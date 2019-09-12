@@ -12,10 +12,10 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static java.lang.String.format;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -33,9 +33,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.user.server.PreferenceManager;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -64,6 +66,8 @@ public class GitUserProfileProvisionerTest {
 
   @Mock private PreferenceManager preferenceManager;
 
+  @Mock private UserManager userManager;
+
   private GitUserProfileProvisioner gitUserProfileProvisioner;
 
   @BeforeMethod
@@ -73,7 +77,7 @@ public class GitUserProfileProvisionerTest {
     when(pod.getMetadata()).thenReturn(podMeta);
     when(pod.getSpec()).thenReturn(podSpec);
     k8sEnv.addPod(pod);
-    gitUserProfileProvisioner = new GitUserProfileProvisioner(preferenceManager);
+    gitUserProfileProvisioner = new GitUserProfileProvisioner(preferenceManager, userManager);
 
     Subject subject = new SubjectImpl(null, "id", null, false);
     EnvironmentContext environmentContext = new EnvironmentContext();
@@ -82,31 +86,14 @@ public class GitUserProfileProvisionerTest {
   }
 
   @Test
-  public void testShouldDoNothingWhenGitUserNameAndEmailIsNotConfigured() throws Exception {
-    when(preferenceManager.find(eq("id"), eq("theia-user-preferences"))).thenReturn(emptyMap());
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
-
-    verifyZeroInteractions(runtimeIdentity);
-  }
-
-  @Test
-  public void testShouldDoNothingWhenGitPreferencesDoesNotContainsGitPreferences()
-      throws Exception {
-    Map<String, String> preferences =
-        singletonMap(
-            "theia-user-preferences",
-            "{\"chePlugins.repositories\":{\"Plugins\":\"http://url/\",\"my\":\"https://url/plugins.json\"}}");
-    when(preferenceManager.find(eq("id"), eq("theia-user-preferences"))).thenReturn(preferences);
-
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
-
-    verifyZeroInteractions(runtimeIdentity);
-  }
-
-  @Test
-  public void testShouldDoNothingWhenGitPreferencesAreEmpty() throws Exception {
+  public void testShouldDoNothingWhenGitPreferencesAndUserManagerAreEmpty() throws Exception {
     Map<String, String> preferences = singletonMap("theia-user-preferences", "{}");
     when(preferenceManager.find(eq("id"), eq("theia-user-preferences"))).thenReturn(preferences);
+
+    User user = mock(User.class);
+    when(userManager.getById(eq("id"))).thenReturn(user);
+    when(user.getName()).thenReturn(null);
+    when(user.getEmail()).thenReturn(null);
 
     gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
 
@@ -128,15 +115,10 @@ public class GitUserProfileProvisionerTest {
 
     Warning actualWarning = warnings.get(0);
     String warnMsg =
-        format(
-            Warnings
-                .INTERNAL_SERVER_ERROR_OCCURRED_DURING_OPERATING_WITH_USER_PREFERENCES_MESSAGE_FMT,
-            "message");
+        format(Warnings.EXCEPTION_IN_USER_MANAGEMENT_DURING_GIT_PROVISION_MESSAGE_FMT, "message");
     Warning expectedWarning =
         new WarningImpl(
-            Warnings
-                .INTERNAL_SERVER_ERROR_OCCURRED_DURING_OPERATING_WITH_USER_PREFERENCES_WARNING_CODE,
-            warnMsg);
+            Warnings.EXCEPTION_IN_USER_MANAGEMENT_DURING_GIT_PROVISION_WARNING_CODE, warnMsg);
 
     assertEquals(expectedWarning, actualWarning);
   }
@@ -163,6 +145,28 @@ public class GitUserProfileProvisionerTest {
         new WarningImpl(
             Warnings.JSON_IS_NOT_A_VALID_REPRESENTATION_FOR_AN_OBJECT_OF_TYPE_WARNING_CODE,
             warnMsg);
+
+    assertEquals(expectedWarning, actualWarning);
+  }
+
+  @Test
+  public void testShouldExpectWarningWhenUserManagerThrowsServerException() throws Exception {
+    when(userManager.getById(eq("id"))).thenThrow(new ServerException("message"));
+
+    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
+
+    verifyZeroInteractions(runtimeIdentity);
+
+    List<Warning> warnings = k8sEnv.getWarnings();
+
+    assertEquals(warnings.size(), 1);
+
+    Warning actualWarning = warnings.get(0);
+    String warnMsg =
+        format(Warnings.EXCEPTION_IN_USER_MANAGEMENT_DURING_GIT_PROVISION_MESSAGE_FMT, "message");
+    Warning expectedWarning =
+        new WarningImpl(
+            Warnings.EXCEPTION_IN_USER_MANAGEMENT_DURING_GIT_PROVISION_WARNING_CODE, warnMsg);
 
     assertEquals(expectedWarning, actualWarning);
   }
@@ -354,6 +358,54 @@ public class GitUserProfileProvisionerTest {
 
     String gitconfig = configMap.getData().get("gitconfig");
     String expectedGitconfig = "[user]\n\tname = user\n\temail = email\n";
+
+    assertEquals(gitconfig, expectedGitconfig);
+  }
+
+  @Test
+  public void testShouldProvisionNameAndEmailFromUserManagerWhenUserPreferencesEmpty()
+      throws Exception {
+    String json = "{}";
+    Map<String, String> preferences = singletonMap("theia-user-preferences", json);
+    when(preferenceManager.find(eq("id"), eq("theia-user-preferences"))).thenReturn(preferences);
+    when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
+
+    ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
+    when(pod.getMetadata()).thenReturn(podMeta);
+    when(pod.getSpec()).thenReturn(podSpec);
+    when(podSpec.getContainers()).thenReturn(singletonList(container));
+
+    User userMock = mock(User.class);
+    when(userMock.getName()).thenReturn("userMockName");
+    when(userMock.getEmail()).thenReturn("userMockEmail");
+    when(userManager.getById(eq("id"))).thenReturn(userMock);
+
+    List<VolumeMount> volumeMounts = new ArrayList<>();
+
+    when(container.getVolumeMounts()).thenReturn(volumeMounts);
+    k8sEnv.addPod(pod);
+
+    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
+
+    assertEquals(volumeMounts.size(), 1);
+
+    VolumeMount mount = volumeMounts.get(0);
+
+    assertEquals(mount.getMountPath(), "/etc/gitconfig");
+    assertEquals(mount.getName(), "gitconfigvolume");
+    assertFalse(mount.getReadOnly());
+    assertEquals(mount.getSubPath(), "gitconfig");
+
+    assertEquals(k8sEnv.getConfigMaps().size(), 1);
+    assertTrue(k8sEnv.getConfigMaps().containsKey("wksp-gitconfig"));
+
+    ConfigMap configMap = k8sEnv.getConfigMaps().get("wksp-gitconfig");
+
+    assertEquals(configMap.getData().size(), 1);
+    assertTrue(configMap.getData().containsKey("gitconfig"));
+
+    String gitconfig = configMap.getData().get("gitconfig");
+    String expectedGitconfig = "[user]\n\tname = userMockName\n\temail = userMockEmail\n";
 
     assertEquals(gitconfig, expectedGitconfig);
   }
