@@ -116,6 +116,7 @@ suite('Language server validation', async () => {
         await editor.waitSuggestion(javaFileName, 'run(Class<?> primarySource, String... args) : ConfigurableApplicationContext');
     });
 
+    // it's skipped because of issue https://github.com/eclipse/che/issues/14520
     test.skip('Codenavigation', async () => {
         await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
         await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
@@ -288,6 +289,7 @@ async function runTask(task: string) {
     await quickOpenContainer.clickOnContainerItem(task);
     await quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
 }
+
 // sometimes under high loading the first click can be failed
 async function isureClickOnDebugMenu() {
     try { await topMenu.selectOption('Debug', 'Open Configurations'); } catch (e) {
