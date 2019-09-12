@@ -16,9 +16,14 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 
 /**
@@ -28,6 +33,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFacto
  */
 @Singleton
 public class KubernetesNamespaceFactory {
+
+  private static final Map<String, Function<Subject, String>> NAMESPACE_NAME_PLACEHOLDERS =
+      new HashMap<>();
+
+  static {
+    NAMESPACE_NAME_PLACEHOLDERS.put("<username>", Subject::getUserName);
+    NAMESPACE_NAME_PLACEHOLDERS.put("<userid>", Subject::getUserId);
+  }
 
   private final String namespaceName;
   private final boolean isPredefined;
@@ -42,10 +55,19 @@ public class KubernetesNamespaceFactory {
       @Nullable @Named("che.infra.kubernetes.cluster_role_name") String clusterRoleName,
       KubernetesClientFactory clientFactory) {
     this.namespaceName = namespaceName;
-    this.isPredefined = !isNullOrEmpty(namespaceName);
+    this.isPredefined = !isNullOrEmpty(namespaceName) && !hasPlaceholders(namespaceName);
     this.serviceAccountName = serviceAccountName;
     this.clusterRoleName = clusterRoleName;
     this.clientFactory = clientFactory;
+  }
+
+  private boolean hasPlaceholders(String namespaceName) {
+    for (String placeholder : NAMESPACE_NAME_PLACEHOLDERS.keySet()) {
+      if (namespaceName.contains(placeholder)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -67,7 +89,8 @@ public class KubernetesNamespaceFactory {
    * @throws InfrastructureException if any exception occurs during namespace preparing
    */
   public KubernetesNamespace create(String workspaceId) throws InfrastructureException {
-    final String namespaceName = isPredefined ? this.namespaceName : workspaceId;
+    final String namespaceName =
+        evalNamespaceName(workspaceId, EnvironmentContext.getCurrent().getSubject());
     KubernetesNamespace namespace = doCreateNamespace(workspaceId, namespaceName);
     namespace.prepare();
 
@@ -81,6 +104,20 @@ public class KubernetesNamespaceFactory {
     }
 
     return namespace;
+  }
+
+  protected String evalNamespaceName(String workspaceId, Subject currentUser) {
+    if (isNullOrEmpty(this.namespaceName)) {
+      return workspaceId;
+    } else {
+      String tmpNamespaceName = this.namespaceName;
+      for (String placeholder : NAMESPACE_NAME_PLACEHOLDERS.keySet()) {
+        tmpNamespaceName =
+            tmpNamespaceName.replaceAll(
+                placeholder, NAMESPACE_NAME_PLACEHOLDERS.get(placeholder).apply(currentUser));
+      }
+      return tmpNamespaceName;
+    }
   }
 
   /**
@@ -105,5 +142,13 @@ public class KubernetesNamespaceFactory {
       String workspaceId, String namespaceName) {
     return new KubernetesWorkspaceServiceAccount(
         workspaceId, namespaceName, serviceAccountName, clusterRoleName, clientFactory);
+  }
+
+  protected String getServiceAccountName() {
+    return serviceAccountName;
+  }
+
+  protected String getClusterRoleName() {
+    return clusterRoleName;
   }
 }
