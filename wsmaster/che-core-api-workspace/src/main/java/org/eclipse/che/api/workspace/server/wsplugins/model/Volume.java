@@ -17,6 +17,7 @@ public class Volume {
 
   private String name = null;
   private String mountPath = null;
+  private boolean persistVolume;
 
   /** */
   public Volume name(String name) {
@@ -46,6 +47,19 @@ public class Volume {
     this.mountPath = mountPath;
   }
 
+  public Volume persistVolume(boolean persistVolume) {
+    this.persistVolume = persistVolume;
+    return this;
+  }
+
+  public boolean isPersistVolume() {
+    return persistVolume;
+  }
+
+  public void setPersistVolume(boolean persistVolume) {
+    this.persistVolume = persistVolume;
+  }
+
   @Override
   public boolean equals(java.lang.Object o) {
     if (this == o) {
@@ -55,21 +69,23 @@ public class Volume {
       return false;
     }
     Volume volume = (Volume) o;
-    return Objects.equals(name, volume.name) && Objects.equals(mountPath, volume.mountPath);
+    return Objects.equals(name, volume.name)
+        && Objects.equals(mountPath, volume.mountPath)
+        && Objects.equals(persistVolume, volume.persistVolume);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, mountPath);
+    return Objects.hash(name, mountPath, persistVolume);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class Volume {\n");
-
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    mountPath: ").append(toIndentedString(mountPath)).append("\n");
+    sb.append("    persistVolume: ").append(toIndentedString(persistVolume)).append("\n");
     sb.append("}");
     return sb.toString();
   }

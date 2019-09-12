@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_SOURCE_ATTRIBUTE;
@@ -25,9 +26,17 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Sets;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
+import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.VolumeBuilder;
+import io.fabric8.kubernetes.api.model.VolumeMount;
+import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +57,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Command;
+import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -114,7 +124,9 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     CommandsResolver commandsResolver = new CommandsResolver(kubernetesEnvironment);
     for (ChePlugin chePlugin : chePlugins) {
       for (CheContainer container : chePlugin.getInitContainers()) {
-        pod.getSpec().getInitContainers().add(toK8sContainer(container));
+        Container k8sInitContainer = toK8sContainer(container);
+        pod.getSpec().getInitContainers().add(k8sInitContainer);
+        applyVolumes(k8sInitContainer, container.getVolumes(), kubernetesEnvironment, pod);
       }
 
       Collection<CommandImpl> pluginRelatedCommands = commandsResolver.resolve(chePlugin);
@@ -136,6 +148,100 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       // enable per-workspace security with JWT proxy for sidecar based workspaces
       // because it is the only workspace security implementation supported for now
       kubernetesEnvironment.getAttributes().putIfAbsent(SECURE_EXPOSER_IMPL_PROPERTY, "jwtproxy");
+    }
+  }
+
+  private void applyVolumes(
+      Container container,
+      List<Volume> volumes,
+      KubernetesEnvironment kubernetesEnvironment,
+      PodData pod) {
+    List<Volume> ephemeralVolumes = new ArrayList<>();
+    List<Volume> persistedVolumes = new ArrayList<>();
+    for (Volume volume : volumes) {
+      if (volume.isPersistVolume()) {
+        persistedVolumes.add(volume);
+      } else {
+        ephemeralVolumes.add(volume);
+      }
+    }
+
+    applyEphemeralVolumes(container, ephemeralVolumes, pod);
+    applyPersistedVolumes(container, persistedVolumes, pod, kubernetesEnvironment);
+  }
+
+  private void applyEphemeralVolumes(Container container, List<Volume> volumes, PodData pod) {
+    List<VolumeMount> ephemeralVolumeMounts =
+        volumes
+            .stream()
+            .map(
+                volume ->
+                    new VolumeMountBuilder()
+                        .withName(volume.getName())
+                        .withMountPath(volume.getMountPath())
+                        .build())
+            .collect(toList());
+
+    container.getVolumeMounts().addAll(ephemeralVolumeMounts);
+
+    for (VolumeMount ephemeralVolumeMount : ephemeralVolumeMounts) {
+      addEmptyDirVolumeIfAbsent(pod.getSpec(), ephemeralVolumeMount.getName());
+    }
+  }
+
+  private void addEmptyDirVolumeIfAbsent(PodSpec podSpec, String uniqueVolumeName) {
+    if (podSpec
+        .getVolumes()
+        .stream()
+        .noneMatch(volume -> volume.getName().equals(uniqueVolumeName))) {
+      podSpec
+          .getVolumes()
+          .add(
+              new VolumeBuilder()
+                  .withName(uniqueVolumeName)
+                  .withNewEmptyDir()
+                  .endEmptyDir()
+                  .build());
+    }
+  }
+
+  private void applyPersistedVolumes(
+      Container container,
+      List<Volume> volumes,
+      PodData pod,
+      KubernetesEnvironment kubernetesEnvironment) {
+    List<VolumeMount> volumeMounts =
+        volumes
+            .stream()
+            .map(
+                volume ->
+                    new VolumeMountBuilder()
+                        .withName(volume.getName())
+                        .withMountPath(volume.getMountPath())
+                        .build())
+            .collect(toList());
+
+    container.getVolumeMounts().addAll(volumeMounts);
+
+    for (Volume volume : volumes) {
+      pod.getSpec()
+          .getVolumes()
+          .add(
+              new VolumeBuilder()
+                  .withName(volume.getName())
+                  .withPersistentVolumeClaim(
+                      new PersistentVolumeClaimVolumeSourceBuilder()
+                          .withClaimName(volume.getName())
+                          .build())
+                  .build());
+
+      PersistentVolumeClaim pluginsPVC =
+          new PersistentVolumeClaimBuilder()
+              .withNewMetadata()
+              .withName(volume.getName())
+              .endMetadata()
+              .build();
+      kubernetesEnvironment.getPersistentVolumeClaims().put(volume.getName(), pluginsPVC);
     }
   }
 
@@ -211,6 +317,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     List<ChePluginEndpoint> containerEndpoints = k8sContainerResolver.getEndpoints();
 
     Container k8sContainer = k8sContainerResolver.resolve();
+    applyVolumes(k8sContainer, container.getVolumes(), kubernetesEnvironment, pod);
 
     String machineName = k8sContainer.getName();
     Names.putMachineName(pod.getMetadata(), k8sContainer.getName(), machineName);
