@@ -739,13 +739,13 @@
     </dependencyManagement>
     <repositories>
         <repository>
-            <id>ossrh</id>
-            <name>central public snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
             <snapshots>
                 <enabled>true</enabled>
                 <checksumPolicy>fail</checksumPolicy>
             </snapshots>
+            <id>ossrh</id>
+            <name>central public snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
     </repositories>
     <pluginRepositories>
