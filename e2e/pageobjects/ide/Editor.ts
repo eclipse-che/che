@@ -344,7 +344,7 @@ export class Editor {
     }
 
     private getSuggestionLineXpathLocator(suggestionText: string): By {
-        return By.xpath(`//div[@widgetid='editor.widget.suggestWidget']//div[@aria-label='${suggestionText}, suggestion, has details']`);
+        return By.xpath(`//div[@widgetid='editor.widget.suggestWidget']//span[@class='monaco-highlighted-label' and contains(.,'${suggestionText}')]`);
     }
 
     private getTabXpathLocator(tabTitle: string): string {
