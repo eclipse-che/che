@@ -4240,7 +4240,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(che_workspace_start_time_seconds_sum[5m])/rate(che_workspace_start_time_seconds_count [5m])",
+              "expr": "rate(che_workspace_start_time_seconds_sum[1h])/rate(che_workspace_start_time_seconds_count [1h])",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -4332,7 +4332,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(che_workspace_stop_time_seconds_sum[5m])/rate(che_workspace_stop_time_seconds_count [5m])",
+              "expr": "rate(che_workspace_stop_time_seconds_sum[1h])/rate(che_workspace_stop_time_seconds_count [1h])",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
