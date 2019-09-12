@@ -167,7 +167,7 @@ export class WorkspaceDataManager {
     } else if (workspace.devfile) {
       const components = workspace.devfile.components || [];
       components.forEach(component => {
-        if (component.type === PLUGIN_TYPE) {
+        if (component.type === PLUGIN_TYPE && component.id) {
           plugins.push(component.id);
         }
       });
