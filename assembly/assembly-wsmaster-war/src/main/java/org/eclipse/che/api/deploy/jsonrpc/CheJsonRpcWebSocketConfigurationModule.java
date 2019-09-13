@@ -27,14 +27,8 @@ public class CheJsonRpcWebSocketConfigurationModule implements Module {
         .annotatedWith(Names.named(CheMajorWebSocketEndpointConfiguration.EXECUTOR_NAME))
         .toProvider(CheMajorWebSocketEndpointExecutorServiceProvider.class);
 
-    binder
-        .bind(ExecutorService.class)
-        .annotatedWith(Names.named(CheMinorWebSocketEndpointConfiguration.EXECUTOR_NAME))
-        .toProvider(CheMinorWebSocketEndpointExecutorServiceProvider.class);
-
     Multibinder<RequestProcessorConfigurationProvider.Configuration> configurationMultibinder =
         Multibinder.newSetBinder(binder, RequestProcessorConfigurationProvider.Configuration.class);
     configurationMultibinder.addBinding().to(CheMajorWebSocketEndpointConfiguration.class);
-    configurationMultibinder.addBinding().to(CheMinorWebSocketEndpointConfiguration.class);
   }
 }

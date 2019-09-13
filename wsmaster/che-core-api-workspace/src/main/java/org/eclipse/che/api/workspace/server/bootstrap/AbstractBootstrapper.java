@@ -34,7 +34,6 @@ public abstract class AbstractBootstrapper {
   private final String machineName;
   private final EventService eventService;
   private final EventSubscriber<BootstrapperStatusEvent> bootstrapperStatusListener;
-  private final String installerEndpoint;
   private final String outputEndpoint;
   private CompletableFuture<BootstrapperStatusEvent> finishEventFuture;
 
@@ -42,11 +41,9 @@ public abstract class AbstractBootstrapper {
       String machineName,
       RuntimeIdentity runtimeIdentity,
       String outputEndpoint,
-      String installerEndpoint,
       EventService eventService) {
     this.machineName = machineName;
     this.eventService = eventService;
-    this.installerEndpoint = installerEndpoint;
     this.outputEndpoint = outputEndpoint;
     this.bootstrapperStatusListener =
         event -> {
@@ -82,7 +79,7 @@ public abstract class AbstractBootstrapper {
 
     eventService.subscribe(bootstrapperStatusListener, BootstrapperStatusEvent.class);
     try {
-      doBootstrapAsync(installerEndpoint, outputEndpoint);
+      doBootstrapAsync(outputEndpoint, outputEndpoint);
 
       // waiting for DONE or FAILED bootstrapper status event
       BootstrapperStatusEvent resultEvent =
@@ -137,7 +134,7 @@ public abstract class AbstractBootstrapper {
 
     eventService.subscribe(bootstrapperStatusListener, BootstrapperStatusEvent.class);
     try {
-      doBootstrapAsync(installerEndpoint, outputEndpoint);
+      doBootstrapAsync(outputEndpoint, outputEndpoint);
     } catch (InfrastructureException ex) {
       finishEventFuture.completeExceptionally(
           new InfrastructureException(

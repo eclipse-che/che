@@ -21,8 +21,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.deploy.jsonrpc.CheMajorWebSocketEndpointConfiguration;
 import org.eclipse.che.api.deploy.jsonrpc.CheMajorWebSocketEndpointExecutorServiceProvider;
-import org.eclipse.che.api.deploy.jsonrpc.CheMinorWebSocketEndpointConfiguration;
-import org.eclipse.che.api.deploy.jsonrpc.CheMinorWebSocketEndpointExecutorServiceProvider;
 import org.eclipse.che.core.metrics.ExecutorServiceMetrics;
 
 /**
@@ -35,10 +33,6 @@ public class MetricsOverrideBinding implements Module {
     binder
         .bind(CheMajorWebSocketEndpointExecutorServiceProvider.class)
         .to(MeteredCheMajorWebSocketEndpointExecutorServiceProvider.class);
-
-    binder
-        .bind(CheMinorWebSocketEndpointExecutorServiceProvider.class)
-        .to(MeteredCheMinorWebSocketEndpointExecutorServiceProvider.class);
   }
 
   @Singleton
@@ -67,38 +61,6 @@ public class MetricsOverrideBinding implements Module {
                 meterRegistry,
                 super.get(),
                 CheMajorWebSocketEndpointConfiguration.EXECUTOR_NAME,
-                Tags.empty());
-      }
-      return executorService;
-    }
-  }
-
-  @Singleton
-  public static class MeteredCheMinorWebSocketEndpointExecutorServiceProvider
-      extends CheMinorWebSocketEndpointExecutorServiceProvider {
-    private final PrometheusMeterRegistry meterRegistry;
-
-    private ExecutorService executorService;
-
-    @Inject
-    public MeteredCheMinorWebSocketEndpointExecutorServiceProvider(
-        @Named(JSON_RPC_MINOR_CORE_POOL_SIZE_PARAMETER_NAME) int corePoolSize,
-        @Named(JSON_RPC_MINOR_MAX_POOL_SIZE_PARAMETER_NAME) int maxPoolSize,
-        @Named(JSON_RPC_MINOR_QUEUE_CAPACITY_PARAMETER_NAME) int queueCapacity,
-        PrometheusMeterRegistry meterRegistry) {
-      super(corePoolSize, maxPoolSize, queueCapacity);
-      this.meterRegistry = meterRegistry;
-    }
-
-    @Override
-    public synchronized ExecutorService get() {
-      if (executorService == null) {
-
-        executorService =
-            ExecutorServiceMetrics.monitor(
-                meterRegistry,
-                super.get(),
-                CheMinorWebSocketEndpointConfiguration.EXECUTOR_NAME,
                 Tags.empty());
       }
       return executorService;
