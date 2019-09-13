@@ -76,20 +76,6 @@ public class MachineResolverTest {
             wsAttributes);
   }
 
-  @Test
-  public void shouldSetVolumesInMachineConfig() throws InfrastructureException {
-    List<Volume> sidecarVolumes =
-        asList(
-            new Volume().name("vol1").mountPath("/path1"),
-            new Volume().name("vol2").mountPath("/path2"));
-    cheContainer.setVolumes(sidecarVolumes);
-    Map<String, Object> expected = of("vol1", volume("/path1"), "vol2", volume("/path2"));
-
-    InternalMachineConfig machineConfig = resolver.resolve();
-
-    assertEquals(machineConfig.getVolumes(), expected);
-  }
-
   @Test(dataProvider = "serverProvider")
   public void shouldSetServersInMachineConfig(
       List<ChePluginEndpoint> containerEndpoints, Map<String, ServerConfig> expected)
