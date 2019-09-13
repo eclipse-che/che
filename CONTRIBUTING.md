@@ -19,22 +19,18 @@ Repository | Component | Description | Devfile | Contributing.md
 --- | [workspace-loader](https://github.com/eclipse/che/tree/master/workspace-loader) |  | [devfile](https://github.com/eclipse/che/blob/master/workspace-loader/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#workspace-loader)
 --- | [main container images](https://github.com/eclipse/che/tree/master/dockerfiles) | source code, dockerfiles to build our main docker images. Note that Che-theia related dockerfiles are located in che-theia repo. | | 
 --- | [End2end test](https://github.com/eclipse/che/tree/master/e2e) | source code of our integration tests. | | 
+[chectl](https://github.com/che-incubator/chectl) | | The CLI to install Che, create and start workspaces and devfiles | [devfile](https://github.com/che-incubator/chectl/blob/master/devfile.yaml) | [doc](https://github.com/che-incubator/chectl/blob/master/CONTRIBUTING.md)
 [che-theia](https://github.com/eclipse/che-theia) | | Theia IDE integrated in Che. | [devfile](https://github.com/eclipse/che-theia/blob/master/devfiles/che-theia-all.devfile.yaml) | [doc](https://github.com/eclipse/che-theia/blob/master/CONTRIBUTING.md)
 --- | [generator](https://github.com/eclipse/che-theia/tree/master/generator) | `che:theia init` CLI to prepare and build che-theia | | [doc](https://github.com/eclipse/che-theia/blob/master/generator/CONTRIBUTING.md)
-[chectl](https://github.com/che-incubator/chectl) | | The CLI to install Che, create and start workspaces and devfiles | [devfile](https://github.com/che-incubator/chectl/blob/master/devfile.yaml) | [doc](https://github.com/che-incubator/chectl/blob/master/CONTRIBUTING.md)
-[plugin-registry](https://github.com/eclipse/che-plugin-registry) | | The default set of Che plugins (vscode extension + containers) or editors that could be installed on any Che workspaces. | | 
 [devfile-registry](https://github.com/eclipse/che-devfile-registry) | | The default set of devfiles that would be made available on the Che dashboard stacks. | | 
-[redhat-developer/devfile](https://github.com/redhat-developer/devfile) | | Contribute to the devfile documentation: https://redhat-developer.github.io/devfile/ | | 
-[plugin-broker](https://github.com/eclipse/che-plugin-broker) | | The workspace microservice that is in charge of analyzing, preparing and installing the workspace components defined in a Devfile. | [devfile](https://github.com/eclipse/che-plugin-broker/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che-plugin-broker/blob/master/CONTRIBUTING.md)
-[operator](https://github.com/eclipse/che-operator) | | Che operator to deploy, update and manage K8S/OpenShift resources of Che. | | 
 [docs](https://github.com/eclipse/che-docs) | | Eclipse Che documentation https://www.eclipse.org/che/docs/ source code. | [devfile](https://github.com/eclipse/che-docs/blob/master/devfile.yaml) | 
+[machine-exec](https://github.com/eclipse/che-machine-exec) | | Interface to execute tasks and terminals on other containers within a workspace. | [devfile](https://github.com/eclipse/che-machine-exec/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che-machine-exec/blob/master/CONTRIBUTING.md)
+[operator](https://github.com/eclipse/che-operator) | | Che operator to deploy, update and manage K8S/OpenShift resources of Che. | | 
+[plugin-broker](https://github.com/eclipse/che-plugin-broker) | | The workspace microservice that is in charge of analyzing, preparing and installing the workspace components defined in a Devfile. | [devfile](https://github.com/eclipse/che-plugin-broker/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che-plugin-broker/blob/master/CONTRIBUTING.md)
+[plugin-registry](https://github.com/eclipse/che-plugin-registry) | | The default set of Che plugins (vscode extension + containers) or editors that could be installed on any Che workspaces. | |
+[redhat-developer/devfile](https://github.com/redhat-developer/devfile) | | Contribute to the devfile documentation: https://redhat-developer.github.io/devfile/ | | 
 [website](https://github.com/eclipse/che-website) | | https://eclipse.org/che website source code. | [devfile](https://github.com/eclipse/che-website/blob/master/devfile.yaml) | 
 [workspace-client](https://github.com/eclipse/che-workspace-client) | | JS library to interact with a che-server. | | 
-[machine-exec](https://github.com/eclipse/che-machine-exec) | | Interface to execute tasks and terminals on other containers within a workspace. | [devfile](https://github.com/eclipse/che-machine-exec/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che-machine-exec/blob/master/CONTRIBUTING.md)
-
-
-
-
 
 
 ## Devfile to contribute
