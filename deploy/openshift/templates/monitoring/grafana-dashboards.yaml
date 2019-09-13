@@ -6060,8 +6060,8 @@ data:
           }
         }
       ],
-      "refresh": "30s",
-      "schemaVersion": 19,
+      "refresh": "15m",
+      "schemaVersion": 18,
       "style": "dark",
       "tags": [],
       "templating": {
