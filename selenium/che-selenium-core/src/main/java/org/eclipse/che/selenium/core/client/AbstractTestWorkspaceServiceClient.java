@@ -13,11 +13,9 @@ package org.eclipse.che.selenium.core.client;
 
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
-import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
+import static org.eclipse.che.workspace.infrastructure.docker.environment.WsAgentMachineFinderUtil.containsWsAgentServer;
 
 import java.util.List;
 import java.util.Map;

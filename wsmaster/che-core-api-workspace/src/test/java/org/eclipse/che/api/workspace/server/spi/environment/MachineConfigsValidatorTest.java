@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
-import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.mockito.testng.MockitoTestNGListener;
@@ -210,18 +209,6 @@ public class MachineConfigsValidatorTest {
   @DataProvider(name = "validServerProtocols")
   public Object[][] validServerProtocols() {
     return new Object[][] {{"a"}, {"http"}, {"tcp"}, {"tcp2"}};
-  }
-
-  @Test
-  public void shouldPassIfWsAgentServerAndInstallerAreInTheSameMachine() throws Exception {
-    // given
-    InternalMachineConfig machine = machineMock();
-    when(machine.getServers()).thenReturn(createServers(Constants.SERVER_WS_AGENT_HTTP_REFERENCE));
-    when(machine.getInstallers())
-        .thenReturn(createInstallers(WsAgentMachineFinderUtil.WS_AGENT_INSTALLER));
-
-    // when
-    machinesValidator.validate(singletonMap(MACHINE_NAME, machine));
   }
 
   private static InternalMachineConfig machineMock() {
