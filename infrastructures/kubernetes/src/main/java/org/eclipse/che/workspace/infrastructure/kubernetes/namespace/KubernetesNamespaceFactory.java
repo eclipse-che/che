@@ -55,24 +55,19 @@ public class KubernetesNamespaceFactory {
       @Nullable @Named("che.infra.kubernetes.cluster_role_name") String clusterRoleName,
       KubernetesClientFactory clientFactory) {
     this.namespaceName = namespaceName;
-    this.isPredefined = !isNullOrEmpty(namespaceName) && !hasPlaceholders(namespaceName);
+    this.isPredefined = !isNullOrEmpty(namespaceName) && hasNoPlaceholders(this.namespaceName);
     this.serviceAccountName = serviceAccountName;
     this.clusterRoleName = clusterRoleName;
     this.clientFactory = clientFactory;
   }
 
-  private boolean hasPlaceholders(String namespaceName) {
-    for (String placeholder : NAMESPACE_NAME_PLACEHOLDERS.keySet()) {
-      if (namespaceName.contains(placeholder)) {
-        return true;
-      }
-    }
-    return false;
+  private boolean hasNoPlaceholders(String namespaceName) {
+    return NAMESPACE_NAME_PLACEHOLDERS.keySet().stream().noneMatch(namespaceName::contains);
   }
 
   /**
-   * Returns true if namespace is predefined for all workspaces or false if each workspace will be
-   * provided with a new namespace.
+   * True if namespace is predefined for all workspaces. False if each workspace will be provided
+   * with a new namespace or provided for each user when using placeholders.
    */
   public boolean isPredefined() {
     return isPredefined;
