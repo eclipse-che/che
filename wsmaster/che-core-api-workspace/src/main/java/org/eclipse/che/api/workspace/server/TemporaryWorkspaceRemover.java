@@ -14,6 +14,7 @@ package org.eclipse.che.api.workspace.server;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.Pages;
@@ -45,7 +46,8 @@ public class TemporaryWorkspaceRemover {
 
   @ScheduleDelay(
       initialDelayParameterName = "che.workspace.cleanup_temporary_stopped_period_min",
-      delayParameterName = "che.workspace.cleanup_temporary_stopped_period_min")
+      delayParameterName = "che.workspace.cleanup_temporary_stopped_period_min",
+      unit = TimeUnit.MINUTES)
   void initialize() {
     try {
       removeTemporaryWs();
