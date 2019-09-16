@@ -178,6 +178,7 @@ export class ImportGithubProjectController {
       this.organizationsList = this.importGithubProjectService.getOrganizations();
       this.cheListHelper.setList(this.githubRepositoriesList, 'clone_url');
     });
+    this.importGithubProjectService.askLoad();
   }
 
   /**
