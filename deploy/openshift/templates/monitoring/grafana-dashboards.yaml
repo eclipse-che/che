@@ -6182,7 +6182,7 @@ data:
           "type": "row"
         }
       ],
-      "refresh": "1d",
+      "refresh": "15m",
       "schemaVersion": 19,
       "style": "dark",
       "tags": [],
