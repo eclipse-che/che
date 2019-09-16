@@ -65,6 +65,8 @@ export class ImportZipProjectController {
     });
   }
 
+  $onInit(): void { }
+
   /**
    * Callback which is called when project template is added to the list of ready-to-import projects.
    * Clears project's location.

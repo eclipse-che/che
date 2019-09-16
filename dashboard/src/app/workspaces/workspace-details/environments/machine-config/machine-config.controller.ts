@@ -85,7 +85,9 @@ export class WorkspaceMachineConfigController {
         $timeout.cancel(this.timeoutPromise);
       }
     });
+  }
 
+  $onInit(): void {
     this.init();
   }
 

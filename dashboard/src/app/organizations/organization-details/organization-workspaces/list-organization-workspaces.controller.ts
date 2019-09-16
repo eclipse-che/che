@@ -111,7 +111,9 @@ export class ListOrganizationWorkspacesController {
     $scope.$on('$destroy', () => {
       cheListHelperFactory.removeHelper(helperId);
     });
+  }
 
+  $onInit(): void {
     this.fetchPermissions();
   }
 

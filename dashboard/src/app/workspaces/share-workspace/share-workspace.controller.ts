@@ -146,6 +146,17 @@ export class ShareWorkspaceController {
     this.namespace = $route.current.params.namespace;
     this.workspaceName = $route.current.params.workspaceName;
 
+    this.userOrderBy = 'email';
+    this.userFilter = {email: ''};
+
+    const helperId = 'share-workspace';
+    this.cheListHelper = cheListHelperFactory.getHelper(helperId);
+    $scope.$on('$destroy', () => {
+      cheListHelperFactory.removeHelper(helperId);
+    });
+  }
+
+  $onInit(): void {
     this.workspace = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
     if (this.workspace) {
       this.refreshWorkspacePermissions();
@@ -162,15 +173,6 @@ export class ShareWorkspaceController {
         this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Failed to update workspace data.');
       });
     }
-
-    this.userOrderBy = 'email';
-    this.userFilter = {email: ''};
-
-    const helperId = 'share-workspace';
-    this.cheListHelper = cheListHelperFactory.getHelper(helperId);
-    $scope.$on('$destroy', () => {
-      cheListHelperFactory.removeHelper(helperId);
-    });
 
     this.fetchPersonalAccount();
   }

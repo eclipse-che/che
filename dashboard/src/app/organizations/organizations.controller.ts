@@ -78,6 +78,11 @@ export class OrganizationsController {
     this.fetchOrganizations();
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Fetches the list of root organizations.
    * @param pageKey {string}

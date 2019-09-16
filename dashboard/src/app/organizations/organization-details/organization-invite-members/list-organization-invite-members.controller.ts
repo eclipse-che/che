@@ -30,6 +30,14 @@ export class ListOrganizationInviteMembersController {
    */
   private $mdDialog: ng.material.IDialogService;
   /**
+   * User API interaction.
+   */
+  private cheUser: any;
+  /**
+   * Resources service.
+   */
+  private resourcesService: che.service.IResourcesService;
+  /**
    * No members selected.
    */
   private isNoSelected: boolean;
@@ -76,16 +84,21 @@ export class ListOrganizationInviteMembersController {
   constructor($mdDialog: angular.material.IDialogService, lodash: any, cheUser: any, resourcesService: che.service.IResourcesService) {
     this.$mdDialog = $mdDialog;
     this.lodash = lodash;
-    this.organizationRoles = resourcesService.getOrganizationRoles();
+    this.cheUser = cheUser;
+    this.resourcesService = resourcesService;
 
     this.isNoSelected = true;
     this.isBulkChecked = false;
     this.membersSelectedStatus = {};
     this.membersSelectedNumber = 0;
     this.membersOrderBy = 'email';
+  }
+
+  $onInit(): void {
+    this.organizationRoles = this.resourcesService.getOrganizationRoles();
 
     // add current user to members list
-    const user = cheUser.getUser();
+    const user = this.cheUser.getUser();
     const member = user as che.IMember;
     member.role = this.organizationRoles.ADMIN.name;
     this.members = [member];

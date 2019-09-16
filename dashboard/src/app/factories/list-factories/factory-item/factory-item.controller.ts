@@ -44,6 +44,8 @@ export class FactoryItemController {
     this.loadFactoryService =  loadFactoryService;
   }
 
+  $onInit(): void { }
+
   /**
    * Returns `true` if supported version of factory workspace.
    * @returns {boolean}

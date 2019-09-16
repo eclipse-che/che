@@ -60,7 +60,6 @@ export class TemplateSelectorController {
    */
   constructor($filter: ng.IFilterService, $scope: ng.IScope, addImportProjectService: AddImportProjectService, templateSelectorSvc: TemplateSelectorSvc,
     cheListHelperFactory: che.widget.ICheListHelperFactory) {
-
     this.$filter = $filter;
     this.templateSelectorSvc = templateSelectorSvc;
     this.addImportProjectService = addImportProjectService;
@@ -83,7 +82,6 @@ export class TemplateSelectorController {
       cheListHelperFactory.removeHelper(helperId);
     });
 
-    this.selectedTemplates = this.templateSelectorSvc.getTemplates();
 
     const actionOnPublish = (source: ProjectSource) => {
       this.onAddImportProjectServicePublish(source);
@@ -93,6 +91,10 @@ export class TemplateSelectorController {
     $scope.$on('$destroy', () => {
       this.addImportProjectService.unsubscribe(actionOnPublish);
     });
+  }
+
+  $onInit(): void {
+    this.selectedTemplates = this.templateSelectorSvc.getTemplates();
   }
 
   /**

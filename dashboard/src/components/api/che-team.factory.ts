@@ -108,6 +108,8 @@ export class CheTeam implements che.api.ICheTeam {
     cheTeamEventsManager.addNewTeamHandler(() => {
       this.fetchTeams();
     });
+
+    this.fetchTeams(); // this resolves `cheNamespaceRegistry.fetchNamespaces()` as well
   }
 
   /**

@@ -48,16 +48,6 @@ export class CheLearnMoreCtrl {
     // current index is first one
     this.currentIndex = 0;
 
-    let preferences = this.chePreferences.getPreferences();
-    let promise = preferences.$promise;
-
-    promise.then(() => {
-      let selectedIndexInPreferences = preferences[this.WIDGET_PREFERENCES_PREFIX + 'selected-index'];
-      if (selectedIndexInPreferences) {
-        this.currentIndex = parseInt(selectedIndexInPreferences, 10);
-      }
-    });
-
     // by default, all icons are disabled
     this.stateIcons = [];
 
@@ -69,6 +59,16 @@ export class CheLearnMoreCtrl {
     // listener on events
     this.$scope.$on('cheLearnMore:updateState', (event: ng.IAngularEvent, data: any) => {
       this.updateState(data);
+    });
+  }
+
+  $onInit(): void {
+    const preferences = this.chePreferences.getPreferences();
+    preferences.$promise.then(() => {
+      let selectedIndexInPreferences = preferences[this.WIDGET_PREFERENCES_PREFIX + 'selected-index'];
+      if (selectedIndexInPreferences) {
+        this.currentIndex = parseInt(selectedIndexInPreferences, 10);
+      }
     });
 
     this.compileTemplate();

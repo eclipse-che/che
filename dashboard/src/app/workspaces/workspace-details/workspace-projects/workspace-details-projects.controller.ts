@@ -31,6 +31,7 @@ export class WorkspaceDetailsProjectsCtrl {
 
   static $inject = ['cheAPI', '$mdDialog', 'confirmDialogService', '$scope', 'cheListHelperFactory', 'randomSvc', 'createWorkspaceSvc', 'workspaceDetailsService', 'workspaceDetailsProjectsService'];
 
+  private cheAPI: CheAPI;
   /**
    * Material design Dialog service.
    */
@@ -85,6 +86,7 @@ export class WorkspaceDetailsProjectsCtrl {
               createWorkspaceSvc: CreateWorkspaceSvc,
               workspaceDetailsService: WorkspaceDetailsService,
               workspaceDetailsProjectsService: WorkspaceDetailsProjectsService) {
+    this.cheAPI = cheAPI;
     this.$mdDialog = $mdDialog;
     this.confirmDialogService = confirmDialogService;
     this.randomSvc = randomSvc;
@@ -98,10 +100,6 @@ export class WorkspaceDetailsProjectsCtrl {
       cheListHelperFactory.removeHelper(helperId);
     });
 
-    const preferences = cheAPI.getPreferences().getPreferences();
-    this.workspaceDataManager = cheAPI.getWorkspace().getWorkspaceDataManager();
-    this.profileCreationDate = preferences['che:created'];
-
     this.projectFilter = {name: ''};
 
     const workspaceEditWatcher = $scope.$on('edit-workspace-details', (event: ng.IAngularEvent, data: {status: string}) => {
@@ -111,7 +109,6 @@ export class WorkspaceDetailsProjectsCtrl {
       }
     });
 
-    this.updateProjectsData(this.workspaceDetails);
     const action = this.updateProjectsData.bind(this);
     workspaceDetailsService.subscribeOnWorkspaceChange(action);
 
@@ -122,6 +119,14 @@ export class WorkspaceDetailsProjectsCtrl {
       // unregister watcher
       workspaceEditWatcher();
     });
+  }
+
+  $onInit(): void {
+    const preferences = this.cheAPI.getPreferences().getPreferences();
+    this.workspaceDataManager = this.cheAPI.getWorkspace().getWorkspaceDataManager();
+    this.profileCreationDate = preferences['che:created'];
+
+    this.updateProjectsData(this.workspaceDetails);
   }
 
   /**

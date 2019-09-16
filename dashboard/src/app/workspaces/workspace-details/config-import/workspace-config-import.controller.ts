@@ -83,6 +83,8 @@ export class WorkspaceConfigImportController {
     this.errorMessagesService.registerCallback(this.errorsScopeEnvironment, this.updateErrorsList.bind(this, this.errorsScopeEnvironment));
   }
 
+  $onInit(): void { }
+
   updateErrorsList(errorsScope: string, otherErrors: string[]) {
     this.otherValidationMessages[errorsScope] = angular.copy(otherErrors);
   }
