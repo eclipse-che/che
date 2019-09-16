@@ -45,8 +45,7 @@ public class TemporaryWorkspaceRemover {
 
   @ScheduleDelay(
       initialDelayParameterName = "che.workspace.cleanup_temporary_stopped_period_min",
-      delayParameterName = "che.workspace.cleanup_temporary_stopped_period_min"
-  )
+      delayParameterName = "che.workspace.cleanup_temporary_stopped_period_min")
   void initialize() {
     try {
       removeTemporaryWs();
