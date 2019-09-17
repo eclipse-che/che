@@ -233,10 +233,4 @@ public class TheiaIde {
   public String getBranchName() {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(branchName);
   }
-
-  public void checkIdeIsReadyToUse() {
-    switchToIdeFrame();
-    waitTheiaIde();
-    openNavbarMenu();
-  }
 }
