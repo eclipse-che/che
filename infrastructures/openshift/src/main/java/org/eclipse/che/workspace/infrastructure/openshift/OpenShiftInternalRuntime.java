@@ -15,11 +15,14 @@ import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Route;
+import io.fabric8.openshift.api.model.RouteSpec;
 import io.opentracing.Tracer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -39,6 +42,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRunti
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.Services;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
@@ -161,5 +165,23 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     }
 
     return createdRoutes;
+  }
+
+  @Override
+  protected Optional<String> findHostForServicePort(Service service, int port)
+      throws InfrastructureException {
+    Optional<ServicePort> foundPort = Services.findPort(service, port);
+    if (!foundPort.isPresent()) {
+      return Optional.empty();
+    }
+
+    for (Route route : project.routes().get()) {
+      RouteSpec spec = route.getSpec();
+      if (spec.getTo().getName().equals(service.getMetadata().getName())
+          && spec.getPort().getTargetPort().getStrVal().equals(foundPort.get().getName())) {
+        return Optional.of(route.getSpec().getHost());
+      }
+    }
+    return Optional.empty();
   }
 }

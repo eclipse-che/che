@@ -24,6 +24,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSe
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlEndpointsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
@@ -66,6 +67,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private CertificateProvisioner certificateProvisioner;
   @Mock private VcsSshKeysProvisioner vcsSshKeysProvisioner;
   @Mock private GitUserProfileProvisioner gitUserProfileProvisioner;
+  @Mock private PreviewUrlEndpointsProvisioner previewUrlEndpointsProvisioner;
 
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> k8sInfraProvisioner;
 
@@ -91,7 +93,8 @@ public class KubernetesEnvironmentProvisionerTest {
             serviceAccountProvisioner,
             certificateProvisioner,
             vcsSshKeysProvisioner,
-            gitUserProfileProvisioner);
+            gitUserProfileProvisioner,
+            previewUrlEndpointsProvisioner);
     provisionOrder =
         inOrder(
             logsVolumeMachineProvisioner,
@@ -108,7 +111,8 @@ public class KubernetesEnvironmentProvisionerTest {
             proxySettingsProvisioner,
             serviceAccountProvisioner,
             certificateProvisioner,
-            gitUserProfileProvisioner);
+            gitUserProfileProvisioner,
+            previewUrlEndpointsProvisioner);
   }
 
   @Test

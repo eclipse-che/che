@@ -29,6 +29,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftPreviewUrlEndpointProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftUniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProvisioner;
 import org.mockito.InOrder;
@@ -63,6 +64,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private CertificateProvisioner certificateProvisioner;
   @Mock private VcsSshKeysProvisioner vcsSshKeysProvisioner;
   @Mock private GitUserProfileProvisioner gitUserProfileProvisioner;
+  @Mock private OpenShiftPreviewUrlEndpointProvisioner previewUrlEndpointsProvisioner;
 
   private OpenShiftEnvironmentProvisioner osInfraProvisioner;
 
@@ -87,7 +89,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             serviceAccountProvisioner,
             certificateProvisioner,
             vcsSshKeysProvisioner,
-            gitUserProfileProvisioner);
+            gitUserProfileProvisioner,
+            previewUrlEndpointsProvisioner);
     provisionOrder =
         inOrder(
             logsVolumeMachineProvisioner,
@@ -104,7 +107,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             serviceAccountProvisioner,
             certificateProvisioner,
             vcsSshKeysProvisioner,
-            gitUserProfileProvisioner);
+            gitUserProfileProvisioner,
+            previewUrlEndpointsProvisioner);
   }
 
   @Test

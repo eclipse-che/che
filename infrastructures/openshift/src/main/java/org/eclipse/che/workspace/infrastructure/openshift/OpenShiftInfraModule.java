@@ -57,6 +57,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiExternalEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiInternalEnvVarProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlEndpointsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
@@ -75,6 +76,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectOnWorkspaceRemove;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftPreviewUrlEndpointProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftCookiePathStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerExposureStrategy;
@@ -119,6 +121,8 @@ public class OpenShiftInfraModule extends AbstractModule {
     bind(new TypeLiteral<ExternalServerExposer<OpenShiftEnvironment>>() {})
         .to(OpenShiftExternalServerExposer.class);
     bind(ServersConverter.class).to(new TypeLiteral<ServersConverter<OpenShiftEnvironment>>() {});
+    bind(PreviewUrlEndpointsProvisioner.class)
+        .to(new TypeLiteral<OpenShiftPreviewUrlEndpointProvisioner<OpenShiftEnvironment>>() {});
 
     Multibinder<EnvVarProvider> envVarProviders =
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);
