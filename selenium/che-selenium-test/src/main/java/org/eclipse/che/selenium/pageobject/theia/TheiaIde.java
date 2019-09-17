@@ -16,6 +16,7 @@ import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_CLOSE_BUTTON;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_MESSAGE_CONTAINS_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_MESSAGE_EQUALS_TO_XPATH_TEMPLATE;
@@ -138,7 +139,7 @@ public class TheiaIde {
   }
 
   public void waitNotificationDisappearance(String notificationText) {
-    waitNotificationDisappearance(notificationText, LOAD_PAGE_TIMEOUT_SEC);
+    waitNotificationDisappearance(notificationText, WIDGET_TIMEOUT_SEC);
   }
 
   public void waitNotificationDisappearance(String notificationText, int timeout) {
