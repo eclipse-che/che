@@ -95,6 +95,12 @@ public class WorkspaceActivityChecker {
     } catch (ServerException e) {
       LOG.error(e.getLocalizedMessage(), e);
     }
+
+    try {
+      reconcileActivityStatuses();
+    } catch (ServerException e) {
+      LOG.error(e.getLocalizedMessage(), e);
+    }
   }
 
   private void stopAllExpired() throws ServerException {
@@ -149,6 +155,29 @@ public class WorkspaceActivityChecker {
         boolean noLastRunningTime = rectifyLastRunningTime(activity, now, latestActivityTime);
 
         rectifyExpirationTime(activity, now, noLastRunningTime, latestActivityTime, idleTimeout);
+      }
+    }
+  }
+
+  /**
+   * Makes sure that any activity records are rectified if they do not reflect the true state of the
+   * workspace anymore.
+   *
+   * @throws ServerException or error
+   */
+  private void reconcileActivityStatuses() throws ServerException {
+    for (WorkspaceActivity a : activityDao.getAll()) {
+      WorkspaceStatus status = workspaceRuntimes.getStatus(a.getWorkspaceId());
+      if (a.getStatus() != status) {
+        if (LOG.isWarnEnabled()) {
+          LOG.warn(
+              "Activity record for workspace {} was registering {} status while the workspace was {} in reality."
+                  + " Rectifying the activity record to reflect the true state of the workspace.",
+              a.getWorkspaceId(),
+              a.getStatus(),
+              status);
+        }
+        activityDao.setStatusChangeTime(a.getWorkspaceId(), status, clock.millis());
       }
     }
   }
@@ -362,7 +391,7 @@ public class WorkspaceActivityChecker {
       LOG.warn(
           "Workspace '{}' has been found running yet there is an activity on it newer than the"
               + " last running time. This should not happen. Resetting the last running time to"
-              + " the newest activity time. The activity record is this: ",
+              + " the newest activity time. The activity record is this: {}",
           wsId,
           activity.toString());
       activityDao.setStatusChangeTime(wsId, WorkspaceStatus.RUNNING, latestActivityTime);

@@ -215,6 +215,26 @@ public class WorkspaceActivityCheckerTest {
     verify(workspaceActivityDao, never()).setExpirationTime(anyString(), anyLong());
   }
 
+  @Test
+  public void shouldRestoreTrueStateOfWorkspaceIfActivityDoesntReflectThat() throws Exception {
+    // given
+    String wsId = "1";
+    WorkspaceActivity activity = new WorkspaceActivity();
+    activity.setCreated(clock.millis());
+    activity.setWorkspaceId(wsId);
+    activity.setStatus(WorkspaceStatus.STARTING);
+    activity.setLastStarting(clock.millis());
+    when(workspaceActivityDao.getAll()).thenReturn(singleton(activity));
+    when(workspaceRuntimes.getStatus(eq(wsId))).thenReturn(WorkspaceStatus.STOPPED);
+
+    // when
+    checker.validate();
+
+    // then
+    verify(workspaceActivityDao)
+        .setStatusChangeTime(eq(wsId), eq(WorkspaceStatus.STOPPED), eq(clock.millis()));
+  }
+
   private static final class ManualClock extends Clock {
 
     private Instant instant;

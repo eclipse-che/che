@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.activity;
 
 import java.util.List;
+import java.util.Set;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
@@ -126,4 +127,11 @@ public interface WorkspaceActivityDao {
    * @throws ServerException on other error
    */
   void createActivity(WorkspaceActivity activity) throws ConflictException, ServerException;
+
+  /**
+   * Returns all current workspace activities.
+   *
+   * @return the workspace activities for all workspaces
+   */
+  Set<WorkspaceActivity> getAll() throws ServerException;
 }

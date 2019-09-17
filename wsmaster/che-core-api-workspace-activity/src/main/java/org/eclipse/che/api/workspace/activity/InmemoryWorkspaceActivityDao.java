@@ -11,8 +11,10 @@
  */
 package org.eclipse.che.api.workspace.activity;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
@@ -147,6 +149,11 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
     } else {
       workspaceActivities.put(activity.getWorkspaceId(), activity);
     }
+  }
+
+  @Override
+  public Set<WorkspaceActivity> getAll() {
+    return new HashSet<>(workspaceActivities.values());
   }
 
   private boolean isGreater(Long value, long threshold) {
