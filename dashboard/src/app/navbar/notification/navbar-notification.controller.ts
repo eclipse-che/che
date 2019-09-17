@@ -33,6 +33,8 @@ export class NavbarNotificationController {
     });
   }
 
+  $onInit(): void { }
+
   /**
    * Returns the number of notifications to be shown to user.
    * @returns {number} number of the notifications

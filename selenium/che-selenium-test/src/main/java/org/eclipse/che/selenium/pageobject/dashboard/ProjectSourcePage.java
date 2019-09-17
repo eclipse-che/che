@@ -78,9 +78,9 @@ public class ProjectSourcePage {
 
     String PROJECT_NAME = "//input[@name='projectName']";
     String PROJECT_DESCRIPTION = "//input[@name='projectDescription']";
-    String CONNECT_GITHUB_ACCOUNT_BUTTON = "//span[text()='Connect your github account']";
-    String GITHUB_PROJECTS_LIST =
-        "//md-list[contains(@class,'import-github-project-repositories-list')]";
+    String CONNECT_GITHUB_ACCOUNT_BUTTON =
+        "//*[@id='import-github-project-button']/*[contains(@class, 'che-button')]";
+    String GITHUB_PROJECTS_LIST = "//*[contains(@class,'import-github-project-repositories-list')]";
     String GITHUB_PROJECT_CHECKBOX = "//md-checkbox[@aria-label='GitHub repository %s']";
 
     String LOGIN_FIELD = "login_field";

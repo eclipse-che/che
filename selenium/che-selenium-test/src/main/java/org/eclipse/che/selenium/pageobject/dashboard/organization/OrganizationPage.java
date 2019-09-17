@@ -47,7 +47,8 @@ public class OrganizationPage {
     String WORKSPACE_CAP = "//input[@name = 'workspaceCap']";
     String RUNNING_WORKSPACE_CAP = "//input[@name = 'runtimeCap']";
     String WORKSPACE_RAM_CAP = "//input[@name = 'workspaceRamCap']";
-    String DELETE_ORG_BUTTON = "//button[contains(@class, 'che-button')]//span[text() = 'Delete']";
+    String DELETE_ORG_BUTTON =
+        "//*[contains(@class, 'delete-organization')]/*[contains(@class, 'che-button')]";
     String DELETE_ORG_WIDGET_BUTTON =
         "//div[contains(@class,'che-confirm-dialog-notification')]//span";
     String SUB_ORGANIZATIONS_TAB = "//md-tab-item//span[contains(text(), 'Sub-Organizations')]";

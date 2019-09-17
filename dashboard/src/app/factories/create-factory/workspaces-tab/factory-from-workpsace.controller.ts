@@ -44,20 +44,21 @@ export class FactoryFromWorkspaceCtrl {
     this.cheNotification = cheNotification;
     this.workspacesService = workspacesService;
 
-    this.workspaces = cheAPI.getWorkspace().getWorkspaces().filter((workspace: che.IWorkspace) => {
-      return this.workspacesService.isSupported(workspace);
-    });
-    this.workspacesById = cheAPI.getWorkspace().getWorkspacesById();
-
     this.filtersWorkspaceSelected = {};
 
     this.workspaceFilter = {config: {name: ''}};
 
     this.isLoading = true;
+  }
+
+  $onInit(): void {
+    this.workspaces = this.cheAPI.getWorkspace().getWorkspaces().filter((workspace: che.IWorkspace) => {
+      return this.workspacesService.isSupported(workspace);
+    });
+    this.workspacesById = this.cheAPI.getWorkspace().getWorkspacesById();
 
     // fetch workspaces when initializing
-    let promise = cheAPI.getWorkspace().fetchWorkspaces();
-
+    let promise = this.cheAPI.getWorkspace().fetchWorkspaces();
     promise.then(() => {
         this.isLoading = false;
         this.updateData();
@@ -67,7 +68,6 @@ export class FactoryFromWorkspaceCtrl {
           this.updateData();
         }
       });
-
   }
 
   updateData(): void {

@@ -64,6 +64,11 @@ export class DeleteDevMachineDialogController {
     }
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Closes this dialog.
    */

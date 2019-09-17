@@ -88,13 +88,16 @@ export class MachineSelectorController {
     this.$scope = $scope;
     this.$timeout = $timeout;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
-    this.init(this.workspaceDetails);
+
     const action = this.init.bind(this);
     workspaceDetailsService.subscribeOnWorkspaceChange(action);
-
     $scope.$on('$destroy', () => {
       workspaceDetailsService.subscribeOnWorkspaceChange(action);
     });
+  }
+
+  $onInit(): void {
+    this.init(this.workspaceDetails);
   }
 
   /**

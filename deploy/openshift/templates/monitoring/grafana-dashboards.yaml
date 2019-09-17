@@ -3625,7 +3625,7 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 1,
-      "iteration": 1568122748216,
+      "iteration": 1568358742338,
       "links": [],
       "panels": [
         {
@@ -3829,7 +3829,7 @@ data:
           "fillGradient": 0,
           "gridPos": {
             "h": 5,
-            "w": 5,
+            "w": 6,
             "x": 0,
             "y": 7
           },
@@ -3929,7 +3929,7 @@ data:
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 5,
+            "x": 6,
             "y": 7
           },
           "id": 48,
@@ -4026,8 +4026,8 @@ data:
           "fillGradient": 0,
           "gridPos": {
             "h": 5,
-            "w": 5,
-            "x": 11,
+            "w": 6,
+            "x": 12,
             "y": 7
           },
           "id": 6,
@@ -4116,11 +4116,11 @@ data:
           "fillGradient": 0,
           "gridPos": {
             "h": 5,
-            "w": 7,
-            "x": 16,
+            "w": 6,
+            "x": 18,
             "y": 7
           },
-          "id": 10,
+          "id": 59,
           "legend": {
             "avg": true,
             "current": true,
@@ -4148,7 +4148,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "che_workspace_status{status=\"RUNNING\"}",
+              "expr": "che_workspace_status{status=\"STOPPING\"}",
               "format": "time_series",
               "instant": false,
               "intervalFactor": 1,
@@ -4160,7 +4160,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Running Workspaces",
+          "title": "Stopping Workspaces",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -4480,144 +4480,31 @@ data:
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 6,
-            "w": 11,
-            "x": 0,
-            "y": 17
+            "h": 5,
+            "w": 6,
+            "x": 18,
+            "y": 12
           },
-          "id": 55,
+          "id": 10,
           "legend": {
-            "alignAsTable": false,
-            "avg": false,
+            "avg": true,
             "current": true,
             "max": true,
-            "min": false,
-            "rightSide": true,
+            "min": true,
             "show": true,
             "total": false,
             "values": true
           },
           "lines": true,
           "linewidth": 1,
-          "nullPointMode": "null as zero",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"WorkspaceRuntimes#startAsync\"}",
-              "legendFormat": "{{operation}}",
-              "refId": "F"
-            },
-            {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"SidecarToolingProvisioner#provision\"}",
-              "legendFormat": "{{operation}}",
-              "refId": "A"
-            },
-            {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftEnvironmentProvisioner#provision\"}",
-              "legendFormat": "{{operation}}",
-              "refId": "B"
-            },
-            {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"UniqueWorkspacePVCStrategy#prepare\"}",
-              "legendFormat": "{{operation}}",
-              "refId": "C"
-            },
-            {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#startMachines\"}",
-              "legendFormat": "{{operation}}",
-              "refId": "D"
-            },
-            {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"WaitMachinesStart\"}",
-              "legendFormat": "{{operation}}",
-              "refId": "E"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Workspace Start Max",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": 0,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": 0,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 6,
-            "w": 11,
-            "x": 11,
-            "y": 17
-          },
-          "id": 56,
-          "legend": {
-            "alignAsTable": false,
-            "avg": false,
-            "current": true,
-            "max": true,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
+          "links": [],
           "nullPointMode": "null",
           "options": {
             "dataLinks": []
           },
+          "paceLength": 10,
           "percentage": false,
-          "pointradius": 2,
+          "pointradius": 5,
           "points": false,
           "renderer": "flot",
           "seriesOverrides": [],
@@ -4626,41 +4513,19 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WorkspaceRuntimes#startAsync\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WorkspaceRuntimes#startAsync\"}[1h])",
-              "legendFormat": "{{operation}}",
+              "expr": "che_workspace_status{status=\"RUNNING\"}",
+              "format": "time_series",
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "running",
               "refId": "A"
-            },
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"SidecarToolingProvisioner#provision\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"SidecarToolingProvisioner#provision\"}[1h])",
-              "legendFormat": "{{operation}}",
-              "refId": "B"
-            },
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftEnvironmentProvisioner#provision\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftEnvironmentProvisioner#provision\"}[1h])",
-              "legendFormat": "{{operation}}",
-              "refId": "C"
-            },
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"UniqueWorkspacePVCStrategy#prepare\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"UniqueWorkspacePVCStrategy#prepare\"}[1h])",
-              "legendFormat": "{{operation}}",
-              "refId": "D"
-            },
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#startMachines\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#startMachines\"}[1h])",
-              "legendFormat": "{{operation}}",
-              "refId": "E"
-            },
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WaitMachinesStart\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WaitMachinesStart\"}[1h])",
-              "legendFormat": "{{operation}}",
-              "refId": "F"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Workspace Start Avg",
+          "title": "Running Workspaces",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -4680,7 +4545,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": 0,
+              "min": null,
               "show": true
             },
             {
@@ -4688,7 +4553,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": 0,
+              "min": null,
               "show": true
             }
           ],
@@ -4706,31 +4571,31 @@ data:
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 6,
-            "w": 11,
+            "h": 5,
+            "w": 6,
             "x": 0,
-            "y": 23
+            "y": 17
           },
-          "id": 51,
+          "id": 62,
           "legend": {
-            "alignAsTable": false,
             "avg": false,
             "current": true,
-            "max": true,
+            "max": false,
             "min": false,
-            "rightSide": true,
             "show": true,
             "total": false,
             "values": true
           },
           "lines": true,
           "linewidth": 1,
-          "nullPointMode": "null as zero",
+          "links": [],
+          "nullPointMode": "null",
           "options": {
             "dataLinks": []
           },
+          "paceLength": 10,
           "percentage": false,
-          "pointradius": 2,
+          "pointradius": 5,
           "points": false,
           "renderer": "flot",
           "seriesOverrides": [],
@@ -4739,41 +4604,18 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#createSecrets\"}",
-              "legendFormat": "{{operation}}",
+              "expr": "rate(che_workspace_start_time_seconds_bucket{le=\"62.992853672\",result=\"success\"}[1h]) / ignoring(le) rate(che_workspace_start_time_seconds_count{result=\"success\"}[1h])",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "failure",
               "refId": "A"
-            },
-            {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#createConfigMaps\"}",
-              "legendFormat": "{{operation}}",
-              "refId": "B"
-            },
-            {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#createServices\"}",
-              "legendFormat": "{{operation}}",
-              "refId": "C"
-            },
-            {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#createRoutes\"}",
-              "legendFormat": "{{operation}}",
-              "refId": "D"
-            },
-            {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#doStartMachine\"}",
-              "legendFormat": "{{operation}}",
-              "refId": "E"
-            },
-            {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#listenEvents\"}",
-              "legendFormat": "{{operation}}",
-              "refId": "F"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "OpenShiftInternalRuntime#startMachines Max",
+          "title": "Workspaces started under 60 seconds",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -4789,318 +4631,19 @@ data:
           },
           "yaxes": [
             {
-              "format": "short",
+              "format": "percentunit",
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": 0,
+              "min": "0",
               "show": true
             },
             {
-              "format": "short",
+              "format": "percentunit",
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": 0,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 6,
-            "w": 11,
-            "x": 11,
-            "y": 23
-          },
-          "id": 54,
-          "legend": {
-            "alignAsTable": false,
-            "avg": false,
-            "current": true,
-            "max": true,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null as zero",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createSecrets\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createSecrets\"}[1h])",
-              "legendFormat": "{{operation}}",
-              "refId": "A"
-            },
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createConfigMaps\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createConfigMaps\"}[1h])",
-              "legendFormat": "{{operation}}",
-              "refId": "B"
-            },
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createServices\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createServices\"}[1h])",
-              "legendFormat": "{{operation}}",
-              "refId": "C"
-            },
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createRoutes\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createRoutes\"}[1h])",
-              "legendFormat": "{{operation}}",
-              "refId": "D"
-            },
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#listenEvents\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#listenEvents\"}[1h])",
-              "legendFormat": "{{operation}}",
-              "refId": "E"
-            },
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#doStartMachine\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#doStartMachine\"}[1h])",
-              "legendFormat": "{{operation}}",
-              "refId": "F"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "OpenShiftInternalRuntime#startMachines Avg",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": 0,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": 0,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 6,
-            "w": 11,
-            "x": 0,
-            "y": 29
-          },
-          "id": 57,
-          "legend": {
-            "alignAsTable": false,
-            "avg": false,
-            "current": true,
-            "max": true,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null as zero",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"WorkspaceRuntimes#stopAsync\"}",
-              "legendFormat": "{{operation}}",
-              "refId": "A"
-            },
-            {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#internalStop\"}",
-              "legendFormat": "{{operation}}",
-              "refId": "B"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Workspace Stop Max",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": 0,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": 0,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 6,
-            "w": 11,
-            "x": 11,
-            "y": 29
-          },
-          "id": 58,
-          "legend": {
-            "alignAsTable": false,
-            "avg": false,
-            "current": true,
-            "max": true,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null as zero",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WorkspaceRuntimes#stopAsync\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WorkspaceRuntimes#stopAsync\"}[1h])",
-              "legendFormat": "{{operation}}",
-              "refId": "A"
-            },
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#internalStop\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#internalStop\"}[1h])",
-              "legendFormat": "{{operation}}",
-              "refId": "B"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Workspace Stop Avg",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": 0,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": 0,
+              "min": "0",
               "show": true
             }
           ],
@@ -5115,7 +4658,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 35
+            "y": 22
           },
           "id": 24,
           "panels": [],
@@ -5132,9 +4675,9 @@ data:
           "fillGradient": 0,
           "gridPos": {
             "h": 7,
-            "w": 11,
+            "w": 12,
             "x": 0,
-            "y": 36
+            "y": 23
           },
           "id": 16,
           "legend": {
@@ -5219,7 +4762,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 43
+            "y": 30
           },
           "id": 22,
           "panels": [],
@@ -5236,9 +4779,9 @@ data:
           "fillGradient": 0,
           "gridPos": {
             "h": 7,
-            "w": 9,
+            "w": 8,
             "x": 0,
-            "y": 44
+            "y": 31
           },
           "id": 18,
           "legend": {
@@ -5352,9 +4895,9 @@ data:
           "fillGradient": 0,
           "gridPos": {
             "h": 7,
-            "w": 7,
-            "x": 9,
-            "y": 44
+            "w": 8,
+            "x": 8,
+            "y": 31
           },
           "id": 26,
           "legend": {
@@ -5450,11 +4993,12 @@ data:
           "datasource": "$datasource",
           "decimals": null,
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 7,
-            "w": 7,
+            "w": 8,
             "x": 16,
-            "y": 44
+            "y": 31
           },
           "id": 32,
           "legend": {
@@ -5473,7 +5017,9 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
-          "options": {},
+          "options": {
+            "dataLinks": []
+          },
           "paceLength": 10,
           "percentage": false,
           "pointradius": 5,
@@ -5550,11 +5096,12 @@ data:
           "dashes": false,
           "datasource": "$datasource",
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
-            "h": 8,
-            "w": 9,
+            "h": 7,
+            "w": 8,
             "x": 0,
-            "y": 51
+            "y": 38
           },
           "id": 30,
           "legend": {
@@ -5570,7 +5117,9 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null as zero",
-          "options": {},
+          "options": {
+            "dataLinks": []
+          },
           "paceLength": 10,
           "percentage": false,
           "pointradius": 5,
@@ -5644,11 +5193,12 @@ data:
           "dashes": false,
           "datasource": "$datasource",
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
-            "h": 8,
-            "w": 7,
-            "x": 9,
-            "y": 51
+            "h": 7,
+            "w": 8,
+            "x": 8,
+            "y": 38
           },
           "id": 34,
           "legend": {
@@ -5664,7 +5214,9 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null as zero",
-          "options": {},
+          "options": {
+            "dataLinks": []
+          },
           "paceLength": 10,
           "percentage": false,
           "pointradius": 5,
@@ -5740,11 +5292,12 @@ data:
           "datasource": "$datasource",
           "description": "",
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
-            "h": 8,
-            "w": 7,
+            "h": 7,
+            "w": 8,
             "x": 16,
-            "y": 51
+            "y": 38
           },
           "id": 28,
           "legend": {
@@ -5760,7 +5313,9 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null as zero",
-          "options": {},
+          "options": {
+            "dataLinks": []
+          },
           "paceLength": 10,
           "percentage": false,
           "pointradius": 5,
@@ -5835,153 +5390,809 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 59
+            "y": 45
           },
-          "id": 42,
+          "id": 61,
           "panels": [],
-          "title": "Workspaces detailed",
+          "title": "Traces",
           "type": "row"
         },
         {
-          "cards": {
-            "cardPadding": null,
-            "cardRound": null
-          },
-          "color": {
-            "cardColor": "#b4ff00",
-            "colorScale": "sqrt",
-            "colorScheme": "interpolateReds",
-            "exponent": 0.5,
-            "mode": "spectrum"
-          },
-          "dataFormat": "tsbuckets",
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
           "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
-            "h": 12,
-            "w": 11,
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 46
+          },
+          "id": 55,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"WorkspaceRuntimes#startAsync\"}",
+              "legendFormat": "{{operation}}",
+              "refId": "F"
+            },
+            {
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"SidecarToolingProvisioner#provision\"}",
+              "legendFormat": "{{operation}}",
+              "refId": "A"
+            },
+            {
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftEnvironmentProvisioner#provision\"}",
+              "legendFormat": "{{operation}}",
+              "refId": "B"
+            },
+            {
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"UniqueWorkspacePVCStrategy#prepare\"}",
+              "legendFormat": "{{operation}}",
+              "refId": "C"
+            },
+            {
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#startMachines\"}",
+              "legendFormat": "{{operation}}",
+              "refId": "D"
+            },
+            {
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"WaitMachinesStart\"}",
+              "legendFormat": "{{operation}}",
+              "refId": "E"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Workspace Start Max",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 46
+          },
+          "id": 56,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WorkspaceRuntimes#startAsync\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WorkspaceRuntimes#startAsync\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "A"
+            },
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"SidecarToolingProvisioner#provision\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"SidecarToolingProvisioner#provision\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "B"
+            },
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftEnvironmentProvisioner#provision\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftEnvironmentProvisioner#provision\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "C"
+            },
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"UniqueWorkspacePVCStrategy#prepare\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"UniqueWorkspacePVCStrategy#prepare\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "D"
+            },
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#startMachines\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#startMachines\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "E"
+            },
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WaitMachinesStart\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WaitMachinesStart\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "F"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Workspace Start Avg",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 53
+          },
+          "id": 51,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#createSecrets\"}",
+              "legendFormat": "{{operation}}",
+              "refId": "A"
+            },
+            {
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#createConfigMaps\"}",
+              "legendFormat": "{{operation}}",
+              "refId": "B"
+            },
+            {
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#createServices\"}",
+              "legendFormat": "{{operation}}",
+              "refId": "C"
+            },
+            {
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#createRoutes\"}",
+              "legendFormat": "{{operation}}",
+              "refId": "D"
+            },
+            {
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#doStartMachine\"}",
+              "legendFormat": "{{operation}}",
+              "refId": "E"
+            },
+            {
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#listenEvents\"}",
+              "legendFormat": "{{operation}}",
+              "refId": "F"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "OpenShiftInternalRuntime#startMachines Max",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 53
+          },
+          "id": 54,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createSecrets\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createSecrets\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "A"
+            },
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createConfigMaps\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createConfigMaps\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "B"
+            },
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createServices\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createServices\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "C"
+            },
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createRoutes\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createRoutes\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "D"
+            },
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#listenEvents\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#listenEvents\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "E"
+            },
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#doStartMachine\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#doStartMachine\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "F"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "OpenShiftInternalRuntime#startMachines Avg",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
             "x": 0,
             "y": 60
           },
-          "heatmap": {},
-          "hideZeroBuckets": false,
-          "highlightCards": true,
-          "id": 38,
+          "id": 58,
           "legend": {
-            "show": true
+            "alignAsTable": false,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
           },
-          "links": [],
-          "options": {},
-          "reverseYBuckets": false,
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
           "targets": [
             {
-              "expr": "increase(che_workspace_start_time_seconds_bucket{result=\"fail\"}[1h])",
-              "format": "heatmap",
-              "interval": "1m",
-              "intervalFactor": 1,
-              "legendFormat": "{{le}}",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WorkspaceRuntimes#stopAsync\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WorkspaceRuntimes#stopAsync\"}[1h])",
+              "legendFormat": "{{operation}}",
               "refId": "A"
+            },
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#internalStop\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#internalStop\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "B"
             }
           ],
+          "thresholds": [],
           "timeFrom": null,
+          "timeRegions": [],
           "timeShift": null,
-          "title": "Failed start",
+          "title": "Workspace Stop Avg",
           "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
             "show": true,
-            "showHistogram": false
+            "values": []
           },
-          "type": "heatmap",
-          "xAxis": {
-            "show": true
-          },
-          "xBucketNumber": null,
-          "xBucketSize": null,
-          "yAxis": {
-            "decimals": null,
-            "format": "short",
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true,
-            "splitFactor": null
-          },
-          "yBucketBound": "auto",
-          "yBucketNumber": null,
-          "yBucketSize": null
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
         },
         {
-          "cards": {
-            "cardPadding": null,
-            "cardRound": null
-          },
-          "color": {
-            "cardColor": "#b4ff00",
-            "colorScale": "sqrt",
-            "colorScheme": "interpolateBlues",
-            "exponent": 0.5,
-            "mode": "spectrum"
-          },
-          "dataFormat": "tsbuckets",
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
           "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
-            "h": 12,
-            "w": 13,
-            "x": 11,
+            "h": 7,
+            "w": 12,
+            "x": 12,
             "y": 60
           },
-          "heatmap": {},
-          "hideZeroBuckets": false,
-          "highlightCards": true,
-          "id": 40,
+          "id": 57,
           "legend": {
-            "show": true
+            "alignAsTable": false,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
           },
-          "links": [],
-          "options": {},
-          "reverseYBuckets": false,
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
           "targets": [
             {
-              "expr": "increase(che_workspace_start_time_seconds_bucket{result=\"success\"} [1h])",
-              "format": "heatmap",
-              "interval": "1m",
-              "intervalFactor": 1,
-              "legendFormat": "{{le}}",
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"WorkspaceRuntimes#stopAsync\"}",
+              "legendFormat": "{{operation}}",
               "refId": "A"
+            },
+            {
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#internalStop\"}",
+              "legendFormat": "{{operation}}",
+              "refId": "B"
             }
           ],
+          "thresholds": [],
           "timeFrom": null,
+          "timeRegions": [],
           "timeShift": null,
-          "title": "Success start",
+          "title": "Workspace Stop Max",
           "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
             "show": true,
-            "showHistogram": false
+            "values": []
           },
-          "type": "heatmap",
-          "xAxis": {
-            "show": true
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "collapsed": true,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 67
           },
-          "xBucketNumber": null,
-          "xBucketSize": null,
-          "yAxis": {
-            "decimals": null,
-            "format": "short",
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true,
-            "splitFactor": null
-          },
-          "yBucketBound": "auto",
-          "yBucketNumber": null,
-          "yBucketSize": null
+          "id": 42,
+          "panels": [
+            {
+              "cards": {
+                "cardPadding": null,
+                "cardRound": null
+              },
+              "color": {
+                "cardColor": "#b4ff00",
+                "colorScale": "sqrt",
+                "colorScheme": "interpolateReds",
+                "exponent": 0.5,
+                "mode": "spectrum"
+              },
+              "dataFormat": "tsbuckets",
+              "datasource": "$datasource",
+              "gridPos": {
+                "h": 12,
+                "w": 12,
+                "x": 0,
+                "y": 68
+              },
+              "heatmap": {},
+              "hideZeroBuckets": false,
+              "highlightCards": true,
+              "id": 38,
+              "legend": {
+                "show": true
+              },
+              "links": [],
+              "options": {},
+              "reverseYBuckets": false,
+              "targets": [
+                {
+                  "expr": "increase(che_workspace_start_time_seconds_bucket{result=\"fail\"}[1h])",
+                  "format": "heatmap",
+                  "interval": "1m",
+                  "intervalFactor": 1,
+                  "legendFormat": "{{le}}",
+                  "refId": "A"
+                }
+              ],
+              "timeFrom": null,
+              "timeShift": null,
+              "title": "Failed start",
+              "tooltip": {
+                "show": true,
+                "showHistogram": false
+              },
+              "type": "heatmap",
+              "xAxis": {
+                "show": true
+              },
+              "xBucketNumber": null,
+              "xBucketSize": null,
+              "yAxis": {
+                "decimals": null,
+                "format": "short",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true,
+                "splitFactor": null
+              },
+              "yBucketBound": "auto",
+              "yBucketNumber": null,
+              "yBucketSize": null
+            },
+            {
+              "cards": {
+                "cardPadding": null,
+                "cardRound": null
+              },
+              "color": {
+                "cardColor": "#b4ff00",
+                "colorScale": "sqrt",
+                "colorScheme": "interpolateBlues",
+                "exponent": 0.5,
+                "mode": "spectrum"
+              },
+              "dataFormat": "tsbuckets",
+              "datasource": "$datasource",
+              "gridPos": {
+                "h": 12,
+                "w": 12,
+                "x": 12,
+                "y": 68
+              },
+              "heatmap": {},
+              "hideZeroBuckets": false,
+              "highlightCards": true,
+              "id": 40,
+              "legend": {
+                "show": true
+              },
+              "links": [],
+              "options": {},
+              "reverseYBuckets": false,
+              "targets": [
+                {
+                  "expr": "increase(che_workspace_start_time_seconds_bucket{result=\"success\"} [1h])",
+                  "format": "heatmap",
+                  "interval": "1m",
+                  "intervalFactor": 1,
+                  "legendFormat": "{{le}}",
+                  "refId": "A"
+                }
+              ],
+              "timeFrom": null,
+              "timeShift": null,
+              "title": "Success start",
+              "tooltip": {
+                "show": true,
+                "showHistogram": false
+              },
+              "type": "heatmap",
+              "xAxis": {
+                "show": true
+              },
+              "xBucketNumber": null,
+              "xBucketSize": null,
+              "yAxis": {
+                "decimals": null,
+                "format": "short",
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true,
+                "splitFactor": null
+              },
+              "yBucketBound": "auto",
+              "yBucketNumber": null,
+              "yBucketSize": null
+            }
+          ],
+          "title": "Workspaces detailed",
+          "type": "row"
         }
       ],
       "refresh": "15m",
-      "schemaVersion": 18,
+      "schemaVersion": 19,
       "style": "dark",
       "tags": [],
       "templating": {
         "list": [
           {
+            "current": {
+              "text": "che",
+              "value": "che"
+            },
             "hide": 0,
             "includeAll": false,
             "label": null,

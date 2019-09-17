@@ -19,6 +19,6 @@
  */
 export class CreateFactoryGitController {
 
-
+  $onInit(): void { }
 
 }

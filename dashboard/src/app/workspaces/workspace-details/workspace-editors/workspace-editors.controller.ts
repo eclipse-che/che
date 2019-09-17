@@ -72,7 +72,9 @@ export class WorkspaceEditorsController {
     $scope.$on('$destroy', () => {
       deRegistrationFn();
     });
+  }
 
+  $onInit(): void {
     this.loadPlugins();
   }
 

@@ -85,6 +85,11 @@ export class LoadFactoryController {
     this.getFactoryData();
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Hides menu and footer to maximize view.
    */

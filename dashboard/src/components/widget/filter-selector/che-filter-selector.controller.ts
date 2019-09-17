@@ -29,6 +29,7 @@ export class CheFilterSelectorController {
     this.width = this.width || '150px';
   }
 
+  $onInit(): void { }
 
   /**
    * Performs value selection and calls value changed handler.

@@ -34,7 +34,9 @@ export class DashboardLastWorkspacesController {
   constructor(cheWorkspace: CheWorkspace, cheNotification: CheNotification) {
     this.cheWorkspace = cheWorkspace;
     this.cheNotification = cheNotification;
+  }
 
+  $onInit(): void {
     this.loadData();
   }
 
@@ -48,7 +50,7 @@ export class DashboardLastWorkspacesController {
       this.isLoading = false;
       return;
     }
-    
+
     let promise = this.cheWorkspace.fetchWorkspaces();
 
     promise.then((result) => {

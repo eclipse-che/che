@@ -239,7 +239,7 @@ public class AddOrImportForm {
 
   public WebElement waitConnectYourGithubAccountButton() {
     return seleniumWebDriverHelper.waitVisibility(
-        By.xpath("//che-button-default[@class='import-github-project-button']/button"));
+        By.xpath("//*[@id='import-github-project-button']/*[contains(@class, 'che-button')]"));
   }
 
   public void clickConnectYourGithubAccountButton() {

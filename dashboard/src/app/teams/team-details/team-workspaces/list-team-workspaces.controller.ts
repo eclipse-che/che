@@ -50,6 +50,10 @@ export class ListTeamWorkspacesController {
    * Promises service.
    */
   private $q: ng.IQService;
+  /**
+   * Team details service.
+   */
+  private teamDetailsService: TeamDetailsService;
 
   private lodash: any;
   /**
@@ -87,6 +91,7 @@ export class ListTeamWorkspacesController {
     this.$mdDialog = $mdDialog;
     this.$q = $q;
     this.lodash = lodash;
+    this.teamDetailsService = teamDetailsService;
 
     this.workspaces = [];
     this.isLoading = true;
@@ -97,9 +102,10 @@ export class ListTeamWorkspacesController {
     $scope.$on('$destroy', () => {
       cheListHelperFactory.removeHelper(helperId);
     });
+  }
 
-    this.team = teamDetailsService.getTeam();
-
+  $onInit(): void {
+    this.team = this.teamDetailsService.getTeam();
     this.fetchPermissions();
   }
 

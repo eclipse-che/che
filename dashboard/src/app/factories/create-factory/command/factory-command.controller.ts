@@ -34,6 +34,8 @@ export class FactoryCommandController {
     this.$mdDialog = $mdDialog;
   }
 
+  $onInit(): void { }
+
   /**
    * User clicked on the add button to add a new command
    */
