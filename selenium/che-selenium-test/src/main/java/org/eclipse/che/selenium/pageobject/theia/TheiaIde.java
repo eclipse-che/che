@@ -28,6 +28,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -151,7 +152,11 @@ public class TheiaIde {
   }
 
   public void waitTheiaIde() {
-    seleniumWebDriverHelper.waitVisibility(theiaIde, PREPARING_WS_TIMEOUT_SEC);
+    try {
+      seleniumWebDriverHelper.waitVisibility(theiaIde, PREPARING_WS_TIMEOUT_SEC);
+    } catch (WebDriverException ex) {
+      switchToIdeFrame();
+    }
   }
 
   public void waitTheiaIdeTopPanel() {
@@ -227,5 +232,11 @@ public class TheiaIde {
 
   public String getBranchName() {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(branchName);
+  }
+
+  public void checkIdeIsReadyToUse() {
+    switchToIdeFrame();
+    waitTheiaIde();
+    openNavbarMenu();
   }
 }

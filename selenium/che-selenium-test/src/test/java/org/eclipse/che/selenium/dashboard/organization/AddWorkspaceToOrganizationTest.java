@@ -173,8 +173,9 @@ public class AddWorkspaceToOrganizationTest {
     newWorkspace.waitToolbar();
     newWorkspace.openOrganizationsList();
     newWorkspace.selectOrganizationFromList(organizationName);
-    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
     newWorkspace.typeWorkspaceName(workspaceName);
+    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
+    newWorkspace.waitDevfileSelected(Devfile.JAVA_MAVEN);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
     workspaceDetails.waitToolbarTitleName(workspaceName);
   }
