@@ -718,6 +718,20 @@
                 }
               }
             }
+          },
+          "previewUrl": {
+            "type": "object",
+            "oneOf": [{"required": ["port"]}, {"required": ["path"]}],
+            "properties": {
+              "port": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 65535
+              },
+              "path":  {
+                "type": "string"
+              }
+            }
           }
         }
       }
