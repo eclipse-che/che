@@ -111,7 +111,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
     Map<String, PersistentVolumeClaim> userDefinedPVCs =
         new HashMap<>(k8sEnv.getPersistentVolumeClaims());
 
-    k8sEnv.getPersistentVolumeClaims().clear();
+    k8sEnv.getPersistentVolumeClaims().clear(); // todo clear?
     fillInExistingPVCs(k8sEnv, workspaceId);
 
     pvcProvisioner.provision(k8sEnv, userDefinedPVCs);

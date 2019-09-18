@@ -165,7 +165,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       PersistentVolumeClaim volumeClaim =
           newPVC(
               PROJECTS_VOLUME_NAME,
-              defaultPVCAccessMode,
+              defaultPVCAccessMode, //
               defaultProjectPVCSize,
               pvcStorageClassName);
       componentObjects.add(volumeClaim);

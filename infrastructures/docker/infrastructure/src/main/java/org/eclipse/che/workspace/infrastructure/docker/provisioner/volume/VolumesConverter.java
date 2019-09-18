@@ -23,7 +23,7 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
  *
  * @author Alexander Garagatyi
  */
-public class VolumesConverter implements DockerEnvironmentProvisioner {
+public class VolumesConverter implements DockerEnvironmentProvisioner { //
 
   @Override
   public void provision(DockerEnvironment internalEnv, RuntimeIdentity identity)
