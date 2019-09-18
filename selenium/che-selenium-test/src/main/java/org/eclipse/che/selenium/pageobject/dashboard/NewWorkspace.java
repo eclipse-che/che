@@ -35,7 +35,7 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -189,7 +189,7 @@ public class NewWorkspace {
     try {
       seleniumWebDriverHelper.waitAndClick(By.xpath(format(DEVFILE_ROW_XPATH, devfile.getId())));
       waitDevfileSelected(devfile);
-    } catch (WebDriverException ex) {
+    } catch (TimeoutException ex) {
       seleniumWebDriverHelper.waitAndClick(By.xpath(format(DEVFILE_ROW_XPATH, devfile.getId())));
     }
   }

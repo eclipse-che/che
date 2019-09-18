@@ -16,7 +16,6 @@ import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_CLOSE_BUTTON;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_MESSAGE_CONTAINS_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_MESSAGE_EQUALS_TO_XPATH_TEMPLATE;
@@ -29,7 +28,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -139,7 +138,7 @@ public class TheiaIde {
   }
 
   public void waitNotificationDisappearance(String notificationText) {
-    waitNotificationDisappearance(notificationText, WIDGET_TIMEOUT_SEC);
+    waitNotificationDisappearance(notificationText, LOAD_PAGE_TIMEOUT_SEC);
   }
 
   public void waitNotificationDisappearance(String notificationText, int timeout) {
@@ -155,8 +154,9 @@ public class TheiaIde {
   public void waitTheiaIde() {
     try {
       seleniumWebDriverHelper.waitVisibility(theiaIde, PREPARING_WS_TIMEOUT_SEC);
-    } catch (WebDriverException ex) {
+    } catch (TimeoutException ex) {
       switchToIdeFrame();
+      seleniumWebDriverHelper.waitVisibility(theiaIde, PREPARING_WS_TIMEOUT_SEC);
     }
   }
 
