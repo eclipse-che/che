@@ -22,7 +22,6 @@ import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import 'reflect-metadata';
 import { error, Key } from 'selenium-webdriver';
-import * as restClient from 'typed-rest-client/RestClient';
 import { DriverHelper } from '../../utils/DriverHelper';
 
 const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
@@ -43,10 +42,9 @@ const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 
-suite('RhChe E2E Java Vert.x test', async () => {
+suite('Java Vert.x test', async () => {
     suite('Login and wait dashboard', async () => {
         test('Login', async () => {
-            console.log('URL: ' + TestConstants.TS_SELENIUM_BASE_URL);
             await driverHelper.navigateToUrl(TestConstants.TS_SELENIUM_BASE_URL);
             await loginPage.login();
         });
