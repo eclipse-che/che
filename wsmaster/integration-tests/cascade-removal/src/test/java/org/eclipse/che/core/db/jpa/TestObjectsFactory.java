@@ -142,7 +142,7 @@ public final class TestObjectsFactory {
   private static org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl
       createDevfileCommand(String name) {
     return new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
-        name, singletonList(createAction()), singletonMap("attr1", "value1"));
+        name, singletonList(createAction()), singletonMap("attr1", "value1"), null);
   }
 
   private static ActionImpl createAction() {

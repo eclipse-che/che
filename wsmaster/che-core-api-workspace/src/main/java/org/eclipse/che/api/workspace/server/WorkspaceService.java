@@ -954,6 +954,30 @@ public class WorkspaceService extends Service {
       }
     }
 
+    if (workspaceDto.getRuntime() != null && !workspaceDto.getRuntime().getMachines().isEmpty()) {
+      workspaceDto
+          .getRuntime()
+          .getCommands()
+          .stream()
+          .filter(c -> c.getAttributes().containsKey("previewUrl"))
+          .forEach(
+              c -> {
+                String previewUrl = c.getAttributes().get("previewUrl");
+                String machine = c.getAttributes().get("machineName");
+                previewUrl =
+                    workspaceDto
+                            .getRuntime()
+                            .getMachines()
+                            .get(machine)
+                            .getServers()
+                            .get("8080/tcp")  // TODO: what server to get?
+                            .getUrl()
+                        + previewUrl; // TODO: url will probably end with `/`. ensure to write port correctly
+
+                c.getAttributes().put("previewUrl", previewUrl);
+              });
+    }
+
     return workspaceDto;
   }
 
