@@ -102,7 +102,9 @@ public class KubernetesNamespaceFactory {
   }
 
   protected String evalNamespaceName(String workspaceId, Subject currentUser) {
-    if (isNullOrEmpty(this.namespaceName)) {
+    if (isPredefined) {
+      return this.namespaceName;
+    } else if (isNullOrEmpty(this.namespaceName)) {
       return workspaceId;
     } else {
       String tmpNamespaceName = this.namespaceName;
