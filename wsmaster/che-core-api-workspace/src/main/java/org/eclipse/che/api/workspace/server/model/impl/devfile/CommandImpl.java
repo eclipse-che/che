@@ -65,7 +65,10 @@ public class CommandImpl implements Command {
 
   public CommandImpl() {}
 
-  public CommandImpl(String name, List<? extends Action> actions, Map<String, String> attributes,
+  public CommandImpl(
+      String name,
+      List<? extends Action> actions,
+      Map<String, String> attributes,
       PreviewUrl previewUrl) {
     this.name = name;
     if (actions != null) {
@@ -74,7 +77,9 @@ public class CommandImpl implements Command {
     if (attributes != null) {
       this.attributes = new HashMap<>(attributes);
     }
-    this.previewUrl = new PreviewUrlImpl(previewUrl.getPort(), previewUrl.getPath());
+    if (previewUrl != null) {
+      this.previewUrl = new PreviewUrlImpl(previewUrl.getPort(), previewUrl.getPath());
+    }
   }
 
   public CommandImpl(Command command) {
