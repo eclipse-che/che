@@ -3625,8 +3625,7 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 1,
-      "id": 2,
-      "iteration": 1568820499410,
+      "iteration": 1568838348539,
       "links": [],
       "panels": [
         {
@@ -3660,12 +3659,12 @@ data:
           "id": 14,
           "legend": {
             "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
+            "current": true,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -3750,12 +3749,12 @@ data:
           "id": 47,
           "legend": {
             "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
+            "current": true,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
