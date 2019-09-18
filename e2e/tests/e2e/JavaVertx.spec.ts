@@ -72,19 +72,7 @@ suite('RhChe E2E Java Vert.x test', async () => {
         });
 
         test('Wait project imported', async () => {
-            try {
-                await projectTree.waitProjectImported(sampleName, 'src');
-            } catch (err) {
-                if (!(err instanceof error.TimeoutError)) {
-                    throw err;
-                }
-                var rest: restClient.RestClient = new restClient.RestClient('user-agent');
-                const workspaceStatusApiUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/api/workspace/${namespace}:${workspaceName}`;
-
-                const response: restClient.IRestResponse<any> = await rest.get(workspaceStatusApiUrl);
-                console.log('WORKSPACE DEFINITION: ' + JSON.stringify(response.result));
-                throw err;
-            }
+            await projectTree.waitProjectImported(sampleName, 'src');
         });
 
     });
