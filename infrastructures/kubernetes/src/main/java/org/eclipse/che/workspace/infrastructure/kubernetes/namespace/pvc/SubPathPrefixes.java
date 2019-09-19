@@ -55,6 +55,7 @@ public class SubPathPrefixes {
             k8sEnv
                 .getPersistentVolumeClaims()
                 .get(volume.getPersistentVolumeClaim().getClaimName());
+
         String cheVolumeName = pvc.getMetadata().getLabels().get(CHE_VOLUME_NAME_LABEL);
         if (cheVolumeName == null) {
           cheVolumeName = pvc.getMetadata().getName();
