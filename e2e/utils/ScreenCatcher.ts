@@ -19,7 +19,9 @@ export class ScreenCatcher {
 
     async catchMethodScreen(methodName: string, methodIndex: number, screenshotIndex: number) {
         const executionScreenCastDir = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/executionScreencast`;
-        const screenshotDir: string = `${executionScreenCastDir}/${methodIndex}-${methodName}`;
+        const executionScreenCastErrorsDir = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/executionScreencastErrors`;
+        const formattedMethodIndex: string = new Intl.NumberFormat('en-us', { minimumIntegerDigits: 3 }).format(methodIndex);
+        const formattedScreenshotIndex: string = new Intl.NumberFormat('en-us', { minimumIntegerDigits: 5 }).format(screenshotIndex).replace(/,/g, '');
 
         if (!fs.existsSync(TestConstants.TS_SELENIUM_REPORT_FOLDER)) {
             fs.mkdirSync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
@@ -29,22 +31,39 @@ export class ScreenCatcher {
             fs.mkdirSync(executionScreenCastDir);
         }
 
-        if (!fs.existsSync(screenshotDir)) {
-            fs.mkdirSync(screenshotDir);
-        }
-
         const date: Date = new Date();
-        const timeStamp: string = `(${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}:${date.getMilliseconds()})`;
-        const screenshotPath: string = `${screenshotDir}/${screenshotIndex}-${methodName}-${timeStamp}.png`;
+        const timeStr: string = date.toLocaleTimeString('en-us', { hour12: false }) + '.' + new Intl.NumberFormat('en-us', { minimumIntegerDigits: 3 }).format(date.getMilliseconds());
 
-        await this.catcheScreen(screenshotPath);
+        const screenshotPath: string = `${executionScreenCastDir}/${formattedMethodIndex}${formattedScreenshotIndex}--(${timeStr}): ${methodName}.png`;
+
+        try {
+            await this.catchScreen(screenshotPath);
+        } catch (err) {
+            if (!fs.existsSync(executionScreenCastErrorsDir)) {
+                fs.mkdirSync(executionScreenCastErrorsDir);
+            }
+
+            let errorLogFilePath: string = screenshotPath.replace('.png', '.txt');
+            errorLogFilePath = errorLogFilePath.replace(executionScreenCastDir, executionScreenCastErrorsDir);
+            await this.writeErrorLog(errorLogFilePath, err);
+        }
     }
 
-    async catcheScreen(screenshotPath: string) {
+    async catchScreen(screenshotPath: string) {
         const screenshot: string = await this.driverHelper.getDriver().takeScreenshot();
         const screenshotStream = fs.createWriteStream(screenshotPath);
         screenshotStream.write(new Buffer(screenshot, 'base64'));
         screenshotStream.end();
+    }
+
+    async writeErrorLog(errorLogPath: string, err: Error) {
+        console.log(`Failed to save screenshot, additional information in the ${errorLogPath}`);
+
+        if (err.stack) {
+            const screenshotStream = fs.createWriteStream(errorLogPath);
+            screenshotStream.write(new Buffer(err.stack, 'utf8'));
+            screenshotStream.end();
+        }
     }
 
 }

@@ -9,9 +9,9 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
-import {CheNotification} from '../../../../components/notification/che-notification.factory';
-import {CheSsh} from '../../../../components/api/che-ssh.factory';
+import { CheWorkspace } from '../../../../components/api/workspace/che-workspace.factory';
+import { CheNotification } from '../../../../components/notification/che-notification.factory';
+import { CheSsh } from '../../../../components/api/che-ssh.factory';
 'use strict';
 
 /**
@@ -54,15 +54,15 @@ export class WorkspaceDetailsSshCtrl {
    */
   private $q: ng.IQService;
 
-  private $timeout : ng.ITimeoutService;
+  private $timeout: ng.ITimeoutService;
 
-  private namespace : string;
-  private workspaceName : string;
-  private workspaceKey : string;
-  private workspace : any;
+  private namespace: string;
+  private workspaceName: string;
+  private workspaceKey: string;
+  private workspace: any;
   private workspaceId: string;
 
-  private sshKeyPair : any;
+  private sshKeyPair: any;
   /**
    * Loading state of the page.
    */
@@ -73,19 +73,19 @@ export class WorkspaceDetailsSshCtrl {
    */
   private hasSSHAgents: boolean;
 
-  private machineSshAgents : Array<{agentEnabled : boolean, name: string}>;
+  private machineSshAgents: Array<{ agentEnabled: boolean, name: string }>;
 
   /**
    * Default constructor that is using resource
    */
   constructor($route: ng.route.IRouteService,
-              cheSsh: CheSsh,
-              cheWorkspace: CheWorkspace,
-              cheNotification: CheNotification,
-              $mdDialog: ng.material.IDialogService,
-              $log: ng.ILogService,
-              $q: ng.IQService,
-              $timeout : ng.ITimeoutService) {
+    cheSsh: CheSsh,
+    cheWorkspace: CheWorkspace,
+    cheNotification: CheNotification,
+    $mdDialog: ng.material.IDialogService,
+    $log: ng.ILogService,
+    $q: ng.IQService,
+    $timeout: ng.ITimeoutService) {
     this.cheWorkspace = cheWorkspace;
     this.cheSsh = cheSsh;
     this.cheNotification = cheNotification;
@@ -98,11 +98,11 @@ export class WorkspaceDetailsSshCtrl {
     this.namespace = $route.current.params.namespace;
     this.workspaceName = $route.current.params.workspaceName;
     this.workspaceKey = this.namespace + ':' + this.workspaceName;
-
-    this.updateData();
-
   }
 
+  $onInit(): void {
+    this.updateData();
+  }
 
   updateData() {
     this.hasSSHAgents = false;
@@ -117,13 +117,13 @@ export class WorkspaceDetailsSshCtrl {
       this.isLoading = false;
     });
 
-    let defaultEnv : string = this.workspace.config.defaultEnv;
-    let machines : any = defaultEnv ? this.workspace.config.environments[defaultEnv].machines : [];
-    let machineNames : Array<string> = Object.keys(machines);
+    let defaultEnv: string = this.workspace.config.defaultEnv;
+    let machines: any = defaultEnv ? this.workspace.config.environments[defaultEnv].machines : [];
+    let machineNames: Array<string> = Object.keys(machines);
     this.machineSshAgents.length = 0;
     machineNames.forEach((machineName: string) => {
-      let enabled : boolean = machines[machineName].installers && machines[machineName].installers.indexOf('org.eclipse.che.ssh') >= 0;
-      let machineAgent = {agentEnabled : enabled, name: machineName};
+      let enabled: boolean = machines[machineName].installers && machines[machineName].installers.indexOf('org.eclipse.che.ssh') >= 0;
+      let machineAgent = { agentEnabled: enabled, name: machineName };
       this.machineSshAgents.push(machineAgent);
       if (enabled) {
         this.hasSSHAgents = true;

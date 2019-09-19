@@ -179,7 +179,7 @@ class Loader {
   private $element: ng.IAugmentedJQuery;
 
   private loader: ng.IAugmentedJQuery;
-  // todo: try to remove this
+  // TODO: try to remove this
   private load: ng.IAugmentedJQuery;
 
   // if `true` then wait when current iteration ends and then render next step

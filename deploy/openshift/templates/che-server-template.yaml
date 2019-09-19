@@ -138,8 +138,6 @@ objects:
             value: "${CHE_OAUTH_GITHUB_CLIENTID}"
           - name: CHE_OAUTH_GITHUB_CLIENTSECRET
             value: "${CHE_OAUTH_GITHUB_CLIENTSECRET}"
-          - name: CHE_PREDEFINED_STACKS_RELOAD__ON__START
-            value: 'true'
           - name: JAVA_OPTS
             value: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10
               -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90

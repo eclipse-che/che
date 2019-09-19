@@ -169,10 +169,14 @@ export class ImportGithubProjectService implements IEditingProgress {
     if (this.isGitHubOAuthProviderAvailable) {
       defer.resolve(this.isGitHubOAuthProviderAvailable);
     } else {
-      this.cheAPI.getOAuthProvider().fetchOAuthProviders().finally(() => {
-        this.isGitHubOAuthProviderAvailable = this.cheAPI.getOAuthProvider().isOAuthProviderRegistered('github');
-        defer.resolve(this.isGitHubOAuthProviderAvailable);
-      });
+      this.cheAPI.getOAuthProvider().fetchOAuthProviders()
+        .catch((error: any) => {
+          // noop
+        })
+        .finally(() => {
+          this.isGitHubOAuthProviderAvailable = this.cheAPI.getOAuthProvider().isOAuthProviderRegistered('github');
+          defer.resolve(this.isGitHubOAuthProviderAvailable);
+        });
     }
 
     return defer.promise;
@@ -185,11 +189,10 @@ export class ImportGithubProjectService implements IEditingProgress {
    */
   askLoad(): ng.IPromise<any> {
     this.state = LoadingState.LOADING;
-    return this.checkTokenValidity().then(() => {
-      return this.loadRepositories();
-    }).catch(() => {
-      this.state = LoadingState.NO_REPO;
-    });
+    return this.checkTokenValidity()
+      .then(() => this.loadRepositories())
+      .then(() => this.state = LoadingState.LOADED)
+      .catch(() => this.state = LoadingState.NO_REPO);
   }
 
   /**
@@ -270,11 +273,8 @@ export class ImportGithubProjectService implements IEditingProgress {
           if (this.repositoriesLoadedCallback) {
             this.repositoriesLoadedCallback();
           }
-          this.state = LoadingState.LOADED;
         });
       });
-    }, function () {
-      this.state = LoadingState.LOAD_ERROR;
     });
   }
 

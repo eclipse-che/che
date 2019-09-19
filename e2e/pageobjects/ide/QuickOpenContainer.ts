@@ -19,7 +19,7 @@ export class QuickOpenContainer {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     public async waitContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const monacoQuickOpenContainerLocator: By = By.xpath('//div[@class=\'monaco-quick-open-widget\' and @aria-hidden=\'false\']');
+        const monacoQuickOpenContainerLocator: By = By.xpath('//div[@class=\'monaco-quick-open-widget\']');
         await this.driverHelper.waitVisibility(monacoQuickOpenContainerLocator, timeout);
     }
 

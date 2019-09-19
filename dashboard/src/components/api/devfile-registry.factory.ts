@@ -10,6 +10,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheKeycloak} from './che-keycloak.factory';
 
 export interface IDevfileMetaData {
   displayName: string;
@@ -20,33 +21,54 @@ export interface IDevfileMetaData {
   tags: Array<string>;
 }
 
+enum MemoryUnit { 'B', 'Ki', 'Mi', 'Gi' }
+
+const DEFAULT_JWTPROXY_MEMORY_LIMIT = '128Mi';// default value for che.server.secure_exposer.jwtproxy.memory_limit
 
 /**
  * This class is handling devfile registry api
  * @author Ann Shumilova
  */
 export class DevfileRegistry {
-  static $inject = ['$http'];
+  static $inject = ['$http', '$filter', 'cheKeycloak'];
 
   /**
    * Angular Http service.
    */
   private $http: ng.IHttpService;
 
+  private $filter: ng.IFilterService;
+
   private devfilesMap: Map<string, che.IWorkspaceDevfile>;
+
+  private isKeycloackPresent: boolean;
+
+  private jwtproxyMemoryLimitNumber: number;
 
   /**
    * Default constructor that is using resource
    */
-  constructor($http: ng.IHttpService) {
+  constructor($http: ng.IHttpService, $filter: ng.IFilterService, cheKeycloak: CheKeycloak) {
     this.$http = $http;
+    this.$filter = $filter;
+
     this.devfilesMap = new Map<string, che.IWorkspaceDevfile>();
+    this.isKeycloackPresent = cheKeycloak.isPresent();
+    this.jwtproxyMemoryLimitNumber = this.getMemoryLimit(DEFAULT_JWTPROXY_MEMORY_LIMIT);
   }
 
   fetchDevfiles(location: string): ng.IPromise<Array<IDevfileMetaData>> {
     let promise = this.$http({ 'method': 'GET', 'url': location + '/devfiles/index.json' });
     return promise.then((result: any) => {
-      return result.data;
+      return result.data.map((devfileMetaData: IDevfileMetaData) => {
+        let globalMemoryLimitNumber = this.getMemoryLimit(devfileMetaData.globalMemoryLimit);
+        // TODO remove this after fixing https://github.com/eclipse/che/issues/11424
+        if (this.isKeycloackPresent) {
+          globalMemoryLimitNumber += this.jwtproxyMemoryLimitNumber;
+        }
+        devfileMetaData.globalMemoryLimit = this.$filter('changeMemoryUnit')(globalMemoryLimitNumber, ['B','GB']);
+        return devfileMetaData;
+      });
     });
   }
 
@@ -85,5 +107,27 @@ export class DevfileRegistry {
       return jsyaml.load(yaml);
     } catch (e) {
     }
+  }
+
+   /**
+   * Returns memory limit.
+   * @param {string} memoryLimit
+   * @returns {number}
+   */
+  getMemoryLimit(memoryLimit: string): number {
+    if (!memoryLimit) {
+      return -1;
+    }
+    const regExpExecArray = /^([0-9]+)([a-zA-Z]{1,3})$/.exec(memoryLimit);
+    if (regExpExecArray === null) {
+      return -1;
+    }
+    const [, memoryLimitNumber, memoryLimitUnit] = regExpExecArray;
+    const power = MemoryUnit[memoryLimitUnit];
+    if (!power) {
+      return -1;
+    }
+
+    return parseInt(memoryLimitNumber, 10) * Math.pow(1024, power);
   }
 }

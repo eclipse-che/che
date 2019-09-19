@@ -78,6 +78,8 @@ export class ListMembersController {
     this.membersOrderBy = 'email';
   }
 
+  $onInit(): void { }
+
   /**
    * Forms the list of members.
    */

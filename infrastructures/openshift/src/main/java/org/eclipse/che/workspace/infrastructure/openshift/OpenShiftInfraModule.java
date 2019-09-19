@@ -58,10 +58,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesC
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiInternalEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.DefaultSecureServersFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.CookiePathStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
@@ -72,7 +74,9 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectOnWorkspaceRemove;
+import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftCookiePathStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases.OpenshiftBrokerEnvironmentFactory;
 
 /** @author Sergii Leshchenko */
@@ -109,7 +113,7 @@ public class OpenShiftInfraModule extends AbstractModule {
     volumesStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
     bind(WorkspaceVolumesStrategy.class).toProvider(WorkspaceVolumeStrategyProvider.class);
 
-    bind(new TypeLiteral<ExternalServerExposerStrategy<OpenShiftEnvironment>>() {})
+    bind(new TypeLiteral<ExternalServerExposer<OpenShiftEnvironment>>() {})
         .to(OpenShiftExternalServerExposer.class);
     bind(ServersConverter.class).to(new TypeLiteral<ServersConverter<OpenShiftEnvironment>>() {});
 
@@ -185,5 +189,8 @@ public class OpenShiftInfraModule extends AbstractModule {
 
     KubernetesDevfileBindings.addAllowedEnvironmentTypeUpgradeBindings(
         binder(), OpenShiftEnvironment.TYPE, KubernetesEnvironment.TYPE);
+
+    bind(ExternalServiceExposureStrategy.class).to(OpenShiftServerExposureStrategy.class);
+    bind(CookiePathStrategy.class).to(OpenShiftCookiePathStrategy.class);
   }
 }

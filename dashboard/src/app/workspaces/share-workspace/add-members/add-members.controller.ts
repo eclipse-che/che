@@ -91,7 +91,7 @@ export class AddMemberController {
     this.isAllSelected = true;
 
     if (this.team) {
-     this.fetchTeamMembers();
+      this.fetchTeamMembers();
     }
 
     const helperId = 'add-members';
@@ -99,6 +99,11 @@ export class AddMemberController {
     $scope.$on('$destroy', () => {
       cheListHelperFactory.removeHelper(helperId);
     });
+  }
+
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   fetchTeamMembers(): void {

@@ -86,6 +86,8 @@ export class UniqueFactoryNameValidator implements ng.IDirective {
             } else {
               deferred.resolve(true);
             }
+          }).catch(() => {
+            // this fixes unit test for the directive
           });
         }
 

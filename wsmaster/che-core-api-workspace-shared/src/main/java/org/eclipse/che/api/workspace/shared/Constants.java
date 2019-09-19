@@ -31,12 +31,6 @@ public final class Constants {
   public static final String WORKSPACE_STOPPED_BY = "stopped_by";
   public static final String WORKSPACE_STOP_REASON = "stop_reason";
 
-  public static final String LINK_REL_CREATE_STACK = "create stack";
-  public static final String LINK_REL_UPDATE_STACK = "update stack";
-  public static final String LINK_REL_REMOVE_STACK = "remove stack";
-  public static final String LINK_REL_GET_STACK_BY_ID = "get stack by id";
-  public static final String LINK_REL_SEARCH_STACKS = "search stacks";
-
   public static final String LINK_REL_GET_ICON = "get icon link";
   public static final String LINK_REL_UPLOAD_ICON = "upload icon link";
   public static final String LINK_REL_DELETE_ICON = "delete icon link";
@@ -128,13 +122,6 @@ public final class Constants {
   public static final String SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE = "sidecar.%s.memory_limit";
 
   /**
-   * Template for workspace config attribute key that stores plugin component preference. The first
-   * %s should be replaced with `pluginPublisher/pluginName` and the second one should be replaced
-   * with preference name. Example value: `plugin.redhat/java.preference.java.home`.
-   */
-  public static final String PLUGIN_PREFERENCE_ATTR_TEMPLATE = "plugin.%s.preference.%s";
-
-  /**
    * Describes workspace runtimes which perform start/stop of this workspace. Should be set/read
    * from {@link Workspace#getAttributes}
    */
@@ -194,6 +181,9 @@ public final class Constants {
 
   /** Attribute of {@link Server} that specifies exposure of which port created the server */
   public static final String SERVER_PORT_ATTRIBUTE = "port";
+
+  /** When generating workspace name from generateName, append this many characters. */
+  public static final int WORKSPACE_GENERATE_NAME_CHARS_APPEND = 5;
 
   private Constants() {}
 }

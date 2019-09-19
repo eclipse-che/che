@@ -33,7 +33,11 @@ public class FileStoresMeterBinder implements MeterBinder {
   @Override
   public void bindTo(MeterRegistry registry) {
     for (FileStore fileStore : FileSystems.getDefault().getFileStores()) {
-      LOG.debug("Add gauge metric for {}", fileStore.name());
+      LOG.debug(
+          "Add gauge metric for {}, isReadOnly {}, type {}",
+          fileStore.name(),
+          fileStore.isReadOnly(),
+          fileStore.type());
       Iterable<Tag> tagsWithPath = Tags.concat(Tags.empty(), "path", fileStore.toString());
 
       Gauge.builder("disk.free", fileStore, exceptionToNonWrapper(FileStore::getUnallocatedSpace))

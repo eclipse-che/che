@@ -92,7 +92,8 @@ public class DashboardFactories {
     String DONE_BUTTON_XPATH = "//button/span[text()='Done']";
     String FACTORY_NAME_FIELD_CSS = "input[placeholder='Name of the factory']";
     String WORKSPACES_TAB_SELECT_XPATH = "//span[text()='Workspace']/parent::md-tab-item";
-    String CREATE_FACTORY_ICON_XPATH = "//a/span[text()='Create Factory']";
+    String CREATE_FACTORY_ICON_XPATH =
+        "//*[@id='add-item-button']/*[contains(@class, 'che-button')]";
     String ADD_CONFIGURE_ACTION_XPATH = "//md-card[@che-title='Configure Actions']//button";
     String OPEN_FACTORY_BUTTON_XPATH = "//che-button-default[@che-button-title='Open']";
     String CONFIGURE_ACTION_TITLE_XPATH = "//div[text()='Configure Actions']";

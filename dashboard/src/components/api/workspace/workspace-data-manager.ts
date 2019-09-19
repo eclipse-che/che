@@ -23,6 +23,10 @@ const PLUGIN_TYPE = 'chePlugin';
  */
 export class WorkspaceDataManager {
 
+  static get DEFAULT_EDITOR(): string {
+    return 'eclipse/che-theia/latest';
+  }
+
   /**
    * Returns the name of the pointed workspace.
    *
@@ -161,8 +165,9 @@ export class WorkspaceDataManager {
       return workspace.config.attributes && workspace.config.attributes.plugins ?
       workspace.config.attributes.plugins.split(',') : [];
     } else if (workspace.devfile) {
-      workspace.devfile.components.forEach(component => {
-        if (component.type === PLUGIN_TYPE) {
+      const components = workspace.devfile.components || [];
+      components.forEach(component => {
+        if (component.type === PLUGIN_TYPE && component.id) {
           plugins.push(component.id);
         }
       });
@@ -182,6 +187,7 @@ export class WorkspaceDataManager {
       workspace.config.attributes.plugins = plugins.join(',');
     } else if (workspace.devfile) {
       let pluginComponents = [];
+      workspace.devfile.components = workspace.devfile.components || [];
       workspace.devfile.components.forEach(component => {
         if (component.type === PLUGIN_TYPE) {
           pluginComponents.push(component);
@@ -200,6 +206,10 @@ export class WorkspaceDataManager {
       plugins.forEach((plugin: string) => {
         workspace.devfile.components.push({id: plugin, type: PLUGIN_TYPE});
       });
+
+      if(workspace.devfile.components && workspace.devfile.components.length === 0) {
+        delete workspace.devfile.components;
+      }
     }
   }
 
@@ -213,8 +223,9 @@ export class WorkspaceDataManager {
       return workspace.config.attributes && workspace.config.attributes.editor ?
       workspace.config.attributes.editor : null;
     } else if (workspace.devfile) {
-      let editor = null;
-      workspace.devfile.components.forEach(component => {
+      let editor = WorkspaceDataManager.DEFAULT_EDITOR;
+      const components = workspace.devfile.components || [];
+      components.forEach(component => {
         if (component.type === EDITOR_TYPE) {
           editor = component.id;
         }
@@ -235,6 +246,7 @@ export class WorkspaceDataManager {
       workspace.config.attributes.editor = editor;
     } else if (workspace.devfile) {
       let editorComponents = [];
+      workspace.devfile.components = workspace.devfile.components || [];
       workspace.devfile.components.forEach(component => {
         if (component.type === EDITOR_TYPE) {
           editorComponents.push(component);
@@ -245,7 +257,13 @@ export class WorkspaceDataManager {
         workspace.devfile.components.splice(workspace.devfile.components.indexOf(editor), 1);
       });
 
-      workspace.devfile.components.push({id: editor, type: EDITOR_TYPE});
+      if (editor) {
+        workspace.devfile.components.push({id: editor, type: EDITOR_TYPE});
+      }
+
+      if(workspace.devfile.components && workspace.devfile.components.length === 0) {
+        delete workspace.devfile.components;
+      }
     }
   }
 

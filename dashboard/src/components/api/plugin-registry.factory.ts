@@ -26,6 +26,11 @@ export interface IPlugin {
   isEnabled: boolean;
 }
 
+export interface IPluginRow extends IPlugin {
+  selected: string;
+  versions: string[];
+}
+
 
 /**
  * This class is handling plugin registry api

@@ -41,7 +41,7 @@ export class ListOrganizationWorkspacesController {
   /**
    * Workspace API interaction.
    */
-  private cheWorkspace: any;
+  private cheWorkspace: CheWorkspace;
   /**
    * Service for displaying notifications.
    */
@@ -111,7 +111,9 @@ export class ListOrganizationWorkspacesController {
     $scope.$on('$destroy', () => {
       cheListHelperFactory.removeHelper(helperId);
     });
+  }
 
+  $onInit(): void {
     this.fetchPermissions();
   }
 
@@ -226,7 +228,7 @@ export class ListOrganizationWorkspacesController {
         this.cheListHelper.itemsSelectionStatus[workspaceId] = false;
 
         let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
-        workspaceName = workspace.config.name;
+        workspaceName = this.getWorkspaceName(workspace);
         let stoppedStatusPromise = this.cheWorkspace.fetchStatusChange(workspaceId, 'STOPPED');
 
         // stop workspace if it's status is RUNNING
@@ -306,7 +308,7 @@ export class ListOrganizationWorkspacesController {
    * @param tab {string}
    */
   redirectToWorkspaceDetails(workspace: che.IWorkspace, tab?: string): void {
-    this.$location.path('/workspace/' + workspace.namespace + '/' + workspace.config.name).search({tab: tab ? tab : 'Overview'});
+    this.$location.path('/workspace/' + workspace.namespace + '/' + this.getWorkspaceName(workspace)).search({tab: tab ? tab : 'Overview'});
   }
 
   /**
@@ -315,6 +317,10 @@ export class ListOrganizationWorkspacesController {
    * @returns {string}
    */
   getMemoryLimit(workspace: che.IWorkspace): string {
+    if (!workspace.config && workspace.devfile) {
+      return '-';
+    }
+
     const environment = workspace.config.environments[workspace.config.defaultEnv];
     if (!environment) {
       return '-';
@@ -341,4 +347,7 @@ export class ListOrganizationWorkspacesController {
     return workspace && workspace.status ? workspace.status : 'unknown';
   }
 
+  getWorkspaceName(workspace: che.IWorkspace): string {
+    return this.cheWorkspace.getWorkspaceDataManager().getName(workspace);
+  }
 }

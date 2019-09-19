@@ -40,7 +40,7 @@ import org.eclipse.che.api.workspace.activity.JpaWorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivity;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.WorkspaceExpiration;
-import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
+import org.eclipse.che.api.workspace.server.devfile.SerializableConverter;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -60,8 +60,6 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
@@ -128,7 +126,6 @@ public class PostgreSqlTckModule extends TckModule {
                 MachineConfigImpl.class,
                 SourceStorageImpl.class,
                 ServerConfigImpl.class,
-                StackImpl.class,
                 CommandImpl.class,
                 SshPairImpl.class,
                 WorkspaceActivity.class,
@@ -153,6 +150,7 @@ public class PostgreSqlTckModule extends TckModule {
                 KubernetesServerImpl.ServerId.class)
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
+            .addClass(SerializableConverter.class)
             .build());
     bind(TckResourcesCleaner.class).to(JpaCleaner.class);
 
@@ -191,10 +189,8 @@ public class PostgreSqlTckModule extends TckModule {
 
     // workspace
     bind(WorkspaceDao.class).to(JpaWorkspaceDao.class);
-    bind(StackDao.class).to(JpaStackDao.class);
     bind(WorkspaceActivityDao.class).to(JpaWorkspaceActivityDao.class);
     bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new WorkspaceRepository());
-    bind(new TypeLiteral<TckRepository<StackImpl>>() {}).toInstance(new StackRepository());
     bind(new TypeLiteral<TckRepository<WorkspaceExpiration>>() {})
         .toInstance(new JpaTckRepository<>(WorkspaceExpiration.class));
 
@@ -304,21 +300,6 @@ public class PostgreSqlTckModule extends TckModule {
         if (entity.getConfig() != null) {
           entity.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
         }
-      }
-      super.createAll(entities);
-    }
-  }
-
-  private static class StackRepository extends JpaTckRepository<StackImpl> {
-
-    public StackRepository() {
-      super(StackImpl.class);
-    }
-
-    @Override
-    public void createAll(Collection<? extends StackImpl> entities) throws TckRepositoryException {
-      for (StackImpl stack : entities) {
-        stack.getWorkspaceConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
       }
       super.createAll(entities);
     }

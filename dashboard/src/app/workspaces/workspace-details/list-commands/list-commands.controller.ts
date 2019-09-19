@@ -49,6 +49,8 @@ export class ListCommandsController {
     this.commandsOrderBy = 'name';
   }
 
+  $onInit(): void { }
+
   /**
    * Update command selected status
    */

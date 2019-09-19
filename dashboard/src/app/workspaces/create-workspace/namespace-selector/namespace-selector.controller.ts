@@ -37,6 +37,8 @@ export class NamespaceSelectorController {
     this.namespaceSelectorSvc = namespaceSelectorSvc;
   }
 
+  $onInit(): void { }
+
   /**
    * Returns list of labels of namespaces
    *

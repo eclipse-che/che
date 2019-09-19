@@ -83,6 +83,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
@@ -115,6 +116,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners;
   private final KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner;
   private final SidecarToolingProvisioner<E> toolingProvisioner;
+  private final IngressPathTransformInverter ingressPathTransformInverter;
   private final RuntimeHangingDetector runtimeHangingDetector;
   protected final Tracer tracer;
 
@@ -136,6 +138,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
       KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<E> toolingProvisioner,
+      IngressPathTransformInverter ingressPathTransformInverter,
       RuntimeHangingDetector runtimeHangingDetector,
       Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
@@ -156,6 +159,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.toolingProvisioner = toolingProvisioner;
     this.kubernetesEnvironmentProvisioner = kubernetesEnvironmentProvisioner;
     this.internalEnvironmentProvisioners = internalEnvironmentProvisioners;
+    this.ingressPathTransformInverter = ingressPathTransformInverter;
     this.runtimeHangingDetector = runtimeHangingDetector;
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
     this.tracer = tracer;
@@ -585,7 +589,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     listenEvents();
 
     final KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(createdServices, readyIngresses);
+        new KubernetesServerResolver(ingressPathTransformInverter, createdServices, readyIngresses);
 
     doStartMachine(serverResolver);
   }

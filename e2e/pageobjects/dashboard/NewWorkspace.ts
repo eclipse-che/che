@@ -9,14 +9,14 @@
  **********************************************************************/
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { CLASSES } from '../../inversify.types';
+import { CLASSES, TYPES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { By } from 'selenium-webdriver';
 import 'reflect-metadata';
 import { Dashboard } from './Dashboard';
 import { Workspaces } from './Workspaces';
 import { WorkspaceDetails } from './workspace-details/WorkspaceDetails';
-import { TestWorkspaceUtil, Ide, WorkspaceStatus } from '../..';
+import { ITestWorkspaceUtil, Ide, WorkspaceStatus } from '../..';
 
 
 @injectable()
@@ -36,7 +36,7 @@ export class NewWorkspace {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard,
         @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces,
-        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil,
+        @inject(TYPES.WorkspaceUtil) private readonly testWorkspaceUtil: ITestWorkspaceUtil,
         @inject(CLASSES.WorkspaceDetails) private readonly workspaceDetails: WorkspaceDetails) { }
 
     async createAndRunWorkspace(namespace: string, workspaceName: string, dataStackId: string) {

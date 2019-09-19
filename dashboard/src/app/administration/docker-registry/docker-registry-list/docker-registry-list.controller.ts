@@ -65,7 +65,9 @@ export class DockerRegistryListController {
     $scope.$on('$destroy', () => {
       cheListHelperFactory.removeHelper(helperId);
     });
+  }
 
+  $onInit(): void {
     this.getRegistries();
   }
 

@@ -49,7 +49,6 @@ import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.spi.provision.InstallerConfigProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.MachineNameProvisioner;
-import org.eclipse.che.api.workspace.server.spi.provision.ProjectsVolumeForWsAgentProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
@@ -68,7 +67,6 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentJava
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceIdEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNameEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNamespaceNameEnvVarProvider;
-import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
@@ -143,10 +141,6 @@ public class WsMasterModule extends AbstractModule {
     factoryParametersResolverMultibinder.addBinding().to(GithubFactoryParametersResolver.class);
 
     bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
-    bind(org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader.class)
-        .asEagerSingleton();
-    bind(org.eclipse.che.api.project.server.template.ProjectTemplateRegistry.class);
-    bind(org.eclipse.che.api.project.server.template.ProjectTemplateService.class);
     bind(org.eclipse.che.api.ssh.server.SshService.class);
     bind(org.eclipse.che.api.user.server.UserService.class);
     bind(org.eclipse.che.api.user.server.ProfileService.class);
@@ -155,12 +149,6 @@ public class WsMasterModule extends AbstractModule {
 
     install(new DevfileModule());
 
-    MapBinder<String, String> stacks =
-        MapBinder.newMapBinder(
-            binder(), String.class, String.class, Names.named(StackLoader.CHE_PREDEFINED_STACKS));
-    stacks.addBinding("stacks.json").toInstance("stacks-images");
-    stacks.addBinding("che-in-che.json").toInstance("");
-    bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
@@ -169,8 +157,7 @@ public class WsMasterModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), InternalEnvironmentProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(InstallerConfigProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(EnvVarEnvironmentProvisioner.class);
-    internalEnvironmentProvisioners.addBinding().to(ProjectsVolumeForWsAgentProvisioner.class);
-    internalEnvironmentProvisioners.addBinding().to(MachineNameProvisioner.class);
+   internalEnvironmentProvisioners.addBinding().to(MachineNameProvisioner.class);
 
     Multibinder<EnvVarProvider> envVarProviders =
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);
@@ -303,7 +290,6 @@ public class WsMasterModule extends AbstractModule {
     bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
     bind(MachineTokenProvider.class).to(MachineTokenProvider.EmptyMachineTokenProvider.class);
 
-    bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);
 
     install(new org.eclipse.che.api.user.server.jpa.UserJpaModule());

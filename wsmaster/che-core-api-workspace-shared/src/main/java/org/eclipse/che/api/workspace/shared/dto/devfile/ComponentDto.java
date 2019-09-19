@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.shared.dto.devfile;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
@@ -49,11 +50,11 @@ public interface ComponentDto extends Component {
   ComponentDto withRegistryUrl(String registryUrl);
 
   @Override
-  Map<String, String> getPreferences();
+  Map<String, Serializable> getPreferences();
 
-  void setPreferences(Map<String, String> preferences);
+  void setPreferences(Map<String, Serializable> preferences);
 
-  ComponentDto withPreferences(Map<String, String> preferences);
+  ComponentDto withPreferences(Map<String, Serializable> preferences);
 
   @Override
   String getReference();

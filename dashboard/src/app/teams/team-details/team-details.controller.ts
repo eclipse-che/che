@@ -177,6 +177,11 @@ tab: Object = Tab;
     }
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Update selected tab index by search part of URL.
    *

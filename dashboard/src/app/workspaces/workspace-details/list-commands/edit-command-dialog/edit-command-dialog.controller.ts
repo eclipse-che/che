@@ -53,6 +53,11 @@ export class EditCommandDialogController {
     });
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Check if the name is unique.
    * @param name

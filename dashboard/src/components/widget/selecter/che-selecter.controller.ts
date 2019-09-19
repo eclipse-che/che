@@ -34,6 +34,8 @@ export class CheSelecterCtrl {
     this.selectedValuesByKey = new Map();
   }
 
+  $onInit(): void { }
+
   /**
    * perform sharing state in an upper scope as it may be shared
    */

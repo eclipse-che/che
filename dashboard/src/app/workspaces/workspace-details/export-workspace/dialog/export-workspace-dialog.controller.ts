@@ -83,6 +83,11 @@ export class ExportWorkspaceDialogController {
     ($scope as any).selectedIndex = this.destination === 'file' ? 0 : 1;
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * It will hide the dialog box.
    */

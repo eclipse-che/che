@@ -29,9 +29,6 @@ import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyPairImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl;
 import org.eclipse.che.multiuser.resource.spi.impl.FreeResourcesLimitImpl;
@@ -94,24 +91,6 @@ public final class TestObjectsFactory {
         null,
         null,
         null);
-  }
-
-  public static StackImpl createStack(String id, String name) {
-    return StackImpl.builder()
-        .setId(id)
-        .setName(name)
-        .setCreator("user123")
-        .setDescription(id + "-description")
-        .setScope(id + "-scope")
-        .setWorkspaceConfig(createWorkspaceConfig(id + "test"))
-        .setTags(asList(id + "-tag1", id + "-tag2"))
-        .setComponents(
-            asList(
-                new StackComponentImpl(id + "-component1", id + "-component1-version"),
-                new StackComponentImpl(id + "-component2", id + "-component2-version")))
-        .setStackIcon(
-            new StackIcon(id + "-icon", id + "-media-type", "0x1234567890abcdef".getBytes()))
-        .build();
   }
 
   public static WorkerImpl createWorker(String userId, String workspaceId) {

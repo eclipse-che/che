@@ -62,6 +62,8 @@ public class K8sContainerResolver {
             .withName(buildContainerName(cheContainer.getName()))
             .withEnv(toK8sEnv(cheContainer.getEnv()))
             .withPorts(getContainerPorts())
+            .withCommand(cheContainer.getCommand())
+            .withArgs(cheContainer.getArgs())
             .build();
 
     provisionMemoryLimit(container, cheContainer);

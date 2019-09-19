@@ -64,7 +64,9 @@ public class DevfileSchemaValidatorTest {
       {"dockerimage_component/devfile_dockerimage_component_without_entry_point.yaml"},
       {"editor_plugin_component/devfile_editor_component_with_custom_registry.yaml"},
       {"editor_plugin_component/devfile_editor_plugins_components_with_memory_limit.yaml"},
-      {"editor_plugin_component/devfile_plugin_component_with_reference.yaml"}
+      {"editor_plugin_component/devfile_plugin_component_with_reference.yaml"},
+      {"devfile/devfile_just_generatename.yaml"},
+      {"devfile/devfile_name_and_generatename.yaml"}
     };
   }
 
@@ -89,7 +91,7 @@ public class DevfileSchemaValidatorTest {
       // Devfile model testing
       {
         "devfile/devfile_empty_metadata.yaml",
-        "(/metadata):The object must have a property whose name is \"name\"."
+        "At least one of the following sets of problems must be resolved.: [(/metadata):The object must have a property whose name is \"name\".(/metadata):The object must have a property whose name is \"generateName\".]"
       },
       {
         "devfile/devfile_null_metadata.yaml",
@@ -100,8 +102,8 @@ public class DevfileSchemaValidatorTest {
         "The object must have a property whose name is \"metadata\"."
       },
       {
-        "devfile/devfile_missing_name.yaml",
-        "(/metadata/something):The object must not have a property whose name is \"something\".(/metadata):The object must have a property whose name is \"name\"."
+        "devfile/devfile_missing_name_and_generatename.yaml",
+        "(/metadata/something):The object must not have a property whose name is \"something\".At least one of the following sets of problems must be resolved.: [(/metadata):The object must have a property whose name is \"name\".(/metadata):The object must have a property whose name is \"generateName\".]"
       },
       {
         "devfile/devfile_missing_api_version.yaml",

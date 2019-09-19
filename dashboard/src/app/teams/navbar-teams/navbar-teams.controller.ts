@@ -31,14 +31,17 @@ export class NavbarTeamsController {
    */
   constructor(cheTeam: che.api.ICheTeam) {
     this.cheTeam = cheTeam;
+  }
+
+  $onInit(): void {
     this.fetchTeams();
   }
 
   /**
    * Fetch the list of available teams.
    */
-  fetchTeams(): void {
-    this.cheTeam.fetchTeams();
+  fetchTeams(): ng.IPromise<any> {
+    return this.cheTeam.fetchTeams();
   }
 
   getTeamDisplayName(team: any): string {

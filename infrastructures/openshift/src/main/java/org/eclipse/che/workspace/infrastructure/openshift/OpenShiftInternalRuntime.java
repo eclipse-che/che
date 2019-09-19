@@ -92,6 +92,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         internalEnvironmentProvisioners,
         kubernetesEnvironmentProvisioner,
         toolingProvisioner,
+        null,
         runtimeHangingDetector,
         tracer,
         context,

@@ -16,7 +16,6 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATT
 import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMPONENT_TYPE;
-import static org.eclipse.che.api.workspace.shared.Constants.PLUGIN_PREFERENCE_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -91,12 +90,6 @@ public class PluginComponentToWorkspaceApplierTest {
             .getAttributes()
             .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-plugin")),
         "1234M");
-
-    assertEquals(
-        workspaceConfig
-            .getAttributes()
-            .get(format(PLUGIN_PREFERENCE_ATTR_TEMPLATE, "eclipse/super-plugin", "java-home")),
-        "/home/user/jdk11");
   }
 
   @Test

@@ -55,6 +55,7 @@ body
   font-family 'Open Sans'
   background-color $background-site-color
   min-width 600px
+  overflow hidden
 
 button,
 select,
@@ -95,7 +96,15 @@ md-option:hover
     transition none !important
 
 .main-page
+  max-height 100vh
   min-width 320px
+  overflow hidden
+  div#main-content
+    height 100%
+
+  @-moz-document url-prefix()
+    #main-content
+      max-height calc(100vh - 30px)
 
 .progress-line
   position absolute

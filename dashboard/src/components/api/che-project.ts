@@ -136,7 +136,7 @@ export class CheProject {
    * @returns {ng.IPromise<any>}
    */
   fetchProjectDetails(workspaceId: string, projectPath: string): ng.IPromise<any> {
-    // todo why we cannot use project path
+    // TODO why we cannot use project path
     let projectName = projectPath[0] === '/' ? projectPath.slice(1) : projectPath;
     let promise = this.remoteProjectsAPI.details({path: projectName}).$promise;
 

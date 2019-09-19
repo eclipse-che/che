@@ -50,6 +50,12 @@ public class VerifierConfig {
 
   private Set<String> excludes;
 
+  @JsonProperty("public_base_path")
+  private String publicBasePath;
+
+  @JsonProperty("cookie_path")
+  private String cookiePath;
+
   public String getAudience() {
     return audience;
   }
@@ -178,6 +184,32 @@ public class VerifierConfig {
 
   public VerifierConfig withCookiesEnabled(boolean cookiesEnabled) {
     this.cookiesEnabled = cookiesEnabled;
+    return this;
+  }
+
+  public String getPublicBasePath() {
+    return publicBasePath;
+  }
+
+  public void setPublicBasePath(String publicBasePath) {
+    this.publicBasePath = publicBasePath;
+  }
+
+  public VerifierConfig withPublicBasePath(String publicBasePath) {
+    this.publicBasePath = publicBasePath;
+    return this;
+  }
+
+  public String getCookiePath() {
+    return cookiePath;
+  }
+
+  public void setCookiePath(String cookiePath) {
+    this.cookiePath = cookiePath;
+  }
+
+  public VerifierConfig withCookiePath(String cookiePath) {
+    this.cookiePath = cookiePath;
     return this;
   }
 }
