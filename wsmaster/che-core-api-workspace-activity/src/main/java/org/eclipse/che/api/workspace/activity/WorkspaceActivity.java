@@ -79,7 +79,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
   @NamedQuery(name = "WorkspaceActivity.getAll", query = "SELECT a FROM WorkspaceActivity a"),
   @NamedQuery(
       name = "WorkspaceActivity.getAllCount",
-      query = "SELECT COUNT(*) FROM WorkspaceActivity"),
+      query = "SELECT COUNT(a) FROM WorkspaceActivity a"),
 })
 public class WorkspaceActivity {
 
