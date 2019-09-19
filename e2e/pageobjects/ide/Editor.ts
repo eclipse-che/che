@@ -299,10 +299,10 @@ export class Editor {
     }
 
     async clickOnTheTextInDefinedPosition(line: number, column: number) {
-        const addishionalShifting = 19;
-        const addishionalShiftingToX = 1;
-        const yPosition: number = await this.getLineYCoordinates(line) + addishionalShifting;
-        const xPosition: number = column + addishionalShiftingToX;
+        const additionalShiftingToY = 19;
+        const additionalShiftingToX = 1;
+        const yPosition: number = await this.getLineYCoordinates(line) + additionalShiftingToY;
+        const xPosition: number = column + additionalShiftingToX;
         new  ActionSequence(this.driverHelper.getDriver()).
         mouseMove({x: xPosition, y: yPosition}).
         click().
@@ -310,23 +310,23 @@ export class Editor {
 }
 
     async goToDefinitionWithMouseClicking(line: number, column: number) {
-        const addishionalShiftingToY = 19;
-        const addishionalShiftingToX = 1;
-        const yPosition: number = await this.getLineYCoordinates(line) + addishionalShiftingToY;
+        const additionalShiftingToY = 19;
+        const additionalShiftingToX = 1;
+        const yPosition: number = await this.getLineYCoordinates(line) + additionalShiftingToY;
         new  ActionSequence(this.driverHelper.getDriver()).
         keyDown(Key.CONTROL).
-        mouseMove({x: column + addishionalShiftingToX, y: yPosition}).
+        mouseMove({x: column + additionalShiftingToX, y: yPosition}).
         click().
         keyDown(Key.CONTROL).
         perform();
     }
 
     async mouseContextClickInDefinedPosition(line: number, column: number) {
-        const addishionalShiftingToY = 19;
-        const addishionalShiftingToX = 1;
-        const yPosition: number = await this.getLineYCoordinates(line) + addishionalShiftingToY;
+        const additionalShiftingToY = 19;
+        const additionalShiftingToX = 1;
+        const yPosition: number = await this.getLineYCoordinates(line) + additionalShiftingToY;
         new  ActionSequence(this.driverHelper.getDriver()).
-        mouseMove({x: column + addishionalShiftingToX, y: yPosition}).
+        mouseMove({x: column + additionalShiftingToX, y: yPosition}).
         click(Button.RIGHT).
         perform();
     }

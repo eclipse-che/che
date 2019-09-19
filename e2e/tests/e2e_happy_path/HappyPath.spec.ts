@@ -296,7 +296,6 @@ async function checkCodeNavigationWithContextMenu() {
     await contextMenu.invokeContextMenuOnActiveElementWithKeys();
     await contextMenu.waitContextMenuAndClickOnItem('Go to Definition');
     console.log('please check the satus of the known issue: https://github.com/eclipse/che/issues/14520. If it is fixed, we have to return the test to previous state.');
-    return ''
 }
 // sometimes under high loading the first click can be failed
 async function isureClickOnDebugMenu() {
