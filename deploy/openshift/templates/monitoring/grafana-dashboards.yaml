@@ -3625,7 +3625,8 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 1,
-      "iteration": 1568838348539,
+      "id": 2,
+      "iteration": 1568900496815,
       "links": [],
       "panels": [
         {
@@ -3642,14 +3643,23 @@ data:
           "type": "row"
         },
         {
-          "aliasColors": {},
-          "bars": false,
           "cacheTimeout": null,
-          "dashLength": 10,
-          "dashes": false,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
           "datasource": "$datasource",
-          "fill": 1,
-          "fillGradient": 0,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
           "gridPos": {
             "h": 5,
             "w": 5,
@@ -3657,89 +3667,86 @@ data:
             "y": 1
           },
           "id": 14,
-          "legend": {
-            "avg": false,
-            "current": true,
-            "max": true,
-            "min": true,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
+          "interval": null,
           "links": [],
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false,
+            "ymax": null,
+            "ymin": null
           },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "tableColumn": "",
           "targets": [
             {
               "expr": "che_user_total",
               "format": "time_series",
+              "instant": true,
               "intervalFactor": 1,
               "legendFormat": "Number of Users",
               "refId": "A"
             }
           ],
-          "thresholds": [],
+          "thresholds": "",
           "timeFrom": null,
-          "timeRegions": [],
           "timeShift": null,
           "title": "Number of Users",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
             {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
             }
           ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+          "valueName": "avg"
         },
         {
-          "aliasColors": {},
-          "bars": false,
           "cacheTimeout": null,
-          "dashLength": 10,
-          "dashes": false,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
           "datasource": "$datasource",
-          "fill": 1,
-          "fillGradient": 0,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
           "gridPos": {
             "h": 5,
             "w": 5,
@@ -3747,80 +3754,67 @@ data:
             "y": 1
           },
           "id": 47,
-          "legend": {
-            "avg": false,
-            "current": true,
-            "max": true,
-            "min": true,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
+          "interval": null,
           "links": [],
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false,
+            "ymax": null,
+            "ymin": null
           },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "tableColumn": "",
           "targets": [
             {
               "expr": "sum(che_workspace_status)",
               "format": "time_series",
-              "instant": false,
+              "instant": true,
               "intervalFactor": 1,
               "legendFormat": "Number of Workspaces",
               "refId": "A"
             }
           ],
-          "thresholds": [],
+          "thresholds": "",
           "timeFrom": null,
-          "timeRegions": [],
           "timeShift": null,
           "title": "Number of Workspaces",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
             {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
             }
           ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+          "valueName": "avg"
         },
         {
           "collapsed": false,
@@ -4670,12 +4664,206 @@ data:
           }
         },
         {
+          "aliasColors": {},
+          "bars": false,
+          "cacheTimeout": null,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 17
+          },
+          "id": 77,
+          "legend": {
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(che_workspace_status)",
+              "format": "time_series",
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "Number of Workspaces",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Number of Workspaces",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
           "collapsed": false,
           "gridPos": {
             "h": 1,
             "w": 24,
             "x": 0,
             "y": 22
+          },
+          "id": 80,
+          "panels": [],
+          "title": "Users",
+          "type": "row"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "cacheTimeout": null,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 0,
+            "y": 23
+          },
+          "id": 78,
+          "legend": {
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "che_user_total",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "Number of Users",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Number of Users",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 28
           },
           "id": 24,
           "panels": [],
@@ -4694,7 +4882,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 23
+            "y": 29
           },
           "id": 16,
           "legend": {
@@ -4779,7 +4967,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 30
+            "y": 36
           },
           "id": 64,
           "panels": [],
@@ -4798,7 +4986,7 @@ data:
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 31
+            "y": 37
           },
           "id": 66,
           "legend": {
@@ -4884,7 +5072,7 @@ data:
             "h": 6,
             "w": 6,
             "x": 6,
-            "y": 31
+            "y": 37
           },
           "id": 68,
           "legend": {
@@ -4970,7 +5158,7 @@ data:
             "h": 6,
             "w": 6,
             "x": 12,
-            "y": 31
+            "y": 37
           },
           "id": 70,
           "legend": {
@@ -5057,7 +5245,7 @@ data:
             "h": 6,
             "w": 6,
             "x": 18,
-            "y": 31
+            "y": 37
           },
           "id": 72,
           "legend": {
@@ -5143,7 +5331,7 @@ data:
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 37
+            "y": 43
           },
           "id": 74,
           "legend": {
@@ -5229,7 +5417,7 @@ data:
             "h": 6,
             "w": 6,
             "x": 6,
-            "y": 37
+            "y": 43
           },
           "id": 76,
           "legend": {
@@ -5309,7 +5497,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 43
+            "y": 49
           },
           "id": 22,
           "panels": [],
@@ -5328,7 +5516,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 0,
-            "y": 44
+            "y": 50
           },
           "id": 18,
           "legend": {
@@ -5444,7 +5632,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 8,
-            "y": 44
+            "y": 50
           },
           "id": 26,
           "legend": {
@@ -5545,7 +5733,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 16,
-            "y": 44
+            "y": 50
           },
           "id": 32,
           "legend": {
@@ -5648,7 +5836,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 0,
-            "y": 51
+            "y": 57
           },
           "id": 30,
           "legend": {
@@ -5745,7 +5933,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 8,
-            "y": 51
+            "y": 57
           },
           "id": 34,
           "legend": {
@@ -5844,7 +6032,7 @@ data:
             "h": 7,
             "w": 8,
             "x": 16,
-            "y": 51
+            "y": 57
           },
           "id": 28,
           "legend": {
@@ -5937,7 +6125,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 58
+            "y": 64
           },
           "id": 61,
           "panels": [],
@@ -5956,7 +6144,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 59
+            "y": 65
           },
           "id": 55,
           "legend": {
@@ -6069,7 +6257,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 59
+            "y": 65
           },
           "id": 56,
           "legend": {
@@ -6182,7 +6370,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 66
+            "y": 72
           },
           "id": 51,
           "legend": {
@@ -6295,7 +6483,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 66
+            "y": 72
           },
           "id": 54,
           "legend": {
@@ -6408,7 +6596,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 73
+            "y": 79
           },
           "id": 58,
           "legend": {
@@ -6501,7 +6689,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 73
+            "y": 79
           },
           "id": 57,
           "legend": {
@@ -6588,7 +6776,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 80
+            "y": 86
           },
           "id": 42,
           "panels": [
