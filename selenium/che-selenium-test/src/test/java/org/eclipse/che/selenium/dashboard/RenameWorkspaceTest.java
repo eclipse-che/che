@@ -12,18 +12,18 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.OVERVIEW;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status.STOPPED;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.io.IOException;
+import java.util.Collections;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
@@ -32,8 +32,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
-/** TODO rewrite to use che7 workspace */
-@Test(groups = UNDER_REPAIR)
 public class RenameWorkspaceTest {
 
   private static final int MIN_WORKSPACE_NAME_SIZE = 3;
@@ -47,18 +45,20 @@ public class RenameWorkspaceTest {
 
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
-  @Inject private TestWorkspace ws;
   @Inject private DefaultTestUser user;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Workspaces workspaces;
   @Inject private WorkspaceOverview workspaceOverview;
+  @Inject private CreateWorkspaceHelper createWorkspaceHelper;
 
   private String workspaceName;
 
   @BeforeClass
   public void setUp() throws Exception {
-    this.workspaceName = ws.getName();
+    this.workspaceName = generate("workspace", 5);
     dashboard.open();
+    createWorkspaceHelper.createAndEditWorkspaceFromStack(
+        Devfile.JAVA_MAVEN, workspaceName, Collections.emptyList(), null);
   }
 
   @AfterClass
@@ -72,8 +72,6 @@ public class RenameWorkspaceTest {
   public void renameNameWorkspaceTest() throws IOException {
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.clickOnWorkspaceActionsButton(workspaceName);
-    workspaces.waitWorkspaceStatus(workspaceName, STOPPED);
     workspaces.selectWorkspaceItemName(workspaceName);
     workspaceDetails.waitToolbarTitleName(workspaceName);
     workspaceDetails.selectTabInWorkspaceMenu(OVERVIEW);

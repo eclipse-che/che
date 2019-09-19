@@ -75,6 +75,7 @@ public class Workspaces {
     String SEARCH_WORKSPACE_FIELD = "//input[@ng-placeholder='Search']";
     String NO_WORKSPACE_FOUND = "//span[text()='No workspaces found.']";
     String WORKSPACE_ITEM_NAME = "//div[@class='workspace-name-clip' and contains(@id, '/%s')]";
+    String WORKSPACE_ITEM_XPATH = "//div[@id='ws-name-%s']";
     String WORKSPACE_ITEM_FULL_NAME = "//div[@id='ws-full-name-%s']";
     String WORKSPACE_ITEM_CHECKBOX = "//div[@id='ws-name-%s']//md-checkbox";
     String WORKSPACE_ITEM_RAM = "//div[@id='ws-name-%s']//span[@name='workspace-ram-value']";
@@ -132,7 +133,7 @@ public class Workspaces {
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             visibilityOfElementLocated(
-                By.xpath(format(Locators.WORKSPACE_ITEM_NAME, workspaceName))))
+                By.xpath(format(Locators.WORKSPACE_ITEM_XPATH, workspaceName))))
         .getAttribute("data-ws-status");
   }
 
