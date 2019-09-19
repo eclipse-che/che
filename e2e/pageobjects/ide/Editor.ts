@@ -12,8 +12,9 @@ import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
-import { By, Key, error } from 'selenium-webdriver';
+import { By, Key, error, ActionSequence, Button } from 'selenium-webdriver';
 import { Ide } from './Ide';
+
 
 @injectable()
 export class Editor {
@@ -278,7 +279,8 @@ export class Editor {
         }
     }
 
-    private async getLineYCoordinates(lineNumber: number): Promise<number> {
+
+     async getLineYCoordinates(lineNumber: number): Promise<number> {
         const lineNumberLocator: By = By.xpath(`//div[contains(@class, 'line-numbers') and text()='${lineNumber}']` +
             `//parent::div[contains(@style, 'position')]`);
 
@@ -294,6 +296,39 @@ export class Editor {
         }
 
         return lineYCoordinate;
+    }
+
+    async clickOnTheTextInDefinedPosition(line: number, column: number) {
+        const addishionalShifting = 19;
+        const addishionalShiftingToX = 1;
+        const yPosition: number = await this.getLineYCoordinates(line) + addishionalShifting;
+        const xPosition: number = column + addishionalShiftingToX;
+        new  ActionSequence(this.driverHelper.getDriver()).
+        mouseMove({x: xPosition, y: yPosition}).
+        click().
+        perform();
+}
+
+    async goToDefinitionWithMouseClicking(line: number, column: number) {
+        const addishionalShiftingToY = 19;
+        const addishionalShiftingToX = 1;
+        const yPosition: number = await this.getLineYCoordinates(line) + addishionalShiftingToY;
+        new  ActionSequence(this.driverHelper.getDriver()).
+        keyDown(Key.CONTROL).
+        mouseMove({x: column + addishionalShiftingToX, y: yPosition}).
+        click().
+        keyDown(Key.CONTROL).
+        perform();
+    }
+
+    async mouseContextClickInDefinedPosition(line: number, column: number) {
+        const addishionalShiftingToY = 19;
+        const addishionalShiftingToX = 1;
+        const yPosition: number = await this.getLineYCoordinates(line) + addishionalShiftingToY;
+        new  ActionSequence(this.driverHelper.getDriver()).
+        mouseMove({x: column + addishionalShiftingToX, y: yPosition}).
+        click(Button.RIGHT).
+        perform();
     }
 
     private getTabWithUnsavedStatus(tabTitle: string): By {

@@ -37,7 +37,8 @@ const CLASSES = {
     ScreenCatcher: 'ScreenCatcher',
     OcpLoginPage: 'OcpLoginPage',
     OcpWebConsolePage: 'OcpWebConsolePage',
-    OpenWorkspaceWidget: 'OpenWorkspaceWidget'
+    OpenWorkspaceWidget: 'OpenWorkspaceWidget',
+    ContextMenu: 'ContextMenu'
 };
 
 export { TYPES, CLASSES };

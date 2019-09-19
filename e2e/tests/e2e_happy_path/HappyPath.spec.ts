@@ -9,7 +9,7 @@
  **********************************************************************/
 
 import { e2eContainer } from '../../inversify.config';
-import { DriverHelper } from '../../utils/DriverHelper';
+import { DriverHelper, } from '../../utils/DriverHelper';
 import { TYPES, CLASSES } from '../../inversify.types';
 import { Ide, RightToolbarButton } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
@@ -26,6 +26,7 @@ import { Terminal } from '../../pageobjects/ide/Terminal';
 import { OpenWorkspaceWidget } from '../../pageobjects/ide/OpenWorkspaceWidget';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import * as fs from 'fs';
+import { ContextMenu } from '../../pageobjects/ide/ContextMenu';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -33,6 +34,7 @@ const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
+const contextMenu: ContextMenu = e2eContainer.get(CLASSES.ContextMenu);
 const previewWidget: PreviewWidget = e2eContainer.get(CLASSES.PreviewWidget);
 const rightToolbar: RightToolbar = e2eContainer.get(CLASSES.RightToolbar);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
@@ -116,10 +118,11 @@ suite('Language server validation', async () => {
         await editor.waitSuggestion(javaFileName, 'run(Class<?> primarySource, String... args) : ConfigurableApplicationContext');
     });
 
-    // it's skipped because of issue https://github.com/eclipse/che/issues/14520
-    test.skip('Codenavigation', async () => {
+
+    test('Codenavigation', async () => {
         await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
-        await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
+        await checkCodeNavigationWithContextMenu();
+        // await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
         await editor.waitEditorAvailable(codeNavigationClassName);
     });
 
@@ -289,7 +292,12 @@ async function runTask(task: string) {
     await quickOpenContainer.clickOnContainerItem(task);
     await quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
 }
-
+async function checkCodeNavigationWithContextMenu() {
+    await contextMenu.invokeContextMenuOnActiveElementWithKeys();
+    await contextMenu.waitContextMenuAndClickOnItem('Go to Definition');
+    console.log('please check the satus of the known issue: https://github.com/eclipse/che/issues/14520. If it is fixed, we have to return the test to previous state.');
+    return ''
+}
 // sometimes under high loading the first click can be failed
 async function isureClickOnDebugMenu() {
     try { await topMenu.selectOption('Debug', 'Open Configurations'); } catch (e) {
@@ -319,5 +327,6 @@ async function checkJavaPathCompletion() {
         await editor.type(classPathFilename, classpathText, 1);
         await editor.waitTabWithSavedStatus(classPathFilename);
     }
-}
 
+
+}

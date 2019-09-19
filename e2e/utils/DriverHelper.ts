@@ -12,7 +12,7 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../inversify.types';
 import { error, ActionSequence } from 'selenium-webdriver';
 import 'reflect-metadata';
-import { ThenableWebDriver, By, until, WebElement } from 'selenium-webdriver';
+import { ThenableWebDriver, By, until, WebElement, Button } from 'selenium-webdriver';
 import { TestConstants } from '../TestConstants';
 
 
@@ -258,6 +258,7 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum gettin of the '${cssAttribute}' css attribute attempts, from the '${elementLocator}' element`);
     }
 
+
     public async waitAttributeValue(elementLocator: By,
         attribute: string,
         expectedValue: string,
@@ -445,10 +446,15 @@ export class DriverHelper {
         }, timeout);
     }
 
+
+
     async switchToSecondWindow(mainWindowHandle: string) {
         await this.waitOpenningSecondWindow();
         const handles: string[] = await this.driver.getAllWindowHandles();
         handles.splice(handles.indexOf(mainWindowHandle), 1);
         await this.driver.switchTo().window(handles[0]);
     }
+async performRightClickOnActiveElement() {
+    await this.driver.actions().click(this.driver.switchTo().activeElement(), Button.RIGHT).perform();
+}
 }
