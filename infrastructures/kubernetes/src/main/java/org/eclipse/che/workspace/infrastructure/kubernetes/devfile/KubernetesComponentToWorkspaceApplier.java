@@ -16,9 +16,12 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Components.getIdentifiableComponentName;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Names.machineName;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesDevfileBindings.KUBERNETES_BASED_COMPONENTS_KEY_NAME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newPVC;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolume;
@@ -33,7 +36,9 @@ import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -46,8 +51,8 @@ import org.eclipse.che.api.workspace.server.devfile.DevfileRecipeFormatException
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
@@ -144,7 +149,9 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
 
     List<PodData> podsData = getPodDatas(componentObjects);
 
-    estimateCommandsMachineName(workspaceConfig, k8sComponent, podsData);
+    Map<String, Map<String, String>> podToContainerAndMachineName = estimateMachineNames(podsData);
+
+    linkCommandsToMachineName(workspaceConfig, k8sComponent, podToContainerAndMachineName);
 
     if (Boolean.TRUE.equals(k8sComponent.getMountSources())) {
       applyProjectsVolumes(podsData, componentObjects);
@@ -152,7 +159,12 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
 
     applyEntrypoints(k8sComponent.getEntrypoints(), componentObjects);
 
-    k8sEnvProvisioner.provision(workspaceConfig, environmentType, componentObjects, emptyMap());
+    Map<String, MachineConfigImpl> machineConfigs =
+        k8sComponent.getAlias() != null ?
+            prepareMachineConfigs(k8sComponent.getAlias(), podToContainerAndMachineName)
+            : emptyMap();
+
+    k8sEnvProvisioner.provision(workspaceConfig, environmentType, componentObjects, machineConfigs);
   }
 
   private void applyProjectsVolumes(List<PodData> podsData, List<HasMetadata> componentObjects) {
@@ -190,6 +202,33 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
         }
       }
     }
+  }
+
+  private Map<String, MachineConfigImpl> prepareMachineConfigs(
+      String componentAlias, Map<String, Map<String, String>> machineNamesData) {
+    Map<String, MachineConfigImpl> configsMap = new HashMap<>();
+    machineNamesData
+        .values()
+        .stream()
+        .flatMap(containers -> containers.values().stream())
+        .forEach(
+            machineName -> {
+              MachineConfigImpl config = new MachineConfigImpl();
+              config.getAttributes().put(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE, componentAlias);
+              configsMap.put(machineName, config);
+            });
+    return configsMap;
+  }
+
+  private Map<String, Map<String, String>> estimateMachineNames(List<PodData> podsData) {
+    Map<String, Map<String, String>> podToContainerAndMachineName = new HashMap<>();
+    for (PodData podData : podsData) {
+      Map<String, String> containersToMachineNames =
+          podData.getSpec().getContainers().stream()
+              .collect(toMap(Container::getName, c -> machineName(podData, c)));
+      podToContainerAndMachineName.put(podData.getMetadata().getName(), containersToMachineNames);
+    }
+    return podToContainerAndMachineName;
   }
 
   private String retrieveContent(Component recipeComponent, FileContentProvider fileContentProvider)
@@ -235,8 +274,10 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
    *
    * <p>Machine name will be set only if the specified recipe objects has the only one container.
    */
-  private void estimateCommandsMachineName(
-      WorkspaceConfig workspaceConfig, Component component, List<PodData> podsData) {
+  private void linkCommandsToMachineName(
+      WorkspaceConfig workspaceConfig,
+      Component component,
+      Map<String, Map<String, String>> namesData) {
     List<? extends Command> componentCommands =
         workspaceConfig
             .getCommands()
@@ -253,18 +294,20 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       return;
     }
 
-    if (podsData.size() != 1) {
+    if (namesData.size() != 1) {
       // many or no pods - can't estimate the name because of ambiguity or lack of information
       return;
     }
 
-    PodData pod = podsData.get(0);
-    if (pod.getSpec().getContainers().size() != 1) {
+    Map<String, String> containerToMachineName = namesData.values().iterator().next();
+    if (containerToMachineName.size() != 1) {
       // many or no containers - can't estimate the name
       return;
     }
-    String machineName = Names.machineName(pod, pod.getSpec().getContainers().get(0));
-    componentCommands.forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
+    componentCommands.forEach(
+        c ->
+            c.getAttributes()
+                .put(MACHINE_NAME_ATTRIBUTE, containerToMachineName.values().iterator().next()));
   }
 
   private List<PodData> getPodDatas(List<HasMetadata> componentsObjects) {
