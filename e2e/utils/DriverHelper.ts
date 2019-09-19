@@ -258,7 +258,6 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum gettin of the '${cssAttribute}' css attribute attempts, from the '${elementLocator}' element`);
     }
 
-
     public async waitAttributeValue(elementLocator: By,
         attribute: string,
         expectedValue: string,

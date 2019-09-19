@@ -325,13 +325,12 @@ async function checkJavaPathCompletion() {
 
         await projectTree.expandPathAndOpenFile(projectName, classPathFilename);
         await editor.waitEditorAvailable(classPathFilename);
-
         await editor.type(classPathFilename, Key.chord(Key.CONTROL, 'a'), 1);
         await editor.performKeyCombination(classPathFilename, Key.DELETE);
-
         await editor.type(classPathFilename, classpathText, 1);
         await editor.waitTabWithSavedStatus(classPathFilename);
     }
 
 
 }
+
