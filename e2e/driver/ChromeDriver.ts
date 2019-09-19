@@ -51,7 +51,7 @@ export class ChromeDriver implements IDriver {
             .forBrowser('chrome')
             .setChromeOptions(options);
 
-            // if 'true' run with remote driver
+        // if 'true' run with remote driver
         if (TestConstants.TS_SELENIUM_REMOTE_DRIVER_URL) {
             builder = builder.usingServer(TestConstants.TS_SELENIUM_REMOTE_DRIVER_URL);
         }

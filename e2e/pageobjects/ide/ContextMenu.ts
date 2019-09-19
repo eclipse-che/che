@@ -25,8 +25,8 @@ export class ContextMenu {
     }
 
 
-   async waitContextMenuAndClickOnItem(nameOfitem: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT ) {
-        const itemLocator: string = `//div[@class='p-Menu-itemLabel' and text()='${nameOfitem}']`;
+   async waitContextMenuAndClickOnItem(nameOfItem: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT ) {
+        const itemLocator: string = `//div[@class='p-Menu-itemLabel' and text()='${nameOfItem}']`;
         await this.waitContextMenu();
         await this.driverHelper.waitAndClick(By.xpath(itemLocator), timeout);
    }

@@ -19,6 +19,10 @@ import { Ide } from './Ide';
 @injectable()
 export class Editor {
     private static readonly SUGGESTION_WIDGET_BODY_CSS: string = 'div.visible[widgetId=\'editor.widget.suggestWidget\']';
+    
+    private static readonly ADDITIONAL_SHIFTING_TO_Y:number = 19;
+    private static readonly ADDITIONAL_SHIFTING_TO_X: number = 1;
+
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Ide) private readonly ide: Ide) { }
@@ -280,7 +284,7 @@ export class Editor {
     }
 
 
-     async getLineYCoordinates(lineNumber: number): Promise<number> {
+    async getLineYCoordinates(lineNumber: number): Promise<number> {
         const lineNumberLocator: By = By.xpath(`//div[contains(@class, 'line-numbers') and text()='${lineNumber}']` +
             `//parent::div[contains(@style, 'position')]`);
 
@@ -298,37 +302,33 @@ export class Editor {
         return lineYCoordinate;
     }
 
-    async clickOnTheTextInDefinedPosition(line: number, column: number) {
-        const additionalShiftingToY = 19;
+    async clickOnLineAndChar(line: number, column: number) {
+        
         const additionalShiftingToX = 1;
-        const yPosition: number = await this.getLineYCoordinates(line) + additionalShiftingToY;
-        const xPosition: number = column + additionalShiftingToX;
-        new  ActionSequence(this.driverHelper.getDriver()).
-        mouseMove({x: xPosition, y: yPosition}).
-        click().
-        perform();
-}
+        const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
+        const xPosition: number = column +  Editor.ADDITIONAL_SHIFTING_TO_X;
+        new ActionSequence(this.driverHelper.getDriver()).
+            mouseMove({ x: xPosition, y: yPosition }).
+            click().
+            perform();
+    }
 
     async goToDefinitionWithMouseClicking(line: number, column: number) {
-        const additionalShiftingToY = 19;
-        const additionalShiftingToX = 1;
-        const yPosition: number = await this.getLineYCoordinates(line) + additionalShiftingToY;
-        new  ActionSequence(this.driverHelper.getDriver()).
-        keyDown(Key.CONTROL).
-        mouseMove({x: column + additionalShiftingToX, y: yPosition}).
-        click().
-        keyDown(Key.CONTROL).
-        perform();
+        const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
+        new ActionSequence(this.driverHelper.getDriver()).
+            keyDown(Key.CONTROL).
+            mouseMove({ x: column + Editor.ADDITIONAL_SHIFTING_TO_X, y: yPosition }).
+            click().
+            keyDown(Key.CONTROL).
+            perform();
     }
 
     async mouseContextClickInDefinedPosition(line: number, column: number) {
-        const additionalShiftingToY = 19;
-        const additionalShiftingToX = 1;
-        const yPosition: number = await this.getLineYCoordinates(line) + additionalShiftingToY;
-        new  ActionSequence(this.driverHelper.getDriver()).
-        mouseMove({x: column + additionalShiftingToX, y: yPosition}).
-        click(Button.RIGHT).
-        perform();
+        const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
+        new ActionSequence(this.driverHelper.getDriver()).
+            mouseMove({ x: column + Editor.ADDITIONAL_SHIFTING_TO_X, y: yPosition }).
+            click(Button.RIGHT).
+            perform();
     }
 
     private getTabWithUnsavedStatus(tabTitle: string): By {
