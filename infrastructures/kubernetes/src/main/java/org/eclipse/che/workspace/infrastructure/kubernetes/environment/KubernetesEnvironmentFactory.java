@@ -139,7 +139,7 @@ public class KubernetesEnvironmentFactory
     }
 
     KubernetesEnvironment k8sEnv =
-        KubernetesEnvironment.builder() //
+        KubernetesEnvironment.builder()
             .setInternalRecipe(recipe)
             .setMachines(machines)
             .setWarnings(warnings)

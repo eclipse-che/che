@@ -145,7 +145,7 @@ public class KubernetesObjectUtil {
    * Returns new instance of {@link PersistentVolumeClaim} with specified name, accessMode, quantity
    * and storageClassName.
    */
-  public static PersistentVolumeClaim newPVC( //
+  public static PersistentVolumeClaim newPVC(
       String name, String accessMode, String quantity, String storageClassName) {
     SpecNested<PersistentVolumeClaimBuilder> specs =
         new PersistentVolumeClaimBuilder()
@@ -166,7 +166,7 @@ public class KubernetesObjectUtil {
   }
 
   /** Returns new instance of {@link VolumeMount} with specified name, mountPath and subPath. */
-  public static VolumeMount newVolumeMount(String name, String mountPath, String subPath) { //
+  public static VolumeMount newVolumeMount(String name, String mountPath, String subPath) {
     return new VolumeMountBuilder()
         .withMountPath(mountPath)
         .withName(name)
@@ -175,7 +175,7 @@ public class KubernetesObjectUtil {
   }
 
   /** Returns new instance of {@link Volume} with specified name and name of claim related to. */
-  public static Volume newVolume(String name, String pvcName) { //
+  public static Volume newVolume(String name, String pvcName) {
     final PersistentVolumeClaimVolumeSource pvcs =
         new PersistentVolumeClaimVolumeSourceBuilder().withClaimName(pvcName).build();
     return new VolumeBuilder().withPersistentVolumeClaim(pvcs).withName(name).build();

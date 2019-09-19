@@ -65,7 +65,7 @@ public class PodsVolumes {
       pod.getSpec()
           .getVolumes()
           .add(
-              new VolumeBuilder() // todo use method builder ?
+              new VolumeBuilder()
                   .withName(commonPVCName)
                   .withNewPersistentVolumeClaim()
                   .withClaimName(commonPVCName)

@@ -138,7 +138,6 @@ public class PVCProvisioner {
     }
   }
 
-  //
   /**
    * Groups list of given PVCs by volume name. The result may be used for easy accessing to PVCs by
    * Che Volume name.
@@ -183,7 +182,7 @@ public class PVCProvisioner {
         pvc = volumeName2PVC.get(volumeName);
       }
       // when PVC is not found in environment then create new one
-      else { // todo here
+      else {
         final String uniqueName = Names.generateName(pvcNamePrefix);
         pvc = newPVC(uniqueName, pvcAccessMode, pvcQuantity, pvcStorageClassName);
         putLabel(pvc, CHE_WORKSPACE_ID_LABEL, workspaceId);
