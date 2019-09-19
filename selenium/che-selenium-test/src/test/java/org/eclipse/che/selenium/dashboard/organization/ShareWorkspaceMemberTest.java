@@ -49,8 +49,6 @@ public class ShareWorkspaceMemberTest {
   private static final String ADMIN_PERMISSIONS =
       "read, use, run, configure, setPermissions, delete";
   private static final String MEMBER_PERMISSIONS = "read, use, run, configure";
-  private static final String PROJECT_NAME = "web-java-spring";
-  private static final String FILE_NAME = "readme.txt";
   private static final String FILE_CONTENT = generate("", 10);
 
   private String systemAdminName;
@@ -85,13 +83,16 @@ public class ShareWorkspaceMemberTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(WORKSPACE_NAME, adminTestUser.getName());
+    if (workspaceServiceClient.exists(WORKSPACE_NAME, adminTestUser.getName())) {
+      workspaceServiceClient.stop(WORKSPACE_NAME, adminTestUser.getName());
+      workspaceServiceClient.delete(WORKSPACE_NAME, adminTestUser.getName());
+    }
     org.delete();
   }
 
   @Test
   public void checkSharingByWorkspaceOwner() {
-    dashboard.open();
+    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
@@ -137,15 +138,14 @@ public class ShareWorkspaceMemberTest {
 
     // open workspace and check
     workspaceDetails.clickOpenInIdeWsBtn();
-
     theiaIde.switchToIdeFrame();
     theiaIde.waitTheiaIde();
     theiaIde.waitLoaderInvisibility();
     theiaIde.waitTheiaIdeTopPanel();
-
-    theiaEditor.waitEditorTab("README.md");
+    theiaEditor.waitActiveEditor();
     theiaEditor.waitEditorTab("Preview README.md");
-    theiaEditor.clickOnEditorTab("README.md");
+    theiaProjectTree.openItem(CONSOLE_JAVA_SIMPLE + "/README.md");
+    theiaEditor.waitEditorTab("README.md");
     theiaEditor.isEditorContains(FILE_CONTENT);
 
     // try to delete the workspace
@@ -187,6 +187,7 @@ public class ShareWorkspaceMemberTest {
     theiaProjectTree.openItem(CONSOLE_JAVA_SIMPLE + "/README.md");
 
     theiaEditor.waitEditorTab("README.md");
+    theiaEditor.clickOnEditorTab("README.md");
     theiaEditor.enterText(FILE_CONTENT);
     theiaEditor.isEditorContains(FILE_CONTENT);
   }
