@@ -153,7 +153,7 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
   @Override
   public Page<WorkspaceActivity> getAll(int maxItems, long skipCount) {
     return new Page<>(
-        workspaceActivities.values().stream().skip(skipCount).collect(toList()),
+        workspaceActivities.values().stream().skip(skipCount).limit(maxItems).collect(toList()),
         skipCount,
         maxItems,
         workspaceActivities.size());
