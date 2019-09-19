@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import java.time.Clock;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -166,7 +167,7 @@ public class WorkspaceActivityChecker {
    * @throws ServerException or error
    */
   private void reconcileActivityStatuses() throws ServerException {
-    for (WorkspaceActivity a : activityDao.getAll()) {
+    for (WorkspaceActivity a : Pages.iterateLazily(activityDao::getAll, 200)) {
       WorkspaceStatus status = workspaceRuntimes.getStatus(a.getWorkspaceId());
       if (a.getStatus() != status) {
         if (LOG.isWarnEnabled()) {

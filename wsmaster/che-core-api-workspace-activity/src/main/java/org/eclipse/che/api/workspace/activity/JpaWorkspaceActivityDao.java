@@ -15,7 +15,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.inject.persist.Transactional;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -208,12 +207,20 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
 
   @Override
   @Transactional(rollbackOn = ServerException.class)
-  public Set<WorkspaceActivity> getAll() throws ServerException {
+  public Page<WorkspaceActivity> getAll(int maxItems, long skipCount) throws ServerException {
     try {
       EntityManager em = managerProvider.get();
-      return em.createNamedQuery("WorkspaceActivity.getAll", WorkspaceActivity.class)
-          .getResultStream()
-          .collect(Collectors.toSet());
+      long total =
+          em.createNamedQuery("WorkspaceActivity.getAllCount", Long.class).getSingleResult();
+
+      List<WorkspaceActivity> page =
+          em.createNamedQuery("WorkspaceActivity.getAll", WorkspaceActivity.class)
+              .setFirstResult((int) skipCount)
+              .setMaxResults(maxItems)
+              .getResultStream()
+              .collect(Collectors.toList());
+
+      return new Page<>(page, skipCount, maxItems, total);
     } catch (RuntimeException e) {
       throw new ServerException(e.getLocalizedMessage(), e);
     }

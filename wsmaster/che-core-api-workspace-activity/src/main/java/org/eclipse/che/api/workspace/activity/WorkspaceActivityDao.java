@@ -12,7 +12,6 @@
 package org.eclipse.che.api.workspace.activity;
 
 import java.util.List;
-import java.util.Set;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
@@ -131,7 +130,9 @@ public interface WorkspaceActivityDao {
   /**
    * Returns all current workspace activities.
    *
+   * @param maxItems the page size
+   * @param skipCount the number of records to skip
    * @return the workspace activities for all workspaces
    */
-  Set<WorkspaceActivity> getAll() throws ServerException;
+  Page<WorkspaceActivity> getAll(int maxItems, long skipCount) throws ServerException;
 }

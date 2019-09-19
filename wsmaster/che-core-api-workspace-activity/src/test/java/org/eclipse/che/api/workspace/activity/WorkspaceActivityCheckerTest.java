@@ -11,7 +11,9 @@
  */
 package org.eclipse.che.api.workspace.activity;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -29,6 +31,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
@@ -224,7 +227,18 @@ public class WorkspaceActivityCheckerTest {
     activity.setWorkspaceId(wsId);
     activity.setStatus(WorkspaceStatus.STARTING);
     activity.setLastStarting(clock.millis());
-    when(workspaceActivityDao.getAll()).thenReturn(singleton(activity));
+    when(workspaceActivityDao.getAll(anyInt(), anyLong()))
+        .thenAnswer(
+            inv -> {
+              int maxItems = inv.getArgument(0);
+              long skipCount = inv.getArgument(1);
+
+              if (skipCount < 1) {
+                return new Page<>(singleton(activity), skipCount, maxItems, 1);
+              } else {
+                return new Page<>(emptyList(), skipCount, maxItems, 1);
+              }
+            });
     when(workspaceRuntimes.getStatus(eq(wsId))).thenReturn(WorkspaceStatus.STOPPED);
 
     // when
