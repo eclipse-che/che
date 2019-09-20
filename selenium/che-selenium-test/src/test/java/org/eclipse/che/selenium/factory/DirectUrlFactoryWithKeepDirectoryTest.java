@@ -77,6 +77,7 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectsRootItem();
+    theiaIde.waitAllNotificationClosed();
 
     theiaProjectTree.waitItem(repositoryName);
     theiaProjectTree.openItem(repositoryName + "/my-lib");

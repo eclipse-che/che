@@ -177,6 +177,7 @@ public class ShareWorkspaceMemberTest {
 
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
+    theiaIde.waitAllNotificationClosed();
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
     theiaProjectTree.expandItem(CONSOLE_JAVA_SIMPLE);
     theiaProjectTree.openItem(CONSOLE_JAVA_SIMPLE + "/README.md");
