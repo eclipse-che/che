@@ -11,6 +11,7 @@ jwtproxy:
       - options:
           iss: "wsmaster"
         type: "static"
+      cookie_path: "/"
       key_server:
         options:
           issuer: "wsmaster"
@@ -21,6 +22,7 @@ jwtproxy:
       max_ttl: "1m"
       nonce_storage:
         type: "void"
+      public_base_path: "/there"
       upstream: "http://tomcat:8080"
   - listen_addr: ":4101"
     verifier:
@@ -31,6 +33,7 @@ jwtproxy:
       - options:
           iss: "wsmaster"
         type: "static"
+      cookie_path: "/cookies"
       excludes:
       - "/api/liveness"
       - "/other/exclude"
@@ -44,4 +47,5 @@ jwtproxy:
       max_ttl: "1m"
       nonce_storage:
         type: "void"
+      public_base_path: "/here"
       upstream: "ws://terminal:4101"

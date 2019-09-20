@@ -12,13 +12,12 @@
 # Build step: $ docker build -t eclipse-che-dashboard .
 # It builds an archive file that can be used by doing later
 #  $ docker run --rm eclipse-che-dashboard | tar -C target/ -zxf -
-FROM node:8.15.1
+FROM node:8.16.0
 
 RUN apt-get update && \
     apt-get install -y git \
     && apt-get -y clean \
     && rm -rf /var/lib/apt/lists/*
-RUN yarn global upgrade yarn@1.13.0
 COPY package.json /dashboard/
 COPY yarn.lock /dashboard/
 COPY typings.json /dashboard/

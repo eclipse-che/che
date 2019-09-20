@@ -10,6 +10,8 @@
     "test": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha.opts",
     "test-happy-path": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-happy-path.opts",
     "test-che-install": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-che-operatorhub.opts",
+    "test-wkspc-creation-and-ls": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-wkspc-creation-and-ls.opts",
+    "test-java-vertx": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-java-vertx.opts",
     "lint": "tslint --fix -p .",
     "tsc": "tsc -p ."
   },
@@ -23,7 +25,7 @@
     "@types/selenium-webdriver": "^3.0.16",
     "axios": "0.17.1",
     "chai": "^4.2.0",
-    "chromedriver": "^2.46.0",
+    "chromedriver": "^76.0.0",
     "mocha": "^6.1.4",
     "rimraf": "^2.6.2",
     "selenium-webdriver": "^3.6.0",

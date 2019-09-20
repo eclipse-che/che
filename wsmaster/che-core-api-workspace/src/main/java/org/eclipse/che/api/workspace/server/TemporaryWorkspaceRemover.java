@@ -14,7 +14,7 @@ package org.eclipse.che.api.workspace.server;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.common.annotations.VisibleForTesting;
-import javax.annotation.PostConstruct;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.Pages;
@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.commons.schedule.ScheduleDelay;
 import org.slf4j.Logger;
 
 /**
@@ -43,7 +44,10 @@ public class TemporaryWorkspaceRemover {
     this.runtimes = runtimes;
   }
 
-  @PostConstruct
+  @ScheduleDelay(
+      initialDelayParameterName = "che.workspace.cleanup_temporary_initial_delay_min",
+      delayParameterName = "che.workspace.cleanup_temporary_period_min",
+      unit = TimeUnit.MINUTES)
   void initialize() {
     try {
       removeTemporaryWs();

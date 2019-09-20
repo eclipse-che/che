@@ -19,6 +19,8 @@
  */
 export class CheFooterController {
 
+  $onInit(): void { }
+
   /**
    * Returns 'Make a wish' email subject.
    *

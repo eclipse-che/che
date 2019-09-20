@@ -79,8 +79,9 @@ public class CreateAndDeleteProjectsTest {
     dashboardWindow = seleniumWebDriver.getWindowHandle();
 
     // we are selecting 'Java' stack from the 'All Devfile' tab for compatibility with OSIO
-    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
     newWorkspace.typeWorkspaceName(WORKSPACE);
+    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
+    newWorkspace.waitDevfileSelected(Devfile.JAVA_MAVEN);
     projectSourcePage.waitCreatedProjectButton(CONSOLE_JAVA_SIMPLE);
 
     // create 'console-java-simple-1' project

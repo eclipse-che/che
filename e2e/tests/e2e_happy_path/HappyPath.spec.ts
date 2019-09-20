@@ -10,7 +10,7 @@
 
 import { e2eContainer } from '../../inversify.config';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { CLASSES } from '../../inversify.types';
+import { TYPES, CLASSES } from '../../inversify.types';
 import { Ide, RightToolbarButton } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
@@ -24,6 +24,7 @@ import { DebugView } from '../../pageobjects/ide/DebugView';
 import { WarningDialog } from '../../pageobjects/ide/WarningDialog';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import { OpenWorkspaceWidget } from '../../pageobjects/ide/OpenWorkspaceWidget';
+import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import * as fs from 'fs';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
@@ -51,6 +52,7 @@ const textForErrorMessageChange: string = 'HHHHHHHHHHHHH';
 const codeNavigationClassName: string = 'SpringApplication.class';
 const pathToYamlFolder: string = projectName;
 const yamlFileName: string = 'devfile.yaml';
+const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
 
 const SpringAppLocators = {
     springTitleLocator: By.xpath('//div[@class=\'container-fluid\']//h2[text()=\'Welcome\']'),
@@ -63,7 +65,8 @@ const SpringAppLocators = {
 
 suite('Validation of workspace start', async () => {
     test('Open workspace', async () => {
-        await driverHelper.navigateAndWaitToUrl(workspaceUrl);
+        await driverHelper.navigateToUrl(workspaceUrl);
+        await loginPage.login();
     });
 
     test('Wait workspace running state', async () => {
@@ -113,7 +116,8 @@ suite('Language server validation', async () => {
         await editor.waitSuggestion(javaFileName, 'run(Class<?> primarySource, String... args) : ConfigurableApplicationContext');
     });
 
-    test('Codenavigation', async () => {
+    // it's skipped because of issue https://github.com/eclipse/che/issues/14520
+    test.skip('Codenavigation', async () => {
         await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
         await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
         await editor.waitEditorAvailable(codeNavigationClassName);
@@ -207,8 +211,6 @@ suite('Display source code changes in the running application', async () => {
 suite('Validation of debug functionality', async () => {
     test('Open file and activate breakpoint', async () => {
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToJavaFolder, javaFileName);
-        await editor.selectTab(javaFileName);
-        await editor.moveCursorToLineAndChar(javaFileName, 34, 1);
         await editor.activateBreakpoint(javaFileName, 32);
     });
 
@@ -285,7 +287,9 @@ async function runTask(task: string) {
     }
 
     await quickOpenContainer.clickOnContainerItem(task);
+    await quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
 }
+
 // sometimes under high loading the first click can be failed
 async function isureClickOnDebugMenu() {
     try { await topMenu.selectOption('Debug', 'Open Configurations'); } catch (e) {

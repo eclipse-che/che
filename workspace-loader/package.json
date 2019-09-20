@@ -7,7 +7,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "compile": "webpack --config webpack.prod.js",
-    "start": "webpack-dev-server --open --config webpack.dev.js",
+    "start": "webpack-dev-server --open --disable-host-check --config webpack.dev.js",
     "format": "tsfmt -r --useTsfmt tsfmt.json",
     "lint:fix": "tslint -c tslint.json --fix --project .",
     "build": "yarn run format && yarn run compile"
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@eclipse-che/api": "^7.0.0-beta-4.0-80162ea6d2",
-    "lodash": "4.17.11",
+    "lodash": "4.17.15",
     "reconnecting-websocket": "3.2.2"
   },
   "jest": {

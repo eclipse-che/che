@@ -23,6 +23,8 @@ export class CheConfirmDialogController {
   content: string;
   title: string;
 
+  $onInit(): void { }
+
   /**
    * It will hide the dialog box and reject it.
    */

@@ -93,6 +93,10 @@ export class CheHttpBackend {
    * Setup all data that should be retrieved on calls
    */
   setup(): void {
+    this.$httpBackend.when('GET', '/api/oauth/').respond(200, []);
+    this.$httpBackend.when('GET', 'https://api.github.com/user/orgs').respond(200, {});
+    this.$httpBackend.when('GET', 'https://api.github.com/user').respond(200, {});
+
     this.$httpBackend.when('OPTIONS', '/api/').respond({});
     this.$httpBackend.when('GET', '/api/').respond(200, {rootResources: []});
 

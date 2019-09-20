@@ -122,7 +122,6 @@ export class WorkspaceMachinesController {
     this.machines = [];
     this.cheListHelper = cheListHelperFactory.getHelper(MACHINE_LIST_HELPER_ID);
 
-    this.updateData(this.workspaceDetails);
     const action = this.updateData.bind(this);
     workspaceDetailsService.subscribeOnWorkspaceChange(action);
 
@@ -130,6 +129,10 @@ export class WorkspaceMachinesController {
       workspaceDetailsService.unsubscribeOnWorkspaceChange(action);
       cheListHelperFactory.removeHelper(MACHINE_LIST_HELPER_ID);
     });
+  }
+
+  $onInit(): void {
+    this.updateData(this.workspaceDetails);
   }
 
   /**

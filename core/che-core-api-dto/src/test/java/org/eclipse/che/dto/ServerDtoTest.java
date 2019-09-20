@@ -31,6 +31,7 @@ import org.eclipse.che.dto.definitions.DTOHierarchy.GrandchildDto;
 import org.eclipse.che.dto.definitions.DtoWithAny;
 import org.eclipse.che.dto.definitions.DtoWithDelegate;
 import org.eclipse.che.dto.definitions.DtoWithFieldNames;
+import org.eclipse.che.dto.definitions.DtoWithSerializable;
 import org.eclipse.che.dto.definitions.SimpleDto;
 import org.eclipse.che.dto.definitions.model.Model;
 import org.eclipse.che.dto.definitions.model.ModelComponentDto;
@@ -434,5 +435,37 @@ public class ServerDtoTest {
           "interface org.eclipse.che.dto.definitions.DTOHierarchy\\$GrandchildWithoutDto is not a DTO type")
   public void shouldThrowExceptionWhenInterfaceIsNotAnnotatedAsDto() {
     DtoFactory.newDto(DTOHierarchy.GrandchildWithoutDto.class);
+  }
+
+  @Test
+  public void checkDtoDeserializationWithSerializableFields() {
+    final int fooId = 1;
+    final String fooString = "some string";
+    final long fooLong = 1234514362645634611L;
+    final double fooDouble = 1.2345;
+    final double fooRoundingDouble = 6.00;
+
+    JsonObject jsonMap = new JsonObject();
+    jsonMap.add("fooLong", new JsonPrimitive(fooLong));
+    jsonMap.add("fooBoolean", new JsonPrimitive(true));
+    jsonMap.add("fooDouble", new JsonPrimitive(fooDouble));
+    jsonMap.add("fooRoundingDouble", new JsonPrimitive(fooRoundingDouble));
+    jsonMap.add("fooString", new JsonPrimitive(fooString));
+
+    JsonObject json = new JsonObject();
+    json.add("id", new JsonPrimitive(fooId));
+    json.add("object", new JsonPrimitive(fooString));
+    json.add("objectMap", jsonMap);
+
+    DtoWithSerializable dto =
+        dtoFactory.createDtoFromJson(json.toString(), DtoWithSerializable.class);
+
+    assertEquals(dto.getId(), fooId);
+    assertEquals(dto.getObject(), fooString);
+    assertEquals(dto.getObjectMap().get("fooLong"), fooLong);
+    assertEquals(dto.getObjectMap().get("fooBoolean"), true);
+    assertEquals(dto.getObjectMap().get("fooDouble"), fooDouble);
+    assertEquals(dto.getObjectMap().get("fooString"), fooString);
+    assertEquals(dto.getObjectMap().get("fooRoundingDouble"), Math.round(fooRoundingDouble));
   }
 }

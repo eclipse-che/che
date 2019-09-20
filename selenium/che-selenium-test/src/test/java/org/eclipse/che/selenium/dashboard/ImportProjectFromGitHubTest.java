@@ -97,9 +97,10 @@ public class ImportProjectFromGitHubTest {
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
+    newWorkspace.typeWorkspaceName(WORKSPACE);
     // we are selecting 'Java' stack from the 'All Devfile' tab for compatibility with OSIO
     newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
-    newWorkspace.typeWorkspaceName(WORKSPACE);
+    newWorkspace.waitDevfileSelected(Devfile.JAVA_MAVEN);
 
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSourceTab(GITHUB);
