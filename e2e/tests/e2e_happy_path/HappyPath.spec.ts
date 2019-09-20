@@ -330,7 +330,5 @@ async function checkJavaPathCompletion() {
         await editor.type(classPathFilename, classpathText, 1);
         await editor.waitTabWithSavedStatus(classPathFilename);
     }
-
-
 }
 
