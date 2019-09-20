@@ -303,9 +303,9 @@ export class Editor {
     }
 
     async clickOnLineAndChar(line: number, char: number) {
-
         const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
-        const xPosition: number = char +  Editor.ADDITIONAL_SHIFTING_TO_X;
+        const xPosition: number = char + Editor.ADDITIONAL_SHIFTING_TO_X;
+
         new ActionSequence(this.driverHelper.getDriver()).
             mouseMove({ x: xPosition, y: yPosition }).
             click().
@@ -314,6 +314,7 @@ export class Editor {
 
     async goToDefinitionWithMouseClicking(line: number, char: number) {
         const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
+
         new ActionSequence(this.driverHelper.getDriver()).
             keyDown(Key.CONTROL).
             mouseMove({ x: char + Editor.ADDITIONAL_SHIFTING_TO_X, y: yPosition }).
@@ -324,6 +325,7 @@ export class Editor {
 
     async mouseRightButtonClick(line: number, char: number) {
         const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
+
         new ActionSequence(this.driverHelper.getDriver()).
             mouseMove({ x: char + Editor.ADDITIONAL_SHIFTING_TO_X, y: yPosition }).
             click(Button.RIGHT).
