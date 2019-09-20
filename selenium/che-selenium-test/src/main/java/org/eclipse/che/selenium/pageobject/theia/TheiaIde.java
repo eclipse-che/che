@@ -157,6 +157,7 @@ public class TheiaIde {
     } catch (TimeoutException ex) {
       switchToIdeFrame();
       seleniumWebDriverHelper.waitVisibility(theiaIde, PREPARING_WS_TIMEOUT_SEC);
+      waitNotificationPanelClosed();
     }
   }
 

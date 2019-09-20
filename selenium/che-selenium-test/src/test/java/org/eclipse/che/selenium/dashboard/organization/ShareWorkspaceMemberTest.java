@@ -49,7 +49,6 @@ public class ShareWorkspaceMemberTest {
   private static final String ADMIN_PERMISSIONS =
       "read, use, run, configure, setPermissions, delete";
   private static final String MEMBER_PERMISSIONS = "read, use, run, configure";
-  private static final String FILE_CONTENT = generate("", 10);
 
   private String systemAdminName;
   private String memberName;
@@ -78,7 +77,6 @@ public class ShareWorkspaceMemberTest {
     memberName = testUser.getEmail();
 
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
-    createWorkspace(WORKSPACE_NAME);
   }
 
   @AfterClass
@@ -92,6 +90,7 @@ public class ShareWorkspaceMemberTest {
 
   @Test
   public void checkSharingByWorkspaceOwner() {
+    createWorkspace(WORKSPACE_NAME);
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
@@ -142,11 +141,7 @@ public class ShareWorkspaceMemberTest {
     theiaIde.waitTheiaIde();
     theiaIde.waitLoaderInvisibility();
     theiaIde.waitTheiaIdeTopPanel();
-    theiaEditor.waitActiveEditor();
-    theiaEditor.waitEditorTab("Preview README.md");
-    theiaProjectTree.openItem(CONSOLE_JAVA_SIMPLE + "/README.md");
     theiaEditor.waitEditorTab("README.md");
-    theiaEditor.isEditorContains(FILE_CONTENT);
 
     // try to delete the workspace
     dashboard.open();
@@ -185,10 +180,6 @@ public class ShareWorkspaceMemberTest {
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
     theiaProjectTree.expandItem(CONSOLE_JAVA_SIMPLE);
     theiaProjectTree.openItem(CONSOLE_JAVA_SIMPLE + "/README.md");
-
     theiaEditor.waitEditorTab("README.md");
-    theiaEditor.clickOnEditorTab("README.md");
-    theiaEditor.enterText(FILE_CONTENT);
-    theiaEditor.isEditorContains(FILE_CONTENT);
   }
 }
