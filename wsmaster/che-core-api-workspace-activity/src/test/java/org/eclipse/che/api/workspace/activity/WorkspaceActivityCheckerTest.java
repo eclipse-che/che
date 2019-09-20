@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -57,12 +58,21 @@ public class WorkspaceActivityCheckerTest {
   @Mock private EventService eventService;
 
   @BeforeMethod
-  public void setUp() {
+  public void setUp() throws Exception {
     clock = new ManualClock();
 
     WorkspaceActivityManager activityManager =
         new WorkspaceActivityManager(
             workspaceManager, workspaceActivityDao, eventService, DEFAULT_TIMEOUT, clock);
+
+    when(workspaceActivityDao.getAll(anyInt(), anyLong()))
+        .thenAnswer(
+            inv -> {
+              int maxItems = inv.getArgument(0);
+              long skipCount = inv.getArgument(1);
+
+              return new Page<WorkspaceActivity>(emptyList(), skipCount, maxItems, 0);
+            });
 
     checker =
         new WorkspaceActivityChecker(
@@ -227,8 +237,7 @@ public class WorkspaceActivityCheckerTest {
     activity.setWorkspaceId(wsId);
     activity.setStatus(WorkspaceStatus.STARTING);
     activity.setLastStarting(clock.millis());
-    when(workspaceActivityDao.getAll(anyInt(), anyLong()))
-        .thenAnswer(
+    doAnswer(
             inv -> {
               int maxItems = inv.getArgument(0);
               long skipCount = inv.getArgument(1);
@@ -238,7 +247,10 @@ public class WorkspaceActivityCheckerTest {
               } else {
                 return new Page<>(emptyList(), skipCount, maxItems, 1);
               }
-            });
+            })
+        .when(workspaceActivityDao)
+        .getAll(anyInt(), anyLong());
+
     when(workspaceRuntimes.getStatus(eq(wsId))).thenReturn(WorkspaceStatus.STOPPED);
 
     // when
