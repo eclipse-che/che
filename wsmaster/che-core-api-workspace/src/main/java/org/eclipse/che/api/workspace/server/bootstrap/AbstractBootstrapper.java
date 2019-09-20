@@ -28,7 +28,9 @@ import org.eclipse.che.api.workspace.shared.dto.event.BootstrapperStatusEvent;
  * Bootstraps installers.
  *
  * @author Sergii Leshchenko
+ * @deprecated should be removed along with the docker infrastructure
  */
+@Deprecated
 public abstract class AbstractBootstrapper {
 
   private final String machineName;
