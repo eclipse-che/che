@@ -94,7 +94,7 @@ public class WorkspaceActivityChecker {
   }
 
   @ScheduleDelay(
-      initialDelayParameterName = "che.workspace.activity_cleanup_scheduler_period_s",
+      initialDelayParameterName = "che.workspace.activity_cleanup_scheduler_initial_delay_s",
       delayParameterName = "che.workspace.activity_cleanup_scheduler_period_s")
   @VisibleForTesting
   void cleanup() {
