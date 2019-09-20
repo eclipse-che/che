@@ -83,7 +83,7 @@ public class WorkspaceActivityCheckerTest {
   public void shouldStopAllExpiredWorkspaces() throws Exception {
     when(workspaceActivityDao.findExpired(anyLong())).thenReturn(Arrays.asList("1", "2", "3"));
 
-    checker.validate();
+    checker.expire();
 
     verify(workspaceActivityDao, times(3)).removeExpiration(anyString());
     verify(workspaceActivityDao).removeExpiration(eq("1"));
@@ -106,7 +106,7 @@ public class WorkspaceActivityCheckerTest {
 
     // when
     clock.forward(Duration.of(1, ChronoUnit.SECONDS));
-    checker.validate();
+    checker.cleanup();
 
     // then
     ArgumentCaptor<WorkspaceActivity> captor = ArgumentCaptor.forClass(WorkspaceActivity.class);
@@ -137,7 +137,7 @@ public class WorkspaceActivityCheckerTest {
                 .build());
 
     // when
-    checker.validate();
+    checker.cleanup();
 
     // then
     verify(workspaceActivityDao).setCreatedTime(eq(id), eq(15L));
@@ -156,7 +156,7 @@ public class WorkspaceActivityCheckerTest {
 
     // when
     clock.forward(Duration.of(1, ChronoUnit.SECONDS));
-    checker.validate();
+    checker.cleanup();
 
     // then
     verify(workspaceActivityDao, never()).setCreatedTime(eq(id), anyLong());
@@ -183,7 +183,7 @@ public class WorkspaceActivityCheckerTest {
 
     // when
     clock.forward(Duration.of(1, ChronoUnit.SECONDS));
-    checker.validate();
+    checker.cleanup();
 
     // then
     verify(workspaceActivityDao).setCreatedTime(eq(id), eq(15L));
@@ -204,7 +204,7 @@ public class WorkspaceActivityCheckerTest {
 
     // when
     clock.forward(Duration.of(1500, ChronoUnit.MILLIS));
-    checker.validate();
+    checker.cleanup();
 
     // then
     verify(workspaceActivityDao).setExpirationTime(eq(id), eq(lastRunning + DEFAULT_TIMEOUT));
@@ -222,7 +222,7 @@ public class WorkspaceActivityCheckerTest {
 
     // when
     clock.forward(Duration.of(900, ChronoUnit.MILLIS));
-    checker.validate();
+    checker.cleanup();
 
     // then
     verify(workspaceActivityDao, never()).setExpirationTime(anyString(), anyLong());
@@ -254,7 +254,7 @@ public class WorkspaceActivityCheckerTest {
     when(workspaceRuntimes.getStatus(eq(wsId))).thenReturn(WorkspaceStatus.STOPPED);
 
     // when
-    checker.validate();
+    checker.cleanup();
 
     // then
     verify(workspaceActivityDao)
