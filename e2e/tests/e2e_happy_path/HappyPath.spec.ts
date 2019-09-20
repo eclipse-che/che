@@ -298,11 +298,13 @@ async function runTask(task: string) {
     await quickOpenContainer.clickOnContainerItem(task);
     await quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
 }
+
 async function checkCodeNavigationWithContextMenu() {
     await contextMenu.invokeContextMenuOnActiveElementWithKeys();
     await contextMenu.waitContextMenuAndClickOnItem('Go to Definition');
     console.log('Known isuue https://github.com/eclipse/che/issues/14520.');
 }
+
 // sometimes under high loading the first click can be failed
 async function isureClickOnDebugMenu() {
     try { await topMenu.selectOption('Debug', 'Open Configurations'); } catch (e) {
