@@ -12,7 +12,7 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../inversify.types';
 import { error, ActionSequence } from 'selenium-webdriver';
 import 'reflect-metadata';
-import { ThenableWebDriver, By, until, WebElement, Button } from 'selenium-webdriver';
+import { ThenableWebDriver, By, until, WebElement } from 'selenium-webdriver';
 import { TestConstants } from '../TestConstants';
 
 
@@ -439,13 +439,11 @@ export class DriverHelper {
     async waitOpenningSecondWindow(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driver.wait(async () => {
             const handles: string[] = await this.driver.getAllWindowHandles();
-           if (handles.length > 1) {
+            if (handles.length > 1) {
                 return true;
             }
         }, timeout);
     }
-
-
 
     async switchToSecondWindow(mainWindowHandle: string) {
         await this.waitOpenningSecondWindow();
@@ -453,7 +451,5 @@ export class DriverHelper {
         handles.splice(handles.indexOf(mainWindowHandle), 1);
         await this.driver.switchTo().window(handles[0]);
     }
-async performRightClickOnActiveElement() {
-    await this.driver.actions().click(this.driver.switchTo().activeElement(), Button.RIGHT).perform();
-}
+
 }

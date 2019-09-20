@@ -19,8 +19,8 @@ import { Ide } from './Ide';
 @injectable()
 export class Editor {
     private static readonly SUGGESTION_WIDGET_BODY_CSS: string = 'div.visible[widgetId=\'editor.widget.suggestWidget\']';
-    
-    private static readonly ADDITIONAL_SHIFTING_TO_Y:number = 19;
+
+    private static readonly ADDITIONAL_SHIFTING_TO_Y: number = 19;
     private static readonly ADDITIONAL_SHIFTING_TO_X: number = 1;
 
 
@@ -302,31 +302,30 @@ export class Editor {
         return lineYCoordinate;
     }
 
-    async clickOnLineAndChar(line: number, column: number) {
-        
-        const additionalShiftingToX = 1;
+    async clickOnLineAndChar(line: number, char: number) {
+
         const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
-        const xPosition: number = column +  Editor.ADDITIONAL_SHIFTING_TO_X;
+        const xPosition: number = char +  Editor.ADDITIONAL_SHIFTING_TO_X;
         new ActionSequence(this.driverHelper.getDriver()).
             mouseMove({ x: xPosition, y: yPosition }).
             click().
             perform();
     }
 
-    async goToDefinitionWithMouseClicking(line: number, column: number) {
+    async goToDefinitionWithMouseClicking(line: number, char: number) {
         const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
         new ActionSequence(this.driverHelper.getDriver()).
             keyDown(Key.CONTROL).
-            mouseMove({ x: column + Editor.ADDITIONAL_SHIFTING_TO_X, y: yPosition }).
+            mouseMove({ x: char + Editor.ADDITIONAL_SHIFTING_TO_X, y: yPosition }).
             click().
             keyDown(Key.CONTROL).
             perform();
     }
 
-    async mouseContextClickInDefinedPosition(line: number, column: number) {
+    async mouseRightButtonClick(line: number, char: number) {
         const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
         new ActionSequence(this.driverHelper.getDriver()).
-            mouseMove({ x: column + Editor.ADDITIONAL_SHIFTING_TO_X, y: yPosition }).
+            mouseMove({ x: char + Editor.ADDITIONAL_SHIFTING_TO_X, y: yPosition }).
             click(Button.RIGHT).
             perform();
     }
