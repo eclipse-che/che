@@ -160,8 +160,8 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     applyEntrypoints(k8sComponent.getEntrypoints(), componentObjects);
 
     Map<String, MachineConfigImpl> machineConfigs =
-        k8sComponent.getAlias() != null ?
-            prepareMachineConfigs(k8sComponent.getAlias(), podToContainerAndMachineName)
+        k8sComponent.getAlias() != null
+            ? prepareMachineConfigs(k8sComponent.getAlias(), podToContainerAndMachineName)
             : emptyMap();
 
     k8sEnvProvisioner.provision(workspaceConfig, environmentType, componentObjects, machineConfigs);
@@ -224,7 +224,10 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     Map<String, Map<String, String>> podToContainerAndMachineName = new HashMap<>();
     for (PodData podData : podsData) {
       Map<String, String> containersToMachineNames =
-          podData.getSpec().getContainers().stream()
+          podData
+              .getSpec()
+              .getContainers()
+              .stream()
               .collect(toMap(Container::getName, c -> machineName(podData, c)));
       podToContainerAndMachineName.put(podData.getMetadata().getName(), containersToMachineNames);
     }

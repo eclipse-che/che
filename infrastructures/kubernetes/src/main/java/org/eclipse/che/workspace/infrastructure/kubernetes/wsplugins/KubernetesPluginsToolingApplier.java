@@ -226,6 +226,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .setProjectsRootPathEnvVar(projectsRootEnvVariableProvider.get(runtimeIdentity))
             .setPluginPublisher(chePlugin.getPublisher())
             .setPluginName(chePlugin.getName())
+            .setPluginId(chePlugin.getId())
             .build();
 
     InternalMachineConfig machineConfig = machineResolver.resolve();
