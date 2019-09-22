@@ -4578,10 +4578,10 @@ data:
           },
           "id": 62,
           "legend": {
-            "avg": false,
+            "avg": true,
             "current": true,
-            "max": false,
-            "min": false,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
             "values": true
@@ -4607,7 +4607,7 @@ data:
               "expr": "rate(che_workspace_start_time_seconds_bucket{le=\"62.992853672\",result=\"success\"}[1h]) / ignoring(le) rate(che_workspace_start_time_seconds_count{result=\"success\"}[1h])",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "failure",
+              "legendFormat": "workspace start ratio",
               "refId": "A"
             }
           ],
@@ -4634,7 +4634,7 @@ data:
               "format": "percentunit",
               "label": null,
               "logBase": 1,
-              "max": null,
+              "max": "1",
               "min": "0",
               "show": true
             },
@@ -4642,7 +4642,7 @@ data:
               "format": "percentunit",
               "label": null,
               "logBase": 1,
-              "max": null,
+              "max": "1",
               "min": "0",
               "show": true
             }
@@ -6719,10 +6719,6 @@ data:
       "templating": {
         "list": [
           {
-            "current": {
-              "text": "che",
-              "value": "che"
-            },
             "hide": 0,
             "includeAll": false,
             "label": null,
