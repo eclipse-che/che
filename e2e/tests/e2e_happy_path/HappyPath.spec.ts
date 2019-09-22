@@ -88,6 +88,7 @@ suite('Validation of workspace start', async () => {
     });
 
 });
+
 suite('Language server validation', async () => {
     test('Java LS initialization', async () => {
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToJavaFolder, javaFileName);
@@ -121,11 +122,12 @@ suite('Language server validation', async () => {
 
     test('Codenavigation', async () => {
         await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
-        // workaround for issue: https://github.com/eclipse/che/issues/14520
         try {
             await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
             await editor.waitEditorAvailable(codeNavigationClassName);
-        } catch (err) {
+        }
+        // workaround for issue: https://github.com/eclipse/che/issues/14520
+        catch (err) {
             if (err instanceof error.TimeoutError) {
                 checkCodeNavigationWithContextMenu();
             }
@@ -174,7 +176,7 @@ suite('Validation of workspace build and run', async () => {
 });
 
 suite('Display source code changes in the running application', async () => {
-    test('Change source code', async () => {
+        test('Change source code', async () => {
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToChangedJavaFileFolder, changedJavaFileName);
         await editor.waitEditorAvailable(changedJavaFileName);
         await editor.clickOnTab(changedJavaFileName);

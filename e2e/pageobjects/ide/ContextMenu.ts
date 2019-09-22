@@ -19,11 +19,11 @@ export class ContextMenu {
           await this.driverHelper.getAction().click(webElement, Button.RIGHT).perform();
           this.waitContextMenu(timeout);
      }
+
      async invokeContextMenuOnActiveElementWithKeys(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
           this.driverHelper.getDriver().switchTo().activeElement().sendKeys(Key.SHIFT + Key.F10);
           this.waitContextMenu(timeout);
      }
-
 
      async waitContextMenuAndClickOnItem(nameOfItem: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
           const itemLocator: string = `//div[@class='p-Menu-itemLabel' and text()='${nameOfItem}']`;
@@ -34,6 +34,5 @@ export class ContextMenu {
      async waitContextMenu(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
           await this.driverHelper.waitVisibility(By.css(ContextMenu.SUGGESTION_WIDGET_BODY_CSS), timeout);
      }
-
 
 }

@@ -55,6 +55,7 @@ export class ChromeDriver implements IDriver {
         if (TestConstants.TS_SELENIUM_REMOTE_DRIVER_URL) {
             builder = builder.usingServer(TestConstants.TS_SELENIUM_REMOTE_DRIVER_URL);
         }
+       
         return builder;
 
     }
