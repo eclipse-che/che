@@ -187,6 +187,10 @@ angular.element(document).ready(() => {
   });
 });
 
+initModule.config(['$locationProvider', $locationProvider => {
+  $locationProvider.hashPrefix('');
+}]);
+
 // add a global resolve flag on all routes (user needs to be resolved first)
 initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
   $routeProvider.accessWhen = (path: string, route: che.route.IRoute) => {

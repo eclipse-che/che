@@ -73,6 +73,10 @@ export class ListTeamMembersController {
    */
   private $q: ng.IQService;
   /**
+   * Team details service.
+   */
+  private teamDetailsService: TeamDetailsService;
+  /**
    * Lodash library.
    */
   private lodash: any;
@@ -129,6 +133,7 @@ export class ListTeamMembersController {
     this.lodash = lodash;
     this.cheNotification = cheNotification;
     this.confirmDialogService = confirmDialogService;
+    this.teamDetailsService = teamDetailsService;
 
     this.members = [];
     this.isLoading = true;
@@ -139,9 +144,11 @@ export class ListTeamMembersController {
     $scope.$on('$destroy', () => {
       cheListHelperFactory.removeHelper(helperId);
     });
+  }
 
-    this.owner = teamDetailsService.getOwner();
-    this.team  = teamDetailsService.getTeam();
+  $onInit(): void {
+    this.owner = this.teamDetailsService.getOwner();
+    this.team  = this.teamDetailsService.getTeam();
 
     this.refreshData(true, true);
   }

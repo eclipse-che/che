@@ -109,9 +109,12 @@ export class EditMachineDialogController {
     // update memory limit
     this.environmentManager.setMemoryLimit(this.machine, this.machineRAM);
     this.originMachine = angular.copy(this.machine);
-    if (!this.updateMachineRAM()) {
-      this.stringifyMachineRecipe();
-    }
+    this.updateMachineRAM();
+  }
+
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   /**

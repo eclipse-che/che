@@ -52,7 +52,6 @@ export class EnvVariablesController {
     this.$mdDialog = $mdDialog;
     this.confirmDialogService = confirmDialogService;
 
-    this.buildVariablesList(this.selectedMachine);
     const deRegistrationFn = $scope.$watch(() => {
       return this.selectedMachine;
     }, (selectedMachine: IEnvironmentManagerMachine) => {
@@ -62,6 +61,10 @@ export class EnvVariablesController {
     $scope.$on('$destroy', () => {
       deRegistrationFn();
     });
+  }
+
+  $onInit(): void {
+    this.buildVariablesList(this.selectedMachine);
   }
 
   /**

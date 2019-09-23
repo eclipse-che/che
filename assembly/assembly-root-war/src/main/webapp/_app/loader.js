@@ -278,10 +278,8 @@ class Loader {
      * @param {string} token
      */
     asyncAuthenticate(redirectUrl, token) {
-        const re = new RegExp(/(https?:\/\/[^\/]+?)(?:$|\/).*/),
-            //                  \    /     \     /
-            //                  scheme    host:port
-            url = redirectUrl.replace(re, "$1" + "/jwt/auth");
+        redirectUrl = new URL(redirectUrl);
+        const url = redirectUrl.origin + redirectUrl.pathname.replace("//", "/") + "jwt/auth";
         return new Promise((resolve, reject) => {
             const request = new XMLHttpRequest();
             request.open('GET', url);
@@ -293,7 +291,7 @@ class Loader {
                     return;
                 }
                 if (request.status !== 204) {
-                    const errorMessage = 'Failed to authenticate: "' + this.getRequestErrorMessage(xhr) + '"';
+                    const errorMessage = 'Failed to authenticate: "' + this.getRequestErrorMessage(request) + '"';
                     reject(new Error(errorMessage));
                     return;
                 }

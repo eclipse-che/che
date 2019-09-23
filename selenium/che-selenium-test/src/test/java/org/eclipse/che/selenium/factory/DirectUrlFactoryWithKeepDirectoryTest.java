@@ -71,7 +71,6 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
     theiaIde.switchToIdeFrame();
     theiaIde.waitTheiaIde();
     theiaIde.waitLoaderInvisibility();
-    theiaIde.waitNotificationEqualsTo("Che Workspace: Finished cloning projects.");
     theiaIde.waitNotificationDisappearance(
         "Che Workspace: Finished cloning projects.", UPDATING_PROJECT_TIMEOUT_SEC);
 

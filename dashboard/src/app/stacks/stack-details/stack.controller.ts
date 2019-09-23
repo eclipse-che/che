@@ -40,4 +40,10 @@ export class StackController {
     this.devfileYaml = jsyaml.dump(initData.devfileContent, {'indent': 1});
     this.devfileName = initData.devfileContent.metadata.name;
   }
+
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
 }

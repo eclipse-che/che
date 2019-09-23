@@ -206,6 +206,27 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   }
 
   @Override
+  @Transactional(rollbackOn = ServerException.class)
+  public Page<WorkspaceActivity> getAll(int maxItems, long skipCount) throws ServerException {
+    try {
+      EntityManager em = managerProvider.get();
+      long total =
+          em.createNamedQuery("WorkspaceActivity.getAllCount", Long.class).getSingleResult();
+
+      List<WorkspaceActivity> page =
+          em.createNamedQuery("WorkspaceActivity.getAll", WorkspaceActivity.class)
+              .setFirstResult((int) skipCount)
+              .setMaxResults(maxItems)
+              .getResultStream()
+              .collect(Collectors.toList());
+
+      return new Page<>(page, skipCount, maxItems, total);
+    } catch (RuntimeException e) {
+      throw new ServerException(e.getLocalizedMessage(), e);
+    }
+  }
+
+  @Override
   @Transactional(rollbackOn = {ConflictException.class, ServerException.class})
   public void createActivity(WorkspaceActivity activity) throws ConflictException, ServerException {
     try {

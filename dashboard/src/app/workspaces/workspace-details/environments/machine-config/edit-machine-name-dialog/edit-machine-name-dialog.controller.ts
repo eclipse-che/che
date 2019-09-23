@@ -39,6 +39,11 @@ export class EditMachineNameDialogController {
     this.machineNamesLowercase = this.machineNames.map((name: string) => name.toLowerCase());
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   isUnique(name: string): boolean {
     return this.machineNamesLowercase.indexOf(name.toLowerCase()) < 0;
   }

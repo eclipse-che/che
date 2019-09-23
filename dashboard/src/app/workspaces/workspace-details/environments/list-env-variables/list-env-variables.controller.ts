@@ -54,7 +54,9 @@ export class ListEnvVariablesController {
     this.$mdDialog = $mdDialog;
     this.lodash = lodash;
     this.confirmDialogService = confirmDialogService;
+  }
 
+  $onInit(): void {
     this.buildVariablesList();
   }
 

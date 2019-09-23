@@ -38,8 +38,9 @@ public class ConfirmDialog {
     String DIALOG_CLOSE_BUTTON_XPATH = "//che-popup//div[contains(@class, 'che-popup-header')]//i";
     String DIALOG_MESSAGE_XPATH =
         "//che-popup//div[contains(@class, 'che-confirm-dialog-notification')]/div";
-    String DIALOG_CANCEL_BUTTON = "//che-popup//che-button-notice//span";
-    String DIALOG_CONFIRM_BUTTON = "//che-popup//che-button-primary//span";
+    String DIALOG_CANCEL_BUTTON =
+        "//*[@id='cancel-dialog-button']/*[contains(@class, 'che-button')]";
+    String DIALOG_CONFIRM_BUTTON = "//*[@id='ok-dialog-button']/*[contains(@class, 'che-button')]";
   }
 
   @FindBy(xpath = Locators.DIALOG_XPATH)

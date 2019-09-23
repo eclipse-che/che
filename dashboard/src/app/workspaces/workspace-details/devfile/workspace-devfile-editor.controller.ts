@@ -65,8 +65,9 @@ export class WorkspaceDevfileEditorController {
       const validateOnly = true;
       this.onChange(validateOnly);
     }, true);
-
   }
+
+  $onInit(): void { }
 
   /**
    * Callback when editor content is changed.

@@ -85,6 +85,11 @@ export class LoadFactoryController {
     this.getFactoryData();
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Hides menu and footer to maximize view.
    */
@@ -231,21 +236,26 @@ export class LoadFactoryController {
    * Detect workspace to start: create new one or get created one.
    */
   getWorkspaceToStart(): void {
-    let createPolicy = (this.factory.policies) ? this.factory.policies.create : 'perClick';
+    const createPolicy = this.factory.policies ? this.factory.policies.create : this.routeParams['policies.create'] || 'perClick';
     let workspace = null;
-    switch (createPolicy) {
-      case 'perUser' :
+    switch (createPolicy.toLowerCase()) {
+      case 'peruser' :
         workspace = this.lodash.find(this.workspaces, (w: che.IWorkspace) => {
-          return this.factory.id === (w.attributes as any).factoryId;
+          if (this.factory.id) {
+            return this.factory.id === (w.attributes as any).factoryId;
+          } else if (this.routeParams.url){
+            return this.routeParams.url === (w.attributes as any).factoryurl;
+          }
+          return false;
         });
         break;
-      case 'perAccount' :
+      case 'peraccount' :
         // TODO when account is ready
         workspace = this.lodash.find(this.workspaces, (w: che.IWorkspace) => {
           return this.factory.workspace.name === w.config.name;
         });
         break;
-      case 'perClick' :
+      case 'perclick' :
         break;
     }
 
@@ -276,35 +286,27 @@ export class LoadFactoryController {
    * Create workspace from factory config.
    */
   createWorkspace(): any {
+    let creationPromise: ng.IPromise<any>;
     if (this.factory.workspace) {
       let config = this.factory.workspace;
       // set factory attribute:
       let attrs = {factoryId: this.factory.id};
       config.name = this.getWorkspaceName(config.name);
 
-      // TODO: fix account when ready:
-      let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, config, attrs);
-      creationPromise.then((data: any) => {
-        this.$timeout(() => {
-          this.startWorkspace(data);
-        }, 1000);
-      }, (error: any) => {
-        this.handleError(error);
-      });
+      creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, config, attrs);
     } else if (this.factory.devfile) {
       let devfile = this.factory.devfile;
-      // set factory attribute:
-      let attrs = {factoryId: this.factory.id};
-
-      let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromDevfile(null, devfile, attrs);
-      creationPromise.then((data: any) => {
-        this.$timeout(() => {
-          this.startWorkspace(data);
-        }, 1000);
-      }, (error: any) => {
-        this.handleError(error);
-      });
+      // set devfile attribute:
+      let attrs = {factoryurl: this.routeParams.url};
+      creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromDevfile(null, devfile, attrs);
     }
+    creationPromise.then((data: any) => {
+      this.$timeout(() => {
+        this.startWorkspace(data);
+      }, 1000);
+    }, (error: any) => {
+      this.handleError(error);
+    });
   }
 
   /**

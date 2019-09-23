@@ -34,7 +34,8 @@
       <edit-project project-names="projectSourceSelectorController.getProjectTemplateNames()"
                     project-template="projectSourceSelectorController.selectedProjectTemplate"
                     project-on-edit="projectSourceSelectorController.projectTemplateOnEdit(template)"
-                    project-on-remove="projectSourceSelectorController.projectTemplateOnRemove()"></edit-project>
+                    project-on-remove="projectSourceSelectorController.projectTemplateOnRemove()"
+                    is-project-name-unique="projectSourceSelectorController.isProjectNameUnique({name: name})"></edit-project>
     </div>
   </div>
 

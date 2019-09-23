@@ -12,12 +12,14 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
@@ -33,11 +35,17 @@ import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.user.server.PreferenceManager;
+import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 @Singleton
@@ -54,51 +62,107 @@ public class GitUserProfileProvisioner implements ConfigurationProvisioner<Kuber
   private static final String CONFIG_MAP_VOLUME_NAME = "gitconfigvolume";
 
   private PreferenceManager preferenceManager;
+  private UserManager userManager;
 
   @Inject
-  public GitUserProfileProvisioner(PreferenceManager preferenceManager) {
+  public GitUserProfileProvisioner(PreferenceManager preferenceManager, UserManager userManager) {
     this.preferenceManager = preferenceManager;
+    this.userManager = userManager;
   }
 
   @Override
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-    getPreferenceValue(PREFERENCES_KEY_FILTER)
-        .ifPresent(
-            preferenceJsonValue -> {
-              Map<String, String> theiaPreferences = getMapFromJsonObject(preferenceJsonValue);
 
-              getGlobalGitConfigFileContent(
-                      theiaPreferences.get(GIT_USER_NAME_PROPERTY),
-                      theiaPreferences.get(GIT_USER_EMAIL_PROPERTY))
-                  .ifPresent(
-                      gitConfigFileContent -> {
-                        String gitConfigMapName =
-                            identity.getWorkspaceId() + GIT_CONFIG_MAP_NAME_SUFFIX;
-
-                        doProvisionGlobalGitConfig(gitConfigMapName, gitConfigFileContent, k8sEnv);
-                      });
-            });
-  }
-
-  private Map<String, String> getMapFromJsonObject(String json) {
-    Type stringMapType = new TypeToken<Map<String, String>>() {}.getType();
-
-    return new Gson().fromJson(json, stringMapType);
-  }
-
-  private Optional<String> getPreferenceValue(String keyFilter) throws InfrastructureException {
     try {
-      String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
-      Map<String, String> preferencesMap = preferenceManager.find(userId, keyFilter);
+      Pair<String, String> userAndEmail = getUserFromPreferences();
 
-      return ofNullable(preferencesMap.get(keyFilter));
-    } catch (ServerException e) {
-      throw new InfrastructureException(e);
+      if (userAndEmail == null) {
+        userAndEmail = getUserFromUserManager();
+      }
+
+      prepareAndProvisionGitConfiguration(
+          userAndEmail.first, userAndEmail.second, k8sEnv, identity);
+    } catch (ServerException | NotFoundException e) {
+      reportWarning(
+          k8sEnv,
+          Warnings.EXCEPTION_IN_USER_MANAGEMENT_DURING_GIT_PROVISION_WARNING_CODE,
+          format(
+              Warnings.EXCEPTION_IN_USER_MANAGEMENT_DURING_GIT_PROVISION_MESSAGE_FMT,
+              e.getMessage()));
+    } catch (JsonSyntaxException e) {
+      reportWarning(
+          k8sEnv,
+          Warnings.JSON_IS_NOT_A_VALID_REPRESENTATION_FOR_AN_OBJECT_OF_TYPE_WARNING_CODE,
+          format(
+              Warnings.JSON_IS_NOT_A_VALID_REPRESENTATION_FOR_AN_OBJECT_OF_TYPE_MESSAGE_FMT,
+              e.getMessage()));
     }
   }
 
-  private Optional<String> getGlobalGitConfigFileContent(String userName, String userEmail) {
+  private void reportWarning(KubernetesEnvironment k8sEnv, int code, String message) {
+    k8sEnv.getWarnings().add(new WarningImpl(code, message));
+  }
+
+  private Pair<String, String> getUserFromPreferences()
+      throws ServerException, JsonSyntaxException {
+    String preferenceJson = getPreferenceJson(PREFERENCES_KEY_FILTER);
+    Map<String, Object> preferences = getMapFromJsonObject(preferenceJson);
+
+    String name = getStringValueOrNull(preferences, GIT_USER_NAME_PROPERTY);
+    String email = getStringValueOrNull(preferences, GIT_USER_EMAIL_PROPERTY);
+
+    return isNullOrEmpty(name) && isNullOrEmpty(email) ? null : Pair.of(name, email);
+  }
+
+  private Pair<String, String> getUserFromUserManager() throws NotFoundException, ServerException {
+    String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
+    User user = userManager.getById(userId);
+
+    return Pair.of(user.getName(), user.getEmail());
+  }
+
+  private void prepareAndProvisionGitConfiguration(
+      String name, String email, KubernetesEnvironment k8sEnv, RuntimeIdentity identity) {
+    prepareGitConfigurationContent(name, email)
+        .ifPresent(
+            content -> {
+              String configMapName = identity.getWorkspaceId() + GIT_CONFIG_MAP_NAME_SUFFIX;
+
+              doProvisionGitConfiguration(configMapName, content, k8sEnv);
+            });
+  }
+
+  private String getStringValueOrNull(Map<String, Object> map, String key) {
+    Object value = map.get(key);
+
+    return value instanceof String ? (String) value : null;
+  }
+
+  private Map<String, Object> getMapFromJsonObject(String json) throws JsonSyntaxException {
+    if (isNullOrEmpty(json)) {
+      return emptyMap();
+    }
+
+    Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
+
+    /*
+    The main idea to implicit cast map from string:object to string:string is that,
+    we're looking for a two specific properties in the end, that have 100% string values,
+    so we don't care about what we have in other properties.
+    */
+
+    return new Gson().fromJson(json, typeToken);
+  }
+
+  private String getPreferenceJson(String keyFilter) throws ServerException {
+    String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
+    Map<String, String> preferencesMap = preferenceManager.find(userId, keyFilter);
+
+    return preferencesMap.get(keyFilter);
+  }
+
+  private Optional<String> prepareGitConfigurationContent(String userName, String userEmail) {
     if (isNullOrEmpty(userName) && isNullOrEmpty(userEmail)) {
       return empty();
     }
@@ -117,7 +181,7 @@ public class GitUserProfileProvisioner implements ConfigurationProvisioner<Kuber
     return of(config.toString());
   }
 
-  private void doProvisionGlobalGitConfig(
+  private void doProvisionGitConfiguration(
       String gitConfigMapName, String gitConfig, KubernetesEnvironment k8sEnv) {
     Map<String, String> gitConfigData = singletonMap(GIT_CONFIG, gitConfig);
     ConfigMap configMap =

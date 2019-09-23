@@ -55,6 +55,8 @@ export class TeamItemController {
     this.cheNotification = cheNotification;
   }
 
+  $onInit(): void { }
+
   /**
    * Redirect to team details.
    */

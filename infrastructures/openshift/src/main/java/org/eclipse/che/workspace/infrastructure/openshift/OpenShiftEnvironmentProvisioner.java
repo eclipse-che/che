@@ -21,6 +21,7 @@ import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitUserProfileProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
@@ -68,6 +69,7 @@ public class OpenShiftEnvironmentProvisioner
   private final ServiceAccountProvisioner serviceAccountProvisioner;
   private final CertificateProvisioner certificateProvisioner;
   private final VcsSshKeysProvisioner vcsSshKeysProvisioner;
+  private final GitUserProfileProvisioner gitUserProfileProvisioner;
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
@@ -86,7 +88,8 @@ public class OpenShiftEnvironmentProvisioner
       ProxySettingsProvisioner proxySettingsProvisioner,
       ServiceAccountProvisioner serviceAccountProvisioner,
       CertificateProvisioner certificateProvisioner,
-      VcsSshKeysProvisioner vcsSshKeysProvisioner) {
+      VcsSshKeysProvisioner vcsSshKeysProvisioner,
+      GitUserProfileProvisioner gitUserProfileProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -103,6 +106,7 @@ public class OpenShiftEnvironmentProvisioner
     this.serviceAccountProvisioner = serviceAccountProvisioner;
     this.certificateProvisioner = certificateProvisioner;
     this.vcsSshKeysProvisioner = vcsSshKeysProvisioner;
+    this.gitUserProfileProvisioner = gitUserProfileProvisioner;
   }
 
   @Override
@@ -138,6 +142,7 @@ public class OpenShiftEnvironmentProvisioner
     serviceAccountProvisioner.provision(osEnv, identity);
     certificateProvisioner.provision(osEnv, identity);
     vcsSshKeysProvisioner.provision(osEnv, identity);
+    gitUserProfileProvisioner.provision(osEnv, identity);
     LOG.debug(
         "Provisioning OpenShift environment done for workspace '{}'", identity.getWorkspaceId());
   }

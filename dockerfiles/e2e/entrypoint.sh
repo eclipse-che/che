@@ -7,6 +7,11 @@ if [ -z "$TS_SELENIUM_BASE_URL" ]; then
     exit 1
 fi
 
+# Set testing suite
+if [ -z "$TEST_SUITE" ]; then
+    TEST_SUITE=test-happy-path
+fi
+
 # Launch selenium server
 /usr/bin/supervisord --configuration /etc/supervisord.conf & \
 export TS_SELENIUM_REMOTE_DRIVER_URL=http://localhost:4444/wd/hub
@@ -42,5 +47,6 @@ else
 	cd /tmp/e2e || exit
 fi
 
+
 # Launch tests
-npm run test-happy-path
+npm run $TEST_SUITE

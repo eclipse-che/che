@@ -205,6 +205,11 @@ public class KubernetesNamespace {
           .done();
       waitDefaultServiceAccount(namespaceName, client);
     } catch (KubernetesClientException e) {
+      if (e.getCode() == 403) {
+        LOG.error(
+            "Unable to create new Kubernetes project due to lack of permissions."
+                + "When using workspace namespace placeholders, service account with lenient permissions (cluster-admin) must be used.");
+      }
       throw new KubernetesInfrastructureException(e);
     }
   }
