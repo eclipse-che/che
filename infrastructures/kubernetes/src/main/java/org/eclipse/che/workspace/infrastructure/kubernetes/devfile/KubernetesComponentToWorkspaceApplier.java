@@ -204,6 +204,10 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     }
   }
 
+  /**
+   * Creates map of machine names and corresponding {@link MachineConfigImpl} with component alias
+   * attribute set.
+   */
   private Map<String, MachineConfigImpl> prepareMachineConfigs(
       String componentAlias, Map<String, Map<String, String>> machineNamesData) {
     Map<String, MachineConfigImpl> configsMap = new HashMap<>();
@@ -220,6 +224,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     return configsMap;
   }
 
+  /** Estimates the name of machine for each container in the given list of pods. */
   private Map<String, Map<String, String>> estimateMachineNames(List<PodData> podsData) {
     Map<String, Map<String, String>> podToContainerAndMachineName = new HashMap<>();
     for (PodData podData : podsData) {

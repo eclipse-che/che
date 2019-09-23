@@ -47,6 +47,7 @@ public class MachineResolverTest {
 
   private static final String DEFAULT_MEM_LIMIT = "100001";
   private static final String PLUGIN_NAME = "testplugin";
+  private static final String PLUGIN_ID = "testpluginId";
   private static final String PLUGIN_PUBLISHER = "testpublisher";
   private static final String PLUGIN_PUBLISHER_NAME = PLUGIN_PUBLISHER + "/" + PLUGIN_NAME;
   private static final String PROJECTS_ENV_VAR = "env_with_with_location_of_projects";
@@ -68,6 +69,7 @@ public class MachineResolverTest {
         new MachineResolver(
             PLUGIN_PUBLISHER,
             PLUGIN_NAME,
+            PLUGIN_ID,
             new Pair<>(PROJECTS_ENV_VAR, PROJECTS_MOUNT_PATH),
             container,
             cheContainer,

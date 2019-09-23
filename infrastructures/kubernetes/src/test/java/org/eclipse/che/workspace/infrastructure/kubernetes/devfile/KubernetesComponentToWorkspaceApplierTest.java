@@ -17,6 +17,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
@@ -45,6 +46,7 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
@@ -255,6 +257,38 @@ public class KubernetesComponentToWorkspaceApplierTest {
         }
       }
     }
+  }
+
+  @Test
+  public void shouldProvisionMachinesMapWithComponentAttributePreSet() throws Exception {
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<Map<String, MachineConfigImpl>> mapCaptor = ArgumentCaptor.forClass(Map.class);
+    // given
+    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
+    List<HasMetadata> k8sList = toK8SList(yamlRecipeContent).getItems();
+    doReturn(k8sList).when(k8sRecipeParser).parse(anyString());
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setAlias(COMPONENT_NAME);
+    component.setMountSources(true);
+
+    // when
+    applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
+
+    // then
+    verify(k8sEnvProvisioner).provision(any(), any(), any(), mapCaptor.capture());
+    Map<String, MachineConfigImpl> machines = mapCaptor.getValue();
+    assertTrue(
+        machines
+            .values()
+            .stream()
+            .allMatch(
+                config ->
+                    config
+                        .getAttributes()
+                        .get(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE)
+                        .equals(component.getAlias())));
   }
 
   @Test
