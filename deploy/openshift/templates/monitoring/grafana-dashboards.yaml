@@ -6393,7 +6393,7 @@ data:
             "x": 0,
             "y": 73
           },
-          "id": 58,
+          "id": 57,
           "legend": {
             "alignAsTable": false,
             "avg": false,
@@ -6421,12 +6421,12 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WorkspaceRuntimes#stopAsync\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WorkspaceRuntimes#stopAsync\"}[1h])",
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"WorkspaceRuntimes#stopAsync\"}",
               "legendFormat": "{{operation}}",
               "refId": "A"
             },
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#internalStop\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#internalStop\"}[1h])",
+              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#internalStop\"}",
               "legendFormat": "{{operation}}",
               "refId": "B"
             }
@@ -6435,7 +6435,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Workspace Stop Avg",
+          "title": "Workspace Stop Max",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -6486,7 +6486,7 @@ data:
             "x": 12,
             "y": 73
           },
-          "id": 57,
+          "id": 58,
           "legend": {
             "alignAsTable": false,
             "avg": false,
@@ -6514,12 +6514,12 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"WorkspaceRuntimes#stopAsync\"}",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WorkspaceRuntimes#stopAsync\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WorkspaceRuntimes#stopAsync\"}[1h])",
               "legendFormat": "{{operation}}",
               "refId": "A"
             },
             {
-              "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#internalStop\"}",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#internalStop\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#internalStop\"}[1h])",
               "legendFormat": "{{operation}}",
               "refId": "B"
             }
@@ -6528,7 +6528,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Workspace Stop Max",
+          "title": "Workspace Stop Avg",
           "tooltip": {
             "shared": true,
             "sort": 0,
