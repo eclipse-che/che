@@ -46,7 +46,6 @@ import org.eclipse.che.api.workspace.server.WorkspaceLockService;
 import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.devfile.DevfileModule;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
-import org.eclipse.che.api.workspace.server.spi.provision.InstallerConfigProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.MachineNameProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
@@ -155,7 +154,6 @@ public class WsMasterModule extends AbstractModule {
 
     Multibinder<InternalEnvironmentProvisioner> internalEnvironmentProvisioners =
         Multibinder.newSetBinder(binder(), InternalEnvironmentProvisioner.class);
-    internalEnvironmentProvisioners.addBinding().to(InstallerConfigProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(EnvVarEnvironmentProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(MachineNameProvisioner.class);
 
