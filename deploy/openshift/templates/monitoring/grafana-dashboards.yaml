@@ -3625,7 +3625,7 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 1,
-      "iteration": 1568816245781,
+      "iteration": 1569245375340,
       "links": [],
       "panels": [
         {
@@ -4785,13 +4785,13 @@ data:
           },
           "id": 66,
           "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -4871,13 +4871,13 @@ data:
           },
           "id": 68,
           "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -4957,13 +4957,13 @@ data:
           },
           "id": 70,
           "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -5044,13 +5044,13 @@ data:
           },
           "id": 72,
           "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -5130,13 +5130,13 @@ data:
           },
           "id": 74,
           "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -5216,13 +5216,13 @@ data:
           },
           "id": 76,
           "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -6593,7 +6593,7 @@ data:
                 "h": 12,
                 "w": 12,
                 "x": 0,
-                "y": 68
+                "y": 81
               },
               "heatmap": {},
               "hideZeroBuckets": false,
@@ -6659,7 +6659,7 @@ data:
                 "h": 12,
                 "w": 12,
                 "x": 12,
-                "y": 68
+                "y": 81
               },
               "heatmap": {},
               "hideZeroBuckets": false,
