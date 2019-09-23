@@ -22,13 +22,11 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.mockito.testng.MockitoTestNGListener;
@@ -222,12 +220,6 @@ public class MachineConfigsValidatorTest {
     InternalMachineConfig machineConfig = machineMock();
     when(machineConfig.getServers()).thenReturn(createServers(servers));
     return machineConfig;
-  }
-
-  private static List<InstallerImpl> createInstallers(String... installers) {
-    return Arrays.stream(installers)
-        .map(s -> new InstallerImpl().withId(s))
-        .collect(Collectors.toList());
   }
 
   private static Map<String, ServerConfig> createServers(String... servers) {
