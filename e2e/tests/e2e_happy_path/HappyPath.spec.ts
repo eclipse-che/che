@@ -89,7 +89,7 @@ suite('Validation of workspace start', async () => {
 
 });
 
-suite('Language server validation', async () => {
+suite.skip('Language server validation', async () => {
     test('Java LS initialization', async () => {
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToJavaFolder, javaFileName);
         await editor.selectTab(javaFileName);
@@ -125,9 +125,7 @@ suite('Language server validation', async () => {
         try {
             await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
             await editor.waitEditorAvailable(codeNavigationClassName);
-        }
-        // workaround for issue: https://github.com/eclipse/che/issues/14520
-        catch (err) {
+        } catch (err) {
             if (err instanceof error.TimeoutError) {
                 checkCodeNavigationWithContextMenu();
             }
@@ -145,7 +143,7 @@ suite('Language server validation', async () => {
     });
 });
 
-suite('Validation of workspace build and run', async () => {
+suite.skip('Validation of workspace build and run', async () => {
     test('Build application', async () => {
         await runTask('che: build-file-output');
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'build-output.txt');
@@ -175,8 +173,8 @@ suite('Validation of workspace build and run', async () => {
     });
 });
 
-suite('Display source code changes in the running application', async () => {
-        test('Change source code', async () => {
+suite.skip('Display source code changes in the running application', async () => {
+    test('Change source code', async () => {
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToChangedJavaFileFolder, changedJavaFileName);
         await editor.waitEditorAvailable(changedJavaFileName);
         await editor.clickOnTab(changedJavaFileName);
@@ -219,7 +217,7 @@ suite('Display source code changes in the running application', async () => {
     });
 });
 
-suite('Validation of debug functionality', async () => {
+suite.skip('Validation of debug functionality', async () => {
     test('Open file and activate breakpoint', async () => {
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToJavaFolder, javaFileName);
         await editor.activateBreakpoint(javaFileName, 32);
