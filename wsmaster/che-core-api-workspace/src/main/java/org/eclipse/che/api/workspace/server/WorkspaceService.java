@@ -970,9 +970,10 @@ public class WorkspaceService extends Service {
                             .getMachines()
                             .get(machine)
                             .getServers()
-                            .get("8080/tcp")  // TODO: what server to get?
+                            .get("8080/tcp") // TODO: what server to get?
                             .getUrl()
-                        + previewUrl; // TODO: url will probably end with `/`. ensure to write port correctly
+                        + previewUrl; // TODO: url will probably end with `/`. ensure to write port
+                // correctly
 
                 c.getAttributes().put("previewUrl", previewUrl);
               });

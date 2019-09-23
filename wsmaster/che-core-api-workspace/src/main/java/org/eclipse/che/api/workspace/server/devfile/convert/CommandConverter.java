@@ -101,7 +101,10 @@ public class CommandConverter {
           .getAttributes()
           .put(
               "previewUrl",
-              ":" + devCommand.getPreviewUrl().getPort() + "/" + devCommand.getPreviewUrl().getPath()); // TODO: handle null port or path
+              ":"
+                  + devCommand.getPreviewUrl().getPort()
+                  + "/"
+                  + devCommand.getPreviewUrl().getPath()); // TODO: handle null port or path
     }
 
     if (commandAction.getWorkdir() != null) {
