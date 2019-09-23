@@ -36,7 +36,6 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
@@ -66,14 +65,13 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
 
   @Inject
   public OpenShiftEnvironmentFactory(
-      InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
       MachineConfigsValidator machinesValidator,
       OpenShiftEnvironmentValidator envValidator,
       KubernetesRecipeParser k8sObjectsParser,
       MemoryAttributeProvisioner memoryProvisioner,
       PodMerger podMerger) {
-    super(installerRegistry, recipeRetriever, machinesValidator);
+    super(recipeRetriever, machinesValidator);
     this.envValidator = envValidator;
     this.k8sObjectsParser = k8sObjectsParser;
     this.memoryProvisioner = memoryProvisioner;

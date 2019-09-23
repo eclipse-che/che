@@ -27,9 +27,6 @@ public class TracingSpanConstants {
   /** Span name for async wait for servers to be running */
   public static final String CHECK_SERVERS = "CheckServers";
 
-  /** Span name for bootstrapping of Che 6 installers */
-  public static final String BOOTSTRAP_INSTALLERS = "BootstrapInstallers";
-
   /** Span name for wait for broker storage to be ready */
   public static final String PREPARE_STORAGE_PHASE = "PrepareStorage";
 

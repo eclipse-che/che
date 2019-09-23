@@ -11,9 +11,6 @@
  */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_SOURCE_ATTRIBUTE;
@@ -30,7 +27,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,9 +35,6 @@ import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
-import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
@@ -63,7 +56,6 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class InternalEnvironmentFactoryTest {
 
-  @Mock private InstallerRegistry installerRegistry;
   @Mock private RecipeRetriever recipeRetriever;
   @Mock private MachineConfigsValidator machinesValidator;
 
@@ -73,8 +65,7 @@ public class InternalEnvironmentFactoryTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    environmentFactory =
-        spy(new TestEnvironmentFactory(installerRegistry, recipeRetriever, machinesValidator));
+    environmentFactory = spy(new TestEnvironmentFactory(recipeRetriever, machinesValidator));
     final InternalEnvironment internalEnv = mock(InternalEnvironment.class);
     lenient().when(internalEnv.getMachines()).thenReturn(Collections.emptyMap());
     lenient().when(environmentFactory.doCreate(any(), anyMap(), anyList())).thenReturn(internalEnv);
@@ -95,27 +86,6 @@ public class InternalEnvironmentFactoryTest {
     // then
     verify(recipeRetriever).getRecipe(recipe);
     verify(environmentFactory).doCreate(eq(retrievedRecipe), any(), any());
-  }
-
-  @Test
-  public void shouldUseRetrievedInstallerWhileInternalEnvironmentCreation() throws Exception {
-    // given
-    List<Installer> installersToRetrieve =
-        ImmutableList.of(createInstaller("org.eclipse.che.terminal", "script"));
-    doReturn(installersToRetrieve).when(installerRegistry).getOrderedInstallers(anyList());
-
-    List<String> sourceInstallers = singletonList("org.eclipse.che.terminal");
-    MachineConfigImpl machineConfig = new MachineConfigImpl().withInstallers(sourceInstallers);
-    EnvironmentImpl env = new EnvironmentImpl(null, ImmutableMap.of("machine", machineConfig));
-
-    // when
-    environmentFactory.create(env);
-
-    // then
-    verify(installerRegistry).getOrderedInstallers(sourceInstallers);
-    verify(environmentFactory).doCreate(any(), machinesCaptor.capture(), any());
-    Map<String, InternalMachineConfig> internalMachines = machinesCaptor.getValue();
-    assertEquals(internalMachines.get("machine").getInstallers(), installersToRetrieve);
   }
 
   @Test
@@ -261,18 +231,12 @@ public class InternalEnvironmentFactoryTest {
         RECIPE_CONTAINER_SOURCE);
   }
 
-  private InstallerImpl createInstaller(String id, String script) {
-    return new InstallerImpl(id, "any", "any", "any", emptyList(), emptyMap(), script, emptyMap());
-  }
-
   private static class TestEnvironmentFactory
       extends InternalEnvironmentFactory<InternalEnvironment> {
 
     private TestEnvironmentFactory(
-        InstallerRegistry installerRegistry,
-        RecipeRetriever recipeRetriever,
-        MachineConfigsValidator machinesValidator) {
-      super(installerRegistry, recipeRetriever, machinesValidator);
+        RecipeRetriever recipeRetriever, MachineConfigsValidator machinesValidator) {
+      super(recipeRetriever, machinesValidator);
     }
 
     @Override
