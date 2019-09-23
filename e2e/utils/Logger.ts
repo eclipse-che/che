@@ -24,7 +24,8 @@ export abstract class Logger {
             return;
         }
 
-        console.log(`    ----> ${text}`);
+        // console.log(`    ----> ${text}`);
+        console.log(`        ▼ ${text}`);
     }
 
     public static trace(text: string) {
@@ -36,7 +37,8 @@ export abstract class Logger {
             return;
         }
 
-        console.log(`        ----> ${text}`);
+        // console.log(`        ----> ${text}`);
+        console.log(`            ‣ ${text}`);
     }
 
 }
