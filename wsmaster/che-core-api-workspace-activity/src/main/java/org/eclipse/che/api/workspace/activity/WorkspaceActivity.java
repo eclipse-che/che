@@ -76,6 +76,10 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
           "SELECT COUNT(a) FROM WorkspaceActivity a"
               + " WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING"
               + " AND a.lastStarting <= :time"),
+  @NamedQuery(name = "WorkspaceActivity.getAll", query = "SELECT a FROM WorkspaceActivity a"),
+  @NamedQuery(
+      name = "WorkspaceActivity.getAllCount",
+      query = "SELECT COUNT(a) FROM WorkspaceActivity a"),
 })
 public class WorkspaceActivity {
 

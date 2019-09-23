@@ -81,6 +81,7 @@ public class CreateWorkspaceTest {
   public void checkProjectSourcePage() {
     // add a project from the 'console-java-simple' sample
     newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
+    newWorkspace.waitDevfileSelected(Devfile.JAVA_MAVEN);
     projectSourcePage.waitOpened();
     projectSourcePage.waitCreatedProjectButton(projectName);
 

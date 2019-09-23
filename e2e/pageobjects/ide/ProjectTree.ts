@@ -131,13 +131,13 @@ export class ProjectTree {
     }
 
     async expandPathAndOpenFile(pathToItem: string, fileName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        let items:Array<string> = pathToItem.split('/');
+        let items: Array<string> = pathToItem.split('/');
         let projectName: string = items[0];
         let paths: Array<string> = new Array();
         paths.push(projectName);
 
         // make direct path for each project tree item
-        for(let i = 1; i < items.length; i++){
+        for (let i = 1; i < items.length; i++) {
             let item = items[i];
             projectName = `${projectName}/${item}`;
             paths.push(projectName);

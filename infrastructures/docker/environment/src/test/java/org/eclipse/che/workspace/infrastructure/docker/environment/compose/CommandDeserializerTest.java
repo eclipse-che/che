@@ -21,7 +21,6 @@ import static org.testng.Assert.fail;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
 import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
@@ -45,7 +44,6 @@ import org.yaml.snakeyaml.error.YAMLException;
 @Listeners(MockitoTestNGListener.class)
 public class CommandDeserializerTest {
 
-  @Mock InstallerRegistry installerRegistry;
   @Mock RecipeRetriever recipeRetriever;
   @Mock MachineConfigsValidator machinesValidator;
   @Mock ComposeEnvironmentValidator composeValidator;
@@ -58,12 +56,7 @@ public class CommandDeserializerTest {
   public void setup() {
     factory =
         new ComposeEnvironmentFactory(
-            installerRegistry,
-            recipeRetriever,
-            machinesValidator,
-            composeValidator,
-            startStrategy,
-            memoryProvisioner);
+            recipeRetriever, machinesValidator, composeValidator, startStrategy, memoryProvisioner);
   }
 
   private static final String RECIPE_WITHOUT_COMMAND_VALUE =

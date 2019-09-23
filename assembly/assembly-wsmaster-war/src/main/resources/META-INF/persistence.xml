@@ -60,9 +60,6 @@
         <class>org.eclipse.che.api.workspace.server.devfile.SerializableConverter</class>
 
         <class>org.eclipse.che.api.ssh.server.model.impl.SshPairImpl</class>
-
-        <class>org.eclipse.che.api.installer.server.model.impl.InstallerImpl</class>
-        <class>org.eclipse.che.api.installer.server.model.impl.InstallerServerConfigImpl</class>
         
         <class>org.eclipse.che.multiuser.api.permission.server.model.impl.SystemPermissionsImpl</class>
         <class>org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermissions</class>

@@ -21,6 +21,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
  * @author Anatoliy Bazko
  * @author Alexander Garagatyi
  */
+@Deprecated
 public interface Installer {
 
   /**

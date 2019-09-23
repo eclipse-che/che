@@ -21,6 +21,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -183,5 +184,16 @@ public class KubernetesNamespaceFactoryTest {
 
     // then
     verify(namespaceFactory, never()).doCreateServiceAccount(any(), any());
+  }
+
+  @Test
+  public void testPlaceholder() {
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "blabol-<userid>-<username>-<userid>-<username>--", "", "", clientFactory);
+    String namespace =
+        namespaceFactory.evalNamespaceName(null, new SubjectImpl("JonDoe", "123", null, false));
+
+    assertEquals(namespace, "blabol-123-JonDoe-123-JonDoe--");
   }
 }
