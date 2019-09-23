@@ -15,6 +15,7 @@ import { Ide, RightToolbarButton } from './Ide';
 import { TestConstants } from '../../TestConstants';
 import { By, error } from 'selenium-webdriver';
 import { Editor } from './Editor';
+import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class ProjectTree {
@@ -26,6 +27,8 @@ export class ProjectTree {
         @inject(CLASSES.Editor) private readonly editor: Editor) { }
 
     async openProjectTreeContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('ProjectTree.openProjectTreeContainer');
+
         const selectedExplorerButtonLocator: By = By.css(Ide.SELECTED_EXPLORER_BUTTON_CSS);
 
         await this.ide.waitRightToolbarButton(RightToolbarButton.Explorer, timeout);
@@ -40,12 +43,16 @@ export class ProjectTree {
     }
 
     async waitItemExpanded(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('ProjectTree.waitItemExpanded');
+
         const locator: string = await this.getExpandedItemCssLocator(itemPath);
         const expandedItemLocator: By = By.css(locator);
         await this.driverHelper.waitVisibility(expandedItemLocator, timeout);
     }
 
     async waitItemCollapsed(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('ProjectTree.waitItemCollapsed');
+
         const locator: string = await this.getCollapsedItemCssLocator(itemPath);
         const collapsedItemLocator: By = By.css(locator);
 
@@ -53,16 +60,22 @@ export class ProjectTree {
     }
 
     async waitProjectTreeContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('ProjectTree.waitProjectTreeContainer');
+
         await this.driverHelper.waitPresence(By.css(ProjectTree.PROJECT_TREE_CONTAINER_CSS), timeout);
     }
 
     async waitProjectTreeContainerClosed(attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
 
+        Logger.debug('ProjectTree.waitProjectTreeContainerClosed');
+
         await this.driverHelper.waitDisappearance(By.css(ProjectTree.PROJECT_TREE_CONTAINER_CSS), attempts, polling);
     }
 
     async waitItem(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('ProjectTree.waitItem');
+
         const locator: string = await this.getItemCss(itemPath);
         await this.driverHelper.waitVisibility(By.css(locator), timeout);
     }
@@ -70,11 +83,16 @@ export class ProjectTree {
     async waitItemDisappearance(itemPath: string,
         attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
+
+        Logger.debug('ProjectTree.waitItemDisappearance');
+
         const locator: string = await this.getItemCss(itemPath);
         await this.driverHelper.waitDisappearance(By.css(locator), attempts, polling);
     }
 
     async clickOnItem(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('ProjectTree.clickOnItem');
+
         const locator: string = await this.getItemCss(itemPath);
         await this.driverHelper.waitAndClick(By.css(locator), timeout);
         await this.waitItemSelected(itemPath, timeout);
@@ -82,11 +100,15 @@ export class ProjectTree {
     }
 
     async waitItemSelected(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('ProjectTree.waitItemSelected');
+
         const selectedItemLocator: By = By.css(`div[title='/projects/${itemPath}'].theia-mod-selected.theia-mod-focus`);
         await this.driverHelper.waitVisibility(selectedItemLocator, timeout);
     }
 
     async expandItem(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('ProjectTree.expandItem');
+
         const locator: string = await this.getExpandIconCssLocator(itemPath);
         const expandIconLocator: By = By.css(locator);
         const treeItemLocator: By = By.css(this.getTreeItemCssLocator(itemPath));
@@ -116,6 +138,8 @@ export class ProjectTree {
     }
 
     async collapseItem(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('ProjectTree.collapseItem');
+
         const locator: string = await this.getExpandIconCssLocator(itemPath);
         const expandIconLocator: By = By.css(locator);
         const treeItemLocator: By = By.css(this.getTreeItemCssLocator(itemPath));
@@ -131,6 +155,8 @@ export class ProjectTree {
     }
 
     async expandPathAndOpenFile(pathToItem: string, fileName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('ProjectTree.expandPathAndOpenFile');
+
         let items: Array<string> = pathToItem.split('/');
         let projectName: string = items[0];
         let paths: Array<string> = new Array();
@@ -157,6 +183,8 @@ export class ProjectTree {
     }
 
     async expandPathAndOpenFileInAssociatedWorkspace(pathToItem: string, fileName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('ProjectTree.expandPathAndOpenFileInAssociatedWorkspace');
+
         let projectName: string = pathToItem.split('/')[0];
         let pathEntry = `${projectName}`;
         let pathToItemInAssociatedWorkspace = pathToItem.replace(`${projectName}/`, '');
@@ -193,12 +221,11 @@ export class ProjectTree {
         visibilityItemPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5,
         triesPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 30) {
 
+        Logger.debug('ProjectTree.waitProjectImported');
+
         const rootItem: string = `${projectName}`;
         const rootItemLocator: By = By.css(this.getTreeItemCssLocator(`${projectName}`));
         const rootSubitemLocator: By = By.css(this.getTreeItemCssLocator(`${projectName}/${rootSubItem}`));
-
-
-
 
         for (let i = 0; i < attempts; i++) {
             const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, attempts, visibilityItemPolling);
