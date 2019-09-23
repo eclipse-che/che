@@ -14,7 +14,10 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 import static com.google.common.collect.ImmutableMap.of;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
@@ -47,9 +50,9 @@ public class MachineResolverTest {
 
   private static final String DEFAULT_MEM_LIMIT = "100001";
   private static final String PLUGIN_NAME = "testplugin";
-  private static final String PLUGIN_ID = "testpluginId";
   private static final String PLUGIN_PUBLISHER = "testpublisher";
   private static final String PLUGIN_PUBLISHER_NAME = PLUGIN_PUBLISHER + "/" + PLUGIN_NAME;
+  private static final String PLUGIN_ID = PLUGIN_PUBLISHER_NAME + "/" + "latest";
   private static final String PROJECTS_ENV_VAR = "env_with_with_location_of_projects";
   private static final String PROJECTS_MOUNT_PATH = "/wherever/i/may/roam";
 
@@ -90,6 +93,19 @@ public class MachineResolverTest {
     InternalMachineConfig machineConfig = resolver.resolve();
 
     assertEquals(machineConfig.getVolumes(), expected);
+  }
+
+  @Test
+  public void shouldSetComponentAliasAttributeInMachineConfig() throws InfrastructureException {
+    String componentAlias = "mycomponent";
+    wsAttributes.put(
+        PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE,
+        "another/foo/plugin=fooplugin," + PLUGIN_ID + "=" + componentAlias);
+    wsAttributes.put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, "some/theia/editor=myeditor");
+
+    InternalMachineConfig machineConfig = resolver.resolve();
+    assertEquals(
+        machineConfig.getAttributes().get(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE), componentAlias);
   }
 
   @Test(dataProvider = "serverProvider")

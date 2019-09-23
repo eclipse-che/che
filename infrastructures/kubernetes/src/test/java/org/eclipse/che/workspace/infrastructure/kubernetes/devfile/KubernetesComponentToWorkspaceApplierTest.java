@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 
 import static io.fabric8.kubernetes.client.utils.Serialization.unmarshal;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
@@ -23,6 +22,7 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_
 import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -175,10 +175,10 @@ public class KubernetesComponentToWorkspaceApplierTest {
     // then
     verify(k8sEnvProvisioner)
         .provision(
-            workspaceConfig,
-            KubernetesEnvironment.TYPE,
-            toK8SList(yamlRecipeContent).getItems(),
-            emptyMap());
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            eq(toK8SList(yamlRecipeContent).getItems()),
+            anyMap());
   }
 
   @Test
@@ -195,10 +195,10 @@ public class KubernetesComponentToWorkspaceApplierTest {
 
     verify(k8sEnvProvisioner)
         .provision(
-            workspaceConfig,
-            KubernetesEnvironment.TYPE,
-            toK8SList(yamlRecipeContent).getItems(),
-            emptyMap());
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            eq(toK8SList(yamlRecipeContent).getItems()),
+            anyMap());
   }
 
   @Test
@@ -310,10 +310,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     // then
     verify(k8sEnvProvisioner)
         .provision(
-            eq(workspaceConfig),
-            eq(KubernetesEnvironment.TYPE),
-            objectsCaptor.capture(),
-            eq(emptyMap()));
+            eq(workspaceConfig), eq(KubernetesEnvironment.TYPE), objectsCaptor.capture(), anyMap());
     List<HasMetadata> resultItemsList = objectsCaptor.getValue();
     assertEquals(resultItemsList.size(), 3);
     assertEquals(1, resultItemsList.stream().filter(it -> "Pod".equals(it.getKind())).count());
