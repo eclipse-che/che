@@ -69,9 +69,8 @@ public class OpenShiftKeycloakCliCommandExecutor implements KeycloakCliCommandEx
     // obtain name of keycloak pod
     String getKeycloakPodNameCommand =
         format(
-            "get pods --namespace=eclipse-che | grep keycloak | awk '{print $1}'",
-            cheOpenshiftProject != null ? cheOpenshiftProject : DEFAULT_CHE_OPENSHIFT_PROJECT,
-            keycloakApp != null ? keycloakApp : DEFAULT_KEYCLOAK_APP);
+            "get pods --namespace=%s | grep keycloak | awk '{print $1}'",
+            cheOpenshiftProject != null ? cheOpenshiftProject : DEFAULT_CHE_OPENSHIFT_PROJECT);
 
     keycloakPodName = openShiftCliCommandExecutor.execute(getKeycloakPodNameCommand);
 
