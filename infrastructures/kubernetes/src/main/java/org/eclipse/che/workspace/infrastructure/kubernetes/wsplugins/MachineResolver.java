@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Function;
+import java.util.Optional;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
@@ -89,26 +89,39 @@ public class MachineResolver {
 
   private Map<String, String> toMachineAttributes(
       String pluginId, Map<String, String> wsAttributes) {
-    String pluginComponentAliases =
-        wsAttributes.get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
-    String editorComponentAlias = wsAttributes.get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE);
+    Map<String, String> attributes = new HashMap<>();
+
+    Optional<String> pluginAlias = findPluginAlias(pluginId, wsAttributes);
+    pluginAlias.ifPresent(s -> attributes.put(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE, s));
+
+    return attributes;
+  }
+
+  private Optional<String> findPluginAlias(String pluginId, Map<String, String> wsAttributes) {
 
     List<String> aliases = new ArrayList<>();
+
+    String pluginComponentAliases =
+        wsAttributes.get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
     if (!isNullOrEmpty(pluginComponentAliases)) {
       aliases.addAll(asList(pluginComponentAliases.split(",")));
     }
+
+    String editorComponentAlias = wsAttributes.get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE);
     if (!isNullOrEmpty(editorComponentAlias)) {
       aliases.add(editorComponentAlias);
     }
-    if (!aliases.isEmpty()) {
-      return aliases
-          .stream()
-          .map(value -> value.split("="))
-          .filter(arr -> arr[0].equals(pluginId))
-          .map(arr -> arr[1])
-          .collect(toMap(alias -> DEVFILE_COMPONENT_ALIAS_ATTRIBUTE, Function.identity()));
+
+    if (aliases.isEmpty()) {
+      return Optional.empty();
     }
-    return null;
+
+    return aliases
+        .stream()
+        .map(value -> value.split("="))
+        .filter(arr -> arr[0].equals(pluginId))
+        .map(arr -> arr[1])
+        .findAny();
   }
 
   private void normalizeMemory(Container container, InternalMachineConfig machineConfig) {
