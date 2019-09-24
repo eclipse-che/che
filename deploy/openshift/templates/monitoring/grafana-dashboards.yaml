@@ -6782,3 +6782,4 @@ data:
       updateIntervalSeconds: 10000
       options:
         path: /etc/grafana/provisioning/dashboards
+
