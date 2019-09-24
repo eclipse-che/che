@@ -24,7 +24,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.Certificate
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitUserProfileProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
@@ -64,7 +63,6 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final EnvVarsConverter envVarsConverter;
     private final RestartPolicyRewriter restartPolicyRewriter;
     private final RamLimitRequestProvisioner ramLimitProvisioner;
-    private final InstallerServersPortProvisioner installerServersPortProvisioner;
     private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
     private final SecurityContextProvisioner securityContextProvisioner;
     private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
@@ -85,7 +83,6 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         RestartPolicyRewriter restartPolicyRewriter,
         WorkspaceVolumesStrategy volumesStrategy,
         RamLimitRequestProvisioner ramLimitProvisioner,
-        InstallerServersPortProvisioner installerServersPortProvisioner,
         LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
         SecurityContextProvisioner securityContextProvisioner,
         PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
@@ -103,7 +100,6 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.envVarsConverter = envVarsConverter;
       this.restartPolicyRewriter = restartPolicyRewriter;
       this.ramLimitProvisioner = ramLimitProvisioner;
-      this.installerServersPortProvisioner = installerServersPortProvisioner;
       this.logsVolumeMachineProvisioner = logsVolumeMachineProvisioner;
       this.securityContextProvisioner = securityContextProvisioner;
       this.podTerminationGracePeriodProvisioner = podTerminationGracePeriodProvisioner;
@@ -125,8 +121,6 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
 
       LOG.debug("Start provisioning Kubernetes environment for workspace '{}'", workspaceId);
       // 1 stage - update environment according Infrastructure specific
-      LOG.debug("Provisioning installer server ports for workspace '{}'", workspaceId);
-      installerServersPortProvisioner.provision(k8sEnv, identity);
       if (pvcEnabled) {
         LOG.debug("Provisioning logs volume for workspace '{}'", workspaceId);
         logsVolumeMachineProvisioner.provision(k8sEnv, identity);
