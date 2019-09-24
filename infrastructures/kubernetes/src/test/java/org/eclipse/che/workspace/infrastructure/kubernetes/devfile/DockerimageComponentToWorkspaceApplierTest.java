@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.DISCOVERABLE_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.DOCKERIMAGE_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
@@ -417,6 +418,30 @@ public class DockerimageComponentToWorkspaceApplierTest {
         machineConfig.getVolumes().get(PROJECTS_VOLUME_NAME);
     assertNotNull(projectsVolume);
     assertEquals(projectsVolume.getPath(), PROJECTS_MOUNT_PATH);
+  }
+
+  @Test
+  public void shouldProvisionMachineConfigWithAliasAttribute() throws Exception {
+    // given
+    ComponentImpl dockerimageComponent = new ComponentImpl();
+    dockerimageComponent.setAlias("jdk-alias");
+    dockerimageComponent.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
+    dockerimageComponent.setMemoryLimit("1G");
+
+    // when
+    dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
+
+    // then
+    verify(k8sEnvProvisioner)
+        .provision(
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            objectsCaptor.capture(),
+            machinesCaptor.capture());
+    MachineConfigImpl machineConfig = machinesCaptor.getValue().get("jdk-alias");
+    assertNotNull(machineConfig);
+    assertEquals(machineConfig.getAttributes().get(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE), "jdk-alias");
   }
 
   @Test
