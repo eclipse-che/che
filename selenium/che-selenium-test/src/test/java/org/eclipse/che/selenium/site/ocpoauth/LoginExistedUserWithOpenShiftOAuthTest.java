@@ -104,10 +104,8 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
     // (we can't use dashboard.open() here to login with OAuth)
     seleniumWebDriver.navigate().to(testDashboardUrlProvider.get());
 
-    // click on button to login with OpenShift OAuth
-    cheLoginPage.loginWithOpenShiftOAuth();
-
     // login to OCP from login page with default test user credentials
+    openShiftLoginPage.waitOnOpen();
     openShiftLoginPage.login(defaultTestUser.getName(), defaultTestUser.getPassword());
 
     // authorize ocp-client to access OpenShift account
