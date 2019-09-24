@@ -23,7 +23,7 @@
     "@types/node": "^11.13.4",
     "@types/rimraf": "^2.0.2",
     "@types/selenium-webdriver": "^3.0.16",
-    "axios": "0.17.1",
+    "axios": "0.18.1",
     "chai": "^4.2.0",
     "chromedriver": "^76.0.0",
     "mocha": "^6.1.4",
