@@ -89,7 +89,7 @@ suite('Validation of workspace start', async () => {
 
 });
 
-suite.skip('Language server validation', async () => {
+suite('Language server validation', async () => {
     test('Java LS initialization', async () => {
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToJavaFolder, javaFileName);
         await editor.selectTab(javaFileName);
@@ -143,7 +143,7 @@ suite.skip('Language server validation', async () => {
     });
 });
 
-suite.skip('Validation of workspace build and run', async () => {
+suite('Validation of workspace build and run', async () => {
     test('Build application', async () => {
         await runTask('che: build-file-output');
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'build-output.txt');
@@ -173,7 +173,7 @@ suite.skip('Validation of workspace build and run', async () => {
     });
 });
 
-suite.skip('Display source code changes in the running application', async () => {
+suite('Display source code changes in the running application', async () => {
     test('Change source code', async () => {
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToChangedJavaFileFolder, changedJavaFileName);
         await editor.waitEditorAvailable(changedJavaFileName);
@@ -217,7 +217,7 @@ suite.skip('Display source code changes in the running application', async () =>
     });
 });
 
-suite.skip('Validation of debug functionality', async () => {
+suite('Validation of debug functionality', async () => {
     test('Open file and activate breakpoint', async () => {
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToJavaFolder, javaFileName);
         await editor.activateBreakpoint(javaFileName, 32);

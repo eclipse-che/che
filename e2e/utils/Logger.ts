@@ -11,23 +11,23 @@ import { TestConstants } from '../TestConstants';
  **********************************************************************/
 
 export abstract class Logger {
-    // public error(text: string) {
-    //     console.log(text);
-    // }
-
-    // public info(text: string) {
-    //     console.log(text);
-    // }
-
+    /**
+     * Uses for logging of the public methods of the pageobjects.
+     * @param text log text
+     */
     public static debug(text: string) {
         if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'INFO') {
             return;
         }
 
-        // console.log(`    ----> ${text}`);
         console.log(`        ▼ ${text}`);
     }
 
+    /**
+     * Uses for logging of the public methods of the {@link DriverHelper} or
+     * private methods inside of pageobjects.
+     * @param text log text
+     */
     public static trace(text: string) {
         if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'INFO') {
             return;
@@ -37,7 +37,6 @@ export abstract class Logger {
             return;
         }
 
-        // console.log(`        ----> ${text}`);
         console.log(`            ‣ ${text}`);
     }
 

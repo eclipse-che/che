@@ -13,6 +13,7 @@ import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { By, WebElement, error } from 'selenium-webdriver';
+import { Logger } from '../../utils/Logger';
 
 export enum RightToolbarButton {
     Explorer = 'Explorer',
@@ -35,18 +36,23 @@ export class Ide {
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitAndSwitchToIdeFrame(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug('Ide.waitAndSwitchToIdeFrame');
+
         await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
     }
 
     async waitNotification(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const notificationLocator: By = By.xpath(this.getNotificationXpathLocator(notificationText));
+        Logger.debug(`Ide.waitNotification "${notificationText}"`);
 
+        const notificationLocator: By = By.xpath(this.getNotificationXpathLocator(notificationText));
         await this.driverHelper.waitVisibility(notificationLocator, timeout);
     }
 
     async waitNotificationAndClickOnButton(notificationText: string,
         buttonText: string,
         timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+
+        Logger.debug(`Ide.waitNotificationAndClickOnButton "${notificationText}" buttonText: "${buttonText}"`);
 
         await this.driverHelper.getDriver().wait(async () => {
             await this.waitNotification(notificationText, timeout);
@@ -69,29 +75,38 @@ export class Ide {
     }
 
     async waitNotificationAndConfirm(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Ide.waitNotificationAndConfirm "${notificationText}"`);
+
         await this.waitNotificationAndClickOnButton(notificationText, 'yes', timeout);
     }
 
     async waitNotificationAndOpenLink(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Ide.waitNotificationAndOpenLink "${notificationText}"`);
+
         await this.waitApllicationIsReady(await this.getApplicationUrlFromNotification(notificationText));
         await this.waitNotificationAndClickOnButton(notificationText, 'Open Link', timeout);
     }
 
     async isNotificationPresent(notificationText: string): Promise<boolean> {
-        const notificationLocator: By = By.xpath(this.getNotificationXpathLocator(notificationText));
+        Logger.debug(`Ide.isNotificationPresent "${notificationText}"`);
 
+        const notificationLocator: By = By.xpath(this.getNotificationXpathLocator(notificationText));
         return await this.driverHelper.waitVisibilityBoolean(notificationLocator);
     }
 
     async waitNotificationDisappearance(notificationText: string,
         attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
-        const notificationLocator: By = By.xpath(this.getNotificationXpathLocator(notificationText));
 
+        Logger.debug(`Ide.waitNotificationDisappearance "${notificationText}"`);
+
+        const notificationLocator: By = By.xpath(this.getNotificationXpathLocator(notificationText));
         await this.driverHelper.waitDisappearance(notificationLocator, attempts, polling);
     }
 
     async clickOnNotificationButton(notificationText: string, buttonText: string) {
+        Logger.debug(`Ide.clickOnNotificationButton "${notificationText}" buttonText: "${buttonText}"`);
+
         const yesButtonLocator: string = `//div[@class='theia-notification-list']//span[contains(.,'${notificationText}')]/parent::div/parent::div/parent::div/div[@class='theia-notification-list-item-content-bottom']//div[@class='theia-notification-buttons']//button[text()='${buttonText}'] `;
         await this.driverHelper.waitAndClick(By.xpath(yesButtonLocator));
     }
@@ -100,11 +115,15 @@ export class Ide {
         workspaceName: string,
         timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
 
+        Logger.debug('Ide.waitWorkspaceAndIde');
+
         await this.waitAndSwitchToIdeFrame(timeout);
         await this.waitIde(timeout);
     }
 
     async waitIde(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug('Ide.waitIde');
+
         const mainIdeParts: Array<By> = [By.css(Ide.TOP_MENU_PANEL_CSS), By.css(Ide.LEFT_CONTENT_PANEL_CSS), By.id(Ide.EXPLORER_BUTTON_ID)];
 
         for (const idePartLocator of mainIdeParts) {
@@ -113,32 +132,43 @@ export class Ide {
     }
 
     async waitRightToolbarButton(buttonTitle: RightToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const buttonLocator: By = this.getRightToolbarButtonLocator(buttonTitle);
+        Logger.debug('Ide.waitRightToolbarButton');
 
+        const buttonLocator: By = this.getRightToolbarButtonLocator(buttonTitle);
         await this.driverHelper.waitVisibility(buttonLocator, timeout);
     }
 
     async waitAndClickRightToolbarButton(buttonTitle: RightToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const buttonLocator: By = this.getRightToolbarButtonLocator(buttonTitle);
+        Logger.debug('Ide.waitAndClickRightToolbarButton');
 
+        const buttonLocator: By = this.getRightToolbarButtonLocator(buttonTitle);
         await this.driverHelper.waitAndClick(buttonLocator, timeout);
     }
 
     async waitTopMenuPanel(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Ide.waitTopMenuPanel');
+
         await this.driverHelper.waitVisibility(By.css(Ide.TOP_MENU_PANEL_CSS), timeout);
     }
 
     async waitLeftContentPanel(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Ide.waitLeftContentPanel');
+
         await this.driverHelper.waitVisibility(By.css(Ide.LEFT_CONTENT_PANEL_CSS));
     }
 
     async waitPreloaderAbsent(attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
+
+        Logger.debug('Ide.waitPreloaderAbsent');
+
         await this.driverHelper.waitDisappearance(By.css(Ide.PRELOADER_CSS), attempts, polling);
     }
 
     async waitStatusBarContains(expectedText: string, timeout: number = TestConstants.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT) {
         const statusBarLocator: By = By.css('div[id=\'theia-statusBar\']');
+
+        Logger.debug(`Ide.waitStatusBarContains "${expectedText}"`);
 
         await this.driverHelper.getDriver().wait(async () => {
             const elementText: string = await this.driverHelper.waitAndGetText(statusBarLocator, timeout);
@@ -148,11 +178,15 @@ export class Ide {
                 return true;
             }
 
+            await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING * 2);
+
         }, timeout);
     }
 
     async waitStatusBarTextAbsence(expectedText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const statusBarLocator: By = By.css('div[id=\'theia-statusBar\']');
+
+        Logger.debug(`Ide.waitStatusBarTextAbsence "${expectedText}"`);
 
         // for ensuring that check is not invoked in the gap of status displaying
         for (let i: number = 0; i < 3; i++) {
@@ -165,15 +199,21 @@ export class Ide {
                     return true;
                 }
 
+                await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING * 2);
+
             }, timeout);
         }
     }
 
     async waitIdeFrameAndSwitchOnIt(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug('Ide.waitIdeFrameAndSwitchOnIt');
+
         await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
     }
 
     async checkLsInitializationStart(expectedTextInStatusBar: string) {
+        Logger.debug('Ide.checkLsInitializationStart');
+
         try {
             await this.waitStatusBarContains(expectedTextInStatusBar, 20000);
         } catch (err) {
@@ -190,6 +230,8 @@ export class Ide {
 
     async closeAllNotifications() {
         const notificationLocator: By = By.css('.theia-Notification');
+
+        Logger.debug('Ide.closeAllNotifications');
 
         if (! await this.driverHelper.isVisible(notificationLocator)) {
             return;
@@ -215,20 +257,23 @@ export class Ide {
     }
 
     async performKeyCombination(keyCombination: string) {
-        const bodyLocator: By = By.tagName('body');
+        Logger.debug(`Ide.performKeyCombination "${keyCombination}"`);
 
+        const bodyLocator: By = By.tagName('body');
         await this.driverHelper.type(bodyLocator, keyCombination);
     }
 
     async waitRightToolbarButtonSelection(buttonTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const selectedRightToolbarButtonLocator: By = this.getSelectedRightToolbarButtonLocator(buttonTitle);
+        Logger.debug('Ide.waitRightToolbarButtonSelection');
 
+        const selectedRightToolbarButtonLocator: By = this.getSelectedRightToolbarButtonLocator(buttonTitle);
         await this.driverHelper.waitVisibility(selectedRightToolbarButtonLocator, timeout);
     }
 
     async getApplicationUrlFromNotification(notificationText: string) {
-        const notificationTextLocator: By = By.xpath(`//div[@class='theia-notification-message']/span[contains(.,'${notificationText}')]`);
+        Logger.debug(`Ide.getApplicationUrlFromNotification ${notificationText}`);
 
+        const notificationTextLocator: By = By.xpath(`//div[@class='theia-notification-message']/span[contains(.,'${notificationText}')]`);
         let notification = await this.driverHelper.waitAndGetText(notificationTextLocator);
         let regexp: RegExp = new RegExp('^.*(https?://.*)$');
 
@@ -241,6 +286,8 @@ export class Ide {
 
     async waitApllicationIsReady(url: string,
         timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+
+        Logger.debug(`Ide.waitApllicationIsReady ${url}`);
 
         await this.driverHelper.getDriver().wait(async () => {
             try {
@@ -268,7 +315,5 @@ export class Ide {
     private getNotificationXpathLocator(notificationText: string): string {
         return `//div[@class='theia-notification-message']/span[contains(.,'${notificationText}')]`;
     }
-
-
 
 }
