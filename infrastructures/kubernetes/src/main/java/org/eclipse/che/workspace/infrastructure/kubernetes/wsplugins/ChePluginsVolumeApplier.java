@@ -58,10 +58,10 @@ public class ChePluginsVolumeApplier {
     List<Volume> ephemeralVolumes = new ArrayList<>();
     List<Volume> persistedVolumes = new ArrayList<>();
     for (Volume volume : volumes) {
-      if (volume.isPersistVolume()) {
-        persistedVolumes.add(volume);
-      } else {
+      if (volume.isEphemeral()) {
         ephemeralVolumes.add(volume);
+      } else {
+        persistedVolumes.add(volume);
       }
     }
 

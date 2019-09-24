@@ -17,7 +17,7 @@ public class Volume {
 
   private String name = null;
   private String mountPath = null;
-  private boolean persistVolume;
+  private boolean ephemeral;
 
   /** */
   public Volume name(String name) {
@@ -47,17 +47,17 @@ public class Volume {
     this.mountPath = mountPath;
   }
 
-  public Volume persistVolume(boolean persistVolume) {
-    this.persistVolume = persistVolume;
+  public Volume ephemeral(boolean ephemeral) {
+    this.ephemeral = ephemeral;
     return this;
   }
 
-  public boolean isPersistVolume() {
-    return persistVolume;
+  public boolean isEphemeral() {
+    return ephemeral;
   }
 
-  public void setPersistVolume(boolean persistVolume) {
-    this.persistVolume = persistVolume;
+  public void setEphemeral(boolean ephemeral) {
+    this.ephemeral = ephemeral;
   }
 
   @Override
@@ -71,12 +71,12 @@ public class Volume {
     Volume volume = (Volume) o;
     return Objects.equals(name, volume.name)
         && Objects.equals(mountPath, volume.mountPath)
-        && Objects.equals(persistVolume, volume.persistVolume);
+        && Objects.equals(ephemeral, volume.ephemeral);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, mountPath, persistVolume);
+    return Objects.hash(name, mountPath, ephemeral);
   }
 
   @Override
@@ -85,7 +85,7 @@ public class Volume {
     sb.append("class Volume {\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    mountPath: ").append(toIndentedString(mountPath)).append("\n");
-    sb.append("    persistVolume: ").append(toIndentedString(persistVolume)).append("\n");
+    sb.append("    ephemeral: ").append(toIndentedString(ephemeral)).append("\n");
     sb.append("}");
     return sb.toString();
   }
