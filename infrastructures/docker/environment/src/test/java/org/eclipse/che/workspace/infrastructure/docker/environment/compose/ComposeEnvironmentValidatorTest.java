@@ -22,11 +22,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.shared.Constants;
-import org.eclipse.che.workspace.infrastructure.docker.environment.WsAgentMachineFinderUtil;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.BuildContext;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 import org.mockito.Mock;
@@ -45,7 +43,6 @@ public class ComposeEnvironmentValidatorTest {
   @Mock private InternalMachineConfig machineConfig;
   @Mock private ComposeService service;
   @Mock private BuildContext buildContext;
-  @Mock private InstallerImpl installer;
   @Mock private ServerConfigImpl server;
 
   private ComposeEnvironmentValidator composeEnvironmentValidator =
@@ -57,8 +54,6 @@ public class ComposeEnvironmentValidatorTest {
     when(composeEnv.getServices())
         .thenReturn(newLinkedHashMap(singletonMap(MACHINE_NAME, service)));
     when(service.getImage()).thenReturn("test/image:latest");
-    when(machineConfig.getInstallers()).thenReturn(singletonList(installer));
-    when(installer.getId()).thenReturn(WsAgentMachineFinderUtil.WS_AGENT_INSTALLER);
     when(server.getPort()).thenReturn("8080/tcp");
     when(server.getPath()).thenReturn("/some/path");
     when(server.getProtocol()).thenReturn("https");

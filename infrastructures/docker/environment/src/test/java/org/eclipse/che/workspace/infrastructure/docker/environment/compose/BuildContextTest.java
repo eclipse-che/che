@@ -16,7 +16,6 @@ import static org.testng.Assert.assertEquals;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
 import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
@@ -36,7 +35,6 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class BuildContextTest {
 
-  @Mock InstallerRegistry installerRegistry;
   @Mock RecipeRetriever recipeRetriever;
   @Mock MachineConfigsValidator machinesValidator;
   @Mock ComposeEnvironmentValidator composeValidator;
@@ -49,12 +47,7 @@ public class BuildContextTest {
   public void setup() {
     factory =
         new ComposeEnvironmentFactory(
-            installerRegistry,
-            recipeRetriever,
-            machinesValidator,
-            composeValidator,
-            startStrategy,
-            memoryProvisioner);
+            recipeRetriever, machinesValidator, composeValidator, startStrategy, memoryProvisioner);
   }
 
   @Test

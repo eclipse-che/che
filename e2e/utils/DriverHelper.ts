@@ -439,7 +439,7 @@ export class DriverHelper {
     async waitOpenningSecondWindow(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driver.wait(async () => {
             const handles: string[] = await this.driver.getAllWindowHandles();
-           if (handles.length > 1) {
+            if (handles.length > 1) {
                 return true;
             }
         }, timeout);
@@ -451,4 +451,5 @@ export class DriverHelper {
         handles.splice(handles.indexOf(mainWindowHandle), 1);
         await this.driver.switchTo().window(handles[0]);
     }
+
 }

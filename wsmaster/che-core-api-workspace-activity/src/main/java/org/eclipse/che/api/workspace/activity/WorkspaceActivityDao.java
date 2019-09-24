@@ -126,4 +126,13 @@ public interface WorkspaceActivityDao {
    * @throws ServerException on other error
    */
   void createActivity(WorkspaceActivity activity) throws ConflictException, ServerException;
+
+  /**
+   * Returns all current workspace activities.
+   *
+   * @param maxItems the page size
+   * @param skipCount the number of records to skip
+   * @return the workspace activities for all workspaces
+   */
+  Page<WorkspaceActivity> getAll(int maxItems, long skipCount) throws ServerException;
 }

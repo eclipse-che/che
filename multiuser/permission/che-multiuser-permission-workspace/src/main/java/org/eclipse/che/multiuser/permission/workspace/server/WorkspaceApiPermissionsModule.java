@@ -16,7 +16,6 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import org.eclipse.che.multiuser.api.permission.server.SuperPrivilegesChecker;
 import org.eclipse.che.multiuser.api.permission.shared.model.PermissionsDomain;
-import org.eclipse.che.multiuser.permission.workspace.server.filters.InstallerServicePermissionFilter;
 import org.eclipse.che.multiuser.permission.workspace.server.filters.WorkspacePermissionsFilter;
 import org.eclipse.che.multiuser.permission.workspace.server.filters.WorkspaceRemoteSubscriptionPermissionFilter;
 
@@ -26,7 +25,6 @@ public class WorkspaceApiPermissionsModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(WorkspacePermissionsFilter.class);
-    bind(InstallerServicePermissionFilter.class).asEagerSingleton();
     bind(WorkspaceRemoteSubscriptionPermissionFilter.class).asEagerSingleton();
 
     bind(WorkspaceCreatorPermissionsProvider.class).asEagerSingleton();

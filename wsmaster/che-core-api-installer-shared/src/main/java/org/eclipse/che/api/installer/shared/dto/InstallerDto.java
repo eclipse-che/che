@@ -19,6 +19,7 @@ import org.eclipse.che.dto.shared.DTO;
 
 /** @author Anatoliy Bazko */
 @DTO
+@Deprecated
 public interface InstallerDto extends Installer {
 
   @Override

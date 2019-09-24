@@ -98,7 +98,7 @@ public class KubernetesEnvironmentFactoryTest {
   public void setup() throws Exception {
     k8sEnvFactory =
         new KubernetesEnvironmentFactory(
-            null, null, null, k8sRecipeParser, k8sEnvValidator, memoryProvisioner, podMerger);
+            null, null, k8sRecipeParser, k8sEnvValidator, memoryProvisioner, podMerger);
     lenient().when(internalEnvironment.getRecipe()).thenReturn(internalRecipe);
     machines = ImmutableMap.of(MACHINE_NAME_1, machineConfig1, MACHINE_NAME_2, machineConfig2);
   }
