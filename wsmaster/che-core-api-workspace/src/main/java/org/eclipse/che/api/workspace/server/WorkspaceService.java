@@ -962,20 +962,15 @@ public class WorkspaceService extends Service {
           .filter(c -> c.getAttributes().containsKey("previewUrl"))
           .forEach(
               c -> {
-                String previewUrl = c.getAttributes().get("previewUrl");
                 String machine = c.getAttributes().get("machineName");
-                previewUrl =
-                    workspaceDto
-                            .getRuntime()
-                            .getMachines()
-                            .get(machine)
-                            .getServers()
-                            .get("8080/tcp") // TODO: what server to get?
-                            .getUrl()
-                        + previewUrl; // TODO: url will probably end with `/`. ensure to write port
-                // correctly
-
-                c.getAttributes().put("previewUrl", previewUrl);
+                Map<String, ServerDto> servers =
+                    workspaceDto.getRuntime().getMachines().get(machine).getServers();
+                if (servers.values().size() == 1) {
+                  ServerDto server = servers.values().iterator().next();
+                  String serverUrl = server.getUrl();
+                  String previewUrl = serverUrl + c.getAttributes().get("previewUrl");
+                  c.getAttributes().put("previewUrl", previewUrl);
+                }
               });
     }
 
