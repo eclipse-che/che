@@ -16,7 +16,6 @@ import static org.mockito.Mockito.*;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
 import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
@@ -40,7 +39,6 @@ public class ComposeEnvironmentFactoryTest {
   private static final String MACHINE_NAME_1 = "machine1";
   private static final String MACHINE_NAME_2 = "machine2";
 
-  @Mock private InstallerRegistry installerRegistry;
   @Mock private RecipeRetriever recipeRetriever;
   @Mock private MachineConfigsValidator machinesValidator;
   @Mock private ComposeEnvironmentValidator composeValidator;
@@ -53,12 +51,7 @@ public class ComposeEnvironmentFactoryTest {
   public void setup() {
     composeEnvironmentFactory =
         new ComposeEnvironmentFactory(
-            installerRegistry,
-            recipeRetriever,
-            machinesValidator,
-            composeValidator,
-            startStrategy,
-            memoryProvisioner);
+            recipeRetriever, machinesValidator, composeValidator, startStrategy, memoryProvisioner);
   }
 
   @Test

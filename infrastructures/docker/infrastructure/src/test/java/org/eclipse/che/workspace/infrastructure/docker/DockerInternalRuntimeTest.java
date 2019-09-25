@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.FAILED;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
@@ -39,7 +38,6 @@ import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -48,7 +46,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
@@ -122,9 +119,7 @@ public class DockerInternalRuntimeTest {
     final DockerContainerConfig config1 = new DockerContainerConfig();
     final DockerContainerConfig config2 = new DockerContainerConfig();
     final InternalMachineConfig internalMachineCfg1 = mock(InternalMachineConfig.class);
-    when(internalMachineCfg1.getInstallers()).thenReturn(singletonList(newInstaller(1)));
     final InternalMachineConfig internalMachineCfg2 = mock(InternalMachineConfig.class);
-    when(internalMachineCfg2.getInstallers()).thenReturn(singletonList(newInstaller(2)));
 
     ImmutableMap<String, InternalMachineConfig> machines =
         ImmutableMap.of(DEV_MACHINE, internalMachineCfg1, DB_MACHINE, internalMachineCfg2);
@@ -203,32 +198,6 @@ public class DockerInternalRuntimeTest {
       verifyEventsOrder(
           newEvent(DEV_MACHINE, STARTING, null),
           newEvent(DEV_MACHINE, FAILED, msg),
-          newEvent(DEV_MACHINE, STOPPED, null));
-      throw ex;
-    }
-  }
-
-  @Test(expectedExceptions = InfrastructureException.class)
-  public void throwsExceptionWhenBootstrappingOfInstallersFailed() throws Exception {
-    mockInstallersBootstrapFailed(new InfrastructureException("bootstrap failed"));
-    mockContainerStart();
-    try {
-      dockerRuntime.start(emptyMap());
-    } catch (InfrastructureException ex) {
-      verify(starter, times(1))
-          .startContainer(
-              nullable(String.class),
-              nullable(String.class),
-              nullable(String.class),
-              any(),
-              any(),
-              any());
-      verify(bootstrapper, times(1)).bootstrap(BOOTSTRAPPING_TIMEOUT_MINUTES);
-      verify(eventService, times(4)).publish(any(MachineStatusEvent.class));
-      verifyEventsOrder(
-          newEvent(DEV_MACHINE, STARTING, null),
-          newEvent(DEV_MACHINE, RUNNING, null),
-          newEvent(DEV_MACHINE, FAILED, "bootstrap failed"),
           newEvent(DEV_MACHINE, STOPPED, null));
       throw ex;
     }
@@ -481,27 +450,5 @@ public class DockerInternalRuntimeTest {
             nullable(DockerMachine.class)))
         .thenReturn(bootstrapper);
     doNothing().when(bootstrapper).bootstrap(BOOTSTRAPPING_TIMEOUT_MINUTES);
-  }
-
-  private void mockInstallersBootstrapFailed(InfrastructureException exception) throws Exception {
-    when(bootstrapperFactory.create(
-            nullable(String.class),
-            nullable(RuntimeIdentity.class),
-            anyList(),
-            nullable(DockerMachine.class)))
-        .thenReturn(bootstrapper);
-    doThrow(exception).when(bootstrapper).bootstrap(BOOTSTRAPPING_TIMEOUT_MINUTES);
-  }
-
-  private InstallerImpl newInstaller(int i) {
-    return new InstallerImpl(
-        "installer_" + i,
-        "installer_name" + i,
-        String.valueOf(i) + ".0.0",
-        "test installer",
-        Collections.emptyList(),
-        emptyMap(),
-        "echo hello",
-        emptyMap());
   }
 }
