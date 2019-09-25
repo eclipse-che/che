@@ -12,7 +12,6 @@
 
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
-import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newPVC;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolume;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolumeMount;
@@ -21,11 +20,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
-import io.fabric8.kubernetes.api.model.VolumeMount;
-import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -59,43 +54,49 @@ public class ChePluginsVolumeApplier {
       Container container,
       Collection<Volume> volumes,
       KubernetesEnvironment k8sEnv) {
-    List<Volume> ephemeralVolumes = new ArrayList<>();
-    List<Volume> persistedVolumes = new ArrayList<>();
     for (Volume volume : volumes) {
-      if (volume.isEphemeral()) {
-        ephemeralVolumes.add(volume);
-      } else {
-        persistedVolumes.add(volume);
-      }
-    }
+      String podVolumeName = provisionPodVolume(volume, pod, k8sEnv);
 
-    applyEphemeralVolumes(container, ephemeralVolumes, pod);
-    applyPersistedVolumes(container, persistedVolumes, pod, k8sEnv);
+      container.getVolumeMounts().add(newVolumeMount(podVolumeName, volume.getMountPath(), ""));
+    }
   }
 
-  private void applyEphemeralVolumes(
-      Container container, List<Volume> volumes, KubernetesEnvironment.PodData pod) {
-
-    if (volumes.isEmpty()) {
-      return;
+  private String provisionPodVolume(
+      Volume volume, KubernetesEnvironment.PodData pod, KubernetesEnvironment k8sEnv) {
+    if (volume.isEphemeral()) {
+      addEmptyDirVolumeIfAbsent(pod.getSpec(), volume.getName());
+      return volume.getName();
+    } else {
+      return provisionPVCPodVolume(volume, pod, k8sEnv).getName();
     }
+  }
 
-    List<VolumeMount> ephemeralVolumeMounts =
-        volumes
+  private io.fabric8.kubernetes.api.model.Volume provisionPVCPodVolume(
+      Volume volume, KubernetesEnvironment.PodData pod, KubernetesEnvironment k8sEnv) {
+    final PersistentVolumeClaim pvc =
+        newPVC(volume.getName(), pvcAccessMode, pvcQuantity, pvcStorageClassName);
+    k8sEnv.getPersistentVolumeClaims().put(volume.getName(), pvc);
+
+    String pvcName = pvc.getMetadata().getName();
+
+    PodSpec podSpec = pod.getSpec();
+    Optional<io.fabric8.kubernetes.api.model.Volume> volumeOpt =
+        podSpec
+            .getVolumes()
             .stream()
-            .map(
-                volume ->
-                    new VolumeMountBuilder()
-                        .withName(volume.getName())
-                        .withMountPath(volume.getMountPath())
-                        .build())
-            .collect(toList());
-
-    container.getVolumeMounts().addAll(ephemeralVolumeMounts);
-
-    for (VolumeMount ephemeralVolumeMount : ephemeralVolumeMounts) {
-      addEmptyDirVolumeIfAbsent(pod.getSpec(), ephemeralVolumeMount.getName());
+            .filter(
+                vm ->
+                    vm.getPersistentVolumeClaim() != null
+                        && pvcName.equals(vm.getPersistentVolumeClaim().getClaimName()))
+            .findAny();
+    io.fabric8.kubernetes.api.model.Volume podVolume;
+    if (volumeOpt.isPresent()) {
+      podVolume = volumeOpt.get();
+    } else {
+      podVolume = newVolume(pvcName, pvcName);
+      podSpec.getVolumes().add(podVolume);
     }
+    return podVolume;
   }
 
   private void addEmptyDirVolumeIfAbsent(PodSpec podSpec, String uniqueVolumeName) {
@@ -111,46 +112,6 @@ public class ChePluginsVolumeApplier {
                   .withNewEmptyDir()
                   .endEmptyDir()
                   .build());
-    }
-  }
-
-  private void applyPersistedVolumes(
-      Container container,
-      List<Volume> volumes,
-      KubernetesEnvironment.PodData pod,
-      KubernetesEnvironment k8sEnv) {
-    if (volumes.isEmpty()) {
-      return;
-    }
-
-    for (Volume volume : volumes) {
-      final PersistentVolumeClaim pvc =
-          newPVC(volume.getName(), pvcAccessMode, pvcQuantity, pvcStorageClassName);
-      k8sEnv.getPersistentVolumeClaims().put(volume.getName(), pvc);
-
-      String pvcName = pvc.getMetadata().getName();
-
-      PodSpec podSpec = pod.getSpec();
-      Optional<io.fabric8.kubernetes.api.model.Volume> volumeOpt =
-          podSpec
-              .getVolumes()
-              .stream()
-              .filter(
-                  vm ->
-                      vm.getPersistentVolumeClaim() != null
-                          && pvcName.equals(vm.getPersistentVolumeClaim().getClaimName()))
-              .findAny();
-      io.fabric8.kubernetes.api.model.Volume podVolume;
-      if (volumeOpt.isPresent()) {
-        podVolume = volumeOpt.get();
-      } else {
-        podVolume = newVolume(pvcName, pvcName);
-        podSpec.getVolumes().add(podVolume);
-      }
-
-      container
-          .getVolumeMounts()
-          .add(newVolumeMount(podVolume.getName(), volume.getMountPath(), ""));
     }
   }
 }
