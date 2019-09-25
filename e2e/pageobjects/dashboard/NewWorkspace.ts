@@ -17,6 +17,7 @@ import { Dashboard } from './Dashboard';
 import { Workspaces } from './Workspaces';
 import { WorkspaceDetails } from './workspace-details/WorkspaceDetails';
 import { ITestWorkspaceUtil, Ide, WorkspaceStatus } from '../..';
+import { Logger } from '../../utils/Logger';
 
 
 @injectable()
@@ -40,6 +41,8 @@ export class NewWorkspace {
         @inject(CLASSES.WorkspaceDetails) private readonly workspaceDetails: WorkspaceDetails) { }
 
     async createAndRunWorkspace(namespace: string, workspaceName: string, dataStackId: string) {
+        Logger.debug(`NewWorkspace.createAndRunWorkspace "${namespace}/${workspaceName}" stackID: "${dataStackId}"`);
+
         await this.prepareWorkspace(workspaceName, dataStackId);
         await this.clickOnCreateAndOpenButton();
 
@@ -49,11 +52,15 @@ export class NewWorkspace {
     }
 
     async waitPageAbsence(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug('NewWorkspace.waitPageAbsence');
+
         await this.driverHelper.waitDisappearanceWithTimeout(By.css(NewWorkspace.NAME_FIELD_CSS), timeout);
         await this.driverHelper.waitDisappearanceWithTimeout(By.css(NewWorkspace.TITLE_CSS), timeout);
     }
 
     async createWorkspaceAndProceedEditing(workspaceName: string, dataStackId: string) {
+        Logger.debug(`NewWorkspace.createWorkspaceAndProceedEditing "${workspaceName}" stackID: "${dataStackId}"`);
+
         await this.prepareWorkspace(workspaceName, dataStackId);
         await this.selectCreateWorkspaceAndProceedEditing();
 
@@ -61,20 +68,28 @@ export class NewWorkspace {
     }
 
     async createAndOpenWorkspace(workspaceName: string, dataStackId: string) {
+        Logger.debug(`NewWorkspace.createAndOpenWorkspace "${workspaceName}" stackID: "${dataStackId}"`);
+
         await this.prepareWorkspace(workspaceName, dataStackId);
         await this.clickOnCreateAndOpenButton();
     }
 
     async confirmProjectAdding(sampleName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`NewWorkspace.confirmProjectAdding "${sampleName}"`);
+
         await this.clickOnAddButton(timeout);
         await this.waitProjectAdding(sampleName, timeout);
     }
 
     async waitProjectSourceForm(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('NewWorkspace.waitProjectSourceForm');
+
         await this.driverHelper.waitVisibility(By.css(NewWorkspace.PROJECT_SOURCE_FORM_CSS), timeout);
     }
 
     async selectStack(dataStackId: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`NewWorkspace.selectStack datastackID: "${dataStackId}"`);
+
         const stackLocator: By = By.css(this.getStackCssLocator(dataStackId));
 
         await this.driverHelper.waitAndClick(stackLocator, timeout);
@@ -82,12 +97,16 @@ export class NewWorkspace {
     }
 
     async waitStackSelection(dataStackId: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`NewWorkspace.waitStackSelection datastackID: "${dataStackId}"`);
+
         const selectedStackLocator: By = By.css(this.getSelectedStackCssLocator(dataStackId));
 
         await this.driverHelper.waitAndClick(selectedStackLocator, timeout);
     }
 
     async openPageByUI() {
+        Logger.debug('NewWorkspace.openPageByUI');
+
         await this.dashboard.waitPage();
         await this.dashboard.clickWorkspacesButton();
         await this.workspaces.clickAddWorkspaceButton();
@@ -96,16 +115,22 @@ export class NewWorkspace {
     }
 
     async waitPage(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug('NewWorkspace.waitPage');
+
         await this.driverHelper.waitVisibility(By.css(NewWorkspace.NAME_FIELD_CSS), timeout);
         await this.driverHelper.waitVisibility(By.css(NewWorkspace.TITLE_CSS), timeout);
         await this.waitLoaderAbsence(timeout);
     }
 
     async waitLoaderAbsence(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug('NewWorkspace.waitLoaderAbsence');
+
         await this.driverHelper.waitPresence(By.css(NewWorkspace.HIDDEN_LOADER_CSS), timeout);
     }
 
     async selectCreateWorkspaceAndProceedEditing(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('NewWorkspace.selectCreateWorkspaceAndProceedEditing');
+
         const createAndProceedEditingButtonLocator: By = By.xpath('//span[text()=\'Create & Proceed Editing\']');
 
         // open drop down list
@@ -116,12 +141,16 @@ export class NewWorkspace {
     }
 
     async typeWorkspaceName(workspaceName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`NewWorkspace.typeWorkspaceName "${workspaceName}"`);
+
         const workspaceNameFieldLocator: By = By.css(NewWorkspace.NAME_FIELD_CSS);
 
         await this.driverHelper.enterValue(workspaceNameFieldLocator, workspaceName, timeout);
     }
 
     async clickOnChe7Stack(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('NewWorkspace.clickOnChe7Stack');
+
         const che7StackLocator: By = By.css(NewWorkspace.CHE_7_STACK_CSS);
 
         await this.driverHelper.waitAndClick(che7StackLocator, timeout);
@@ -129,12 +158,16 @@ export class NewWorkspace {
     }
 
     async waitChe7StackSelected(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('NewWorkspace.waitChe7StackSelected');
+
         const che7SelectedStackLocator: By = By.css(NewWorkspace.SELECTED_CHE_7_STACK_CSS);
 
         await this.driverHelper.waitVisibility(che7SelectedStackLocator, timeout);
     }
 
     async clickOnCreateAndOpenButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('NewWorkspace.clickOnCreateAndOpenButton');
+
         const ideFrameLocator: By = By.xpath('//ide-iframe[@id=\'ide-iframe-window\' and @aria-hidden=\'false\']');
 
         await this.driverHelper.waitAndClick(By.xpath(NewWorkspace.CREATE_AND_OPEN_BUTTON_XPATH), timeout);
@@ -144,6 +177,8 @@ export class NewWorkspace {
     }
 
     async clickOnAddOrImportProjectButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('NewWorkspace.clickOnAddOrImportProjectButton');
+
         const addOrImportProjectButtonLocator: By = By.css(NewWorkspace.ADD_OR_IMPORT_PROJECT_BUTTON_CSS);
 
         await this.driverHelper.waitAndClick(addOrImportProjectButtonLocator, timeout);
@@ -151,12 +186,16 @@ export class NewWorkspace {
     }
 
     async waitSampleCheckboxEnabling(sampleName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`NewWorkspace.waitSampleCheckboxEnabling "${sampleName}"`);
+
         const enabledSampleCheckboxLocator: By = By.css(`#sample-${sampleName}>md-checkbox[aria-checked='true']`);
 
         await this.driverHelper.waitVisibility(enabledSampleCheckboxLocator, timeout);
     }
 
     async enableSampleCheckbox(sampleName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`NewWorkspace.enableSampleCheckbox "${sampleName}"`);
+
         const sampleCheckboxLocator: By = By.xpath(`(//*[@id='sample-${sampleName}']//md-checkbox//div)[1]`);
 
         await this.driverHelper.waitAndClick(sampleCheckboxLocator, timeout);
@@ -164,18 +203,24 @@ export class NewWorkspace {
     }
 
     async waitProjectAdding(projectName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`NewWorkspace.waitProjectAdding "${projectName}"`);
+
         const addedProjectLocator: By = By.css(`#project-source-selector toggle-single-button#${projectName}`);
 
         await this.driverHelper.waitVisibility(addedProjectLocator, timeout);
     }
 
     async waitProjectAbsence(projectName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`NewWorkspace.waitProjectAbsence "${projectName}"`);
+
         const addedProjectLocator: By = By.css(`#project-source-selector toggle-single-button#${projectName}`);
 
         await this.driverHelper.waitDisappearance(addedProjectLocator, timeout);
     }
 
     async clickOnAddButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('NewWorkspace.clickOnAddButton');
+
         await this.driverHelper.waitAndClick(By.css(NewWorkspace.ADD_BUTTON_CSS), timeout);
     }
 
