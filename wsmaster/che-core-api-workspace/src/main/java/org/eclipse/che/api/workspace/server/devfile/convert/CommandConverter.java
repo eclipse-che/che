@@ -96,17 +96,6 @@ public class CommandConverter {
     command.setType(commandAction.getType());
     command.setCommandLine(commandAction.getCommand());
 
-    if (devCommand.getPreviewUrl() != null) {
-      command
-          .getAttributes()
-          .put(
-              "previewUrl",
-              ":"
-                  + devCommand.getPreviewUrl().getPort()
-                  + "/"
-                  + devCommand.getPreviewUrl().getPath()); // TODO: handle null port or path
-    }
-
     if (commandAction.getWorkdir() != null) {
       command.getAttributes().put(WORKING_DIRECTORY_ATTRIBUTE, commandAction.getWorkdir());
     }

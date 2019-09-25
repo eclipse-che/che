@@ -65,6 +65,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
@@ -956,21 +957,35 @@ public class WorkspaceService extends Service {
 
     if (workspaceDto.getRuntime() != null && !workspaceDto.getRuntime().getMachines().isEmpty()) {
       workspaceDto
-          .getRuntime()
+          .getDevfile()
           .getCommands()
           .stream()
-          .filter(c -> c.getAttributes().containsKey("previewUrl"))
+          .filter(c -> c.getPreviewUrl() != null)
           .forEach(
               c -> {
-                String machine = c.getAttributes().get("machineName");
-                Map<String, ServerDto> servers =
-                    workspaceDto.getRuntime().getMachines().get(machine).getServers();
-                if (servers.values().size() == 1) {
-                  ServerDto server = servers.values().iterator().next();
-                  String serverUrl = server.getUrl();
-                  String previewUrl = serverUrl + c.getAttributes().get("previewUrl");
-                  c.getAttributes().put("previewUrl", previewUrl);
-                }
+                workspaceDto
+                    .getRuntime()
+                    .getCommands()
+                    .stream()
+                    .filter(cdto -> cdto.getName().equals(c.getName()))
+                    .forEach(
+                        cdto -> {
+                          String machineName = cdto.getAttributes().get("machineName");
+                          Map<String, ? extends Server> machineServers =
+                              workspace.getRuntime().getMachines().get(machineName).getServers();
+                          if (machineServers.size() == 1) {
+                            Server server = machineServers.values().iterator().next();
+                            String serverUrl = server.getUrl();
+                            cdto.getAttributes()
+                                .put(
+                                    "previewUrl",
+                                    serverUrl.substring(0, serverUrl.length() - 1)
+                                        + ":"
+                                        + c.getPreviewUrl().getPort()
+                                        + "/"
+                                        + c.getPreviewUrl().getPath());
+                          }
+                        });
               });
     }
 
