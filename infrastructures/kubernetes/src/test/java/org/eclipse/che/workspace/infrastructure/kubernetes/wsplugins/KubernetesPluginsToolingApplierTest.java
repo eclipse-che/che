@@ -471,10 +471,10 @@ public class KubernetesPluginsToolingApplierTest {
 
     verify(chePluginsVolumeApplier)
         .applyVolumes(
+            any(PodData.class),
             eq(container),
             eq(cheContainer.getVolumes()),
-            eq(internalEnvironment),
-            any(PodData.class));
+            eq(internalEnvironment));
   }
 
   @Test
@@ -493,10 +493,10 @@ public class KubernetesPluginsToolingApplierTest {
 
     verify(chePluginsVolumeApplier)
         .applyVolumes(
+            any(PodData.class),
             eq(toolingInitContainer),
             eq(initContainer.getVolumes()),
-            eq(internalEnvironment),
-            any(PodData.class));
+            eq(internalEnvironment));
   }
 
   @Test
@@ -522,13 +522,10 @@ public class KubernetesPluginsToolingApplierTest {
 
     verify(chePluginsVolumeApplier)
         .applyVolumes(
-            any(Container.class), eq(volumes), eq(internalEnvironment), any(PodData.class));
-    verify(chePluginsVolumeApplier)
-        .applyVolumes(
+            any(PodData.class),
             any(Container.class),
             eq(chePlugin.getContainers().get(0).getVolumes()),
-            eq(internalEnvironment),
-            any(PodData.class));
+            eq(internalEnvironment));
   }
 
   @Test

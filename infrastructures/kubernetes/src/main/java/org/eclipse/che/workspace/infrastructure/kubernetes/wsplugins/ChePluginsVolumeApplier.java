@@ -73,11 +73,13 @@ public class ChePluginsVolumeApplier {
 
   private io.fabric8.kubernetes.api.model.Volume provisionPVCPodVolume(
       Volume volume, KubernetesEnvironment.PodData pod, KubernetesEnvironment k8sEnv) {
-    final PersistentVolumeClaim pvc =
-        newPVC(volume.getName(), pvcAccessMode, pvcQuantity, pvcStorageClassName);
-    k8sEnv.getPersistentVolumeClaims().put(volume.getName(), pvc);
+    String pvcName = volume.getName();
 
-    String pvcName = pvc.getMetadata().getName();
+    if (!k8sEnv.getPersistentVolumeClaims().containsKey(pvcName)) {
+      final PersistentVolumeClaim pvc =
+          newPVC(pvcName, pvcAccessMode, pvcQuantity, pvcStorageClassName);
+      k8sEnv.getPersistentVolumeClaims().put(pvcName, pvc);
+    }
 
     PodSpec podSpec = pod.getSpec();
     Optional<io.fabric8.kubernetes.api.model.Volume> volumeOpt =
