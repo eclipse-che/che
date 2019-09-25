@@ -33,6 +33,10 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
+/**
+ * Components for applying workspace plugin volumes to the kubernetes {@link
+ * io.fabric8.kubernetes.api.model.Container}.
+ */
 @Singleton
 public class ChePluginsVolumeApplier {
 
@@ -51,10 +55,10 @@ public class ChePluginsVolumeApplier {
   }
 
   public void applyVolumes(
+      KubernetesEnvironment.PodData pod,
       Container container,
       Collection<Volume> volumes,
-      KubernetesEnvironment k8sEnv,
-      KubernetesEnvironment.PodData pod) {
+      KubernetesEnvironment k8sEnv) {
     List<Volume> ephemeralVolumes = new ArrayList<>();
     List<Volume> persistedVolumes = new ArrayList<>();
     for (Volume volume : volumes) {

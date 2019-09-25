@@ -65,7 +65,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.Default
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.CookiePathStrategy;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.ChePluginsVolumeApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
@@ -130,7 +129,6 @@ public class OpenShiftInfraModule extends AbstractModule {
         .addBinding()
         .to(KubernetesClientTermination.class);
 
-    bind(ChePluginsVolumeApplier.class);
     MapBinder<String, ChePluginsApplier> pluginsAppliers =
         MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
     pluginsAppliers.addBinding(OpenShiftEnvironment.TYPE).to(KubernetesPluginsToolingApplier.class);
