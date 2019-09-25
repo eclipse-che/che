@@ -35,6 +35,7 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -82,7 +83,7 @@ public class NewWorkspace {
     String TOP_CREATE_BUTTON_XPATH = "//button[@name='split-button']";
     String TOP_DROPDOWN_BUTTON_XPATH = "//button[@name='dropdown-toggle']";
     String TOP_EDIT_BUTTON_XPATH = "//span[text()='Create & Proceed Editing']";
-    String BOTTOM_CREATE_BUTTON_XPATH = "//che-button-save-flat/button[@name='saveButton']";
+    String BOTTOM_CREATE_BUTTON_XPATH = "//*[@id='create-workspace-footer-button']";
   }
 
   public enum Devfile {
@@ -185,7 +186,12 @@ public class NewWorkspace {
 
   public void selectDevfile(Devfile devfile) {
     waitDevfiles(asList(devfile));
-    seleniumWebDriverHelper.waitAndClick(By.xpath(format(DEVFILE_ROW_XPATH, devfile.getId())));
+    try {
+      seleniumWebDriverHelper.waitAndClick(By.xpath(format(DEVFILE_ROW_XPATH, devfile.getId())));
+      waitDevfileSelected(devfile);
+    } catch (TimeoutException ex) {
+      seleniumWebDriverHelper.waitAndClick(By.xpath(format(DEVFILE_ROW_XPATH, devfile.getId())));
+    }
   }
 
   public boolean isCreateWorkspaceButtonEnabled() {

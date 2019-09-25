@@ -62,6 +62,8 @@ export class RamSettingsController {
     }, true);
   }
 
+  $onInit(): void { }
+
   /**
    * Builds list of machines properties.
    */

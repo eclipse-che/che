@@ -120,6 +120,11 @@ export class CreateTeamController {
     }
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Performs new team creation.
    */

@@ -42,6 +42,10 @@ export class ListTeamsController {
    */
   private confirmDialogService: any;
   /**
+   * Resources service.
+   */
+  private resourcesService: che.service.IResourcesService;
+  /**
    * Promises service.
    */
   private $q: ng.IQService;
@@ -95,12 +99,11 @@ export class ListTeamsController {
     this.cheTeam = cheTeam;
     this.chePermissions = chePermissions;
     this.cheResourcesDistribution = cheResourcesDistribution;
-    this.resourceLimits = resourcesService.getResourceLimits();
-
     this.cheNotification = cheNotification;
     this.confirmDialogService = confirmDialogService;
     this.$q = $q;
     this.$location = $location;
+    this.resourcesService = resourcesService;
 
     this.teams = [];
     this.isLoading = true;
@@ -108,13 +111,10 @@ export class ListTeamsController {
     this.teamsSelectedStatus = {};
     this.isBulkChecked = false;
     this.isNoSelected = true;
-    this.fetchTeams();
 
-
-    let refreshHandler = () => {
+    const refreshHandler = () => {
       this.fetchTeams();
     };
-
     cheTeamEventsManager.addDeleteHandler(refreshHandler);
     cheTeamEventsManager.addRenameHandler(refreshHandler);
 
@@ -122,6 +122,11 @@ export class ListTeamsController {
       cheTeamEventsManager.removeRenameHandler(refreshHandler);
       cheTeamEventsManager.removeDeleteHandler(refreshHandler);
     });
+  }
+
+  $onInit(): void {
+    this.resourceLimits = this.resourcesService.getResourceLimits();
+    this.fetchTeams();
   }
 
   /**

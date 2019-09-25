@@ -64,6 +64,10 @@ export class ListOrganizationMembersController {
    */
   private confirmDialogService: ConfirmDialogService;
   /**
+   * Resources service.
+   */
+  private resourcesService: che.service.IResourcesService;
+  /**
    * Promises service.
    */
   private $q: ng.IQService;
@@ -134,9 +138,8 @@ export class ListOrganizationMembersController {
     this.cheNotification = cheNotification;
     this.confirmDialogService = confirmDialogService;
     this.organizationsPermissionService = organizationsPermissionService;
-    this.organizationActions = resourcesService.getOrganizationActions();
-    this.organizationRoles = resourcesService.getOrganizationRoles();
     this.$log = $log;
+    this.resourcesService = resourcesService;
 
     this.members = [];
 
@@ -146,6 +149,11 @@ export class ListOrganizationMembersController {
     $scope.$on('$destroy', () => {
       cheListHelperFactory.removeHelper(helperId);
     });
+  }
+
+  $onInit(): void {
+    this.organizationActions = this.resourcesService.getOrganizationActions();
+    this.organizationRoles = this.resourcesService.getOrganizationRoles();
 
     this.formMemberList();
   }

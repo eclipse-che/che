@@ -39,6 +39,7 @@ import { OcpLoginPage } from '../pageobjects/openshift/OcpLoginPage';
 import { OcpWebConsolePage } from '../pageobjects/openshift/OcpWebConsolePage';
 import { OcpLoginByTempAdmin } from '../pageobjects/login/OcpLoginByTempAdmin';
 import { OpenWorkspaceWidget } from '../pageobjects/ide/OpenWorkspaceWidget';
+import { ContextMenu } from '../pageobjects/ide/ContextMenu';
 import { ITestWorkspaceUtil } from '..';
 
 export function getContainer(): Container {
@@ -54,6 +55,7 @@ export function getContainer(): Container {
         e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(SingleUserLoginPage).inSingletonScope();
     }
 
+    e2eContainer.bind<ContextMenu>(CLASSES.ContextMenu).to(ContextMenu).inSingletonScope();
     e2eContainer.bind<DriverHelper>(CLASSES.DriverHelper).to(DriverHelper).inSingletonScope();
     e2eContainer.bind<Dashboard>(CLASSES.Dashboard).to(Dashboard).inSingletonScope();
     e2eContainer.bind<Workspaces>(CLASSES.Workspaces).to(Workspaces).inSingletonScope();

@@ -38,6 +38,11 @@ export class NoGithubOauthDialogController {
     this.message = ($rootScope as any).branding.oauthDocs;
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * It will hide the dialog box.
    */

@@ -13,6 +13,14 @@ import { DashboardLastWorkspacesController } from "./last-workspaces.controller"
 import { CheWorkspace } from "../../../components/api/workspace/che-workspace.factory";
 import { CheNotification } from "../../../components/notification/che-notification.factory";
 
+declare const expect: (param: any) => {
+  toHaveBeenCalledTimes: any;
+  toBeTruthy: () => any;
+  toBeFalsy: () => any;
+  toBe: any;
+  not: any;
+};
+
 /**
  * @author Lucia Jelinkova
  */
@@ -21,6 +29,14 @@ describe(`Last workspaces controller >`, () => {
   let controller: DashboardLastWorkspacesController;
   let cheWorkspace: CheWorkspace;
   let cheNotification: CheNotification;
+
+  let createGeneralError = () => Promise.reject('This is some error');
+  let createHTTPError = (message: string) => Promise.reject({
+    'status': status,
+    'data': {
+      'message': message
+    }
+  });
 
   beforeEach(() => {
     // tell angular to mock the module
@@ -119,19 +135,5 @@ describe(`Last workspaces controller >`, () => {
     expect(cheWorkspace.fetchWorkspaces).toHaveBeenCalledTimes(1);
     expect(cheNotification.showError).toHaveBeenCalledTimes(1);
   });
-
-  function createGeneralError(): Promise<any> {
-    return Promise.reject("This is some error");
-  }
-
-  function createHTTPError(message: string): Promise<any> {
-    var error = {
-      'status': status,
-      'data': {
-        'message': message
-      }
-    }
-    return Promise.reject(error);
-  }
 });
 

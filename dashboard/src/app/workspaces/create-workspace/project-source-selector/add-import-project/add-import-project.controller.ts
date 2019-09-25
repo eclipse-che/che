@@ -62,12 +62,14 @@ export class AddImportProjectController {
 
     this.projectSource = ProjectSource;
 
-    this.activeProjectSource = this.devfile ? ProjectSource.SAMPLES : ProjectSource.GIT;
-    this.sourceChanged();
-
     $scope.$on('$destroy', () => {
       this.addImportProjectService.clearAllSources();
     });
+  }
+
+  $onInit(): void {
+    this.activeProjectSource = this.devfile ? ProjectSource.SAMPLES : ProjectSource.GIT;
+    this.sourceChanged();
   }
 
   /**

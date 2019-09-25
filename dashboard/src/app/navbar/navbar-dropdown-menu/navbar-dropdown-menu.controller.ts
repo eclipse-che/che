@@ -33,7 +33,9 @@ export class NavbarDropdownMenuController {
    */
   constructor($window: ng.IWindowService) {
     this.$window = $window;
+  }
 
+  $onInit(): void {
     this.offset = angular.isUndefined(this.offset) ? '0 0' : this.offset;
   }
 

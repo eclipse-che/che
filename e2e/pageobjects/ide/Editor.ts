@@ -12,12 +12,17 @@ import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
-import { By, Key, error } from 'selenium-webdriver';
+import { By, Key, error, ActionSequence, Button } from 'selenium-webdriver';
 import { Ide } from './Ide';
+
 
 @injectable()
 export class Editor {
     private static readonly SUGGESTION_WIDGET_BODY_CSS: string = 'div.visible[widgetId=\'editor.widget.suggestWidget\']';
+
+    private static readonly ADDITIONAL_SHIFTING_TO_Y: number = 19;
+    private static readonly ADDITIONAL_SHIFTING_TO_X: number = 1;
+
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Ide) private readonly ide: Ide) { }
@@ -278,7 +283,8 @@ export class Editor {
         }
     }
 
-    private async getLineYCoordinates(lineNumber: number): Promise<number> {
+
+    async getLineYCoordinates(lineNumber: number): Promise<number> {
         const lineNumberLocator: By = By.xpath(`//div[contains(@class, 'line-numbers') and text()='${lineNumber}']` +
             `//parent::div[contains(@style, 'position')]`);
 
@@ -294,6 +300,36 @@ export class Editor {
         }
 
         return lineYCoordinate;
+    }
+
+    async clickOnLineAndChar(line: number, char: number) {
+        const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
+        const xPosition: number = char + Editor.ADDITIONAL_SHIFTING_TO_X;
+
+        new ActionSequence(this.driverHelper.getDriver()).
+            mouseMove({ x: xPosition, y: yPosition }).
+            click().
+            perform();
+    }
+
+    async goToDefinitionWithMouseClicking(line: number, char: number) {
+        const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
+
+        new ActionSequence(this.driverHelper.getDriver()).
+            keyDown(Key.CONTROL).
+            mouseMove({ x: char + Editor.ADDITIONAL_SHIFTING_TO_X, y: yPosition }).
+            click().
+            keyDown(Key.CONTROL).
+            perform();
+    }
+
+    async mouseRightButtonClick(line: number, char: number) {
+        const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
+
+        new ActionSequence(this.driverHelper.getDriver()).
+            mouseMove({ x: char + Editor.ADDITIONAL_SHIFTING_TO_X, y: yPosition }).
+            click(Button.RIGHT).
+            perform();
     }
 
     private getTabWithUnsavedStatus(tabTitle: string): By {

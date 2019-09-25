@@ -39,6 +39,8 @@ export class CheDropZoneCtrl {
     this.lodash = lodash;
   }
 
+  $onInit(): void { }
+
   dropCallback(evt: ICheDropZoneEventObject): void {
     evt.stopPropagation();
     evt.preventDefault();

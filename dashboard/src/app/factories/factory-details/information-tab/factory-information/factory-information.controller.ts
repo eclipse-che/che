@@ -32,6 +32,7 @@ export class FactoryInformationController {
   private $timeout: ng.ITimeoutService;
   private lodash: any;
   private $filter: ng.IFilterService;
+  private cheBranding: CheBranding;
 
   private timeoutPromise: ng.IPromise<any>;
   private editorLoadedPromise: ng.IPromise<any>;
@@ -73,7 +74,7 @@ export class FactoryInformationController {
     this.lodash = lodash;
     this.$filter = $filter;
     this.confirmDialogService = confirmDialogService;
-    this.factoryDocs = cheBranding.getDocs().factory;
+    this.cheBranding = cheBranding;
 
     this.timeoutPromise = null;
     $scope.$on('$destroy', () => {
@@ -97,12 +98,16 @@ export class FactoryInformationController {
 
     this.stackRecipeMode = 'current-recipe';
 
-    this.updateData();
     $scope.$watch(() => {
       return this.factory;
     }, () => {
       this.updateData();
     });
+  }
+
+  $onInit(): void {
+    this.factoryDocs = this.cheBranding.getDocs().factory;
+    this.updateData();
   }
 
   /**

@@ -70,7 +70,7 @@ public class Workspaces {
     String DOCUMENTATION_LINK = "//div[@che-link-title='Learn more.']/a";
     String ADD_WORKSPACE_BTN = "add-item-button";
     String DELETE_WORKSPACE_BTN = "delete-item-button";
-    String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
+    String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button[text()='Delete']";
     String BULK_CHECKBOX = "//md-checkbox[@aria-label='Workspace list']";
     String SEARCH_WORKSPACE_FIELD = "//input[@ng-placeholder='Search']";
     String NO_WORKSPACE_FOUND = "//span[text()='No workspaces found.']";
