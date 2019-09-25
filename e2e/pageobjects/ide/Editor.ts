@@ -14,6 +14,7 @@ import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { By, Key, error, ActionSequence, Button } from 'selenium-webdriver';
 import { Ide } from './Ide';
+import { Logger } from '../../utils/Logger';
 
 
 @injectable()
@@ -28,16 +29,22 @@ export class Editor {
         @inject(CLASSES.Ide) private readonly ide: Ide) { }
 
     public async waitSuggestionContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Editor.waitSuggestionContainer');
+
         await this.driverHelper.waitVisibility(By.css(Editor.SUGGESTION_WIDGET_BODY_CSS), timeout);
     }
 
     public async waitSuggestionContainerClosed() {
+        Logger.debug('Editor.waitSuggestionContainerClosed');
+
         await this.driverHelper.waitDisappearanceWithTimeout(By.css(Editor.SUGGESTION_WIDGET_BODY_CSS));
     }
 
     public async waitSuggestion(editorTabTitle: string,
         suggestionText: string,
         timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+
+        Logger.debug(`Editor.waitSuggestion tabTitle: "${editorTabTitle}" suggestion: "${suggestionText}"`);
 
         const suggestionLocator: By = this.getSuggestionLineXpathLocator(suggestionText);
 
@@ -59,39 +66,56 @@ export class Editor {
     }
 
     public async pressControlSpaceCombination(editorTabTitle: string) {
+        Logger.debug(`Editor.pressControlSpaceCombination "${editorTabTitle}"`);
+
         await this.performKeyCombination(editorTabTitle, Key.chord(Key.CONTROL, Key.SPACE));
     }
 
     public async pressEscapeButton(editorTabTitle: string) {
+        Logger.debug(`Editor.pressEscapeButton "${editorTabTitle}"`);
+
         await this.performKeyCombination(editorTabTitle, Key.ESCAPE);
     }
 
     public async clickOnSuggestion(suggestionText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Editor.clickOnSuggestion "${suggestionText}"`);
+
         await this.driverHelper.waitAndClick(this.getSuggestionLineXpathLocator(suggestionText), timeout);
     }
 
     public async waitTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Editor.waitTab "${tabTitle}"`);
+
         await this.driverHelper.waitVisibility(By.xpath(this.getTabXpathLocator(tabTitle)), timeout);
     }
 
     public async waitTabDisappearance(tabTitle: string,
         attempt: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
+
+        Logger.debug(`Editor.waitTabDisappearance "${tabTitle}"`);
+
         await this.driverHelper.waitDisappearance(By.xpath(this.getTabXpathLocator(tabTitle)), attempt, polling);
     }
 
     public async clickOnTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Editor.clickOnTab "${tabTitle}"`);
+
         await this.ide.closeAllNotifications();
         await this.driverHelper.waitAndClick(By.xpath(this.getTabXpathLocator(tabTitle)), timeout);
     }
 
     public async waitTabFocused(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Editor.waitTabFocused "${tabTitle}"`);
+
         const focusedTabLocator: By = By.xpath(`//li[contains(@class, 'p-TabBar-tab') and contains(@class, 'theia-mod-active')]//div[text()='${tabTitle}']`);
 
         await this.driverHelper.waitVisibility(focusedTabLocator, timeout);
     }
 
     public async selectTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Editor.selectTab "${tabTitle}"`);
+
         await this.ide.closeAllNotifications();
         await this.waitTab(tabTitle, timeout);
         await this.clickOnTab(tabTitle, timeout);
@@ -99,18 +123,24 @@ export class Editor {
     }
 
     async closeTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Editor.closeTab "${tabTitle}"`);
+
         const tabCloseButtonLocator: By = By.xpath(`//div[text()='${tabTitle}']/parent::li//div[contains(@class, 'p-TabBar-tabCloseIcon')]`);
 
         await this.driverHelper.waitAndClick(tabCloseButtonLocator, timeout);
     }
 
     async waitTabWithUnsavedStatus(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Editor.waitTabWithUnsavedStatus "${tabTitle}"`);
+
         const unsavedTabLocator: By = this.getTabWithUnsavedStatus(tabTitle);
 
         await this.driverHelper.waitVisibility(unsavedTabLocator, timeout);
     }
 
     async waitTabWithSavedStatus(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Editor.waitTabWithSavedStatus "${tabTitle}"`);
+
         const unsavedTabLocator: By = this.getTabWithUnsavedStatus(tabTitle);
 
         await this.driverHelper.getDriver().wait(async () => {
@@ -130,6 +160,8 @@ export class Editor {
     }
 
     async waitEditorOpened(editorTabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Editor.waitEditorOpened "${editorTabTitle}"`);
+
         const firstEditorLineLocator: By = By.xpath(this.getEditorLineXpathLocator(1));
 
         await this.driverHelper.waitPresence(this.getEditorBodyLocator(editorTabTitle), timeout);
@@ -137,11 +169,15 @@ export class Editor {
     }
 
     async waitEditorAvailable(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Editor.waitEditorAvailable "${tabTitle}"`);
+
         await this.waitTab(tabTitle, timeout);
         await this.waitEditorOpened(tabTitle, timeout);
     }
 
     async getLineText(tabTitle: string, lineNumber: number): Promise<string> {
+        Logger.debug(`Editor.getLineText "${tabTitle}"`);
+
         const lineIndex: number = lineNumber - 1;
         const editorText: string = await this.getEditorVisibleText(tabTitle);
         const editorLines: string[] = editorText.split('\n');
@@ -151,6 +187,8 @@ export class Editor {
     }
 
     async getEditorVisibleText(tabTitle: string): Promise<string> {
+        Logger.debug(`Editor.getEditorVisibleText "${tabTitle}"`);
+
         const editorBodyLocator: By = By.xpath(`//div[contains(@data-uri, \'${tabTitle}')]//div[@class=\'view-lines\']`);
         // const editorBodyLocator: By = By.xpath('//div[@class=\'view-lines\']');
         const editorText: string = await this.driverHelper.waitAndGetText(editorBodyLocator);
@@ -160,6 +198,9 @@ export class Editor {
     async waitText(tabTitle: string, expectedText: string,
         timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
+
+        Logger.debug(`Editor.waitText "${tabTitle}"`);
+
         await this.driverHelper.getDriver().wait(async () => {
             const editorText: string = await this.getEditorVisibleText(tabTitle);
             const isEditorContainText: boolean = editorText.includes(expectedText);
@@ -177,6 +218,8 @@ export class Editor {
         timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
 
+        Logger.debug(`Editor.followAndWaitForText title: "${editorTabTitle}" text: "${expectedText}"`);
+
         await this.selectTab(editorTabTitle, timeout);
         await this.driverHelper.getDriver().wait(async () => {
             await this.performKeyCombination(editorTabTitle, Key.chord(Key.CONTROL, Key.END));
@@ -193,6 +236,8 @@ export class Editor {
     }
 
     async moveCursorToLineAndChar(editorTabTitle: string, line: number, char: number) {
+        Logger.debug(`Editor.moveCursorToLineAndChar title: "${editorTabTitle}" line: "${line}" char: "${char}"`);
+
         // set cursor to the 1:1 position
         await this.performKeyCombination(editorTabTitle, Key.chord(Key.CONTROL, Key.HOME));
 
@@ -208,59 +253,71 @@ export class Editor {
     }
 
     async performKeyCombination(editorTabTitle: string, text: string) {
-        const interactionContainerLocator: By = this.getEditorActionArreaLocator(editorTabTitle);
+        Logger.debug(`Editor.performKeyCombination title: "${editorTabTitle}" text: "${text}"`);
 
+        const interactionContainerLocator: By = this.getEditorActionArreaLocator(editorTabTitle);
         await this.driverHelper.type(interactionContainerLocator, text);
     }
 
     async type(editorTabTitle: string, text: string, line: number) {
+        Logger.debug(`Editor.type title: "${editorTabTitle}" text: "${text}"`);
+
         await this.selectTab(editorTabTitle);
         await this.moveCursorToLineAndChar(editorTabTitle, line, 1);
         await this.performKeyCombination(editorTabTitle, text);
     }
 
     async waitErrorInLine(lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const errorInLineLocator: By = await this.getErrorInLineLocator(lineNumber);
+        Logger.debug(`Editor.waitErrorInLine line: "${lineNumber}"`);
 
+        const errorInLineLocator: By = await this.getErrorInLineLocator(lineNumber);
         await this.driverHelper.waitVisibility(errorInLineLocator, timeout);
     }
 
     async waitErrorInLineDisappearance(lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const errorInLineLocator: By = await this.getErrorInLineLocator(lineNumber);
+        Logger.debug(`Editor.waitErrorInLineDisappearance line: "${lineNumber}"`);
 
+        const errorInLineLocator: By = await this.getErrorInLineLocator(lineNumber);
         await this.driverHelper.waitDisappearanceWithTimeout(errorInLineLocator, timeout);
     }
 
     async waitStoppedDebugBreakpoint(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Editor.waitStoppedDebugBreakpoint title: "${tabTitle}" line: "${lineNumber}"`);
+
         const stoppedDebugBreakpointLocator: By = By.xpath(await this.getStoppedDebugBreakpointXpathLocator(tabTitle, lineNumber));
         await this.driverHelper.waitVisibility(stoppedDebugBreakpointLocator, timeout);
     }
 
     async waitBreakpoint(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const debugBreakpointLocator: By = await this.getDebugBreakpointLocator(tabTitle, lineNumber);
+        Logger.debug(`Editor.waitBreakpoint title: "${tabTitle}" line: "${lineNumber}"`);
 
+        const debugBreakpointLocator: By = await this.getDebugBreakpointLocator(tabTitle, lineNumber);
         await this.driverHelper.waitVisibility(debugBreakpointLocator, timeout);
     }
 
     async waitBreakpointAbsence(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const debugBreakpointLocator: By = await this.getDebugBreakpointLocator(tabTitle, lineNumber);
+        Logger.debug(`Editor.waitBreakpointAbsence title: "${tabTitle}" line: "${lineNumber}"`);
 
+        const debugBreakpointLocator: By = await this.getDebugBreakpointLocator(tabTitle, lineNumber);
         await this.driverHelper.waitDisappearanceWithTimeout(debugBreakpointLocator, timeout);
     }
 
     async waitBreakpointHint(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const debugBreakpointHintLocator: By = await this.getDebugBreakpointHintLocator(tabTitle, lineNumber);
+        Logger.debug(`Editor.waitBreakpointHint title: "${tabTitle}" line: "${lineNumber}"`);
 
+        const debugBreakpointHintLocator: By = await this.getDebugBreakpointHintLocator(tabTitle, lineNumber);
         await this.driverHelper.waitVisibility(debugBreakpointHintLocator, timeout);
     }
 
     async waitBreakpointHintDisappearance(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const debugBreakpointHintLocator: By = await this.getDebugBreakpointHintLocator(tabTitle, lineNumber);
+        Logger.debug(`Editor.waitBreakpointHintDisappearance title: "${tabTitle}" line: "${lineNumber}"`);
 
+        const debugBreakpointHintLocator: By = await this.getDebugBreakpointHintLocator(tabTitle, lineNumber);
         await this.driverHelper.waitDisappearanceWithTimeout(debugBreakpointHintLocator, timeout);
     }
 
     async activateBreakpoint(tabTitle: string, lineNumber: number) {
+        Logger.debug(`Editor.activateBreakpoint title: "${tabTitle}" line: "${lineNumber}"`);
 
         const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
@@ -285,6 +342,8 @@ export class Editor {
 
 
     async getLineYCoordinates(lineNumber: number): Promise<number> {
+        Logger.debug(`Editor.getLineYCoordinates line: "${lineNumber}"`);
+
         const lineNumberLocator: By = By.xpath(`//div[contains(@class, 'line-numbers') and text()='${lineNumber}']` +
             `//parent::div[contains(@style, 'position')]`);
 
@@ -303,6 +362,8 @@ export class Editor {
     }
 
     async clickOnLineAndChar(line: number, char: number) {
+        Logger.debug(`Editor.clickOnLineAndChar line: "${line}" char: "${char}"`);
+
         const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
         const xPosition: number = char + Editor.ADDITIONAL_SHIFTING_TO_X;
 
@@ -313,6 +374,8 @@ export class Editor {
     }
 
     async goToDefinitionWithMouseClicking(line: number, char: number) {
+        Logger.debug(`Editor.goToDefinitionWithMouseClicking line: "${line}" char: "${char}"`);
+
         const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
 
         new ActionSequence(this.driverHelper.getDriver()).
@@ -324,6 +387,8 @@ export class Editor {
     }
 
     async mouseRightButtonClick(line: number, char: number) {
+        Logger.debug(`Editor.mouseRightButtonClick line: "${line}" char: "${char}"`);
+
         const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
 
         new ActionSequence(this.driverHelper.getDriver()).
