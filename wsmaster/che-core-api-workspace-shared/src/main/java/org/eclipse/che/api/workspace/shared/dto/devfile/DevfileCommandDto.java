@@ -14,6 +14,7 @@ package org.eclipse.che.api.workspace.shared.dto.devfile;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.devfile.Command;
+import org.eclipse.che.api.core.model.workspace.devfile.PreviewUrl;
 import org.eclipse.che.dto.shared.DTO;
 
 /** @author Sergii Leshchenko */
@@ -25,6 +26,8 @@ public interface DevfileCommandDto extends Command {
   void setName(String name);
 
   DevfileCommandDto withName(String name);
+
+  void setPreviewUrl(PreviewUrl previewUrl);
 
   @Override
   List<DevfileActionDto> getActions();
