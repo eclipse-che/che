@@ -4589,10 +4589,10 @@ data:
           },
           "id": 62,
           "legend": {
-            "avg": false,
+            "avg": true,
             "current": true,
-            "max": false,
-            "min": false,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
             "values": true
@@ -4618,7 +4618,7 @@ data:
               "expr": "rate(che_workspace_start_time_seconds_bucket{le=\"62.992853672\",result=\"success\"}[1h]) / ignoring(le) rate(che_workspace_start_time_seconds_count{result=\"success\"}[1h])",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "failure",
+              "legendFormat": "workspace start ratio",
               "refId": "A"
             }
           ],
@@ -4645,7 +4645,7 @@ data:
               "format": "percentunit",
               "label": null,
               "logBase": 1,
-              "max": null,
+              "max": "1",
               "min": "0",
               "show": true
             },
@@ -4653,7 +4653,7 @@ data:
               "format": "percentunit",
               "label": null,
               "logBase": 1,
-              "max": null,
+              "max": "1",
               "min": "0",
               "show": true
             }
@@ -4995,13 +4995,13 @@ data:
           },
           "id": 66,
           "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -5081,13 +5081,13 @@ data:
           },
           "id": 68,
           "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -5167,13 +5167,13 @@ data:
           },
           "id": 70,
           "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -5254,13 +5254,13 @@ data:
           },
           "id": 72,
           "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -5340,13 +5340,13 @@ data:
           },
           "id": 74,
           "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -5426,13 +5426,13 @@ data:
           },
           "id": 76,
           "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -6603,99 +6603,6 @@ data:
             "x": 0,
             "y": 79
           },
-          "id": 58,
-          "legend": {
-            "alignAsTable": false,
-            "avg": false,
-            "current": true,
-            "max": true,
-            "min": false,
-            "rightSide": false,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null as zero",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WorkspaceRuntimes#stopAsync\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WorkspaceRuntimes#stopAsync\"}[1h])",
-              "legendFormat": "{{operation}}",
-              "refId": "A"
-            },
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#internalStop\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#internalStop\"}[1h])",
-              "legendFormat": "{{operation}}",
-              "refId": "B"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Workspace Stop Avg",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": 0,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": 0,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 7,
-            "w": 12,
-            "x": 12,
-            "y": 79
-          },
           "id": 57,
           "legend": {
             "alignAsTable": false,
@@ -6776,6 +6683,99 @@ data:
           }
         },
         {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 79
+          },
+          "id": 58,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WorkspaceRuntimes#stopAsync\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WorkspaceRuntimes#stopAsync\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "A"
+            },
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#internalStop\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#internalStop\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Workspace Stop Avg",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
           "collapsed": true,
           "gridPos": {
             "h": 1,
@@ -6803,7 +6803,7 @@ data:
                 "h": 12,
                 "w": 12,
                 "x": 0,
-                "y": 68
+                "y": 81
               },
               "heatmap": {},
               "hideZeroBuckets": false,
@@ -6869,7 +6869,7 @@ data:
                 "h": 12,
                 "w": 12,
                 "x": 12,
-                "y": 68
+                "y": 81
               },
               "heatmap": {},
               "hideZeroBuckets": false,
@@ -6929,10 +6929,6 @@ data:
       "templating": {
         "list": [
           {
-            "current": {
-              "text": "che",
-              "value": "che"
-            },
             "hide": 0,
             "includeAll": false,
             "label": null,
