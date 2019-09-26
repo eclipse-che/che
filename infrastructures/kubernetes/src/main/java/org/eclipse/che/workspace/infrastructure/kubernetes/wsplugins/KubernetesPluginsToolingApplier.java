@@ -71,18 +71,21 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
   private final String sidecarImagePullPolicy;
   private final boolean isAuthEnabled;
   private final ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider;
+  private final ChePluginsVolumeApplier chePluginsVolumeApplier;
 
   @Inject
   public KubernetesPluginsToolingApplier(
       @Named("che.workspace.sidecar.image_pull_policy") String sidecarImagePullPolicy,
       @Named("che.workspace.sidecar.default_memory_limit_mb") long defaultSidecarMemoryLimitMB,
       @Named("che.agents.auth_enabled") boolean isAuthEnabled,
-      ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider) {
+      ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider,
+      ChePluginsVolumeApplier chePluginsVolumeApplier) {
     this.defaultSidecarMemoryLimitBytes = String.valueOf(defaultSidecarMemoryLimitMB * 1024 * 1024);
     this.isAuthEnabled = isAuthEnabled;
     this.sidecarImagePullPolicy =
         validImagePullPolicies.contains(sidecarImagePullPolicy) ? sidecarImagePullPolicy : null;
     this.projectsRootEnvVariableProvider = projectsRootEnvVariableProvider;
+    this.chePluginsVolumeApplier = chePluginsVolumeApplier;
   }
 
   @Override
@@ -95,13 +98,13 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       return;
     }
 
-    KubernetesEnvironment kubernetesEnvironment = (KubernetesEnvironment) internalEnvironment;
+    KubernetesEnvironment k8sEnv = (KubernetesEnvironment) internalEnvironment;
 
-    Map<String, PodData> pods = kubernetesEnvironment.getPodsData();
+    Map<String, PodData> pods = k8sEnv.getPodsData();
     switch (pods.size()) {
       case 0:
-        addToolingPod(kubernetesEnvironment);
-        pods = kubernetesEnvironment.getPodsData();
+        addToolingPod(k8sEnv);
+        pods = k8sEnv.getPodsData();
         break;
       case 1:
         break;
@@ -111,31 +114,27 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     }
     PodData pod = pods.values().iterator().next();
 
-    CommandsResolver commandsResolver = new CommandsResolver(kubernetesEnvironment);
+    CommandsResolver commandsResolver = new CommandsResolver(k8sEnv);
     for (ChePlugin chePlugin : chePlugins) {
       for (CheContainer container : chePlugin.getInitContainers()) {
-        pod.getSpec().getInitContainers().add(toK8sContainer(container));
+        Container k8sInitContainer = toK8sContainer(container);
+        pod.getSpec().getInitContainers().add(k8sInitContainer);
+        chePluginsVolumeApplier.applyVolumes(pod, k8sInitContainer, container.getVolumes(), k8sEnv);
       }
 
       Collection<CommandImpl> pluginRelatedCommands = commandsResolver.resolve(chePlugin);
 
       for (CheContainer container : chePlugin.getContainers()) {
-        addSidecar(
-            pod,
-            container,
-            chePlugin,
-            kubernetesEnvironment,
-            pluginRelatedCommands,
-            runtimeIdentity);
+        addSidecar(pod, container, chePlugin, k8sEnv, pluginRelatedCommands, runtimeIdentity);
       }
     }
 
-    chePlugins.forEach(chePlugin -> populateWorkspaceEnvVars(chePlugin, kubernetesEnvironment));
+    chePlugins.forEach(chePlugin -> populateWorkspaceEnvVars(chePlugin, k8sEnv));
 
     if (isAuthEnabled) {
       // enable per-workspace security with JWT proxy for sidecar based workspaces
       // because it is the only workspace security implementation supported for now
-      kubernetesEnvironment.getAttributes().putIfAbsent(SECURE_EXPOSER_IMPL_PROPERTY, "jwtproxy");
+      k8sEnv.getAttributes().putIfAbsent(SECURE_EXPOSER_IMPL_PROPERTY, "jwtproxy");
     }
   }
 
@@ -201,7 +200,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       PodData pod,
       CheContainer container,
       ChePlugin chePlugin,
-      KubernetesEnvironment kubernetesEnvironment,
+      KubernetesEnvironment k8sEnv,
       Collection<CommandImpl> sidecarRelatedCommands,
       RuntimeIdentity runtimeIdentity)
       throws InfrastructureException {
@@ -211,6 +210,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     List<ChePluginEndpoint> containerEndpoints = k8sContainerResolver.getEndpoints();
 
     Container k8sContainer = k8sContainerResolver.resolve();
+    chePluginsVolumeApplier.applyVolumes(pod, k8sContainer, container.getVolumes(), k8sEnv);
 
     String machineName = k8sContainer.getName();
     Names.putMachineName(pod.getMetadata(), k8sContainer.getName(), machineName);
@@ -222,7 +222,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .setContainer(k8sContainer)
             .setContainerEndpoints(containerEndpoints)
             .setDefaultSidecarMemorySizeAttribute(defaultSidecarMemoryLimitBytes)
-            .setAttributes(kubernetesEnvironment.getAttributes())
+            .setAttributes(k8sEnv.getAttributes())
             .setProjectsRootPathEnvVar(projectsRootEnvVariableProvider.get(runtimeIdentity))
             .setPluginPublisher(chePlugin.getPublisher())
             .setPluginName(chePlugin.getName())
@@ -232,7 +232,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     InternalMachineConfig machineConfig = machineResolver.resolve();
     machineConfig.getAttributes().put(CONTAINER_SOURCE_ATTRIBUTE, TOOL_CONTAINER_SOURCE);
     machineConfig.getAttributes().put(PLUGIN_MACHINE_ATTRIBUTE, chePlugin.getId());
-    kubernetesEnvironment.getMachines().put(machineName, machineConfig);
+    k8sEnv.getMachines().put(machineName, machineConfig);
 
     sidecarRelatedCommands.forEach(
         c ->
@@ -245,11 +245,11 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         .getCommands()
         .stream()
         .map(c -> asCommand(machineName, c))
-        .forEach(c -> kubernetesEnvironment.getCommands().add(c));
+        .forEach(c -> k8sEnv.getCommands().add(c));
 
     SidecarServicesProvisioner sidecarServicesProvisioner =
         new SidecarServicesProvisioner(containerEndpoints, pod.getMetadata().getName());
-    sidecarServicesProvisioner.provision(kubernetesEnvironment);
+    sidecarServicesProvisioner.provision(k8sEnv);
   }
 
   private CommandImpl asCommand(String machineName, Command command) {
