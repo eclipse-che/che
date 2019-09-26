@@ -167,7 +167,6 @@ public class MachineResolver {
                 projectsRootPathEnvVar.second,
                 projectsRootPathEnvVar.first));
       }
-      result.put(volume.getName(), new VolumeImpl().withPath(volume.getMountPath()));
     }
     return result;
   }
