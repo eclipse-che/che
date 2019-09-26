@@ -721,7 +721,7 @@
           },
           "previewUrl": {
             "type": "object",
-            "oneOf": [{"required": ["port"]}, {"required": ["path"]}],
+            "required": ["port"],
             "properties": {
               "port": {
                 "type": "number",

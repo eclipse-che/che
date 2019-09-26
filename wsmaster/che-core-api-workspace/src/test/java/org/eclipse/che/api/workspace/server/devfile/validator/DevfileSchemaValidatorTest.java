@@ -68,7 +68,6 @@ public class DevfileSchemaValidatorTest {
       {"devfile/devfile_just_generatename.yaml"},
       {"devfile/devfile_name_and_generatename.yaml"},
       {"command/devfile_command_with_preview_url.yaml"},
-      {"command/devfile_command_with_preview_url_only_path.yaml"},
       {"command/devfile_command_with_preview_url_only_port.yaml"},
     };
   }
@@ -205,7 +204,7 @@ public class DevfileSchemaValidatorTest {
       },
       {
         "command/devfile_command_with_preview_url_without_params.yaml",
-        "(/commands/0/previewUrl):The value must be of object type, but actual type is null.All but one of the following sets of problems must be resolved.: [(/commands/0/previewUrl):The value must be of object type, but actual type is null.(/commands/0/previewUrl):The value must be of object type, but actual type is null.]"
+        "(/commands/0/previewUrl):The value must be of object type, but actual type is null."
       },
       {
         "command/devfile_command_with_preview_url_port_is_string.yaml",
@@ -218,6 +217,10 @@ public class DevfileSchemaValidatorTest {
       {
         "command/devfile_command_with_preview_url_port_is_negative.yaml",
         "(/commands/0/previewUrl/port):The numeric value must be greater than or equal to 0."
+      },
+      {
+        "command/devfile_command_with_preview_url_only_path.yaml",
+        "(/commands/0/previewUrl):The object must have a property whose name is \"port\"."
       },
     };
   }
