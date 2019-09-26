@@ -38,6 +38,8 @@ public class RenameWorkspaceTest {
   private static final int MAX_WORKSPACE_NAME_SIZE = 100;
   private static final String MIN_WORKSPACE_NAME = generate("", MIN_WORKSPACE_NAME_SIZE);
   private static final String MAX_WORKSPACE_NAME = generate("", MAX_WORKSPACE_NAME_SIZE);
+  private static final String WORKSPACE_NAME =
+      generate(DeleteRunningWorkspaceTest.class.getSimpleName(), 5);
   private static final String WS_NAME_TOO_SHORT =
       ("The name has to be more than 3 characters long.");
   private static final String WS_NAME_TOO_LONG =
@@ -51,19 +53,16 @@ public class RenameWorkspaceTest {
   @Inject private WorkspaceOverview workspaceOverview;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
 
-  private String workspaceName;
-
   @BeforeClass
   public void setUp() throws Exception {
-    this.workspaceName = generate("workspace", 5);
     dashboard.open();
     createWorkspaceHelper.createAndEditWorkspaceFromStack(
-        Devfile.JAVA_MAVEN, workspaceName, Collections.emptyList(), null);
+        Devfile.JAVA_MAVEN, WORKSPACE_NAME, Collections.emptyList(), null);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(workspaceName, user.getName());
+    workspaceServiceClient.delete(WORKSPACE_NAME, user.getName());
     workspaceServiceClient.delete(MIN_WORKSPACE_NAME, user.getName());
     workspaceServiceClient.delete(MAX_WORKSPACE_NAME, user.getName());
   }
@@ -72,21 +71,21 @@ public class RenameWorkspaceTest {
   public void renameNameWorkspaceTest() throws IOException {
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.selectWorkspaceItemName(workspaceName);
-    workspaceDetails.waitToolbarTitleName(workspaceName);
+    workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
+    workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
     workspaceDetails.selectTabInWorkspaceMenu(OVERVIEW);
 
     // type name with 1 characters and check error message that this name is too short
     workspaceOverview.enterNameWorkspace("w");
     assertTrue(workspaceOverview.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
     workspaceDetails.clickOnCancelChangesBtn();
-    workspaceOverview.checkNameWorkspace(workspaceName);
+    workspaceOverview.checkNameWorkspace(WORKSPACE_NAME);
 
     // type name with 101 characters and check error message that this name is too long
     workspaceOverview.enterNameWorkspace(MAX_WORKSPACE_NAME + "a");
     assertTrue(workspaceOverview.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
     workspaceDetails.clickOnCancelChangesBtn();
-    workspaceOverview.checkNameWorkspace(workspaceName);
+    workspaceOverview.checkNameWorkspace(WORKSPACE_NAME);
 
     // type a name with min possible size and check that the workspace renamed
     renameWorkspace(MIN_WORKSPACE_NAME);

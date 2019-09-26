@@ -11,12 +11,12 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.RUNNING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.OVERVIEW;
 
 import com.google.inject.Inject;
 import java.util.Collections;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
@@ -33,6 +33,9 @@ import org.testng.annotations.Test;
 /** @author Andrey Chizhikov */
 public class DeleteRunningWorkspaceTest {
 
+  private static final String WORKSPACE_NAME =
+      generate(DeleteRunningWorkspaceTest.class.getSimpleName(), 5);
+
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
@@ -41,36 +44,33 @@ public class DeleteRunningWorkspaceTest {
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
 
-  private String workspaceName;
-
   @BeforeClass
   public void setUp() throws Exception {
-    this.workspaceName = NameGenerator.generate("workspace", 5);
     dashboard.open();
     createWorkspaceHelper.createAndEditWorkspaceFromStack(
-        Devfile.JAVA_MAVEN, workspaceName, Collections.emptyList(), null);
+        Devfile.JAVA_MAVEN, WORKSPACE_NAME, Collections.emptyList(), null);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
+    workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
   }
 
   @Test
   public void deleteRunningWorkspaceTest() {
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.clickOnWorkspaceStopStartButton(workspaceName);
-    workspaces.waitWorkspaceStatus(workspaceName, Status.RUNNING);
+    workspaces.clickOnWorkspaceStopStartButton(WORKSPACE_NAME);
+    workspaces.waitWorkspaceStatus(WORKSPACE_NAME, Status.RUNNING);
 
     dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.selectWorkspaceItemName(workspaceName);
-    workspaceDetails.waitToolbarTitleName(workspaceName);
+    workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
+    workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
     workspaceDetails.selectTabInWorkspaceMenu(OVERVIEW);
     workspaceDetails.checkStateOfWorkspace(RUNNING);
     workspaceOverview.clickOnDeleteWorkspace();
     workspaceDetails.clickOnDeleteButtonInDialogWindow();
     dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.waitWorkspaceIsNotPresent(workspaceName);
+    workspaces.waitWorkspaceIsNotPresent(WORKSPACE_NAME);
   }
 }

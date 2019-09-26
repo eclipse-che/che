@@ -96,7 +96,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitItem(repositoryName);
-    theiaIde.waitAllNotificationClosed();
+    theiaIde.waitAllNotificationsClosed();
     theiaProjectTree.expandItem(repositoryName);
     theiaProjectTree.expandItem(repositoryName + "/my-lib");
     theiaProjectTree.waitItem(repositoryName + "/my-lib/src");

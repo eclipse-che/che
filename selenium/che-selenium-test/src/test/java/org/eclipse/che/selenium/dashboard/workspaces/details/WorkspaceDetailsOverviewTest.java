@@ -22,7 +22,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.Test;
@@ -76,9 +75,6 @@ public class WorkspaceDetailsOverviewTest {
 
   @Test(priority = 1)
   public void shouldCheckExportAsFile() {
-    // workspace details page bug workaround
-    workspaceDetails.selectTabInWorkspaceMenu(WorkspaceDetailsTab.OVERVIEW);
-
     workspaceOverview.checkNameWorkspace(WORKSPACE_NAME);
 
     // check of closing by "Esc"

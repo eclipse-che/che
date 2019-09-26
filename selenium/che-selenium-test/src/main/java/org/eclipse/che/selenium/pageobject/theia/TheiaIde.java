@@ -154,7 +154,7 @@ public class TheiaIde {
     seleniumWebDriverHelper.waitInvisibility(By.className("theia-Notification"));
   }
 
-  public void waitAllNotificationClosed() {
+  public void waitAllNotificationsClosed() {
     seleniumWebDriverHelper.waitInvisibility(
         By.xpath((Locators.NOTIFICATION_ITEM_XPATH)), LOADER_TIMEOUT_SEC);
   }

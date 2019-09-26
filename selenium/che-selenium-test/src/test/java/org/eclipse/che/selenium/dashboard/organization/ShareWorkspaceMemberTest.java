@@ -81,10 +81,7 @@ public class ShareWorkspaceMemberTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    if (workspaceServiceClient.exists(WORKSPACE_NAME, adminTestUser.getName())) {
-      workspaceServiceClient.stop(WORKSPACE_NAME, adminTestUser.getName());
-      workspaceServiceClient.delete(WORKSPACE_NAME, adminTestUser.getName());
-    }
+    workspaceServiceClient.delete(WORKSPACE_NAME, adminTestUser.getName());
     org.delete();
   }
 
@@ -177,7 +174,7 @@ public class ShareWorkspaceMemberTest {
 
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
-    theiaIde.waitAllNotificationClosed();
+    theiaIde.waitAllNotificationsClosed();
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
     theiaProjectTree.expandItem(CONSOLE_JAVA_SIMPLE);
     theiaProjectTree.openItem(CONSOLE_JAVA_SIMPLE + "/README.md");
