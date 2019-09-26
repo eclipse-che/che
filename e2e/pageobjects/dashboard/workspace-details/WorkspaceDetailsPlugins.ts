@@ -12,7 +12,7 @@ import { injectable, inject } from 'inversify';
 import 'reflect-metadata';
 import { CLASSES, TYPES } from '../../../inversify.types';
 import { TestConstants } from '../../../TestConstants';
-import { By, logging } from 'selenium-webdriver';
+import { By } from 'selenium-webdriver';
 import { WorkspaceDetails } from './WorkspaceDetails';
 import { ITestWorkspaceUtil } from '../../../utils/workspace/ITestWorkspaceUtil';
 import { WorkspaceStatus } from '../../../utils/workspace/WorkspaceStatus';
