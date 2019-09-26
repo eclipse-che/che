@@ -25,11 +25,15 @@ import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_N
 import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_GENERATE_NAME_CHARS_APPEND;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
@@ -46,12 +50,16 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
+import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.Constants;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.annotation.Traced;
@@ -59,6 +67,7 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.tracing.TracingTags;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,27 +84,35 @@ public class WorkspaceManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceManager.class);
 
+  private final String apiEndpoint;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceRuntimes runtimes;
   private final AccountManager accountManager;
   private final EventService eventService;
   private final WorkspaceValidator validator;
+  private final DevfileSchemaValidator devfileSchemaValidator;
   private final DevfileIntegrityValidator devfileIntegrityValidator;
+  private final ObjectMapper objectMapper;
 
   @Inject
   public WorkspaceManager(
+      @Named("che.api") String apiEndpoint,
       WorkspaceDao workspaceDao,
       WorkspaceRuntimes runtimes,
       EventService eventService,
       AccountManager accountManager,
       WorkspaceValidator validator,
+      DevfileSchemaValidator devfileSchemaValidator,
       DevfileIntegrityValidator devfileIntegrityValidator) {
+    this.apiEndpoint = apiEndpoint;
     this.workspaceDao = workspaceDao;
     this.runtimes = runtimes;
     this.accountManager = accountManager;
     this.eventService = eventService;
     this.validator = validator;
+    this.devfileSchemaValidator = devfileSchemaValidator;
     this.devfileIntegrityValidator = devfileIntegrityValidator;
+    this.objectMapper = new ObjectMapper();
   }
 
   /**
@@ -307,7 +324,9 @@ public class WorkspaceManager {
 
     WorkspaceImpl workspace = workspaceDao.get(id);
     if (workspace.getConfig() != null) {
-      workspace.setConfig(new WorkspaceConfigImpl(update.getConfig()));
+      WorkspaceConfigImpl configImpl = new WorkspaceConfigImpl(update.getConfig());
+      relativizeRecipeLinks(configImpl);
+      workspace.setConfig(configImpl);
     }
     if (workspace.getDevfile() != null) {
       workspace.setDevfile(new DevfileImpl(update.getDevfile()));
@@ -317,6 +336,29 @@ public class WorkspaceManager {
     workspace.setTemporary(update.isTemporary());
 
     return normalizeState(workspaceDao.update(workspace), true);
+  }
+
+  public WorkspaceImpl updateWorkspace(
+      String id, String content, FileContentProvider contentProvider)
+      throws ValidationException, ConflictException, NotFoundException, ServerException {
+    requireNonNull(id, "Required non-null workspace id");
+    requireNonNull(content, "Required non-null workspace update content");
+    try {
+      JsonNode wsNode = objectMapper.readTree(content);
+      JsonNode devfileNode = wsNode.path("devfile");
+      if (!devfileNode.isNull()) {
+        devfileSchemaValidator.validate(devfileNode);
+        DevfileImpl devfile = objectMapper.treeToValue(devfileNode, DevfileImpl.class);
+        devfileIntegrityValidator.validateDevfile(devfile);
+        devfileIntegrityValidator.validateContentReferences(devfile, contentProvider);
+      }
+      WorkspaceDto ws = DtoFactory.getInstance().createDtoFromJson(content, WorkspaceDto.class);
+      return updateWorkspace(id, ws);
+    } catch (DevfileFormatException e) {
+      throw new ValidationException(e.getMessage(), e);
+    } catch (IOException e) {
+      throw new ServerException(e.getMessage(), e);
+    }
   }
 
   /**
@@ -610,5 +652,30 @@ public class WorkspaceManager {
       wsName = key.substring(lastSlashIndex + 1);
     }
     return workspaceDao.get(wsName, namespace);
+  }
+
+  private void relativizeRecipeLinks(WorkspaceConfigImpl config) {
+    if (config != null) {
+      Map<String, EnvironmentImpl> environments = config.getEnvironments();
+      if (environments != null && !environments.isEmpty()) {
+        for (EnvironmentImpl environment : environments.values()) {
+          relativizeRecipeLinks(environment);
+        }
+      }
+    }
+  }
+
+  private void relativizeRecipeLinks(EnvironmentImpl environment) {
+    if (environment != null) {
+      RecipeImpl recipe = environment.getRecipe();
+      if (recipe != null) {
+        if ("dockerfile".equals(recipe.getType())) {
+          String location = recipe.getLocation();
+          if (location != null && location.startsWith(apiEndpoint)) {
+            recipe.setLocation(location.substring(apiEndpoint.length()));
+          }
+        }
+      }
+    }
   }
 }

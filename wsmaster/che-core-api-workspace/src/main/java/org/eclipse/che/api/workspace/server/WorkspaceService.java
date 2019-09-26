@@ -203,9 +203,6 @@ public class WorkspaceService extends Service {
   @Produces(APPLICATION_JSON)
   @ApiOperation(
       value = "Creates a new workspace based on the Devfile.",
-      notes =
-          "This method is in beta phase. It's strongly recommended to use `POST /devfile` instead"
-              + " to get a workspace from Devfile. Workspaces created with this method are not stable yet.",
       consumes = "application/json, text/yaml, text/x-yaml",
       produces = APPLICATION_JSON,
       nickname = "createFromDevfile",
@@ -399,13 +396,10 @@ public class WorkspaceService extends Service {
   })
   public WorkspaceDto update(
       @ApiParam("The workspace id") @PathParam("id") String id,
-      @ApiParam(value = "The workspace update", required = true) WorkspaceDto update)
+      @ApiParam(value = "The workspace update", required = true) String update)
       throws BadRequestException, ServerException, ForbiddenException, NotFoundException,
           ConflictException {
-    checkArgument(
-        update.getConfig() != null ^ update.getDevfile() != null,
-        "Required non-null workspace configuration or devfile update but not both");
-    relativizeRecipeLinks(update.getConfig());
+    // relativizeRecipeLinks(update.getConfig());
     return asDtoWithLinksAndToken(doUpdate(id, update));
   }
 
@@ -923,6 +917,16 @@ public class WorkspaceService extends Service {
       throws BadRequestException, ConflictException, NotFoundException, ServerException {
     try {
       return workspaceManager.updateWorkspace(id, update);
+    } catch (ValidationException x) {
+      throw new BadRequestException(x.getMessage());
+    }
+  }
+
+  private WorkspaceImpl doUpdate(String id, String updateContent)
+      throws BadRequestException, ConflictException, NotFoundException, ServerException {
+    try {
+      return workspaceManager.updateWorkspace(
+          id, updateContent, FileContentProvider.cached(devfileContentProvider));
     } catch (ValidationException x) {
       throw new BadRequestException(x.getMessage());
     }

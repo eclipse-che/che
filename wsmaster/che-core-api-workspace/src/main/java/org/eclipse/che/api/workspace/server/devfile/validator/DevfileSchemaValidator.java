@@ -71,7 +71,7 @@ public class DevfileSchemaValidator {
     }
   }
 
-  private void validate(JsonNode contentNode) throws DevfileFormatException {
+  public void validate(JsonNode contentNode) throws DevfileFormatException {
     try {
       List<Problem> validationErrors = new ArrayList<>();
       ProblemHandler handler = ProblemHandler.collectingTo(validationErrors);
