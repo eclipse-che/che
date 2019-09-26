@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.pageobject.theia;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_CLOSE_BUTTON;
@@ -57,6 +58,8 @@ public class TheiaIde {
     String ABOUT_DIALOG_TITLE_XPATH = ABOUT_DIALOG_XPATH + "//div[@class='dialogTitle']";
     String ABOUT_DIALOG_CONTENT_XPATH = ABOUT_DIALOG_XPATH + "//div[@class='dialogContent']";
     String ABOUT_DIALOG_OK_BUTTON_XPATH = ABOUT_DIALOG_XPATH + "//button";
+    String NOTIFICATION_ITEM_XPATH =
+        "//div[@class='theia-notification-list-item']//div[@class='theia-notification-message']";
     String NOTIFICATION_MESSAGE_EQUALS_TO_XPATH_TEMPLATE =
         "//div[@class='theia-notification-list-item']//div[@class='theia-notification-message']//span[text()='%s']";
     String NOTIFICATION_MESSAGE_CONTAINS_XPATH_TEMPLATE =
@@ -149,6 +152,11 @@ public class TheiaIde {
 
   public void waitNotificationPanelClosed() {
     seleniumWebDriverHelper.waitInvisibility(By.className("theia-Notification"));
+  }
+
+  public void waitAllNotificationsClosed() {
+    seleniumWebDriverHelper.waitInvisibility(
+        By.xpath((Locators.NOTIFICATION_ITEM_XPATH)), LOADER_TIMEOUT_SEC);
   }
 
   public void waitTheiaIde() {

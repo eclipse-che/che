@@ -12,28 +12,24 @@
 package org.eclipse.che.selenium.dashboard.workspaces.details;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.openqa.selenium.Keys.ESCAPE;
 
 import com.google.inject.Inject;
 import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
-import org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.Test;
 
-/** TODO rewrite to use che7 workspace */
-@Test(groups = UNDER_REPAIR)
 public class WorkspaceDetailsOverviewTest {
+
   private static final String WORKSPACE_NAME = NameGenerator.generate("test-workspace", 4);
   private static final String CHANGED_WORKSPACE_NAME = NameGenerator.generate(WORKSPACE_NAME, 4);
-  private static final String MACHINE_NAME = "dev-machine";
-  private static final String SAMPLE_NAME = "console-java-simple";
   private static final String TOO_SHORT_NAME = "wk";
   private static final String MAX_LONG_NAME = NameGenerator.generate("wksp-", 95);
   private static final String TOO_LONG_NAME = NameGenerator.generate(MAX_LONG_NAME, 1);
@@ -49,60 +45,13 @@ public class WorkspaceDetailsOverviewTest {
   private static final List<String> NOT_VALID_NAMES =
       asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
 
-  private static final String EXPECTED_ATTRIBUTES_CONFIG =
-      "  \"default\": {\n"
-          + "      \"machines\": {\n"
-          + "        \"dev-machine\": {\n"
-          + "          \"attributes\": {\n"
-          + "            \"memoryLimitBytes\": \"2147483648\"\n"
-          + "          },\n"
-          + "          \"servers\": {\n"
-          + "            \"tomcat8-debug\": {\n"
-          + "              \"attributes\": {},\n"
-          + "              \"port\": \"8000\",\n"
-          + "              \"protocol\": \"http\"\n"
-          + "            },\n"
-          + "            \"codeserver\": {\n"
-          + "              \"attributes\": {},\n"
-          + "              \"port\": \"9876\",\n"
-          + "              \"protocol\": \"http\"\n"
-          + "            },\n"
-          + "            \"tomcat8\": {\n"
-          + "              \"attributes\": {},\n"
-          + "              \"port\": \"8080\",\n"
-          + "              \"protocol\": \"http\"\n"
-          + "            }\n"
-          + "          },\n"
-          + "          \"volumes\": {},\n"
-          + "          \"installers\": [\n"
-          + "            \"org.eclipse.che.exec\",\n"
-          + "            \"org.eclipse.che.terminal\",\n"
-          + "            \"org.eclipse.che.ws-agent\"\n"
-          + "          ],\n";
-
-  private static final String EXPECTED_IMAGE_CONFIG =
-      "      \"recipe\": {\n"
-          + "        \"type\": \"dockerimage\",\n"
-          + "        \"content\": \"eclipse/ubuntu_jdk8\"\n"
-          + "      }\n";
-
-  private static final String EXPECTED_COMMAND_LINE_CONFIG =
-      "  \"commands\": [\n"
-          + "    {\n"
-          + "      \"commandLine\": \"mvn clean install -f ${current.project.path}\",\n"
-          + "      \"name\": \"build\",\n"
-          + "      \"attributes\": {\n"
-          + "        \"goal\": \"Build\",\n"
-          + "        \"previewUrl\": \"\"\n"
-          + "      },\n"
-          + "      \"type\": \"mvn\"\n";
-
   @Inject private Dashboard dashboard;
   @Inject private NewWorkspace newWorkspace;
   @Inject private Workspaces workspaces;
-  @Inject private AddOrImportForm addOrImportForm;
   @Inject private WorkspaceOverview workspaceOverview;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
+
+  @Inject private WorkspaceDetails workspaceDetails;
 
   @Test
   public void shouldCreateWorkspaceAndOpenOverviewPage() {
@@ -115,36 +64,13 @@ public class WorkspaceDetailsOverviewTest {
     newWorkspace.waitPageLoad();
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
 
-    selectDevfileAndCheckWorkspaceName(Devfile.APACHE_CAMEL);
+    selectDevfileAndCheckWorkspaceName(Devfile.JAVA_MAVEN);
 
     selectDevfileAndCheckWorkspaceName(Devfile.JAVA_GRADLE);
 
     // create workspace
-    addOrImportForm.clickOnAddOrImportProjectButton();
-    addOrImportForm.addSampleToWorkspace(SAMPLE_NAME);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
     workspaceOverview.checkNameWorkspace(WORKSPACE_NAME);
-  }
-
-  @Test(priority = 2)
-  public void shouldCheckNameField() {
-    workspaceOverview.waitNameFieldValue(WORKSPACE_NAME);
-
-    // check of empty name
-    workspaceOverview.enterNameWorkspace("");
-    workspaceOverview.waitErrorBorderOfNameField();
-    workspaceOverview.waitDisabledSaveButton();
-
-    // check too short name
-    nameShouldBeValid(CHANGED_WORKSPACE_NAME);
-    nameShouldBeInvalid(TOO_SHORT_NAME, SHORT_NAME_ERROR_MESSAGE);
-
-    // check too long name
-    nameShouldBeValid(MIN_SHORT_NAME);
-    nameShouldBeInvalid(TOO_LONG_NAME, LONG_NAME_ERROR_MESSAGE);
-
-    nameShouldBeValid(MAX_LONG_NAME);
-    namesShouldBeValid();
   }
 
   @Test(priority = 1)
@@ -168,12 +94,31 @@ public class WorkspaceDetailsOverviewTest {
 
     // check config
     openExportWorkspaceForm();
-    workspaceOverview.waitConfiguration(
-        EXPECTED_ATTRIBUTES_CONFIG, EXPECTED_COMMAND_LINE_CONFIG, EXPECTED_IMAGE_CONFIG);
     workspaceOverview.clickOnToPrivateCloudButton();
     workspaceOverview.waitToPrivateCloudTabOpened();
     seleniumWebDriverHelper.sendKeys(ESCAPE.toString());
     workspaceOverview.waitExportWorkspaceFormClosed();
+  }
+
+  @Test(priority = 2)
+  public void shouldCheckNameField() {
+    workspaceOverview.waitNameFieldValue(WORKSPACE_NAME);
+
+    // check of empty name
+    workspaceOverview.enterNameWorkspace("");
+    workspaceOverview.waitErrorBorderOfNameField();
+    workspaceOverview.waitDisabledSaveButton();
+
+    // check too short name
+    nameShouldBeValid(CHANGED_WORKSPACE_NAME);
+    nameShouldBeInvalid(TOO_SHORT_NAME, SHORT_NAME_ERROR_MESSAGE);
+
+    // check too long name
+    nameShouldBeValid(MIN_SHORT_NAME);
+    nameShouldBeInvalid(TOO_LONG_NAME, LONG_NAME_ERROR_MESSAGE);
+
+    nameShouldBeValid(MAX_LONG_NAME);
+    namesShouldBeValid();
   }
 
   private void selectDevfileAndCheckWorkspaceName(Devfile devfile) {
