@@ -39,7 +39,7 @@ public class RenameWorkspaceTest {
   private static final String MIN_WORKSPACE_NAME = generate("", MIN_WORKSPACE_NAME_SIZE);
   private static final String MAX_WORKSPACE_NAME = generate("", MAX_WORKSPACE_NAME_SIZE);
   private static final String WORKSPACE_NAME =
-      generate(DeleteRunningWorkspaceTest.class.getSimpleName(), 5);
+      generate(RenameWorkspaceTest.class.getSimpleName(), 5);
   private static final String WS_NAME_TOO_SHORT =
       ("The name has to be more than 3 characters long.");
   private static final String WS_NAME_TOO_LONG =
