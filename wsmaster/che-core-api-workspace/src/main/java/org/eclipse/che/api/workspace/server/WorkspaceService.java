@@ -973,18 +973,21 @@ public class WorkspaceService extends Service {
                           String machineName = cdto.getAttributes().get("machineName");
                           Map<String, ? extends Server> machineServers =
                               workspace.getRuntime().getMachines().get(machineName).getServers();
-                          if (machineServers.size() == 1) {
-                            Server server = machineServers.values().iterator().next();
-                            String serverUrl = server.getUrl();
-                            cdto.getAttributes()
-                                .put(
-                                    "previewUrl",
-                                    serverUrl.substring(0, serverUrl.length() - 1)
-                                        + ":"
-                                        + c.getPreviewUrl().getPort()
-                                        + "/"
-                                        + c.getPreviewUrl().getPath());
-                          }
+                          machineServers
+                              .values()
+                              .stream()
+                              .filter(
+                                  s ->
+                                      s.getAttributes().containsKey("port")
+                                          && s.getAttributes()
+                                              .get("port")
+                                              .equals("" + c.getPreviewUrl().getPort()))
+                              .forEach(
+                                  server -> {
+                                    String serverUrl = server.getUrl();
+                                    cdto.getAttributes()
+                                        .put("previewUrl", serverUrl + c.getPreviewUrl().getPath());
+                                  });
                         });
               });
     }
