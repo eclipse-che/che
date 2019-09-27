@@ -126,6 +126,7 @@ suite('Language server validation', async () => {
             await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
             await editor.waitEditorAvailable(codeNavigationClassName);
         } catch (err) {
+            // workaround for issue: https://github.com/eclipse/che/issues/14520
             if (err instanceof error.TimeoutError) {
                 checkCodeNavigationWithContextMenu();
             }
@@ -174,7 +175,7 @@ suite('Validation of workspace build and run', async () => {
 });
 
 suite('Display source code changes in the running application', async () => {
-        test('Change source code', async () => {
+    test('Change source code', async () => {
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToChangedJavaFileFolder, changedJavaFileName);
         await editor.waitEditorAvailable(changedJavaFileName);
         await editor.clickOnTab(changedJavaFileName);

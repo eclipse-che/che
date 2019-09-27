@@ -7,6 +7,7 @@ export * from './driver/ChromeDriver';
 export * from './driver/IDriver';
 export * from './driver/ContainerInitializer';
 export * from './utils/ScreenCatcher';
+export * from './utils/Logger';
 export * from './utils/DriverHelper';
 export * from './utils/NameGenerator';
 export * from './utils/workspace/ITestWorkspaceUtil';
