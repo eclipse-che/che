@@ -37,6 +37,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -1368,6 +1369,116 @@ public class WorkspaceServiceTest {
     assertEquals(retrievedCommands.size(), 1);
     assertTrue(retrievedCommands.get(0).getAttributes().containsKey("previewUrl"));
     assertEquals(retrievedCommands.get(0).getAttributes().get("previewUrl"), PREVIEW_URL_EXPECTED);
+  }
+
+  @Test
+  public void shouldNotSetRuntimeCommandPreviewUrlWhenNoMachineFound()
+      throws NotFoundException, ServerException {
+    final String WS_KEY = "123";
+    final String PREVIEW_URL_SERVER = "testServerURL";
+    final String PREVIEW_URL_PATH = "/hello";
+    final String PREVIEW_URL_EXPECTED = PREVIEW_URL_SERVER + PREVIEW_URL_PATH;
+    final DevfileDto devfile =
+        newDto(DevfileDto.class)
+            .withApiVersion("0.0.1")
+            .withMetadata(newDto(MetadataDto.class).withName("ws"))
+            .withCommands(
+                Collections.singletonList(
+                    newDto(DevfileCommandDto.class)
+                        .withName("test command with preview url")
+                        .withPreviewUrl(
+                            newDto(PreviewUrlDto.class)
+                                .withPath(PREVIEW_URL_PATH)
+                                .withPort(1234))));
+    WorkspaceImpl workspace = createWorkspace(devfile);
+
+    Map<String, Server> servers =
+        ImmutableMap.of(
+            "server1",
+            new ServerImpl()
+                .withStatus(ServerStatus.UNKNOWN)
+                .withUrl(PREVIEW_URL_SERVER)
+                .withAttributes(singletonMap("port", "1234")));
+    Map<String, Machine> machines =
+        singletonMap(
+            "this machine does not exist",
+            new MachineImpl(singletonMap("key", "value"), servers, RUNNING));
+    CommandImpl runtimeCommand = new CommandImpl("test command with preview url", "eh", "exec");
+    runtimeCommand.getAttributes().put("machineName", "machine1");
+    List<? extends Command> runtimeCommands = singletonList(runtimeCommand);
+    workspace.setRuntime(
+        new RuntimeImpl("activeEnv", machines, "user123", runtimeCommands, emptyList()));
+
+    when(wsManager.getWorkspace(WS_KEY)).thenReturn(workspace);
+
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .when()
+            .get(SECURE_PATH + "/workspace/" + WS_KEY);
+
+    assertEquals(response.getStatusCode(), 200);
+    WorkspaceImpl retrievedWorkspace =
+        new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT);
+
+    List<? extends Command> retrievedCommands = retrievedWorkspace.getRuntime().getCommands();
+    assertEquals(retrievedCommands.size(), 1);
+    assertFalse(retrievedCommands.get(0).getAttributes().containsKey("previewUrl"));
+  }
+
+  public void shouldNotSetRuntimeCommandPreviewUrlWhenNoServerWithMatchingPortFound()
+      throws NotFoundException, ServerException {
+
+    final String WS_KEY = "123";
+    final String PREVIEW_URL_SERVER = "testServerURL";
+    final String PREVIEW_URL_PATH = "/hello";
+    final String PREVIEW_URL_EXPECTED = PREVIEW_URL_SERVER + PREVIEW_URL_PATH;
+    final DevfileDto devfile =
+        newDto(DevfileDto.class)
+            .withApiVersion("0.0.1")
+            .withMetadata(newDto(MetadataDto.class).withName("ws"))
+            .withCommands(
+                Collections.singletonList(
+                    newDto(DevfileCommandDto.class)
+                        .withName("test command with preview url")
+                        .withPreviewUrl(
+                            newDto(PreviewUrlDto.class)
+                                .withPath(PREVIEW_URL_PATH)
+                                .withPort(1234))));
+    WorkspaceImpl workspace = createWorkspace(devfile);
+
+    Map<String, Server> servers =
+        ImmutableMap.of(
+            "server1",
+            new ServerImpl()
+                .withStatus(ServerStatus.UNKNOWN)
+                .withUrl(PREVIEW_URL_SERVER)
+                .withAttributes(singletonMap("port", "12345")));
+    Map<String, Machine> machines =
+        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers, RUNNING));
+    CommandImpl runtimeCommand = new CommandImpl("test command with preview url", "eh", "exec");
+    runtimeCommand.getAttributes().put("machineName", "machine1");
+    List<? extends Command> runtimeCommands = singletonList(runtimeCommand);
+    workspace.setRuntime(
+        new RuntimeImpl("activeEnv", machines, "user123", runtimeCommands, emptyList()));
+
+    when(wsManager.getWorkspace(WS_KEY)).thenReturn(workspace);
+
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .when()
+            .get(SECURE_PATH + "/workspace/" + WS_KEY);
+
+    assertEquals(response.getStatusCode(), 200);
+    WorkspaceImpl retrievedWorkspace =
+        new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT);
+
+    List<? extends Command> retrievedCommands = retrievedWorkspace.getRuntime().getCommands();
+    assertEquals(retrievedCommands.size(), 1);
+    assertFalse(retrievedCommands.get(0).getAttributes().containsKey("previewUrl"));
   }
 
   private static String unwrapError(Response response) {

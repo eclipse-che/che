@@ -996,6 +996,10 @@ public class WorkspaceService extends Service {
             "Can't construct PreviewUrl for command without 'machineName' attribute. {}", command);
         continue;
       }
+      if (!machines.containsKey(command.getAttributes().get("machineName"))) {
+        LOG.debug("Couldn't find matching machine. {}", command.getAttributes().get("machineName"));
+        continue;
+      }
 
       Optional<DevfileCommandDto> matchingDevfileCommand =
           devfileCommandsWithPreviewUrl
