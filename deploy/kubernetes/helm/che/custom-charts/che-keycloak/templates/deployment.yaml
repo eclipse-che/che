@@ -7,7 +7,7 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
@@ -17,6 +17,10 @@ metadata:
   name: keycloak
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: che
+      component: keycloak
   template:
     metadata:
       labels:
