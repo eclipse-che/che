@@ -126,6 +126,7 @@ suite('Language server validation', async () => {
             await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
             await editor.waitEditorAvailable(codeNavigationClassName);
         } catch (err) {
+            // workaround for issue: https://github.com/eclipse/che/issues/14520
             if (err instanceof error.TimeoutError) {
                 checkCodeNavigationWithContextMenu();
             }
