@@ -108,6 +108,12 @@ public class IdentityProviderConfigFactory extends OpenShiftClientConfigFactory 
     }
   }
 
+  @Override
+  public boolean isPersonalized() {
+    // config is personalized only if OAuth is configured and the current user is not anonymous
+    return oauthIdentityProvider != null;
+  }
+
   /**
    * Builds the OpenShift {@link Config} object based on a default {@link Config} object and an
    * optional workspace Id.
