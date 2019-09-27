@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.server;
 
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -37,6 +38,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -44,14 +46,18 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.jayway.restassured.response.Response;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
@@ -73,6 +79,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.token.MachineTokenException;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
@@ -84,8 +91,10 @@ import org.eclipse.che.api.workspace.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileCommandDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.PreviewUrlDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -1304,6 +1313,61 @@ public class WorkspaceServiceTest {
             CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
             "cheWorkspaceDevfileRegistryUrl",
             CHE_WORKSPACE_DEVFILE_REGISTRY_ULR));
+  }
+
+  @Test
+  public void shouldGetWorkspaceWithPreviewUrlInCommandsWhereApplicable()
+      throws NotFoundException, ServerException, MachineTokenException {
+    final String WS_KEY = "123";
+    final String PREVIEW_URL_SERVER = "testServerURL";
+    final String PREVIEW_URL_PATH = "/hello";
+    final String PREVIEW_URL_EXPECTED = PREVIEW_URL_SERVER + PREVIEW_URL_PATH;
+    final DevfileDto devfile =
+        newDto(DevfileDto.class)
+            .withApiVersion("0.0.1")
+            .withMetadata(newDto(MetadataDto.class).withName("ws"))
+            .withCommands(
+                Collections.singletonList(
+                    newDto(DevfileCommandDto.class)
+                        .withName("test command with preview url")
+                        .withPreviewUrl(
+                            newDto(PreviewUrlDto.class)
+                                .withPath(PREVIEW_URL_PATH)
+                                .withPort(1234))));
+    WorkspaceImpl workspace = createWorkspace(devfile);
+
+    Map<String, Server> servers =
+        ImmutableMap.of(
+            "server1",
+            new ServerImpl()
+                .withStatus(ServerStatus.UNKNOWN)
+                .withUrl(PREVIEW_URL_SERVER)
+                .withAttributes(singletonMap("port", "1234")));
+    Map<String, Machine> machines =
+        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers, RUNNING));
+    CommandImpl runtimeCommand = new CommandImpl("test command with preview url", "eh", "exec");
+    runtimeCommand.getAttributes().put("machineName", "machine1");
+    List<? extends Command> runtimeCommands = singletonList(runtimeCommand);
+    workspace.setRuntime(
+        new RuntimeImpl("activeEnv", machines, "user123", runtimeCommands, emptyList()));
+
+    when(wsManager.getWorkspace(WS_KEY)).thenReturn(workspace);
+
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .when()
+            .get(SECURE_PATH + "/workspace/" + WS_KEY);
+
+    assertEquals(response.getStatusCode(), 200);
+    WorkspaceImpl retrievedWorkspace =
+        new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT);
+
+    List<? extends Command> retrievedCommands = retrievedWorkspace.getRuntime().getCommands();
+    assertEquals(retrievedCommands.size(), 1);
+    assertTrue(retrievedCommands.get(0).getAttributes().containsKey("previewUrl"));
+    assertEquals(retrievedCommands.get(0).getAttributes().get("previewUrl"), PREVIEW_URL_EXPECTED);
   }
 
   private static String unwrapError(Response response) {
