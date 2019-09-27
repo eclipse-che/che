@@ -66,6 +66,8 @@ export class MemberItemController {
     this.otherActions = [];
   }
 
+  $onInit(): void { }
+
   /**
    * Call user permissions removal. Show the dialog
    * @param  event - the $event

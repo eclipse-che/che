@@ -191,6 +191,8 @@ export class ChePermissions implements che.api.IChePermissions {
     promise.then((systemPermissions: che.api.ISystemPermissions) => {
       this.updateUserServices(systemPermissions);
       this.systemPermissions = systemPermissions;
+    }, (error: any) => {
+        // noop
     });
 
     return promise;

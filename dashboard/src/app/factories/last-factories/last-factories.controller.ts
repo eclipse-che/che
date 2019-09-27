@@ -35,14 +35,16 @@ export class LastFactoriesController {
   constructor(cheFactory: CheFactory) {
     this.cheFactory = cheFactory;
 
-    this.factories = this.cheFactory.getPageFactories();
-
     // TODO we should change to modificationDate after model's change
     this.factoriesOrderBy = '-creator.created';
     this.maxItems = 5;
+  }
+
+  $onInit(): void {
+    this.factories = this.cheFactory.getPageFactories();
 
     // TODO add OrderBy to condition in fetch API
-    let promise = this.cheFactory.fetchFactories(this.maxItems);
+    const promise = this.cheFactory.fetchFactories(this.maxItems);
 
     this.isLoading = true;
     promise.finally(() => {

@@ -13,15 +13,16 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 
 import static io.fabric8.kubernetes.client.utils.Serialization.unmarshal;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -45,6 +46,7 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
@@ -173,10 +175,10 @@ public class KubernetesComponentToWorkspaceApplierTest {
     // then
     verify(k8sEnvProvisioner)
         .provision(
-            workspaceConfig,
-            KubernetesEnvironment.TYPE,
-            toK8SList(yamlRecipeContent).getItems(),
-            emptyMap());
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            eq(toK8SList(yamlRecipeContent).getItems()),
+            anyMap());
   }
 
   @Test
@@ -193,10 +195,10 @@ public class KubernetesComponentToWorkspaceApplierTest {
 
     verify(k8sEnvProvisioner)
         .provision(
-            workspaceConfig,
-            KubernetesEnvironment.TYPE,
-            toK8SList(yamlRecipeContent).getItems(),
-            emptyMap());
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            eq(toK8SList(yamlRecipeContent).getItems()),
+            anyMap());
   }
 
   @Test
@@ -258,6 +260,38 @@ public class KubernetesComponentToWorkspaceApplierTest {
   }
 
   @Test
+  public void shouldProvisionMachinesMapWithComponentAttributePreSet() throws Exception {
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<Map<String, MachineConfigImpl>> mapCaptor = ArgumentCaptor.forClass(Map.class);
+    // given
+    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
+    List<HasMetadata> k8sList = toK8SList(yamlRecipeContent).getItems();
+    doReturn(k8sList).when(k8sRecipeParser).parse(anyString());
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setAlias(COMPONENT_NAME);
+    component.setMountSources(true);
+
+    // when
+    applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
+
+    // then
+    verify(k8sEnvProvisioner).provision(any(), any(), any(), mapCaptor.capture());
+    Map<String, MachineConfigImpl> machines = mapCaptor.getValue();
+    assertTrue(
+        machines
+            .values()
+            .stream()
+            .allMatch(
+                config ->
+                    config
+                        .getAttributes()
+                        .get(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE)
+                        .equals(component.getAlias())));
+  }
+
+  @Test
   public void shouldFilterRecipeWithGivenSelectors() throws Exception {
     // given
     String yamlRecipeContent = getResource("devfile/petclinic.yaml");
@@ -276,10 +310,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     // then
     verify(k8sEnvProvisioner)
         .provision(
-            eq(workspaceConfig),
-            eq(KubernetesEnvironment.TYPE),
-            objectsCaptor.capture(),
-            eq(emptyMap()));
+            eq(workspaceConfig), eq(KubernetesEnvironment.TYPE), objectsCaptor.capture(), anyMap());
     List<HasMetadata> resultItemsList = objectsCaptor.getValue();
     assertEquals(resultItemsList.size(), 3);
     assertEquals(1, resultItemsList.stream().filter(it -> "Pod".equals(it.getKind())).count());

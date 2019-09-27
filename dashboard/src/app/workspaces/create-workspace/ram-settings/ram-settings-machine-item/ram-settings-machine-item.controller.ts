@@ -26,6 +26,8 @@ export class RamSettingsMachineItemController {
    */
   onRamChange: (data: {name: string, memoryLimitGBytes: number}) => void;
 
+  $onInit(): void { }
+
   /**
    * Callback which is called when machine's RAM setting is changed.
    *
@@ -36,4 +38,3 @@ export class RamSettingsMachineItemController {
   }
 
 }
-

@@ -16,6 +16,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.DISCOVERABLE_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.DOCKERIMAGE_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
@@ -132,6 +133,10 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
       machineConfig
           .getVolumes()
           .put(PROJECTS_VOLUME_NAME, new VolumeImpl().withPath(projectFolderPath));
+    }
+
+    if (!isNullOrEmpty(componentAlias)) {
+      machineConfig.getAttributes().put(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE, componentAlias);
     }
 
     List<HasMetadata> componentObjects = new ArrayList<>();

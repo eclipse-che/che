@@ -11,11 +11,11 @@
  */
 'use strict';
 
-import {CheBranding} from '../../../../../../components/branding/che-branding.factory';
-import {ImportGithubProjectService, LoadingState} from './import-github-project.service';
-import {ProjectSource} from '../../project-source.enum';
-import {IGithubRepository} from './github-repository-interface';
-import {AddImportProjectService} from '../add-import-project.service';
+import { CheBranding } from '../../../../../../components/branding/che-branding.factory';
+import { ImportGithubProjectService, LoadingState } from './import-github-project.service';
+import { ProjectSource } from '../../project-source.enum';
+import { IGithubRepository } from './github-repository-interface';
+import { AddImportProjectService } from '../add-import-project.service';
 
 /**
  * This class is handling the controller for the GitHub part
@@ -26,7 +26,7 @@ import {AddImportProjectService} from '../add-import-project.service';
 export class ImportGithubProjectController {
 
   static $inject = ['$q', '$mdDialog', '$location', '$browser', '$scope', 'githubPopup', 'cheBranding', 'githubOrganizationNameResolver',
-'importGithubProjectService', 'cheListHelperFactory', 'addImportProjectService', 'keycloakAuth'];
+    'importGithubProjectService', 'cheListHelperFactory', 'addImportProjectService', 'keycloakAuth'];
 
   /**
    * Promises service.
@@ -104,7 +104,7 @@ export class ImportGithubProjectController {
   /**
    * The list of GitHub repositories.
    */
-  private githubRepositoriesList: Array<IGithubRepository>;
+  private githubRepositoriesList: Array<IGithubRepository> = [];
   /**
    * The list of GitHub organization.
    */
@@ -121,10 +121,10 @@ export class ImportGithubProjectController {
   /**
    * Default constructor that is using resource
    */
-  constructor ($q: ng.IQService, $mdDialog: ng.material.IDialogService, $location: ng.ILocationService,
-               $browser: any, $scope: ng.IScope, githubPopup: any, cheBranding: CheBranding,
-               githubOrganizationNameResolver: any, importGithubProjectService: ImportGithubProjectService,
-               cheListHelperFactory: che.widget.ICheListHelperFactory, addImportProjectService: AddImportProjectService, keycloakAuth: any) {
+  constructor($q: ng.IQService, $mdDialog: ng.material.IDialogService, $location: ng.ILocationService,
+    $browser: any, $scope: ng.IScope, githubPopup: any, cheBranding: CheBranding,
+    githubOrganizationNameResolver: any, importGithubProjectService: ImportGithubProjectService,
+    cheListHelperFactory: che.widget.ICheListHelperFactory, addImportProjectService: AddImportProjectService, keycloakAuth: any) {
     this.$q = $q;
     this.$mdDialog = $mdDialog;
     this.$location = $location;
@@ -135,8 +135,8 @@ export class ImportGithubProjectController {
     this.resolveOrganizationName = this.githubOrganizationNameResolver.resolve;
     this.addImportProjectService = addImportProjectService;
     this.keycloakAuth = keycloakAuth;
-
     this.importGithubProjectService = importGithubProjectService;
+
     this.productName = cheBranding.getName();
     this.loadingState = LoadingState;
 
@@ -146,15 +146,12 @@ export class ImportGithubProjectController {
       cheListHelperFactory.removeHelper(helperId);
     });
 
-    this.repositoryFilter = {name: ''};
+    this.repositoryFilter = { name: '' };
     this.organizationFilter = {
       owner: {
         login: ''
       }
     };
-
-    this.githubRepositoriesList = this.importGithubProjectService.getGithubRepositories();
-    this.organizationsList = this.importGithubProjectService.getOrganizations();
     this.cheListHelper.setList(this.githubRepositoriesList, 'clone_url');
 
     const actionOnPublish = (source: ProjectSource) => {
@@ -165,6 +162,11 @@ export class ImportGithubProjectController {
     $scope.$on('$destroy', () => {
       this.addImportProjectService.unsubscribe(actionOnPublish);
     });
+  }
+
+  $onInit(): void {
+    this.githubRepositoriesList = this.importGithubProjectService.getGithubRepositories();
+    this.organizationsList = this.importGithubProjectService.getOrganizations();
 
     this.selectedRepositories = this.importGithubProjectService.getSelectedRepositories();
     this.selectedRepositories.forEach((repository: IGithubRepository) => {
@@ -176,8 +178,8 @@ export class ImportGithubProjectController {
       this.organizationsList = this.importGithubProjectService.getOrganizations();
       this.cheListHelper.setList(this.githubRepositoriesList, 'clone_url');
     });
+    this.importGithubProjectService.askLoad();
   }
-
 
   /**
    * Returns current loading state.
@@ -268,7 +270,7 @@ export class ImportGithubProjectController {
         width: 1020,
         height: 618
       })
-      .then( () => {
+      .then(() => {
         return this.importGithubProjectService.getAndStoreRemoteToken();
       }, (rejectionReason: any) => {
         return this.$q.reject(rejectionReason);

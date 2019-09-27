@@ -167,6 +167,11 @@ export class WorkspaceDetailsController {
     };
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Returns `true` if supported.
    *
@@ -216,10 +221,8 @@ export class WorkspaceDetailsController {
    * @param {string} tab
    */
   updateSelectedTab(tab: string): void {
-    const value = this.tab[tab];
-    if (angular.isDefined(value)) {
-      this.selectedTabIndex = parseInt(value, 10);
-    }
+    const tabIndex = parseInt(this.tab[tab], 10);
+    this.selectedTabIndex = isNaN(tabIndex) ? 0 : tabIndex;
   }
 
   /**

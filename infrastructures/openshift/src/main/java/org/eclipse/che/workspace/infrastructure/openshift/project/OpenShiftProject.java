@@ -27,6 +27,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesP
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Defines an internal API for managing subset of objects inside {@link Project} instance.
@@ -34,6 +36,8 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory
  * @author Sergii Leshchenko
  */
 public class OpenShiftProject extends KubernetesNamespace {
+
+  private static final Logger LOG = LoggerFactory.getLogger(OpenShiftProject.class);
 
   private final OpenShiftRoutes routes;
   private final OpenShiftClientFactory clientFactory;
@@ -115,6 +119,11 @@ public class OpenShiftProject extends KubernetesNamespace {
           .endMetadata()
           .done();
     } catch (KubernetesClientException e) {
+      if (e.getCode() == 403) {
+        LOG.error(
+            "Unable to create new OpenShift project due to lack of permissions."
+                + "HINT: When using workspace project name placeholders, os-oauth or service account with more lenient permissions (cluster-admin) must be used.");
+      }
       throw new KubernetesInfrastructureException(e);
     }
   }

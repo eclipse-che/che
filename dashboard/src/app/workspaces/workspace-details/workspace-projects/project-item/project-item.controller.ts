@@ -36,4 +36,7 @@ export class ProjectItemCtrl {
     this.$location = $location;
     this.cheWorkspace = cheWorkspace;
   }
+
+  $onInit(): void { }
+
 }

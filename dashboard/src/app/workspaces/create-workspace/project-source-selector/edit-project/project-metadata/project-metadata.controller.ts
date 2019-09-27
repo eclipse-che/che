@@ -86,6 +86,8 @@ export class ProjectMetadataController {
     });
   }
 
+  $onInit(): void { }
+
   /**
    * Restores project's name and source location from original state.
    */

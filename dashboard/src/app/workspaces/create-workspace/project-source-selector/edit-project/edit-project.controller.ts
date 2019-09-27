@@ -53,7 +53,10 @@ export class EditProjectController {
 
     $scope.$on('$destroy', () => {
       this.editProjectService.restoreTemplate();
-    });  }
+    });
+  }
+
+  $onInit(): void { }
 
   /**
    * Callback which should be called when "Save" button is pressed.

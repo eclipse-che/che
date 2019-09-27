@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.shared.model.Installer;
 
 /**
@@ -33,7 +32,7 @@ import org.eclipse.che.api.installer.shared.model.Installer;
  * @author gazarenkov
  */
 public class InternalMachineConfig {
-  private final List<InstallerImpl> installers;
+  private final List<Installer> installers;
   private final Map<String, ServerConfig> servers;
   private final Map<String, String> env;
   private final Map<String, String> attributes;
@@ -57,9 +56,6 @@ public class InternalMachineConfig {
     if (servers != null) {
       this.servers.putAll(servers);
     }
-    if (installers != null) {
-      installers.forEach(i -> this.installers.add(new InstallerImpl(i)));
-    }
     if (env != null) {
       this.env.putAll(env);
     }
@@ -72,7 +68,7 @@ public class InternalMachineConfig {
   }
 
   /** Returns modifiable ordered list of installers configs of the machine. */
-  public List<InstallerImpl> getInstallers() {
+  public List<Installer> getInstallers() {
     return installers;
   }
 

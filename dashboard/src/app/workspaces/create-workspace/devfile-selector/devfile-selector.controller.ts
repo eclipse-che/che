@@ -35,6 +35,9 @@ export class DevfileSelectorController {
     this.devfileRegistry = devfileRegistry;
     this.cheWorkspace = cheWorkspace;
     this.devfileOrderBy = 'displayName';
+  }
+
+  $onInit(): void {
     this.loadDevfiles();
   }
 
@@ -51,7 +54,7 @@ export class DevfileSelectorController {
 
   devfileOnClick(devfile: any): void {
     this.selectedDevfile = devfile;
-    
+
     let location = this.cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
 
     let devfileContent = this.devfileRegistry.getDevfile(location, devfile.links.self);

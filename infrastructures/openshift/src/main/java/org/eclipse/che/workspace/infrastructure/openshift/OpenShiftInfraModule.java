@@ -40,7 +40,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.InconsistentRuntimesD
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientTermination;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.DockerimageComponentToWorkspaceApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentToWorkspaceApplier;
@@ -60,9 +59,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesC
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.DefaultSecureServersFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.CookiePathStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
@@ -73,7 +74,9 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectOnWorkspaceRemove;
+import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftCookiePathStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases.OpenshiftBrokerEnvironmentFactory;
 
 /** @author Sergii Leshchenko */
@@ -97,7 +100,6 @@ public class OpenShiftInfraModule extends AbstractModule {
     install(new FactoryModuleBuilder().build(OpenShiftRuntimeFactory.class));
     install(new FactoryModuleBuilder().build(StartSynchronizerFactory.class));
 
-    install(new FactoryModuleBuilder().build(KubernetesBootstrapperFactory.class));
     bind(WorkspacePVCCleaner.class).asEagerSingleton();
     bind(RemoveProjectOnWorkspaceRemove.class).asEagerSingleton();
 
@@ -187,5 +189,8 @@ public class OpenShiftInfraModule extends AbstractModule {
 
     KubernetesDevfileBindings.addAllowedEnvironmentTypeUpgradeBindings(
         binder(), OpenShiftEnvironment.TYPE, KubernetesEnvironment.TYPE);
+
+    bind(ExternalServiceExposureStrategy.class).to(OpenShiftServerExposureStrategy.class);
+    bind(CookiePathStrategy.class).to(OpenShiftCookiePathStrategy.class);
   }
 }

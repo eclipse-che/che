@@ -27,6 +27,11 @@ export class AfterCreationDialogController {
     this.$mdDialog = $mdDialog;
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * It will hide the dialog box.
    */

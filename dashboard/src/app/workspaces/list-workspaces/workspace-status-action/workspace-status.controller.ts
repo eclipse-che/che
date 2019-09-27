@@ -42,6 +42,8 @@ export class WorkspaceStatusController {
     this.cheNotification = cheNotification;
   }
 
+  $onInit(): void { }
+
   /**
    * Change workspace status.
    */

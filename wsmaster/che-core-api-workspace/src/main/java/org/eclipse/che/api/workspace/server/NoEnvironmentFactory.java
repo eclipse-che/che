@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.Warning;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
@@ -34,10 +33,8 @@ public class NoEnvironmentFactory extends InternalEnvironmentFactory<InternalEnv
 
   @Inject
   public NoEnvironmentFactory(
-      InstallerRegistry installerRegistry,
-      RecipeRetriever recipeRetriever,
-      MachineConfigsValidator machinesValidator) {
-    super(installerRegistry, recipeRetriever, machinesValidator);
+      RecipeRetriever recipeRetriever, MachineConfigsValidator machinesValidator) {
+    super(recipeRetriever, machinesValidator);
   }
 
   @Override

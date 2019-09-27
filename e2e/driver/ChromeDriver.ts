@@ -38,7 +38,6 @@ export class ChromeDriver implements IDriver {
             .addArguments('--no-sandbox')
             .addArguments('--disable-web-security')
             .addArguments('--allow-running-insecure-content');
-
         // if 'true' run in 'headless' mode
         if (TestConstants.TS_SELENIUM_HEADLESS) {
             options = options.addArguments('headless');
@@ -58,6 +57,7 @@ export class ChromeDriver implements IDriver {
         }
 
         return builder;
+
     }
 
 }

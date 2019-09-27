@@ -41,6 +41,8 @@ export class FactoryActionBoxController {
     this.selectedAction = this.actions[0].id;
   }
 
+  $onInit(): void { }
+
   /**
    * Edit the action based on the provided index
    * @param $event the mouse event

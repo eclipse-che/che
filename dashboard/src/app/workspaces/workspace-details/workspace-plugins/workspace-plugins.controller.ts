@@ -74,7 +74,9 @@ export class WorkspacePluginsController {
     $scope.$on('$destroy', () => {
       deRegistrationFn();
     });
+  }
 
+  $onInit(): void {
     this.loadPlugins();
   }
 
@@ -211,11 +213,11 @@ export class WorkspacePluginsController {
    * @returns {string} plugin ID
    */
   private findInSelected(plugin: IPluginRow): string {
-    const selectedPluginId = this.selectedPlugins.find(selectedPluginId => {
+    const pluginId = this.selectedPlugins.find(selectedPluginId => {
       const partialId = `${plugin.publisher}/${plugin.name}/`;
       return selectedPluginId.indexOf(partialId) !== -1;
     });
-    return !!selectedPluginId ? selectedPluginId : '';
+    return !!pluginId ? pluginId : '';
   }
 
   /**

@@ -19,6 +19,7 @@ import com.google.inject.Singleton;
 import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 
@@ -30,9 +31,6 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory
 @Singleton
 public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
 
-  private final String projectName;
-  private final String serviceAccountName;
-  private final String clusterRoleName;
   private final OpenShiftClientFactory clientFactory;
 
   @Inject
@@ -42,9 +40,6 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
       @Nullable @Named("che.infra.kubernetes.cluster_role_name") String clusterRoleName,
       OpenShiftClientFactory clientFactory) {
     super(projectName, serviceAccountName, clusterRoleName, clientFactory);
-    this.projectName = projectName;
-    this.serviceAccountName = serviceAccountName;
-    this.clusterRoleName = clusterRoleName;
     this.clientFactory = clientFactory;
   }
 
@@ -59,11 +54,12 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
    * @throws InfrastructureException if any exception occurs during project preparing
    */
   public OpenShiftProject create(String workspaceId) throws InfrastructureException {
-    final String projectName = isPredefined() ? this.projectName : workspaceId;
+    final String projectName =
+        evalNamespaceName(workspaceId, EnvironmentContext.getCurrent().getSubject());
     OpenShiftProject osProject = doCreateProject(workspaceId, projectName);
     osProject.prepare();
 
-    if (!isPredefined() && !isNullOrEmpty(serviceAccountName)) {
+    if (!isPredefined() && !isNullOrEmpty(getServiceAccountName())) {
       // prepare service account for workspace only if account name is configured
       // and project is not predefined
       // since predefined project should be prepared during Che deployment
@@ -95,6 +91,6 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   @VisibleForTesting
   OpenShiftWorkspaceServiceAccount doCreateServiceAccount(String workspaceId, String projectName) {
     return new OpenShiftWorkspaceServiceAccount(
-        workspaceId, projectName, serviceAccountName, clusterRoleName, clientFactory);
+        workspaceId, projectName, getServiceAccountName(), getClusterRoleName(), clientFactory);
   }
 }
