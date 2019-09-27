@@ -61,7 +61,7 @@ export class Editor {
 
         await this.driverHelper.getDriver().wait(async () => {
             try {
-                await this.scrollAndSearchSuggestion(editorTabTitle, suggestionLocator);
+                await this.scrollAndSearchSuggestion(editorTabTitle, suggestionLocator, 40000);
                 return true;
             } catch (err) {
                 if (!(err instanceof error.TimeoutError)) {
