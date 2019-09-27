@@ -1,4 +1,7 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provider
 data:
   dashboards.yaml: |-
     {
@@ -15,7 +18,4 @@ data:
             }
         ]
     }
-kind: ConfigMap
-metadata:
-  name: grafana-dashboard-provider
 
