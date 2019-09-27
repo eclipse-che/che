@@ -27,8 +27,6 @@
           <class name="org.eclipse.che.selenium.dashboard.workspaces.details.WorkspaceDetailsProjectsTest"/>
           <class name="org.eclipse.che.selenium.dashboard.RenameWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateWorkspaceTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.CreateFactoryTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.FactoriesListTest"/>
           <class name="org.eclipse.che.selenium.dashboard.workspaces.NewWorkspacePageTest"/>
           <class name="org.eclipse.che.selenium.dashboard.organization.UserEmptyOrganizationTest"/>
           <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolderTest"/>

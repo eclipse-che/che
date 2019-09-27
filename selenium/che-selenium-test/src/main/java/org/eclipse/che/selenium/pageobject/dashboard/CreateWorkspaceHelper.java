@@ -39,20 +39,16 @@ public class CreateWorkspaceHelper {
 
   public TestWorkspace createWorkspaceFromDevfileWithProject(
       Devfile devfile, String workspaceName, String projectName) {
-    return createWorkspaceFromStack(devfile, workspaceName, ImmutableList.of(projectName), null);
+    return createAndStartWorkspaceFromStack(
+        devfile, workspaceName, ImmutableList.of(projectName), null);
   }
 
   public TestWorkspace createWorkspaceFromDevfileWithoutProject(
       Devfile devfile, String workspaceName) {
-    return createWorkspaceFromStack(devfile, workspaceName, Collections.emptyList(), null);
+    return createAndStartWorkspaceFromStack(devfile, workspaceName, Collections.emptyList(), null);
   }
 
-  public TestWorkspace createWorkspaceFromStackWithProjects(
-      Devfile devfile, String workspaceName, List<String> projectNames) {
-    return createWorkspaceFromStack(devfile, workspaceName, projectNames, null);
-  }
-
-  public TestWorkspace createWorkspaceFromStack(
+  public TestWorkspace createAndStartWorkspaceFromStack(
       Devfile devfile, String workspaceName, List<String> projectNames, Double machineRam) {
     prepareWorkspace(devfile, workspaceName, machineRam);
 
@@ -61,6 +57,19 @@ public class CreateWorkspaceHelper {
 
     projectSourcePage.clickOnAddProjectButton();
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
+
+    return testWorkspaceProvider.getWorkspace(workspaceName, defaultTestUser);
+  }
+
+  public TestWorkspace createAndEditWorkspaceFromStack(
+      Devfile devfile, String workspaceName, List<String> projectNames, Double machineRam) {
+    prepareWorkspace(devfile, workspaceName, machineRam);
+
+    projectSourcePage.clickOnAddOrImportProjectButton();
+    projectNames.forEach(projectSourcePage::selectSample);
+
+    projectSourcePage.clickOnAddProjectButton();
+    newWorkspace.clickOnCreateButtonAndEditWorkspace();
 
     return testWorkspaceProvider.getWorkspace(workspaceName, defaultTestUser);
   }

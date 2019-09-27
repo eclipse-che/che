@@ -35,6 +35,17 @@ export class Editor {
         await this.driverHelper.waitDisappearanceWithTimeout(By.css(Editor.SUGGESTION_WIDGET_BODY_CSS));
     }
 
+    public async scrollAndSearchSuggestion(editorTabTitle: string, suggestionLocator: By, timeout: number = 10000) {
+        await this.driverHelper.getDriver().wait(async () => {
+            await this.waitSuggestionContainer();
+            if (await this.driverHelper.isVisible(suggestionLocator)) {
+                return true;
+            }
+
+            await this.performKeyCombination(editorTabTitle, Key.ARROW_DOWN);
+        }, timeout);
+    }
+
     public async waitSuggestion(editorTabTitle: string,
         suggestionText: string,
         timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -42,9 +53,8 @@ export class Editor {
         const suggestionLocator: By = this.getSuggestionLineXpathLocator(suggestionText);
 
         await this.driverHelper.getDriver().wait(async () => {
-            await this.waitSuggestionContainer();
             try {
-                await this.driverHelper.waitVisibility(suggestionLocator, 5000);
+                await this.scrollAndSearchSuggestion(editorTabTitle, suggestionLocator);
                 return true;
             } catch (err) {
                 if (!(err instanceof error.TimeoutError)) {

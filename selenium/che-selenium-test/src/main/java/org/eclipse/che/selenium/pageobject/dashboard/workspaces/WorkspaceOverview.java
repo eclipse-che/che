@@ -58,10 +58,10 @@ public class WorkspaceOverview {
 
   public interface Locators {
     String NAME_WORKSPACE_INPUT = "//input[@placeholder='Name of the workspace *']";
-    String DELETE_WORKSPACE_BTN = "//button/span[text()='Delete']";
+    String DELETE_WORKSPACE_BTN = "//button[text()='Delete']";
     String WORKSPACE_TITLE = "//div[contains(@class,'toolbar-info')]/span[text()='%s']";
     String EXPORT_WORKSPACE_BTN =
-        "//button[contains(@class, 'che-button')]/span[text()='Export as a file']";
+        "//button[contains(@class, 'che-button')][text()='Export as a file']";
     String DOWNLOAD_WORKSPACE_BTN = "//che-button-default[@che-button-title='download']";
     String CLIPBOARD_JSON_WS_BTN = "//che-button-default[@che-button-title='clipboard']";
     String HIDE_JSON_WS_BTN = "//span[text()='Close']";
@@ -70,8 +70,7 @@ public class WorkspaceOverview {
     String EXPORT_WS_FORM_XPATH = "//che-popup[@title='Export Workspace']";
     String AS_FILE_CONFIG_BODY_XPATH =
         "//che-popup[@title='Export Workspace']//div[@class='CodeMirror-code']";
-
-    String SAVE_BUTTON_XPATH = "//button[@name='save-button' ]";
+    String SAVE_BUTTON_XPATH = "//che-button-save-flat[@che-button-title='Save']";
     String AS_FILE_BUTTON_XPATH = "//md-tab-item/span[text()='As a File']";
     String PRIVATE_CLOUD_BUTTON_XPATH = "//md-tab-item/span[text()='To Private Cloud']";
   }

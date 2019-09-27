@@ -12,28 +12,20 @@
 package org.eclipse.che.selenium.dashboard.organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.FILE;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
+import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.OVERVIEW;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.SHARE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status.STOPPED;
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
+import java.util.Collections;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.pageobject.AskForValueDialog;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.Consoles;
-import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.Menu;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
@@ -43,6 +35,9 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceShare;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.eclipse.che.selenium.pageobject.theia.TheiaEditor;
+import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
+import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -54,32 +49,25 @@ public class ShareWorkspaceMemberTest {
   private static final String ADMIN_PERMISSIONS =
       "read, use, run, configure, setPermissions, delete";
   private static final String MEMBER_PERMISSIONS = "read, use, run, configure";
-  private static final String PROJECT_NAME = "web-java-spring";
-  private static final String FILE_NAME = "readme.txt";
-  private static final String FILE_CONTENT = generate("", 10);
 
   private String systemAdminName;
   private String memberName;
 
   @InjectTestOrganization private TestOrganization org;
 
-  @Inject private Ide ide;
-  @Inject private Menu menu;
   @Inject private TestUser testUser;
-  @Inject private Consoles consoles;
-  @Inject private CodenvyEditor editor;
   @Inject private Workspaces workspaces;
   @Inject private NavigationBar navigationBar;
   @Inject private AdminTestUser adminTestUser;
   @Inject private WorkspaceShare workspaceShare;
-  @Inject private ProjectExplorer projectExplorer;
   @Inject private WorkspaceDetails workspaceDetails;
-  @Inject private AskForValueDialog askForValueDialog;
+  @Inject private TheiaProjectTree theiaProjectTree;
   @Inject private WorkspaceOverview workspaceOverview;
   @Inject private CheMultiuserAdminDashboard dashboard;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private TheiaIde theiaIde;
+  @Inject private TheiaEditor theiaEditor;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -89,7 +77,6 @@ public class ShareWorkspaceMemberTest {
     memberName = testUser.getEmail();
 
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
-    createWorkspace(WORKSPACE_NAME);
   }
 
   @AfterClass
@@ -100,7 +87,8 @@ public class ShareWorkspaceMemberTest {
 
   @Test
   public void checkSharingByWorkspaceOwner() {
-    dashboard.open();
+    createWorkspace(WORKSPACE_NAME);
+    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
@@ -146,14 +134,11 @@ public class ShareWorkspaceMemberTest {
 
     // open workspace and check
     workspaceDetails.clickOpenInIdeWsBtn();
-    ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
-    notificationsPopupPanel.waitPopupPanelsAreClosed();
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME + "/" + FILE_NAME);
-    editor.waitActive();
-    editor.selectTabByName(FILE_NAME);
-    editor.waitTextIntoEditor(FILE_CONTENT);
+    theiaIde.switchToIdeFrame();
+    theiaIde.waitTheiaIde();
+    theiaIde.waitLoaderInvisibility();
+    theiaIde.waitTheiaIdeTopPanel();
+    theiaEditor.waitEditorTab("README.md");
 
     // try to delete the workspace
     dashboard.open();
@@ -179,22 +164,20 @@ public class ShareWorkspaceMemberTest {
   }
 
   private void createWorkspace(String workspaceName) {
-    createWorkspaceHelper.createWorkspaceFromDevfileWithProject(
-        Devfile.JAVA_MAVEN, workspaceName, PROJECT_NAME);
+    createWorkspaceHelper.createAndStartWorkspaceFromStack(
+        Devfile.JAVA_MAVEN, workspaceName, Collections.emptyList(), null);
 
-    ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
+    theiaIde.switchToIdeFrame();
+    theiaIde.waitTheiaIde();
+    theiaIde.waitLoaderInvisibility();
+    theiaIde.waitTheiaIdeTopPanel();
 
-    projectExplorer.waitProjectInitialization(PROJECT_NAME);
-
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
-
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    menu.runCommand(PROJECT, NEW, FILE);
-    askForValueDialog.createNotJavaFileByName(FILE_NAME);
-    editor.waitActive();
-    editor.selectTabByName(FILE_NAME);
-    editor.typeTextIntoEditor(FILE_CONTENT);
-    editor.waitTabFileWithSavedStatus(FILE_NAME);
+    theiaProjectTree.waitFilesTab();
+    theiaProjectTree.clickOnFilesTab();
+    theiaIde.waitAllNotificationsClosed();
+    theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
+    theiaProjectTree.expandItem(CONSOLE_JAVA_SIMPLE);
+    theiaProjectTree.openItem(CONSOLE_JAVA_SIMPLE + "/README.md");
+    theiaEditor.waitEditorTab("README.md");
   }
 }
