@@ -997,23 +997,25 @@ public class WorkspaceService extends Service {
         continue;
       }
 
-      DevfileCommandDto matchingDevfileCommand =
+      Optional<DevfileCommandDto> matchingDevfileCommand =
           commandsWithDevfilePreviewUrl
               .stream()
               .filter(devfileCommandDto -> devfileCommandDto.getName().equals(command.getName()))
-              .findFirst()
-              .orElseThrow(() -> new RuntimeException("Didn't find matching command"));
+              .findFirst();
 
-      String machineName = command.getAttributes().get("machineName");
-      Collection<ServerDto> servers = machines.get(machineName).getServers().values();
-      findServerWithMatchingPort(servers, matchingDevfileCommand.getPreviewUrl().getPort())
-          .map(
-              server ->
-                  command
-                      .getAttributes()
-                      .put(
-                          "previewUrl",
-                          composePreviewUrl(server, matchingDevfileCommand.getPreviewUrl())));
+      if (matchingDevfileCommand.isPresent()) {
+        DevfileCommandDto devfileCommand = matchingDevfileCommand.get();
+        String machineName = command.getAttributes().get("machineName");
+        Collection<ServerDto> servers = machines.get(machineName).getServers().values();
+        findServerWithMatchingPort(servers, devfileCommand.getPreviewUrl().getPort())
+            .map(
+                server ->
+                    command
+                        .getAttributes()
+                        .put(
+                            "previewUrl",
+                            composePreviewUrl(server, devfileCommand.getPreviewUrl())));
+      }
     }
   }
 
