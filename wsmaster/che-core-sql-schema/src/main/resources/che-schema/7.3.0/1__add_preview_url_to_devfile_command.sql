@@ -12,4 +12,4 @@
 
 
 ALTER TABLE devfile_command ADD COLUMN preview_url_port INTEGER;
-ALTER TABLE devfile_command ADD COLUMN preview_url_path VARCHAR(255);
+ALTER TABLE devfile_command ADD COLUMN preview_url_path TEXT;
