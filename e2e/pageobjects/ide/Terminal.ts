@@ -12,41 +12,54 @@ import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { By, Key, WebElement, error } from 'selenium-webdriver';
 import { TestConstants } from '../../TestConstants';
+import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class Terminal {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Terminal.waitTab "${tabTitle}"`);
+
         const terminalTabLocator: By = By.css(this.getTerminalTabCssLocator(tabTitle));
 
         await this.driverHelper.waitVisibility(terminalTabLocator, timeout);
     }
 
     async waitTabAbsence(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Terminal.waitTabAbsence "${tabTitle}"`);
+
         const terminalTabLocator: By = By.css(this.getTerminalTabCssLocator(tabTitle));
 
         await this.driverHelper.waitDisappearanceWithTimeout(terminalTabLocator, timeout);
     }
 
     async clickOnTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Terminal.clickOnTab "${tabTitle}"`);
+
         const terminalTabLocator: By = By.css(this.getTerminalTabCssLocator(tabTitle));
 
         await this, this.driverHelper.waitAndClick(terminalTabLocator, timeout);
     }
 
     async waitTabFocused(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Terminal.waitTabFocused "${tabTitle}"`);
+
         const focusedTerminalTabLocator: By = this.getFocusedTerminalTabLocator(tabTitle);
 
         await this.driverHelper.waitVisibility(focusedTerminalTabLocator, timeout);
     }
 
     async selectTerminalTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Terminal.selectTerminalTab "${tabTitle}"`);
+
         await this.clickOnTab(tabTitle, timeout);
         await this.waitTabFocused(tabTitle, timeout);
     }
 
     async clickOnTabCloseIcon(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Terminal.clickOnTabCloseIcon "${tabTitle}"`);
+
         const terminalTabCloseIconLocator: By =
             By.css(`${this.getTerminalTabCssLocator(tabTitle)} div.p-TabBar-tabCloseIcon`);
 
@@ -54,11 +67,15 @@ export class Terminal {
     }
 
     async closeTerminalTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Terminal.closeTerminalTab "${tabTitle}"`);
+
         await this.clickOnTabCloseIcon(tabTitle, timeout);
         await this.waitTabAbsence(tabTitle, timeout);
     }
 
     async type(terminalTabTitle: string, text: string) {
+        Logger.debug(`Terminal.type "${terminalTabTitle}"`);
+
         const terminalIndex: number = await this.getTerminalIndex(terminalTabTitle);
         const terminalInteractionContainer: By = this.getTerminalEditorInteractionEditorLocator(terminalIndex);
 
@@ -66,6 +83,8 @@ export class Terminal {
     }
 
     async rejectTerminalProcess(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Terminal.rejectTerminalProcess "${tabTitle}"`);
+
         await this.selectTerminalTab(tabTitle, timeout);
         await this.type(tabTitle, Key.chord(Key.CONTROL, 'c'));
     }

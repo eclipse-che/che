@@ -11,11 +11,14 @@ import 'reflect-metadata';
 import { ICheLoginPage } from './ICheLoginPage';
 import { injectable } from 'inversify';
 import { TestConstants } from '../../TestConstants';
+import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class SingleUserLoginPage implements ICheLoginPage {
 
     async login(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug('SingleUserLoginPage.login');
+
         // do nothing
     }
 
