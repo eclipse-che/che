@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.Consumes;
@@ -64,6 +65,7 @@ import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.Service;
@@ -90,6 +92,7 @@ import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
 import org.eclipse.che.api.workspace.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileCommandDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
@@ -953,46 +956,49 @@ public class WorkspaceService extends Service {
       } catch (MachineTokenException e) {
         throw new ServerException(e.getMessage(), e);
       }
-    }
 
-    if (workspaceDto.getRuntime() != null && !workspaceDto.getRuntime().getMachines().isEmpty()) {
-      workspaceDto
-          .getDevfile()
-          .getCommands()
-          .stream()
-          .filter(c -> c.getPreviewUrl() != null)
-          .forEach(
-              c -> {
-                workspaceDto
-                    .getRuntime()
-                    .getCommands()
-                    .stream()
-                    .filter(cdto -> cdto.getName().equals(c.getName()))
-                    .forEach(
-                        cdto -> {
-                          String machineName = cdto.getAttributes().get("machineName");
-                          Map<String, ? extends Server> machineServers =
-                              workspace.getRuntime().getMachines().get(machineName).getServers();
-                          machineServers
-                              .values()
-                              .stream()
-                              .filter(
-                                  s ->
-                                      s.getAttributes().containsKey("port")
-                                          && s.getAttributes()
-                                              .get("port")
-                                              .equals("" + c.getPreviewUrl().getPort()))
-                              .forEach(
-                                  server -> {
-                                    String serverUrl = server.getUrl();
-                                    cdto.getAttributes()
-                                        .put("previewUrl", serverUrl + c.getPreviewUrl().getPath());
-                                  });
-                        });
-              });
+      if (!runtimeDto.getMachines().isEmpty()) {
+        fixRuntimeCommandsPreviewUrls(workspaceDto);
+      }
     }
 
     return workspaceDto;
+  }
+
+  private void fixRuntimeCommandsPreviewUrls(WorkspaceDto workspaceDto) {
+    Map<String, MachineDto> machines = workspaceDto.getRuntime().getMachines();
+    List<DevfileCommandDto> commandsWithDevfilePreviewUrl = workspaceDto
+        .getDevfile()
+        .getCommands()
+        .stream()
+        .filter(c -> c.getPreviewUrl() != null)
+        .collect(Collectors.toList());
+
+    for (Command command : workspaceDto.getRuntime().getCommands()) {
+      DevfileCommandDto matchingDevfileCommand = commandsWithDevfilePreviewUrl.stream()
+          .filter(devfileCommandDto -> devfileCommandDto.getName().equals(command.getName()))
+          .findFirst()
+          .orElseThrow(() -> new RuntimeException("Didn't find matching command"));
+
+      String machineName = command.getAttributes().get("machineName");
+      Map<String, ? extends Server> machineServers = machines.get(machineName).getServers();
+      machineServers
+          .values()
+          .stream()
+          .filter(
+              s ->
+                  s.getAttributes().containsKey("port")
+                      && s.getAttributes()
+                      .get("port")
+                      .equals("" + matchingDevfileCommand.getPreviewUrl().getPort()))
+          .forEach(
+              server -> {
+                String serverUrl = server.getUrl();
+                command.getAttributes()
+                    .put("previewUrl",
+                        serverUrl + matchingDevfileCommand.getPreviewUrl().getPath());
+              });
+    }
   }
 
   private WorkspaceDto filterServers(WorkspaceDto workspace, boolean includeInternal) {
