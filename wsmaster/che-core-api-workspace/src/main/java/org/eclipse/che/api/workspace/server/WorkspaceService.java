@@ -978,7 +978,7 @@ public class WorkspaceService extends Service {
       return;
     }
     Map<String, MachineDto> machines = workspaceDto.getRuntime().getMachines();
-    List<DevfileCommandDto> commandsWithDevfilePreviewUrl =
+    List<DevfileCommandDto> devfileCommandsWithPreviewUrl =
         workspaceDto
             .getDevfile()
             .getCommands()
@@ -998,7 +998,7 @@ public class WorkspaceService extends Service {
       }
 
       Optional<DevfileCommandDto> matchingDevfileCommand =
-          commandsWithDevfilePreviewUrl
+          devfileCommandsWithPreviewUrl
               .stream()
               .filter(devfileCommandDto -> devfileCommandDto.getName().equals(command.getName()))
               .findFirst();

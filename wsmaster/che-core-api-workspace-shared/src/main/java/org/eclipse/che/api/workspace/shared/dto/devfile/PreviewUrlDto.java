@@ -26,5 +26,9 @@ public interface PreviewUrlDto extends PreviewUrl {
 
   void setPort(int port);
 
+  PreviewUrlDto withPort(int port);
+
   void setPath(String path);
+
+  PreviewUrlDto withPath(String path);
 }
