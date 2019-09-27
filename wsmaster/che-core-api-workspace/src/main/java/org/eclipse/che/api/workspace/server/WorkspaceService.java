@@ -37,9 +37,11 @@ import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Example;
 import io.swagger.annotations.ExampleProperty;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -67,6 +69,7 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.core.model.workspace.devfile.PreviewUrl;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
@@ -95,6 +98,8 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileCommandDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Defines Workspace REST API.
@@ -105,6 +110,8 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 @Api(value = "/workspace", description = "Workspace REST API")
 @Path("/workspace")
 public class WorkspaceService extends Service {
+
+  private static final Logger LOG = LoggerFactory.getLogger(WorkspaceService.class);
 
   private final WorkspaceManager workspaceManager;
   private final MachineTokenProvider machineTokenProvider;
@@ -957,48 +964,78 @@ public class WorkspaceService extends Service {
         throw new ServerException(e.getMessage(), e);
       }
 
-      if (!runtimeDto.getMachines().isEmpty()) {
-        fixRuntimeCommandsPreviewUrls(workspaceDto);
-      }
+      fixRuntimeCommandsPreviewUrls(workspaceDto);
     }
 
     return workspaceDto;
   }
 
   private void fixRuntimeCommandsPreviewUrls(WorkspaceDto workspaceDto) {
+    if (workspaceDto.getRuntime().getMachines().isEmpty()
+        || workspaceDto.getDevfile() == null
+        || workspaceDto.getDevfile().getCommands() == null
+        || workspaceDto.getDevfile().getCommands().isEmpty()) {
+      return;
+    }
     Map<String, MachineDto> machines = workspaceDto.getRuntime().getMachines();
-    List<DevfileCommandDto> commandsWithDevfilePreviewUrl = workspaceDto
-        .getDevfile()
-        .getCommands()
-        .stream()
-        .filter(c -> c.getPreviewUrl() != null)
-        .collect(Collectors.toList());
+    List<DevfileCommandDto> commandsWithDevfilePreviewUrl =
+        workspaceDto
+            .getDevfile()
+            .getCommands()
+            .stream()
+            .filter(c -> c.getPreviewUrl() != null)
+            .collect(Collectors.toList());
 
     for (Command command : workspaceDto.getRuntime().getCommands()) {
-      DevfileCommandDto matchingDevfileCommand = commandsWithDevfilePreviewUrl.stream()
-          .filter(devfileCommandDto -> devfileCommandDto.getName().equals(command.getName()))
-          .findFirst()
-          .orElseThrow(() -> new RuntimeException("Didn't find matching command"));
+      if (command.getAttributes().containsKey("previewUrl")) {
+        LOG.debug("Command already have 'previewUrl' attribute. {}", command);
+        continue;
+      }
+      if (!command.getAttributes().containsKey("machineName")) {
+        LOG.debug(
+            "Can't construct PreviewUrl for command without 'machineName' attribute. {}", command);
+        continue;
+      }
+
+      DevfileCommandDto matchingDevfileCommand =
+          commandsWithDevfilePreviewUrl
+              .stream()
+              .filter(devfileCommandDto -> devfileCommandDto.getName().equals(command.getName()))
+              .findFirst()
+              .orElseThrow(() -> new RuntimeException("Didn't find matching command"));
 
       String machineName = command.getAttributes().get("machineName");
-      Map<String, ? extends Server> machineServers = machines.get(machineName).getServers();
-      machineServers
-          .values()
-          .stream()
-          .filter(
-              s ->
-                  s.getAttributes().containsKey("port")
-                      && s.getAttributes()
-                      .get("port")
-                      .equals("" + matchingDevfileCommand.getPreviewUrl().getPort()))
-          .forEach(
-              server -> {
-                String serverUrl = server.getUrl();
-                command.getAttributes()
-                    .put("previewUrl",
-                        serverUrl + matchingDevfileCommand.getPreviewUrl().getPath());
-              });
+      Collection<ServerDto> servers = machines.get(machineName).getServers().values();
+      findServerWithMatchingPort(servers, matchingDevfileCommand.getPreviewUrl().getPort())
+          .map(
+              server ->
+                  command
+                      .getAttributes()
+                      .put(
+                          "previewUrl",
+                          composePreviewUrl(server, matchingDevfileCommand.getPreviewUrl())));
     }
+  }
+
+  private String composePreviewUrl(Server server, PreviewUrl previewUrl) {
+    return server.getUrl() + previewUrl.getPath();
+  }
+
+  private Optional<ServerDto> findServerWithMatchingPort(Collection<ServerDto> servers, int port) {
+    Optional<ServerDto> server =
+        servers
+            .stream()
+            .filter(
+                s ->
+                    s.getAttributes().containsKey("port")
+                        && s.getAttributes().get("port").equals("" + port))
+            .findFirst();
+
+    if (!server.isPresent()) {
+      LOG.debug("Didn't find matching server with port {} for PreviewUrl.", port);
+    }
+
+    return server;
   }
 
   private WorkspaceDto filterServers(WorkspaceDto workspace, boolean includeInternal) {
