@@ -47,10 +47,10 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
-import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -90,9 +90,9 @@ public class WorkspaceManager {
   private final AccountManager accountManager;
   private final EventService eventService;
   private final WorkspaceValidator validator;
-  private final DevfileSchemaValidator devfileSchemaValidator;
   private final DevfileIntegrityValidator devfileIntegrityValidator;
   private final ObjectMapper objectMapper;
+  private final DevfileManager devfileManager;
 
   @Inject
   public WorkspaceManager(
@@ -102,16 +102,16 @@ public class WorkspaceManager {
       EventService eventService,
       AccountManager accountManager,
       WorkspaceValidator validator,
-      DevfileSchemaValidator devfileSchemaValidator,
-      DevfileIntegrityValidator devfileIntegrityValidator) {
+      DevfileIntegrityValidator devfileIntegrityValidator,
+      DevfileManager devfileManager) {
     this.apiEndpoint = apiEndpoint;
     this.workspaceDao = workspaceDao;
     this.runtimes = runtimes;
     this.accountManager = accountManager;
     this.eventService = eventService;
     this.validator = validator;
-    this.devfileSchemaValidator = devfileSchemaValidator;
     this.devfileIntegrityValidator = devfileIntegrityValidator;
+    this.devfileManager = devfileManager;
     this.objectMapper = new ObjectMapper();
   }
 
@@ -347,9 +347,7 @@ public class WorkspaceManager {
       JsonNode wsNode = objectMapper.readTree(content);
       JsonNode devfileNode = wsNode.path("devfile");
       if (!devfileNode.isNull()) {
-        devfileSchemaValidator.validate(devfileNode);
-        DevfileImpl devfile = objectMapper.treeToValue(devfileNode, DevfileImpl.class);
-        devfileIntegrityValidator.validateDevfile(devfile);
+        DevfileImpl devfile = devfileManager.parseJson(devfileNode.toString());
         devfileIntegrityValidator.validateContentReferences(devfile, contentProvider);
       }
       WorkspaceDto ws = DtoFactory.getInstance().createDtoFromJson(content, WorkspaceDto.class);
