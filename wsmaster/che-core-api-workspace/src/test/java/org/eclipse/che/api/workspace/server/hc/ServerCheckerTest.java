@@ -45,7 +45,6 @@ public class ServerCheckerTest {
   @BeforeMethod
   public void setUp() throws Exception {
     timer = new Timer(true);
-
   }
 
   @AfterMethod
@@ -56,15 +55,15 @@ public class ServerCheckerTest {
   @Test(timeOut = TIMEOUT_MS)
   public void successfulCheckTest() throws Exception {
     checker =
-            spy(
-                    new TestServerChecker(
-                            MACHINE_NAME,
-                            SERVER_REF,
-                            PERIOD_MS,
-                            TIMEOUT_MS,
-                            SUCCESS_THRESHOLD,
-                            TimeUnit.MILLISECONDS,
-                            timer));
+        spy(
+            new TestServerChecker(
+                MACHINE_NAME,
+                SERVER_REF,
+                PERIOD_MS,
+                TIMEOUT_MS,
+                SUCCESS_THRESHOLD,
+                TimeUnit.MILLISECONDS,
+                timer));
     CompletableFuture<String> reportCompFuture = checker.getReportCompFuture();
     // not considered as available before start
     assertFalse(reportCompFuture.isDone());
