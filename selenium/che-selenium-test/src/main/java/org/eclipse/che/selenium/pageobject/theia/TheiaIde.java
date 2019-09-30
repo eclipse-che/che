@@ -234,6 +234,15 @@ public class TheiaIde {
     seleniumWebDriverHelper.sendKeys(keyCombination);
   }
 
+  public void waitOpenedWorkspaceIsReadyToUse() {
+    // switch to the IDE and wait for workspace is ready to use
+    switchToIdeFrame();
+    waitTheiaIde();
+    waitLoaderInvisibility();
+    waitTheiaIdeTopPanel();
+    waitAllNotificationsClosed();
+  }
+
   @PreDestroy
   public void close() {
     seleniumWebDriver.quit();

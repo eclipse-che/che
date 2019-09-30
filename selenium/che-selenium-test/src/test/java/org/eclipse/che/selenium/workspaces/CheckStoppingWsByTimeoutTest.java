@@ -13,36 +13,37 @@ package org.eclipse.che.selenium.workspaces;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import java.util.Collections;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.pageobject.Events;
-import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.ToastLoader;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
+import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
+import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
+import org.openqa.selenium.By;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** TODO rewrite to use che7 workspace */
-@Test(groups = UNDER_REPAIR)
 public class CheckStoppingWsByTimeoutTest {
 
-  private static int TOASTLOADER_WIDGET_LATENCY_TIMEOUT_IN_MILLISEC = 20000;
-  @Inject private Ide ide;
-  @Inject private ProjectExplorer projectExplorer;
-  @Inject private ToastLoader toastLoader;
+  private static final String WORKSPACE_NAME =
+      generate(CheckStoppingWsByTimeoutTest.class.getSimpleName(), 5);
+
+  @Inject private Dashboard dashboard;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
-  @Inject private TestWorkspace testWorkspace;
-  @Inject private DefaultTestUser testUser;
-  @Inject private Events eventsPanel;
+  @Inject private DefaultTestUser defaultTestUser;
+  @Inject private CreateWorkspaceHelper createWorkspaceHelper;
+  @Inject private TheiaIde theiaIde;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
   @Named("che.workspace_agent_dev_inactive_stop_timeout_ms")
@@ -52,38 +53,36 @@ public class CheckStoppingWsByTimeoutTest {
   @Named("che.workspace.activity_check_scheduler_period_s")
   private int cheWorkspaceActivityCheckSchedulerPeriodInSeconds;
 
-  @Inject TestUserHttpJsonRequestFactory testUserHttpJsonRequestFactory;
-
   @BeforeClass
   public void setUp() throws Exception {
-    ide.open(testWorkspace);
-    projectExplorer.waitProjectExplorer();
-    // We should invoke delay without any action for triggering workspace activity checker
-    sleepQuietly(getCommonTimeoutInMilliSec(), MILLISECONDS);
+    dashboard.open();
+    createWorkspaceHelper.createAndStartWorkspaceFromStack(
+        Devfile.JAVA_MAVEN, WORKSPACE_NAME, Collections.emptyList(), null);
+  }
+
+  @AfterClass
+  public void tearDown() throws Exception {
+    workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
   }
 
   @Test
   public void checkStoppingByApi() throws Exception {
-    Workspace workspace =
-        workspaceServiceClient.getByName(testWorkspace.getName(), testUser.getName());
+    theiaIde.waitOpenedWorkspaceIsReadyToUse();
+    sleepQuietly(getCommonTimeoutInMilliSec(), MILLISECONDS);
 
+    Workspace workspace =
+        workspaceServiceClient.getByName(WORKSPACE_NAME, defaultTestUser.getName());
     assertEquals(workspace.getStatus(), STOPPED);
   }
 
   @Test(priority = 1)
-  public void checkLoadToasterAfterStopping() {
-    toastLoader.waitToastLoaderButton("Start");
-  }
-
-  @Test(priority = 2)
-  public void checkStopReasonNotification() {
-    eventsPanel.clickEventLogBtn();
-    eventsPanel.waitExpectedMessage("Workspace idle timeout exceeded");
+  public void checkIdeStatusAfterStopping() {
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath("//div[@id='theia-statusBar']//div[@title='Cannot connect to backend.']"));
   }
 
   private int getCommonTimeoutInMilliSec() {
     return cheWorkspaceAgentDevInactiveStopTimeoutMilliseconds
-        + TOASTLOADER_WIDGET_LATENCY_TIMEOUT_IN_MILLISEC
         + cheWorkspaceActivityCheckSchedulerPeriodInSeconds * 1000;
   }
 }
