@@ -13,6 +13,7 @@ import { injectable, inject } from 'inversify';
 import { OcpLoginPage } from '../openshift/OcpLoginPage';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
+import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class OcpLoginByTempAdmin implements IOcpLoginPage {
@@ -21,6 +22,8 @@ export class OcpLoginByTempAdmin implements IOcpLoginPage {
         @inject(CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage) { }
 
     async login() {
+        Logger.debug('OcpLoginByTempAdmin.login');
+
         if (TestConstants.TS_OCP_LOGIN_PAGE_HTPASW) {
             await this.ocpLogin.clickOnLoginWitnKubeAdmin();
         }

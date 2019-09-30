@@ -4,6 +4,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../TestConstants';
 import { By } from 'selenium-webdriver';
 import { Ide } from './Ide';
+import { Logger } from '../../utils/Logger';
 
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
@@ -23,6 +24,8 @@ export class TopMenu {
         @inject(CLASSES.Ide) private readonly ide: Ide) { }
 
     public async waitTopMenu(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('TopMenu.waitTopMenu');
+
         for (const buttonText of TopMenu.TOP_MENU_BUTTONS) {
             const buttonLocator: By = this.getTopMenuButtonLocator(buttonText);
             await this.driverHelper.waitVisibility(buttonLocator, timeout);
@@ -30,11 +33,15 @@ export class TopMenu {
     }
 
     public async selectOption(topMenuButtonText: string, submenuItemtext: string) {
+        Logger.debug(`TopMenu.selectOption "${topMenuButtonText}"`);
+
         await this.clickOnTopMenuButton(topMenuButtonText);
         await this.clickOnSubmenuItem(submenuItemtext);
     }
 
     public async clickOnTopMenuButton(buttonText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`TopMenu.clickOnTopMenuButton "${buttonText}"`);
+
         const buttonLocator: By = this.getTopMenuButtonLocator(buttonText);
 
         await this.ide.closeAllNotifications();
@@ -42,6 +49,8 @@ export class TopMenu {
     }
 
     public async clickOnSubmenuItem(itemText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`TopMenu.clickOnSubmenuItem "${itemText}"`);
+
         const submenuItemLocator: By = this.getSubmenuItemLocator(itemText);
         await this.driverHelper.waitAndClick(submenuItemLocator, timeout);
     }

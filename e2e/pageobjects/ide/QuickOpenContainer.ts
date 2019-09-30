@@ -3,6 +3,7 @@ import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../TestConstants';
 import { By } from 'selenium-webdriver';
+import { Logger } from '../../utils/Logger';
 
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
@@ -19,16 +20,22 @@ export class QuickOpenContainer {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     public async waitContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('QuickOpenContainer.waitContainer');
+
         const monacoQuickOpenContainerLocator: By = By.xpath('//div[@class=\'monaco-quick-open-widget\']');
         await this.driverHelper.waitVisibility(monacoQuickOpenContainerLocator, timeout);
     }
 
     public async waitContainerDisappearance() {
+        Logger.debug('QuickOpenContainer.waitContainerDisappearance');
+
         const monacoQuickOpenContainerLocator: By = By.xpath('//div[@class=\'monaco-quick-open-widget\' and @aria-hidden=\'true\']');
         await this.driverHelper.waitDisappearance(monacoQuickOpenContainerLocator);
     }
 
     public async clickOnContainerItem(itemText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`QuickOpenContainer.clickOnContainerItem "${itemText}"`);
+
         const quickContainerItemLocator: By = By.xpath(`//div[@class='quick-open-entry']//span[text()='${itemText}']`);
 
         await this.waitContainer(timeout);
@@ -37,6 +44,8 @@ export class QuickOpenContainer {
     }
 
     public async type(text: string) {
+        Logger.debug(`QuickOpenContainer.type "${text}"`);
+
         await this.driverHelper.enterValue(By.css('.quick-open-input input'), text);
     }
 

@@ -16,6 +16,7 @@ import { By } from 'selenium-webdriver';
 import { WorkspaceDetails } from './WorkspaceDetails';
 import { ITestWorkspaceUtil } from '../../../utils/workspace/ITestWorkspaceUtil';
 import { WorkspaceStatus } from '../../../utils/workspace/WorkspaceStatus';
+import { Logger } from '../../../utils/Logger';
 
 
 @injectable()
@@ -25,24 +26,32 @@ export class WorkspaceDetailsPlugins {
         @inject(TYPES.WorkspaceUtil) private readonly testWorkspaceUtil: ITestWorkspaceUtil) { }
 
     async waitPluginListItem(pluginName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`WorkspaceDetailsPlugins.waitPluginListItem ${pluginName}`);
+
         const pluginListItemLocator: By = By.css(this.getPluginListItemCssLocator(pluginName));
 
         await this.driverHelper.waitVisibility(pluginListItemLocator, timeout);
     }
 
     async enablePlugin(pluginName: string, pluginVersion?: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`WorkspaceDetailsPlugins.enablePlugin ${pluginName}:${pluginVersion}`);
+
         await this.waitPluginDisabling(pluginName, pluginVersion, timeout);
         await this.clickOnPluginListItemSwitcher(pluginName, pluginVersion, timeout);
         await this.waitPluginEnabling(pluginName, pluginVersion, timeout);
     }
 
     async disablePlugin(pluginName: string, pluginVersion?: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`WorkspaceDetailsPlugins.disablePlugin ${pluginName}:${pluginVersion}`);
+
         await this.waitPluginEnabling(pluginName, pluginVersion, timeout);
         await this.clickOnPluginListItemSwitcher(pluginName, pluginVersion, timeout);
         await this.waitPluginDisabling(pluginName, pluginVersion, timeout);
     }
 
     async addPluginAndOpenWorkspace(namespace: string, workspaceName: string, pluginName: string, pluginId: string, pluginVersion?: string) {
+        Logger.debug(`WorkspaceDetailsPlugins.addPluginAndOpenWorkspace ${namespace}/${workspaceName} plugin: ${pluginName}:${pluginVersion}`);
+
         await this.workspaceDetails.selectTab('Plugins');
         await this.enablePlugin(pluginName, pluginVersion);
         await this.workspaceDetails.saveChanges();
