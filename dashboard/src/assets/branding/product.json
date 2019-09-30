@@ -5,7 +5,6 @@
   "logoTextFile": "che-logo-text.svg",
   "favicon": "favicon.ico",
   "loader": "loader.svg",
-  "ideResources": "/_app/",
   "websocketContext": "/api/websocket",
   "helpPath": "https://www.eclipse.org/che/",
   "helpTitle": "Community",
