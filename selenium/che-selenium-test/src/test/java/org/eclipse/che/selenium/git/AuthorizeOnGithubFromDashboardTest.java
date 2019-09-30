@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GITHUB;
 import static org.testng.Assert.assertEquals;
@@ -40,7 +41,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
-@Test(groups = TestGroup.GITHUB)
+@Test(groups = {TestGroup.GITHUB, UNDER_REPAIR})
 public class AuthorizeOnGithubFromDashboardTest {
   private static final Logger LOG =
       LoggerFactory.getLogger(AuthorizeOnGithubFromDashboardTest.class);
