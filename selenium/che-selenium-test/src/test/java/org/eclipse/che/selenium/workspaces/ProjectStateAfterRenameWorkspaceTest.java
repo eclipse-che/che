@@ -71,6 +71,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectAreaOpened();
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
+    theiaIde.waitAllNotificationsClosed();
 
     openFilesInEditor();
     checkFilesAreOpened();
