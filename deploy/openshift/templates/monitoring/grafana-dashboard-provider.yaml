@@ -11,7 +11,7 @@ data:
                 "folder": "",
                 "name": "0",
                 "options": {
-                    "path": "/grafana-dashboard-definitions/0"
+                    "path": "/etc/grafana/provisioning/dashboards/che"
                 },
                 "orgId": 1,
                 "type": "file"

@@ -83,7 +83,7 @@ objects:
           volumeMounts:
           - mountPath: /etc/grafana/provisioning/datasources
             name: volume-datasources
-          - mountPath: /grafana-dashboard-definitions/0
+          - mountPath: /etc/grafana/provisioning/dashboards/che
             name: volume-dashboards
           - mountPath: /etc/grafana/provisioning/dashboards
             name: volume-dashboard-provider
