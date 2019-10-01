@@ -31,8 +31,6 @@ import {DemoComponentsController} from './demo-components/demo-components.contro
 import {CheBranding} from '../components/branding/che-branding.factory';
 import {ChePreferences} from '../components/api/che-preferences.factory';
 import {RoutingRedirect} from '../components/routing/routing-redirect.factory';
-import IdeIFrameSvc from './ide/ide-iframe/ide-iframe.service';
-import {CheIdeFetcher} from '../components/ide-fetcher/che-ide-fetcher.service';
 import {RouteHistory} from '../components/routing/route-history.service';
 import {CheUIElementsInjectorService} from '../components/service/injector/che-ui-elements-injector.service';
 import {OrganizationsConfig} from './organizations/organizations-config';
@@ -260,8 +258,18 @@ initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) 
 /**
  * Setup route redirect module
  */
-initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$timeout', '$mdSidenav', 'cheIdeFetcher', 'routeHistory', 'cheUIElementsInjectorService', 'workspaceDetailsService',
-  ($rootScope: che.IRootScopeService, $location: ng.ILocationService, $routeParams: ng.route.IRouteParamsService, routingRedirect: RoutingRedirect, $timeout: ng.ITimeoutService, $mdSidenav: ng.material.ISidenavService, cheIdeFetcher: CheIdeFetcher, routeHistory: RouteHistory, cheUIElementsInjectorService: CheUIElementsInjectorService) => {
+initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$timeout', '$mdSidenav', 'routeHistory', 'cheUIElementsInjectorService', 'workspaceDetailsService',
+  (
+    $rootScope: che.IRootScopeService,
+    $location: ng.ILocationService,
+    $routeParams: ng.route.IRouteParamsService,
+    routingRedirect: RoutingRedirect,
+    $timeout: ng.ITimeoutService,
+    $mdSidenav: ng.material.ISidenavService,
+    routeHistory: RouteHistory,
+    cheUIElementsInjectorService: CheUIElementsInjectorService
+  ) => {
+
     $rootScope.hideLoader = false;
     $rootScope.waitingLoaded = false;
     $rootScope.showIDE = false;
@@ -269,7 +277,6 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
 
     // here only to create instances of these components
     /* tslint:disable */
-    cheIdeFetcher;
     routeHistory;
     /* tslint:enable */
 
@@ -324,7 +331,6 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
 ]);
 
 initModule.config(['$mdThemingProvider', 'jsonColors', ($mdThemingProvider: ng.material.IThemingProvider, jsonColors: any) => {
-
   const cheColors = angular.fromJson(jsonColors);
   const getColor = (key: string) => {
     let color = cheColors[key];
