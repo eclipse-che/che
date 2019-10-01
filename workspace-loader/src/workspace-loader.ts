@@ -26,6 +26,10 @@ export class WorkspaceLoader {
     private workspace: che.workspace.Workspace;
     private runtimeIsAccessible: Deferred<void>;
 
+    // `false` if workspace has been stopped intentionally
+    // and workspace-loader should not restart it
+    private doRestart: boolean = true;
+
     constructor(
         private readonly loader: Loader,
         private readonly keycloak?: any
@@ -204,18 +208,25 @@ export class WorkspaceLoader {
             return;
         }
 
+        if (message.status === 'STOPPING') {
+            if (message.prevStatus === 'STARTING') {
+                this.doRestart = false;
+            }
+        }
+
         if (message.status === 'STOPPED') {
             if (message.prevStatus === 'STARTING') {
                 this.loader.error('Workspace stopped.');
                 this.runtimeIsAccessible.reject('Workspace stopped.');
             }
-            if (message.prevStatus === 'STOPPING') {
+            if (message.prevStatus === 'STOPPING' && this.doRestart) {
                 try {
                     await this.startWorkspace();
                 } catch (e) {
                     this.runtimeIsAccessible.reject(e);
                 }
             }
+            this.doRestart = true;
         }
     }
 
