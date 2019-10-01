@@ -4735,7 +4735,7 @@ data:
           "yaxes": [
             {
               "decimals": 0,
-              "format": "short",
+              "format": "none",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -4744,7 +4744,7 @@ data:
             },
             {
               "decimals": null,
-              "format": "short",
+              "format": "none",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -4841,7 +4841,7 @@ data:
           "yaxes": [
             {
               "decimals": 0,
-              "format": "short",
+              "format": "none",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -4849,7 +4849,7 @@ data:
               "show": true
             },
             {
-              "format": "short",
+              "format": "none",
               "label": null,
               "logBase": 1,
               "max": null,
