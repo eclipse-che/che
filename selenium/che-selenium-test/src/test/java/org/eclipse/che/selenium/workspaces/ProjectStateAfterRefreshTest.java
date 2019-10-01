@@ -65,12 +65,14 @@ public class ProjectStateAfterRefreshTest {
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectAreaOpened();
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
+    theiaIde.waitAllNotificationsClosed();
 
     openFilesInEditor();
     checkFilesAreOpened();
 
     seleniumWebDriver.navigate().refresh();
     theiaIde.waitOpenedWorkspaceIsReadyToUse();
+    theiaIde.waitAllNotificationsClosed();
 
     checkFilesAreOpened();
   }

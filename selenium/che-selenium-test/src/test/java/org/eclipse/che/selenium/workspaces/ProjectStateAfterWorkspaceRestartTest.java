@@ -69,6 +69,7 @@ public class ProjectStateAfterWorkspaceRestartTest {
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectAreaOpened();
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
+    theiaIde.waitAllNotificationsClosed();
 
     openFilesInEditor();
     checkFilesAreOpened();
@@ -85,6 +86,9 @@ public class ProjectStateAfterWorkspaceRestartTest {
     workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
     workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
     workspaceDetails.clickOpenInIdeWsBtn();
+
+    theiaIde.waitOpenedWorkspaceIsReadyToUse();
+    theiaIde.waitAllNotificationsClosed();
 
     // check state of the project
     checkFilesAreOpened();
