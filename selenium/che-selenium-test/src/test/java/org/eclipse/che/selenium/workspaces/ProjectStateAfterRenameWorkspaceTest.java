@@ -71,7 +71,6 @@ public class ProjectStateAfterRenameWorkspaceTest {
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectAreaOpened();
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
-    theiaIde.waitAllNotificationsClosed();
 
     openFilesInEditor();
     checkFilesAreOpened();
@@ -90,13 +89,12 @@ public class ProjectStateAfterRenameWorkspaceTest {
     workspaceDetails.clickOpenInIdeWsBtn();
 
     theiaIde.waitOpenedWorkspaceIsReadyToUse();
-    theiaIde.waitAllNotificationsClosed();
 
     checkFilesAreOpened();
   }
 
   private void openFilesInEditor() {
-    theiaProjectTree.openItem(CONSOLE_JAVA_SIMPLE);
+    theiaProjectTree.expandItem(CONSOLE_JAVA_SIMPLE);
     theiaProjectTree.waitItem(PATH_TO_POM_FILE);
     theiaProjectTree.waitItem(PATH_TO_README_FILE);
 
