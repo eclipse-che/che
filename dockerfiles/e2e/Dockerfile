@@ -7,9 +7,8 @@ USER root
 RUN apt-get update && apt-get install && \
     apt-get install -y nodejs && \
     apt-get install -y npm && \
-    npm install -g typescript 
-
-RUN apt-get install x11vnc -y
+    npm install -g typescript && \
+    apt-get install x11vnc -y
 
 COPY e2e/package.json e2e/package-lock.json /tmp/e2e/
 
