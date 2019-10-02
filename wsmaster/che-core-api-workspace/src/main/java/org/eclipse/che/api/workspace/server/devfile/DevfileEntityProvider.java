@@ -55,24 +55,33 @@ public class DevfileEntityProvider implements EntityProvider<DevfileDto> {
   }
 
   @Override
-  public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations,
-      MediaType mediaType) {
+  public boolean isReadable(
+      Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
     return type == DevfileDto.class;
   }
 
   @Override
-  public DevfileDto readFrom(Class<DevfileDto> type, Type genericType, Annotation[] annotations,
-      MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
+  public DevfileDto readFrom(
+      Class<DevfileDto> type,
+      Type genericType,
+      Annotation[] annotations,
+      MediaType mediaType,
+      MultivaluedMap<String, String> httpHeaders,
+      InputStream entityStream)
       throws IOException, WebApplicationException {
 
     try {
       if (mediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
-        return asDto(devfileManager.parseJson(CharStreams
-            .toString(new InputStreamReader(entityStream, getCharsetOrUtf8(mediaType)))));
-      } else if (mediaType.isCompatible(MediaType.valueOf("text/yaml")) || mediaType
-          .isCompatible(MediaType.valueOf("text/x-yaml"))) {
-        return asDto(devfileManager.parseYaml(CharStreams
-            .toString(new InputStreamReader(entityStream, getCharsetOrUtf8(mediaType)))));
+        return asDto(
+            devfileManager.parseJson(
+                CharStreams.toString(
+                    new InputStreamReader(entityStream, getCharsetOrUtf8(mediaType)))));
+      } else if (mediaType.isCompatible(MediaType.valueOf("text/yaml"))
+          || mediaType.isCompatible(MediaType.valueOf("text/x-yaml"))) {
+        return asDto(
+            devfileManager.parseYaml(
+                CharStreams.toString(
+                    new InputStreamReader(entityStream, getCharsetOrUtf8(mediaType)))));
       }
     } catch (DevfileFormatException e) {
       throw new BadRequestException(e.getMessage());
@@ -81,27 +90,36 @@ public class DevfileEntityProvider implements EntityProvider<DevfileDto> {
   }
 
   @Override
-  public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations,
-      MediaType mediaType) {
+  public boolean isWriteable(
+      Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
     return DevfileDto.class.isAssignableFrom(type);
   }
 
   @Override
-  public long getSize(DevfileDto devfileDto, Class<?> type, Type genericType,
-      Annotation[] annotations, MediaType mediaType) {
+  public long getSize(
+      DevfileDto devfileDto,
+      Class<?> type,
+      Type genericType,
+      Annotation[] annotations,
+      MediaType mediaType) {
     return -1;
   }
 
   @Override
-  public void writeTo(DevfileDto devfileDto, Class<?> type, Type genericType,
-      Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders,
-      OutputStream entityStream) throws IOException, WebApplicationException {
+  public void writeTo(
+      DevfileDto devfileDto,
+      Class<?> type,
+      Type genericType,
+      Annotation[] annotations,
+      MediaType mediaType,
+      MultivaluedMap<String, Object> httpHeaders,
+      OutputStream entityStream)
+      throws IOException, WebApplicationException {
     httpHeaders.putSingle(HttpHeaders.CACHE_CONTROL, "public, no-cache, no-store, no-transform");
     try (Writer w = new OutputStreamWriter(entityStream, StandardCharsets.UTF_8)) {
       w.write(DtoFactory.getInstance().toJson(devfileDto));
       w.flush();
     }
-
   }
 
   private String getCharsetOrUtf8(MediaType mediaType) {

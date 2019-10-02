@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.workspace.server;
 
-
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 
@@ -53,8 +52,8 @@ import org.everrest.core.provider.EntityProvider;
 @Consumes({APPLICATION_JSON})
 public class WorkspaceEntityProvider implements EntityProvider<WorkspaceDto> {
 
-  protected DevfileManager devfileManager;
-  protected ObjectMapper mapper = new ObjectMapper();
+  private DevfileManager devfileManager;
+  private ObjectMapper mapper = new ObjectMapper();
 
   @Inject
   public WorkspaceEntityProvider(DevfileManager devfileManager) {
@@ -62,40 +61,55 @@ public class WorkspaceEntityProvider implements EntityProvider<WorkspaceDto> {
     SimpleModule module = new SimpleModule();
     module.addDeserializer(DevfileDto.class, new DevfileDtoDeserializer());
     mapper.registerModule(module);
-
   }
 
-
   @Override
-  public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations,
-      MediaType mediaType) {
+  public boolean isReadable(
+      Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
     return type == WorkspaceDto.class;
   }
 
   @Override
-  public WorkspaceDto readFrom(Class<WorkspaceDto> type, Type genericType, Annotation[] annotations,
-      MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
+  public WorkspaceDto readFrom(
+      Class<WorkspaceDto> type,
+      Type genericType,
+      Annotation[] annotations,
+      MediaType mediaType,
+      MultivaluedMap<String, String> httpHeaders,
+      InputStream entityStream)
       throws IOException, WebApplicationException {
-    return mapper.readerFor(WorkspaceDtoImpl.class).without(DeserializationFeature.WRAP_EXCEPTIONS)
+    return mapper
+        .readerFor(WorkspaceDtoImpl.class)
+        .without(DeserializationFeature.WRAP_EXCEPTIONS)
         .readValue(entityStream);
   }
 
   @Override
-  public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations,
-      MediaType mediaType) {
+  public boolean isWriteable(
+      Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
     return WorkspaceDto.class.isAssignableFrom(type);
   }
 
   @Override
-  public long getSize(WorkspaceDto workspaceDto, Class<?> type, Type genericType,
-      Annotation[] annotations, MediaType mediaType) {
+  public long getSize(
+      WorkspaceDto workspaceDto,
+      Class<?> type,
+      Type genericType,
+      Annotation[] annotations,
+      MediaType mediaType) {
     return -1;
   }
 
   @Override
-  public void writeTo(WorkspaceDto workspaceDto, Class<?> type, Type genericType,
-      Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders,
-      OutputStream entityStream) throws IOException, WebApplicationException {
+  public void writeTo(
+      WorkspaceDto workspaceDto,
+      Class<?> type,
+      Type genericType,
+      Annotation[] annotations,
+      MediaType mediaType,
+      MultivaluedMap<String, Object> httpHeaders,
+      OutputStream entityStream)
+      throws IOException, WebApplicationException {
     httpHeaders.putSingle(HttpHeaders.CACHE_CONTROL, "public, no-cache, no-store, no-transform");
     try (Writer w = new OutputStreamWriter(entityStream, StandardCharsets.UTF_8)) {
       w.write(DtoFactory.getInstance().toJson(workspaceDto));

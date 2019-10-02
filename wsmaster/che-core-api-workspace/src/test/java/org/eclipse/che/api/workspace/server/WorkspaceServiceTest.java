@@ -50,6 +50,7 @@ import java.util.Map;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
@@ -60,9 +61,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
-import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
@@ -72,7 +71,6 @@ import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
@@ -129,7 +127,6 @@ public class WorkspaceServiceTest {
   @Mock private WorkspaceManager wsManager;
   @Mock private MachineTokenProvider machineTokenProvider;
   @Mock private WorkspaceLinksGenerator linksGenerator;
-  @Mock private DevfileManager devfileManager;
   @Mock private URLFetcher urlFetcher;
 
   private WorkspaceService service;
@@ -145,8 +142,7 @@ public class WorkspaceServiceTest {
             linksGenerator,
             CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
             CHE_WORKSPACE_DEVFILE_REGISTRY_ULR,
-            urlFetcher,
-            devfileManager);
+            urlFetcher);
   }
 
   @Test
@@ -188,8 +184,6 @@ public class WorkspaceServiceTest {
     final DevfileDto devfileDto = createDevfileDto();
     final WorkspaceImpl workspace = createWorkspace(devfileDto);
 
-    when(devfileManager.parseJson(any())).thenReturn(new DevfileImpl());
-
     when(wsManager.createWorkspace(any(Devfile.class), anyString(), any(), any()))
         .thenReturn(workspace);
 
@@ -199,43 +193,6 @@ public class WorkspaceServiceTest {
             .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .contentType("application/json")
             .body(devfileDto)
-            .when()
-            .post(
-                SECURE_PATH
-                    + "/workspace/devfile"
-                    + "?namespace=test"
-                    + "&attribute=factoryId:factory123"
-                    + "&attribute=custom:custom:value");
-
-    assertEquals(response.getStatusCode(), 201);
-    assertEquals(
-        new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
-    verify(wsManager)
-        .createWorkspace(
-            any(Devfile.class),
-            eq("test"),
-            eq(
-                ImmutableMap.of(
-                    "factoryId", "factory123",
-                    "custom", "custom:value")),
-            any());
-  }
-
-  @Test
-  public void shouldAcceptYamlDevfileWhenCreatingWorkspace() throws Exception {
-    final DevfileDto devfileDto = createDevfileDto();
-    final WorkspaceImpl workspace = createWorkspace(devfileDto);
-
-    when(devfileManager.parseYaml(any())).thenReturn(new DevfileImpl());
-
-    when(wsManager.createWorkspace(any(Devfile.class), anyString(), any(), any()))
-        .thenReturn(workspace);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .contentType("text/yaml")
             .when()
             .post(
                 SECURE_PATH
@@ -263,10 +220,8 @@ public class WorkspaceServiceTest {
     final DevfileDto devfileDto = createDevfileDto();
     final WorkspaceImpl workspace = createWorkspace(devfileDto);
 
-    when(devfileManager.parseJson(any())).thenThrow(new DevfileFormatException("boom"));
-
     when(wsManager.createWorkspace(any(Devfile.class), anyString(), any(), any()))
-        .thenReturn(workspace);
+        .thenThrow(new ValidationException("boom"));
 
     final Response response =
         given()
@@ -285,8 +240,6 @@ public class WorkspaceServiceTest {
     assertEquals(response.getStatusCode(), 400);
     String error = unwrapError(response);
     assertEquals(error, "boom");
-
-    verify(wsManager, never()).createWorkspace(any(Devfile.class), any(), any(), any());
   }
 
   @Test

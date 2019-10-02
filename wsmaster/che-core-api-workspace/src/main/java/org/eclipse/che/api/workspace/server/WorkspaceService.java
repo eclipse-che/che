@@ -65,7 +65,6 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.rest.Service;
-import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
@@ -108,7 +107,6 @@ public class WorkspaceService extends Service {
   private final String apiEndpoint;
   private final boolean cheWorkspaceAutoStart;
   private final FileContentProvider devfileContentProvider;
-  private final DevfileManager devfileManager;
 
   @Inject
   public WorkspaceService(
@@ -119,8 +117,7 @@ public class WorkspaceService extends Service {
       WorkspaceLinksGenerator linksGenerator,
       @Named(CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY) @Nullable String pluginRegistryUrl,
       @Named(CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY) @Nullable String devfileRegistryUrl,
-      URLFetcher urlFetcher,
-      DevfileManager devfileManager) {
+      URLFetcher urlFetcher) {
     this.apiEndpoint = apiEndpoint;
     this.cheWorkspaceAutoStart = cheWorkspaceAutoStart;
     this.workspaceManager = workspaceManager;
@@ -129,7 +126,6 @@ public class WorkspaceService extends Service {
     this.pluginRegistryUrl = pluginRegistryUrl;
     this.devfileRegistryUrl = devfileRegistryUrl;
     this.devfileContentProvider = new URLFileContentProvider(null, urlFetcher);
-    this.devfileManager = devfileManager;
   }
 
   @POST
@@ -197,7 +193,7 @@ public class WorkspaceService extends Service {
   @Beta
   @Path("/devfile")
   @POST
-  @Consumes({APPLICATION_JSON, "text/yaml", "text/x-yaml"})
+  @Consumes({APPLICATION_JSON})
   @Produces(APPLICATION_JSON)
   @ApiOperation(
       value = "Creates a new workspace based on the Devfile.",
@@ -220,7 +216,8 @@ public class WorkspaceService extends Service {
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public Response create(
-      @ApiParam(value = "The devfile of the workspace to create", required = true) DevfileDto devfile,
+      @ApiParam(value = "The devfile of the workspace to create", required = true)
+          DevfileDto devfile,
       @ApiParam(
               value =
                   "Workspace attribute defined in 'attrName:attrValue' format. "
