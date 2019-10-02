@@ -65,16 +65,16 @@ public class WebApplicationExceptionMapper implements ExceptionMapper<WebApplica
           .type(MediaType.APPLICATION_JSON)
           .build();
     } else if (exception instanceof NotAllowedException) {
-    return Response.status(Status.METHOD_NOT_ALLOWED)
-        .entity(DtoFactory.getInstance().toJson(error))
-        .type(MediaType.APPLICATION_JSON)
-        .build();
-  } else if (exception instanceof NotSupportedException) {
-    return Response.status(Status.UNSUPPORTED_MEDIA_TYPE)
-        .entity(DtoFactory.getInstance().toJson(error))
-        .type(MediaType.APPLICATION_JSON)
-        .build();
-  } else {
+      return Response.status(Status.METHOD_NOT_ALLOWED)
+          .entity(DtoFactory.getInstance().toJson(error))
+          .type(MediaType.APPLICATION_JSON)
+          .build();
+    } else if (exception instanceof NotSupportedException) {
+      return Response.status(Status.UNSUPPORTED_MEDIA_TYPE)
+          .entity(DtoFactory.getInstance().toJson(error))
+          .type(MediaType.APPLICATION_JSON)
+          .build();
+    } else {
       return Response.serverError()
           .entity(DtoFactory.getInstance().toJson(error))
           .type(MediaType.APPLICATION_JSON)
