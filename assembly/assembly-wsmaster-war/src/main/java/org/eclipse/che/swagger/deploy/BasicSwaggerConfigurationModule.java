@@ -12,6 +12,7 @@
 package org.eclipse.che.swagger.deploy;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Resources;
 import com.google.inject.servlet.ServletModule;
 import java.io.InputStream;
 import java.util.jar.Manifest;
@@ -40,9 +41,9 @@ public class BasicSwaggerConfigurationModule extends ServletModule {
   }
 
   private String getCheVersion() {
-    try {
+    try {;
       try (InputStream manifestInputStream =
-          BasicSwaggerConfigurationModule.class.getResourceAsStream("/META-INF/MANIFEST.MF")) {
+          Resources.asByteSource(Resources.getResource("/META-INF/MANIFEST.MF")).openStream()) {
         final Manifest manifest = new Manifest(manifestInputStream);
         return manifest.getMainAttributes().getValue("Specification-Version");
       }
