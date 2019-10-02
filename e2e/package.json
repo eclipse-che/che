@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "cleanup-docker": "if [ $(docker ps -a | grep -c selenium-e2e) -gt 0 ]; then docker rm -f $(docker ps --filter \"name=selenium-e2e\" -aq); fi;",
-    "test-docker": "npm run cleanup-docker && docker run -it --shm-size=2g --name selenium-e2e -e TS_SELENIUM_BASE_URL=$TS_SELENIUM_BASE_URL eclipse/che-e2e:nightly",
-    "test-docker-mount-e2e": "npm run cleanup-docker && docker run -it --shm-size=2g --name selenium-e2e -e TS_SELENIUM_BASE_URL=$TS_SELENIUM_BASE_URL -v $(pwd):/tmp/e2e:Z eclipse/che-e2e:nightly",
+    "test-docker": "npm run cleanup-docker && docker run -it --shm-size=2g -p 5920:5920 --name selenium-e2e -e TS_SELENIUM_BASE_URL=$TS_SELENIUM_BASE_URL eclipse/che-e2e:nightly",
+    "test-docker-mount-e2e": "npm run cleanup-docker && docker run -it --shm-size=2g -p 5920:5920 --name selenium-e2e -e TS_SELENIUM_BASE_URL=$TS_SELENIUM_BASE_URL -v $(pwd):/tmp/e2e:Z eclipse/che-e2e:nightly",
     "test": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha.opts",
     "test-happy-path": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-happy-path.opts",
     "test-che-install": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-che-operatorhub.opts",
