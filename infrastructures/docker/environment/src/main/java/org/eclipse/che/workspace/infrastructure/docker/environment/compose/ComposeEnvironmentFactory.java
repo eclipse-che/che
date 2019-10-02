@@ -27,7 +27,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
@@ -54,13 +53,12 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
 
   @Inject
   public ComposeEnvironmentFactory(
-      InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
       MachineConfigsValidator machinesValidator,
       ComposeEnvironmentValidator composeValidator,
       ComposeServicesStartStrategy startStrategy,
       MemoryAttributeProvisioner memoryProvisioner) {
-    super(installerRegistry, recipeRetriever, machinesValidator);
+    super(recipeRetriever, machinesValidator);
     this.startStrategy = startStrategy;
     this.composeValidator = composeValidator;
     this.memoryProvisioner = memoryProvisioner;

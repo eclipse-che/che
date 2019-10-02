@@ -61,7 +61,7 @@ public class OpenShiftLoginPage {
     waitOnClose();
   }
 
-  private void waitOnOpen() {
+  public void waitOnOpen() {
     seleniumWebDriverHelper.waitAllVisibility(asList(usernameInput, passwordInput, loginButton));
   }
 

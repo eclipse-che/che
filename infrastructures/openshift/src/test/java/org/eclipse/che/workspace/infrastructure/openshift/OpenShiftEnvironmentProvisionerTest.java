@@ -19,7 +19,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitUserProfileProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
@@ -48,7 +47,6 @@ import org.testng.annotations.Test;
 public class OpenShiftEnvironmentProvisionerTest {
 
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
-  @Mock private InstallerServersPortProvisioner installerServersPortProvisioner;
   @Mock private OpenShiftUniqueNamesProvisioner uniqueNamesProvisioner;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
@@ -82,7 +80,6 @@ public class OpenShiftEnvironmentProvisionerTest {
             restartPolicyRewriter,
             volumesStrategy,
             ramLimitProvisioner,
-            installerServersPortProvisioner,
             logsVolumeMachineProvisioner,
             podTerminationGracePeriodProvisioner,
             imagePullSecretProvisioner,
@@ -93,7 +90,6 @@ public class OpenShiftEnvironmentProvisionerTest {
             gitUserProfileProvisioner);
     provisionOrder =
         inOrder(
-            installerServersPortProvisioner,
             logsVolumeMachineProvisioner,
             serversProvisioner,
             envVarsProvisioner,
@@ -115,9 +111,6 @@ public class OpenShiftEnvironmentProvisionerTest {
   public void performsOrderedProvisioning() throws Exception {
     osInfraProvisioner.provision(osEnv, runtimeIdentity);
 
-    provisionOrder
-        .verify(installerServersPortProvisioner)
-        .provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(logsVolumeMachineProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(serversProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(envVarsProvisioner).provision(eq(osEnv), eq(runtimeIdentity));

@@ -24,10 +24,6 @@ import javax.persistence.EntityManager;
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.account.spi.jpa.JpaAccountDao;
-import org.eclipse.che.api.installer.server.jpa.JpaInstallerDao;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
-import org.eclipse.che.api.installer.server.model.impl.InstallerServerConfigImpl;
-import org.eclipse.che.api.installer.server.spi.InstallerDao;
 import org.eclipse.che.api.ssh.server.jpa.JpaSshDao;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
@@ -135,8 +131,6 @@ public class MySqlTckModule extends TckModule {
                 ServerConfigImpl.class,
                 CommandImpl.class,
                 SshPairImpl.class,
-                InstallerImpl.class,
-                InstallerServerConfigImpl.class,
                 WorkspaceActivity.class,
                 VolumeImpl.class,
                 SignatureKeyImpl.class,
@@ -205,11 +199,6 @@ public class MySqlTckModule extends TckModule {
 
     bind(new TypeLiteral<TckRepository<WorkspaceExpiration>>() {})
         .toInstance(new JpaTckRepository<>(WorkspaceExpiration.class));
-
-    // installer
-    bind(InstallerDao.class).to(JpaInstallerDao.class);
-    bind(new TypeLiteral<TckRepository<InstallerImpl>>() {})
-        .toInstance(new JpaTckRepository<>(InstallerImpl.class));
 
     // sign keys
     bind(SignatureKeyDao.class).to(JpaSignatureKeyDao.class);

@@ -16,6 +16,7 @@ import { By } from 'selenium-webdriver';
 import { Ide } from '../../ide/Ide';
 import { ITestWorkspaceUtil } from '../../../utils/workspace/ITestWorkspaceUtil';
 import { WorkspaceStatus } from '../../../utils/workspace/WorkspaceStatus';
+import { Logger } from '../../../utils/Logger';
 
 
 @injectable()
@@ -30,16 +31,22 @@ export class WorkspaceDetails {
         @inject(TYPES.WorkspaceUtil) private readonly testWorkspaceUtil: ITestWorkspaceUtil) { }
 
     async waitLoaderDisappearance(attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
+        Logger.debug('WorkspaceDetails.waitLoaderDisappearance');
+
         await this.driverHelper.waitDisappearance(By.css(WorkspaceDetails.WORKSPACE_DETAILS_LOADER_CSS), attempts, polling);
     }
 
     async saveChanges() {
+        Logger.debug('WorkspaceDetails.saveChanges');
+
         await this.waitSaveButton();
         await this.clickOnSaveButton();
         await this.waitSaveButtonDisappearance();
     }
 
     async waitPage(workspaceName: string, timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug(`WorkspaceDetails.saveChanges workspace: "${workspaceName}"`);
+
         await this.waitWorkspaceTitle(workspaceName, timeout);
         await this.waitOpenButton(timeout);
         await this.waitRunButton(timeout);
@@ -48,31 +55,42 @@ export class WorkspaceDetails {
     }
 
     async waitWorkspaceTitle(workspaceName: string, timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug(`WorkspaceDetails.waitWorkspaceTitle title: "${workspaceName}"`);
+
         const workspaceTitleLocator: By = By.css(this.getWorkspaceTitleCssLocator(workspaceName));
 
         await this.driverHelper.waitVisibility(workspaceTitleLocator, timeout);
     }
 
     async waitRunButton(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug('WorkspaceDetails.waitRunButton');
+
         await this.driverHelper.waitVisibility(By.css(WorkspaceDetails.RUN_BUTTON_CSS), timeout);
     }
 
     async clickOnRunButton(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug('WorkspaceDetails.clickOnRunButton');
+
         await this.driverHelper.waitAndClick(By.css(WorkspaceDetails.RUN_BUTTON_CSS), timeout);
     }
 
     async waitOpenButton(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug('WorkspaceDetails.waitOpenButton');
+
         await this.driverHelper.waitVisibility(By.css(WorkspaceDetails.OPEN_BUTTON_CSS), timeout);
     }
 
     async openWorkspace(namespace: string, workspaceName: string, timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
-        await this.clickOnOpenButton(timeout);
+        Logger.debug(`WorkspaceDetails.openWorkspace "${namespace}/${workspaceName}"`);
 
+        await this.clickOnOpenButton(timeout);
         await this.driverHelper.waitVisibility(By.css(Ide.ACTIVATED_IDE_IFRAME_CSS));
         await this.testWorkspaceUtil.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.STARTING);
     }
 
     async waitTabsPresence(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug('WorkspaceDetails.waitTabsPresence');
+
         const workspaceDetailsTabs: Array<string> = ['Overview', 'Projects', 'Containers', 'Servers',
             'Env Variables', 'Volumes', 'Config', 'SSH', 'Plugins', 'Editors'];
 
@@ -84,6 +102,8 @@ export class WorkspaceDetails {
     }
 
     async selectTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`WorkspaceDetails.selectTab ${tabTitle}`);
+
         await this.clickOnTab(tabTitle, timeout);
         await this.waitTabSelected(tabTitle, timeout);
     }

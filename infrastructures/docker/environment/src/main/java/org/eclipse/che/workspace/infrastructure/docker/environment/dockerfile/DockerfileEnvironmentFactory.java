@@ -20,7 +20,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.*;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -34,11 +33,10 @@ public class DockerfileEnvironmentFactory
 
   @Inject
   public DockerfileEnvironmentFactory(
-      InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
       MachineConfigsValidator machinesValidator,
       MemoryAttributeProvisioner memoryProvisioner) {
-    super(installerRegistry, recipeRetriever, machinesValidator);
+    super(recipeRetriever, machinesValidator);
     this.memoryProvisioner = memoryProvisioner;
   }
 

@@ -157,5 +157,10 @@ export const TestConstants = {
     /**
      * Stop and remove workspace if a test fails.
      */
-    DELETE_WORKSPACE_ON_FAILED_TEST: process.env.DELETE_WORKSPACE_ON_FAILED_TEST === 'true'
+    DELETE_WORKSPACE_ON_FAILED_TEST: process.env.DELETE_WORKSPACE_ON_FAILED_TEST === 'true',
+
+    /**
+     * Log level settings, possible variants: 'INFO' (by default), 'DEBUG', 'TRACE'.
+     */
+    TS_SELENIUM_LOG_LEVEL: process.env.TS_SELENIUM_LOG_LEVEL || 'INFO'
 };

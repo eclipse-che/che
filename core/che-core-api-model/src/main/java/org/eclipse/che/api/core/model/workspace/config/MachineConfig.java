@@ -13,6 +13,7 @@ package org.eclipse.che.api.core.model.workspace.config;
 
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.devfile.Component;
 
 /**
  * Machine configuration
@@ -55,6 +56,12 @@ public interface MachineConfig {
    * <p>The format is a YAML list of strings, e.g. {@code ['-f', '--yes']}
    */
   String CONTAINER_ARGS_ATTRIBUTE = "containerArgs";
+
+  /**
+   * Name of the attribute from {@link #getAttributes()} which, if present, defines the alias of the
+   * {@link Component} of the devfile which was a source of the given machine.
+   */
+  String DEVFILE_COMPONENT_ALIAS_ATTRIBUTE = "component";
 
   /**
    * Returns configured installers.

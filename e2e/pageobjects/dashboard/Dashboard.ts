@@ -14,6 +14,7 @@ import { By } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../TestConstants';
 import { Workspaces } from './Workspaces';
+import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class Dashboard {
@@ -27,6 +28,8 @@ export class Dashboard {
         @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces) { }
 
     async stopWorkspaceByUI(workspaceName: string) {
+        Logger.debug(`Dashboard.stopWorkspaceByUI "${workspaceName}"`);
+
         await this.openDashboard();
         await this.clickWorkspacesButton();
         await this.workspaces.waitPage();
@@ -37,6 +40,8 @@ export class Dashboard {
     }
 
     async deleteWorkspaceByUI(workspaceName: string) {
+        Logger.debug(`Dashboard.deleteWorkspaceByUI "${workspaceName}"`);
+
         await this.openDashboard();
         await this.clickWorkspacesButton();
         await this.workspaces.waitPage();
@@ -49,12 +54,16 @@ export class Dashboard {
     }
 
     async openDashboard() {
-          await this.driverHelper.getDriver().navigate().to(TestConstants.TS_SELENIUM_BASE_URL);
-          await this.waitPage();
+        Logger.debug('Dashboard.openDashboard');
+
+        await this.driverHelper.getDriver().navigate().to(TestConstants.TS_SELENIUM_BASE_URL);
+        await this.waitPage();
 
     }
 
     async waitPage(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug('Dashboard.waitPage');
+
         await this.driverHelper.waitVisibility(By.css(Dashboard.DASHBOARD_BUTTON_CSS), timeout);
         await this.driverHelper.waitVisibility(By.css(Dashboard.WORKSPACES_BUTTON_CSS), timeout);
         await this.driverHelper.waitVisibility(By.css(Dashboard.STACKS_BUTTON_CSS), timeout);
@@ -62,26 +71,38 @@ export class Dashboard {
     }
 
     async clickDashboardButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Dashboard.clickDashboardButton');
+
         await this.driverHelper.waitAndClick(By.css(Dashboard.DASHBOARD_BUTTON_CSS), timeout);
     }
 
     async clickWorkspacesButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Dashboard.clickWorkspacesButton');
+
         await this.driverHelper.waitAndClick(By.css(Dashboard.WORKSPACES_BUTTON_CSS), timeout);
     }
 
     async clickStacksdButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Dashboard.clickStacksdButton');
+
         await this.driverHelper.waitAndClick(By.css(Dashboard.STACKS_BUTTON_CSS), timeout);
     }
 
     async clickFactoriesButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Dashboard.clickFactoriesButton');
+
         await this.driverHelper.waitAndClick(By.css(Dashboard.FACTORIES_BUTTON_CSS), timeout);
     }
 
     async waitLoader(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Dashboard.waitLoader');
+
         await this.driverHelper.waitVisibility(By.css(Dashboard.LOADER_PAGE_CSS), timeout);
     }
 
     async waitLoaderDisappearance(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Dashboard.waitLoaderDisappearance');
+
         await this.driverHelper.waitDisappearance(By.css(Dashboard.LOADER_PAGE_CSS), timeout);
     }
 

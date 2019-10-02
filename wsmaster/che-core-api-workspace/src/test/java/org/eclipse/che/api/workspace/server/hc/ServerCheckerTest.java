@@ -36,7 +36,8 @@ public class ServerCheckerTest {
   private static final String MACHINE_NAME = "mach1";
   private static final String SERVER_REF = "ref1";
   private static final long PERIOD_MS = 10;
-  private static final long TIMEOUT_MS = 500;
+  private static final long CHECKER_TIMEOUT_MS = 5000;
+  private static final long TEST_TIMEOUT_MS = CHECKER_TIMEOUT_MS + 1000;
   private static final int SUCCESS_THRESHOLD = 1;
 
   private Timer timer;
@@ -45,16 +46,6 @@ public class ServerCheckerTest {
   @BeforeMethod
   public void setUp() throws Exception {
     timer = new Timer(true);
-    checker =
-        spy(
-            new TestServerChecker(
-                MACHINE_NAME,
-                SERVER_REF,
-                PERIOD_MS,
-                TIMEOUT_MS,
-                SUCCESS_THRESHOLD,
-                TimeUnit.MILLISECONDS,
-                timer));
   }
 
   @AfterMethod
@@ -62,8 +53,18 @@ public class ServerCheckerTest {
     timer.cancel();
   }
 
-  @Test(timeOut = TIMEOUT_MS)
+  @Test(timeOut = TEST_TIMEOUT_MS)
   public void successfulCheckTest() throws Exception {
+    checker =
+        spy(
+            new TestServerChecker(
+                MACHINE_NAME,
+                SERVER_REF,
+                PERIOD_MS,
+                CHECKER_TIMEOUT_MS,
+                SUCCESS_THRESHOLD,
+                TimeUnit.MILLISECONDS,
+                timer));
     CompletableFuture<String> reportCompFuture = checker.getReportCompFuture();
     // not considered as available before start
     assertFalse(reportCompFuture.isDone());
@@ -83,7 +84,7 @@ public class ServerCheckerTest {
     verify(checker, atLeast(2)).isAvailable();
   }
 
-  @Test(timeOut = TIMEOUT_MS)
+  @Test(timeOut = TEST_TIMEOUT_MS)
   public void checkTimeoutTest() throws Exception {
     checker =
         spy(

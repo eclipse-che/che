@@ -19,7 +19,6 @@ interface IBranding {
   logoTextFile?: string;
   favicon?: string;
   loader?: string;
-  ideResources?: string;
   websocketContext?: string;
   helpPath?: string;
   helpTitle?: string;
@@ -56,7 +55,6 @@ const DEFAULT_PRODUCT_FAVICON = 'favicon.ico';
 const DEFAULT_LOADER = 'loader.svg';
 const DEFAULT_PRODUCT_LOGO = 'che-logo.svg';
 const DEFAULT_PRODUCT_LOGO_TEXT = 'che-logo-text.svg';
-const DEFAULT_IDE_RESOURCES_PATH = '/_app/';
 const DEFAULT_OAUTH_DOCS = 'Configure OAuth in the che.properties file.';
 const DEFAULT_CLI_NAME = 'che.env';
 const DEFAULT_CLI_CONFIG_NAME = 'CHE';
@@ -65,7 +63,7 @@ const DEFAULT_DOCS_WORKSPACE = '/docs/getting-started/intro/index.html';
 const DEFAULT_DOCS_ORGANIZATION = '/docs/organizations.html';
 const DEFAULT_DOCS_FACTORY = '/docs/factories-getting-started.html';
 const DEFAULT_DOCS_GENERAL = '/docs';
-const DEFAULT_DOCS_CONVERTING = '/docs/che-7/converting-a-che-6-workspace-to-a-che-7-devfile.html';
+const DEFAULT_DOCS_CONVERTING = '/docs/che-7/converting-a-che-6-workspace-to-a-che-7-devfile/';
 const DEFAULT_WORKSPACE_PRIORITY_STACKS = ['Java', 'Java-MySQL', 'Blank'];
 const DEFAULT_WORKSPACE_DEFAULT_STACK = 'java-mysql';
 const DEFAULT_WORKSPACE_CREATION_LINK = '#/create-workspace';
@@ -125,7 +123,6 @@ export class CheBranding {
         logoText: this.getProductLogoText(),
         favicon: this.getProductFavicon(),
         loaderURL: this.getLoaderUrl(),
-        ideResourcesPath: this.getIdeResourcesPath(),
         websocketContext: this.getWebsocketContext(),
         helpPath: this.getProductHelpPath(),
         helpTitle: this.getProductHelpTitle(),
@@ -205,14 +202,6 @@ export class CheBranding {
    */
   getLoaderUrl(): string {
     return this.brandingData.loader ? ASSET_PREFIX + this.brandingData.loader : ASSET_PREFIX + DEFAULT_LOADER;
-  }
-
-  /**
-   * Gets ide resources path.
-   * @returns {string}
-   */
-  getIdeResourcesPath(): string {
-    return this.brandingData.ideResources ? this.brandingData.ideResources : DEFAULT_IDE_RESOURCES_PATH;
   }
 
   /**

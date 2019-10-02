@@ -67,7 +67,8 @@ public class EditorComponentToWorkspaceApplierTest {
     // then
     assertEquals(workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE), editorId);
     assertEquals(
-        workspaceConfig.getAttributes().get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE), "editor");
+        workspaceConfig.getAttributes().get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE),
+        editorId + "=" + editorComponent.getAlias());
     assertEquals(
         workspaceConfig
             .getAttributes()
@@ -98,7 +99,12 @@ public class EditorComponentToWorkspaceApplierTest {
         workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE),
         registryUrl + "#" + editorId);
     assertEquals(
-        workspaceConfig.getAttributes().get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE), "editor1");
+        workspaceConfig.getAttributes().get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE),
+        registryUrl.substring(0, registryUrl.length() - 1)
+            + "#"
+            + editorId
+            + "="
+            + editorComponent.getAlias());
     assertEquals(
         workspaceConfig
             .getAttributes()
@@ -132,7 +138,8 @@ public class EditorComponentToWorkspaceApplierTest {
     assertEquals(
         workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE), reference);
     assertEquals(
-        workspaceConfig.getAttributes().get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE), "editor1");
+        workspaceConfig.getAttributes().get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE),
+        "eclipse/super-editor/0.0.1" + "=" + editorComponent.getAlias());
     assertEquals(
         workspaceConfig
             .getAttributes()

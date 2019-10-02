@@ -4,6 +4,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../TestConstants';
 import { By, WebElement } from 'selenium-webdriver';
 import { Ide, RightToolbarButton } from './Ide';
+import { Logger } from '../../utils/Logger';
 
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
@@ -21,6 +22,8 @@ export class GitHubPlugin {
         @inject(CLASSES.Ide) private readonly ide: Ide) { }
 
     async openGitHubPluginContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('GitHubPlugin.openGitHubPluginContainer');
+
         const selectedGitButtonLocator: By = By.xpath(Ide.SELECTED_GIT_BUTTON_XPATH);
 
         await this.ide.waitRightToolbarButton(RightToolbarButton.Git, timeout);
@@ -34,12 +37,16 @@ export class GitHubPlugin {
     }
 
     async waitGitHubContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('GitHubPlugin.waitGitHubContainer');
+
         const githubContainerLocator: By = By.css('#theia-gitContainer .theia-git-main-container');
 
         await this.driverHelper.waitVisibility(githubContainerLocator, timeout);
     }
 
     async getChangesList(): Promise<string[]> {
+        Logger.debug('GitHubPlugin.getChangesList');
+
         const gitHubChangesLocator: By = By.xpath('//div[@id=\'theia-gitContainer\']//div[@id=\'unstagedChanges\']//div[contains(@class, \'gitItem\')]');
         const changesElements: WebElement[] = await this.driverHelper.waitAllPresence(gitHubChangesLocator);
         const changesCount: number = changesElements.length;
@@ -56,6 +63,8 @@ export class GitHubPlugin {
     }
 
     async waitChangesPresence(changesText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`GitHubPlugin.waitChangesPresence "${changesText}"`);
+
         await this.driverHelper
             .getDriver()
             .wait(async () => {
@@ -69,7 +78,7 @@ export class GitHubPlugin {
             }, timeout);
     }
 
-    getGitHubChangesItemXpathLocator(index: number): string {
+    private getGitHubChangesItemXpathLocator(index: number): string {
         return `(//div[@id='theia-gitContainer']//div[@id='unstagedChanges']//div[contains(@class, 'gitItem')])[${index + 1}]`;
     }
 

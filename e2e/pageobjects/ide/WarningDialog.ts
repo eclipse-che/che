@@ -11,6 +11,7 @@ import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { By } from 'selenium-webdriver';
+import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class WarningDialog {
@@ -20,11 +21,14 @@ export class WarningDialog {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async dialogDisplayes(): Promise<boolean> {
+        Logger.debug('WarningDialog.dialogDisplayes');
 
         return await this.driverHelper.isVisible(By.xpath(WarningDialog.DIALOG_BODY_XPATH_LOCATOR));
     }
 
     async waitAndCloseIfAppear() {
+        Logger.debug('WarningDialog.waitAndCloseIfAppear');
+
         const dialogDisplayes: boolean = await this.driverHelper.waitVisibilityBoolean(By.xpath(WarningDialog.DIALOG_BODY_XPATH_LOCATOR));
 
         if (dialogDisplayes) {
@@ -35,10 +39,14 @@ export class WarningDialog {
     }
 
     async closeDialog() {
+        Logger.debug('WarningDialog.closeDialog');
+
         await this.driverHelper.waitAndClick(By.xpath(WarningDialog.CLOSE_BUTTON_XPATH_LOCATOR));
     }
 
     async waitDialogDissappearance() {
+        Logger.debug('WarningDialog.waitDialogDissappearance');
+
         await this.driverHelper.waitDisappearanceWithTimeout(By.xpath(WarningDialog.CLOSE_BUTTON_XPATH_LOCATOR));
     }
 
