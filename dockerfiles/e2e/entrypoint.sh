@@ -15,12 +15,11 @@ fi
 # Launch display mode and VNC server
 export DISPLAY=':20'
 Xvfb :20 -screen 0 1920x1080x16 > /dev/null 2>&1 &
-x11vnc -passwd 123456 -display :20 -N -forever > /dev/null 2>&1 &
+x11vnc -display :20 -N -forever > /dev/null 2>&1 &
 echo ''
 echo '#######################'
 echo ''
 echo 'For remote debug connect to the VNC server 0.0.0.0:5920'
-echo 'password: 123456'
 echo ''
 echo '#######################'
 echo ''
