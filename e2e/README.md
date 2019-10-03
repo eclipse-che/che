@@ -36,9 +36,13 @@
 - export the ```"TS_SELENIUM_BASE_URL"``` variable with "Che" url
 - run command ```"npm run test-docker-mount-e2e"```
 
+## Debug docker launch
+
+The ```'eclipse/che-e2e'``` docker image has VNC server instaled inside. For connecting use ```'0.0.0.0:5920'``` adress.
+
 ## The "Happy Path" scenario launching
 
-**The easiest way to do that is to perform steps which described in the "Docker launch" paragraph. 
+**The easiest way to do that is to perform steps which are described in the "Docker launch" paragraph.
 For running tests without docker, please perform next steps:**
 
 - Deploy Che on Kubernetes infrastructure by using 'Minikube' and 'Chectl' <https://github.com/eclipse/che/blob/master/deploy/kubernetes/README.md>

@@ -12,58 +12,18 @@
       Red Hat, Inc. - initial API and implementation
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
         <version>7.3.0-SNAPSHOT</version>
     </parent>
-    <artifactId>assembly-main</artifactId>
-    <packaging>pom</packaging>
-    <name>Che IDE :: Assemblies Tomcat</name>
-    <dependencies>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>assembly-che-tomcat8</artifactId>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>assembly-root-war</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>assembly-swagger-war</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>assembly-workspace-loader-war</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>assembly-wsmaster-war</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.dashboard</groupId>
-            <artifactId>che-dashboard-war</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.docs</groupId>
-            <artifactId>che-docs</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-    </dependencies>
+    <artifactId>assembly-che-tomcat8</artifactId>
+    <packaging>jar</packaging>
+    <name>Che IDE :: Assemblies Che Tomcat8</name>
     <build>
+        <finalName>assembly-che-tomcat8</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -83,8 +43,21 @@
                     <descriptors>
                         <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
                     </descriptors>
-                    <finalName>eclipse-che-${project.version}</finalName>
-                    <tarLongFileMode>posix</tarLongFileMode>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                    <filesets>
+                        <fileset>
+                            <directory>${project.build.directory}</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
                 </configuration>
             </plugin>
             <plugin>
@@ -100,13 +73,19 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che</groupId>
-                                    <artifactId>assembly-che-tomcat8</artifactId>
+                                    <groupId>org.apache.tomcat</groupId>
+                                    <artifactId>tomcat</artifactId>
                                     <type>zip</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/dependency</outputDirectory>
+                                    <version>${org.apache.tomcat.version}</version>
+                                    <overWrite>false</overWrite>
                                 </artifactItem>
                             </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <skip>true</skip>
                         </configuration>
                     </execution>
                 </executions>

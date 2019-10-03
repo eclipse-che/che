@@ -73,12 +73,24 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
+                <artifactId>assembly-che-tomcat8</artifactId>
+                <version>${che.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-main</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-root-war</artifactId>
+                <version>${che.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>assembly-swagger-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
             </dependency>
@@ -502,23 +514,6 @@
                 <groupId>org.eclipse.che.infrastructure.docker</groupId>
                 <artifactId>infrastructure-docker</artifactId>
                 <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.lib</groupId>
-                <artifactId>che-swagger-module</artifactId>
-                <version>${che.lib.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.lib</groupId>
-                <artifactId>che-swagger-war</artifactId>
-                <version>${che.lib.version}</version>
-                <type>war</type>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.lib</groupId>
-                <artifactId>che-tomcat8-slf4j-logback</artifactId>
-                <version>${che.lib.version}</version>
-                <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.multiuser</groupId>
