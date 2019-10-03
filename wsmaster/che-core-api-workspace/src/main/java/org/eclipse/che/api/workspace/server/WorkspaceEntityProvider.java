@@ -37,6 +37,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.ext.MessageBodyReader;
+import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
@@ -44,7 +46,6 @@ import org.eclipse.che.api.workspace.server.dto.DtoServerImpls.WorkspaceDtoImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.everrest.core.provider.EntityProvider;
 
 /**
  * Entity provider for {@link WorkspaceDto}. Performs schema validation of devfile part of the
@@ -56,7 +57,8 @@ import org.everrest.core.provider.EntityProvider;
 @Provider
 @Produces({APPLICATION_JSON})
 @Consumes({APPLICATION_JSON})
-public class WorkspaceEntityProvider implements EntityProvider<WorkspaceDto> {
+public class WorkspaceEntityProvider
+    implements MessageBodyReader<WorkspaceDto>, MessageBodyWriter<WorkspaceDto> {
 
   private DevfileManager devfileManager;
   private ObjectMapper mapper = new ObjectMapper();

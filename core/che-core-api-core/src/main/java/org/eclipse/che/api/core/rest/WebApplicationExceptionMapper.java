@@ -31,7 +31,7 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.dto.server.DtoFactory;
 
 /**
- * Mapper for the javax.ws.rs.* exceptions.
+ * Mapper for the {@link WebApplicationException} exceptions.
  *
  * @author Max Shaposhnyk
  */

@@ -35,11 +35,12 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.ext.MessageBodyReader;
+import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.everrest.core.provider.EntityProvider;
 
 /**
  * Parses {@link DevfileDto} either from Json or yaml content, and performs schema validation before
@@ -51,7 +52,8 @@ import org.everrest.core.provider.EntityProvider;
 @Provider
 @Produces({APPLICATION_JSON})
 @Consumes({APPLICATION_JSON, "text/yaml", "text/x-yaml"})
-public class DevfileEntityProvider implements EntityProvider<DevfileDto> {
+public class DevfileEntityProvider
+    implements MessageBodyReader<DevfileDto>, MessageBodyWriter<DevfileDto> {
 
   private DevfileManager devfileManager;
 

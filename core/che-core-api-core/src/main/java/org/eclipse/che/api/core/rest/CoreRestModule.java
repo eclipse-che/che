@@ -25,5 +25,6 @@ public class CoreRestModule extends AbstractModule {
     bind(RuntimeExceptionMapper.class);
     bind(ApiInfo.class).toProvider(ApiInfoProvider.class);
     Multibinder.newSetBinder(binder(), Class.class, Names.named("che.json.ignored_classes"));
+    bind(WebApplicationExceptionMapper.class);
   }
 }
