@@ -116,7 +116,7 @@ suite('Language server validation', async () => {
     test('Suggestion', async () => {
         await editor.moveCursorToLineAndChar(javaFileName, 32, 27);
         await editor.pressControlSpaceCombination(javaFileName);
-        await editor.waitSuggestion(javaFileName, 'run(Class<?> primarySource, String... args) : ConfigurableApplicationContext', 120000);
+        await editor.waitSuggestionWithScrolling(javaFileName, 'run(Class<?> primarySource, String... args) : ConfigurableApplicationContext', 120000);
     });
 
 
