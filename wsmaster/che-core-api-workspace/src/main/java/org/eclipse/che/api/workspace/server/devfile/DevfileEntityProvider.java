@@ -28,8 +28,8 @@ import java.nio.charset.StandardCharsets;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
@@ -92,7 +92,7 @@ public class DevfileEntityProvider implements EntityProvider<DevfileDto> {
     } catch (DevfileFormatException e) {
       throw new BadRequestException(e.getMessage());
     }
-    throw new ClientErrorException("Unknown media type " + mediaType.toString(), 400);
+    throw new NotSupportedException("Unknown media type " + mediaType.toString());
   }
 
   @Override
