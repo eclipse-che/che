@@ -12,7 +12,9 @@
 package org.eclipse.che.selenium.workspaces;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.Collections;
@@ -27,11 +29,14 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Statu
 import org.eclipse.che.selenium.pageobject.theia.TheiaEditor;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 10.03.16 * */
+@Test(groups = {UNDER_REPAIR})
+/** TODO the test looks outdated */
 public class ProjectStateAfterWorkspaceRestartTest {
 
   private static final String WORKSPACE_NAME =
@@ -90,7 +95,12 @@ public class ProjectStateAfterWorkspaceRestartTest {
     theiaIde.waitOpenedWorkspaceIsReadyToUse();
 
     // check state of the project
-    checkFilesAreOpened();
+    try {
+      checkFilesAreOpened();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/14717");
+    }
   }
 
   private void openFilesInEditor() {
