@@ -12,6 +12,8 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
@@ -25,11 +27,13 @@ import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.ssh.server.SshManager;
@@ -95,25 +99,33 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
       throws InfrastructureException {
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
+    List<SshPairImpl> sshPairs = emptyList();
     try {
-      List<SshPairImpl> sshPairs = sshManager.getPairs(identity.getOwnerId(), "vcs");
-      if (sshPairs.isEmpty()) {
+      sshPairs = sshManager.getPairs(identity.getOwnerId(), "vcs");
+    } catch (ServerException e) {
+      LOG.warn("Unable to get SSH Keys. Cause: {}", e.getMessage());
+      return;
+    }
+    if (sshPairs.isEmpty()) {
+      try {
+        sshPairs =
+            singletonList(
+                sshManager.generatePair(
+                    identity.getOwnerId(), "vcs", "default-" + new Date().getTime()));
+      } catch (ServerException | ConflictException e) {
+        LOG.warn("Unable to generate the initial SSH key. Cause: {}", e.getMessage());
         return;
       }
-
-      StringBuilder sshConfigData = new StringBuilder();
-
-      for (SshPair sshPair : sshPairs) {
-        doProvisionSshKey(sshPair, k8sEnv, identity.getWorkspaceId());
-
-        sshConfigData.append(buildConfig(sshPair.getName()));
-      }
-
-      String sshConfigMapName = identity.getWorkspaceId() + SSH_CONFIG_MAP_NAME_SUFFIX;
-      doProvisionSshConfig(sshConfigMapName, sshConfigData.toString(), k8sEnv);
-    } catch (ServerException e) {
-      LOG.warn("Unable get SSH Keys. Cause: %s", e.getMessage(), e);
     }
+
+    StringBuilder sshConfigData = new StringBuilder();
+    for (SshPair sshPair : sshPairs) {
+      doProvisionSshKey(sshPair, k8sEnv, identity.getWorkspaceId());
+      sshConfigData.append(buildConfig(sshPair.getName()));
+    }
+
+    String sshConfigMapName = identity.getWorkspaceId() + SSH_CONFIG_MAP_NAME_SUFFIX;
+    doProvisionSshConfig(sshConfigMapName, sshConfigData.toString(), k8sEnv);
   }
 
   private void doProvisionSshKey(SshPair sshPair, KubernetesEnvironment k8sEnv, String wsId) {
