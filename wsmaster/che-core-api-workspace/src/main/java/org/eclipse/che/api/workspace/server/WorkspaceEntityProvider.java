@@ -46,6 +46,12 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.core.provider.EntityProvider;
 
+/**
+ * Entity provider for {@link WorkspaceDto}. Performs schema validation of devfile part of the
+ * workspace before actual {@link DevfileDto} creation.
+ *
+ * @author Max Shaposhnyk
+ */
 @Singleton
 @Provider
 @Produces({APPLICATION_JSON})

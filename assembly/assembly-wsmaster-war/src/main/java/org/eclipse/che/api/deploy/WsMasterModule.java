@@ -151,7 +151,6 @@ public class WsMasterModule extends AbstractModule {
     install(new DevfileModule());
 
     bind(WorkspaceEntityProvider.class);
-    bind(WebApplicationExceptionMapper.class);
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
@@ -208,6 +207,7 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.security.oauth.OAuthAuthenticatorProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl.class);
 
+    bind(WebApplicationExceptionMapper.class);
     install(new org.eclipse.che.api.core.rest.CoreRestModule());
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
     install(new org.eclipse.che.swagger.deploy.DocsModule());

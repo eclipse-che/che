@@ -41,6 +41,12 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.core.provider.EntityProvider;
 
+/**
+ * Parses {@link DevfileDto} either from Json or yaml content, and performs schema validation before
+ * the actual DTO created.
+ *
+ * @author Max Shaposhnyk
+ */
 @Singleton
 @Provider
 @Produces({APPLICATION_JSON})
