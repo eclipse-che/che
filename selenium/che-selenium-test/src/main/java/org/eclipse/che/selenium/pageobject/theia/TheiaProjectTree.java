@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.pageobject.theia;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.EXPAND_ITEM_ICON_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.FILES_TAB_ID;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.OPEN_WORKSPACE_BUTTON_XPATH;
@@ -98,7 +99,7 @@ public class TheiaProjectTree {
 
   public void waitItem(String itemPath) {
     String itemId = getProjectItemId(itemPath);
-    seleniumWebDriverHelper.waitVisibility(By.id(itemId));
+    seleniumWebDriverHelper.waitVisibility(By.id(itemId), ELEMENT_TIMEOUT_SEC);
   }
 
   public void waitItemDisappearance(String itemPath) {
