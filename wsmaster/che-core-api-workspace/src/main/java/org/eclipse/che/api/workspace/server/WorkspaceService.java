@@ -23,7 +23,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
@@ -190,16 +189,12 @@ public class WorkspaceService extends Service {
     return Response.status(201).entity(asDtoWithLinksAndToken(workspace)).build();
   }
 
-  @Beta
   @Path("/devfile")
   @POST
   @Consumes({APPLICATION_JSON})
   @Produces(APPLICATION_JSON)
   @ApiOperation(
       value = "Creates a new workspace based on the Devfile.",
-      notes =
-          "This method is in beta phase. It's strongly recommended to use `POST /devfile` instead"
-              + " to get a workspace from Devfile. Workspaces created with this method are not stable yet.",
       consumes = "application/json, text/yaml, text/x-yaml",
       produces = APPLICATION_JSON,
       nickname = "createFromDevfile",
