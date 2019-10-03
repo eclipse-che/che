@@ -36,7 +36,6 @@ import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 10.03.16 * */
 @Test(groups = {UNDER_REPAIR})
-/** TODO the test looks outdated */
 public class ProjectStateAfterWorkspaceRestartTest {
 
   private static final String WORKSPACE_NAME =
