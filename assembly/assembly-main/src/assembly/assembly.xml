@@ -71,7 +71,7 @@
             <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>swagger.war</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.lib:che-swagger-war</include>
+                <include>org.eclipse.che:assembly-swagger-war</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -100,12 +100,4 @@
            </includes>
         </fileSet>
     </fileSets>
-      <files>
-        <file>
-            <source>${project.basedir}/src/assembly/tomcat/conf/server.xml</source>
-            <outputDirectory>tomcat/conf</outputDirectory>
-            <destName>server.xml</destName>
-            <fileMode>755</fileMode>
-        </file>
-    </files>
 </assembly>
