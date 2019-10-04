@@ -191,7 +191,7 @@ public class WorkspaceService extends Service {
 
   @Path("/devfile")
   @POST
-  @Consumes({APPLICATION_JSON})
+  @Consumes({APPLICATION_JSON, "text/yaml", "text/x-yaml"})
   @Produces(APPLICATION_JSON)
   @ApiOperation(
       value = "Creates a new workspace based on the Devfile.",
