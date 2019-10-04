@@ -10,15 +10,5 @@
 base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
-# HAPPY_PATH_DIR="${base_dir}/../../e2e"
-# MVN_DEP_DIR="${base_dir}/e2e"
-
-# if [ -d $MVN_DEP_DIR ]; then
-#     rm -rf $MVN_DEP_DIR
-# fi
-
-# echo "Copying source code ${HAPPY_PATH_DIR} --> ${MVN_DEP_DIR}"
-# cp -r "${HAPPY_PATH_DIR}" "${MVN_DEP_DIR}"
-
 init --name:happy-path "$@"
 build
