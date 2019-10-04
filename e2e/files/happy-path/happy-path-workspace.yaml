@@ -6,7 +6,7 @@ projects:
   - name: petclinic
     source:
       type: git
-      location: 'https://github.com/spring-projects/spring-petclinic.git'
+      location: "https://github.com/spring-projects/spring-petclinic.git"
 components:
   - type: kubernetes
     alias: petclinic-web
@@ -25,8 +25,8 @@ components:
   - type: dockerimage
     alias: maven-container
     image: bujhtr5555/che-java-mvn:latest
-    command: ['sleep']
-    args: ['infinity']
+    command: ["sleep"]
+    args: ["infinity"]
     env:
       - name: MAVEN_CONFIG
         value: /home/user/.m2
@@ -47,7 +47,7 @@ commands:
     actions:
       - type: exec
         component: maven-container
-        command: 'mkdir -p /projects/petclinic/?/.m2 && cp -r /.m2/* /projects/petclinic/?/.m2 && cd /projects/petclinic && mvn package >> build-output.txt'
+        command: "mkdir -p /projects/petclinic/?/.m2/repository && cp -r /.m2/* /projects/petclinic/?/.m2/repository && cd /projects/petclinic && mvn package >> build-output.txt"
         workdir: /projects/petclinic
   - name: run
     actions:
