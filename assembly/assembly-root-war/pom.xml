@@ -40,6 +40,10 @@
             <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-inject</artifactId>
         </dependency>
@@ -98,6 +102,7 @@
                         <id>analyze</id>
                         <configuration>
                             <ignoredUnusedDeclaredDependencies>
+                                <dep>net.logstash.logback:logstash-logback-encoder</dep>
                                 <dep>ch.qos.logback:logback-classic</dep>
                                 <dep>org.eclipse.che.core:che-core-commons-j2ee</dep>
                                 <dep>org.eclipse.che.core:che-core-commons-logback</dep>
