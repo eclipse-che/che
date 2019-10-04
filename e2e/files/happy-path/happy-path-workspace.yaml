@@ -9,7 +9,7 @@ projects:
       location: 'https://github.com/spring-projects/spring-petclinic.git'
 components:
   - type: cheEditor
-    id: eclipse/che-theia/latest
+    id: eclipse/che-theia/next
     memoryLimit: 768Mi
   - type: kubernetes
     alias: petclinic-web
