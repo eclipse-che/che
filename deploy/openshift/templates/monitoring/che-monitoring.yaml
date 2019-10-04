@@ -83,8 +83,10 @@ objects:
           volumeMounts:
           - mountPath: /etc/grafana/provisioning/datasources
             name: volume-datasources
-          - mountPath: /etc/grafana/provisioning/dashboards
+          - mountPath: /etc/grafana/provisioning/dashboards/che
             name: volume-dashboards
+          - mountPath: /etc/grafana/provisioning/dashboards
+            name: volume-dashboard-provider
           readinessProbe:
             httpGet:
               path: /api/health
@@ -106,8 +108,12 @@ objects:
           name: volume-datasources
         - configMap:
             defaultMode: 420
-            name: grafana-dashboards
+            name: che-grafana-dashboards
           name: volume-dashboards
+        - configMap:
+            defaultMode: 420
+            name: grafana-dashboard-provider
+          name: volume-dashboard-provider
     test: false
     triggers:
       - type: ConfigChange
