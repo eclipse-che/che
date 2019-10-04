@@ -228,8 +228,8 @@ pipeline {
 
                 archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**, logs-and-configs/**"
 
-                sh "sudo rm -rf ${WORKSPACE}/e2e" || true
-                sh "sudo rm -rf ${WORKSPACE}/logs-and-configs" || true
+                sh "sudo rm -rf ${WORKSPACE}/e2e"
+                sh "sudo rm -rf ${WORKSPACE}/logs-and-configs"
             }
 
             cleanWs notFailBuild: true, disableDeferredWipeout: true, deleteDirs: true
