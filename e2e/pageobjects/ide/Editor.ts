@@ -422,10 +422,9 @@ export class Editor {
 
     private async scrollAndSearchSuggestion(editorTabTitle: string, suggestionLocator: By, timeout: number = 10000) {
         await this.driverHelper.getDriver().wait(async () => {
-            await this.waitSuggestionContainer();
-
             const loadingLocator: By = this.getSuggestionLineXpathLocator('Loading');
 
+            await this.waitSuggestionContainer();
             await this.driverHelper.waitDisappearance(loadingLocator);
 
             if (await this.driverHelper.isVisible(suggestionLocator)) {
