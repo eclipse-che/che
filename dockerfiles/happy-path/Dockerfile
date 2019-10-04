@@ -1,4 +1,4 @@
-FROM quay.io/eclipse/che-java11-maven:7.2.0
+FROM quay.io/eclipse/che-java11-maven:nightly
 
 USER root
 
