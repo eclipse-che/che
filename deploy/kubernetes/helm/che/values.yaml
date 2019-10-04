@@ -61,7 +61,7 @@ global:
   cheWorkspaceServiceAccount: "che-workspace"
   # If set, Che will bind the specified cluster role to the workspace service account when creating a workspace.
   cheWorkspaceClusterRole: ""
-  workspaceIdleTimeout: "-1"
+  workspaceIdleTimeout: "1800000"
   log:
     loggerConfig: ""
     appenderName: "plaintext"
