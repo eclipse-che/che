@@ -33,11 +33,10 @@ components:
     env:
       - name: MAVEN_CONFIG
         value: /home/user/.m2
-    memoryLimit: 1512Mi
+    memoryLimit: 3Gi
     mountSources: true
   - type: chePlugin
     id: redhat/java/latest
-    memoryLimit: 512Mi
   - type: chePlugin
     id: redhat/vscode-yaml/latest
 commands:
