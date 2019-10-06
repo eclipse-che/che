@@ -100,3 +100,7 @@ e2e/report/
 */.grunt
 */.lock-wscript
 */cypress-tests/dist
+
+# .NET (Core) #
+#####################
+obj/
