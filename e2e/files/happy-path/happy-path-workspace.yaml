@@ -50,7 +50,7 @@ commands:
     actions:
       - type: exec
         component: maven-container
-        command: mkdir -p /projects/petclinic/?/.m2 && cp -r /.m2/* /projects/petclinic/?/.m2 && cd /projects/petclinic && mvn package >> build-output.txt && echo "#!/bin/bash\nfor i in {0..100} ;\ndo\nif [[ ! -z \"$(tail -n 40 /projects/petclinic/build-output.txt | grep \'BUILD SUCCESS\')\"]]\nthen\necho \"BUILD SUCCESS\" > /projects/petclinic/build-success.txt;\nexit 0\nfi\nsleep 10\ndone" > /projects/petclinic/wait-success-build.sh
+        command: mkdir -p /projects/petclinic/?/.m2 && cp -r /.m2/* /projects/petclinic/?/.m2 && cd /projects/petclinic && tail -n 40 /projects/petclinic/build-output.txt | grep 'BUILD SUCCESS' > /projects/petclinic/result.txt
         workdir: /projects/petclinic
   - name: run
     actions:
