@@ -160,7 +160,11 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
         .add(
             new VolumeBuilder()
                 .withName(secretName)
-                .withSecret(new SecretVolumeSourceBuilder().withSecretName(secretName).build())
+                .withSecret(
+                    new SecretVolumeSourceBuilder()
+                        .withSecretName(secretName)
+                        .withDefaultMode(0600)
+                        .build())
                 .build());
     List<Container> containers = podSpec.getContainers();
     containers.forEach(
