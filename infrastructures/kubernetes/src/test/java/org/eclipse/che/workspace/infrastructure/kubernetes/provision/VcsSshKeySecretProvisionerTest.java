@@ -11,9 +11,10 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -73,13 +74,16 @@ public class VcsSshKeySecretProvisionerTest {
   }
 
   @Test
-  public void doNotDoAnythingIfNoSshKeys() throws Exception {
+  public void generateSshKeyIfNoSshKeys() throws Exception {
     when(sshManager.getPairs(someUser, "vcs")).thenReturn(Collections.emptyList());
+    when(sshManager.generatePair(eq(someUser), eq("vcs"), anyString()))
+        .thenReturn(
+            new SshPairImpl(
+                someUser, "vcs", "default-" + UUID.randomUUID().toString(), "public", "private"));
 
     vcsSshKeysProvisioner.provision(k8sEnv, runtimeIdentity);
 
-    assertTrue(k8sEnv.getSecrets().isEmpty());
-    verifyZeroInteractions(podSpec);
+    assertEquals(k8sEnv.getSecrets().size(), 1);
   }
 
   @Test
