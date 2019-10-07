@@ -148,7 +148,7 @@ suite('Validation of workspace build and run', async () => {
     test('Build application', async () => {
         await runTask('che: build-file-output');
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'build-output.txt');
-        await editor.followAndWaitForText('build-output.txt', '[INFO] BUILD SUCCESS', 220000, 5000);
+        await editor.followAndWaitForText('build-output.txt', '[INFO] BUILD SUCCESS', 300000, 10000);
     });
 
     test('Run application', async () => {
