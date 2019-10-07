@@ -31,7 +31,6 @@ describe('If recipe has content', () => {
           'attributes': {'memoryLimitBytes': '2147483648'},
           'servers': {},
           'volumes': {},
-          'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
         }
       },
       'recipe': {
@@ -73,12 +72,6 @@ describe('If recipe has content', () => {
       expect(source).toEqual(expectedSource);
     });
 
-    it('the machine should be a dev machine', () => {
-      let isDev = envManager.isDev(machines[0]);
-
-      expect(isDev).toBe(true);
-    });
-
     it('should update environment\'s recipe via machine\'s source', () => {
       let oldMachines = envManager.getMachines(environment),
           oldSource = envManager.getSource(oldMachines[0]),
@@ -109,7 +102,6 @@ describe('If recipe has location', () => {
         'dev-machine': {
           'servers': {},
           'volumes': {},
-          'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'],
           'attributes': {'memoryLimitBytes': '2147483648'}
         }
       },
@@ -149,12 +141,6 @@ describe('If recipe has location', () => {
       let source = envManager.getSource(machines[0]);
 
       expect(source).toEqual(null);
-    });
-
-    it('the machine should be a dev machine', () => {
-      let isDev = envManager.isDev(machines[0]);
-
-      expect(isDev).toBe(true);
     });
 
   });

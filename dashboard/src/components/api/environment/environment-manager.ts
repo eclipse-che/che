@@ -146,7 +146,10 @@ export abstract class EnvironmentManager {
    * @returns {string}
    */
   getUniqueMachineName(environment: che.IWorkspaceEnvironment, namePrefix?: string): string {
-    let newMachineName =  namePrefix ? namePrefix : 'new-machine';
+    let newMachineName =  'new-container';
+    if (namePrefix) {
+      newMachineName = `${namePrefix}/${newMachineName}`;
+    }
     const usedMachinesNames: Array<string> = environment && environment.machines ? Object.keys(environment.machines) : [];
     for (let pos: number = 1; pos < 1000; pos++) {
       if (usedMachinesNames.indexOf(newMachineName + pos.toString()) === -1) {
@@ -174,13 +177,15 @@ export abstract class EnvironmentManager {
 
     Object.keys(runtime.machines).forEach((machineName: string) => {
       let runtimeMachine = runtime.machines[machineName];
-      let machine: any = {name: machineName, servers: {}};
+      let machine: any = {name: machineName, servers: {}, attributes: runtimeMachine.attributes};
       if (runtimeMachine && runtimeMachine.servers) {
         machine.runtime = {
           servers: runtimeMachine.servers
         };
       }
-      machines.push(machine);
+      if (runtimeMachine.attributes['source'] === 'recipe') {
+        machines.push(machine);
+      }
     });
 
     return machines;
@@ -351,7 +356,7 @@ export abstract class EnvironmentManager {
   setMemoryLimit(machine: IEnvironmentManagerMachine, limit: number): void {
     machine.attributes = machine.attributes ? machine.attributes : {};
     if (limit) {
-      machine.attributes.memoryLimitBytes = limit;
+      machine.attributes.memoryLimitBytes = limit.toString();
     }
   }
 }

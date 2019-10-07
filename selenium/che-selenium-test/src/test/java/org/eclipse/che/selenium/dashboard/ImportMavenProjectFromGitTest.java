@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GIT;
 
 import com.google.inject.Inject;
@@ -22,16 +21,15 @@ import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
-import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
+import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -43,17 +41,15 @@ public class ImportMavenProjectFromGitTest {
   private String testProjectName;
 
   @Inject private Dashboard dashboard;
-  @Inject private ProjectExplorer explorer;
   @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
-  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private Workspaces workspaces;
-  @Inject private Ide ide;
-  @Inject private ToastLoader toastLoader;
   @Inject private TestGitHubRepository testRepo;
+  @Inject private TheiaIde theiaIde;
+  @Inject private TheiaProjectTree theiaProjectTree;
 
   // it is used to read workspace logs on test failure
   private TestWorkspace testWorkspace;
@@ -81,10 +77,10 @@ public class ImportMavenProjectFromGitTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
 
-    // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
-    newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(JAVA);
     newWorkspace.typeWorkspaceName(WORKSPACE);
+    // we are selecting 'Java' stack from the 'All Devfile' tab for compatibility with OSIO
+    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
+    newWorkspace.waitDevfileSelected(Devfile.JAVA_MAVEN);
 
     projectSourcePage.clickOnAddOrImportProjectButton();
 
@@ -97,10 +93,13 @@ public class ImportMavenProjectFromGitTest {
     // possible to read logs in case of test failure
     testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE, defaultTestUser);
 
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+    theiaIde.switchToIdeFrame();
+    theiaIde.waitTheiaIde();
+    theiaIde.waitLoaderInvisibility();
+    theiaIde.waitTheiaIdeTopPanel();
 
-    toastLoader.waitToastLoaderAndClickStartButton();
-    ide.waitOpenedWorkspaceIsReadyToUse();
-    explorer.waitItem(testProjectName);
+    // wait the project in the tree
+    theiaProjectTree.clickOnFilesTab();
+    theiaProjectTree.waitItem(testProjectName);
   }
 }

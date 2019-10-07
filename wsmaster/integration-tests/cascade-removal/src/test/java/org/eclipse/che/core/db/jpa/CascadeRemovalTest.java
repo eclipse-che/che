@@ -19,7 +19,8 @@ import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createPreferences;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createProfile;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createSshPair;
 import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createUser;
-import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createWorkspace;
+import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createWorkspaceWithConfig;
+import static org.eclipse.che.core.db.jpa.TestObjectsFactory.createWorkspaceWithDevfile;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -35,6 +36,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -69,6 +71,9 @@ import org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
+import org.eclipse.che.api.workspace.server.devfile.SerializableConverter;
+import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
+import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
@@ -82,7 +87,14 @@ import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
@@ -180,11 +192,22 @@ public class CascadeRemovalTest {
                             MachineConfigImpl.class,
                             SourceStorageImpl.class,
                             ServerConfigImpl.class,
-                            StackImpl.class,
                             CommandImpl.class,
                             RecipeImpl.class,
                             SshPairImpl.class,
                             VolumeImpl.class,
+                            ActionImpl.class,
+                            org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl
+                                .class,
+                            ComponentImpl.class,
+                            DevfileImpl.class,
+                            EndpointImpl.class,
+                            EntrypointImpl.class,
+                            EnvImpl.class,
+                            ProjectImpl.class,
+                            SourceImpl.class,
+                            org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl
+                                .class,
                             KubernetesRuntimeState.class,
                             KubernetesRuntimeCommandImpl.class,
                             KubernetesMachineImpl.class,
@@ -193,6 +216,7 @@ public class CascadeRemovalTest {
                             KubernetesServerImpl.ServerId.class)
                         .addEntityClass(
                             "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
+                        .addClass(SerializableConverter.class)
                         .setExceptionHandler(H2ExceptionHandler.class)
                         .build());
                 bind(EventService.class).in(Singleton.class);
@@ -234,12 +258,17 @@ public class CascadeRemovalTest {
                             mock(DBInitializer.class),
                             mock(ProbeScheduler.class),
                             new DefaultWorkspaceStatusCache(),
-                            new DefaultWorkspaceLockService()));
+                            new DefaultWorkspaceLockService(),
+                            mock(DevfileConverter.class)));
                 when(wR.hasRuntime(anyString())).thenReturn(false);
                 bind(WorkspaceRuntimes.class).toInstance(wR);
                 bind(AccountManager.class);
                 bind(WorkspaceSharedPool.class)
                     .toInstance(new WorkspaceSharedPool("cached", null, null, null));
+
+                MapBinder.newMapBinder(binder(), String.class, ComponentIntegrityValidator.class)
+                    .addBinding("kubernetes")
+                    .toInstance(mock(ComponentIntegrityValidator.class));
               }
             });
 
@@ -345,8 +374,8 @@ public class CascadeRemovalTest {
 
     preferenceDao.setPreferences(user.getId(), preferences = createPreferences());
 
-    workspaceDao.create(workspace1 = createWorkspace("workspace1", account));
-    workspaceDao.create(workspace2 = createWorkspace("workspace2", account));
+    workspaceDao.create(workspace1 = createWorkspaceWithConfig("workspace1", account));
+    workspaceDao.create(workspace2 = createWorkspaceWithDevfile("workspace2", account));
 
     workspaceActivityDao.setCreatedTime(workspace1.getId(), System.currentTimeMillis());
     workspaceActivityDao.setCreatedTime(workspace2.getId(), System.currentTimeMillis());

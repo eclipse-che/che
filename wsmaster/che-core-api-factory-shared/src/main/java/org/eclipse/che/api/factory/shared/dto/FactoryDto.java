@@ -20,6 +20,7 @@ import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -38,8 +39,16 @@ public interface FactoryDto extends Factory, Hyperlinks {
 
   FactoryDto withV(String v);
 
+  @FactoryParameter(obligation = OPTIONAL)
+  DevfileDto getDevfile();
+
+  void setDevfile(DevfileDto workspace);
+
+  FactoryDto withDevfile(DevfileDto devfileDto);
+
+  /** because factory DTO may have devfile, in that case, workspace may be optional */
   @Override
-  @FactoryParameter(obligation = MANDATORY)
+  @FactoryParameter(obligation = OPTIONAL)
   WorkspaceConfigDto getWorkspace();
 
   void setWorkspace(WorkspaceConfigDto workspace);
@@ -85,6 +94,18 @@ public interface FactoryDto extends Factory, Hyperlinks {
   void setId(String id);
 
   FactoryDto withId(String id);
+
+  /**
+   * Indicates filename in repository from which the factory was created (for example, .devfile or
+   * .factory.json) or just contains 'repo' value if factory was created from bare GitHub
+   * repository. For custom raw URL's (pastebin, gist etc) value is {@code null}
+   */
+  @FactoryParameter(obligation = OPTIONAL, setByServer = true)
+  String getSource();
+
+  void setSource(String source);
+
+  FactoryDto withSource(String source);
 
   @Override
   @FactoryParameter(obligation = OPTIONAL)

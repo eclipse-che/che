@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.site.ocpoauth;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
@@ -23,19 +22,17 @@ import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
-import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.ocp.AuthorizeOpenShiftAccessPage;
 import org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage;
 import org.eclipse.che.selenium.pageobject.ocp.OpenShiftProjectCatalogPage;
 import org.eclipse.che.selenium.pageobject.site.CheLoginPage;
 import org.eclipse.che.selenium.pageobject.site.FirstBrokerProfilePage;
+import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
@@ -88,13 +85,10 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
   @Inject private Workspaces workspaces;
   @Inject private NewWorkspace newWorkspace;
   @Inject private TestWorkspaceServiceClient defaultUserWorkspaceServiceClient;
-  @Inject private ToastLoader toastLoader;
-  @Inject private Ide ide;
-  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private OpenShiftProjectCatalogPage openShiftProjectCatalogPage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestDashboardUrlProvider testDashboardUrlProvider;
-  @Inject private TestWorkspaceProvider testWorkspaceProvider;
+  @Inject private TheiaIde theiaIde;
 
   // it is used to read workspace logs on test failure
   private TestWorkspace testWorkspace;
@@ -110,10 +104,8 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
     // (we can't use dashboard.open() here to login with OAuth)
     seleniumWebDriver.navigate().to(testDashboardUrlProvider.get());
 
-    // click on button to login with OpenShift OAuth
-    cheLoginPage.loginWithOpenShiftOAuth();
-
     // login to OCP from login page with default test user credentials
+    openShiftLoginPage.waitOnOpen();
     openShiftLoginPage.login(defaultTestUser.getName(), defaultTestUser.getPassword());
 
     // authorize ocp-client to access OpenShift account
@@ -140,18 +132,13 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
-    newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(JAVA);
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
+    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
-    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
-    // possible to read logs in case of test failure
-    testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE_NAME, defaultTestUser);
 
-    // switch to the Eclipse Che IDE and wait until workspace is ready to use
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
-    toastLoader.waitToastLoaderAndClickStartButton();
-    ide.waitOpenedWorkspaceIsReadyToUse();
+    // switch to the IDE and wait for workspace is ready to use
+    theiaIde.switchToIdeFrame();
+    theiaIde.waitTheiaIde();
 
     // go to OCP and check if there is a project with name equals to test workspace id
     openShiftProjectCatalogPage.open();

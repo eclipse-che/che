@@ -194,6 +194,28 @@ public class CheTerminal {
   }
 
   /**
+   * waits text into the terminal
+   *
+   * @param terminalNumber
+   * @param expectedText expected text massive into terminal
+   */
+  public void waitTextInTerminal(int terminalNumber, String... expectedText) {
+    for (String string : expectedText) {
+      new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+          .until((WebDriver input) -> getVisibleTextFromTerminal(terminalNumber).contains(string));
+    }
+  }
+
+  /**
+   * waits text in the first terminal
+   *
+   * @param expectedText expected text massive into terminal
+   */
+  public void waitTextInFirstTerminal(String... expectedText) {
+    waitTextInTerminal(1, expectedText);
+  }
+
+  /**
    * waits expected text is not present in the terminal
    *
    * @param expectedText expected text

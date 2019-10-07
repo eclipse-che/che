@@ -105,6 +105,8 @@ export class WorkspaceEnvironmentsController {
     });
   }
 
+  $onInit(): void { }
+
   /**
    * Sets initial values
    */

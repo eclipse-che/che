@@ -58,6 +58,10 @@ HELP="
 --image-che - Override default Che image. Example: --image-che=org/repo:tag. Tag is mandatory!
 --secure | -s - Deploy Che with SSL enabled
 --setup-ocp-oauth - register OCP oauth client and setup Keycloak and Che to use OpenShift Identity Provider
+--deploy-che-plugin-registry - deploy Che plugin registry
+--deploy-che-devfile-registry - deploy Che devfile registry
+--tracing - Deploy jaeger and enable tracing collection
+--monitoring - Deploy Grafana + Prometheus and enable metrics collection
 ===================================
 ENV vars: this script automatically detect envs vars beginning with "CHE_" and passes them to Che deployments:
 CHE_IMAGE_REPO - Che server Docker image, defaults to "eclipse-che-server"
@@ -106,6 +110,22 @@ case $key in
     ;;
     --debug)
     CHE_DEBUG_SERVER=true
+    shift
+    ;;
+    --tracing)
+    CHE_TRACING_ENABLED=true
+    shift
+    ;;
+    --monitoring)
+    CHE_METRICS_ENABLED=true
+    shift
+    ;;
+    --deploy-che-plugin-registry)
+    DEPLOY_CHE_PLUGIN_REGISTRY=true
+    shift
+    ;;
+    --deploy-che-devfile-registry)
+    DEPLOY_CHE_DEVFILE_REGISTRY=true
     shift
     ;;
     --help)
@@ -180,17 +200,39 @@ export KEYCLOAK_USER=${KEYCLOAK_USER:-${DEFAULT_KEYCLOAK_USER}}
 DEFAULT_KEYCLOAK_PASSWORD=admin
 export KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:-${DEFAULT_KEYCLOAK_PASSWORD}}
 
-DEFAULT_PLUGIN_REGISTRY_IMAGE_TAG="latest"
+###
+### Plugin Registry settings
+###
+DEFAULT_PLUGIN_REGISTRY_IMAGE_TAG="nightly"
 export PLUGIN_REGISTRY_IMAGE_TAG=${PLUGIN_REGISTRY_IMAGE_TAG:-${DEFAULT_PLUGIN_REGISTRY_IMAGE_TAG}}
 
-DEFAULT_PLUGIN_REGISTRY_IMAGE="eclipse/che-plugin-registry"
+DEFAULT_PLUGIN_REGISTRY_IMAGE="quay.io/eclipse/che-plugin-registry"
 export PLUGIN_REGISTRY_IMAGE=${PLUGIN_REGISTRY_IMAGE:-${DEFAULT_PLUGIN_REGISTRY_IMAGE}}
 
 DEFAULT_PLUGIN_REGISTRY_IMAGE_PULL_POLICY="Always"
 export PLUGIN_REGISTRY_IMAGE_PULL_POLICY=${PLUGIN_REGISTRY_IMAGE_PULL_POLICY:-${DEFAULT_PLUGIN_REGISTRY_IMAGE_PULL_POLICY}}
 
-DEFAULT_PLUGIN__REGISTRY__URL="https://che-plugin-registry.openshift.io"
+DEFAULT_PLUGIN__REGISTRY__URL="https://che-plugin-registry.openshift.io/v3"
 export PLUGIN__REGISTRY__URL=${PLUGIN__REGISTRY__URL:-${DEFAULT_PLUGIN__REGISTRY__URL}}
+
+###
+### Devfile Registry settings
+###
+DEFAULT_DEVFILE_REGISTRY_IMAGE_TAG="nightly"
+export DEVFILE_REGISTRY_IMAGE_TAG=${DEVFILE_REGISTRY_IMAGE_TAG:-${DEFAULT_DEVFILE_REGISTRY_IMAGE_TAG}}
+
+DEFAULT_DEVFILE_REGISTRY_IMAGE="quay.io/eclipse/che-devfile-registry"
+export DEVFILE_REGISTRY_IMAGE=${DEVFILE_REGISTRY_IMAGE:-${DEFAULT_DEVFILE_REGISTRY_IMAGE}}
+
+DEFAULT_DEVFILE_REGISTRY_IMAGE_PULL_POLICY="Always"
+export DEVFILE_REGISTRY_IMAGE_PULL_POLICY=${DEVFILE_REGISTRY_IMAGE_PULL_POLICY:-${DEFAULT_DEVFILE_REGISTRY_IMAGE_PULL_POLICY}}
+
+DEFAULT_DEVFILE__REGISTRY__URL="https://che-devfile-registry.openshift.io/"
+export DEVFILE__REGISTRY__URL=${DEVFILE__REGISTRY__URL:-${DEFAULT_DEVFILE__REGISTRY__URL}}
+
+
+DEFAULT_CHE_METRICS_ENABLED="false"
+export CHE_METRICS_ENABLED=${CHE_METRICS_ENABLED:-${DEFAULT_CHE_METRICS_ENABLED}}
 
 DEFAULT_CHE_TRACING_ENABLED="false"
 export CHE_TRACING_ENABLED=${CHE_TRACING_ENABLED:-${DEFAULT_CHE_TRACING_ENABLED}}
@@ -360,6 +402,7 @@ createNewProject() {
   WAIT_FOR_PROJECT_TO_DELETE=true
   CHE_REMOVE_PROJECT=true
   DELETE_OPENSHIFT_PROJECT_MESSAGE=$(printInfo "Removing namespace ${CHE_OPENSHIFT_PROJECT}")
+  CREATE_ATTEMPTS=1
   if ${OC_BINARY} get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
     printWarning "Namespace \"${CHE_OPENSHIFT_PROJECT}\" exists."
     while $WAIT_FOR_PROJECT_TO_DELETE
@@ -369,6 +412,7 @@ createNewProject() {
       if $CHE_REMOVE_PROJECT; then
         ${OC_BINARY} delete project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
         CHE_REMOVE_PROJECT=false
+        CREATE_ATTEMPTS=50
       fi
       DELETE_OPENSHIFT_PROJECT_MESSAGE="`tput setaf 2`.`tput sgr0`"
       if ! ${OC_BINARY} get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
@@ -379,16 +423,28 @@ createNewProject() {
     done
     echo "`tput setaf 2` Done!`tput sgr0`"
   fi
-  printInfo "Creating namespace \"${CHE_OPENSHIFT_PROJECT}\""
-  # sometimes even if the project does not exist creating a new one is impossible as it's apparently exists
-  sleep 1
-  ${OC_BINARY} new-project "${CHE_OPENSHIFT_PROJECT}" > /dev/null
-  OUT=$?
-  if [ ${OUT} -eq 1 ]; then
-    printError "Failed to create namespace ${CHE_OPENSHIFT_PROJECT}. It may exist in someone else's account or namespace deletion has not been fully completed. Try again in a short while or pick a different project name -p=myProject"
-    exit ${OUT}
-  else
+
+  CURRENT_ATTEMPT=0
+  CREATE_SUCCESS=1
+
+  while [[ ${CURRENT_ATTEMPT} -lt ${CREATE_ATTEMPTS} ]]; do
+    CURRENT_ATTEMPT=$((CURRENT_ATTEMPT + 1));
+    printInfo "Creating namespace \"${CHE_OPENSHIFT_PROJECT}\" (attempt ${CURRENT_ATTEMPT}/${CREATE_ATTEMPTS})"
+
+    OUT=`${OC_BINARY} new-project "${CHE_OPENSHIFT_PROJECT}" > /dev/null 2>&1; echo $?`
+    if [[ ${OUT} -ne 0 ]]; then
+      sleep 5 
+    else
+      CREATE_SUCCESS=0
+      CURRENT_ATTEMPT=${CREATE_ATTEMPTS}
+    fi
+  done
+
+  if [[ ${CREATE_SUCCESS} ]]; then
     printInfo "Namespace \"${CHE_OPENSHIFT_PROJECT}\" successfully created"
+  else
+    printError "Failed to create namespace ${CHE_OPENSHIFT_PROJECT}. It may exist in someone else's account or namespace deletion has not been fully completed. Try again in a short while or pick a different project name -p=myProject"
+    exit 1
   fi
 }
 
@@ -399,8 +455,8 @@ if [ "${CHE_DEBUG_SERVER}" == "true" ]; then
   ${OC_BINARY}  expose service che-debug
   NodePort=$(oc get service che-debug -o jsonpath='{.spec.ports[0].nodePort}')
   printInfo "Remote wsmaster debugging URL: ${CLUSTER_IP}:${NodePort}"
-  printInfo "Removing liveness and readiness probes from Che deployment"
-  oc set probe dc/che --remove --readiness --liveness
+  printInfo "Increasing failure threshold for probes of Che deployment"
+  oc set probe dc/che --readiness --liveness --failure-threshold=99999
 fi
 }
 
@@ -431,12 +487,38 @@ if [ "${DEPLOY_CHE_PLUGIN_REGISTRY}" == "true" ]; then
 fi
 }
 
+deployCheDevfileRegistry() {
+if [ "${DEPLOY_CHE_DEVFILE_REGISTRY}" == "true" ]; then
+  echo "Deploying Che devfile registry..."
+  ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-devfile-registry.yml \
+             -p IMAGE=${DEVFILE_REGISTRY_IMAGE} \
+             -p IMAGE_TAG=${DEVFILE_REGISTRY_IMAGE_TAG} \
+             -p PULL_POLICY=${DEVFILE_REGISTRY_IMAGE_PULL_POLICY}
+
+  DEVFILE_REGISTRY_ROUTE=$($OC_BINARY get route/che-devfile-registry --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
+  echo "Che devfile registry deployment complete. $DEVFILE_REGISTRY_ROUTE"
+fi
+}
+
 deployJaeger(){
     if [ "${CHE_TRACING_ENABLED}" == "true" ]; then
       echo "Deploying Jaeger..."
       ${OC_BINARY} new-app -f ${BASE_DIR}/templates/jaeger-all-in-one-template.yml
       JAEGER_ROUTE=$($OC_BINARY get route/jaeger-query --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
       echo "Jaeger deployment complete. $JAEGER_ROUTE"
+    fi
+}
+
+deployMetrics(){
+    if [ "${CHE_METRICS_ENABLED}" == "true" ]; then
+      echo "Deploying Grafana and Prometheus..."
+      ${OC_BINARY} apply -f ${BASE_DIR}/templates/monitoring/grafana-dashboards.yaml
+      ${OC_BINARY} apply -f ${BASE_DIR}/templates/monitoring/grafana-dashboard-provider.yaml
+      ${OC_BINARY} apply -f ${BASE_DIR}/templates/monitoring/grafana-datasources.yaml
+      ${OC_BINARY} apply -f ${BASE_DIR}/templates/monitoring/prometheus-config.yaml
+      ${OC_BINARY} new-app -f ${BASE_DIR}/templates/monitoring/che-monitoring.yaml
+      echo "Grafana deployment complete. $($OC_BINARY get route/grafana --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})"
+      echo "Prometheus deployment complete. $($OC_BINARY get route/prometheus --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})"
     fi
 }
 
@@ -455,11 +537,13 @@ Multi-User: ${CHE_MULTIUSER}
 HTTPS support: ${ENABLE_SSL}
 Namespace: ${CHE_OPENSHIFT_PROJECT}
 Che version: ${CHE_IMAGE_TAG}
+Che server debug: ${CHE_DEBUG_SERVER}
 Image: ${CHE_IMAGE_REPO}
 Pull policy: ${IMAGE_PULL_POLICY}
 Update strategy: ${UPDATE_STRATEGY}
-Setup OpenShift oAuth: ${SETUP_OCP_OAUTH}
+Setup OpenShift OAuth: ${SETUP_OCP_OAUTH}
 Enable Jaeger based tracing: ${CHE_TRACING_ENABLED}
+Enable metrics collection: ${CHE_METRICS_ENABLED}
 Environment variables:
 ${CHE_VAR_ARRAY}"
     CHE_INFRA_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT}
@@ -497,8 +581,8 @@ ${CHE_VAR_ARRAY}"
       wait_for_keycloak
 
       if [ "${SETUP_OCP_OAUTH}" == "true" ]; then
-        printInfo "Registering oAuth client in OpenShift"
-        # register oAuth client in OpenShift
+        printInfo "Registering OAuth client in OpenShift"
+        # register OAuth client in OpenShift
         printInfo "Logging as \"system:admin\""
         $OC_BINARY login -u "system:admin"
         KEYCLOAK_ROUTE=$($OC_BINARY get route/keycloak --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
@@ -509,7 +593,7 @@ ${CHE_VAR_ARRAY}"
           -p OCP_OAUTH_CLIENT_SECRET=${OCP_OAUTH_CLIENT_SECRET} | oc apply -f -
 
         # register OpenShift Identity Provider in Keycloak
-        printInfo "Registering oAuth client in Keycloak"
+        printInfo "Registering OAuth client in Keycloak"
         printInfo "Logging as \"${OPENSHIFT_USERNAME}\""
         $OC_BINARY login -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}"
         KEYCLOAK_POD_NAME=$(${OC_BINARY} get pod --namespace=${CHE_OPENSHIFT_PROJECT} -l app=keycloak --no-headers | awk '{print $1}')
@@ -526,7 +610,7 @@ ${CHE_VAR_ARRAY}"
           -s config.defaultScope="user:full" \
           --no-config --server http://localhost:8080/auth --user ${KEYCLOAK_USER} --password ${KEYCLOAK_PASSWORD} --realm master
 
-        # setup Che variables related to oAuth identity provider
+        # setup Che variables related to OAuth identity provider
         CHE_INFRA_OPENSHIFT_PROJECT=
         CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=${OCP_IDENTITY_PROVIDER_ID}
       fi
@@ -534,7 +618,12 @@ ${CHE_VAR_ARRAY}"
 
     if [ "${DEPLOY_CHE_PLUGIN_REGISTRY}" == "true" ]; then
         PLUGIN_REGISTRY_ROUTE=$($OC_BINARY get route/che-plugin-registry --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
-        PLUGIN__REGISTRY__URL="${HTTP_PROTOCOL}://${PLUGIN_REGISTRY_ROUTE}"
+        PLUGIN__REGISTRY__URL="${HTTP_PROTOCOL}://${PLUGIN_REGISTRY_ROUTE}/v3"
+    fi
+
+    if [ "${DEPLOY_CHE_DEVFILE_REGISTRY}" == "true" ]; then
+        DEVFILE_REGISTRY_ROUTE=$($OC_BINARY get route/che-devfile-registry --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
+        DEVFILE__REGISTRY__URL="${HTTP_PROTOCOL}://${DEVFILE_REGISTRY_ROUTE}/"
     fi
 
     if [ ! -z ${CHE_INFRA_OPENSHIFT_PROJECT} ]; then
@@ -558,8 +647,11 @@ ${CHE_VAR_ARRAY}"
                          -p CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=${CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER} \
                          -p TLS=${TLS} \
                          -p CHE_WORKSPACE_PLUGIN__REGISTRY__URL=${PLUGIN__REGISTRY__URL} \
+                         -p CHE_WORKSPACE_DEVFILE__REGISTRY__URL=${DEVFILE__REGISTRY__URL} \
                          -p CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME=${WORKSPACE_SERVICE_ACCOUNT_NAME} \
+                         -p CHE_DEBUG_SERVER=${CHE_DEBUG_SERVER} \
                          -p CHE_TRACING_ENABLED=${CHE_TRACING_ENABLED} \
+                         -p CHE_METRICS_ENABLED=${CHE_METRICS_ENABLED} \
                          ${ENV}
 
     if [ ${UPDATE_STRATEGY} == "Recreate" ]; then
@@ -586,5 +678,7 @@ isLoggedIn
 createNewProject
 getRoutingSuffix
 deployChePluginRegistry
+deployCheDevfileRegistry
 deployJaeger
+deployMetrics
 deployChe

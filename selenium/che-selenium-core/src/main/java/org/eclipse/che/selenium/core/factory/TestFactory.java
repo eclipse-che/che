@@ -60,7 +60,6 @@ public class TestFactory {
     seleniumWebDriver.get(dashboardUrl.get().toString());
     entrance.login(owner);
     seleniumWebDriver.get(factoryUrl);
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
   }
 
   /** Opens factory url. */

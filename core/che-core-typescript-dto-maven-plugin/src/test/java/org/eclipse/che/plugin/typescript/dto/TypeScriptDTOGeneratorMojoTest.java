@@ -82,4 +82,23 @@ public class TypeScriptDTOGeneratorMojoTest {
         "The MyCustomDTO has not been generated in the typescript definition file.",
         foundMyCustomDTO);
   }
+
+  @Test
+  public void checkDTSFileCreated() throws Exception {
+    File projectCopy = this.resources.getBasedir("project-d-ts");
+    File pom = new File(projectCopy, "pom.xml");
+    assertNotNull(pom);
+    assertTrue(pom.exists());
+
+    TypeScriptDTOGeneratorMojo mojo =
+        (TypeScriptDTOGeneratorMojo) this.rule.lookupMojo("build", pom);
+    configure(mojo, projectCopy);
+    mojo.execute();
+
+    File typeScriptFile = mojo.getTypescriptFile();
+    Assert.assertNotNull(typeScriptFile);
+
+    // Check file has been generated
+    Assert.assertTrue(typeScriptFile.exists());
+  }
 }

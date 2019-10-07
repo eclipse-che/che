@@ -11,7 +11,7 @@
          ng-show="importGithubProjectController.state == importGithubProjectController.loadingState.NO_REPO">
       <div class="import-github-project-warningempty">Your GitHub repositories will appear here</div>
       <div class="import-github-project-prompt">GitHub repositories can easily be imported in {{importGithubProjectController.productName}}</div>
-      <che-button-default class="import-github-project-button"
+      <che-button-default id="import-github-project-button"
                           che-button-icon="fa fa-github"
                           che-button-title="Connect your github account"
                           ng-click="importGithubProjectController.authenticateWithGitHub()">

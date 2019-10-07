@@ -64,7 +64,7 @@ public class OnAppLoadedImpl implements OnAppLoaded {
   @Override
   public List<ActionImpl> getActions() {
     if (actions == null) {
-      return new ArrayList<>();
+      actions = new ArrayList<>();
     }
     return actions;
   }

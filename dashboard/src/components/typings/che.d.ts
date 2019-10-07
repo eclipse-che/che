@@ -18,6 +18,7 @@ declare namespace che {
   export interface IRootScopeService extends ng.IRootScopeService {
     hideLoader: boolean;
     showIDE: boolean;
+    hideNavbar: boolean;
     wantTokeepLoader: boolean;
     waitingLoaded: boolean;
     currentPage: string;
@@ -171,6 +172,12 @@ declare namespace che {
       NOENVIRONMENT: string;
       getValues(): Array<string>;
     }
+
+    export interface ICheMachineSourceTypes {
+      TOOL: string;
+      RECIPE: string;
+      getValues(): Array<string>;
+    }
   }
 
   export namespace service {
@@ -288,10 +295,18 @@ declare namespace che {
     status?: string;
     namespace?: string;
     attributes?: IWorkspaceAttributes;
-    config: IWorkspaceConfig;
+    config?: IWorkspaceConfig;
+    devfile?: IWorkspaceDevfile;
     runtime?: IWorkspaceRuntime;
     isLocked?: boolean;
     usedResources?: string;
+  }
+
+  export interface IWorkspaceSettings {
+    supportedRecipeTypes: string;
+    cheWorkspacePluginRegistryUrl: string;
+    cheWorkspaceDevfileRegistryUrl?: string;
+    [propName: string]: string | boolean;
   }
 
   export interface IWorkspaceAttributes {
@@ -310,7 +325,24 @@ declare namespace che {
     };
     projects?: Array <any>;
     commands?: Array <any>;
-    attributes?: {[attrName: string]: string};
+    attributes?: IWorkspaceConfigAttributes;
+  }
+
+  export interface IWorkspaceConfigAttributes {
+    persistVolumes?: string;
+    editor?: string;
+    plugins?: string;
+  }
+
+  export interface IWorkspaceDevfile {
+    apiVersion: string;
+    components: Array<any>;
+    projects?: Array <any>;
+    commands?: Array <any>;
+    attributes?: che.IWorkspaceConfigAttributes;
+    metadata: {
+      name: string
+    }
   }
 
   export interface IWorkspaceEnvironment {
@@ -332,6 +364,7 @@ declare namespace che {
     installers?: string[];
     attributes?: {
       memoryLimitBytes?: string|number;
+      source?: string;
       [attrName: string]: string|number;
     };
     servers?: {
@@ -490,11 +523,13 @@ declare namespace che {
     name?: string;
     v: string;
     workspace: IWorkspaceConfig;
+    devfile?: IWorkspaceDevfile;
     creator: any;
     ide?: any;
     button?: any;
     policies?: any;
     links?: string[];
+    source?: string;
   }
 
   export interface IRegistry {

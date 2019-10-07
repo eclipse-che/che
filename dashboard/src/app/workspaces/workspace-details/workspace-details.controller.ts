@@ -16,15 +16,12 @@ import {WorkspaceDetailsService} from './workspace-details.service';
 import IdeSvc from '../../ide/ide.service';
 import {WorkspacesService} from '../workspaces.service';
 import {ICheEditModeOverlayConfig} from '../../../components/widget/edit-mode-overlay/che-edit-mode-overlay.directive';
-import {IEnvironmentManagerMachine} from '../../../components/api/environment/environment-manager-machine';
 
 export  interface IInitData {
   namespaceId: string;
   workspaceName: string;
   workspaceDetails: che.IWorkspace;
 }
-
-const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Installers', 'Servers', 'Env_Variables', 'Volumes', 'Config', 'SSH', 'Tools', 'Plugins'];
 
 /**
  * @ngdoc controller
@@ -65,8 +62,9 @@ export class WorkspaceDetailsController {
   private tab: { [key: string]: string } = {};
   private errorMessage: string = '';
   private tabsValidationTimeout: ng.IPromise<any>;
-  private toolsFilter: Function;
   private pluginRegistry: string;
+  private TAB: Array<string>;
+
   /**
    * There are unsaved changes to apply (with restart) when is't <code>true</code>.
    */
@@ -124,7 +122,7 @@ export class WorkspaceDetailsController {
     this.originWorkspaceDetails = angular.copy(initData.workspaceDetails);
     this.workspaceDetails = angular.copy(initData.workspaceDetails);
     this.checkEditMode();
-
+    this.TAB = this.workspaceDetails.config ? ['Overview', 'Projects', 'Containers', 'Servers', 'Env_Variables', 'Volumes', 'Config', 'SSH', 'Plugins', 'Editors'] : ['Overview', 'Projects', 'Plugins', 'Editors', 'Devfile'];
     this.updateTabs();
 
     this.updateSelectedTab(this.$location.search().tab);
@@ -156,7 +154,7 @@ export class WorkspaceDetailsController {
       },
       saveButton: {
         action: () => {
-          this.saveConfigChanges();
+          this.saveConfigChanges(true);
         },
         title: 'Save',
         disabled: false
@@ -167,16 +165,15 @@ export class WorkspaceDetailsController {
         }
       }
     };
+  }
 
-    this.toolsFilter = (machine: IEnvironmentManagerMachine) => {
-      let serverAttributes = this.lodash.pluck(machine.servers, 'attributes');
-      let types = this.lodash.pluck(serverAttributes, 'type');
-      return types.indexOf('ide') >= 0;
-    };
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   /**
-   * Returns `true` if the recipe of default environment of the workspace has supported recipe type
+   * Returns `true` if supported.
    *
    * @returns {boolean}
    */
@@ -184,12 +181,20 @@ export class WorkspaceDetailsController {
     return this.workspacesService.isSupported(this.workspaceDetails);
   }
 
+  isSupportedVersion(): boolean {
+    return this.workspacesService.isSupportedVersion(this.workspaceDetails);
+  }
+
+  isSupportedRecipeType(): boolean {
+    return this.workspacesService.isSupportedRecipeType(this.workspaceDetails);
+  }
+
   /**
    * Update tabs.
    */
   updateTabs(): void {
     this.tab = {};
-    TAB.forEach((tab: string, $index: number) => {
+    this.TAB.forEach((tab: string, $index: number) => {
       const index = $index.toString();
       this.tab[tab] = index;
       this.tab[index] = tab;
@@ -216,10 +221,8 @@ export class WorkspaceDetailsController {
    * @param {string} tab
    */
   updateSelectedTab(tab: string): void {
-    const value = this.tab[tab];
-    if (angular.isDefined(value)) {
-      this.selectedTabIndex = parseInt(value, 10);
-    }
+    const tabIndex = parseInt(this.tab[tab], 10);
+    this.selectedTabIndex = isNaN(tabIndex) ? 0 : tabIndex;
   }
 
   /**
@@ -278,7 +281,6 @@ export class WorkspaceDetailsController {
     if (angular.equals(this.workspaceDetails.config, config)) {
       return;
     }
-
     if (this.newName !== config.name) {
       this.newName = config.name;
     }
@@ -290,7 +292,51 @@ export class WorkspaceDetailsController {
     }
 
     this.workspaceDetails.config = config;
-    this.checkEditMode();
+
+
+    if (!this.originWorkspaceDetails || !this.workspaceDetails) {
+      return;
+    }
+
+    // check for failed tabs
+    const failedTabs = this.checkForFailedTabs();
+    // publish changes
+    this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
+
+    if (!failedTabs || failedTabs.length === 0) {
+      let runningWorkspace = this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.STARTING] || this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.RUNNING];
+      this.saveConfigChanges(false, runningWorkspace);
+    }
+  }
+
+  /**
+   * Callback when workspace devfile has been changed in editor.
+   *
+   * @param {che.IWorkspaceDevfile} devfile workspace devfile
+   */
+  updateWorkspaceDevfile(devfile: che.IWorkspaceDevfile): void {
+    if (!devfile) {
+      return;
+    }
+    if (angular.equals(this.workspaceDetails.devfile, devfile)) {
+      return;
+    }
+
+    if (this.newName !== devfile.metadata.name) {
+      this.newName = devfile.metadata.name;
+    }
+
+    this.workspaceDetails.devfile = devfile;
+
+
+    if (!this.originWorkspaceDetails || !this.workspaceDetails) {
+      return;
+    }
+
+    this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
+
+    let runningWorkspace = this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.STARTING] || this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.RUNNING];
+    this.saveConfigChanges(false, runningWorkspace);
   }
 
   /**
@@ -320,13 +366,13 @@ export class WorkspaceDetailsController {
    * @returns {string}
    */
   getOverlayMessage(failedTabs?: string[]): string {
-    if (this.isSupported === false) {
+    if (!this.isSupportedRecipeType()) {
       return `Current infrastructure doesn't support this workspace recipe type.`;
     }
 
-    if (this.isSwitchToPlugins()) {
-      return 'Installers and plugins are different concepts, which are not compatible between each others. Enabling plugins causes disabling all installers.';
-    } 
+    if (!this.isSupportedVersion()) {
+      return `This workspace is using old definition format which is not compatible anymore.`;
+    }
 
     if (failedTabs && failedTabs.length > 0) {
       const url = this.$location.absUrl().split('?')[0];
@@ -370,7 +416,6 @@ export class WorkspaceDetailsController {
 
     // message visibility
     this.editOverlayConfig.message.visible = !this.isSupported
-      || this.isSwitchToPlugins()
       || failedTabs.length > 0
       || this.unsavedChangesToApply
       || this.workspaceDetailsService.getRestartToApply(this.workspaceId);
@@ -389,7 +434,7 @@ export class WorkspaceDetailsController {
     }
 
     return this.tabsValidationTimeout = this.$timeout(() => {
-      const configIsDiffer = !angular.equals(this.originWorkspaceDetails.config, this.workspaceDetails.config);
+      const configIsDiffer = this.originWorkspaceDetails.config ? !angular.equals(this.originWorkspaceDetails.config, this.workspaceDetails.config) : !angular.equals(this.originWorkspaceDetails.devfile, this.workspaceDetails.devfile);
 
       // the workspace should be restarted only if its status is STARTING or RUNNING
       if (this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.STARTING] || this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.RUNNING]) {
@@ -440,8 +485,9 @@ export class WorkspaceDetailsController {
 
   /**
    * Updates workspace with new config.
+   *
    */
-  saveConfigChanges(): void {
+  saveConfigChanges(refreshPage: boolean, notifyRestart?: boolean): void {
     this.editOverlayConfig.disabled = true;
 
     this.loading = true;
@@ -456,12 +502,18 @@ export class WorkspaceDetailsController {
         }
         this.unsavedChangesToApply = false;
 
-        this.cheNotification.showInfo('Workspace updated.');
+        let message = 'Workspace updated.';
+        message += notifyRestart ? '<br/>To apply changes in running workspace - need to restart it.' : '';
+        this.cheNotification.showInfo(message);
+
         this.$scope.$broadcast('edit-workspace-details', {status: 'saved'});
 
-        return this.cheWorkspace.fetchWorkspaceDetails(this.originWorkspaceDetails.id).then(() => {
-          this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceDetails.config.name).search({tab: this.tab[this.selectedTabIndex]});
-        });
+        if (refreshPage) {
+          return this.cheWorkspace.fetchWorkspaceDetails(this.originWorkspaceDetails.id).then(() => {
+            let name = this.cheWorkspace.getWorkspaceDataManager().getName(this.workspaceDetails);
+            this.$location.path('/workspace/' + this.namespaceId + '/' + name).search({tab: this.tab[this.selectedTabIndex]});
+          });
+        }
       })
       .catch((error: any) => {
         this.$scope.$broadcast('edit-workspace-details', {status: 'failed'});
@@ -533,23 +585,5 @@ export class WorkspaceDetailsController {
     });
 
     return tabs.some((tabKey: string) => this.checkFormsNotValid(tabKey));
-  }
-
-  /**
-   * Checks whether "plugins" were disabled in origin workspace config and are enabled now.
-   */
-  isSwitchToPlugins(): boolean {
-    let originEditor = this.originWorkspaceDetails.config.attributes['editor'] || '';
-    let originPlugins = this.originWorkspaceDetails.config.attributes['plugins'] || '';
-    return this.isPluginsEnabled() && (originEditor.length === 0 && originPlugins.length === 0);
-  }
-
-  /**
-   * Checks whether "plugins" are enabled in workspace config.
-   */
-  isPluginsEnabled(): boolean {
-    let editor = this.workspaceDetails.config.attributes['editor'] || '';
-    let plugins = this.workspaceDetails.config.attributes['plugins'] || '';
-    return (editor.length > 0 || plugins.length > 0);
   }
 }

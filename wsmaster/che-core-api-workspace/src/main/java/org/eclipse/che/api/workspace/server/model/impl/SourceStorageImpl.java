@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.api.workspace.server.model.impl;
 
+import static java.lang.String.format;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -23,6 +25,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 
@@ -61,6 +65,20 @@ public class SourceStorageImpl implements SourceStorage {
     this.location = location;
     if (parameters != null) {
       this.parameters = new HashMap<>(parameters);
+    }
+  }
+
+  @PrePersist
+  @PreUpdate
+  public void validate() {
+    if (parameters != null) {
+      for (Map.Entry<String, String> e : parameters.entrySet()) {
+        if (e.getValue() == null) {
+          throw new IllegalStateException(
+              format(
+                  "Parameter '%s' of the source %s is null. This is illegal.", e.getKey(), this));
+        }
+      }
     }
   }
 

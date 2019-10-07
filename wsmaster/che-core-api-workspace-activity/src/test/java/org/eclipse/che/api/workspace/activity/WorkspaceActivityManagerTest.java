@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
@@ -154,6 +155,20 @@ public class WorkspaceActivityManagerTest {
             new WorkspaceImpl(DtoFactory.newDto(WorkspaceDto.class).withId(wsId), null)));
 
     verify(workspaceActivityDao, times(1)).removeActivity(eq(wsId));
+  }
+
+  @Test
+  public void shouldCountWorkspacesInStatus() throws Exception {
+    // given
+    when(workspaceActivityDao.countWorkspacesInStatus(eq(WorkspaceStatus.STARTING), eq(0L)))
+        .thenReturn(15L);
+
+    // when
+    long count = activityManager.countWorkspacesInStatus(WorkspaceStatus.STARTING, 0L);
+
+    // then
+    verify(workspaceActivityDao).countWorkspacesInStatus(eq(WorkspaceStatus.STARTING), eq(0L));
+    assertEquals(15L, count);
   }
 
   @DataProvider(name = "wsStatus")

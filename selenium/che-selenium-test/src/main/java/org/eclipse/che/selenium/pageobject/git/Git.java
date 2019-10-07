@@ -397,6 +397,7 @@ public class Git {
     gitCommit.waitMainFormCommit();
     gitCommit.typeCommitMsg(text);
     gitCommit.clickOnBtnCommit();
+    loader.waitOnClosed();
     gitCommit.waitMainFormCommitIsClosed();
     loader.waitOnClosed();
   }

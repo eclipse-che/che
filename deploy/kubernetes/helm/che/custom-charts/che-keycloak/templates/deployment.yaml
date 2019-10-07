@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012-2017 Red Hat, Inc.
+# Copyright (c) 2012-2019 Red Hat, Inc.
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -7,39 +7,50 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    app: che
+    component: keycloak
     io.kompose.service: keycloak
   name: keycloak
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: che
+      component: keycloak
   template:
     metadata:
       labels:
+        app: che
+        component: keycloak
         io.kompose.service: keycloak
     spec:
       initContainers:
       - name: wait-for-postgres
-        image: alpine:3.5
-        command: ["sh", "-c", "apk --no-cache add curl jq ; adresses_length=0; until [ $adresses_length -gt 0 ]; do echo waiting for postgres to be ready...; sleep 2; endpoints=`curl -s --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"     https://kubernetes.default/api/v1/namespaces/$POD_NAMESPACE/endpoints/postgres`; adresses_length=`echo $endpoints | jq -r \".subsets[]?.addresses // [] | length\"`; done;"]
+        image: eclipse/che-endpoint-watcher:nightly
         env:
           - name: POD_NAMESPACE
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: ENDPOINT
+            value: postgres
       containers:
       - env:
-        - name: POSTGRES_PORT_5432_TCP_ADDR
+        - name: DB_VENDOR
+          value: POSTGRES
+        - name: DB_ADDR
           value: postgres
-        - name: POSTGRES_PORT_5432_TCP_PORT
+        - name: DB_PORT
           value: "5432"
-        - name: POSTGRES_DATABASE
+        - name: DB_DATABASE
           value: keycloak
-        - name: POSTGRES_USER
+        - name: DB_USER
           value: keycloak
-        - name: POSTGRES_PASSWORD
+        - name: DB_PASSWORD
           value: keycloak
         - name: KEYCLOAK_USER
           value: admin
@@ -95,6 +106,13 @@ spec:
         - mountPath: /opt/jboss/keycloak/standalone/log
           name: keycloak-log
       restartPolicy: Always
+      securityContext:
+        # `fsGroup`, `runAsGroup`, and `runAsUser` must be
+        # same values that `USER` in the container image.
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsUser: 1000
+        runAsNonRoot: true
       serviceAccountName: che-keycloak
       volumes:
       - name: keycloak-data
@@ -103,5 +121,4 @@ spec:
       - name: keycloak-log
         persistentVolumeClaim:
           claimName: keycloak-log
-  test: false
 status: {}

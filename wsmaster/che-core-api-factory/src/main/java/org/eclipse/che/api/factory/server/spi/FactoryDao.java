@@ -14,6 +14,7 @@ package org.eclipse.che.api.factory.server.spi;
 import java.util.List;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.commons.lang.Pair;
@@ -71,6 +72,16 @@ public interface FactoryDao {
   FactoryImpl getById(String id) throws NotFoundException, ServerException;
 
   /**
+   * Gets all factories of specified user.
+   *
+   * @param userId user identifier
+   * @return list factory instances, never null
+   * @throws NullPointerException when {@code userId} is null
+   * @throws ServerException when any other error occurs
+   */
+  Page<FactoryImpl> getByUser(String userId, int maxItems, long skipCount) throws ServerException;
+
+  /**
    * Gets the factories for the list of attributes.
    *
    * @param maxItems the maximum count of items to fetch
@@ -80,6 +91,6 @@ public interface FactoryDao {
    * @throws IllegalArgumentException when {@code skipCount} or {@code maxItems} is negative
    * @throws ServerException when any other error occurs
    */
-  List<FactoryImpl> getByAttribute(
+  Page<FactoryImpl> getByAttributes(
       int maxItems, int skipCount, List<Pair<String, String>> attributes) throws ServerException;
 }

@@ -15,7 +15,6 @@ import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_JDK8;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
@@ -34,6 +33,7 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DocumentationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
@@ -48,6 +48,8 @@ import org.testng.annotations.Test;
  * @author Sergey Skorik
  * @author Ihor Okhrimenko
  */
+/** TODO rewrite to use che7 workspace */
+@Test(groups = UNDER_REPAIR)
 public class WorkspacesListTest {
   private static final int BLANK_WS_MB = 2048;
   private static final int JAVA_WS_MB = 3072;
@@ -339,7 +341,7 @@ public class WorkspacesListTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
     newWorkspace.typeWorkspaceName(NEWEST_CREATED_WORKSPACE_NAME);
-    newWorkspace.selectStack(BLANK);
+    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
     workspaceOverview.checkNameWorkspace(NEWEST_CREATED_WORKSPACE_NAME);
 

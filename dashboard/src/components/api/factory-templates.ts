@@ -20,6 +20,10 @@ export class CheFactoryTemplates {
     return JSON.stringify({
       'v': '4.0',
       'workspace': {
+        'attributes': {
+          'editor': 'eclipse/che-theia/next',
+          'plugins': 'eclipse/che-machine-exec-plugin/0.0.1'
+        },
         'projects': [
           {
             'name': 'Spring',
@@ -54,10 +58,6 @@ export class CheFactoryTemplates {
           'wss': {
             'machines': {
               'dev-machine': {
-                'installers': [
-                  'org.eclipse.che.terminal',
-                  'org.eclipse.che.ws-agent'
-                ],
                 'servers': {},
                 'attributes': {
                   'memoryLimitBytes': '2147483648'
@@ -78,6 +78,10 @@ export class CheFactoryTemplates {
     return JSON.stringify({
       'v': '4.0',
       'workspace': {
+        'attributes': {
+          'editor': 'eclipse/che-theia/next',
+          'plugins': 'eclipse/che-machine-exec-plugin/0.0.1'
+        },
         'commands': [],
         'projects': [
           {
@@ -109,15 +113,10 @@ export class CheFactoryTemplates {
         ],
         'defaultEnv': 'wss',
         'name': 'wss',
-        'attributes': {},
         'environments': {
           'wss': {
             'machines': {
               'dev-machine': {
-                'installers': [
-                  'org.eclipse.che.terminal',
-                  'org.eclipse.che.ws-agent'
-                ],
                 'servers': {},
                 'attributes': {
                   'memoryLimitBytes': '2147483648'
@@ -143,6 +142,10 @@ export class CheFactoryTemplates {
     return JSON.stringify({
       'v': '4.0',
       'workspace': {
+        'attributes': {
+          'editor': 'eclipse/che-theia/next',
+          'plugins': 'eclipse/che-machine-exec-plugin/0.0.1'
+        },
         'commands': [],
         'projects': [
           {
@@ -166,10 +169,6 @@ export class CheFactoryTemplates {
           'wss': {
             'machines': {
               'dev-machine': {
-                'installers': [
-                  'org.eclipse.che.terminal',
-                  'org.eclipse.che.ws-agent'
-                ],
                 'servers': {},
                 'attributes': {
                   'memoryLimitBytes': '2147483648'

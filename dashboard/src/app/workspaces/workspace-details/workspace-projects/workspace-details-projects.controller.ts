@@ -12,12 +12,12 @@
 'use strict';
 import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
 import {CheAPI} from '../../../../components/api/che-api.factory';
-import {StackSelectorSvc} from '../../create-workspace/stack-selector/stack-selector.service';
 import {RandomSvc} from '../../../../components/utils/random.service';
 import {WorkspaceDetailsProjectsService} from './workspace-details-projects.service';
 import {WorkspaceDetailsService} from '../workspace-details.service';
 import {CreateWorkspaceSvc} from '../../create-workspace/create-workspace.service';
 import {WorkspaceStatus} from '../../../../components/api/workspace/che-workspace.factory';
+import {WorkspaceDataManager} from '../../../../components/api/workspace/workspace-data-manager';
 
 /**
  * @ngdoc controller
@@ -29,8 +29,9 @@ import {WorkspaceStatus} from '../../../../components/api/workspace/che-workspac
  */
 export class WorkspaceDetailsProjectsCtrl {
 
-  static $inject = ['cheAPI', '$mdDialog', 'confirmDialogService', '$scope', 'cheListHelperFactory', 'stackSelectorSvc', 'randomSvc', 'createWorkspaceSvc', 'workspaceDetailsService', 'workspaceDetailsProjectsService'];
+  static $inject = ['cheAPI', '$mdDialog', 'confirmDialogService', '$scope', 'cheListHelperFactory', 'randomSvc', 'createWorkspaceSvc', 'workspaceDetailsService', 'workspaceDetailsProjectsService'];
 
+  private cheAPI: CheAPI;
   /**
    * Material design Dialog service.
    */
@@ -43,10 +44,6 @@ export class WorkspaceDetailsProjectsCtrl {
    * List helper.
    */
   private cheListHelper: che.widget.ICheListHelper;
-  /**
-   * Stack selector service.
-   */
-  private stackSelectorSvc: StackSelectorSvc;
   /**
    * Generator for random strings.
    */
@@ -63,7 +60,8 @@ export class WorkspaceDetailsProjectsCtrl {
    * Workspace details service.
    */
   private workspaceDetailsService: WorkspaceDetailsService;
-
+  private workspaceDataManager: WorkspaceDataManager;
+  private projects: Array <any>;
   private projectFilter: any;
   private profileCreationDate: any;
   /**
@@ -84,14 +82,13 @@ export class WorkspaceDetailsProjectsCtrl {
               confirmDialogService: ConfirmDialogService,
               $scope: ng.IScope,
               cheListHelperFactory: che.widget.ICheListHelperFactory,
-              stackSelectorSvc: StackSelectorSvc,
               randomSvc: RandomSvc,
               createWorkspaceSvc: CreateWorkspaceSvc,
               workspaceDetailsService: WorkspaceDetailsService,
               workspaceDetailsProjectsService: WorkspaceDetailsProjectsService) {
+    this.cheAPI = cheAPI;
     this.$mdDialog = $mdDialog;
     this.confirmDialogService = confirmDialogService;
-    this.stackSelectorSvc = stackSelectorSvc;
     this.randomSvc = randomSvc;
     this.workspaceDetailsProjectsService = workspaceDetailsProjectsService;
     this.createWorkspaceSvc = createWorkspaceSvc;
@@ -103,9 +100,6 @@ export class WorkspaceDetailsProjectsCtrl {
       cheListHelperFactory.removeHelper(helperId);
     });
 
-    const preferences = cheAPI.getPreferences().getPreferences();
-    this.profileCreationDate = preferences['che:created'];
-
     this.projectFilter = {name: ''};
 
     const workspaceEditWatcher = $scope.$on('edit-workspace-details', (event: ng.IAngularEvent, data: {status: string}) => {
@@ -115,7 +109,6 @@ export class WorkspaceDetailsProjectsCtrl {
       }
     });
 
-    this.updateProjectsData(this.workspaceDetails);
     const action = this.updateProjectsData.bind(this);
     workspaceDetailsService.subscribeOnWorkspaceChange(action);
 
@@ -126,6 +119,14 @@ export class WorkspaceDetailsProjectsCtrl {
       // unregister watcher
       workspaceEditWatcher();
     });
+  }
+
+  $onInit(): void {
+    const preferences = this.cheAPI.getPreferences().getPreferences();
+    this.workspaceDataManager = this.cheAPI.getWorkspace().getWorkspaceDataManager();
+    this.profileCreationDate = preferences['che:created'];
+
+    this.updateProjectsData(this.workspaceDetails);
   }
 
   /**
@@ -148,8 +149,8 @@ export class WorkspaceDetailsProjectsCtrl {
       return;
     }
     this.workspaceDetails = workspaceDetails;
-    this.stackSelectorSvc.setStackId(this.workspaceDetails.attributes.stackId);
-    this.cheListHelper.setList(this.workspaceDetails.config.projects, 'name');
+    this.projects = this.workspaceDataManager.getProjects(this.workspaceDetails);
+    this.cheListHelper.setList(this.projects, 'name');
   }
 
   /**
@@ -174,24 +175,22 @@ export class WorkspaceDetailsProjectsCtrl {
 
     projectTemplates.forEach((projectTemplate: che.IProjectTemplate) => {
       const origName = projectTemplate.name;
-
       if (this.isProjectNameUnique(origName) === false) {
         // update name, displayName and path
         const newName = this.getUniqueName(origName);
         projectTemplate.name = newName;
-        projectTemplate.displayName = newName;
-        projectTemplate.path = '/' +  newName.replace(/[^\w-_]/g, '_');
       }
 
       if (!projectTemplate.type && projectTemplate.projectType) {
         projectTemplate.type = projectTemplate.projectType;
       }
-
       this.workspaceDetailsProjectsService.addProjectTemplate(projectTemplate);
-      this.workspaceDetails.config.projects.push(projectTemplate);
+      this.workspaceDataManager.addProject(this.workspaceDetails, projectTemplate);
     });
-
-    this.createWorkspaceSvc.addProjectCommands(this.workspaceDetails.config, projectTemplates);
+    //TODO waits for fix https://github.com/eclipse/che/issues/13514 to enable for devfile
+    if (this.workspaceDetails.config) {
+      this.createWorkspaceSvc.addProjectCommands(this.workspaceDetails, projectTemplates);
+    }
     this.projectsOnChange();
   }
 
@@ -202,7 +201,7 @@ export class WorkspaceDetailsProjectsCtrl {
    * @return {boolean}
    */
   isProjectNameUnique(name: string): boolean {
-    return this.workspaceDetails.config.projects.every((project: che.IProject) => {
+    return this.projects.every((project: che.IProject) => {
       return project.name !== name;
     });
   }
@@ -234,10 +233,10 @@ export class WorkspaceDetailsProjectsCtrl {
           });
 
     this.showDeleteProjectsConfirmation(selectedProjects.length).then(() => {
-      this.workspaceDetails.config.projects = this.workspaceDetails.config.projects.filter((project: che.IProject) => {
+      this.projects = this.projects.filter((project: che.IProject) => {
         return selectedProjectsNames.indexOf(project.name) === -1;
       });
-
+      this.workspaceDataManager.setProjects(this.workspaceDetails, this.projects);
       this.workspaceDetailsProjectsService.addProjectNamesToDelete(selectedProjectsNames);
 
       this.projectsOnChange();

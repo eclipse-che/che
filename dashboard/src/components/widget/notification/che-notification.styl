@@ -6,7 +6,8 @@ div#che-notification-container
   right 0
 
 md-toast.che-notification-info,
-md-toast.che-notification-error
+md-toast.che-notification-error,
+md-toast.che-notification-warning
   transition-delay 0s
   transition .3s
   box-shadow 0 1px 1px 2px rgba(0, 0, 0, 0.15)
@@ -28,7 +29,8 @@ md-toast.hide-notification
   margin 0
 
 md-toast.che-notification-info div,
-md-toast.che-notification-error div
+md-toast.che-notification-error div,
+md-toast.che-notification-warning div
   justify-content flex-start
 
 i.che-notification-close-icon
@@ -43,11 +45,16 @@ i.che-notification-error-icon
   margin 5px 10px
   color $red-lipstick-color
 
+i.che-notification-warning-icon
+  margin 5px 10px
+  color $warning-color 
+
 md-toast.che-notification-info
   color #3c763d
 
 md-toast.che-notification-info span,
-md-toast.che-notification-error span
+md-toast.che-notification-error span,
+md-toast.che-notification-warning span
   margin-left 5px
   max-height 100%
   overflow auto
@@ -57,3 +64,6 @@ span.che-notification-error-title
 
 span.che-notification-message
   color $dark-menacing-sky-color
+
+span.che-notification-warning-title
+  color $warning-color

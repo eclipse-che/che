@@ -13,6 +13,7 @@ package org.eclipse.che.api.core.model.workspace.config;
 
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.devfile.Component;
 
 /**
  * Machine configuration
@@ -36,6 +37,31 @@ public interface MachineConfig {
    * ignored and only limit is used
    */
   String MEMORY_REQUEST_ATTRIBUTE = "memoryRequestBytes";
+
+  /**
+   * Name of the attribute from {@link #getAttributes()} which, if present, defines the entrypoint
+   * command to be executed in the machine/container.
+   *
+   * <p>The format is a YAML list of strings, e.g. {@code ['/bin/sh', '-c']}
+   */
+  String CONTAINER_COMMAND_ATTRIBUTE = "containerCommand";
+
+  /**
+   * Name of the attribute from {@link #getAttributes()} which, if present, defines the command line
+   * arguments of the entrypoint command specified using the {@link #CONTAINER_COMMAND_ATTRIBUTE}.
+   *
+   * <p>If {@link #CONTAINER_COMMAND_ATTRIBUTE} is not present, the default command defined in the
+   * image is used and the arguments are provided to it.
+   *
+   * <p>The format is a YAML list of strings, e.g. {@code ['-f', '--yes']}
+   */
+  String CONTAINER_ARGS_ATTRIBUTE = "containerArgs";
+
+  /**
+   * Name of the attribute from {@link #getAttributes()} which, if present, defines the alias of the
+   * {@link Component} of the devfile which was a source of the given machine.
+   */
+  String DEVFILE_COMPONENT_ALIAS_ATTRIBUTE = "component";
 
   /**
    * Returns configured installers.

@@ -25,11 +25,13 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.core.db.jpa.IntegrityConstraintViolationException;
 import org.eclipse.che.multiuser.resource.spi.FreeResourcesLimitDao;
 import org.eclipse.che.multiuser.resource.spi.impl.FreeResourcesLimitImpl;
 import org.slf4j.Logger;
@@ -47,7 +49,8 @@ public class JpaFreeResourcesLimitDao implements FreeResourcesLimitDao {
   @Inject private Provider<EntityManager> managerProvider;
 
   @Override
-  public void store(FreeResourcesLimitImpl resourcesLimit) throws ServerException {
+  public void store(FreeResourcesLimitImpl resourcesLimit)
+      throws ConflictException, ServerException {
     requireNonNull(resourcesLimit, "Required non-null resource limit");
     try {
       doStore(resourcesLimit);
@@ -110,16 +113,22 @@ public class JpaFreeResourcesLimitDao implements FreeResourcesLimitDao {
     }
   }
 
-  @Transactional
-  protected void doStore(FreeResourcesLimitImpl resourcesLimit) throws ServerException {
+  @Transactional(rollbackOn = {RuntimeException.class, ConflictException.class})
+  protected void doStore(FreeResourcesLimitImpl resourcesLimit) throws ConflictException {
     EntityManager manager = managerProvider.get();
     try {
       final FreeResourcesLimitImpl existedLimit = doGet(resourcesLimit.getAccountId());
       existedLimit.setResources(resourcesLimit.getResources());
+      manager.flush();
     } catch (NoResultException n) {
-      manager.persist(resourcesLimit);
+      try {
+        manager.persist(resourcesLimit);
+        manager.flush();
+      } catch (IntegrityConstraintViolationException e) {
+        throw new ConflictException(
+            format("The specified account '%s' does not exist", resourcesLimit.getAccountId()));
+      }
     }
-    manager.flush();
   }
 
   @Transactional

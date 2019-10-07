@@ -28,6 +28,7 @@ export class AddImportProject implements ng.IDirective {
     [propName: string]: string;
   } = {
     isProjectNameUnique: '&',
-    projectOnAdd: '&'
+    projectOnAdd: '&',
+    devfile: '=' 
   };
 }

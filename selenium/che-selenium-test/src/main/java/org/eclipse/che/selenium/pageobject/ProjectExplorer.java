@@ -460,7 +460,7 @@ public class ProjectExplorer {
    * @param name item's visible name
    */
   public void waitItemIsNotPresentVisibleArea(String name) {
-    seleniumWebDriverHelper.waitInvisibility(By.name(name));
+    seleniumWebDriverHelper.waitInvisibility(By.name(name), WIDGET_TIMEOUT_SEC);
   }
 
   /**

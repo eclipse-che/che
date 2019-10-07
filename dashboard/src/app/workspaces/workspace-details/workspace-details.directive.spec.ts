@@ -57,7 +57,6 @@ describe(`WorkspaceDetailsController >`, () => {
               'dev-machine': {
                 'env': {},
                 'volumes': {},
-                'installers': ['org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent'],
                 'servers': {
                   'tomcat8-debug': {'protocol': 'http', 'port': '8000'},
                   'codeserver': {'protocol': 'http', 'port': '9876'},
@@ -109,6 +108,8 @@ describe(`WorkspaceDetailsController >`, () => {
       })
       .service('workspacesService', function() {
         this.isSupported = () => { return true; };
+        this.isSupportedVersion = () => { return true; };
+        this.isSupportedRecipeType = () => { return true; };
       })
       .service('$route', function() {
         this.current = {
@@ -160,6 +161,17 @@ describe(`WorkspaceDetailsController >`, () => {
           }
           subscriptions[workspaceId].push(action);
         };
+        this.unsubscribeOnWorkspaceChange = (workspaceId: string, action: Function): void => {
+          const actions = subscriptions[workspaceId];
+          if (actions === undefined) {
+            return;
+          }
+          const index = actions.indexOf(action);
+          if (index === -1) {
+            return;
+          }
+          actions.splice(index, 1);
+        };
         this.getWorkspaceById = (workspaceId: string): che.IWorkspace => {
           return workspace;
         };
@@ -201,6 +213,14 @@ describe(`WorkspaceDetailsController >`, () => {
         this.getWorkspaceSettings = () => {
           return {};
         };
+
+        this.getWorkspaceDataManager = () => {
+          return {
+            getName(data: che.IWorkspace): string {
+              return 'name';
+            }
+          };
+        };
       })
       // terminal directives which prevent to execute an original ones
       .directive('mdTab', function () {
@@ -219,9 +239,6 @@ describe(`WorkspaceDetailsController >`, () => {
       .directive('cheMachineServers', function () {
         return { priority: 100000, terminal: true, restrict: 'E' };
       })
-      .directive('cheMachineAgents', function () {
-        return { priority: 100000, terminal: true, restrict: 'E' };
-      })
       .directive('cheMachineSelector', function () {
         return { priority: 100000, terminal: true, restrict: 'E' };
       })
@@ -233,10 +250,7 @@ describe(`WorkspaceDetailsController >`, () => {
       })
       .directive('workspaceDetailsSsh', function () {
         return { priority: 100000, terminal: true, restrict: 'E' };
-      })
-      .directive('workspaceDetailsTools', function () {
-      return { priority: 100000, terminal: true, restrict: 'E' };
-    });
+      });
 
     angular.mock.module('workspaceDetailsMock');
   });
@@ -283,7 +297,7 @@ describe(`WorkspaceDetailsController >`, () => {
   describe(`overflow panel >`, () => {
 
     function getOverlayPanelEl(): ng.IAugmentedJQuery {
-      return compiledDirective.find('.che-edit-mode-overlay');
+      return compiledDirective.find('che-edit-mode-overlay');
     }
     function getSaveButton(): ng.IAugmentedJQuery {
       return compiledDirective.find('.save-button button');
@@ -297,7 +311,7 @@ describe(`WorkspaceDetailsController >`, () => {
 
     it(`should be hidden initially >`, () => {
       compileDirective();
-      expect(getOverlayPanelEl().length).toEqual(0);
+      expect(getOverlayPanelEl().children().length).toEqual(0);
     });
 
     describe(`when config is changed >`, () => {
@@ -340,7 +354,7 @@ describe(`WorkspaceDetailsController >`, () => {
             });
 
             it(`the overlay panel should be hidden >`, () => {
-              expect(getOverlayPanelEl().length).toEqual(0);
+              expect(getOverlayPanelEl().children().length).toEqual(0);
             });
 
           });
@@ -357,7 +371,7 @@ describe(`WorkspaceDetailsController >`, () => {
             });
 
             it(`the overlay panel should be hidden >`, () => {
-              expect(getOverlayPanelEl().length).toEqual(0);
+              expect(getOverlayPanelEl().children().length).toEqual(0);
             });
 
           });
@@ -400,7 +414,7 @@ describe(`WorkspaceDetailsController >`, () => {
             });
 
             it(`the overlay panel should be hidden >`, () => {
-              expect(getOverlayPanelEl().length).toEqual(0);
+              expect(getOverlayPanelEl().children().length).toEqual(0);
             });
 
           });
@@ -443,7 +457,7 @@ describe(`WorkspaceDetailsController >`, () => {
             });
 
             it(`the overlay panel should be hidden >`, () => {
-              expect(getOverlayPanelEl().length).toEqual(0);
+              expect(getOverlayPanelEl().children().length).toEqual(0);
             });
 
           });
@@ -494,7 +508,7 @@ describe(`WorkspaceDetailsController >`, () => {
             });
 
             it(`the overlay panel should be hidden >`, () => {
-              expect(getOverlayPanelEl().length).toEqual(0);
+              expect(getOverlayPanelEl().children().length).toEqual(0);
             });
 
           });
@@ -511,7 +525,7 @@ describe(`WorkspaceDetailsController >`, () => {
             });
 
             it(`the overlay panel should be hidden >`, () => {
-              expect(getOverlayPanelEl().length).toEqual(0);
+              expect(getOverlayPanelEl().children().length).toEqual(0);
             });
 
           });
@@ -551,7 +565,7 @@ describe(`WorkspaceDetailsController >`, () => {
             });
 
             it(`the overlay panel should be hidden >`, () => {
-              expect(getOverlayPanelEl().length).toEqual(0);
+              expect(getOverlayPanelEl().children().length).toEqual(0);
             });
 
           });
@@ -568,7 +582,7 @@ describe(`WorkspaceDetailsController >`, () => {
             });
 
             it(`the overlay panel should be hidden >`, () => {
-              expect(getOverlayPanelEl().length).toEqual(0);
+              expect(getOverlayPanelEl().children().length).toEqual(0);
             });
 
           });
@@ -583,6 +597,11 @@ describe(`WorkspaceDetailsController >`, () => {
           compileDirective();
 
           controller.workspacesService.isSupported = jasmine.createSpy('workspaceDetailsController.isSupported')
+            .and
+            .callFake(() => {
+              return false;
+            });
+          controller.workspacesService.isSupportedRecipeType = jasmine.createSpy('workspaceDetailsController.isSupportedRecipeType')
             .and
             .callFake(() => {
               return false;
@@ -619,7 +638,7 @@ describe(`WorkspaceDetailsController >`, () => {
           });
 
           it(`the overlay panel should be hidden >`, () => {
-            expect(getOverlayPanelEl().length).toEqual(0);
+            expect(getOverlayPanelEl().children().length).toEqual(0);
           });
 
         });

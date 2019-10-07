@@ -19,7 +19,6 @@ import static org.testng.Assert.fail;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
 import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
@@ -42,7 +41,6 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class ComposeEnvironmentVariableTest {
 
-  @Mock InstallerRegistry installerRegistry;
   @Mock RecipeRetriever recipeRetriever;
   @Mock MachineConfigsValidator machinesValidator;
   @Mock ComposeEnvironmentValidator composeValidator;
@@ -55,12 +53,7 @@ public class ComposeEnvironmentVariableTest {
   public void setup() {
     factory =
         new ComposeEnvironmentFactory(
-            installerRegistry,
-            recipeRetriever,
-            machinesValidator,
-            composeValidator,
-            startStrategy,
-            memoryProvisioner);
+            recipeRetriever, machinesValidator, composeValidator, startStrategy, memoryProvisioner);
   }
 
   @Test(dataProvider = "correctContentTestData")

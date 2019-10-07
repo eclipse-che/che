@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2017 Red Hat, Inc.
+# Copyright (c) 2012-2019 Red Hat, Inc.
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -17,7 +17,7 @@
 #             -v /home/user/che/storage:/home/user/che/storage \
 #             codenvy/che-server
 #           
-FROM openjdk:8u181-jre-alpine
+FROM openjdk:8u191-jdk-alpine
 
 ENV LANG=C.UTF-8 \
     DOCKER_VERSION=1.6.0 \

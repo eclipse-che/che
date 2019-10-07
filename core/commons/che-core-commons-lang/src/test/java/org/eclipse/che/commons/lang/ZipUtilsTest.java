@@ -21,6 +21,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -33,19 +36,21 @@ import org.testng.annotations.Test;
 
 public class ZipUtilsTest {
 
+  public static final String FILE_NAME = "test";
   private File zipFile;
+  private byte[] testData;
 
   @BeforeMethod
   public void setUp() throws IOException {
     zipFile = File.createTempFile("test", "zip");
     zipFile.deleteOnExit();
 
-    byte[] testData = new byte[2048];
+    testData = new byte[2048];
     Random random = new Random();
     random.nextBytes(testData);
 
     try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile))) {
-      ZipEntry entry = new ZipEntry("test");
+      ZipEntry entry = new ZipEntry(FILE_NAME);
       entry.setSize(testData.length);
       zos.putNextEntry(entry);
       zos.write(testData);
@@ -69,5 +74,14 @@ public class ZipUtilsTest {
         new ZipFile(testJar.getFile()), Pattern.compile(".*[//]?codenvy/[^//]+[.]json"), consumer);
 
     verify(consumer, times(2)).accept(any(InputStream.class));
+  }
+
+  @Test
+  public void testUnzipFile() throws Exception {
+    Path targetDir = Paths.get(zipFile.getParent());
+    ZipUtils.unzip(zipFile, targetDir.toFile());
+    Path unzippedFile = Paths.get(targetDir.toString(), FILE_NAME);
+    Assert.assertEquals(testData, Files.readAllBytes(unzippedFile));
+    Files.delete(unzippedFile);
   }
 }

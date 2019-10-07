@@ -129,6 +129,11 @@ export class AdminUserDetailsController {
     this.updateData();
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Update user's data.
    */

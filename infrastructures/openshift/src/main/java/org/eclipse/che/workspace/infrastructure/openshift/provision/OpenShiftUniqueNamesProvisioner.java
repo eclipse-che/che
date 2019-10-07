@@ -35,10 +35,10 @@ public class OpenShiftUniqueNamesProvisioner extends UniqueNamesProvisioner<Open
     final Set<Route> routes = new HashSet<>(osEnv.getRoutes().values());
     osEnv.getRoutes().clear();
     for (Route route : routes) {
-      final ObjectMeta ingressMeta = route.getMetadata();
-      putLabel(route, Constants.CHE_ORIGINAL_NAME_LABEL, ingressMeta.getName());
+      final ObjectMeta routeMeta = route.getMetadata();
+      putLabel(route, Constants.CHE_ORIGINAL_NAME_LABEL, routeMeta.getName());
       final String routeName = Names.generateName("route");
-      ingressMeta.setName(routeName);
+      routeMeta.setName(routeName);
       osEnv.getRoutes().put(routeName, route);
     }
   }

@@ -51,7 +51,6 @@ describe('ComposeEnvironmentManager', () => {
             'volumes': {
               'volume1': {'path': '/some/path'}
             },
-            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
           }
         },
         'recipe': {
@@ -78,15 +77,6 @@ describe('ComposeEnvironmentManager', () => {
 
       expect(servers).toEqual(expectedServers);
     });
-
-    it('at least one machine should contain \'ws-agent\'', () => {
-      let devMachinesList = machines.filter((machine: IEnvironmentManagerMachine) => {
-        return envManager.isDev(machine);
-      });
-
-      expect(devMachinesList.length).toBeGreaterThan(0);
-    });
-
   });
 
   describe('for recipe from content', () => {
@@ -113,8 +103,7 @@ describe('ComposeEnvironmentManager', () => {
             'volumes': {
               'vol1': {'path': '/some/path'},
               'm22': {'path': '/home/user/.m2/repository'}
-            },
-            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+            }
           }
         },
         'recipe': {
@@ -197,7 +186,6 @@ describe('ComposeEnvironmentManager', () => {
           'dev-machine': {
             'servers': {},
             'volumes': {},
-            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'],
             'attributes': {'memoryLimitBytes': '2147483648'}
           }
         },

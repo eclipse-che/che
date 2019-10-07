@@ -1,3 +1,0 @@
-package q;
-class A {
-}

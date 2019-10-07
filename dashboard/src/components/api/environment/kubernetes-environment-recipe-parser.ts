@@ -10,12 +10,13 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {IPodItem, KubernetesMachineRecipeParser} from './kubernetes-machine-recipe-parser';
+import {ISupportedListItem, KubernetesMachineRecipeParser, isSupportedItem} from './kubernetes-machine-recipe-parser';
 import {IParser} from './parser';
 
-export interface IPodList {
+export interface ISupportedItemList {
   kind: string;
-  items: Array<IPodItem>;
+  apiVersion: string;
+  items: Array<ISupportedListItem>;
 }
 
 /**
@@ -25,16 +26,16 @@ export interface IPodList {
  */
 export class KubernetesEnvironmentRecipeParser implements IParser {
   private machineRecipeParser = new KubernetesMachineRecipeParser();
-  private recipeByContent: Map<string, IPodList> = new Map();
+  private recipeByContent: Map<string, ISupportedItemList> = new Map();
   private recipeKeys: Array<string> = [];
 
   /**
    * Parses recipe content
    * @param content {string} recipe content
-   * @returns {IPodList} recipe object
+   * @returns {ISupportedItemList} recipe object
    */
-  parse(content: string): IPodList {
-    let recipe: IPodList;
+  parse(content: string): ISupportedItemList {
+    let recipe: ISupportedItemList;
     if (this.recipeByContent.has(content)) {
       recipe = angular.copy(this.recipeByContent.get(content));
       this.validate(recipe);
@@ -54,40 +55,55 @@ export class KubernetesEnvironmentRecipeParser implements IParser {
 
   /**
    * Dumps recipe object.
-   * @param recipe {IPodList} recipe object
+   * @param recipe {ISupportedItemList} recipe object
    * @returns {string} recipe content
    */
-  dump(recipe: IPodList): string {
+  dump(recipe: ISupportedItemList): string {
     return jsyaml.safeDump(recipe, {'indent': 1});
   }
 
   /**
-   * Simple validation of recipe.
-   * @param recipe {IPodList}
+   * Helper method for retreiving items with in a parsed recipe. Useful for overriding
+   * in subclasses mainly, as e.g. OpenShift recipes support templates as well as lists.
+   *
+   * Types are left as `any` to allow overriding
+   *
+   * @param recipe the parsed and validated recipe
    */
-  private validate(recipe: IPodList): void {
+  getRecipeItems(recipe: any): Array<any> {
+    return recipe.items;
+  }
+
+  /**
+   * Simple validation of recipe.
+   * @param recipe {ISupportedItemList}
+   */
+  private validate(recipe: ISupportedItemList): void {
     if (!recipe || !recipe.kind) {
       throw new TypeError(`Recipe should contain a 'kind' section.`);
     }
     if (recipe.kind.toLowerCase() !== 'list') {
       throw new TypeError(`Recipe 'kind' section should be equals 'list'.`);
     }
-    const podItems = recipe.items;
-    if (!podItems) {
-      throw new TypeError(`Recipe pod list should contain an 'items' section.`);
+    const items = recipe.items;
+    if (!items) {
+      throw new TypeError(`Recipe kubernetes list should contain an 'items' section.`);
     }
-    if (!angular.isArray(podItems) || podItems.length === 0) {
-      throw new TypeError(`Recipe pod list should contain at least one 'item'.`);
+    if (!angular.isArray(items) || items.length === 0) {
+      throw new TypeError(`Recipe kubernetes list should contain at least one 'item'.`);
     } else {
-      podItems.forEach((podItem: IPodItem) => {
-        if (!podItem) {
+      items.forEach((item: any) => {
+        if (!item) {
           return;
         }
         // skip services
-        if (podItem.kind && podItem.kind.toLowerCase() === 'service') {
+        if (item.kind && item.kind.toLowerCase() === 'service') {
           return;
         }
-        this.machineRecipeParser.validate(podItem);
+        if (!isSupportedItem(item)) {
+          throw new TypeError(`Item of kind '${item.kind}' is not supported in Kubernetes recipes`);
+        }
+        this.machineRecipeParser.validate(item);
       });
     }
   }

@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.dashboard.organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -25,6 +24,7 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
@@ -33,7 +33,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.MULTIUSER, TestGroup.DOCKER, TestGroup.OPENSHIFT, TestGroup.K8S})
+@Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S})
 public class AddWorkspaceToOrganizationTest {
 
   private static final String WORKSPACE_FOR_ADMIN_1 = generate("workspace", 4);
@@ -164,8 +164,9 @@ public class AddWorkspaceToOrganizationTest {
     newWorkspace.waitToolbar();
     newWorkspace.openOrganizationsList();
     newWorkspace.selectOrganizationFromList(organizationName);
-    newWorkspace.selectStack(JAVA);
     newWorkspace.typeWorkspaceName(workspaceName);
+    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
+    newWorkspace.waitDevfileSelected(Devfile.JAVA_MAVEN);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
     workspaceDetails.waitToolbarTitleName(workspaceName);
   }

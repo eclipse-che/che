@@ -69,10 +69,10 @@ public class WorkspaceServiceTerminationTest {
     String workspaceId = "workspace123";
 
     AtomicBoolean isAnyRunning = new AtomicBoolean(true);
-    when(workspaceRuntimes.isAnyRunning()).thenAnswer(inv -> isAnyRunning.get());
+    when(workspaceRuntimes.isAnyActive()).thenAnswer(inv -> isAnyRunning.get());
 
     // one workspace is running
-    when(workspaceRuntimes.getRunning()).thenReturn(Collections.singleton(workspaceId));
+    when(workspaceRuntimes.getActive()).thenReturn(Collections.singleton(workspaceId));
     when(workspaceRuntimes.getStatus(workspaceId)).thenReturn(status);
 
     when(runtimeInfrastructure.getIdentities()).thenReturn(Collections.emptySet());
@@ -96,7 +96,7 @@ public class WorkspaceServiceTerminationTest {
     String workspaceId = "workspace123";
 
     // one workspace is running
-    when(workspaceRuntimes.getRunning()).thenReturn(Collections.singleton(workspaceId));
+    when(workspaceRuntimes.getActive()).thenReturn(Collections.singleton(workspaceId));
     when(workspaceRuntimes.getStatus(workspaceId)).thenReturn(WorkspaceStatus.RUNNING);
 
     when(workspaceRuntimes.isAnyInProgress())
@@ -115,7 +115,7 @@ public class WorkspaceServiceTerminationTest {
 
   @Test
   public void publishesStoppedWorkspaceStoppedEventsAsServiceItemStoppedEvents() throws Exception {
-    when(workspaceRuntimes.getRunning()).thenReturn(ImmutableSet.of("id1", "id2", "id3"));
+    when(workspaceRuntimes.getActive()).thenReturn(ImmutableSet.of("id1", "id2", "id3"));
     doAnswer(
             inv -> {
               @SuppressWarnings("unchecked")

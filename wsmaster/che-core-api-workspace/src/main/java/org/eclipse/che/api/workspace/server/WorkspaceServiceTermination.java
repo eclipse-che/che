@@ -145,7 +145,7 @@ public class WorkspaceServiceTermination implements ServiceTermination {
   }
 
   private void stopRunningAndStartingWorkspacesAsync() {
-    for (String workspaceId : runtimes.getRunning()) {
+    for (String workspaceId : runtimes.getActive()) {
       WorkspaceStatus status = runtimes.getStatus(workspaceId);
       if (status == WorkspaceStatus.RUNNING || status == WorkspaceStatus.STARTING) {
         try {
@@ -169,7 +169,7 @@ public class WorkspaceServiceTermination implements ServiceTermination {
     private final AtomicInteger currentlyStopped;
 
     private WorkspaceStoppedEventsPropagator() {
-      this.totalRunning = runtimes.getRunning().size();
+      this.totalRunning = runtimes.getActive().size();
       this.currentlyStopped = new AtomicInteger(0);
     }
 
@@ -221,7 +221,7 @@ public class WorkspaceServiceTermination implements ServiceTermination {
         new TimerTask() {
           @Override
           public void run() {
-            if (!runtimes.isAnyRunning()) {
+            if (!runtimes.isAnyActive()) {
               timer.cancel();
               latch.countDown();
             }

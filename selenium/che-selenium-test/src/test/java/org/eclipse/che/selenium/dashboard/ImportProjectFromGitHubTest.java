@@ -12,8 +12,7 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
+import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GITHUB;
 import static org.testng.AssertJUnit.assertTrue;
 
@@ -30,12 +29,13 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
+import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -60,15 +60,15 @@ public class ImportProjectFromGitHubTest {
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
   @Inject private DefaultTestUser defaultTestUser;
-  @Inject private ProjectExplorer projectExplorer;
   @Inject private NewWorkspace newWorkspace;
-  @Inject private ToastLoader toastLoader;
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
   @Inject private TestGitHubRepository testRepo;
+  @Inject private TheiaIde theiaIde;
+  @Inject private TheiaProjectTree theiaProjectTree;
 
   // it is used to read workspace logs on test failure
   private TestWorkspace testWorkspace;
@@ -97,10 +97,10 @@ public class ImportProjectFromGitHubTest {
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
-    // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
-    newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(JAVA);
     newWorkspace.typeWorkspaceName(WORKSPACE);
+    // we are selecting 'Java' stack from the 'All Devfile' tab for compatibility with OSIO
+    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
+    newWorkspace.waitDevfileSelected(Devfile.JAVA_MAVEN);
 
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSourceTab(GITHUB);
@@ -117,18 +117,27 @@ public class ImportProjectFromGitHubTest {
     // possible to read logs in case of test failure
     testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE, defaultTestUser);
 
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
-    toastLoader.waitToastLoaderAndClickStartButton();
-    ide.waitOpenedWorkspaceIsReadyToUse();
-    projectExplorer.waitItem(projectName);
-    projectExplorer.waitDefinedTypeOfFolder(projectName, PROJECT_FOLDER);
+    theiaIde.switchToIdeFrame();
+    theiaIde.waitTheiaIde();
+    theiaIde.waitLoaderInvisibility();
+    theiaIde.waitTheiaIdeTopPanel();
+
+    // wait the project in the tree
+    theiaProjectTree.clickOnFilesTab();
+    theiaProjectTree.waitItem(projectName);
   }
 
   private void connectGithubAccount() {
     projectSourcePage.clickOnConnectGithubAccountButton();
+
+    seleniumWebDriverHelper.waitOpenedSomeWin();
     seleniumWebDriverHelper.switchToNextWindow(ideWin);
 
+    // workaround to avoid freezing blank popup window in chrome-node 3.141.59-dubnium
+    sleepQuietly(5);
+
     projectSourcePage.waitAuthorizationPageOpened();
+
     projectSourcePage.typeLogin(gitHubUsername);
     projectSourcePage.typePassword(gitHubPassword);
     projectSourcePage.clickOnSignInButton();

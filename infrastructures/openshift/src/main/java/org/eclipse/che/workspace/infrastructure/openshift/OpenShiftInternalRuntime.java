@@ -13,14 +13,13 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
+import io.opentracing.Tracer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -30,20 +29,16 @@ import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.annotation.Traced;
-import org.eclipse.che.commons.tracing.OptionalTracer;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
-import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListener;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
@@ -57,7 +52,6 @@ import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServer
 public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShiftEnvironment> {
 
   private final OpenShiftProject project;
-  private final UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
 
   @Inject
   public OpenShiftInternalRuntime(
@@ -65,7 +59,6 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       @Named("che.infra.kubernetes.ingress_start_timeout_min") int ingressStartTimeout,
       NoOpURLRewriter urlRewriter,
       UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory,
-      KubernetesBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
       WorkspaceVolumesStrategy volumesStrategy,
       ProbeScheduler probeScheduler,
@@ -79,7 +72,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       OpenShiftEnvironmentProvisioner kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<OpenShiftEnvironment> toolingProvisioner,
       RuntimeHangingDetector runtimeHangingDetector,
-      @Nullable OptionalTracer tracer,
+      Tracer tracer,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project) {
     super(
@@ -87,7 +80,6 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         ingressStartTimeout,
         urlRewriter,
         unrecoverablePodEventListenerFactory,
-        bootstrapperFactory,
         serverCheckerFactory,
         volumesStrategy,
         probeScheduler,
@@ -100,15 +92,16 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         internalEnvironmentProvisioners,
         kubernetesEnvironmentProvisioner,
         toolingProvisioner,
+        null,
         runtimeHangingDetector,
         tracer,
         context,
         project);
     this.project = project;
-    this.unrecoverablePodEventListenerFactory = unrecoverablePodEventListenerFactory;
   }
 
   @Override
+  @Traced
   protected void startMachines() throws InfrastructureException {
     OpenShiftEnvironment osEnv = getContext().getEnvironment();
     String workspaceId = getContext().getIdentity().getWorkspaceId();
@@ -118,17 +111,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     List<Service> createdServices = createServices(osEnv, workspaceId);
     List<Route> createdRoutes = createRoutes(osEnv, workspaceId);
 
-    // TODO https://github.com/eclipse/che/issues/7653
-    // project.pods().watch(new AbnormalStopHandler());
-
-    project.deployments().watchEvents(new MachineLogsPublisher());
-    if (unrecoverablePodEventListenerFactory.isConfigured()) {
-      Map<String, Pod> pods = getContext().getEnvironment().getPods();
-      UnrecoverablePodEventListener handler =
-          unrecoverablePodEventListenerFactory.create(
-              pods.keySet(), this::handleUnrecoverableEvent);
-      project.deployments().watchEvents(handler);
-    }
+    listenEvents();
 
     doStartMachine(new OpenShiftServerResolver(createdServices, createdRoutes));
   }

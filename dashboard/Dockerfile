@@ -9,10 +9,10 @@
 #   Red Hat, Inc. - initial API and implementation
 
 # This is a Dockerfile allowing to build dashboard by using a docker container.
-# Build step: $ docker build -t eclipse-che-dashboard
+# Build step: $ docker build -t eclipse-che-dashboard .
 # It builds an archive file that can be used by doing later
 #  $ docker run --rm eclipse-che-dashboard | tar -C target/ -zxf -
-FROM node:8.10.0
+FROM node:8.16.0
 
 RUN apt-get update && \
     apt-get install -y git \
@@ -20,9 +20,11 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 COPY package.json /dashboard/
 COPY yarn.lock /dashboard/
-RUN cd /dashboard && npm i yarn && npx yarn install --ignore-scripts
+COPY typings.json /dashboard/
+WORKDIR /dashboard
+RUN yarn install --ignore-optional
 COPY . /dashboard/
-RUN cd /dashboard  && npx yarn
-RUN cd /dashboard && cd target/ && tar zcf /tmp/dashboard.tar.gz dist/
+RUN yarn build && yarn test
+RUN cd /dashboard/target/ && tar zcf /tmp/dashboard.tar.gz dist/
 
 CMD zcat /tmp/dashboard.tar.gz

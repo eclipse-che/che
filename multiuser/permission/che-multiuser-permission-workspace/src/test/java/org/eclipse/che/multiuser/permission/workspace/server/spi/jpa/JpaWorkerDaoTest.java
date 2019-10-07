@@ -71,7 +71,8 @@ public class JpaWorkerDaoTest {
       throws Exception {
 
     final Account account = new AccountImpl("accountId", "namespace", "test");
-    final WorkspaceImpl workspace = new WorkspaceImpl("workspaceId", account, null);
+    final WorkspaceImpl workspace =
+        WorkspaceImpl.builder().setId("workspaceId").setAccount(account).build();
 
     // Persist the account
     manager.getTransaction().begin();

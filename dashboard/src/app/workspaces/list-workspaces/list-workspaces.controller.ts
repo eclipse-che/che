@@ -118,7 +118,11 @@ export class ListWorkspacesCtrl {
 
       this.cheListHelper.applyFilter('namespace', this.namespaceFilter, this.isExactMatch);
     };
+  }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   /**
@@ -164,7 +168,8 @@ export class ListWorkspacesCtrl {
               return this.$q.when();
             }
             let message = error.data && error.data.message ? ' Reason: ' + error.data.message : '';
-            this.cheNotification.showError('Failed to retrieve workspace ' + workspace.config.name + ' data.' + message) ;
+            let workspaceName = this.cheWorkspace.getWorkspaceDataManager().getName(workspace);
+            this.cheNotification.showError('Failed to retrieve workspace ' + workspaceName + ' data.' + message) ;
             return this.$q.reject(error);
           })
           .then(() => {
@@ -249,7 +254,7 @@ export class ListWorkspacesCtrl {
         if (!workspace) {
           return;
         }
-        workspaceName = workspace.config.name;
+        workspaceName = this.cheWorkspace.getWorkspaceDataManager().getName(workspace);
         let stoppedStatusPromise = this.cheWorkspace.fetchStatusChange(workspaceId, 'STOPPED');
 
         // stop workspace if it's status is RUNNING

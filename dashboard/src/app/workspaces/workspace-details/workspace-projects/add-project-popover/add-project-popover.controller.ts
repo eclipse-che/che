@@ -42,6 +42,8 @@ export class AddProjectPopoverController {
     this.isOpen = false;
   }
 
+  $onInit(): void { }
+
   /**
    * Callback which should be called when project templates are added.
    *

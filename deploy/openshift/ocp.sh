@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2012-2017 Red Hat, Inc.
+# Copyright (c) 2012-2019 Red Hat, Inc.
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -240,7 +240,7 @@ remove_che_from_ocp() {
 }
 
 detectIP() {
-    docker run --rm --net host eclipse/che-ip:nightly
+    docker run --rm --net host eclipse/che-ip:6.19.0
 }
 
 parse_args() {

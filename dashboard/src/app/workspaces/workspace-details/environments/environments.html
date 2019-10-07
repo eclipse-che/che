@@ -56,7 +56,7 @@
 
   <!-- Machines -->
   <che-label-container ng-if="workspaceEnvironmentsController.machines.length > 0"
-                       che-label-name="Machines"
+                       che-label-name="Containers"
                        class="che-label-container-last">
   </che-label-container>
   <workspace-machine-config ng-repeat="machine in workspaceEnvironmentsController.machines track by machine.name | orderBy:'name'"
@@ -92,6 +92,6 @@
                       ng-disabled="!workspaceEnvironmentsController.isMultiMachine()"
                       ng-click="workspaceEnvironmentsController.addMachine()"></che-button-default>
   <div class="recipe-warning-container" ng-hide="workspaceEnvironmentsController.isMultiMachine()">
-    Add another machine by changing the environment type to <b>compose</b> or <b>openshift</b>
+    Add another machine by changing the environment type to <b>compose</b>, <b>kubernetes</b> or <b>openshift</b>
   </div>
 </div>

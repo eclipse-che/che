@@ -27,6 +27,8 @@ class IdeIframe  implements ng.IDirective {
     this.templateUrl = 'app/ide/ide-iframe/ide-iframe.html';
   }
 
+  $onInit(): void { }
+
 }
 
 export default IdeIframe;

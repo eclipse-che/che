@@ -16,7 +16,6 @@ import {FactoryConfig} from './factories/factories-config';
 import {ComponentsConfig} from '../components/components-config';
 import {AdminsConfig} from './admin/admin-config';
 import {AdministrationConfig} from './administration/administration-config';
-import {DiagnosticsConfig} from './diagnostics/diagnostics-config';
 import {CheColorsConfig} from './colors/che-color.constant';
 import {CheOutputColorsConfig} from './colors/che-output-colors.constant';
 import {CheCountriesConfig} from './constants/che-countries.constant';
@@ -32,8 +31,6 @@ import {DemoComponentsController} from './demo-components/demo-components.contro
 import {CheBranding} from '../components/branding/che-branding.factory';
 import {ChePreferences} from '../components/api/che-preferences.factory';
 import {RoutingRedirect} from '../components/routing/routing-redirect.factory';
-import IdeIFrameSvc from './ide/ide-iframe/ide-iframe.service';
-import {CheIdeFetcher} from '../components/ide-fetcher/che-ide-fetcher.service';
 import {RouteHistory} from '../components/routing/route-history.service';
 import {CheUIElementsInjectorService} from '../components/service/injector/che-ui-elements-injector.service';
 import {OrganizationsConfig} from './organizations/organizations-config';
@@ -188,6 +185,10 @@ angular.element(document).ready(() => {
   });
 });
 
+initModule.config(['$locationProvider', $locationProvider => {
+  $locationProvider.hashPrefix('');
+}]);
+
 // add a global resolve flag on all routes (user needs to be resolved first)
 initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
   $routeProvider.accessWhen = (path: string, route: che.route.IRoute) => {
@@ -257,15 +258,25 @@ initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) 
 /**
  * Setup route redirect module
  */
-initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$timeout', 'ideIFrameSvc', 'cheIdeFetcher', 'routeHistory', 'cheUIElementsInjectorService', 'workspaceDetailsService',
-  ($rootScope: che.IRootScopeService, $location: ng.ILocationService, $routeParams: ng.route.IRouteParamsService, routingRedirect: RoutingRedirect, $timeout: ng.ITimeoutService, ideIFrameSvc: IdeIFrameSvc, cheIdeFetcher: CheIdeFetcher, routeHistory: RouteHistory, cheUIElementsInjectorService: CheUIElementsInjectorService) => {
+initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$timeout', '$mdSidenav', 'routeHistory', 'cheUIElementsInjectorService', 'workspaceDetailsService',
+  (
+    $rootScope: che.IRootScopeService,
+    $location: ng.ILocationService,
+    $routeParams: ng.route.IRouteParamsService,
+    routingRedirect: RoutingRedirect,
+    $timeout: ng.ITimeoutService,
+    $mdSidenav: ng.material.ISidenavService,
+    routeHistory: RouteHistory,
+    cheUIElementsInjectorService: CheUIElementsInjectorService
+  ) => {
+
     $rootScope.hideLoader = false;
     $rootScope.waitingLoaded = false;
     $rootScope.showIDE = false;
+    $rootScope.hideNavbar = false;
 
     // here only to create instances of these components
     /* tslint:disable */
-    cheIdeFetcher;
     routeHistory;
     /* tslint:enable */
 
@@ -299,6 +310,10 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
       const originalPath: string = route.originalPath;
       if (originalPath && originalPath.indexOf('/ide/') === -1) {
         $rootScope.showIDE = false;
+        if ($rootScope.hideNavbar) {
+          $rootScope.hideNavbar = false;
+          $mdSidenav('left').open();
+        }
       }
       // when a route is about to change, notify the routing redirect node
       if (next.resolve) {
@@ -316,7 +331,6 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
 ]);
 
 initModule.config(['$mdThemingProvider', 'jsonColors', ($mdThemingProvider: ng.material.IThemingProvider, jsonColors: any) => {
-
   const cheColors = angular.fromJson(jsonColors);
   const getColor = (key: string) => {
     let color = cheColors[key];
@@ -477,7 +491,6 @@ new ComponentsConfig(instanceRegister);
 new AdminsConfig(instanceRegister);
 new AdministrationConfig(instanceRegister);
 new IdeConfig(instanceRegister);
-new DiagnosticsConfig(instanceRegister);
 
 new NavbarConfig(instanceRegister);
 new WorkspacesConfig(instanceRegister);

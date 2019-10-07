@@ -18,18 +18,16 @@ package org.eclipse.che.api.factory.shared;
  */
 public final class Constants {
 
+  public static final String CURRENT_VERSION = "4.0";
+
   // factory links rel attributes
   public static final String IMAGE_REL_ATT = "image";
   public static final String RETRIEVE_FACTORY_REL_ATT = "self";
-  public static final String SNIPPET_REL_ATT = "snippet";
   public static final String FACTORY_ACCEPTANCE_REL_ATT = "accept";
   public static final String NAMED_FACTORY_ACCEPTANCE_REL_ATT = "accept-named";
 
-  // factory snippet types
-  public static final String MARKDOWN_SNIPPET_TYPE = "markdown";
-  public static final String IFRAME_SNIPPET_TYPE = "iframe";
-  public static final String HTML_SNIPPET_TYPE = "html";
-  public static final String URL_SNIPPET_TYPE = "url";
+  // url factory parameter names
+  public static final String URL_PARAMETER_NAME = "url";
 
   private Constants() {}
 }

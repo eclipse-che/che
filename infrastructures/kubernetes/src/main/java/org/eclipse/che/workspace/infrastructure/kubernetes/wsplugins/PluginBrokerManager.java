@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import com.google.common.annotations.Beta;
+import io.opentracing.Tracer;
 import java.util.Collection;
 import java.util.List;
 import javax.inject.Inject;
@@ -20,7 +21,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
-import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
+import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
+import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -58,6 +60,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   private final BrokerEnvironmentFactory<E> brokerEnvironmentFactory;
   private final KubernetesEnvironmentProvisioner<E> environmentProvisioner;
   private final UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
+  private final Tracer tracer;
 
   @Inject
   public PluginBrokerManager(
@@ -68,7 +71,8 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
       WorkspaceVolumesStrategy volumesStrategy,
       BrokerEnvironmentFactory<E> brokerEnvironmentFactory,
       UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory,
-      @Named("che.workspace.plugin_broker.wait_timeout_min") int pluginBrokerWaitingTimeout) {
+      @Named("che.workspace.plugin_broker.wait_timeout_min") int pluginBrokerWaitingTimeout,
+      Tracer tracer) {
     this.factory = factory;
     this.eventService = eventService;
     this.pluginsValidator = pluginsValidator;
@@ -77,6 +81,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
     this.environmentProvisioner = environmentProvisioner;
     this.pluginBrokerWaitingTimeout = pluginBrokerWaitingTimeout;
     this.unrecoverablePodEventListenerFactory = unrecoverablePodEventListenerFactory;
+    this.tracer = tracer;
   }
 
   /**
@@ -86,10 +91,11 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
    * <p>This API is in <b>Beta</b> and is subject to changes or removal.
    */
   @Beta
+  @Traced
   public List<ChePlugin> getTooling(
       RuntimeIdentity runtimeID,
       StartSynchronizer startSynchronizer,
-      Collection<PluginMeta> pluginsMeta,
+      Collection<PluginFQN> pluginFQNs,
       boolean isEphemeral)
       throws InfrastructureException {
 
@@ -97,7 +103,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
     KubernetesNamespace kubernetesNamespace = factory.create(workspaceId);
     BrokersResult brokersResult = new BrokersResult();
 
-    E brokerEnvironment = brokerEnvironmentFactory.create(pluginsMeta, runtimeID, brokersResult);
+    E brokerEnvironment = brokerEnvironmentFactory.create(pluginFQNs, runtimeID);
     if (isEphemeral) {
       EphemeralWorkspaceUtility.makeEphemeral(brokerEnvironment.getAttributes());
     }
@@ -123,7 +129,8 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
       String workspaceId,
       StartSynchronizer startSynchronizer,
       KubernetesEnvironment brokerEnvironment) {
-    return new PrepareStorage(workspaceId, brokerEnvironment, volumesStrategy, startSynchronizer);
+    return new PrepareStorage(
+        workspaceId, brokerEnvironment, volumesStrategy, startSynchronizer, tracer);
   }
 
   private DeployBroker getDeployBrokerPhase(
@@ -136,10 +143,11 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
         kubernetesNamespace,
         brokerEnvironment,
         brokersResult,
-        unrecoverablePodEventListenerFactory);
+        unrecoverablePodEventListenerFactory,
+        tracer);
   }
 
   private WaitBrokerResult getWaitBrokerPhase(String workspaceId, BrokersResult brokersResult) {
-    return new WaitBrokerResult(workspaceId, brokersResult, pluginBrokerWaitingTimeout);
+    return new WaitBrokerResult(workspaceId, brokersResult, pluginBrokerWaitingTimeout, tracer);
   }
 }

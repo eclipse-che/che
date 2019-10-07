@@ -37,7 +37,7 @@ getRecommendedThreadCount() {
 }
 
 detectDockerInterfaceIp() {
-    docker run --rm --net host eclipse/che-ip:nightly
+    docker run --rm --net host eclipse/che-ip:6.19.0
 }
 
 initVariables() {
@@ -79,6 +79,7 @@ initVariables() {
     PRODUCT_HOST=$(detectDockerInterfaceIp)
     PRODUCT_PORT=8080
     INCLUDE_TESTS_UNDER_REPAIR=false
+    INCLUDE_FLAKY_TESTS=false
 
     unset DEBUG_OPTIONS
     unset MAVEN_OPTIONS
@@ -151,6 +152,7 @@ checkParameters() {
         elif [[ "$var" == --multiuser ]]; then :
         elif [[ "$var" =~ --exclude=.* ]]; then :
         elif [[ "$var" =~ --include-tests-under-repair ]]; then :
+        elif [[ "$var" =~ --include-flaky-tests ]]; then :
 
         else
             printHelp
@@ -213,6 +215,9 @@ applyCustomOptions() {
 
         elif [[ "$var" == --include-tests-under-repair ]]; then
             INCLUDE_TESTS_UNDER_REPAIR=true
+
+        elif [[ "$var" == --include-flaky-tests ]]; then
+            INCLUDE_FLAKY_TESTS=true
 
         fi
     done
@@ -354,7 +359,7 @@ checkDockerComposeRequirements() {
 checkIfProductIsRun() {
     local url=${PRODUCT_PROTOCOL}"://"${PRODUCT_HOST}:${PRODUCT_PORT}${API_SUFFIX};
 
-    curl -s -X OPTIONS ${url} > /dev/null
+    curl -s -k -X OPTIONS ${url} > /dev/null
     if [[ $? != 0 ]]; then
         echo "[TEST] "${url}" is down"
         exit 1
@@ -423,7 +428,8 @@ Other options:
     --skip-sources-validation           Fast build. Skips source validation and enforce plugins
     --workspace-pool-size=[<SIZE>|auto] Size of test workspace pool.
                                         Default value is 0, that means that test workspaces are created on demand.
-    --include-tests-under-repair        Include tests which belong to group 'UNDER REPAIR'
+    --include-tests-under-repair        Include tests which permanently fail and so belong to group 'UNDER REPAIR'
+    --include-flaky-tests               Include tests which randomly fail and so belong to group 'FLAKY'
 
 HOW TO of usage:
     Test Eclipse Che single user assembly:
@@ -441,8 +447,8 @@ HOW TO of usage:
     Run suite:
         ${CALLER} <...> --suite=<PATH_TO_SUITE>
 
-    Include tests which belong to group 'UNDER REPAIR'
-        ./selenium-tests.sh --include-tests-under-repair
+    Include tests which belong to groups 'UNDER REPAIR' and 'FLAKY'
+        ./selenium-tests.sh --include-tests-under-repair --include-flaky-tests
 
     Rerun failed tests:
         ${CALLER} <...> --failed-tests
@@ -739,6 +745,10 @@ getExcludedGroups() {
       excludeParamArray+=( 'under_repair' )
     fi
 
+    if [[ ${INCLUDE_FLAKY_TESTS} == false ]]; then
+      excludeParamArray+=( 'flaky' )
+    fi
+
     echo $(IFS=$','; echo "${excludeParamArray[*]}")
 }
 
@@ -845,7 +855,7 @@ generateFailSafeReport () {
         for file in $(ls target/site/screenshots/* | sort -r)
         do
             local test=$(basename ${file} | sed 's/\(.*\)_.*/\1/')
-            local testDetailTag="<div id=\"${test}error\" style=\"display:none;\">"
+            local testDetailTag="<div id=\"${test}-failure\" style=\"display:none;\">"
             local screenshotTag="<p><img src=\"screenshots\/"$(basename ${file})"\"><p>"
             sed -i "s/${testDetailTag}/${testDetailTag}${screenshotTag}/" ${FAILSAFE_REPORT}
         done
@@ -879,7 +889,7 @@ attachLinkToTestReport() {
     for file in $(ls ${dirWithResources}/* | sort -r)
     do
         local test=$(basename ${file} | sed 's/\(.*\)_.*/\1/')
-        local testDetailTag="<div id=\"${test}error\" style=\"display:none;\">"
+        local testDetailTag="<div id=\"${test}-failure\" style=\"display:none;\">"
         local filename=$(basename ${file})
         local linkTag="<p><li><a href=\"$relativePathToResource\/$filename\" target=\"_blank\"><b>$titleOfLink<\/b>: $filename<\/a><\/li><\/p>"
         sed -i "s/${testDetailTag}/${testDetailTag}${linkTag}/" ${FAILSAFE_REPORT}

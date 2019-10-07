@@ -42,6 +42,8 @@ export class ChePanelCtrl {
     this.$scope = $scope;
   }
 
+  $onInit(): void { }
+
   /**
    * Sets the id
    * @param id

@@ -12,41 +12,35 @@
 package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
-import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.pageobject.Events;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.TimeoutException;
+import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
+import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-@Test(groups = {GITHUB})
+@Test(groups = {GITHUB, OPENSHIFT})
 public class DirectUrlFactoryWithRootFolderTest {
-  @Inject private ProjectExplorer projectExplorer;
-  @Inject private DefaultTestUser testUser;
+  private static final Logger LOG =
+      LoggerFactory.getLogger(DirectUrlFactoryWithRootFolderTest.class);
+
   @Inject private TestFactoryInitializer testFactoryInitializer;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
-  @Inject private Events events;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
-  @Inject private TestProjectServiceClient projectServiceClient;
   @Inject private TestGitHubRepository testRepo;
+  @Inject private TheiaIde theiaIde;
+  @Inject private TheiaProjectTree theiaProjectTree;
 
   private TestFactory testFactoryWithRootFolder;
 
@@ -62,13 +56,16 @@ public class DirectUrlFactoryWithRootFolderTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testFactoryWithRootFolder.delete();
+    try {
+      testFactoryWithRootFolder.delete();
+    } catch (Exception e) {
+      LOG.warn("It was impossible to remove factory.", e);
+    }
   }
 
   @Test
-  public void factoryWithDirectUrlWithRootFolder() throws Exception {
-    String projectName = testRepo.getName();
-    String expectedMessInTheEventsPanel = "Project " + projectName + " imported";
+  public void factoryWithDirectUrlWithRootFolder() {
+    String repositoryName = testRepo.getName();
     List<String> expectedItemsAfterCloning =
         Arrays.asList(
             "CHANGELOG.md",
@@ -90,26 +87,21 @@ public class DirectUrlFactoryWithRootFolderTest {
 
     testFactoryWithRootFolder.authenticateAndOpen();
 
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(projectName);
-    notificationsPopupPanel.waitProgressPopupPanelClose();
-    events.clickEventLogBtn();
+    theiaIde.switchToIdeFrame();
+    theiaIde.waitTheiaIde();
+    theiaIde.waitLoaderInvisibility();
+    theiaIde.waitNotificationDisappearance(
+        "Che Workspace: Finished cloning projects.", UPDATING_PROJECT_TIMEOUT_SEC);
 
-    try {
-      events.waitExpectedMessage(expectedMessInTheEventsPanel);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/6440");
-    }
-    projectExplorer.openItemByPath(projectName);
+    theiaProjectTree.waitFilesTab();
+    theiaProjectTree.clickOnFilesTab();
+    theiaProjectTree.waitItem(repositoryName);
+    theiaIde.waitAllNotificationsClosed();
+    theiaProjectTree.expandItem(repositoryName);
 
-    String currentWsId =
-        workspaceServiceClient
-            .getByName(seleniumWebDriver.getWorkspaceNameFromBrowserUrl(), testUser.getName())
-            .getId();
-    List<String> visibleItems = projectExplorer.getNamesOfAllOpenItems();
-    assertTrue(visibleItems.containsAll(expectedItemsAfterCloning));
-    String currentTypeOfProject = projectServiceClient.getFirstProject(currentWsId).getType();
-    assertTrue(currentTypeOfProject.equals("blank"));
+    expectedItemsAfterCloning.forEach(
+        name -> {
+          theiaProjectTree.waitItem(repositoryName + "/" + name);
+        });
   }
 }

@@ -21,7 +21,6 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 /** @author Oleksandr Garagatyi */
 public class K8sContainerResolverBuilder {
 
-  private String pluginName;
   private String imagePullPolicy;
   private CheContainer container;
   private List<ChePluginEndpoint> pluginEndpoints;
@@ -36,11 +35,6 @@ public class K8sContainerResolverBuilder {
     return this;
   }
 
-  public K8sContainerResolverBuilder setPluginName(String pluginName) {
-    this.pluginName = pluginName;
-    return this;
-  }
-
   public K8sContainerResolverBuilder setImagePullPolicy(String imagePullPolicy) {
     this.imagePullPolicy = imagePullPolicy;
     return this;
@@ -52,7 +46,7 @@ public class K8sContainerResolverBuilder {
     }
     List<ChePluginEndpoint> containerEndpoints =
         getContainerEndpoints(container.getPorts(), pluginEndpoints);
-    return new K8sContainerResolver(pluginName, imagePullPolicy, container, containerEndpoints);
+    return new K8sContainerResolver(imagePullPolicy, container, containerEndpoints);
   }
 
   private List<ChePluginEndpoint> getContainerEndpoints(

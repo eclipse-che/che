@@ -23,7 +23,7 @@ import org.eclipse.che.commons.lang.Pair;
  * @author Roman Iuvshyn
  * @author Alexander Garagatyi
  */
-public class JavaOptsEnvVariableProvider implements EnvVarProvider {
+public class JavaOptsEnvVariableProvider implements LegacyEnvVarProvider {
 
   /** Env variable for jvm settings */
   public static final String JAVA_OPTS_VARIABLE = "JAVA_OPTS";

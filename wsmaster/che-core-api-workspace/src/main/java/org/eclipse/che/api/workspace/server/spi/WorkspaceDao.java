@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.spi;
 
+import java.util.Optional;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
@@ -69,10 +70,11 @@ public interface WorkspaceDao {
    * <p>Doesn't throw an exception when workspace with given {@code id} does not exist
    *
    * @param id workspace identifier
+   * @return removed workspace
    * @throws NullPointerException when {@code id} is null
    * @throws ServerException when any other error occurs during workspace removing
    */
-  void remove(String id) throws ServerException;
+  Optional<WorkspaceImpl> remove(String id) throws ServerException;
 
   /**
    * Gets workspace by identifier.

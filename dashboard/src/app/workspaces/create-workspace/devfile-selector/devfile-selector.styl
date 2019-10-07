@@ -1,0 +1,106 @@
+.devfile-selector
+  width 100%
+  
+  $devfile-selector-list-header-border = lighten($very-light-grey-color, 4%)
+  $devfile-selector-list-header-background = lighten($very-light-grey-color, 28%)
+
+  .devfile-selector-list
+    background-color $devfile-selector-list-header-background
+    border-top 1px solid $devfile-selector-list-header-border
+    border-radius 2px
+    width 100%
+
+    & > div
+      position relative
+      margin-top 40px
+      che-box-shadow()
+
+      & > div
+        overflow-y auto
+        max-height 307px
+
+      .che-list-header
+        .che-list-header-additional
+          display none
+        .che-list-item-row
+          margin -40px 0 0 0
+        .che-list-header-column > *
+          position absolute
+          line-height 40px
+          top -40px
+
+      .che-list-content
+        .devfile-selector-item-icon
+          line-height inherit
+
+    .devfile-selector-icon-column
+      width 100px !important
+
+    .devfile-selector-devfile-list
+      margin 0
+
+      .che-list
+        margin 0
+
+.devfile-selector-item
+  $devfile-selected-background-color = #F2F7FD
+
+  position relative
+  background-color $che-white-color
+  border 1px solid lighten($very-light-grey-color, 4%)
+  border-top-color lighten($list-separator-color, 7%)
+  z-index 0
+
+  *
+    outline none
+
+  &:not(:first-of-type)
+    margin-top -1px
+
+  &:last-of-type
+    border-radius 0 0 2px 2px
+
+  .devfile-selector-item-icon
+    line-height 38px
+    font-size 30px
+    width 55px
+    text-align center
+    filter grayscale(100%) opacity(50%)
+
+    img
+      height 30px
+      vertical-align top
+
+    div
+      width 50px
+
+  .devfile-selector-item-components > div
+    display inline-block
+    margin-right 10px
+    padding 0 11px
+    border 1px solid darken($che-white-color, 9%)
+    border-radius 2px
+    font-size 9px
+    line-height 14px
+    color $default-color
+
+  // selected state
+  &.devfile-selector-item-selected
+    background-color $devfile-selected-background-color
+    border-color $primary-color
+    z-index 1 !important
+
+    .devfile-selector-item-name
+      color $primary-color
+
+.devfile-selector-item
+  md-item.che-list-item
+    border none
+
+  md-item-content
+    display block
+    border none
+
+    .che-list-item-row
+      line-height 25px
+

@@ -1,4 +1,0 @@
-UTILITY_IMAGE_CHEACTION=eclipse/che-action:nightly
-UTILITY_IMAGE_CHEDIR=eclipse/che-dir:nightly
-UTILITY_IMAGE_CHETEST=eclipse/che-test:nightly
-UTILITY_IMAGE_CHEMOUNT=eclipse/che-mount:nightly

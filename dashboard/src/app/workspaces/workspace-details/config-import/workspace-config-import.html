@@ -1,4 +1,7 @@
 <div layout="column" class="config-import">
+  <div class="saving-message">
+    <span ng-if="workspaceConfigImportController.isSaving">Saving workspace config...</span>
+  </div>
   <div class="config-editor">
     <che-editor editor-content="workspaceConfigImportController.importWorkspaceJson"
                 editor-state="editorState"

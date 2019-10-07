@@ -39,7 +39,7 @@
               <span title="{{navbarRecentWorkspacesController.getWorkspaceName(workspace.id)}}"
                     class="recent-workspace-name-container"
                     ng-class="{'recent-workspaces-stopped-workspace': navbarRecentWorkspacesController.getWorkspaceStatus(workspace.id) === 'STOPPED'}">
-                <span che-clip-the-middle>{{workspace.config.name}}</span>
+                <span che-clip-the-middle>{{navbarRecentWorkspacesController.getWorkspaceName(workspace.id)}}</span>
               </span>
             </div>
           </md-button>

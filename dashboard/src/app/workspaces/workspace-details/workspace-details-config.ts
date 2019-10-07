@@ -22,19 +22,10 @@ import {WorkspaceDetailsService} from './workspace-details.service';
 import {ExportWorkspaceDialogController} from './export-workspace/dialog/export-workspace-dialog.controller';
 import {ExportWorkspaceController} from './export-workspace/export-workspace.controller';
 import {ExportWorkspace} from './export-workspace/export-workspace.directive';
-import {WorkspaceRecipeImportController} from './select-stack/recipe-import/workspace-recipe-import.controller';
-import {WorkspaceRecipeImport} from './select-stack/recipe-import/workspace-recipe-import.directive';
-import {WorkspaceRecipeAuthoringController} from './select-stack/recipe-authoring/workspace-recipe-authoring.controller';
-import {WorkspaceRecipeAuthoring} from './select-stack/recipe-authoring/workspace-recipe-authoring.directive';
 import {WorkspaceConfigImportController} from './config-import/workspace-config-import.controller';
 import {WorkspaceConfigImport} from './config-import/workspace-config-import.directive';
-import {ReadyToGoStacksController} from './select-stack/ready-to-go-stacks/ready-to-go-stacks.controller';
-import {ReadyToGoStacks} from './select-stack/ready-to-go-stacks/ready-to-go-stacks.directive';
-import {CreateProjectStackLibraryController} from './select-stack/stack-library/create-project-stack-library.controller';
-import {CreateProjectStackLibrary} from './select-stack/stack-library/create-project-stack-library.directive';
-import {CheStackLibrarySelecter} from './select-stack/stack-library/stack-library-selecter/che-stack-library-selecter.directive';
-import {WorkspaceSelectStackController} from './select-stack/workspace-select-stack.controller';
-import {WorkspaceSelectStack} from './select-stack/workspace-select-stack.directive';
+import {WorkspaceDevfileEditorController} from './devfile/workspace-devfile-editor.controller';
+import {WorkspaceDevfileEditor} from './devfile/workspace-devfile-editor.directive';
 import {WorkspaceEnvironmentsController} from './environments/environments.controller';
 import {WorkspaceEnvironments} from './environments/environments.directive';
 import {WorkspaceMachineConfigController} from './environments/machine-config/machine-config.controller';
@@ -68,22 +59,15 @@ import {MachineSelector} from './machine-selector/machine-selector.directive';
 import {MachineServersController} from './workspace-machine-servers/machine-servers.controller';
 import {MachineServers} from './workspace-machine-servers/machine-servers.directive';
 import {EditMachineServerDialogController} from './workspace-machine-servers/edit-machine-server-dialog/edit-server-dialog.controller';
-import {MachineAgentsController} from './workspace-machine-agents/machine-agents.controller';
-import {MachineAgents} from './workspace-machine-agents/machine-agents.directive';
 import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
 import {WorkspaceConfigService} from '../workspace-config.service';
 import {CheRecipeService} from './che-recipe.service';
 import {CheProjectItem} from './workspace-projects/project-item/project-item.directive';
 import {ProjectItemCtrl} from './workspace-projects/project-item/project-item.controller';
-import {ProjectRepository} from './workspace-projects/project-details/repository/project-repository.directive';
-import {ProjectRepositoryController} from './workspace-projects/project-details/repository/project-repository.controller';
-import {ProjectDetailsController} from './workspace-projects/project-details/project-details.controller';
 import {NoGithubOauthDialogController} from '../create-workspace/project-source-selector/add-import-project/import-github-project/oauth-dialog/no-github-oauth-dialog.controller';
 import {EditMachineVolumeDialogController} from './workspace-machine-volumes/edit-volume-dialog/edit-volume-dialog.controller';
 import {MachineVolumes} from './workspace-machine-volumes/machine-volumes.directive';
 import {MachineVolumesController} from './workspace-machine-volumes/machine-volumes.controller';
-import {WorkspaceToolsConfig} from './workspace-tools/workspace-tools-config';
-
 
 
 /**
@@ -109,9 +93,6 @@ export class WorkspaceDetailsConfig {
 
     register.directive('cheProjectItem', CheProjectItem);
     register.controller('ProjectItemCtrl', ProjectItemCtrl);
-    register.controller('ProjectDetailsController', ProjectDetailsController);
-    register.controller('ProjectRepositoryController', ProjectRepositoryController);
-    register.directive('projectRepository', ProjectRepository);
     register.controller('NoGithubOauthDialogController', NoGithubOauthDialogController);
 
     register.controller('AddProjectPopoverController', AddProjectPopoverController);
@@ -119,19 +100,10 @@ export class WorkspaceDetailsConfig {
     register.controller('ExportWorkspaceDialogController', ExportWorkspaceDialogController);
     register.controller('ExportWorkspaceController', ExportWorkspaceController);
     register.directive('exportWorkspace', ExportWorkspace);
-    register.controller('WorkspaceRecipeImportController', WorkspaceRecipeImportController);
-    register.directive('cheWorkspaceRecipeImport', WorkspaceRecipeImport);
-    register.controller('WorkspaceRecipeAuthoringController', WorkspaceRecipeAuthoringController);
-    register.directive('cheWorkspaceRecipeAuthoring', WorkspaceRecipeAuthoring);
     register.controller('WorkspaceConfigImportController', WorkspaceConfigImportController);
     register.directive('cheWorkspaceConfigImport', WorkspaceConfigImport);
-    register.controller('ReadyToGoStacksController', ReadyToGoStacksController);
-    register.directive('readyToGoStacks', ReadyToGoStacks);
-    register.controller('CreateProjectStackLibraryController', CreateProjectStackLibraryController);
-    register.directive('createProjectStackLibrary', CreateProjectStackLibrary);
-    register.directive('cheStackLibrarySelecter', CheStackLibrarySelecter);
-    register.controller('WorkspaceSelectStackController', WorkspaceSelectStackController);
-    register.directive('workspaceSelectStack', WorkspaceSelectStack);
+    register.controller('WorkspaceDevfileEditorController', WorkspaceDevfileEditorController);
+    register.directive('workspaceDevfileEditor', WorkspaceDevfileEditor);
     register.controller('WorkspaceEnvironmentsController', WorkspaceEnvironmentsController);
     register.directive('workspaceEnvironments', WorkspaceEnvironments);
     register.controller('WorkspaceMachineConfigController', WorkspaceMachineConfigController);
@@ -168,24 +140,10 @@ export class WorkspaceDetailsConfig {
     register.controller('MachineServersController', MachineServersController);
     register.directive('cheMachineServers', MachineServers);
     register.controller('EditMachineServerDialogController', EditMachineServerDialogController);
-    register.controller('MachineAgentsController', MachineAgentsController);
-    register.directive('cheMachineAgents', MachineAgents);
-
-    /* tslint:disable */
-    new WorkspaceToolsConfig(register);
-    /* tslint:enable */
 
     // config routes
     register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
       $routeProvider
-        .accessWhen('/project/:namespace*/:workspaceName/:projectName', {
-          title: (params: any) => {
-            return params.workspaceName + ' | ' + params.projectName;
-          },
-          templateUrl: 'app/workspaces/workspace-details/workspace-projects/project-details/project-details.html',
-          controller: 'ProjectDetailsController',
-          controllerAs: 'projectDetailsController'
-        })
         .accessWhen('/workspace/:namespace*/:workspaceName', {
           title: (params: any) => {
             return params.workspaceName;

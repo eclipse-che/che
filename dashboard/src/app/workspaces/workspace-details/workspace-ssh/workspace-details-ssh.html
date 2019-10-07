@@ -16,7 +16,7 @@
                       ng-show="workspaceDetailsSshCtrl.isLoading"></md-progress-linear>
 </div>
 <div class="che-list-empty" ng-if="!workspaceDetailsSshCtrl.workspace.config.defaultEnv">
-  <span>There are no machines to display.</span>
+  <span>There are no containers to display.</span>
 </div>
 <md-content flex class="workspace-ssh-content" ng-if="workspaceDetailsSshCtrl.workspace.config.defaultEnv">
   <div layout="row" flex class="workspace-ssh-content-invalid-notification" ng-if="workspaceDetailsSshCtrl.workspace.status !== 'RUNNING'">
@@ -59,7 +59,7 @@
 
   </che-label-container>
 
-  <che-label-container che-label-name="SSH agent" che-label-description="Machines of workspaces with SSH agents. Agents can be enabled/disabled in runtime view.">
+  <che-label-container che-label-name="SSH agent" che-label-description="Containers of workspaces with SSH agents. Agents can be enabled/disabled in runtime view.">
 
     <che-list-header>
       <div flex="100" layout="row" layout-align="start stretch" class="che-list-item-row">

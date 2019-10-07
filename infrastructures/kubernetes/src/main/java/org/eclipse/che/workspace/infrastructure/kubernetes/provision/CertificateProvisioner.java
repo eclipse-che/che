@@ -17,7 +17,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.SecretVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
@@ -30,6 +29,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
 /**
  * Mount configured self-signed certificate as file in each workspace machines if configured.
@@ -39,7 +39,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 @Singleton
 public class CertificateProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
 
-  public static final String CHE_SELF_SIGNED_CERT_SECRET = "che-self-signed-cert";
+  public static final String CHE_SELF_SIGNED_CERT_SECRET_SUFFIX = "-che-self-signed-cert";
   public static final String CHE_SELF_SIGNED_CERT_VOLUME = "che-self-signed-cert";
   public static final String CERT_MOUNT_PATH = "/tmp/che/secret/";
   public static final String CA_CERT_FILE = "ca.crt";
@@ -69,19 +69,20 @@ public class CertificateProvisioner implements ConfigurationProvisioner<Kubernet
     if (!isConfigured()) {
       return;
     }
-
+    String selfSignedCertSecretName =
+        identity.getWorkspaceId() + CHE_SELF_SIGNED_CERT_SECRET_SUFFIX;
     k8sEnv
         .getSecrets()
         .put(
-            CHE_SELF_SIGNED_CERT_SECRET,
+            selfSignedCertSecretName,
             new SecretBuilder()
                 .withNewMetadata()
-                .withName(CHE_SELF_SIGNED_CERT_SECRET)
+                .withName(selfSignedCertSecretName)
                 .endMetadata()
                 .withStringData(ImmutableMap.of(CA_CERT_FILE, certificate))
                 .build());
 
-    for (Pod pod : k8sEnv.getPods().values()) {
+    for (PodData pod : k8sEnv.getPodsData().values()) {
       Optional<Volume> certVolume =
           pod.getSpec()
               .getVolumes()
@@ -90,20 +91,27 @@ public class CertificateProvisioner implements ConfigurationProvisioner<Kubernet
               .findAny();
 
       if (!certVolume.isPresent()) {
-        pod.getSpec().getVolumes().add(buildCertSecretVolume());
+        pod.getSpec().getVolumes().add(buildCertSecretVolume(selfSignedCertSecretName));
       }
 
-      for (Container container : pod.getSpec().getContainers()) {
-        Optional<VolumeMount> certVolumeMount =
-            container
-                .getVolumeMounts()
-                .stream()
-                .filter(vm -> vm.getName().equals(CHE_SELF_SIGNED_CERT_VOLUME))
-                .findAny();
-        if (!certVolumeMount.isPresent()) {
-          container.getVolumeMounts().add(buildCertVolumeMount());
-        }
+      for (Container container : pod.getSpec().getInitContainers()) {
+        provisionCertVolumeMountIfNeeded(container);
       }
+      for (Container container : pod.getSpec().getContainers()) {
+        provisionCertVolumeMountIfNeeded(container);
+      }
+    }
+  }
+
+  private void provisionCertVolumeMountIfNeeded(Container container) {
+    Optional<VolumeMount> certVolumeMount =
+        container
+            .getVolumeMounts()
+            .stream()
+            .filter(vm -> vm.getName().equals(CHE_SELF_SIGNED_CERT_VOLUME))
+            .findAny();
+    if (!certVolumeMount.isPresent()) {
+      container.getVolumeMounts().add(buildCertVolumeMount());
     }
   }
 
@@ -115,11 +123,10 @@ public class CertificateProvisioner implements ConfigurationProvisioner<Kubernet
         .build();
   }
 
-  private Volume buildCertSecretVolume() {
+  private Volume buildCertSecretVolume(String secretName) {
     return new VolumeBuilder()
         .withName(CHE_SELF_SIGNED_CERT_VOLUME)
-        .withSecret(
-            new SecretVolumeSourceBuilder().withSecretName(CHE_SELF_SIGNED_CERT_SECRET).build())
+        .withSecret(new SecretVolumeSourceBuilder().withSecretName(secretName).build())
         .build();
   }
 }

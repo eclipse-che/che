@@ -31,11 +31,14 @@ export class WorkspaceWarningsController {
    */
   constructor() {
     this.warnings = [];
+  }
 
-    if (this.workspace && this.workspace.runtime) {
+  $onInit(): void {
+    if (this.workspace && this.workspace.runtime && this.workspace.runtime.warnings) {
       this.warnings = this.warnings.concat(this.workspace.runtime.warnings);
     }
   }
+
 }
 
 

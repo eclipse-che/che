@@ -30,6 +30,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
@@ -64,11 +65,12 @@ public class FreeResourcesLimitService extends Service {
   @ApiResponses({
     @ApiResponse(code = 201, message = "The resources limit successfully stored"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
+    @ApiResponse(code = 409, message = "The specified account doesn't exist"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public Response storeFreeResourcesLimit(
       @ApiParam(value = "Free resources limit") FreeResourcesLimitDto resourcesLimit)
-      throws BadRequestException, NotFoundException, ServerException {
+      throws BadRequestException, NotFoundException, ConflictException, ServerException {
     freeResourcesLimitValidator.check(resourcesLimit);
     return Response.status(201)
         .entity(DtoConverter.asDto(freeResourcesLimitManager.store(resourcesLimit)))

@@ -27,6 +27,7 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.impl.DefaultClaims;
 import io.jsonwebtoken.impl.DefaultHeader;
 import io.jsonwebtoken.impl.DefaultJwt;
+import io.opentracing.Tracer;
 import java.lang.reflect.Field;
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -48,6 +49,7 @@ import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -72,6 +74,9 @@ public class KeycloakEnvironmentInitalizationFilterTest {
   @Mock private HttpSession session;
   @Mock private JwtParser jwtParser;
 
+  @Mock(answer = Answers.RETURNS_MOCKS)
+  private Tracer tracer;
+
   private KeycloakEnvironmentInitalizationFilter filter;
   private Map<String, String> keycloakAttributes = new HashMap<>();
   private Map<String, String> keycloakSettingsMap = new HashMap<>();
@@ -90,7 +95,8 @@ public class KeycloakEnvironmentInitalizationFilterTest {
             keycloakProfileRetriever,
             tokenExtractor,
             permissionChecker,
-            keycloakSettings);
+            keycloakSettings,
+            tracer);
     Field parser = filter.getClass().getSuperclass().getDeclaredField("jwtParser");
     parser.setAccessible(true);
     parser.set(filter, jwtParser);

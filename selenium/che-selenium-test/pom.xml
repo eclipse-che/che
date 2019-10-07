@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-selenium-parent</artifactId>
         <groupId>org.eclipse.che.selenium</groupId>
-        <version>6.16.0-SNAPSHOT</version>
+        <version>7.3.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-selenium-test</artifactId>
     <packaging>jar</packaging>
@@ -69,10 +69,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-debug-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-dto</artifactId>
         </dependency>
         <dependency>
@@ -82,10 +78,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-system-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -102,6 +94,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.infrastructure.docker</groupId>
+            <artifactId>docker-environment</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.selenium</groupId>
@@ -145,11 +141,6 @@
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-api-permission</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-github-server</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>

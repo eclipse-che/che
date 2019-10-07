@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012-2017 Red Hat, Inc.
+# Copyright (c) 2012-2019 Red Hat, Inc.
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -8,18 +8,26 @@
 #
 
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   creationTimestamp: null
   labels:
+    app: che
+    component: postgres
     io.kompose.service: postgres
   name: postgres
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: che
+      component: postgres
   template:
     metadata:
       labels:
+        app: che
+        component: postgres
         io.kompose.service: postgres
     spec:
       securityContext:
@@ -39,6 +47,10 @@ spec:
           value: "pgchepassword"
         - name: "CHE_POSTGRES_DATABASE"
           value: "dbche"
+        {{- if .Values.global.postgresDebugLogs }}
+        - name: "POSTGRESQL_LOG_DEBUG"
+          value: "true"
+        {{- end }}
         image: {{ .Values.image }}
         securityContext:
           runAsUser: 26
@@ -74,5 +86,4 @@ spec:
       - name: postgres-data
         persistentVolumeClaim:
           claimName: postgres-data
-  test: false
 status: {}

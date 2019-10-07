@@ -122,7 +122,7 @@ class IdeSvc {
   }
 
   startWorkspace(data: any): ng.IPromise<any> {
-    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(data.id, data.config.defaultEnv);
+    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(data.id, data.config ? data.config.defaultEnv: null);
     return startWorkspacePromise;
   }
 
@@ -145,7 +145,8 @@ class IdeSvc {
     let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
     this.openedWorkspace = workspace;
 
-    let workspaceLoaderUrl = this.cheWorkspace.getWorkspaceLoaderUrl(workspace.namespace, workspace.config.name);
+    let name = this.cheWorkspace.getWorkspaceDataManager().getName(workspace);
+    let workspaceLoaderUrl = this.cheWorkspace.getWorkspaceLoaderUrl(workspace.namespace, name);
     let ideUrlLink = workspaceLoaderUrl || workspace.links.ide;
 
     if (this.ideAction != null) {

@@ -1,3 +1,0 @@
-IMAGE_INIT=eclipse/che-init:5.7.1
-IMAGE_CHE=eclipse/che-server:5.7.1
-IMAGE_COMPOSE=docker/compose:1.8.1

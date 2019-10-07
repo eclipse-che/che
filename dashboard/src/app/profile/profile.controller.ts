@@ -42,6 +42,11 @@ export class ProfileController {
     this.userName = <string>(profile.attributes as any).preferred_username;
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Edit profile - redirects to proper page.
    */

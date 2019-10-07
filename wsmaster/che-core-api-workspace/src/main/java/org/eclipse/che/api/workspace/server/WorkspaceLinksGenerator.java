@@ -25,9 +25,9 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.ServiceContext;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 
@@ -52,7 +52,7 @@ public class WorkspaceLinksGenerator {
   }
 
   /** Returns 'rel -> url' map of links for the given workspace. */
-  public Map<String, String> genLinks(Workspace workspace, ServiceContext serviceContext)
+  public Map<String, String> genLinks(WorkspaceImpl workspace, ServiceContext serviceContext)
       throws ServerException {
     final UriBuilder uriBuilder = serviceContext.getServiceUriBuilder();
     final LinkedHashMap<String, String> links = new LinkedHashMap<>();
@@ -70,7 +70,7 @@ public class WorkspaceLinksGenerator {
             .clone()
             .replacePath("")
             .path(workspace.getNamespace())
-            .path(workspace.getConfig().getName())
+            .path(workspace.getName())
             .build()
             .toString());
     if (workspace.getStatus() != WorkspaceStatus.STOPPED) {

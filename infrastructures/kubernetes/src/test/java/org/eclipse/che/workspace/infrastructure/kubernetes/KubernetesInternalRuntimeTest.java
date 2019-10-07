@@ -20,9 +20,9 @@ import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STA
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
@@ -53,19 +53,21 @@ import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.IntOrStringBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.kubernetes.api.model.ServiceSpec;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
 import io.fabric8.kubernetes.api.model.extensions.IngressRule;
 import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
+import io.opentracing.Tracer;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -86,7 +88,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
@@ -104,10 +105,6 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
-import org.eclipse.che.commons.tracing.OptionalTracer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.MachineLogsPublisher;
-import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
-import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -125,6 +122,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesS
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
@@ -179,7 +177,6 @@ public class KubernetesInternalRuntimeTest {
   @Mock private ServersCheckerFactory serverCheckerFactory;
   @Mock private ServersChecker serversChecker;
   @Mock private UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
-  @Mock private KubernetesBootstrapperFactory bootstrapperFactory;
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private KubernetesNamespace namespace;
   @Mock private KubernetesServices services;
@@ -187,13 +184,13 @@ public class KubernetesInternalRuntimeTest {
   @Mock private KubernetesSecrets secrets;
   @Mock private KubernetesConfigsMaps configMaps;
   @Mock private KubernetesDeployments deployments;
-  @Mock private KubernetesBootstrapper bootstrapper;
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
   @Mock private WorkspaceProbesFactory workspaceProbesFactory;
   @Mock private ProbeScheduler probesScheduler;
   @Mock private WorkspaceProbes workspaceProbes;
   @Mock private KubernetesServerResolver kubernetesServerResolver;
   @Mock private InternalEnvironmentProvisioner internalEnvironmentProvisioner;
+  @Mock private IngressPathTransformInverter pathTransformInverter;
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
 
   @Mock
@@ -202,6 +199,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private SidecarToolingProvisioner<KubernetesEnvironment> toolingProvisioner;
   private KubernetesRuntimeStateCache runtimeStatesCache;
   private KubernetesMachineCache machinesCache;
+  private RuntimeEventsPublisher eventPublisher;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
@@ -215,8 +213,16 @@ public class KubernetesInternalRuntimeTest {
                   mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
                   mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
 
+  private final ImmutableMap<String, Deployment> deploymentsMap =
+      ImmutableMap.of(
+          WORKSPACE_POD_NAME,
+          mockDeployment(
+              ImmutableList.of(
+                  mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
+                  mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
+
   @Mock(answer = Answers.RETURNS_MOCKS)
-  private OptionalTracer tracer;
+  private Tracer tracer;
 
   private CommandImpl envCommand = new CommandImpl("envCommand", "echo hello", "env");
 
@@ -226,6 +232,7 @@ public class KubernetesInternalRuntimeTest {
 
     runtimeStatesCache = new MapBasedRuntimeStateCache();
     machinesCache = new MapBasedMachinesCache();
+    eventPublisher = new RuntimeEventsPublisher(eventService);
 
     startSynchronizer = spy(new StartSynchronizer(eventService, 5, IDENTITY));
     when(startSynchronizerFactory.create(any())).thenReturn(startSynchronizer);
@@ -236,12 +243,11 @@ public class KubernetesInternalRuntimeTest {
             5,
             new URLRewriter.NoOpURLRewriter(),
             unrecoverablePodEventListenerFactory,
-            bootstrapperFactory,
             serverCheckerFactory,
             volumesStrategy,
             probesScheduler,
             workspaceProbesFactory,
-            new RuntimeEventsPublisher(eventService),
+            eventPublisher,
             new KubernetesSharedPool(),
             runtimeStatesCache,
             machinesCache,
@@ -249,6 +255,7 @@ public class KubernetesInternalRuntimeTest {
             ImmutableSet.of(internalEnvironmentProvisioner),
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
+            pathTransformInverter,
             runtimeHangingDetector,
             tracer,
             context,
@@ -263,31 +270,105 @@ public class KubernetesInternalRuntimeTest {
     when(namespace.deployments()).thenReturn(deployments);
     when(namespace.secrets()).thenReturn(secrets);
     when(namespace.configMaps()).thenReturn(configMaps);
-    when(bootstrapperFactory.create(any(), anyList(), any(), any(), any()))
-        .thenReturn(bootstrapper);
     doReturn(
             ImmutableMap.of(
                 M1_NAME,
-                mockMachine(mockInstaller("ws-agent")),
+                mock(InternalMachineConfig.class),
                 M2_NAME,
-                mockMachine(mockInstaller("terminal"))))
+                mock(InternalMachineConfig.class)))
         .when(k8sEnv)
         .getMachines();
+
     final Map<String, Service> allServices = ImmutableMap.of(SERVICE_NAME, mockService());
     final Ingress ingress = mockIngress();
     final Map<String, Ingress> allIngresses = ImmutableMap.of(INGRESS_NAME, ingress);
     when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.wait(anyString(), anyLong(), any(), any())).thenReturn(ingress);
-    when(deployments.deploy(any())).thenAnswer(a -> a.getArguments()[0]);
+    when(deployments.deploy(any(Pod.class))).thenAnswer(a -> a.getArguments()[0]);
     when(k8sEnv.getServices()).thenReturn(allServices);
     when(k8sEnv.getIngresses()).thenReturn(allIngresses);
-    when(k8sEnv.getPods()).thenReturn(podsMap);
+    when(k8sEnv.getPodsCopy()).thenReturn(podsMap);
     when(k8sEnv.getCommands()).thenReturn(new ArrayList<>(singletonList(envCommand)));
 
     when(deployments.waitRunningAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
-    when(bootstrapper.bootstrapAsync()).thenReturn(CompletableFuture.completedFuture(null));
     when(serversChecker.startAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
+  }
+
+  @Test
+  public void shouldReturnTrueIfAllPodsExistOnRuntimeConsistencyChecking() throws Exception {
+    // given
+    KubernetesMachineImpl machine1 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine1", "pod1", "container 1", null, emptyMap(), emptyMap());
+    KubernetesMachineImpl machine2 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine2", "pod1", "container 2", null, emptyMap(), emptyMap());
+    KubernetesMachineImpl machine3 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine3", "pod2", "container 1", null, emptyMap(), emptyMap());
+    machinesCache.put(IDENTITY, machine1);
+    machinesCache.put(IDENTITY, machine2);
+    machinesCache.put(IDENTITY, machine3);
+
+    doReturn(Optional.of(mock(Pod.class))).when(deployments).get(anyString());
+
+    // when
+    boolean isConsistent = internalRuntime.isConsistent();
+
+    // then
+    assertTrue(isConsistent);
+  }
+
+  @Test
+  public void shouldReturnTrueIfOnlyOnePodExistsOnRuntimeConsistencyChecking() throws Exception {
+    // given
+    KubernetesMachineImpl machine1 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine1", "pod1", "container 1", null, emptyMap(), emptyMap());
+    KubernetesMachineImpl machine2 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine2", "pod1", "container 2", null, emptyMap(), emptyMap());
+    KubernetesMachineImpl machine3 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine3", "pod2", "container 1", null, emptyMap(), emptyMap());
+    machinesCache.put(IDENTITY, machine1);
+    machinesCache.put(IDENTITY, machine2);
+    machinesCache.put(IDENTITY, machine3);
+
+    doReturn(Optional.of(mock(Pod.class))).when(deployments).get("pod1");
+    doReturn(Optional.empty()).when(deployments).get("pod2");
+
+    // when
+    boolean isConsistent = internalRuntime.isConsistent();
+
+    // then
+    assertTrue(isConsistent);
+  }
+
+  @Test
+  public void shouldReturnFalseIfAllPodsExistOnRuntimeConsistencyChecking() throws Exception {
+    // given
+    KubernetesMachineImpl machine1 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine1", "pod1", "container 1", null, emptyMap(), emptyMap());
+    KubernetesMachineImpl machine2 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine2", "pod1", "container 2", null, emptyMap(), emptyMap());
+    KubernetesMachineImpl machine3 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine3", "pod2", "container 1", null, emptyMap(), emptyMap());
+    machinesCache.put(IDENTITY, machine1);
+    machinesCache.put(IDENTITY, machine2);
+    machinesCache.put(IDENTITY, machine3);
+
+    doReturn(Optional.empty()).when(deployments).get(anyString());
+
+    // when
+    boolean isConsistent = internalRuntime.isConsistent();
+
+    // then
+    assertFalse(isConsistent);
   }
 
   @Test
@@ -300,17 +381,94 @@ public class KubernetesInternalRuntimeTest {
     verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
     verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
     verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
-    verify(deployments).deploy(any());
+    verify(deployments).deploy(any(Pod.class));
     verify(ingresses).create(any());
     verify(services).create(any());
     verify(secrets).create(any());
     verify(configMaps).create(any());
     verify(namespace.deployments(), times(1)).watchEvents(any());
-    verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
         new MachineStatusEvent[] {newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING)},
         new MachineStatusEvent[] {newEvent(M2_NAME, STARTING), newEvent(M2_NAME, RUNNING)});
+    verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
+    verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
+    verify(serversChecker, times(2)).startAsync(any());
+    verify(namespace.deployments(), times(1)).stopWatch();
+  }
+
+  @Test
+  public void startKubernetesEnvironmentWithDeploymentsInsteadOfPods() throws Exception {
+    when(k8sEnv.getPodsCopy()).thenReturn(emptyMap());
+    when(k8sEnv.getDeploymentsCopy()).thenReturn(deploymentsMap);
+    when(k8sEnv.getSecrets()).thenReturn(ImmutableMap.of("secret", new Secret()));
+    when(k8sEnv.getConfigMaps()).thenReturn(ImmutableMap.of("configMap", new ConfigMap()));
+    when(deployments.deploy(any(Deployment.class)))
+        .thenAnswer(
+            a -> {
+              Deployment deployment = (Deployment) a.getArguments()[0];
+              return new PodBuilder()
+                  .withMetadata(deployment.getSpec().getTemplate().getMetadata())
+                  .withSpec(deployment.getSpec().getTemplate().getSpec())
+                  .build();
+            });
+
+    internalRuntime.start(emptyMap());
+
+    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
+    verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
+    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
+    verify(deployments).deploy(any(Deployment.class));
+    verify(ingresses).create(any());
+    verify(services).create(any());
+    verify(secrets).create(any());
+    verify(configMaps).create(any());
+    verify(namespace.deployments(), times(1)).watchEvents(any());
+    verify(eventService, times(4)).publish(any());
+    verifyOrderedEventsChains(
+        new MachineStatusEvent[] {newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING)},
+        new MachineStatusEvent[] {newEvent(M2_NAME, STARTING), newEvent(M2_NAME, RUNNING)});
+    verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
+    verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
+    verify(serversChecker, times(2)).startAsync(any());
+    verify(namespace.deployments(), times(1)).stopWatch();
+  }
+
+  @Test
+  public void startKubernetesEnvironmentWithDeploymentsAndPods() throws Exception {
+    when(k8sEnv.getDeploymentsCopy()).thenReturn(deploymentsMap);
+    when(k8sEnv.getSecrets()).thenReturn(ImmutableMap.of("secret", new Secret()));
+    when(k8sEnv.getConfigMaps()).thenReturn(ImmutableMap.of("configMap", new ConfigMap()));
+    when(deployments.deploy(any(Deployment.class)))
+        .thenAnswer(
+            a -> {
+              Deployment deployment = (Deployment) a.getArguments()[0];
+              return new PodBuilder()
+                  .withMetadata(deployment.getSpec().getTemplate().getMetadata())
+                  .withSpec(deployment.getSpec().getTemplate().getSpec())
+                  .build();
+            });
+
+    internalRuntime.start(emptyMap());
+
+    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
+    verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
+    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
+    verify(deployments).deploy(any(Deployment.class));
+    verify(deployments).deploy(any(Pod.class));
+    verify(ingresses).create(any());
+    verify(services).create(any());
+    verify(secrets).create(any());
+    verify(configMaps).create(any());
+    verify(namespace.deployments(), times(1)).watchEvents(any());
+    verify(eventService, times(6)).publish(any());
+    verifyOrderedEventsChains(
+        new MachineStatusEvent[] {
+          newEvent(M1_NAME, STARTING), newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING)
+        },
+        new MachineStatusEvent[] {
+          newEvent(M2_NAME, STARTING), newEvent(M2_NAME, STARTING), newEvent(M2_NAME, RUNNING)
+        });
     verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
     verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
     verify(serversChecker, times(2)).startAsync(any());
@@ -357,11 +515,10 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.start(emptyMap());
 
-    verify(deployments).deploy(any());
+    verify(deployments).deploy(any(Pod.class));
     verify(ingresses).create(any());
     verify(services).create(any());
     verify(namespace.deployments(), times(2)).watchEvents(any());
-    verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
         new MachineStatusEvent[] {newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING)},
@@ -378,11 +535,10 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.start(emptyMap());
 
-    verify(deployments).deploy(any());
+    verify(deployments).deploy(any(Pod.class));
     verify(ingresses).create(any());
     verify(services).create(any());
     verify(namespace.deployments(), times(1)).watchEvents(any());
-    verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
         new MachineStatusEvent[] {newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING)},
@@ -416,16 +572,19 @@ public class KubernetesInternalRuntimeTest {
     final Container container2 = mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT);
     final ImmutableMap<String, Pod> allPods =
         ImmutableMap.of(WORKSPACE_POD_NAME, mockPod(ImmutableList.of(container1, container2)));
-    when(k8sEnv.getPods()).thenReturn(allPods);
-    doThrow(IllegalStateException.class).when(bootstrapper).bootstrapAsync();
+    when(k8sEnv.getPodsCopy()).thenReturn(allPods);
+
+    internalRuntime = spy(internalRuntime);
+    doThrow(IllegalStateException.class)
+        .when(internalRuntime)
+        .waitRunningAsync(any(), argThat(m -> m.getName().equals(M1_NAME)));
 
     try {
       internalRuntime.start(emptyMap());
     } catch (Exception rethrow) {
-      verify(deployments).deploy(any());
+      verify(deployments).deploy(any(Pod.class));
       verify(ingresses).create(any());
       verify(services).create(any());
-      verify(bootstrapper, atLeastOnce()).bootstrapAsync();
       verify(eventService, atLeastOnce()).publish(any());
       final List<MachineStatusEvent> events = captureEvents();
       assertTrue(events.contains(newEvent(M1_NAME, STARTING)));
@@ -459,7 +618,8 @@ public class KubernetesInternalRuntimeTest {
               + "environment: env1, ownerId: id1' is interrupted")
   public void throwsInfrastructureExceptionWhenMachinesWaitingIsInterrupted() throws Exception {
     final Thread thread = Thread.currentThread();
-    when(bootstrapper.bootstrapAsync()).thenReturn(new CompletableFuture<>());
+    internalRuntime = spy(internalRuntime);
+    doReturn(new CompletableFuture<>()).when(internalRuntime).waitRunningAsync(any(), any());
 
     Executors.newSingleThreadScheduledExecutor()
         .schedule(thread::interrupt, 300, TimeUnit.MILLISECONDS);
@@ -486,7 +646,8 @@ public class KubernetesInternalRuntimeTest {
 
   @Test
   public void testRepublishContainerOutputAsMachineLogEvents() throws Exception {
-    final MachineLogsPublisher logsPublisher = internalRuntime.new MachineLogsPublisher();
+    final MachineLogsPublisher logsPublisher =
+        new MachineLogsPublisher(eventPublisher, machinesCache, IDENTITY);
     final PodEvent out1 =
         mockContainerEventWithoutRandomName(
             WORKSPACE_POD_NAME,
@@ -516,7 +677,8 @@ public class KubernetesInternalRuntimeTest {
 
   @Test
   public void testDoNotPublishForeignMachineOutput() throws ParseException {
-    final MachineLogsPublisher logsPublisher = internalRuntime.new MachineLogsPublisher();
+    final MachineLogsPublisher logsPublisher =
+        new MachineLogsPublisher(eventPublisher, machinesCache, IDENTITY);
     final PodEvent out1 =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
@@ -768,16 +930,45 @@ public class KubernetesInternalRuntimeTest {
   }
 
   private static Pod mockPod(List<Container> containers) {
-    final Pod pod = mock(Pod.class);
-    final PodSpec spec = mock(PodSpec.class);
-    mockName(WORKSPACE_POD_NAME, pod);
-    when(spec.getContainers()).thenReturn(containers);
-    when(pod.getSpec()).thenReturn(spec);
-    when(pod.getMetadata().getLabels())
-        .thenReturn(
-            ImmutableMap.of(
-                POD_SELECTOR, WORKSPACE_POD_NAME, CHE_ORIGINAL_NAME_LABEL, WORKSPACE_POD_NAME));
+    final Pod pod =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName(WORKSPACE_POD_NAME)
+            .withLabels(
+                ImmutableMap.of(
+                    POD_SELECTOR, WORKSPACE_POD_NAME, CHE_ORIGINAL_NAME_LABEL, WORKSPACE_POD_NAME))
+            .endMetadata()
+            .withNewSpec()
+            .withContainers(containers)
+            .endSpec()
+            .build();
     return pod;
+  }
+
+  private static Deployment mockDeployment(List<Container> containers) {
+    final Deployment deployment =
+        new DeploymentBuilder()
+            .withNewMetadata()
+            .withName(WORKSPACE_POD_NAME)
+            .withLabels(
+                ImmutableMap.of(
+                    POD_SELECTOR, WORKSPACE_POD_NAME, CHE_ORIGINAL_NAME_LABEL, WORKSPACE_POD_NAME))
+            .endMetadata()
+            .withNewSpec()
+            .withNewTemplate()
+            .withNewSpec()
+            .withContainers(containers)
+            .endSpec()
+            .withNewMetadata()
+            .withName(WORKSPACE_POD_NAME)
+            .withLabels(
+                ImmutableMap.of(
+                    POD_SELECTOR, WORKSPACE_POD_NAME, CHE_ORIGINAL_NAME_LABEL, WORKSPACE_POD_NAME))
+            .endMetadata()
+            .endTemplate()
+            .endSpec()
+            .build();
+    return deployment;
   }
 
   private static Service mockService() {
@@ -812,18 +1003,6 @@ public class KubernetesInternalRuntimeTest {
     when(ingress.getMetadata().getLabels())
         .thenReturn(ImmutableMap.of(CHE_ORIGINAL_NAME_LABEL, INGRESS_NAME));
     return ingress;
-  }
-
-  private static InstallerImpl mockInstaller(String name) {
-    InstallerImpl installer = mock(InstallerImpl.class);
-    when(installer.getName()).thenReturn(name);
-    return installer;
-  }
-
-  private static InternalMachineConfig mockMachine(InstallerImpl... installers) {
-    final InternalMachineConfig machine1 = mock(InternalMachineConfig.class);
-    when(machine1.getInstallers()).thenReturn(Arrays.asList(installers));
-    return machine1;
   }
 
   private static ObjectMeta mockName(String name, HasMetadata mock) {
@@ -888,7 +1067,7 @@ public class KubernetesInternalRuntimeTest {
         .withMachineName(event.getPodName() + '/' + event.getContainerName());
   }
 
-  private String getCurrentTimestampWithOneHourShiftAhead() throws ParseException {
+  private String getCurrentTimestampWithOneHourShiftAhead() {
     Date currentTimestampWithOneHourShiftAhead = new Date(new Date().getTime() + 3600 * 1000);
     return PodEvents.convertDateToEventTimestamp(currentTimestampWithOneHourShiftAhead);
   }
@@ -901,25 +1080,23 @@ public class KubernetesInternalRuntimeTest {
     private Map<RuntimeIdentity, KubernetesRuntimeState> runtimesStates = new HashMap<>();
 
     @Override
-    public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
+    public Set<RuntimeIdentity> getIdentities() {
       return new HashSet<>(runtimesStates.keySet());
     }
 
     @Override
-    public boolean putIfAbsent(KubernetesRuntimeState state) throws InfrastructureException {
+    public boolean putIfAbsent(KubernetesRuntimeState state) {
       return runtimesStates.putIfAbsent(state.getRuntimeId(), state) == null;
     }
 
     @Override
-    public void updateStatus(RuntimeIdentity runtimeId, WorkspaceStatus newStatus)
-        throws InfrastructureException {
+    public void updateStatus(RuntimeIdentity runtimeId, WorkspaceStatus newStatus) {
       runtimesStates.get(new RuntimeIdentityImpl(runtimeId)).setStatus(newStatus);
     }
 
     @Override
     public boolean updateStatus(
-        RuntimeIdentity identity, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus)
-        throws InfrastructureException {
+        RuntimeIdentity identity, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus) {
       KubernetesRuntimeState state = runtimesStates.get(new RuntimeIdentityImpl(identity));
       if (predicate.test(state.getStatus())) {
         state.setStatus(newStatus);
@@ -940,8 +1117,7 @@ public class KubernetesInternalRuntimeTest {
     }
 
     @Override
-    public Optional<WorkspaceStatus> getStatus(RuntimeIdentity runtimeId)
-        throws InfrastructureException {
+    public Optional<WorkspaceStatus> getStatus(RuntimeIdentity runtimeId) {
       KubernetesRuntimeState runtimeState = runtimesStates.get(runtimeId);
       if (runtimeState == null) {
         return Optional.empty();
@@ -950,8 +1126,7 @@ public class KubernetesInternalRuntimeTest {
     }
 
     @Override
-    public List<? extends Command> getCommands(RuntimeIdentity runtimeId)
-        throws InfrastructureException {
+    public List<? extends Command> getCommands(RuntimeIdentity runtimeId) {
       KubernetesRuntimeState runtimeState = runtimesStates.get(runtimeId);
       if (runtimeState == null) {
         return emptyList();
@@ -960,13 +1135,12 @@ public class KubernetesInternalRuntimeTest {
     }
 
     @Override
-    public Optional<KubernetesRuntimeState> get(RuntimeIdentity runtimeId)
-        throws InfrastructureException {
+    public Optional<KubernetesRuntimeState> get(RuntimeIdentity runtimeId) {
       return Optional.ofNullable(runtimesStates.get(new RuntimeIdentityImpl(runtimeId)));
     }
 
     @Override
-    public void remove(RuntimeIdentity runtimeId) throws InfrastructureException {
+    public void remove(RuntimeIdentity runtimeId) {
       runtimesStates.remove(new RuntimeIdentityImpl(runtimeId));
     }
   }
@@ -984,8 +1158,7 @@ public class KubernetesInternalRuntimeTest {
     }
 
     @Override
-    public void put(RuntimeIdentity runtimeIdentity, KubernetesMachineImpl machine)
-        throws InfrastructureException {
+    public void put(RuntimeIdentity runtimeIdentity, KubernetesMachineImpl machine) {
       machines.put(machineIdOf(runtimeIdentity, machine), machine);
     }
 
@@ -994,8 +1167,7 @@ public class KubernetesInternalRuntimeTest {
         RuntimeIdentity runtimeIdentity,
         String machineName,
         String serverName,
-        ServerStatus newStatus)
-        throws InfrastructureException {
+        ServerStatus newStatus) {
       KubernetesServerImpl server =
           machines.get(machineIdOf(runtimeIdentity, machineName)).getServers().get(serverName);
 
@@ -1009,21 +1181,18 @@ public class KubernetesInternalRuntimeTest {
 
     @Override
     public KubernetesServerImpl getServer(
-        RuntimeIdentity runtimeIdentity, String machineName, String serverName)
-        throws InfrastructureException {
+        RuntimeIdentity runtimeIdentity, String machineName, String serverName) {
       return machines.get(machineIdOf(runtimeIdentity, machineName)).getServers().get(serverName);
     }
 
     @Override
     public void updateMachineStatus(
-        RuntimeIdentity runtimeIdentity, String machineName, MachineStatus newStatus)
-        throws InfrastructureException {
+        RuntimeIdentity runtimeIdentity, String machineName, MachineStatus newStatus) {
       machines.get(machineIdOf(runtimeIdentity, machineName)).setStatus(newStatus);
     }
 
     @Override
-    public Map<String, KubernetesMachineImpl> getMachines(RuntimeIdentity runtimeIdentity)
-        throws InfrastructureException {
+    public Map<String, KubernetesMachineImpl> getMachines(RuntimeIdentity runtimeIdentity) {
       return machines
           .entrySet()
           .stream()
@@ -1032,7 +1201,7 @@ public class KubernetesInternalRuntimeTest {
     }
 
     @Override
-    public void remove(RuntimeIdentity identity) throws InfrastructureException {
+    public void remove(RuntimeIdentity identity) {
       machines.keySet().removeIf(id -> id.getWorkspaceId().equals(identity.getWorkspaceId()));
     }
   }

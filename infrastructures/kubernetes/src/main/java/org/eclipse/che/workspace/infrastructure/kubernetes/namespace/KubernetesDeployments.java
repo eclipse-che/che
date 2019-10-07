@@ -19,6 +19,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_RUNNING;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_SUCCEEDED;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.setSelector;
 
 import com.google.common.base.Strings;
 import io.fabric8.kubernetes.api.model.DoneablePod;
@@ -29,6 +30,7 @@ import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
@@ -57,6 +59,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import okhttp3.Response;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -91,6 +94,8 @@ public class KubernetesDeployments {
   public static final int POD_CREATION_TIMEOUT_MIN = 1;
 
   private static final String POD_OBJECT_KIND = "Pod";
+  private static final String REPLICASET_OBJECT_KIND = "ReplicaSet";
+  private static final String DEPLOYMENT_OBJECT_KIND = "Deployment";
   // error stream data initial capacity
   public static final int ERROR_BUFF_INITIAL_CAP = 2048;
   public static final String STDOUT = "stdout";
@@ -123,40 +128,65 @@ public class KubernetesDeployments {
    */
   public Pod deploy(Pod pod) throws InfrastructureException {
     putLabel(pod, CHE_WORKSPACE_ID_LABEL, workspaceId);
-
-    ObjectMeta metadata = pod.getMetadata();
-    // Note: metadata.name will be changed as for pods it is set by the deployment.
-    String originalName = metadata.getName();
+    // Since we use the pod's metadata as the deployment's metadata
+    // This is used to identify the pod in CreateWatcher.
+    String originalName = pod.getMetadata().getName();
     putLabel(pod, CHE_DEPLOYMENT_NAME_LABEL, originalName);
 
+    ObjectMeta metadata = pod.getMetadata();
     PodSpec podSpec = pod.getSpec();
     podSpec.setRestartPolicy("Always"); // Only allowable value
+
+    Deployment deployment =
+        new DeploymentBuilder()
+            .withMetadata(metadata)
+            .withNewSpec()
+            .withNewSelector()
+            .withMatchLabels(metadata.getLabels())
+            .endSelector()
+            .withReplicas(1)
+            .withNewTemplate()
+            .withMetadata(metadata)
+            .withSpec(podSpec)
+            .endTemplate()
+            .endSpec()
+            .build();
+    return createDeployment(deployment, workspaceId);
+  }
+
+  public Pod deploy(Deployment deployment) throws InfrastructureException {
+    ObjectMeta podMeta = deployment.getSpec().getTemplate().getMetadata();
+    putLabel(podMeta, CHE_WORKSPACE_ID_LABEL, workspaceId);
+    putLabel(podMeta, CHE_DEPLOYMENT_NAME_LABEL, deployment.getMetadata().getName());
+    putLabel(deployment.getMetadata(), CHE_WORKSPACE_ID_LABEL, workspaceId);
+    // Match condition for a deployment is an AND of all labels
+    setSelector(deployment, podMeta.getLabels());
+    // Avoid accidental setting of multiple replicas
+    deployment.getSpec().setReplicas(1);
+
+    PodSpec podSpec = deployment.getSpec().getTemplate().getSpec();
+    podSpec.setRestartPolicy("Always"); // Only allowable value
+
+    return createDeployment(deployment, workspaceId);
+  }
+
+  private Pod createDeployment(Deployment deployment, String workspaceId)
+      throws InfrastructureException {
+    final String deploymentName = deployment.getMetadata().getName();
     final CompletableFuture<Pod> createFuture = new CompletableFuture<>();
     final Watch createWatch =
         clientFactory
             .create(workspaceId)
             .pods()
             .inNamespace(namespace)
-            .watch(new CreateWatcher(createFuture, workspaceId, originalName));
+            .watch(new CreateWatcher(createFuture, workspaceId, deploymentName));
     try {
       clientFactory
           .create(workspaceId)
           .apps()
           .deployments()
           .inNamespace(namespace)
-          .createNew()
-          .withMetadata(metadata)
-          .withNewSpec()
-          .withNewSelector()
-          .withMatchLabels(metadata.getLabels())
-          .endSelector()
-          .withReplicas(1)
-          .withNewTemplate()
-          .withMetadata(metadata)
-          .withSpec(podSpec)
-          .endTemplate()
-          .endSpec()
-          .done();
+          .create(deployment);
       return createFuture.get(POD_CREATION_TIMEOUT_MIN, TimeUnit.MINUTES);
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
@@ -165,17 +195,17 @@ public class KubernetesDeployments {
       throw new InfrastructureException(
           String.format(
               "Interrupted while waiting for Pod creation. -id: %s -message: %s",
-              metadata.getName(), e.getMessage()));
+              deploymentName, e.getMessage()));
     } catch (ExecutionException e) {
       throw new InfrastructureException(
           String.format(
               "Error occured while waiting for Pod creation. -id: %s -message: %s",
-              metadata.getName(), e.getCause().getMessage()));
+              deploymentName, e.getCause().getMessage()));
     } catch (TimeoutException e) {
       throw new InfrastructureException(
           String.format(
               "Pod creation timeout exceeded. -id: %s -message: %s",
-              metadata.getName(), e.getMessage()));
+              deploymentName, e.getMessage()));
     } finally {
       createWatch.close();
     }
@@ -224,13 +254,7 @@ public class KubernetesDeployments {
    * @throws InfrastructureException when any exception occurs
    */
   public Optional<Pod> get(String name) throws InfrastructureException {
-    String podName = getPodName(name);
-    try {
-      return Optional.ofNullable(
-          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName).get());
-    } catch (KubernetesClientException e) {
-      throw new KubernetesInfrastructureException(e);
-    }
+    return findPod(name);
   }
 
   /**
@@ -327,7 +351,7 @@ public class KubernetesDeployments {
     try {
       final String podName = getPodName(name);
       final PodResource<Pod, DoneablePod> podResource =
-          clientFactory.create().pods().inNamespace(namespace).withName(podName);
+          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName);
       final Watch watch =
           podResource.watch(
               new Watcher<Pod>() {
@@ -383,15 +407,16 @@ public class KubernetesDeployments {
         try {
           String podLog =
               clientFactory
-                  .create()
+                  .create(workspaceId)
                   .pods()
                   .inNamespace(namespace)
                   .withName(pod.getMetadata().getName())
                   .getLog();
           exceptionMessage = exceptionMessage.concat(" Pod logs: ").concat(podLog);
 
-        } catch (InfrastructureException e) {
-          exceptionMessage = exceptionMessage.concat(" Error occurred while fetching pod logs.");
+        } catch (InfrastructureException | KubernetesClientException e) {
+          exceptionMessage =
+              exceptionMessage.concat(" Error occurred while fetching pod logs: " + e.getMessage());
         }
       } else {
         exceptionMessage = exceptionMessage.concat(" Reason: ").concat(reason);
@@ -437,7 +462,9 @@ public class KubernetesDeployments {
   }
 
   /**
-   * Registers a specified handler for handling events about changes in pods containers.
+   * Registers a specified handler for handling events about changes in pods containers. Registering
+   * several handlers doesn't create multiple websocket connections, so it is efficient to call this
+   * method several times instead of using composite handler to combine other handlers.
    *
    * @param handler pod container events handler
    * @throws InfrastructureException if any error occurs while watcher starting
@@ -450,7 +477,9 @@ public class KubernetesDeployments {
             public void eventReceived(Action action, Event event) {
               ObjectReference involvedObject = event.getInvolvedObject();
 
-              if (POD_OBJECT_KIND.equals(involvedObject.getKind())) {
+              if (POD_OBJECT_KIND.equals(involvedObject.getKind())
+                  || REPLICASET_OBJECT_KIND.equals(involvedObject.getKind())
+                  || DEPLOYMENT_OBJECT_KIND.equals(involvedObject.getKind())) {
 
                 String podName = involvedObject.getName();
 
@@ -629,6 +658,30 @@ public class KubernetesDeployments {
       }
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
+    }
+  }
+
+  /**
+   * Get logs from pod with specified name. The name can refer to either a deployment or pod
+   * directly. In case of a deployment being provided, logs are returned from pods in that
+   * deployment.
+   *
+   * @return the logs from the pod or null if pod cannot be found.
+   */
+  @Nullable
+  public String getPodLogs(String name) {
+    String podName;
+    try {
+      podName = getPodName(name);
+      return clientFactory
+          .create(workspaceId)
+          .pods()
+          .inNamespace(namespace)
+          .withName(podName)
+          .getLog();
+    } catch (InfrastructureException e) {
+      LOG.error("Could not get logs from pod {}. Pod not found", name);
+      return null;
     }
   }
 
@@ -841,21 +894,10 @@ public class KubernetesDeployments {
     return encoded;
   }
 
-  /**
-   * Returns the name of a specified Pod given either the actual Pod name or the name of the
-   * DeploymentConfig that controls it. <br>
-   * This is necessary because we are trying to transparently wrap Pods in DeploymentConfigs;
-   * attempting to create a Pod named {@code testPod} will result in a DeploymentConfig with name
-   * {@code testPod}, which will in turn create a Pod named e.g {@code testPod-1-xxxxx}.
-   *
-   * @param name Pod or DeploymentConfig name
-   * @return the name of the intended pod.
-   * @see
-   */
-  private String getPodName(String name) throws InfrastructureException {
-    if (clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name).get()
-        != null) {
-      return name;
+  private Optional<Pod> findPod(String name) throws InfrastructureException {
+    Pod pod = clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name).get();
+    if (pod != null) {
+      return Optional.of(pod);
     }
     Deployment deployment =
         clientFactory
@@ -866,7 +908,7 @@ public class KubernetesDeployments {
             .withName(name)
             .get();
     if (deployment == null) {
-      throw new InfrastructureException("Failed to get deployment for pod");
+      return Optional.empty();
     }
     Map<String, String> selector = deployment.getSpec().getSelector().getMatchLabels();
     List<Pod> pods =
@@ -878,32 +920,52 @@ public class KubernetesDeployments {
             .list()
             .getItems();
     if (pods.isEmpty()) {
-      throw new InfrastructureException(String.format("Failed to find pod with name %s", name));
+      return Optional.empty();
     } else if (pods.size() > 1) {
       throw new InfrastructureException(
-          String.format("Found multiple pods in DeploymentConfig %s", name));
+          String.format("Found multiple pods in Deployment '%s'", name));
     }
 
-    return pods.get(0).getMetadata().getName();
+    return Optional.of(pods.get(0));
+  }
+
+  /**
+   * Returns the name of a specified Pod given either the actual Pod name or the name of the
+   * Deployment that controls it. <br>
+   * This is necessary because we are trying to transparently wrap Pods in Deployment; attempting to
+   * create a Pod named {@code testPod} will result in a Deployment with name {@code testPod}, which
+   * will in turn create a Pod named e.g {@code testPod-1-xxxxx}.
+   *
+   * @param name Pod or Deployment name
+   * @return the name of the intended pod.
+   */
+  private String getPodName(String name) throws InfrastructureException {
+    Optional<Pod> pod = findPod(name);
+    if (pod.isPresent()) {
+      return pod.get().getMetadata().getName();
+    } else {
+      throw new InfrastructureException(String.format("Failed to find pod with name %s", name));
+    }
   }
 
   private static class CreateWatcher implements Watcher<Pod> {
 
     private final CompletableFuture<Pod> future;
     private final String workspaceId;
-    private final String originalName;
+    private final String deploymentName;
 
-    private CreateWatcher(CompletableFuture<Pod> future, String workspaceId, String originalName) {
+    private CreateWatcher(
+        CompletableFuture<Pod> future, String workspaceId, String deploymentName) {
       this.future = future;
       this.workspaceId = workspaceId;
-      this.originalName = originalName;
+      this.deploymentName = deploymentName;
     }
 
     @Override
     public void eventReceived(Action action, Pod resource) {
       Map<String, String> labels = resource.getMetadata().getLabels();
       if (workspaceId.equals(labels.get(CHE_WORKSPACE_ID_LABEL))
-          && originalName.equals(labels.get(CHE_DEPLOYMENT_NAME_LABEL))) {
+          && deploymentName.equals(labels.get(CHE_DEPLOYMENT_NAME_LABEL))) {
         future.complete(resource);
       }
     }

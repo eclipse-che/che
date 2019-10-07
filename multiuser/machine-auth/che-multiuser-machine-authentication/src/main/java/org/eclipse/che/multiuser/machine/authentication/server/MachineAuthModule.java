@@ -52,10 +52,19 @@ public class MachineAuthModule extends AbstractModule {
         .addBinding()
         .toInstance(
             new MachineAuthenticatedResource(
-                "/workspace", "getByKey", "addProject", "updateProject", "deleteProject"));
+                "/workspace",
+                "getByKey",
+                "addProject",
+                "updateProject",
+                "deleteProject",
+                "getSettings",
+                "update",
+                "stop"));
     machineAuthenticatedResources
         .addBinding()
-        .toInstance(new MachineAuthenticatedResource("/ssh", "getPair", "generatePair"));
+        .toInstance(
+            new MachineAuthenticatedResource(
+                "/ssh", "getPair", "generatePair", "createPair", "getPairs", "removePair"));
     machineAuthenticatedResources
         .addBinding()
         .toInstance(
@@ -67,10 +76,19 @@ public class MachineAuthModule extends AbstractModule {
                 "resolveFactory"));
     machineAuthenticatedResources
         .addBinding()
-        .toInstance(new MachineAuthenticatedResource("/preferences", "find"));
+        .toInstance(
+            new MachineAuthenticatedResource(
+                "/preferences", "find", "save", "update", "removePreferences"));
     machineAuthenticatedResources
         .addBinding()
         .toInstance(new MachineAuthenticatedResource("/activity", "active"));
+
+    machineAuthenticatedResources
+        .addBinding()
+        .toInstance(new MachineAuthenticatedResource("project-template", "getProjectTemplates"));
+    machineAuthenticatedResources
+        .addBinding()
+        .toInstance(new MachineAuthenticatedResource("/installer", "getInstallers"));
 
     bindConstant().annotatedWith(Names.named("che.auth.signature_key_size")).to(2048);
     bindConstant().annotatedWith(Names.named("che.auth.signature_key_algorithm")).to("RSA");

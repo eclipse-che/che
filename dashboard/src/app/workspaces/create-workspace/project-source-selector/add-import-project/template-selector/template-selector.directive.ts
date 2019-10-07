@@ -35,7 +35,7 @@ export class TemplateSelector implements ng.IDirective {
    */
   constructor() {
     this.scope = {
-      stackTags: '='
+      devfile: '='
     };
   }
 

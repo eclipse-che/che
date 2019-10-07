@@ -186,6 +186,32 @@ public class WorkspaceActivityDaoTest {
     assertEquals(found.getItems(), singletonList(activities[0].getWorkspaceId()));
   }
 
+  @Test(dataProvider = "allWorkspaceStatuses")
+  public void shouldCount0WorkspacesWhenNoActivityRecorded(WorkspaceStatus status)
+      throws Exception {
+    long count = workspaceActivityDao.countWorkspacesInStatus(status, System.currentTimeMillis());
+    assertEquals(count, 0);
+  }
+
+  @Test(dataProvider = "allWorkspaceStatuses")
+  public void shouldCountWorkspacesInStatusIgnoringNewerActivity(WorkspaceStatus status)
+      throws Exception {
+    // given
+    workspaceActivityDao.setCreatedTime(activities[0].getWorkspaceId(), 1L);
+    workspaceActivityDao.setStatusChangeTime(activities[0].getWorkspaceId(), status, 2L);
+
+    workspaceActivityDao.setStatusChangeTime(activities[1].getWorkspaceId(), status, 5L);
+    workspaceActivityDao.setCreatedTime(activities[1].getWorkspaceId(), 1L);
+
+    // when
+    long countIgnoringNewer = workspaceActivityDao.countWorkspacesInStatus(status, 3L);
+    long countIncludingLatest = workspaceActivityDao.countWorkspacesInStatus(status, 6L);
+
+    // then
+    assertEquals(countIgnoringNewer, 1);
+    assertEquals(countIncludingLatest, 2);
+  }
+
   @DataProvider(name = "allWorkspaceStatuses")
   public Object[][] getWorkspaceStatus() {
     return Stream.of(WorkspaceStatus.values())

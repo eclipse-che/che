@@ -1,6 +1,0 @@
-Dockerfile
-src/node_modules
-videos
-src/videos
-build.sh
-test.sh

@@ -17,7 +17,7 @@
     <parent>
         <artifactId>integration-tests-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.16.0-SNAPSHOT</version>
+        <version>7.3.0-SNAPSHOT</version>
     </parent>
     <artifactId>mysql-tck</artifactId>
     <packaging>jar</packaging>
@@ -88,17 +88,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-account</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-installer</artifactId>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-installer</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -241,7 +230,6 @@
                                     che-core-api-user,
                                     che-core-api-ssh,
                                     che-core-api-workspace,
-                                    che-core-api-installer,
                                     che-multiuser-machine-authentication,
                                     infrastructure-kubernetes</includeArtifactIds>
                             <includeScope>test</includeScope>
@@ -303,11 +291,7 @@
                                     <port>jdbc.port:3306</port>
                                 </ports>
                                 <wait>
-                                    <tcp>
-                                        <ports>
-                                            <port>3306</port>
-                                        </ports>
-                                    </tcp>
+                                    <log>ready for connections</log>
                                     <time>60000</time>
                                 </wait>
                                 <restartPolicy>

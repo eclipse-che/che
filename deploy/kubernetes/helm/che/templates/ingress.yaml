@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012-2017 Red Hat, Inc.
+# Copyright (c) 2012-2019 Red Hat, Inc.
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -19,9 +19,6 @@ metadata:
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/ssl-redirect: "true"
 {{- else }}
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/ssl-redirect: "false"
-{{- end }}
-{{- if and .Values.global.tls .Values.global.tls.enabled .Values.global.tls.useCertManager }}
-    certmanager.k8s.io/cluster-issuer: "letsencrypt"
 {{- end }}
 spec:
 {{- if .Values.global.tls.enabled }}

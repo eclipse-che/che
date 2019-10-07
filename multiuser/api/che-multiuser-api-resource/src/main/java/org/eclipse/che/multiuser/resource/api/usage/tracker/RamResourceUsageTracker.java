@@ -27,6 +27,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.multiuser.resource.api.ResourceUsageTracker;
 import org.eclipse.che.multiuser.resource.api.type.RamResourceType;
@@ -72,14 +73,17 @@ public class RamResourceUsageTracker implements ResourceUsageTracker {
       if (WorkspaceStatus.STARTING.equals(activeWorkspace.getStatus())) {
         // starting workspace may not have all machine in runtime
         // it is need to calculate ram from environment config
-        final EnvironmentImpl startingEnvironment =
-            activeWorkspace
-                .getConfig()
-                .getEnvironments()
-                .get(activeWorkspace.getRuntime().getActiveEnv());
-        if (startingEnvironment != null) {
-          currentlyUsedRamMB += environmentRamCalculator.calculate(startingEnvironment);
+        WorkspaceConfigImpl config = activeWorkspace.getConfig();
+
+        if (config != null) {
+          final EnvironmentImpl startingEnvironment =
+              config.getEnvironments().get(activeWorkspace.getRuntime().getActiveEnv());
+          if (startingEnvironment != null) {
+            currentlyUsedRamMB += environmentRamCalculator.calculate(startingEnvironment);
+          }
         }
+        // Estimation of memory for starting workspace with Devfile is not implemented yet
+        // just ignore such
       } else {
         currentlyUsedRamMB += environmentRamCalculator.calculate(activeWorkspace.getRuntime());
       }

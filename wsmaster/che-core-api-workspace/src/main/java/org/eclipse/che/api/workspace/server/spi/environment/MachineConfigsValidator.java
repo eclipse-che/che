@@ -37,9 +37,6 @@ public class MachineConfigsValidator {
    * @throws ValidationException when the specified environment is not valid
    */
   public void validate(Map<String, InternalMachineConfig> machines) throws ValidationException {
-    checkArgument(
-        machines != null && !machines.isEmpty(), "Environment should contain at least 1 machine");
-
     for (Entry<String, InternalMachineConfig> machineConfigEntry : machines.entrySet()) {
       validateMachine(machineConfigEntry.getKey(), machineConfigEntry.getValue());
     }
@@ -86,12 +83,6 @@ public class MachineConfigsValidator {
             Long.parseLong(memoryLimit),
             Long.parseLong(memoryRequest));
       }
-    }
-  }
-
-  private static void checkArgument(boolean expression, String error) throws ValidationException {
-    if (!expression) {
-      throw new ValidationException(error);
     }
   }
 

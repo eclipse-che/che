@@ -23,18 +23,6 @@ public final class Warnings {
       "Ingresses specified in Kubernetes recipe are ignored. "
           + "To expose ports please define servers in machine configuration.";
 
-  public static final int PVC_IGNORED_WARNING_CODE = 4101;
-  public static final String PVC_IGNORED_WARNING_MESSAGE =
-      "Persistent volume claims specified in Kubernetes recipe are ignored.";
-
-  public static final int SECRET_IGNORED_WARNING_CODE = 4102;
-  public static final String SECRET_IGNORED_WARNING_MESSAGE =
-      "Secrets specified in Kubernetes recipe are ignored.";
-
-  public static final int CONFIG_MAP_IGNORED_WARNING_CODE = 4103;
-  public static final String CONFIG_MAP_IGNORED_WARNING_MESSAGE =
-      "Config maps specified in Kubernetes recipe are ignored.";
-
   public static final int RESTART_POLICY_SET_TO_NEVER_WARNING_CODE = 4104;
   public static final String RESTART_POLICY_SET_TO_NEVER_WARNING_MESSAGE_FMT =
       "Restart policy '%s' for pod '%s' is rewritten with %s";
@@ -51,6 +39,17 @@ public final class Warnings {
   public static final String
       COMMAND_IS_CONFIGURED_IN_PLUGIN_WITH_MULTIPLY_CONTAINERS_WARNING_MESSAGE_FMT =
           "There are configured commands for plugin '%s' that has multiply containers. Commands will be configured to be run in first container";
+
+  public static final int JSON_IS_NOT_A_VALID_REPRESENTATION_FOR_AN_OBJECT_OF_TYPE_WARNING_CODE =
+      4108;
+  public static final String JSON_IS_NOT_A_VALID_REPRESENTATION_FOR_AN_OBJECT_OF_TYPE_MESSAGE_FMT =
+      "Unable to provision git configuration into runtime. "
+          + "Json object in user preferences is not a valid representation for an object of type map: '%s'";
+
+  public static final int EXCEPTION_IN_USER_MANAGEMENT_DURING_GIT_PROVISION_WARNING_CODE = 4109;
+  public static final String EXCEPTION_IN_USER_MANAGEMENT_DURING_GIT_PROVISION_MESSAGE_FMT =
+      "Unable to provision git configuration into runtime. "
+          + "Internal server error occurred during operating with user management: '%s'";
 
   private Warnings() {}
 }

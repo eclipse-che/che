@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -50,6 +52,7 @@ public class KubernetesRuntimeState {
   private String namespace;
 
   @Column(name = "status")
+  @Enumerated(EnumType.STRING)
   private WorkspaceStatus status;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)

@@ -43,6 +43,10 @@ export class ListTeamOwnersController {
    */
   private cheNotification: any;
   /**
+   * Team details service.
+   */
+  private teamDetailsService: TeamDetailsService;
+  /**
    * Lodash library.
    */
   private lodash: any;
@@ -70,9 +74,13 @@ export class ListTeamOwnersController {
     this.cheProfile = cheProfile;
     this.cheNotification = cheNotification;
     this.lodash = lodash;
+    this.teamDetailsService = teamDetailsService;
 
     this.isLoading = true;
-    this.owner = teamDetailsService.getOwner();
+  }
+
+  $onInit(): void {
+    this.owner = this.teamDetailsService.getOwner();
     this.processOwner();
   }
 

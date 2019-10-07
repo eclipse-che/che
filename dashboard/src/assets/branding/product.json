@@ -5,7 +5,6 @@
   "logoTextFile": "che-logo-text.svg",
   "favicon": "favicon.ico",
   "loader": "loader.svg",
-  "ideResources": "/_app/",
   "websocketContext": "/api/websocket",
   "helpPath": "https://www.eclipse.org/che/",
   "helpTitle": "Community",
@@ -20,7 +19,11 @@
     "name" : "CHE"
   },
   "docs" : {
-    "stack" : "/docs/creating-starting-workspaces.html",
-    "workspace" : "/docs/what-are-workspaces.html"
+    "devfile" : "/docs/che-7/using-developer-environments-workspaces.html#making-a-workspace-portable-using-a-devfile_using-developer-environments-workspaces",
+    "workspace" : "/docs/what-are-workspaces.html",
+    "factory" : "/docs/factories-getting-started.html",
+    "organization": "/docs/organizations.html",
+    "converting": "/docs/che-7/converting-a-che-6-workspace-to-a-che-7-devfile/",
+    "general": "/docs"
   }
 }

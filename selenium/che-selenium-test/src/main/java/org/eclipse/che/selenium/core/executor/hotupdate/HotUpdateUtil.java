@@ -36,13 +36,13 @@ public class HotUpdateUtil {
   private static final int DELAY_BETWEEN_ATTEMPTS_IN_MILLISECS = 5000;
   private static final String PODS_LIST_COMMAND = "get pods | awk 'NR > 1 {print $1}'";
   private static final String COMMAND_TO_GET_REVISION_OF_CHE_DEPLOYMENT =
-      "get dc | grep che | awk '{print $2}'";
+      "get dc che | awk 'NR==2{print $2}'";
   private static final String COMMAND_TO_GET_NAME_OF_CHE_DEPLOYMENT =
-      "get dc | grep che | awk '{print $1}'";
+      "get dc che | awk 'NR==2{print $1}'";
   private static final String UPDATE_COMMAND_TEMPLATE = "rollout latest %s";
 
-  private final OpenShiftCliCommandExecutor openShiftCliCommandExecutor;
-  private final TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+  protected final OpenShiftCliCommandExecutor openShiftCliCommandExecutor;
+  protected final TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
   @Inject
   public HotUpdateUtil(

@@ -8,7 +8,7 @@
       che-place-holder="Name of the workspace"
       aria-label="Name of the workspace"
       ng-model-options="{ allowInvalid: true }"
-      ng-model="workspaceDetailsOverviewController.workspaceDetails.config.name"
+      ng-model="workspaceDetailsOverviewController.name"
       che-on-change="workspaceDetailsOverviewController.onNameChange()"
       required
       ng-minlength="3"
@@ -43,6 +43,13 @@
         id="open-namespace-button"
         class="fa fa-arrow-circle-right"></div>
     </div>
+  </che-label-container>
+  <!-- Ephemeral mode -->
+  <che-label-container che-label-name="Ephemeral mode" che-label-description="In ephemeral mode workspace has no PVC attached.">
+      <md-switch ng-model="workspaceDetailsOverviewController.isEphemeralMode"
+        ng-change="workspaceDetailsOverviewController.onEphemeralModeChange()"
+        aria-label="ephemeral-mode">
+      </md-switch>
   </che-label-container>
   <!-- Export workspace -->
   <che-label-container che-label-name="Export">

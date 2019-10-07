@@ -11,7 +11,6 @@
  */
 'use strict';
 import {CheErrorMessagesService} from '../../../../components/error-messages/che-error-messages.service';
-import {StackValidationService} from '../../../stacks/stack-details/stack-validation.service';
 
 /**
  * @ngdoc controller
@@ -21,13 +20,12 @@ import {StackValidationService} from '../../../stacks/stack-details/stack-valida
  */
 export class WorkspaceConfigImportController {
 
-  static $inject = ['$log', '$scope', '$timeout', 'cheErrorMessagesService', 'stackValidationService'];
+  static $inject = ['$log', '$scope', '$timeout', 'cheErrorMessagesService'];
 
   $log: ng.ILogService;
   $scope: ng.IScope;
   $timeout: ng.ITimeoutService;
   errorMessagesService: CheErrorMessagesService;
-  validationService: StackValidationService;
 
   editorOptions: {
     lineWrapping: boolean,
@@ -45,21 +43,24 @@ export class WorkspaceConfigImportController {
   errorsScopeSettings: string = 'workspace-details-settings';
   errorsScopeEnvironment: string = 'workspace-details-environment';
   importWorkspaceJson: string;
+  isActive: boolean;
   workspaceConfig: any;
   newWorkspaceConfig: any;
   workspaceConfigOnChange: Function;
+  private saveTimeoutPromise: ng.IPromise<any>;
+  private isSaving: boolean;
 
 
   /**
    * Default constructor that is using resource
    */
-  constructor($log: ng.ILogService, $scope: ng.IScope, $timeout: ng.ITimeoutService, cheErrorMessagesService: CheErrorMessagesService,
-     stackValidationService: StackValidationService) {
+  constructor($log: ng.ILogService, $scope: ng.IScope, $timeout: ng.ITimeoutService, cheErrorMessagesService: CheErrorMessagesService) {
     this.$log = $log;
     this.$scope = $scope;
     this.$timeout = $timeout;
     this.errorMessagesService = cheErrorMessagesService;
-    this.validationService = stackValidationService;
+
+    this.isSaving = false;
 
     this.importWorkspaceJson = angular.toJson(this.workspaceConfig, true);
 
@@ -82,6 +83,8 @@ export class WorkspaceConfigImportController {
     this.errorMessagesService.registerCallback(this.errorsScopeEnvironment, this.updateErrorsList.bind(this, this.errorsScopeEnvironment));
   }
 
+  $onInit(): void { }
+
   updateErrorsList(errorsScope: string, otherErrors: string[]) {
     this.otherValidationMessages[errorsScope] = angular.copy(otherErrors);
   }
@@ -93,10 +96,10 @@ export class WorkspaceConfigImportController {
   workspaceConfigValidation(): che.IValidation {
     let validation: che.IValidation;
     try {
-      const importWorkspace = angular.fromJson(this.importWorkspaceJson);
-      validation = this.validationService.getWorkspaceConfigValidation(importWorkspace);
+      angular.fromJson(this.importWorkspaceJson);
+      validation = {'isValid': true, 'errors': []};
     } catch (error) {
-      validation = {'isValid': true, 'errors': [error.toString()]};
+      validation = {'isValid': false, 'errors': [error.toString()]};
     }
 
     return validation;
@@ -113,18 +116,19 @@ export class WorkspaceConfigImportController {
 
     try {
       let config = angular.fromJson(this.importWorkspaceJson);
-      let validationResult = this.validationService.getWorkspaceConfigValidation(config);
+      this.isSaving = (this.configValidationMessages.length === 0) && !angular.equals(config, this.workspaceConfig);
 
-      this.configValidationMessages = angular.copy(validationResult.errors);
-      this.configErrorsNumber = this.configValidationMessages.length;
-
-      if (validateOnly) {
-        return;
+      if (this.saveTimeoutPromise) {
+        this.$timeout.cancel(this.saveTimeoutPromise);
       }
 
-      // immediately apply config on IU
-      this.newWorkspaceConfig = angular.copy(config);
-      this.applyChanges();
+      this.saveTimeoutPromise = this.$timeout(() => {
+        // immediately apply config on IU
+        this.newWorkspaceConfig = angular.copy(config);
+        this.isSaving = false;
+        this.applyChanges();
+      }, 2000);
+
 
     } catch (e) {
       if (this.configValidationMessages.length === 0) {

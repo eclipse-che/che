@@ -18,6 +18,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.eclipse.che.api.core.websocket.impl.WebsocketIdService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -30,7 +31,7 @@ import org.testng.annotations.Test;
 public class JsonRpcMessageReceiverTest {
 
   static final String MESSAGE = "message";
-  static final String ENDPOINT_ID = "endpoint-id";
+  static final String ENDPOINT_ID = "client-id" + WebsocketIdService.SEPARATOR + "endpoint-id";
 
   @Mock RequestDispatcher requestDispatcher;
   @Mock ResponseDispatcher responseDispatcher;
@@ -92,6 +93,6 @@ public class JsonRpcMessageReceiverTest {
 
     jsonRpcMessageReceiver.receive(ENDPOINT_ID, MESSAGE);
 
-    verify(requestProcessor).process(any());
+    verify(requestProcessor).process(any(), any());
   }
 }

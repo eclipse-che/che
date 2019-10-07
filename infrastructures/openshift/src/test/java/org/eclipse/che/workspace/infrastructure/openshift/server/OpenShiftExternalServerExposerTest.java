@@ -49,7 +49,8 @@ public class OpenShiftExternalServerExposerTest {
         servers);
 
     // then
-    Route route = osEnv.getRoutes().get("service123-servicePort");
+    assertEquals(1, osEnv.getRoutes().size());
+    Route route = osEnv.getRoutes().values().iterator().next();
     assertNotNull(route);
 
     assertEquals(route.getSpec().getTo().getName(), "service123");

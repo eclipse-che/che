@@ -83,6 +83,11 @@ export class ExportWorkspaceDialogController {
     ($scope as any).selectedIndex = this.destination === 'file' ? 0 : 1;
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * It will hide the dialog box.
    */
@@ -95,9 +100,12 @@ export class ExportWorkspaceDialogController {
    * @returns {*}
    */
   getCopyOfConfig() {
-    let copyOfConfig = angular.copy(this.workspaceDetails.config);
-
-    return this.removeLinks(copyOfConfig);
+    if (this.workspaceDetails.config) {
+      let copyOfConfig = angular.copy(this.workspaceDetails.config);
+      return this.removeLinks(copyOfConfig);
+    } else if (this.workspaceDetails.devfile) {
+      return this.workspaceDetails.devfile;
+    }
   }
 
   /**

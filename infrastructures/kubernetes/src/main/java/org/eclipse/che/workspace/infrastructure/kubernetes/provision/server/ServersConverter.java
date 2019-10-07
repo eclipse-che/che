@@ -12,7 +12,6 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision.server;
 
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import java.util.Map;
 import javax.inject.Inject;
@@ -25,9 +24,10 @@ import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
 
@@ -44,14 +44,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureS
 public class ServersConverter<T extends KubernetesEnvironment>
     implements ConfigurationProvisioner<T> {
 
-  private final ExternalServerExposerStrategy<T> externalServerExposerStrategy;
+  private final ExternalServerExposer<T> externalServerExposer;
   private final SecureServerExposerFactoryProvider<T> secureServerExposerFactoryProvider;
 
   @Inject
   public ServersConverter(
-      ExternalServerExposerStrategy<T> externalServerExposerStrategy,
+      ExternalServerExposer<T> externalServerExposer,
       SecureServerExposerFactoryProvider<T> secureServerExposerFactoryProvider) {
-    this.externalServerExposerStrategy = externalServerExposerStrategy;
+    this.externalServerExposer = externalServerExposer;
     this.secureServerExposerFactoryProvider = secureServerExposerFactoryProvider;
   }
 
@@ -64,7 +64,7 @@ public class ServersConverter<T extends KubernetesEnvironment>
     SecureServerExposer<T> secureServerExposer =
         secureServerExposerFactoryProvider.get(k8sEnv).create(identity);
 
-    for (Pod podConfig : k8sEnv.getPods().values()) {
+    for (PodData podConfig : k8sEnv.getPodsData().values()) {
       final PodSpec podSpec = podConfig.getSpec();
       for (Container containerConfig : podSpec.getContainers()) {
         String machineName = Names.machineName(podConfig, containerConfig);
@@ -72,7 +72,7 @@ public class ServersConverter<T extends KubernetesEnvironment>
         if (!machineConfig.getServers().isEmpty()) {
           KubernetesServerExposer kubernetesServerExposer =
               new KubernetesServerExposer<>(
-                  externalServerExposerStrategy,
+                  externalServerExposer,
                   secureServerExposer,
                   machineName,
                   podConfig,

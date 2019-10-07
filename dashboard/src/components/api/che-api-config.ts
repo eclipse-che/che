@@ -13,9 +13,7 @@
 
 import {CheAPI} from './che-api.factory';
 import {CheWorkspace} from './workspace/che-workspace.factory';
-import {CheProjectTemplate} from './che-project-template.factory';
 import {CheFactory} from './che-factory.factory';
-import {CheStack} from './che-stack.factory';
 import {CheWebsocket} from './che-websocket.factory';
 import {CheProfile} from './che-profile.factory';
 import {ChePreferences} from './che-preferences.factory';
@@ -43,17 +41,16 @@ import {CheTeamEventsManager} from './che-team-events-manager.factory';
 import {CheInvite} from './che-invite.factory';
 import {NpmRegistry} from './npm-registry.factory';
 import {PluginRegistry} from './plugin-registry.factory';
+import {DevfileRegistry} from './devfile-registry.factory';
 
 export class ApiConfig {
 
   constructor(register: che.IRegisterService) {
     register.factory('cheWorkspace', CheWorkspace);
-    register.factory('cheProjectTemplate', CheProjectTemplate);
     register.factory('cheFactory', CheFactory);
     register.factory('cheProfile', CheProfile);
     register.factory('chePreferences', ChePreferences);
     register.factory('cheWebsocket', CheWebsocket);
-    register.factory('cheStack', CheStack);
     register.factory('cheHttpBackendProvider', CheHttpBackendProviderFactory);
     register.factory('cheHttpBackend', CheHttpBackendFactory);
     register.factory('cheAPIBuilder', CheAPIBuilder);
@@ -79,5 +76,6 @@ export class ApiConfig {
     register.factory('cheInvite', CheInvite);
     register.factory('npmRegistry', NpmRegistry);
     register.factory('pluginRegistry', PluginRegistry);
+    register.factory('devfileRegistry', DevfileRegistry);
   }
 }

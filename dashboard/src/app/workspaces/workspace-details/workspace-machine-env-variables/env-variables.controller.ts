@@ -13,6 +13,7 @@
 import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
 import {IEnvironmentManagerMachine} from '../../../../components/api/environment/environment-manager-machine';
 import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
+import {CheMachineSourceTypes} from '../../../../components/api/workspace/che-machine-source-types';
 
 interface IEnvironmentVariable {
   name: string;
@@ -42,6 +43,7 @@ export class EnvVariablesController {
   private envVariablesList: Array<IEnvironmentVariable> = [];
   private envVariablesSelectedNumber: number = 0;
   private onChange: Function;
+  private isToolContainer: boolean;
 
   /**
    * Default constructor that is using resource
@@ -50,7 +52,6 @@ export class EnvVariablesController {
     this.$mdDialog = $mdDialog;
     this.confirmDialogService = confirmDialogService;
 
-    this.buildVariablesList(this.selectedMachine);
     const deRegistrationFn = $scope.$watch(() => {
       return this.selectedMachine;
     }, (selectedMachine: IEnvironmentManagerMachine) => {
@@ -62,6 +63,10 @@ export class EnvVariablesController {
     });
   }
 
+  $onInit(): void {
+    this.buildVariablesList(this.selectedMachine);
+  }
+
   /**
    * Build variables list.
    * @param selectedMachine {IEnvironmentManagerMachine}
@@ -70,6 +75,8 @@ export class EnvVariablesController {
     if (!selectedMachine || !this.environmentManager) {
       return;
     }
+    this.isToolContainer = this.selectedMachine.attributes && this.selectedMachine.attributes.source ? this.selectedMachine.attributes.source === CheMachineSourceTypes.TOOL : false;
+
     this.isEnvVarEditable = this.environmentManager.canEditEnvVariables(selectedMachine);
     this.envVariables = this.environmentManager.getEnvVariables(selectedMachine);
     this.envVariablesList = [];

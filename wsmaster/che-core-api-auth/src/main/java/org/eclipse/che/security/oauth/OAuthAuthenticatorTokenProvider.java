@@ -17,7 +17,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
 
-/** Retrieves oAuth token with help of OAuthAuthenticatorProvider. */
+/** Retrieves OAuth token with help of OAuthAuthenticatorProvider. */
 @Singleton
 public class OAuthAuthenticatorTokenProvider implements OAuthTokenProvider {
   private final OAuthAuthenticatorProvider oAuthAuthenticatorProvider;

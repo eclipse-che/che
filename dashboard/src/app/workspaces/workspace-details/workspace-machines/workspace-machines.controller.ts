@@ -122,7 +122,6 @@ export class WorkspaceMachinesController {
     this.machines = [];
     this.cheListHelper = cheListHelperFactory.getHelper(MACHINE_LIST_HELPER_ID);
 
-    this.updateData(this.workspaceDetails);
     const action = this.updateData.bind(this);
     workspaceDetailsService.subscribeOnWorkspaceChange(action);
 
@@ -130,6 +129,10 @@ export class WorkspaceMachinesController {
       workspaceDetailsService.unsubscribeOnWorkspaceChange(action);
       cheListHelperFactory.removeHelper(MACHINE_LIST_HELPER_ID);
     });
+  }
+
+  $onInit(): void {
+    this.updateData(this.workspaceDetails);
   }
 
   /**
@@ -163,7 +166,7 @@ export class WorkspaceMachinesController {
     }
     this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(this.environment.recipe.type);
 
-    this.machines = this.environmentManager.getMachines(this.environment);
+    this.machines = this.environmentManager.getMachines(this.environment, workspaceDetails.runtime);
     this.environment = this.environmentManager.getEnvironment(this.environment, this.machines);
 
     if (!angular.isArray(this.machines)) {
@@ -176,7 +179,6 @@ export class WorkspaceMachinesController {
         return <machine>{
           image: source && source.image ? source.image : '',
           name: machine.name,
-          isDev: this.environmentManager.isDev(machine),
           memoryLimitGBytes: memoryLimitGBytes
         };
       });
@@ -289,13 +291,19 @@ export class WorkspaceMachinesController {
     if (!this.machines || !memoryLimitGBytes) {
       return;
     }
-    const memoryLimitBytesWithUnit = this.$filter('changeMemoryUnit')(memoryLimitGBytes, [MemoryUnit[MemoryUnit.GB], MemoryUnit[MemoryUnit.B]]);
-    const memoryLimitBytes = this.getNumber(memoryLimitBytesWithUnit);
     const machine: IEnvironmentManagerMachine = this.machines.find((machine: IEnvironmentManagerMachine) => {
       return machine && machine.name === name;
     });
 
-    if (machine && this.environmentManager.getMemoryLimit(machine).toString() !== memoryLimitBytes.toString()) {
+    if (!machine) {
+      return;
+    }
+
+    const currentMemoryLimitBytes = this.environmentManager.getMemoryLimit(machine);
+    const currentMemoryLimitGBytes = currentMemoryLimitBytes === -1 ? 0 : this.getNumber(this.$filter('changeMemoryUnit')(currentMemoryLimitBytes, [MemoryUnit[MemoryUnit.B], MemoryUnit[MemoryUnit.GB]]));
+    if (memoryLimitGBytes !== currentMemoryLimitGBytes) {
+      const memoryLimitBytesWithUnit = this.$filter('changeMemoryUnit')(memoryLimitGBytes, [MemoryUnit[MemoryUnit.GB], MemoryUnit[MemoryUnit.B]]);
+      const memoryLimitBytes = this.getNumber(memoryLimitBytesWithUnit);
       this.environmentManager.setMemoryLimit(machine, memoryLimitBytes);
       const environment = this.environmentManager.getEnvironment(this.environment, this.machines);
       this.updateEnvironment(environment);

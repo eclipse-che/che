@@ -27,7 +27,7 @@ public class ValueHelper {
    */
   public static boolean isEmpty(Object value) {
     return (null == value)
-        || (value.getClass().equals(String.class) && isNullOrEmpty((String) value)
+        || ((value.getClass().equals(String.class) && isNullOrEmpty((String) value))
             || (Collection.class.isAssignableFrom(value.getClass())
                 && ((Collection) value).isEmpty())
             || (Map.class.isAssignableFrom(value.getClass()) && ((Map) value).isEmpty()));

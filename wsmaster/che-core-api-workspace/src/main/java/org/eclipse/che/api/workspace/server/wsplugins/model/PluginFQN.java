@@ -11,23 +11,37 @@
  */
 package org.eclipse.che.api.workspace.server.wsplugins.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.net.URI;
+import java.util.Objects;
 
 /**
- * Represents full information about plugin, including registry address, id and version.
+ * Represents full information about plugin, including registry address and id, or direct reference
+ * to plugin descriptor. When {@link PluginFQN#reference} and {@link PluginFQN#id} are set
+ * simultaneously, {@link PluginFQN#reference} should take precedence.
  *
  * @author Max Shaposhnyk
  */
+@JsonInclude(Include.NON_NULL)
 public class PluginFQN {
 
   private URI registry;
   private String id;
-  private String version;
+  private String reference;
 
-  public PluginFQN(URI registry, String id, String version) {
+  public PluginFQN(URI registry, String id) {
     this.registry = registry;
     this.id = id;
-    this.version = version;
+  }
+
+  protected PluginFQN(String reference, String id) {
+    this.reference = reference;
+    this.id = id;
+  }
+
+  public PluginFQN(String reference) {
+    this.reference = reference;
   }
 
   public URI getRegistry() {
@@ -46,11 +60,36 @@ public class PluginFQN {
     this.id = id;
   }
 
-  public String getVersion() {
-    return version;
+  public String getReference() {
+    return reference;
   }
 
-  public void setVersion(String version) {
-    this.version = version;
+  public void setReference(String reference) {
+    this.reference = reference;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getRegistry(), getId(), getReference());
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (!(obj instanceof PluginFQN)) {
+      return false;
+    }
+    PluginFQN other = (PluginFQN) obj;
+    return Objects.equals(getId(), other.getId())
+        && Objects.equals(getRegistry(), other.getRegistry())
+        && Objects.equals(getReference(), other.getReference());
+  }
+
+  @Override
+  public String toString() {
+    return String.format(
+        "{id:%s, registry:%s, reference:%s}", this.id, this.registry, this.reference);
   }
 }

@@ -113,7 +113,7 @@ public class TheiaProposalForm {
     final String keyBindingContainerXpath =
         format(PROPOSAL_KEY_BINDING_XPATH_TEMPLATE, adoptedIndex);
 
-    if (isKeyBindingFieldExisted(proposalIndex)) {
+    if (isKeyBindingFieldExisted(adoptedIndex)) {
       return seleniumWebDriverHelper.waitVisibilityAndGetText(By.xpath(keyBindingContainerXpath));
     }
 

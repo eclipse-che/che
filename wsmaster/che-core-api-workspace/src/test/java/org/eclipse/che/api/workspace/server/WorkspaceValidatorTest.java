@@ -240,7 +240,8 @@ public class WorkspaceValidatorTest {
 
   @Test(
       expectedExceptions = ValidationException.class,
-      expectedExceptionsMessageRegExp = "Command line required for command '.*'")
+      expectedExceptionsMessageRegExp =
+          "Command line or content required for command '.*' in workspace '.*'\\.")
   public void shouldFailValidationIfCommandLineIsNull() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.getCommands().get(0).withCommandLine(null);
@@ -250,7 +251,8 @@ public class WorkspaceValidatorTest {
 
   @Test(
       expectedExceptions = ValidationException.class,
-      expectedExceptionsMessageRegExp = "Command line required for command '.*'")
+      expectedExceptionsMessageRegExp =
+          "Command line or content required for command '.*' in workspace '.*'\\.")
   public void shouldFailValidationIfCommandLineIsEmpty() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.getCommands().get(0).withCommandLine("");
@@ -275,12 +277,14 @@ public class WorkspaceValidatorTest {
   @DataProvider(name = "illegalVolumeNameProvider")
   public static Object[][] illegalVolumeNameProvider() {
     return new Object[][] {
-      {"0volume"},
-      {"CAPITAL"},
+      {"0begin_with_number"},
+      {"begin_with_dot."},
+      {"begin_with_underscore_"},
+      {"begin_with_hyphen-"},
+      {"with_@_special_char"},
+      {"with_@_special_char"},
       {"veryveryveryveryveryveryverylongname"},
       {"volume/name"},
-      {"volume_name"},
-      {"volume-name"}
     };
   }
 

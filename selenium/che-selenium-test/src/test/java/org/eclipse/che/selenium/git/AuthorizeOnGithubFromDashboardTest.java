@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GITHUB;
 import static org.testng.Assert.assertEquals;
 
@@ -110,7 +111,12 @@ public class AuthorizeOnGithubFromDashboardTest {
     projectSourcePage.clickOnConnectGithubAccountButton();
 
     // login to github
+    seleniumWebDriverHelper.waitOpenedSomeWin();
     seleniumWebDriverHelper.switchToNextWindow(ideWin);
+
+    // workaround to avoid freezing blank popup window in chrome-node 3.141.59-dubnium
+    sleepQuietly(5);
+
     projectSourcePage.waitAuthorizationPageOpened();
     projectSourcePage.typeLogin(gitHubUsername);
     projectSourcePage.typePassword(gitHubPassword);

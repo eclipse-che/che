@@ -52,6 +52,7 @@ public class ListenBrokerEvents extends BrokerPhase {
     this.eventService = eventService;
   }
 
+  @Override
   public List<ChePlugin> execute() throws InfrastructureException {
     BrokerStatusListener brokerStatusListener =
         new BrokerStatusListener(workspaceId, pluginsValidator, brokersResult);

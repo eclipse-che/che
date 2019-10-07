@@ -475,6 +475,30 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
 
     </md-tab>
 
+    <md-tab label="Crane" md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.Loader)">
+
+      <div>
+        Current step: {{demoComponentsController.loader.getCurrentProgressStep()}}
+      </div>
+      <div>
+        <input type="button" value="Next Step" ng-click="demoComponentsController.loader.nextStep()">
+      </div>
+      <div>
+        <label for="loader-pause">Pause</label><input id="loader-pause" type="checkbox"
+          ng-click="demoComponentsController.loader.pause()" value="{{demoComponentsController.loader.paused}}">
+      </div>
+
+      <md-content flex>
+        <div class="{{demoComponentsController.loader.paused ? 'animation-pause' : ''}}">
+          <che-loader-crane che-all-steps="demoComponentsController.loader.getLoadingSteps()"
+            che-exclude-steps="[demoComponentsController.loader.getLoadingSteps().length-1]"
+            che-step="{{demoComponentsController.loader.getCurrentProgressStep()}}" che-switch-on-iteration="true">
+          </che-loader-crane>
+        </div>
+      </md-content>
+
+    </md-tab>
+
   </md-tabs>
 
 </md-content>

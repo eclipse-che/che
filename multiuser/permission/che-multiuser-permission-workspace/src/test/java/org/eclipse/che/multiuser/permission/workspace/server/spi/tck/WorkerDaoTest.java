@@ -11,13 +11,13 @@
  */
 package org.eclipse.che.multiuser.permission.workspace.server.spi.tck;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -199,6 +199,7 @@ public class WorkerDaoTest {
   public void shouldRemoveWorker() throws Exception {
     workerDao.removeWorker("ws1", "user1");
     assertEquals(1, workerDao.getWorkersByUser("user1").size());
+    assertNull(notFoundToNull(() -> workerDao.getWorker("ws1", "user1")));
   }
 
   @Test(expectedExceptions = NullPointerException.class)
@@ -232,6 +233,14 @@ public class WorkerDaoTest {
     protected WorkerImpl doCreateInstance(
         String userId, String instanceId, List<String> allowedActions) {
       return new WorkerImpl(userId, instanceId, allowedActions);
+    }
+  }
+
+  private static <T> T notFoundToNull(Callable<T> action) throws Exception {
+    try {
+      return action.call();
+    } catch (NotFoundException x) {
+      return null;
     }
   }
 }

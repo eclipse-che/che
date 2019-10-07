@@ -11,19 +11,22 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
+import static org.eclipse.che.api.workspace.server.devfile.Constants.DOCKERIMAGE_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.PerWorkspacePVCStrategy.PER_WORKSPACE_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy.UNIQUE_STRATEGY;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
-import com.google.inject.name.Names;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.workspace.server.NoEnvironmentFactory;
+import org.eclipse.che.api.workspace.server.devfile.DevfileBindings;
+import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator.NoopComponentIntegrityValidator;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
@@ -33,11 +36,15 @@ import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.InconsistentRuntimesDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientTermination;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
+import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.DockerimageComponentToWorkspaceApplier;
+import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentToWorkspaceApplier;
+import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentValidator;
+import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesDevfileBindings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -51,20 +58,25 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesC
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiInternalEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.DefaultSecureServersFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.CookiePathStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerService;
+import org.eclipse.che.workspace.infrastructure.openshift.devfile.OpenshiftComponentToWorkspaceApplier;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectOnWorkspaceRemove;
+import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftCookiePathStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases.OpenshiftBrokerEnvironmentFactory;
 
 /** @author Sergii Leshchenko */
@@ -79,6 +91,7 @@ public class OpenShiftInfraModule extends AbstractModule {
     factories.addBinding(DockerImageEnvironment.TYPE).to(DockerImageEnvironmentFactory.class);
     factories.addBinding(Constants.NO_ENVIRONMENT_RECIPE_TYPE).to(NoEnvironmentFactory.class);
 
+    bind(InconsistentRuntimesDetector.class).asEagerSingleton();
     bind(RuntimeInfrastructure.class).to(OpenShiftInfrastructure.class);
 
     bind(KubernetesNamespaceFactory.class).to(OpenShiftProjectFactory.class);
@@ -87,7 +100,6 @@ public class OpenShiftInfraModule extends AbstractModule {
     install(new FactoryModuleBuilder().build(OpenShiftRuntimeFactory.class));
     install(new FactoryModuleBuilder().build(StartSynchronizerFactory.class));
 
-    install(new FactoryModuleBuilder().build(KubernetesBootstrapperFactory.class));
     bind(WorkspacePVCCleaner.class).asEagerSingleton();
     bind(RemoveProjectOnWorkspaceRemove.class).asEagerSingleton();
 
@@ -101,7 +113,7 @@ public class OpenShiftInfraModule extends AbstractModule {
     volumesStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
     bind(WorkspaceVolumesStrategy.class).toProvider(WorkspaceVolumeStrategyProvider.class);
 
-    bind(new TypeLiteral<ExternalServerExposerStrategy<OpenShiftEnvironment>>() {})
+    bind(new TypeLiteral<ExternalServerExposer<OpenShiftEnvironment>>() {})
         .to(OpenShiftExternalServerExposer.class);
     bind(ServersConverter.class).to(new TypeLiteral<ServersConverter<OpenShiftEnvironment>>() {});
 
@@ -147,20 +159,38 @@ public class OpenShiftInfraModule extends AbstractModule {
     bind(new TypeLiteral<KubernetesEnvironmentProvisioner<OpenShiftEnvironment>>() {})
         .to(OpenShiftEnvironmentProvisioner.class);
 
-    MapBinder<String, String> pluginBrokers =
-        MapBinder.newMapBinder(
-            binder(),
-            String.class,
-            String.class,
-            Names.named("che.workspace.plugin_broker.images"));
-    pluginBrokers
-        .addBinding("Che Plugin")
-        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.image")));
-    pluginBrokers
-        .addBinding("Che Editor")
-        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.image")));
-    pluginBrokers
-        .addBinding("Theia plugin")
-        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.theia.image")));
+    DevfileBindings.onComponentIntegrityValidatorBinder(
+        binder(),
+        binder -> {
+          binder.addBinding(KUBERNETES_COMPONENT_TYPE).to(KubernetesComponentValidator.class);
+          binder.addBinding(OPENSHIFT_COMPONENT_TYPE).to(KubernetesComponentValidator.class);
+          binder.addBinding(DOCKERIMAGE_COMPONENT_TYPE).to(NoopComponentIntegrityValidator.class);
+        });
+
+    DevfileBindings.onWorkspaceApplierBinder(
+        binder(),
+        binder -> {
+          binder
+              .addBinding(KUBERNETES_COMPONENT_TYPE)
+              .to(KubernetesComponentToWorkspaceApplier.class);
+          binder
+              .addBinding(DOCKERIMAGE_COMPONENT_TYPE)
+              .to(DockerimageComponentToWorkspaceApplier.class);
+          binder
+              .addBinding(OPENSHIFT_COMPONENT_TYPE)
+              .to(OpenshiftComponentToWorkspaceApplier.class);
+        });
+
+    KubernetesDevfileBindings.addKubernetesBasedEnvironmentTypeBindings(
+        binder(), KubernetesEnvironment.TYPE, OpenShiftEnvironment.TYPE);
+
+    KubernetesDevfileBindings.addKubernetesBasedComponentTypeBindings(
+        binder(), KUBERNETES_COMPONENT_TYPE, OPENSHIFT_COMPONENT_TYPE);
+
+    KubernetesDevfileBindings.addAllowedEnvironmentTypeUpgradeBindings(
+        binder(), OpenShiftEnvironment.TYPE, KubernetesEnvironment.TYPE);
+
+    bind(ExternalServiceExposureStrategy.class).to(OpenShiftServerExposureStrategy.class);
+    bind(CookiePathStrategy.class).to(OpenShiftCookiePathStrategy.class);
   }
 }

@@ -84,11 +84,10 @@ public class RuntimeHangingDetector {
 
   private void handleHangingStartingRuntime(KubernetesInternalRuntime runtime) {
     RuntimeIdentity runtimeId = runtime.getContext().getIdentity();
+    eventPublisher.sendAbnormalStoppingEvent(
+        runtimeId, "Workspace is not started in time. Trying interrupt runtime start");
     try {
-      eventPublisher.sendAbnormalStoppingEvent(
-          runtimeId, "Workspace is not started in time. Trying interrupt runtime start");
       runtime.stop(emptyMap());
-      eventPublisher.sendAbnormalStoppedEvent(runtimeId, "Workspace start reached timeout");
       LOG.info(
           "Start of hanging runtime '{}:{}:{}' is interrupted",
           runtimeId.getWorkspaceId(),
@@ -102,6 +101,8 @@ public class RuntimeHangingDetector {
           runtimeId.getOwnerId(),
           e.getMessage(),
           e);
+    } finally {
+      eventPublisher.sendAbnormalStoppedEvent(runtimeId, "Workspace start reached timeout");
     }
   }
 
@@ -135,17 +136,15 @@ public class RuntimeHangingDetector {
 
   private void handleHangingStoppingRuntime(KubernetesInternalRuntime runtime) {
     RuntimeIdentity runtimeId = runtime.getContext().getIdentity();
+    eventPublisher.sendAbnormalStoppingEvent(
+        runtimeId, "Workspace is not stopped in time. Trying to stop it forcibly");
     try {
-      eventPublisher.sendAbnormalStoppingEvent(
-          runtimeId, "Workspace is not stopped in time. Trying to stop it forcibly");
-      runtime.internalStop(emptyMap());
-      runtime.markStopped();
-      eventPublisher.sendAbnormalStoppedEvent(runtimeId, "Workspace stop reached timeout");
       LOG.info(
           "Runtime '{}:{}:{}' is not stopped in time. Stopped it forcibly",
           runtimeId.getWorkspaceId(),
           runtimeId.getEnvName(),
           runtimeId.getOwnerId());
+      runtime.internalStop(emptyMap());
     } catch (InfrastructureException e) {
       LOG.error(
           "Error occurred during forcibly stopping of hanging runtime '{}:{}:{}'. Error: {}",
@@ -154,6 +153,20 @@ public class RuntimeHangingDetector {
           runtimeId.getOwnerId(),
           e.getMessage(),
           e);
+    } finally {
+      try {
+        runtime.markStopped();
+      } catch (InfrastructureException e) {
+        LOG.error(
+            "Error occurred during marking hanging runtime as stopped '{}:{}:{}'. Error: {}",
+            runtimeId.getWorkspaceId(),
+            runtimeId.getEnvName(),
+            runtimeId.getOwnerId(),
+            e.getMessage(),
+            e);
+      }
+
+      eventPublisher.sendAbnormalStoppedEvent(runtimeId, "Workspace stop reached timeout");
     }
   }
 

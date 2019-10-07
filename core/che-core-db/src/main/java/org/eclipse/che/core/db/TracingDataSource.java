@@ -85,7 +85,7 @@ public class TracingDataSource implements DataSource {
   }
 
   public static DataSource wrapWithTracingIfEnabled(DataSource dataSource) {
-    return Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))
+    return Boolean.valueOf(System.getenv("CHE_DB_TRACING_ENABLED"))
         ? new TracingDataSource(dataSource)
         : dataSource;
   }

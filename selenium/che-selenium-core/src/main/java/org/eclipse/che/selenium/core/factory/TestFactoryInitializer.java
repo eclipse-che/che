@@ -31,6 +31,7 @@ import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.factory.shared.dto.IdeDto;
 import org.eclipse.che.api.factory.shared.dto.PoliciesDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -178,6 +179,21 @@ public class TestFactoryInitializer {
     }
 
     @Override
+    public DevfileDto getDevfile() {
+      return factoryDto.getDevfile();
+    }
+
+    @Override
+    public void setDevfile(DevfileDto workspace) {
+      factoryDto.setDevfile(workspace);
+    }
+
+    @Override
+    public FactoryDto withDevfile(DevfileDto devfileDto) {
+      return factoryDto.withDevfile(devfileDto);
+    }
+
+    @Override
     public WorkspaceConfigDto getWorkspace() {
       return factoryDto.getWorkspace();
     }
@@ -285,6 +301,21 @@ public class TestFactoryInitializer {
     @Override
     public FactoryDto withLinks(List<Link> links) {
       return factoryDto.withLinks(links);
+    }
+
+    @Override
+    public String getSource() {
+      return factoryDto.getSource();
+    }
+
+    @Override
+    public void setSource(String source) {
+      factoryDto.setSource(source);
+    }
+
+    @Override
+    public FactoryDto withSource(String source) {
+      return factoryDto.withSource(source);
     }
   }
 }

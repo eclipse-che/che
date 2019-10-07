@@ -12,17 +12,22 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases;
 
 import static java.lang.String.format;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.DEPLOY_BROKER_PHASE;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Secret;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -50,23 +55,29 @@ public class DeployBroker extends BrokerPhase {
   private final BrokersResult brokersResult;
   private final UnrecoverablePodEventListenerFactory factory;
   private final String workspaceId;
+  private final Tracer tracer;
 
   public DeployBroker(
       String workspaceId,
       KubernetesNamespace namespace,
       KubernetesEnvironment brokerEnvironment,
       BrokersResult brokersResult,
-      UnrecoverablePodEventListenerFactory factory) {
+      UnrecoverablePodEventListenerFactory factory,
+      Tracer tracer) {
     this.workspaceId = workspaceId;
     this.namespace = namespace;
     this.brokerEnvironment = brokerEnvironment;
     this.brokersResult = brokersResult;
     this.factory = factory;
+    this.tracer = tracer;
   }
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
     LOG.debug("Starting brokers pod for workspace '{}'", workspaceId);
+    Span tracingSpan = tracer.buildSpan(DEPLOY_BROKER_PHASE).start();
+    TracingTags.WORKSPACE_ID.set(tracingSpan, workspaceId);
+
     KubernetesDeployments deployments = namespace.deployments();
     try {
       // Creates config map that can inject Che tooling plugins meta files into a Che plugin
@@ -75,7 +86,11 @@ public class DeployBroker extends BrokerPhase {
         namespace.configMaps().create(configMap);
       }
 
-      Pod pluginBrokerPod = getPluginBrokerPod(brokerEnvironment.getPods());
+      for (Secret secret : brokerEnvironment.getSecrets().values()) {
+        namespace.secrets().create(secret);
+      }
+
+      Pod pluginBrokerPod = getPluginBrokerPod(brokerEnvironment.getPodsCopy());
 
       if (factory.isConfigured()) {
         UnrecoverablePodEventListener unrecoverableEventListener =
@@ -88,13 +103,24 @@ public class DeployBroker extends BrokerPhase {
       deployments.create(pluginBrokerPod);
 
       LOG.debug("Brokers pod is created for workspace '{}'", workspaceId);
+      tracingSpan.finish();
       return nextPhase.execute();
+    } catch (InfrastructureException e) {
+      // Ensure span is finished with exception message
+      TracingTags.setErrorStatus(tracingSpan, e);
+      tracingSpan.finish();
+      throw e;
     } finally {
       namespace.deployments().stopWatch();
       try {
         deployments.delete();
       } catch (InfrastructureException e) {
         LOG.error("Brokers pod removal failed. Error: " + e.getLocalizedMessage(), e);
+      }
+      try {
+        namespace.secrets().delete();
+      } catch (InfrastructureException ex) {
+        LOG.error("Brokers secret removal failed. Error: " + ex.getLocalizedMessage(), ex);
       }
       try {
         namespace.configMaps().delete();

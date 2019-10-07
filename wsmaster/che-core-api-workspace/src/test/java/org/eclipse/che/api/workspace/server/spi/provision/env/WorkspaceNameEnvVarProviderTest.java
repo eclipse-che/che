@@ -51,8 +51,7 @@ public class WorkspaceNameEnvVarProviderTest {
     // given
     when(runtimeIdentity.getWorkspaceId()).thenReturn("ws-id111");
     doReturn(workspace).when(workspaceDao).get(Mockito.eq("ws-id111"));
-    when(workspace.getConfig()).thenReturn(config);
-    when(config.getName()).thenReturn("ws-name");
+    when(workspace.getName()).thenReturn("ws-name");
 
     // when
     Pair<String, String> actual = provider.get(runtimeIdentity);

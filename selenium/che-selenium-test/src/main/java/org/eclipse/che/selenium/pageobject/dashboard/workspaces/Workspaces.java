@@ -12,11 +12,11 @@
 package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.ERROR_NOTIFICATION_MESSAGE_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.PROGRESS_BAR_XPATH;
@@ -70,11 +70,12 @@ public class Workspaces {
     String DOCUMENTATION_LINK = "//div[@che-link-title='Learn more.']/a";
     String ADD_WORKSPACE_BTN = "add-item-button";
     String DELETE_WORKSPACE_BTN = "delete-item-button";
-    String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
+    String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button[text()='Delete']";
     String BULK_CHECKBOX = "//md-checkbox[@aria-label='Workspace list']";
     String SEARCH_WORKSPACE_FIELD = "//input[@ng-placeholder='Search']";
     String NO_WORKSPACE_FOUND = "//span[text()='No workspaces found.']";
-    String WORKSPACE_ITEM_NAME = "//div[@id='ws-name-%s']";
+    String WORKSPACE_ITEM_NAME = "//div[@class='workspace-name-clip' and contains(@id, '/%s')]";
+    String WORKSPACE_ITEM_XPATH = "//div[@id='ws-name-%s']";
     String WORKSPACE_ITEM_FULL_NAME = "//div[@id='ws-full-name-%s']";
     String WORKSPACE_ITEM_CHECKBOX = "//div[@id='ws-name-%s']//md-checkbox";
     String WORKSPACE_ITEM_RAM = "//div[@id='ws-name-%s']//span[@name='workspace-ram-value']";
@@ -118,7 +119,10 @@ public class Workspaces {
   public void waitErrorNotificationContainsText(String expectedText) {
     final String textAttribute = "che-error-text";
     seleniumWebDriverHelper.waitAttributeContainsValue(
-        By.xpath(ERROR_NOTIFICATION_MESSAGE_XPATH), textAttribute, expectedText);
+        By.xpath(ERROR_NOTIFICATION_MESSAGE_XPATH),
+        textAttribute,
+        expectedText,
+        ELEMENT_TIMEOUT_SEC);
   }
 
   public void waitProgressBarInvisibility() {
@@ -129,13 +133,13 @@ public class Workspaces {
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             visibilityOfElementLocated(
-                By.xpath(format(Locators.WORKSPACE_ITEM_NAME, workspaceName))))
+                By.xpath(format(Locators.WORKSPACE_ITEM_XPATH, workspaceName))))
         .getAttribute("data-ws-status");
   }
 
   public void waitWorkspaceStatus(String workspaceName, String workspaceStatus) {
     // we need long timeout for OCP
-    new WebDriverWait(seleniumWebDriver, PREPARING_WS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, APPLICATION_START_TIMEOUT_SEC)
         .until(
             new ExpectedCondition<Boolean>() {
               @Override
@@ -299,7 +303,7 @@ public class Workspaces {
   }
 
   public void clickOnStackButton() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath("//div[@che-column-title='Stack']/div"));
+    seleniumWebDriverHelper.waitAndClick(By.xpath("//div[@che-column-title='Devfile']/div"));
   }
 
   public void clickOnWorkspaceStopStartButton(String workspaceName) {

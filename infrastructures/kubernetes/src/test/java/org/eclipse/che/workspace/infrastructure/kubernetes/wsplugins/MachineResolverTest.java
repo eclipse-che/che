@@ -14,7 +14,10 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 import static com.google.common.collect.ImmutableMap.of;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
@@ -26,22 +29,32 @@ import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
 import org.eclipse.che.api.workspace.shared.Constants;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
+import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /** @author Oleksandr Garagatyi */
+@Listeners(MockitoTestNGListener.class)
 public class MachineResolverTest {
 
   private static final String DEFAULT_MEM_LIMIT = "100001";
-  private static final String SIDECAR_NAME = "testSidecar";
+  private static final String PLUGIN_NAME = "testplugin";
+  private static final String PLUGIN_PUBLISHER = "testpublisher";
+  private static final String PLUGIN_PUBLISHER_NAME = PLUGIN_PUBLISHER + "/" + PLUGIN_NAME;
+  private static final String PLUGIN_ID = PLUGIN_PUBLISHER_NAME + "/" + "latest";
+  private static final String PROJECTS_ENV_VAR = "env_with_with_location_of_projects";
+  private static final String PROJECTS_MOUNT_PATH = "/wherever/i/may/roam";
 
   private List<ChePluginEndpoint> endpoints;
   private Map<String, String> wsAttributes;
@@ -56,28 +69,35 @@ public class MachineResolverTest {
     container = new Container();
     wsAttributes = new HashMap<>();
     resolver =
-        new MachineResolver(container, cheContainer, DEFAULT_MEM_LIMIT, endpoints, wsAttributes);
-
-    cheContainer.setName(SIDECAR_NAME);
+        new MachineResolver(
+            PLUGIN_PUBLISHER,
+            PLUGIN_NAME,
+            PLUGIN_ID,
+            new Pair<>(PROJECTS_ENV_VAR, PROJECTS_MOUNT_PATH),
+            container,
+            cheContainer,
+            DEFAULT_MEM_LIMIT,
+            endpoints,
+            wsAttributes);
   }
 
   @Test
-  public void shouldSetVolumesInMachineConfig() {
-    List<Volume> sidecarVolumes =
-        asList(
-            new Volume().name("vol1").mountPath("/path1"),
-            new Volume().name("vol2").mountPath("/path2"));
-    cheContainer.setVolumes(sidecarVolumes);
-    Map<String, Object> expected = of("vol1", volume("/path1"), "vol2", volume("/path2"));
+  public void shouldSetComponentAliasAttributeInMachineConfig() throws InfrastructureException {
+    String componentAlias = "mycomponent";
+    wsAttributes.put(
+        PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE,
+        "another/foo/plugin=fooplugin," + PLUGIN_ID + "=" + componentAlias);
+    wsAttributes.put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, "some/theia/editor=myeditor");
 
     InternalMachineConfig machineConfig = resolver.resolve();
-
-    assertEquals(machineConfig.getVolumes(), expected);
+    assertEquals(
+        machineConfig.getAttributes().get(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE), componentAlias);
   }
 
   @Test(dataProvider = "serverProvider")
   public void shouldSetServersInMachineConfig(
-      List<ChePluginEndpoint> containerEndpoints, Map<String, ServerConfig> expected) {
+      List<ChePluginEndpoint> containerEndpoints, Map<String, ServerConfig> expected)
+      throws InfrastructureException {
     endpoints.addAll(containerEndpoints);
 
     InternalMachineConfig machineConfig = resolver.resolve();
@@ -123,7 +143,7 @@ public class MachineResolverTest {
   }
 
   @Test
-  public void shouldSetDefaultMemLimitIfSidecarDoesNotHaveOne() {
+  public void shouldSetDefaultMemLimitIfSidecarDoesNotHaveOne() throws InfrastructureException {
     InternalMachineConfig machineConfig = resolver.resolve();
 
     assertEquals(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), DEFAULT_MEM_LIMIT);
@@ -131,9 +151,10 @@ public class MachineResolverTest {
 
   @Test(dataProvider = "memoryAttributeProvider")
   public void shouldSetMemoryLimitOfASidecarIfCorrespondingWSConfigAttributeIsSet(
-      String attributeValue, String expectedMemLimit) {
+      String attributeValue, String expectedMemLimit) throws InfrastructureException {
     wsAttributes.put(
-        format(Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, SIDECAR_NAME), attributeValue);
+        format(Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, PLUGIN_PUBLISHER_NAME),
+        attributeValue);
 
     InternalMachineConfig machineConfig = resolver.resolve();
 
@@ -152,12 +173,14 @@ public class MachineResolverTest {
   }
 
   @Test
-  public void shouldOverrideMemoryLimitOfASidecarIfCorrespondingWSConfigAttributeIsSet() {
+  public void shouldOverrideMemoryLimitOfASidecarIfCorrespondingWSConfigAttributeIsSet()
+      throws InfrastructureException {
     String attributeValue = "300Mi";
     String expectedMemLimit = toBytesString(attributeValue);
     Containers.addRamLimit(container, 123456789);
     wsAttributes.put(
-        format(Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, SIDECAR_NAME), attributeValue);
+        format(Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, PLUGIN_PUBLISHER_NAME),
+        attributeValue);
 
     InternalMachineConfig machineConfig = resolver.resolve();
 
@@ -165,12 +188,34 @@ public class MachineResolverTest {
   }
 
   @Test
-  public void shouldNotSetMemLimitAttributeIfLimitIsInContainer() {
+  public void shouldNotSetMemLimitAttributeIfLimitIsInContainer() throws InfrastructureException {
     Containers.addRamLimit(container, 123456789);
 
     InternalMachineConfig machineConfig = resolver.resolve();
 
     assertNull(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE));
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void shouldRefuseToMountProjectsManually() throws InfrastructureException {
+    cheContainer.setMountSources(false);
+    Volume volume = new Volume();
+    volume.setName(Constants.PROJECTS_VOLUME_NAME);
+    volume.setMountPath("anything, like");
+    cheContainer.getVolumes().add(volume);
+
+    resolver.resolve();
+  }
+
+  @Test
+  public void shouldAddProjectMountPointWhenMountSources() throws InfrastructureException {
+    cheContainer.setMountSources(true);
+
+    InternalMachineConfig config = resolver.resolve();
+
+    assertEquals(1, config.getVolumes().size());
+    assertEquals(
+        PROJECTS_MOUNT_PATH, config.getVolumes().get(Constants.PROJECTS_VOLUME_NAME).getPath());
   }
 
   private static String toBytesString(String k8sMemorySize) {

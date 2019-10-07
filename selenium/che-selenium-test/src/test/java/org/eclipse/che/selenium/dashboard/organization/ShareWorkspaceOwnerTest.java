@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.dashboard.organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.SHARE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -29,6 +28,7 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceShare;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
@@ -37,7 +37,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.MULTIUSER, TestGroup.DOCKER, TestGroup.OPENSHIFT, TestGroup.K8S})
+@Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S, TestGroup.FLAKY})
 public class ShareWorkspaceOwnerTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
@@ -157,8 +157,9 @@ public class ShareWorkspaceOwnerTest {
     newWorkspace.waitToolbar();
     newWorkspace.openOrganizationsList();
     newWorkspace.selectOrganizationFromList(organizationName);
-    newWorkspace.selectStack(JAVA);
     newWorkspace.typeWorkspaceName(workspaceName);
+    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
+    newWorkspace.waitDevfileSelected(Devfile.JAVA_MAVEN);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
     workspaceDetails.waitToolbarTitleName(workspaceName);
   }

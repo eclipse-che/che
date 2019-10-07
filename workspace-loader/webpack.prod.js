@@ -14,19 +14,22 @@ const merge = require('webpack-merge');
 const common = require('./webpack.common.js');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = merge(common, {
+    mode: 'production',
     devtool: 'source-map',
     module: {
         rules: [
             {
                 test: /\.css$/,
-                use: ExtractTextPlugin.extract({
-                  fallback: "style-loader",
-                  use: "css-loader"
-                })
-              }
+                use: [
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                    },
+                    "css-loader"
+                ]
+            }
         ],
     },
     plugins: [
@@ -40,6 +43,8 @@ module.exports = merge(common, {
             urlPrefix: '/workspace-loader/loader/',
             cssName: 'style.css'
         }),
-        new ExtractTextPlugin('style.css')
+        new MiniCssExtractPlugin({
+            filename: "style.css"
+        })
     ]
 });

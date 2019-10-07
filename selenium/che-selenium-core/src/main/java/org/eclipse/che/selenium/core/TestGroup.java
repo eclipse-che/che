@@ -21,4 +21,5 @@ public interface TestGroup {
   String OSIO = "osio";
   String K8S = "k8s";
   String UNDER_REPAIR = "under_repair";
+  String FLAKY = "flaky";
 }

@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.16.0-SNAPSHOT</version>
+        <version>7.3.0-SNAPSHOT</version>
         <relativePath>../core/pom.xml</relativePath>
     </parent>
     <artifactId>che-master-parent</artifactId>
@@ -25,12 +25,9 @@
     <name>Che Master Parent</name>
     <modules>
         <module>che-core-api-installer-shared</module>
-        <module>che-core-api-installer</module>
         <module>che-core-api-auth-shared</module>
         <module>che-core-api-auth</module>
-        <module>che-core-api-devfile</module>
-        <module>che-core-api-project-templates-shared</module>
-        <module>che-core-api-project-templates</module>
+        <module>che-core-api-auth-github</module>
         <module>che-core-api-workspace-shared</module>
         <module>che-core-api-workspace</module>
         <module>che-core-api-workspace-activity</module>
@@ -39,6 +36,7 @@
         <module>che-core-api-user</module>
         <module>che-core-api-factory-shared</module>
         <module>che-core-api-factory</module>
+        <module>che-core-api-factory-github</module>
         <module>che-core-api-ssh</module>
         <module>che-core-api-ssh-shared</module>
         <module>wsmaster-local</module>
@@ -48,5 +46,6 @@
         <module>che-core-api-system-shared</module>
         <module>che-core-api-logger-shared</module>
         <module>che-core-api-logger</module>
+        <module>che-core-api-metrics</module>
     </modules>
 </project>

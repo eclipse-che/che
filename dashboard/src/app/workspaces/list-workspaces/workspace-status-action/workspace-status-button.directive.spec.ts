@@ -75,7 +75,6 @@ describe('WorkspaceStatus >', () => {
       [defaultEnvironment]: {
         'machines': {
           'dev-machine': {
-            'installers': ['org.eclipse.che.ws-agent']
           }
         },
         'recipe': {

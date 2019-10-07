@@ -132,6 +132,11 @@ export class MemberDialogController {
     }
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Hides the add member dialog.
    */

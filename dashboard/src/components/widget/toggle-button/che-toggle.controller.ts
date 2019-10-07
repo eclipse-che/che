@@ -28,6 +28,8 @@ export class CheToggleController {
     this.$scope = $scope;
   }
 
+  $onInit(): void { }
+
   getSelected(): string {
     return (this.$scope as any).setupModelController.$viewValue;
   }

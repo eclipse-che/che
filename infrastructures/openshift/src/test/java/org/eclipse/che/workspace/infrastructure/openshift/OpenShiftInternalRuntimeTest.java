@@ -15,7 +15,6 @@ import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STA
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
@@ -48,15 +47,14 @@ import io.fabric8.kubernetes.api.model.ServiceSpec;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteSpec;
 import io.fabric8.openshift.api.model.RouteTargetReference;
+import io.opentracing.Tracer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
@@ -67,12 +65,9 @@ import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.commons.tracing.OptionalTracer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
-import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
@@ -127,7 +122,6 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private EventService eventService;
   @Mock private ServersCheckerFactory serverCheckerFactory;
   @Mock private ServersChecker serversChecker;
-  @Mock private KubernetesBootstrapperFactory bootstrapperFactory;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private OpenShiftProject project;
   @Mock private KubernetesServices services;
@@ -135,7 +129,6 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private KubernetesConfigsMaps configMaps;
   @Mock private OpenShiftRoutes routes;
   @Mock private KubernetesDeployments deployments;
-  @Mock private KubernetesBootstrapper bootstrapper;
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
   @Mock private WorkspaceProbesFactory workspaceProbesFactory;
   @Mock private ProbeScheduler probesScheduler;
@@ -148,7 +141,7 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
 
   @Mock(answer = Answers.RETURNS_MOCKS)
-  private OptionalTracer tracer;
+  private Tracer tracer;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
@@ -169,7 +162,6 @@ public class OpenShiftInternalRuntimeTest {
             5,
             new URLRewriter.NoOpURLRewriter(),
             unrecoverablePodEventListenerFactory,
-            bootstrapperFactory,
             serverCheckerFactory,
             volumesStrategy,
             probesScheduler,
@@ -196,16 +188,15 @@ public class OpenShiftInternalRuntimeTest {
     when(project.secrets()).thenReturn(secrets);
     when(project.configMaps()).thenReturn(configMaps);
     when(project.deployments()).thenReturn(deployments);
-    when(bootstrapperFactory.create(any(), anyList(), any(), any(), any()))
-        .thenReturn(bootstrapper);
     doReturn(
             ImmutableMap.of(
                 M1_NAME,
-                mockMachine(mockInstaller("ws-agent")),
+                mock(InternalMachineConfig.class),
                 M2_NAME,
-                mockMachine(mockInstaller("terminal"))))
+                mock(InternalMachineConfig.class)))
         .when(osEnv)
         .getMachines();
+
     allServices = ImmutableMap.of(SERVICE_NAME, mockService());
     allRoutes = ImmutableMap.of(SERVICE_NAME, mockRoute());
     final Container container = mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1, INTERNAL_PORT);
@@ -213,10 +204,10 @@ public class OpenShiftInternalRuntimeTest {
         ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(container)));
     when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(routes.create(any())).thenAnswer(a -> a.getArguments()[0]);
-    when(deployments.deploy(any())).thenAnswer(a -> a.getArguments()[0]);
+    when(deployments.deploy(any(Pod.class))).thenAnswer(a -> a.getArguments()[0]);
     when(osEnv.getServices()).thenReturn(allServices);
     when(osEnv.getRoutes()).thenReturn(allRoutes);
-    when(osEnv.getPods()).thenReturn(allPods);
+    when(osEnv.getPodsCopy()).thenReturn(allPods);
     when(osEnv.getSecrets()).thenReturn(ImmutableMap.of("secret", new Secret()));
     when(osEnv.getConfigMaps()).thenReturn(ImmutableMap.of("configMap", new ConfigMap()));
   }
@@ -227,12 +218,12 @@ public class OpenShiftInternalRuntimeTest {
     final Container container2 = mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT);
     final ImmutableMap<String, Pod> allPods =
         ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(container1, container2)));
-    when(osEnv.getPods()).thenReturn(allPods);
+    when(osEnv.getPodsCopy()).thenReturn(allPods);
     when(unrecoverablePodEventListenerFactory.isConfigured()).thenReturn(true);
 
     internalRuntime.startMachines();
 
-    verify(deployments).deploy(any());
+    verify(deployments).deploy(any(Pod.class));
     verify(routes).create(any());
     verify(services).create(any());
     verify(secrets).create(any());
@@ -250,11 +241,11 @@ public class OpenShiftInternalRuntimeTest {
     final Container container2 = mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT);
     final ImmutableMap<String, Pod> allPods =
         ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(container1, container2)));
-    when(osEnv.getPods()).thenReturn(allPods);
+    when(osEnv.getPodsCopy()).thenReturn(allPods);
 
     internalRuntime.startMachines();
 
-    verify(deployments).deploy(any());
+    verify(deployments).deploy(any(Pod.class));
     verify(routes).create(any());
     verify(services).create(any());
 
@@ -337,18 +328,6 @@ public class OpenShiftInternalRuntimeTest {
     when(route.getMetadata().getLabels())
         .thenReturn(ImmutableMap.of(CHE_ORIGINAL_NAME_LABEL, ROUTE_NAME));
     return route;
-  }
-
-  private static InstallerImpl mockInstaller(String name) {
-    InstallerImpl installer = mock(InstallerImpl.class);
-    when(installer.getName()).thenReturn(name);
-    return installer;
-  }
-
-  private static InternalMachineConfig mockMachine(InstallerImpl... installers) {
-    final InternalMachineConfig machine1 = mock(InternalMachineConfig.class);
-    when(machine1.getInstallers()).thenReturn(Arrays.asList(installers));
-    return machine1;
   }
 
   private static ObjectMeta mockName(String name, HasMetadata mock) {

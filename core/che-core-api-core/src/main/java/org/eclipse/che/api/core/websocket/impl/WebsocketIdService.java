@@ -26,7 +26,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
  */
 @Singleton
 public class WebsocketIdService {
-  private static final String SEPARATOR = "<-:->";
+  public static final String SEPARATOR = "<-:->";
   private static final Random GENERATOR = new Random();
 
   public static String randomClientId() {

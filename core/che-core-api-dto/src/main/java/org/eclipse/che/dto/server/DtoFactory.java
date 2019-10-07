@@ -22,6 +22,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
+import com.google.gson.internal.bind.ReflectiveTypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -104,10 +105,7 @@ public final class DtoFactory {
   private final Map<Class<?>, DtoProvider<?>> dtoImpl2Providers = new ConcurrentHashMap<>();
   private final Gson dtoGson =
       buildDtoParser(
-          ServiceLoader.load(TypeAdapterFactory.class).iterator(),
-          new NullAsEmptyTAF<>(Collection.class, Collections.emptyList()),
-          new NullAsEmptyTAF<>(Map.class, Collections.emptyMap()),
-          new DtoInterfaceTAF());
+          ServiceLoader.load(TypeAdapterFactory.class).iterator(), new DtoInterfaceTAF());
 
   /**
    * Created deep copy of DTO object.
@@ -504,6 +502,18 @@ public final class DtoFactory {
     for (TypeAdapterFactory factory : factories) {
       builder.registerTypeAdapterFactory(factory);
     }
+
+    if (Boolean.valueOf(System.getenv("CHE_LEGACY__DTO__JSON__SERIALIZATION"))) {
+      builder.registerTypeAdapterFactory(
+          new NullAsEmptyTAF<>(Collection.class, Collections.emptyList()));
+      builder.registerTypeAdapterFactory(new NullAsEmptyTAF<>(Map.class, Collections.emptyMap()));
+    } else {
+      builder.registerTypeHierarchyAdapter(Collection.class, new NullOrEmptyCollectionAdapter());
+      builder.registerTypeHierarchyAdapter(Map.class, new NullOrEmptyMapAdapter());
+    }
+
+    builder.registerTypeAdapterFactory(new SerializableInterfaceAdapterFactory());
+
     return builder.create();
   }
 }

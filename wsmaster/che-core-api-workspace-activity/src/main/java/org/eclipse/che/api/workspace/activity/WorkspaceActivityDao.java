@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.activity;
 
 import java.util.List;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -103,6 +104,12 @@ public interface WorkspaceActivityDao {
       long timestamp, WorkspaceStatus status, int maxItems, long skipCount) throws ServerException;
 
   /**
+   * Similar to {@link #findInStatusSince(long, WorkspaceStatus, int, long)} but merely provides the
+   * caller with count of the workspaces in the given state, not their IDs.
+   */
+  long countWorkspacesInStatus(WorkspaceStatus status, long timestamp) throws ServerException;
+
+  /**
    * Returns the workspace activity record of the provided workspace.
    *
    * @param workspaceId the id of the workspace
@@ -110,4 +117,22 @@ public interface WorkspaceActivityDao {
    * @throws ServerException on error
    */
   WorkspaceActivity findActivity(String workspaceId) throws ServerException;
+
+  /**
+   * Creates a new activity record. Fails if activity record already exists.
+   *
+   * @param activity the activity to persist
+   * @throws ConflictException when activity record exists
+   * @throws ServerException on other error
+   */
+  void createActivity(WorkspaceActivity activity) throws ConflictException, ServerException;
+
+  /**
+   * Returns all current workspace activities.
+   *
+   * @param maxItems the page size
+   * @param skipCount the number of records to skip
+   * @return the workspace activities for all workspaces
+   */
+  Page<WorkspaceActivity> getAll(int maxItems, long skipCount) throws ServerException;
 }

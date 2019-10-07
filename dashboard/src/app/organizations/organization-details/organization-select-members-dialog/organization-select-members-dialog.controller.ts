@@ -113,6 +113,11 @@ export class OrganizationSelectMembersDialogController {
     this.formUsersAvailableList();
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Builds list of users that are available to be added.
    */

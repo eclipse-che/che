@@ -11,11 +11,13 @@
  */
 package org.eclipse.che.api.workspace.activity;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -52,7 +54,7 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
         .stream()
         .filter(a -> a.getExpiration() != null && a.getExpiration() < timestamp)
         .map(WorkspaceActivity::getWorkspaceId)
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   @Override
@@ -110,7 +112,7 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
                   }
                 })
             .map(WorkspaceActivity::getWorkspaceId)
-            .collect(Collectors.toList());
+            .collect(toList());
 
     int total = all.size();
     int from = skipCount > total ? total : (int) skipCount;
@@ -125,6 +127,11 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
   }
 
   @Override
+  public long countWorkspacesInStatus(WorkspaceStatus status, long timestamp) {
+    return findInStatusSince(timestamp, status, Integer.MAX_VALUE, 0).getItemsCount();
+  }
+
+  @Override
   public WorkspaceActivity findActivity(String workspaceId) {
     return workspaceActivities.computeIfAbsent(workspaceId, __ -> new WorkspaceActivity());
   }
@@ -132,6 +139,24 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
   @Override
   public void removeActivity(String workspaceId) throws ServerException {
     workspaceActivities.remove(workspaceId);
+  }
+
+  @Override
+  public void createActivity(WorkspaceActivity activity) throws ConflictException {
+    if (workspaceActivities.containsKey(activity.getWorkspaceId())) {
+      throw new ConflictException("Already exists.");
+    } else {
+      workspaceActivities.put(activity.getWorkspaceId(), activity);
+    }
+  }
+
+  @Override
+  public Page<WorkspaceActivity> getAll(int maxItems, long skipCount) {
+    return new Page<>(
+        workspaceActivities.values().stream().skip(skipCount).limit(maxItems).collect(toList()),
+        skipCount,
+        maxItems,
+        workspaceActivities.size());
   }
 
   private boolean isGreater(Long value, long threshold) {

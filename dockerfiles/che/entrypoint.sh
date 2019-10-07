@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2012-2017 Red Hat, Inc.
+# Copyright (c) 2012-2019 Red Hat, Inc.
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -33,6 +33,7 @@ Variables:
     CHE_REGISTRY_HOST                   Hostname of Docker registry to launch, otherwise 'localhost'
     CHE_LOG_LEVEL                       [INFO | DEBUG] Sets the output level of Tomcat messages
     CHE_DEBUG_SERVER                    If true, activates Tomcat's JPDA debugging mode
+    CHE_DEBUG_SUSPEND                   If true, Tomcat will start suspended waiting for debugger
     CHE_HOME                            Where the Che assembly resides - self-determining if not set
 "
 
@@ -65,6 +66,8 @@ Variables:
   DEFAULT_CHE_DEBUG_SERVER=false
   CHE_DEBUG_SERVER=${CHE_DEBUG_SERVER:-${DEFAULT_CHE_DEBUG_SERVER}}
 
+  DEFAULT_CHE_DEBUG_SUSPEND="false"
+  CHE_DEBUG_SUSPEND=${CHE_DEBUG_SUSPEND:-${DEFAULT_CHE_DEBUG_SUSPEND}}
 }
 
 error () {
@@ -106,6 +109,12 @@ set_environment_variables () {
   # Convert windows path name to POSIX
   if [[ "${CATALINA_HOME}" == *":"* ]]; then
     CATALINA_HOME=$(echo /"${CATALINA_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
+  fi
+
+  if [[ "${CHE_DEBUG_SUSPEND}" == "true" ]]; then
+    export JPDA_SUSPEND="y"
+  else
+    export JPDA_SUSPEND="n"
   fi
 
   # Internal properties - should generally not be overridden
@@ -218,12 +227,17 @@ init() {
   ### Any variables with export is a value that native Tomcat che.sh startup script requires
   export CHE_IP=${CHE_IP}
 
-  if [ -f "/assembly/tomcat/bin/catalina.sh" ]; then
-    echo "Found custom assembly..."
-    export CHE_HOME="/assembly"
+  if [ -z "$CHE_HOME" ]; then
+    if [ -f "/assembly/tomcat/bin/catalina.sh" ]; then
+      echo "Found custom assembly in /assembly"
+      export CHE_HOME="/assembly"
+    else
+      echo "Using embedded assembly."
+      export CHE_HOME=$(echo /home/user/eclipse-che/)
+    fi
   else
-    echo "Using embedded assembly..."
-    export CHE_HOME=$(echo /home/user/eclipse-che/)
+    export CHE_HOME=$(echo ${CHE_HOME})
+    echo "Using custom assembly from $CHE_HOME"
   fi
 
   ### We need to discover the host mount provided by the user for `/data`
@@ -266,11 +280,6 @@ init() {
     rm -rf "${CHE_DATA}"/stacks
   fi
 
-  # replace samples.json each run to make sure that we are using corrent samples from the assembly.
-  # also it allows users to store their own samples which should not be touched by us.
-  mkdir -p "${CHE_DATA}"/templates
-  rm -rf "${CHE_DATA}"/templates/samples.json
-  cp -rf "${CHE_HOME}"/templates/* "${CHE_DATA}"/templates
 
   # A che property, which names the Docker network used for che + ws to communicate
   if [ -z "$CHE_DOCKER_NETWORK" ]; then
@@ -283,7 +292,7 @@ init() {
 
 add_cert_to_truststore() {
   if [ "${CHE_SELF__SIGNED__CERT}" != "" ]; then
-    DEFAULT_JAVA_TRUST_STORE=$JAVA_HOME/lib/security/cacerts
+    DEFAULT_JAVA_TRUST_STORE=$JAVA_HOME/jre/lib/security/cacerts
     DEFAULT_JAVA_TRUST_STOREPASS="changeit"
 
     JAVA_TRUST_STORE=/home/user/cacerts

@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.commons.test.tck.TckListener;
@@ -87,6 +88,19 @@ public class FreeResourcesLimitDaoTest {
 
     // then
     assertEquals(limitDao.get(toStore.getAccountId()), new FreeResourcesLimitImpl(toStore));
+  }
+
+  @Test(
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp = "The specified account 'non-existing' does not exist")
+  public void shouldThrowConflictExceptionWhenTryStoreNewResourcesWithSpecifiedNotExistingAccount()
+      throws Exception {
+    // given
+    FreeResourcesLimitImpl toStore =
+        new FreeResourcesLimitImpl("non-existing", limits[0].getResources());
+
+    // when
+    limitDao.store(toStore);
   }
 
   @Test

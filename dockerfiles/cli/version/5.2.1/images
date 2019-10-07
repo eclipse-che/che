@@ -1,2 +1,0 @@
-IMAGE_INIT=eclipse/che-init:5.2.1
-IMAGE_CHE=eclipse/che-server:5.2.1

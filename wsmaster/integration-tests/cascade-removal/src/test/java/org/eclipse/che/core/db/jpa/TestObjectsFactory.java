@@ -23,6 +23,7 @@ import java.util.Map;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.devfile.Metadata;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
@@ -39,9 +40,13 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
@@ -91,6 +96,65 @@ public final class TestObjectsFactory {
             id + "env1", createEnv(),
             id + "env2", createEnv()),
         ImmutableMap.of("attr1", "value1", "attr2", "value2"));
+  }
+
+  public static DevfileImpl createDevfile(String id) {
+    return new DevfileImpl(
+        "0.0.1",
+        asList(createDevfileProject(id + "-project1"), createDevfileProject(id + "-project2")),
+        asList(
+            createDevfileComponent(id + "-component1"), createDevfileComponent(id + "-component2")),
+        asList(createDevfileCommand(id + "-command1"), createDevfileCommand(id + "-command2")),
+        singletonMap("attribute1", "value1"),
+        createMetadata(id + "name"));
+  }
+
+  private static ComponentImpl createDevfileComponent(String name) {
+    return new ComponentImpl(
+        "kubernetes",
+        name,
+        "eclipse/che-theia/0.0.1",
+        ImmutableMap.of("java.home", "/home/user/jdk11"),
+        "https://mysite.com/registry/somepath",
+        "/dev.yaml",
+        "refContent",
+        ImmutableMap.of("app.kubernetes.io/component", "webapp"),
+        singletonList(createEntrypoint()),
+        "image",
+        "256G",
+        false,
+        singletonList("command"),
+        singletonList("arg"),
+        null,
+        null,
+        null);
+  }
+
+  private static EntrypointImpl createEntrypoint() {
+    return new EntrypointImpl(
+        "parentName",
+        singletonMap("parent", "selector"),
+        "containerName",
+        asList("command1", "command2"),
+        asList("arg1", "arg2"));
+  }
+
+  private static org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl
+      createDevfileCommand(String name) {
+    return new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
+        name, singletonList(createAction()), singletonMap("attr1", "value1"));
+  }
+
+  private static ActionImpl createAction() {
+    return new ActionImpl("exec", "component", "run.sh", "/home/user", null, null);
+  }
+
+  private static ProjectImpl createDevfileProject(String name) {
+    return new ProjectImpl(name, createDevfileSource(), "path");
+  }
+
+  private static SourceImpl createDevfileSource() {
+    return new SourceImpl("type", "http://location", "branch1", "point1", "tag1", "commit1");
   }
 
   public static CommandImpl createCommand() {
@@ -144,30 +208,16 @@ public final class TestObjectsFactory {
     return newEnv;
   }
 
-  public static WorkspaceImpl createWorkspace(String id, Account account) {
+  public static WorkspaceImpl createWorkspaceWithConfig(String id, Account account) {
     return new WorkspaceImpl(id, account, createWorkspaceConfig(id));
+  }
+
+  public static WorkspaceImpl createWorkspaceWithDevfile(String id, Account account) {
+    return new WorkspaceImpl(id, account, createDevfile(id));
   }
 
   public static SshPairImpl createSshPair(String owner, String service, String name) {
     return new SshPairImpl(owner, service, name, "public-key", "private-key");
-  }
-
-  public static StackImpl createStack(String id, String name) {
-    return StackImpl.builder()
-        .setId(id)
-        .setName(name)
-        .setCreator("user123")
-        .setDescription(id + "-description")
-        .setScope(id + "-scope")
-        .setWorkspaceConfig(createWorkspaceConfig("test"))
-        .setTags(asList(id + "-tag1", id + "-tag2"))
-        .setComponents(
-            asList(
-                new StackComponentImpl(id + "-component1", id + "-component1-version"),
-                new StackComponentImpl(id + "-component2", id + "-component2-version")))
-        .setStackIcon(
-            new StackIcon(id + "-icon", id + "-media-type", "0x1234567890abcdef".getBytes()))
-        .build();
   }
 
   public static KubernetesRuntimeState createK8sRuntimeState(String workspaceId) {
@@ -192,6 +242,10 @@ public final class TestObjectsFactory {
                 "http://localhost:8080/api",
                 ServerStatus.RUNNING,
                 ImmutableMap.of("key", "value"))));
+  }
+
+  public static Metadata createMetadata(String name) {
+    return new MetadataImpl(name);
   }
 
   private TestObjectsFactory() {}

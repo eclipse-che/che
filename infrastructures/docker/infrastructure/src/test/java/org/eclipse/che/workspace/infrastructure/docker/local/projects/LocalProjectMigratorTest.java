@@ -27,7 +27,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -89,10 +88,8 @@ public class LocalProjectMigratorTest {
       String workspaceId = "ws_id_" + namePrefix + i;
 
       WorkspaceImpl workspace = mock(WorkspaceImpl.class);
-      WorkspaceConfigImpl workspaceConfig = mock(WorkspaceConfigImpl.class);
       when(workspace.getId()).thenReturn(workspaceId);
-      when(workspace.getConfig()).thenReturn(workspaceConfig);
-      when(workspace.getConfig().getName()).thenReturn(workspaceName);
+      when(workspace.getName()).thenReturn(workspaceName);
 
       result.add(workspace);
 

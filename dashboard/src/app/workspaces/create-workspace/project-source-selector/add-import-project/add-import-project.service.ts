@@ -53,6 +53,7 @@ export class AddImportProjectService {
    * Project source.
    */
   private activeProjectSource: ProjectSource;
+
   /**
    * Instance of Observable.
    */
@@ -105,7 +106,7 @@ export class AddImportProjectService {
    * @return {che.IProjectTemplate}
    */
   buildProjectTemplate(props: any): che.IProjectTemplate {
-    const blankProjectTemplate = this.templateSelectorSvc.getTemplateByName('blank-project');
+    const blankProjectTemplate = {name: 'blank-project'};
     return angular.merge({}, blankProjectTemplate, props);
   }
 
@@ -201,5 +202,4 @@ export class AddImportProjectService {
 
     return null;
   }
-
 }

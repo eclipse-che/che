@@ -9,21 +9,24 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-export interface IDeffered<T> {
+
+// tslint:disable:no-any */
+
+export interface IDeferred<T> {
     resolve(value?: T): void;
     reject(reason?: any): void;
     promise: Promise<T>;
 }
 
-export class Deffered<T> implements IDeffered<T> {
+export class Deferred<T> implements IDeferred<T> {
 
     promise: Promise<T>;
     private resolveF;
     private rejectF;
     constructor() {
         this.promise = new Promise((resolve, reject) => {
-            this.resolve = resolve;
-            this.reject = reject;
+            this.resolveF = resolve;
+            this.rejectF = reject;
         });
     }
     resolve(value?: T): void {

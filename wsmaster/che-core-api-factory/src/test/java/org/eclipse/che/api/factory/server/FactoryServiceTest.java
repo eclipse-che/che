@@ -22,14 +22,17 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static org.eclipse.che.api.factory.server.DtoConverter.asDto;
 import static org.eclipse.che.api.factory.server.FactoryService.VALIDATE_QUERY_PARAMETER;
+import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyMapOf;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
@@ -38,21 +41,20 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.ws.rs.core.UriInfo;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
@@ -77,7 +79,9 @@ import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl.WorkspaceConfigImplBuilder;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl.WorkspaceImplBuilder;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -126,12 +130,10 @@ public class FactoryServiceTest {
   @Mock private FactoryEditValidator editValidator;
   @Mock private WorkspaceManager workspaceManager;
   @Mock private FactoryParametersResolverHolder factoryParametersResolverHolder;
-  @Mock private UriInfo uriInfo;
 
   private FactoryBuilder factoryBuilderSpy;
 
   private User user;
-  private Set<FactoryParametersResolver> factoryParametersResolvers;
 
   private FactoryService service;
 
@@ -144,11 +146,8 @@ public class FactoryServiceTest {
   @BeforeMethod
   public void setUp() throws Exception {
     factoryBuilderSpy = spy(new FactoryBuilder(new SourceStorageParametersValidator()));
-    factoryParametersResolvers = new HashSet<>();
     lenient().doNothing().when(factoryBuilderSpy).checkValid(any(FactoryDto.class));
     lenient().doNothing().when(factoryBuilderSpy).checkValid(any(FactoryDto.class), anyBoolean());
-    when(factoryParametersResolverHolder.getFactoryParametersResolvers())
-        .thenReturn(factoryParametersResolvers);
     user = new UserImpl(USER_ID, USER_EMAIL, ADMIN_USER_NAME);
     lenient().when(userManager.getById(anyString())).thenReturn(user);
     lenient()
@@ -169,6 +168,7 @@ public class FactoryServiceTest {
 
   @Filter
   public static class EnvironmentFilter implements RequestFilter {
+    @Override
     public void doFilter(GenericContainerRequest request) {
       EnvironmentContext context = EnvironmentContext.getCurrent();
       context.setSubject(new SubjectImpl(ADMIN_USER_NAME, USER_ID, ADMIN_USER_PASSWORD, false));
@@ -253,10 +253,10 @@ public class FactoryServiceTest {
 
   @Test
   public void shouldReturnFactoryListByNameAttribute() throws Exception {
-    final Factory factory = createFactory();
-    when(factoryManager.getByAttribute(1, 0, ImmutableList.of(Pair.of("name", factory.getName()))))
-        .thenReturn(ImmutableList.of(factory));
-
+    final FactoryImpl factory = createFactory();
+    doReturn(new Page<>(ImmutableList.of(factory), 0, 1, 1))
+        .when(factoryManager)
+        .getByAttribute(1, 0, ImmutableList.of(Pair.of("name", factory.getName())));
     final Response response =
         given()
             .auth()
@@ -288,11 +288,11 @@ public class FactoryServiceTest {
 
   @Test
   public void shouldReturnFactoryListByCreatorAttribute() throws Exception {
-    final Factory factory1 = createNamedFactory("factory1");
-    final Factory factory2 = createNamedFactory("factory2");
-    when(factoryManager.getByAttribute(
-            2, 0, ImmutableList.of(Pair.of("creator.userId", user.getName()))))
-        .thenReturn(ImmutableList.of(factory1, factory2));
+    final FactoryImpl factory1 = createNamedFactory("factory1");
+    final FactoryImpl factory2 = createNamedFactory("factory2");
+    doReturn(new Page<>(ImmutableList.of(factory1, factory2), 0, 2, 2))
+        .when(factoryManager)
+        .getByAttribute(2, 0, ImmutableList.of(Pair.of("creator.userId", user.getName())));
 
     final Response response =
         given()
@@ -406,28 +406,26 @@ public class FactoryServiceTest {
   public void shouldGenerateFactoryJsonIncludeGivenProjects() throws Exception {
     // given
     final String wsId = "workspace123234";
-    WorkspaceImpl.WorkspaceImplBuilder ws = WorkspaceImpl.builder();
-    WorkspaceConfigImpl.WorkspaceConfigImplBuilder wsConfig = WorkspaceConfigImpl.builder();
+    WorkspaceImplBuilder ws = WorkspaceImpl.builder();
+    WorkspaceConfigImplBuilder wsConfig = WorkspaceConfigImpl.builder();
     ws.setId(wsId);
     wsConfig.setProjects(
         Arrays.asList(
-            DTO.createDto(ProjectConfigDto.class)
+            newDto(ProjectConfigDto.class)
                 .withPath("/proj1")
                 .withSource(
-                    DTO.createDto(SourceStorageDto.class).withType("git").withLocation("location")),
-            DTO.createDto(ProjectConfigDto.class)
+                    newDto(SourceStorageDto.class).withType("git").withLocation("location")),
+            newDto(ProjectConfigDto.class)
                 .withPath("/proj2")
                 .withSource(
-                    DTO.createDto(SourceStorageDto.class)
-                        .withType("git")
-                        .withLocation("location"))));
+                    newDto(SourceStorageDto.class).withType("git").withLocation("location"))));
     wsConfig.setName("wsname");
-    wsConfig.setEnvironments(singletonMap("env1", DTO.createDto(EnvironmentDto.class)));
+    wsConfig.setEnvironments(singletonMap("env1", newDto(EnvironmentDto.class)));
     wsConfig.setDefaultEnv("env1");
     ws.setStatus(WorkspaceStatus.RUNNING);
     wsConfig.setCommands(
         singletonList(
-            DTO.createDto(CommandDto.class)
+            newDto(CommandDto.class)
                 .withName("MCI")
                 .withType("mvn")
                 .withCommandLine("clean install")));
@@ -453,20 +451,20 @@ public class FactoryServiceTest {
   public void shouldNotGenerateFactoryIfNoProjectsWithSourceStorage() throws Exception {
     // given
     final String wsId = "workspace123234";
-    WorkspaceImpl.WorkspaceImplBuilder ws = WorkspaceImpl.builder();
-    WorkspaceConfigImpl.WorkspaceConfigImplBuilder wsConfig = WorkspaceConfigImpl.builder();
+    WorkspaceImplBuilder ws = WorkspaceImpl.builder();
+    WorkspaceConfigImplBuilder wsConfig = WorkspaceConfigImpl.builder();
     ws.setId(wsId);
     wsConfig.setProjects(
         Arrays.asList(
-            DTO.createDto(ProjectConfigDto.class).withPath("/proj1"),
-            DTO.createDto(ProjectConfigDto.class).withPath("/proj2")));
+            newDto(ProjectConfigDto.class).withPath("/proj1"),
+            newDto(ProjectConfigDto.class).withPath("/proj2")));
     wsConfig.setName("wsname");
-    wsConfig.setEnvironments(singletonMap("env1", DTO.createDto(EnvironmentDto.class)));
+    wsConfig.setEnvironments(singletonMap("env1", newDto(EnvironmentDto.class)));
     wsConfig.setDefaultEnv("env1");
     ws.setStatus(WorkspaceStatus.RUNNING);
     wsConfig.setCommands(
         singletonList(
-            DTO.createDto(CommandDto.class)
+            newDto(CommandDto.class)
                 .withName("MCI")
                 .withType("mvn")
                 .withCommandLine("clean install")));
@@ -525,7 +523,8 @@ public class FactoryServiceTest {
   @Test
   public void checkValidateResolver() throws Exception {
     final FactoryParametersResolver dummyResolver = Mockito.mock(FactoryParametersResolver.class);
-    factoryParametersResolvers.add(dummyResolver);
+    when(factoryParametersResolverHolder.getFactoryParametersResolver(anyMap()))
+        .thenReturn(dummyResolver);
 
     // invalid factory
     final String invalidFactoryMessage = "invalid factory";
@@ -535,12 +534,10 @@ public class FactoryServiceTest {
 
     // create factory
     final FactoryDto expectFactory =
-        DTO.createDto(FactoryDto.class).withV("4.0").withName("matchingResolverFactory");
+        newDto(FactoryDto.class).withV(CURRENT_VERSION).withName("matchingResolverFactory");
 
     // accept resolver
-    when(dummyResolver.accept(anyMapOf(String.class, String.class))).thenReturn(true);
-    when(dummyResolver.createFactory(anyMapOf(String.class, String.class)))
-        .thenReturn(expectFactory);
+    when(dummyResolver.createFactory(anyMap())).thenReturn(expectFactory);
 
     // when
     final Map<String, String> map = new HashMap<>();
@@ -557,22 +554,22 @@ public class FactoryServiceTest {
     assertTrue(response.getBody().asString().contains(invalidFactoryMessage));
 
     // check we call resolvers
-    verify(dummyResolver).accept(anyMapOf(String.class, String.class));
-    verify(dummyResolver).createFactory(anyMapOf(String.class, String.class));
+    factoryParametersResolverHolder.getFactoryParametersResolver(anyMap());
+    verify(dummyResolver).createFactory(anyMap());
 
     // check we call validator
     verify(acceptValidator).validateOnAccept(any());
   }
 
-  private Factory createFactory() {
+  private FactoryImpl createFactory() {
     return createNamedFactory(FACTORY_NAME);
   }
 
-  private Factory createNamedFactory(String name) {
+  private FactoryImpl createNamedFactory(String name) {
     return createFactoryWithStorage(name, PROJECT_SOURCE_TYPE, PROJECT_SOURCE_LOCATION);
   }
 
-  private Factory createFactoryWithStorage(String name, String type, String location) {
+  private FactoryImpl createFactoryWithStorage(String name, String type, String location) {
     return FactoryImpl.builder()
         .setId(FACTORY_ID)
         .setVersion("4.0")
@@ -620,9 +617,7 @@ public class FactoryServiceTest {
 
   private static <T> List<T> unwrapDtoList(Response response, Class<T> dtoClass)
       throws IOException {
-    return FluentIterable.from(
-            DtoFactory.getInstance()
-                .createListDtoFromJson(response.body().asInputStream(), dtoClass))
-        .toList();
+    return new ArrayList<>(
+        DtoFactory.getInstance().createListDtoFromJson(response.body().asInputStream(), dtoClass));
   }
 }

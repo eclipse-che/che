@@ -23,22 +23,18 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import javax.sql.DataSource;
-import org.eclipse.che.agent.exec.client.ExecAgentClientFactory;
 import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
-import org.eclipse.che.api.devfile.server.DevfileSchemaValidator;
-import org.eclipse.che.api.devfile.server.DevfileService;
+import org.eclipse.che.api.deploy.jsonrpc.CheJsonRpcWebSocketConfigurationModule;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
-import org.eclipse.che.api.installer.server.InstallerModule;
-import org.eclipse.che.api.installer.server.impl.InstallersProvider;
-import org.eclipse.che.api.installer.shared.model.Installer;
+import org.eclipse.che.api.factory.server.github.GithubFactoryParametersResolver;
+import org.eclipse.che.api.metrics.WsMasterMetricsModule;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.system.server.SystemModule;
 import org.eclipse.che.api.user.server.TokenValidator;
@@ -48,11 +44,10 @@ import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceLockService;
 import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
+import org.eclipse.che.api.workspace.server.devfile.DevfileModule;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
-import org.eclipse.che.api.workspace.server.spi.provision.InstallerConfigProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.MachineNameProvisioner;
-import org.eclipse.che.api.workspace.server.spi.provision.ProjectsVolumeForWsAgentProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
@@ -60,6 +55,7 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvV
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.JavaOptsEnvVariableProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.LegacyEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MavenOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.ProjectsRootEnvVariableProvider;
@@ -70,13 +66,13 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentJava
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceIdEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNameEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNamespaceNameEnvVarProvider;
-import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.core.db.DBTermination;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
+import org.eclipse.che.core.tracing.metrics.TracingMetricsModule;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.mail.template.ST.STTemplateProcessorImpl;
 import org.eclipse.che.mail.template.TemplateProcessor;
@@ -90,13 +86,10 @@ import org.eclipse.che.multiuser.organization.api.OrganizationApiModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationJpaModule;
 import org.eclipse.che.multiuser.permission.user.UserServicePermissionsFilter;
 import org.eclipse.che.multiuser.resource.api.ResourceModule;
-import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import org.eclipse.che.security.PBKDF2PasswordEncryptor;
 import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.security.oauth.EmbeddedOAuthAPI;
 import org.eclipse.che.security.oauth.OAuthAPI;
-import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
-import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructure;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -141,40 +134,27 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.factory.server.FactoryService.class);
     install(new org.eclipse.che.api.factory.server.jpa.FactoryJpaModule());
 
+    // Service-specific factory resolvers.
     Multibinder<FactoryParametersResolver> factoryParametersResolverMultibinder =
         Multibinder.newSetBinder(binder(), FactoryParametersResolver.class);
     factoryParametersResolverMultibinder.addBinding().to(GithubFactoryParametersResolver.class);
 
     bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
-    bind(org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader.class)
-        .asEagerSingleton();
-    bind(org.eclipse.che.api.project.server.template.ProjectTemplateRegistry.class);
-    bind(org.eclipse.che.api.project.server.template.ProjectTemplateService.class);
     bind(org.eclipse.che.api.ssh.server.SshService.class);
     bind(org.eclipse.che.api.user.server.UserService.class);
     bind(org.eclipse.che.api.user.server.ProfileService.class);
     bind(org.eclipse.che.api.user.server.PreferencesService.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
 
-    bind(DevfileSchemaValidator.class);
-    bind(DevfileService.class);
+    install(new DevfileModule());
 
-    MapBinder<String, String> stacks =
-        MapBinder.newMapBinder(
-            binder(), String.class, String.class, Names.named(StackLoader.CHE_PREDEFINED_STACKS));
-    stacks.addBinding("stacks.json").toInstance("stacks-images");
-    stacks.addBinding("che-in-che.json").toInstance("");
-    bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
-    install(new FactoryModuleBuilder().build(ExecAgentClientFactory.class));
 
     Multibinder<InternalEnvironmentProvisioner> internalEnvironmentProvisioners =
         Multibinder.newSetBinder(binder(), InternalEnvironmentProvisioner.class);
-    internalEnvironmentProvisioners.addBinding().to(InstallerConfigProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(EnvVarEnvironmentProvisioner.class);
-    internalEnvironmentProvisioners.addBinding().to(ProjectsVolumeForWsAgentProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(MachineNameProvisioner.class);
 
     Multibinder<EnvVarProvider> envVarProviders =
@@ -186,18 +166,26 @@ public class WsMasterModule extends AbstractModule {
     envVarProviders.addBinding().to(WorkspaceIdEnvVarProvider.class);
     envVarProviders.addBinding().to(WorkspaceNamespaceNameEnvVarProvider.class);
     envVarProviders.addBinding().to(WorkspaceNameEnvVarProvider.class);
-
-    envVarProviders.addBinding().to(JavaOptsEnvVariableProvider.class);
-    envVarProviders.addBinding().to(MavenOptsEnvVariableProvider.class);
     envVarProviders.addBinding().to(ProjectsRootEnvVariableProvider.class);
-    envVarProviders.addBinding().to(AgentAuthEnableEnvVarProvider.class);
-    envVarProviders.addBinding().to(WorkspaceAgentJavaOptsEnvVariableProvider.class);
 
-    envVarProviders.addBinding().to(WorkspaceAgentCorsAllowedOriginsEnvVarProvider.class);
-    envVarProviders.addBinding().to(WorkspaceAgentCorsAllowCredentialsEnvVarProvider.class);
-    envVarProviders.addBinding().to(WorkspaceAgentCorsEnabledEnvVarProvider.class);
+    Multibinder<LegacyEnvVarProvider> legacyEnvVarProviderMultibinders =
+        Multibinder.newSetBinder(binder(), LegacyEnvVarProvider.class);
+    legacyEnvVarProviderMultibinders.addBinding().to(JavaOptsEnvVariableProvider.class);
+    legacyEnvVarProviderMultibinders.addBinding().to(MavenOptsEnvVariableProvider.class);
 
-    bind(org.eclipse.che.api.workspace.server.bootstrap.InstallerService.class);
+    legacyEnvVarProviderMultibinders.addBinding().to(AgentAuthEnableEnvVarProvider.class);
+    legacyEnvVarProviderMultibinders
+        .addBinding()
+        .to(WorkspaceAgentJavaOptsEnvVariableProvider.class);
+
+    legacyEnvVarProviderMultibinders
+        .addBinding()
+        .to(WorkspaceAgentCorsAllowedOriginsEnvVarProvider.class);
+    legacyEnvVarProviderMultibinders
+        .addBinding()
+        .to(WorkspaceAgentCorsAllowCredentialsEnvVarProvider.class);
+    legacyEnvVarProviderMultibinders.addBinding().to(WorkspaceAgentCorsEnabledEnvVarProvider.class);
+
     bind(org.eclipse.che.api.workspace.server.event.WorkspaceJsonRpcMessenger.class)
         .asEagerSingleton();
     bind(org.eclipse.che.everrest.EverrestDownloadFileResponseFilter.class);
@@ -210,19 +198,11 @@ public class WsMasterModule extends AbstractModule {
         .asEagerSingleton();
     bind(org.eclipse.che.api.workspace.server.event.ServerStatusJsonRpcMessenger.class)
         .asEagerSingleton();
-    bind(org.eclipse.che.api.workspace.server.event.InstallerStatusJsonRpcMessenger.class)
-        .asEagerSingleton();
-    bind(org.eclipse.che.api.workspace.server.event.InstallerLogJsonRpcMessenger.class)
-        .asEagerSingleton();
     bind(org.eclipse.che.api.workspace.server.event.RuntimeLogJsonRpcMessenger.class)
         .asEagerSingleton();
 
     bind(org.eclipse.che.security.oauth.OAuthAuthenticatorProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl.class);
-
-    // installers
-    install(new InstallerModule());
-    binder().bind(new TypeLiteral<Set<Installer>>() {}).toProvider(InstallersProvider.class);
 
     install(new org.eclipse.che.api.core.rest.CoreRestModule());
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
@@ -275,19 +255,25 @@ public class WsMasterModule extends AbstractModule {
       install(new OpenShiftInfraModule());
     } else if (KubernetesInfrastructure.NAME.equals(infrastructure)) {
       install(new KubernetesInfraModule());
-    } else {
-      install(new LocalDockerModule());
-      install(new DockerInfraModule());
     }
+    install(new CheJsonRpcWebSocketConfigurationModule());
 
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
     MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
 
     if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))) {
       install(new org.eclipse.che.core.tracing.TracingModule());
+    } else {
+      install(new org.eclipse.che.core.tracing.NopTracingModule());
     }
     if (Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
       install(new org.eclipse.che.core.metrics.MetricsModule());
+      install(new WsMasterMetricsModule());
+      install(new MetricsOverrideBinding());
+    }
+    if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))
+        && Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
+      install(new TracingMetricsModule());
     }
   }
 
@@ -298,7 +284,6 @@ public class WsMasterModule extends AbstractModule {
     bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
     bind(MachineTokenProvider.class).to(MachineTokenProvider.EmptyMachineTokenProvider.class);
 
-    bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);
 
     install(new org.eclipse.che.api.user.server.jpa.UserJpaModule());
@@ -374,9 +359,6 @@ public class WsMasterModule extends AbstractModule {
 
     bind(org.eclipse.che.multiuser.permission.factory.FactoryPermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.devfile.DevfilePermissionsFilter.class);
-    bind(
-        org.eclipse.che.multiuser.permission.installer.InstallerRegistryServicePermissionsFilter
-            .class);
     bind(org.eclipse.che.multiuser.permission.workspace.activity.ActivityPermissionsFilter.class);
     bind(AdminPermissionInitializer.class).asEagerSingleton();
     bind(

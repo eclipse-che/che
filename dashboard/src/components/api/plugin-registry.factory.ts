@@ -14,10 +14,21 @@
 export interface IPlugin {
   id: string;
   name: string;
+  publisher: string;
+  deprecate: {
+    autoMigrate: boolean;
+    migrateTo: string;
+  };
+  displayName: string;
   type: string;
   version: string;
   description?: string;
   isEnabled: boolean;
+}
+
+export interface IPluginRow extends IPlugin {
+  selected: string;
+  versions: string[];
 }
 
 
@@ -41,7 +52,7 @@ export class PluginRegistry {
   }
 
   fetchPlugins(location: string): ng.IPromise<Array<IPlugin>> {
-    let promise = this.$http({'method': 'GET', 'url': location + '/plugins/'});
+    let promise = this.$http({ 'method': 'GET', 'url': location + '/plugins/' });
     return promise.then((result: any) => {
       return result.data;
     });

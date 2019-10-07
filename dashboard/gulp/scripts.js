@@ -31,6 +31,11 @@ function webpackWrapper(watch, test, callback) {
       noParse: [/jsonlint/],
       loaders: [
         {
+          test: /\.min\.js\.map$/,
+          include: /node_modules\/angular-websocket\/dist/,
+          loader: 'file-loader'
+        },
+        {
           test: /\.ts$/,
           exclude: /node_modules/,
           loaders: ['babel-loader', 'awesome-typescript-loader']

@@ -41,34 +41,61 @@ public class LoggedRunnable implements Runnable {
           && method.getName().equals("run")
           && method.getParameterTypes().length == 0) {
         LOG.debug(
-            "Invoking method run of class {} instance {}", object.getClass().getName(), object);
+            "Invoking method 'run' of class '{}' instance '{}'",
+            object.getClass().getName(),
+            object);
 
         ((Runnable) object).run();
 
         LOG.debug(
-            "Method of class {} instance {} complete  at {}  sec",
+            "Method of class '{}' instance '{}' is completed in {} sec",
             object.getClass().getName(),
             object,
             TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime));
       } else {
         try {
           LOG.debug(
-              "Invoking run method of class {} instance {}", object.getClass().getName(), object);
+              "Invoking method '{}' of class '{}' instance '{}'",
+              method.getName(),
+              object.getClass().getName(),
+              object);
 
           method.invoke(object);
 
           LOG.debug(
-              "Method of class {} instance {} complete  at {}  sec",
+              "Method of class '{}' instance '{}' is completed in {} sec",
               object.getClass().getName(),
               object,
               TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime));
         } catch (InvocationTargetException | IllegalAccessException e) {
-          LOG.error(e.getMessage(), e);
+          LOG.error(
+              "Error occurred during invocation of method '{}#{}'. Instance: '{}'. Error: {}",
+              object.getClass().getName(),
+              method.getName(),
+              object,
+              e.getMessage(),
+              e);
         }
       }
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
+      LOG.error(
+          "Error occurred during invocation of method '{}#{}'. Instance: '{}'. Error: {}",
+          object.getClass().getName(),
+          method.getName(),
+          object,
+          e.getMessage(),
+          e);
       throw e;
     }
+  }
+
+  @Override
+  public String toString() {
+    return "LoggedRunnable{"
+        + "methodToInvoke="
+        + object.getClass().getName()
+        + '#'
+        + method.getName()
+        + '}';
   }
 }

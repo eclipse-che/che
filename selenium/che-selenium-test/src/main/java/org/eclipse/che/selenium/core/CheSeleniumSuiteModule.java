@@ -55,12 +55,6 @@ import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFacto
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUserFactory;
-import org.eclipse.che.selenium.core.webdriver.DownloadedFileUtil;
-import org.eclipse.che.selenium.core.webdriver.DownloadedIntoGridFileUtil;
-import org.eclipse.che.selenium.core.webdriver.DownloadedLocallyFileUtil;
-import org.eclipse.che.selenium.core.webdriver.UploadIntoGridUtil;
-import org.eclipse.che.selenium.core.webdriver.UploadLocallyUtil;
-import org.eclipse.che.selenium.core.webdriver.UploadUtil;
 import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
 import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceProvider;
 import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceUrlResolver;
@@ -127,7 +121,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
       install(new CheSeleniumSingleUserModule());
     }
 
-    configureTestExecutionModeRelatedDependencies();
+    install(new TestExecutionModule());
   }
 
   private void configureInfrastructureRelatedDependencies(TestConfiguration config) {
@@ -162,17 +156,6 @@ public class CheSeleniumSuiteModule extends AbstractModule {
       default:
         throw new RuntimeException(
             format("Infrastructure '%s' hasn't been supported by tests.", cheInfrastructure));
-    }
-  }
-
-  private void configureTestExecutionModeRelatedDependencies() {
-    boolean gridMode = Boolean.valueOf(System.getProperty("grid.mode"));
-    if (gridMode) {
-      bind(DownloadedFileUtil.class).to(DownloadedIntoGridFileUtil.class);
-      bind(UploadUtil.class).to(UploadIntoGridUtil.class);
-    } else {
-      bind(DownloadedFileUtil.class).to(DownloadedLocallyFileUtil.class);
-      bind(UploadUtil.class).to(UploadLocallyUtil.class);
     }
   }
 

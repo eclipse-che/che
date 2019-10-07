@@ -160,6 +160,7 @@ public class TarUtils {
     }
   }
 
+  /** @apiNote Caller should close `in` after calling this method. */
   public static void untar(InputStream in, File targetDir) throws IOException {
     final TarArchiveInputStream tarIn = new TarArchiveInputStream(in);
     byte[] b = new byte[BUF_SIZE];

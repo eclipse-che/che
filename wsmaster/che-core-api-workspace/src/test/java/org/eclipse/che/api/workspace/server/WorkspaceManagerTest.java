@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.server;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
@@ -19,14 +20,18 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 import static org.eclipse.che.api.workspace.shared.Constants.CREATED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_GENERATE_NAME_CHARS_APPEND;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -34,6 +39,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -57,15 +63,21 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
+import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
@@ -76,9 +88,14 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.ArgumentCaptor;
@@ -107,6 +124,8 @@ public class WorkspaceManagerTest {
   @Mock private AccountManager accountManager;
   @Mock private EventService eventService;
   @Mock private WorkspaceValidator validator;
+  @Mock private DevfileConverter devfileConverter;
+  @Mock private DevfileIntegrityValidator devfileIntegrityValidator;
 
   @Captor private ArgumentCaptor<WorkspaceImpl> workspaceCaptor;
 
@@ -115,7 +134,13 @@ public class WorkspaceManagerTest {
   @BeforeMethod
   public void setUp() throws Exception {
     workspaceManager =
-        new WorkspaceManager(workspaceDao, runtimes, eventService, accountManager, validator);
+        new WorkspaceManager(
+            workspaceDao,
+            runtimes,
+            eventService,
+            accountManager,
+            validator,
+            devfileIntegrityValidator);
     lenient()
         .when(accountManager.getByName(NAMESPACE_1))
         .thenReturn(new AccountImpl("accountId", NAMESPACE_1, "test"));
@@ -155,6 +180,44 @@ public class WorkspaceManagerTest {
   }
 
   @Test
+  public void createsWorkspaceFromDevfile()
+      throws ValidationException, ConflictException, NotFoundException, ServerException {
+    final DevfileImpl devfile = new DevfileImpl();
+    devfile.setApiVersion(CURRENT_API_VERSION);
+    devfile.setName("ws");
+    Workspace workspace = workspaceManager.createWorkspace(devfile, NAMESPACE_1, null, null);
+    assertEquals(workspace.getDevfile(), devfile);
+  }
+
+  @Test
+  public void createsWorkspaceFromDevfileWithGenerateName()
+      throws ValidationException, ConflictException, NotFoundException, ServerException {
+    final String testDevfileGenerateName = "ws-";
+    final DevfileImpl devfile = new DevfileImpl();
+    devfile.setApiVersion(CURRENT_API_VERSION);
+    devfile.getMetadata().setGenerateName(testDevfileGenerateName);
+    Workspace workspace = workspaceManager.createWorkspace(devfile, NAMESPACE_1, null, null);
+
+    assertTrue(workspace.getDevfile().getName().startsWith(testDevfileGenerateName));
+    assertEquals(
+        workspace.getDevfile().getName().length(),
+        testDevfileGenerateName.length() + WORKSPACE_GENERATE_NAME_CHARS_APPEND);
+  }
+
+  @Test
+  public void nameIsUsedWhenNameAndGenerateNameSet()
+      throws ValidationException, ConflictException, NotFoundException, ServerException {
+    final String devfileName = "workspacename";
+    final DevfileImpl devfile = new DevfileImpl();
+    devfile.setApiVersion(CURRENT_API_VERSION);
+    devfile.getMetadata().setName(devfileName);
+    devfile.getMetadata().setGenerateName("this_will_not_be_set_as_a_name");
+    Workspace workspace = workspaceManager.createWorkspace(devfile, NAMESPACE_1, null, null);
+
+    assertEquals(workspace.getDevfile().getName(), devfileName);
+  }
+
+  @Test
   public void getsWorkspaceByIdWithoutRuntime() throws Exception {
     WorkspaceImpl workspace = createAndMockWorkspace();
 
@@ -182,7 +245,7 @@ public class WorkspaceManagerTest {
     final WorkspaceImpl workspace = createAndMockWorkspace();
 
     final WorkspaceImpl result =
-        workspaceManager.getWorkspace(workspace.getConfig().getName(), workspace.getNamespace());
+        workspaceManager.getWorkspace(workspace.getName(), workspace.getNamespace());
 
     assertEquals(result, workspace);
   }
@@ -199,8 +262,7 @@ public class WorkspaceManagerTest {
     final WorkspaceImpl workspace = createAndMockWorkspace();
 
     final WorkspaceImpl result =
-        workspaceManager.getWorkspace(
-            workspace.getNamespace() + ":" + workspace.getConfig().getName());
+        workspaceManager.getWorkspace(workspace.getNamespace() + ":" + workspace.getName());
 
     assertEquals(result, workspace);
   }
@@ -209,8 +271,7 @@ public class WorkspaceManagerTest {
   public void getsWorkspaceByKeyWithoutOwner() throws Exception {
     final WorkspaceImpl workspace = createAndMockWorkspace();
 
-    final WorkspaceImpl result =
-        workspaceManager.getWorkspace(":" + workspace.getConfig().getName());
+    final WorkspaceImpl result = workspaceManager.getWorkspace(":" + workspace.getName());
 
     assertEquals(result, workspace);
   }
@@ -331,7 +392,7 @@ public class WorkspaceManagerTest {
     mockRuntime(workspace, STARTING);
 
     final WorkspaceImpl result =
-        workspaceManager.getWorkspace(workspace.getConfig().getName(), workspace.getNamespace());
+        workspaceManager.getWorkspace(workspace.getName(), workspace.getNamespace());
 
     assertEquals(
         result.getStatus(), STARTING, "Workspace status must be taken from the runtime instance");
@@ -358,6 +419,32 @@ public class WorkspaceManagerTest {
     final WorkspaceImpl updated = workspaceManager.updateWorkspace(workspace.getId(), workspace);
 
     assertEquals(updated.getStatus(), STARTING);
+  }
+
+  @Test(
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "Required non-null workspace configuration or devfile update but not both")
+  public void shouldThrowExceptionWhenTryingToUpdateWorkspaceWithoutWorkspaceConfigAndDevfile()
+      throws Exception {
+    final WorkspaceImpl workspace = WorkspaceImpl.builder().generateId().build();
+
+    workspaceManager.updateWorkspace(workspace.getId(), workspace);
+  }
+
+  @Test(
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "Required non-null workspace configuration or devfile update but not both")
+  public void shouldThrowExceptionWhenTryingToUpdateWorkspaceWithWorkspaceConfigAndDevfile()
+      throws Exception {
+    final Workspace workspace =
+        newDto(WorkspaceDto.class)
+            .withId("workspace123")
+            .withDevfile(newDto(DevfileDto.class))
+            .withConfig(newDto(WorkspaceConfigDto.class));
+
+    workspaceManager.updateWorkspace(workspace.getId(), workspace);
   }
 
   @Test
@@ -396,7 +483,7 @@ public class WorkspaceManagerTest {
 
     workspaceManager.startWorkspace(workspace.getId(), null, emptyMap());
 
-    verify(runtimes).startAsync(workspace, workspace.getConfig().getDefaultEnv(), emptyMap());
+    verify(runtimes).startAsync(workspace, null, emptyMap());
   }
 
   @Test
@@ -410,17 +497,32 @@ public class WorkspaceManagerTest {
 
     workspaceManager.startWorkspace(workspace.getId(), "non-default-env", emptyMap());
 
-    verify(runtimes).startAsync(workspaceCaptor.capture(), eq("non-default-env"), any());
-    assertEquals(workspaceCaptor.getValue().getConfig(), config);
+    verify(runtimes).startAsync(eq(workspace), eq("non-default-env"), anyMap());
   }
 
-  @Test(
-      expectedExceptions = NotFoundException.class,
-      expectedExceptionsMessageRegExp = "Workspace '.*' doesn't contain environment '.*'")
-  public void throwsNotFoundExceptionWhenStartWorkspaceWithNotExistingEnv() throws Exception {
-    final WorkspaceImpl workspace = createAndMockWorkspace();
+  @Test
+  public void startsWorkspaceWithDevfile() throws Exception {
+    DevfileImpl devfile = mock(DevfileImpl.class);
+    WorkspaceImpl workspace = createAndMockWorkspace(devfile, NAMESPACE_1);
 
-    workspaceManager.startWorkspace(workspace.getId(), "fake", null);
+    EnvironmentImpl environment = new EnvironmentImpl(null, emptyMap());
+    Command command = new CommandImpl("cmd", "echo hello", "custom");
+    WorkspaceConfig convertedConfig =
+        new WorkspaceConfigImpl(
+            "any",
+            "",
+            "default",
+            singletonList(command),
+            emptyList(),
+            ImmutableMap.of("default", environment),
+            ImmutableMap.of("attr", "value"));
+    when(devfileConverter.convert(any())).thenReturn(convertedConfig);
+
+    mockAnyWorkspaceStart();
+
+    workspaceManager.startWorkspace(workspace.getId(), null, emptyMap());
+
+    verify(runtimes).startAsync(eq(workspace), eq(null), anyMap());
   }
 
   @Test
@@ -434,7 +536,7 @@ public class WorkspaceManagerTest {
     workspaceManager.startWorkspace(workspaceConfig, workspace.getNamespace(), true, emptyMap());
 
     verify(runtimes)
-        .startAsync(workspaceCaptor.capture(), eq(workspace.getConfig().getDefaultEnv()), any());
+        .startAsync(workspaceCaptor.capture(), eq(workspaceConfig.getDefaultEnv()), anyMap());
     assertTrue(workspaceCaptor.getValue().isTemporary());
   }
 
@@ -527,6 +629,21 @@ public class WorkspaceManagerTest {
     verify(workspaceDao, times(1)).remove(anyString());
   }
 
+  @Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "boom")
+  public void shouldFailTocreateWorkspaceUsingInconsistentDevfile() throws Exception {
+    // given
+    doThrow(new DevfileFormatException("boom"))
+        .when(devfileIntegrityValidator)
+        .validateContentReferences(any(), any());
+
+    Devfile devfile = mock(Devfile.class);
+
+    // when
+    workspaceManager.createWorkspace(devfile, "ns", emptyMap(), null);
+
+    // then exception is thrown
+  }
+
   private void mockRuntimeStatus(WorkspaceImpl workspace, WorkspaceStatus status) {
     lenient().when(runtimes.getStatus(workspace.getId())).thenReturn(status);
   }
@@ -559,7 +676,7 @@ public class WorkspaceManagerTest {
             })
         .when(runtimes)
         .injectRuntime(workspace);
-    lenient().when(runtimes.isAnyRunning()).thenReturn(true);
+    lenient().when(runtimes.isAnyActive()).thenReturn(true);
 
     return runtime;
   }
@@ -568,22 +685,19 @@ public class WorkspaceManagerTest {
     return createAndMockWorkspace(createConfig(), NAMESPACE_1);
   }
 
-  private WorkspaceImpl createAndMockWorkspace(WorkspaceConfig cfg, String namespace)
-      throws Exception {
+  private WorkspaceImpl createAndMockWorkspace(Devfile devfile, String namespace) throws Exception {
     WorkspaceImpl workspace =
         WorkspaceImpl.builder()
+            .setDevfile(devfile)
             .generateId()
-            .setConfig(cfg)
             .setAccount(new AccountImpl("id", namespace, "type"))
             .setStatus(STOPPED)
             .build();
     lenient().when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
     lenient()
-        .when(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace()))
+        .when(workspaceDao.get(workspace.getName(), workspace.getNamespace()))
         .thenReturn(workspace);
-    lenient()
-        .when(workspaceDao.get(workspace.getConfig().getName(), NAMESPACE_1))
-        .thenReturn(workspace);
+    lenient().when(workspaceDao.get(workspace.getName(), NAMESPACE_1)).thenReturn(workspace);
     lenient()
         .when(workspaceDao.getByNamespace(eq(workspace.getNamespace()), anyInt(), anyLong()))
         .thenReturn(new Page<>(singletonList(workspace), 0, 1, 1));
@@ -596,16 +710,40 @@ public class WorkspaceManagerTest {
     return workspace;
   }
 
-  private void mockStart(Workspace workspace) throws Exception {
-    CompletableFuture<Void> cmpFuture = CompletableFuture.completedFuture(null);
+  private WorkspaceImpl createAndMockWorkspace(WorkspaceConfig cfg, String namespace)
+      throws Exception {
+    WorkspaceImpl workspace =
+        WorkspaceImpl.builder()
+            .setConfig(cfg)
+            .generateId()
+            .setAccount(new AccountImpl("id", namespace, "type"))
+            .setStatus(STOPPED)
+            .build();
+    lenient().when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
     lenient()
-        .when(runtimes.startAsync(eq(workspace), eq(workspace.getConfig().getDefaultEnv()), any()))
-        .thenReturn(cmpFuture);
+        .when(workspaceDao.get(workspace.getName(), workspace.getNamespace()))
+        .thenReturn(workspace);
+    lenient().when(workspaceDao.get(workspace.getName(), NAMESPACE_1)).thenReturn(workspace);
+    lenient()
+        .when(workspaceDao.getByNamespace(eq(workspace.getNamespace()), anyInt(), anyLong()))
+        .thenReturn(new Page<>(singletonList(workspace), 0, 1, 1));
+    lenient()
+        .when(workspaceDao.getByNamespace(eq(NAMESPACE_1), anyInt(), anyLong()))
+        .thenReturn(new Page<>(singletonList(workspace), 0, 1, 1));
+    lenient()
+        .when(workspaceDao.getWorkspaces(eq(USER_ID), anyInt(), anyLong()))
+        .thenReturn(new Page<>(singletonList(workspace), 0, 1, 1));
+    return workspace;
+  }
+
+  private void mockStart(WorkspaceImpl workspace) throws Exception {
+    CompletableFuture<Void> cmpFuture = CompletableFuture.completedFuture(null);
+    lenient().when(runtimes.startAsync(eq(workspace), any(), any())).thenReturn(cmpFuture);
   }
 
   private void mockAnyWorkspaceStart() throws Exception {
     CompletableFuture<Void> cmpFuture = CompletableFuture.completedFuture(null);
-    lenient().when(runtimes.startAsync(any(), anyString(), any())).thenReturn(cmpFuture);
+    lenient().when(runtimes.startAsync(any(), any(), any())).thenReturn(cmpFuture);
   }
 
   private void mockAnyWorkspaceStop() throws Exception {
@@ -616,7 +754,7 @@ public class WorkspaceManagerTest {
   private void mockAnyWorkspaceStartFailed(Exception cause) throws Exception {
     final CompletableFuture<Void> cmpFuture = new CompletableFuture<>();
     cmpFuture.completeExceptionally(cause);
-    lenient().when(runtimes.startAsync(any(), anyString(), any())).thenReturn(cmpFuture);
+    lenient().when(runtimes.startAsync(any(), any(), any())).thenReturn(cmpFuture);
   }
 
   private static WorkspaceConfigImpl createConfig() {
@@ -637,6 +775,14 @@ public class WorkspaceManagerTest {
         .setEnvironments(singletonMap("dev-env", environment))
         .setCommands(asList(createCommand(), createCommand()))
         .build();
+  }
+
+  private Pair<String, Environment> getDefaultEnvironment(Workspace workspace) {
+    return getEnvironment(workspace, workspace.getConfig().getDefaultEnv());
+  }
+
+  private Pair<String, Environment> getEnvironment(Workspace workspace, String envName) {
+    return Pair.of(envName, workspace.getConfig().getEnvironments().get(envName));
   }
 
   private static ServerConfigImpl createServerConfig() {

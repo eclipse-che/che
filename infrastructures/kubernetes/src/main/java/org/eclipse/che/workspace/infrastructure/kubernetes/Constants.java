@@ -37,13 +37,6 @@ public final class Constants {
   /** The label that contains a value with volume name. */
   public static final String CHE_VOLUME_NAME_LABEL = "che.workspace.volume_name";
 
-  /**
-   * The annotation with the wildcard reserved for container name. Formatted annotation with the
-   * real container name is used to get machine name.
-   */
-  public static final String MACHINE_NAME_ANNOTATION_FMT =
-      "org.eclipse.che.container.%s.machine_name";
-
   /** Kubernetes Pod status phase values */
   public static final String POD_STATUS_PHASE_RUNNING = "Running";
 

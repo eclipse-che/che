@@ -14,7 +14,7 @@
 /**
  * @ngdoc controller
  * @name projects.create-project.github.oauth-dialog.controller:NoGithubOauthDialogController
- * @description This class is handling the controller for the no Github oAuth dialog
+ * @description This class is handling the controller for the no Github OAuth dialog
  * @author Florent Benoit
  */
 export class NoGithubOauthDialogController {
@@ -36,6 +36,11 @@ export class NoGithubOauthDialogController {
 
     this.name = ($rootScope as any).branding.name;
     this.message = ($rootScope as any).branding.oauthDocs;
+  }
+
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   /**

@@ -22,14 +22,11 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
-import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.mockito.testng.MockitoTestNGListener;
@@ -58,22 +55,6 @@ public class MachineConfigsValidatorTest {
     machinesValidator = new MachineConfigsValidator();
 
     machineConfig = machineMockWithServers(Constants.SERVER_WS_AGENT_HTTP_REFERENCE);
-  }
-
-  @Test(
-      expectedExceptions = ValidationException.class,
-      expectedExceptionsMessageRegExp = "Environment should contain at least 1 machine")
-  public void shouldFailIfMachinesIsNull() throws Exception {
-    // when
-    machinesValidator.validate(null);
-  }
-
-  @Test(
-      expectedExceptions = ValidationException.class,
-      expectedExceptionsMessageRegExp = "Environment should contain at least 1 machine")
-  public void shouldFailIfMachinesIsEmpty() throws Exception {
-    // when
-    machinesValidator.validate(emptyMap());
   }
 
   @Test(
@@ -228,18 +209,6 @@ public class MachineConfigsValidatorTest {
     return new Object[][] {{"a"}, {"http"}, {"tcp"}, {"tcp2"}};
   }
 
-  @Test
-  public void shouldPassIfWsAgentServerAndInstallerAreInTheSameMachine() throws Exception {
-    // given
-    InternalMachineConfig machine = machineMock();
-    when(machine.getServers()).thenReturn(createServers(Constants.SERVER_WS_AGENT_HTTP_REFERENCE));
-    when(machine.getInstallers())
-        .thenReturn(createInstallers(WsAgentMachineFinderUtil.WS_AGENT_INSTALLER));
-
-    // when
-    machinesValidator.validate(singletonMap(MACHINE_NAME, machine));
-  }
-
   private static InternalMachineConfig machineMock() {
     InternalMachineConfig machineConfig = mock(InternalMachineConfig.class);
     when(machineConfig.getServers()).thenReturn(emptyMap());
@@ -251,12 +220,6 @@ public class MachineConfigsValidatorTest {
     InternalMachineConfig machineConfig = machineMock();
     when(machineConfig.getServers()).thenReturn(createServers(servers));
     return machineConfig;
-  }
-
-  private static List<InstallerImpl> createInstallers(String... installers) {
-    return Arrays.stream(installers)
-        .map(s -> new InstallerImpl().withId(s))
-        .collect(Collectors.toList());
   }
 
   private static Map<String, ServerConfig> createServers(String... servers) {

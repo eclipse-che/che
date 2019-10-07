@@ -11,16 +11,18 @@
  */
 package org.eclipse.che.api.workspace.server.wsplugins.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Command {
 
   private String name = null;
 
-  @JsonProperty("working-dir")
+  @JsonProperty("workingDir")
   private String workingDir = null;
 
   private List<String> command = new ArrayList<String>();

@@ -63,7 +63,7 @@ public class OpenShiftProjectCatalogPage {
   }
 
   public void open() {
-    seleniumWebDriver.navigate().to(openShiftWebConsoleUrlProvider.get());
+    seleniumWebDriver.navigate().to(openShiftWebConsoleUrlProvider.get() + "console");
   }
 
   public void logout() {

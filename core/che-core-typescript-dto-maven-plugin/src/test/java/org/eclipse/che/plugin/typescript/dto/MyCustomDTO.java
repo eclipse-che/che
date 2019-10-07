@@ -14,6 +14,7 @@ package org.eclipse.che.plugin.typescript.dto;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.dto.shared.DTO;
+import org.eclipse.che.plugin.typescript.dto.internal.InternalDto;
 
 /** @author Florent Benoit */
 @DTO
@@ -49,4 +50,8 @@ public interface MyCustomDTO {
   void setArguments(List<MyOtherDTO> arguments);
 
   MyCustomDTO withArguments(List<MyOtherDTO> arguments);
+
+  InternalDto getInternal();
+
+  void setInternal(InternalDto internal);
 }

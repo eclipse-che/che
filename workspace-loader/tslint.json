@@ -1,9 +1,13 @@
 {
   "defaultSeverity": "error",
   "rules": {
-    "file-header": [
+    "arrow-parens": [
       true,
-      "[\n\r]+ \\* Copyright \\(c\\) \\d{4}(-\\d{4})? .*[\n\r]+"
+      "ban-single-arg-parens"
+    ],
+    "arrow-return-shorthand": [
+      true,
+      "multiline"
     ],
     "class-name": true,
     "comment-format": [
@@ -12,17 +16,34 @@
     ],
     "curly": true,
     "eofline": true,
+    "file-header": [
+      true,
+      "SPDX-License-Identifier: EPL-2\\.0"
+    ],
     "forin": true,
     "indent": [
       true,
-      "spaces"
+      "spaces",
+      4
+    ],
+    "interface-over-type-literal": true,
+    "jsdoc-format": [
+      true,
+      "check-multiline-start"
     ],
     "max-line-length": [
       true,
       180
     ],
+    "no-any": true,
     "no-consecutive-blank-lines": true,
+    "no-construct": true,
+    "no-magic-numbers": false,
+    "no-null-keyword": true,
+    "no-shadowed-variable": true,
+    "no-string-throw": true,
     "no-trailing-whitespace": true,
+    "no-unused-expression": true,
     "no-var-keyword": true,
     "one-line": [
       true,
@@ -31,15 +52,33 @@
       "check-else",
       "check-whitespace"
     ],
+    "one-variable-per-declaration": true,
+    "prefer-const": [
+      true,
+      {
+        "destructuring": "all"
+      }
+    ],
+    "quotemark": [
+      true,
+      "single",
+      "jsx-single",
+      "avoid-escape",
+      "avoid-template"
+    ],
     "radix": true,
     "semicolon": [
       true,
       "always",
       "ignore-interfaces"
     ],
-    "trailing-comma": [
-      false
+    "space-before-function-paren": [
+      true,
+      {
+        "anonymous": "always"
+      }
     ],
+    "trailing-comma": false,
     "triple-equals": [
       true,
       "allow-null-check"

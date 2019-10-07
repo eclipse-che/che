@@ -62,7 +62,7 @@ public class PreferenceEntity {
 
   public Map<String, String> getPreferences() {
     if (preferences == null) {
-      return new HashMap<>();
+      preferences = new HashMap<>();
     }
     return preferences;
   }

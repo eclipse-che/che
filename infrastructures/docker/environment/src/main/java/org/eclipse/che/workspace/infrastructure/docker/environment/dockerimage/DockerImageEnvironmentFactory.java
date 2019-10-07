@@ -21,7 +21,6 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.*;
@@ -36,11 +35,10 @@ public class DockerImageEnvironmentFactory
 
   @Inject
   public DockerImageEnvironmentFactory(
-      InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
       MachineConfigsValidator machinesValidator,
       MemoryAttributeProvisioner memoryProvisioner) {
-    super(installerRegistry, recipeRetriever, machinesValidator);
+    super(recipeRetriever, machinesValidator);
     this.memoryProvisioner = memoryProvisioner;
   }
 
@@ -64,7 +62,7 @@ public class DockerImageEnvironmentFactory
       @Nullable InternalRecipe recipe,
       Map<String, InternalMachineConfig> machines,
       List<Warning> warnings)
-      throws InfrastructureException, ValidationException {
+      throws ValidationException {
     checkNotNull(recipe, "Null recipe is not supported by docker image environment factory");
     if (!DockerImageEnvironment.TYPE.equals(recipe.getType())) {
       throw new ValidationException(
@@ -77,9 +75,28 @@ public class DockerImageEnvironmentFactory
 
     checkArgument(dockerImage != null, "Docker image should not be null.");
 
+    ensureSingleMachine(machines);
+
     addRamAttributes(machines);
 
     return new DockerImageEnvironment(dockerImage, recipe, machines, warnings);
+  }
+
+  private void ensureSingleMachine(Map<String, InternalMachineConfig> machines)
+      throws ValidationException {
+    int nofMachines = machines.size();
+    if (nofMachines == 0) {
+      // we create a "fake" machine definition where the rest of the code can put additional
+      // definitions, if needed.
+      InternalMachineConfig emptyConfig = new InternalMachineConfig();
+      // let's just call the machine after the type. The name doesn't matter that much anyway.
+      machines.put(DockerImageEnvironment.TYPE, emptyConfig);
+    } else if (nofMachines > 1) {
+      throw new ValidationException(
+          format(
+              "Docker image environment only supports a single machine definition but found %d.",
+              nofMachines));
+    }
   }
 
   private void addRamAttributes(Map<String, InternalMachineConfig> machines) {

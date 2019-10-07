@@ -34,7 +34,7 @@ public interface UserDto extends User {
 
   UserDto withId(String id);
 
-  @ApiModelProperty("User alias which is used for oAuth")
+  @ApiModelProperty("User alias which is used for OAuth")
   List<String> getAliases();
 
   void setAliases(List<String> aliases);

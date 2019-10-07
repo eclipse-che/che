@@ -13,7 +13,11 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_SOURCE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.PLUGIN_MACHINE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.TOOL_CONTAINER_SOURCE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
 
 import com.google.common.annotations.Beta;
@@ -32,11 +36,13 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.provision.env.ProjectsRootEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
@@ -45,6 +51,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.Command;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
 /**
  * Applies Che plugins tooling configuration to a kubernetes internal runtime object.
@@ -63,31 +70,41 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
   private final String defaultSidecarMemoryLimitBytes;
   private final String sidecarImagePullPolicy;
   private final boolean isAuthEnabled;
+  private final ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider;
+  private final ChePluginsVolumeApplier chePluginsVolumeApplier;
 
   @Inject
   public KubernetesPluginsToolingApplier(
       @Named("che.workspace.sidecar.image_pull_policy") String sidecarImagePullPolicy,
       @Named("che.workspace.sidecar.default_memory_limit_mb") long defaultSidecarMemoryLimitMB,
-      @Named("che.agents.auth_enabled") boolean isAuthEnabled) {
+      @Named("che.agents.auth_enabled") boolean isAuthEnabled,
+      ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider,
+      ChePluginsVolumeApplier chePluginsVolumeApplier) {
     this.defaultSidecarMemoryLimitBytes = String.valueOf(defaultSidecarMemoryLimitMB * 1024 * 1024);
     this.isAuthEnabled = isAuthEnabled;
     this.sidecarImagePullPolicy =
         validImagePullPolicies.contains(sidecarImagePullPolicy) ? sidecarImagePullPolicy : null;
+    this.projectsRootEnvVariableProvider = projectsRootEnvVariableProvider;
+    this.chePluginsVolumeApplier = chePluginsVolumeApplier;
   }
 
   @Override
-  public void apply(InternalEnvironment internalEnvironment, Collection<ChePlugin> chePlugins)
+  public void apply(
+      RuntimeIdentity runtimeIdentity,
+      InternalEnvironment internalEnvironment,
+      Collection<ChePlugin> chePlugins)
       throws InfrastructureException {
     if (chePlugins.isEmpty()) {
       return;
     }
 
-    KubernetesEnvironment kubernetesEnvironment = (KubernetesEnvironment) internalEnvironment;
+    KubernetesEnvironment k8sEnv = (KubernetesEnvironment) internalEnvironment;
 
-    Map<String, Pod> pods = kubernetesEnvironment.getPods();
+    Map<String, PodData> pods = k8sEnv.getPodsData();
     switch (pods.size()) {
       case 0:
-        addToolingPod(kubernetesEnvironment);
+        addToolingPod(k8sEnv);
+        pods = k8sEnv.getPodsData();
         break;
       case 1:
         break;
@@ -95,23 +112,29 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         throw new InfrastructureException(
             "Che plugins tooling configuration can be applied to a workspace with one pod only");
     }
-    Pod pod = pods.values().iterator().next();
+    PodData pod = pods.values().iterator().next();
 
-    CommandsResolver commandsResolver = new CommandsResolver(kubernetesEnvironment);
+    CommandsResolver commandsResolver = new CommandsResolver(k8sEnv);
     for (ChePlugin chePlugin : chePlugins) {
+      for (CheContainer container : chePlugin.getInitContainers()) {
+        Container k8sInitContainer = toK8sContainer(container);
+        pod.getSpec().getInitContainers().add(k8sInitContainer);
+        chePluginsVolumeApplier.applyVolumes(pod, k8sInitContainer, container.getVolumes(), k8sEnv);
+      }
+
       Collection<CommandImpl> pluginRelatedCommands = commandsResolver.resolve(chePlugin);
 
       for (CheContainer container : chePlugin.getContainers()) {
-        addSidecar(pod, container, chePlugin, kubernetesEnvironment, pluginRelatedCommands);
+        addSidecar(pod, container, chePlugin, k8sEnv, pluginRelatedCommands, runtimeIdentity);
       }
     }
 
-    chePlugins.forEach(chePlugin -> populateWorkspaceEnvVars(chePlugin, kubernetesEnvironment));
+    chePlugins.forEach(chePlugin -> populateWorkspaceEnvVars(chePlugin, k8sEnv));
 
     if (isAuthEnabled) {
       // enable per-workspace security with JWT proxy for sidecar based workspaces
       // because it is the only workspace security implementation supported for now
-      kubernetesEnvironment.getAttributes().putIfAbsent(SECURE_EXPOSER_IMPL_PROPERTY, "jwtproxy");
+      k8sEnv.getAttributes().putIfAbsent(SECURE_EXPOSER_IMPL_PROPERTY, "jwtproxy");
     }
   }
 
@@ -125,7 +148,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .endSpec()
             .build();
 
-    kubernetesEnvironment.getPods().put(CHE_WORKSPACE_POD, pod);
+    kubernetesEnvironment.addPod(pod);
   }
 
   private void populateWorkspaceEnvVars(
@@ -133,7 +156,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
     List<EnvVar> workspaceEnv = toK8sEnvVars(chePlugin.getWorkspaceEnv());
     kubernetesEnvironment
-        .getPods()
+        .getPodsData()
         .values()
         .stream()
         .flatMap(pod -> pod.getSpec().getContainers().stream())
@@ -151,6 +174,19 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         .collect(Collectors.toList());
   }
 
+  private Container toK8sContainer(CheContainer container) throws InfrastructureException {
+    return toK8sContainerResolver(container, emptyList()).resolve();
+  }
+
+  private K8sContainerResolver toK8sContainerResolver(
+      CheContainer container, List<ChePluginEndpoint> endpoints) {
+    return new K8sContainerResolverBuilder()
+        .setContainer(container)
+        .setImagePullPolicy(sidecarImagePullPolicy)
+        .setPluginEndpoints(endpoints)
+        .build();
+  }
+
   /**
    * Adds k8s and Che specific configuration of a sidecar into the environment. For example:
    * <li>k8s container configuration {@link Container}
@@ -161,25 +197,23 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
    * @throws InfrastructureException when any error occurs
    */
   private void addSidecar(
-      Pod pod,
+      PodData pod,
       CheContainer container,
       ChePlugin chePlugin,
-      KubernetesEnvironment kubernetesEnvironment,
-      Collection<CommandImpl> sidecarRelatedCommands)
+      KubernetesEnvironment k8sEnv,
+      Collection<CommandImpl> sidecarRelatedCommands,
+      RuntimeIdentity runtimeIdentity)
       throws InfrastructureException {
 
     K8sContainerResolver k8sContainerResolver =
-        new K8sContainerResolverBuilder()
-            .setContainer(container)
-            .setImagePullPolicy(sidecarImagePullPolicy)
-            .setPluginName(chePlugin.getName())
-            .setPluginEndpoints(chePlugin.getEndpoints())
-            .build();
+        toK8sContainerResolver(container, chePlugin.getEndpoints());
     List<ChePluginEndpoint> containerEndpoints = k8sContainerResolver.getEndpoints();
 
     Container k8sContainer = k8sContainerResolver.resolve();
+    chePluginsVolumeApplier.applyVolumes(pod, k8sContainer, container.getVolumes(), k8sEnv);
 
-    String machineName = Names.machineName(pod, k8sContainer);
+    String machineName = k8sContainer.getName();
+    Names.putMachineName(pod.getMetadata(), k8sContainer.getName(), machineName);
     pod.getSpec().getContainers().add(k8sContainer);
 
     MachineResolver machineResolver =
@@ -188,37 +222,46 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .setContainer(k8sContainer)
             .setContainerEndpoints(containerEndpoints)
             .setDefaultSidecarMemorySizeAttribute(defaultSidecarMemoryLimitBytes)
-            .setAttributes(kubernetesEnvironment.getAttributes())
+            .setAttributes(k8sEnv.getAttributes())
+            .setProjectsRootPathEnvVar(projectsRootEnvVariableProvider.get(runtimeIdentity))
+            .setPluginPublisher(chePlugin.getPublisher())
+            .setPluginName(chePlugin.getName())
+            .setPluginId(chePlugin.getId())
             .build();
 
     InternalMachineConfig machineConfig = machineResolver.resolve();
-    kubernetesEnvironment.getMachines().put(machineName, machineConfig);
+    machineConfig.getAttributes().put(CONTAINER_SOURCE_ATTRIBUTE, TOOL_CONTAINER_SOURCE);
+    machineConfig.getAttributes().put(PLUGIN_MACHINE_ATTRIBUTE, chePlugin.getId());
+    k8sEnv.getMachines().put(machineName, machineConfig);
 
-    sidecarRelatedCommands.forEach(c -> c.getAttributes().put("machineName", machineName));
+    sidecarRelatedCommands.forEach(
+        c ->
+            c.getAttributes()
+                .put(
+                    org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE,
+                    machineName));
 
     container
         .getCommands()
         .stream()
         .map(c -> asCommand(machineName, c))
-        .forEach(c -> kubernetesEnvironment.getCommands().add(c));
+        .forEach(c -> k8sEnv.getCommands().add(c));
 
     SidecarServicesProvisioner sidecarServicesProvisioner =
         new SidecarServicesProvisioner(containerEndpoints, pod.getMetadata().getName());
-    sidecarServicesProvisioner.provision(kubernetesEnvironment);
+    sidecarServicesProvisioner.provision(k8sEnv);
   }
 
   private CommandImpl asCommand(String machineName, Command command) {
     CommandImpl cmd =
-        new CommandImpl(
-            command.getName(),
-            command.getCommand().stream().collect(Collectors.joining(" ")),
-            "custom");
+        new CommandImpl(command.getName(), String.join(" ", command.getCommand()), "custom");
     cmd.getAttributes().put(WORKING_DIRECTORY_ATTRIBUTE, command.getWorkingDir());
-    cmd.getAttributes().put("machineName", machineName);
+    cmd.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName);
     return cmd;
   }
 
   private static class CommandsResolver {
+
     private final KubernetesEnvironment k8sEnvironment;
     private final ArrayListMultimap<String, CommandImpl> pluginRefToCommand;
 
@@ -230,7 +273,11 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
           .getCommands()
           .forEach(
               (c) -> {
-                String pluginRef = c.getAttributes().get("plugin");
+                String pluginRef =
+                    c.getAttributes()
+                        .get(
+                            org.eclipse.che.api.core.model.workspace.config.Command
+                                .PLUGIN_ATTRIBUTE);
                 if (pluginRef != null) {
                   pluginRefToCommand.put(pluginRef, c);
                 }
@@ -240,7 +287,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     private Collection<CommandImpl> resolve(ChePlugin chePlugin) {
       List<CheContainer> containers = chePlugin.getContainers();
 
-      String pluginRef = chePlugin.getId() + ":" + chePlugin.getVersion();
+      String pluginRef = chePlugin.getId();
       Collection<CommandImpl> pluginsCommands = pluginRefToCommand.removeAll(pluginRef);
 
       if (pluginsCommands.isEmpty()) {

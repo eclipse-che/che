@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.multiuser.resource.spi;
 
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
@@ -27,9 +28,10 @@ public interface FreeResourcesLimitDao {
    *
    * @param resourcesLimit resources limit to store
    * @throws NullPointerException when {@code resourcesLimit} is null
+   * @throws ConflictException when the specified account doesn't exist
    * @throws ServerException when any other error occurs
    */
-  void store(FreeResourcesLimitImpl resourcesLimit) throws ServerException;
+  void store(FreeResourcesLimitImpl resourcesLimit) throws ConflictException, ServerException;
 
   /**
    * Returns free resources limit for account with specified id.

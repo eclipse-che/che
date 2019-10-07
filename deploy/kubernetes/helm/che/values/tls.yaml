@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012-2017 Red Hat, Inc.
+# Copyright (c) 2012-2019 Red Hat, Inc.
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -7,14 +7,7 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-# Currently, TLS support is enabled only for single-host deployments
-
 global:
-  multiuser: true
-  ingressDomain: <your.k8s.com>
-  serverStrategy: single-host
   tls:
     enabled: true
-    useCertManager: true
-    useStaging: false
     secretName: che-tls

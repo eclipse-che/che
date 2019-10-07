@@ -14,12 +14,13 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphas
 import static java.util.Collections.singletonMap;
 
 import com.google.common.annotations.Beta;
-import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 
 /**
  * Extends {@link BrokerEnvironmentFactory} to be used in the kubernetes infrastructure.
@@ -38,13 +39,19 @@ public class KubernetesBrokerEnvironmentFactory
       @Named("che.workspace.plugin_broker.pull_policy") String brokerPullPolicy,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
       MachineTokenEnvVarProvider machineTokenEnvVarProvider,
-      @Named("che.workspace.plugin_broker.images") Map<String, String> pluginTypeToImage) {
+      @Named("che.workspace.plugin_broker.init.image") String initBrokerImage,
+      @Named("che.workspace.plugin_broker.unified.image") String unifiedBrokerImage,
+      @Nullable @Named("che.workspace.plugin_registry_url") String pluginRegistryUrl,
+      CertificateProvisioner certProvisioner) {
     super(
         cheWebsocketEndpoint,
         brokerPullPolicy,
         authEnableEnvVarProvider,
         machineTokenEnvVarProvider,
-        pluginTypeToImage);
+        unifiedBrokerImage,
+        initBrokerImage,
+        pluginRegistryUrl,
+        certProvisioner);
   }
 
   @Override

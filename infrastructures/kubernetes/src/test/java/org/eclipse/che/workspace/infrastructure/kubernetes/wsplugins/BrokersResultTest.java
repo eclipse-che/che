@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
@@ -61,38 +60,32 @@ public class BrokersResultTest {
       expectedExceptionsMessageRegExp =
           "Submitting a broker result is not allowed before calling BrokerResult#get")
   public void shouldThrowExceptionOnCallingAddResultBeforeCallGet() throws Exception {
-    brokersResult.addResult(emptyList());
+    brokersResult.setResult(emptyList());
   }
 
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Broker result is submitted when no more results are expected")
-  public void shouldThrowExceptionIfNumberOfAddResultCallsIsBiggerThanExpected() throws Exception {
+          "Plugins brokering result is unexpectedly submitted more than one time. This indicates unexpected behavior of the system")
+  public void shouldThrowExceptionIfResultIsSubmittedSecondTime() throws Exception {
     // given
-    brokersResult.oneMoreBroker();
-    brokersResult.oneMoreBroker();
-    brokersResult.oneMoreBroker();
     executeBrokerGet();
     waitBrokerGetCalled();
 
     // when
-    brokersResult.addResult(singletonList(new ChePlugin()));
-    brokersResult.addResult(singletonList(new ChePlugin()));
-    brokersResult.addResult(singletonList(new ChePlugin()));
+    brokersResult.setResult(singletonList(new ChePlugin()));
 
     // then
-    brokersResult.addResult(singletonList(new ChePlugin()));
+    brokersResult.setResult(singletonList(new ChePlugin()));
   }
 
   @Test
-  public void shouldReturnResultOfOneBroker() throws Exception {
+  public void shouldReturnResultOfBroker() throws Exception {
     // given
-    brokersResult.oneMoreBroker();
     ChePlugin chePlugin = new ChePlugin();
     executeWhenResultIsStarted(
         () -> {
-          brokersResult.addResult(singletonList(chePlugin));
+          brokersResult.setResult(singletonList(chePlugin));
           return null;
         });
 
@@ -101,27 +94,6 @@ public class BrokersResultTest {
 
     // then
     assertEquals(chePlugins, singletonList(chePlugin));
-  }
-
-  @Test
-  public void shouldCombineResultsOfSeveralBrokers() throws Exception {
-    // given
-    brokersResult.oneMoreBroker();
-    ChePlugin chePlugin = new ChePlugin();
-    brokersResult.oneMoreBroker();
-    ChePlugin chePlugin2 = new ChePlugin();
-    executeWhenResultIsStarted(
-        () -> {
-          brokersResult.addResult(singletonList(chePlugin));
-          brokersResult.addResult(singletonList(chePlugin2));
-          return null;
-        });
-
-    // when
-    List<ChePlugin> chePlugins = brokersResult.get(2, TimeUnit.SECONDS);
-
-    // then
-    assertEquals(chePlugins, asList(chePlugin, chePlugin2));
   }
 
   @Test(
@@ -136,24 +108,7 @@ public class BrokersResultTest {
 
   @Test(expectedExceptions = TimeoutException.class)
   public void shouldThrowTimeoutExceptionIfResultIsNotSubmitted() throws Exception {
-    brokersResult.oneMoreBroker();
-
     brokersResult.get(1, TimeUnit.MILLISECONDS);
-  }
-
-  @Test(expectedExceptions = TimeoutException.class)
-  public void shouldThrowTimeoutExceptionIfNotAllResultsAreSubmitted() throws Exception {
-    // given
-    brokersResult.oneMoreBroker();
-    brokersResult.oneMoreBroker();
-    executeWhenResultIsStarted(
-        () -> {
-          brokersResult.addResult(singletonList(new ChePlugin()));
-          return null;
-        });
-
-    // when
-    brokersResult.get(1, TimeUnit.SECONDS);
   }
 
   @Test
@@ -165,30 +120,6 @@ public class BrokersResultTest {
           return null;
         });
     // given
-    brokersResult.oneMoreBroker();
-    try {
-      brokersResult.get(3, TimeUnit.SECONDS);
-    } catch (ExecutionException e) {
-      // then
-      assertEquals(e.getCause().getClass(), InfrastructureException.class);
-      assertEquals(e.getCause().getMessage(), "test");
-      return;
-    }
-    fail();
-  }
-
-  @Test
-  public void shouldThrowExceptionIfErrorIsSubmittedAfterOneOfTheResults() throws Exception {
-    executeWhenResultIsStarted(
-        () -> {
-          // when
-          brokersResult.addResult(singletonList(new ChePlugin()));
-          brokersResult.error(new InfrastructureException("test"));
-          return null;
-        });
-    // given
-    brokersResult.oneMoreBroker();
-    brokersResult.oneMoreBroker();
     try {
       brokersResult.get(3, TimeUnit.SECONDS);
     } catch (ExecutionException e) {

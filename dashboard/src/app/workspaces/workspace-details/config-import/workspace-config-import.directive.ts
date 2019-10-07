@@ -35,6 +35,7 @@ export class WorkspaceConfigImport {
   constructor() {
     // scope values
     this.scope = {
+      isActive: '=',
       workspaceConfig: '=',
       workspaceConfigOnChange: '&'
     };

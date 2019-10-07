@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage;
 
+import static java.lang.String.format;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,7 +21,11 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 
-/** @author Sergii Leshchenko */
+/**
+ * Represents an environment based on a docker image. It must be declared with exactly 1 machine.
+ *
+ * @author Sergii Leshchenko
+ */
 public class DockerImageEnvironment extends InternalEnvironment {
   public static final String TYPE = "dockerimage";
 
@@ -30,8 +36,19 @@ public class DockerImageEnvironment extends InternalEnvironment {
       InternalRecipe recipe,
       Map<String, InternalMachineConfig> machines,
       List<Warning> warnings) {
-    super(recipe, machines, warnings);
+    super(recipe, checkSingleEntry(machines), warnings);
     this.dockerImage = dockerImage;
+  }
+
+  private static <K, V> Map<K, V> checkSingleEntry(Map<K, V> map) {
+    if (map.size() == 1) {
+      return map;
+    } else {
+      throw new IllegalArgumentException(
+          format(
+              "A docker image environment must contain precisely 1 machine configuration but found %d.",
+              map.size()));
+    }
   }
 
   @Override

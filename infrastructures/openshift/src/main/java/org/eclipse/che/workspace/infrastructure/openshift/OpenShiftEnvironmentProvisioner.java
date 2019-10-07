@@ -21,13 +21,14 @@ import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitUserProfileProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSshKeysProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
@@ -59,13 +60,14 @@ public class OpenShiftEnvironmentProvisioner
   private final EnvVarsConverter envVarsConverter;
   private final RestartPolicyRewriter restartPolicyRewriter;
   private final RamLimitRequestProvisioner ramLimitProvisioner;
-  private final InstallerServersPortProvisioner installerServersPortProvisioner;
   private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
   private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
   private final ImagePullSecretProvisioner imagePullSecretProvisioner;
   private final ProxySettingsProvisioner proxySettingsProvisioner;
   private final ServiceAccountProvisioner serviceAccountProvisioner;
   private final CertificateProvisioner certificateProvisioner;
+  private final VcsSshKeysProvisioner vcsSshKeysProvisioner;
+  private final GitUserProfileProvisioner gitUserProfileProvisioner;
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
@@ -77,13 +79,14 @@ public class OpenShiftEnvironmentProvisioner
       RestartPolicyRewriter restartPolicyRewriter,
       WorkspaceVolumesStrategy volumesStrategy,
       RamLimitRequestProvisioner ramLimitProvisioner,
-      InstallerServersPortProvisioner installerServersPortProvisioner,
       LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
       PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
       ImagePullSecretProvisioner imagePullSecretProvisioner,
       ProxySettingsProvisioner proxySettingsProvisioner,
       ServiceAccountProvisioner serviceAccountProvisioner,
-      CertificateProvisioner certificateProvisioner) {
+      CertificateProvisioner certificateProvisioner,
+      VcsSshKeysProvisioner vcsSshKeysProvisioner,
+      GitUserProfileProvisioner gitUserProfileProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -92,13 +95,14 @@ public class OpenShiftEnvironmentProvisioner
     this.envVarsConverter = envVarsConverter;
     this.restartPolicyRewriter = restartPolicyRewriter;
     this.ramLimitProvisioner = ramLimitProvisioner;
-    this.installerServersPortProvisioner = installerServersPortProvisioner;
     this.logsVolumeMachineProvisioner = logsVolumeMachineProvisioner;
     this.podTerminationGracePeriodProvisioner = podTerminationGracePeriodProvisioner;
     this.imagePullSecretProvisioner = imagePullSecretProvisioner;
     this.proxySettingsProvisioner = proxySettingsProvisioner;
     this.serviceAccountProvisioner = serviceAccountProvisioner;
     this.certificateProvisioner = certificateProvisioner;
+    this.vcsSshKeysProvisioner = vcsSshKeysProvisioner;
+    this.gitUserProfileProvisioner = gitUserProfileProvisioner;
   }
 
   @Override
@@ -111,7 +115,6 @@ public class OpenShiftEnvironmentProvisioner
     LOG.debug(
         "Start provisioning OpenShift environment for workspace '{}'", identity.getWorkspaceId());
     // 1 stage - update environment according Infrastructure specific
-    installerServersPortProvisioner.provision(osEnv, identity);
     if (pvcEnabled) {
       logsVolumeMachineProvisioner.provision(osEnv, identity);
     }
@@ -133,6 +136,8 @@ public class OpenShiftEnvironmentProvisioner
     proxySettingsProvisioner.provision(osEnv, identity);
     serviceAccountProvisioner.provision(osEnv, identity);
     certificateProvisioner.provision(osEnv, identity);
+    vcsSshKeysProvisioner.provision(osEnv, identity);
+    gitUserProfileProvisioner.provision(osEnv, identity);
     LOG.debug(
         "Provisioning OpenShift environment done for workspace '{}'", identity.getWorkspaceId());
   }

@@ -77,7 +77,7 @@ public class TemporaryWorkspaceRemoverTest {
 
   @Test(dataProvider = "activeWorkspaceStatuses")
   public void shouldNotRemoveActiveWorkspace(WorkspaceStatus status) throws Exception {
-    WorkspaceImpl workspace = new WorkspaceImpl("ws123", null, null);
+    WorkspaceImpl workspace = WorkspaceImpl.builder().setId("ws123").build();
     when(workspaceDao.getWorkspaces(eq(true), anyInt(), anyLong()))
         .thenReturn(new Page<>(singletonList(workspace), 0, 1, 1));
     doReturn(status).when(runtimes).getStatus("ws123");
@@ -98,7 +98,7 @@ public class TemporaryWorkspaceRemoverTest {
     List<WorkspaceImpl> wsList = new ArrayList<>();
     for (int i = 0; i < number; i++) {
       String wsId = "id" + i;
-      wsList.add(new WorkspaceImpl(wsId, null, null));
+      wsList.add(WorkspaceImpl.builder().setId(wsId).build());
     }
     return wsList;
   }

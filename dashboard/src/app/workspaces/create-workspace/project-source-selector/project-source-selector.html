@@ -18,7 +18,6 @@
                           che-state="projectSourceSelectorController.buttonState[projectTemplate.name]"
                           uib-tooltip="{{projectTemplate.name}}"></toggle-single-button>
   </div>
-
   <!-- Popover content -->
   <div class="project-source-selector-popover popover right"
        ng-show="projectSourceSelectorController.activeActionType">
@@ -26,14 +25,17 @@
 
     <div ng-if="projectSourceSelectorController.activeActionType === projectSourceSelectorController.actionType.ADD_PROJECT">
       <add-import-project is-project-name-unique="projectSourceSelectorController.isProjectNameUnique(name)"
-                          project-on-add="projectSourceSelectorController.projectTemplateOnAdd(templates)"></add-import-project>
+                          project-on-add="projectSourceSelectorController.projectTemplateOnAdd(templates)"
+                          devfile="projectSourceSelectorController.devfile">
+      </add-import-project>
     </div>
 
     <div ng-if="projectSourceSelectorController.activeActionType === projectSourceSelectorController.actionType.EDIT_PROJECT">
       <edit-project project-names="projectSourceSelectorController.getProjectTemplateNames()"
                     project-template="projectSourceSelectorController.selectedProjectTemplate"
                     project-on-edit="projectSourceSelectorController.projectTemplateOnEdit(template)"
-                    project-on-remove="projectSourceSelectorController.projectTemplateOnRemove()"></edit-project>
+                    project-on-remove="projectSourceSelectorController.projectTemplateOnRemove()"
+                    is-project-name-unique="projectSourceSelectorController.isProjectNameUnique({name: name})"></edit-project>
     </div>
   </div>
 

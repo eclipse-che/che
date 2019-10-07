@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.server.wsplugins;
 
 import com.google.common.annotations.Beta;
 import java.util.Collection;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
@@ -29,11 +30,16 @@ public interface ChePluginsApplier {
   /**
    * Applies Che plugins tooling configuration to internal environment.
    *
+   * @param runtimeIdentity the runtime identity of the workspace that the plugins are being applied
+   *     to
    * @param internalEnvironment infrastructure specific representation of workspace runtime
    *     environment
    * @param chePlugins Che plugins tooling configuration to apply to {@code internalEnvironment}
    * @throws InfrastructureException when applying Che plugins tooling fails
    */
-  void apply(InternalEnvironment internalEnvironment, Collection<ChePlugin> chePlugins)
+  void apply(
+      RuntimeIdentity runtimeIdentity,
+      InternalEnvironment internalEnvironment,
+      Collection<ChePlugin> chePlugins)
       throws InfrastructureException;
 }

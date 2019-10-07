@@ -10,15 +10,12 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {IPlugin, PluginRegistry} from '../../../../components/api/plugin-registry.factory';
-import IWorkspaceConfig = che.IWorkspaceConfig;
+import {IPlugin, PluginRegistry, IPluginRow} from '../../../../components/api/plugin-registry.factory';
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
 
-const PLUGINS_ATTRIBUTE = 'plugins';
-const EDITOR_ATTRIBUTE = 'editor';
 const PLUGIN_SEPARATOR = ',';
 const PLUGIN_VERSION_SEPARATOR = ':';
-const PLUGIN_TYPE = 'Che Plugin';
 const EDITOR_TYPE = 'Che Editor';
 
 /**
@@ -28,21 +25,20 @@ const EDITOR_TYPE = 'Che Editor';
  * @author Ann Shumilova
  */
 export class WorkspacePluginsController {
-  static $inject = ['pluginRegistry', 'cheListHelperFactory', '$scope', 'cheNotification'];
+  static $inject = ['pluginRegistry', 'cheListHelperFactory', '$scope', 'cheNotification', 'cheWorkspace'];
 
-  workspaceConfig: IWorkspaceConfig;
+  workspace: che.IWorkspace;
   pluginRegistryLocation: string;
 
   pluginRegistry: PluginRegistry;
   cheNotification: CheNotification;
+  cheWorkspace: CheWorkspace;
   onChange: Function;
   isLoading: boolean;
 
-  pluginOrderBy = 'name';
-  plugins: Array<IPlugin> = [];
-  editors: Array<IPlugin> = [];
+  pluginOrderBy = 'displayName';
+  plugins: Map<string, IPluginRow> = new Map(); // the key is publisher/name
   selectedPlugins: Array<string> = [];
-  selectedEditor: string = '';
 
   pluginFilter: any;
 
@@ -52,9 +48,10 @@ export class WorkspacePluginsController {
    * Default constructor that is using resource
    */
   constructor(pluginRegistry: PluginRegistry, cheListHelperFactory: che.widget.ICheListHelperFactory, $scope: ng.IScope,
-              cheNotification: CheNotification) {
+              cheNotification: CheNotification, cheWorkspace: CheWorkspace) {
     this.pluginRegistry = pluginRegistry;
     this.cheNotification = cheNotification;
+    this.cheWorkspace = cheWorkspace;
 
     const helperId = 'workspace-plugins';
     this.cheListHelper = cheListHelperFactory.getHelper(helperId);
@@ -63,12 +60,12 @@ export class WorkspacePluginsController {
       cheListHelperFactory.removeHelper(helperId);
     });
 
-    this.pluginFilter = {name: ''};
+    this.pluginFilter = { displayName: '' };
 
     const deRegistrationFn = $scope.$watch(() => {
-      return this.workspaceConfig;
-    }, (workspaceConfig: IWorkspaceConfig) => {
-      if (!workspaceConfig) {
+      return this.workspace;
+    }, (workspace: che.IWorkspace) => {
+      if (!workspace) {
         return;
       }
       this.updatePlugins();
@@ -77,7 +74,9 @@ export class WorkspacePluginsController {
     $scope.$on('$destroy', () => {
       deRegistrationFn();
     });
+  }
 
+  $onInit(): void {
     this.loadPlugins();
   }
 
@@ -85,18 +84,41 @@ export class WorkspacePluginsController {
    * Loads the list of plugins from registry.
    */
   loadPlugins(): void {
-    this.plugins = [];
-    this.editors = [];
+    this.plugins = new Map();
     this.isLoading = true;
-    this.pluginRegistry.fetchPlugins(this.pluginRegistryLocation).then((result: Array<IPlugin>) => {
+    this.pluginRegistry.fetchPlugins(this.pluginRegistryLocation).then((result: Array<IPluginRow>) => {
       this.isLoading = false;
-      result.forEach((item: IPlugin) => {
-        if (item.type === EDITOR_TYPE) {
-          this.editors.push(item);
-        } else {
-          this.plugins.push(item);
+      result.forEach((item: IPluginRow) => {
+        if (item.type !== EDITOR_TYPE) {
+
+          // since plugin registry returns an array of plugins/editors with a single version we need to unite the plugin versions into one
+          const pluginID = `${item.publisher}/${item.name}`;
+
+          item.selected = 'latest'; // set the default selected to latest
+
+          if (this.plugins.has(pluginID)) {
+            const foundPlugin = this.plugins.get(pluginID);
+            foundPlugin.versions.push(item.version);
+          } else {
+            item.versions = [item.version];
+            this.plugins.set(pluginID, item);
+          }
+
         }
-      });  
+      });
+
+      this.selectedPlugins.forEach(plugin => {
+        // a selected plugin is in the form publisher/name/version
+        // find the currently selected ones and set them along with their id
+        const {publisher, name, version} = this.splitPluginId(plugin);
+        const pluginID = `${publisher}/${name}`;
+
+        if (this.plugins.has(pluginID)) {
+          const foundPlugin = this.plugins.get(pluginID);
+          foundPlugin.id = plugin;
+          foundPlugin.selected = version;
+        }
+      });
 
       this.updatePlugins();
     }, (error: any) => {
@@ -111,8 +133,8 @@ export class WorkspacePluginsController {
    * @param str {string} a string to filter projects names
    */
   onSearchChanged(str: string): void {
-    this.pluginFilter.name = str;
-    this.cheListHelper.applyFilter('name', this.pluginFilter);
+    this.pluginFilter.displayName = str;
+    this.cheListHelper.applyFilter('displayName', this.pluginFilter);
   }
 
   /**
@@ -120,79 +142,95 @@ export class WorkspacePluginsController {
    *
    * @param {IPlugin} plugin
    */
-  updatePlugin(plugin: IPlugin): void {
-    let name = plugin.id + PLUGIN_VERSION_SEPARATOR + plugin.version;
+  updatePlugin(plugin: IPluginRow): void {
+    if (plugin.type !== EDITOR_TYPE) {
 
-    if (plugin.type === EDITOR_TYPE) {
-      this.selectedEditor = plugin.isEnabled ? name : '';
-      this.workspaceConfig.attributes[EDITOR_ATTRIBUTE] = this.selectedEditor;
-    } else {
+      const pluginID = `${plugin.publisher}/${plugin.name}`;
+      const pluginIDWithVersion = `${plugin.publisher}/${plugin.name}/${plugin.selected}`;
+
+      this.plugins.get(pluginID).selected = plugin.selected;
+      this.plugins.get(pluginID).id = pluginIDWithVersion;
+
       if (plugin.isEnabled) {
-        this.selectedPlugins.push(name);
+        this.selectedPlugins.push(pluginIDWithVersion);
       } else {
-        this.selectedPlugins.splice(this.selectedPlugins.indexOf(name), 1);
+        this.selectedPlugins.splice(this.selectedPlugins.indexOf(plugin.id), 1);
       }
-      this.workspaceConfig.attributes[PLUGINS_ATTRIBUTE] = this.selectedPlugins.join(PLUGIN_SEPARATOR);
+
+      this.cheWorkspace.getWorkspaceDataManager().setPlugins(this.workspace, this.selectedPlugins);
     }
-    
-    this.cleanupInstallers();
+
     this.onChange();
   }
 
   /**
-   * Clean up all the installers in all machines, when plugin is selected.
+   * Update the selected plugin version when the plugin version dropdown is changed
+   *
+   * @param {IPlugin} plugin
    */
-  cleanupInstallers(): void {
-    let defaultEnv : string = this.workspaceConfig.defaultEnv;
-    let machines : any = this.workspaceConfig.environments[defaultEnv].machines;
-    let machineNames : Array<string> = Object.keys(machines);
-    machineNames.forEach((machineName: string) => {
-      machines[machineName].installers = [];
-    });
+  updateSelectedPlugin(plugin: IPluginRow): void {
+    if (plugin.type !== EDITOR_TYPE) {
+      const pluginID = `${plugin.publisher}/${plugin.name}`;
+      const pluginIDWithVersion = `${pluginID}/${plugin.selected}`;
+
+      this.plugins.get(pluginID).selected = plugin.selected;
+      this.plugins.get(pluginID).id = pluginIDWithVersion;
+
+      const currentlySelectedPlugins = this.cheWorkspace.getWorkspaceDataManager().getPlugins(this.workspace);
+
+      if (plugin.isEnabled) {
+        currentlySelectedPlugins.splice(this.selectedPlugins.indexOf(plugin.id), 1, pluginIDWithVersion);
+      } else {
+        currentlySelectedPlugins.push(pluginIDWithVersion);
+      }
+      this.cheWorkspace.getWorkspaceDataManager().setPlugins(this.workspace, currentlySelectedPlugins);
+      this.selectedPlugins = currentlySelectedPlugins;
+    }
+    this.onChange();
   }
 
   /**
    * Update the state of plugins.
    */
   private updatePlugins(): void {
-    // get selected plugins from workspace configuration attribute - "plugins" (coma separated values):
-    this.selectedPlugins = this.workspaceConfig && this.workspaceConfig.attributes && this.workspaceConfig.attributes[PLUGINS_ATTRIBUTE] ?
-      this.workspaceConfig.attributes[PLUGINS_ATTRIBUTE].split(PLUGIN_SEPARATOR) : [];
-    // get selected plugins from workspace configuration attribute - "editor":
-    this.selectedEditor = this.workspaceConfig && this.workspaceConfig.attributes && this.workspaceConfig.attributes[EDITOR_ATTRIBUTE] ?
-     this.workspaceConfig.attributes[EDITOR_ATTRIBUTE] : '';
+    this.selectedPlugins = this.cheWorkspace.getWorkspaceDataManager().getPlugins(this.workspace);
     // check each plugin's enabled state:
-    this.plugins.forEach((plugin: IPlugin) => {
-      plugin.isEnabled = this.isPluginEnabled(plugin);
+    this.plugins.forEach((plugin: IPluginRow) => {
+      const selectedPluginId = this.findInSelected(plugin);
+      plugin.isEnabled = !!selectedPluginId;
+      if (selectedPluginId) {
+        plugin.id = selectedPluginId;
+        const {publisher, name, version} = this.splitPluginId(selectedPluginId);
+        plugin.selected = version;
+      }
     });
-
-    // check each editor's enabled state:
-    this.editors.forEach((editor: IPlugin) => {
-      editor.isEnabled = this.isEditorEnabled(editor);
-    });
-
-    this.cheListHelper.setList(this.plugins, 'name');
+    this.cheListHelper.setList(Array.from(this.plugins.values()), 'displayName');
   }
 
   /**
-   *
+   * Finds given plugin in the list of enabled plugins and returns its ID with version
    * @param {IPlugin} plugin
-   * @returns {boolean} the plugin's enabled state
+   * @returns {string} plugin ID
    */
-  private isPluginEnabled(plugin: IPlugin): boolean {
-    // name in the format: id:version
-    let name = plugin.id + PLUGIN_VERSION_SEPARATOR + plugin.version;
-    return this.selectedPlugins.indexOf(name) >= 0;
+  private findInSelected(plugin: IPluginRow): string {
+    const pluginId = this.selectedPlugins.find(selectedPluginId => {
+      const partialId = `${plugin.publisher}/${plugin.name}/`;
+      return selectedPluginId.indexOf(partialId) !== -1;
+    });
+    return !!pluginId ? pluginId : '';
   }
 
   /**
-   *
-   * @param {IPlugin} plugin
-   * @returns {boolean} the editor's enabled state
+   * Splits a plugin ID by a separator (slash)
+   * @param id a string in form `${publisher}/${name}` or `${publisher}/${name}/${version}`
    */
-  private isEditorEnabled(editor: IPlugin): boolean {
-    // name in the format: id:version
-    let name = editor.id + PLUGIN_VERSION_SEPARATOR + editor.version;
-    return name === this.selectedEditor;
+  private splitPluginId(id: string): { publisher: string, name: string, version?: string } {
+    const parts = id.split('/');
+    return {
+      publisher: parts[0],
+      name: parts[1],
+      version: parts[2]
+    };
   }
+
 }

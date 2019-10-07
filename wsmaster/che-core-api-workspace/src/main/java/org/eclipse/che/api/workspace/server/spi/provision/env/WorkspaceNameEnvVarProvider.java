@@ -41,7 +41,7 @@ public class WorkspaceNameEnvVarProvider implements EnvVarProvider {
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) throws InfrastructureException {
     try {
       WorkspaceImpl workspace = workspaceDao.get(runtimeIdentity.getWorkspaceId());
-      return Pair.of(CHE_WORKSPACE_NAME, workspace.getConfig().getName());
+      return Pair.of(CHE_WORKSPACE_NAME, workspace.getName());
     } catch (NotFoundException | ServerException e) {
       throw new InfrastructureException(
           "Not able to get workspace name for workspace with id "

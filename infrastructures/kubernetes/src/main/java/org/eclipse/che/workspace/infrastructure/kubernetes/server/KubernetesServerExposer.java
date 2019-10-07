@@ -20,7 +20,6 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
@@ -38,8 +37,9 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 
 /**
@@ -103,18 +103,18 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
   public static final int SERVER_UNIQUE_PART_SIZE = 8;
   public static final String SERVER_PREFIX = "server";
 
-  private final ExternalServerExposerStrategy<T> externalServerExposer;
+  private final ExternalServerExposer<T> externalServerExposer;
   private final SecureServerExposer<T> secureServerExposer;
   private final String machineName;
   private final Container container;
-  private final Pod pod;
+  private final PodData pod;
   private final T k8sEnv;
 
   public KubernetesServerExposer(
-      ExternalServerExposerStrategy<T> externalServerExposer,
+      ExternalServerExposer<T> externalServerExposer,
       SecureServerExposer<T> secureServerExposer,
       String machineName,
-      Pod pod,
+      PodData pod,
       Container container,
       T k8sEnv) {
     this.externalServerExposer = externalServerExposer;

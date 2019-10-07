@@ -57,8 +57,9 @@ public class WorkspaceDetails {
     String APPLY_CHANGES_BUTTON = "//che-button-save-flat[@class='apply-button']";
     String CANCEL_CHANGES_BUTTON = "//button[@name='cancel-button']";
     String CANCEL_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Cancel']";
-    String CLOSE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Close']";
-    String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
+    String CLOSE_DIALOG_BUTTON =
+        "//*[@id='cancel-dialog-button']//*[contains(@class, 'che-button')]";
+    String DELETE_DIALOG_BUTTON = "//*[@id='ok-dialog-button']/*[contains(@class, 'che-button')]";
     String UPDATE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Update']";
     String ADD_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Add']";
     String TOOLBAR_TITLE_NAME =
@@ -70,14 +71,12 @@ public class WorkspaceDetails {
   public enum WorkspaceDetailsTab {
     OVERVIEW("Overview"),
     PROJECTS("Projects"),
-    MACHINES("Machines"),
-    INSTALLERS("Installers"),
+    MACHINES("Containers"),
     SERVERS("Servers"),
     ENV_VARIABLES("Env Variables"),
     VOLUMES("Volumes"),
     CONFIG("Config"),
     SSH("SSH"),
-    TOOLS("Tools"),
     SHARE("Share");
 
     private final String tabTitle;

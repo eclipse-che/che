@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa;
 
 import com.google.inject.TypeLiteral;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.workspace.server.devfile.SerializableConverter;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
@@ -22,6 +23,14 @@ import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
@@ -69,9 +78,21 @@ public class JpaTckModule extends TckModule {
                 KubernetesMachineImpl.class,
                 MachineId.class,
                 KubernetesServerImpl.class,
-                ServerId.class)
+                ServerId.class,
+                // devfile
+                ActionImpl.class,
+                org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl.class,
+                ComponentImpl.class,
+                DevfileImpl.class,
+                EndpointImpl.class,
+                EntrypointImpl.class,
+                EnvImpl.class,
+                ProjectImpl.class,
+                SourceImpl.class,
+                org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl.class)
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
+            .addClass(SerializableConverter.class)
             .setExceptionHandler(H2ExceptionHandler.class)
             .build());
 

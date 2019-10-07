@@ -11,8 +11,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.JWT_PROXY_POD_NAME;
+
 import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.Pod;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
@@ -29,9 +30,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  * @author Mykhailo Kuznietsov
  */
 public class ProxySettingsProvisioner implements ConfigurationProvisioner {
-  private static final String HTTPS_PROXY = "https_proxy";
-  private static final String HTTP_PROXY = "http_proxy";
-  private static final String NO_PROXY = "no_proxy";
+  static final String HTTPS_PROXY = "https_proxy";
+  static final String HTTP_PROXY = "http_proxy";
+  static final String NO_PROXY = "no_proxy";
 
   private final Map<String, String> proxyEnvVars;
 
@@ -60,13 +61,17 @@ public class ProxySettingsProvisioner implements ConfigurationProvisioner {
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     if (!proxyEnvVars.isEmpty()) {
-      for (Pod pod : k8sEnv.getPods().values()) {
-        pod.getSpec()
-            .getContainers()
-            .forEach(
-                container ->
-                    proxyEnvVars.forEach((k, v) -> container.getEnv().add(new EnvVar(k, v, null))));
-      }
+      k8sEnv
+          .getPodsData()
+          .entrySet()
+          .stream()
+          // JWTProxy container doesn't need proxy settings since it never does any outbound
+          // requests, and setting of it may fail accessing internal addresses.
+          .filter(entry -> !entry.getKey().equals(JWT_PROXY_POD_NAME))
+          .flatMap(entry -> entry.getValue().getSpec().getContainers().stream())
+          .forEach(
+              container ->
+                  proxyEnvVars.forEach((k, v) -> container.getEnv().add(new EnvVar(k, v, null))));
     }
   }
 }

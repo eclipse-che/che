@@ -19,11 +19,17 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.workspace.server.spi.environment.*;
+import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
+import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
+import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
+import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -34,7 +40,6 @@ public class DockerImageEnvironmentFactoryTest {
   private static final String MACHINE_NAME = "machine";
 
   @Mock private InternalRecipe recipe;
-  @Mock private InstallerRegistry installerRegistry;
   @Mock private RecipeRetriever recipeRetriever;
   @Mock private MachineConfigsValidator machinesValidator;
   @Mock private MemoryAttributeProvisioner memoryProvisioner;
@@ -44,8 +49,7 @@ public class DockerImageEnvironmentFactoryTest {
   @BeforeMethod
   public void setUp() throws Exception {
     factory =
-        new DockerImageEnvironmentFactory(
-            installerRegistry, recipeRetriever, machinesValidator, memoryProvisioner);
+        new DockerImageEnvironmentFactory(recipeRetriever, machinesValidator, memoryProvisioner);
 
     when(recipe.getType()).thenReturn(DockerImageEnvironment.TYPE);
     when(recipe.getContent()).thenReturn("");
@@ -59,5 +63,19 @@ public class DockerImageEnvironmentFactoryTest {
     factory.doCreate(recipe, machines, Collections.emptyList());
 
     verify(memoryProvisioner).provision(any(), eq(0L), eq(0L));
+  }
+
+  @Test
+  public void testInsertsEmptyMachineConfigIfNoMachines() throws Exception {
+    DockerImageEnvironment env = factory.doCreate(recipe, new HashMap<>(), Collections.emptyList());
+    Assert.assertEquals(1, env.getMachines().size());
+  }
+
+  @Test(expectedExceptions = ValidationException.class)
+  public void shouldFailIfMoreThanOneMachineConfigProvided() throws Exception {
+    Map<String, InternalMachineConfig> machines =
+        ImmutableMap.of("one", new InternalMachineConfig(), "two", new InternalMachineConfig());
+
+    factory.doCreate(recipe, machines, Collections.emptyList());
   }
 }

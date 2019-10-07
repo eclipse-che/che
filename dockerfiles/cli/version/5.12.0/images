@@ -1,4 +1,0 @@
-IMAGE_INIT=eclipse/che-init:5.12.0
-IMAGE_CHE=eclipse/che-server:5.12.0
-IMAGE_COMPOSE=docker/compose:1.8.1
-IMAGE_TRAEFIK=traefik:v1.3.0-rc3

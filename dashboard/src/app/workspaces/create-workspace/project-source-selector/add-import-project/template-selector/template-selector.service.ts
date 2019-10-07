@@ -11,7 +11,6 @@
  */
 'use strict';
 
-import {CheProjectTemplate} from '../../../../../../components/api/che-project-template.factory';
 import {editingProgress, IEditingProgress} from '../../project-source-selector-editing-progress';
 
 /**
@@ -21,7 +20,7 @@ import {editingProgress, IEditingProgress} from '../../project-source-selector-e
  */
 export class TemplateSelectorSvc implements IEditingProgress {
 
-  static $inject = ['$filter', '$q', 'cheProjectTemplate'];
+  static $inject = ['$filter', '$q'];
 
   /**
    * Filter service.
@@ -32,10 +31,6 @@ export class TemplateSelectorSvc implements IEditingProgress {
    */
   $q: ng.IQService;
   /**
-   * Project template API interactions.
-   */
-  cheProjectTemplate: CheProjectTemplate;
-  /**
    * The list of selected templates.
    */
   templates: Array<che.IProjectTemplate>;
@@ -43,10 +38,9 @@ export class TemplateSelectorSvc implements IEditingProgress {
   /**
    * Default constructor that is using resource injection
    */
-  constructor($filter: ng.IFilterService, $q: ng.IQService, cheProjectTemplate: CheProjectTemplate) {
+  constructor($filter: ng.IFilterService, $q: ng.IQService) {
     this.$filter = $filter;
     this.$q = $q;
-    this.cheProjectTemplate = cheProjectTemplate;
 
     this.templates = [];
   }
@@ -66,45 +60,6 @@ export class TemplateSelectorSvc implements IEditingProgress {
       message: `There ${number === 1 ? 'is' : 'are'} ${number} ${number === 1 ? 'sample' : 'samples'} selected but not added.`,
       number: number
     };
-  }
-
-  /**
-   * Fetches list of templates.
-   */
-  getOrFetchTemplates(): ng.IPromise<any> {
-    const defer = this.$q.defer();
-
-    const templates = this.cheProjectTemplate.getAllProjectTemplates();
-    if (templates.length) {
-      defer.resolve();
-    } else {
-      this.cheProjectTemplate.fetchTemplates().finally(() => {
-        defer.resolve();
-      });
-    }
-
-    return defer.promise;
-  }
-
-  /**
-   * Returns list of fetched project templates.
-   *
-   * @return {Array<che.IProjectTemplate>}
-   */
-  getAllTemplates(): Array<che.IProjectTemplate> {
-    return this.cheProjectTemplate.getAllProjectTemplates();
-  }
-
-  /**
-   * Returns project template by name.
-   *
-   * @param {string} name the project template name
-   * @return {undefined|che.IProjectTemplate}
-   */
-  getTemplateByName(name: string): che.IProjectTemplate {
-    return this.getAllTemplates().find((template: che.IProjectTemplate) => {
-      return template.name === name;
-    });
   }
 
   /**

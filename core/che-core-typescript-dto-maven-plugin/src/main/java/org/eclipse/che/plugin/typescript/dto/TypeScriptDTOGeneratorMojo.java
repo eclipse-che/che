@@ -18,7 +18,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -47,6 +46,10 @@ public class TypeScriptDTOGeneratorMojo extends AbstractMojo {
   @Parameter(defaultValue = "${project.build.directory}")
   private File targetDirectory;
 
+  /** should build new '.d.ts' DTO on old 'ts' DTO interfaces */
+  @Parameter(defaultValue = "false", property = "dts")
+  private boolean dts;
+
   @Component private MavenProjectHelper projectHelper;
 
   /** Path to the generated typescript file */
@@ -56,10 +59,43 @@ public class TypeScriptDTOGeneratorMojo extends AbstractMojo {
   private boolean useClassPath;
 
   @Override
-  public void execute() throws MojoExecutionException, MojoFailureException {
+  public void execute() throws MojoExecutionException {
+    if (dts) {
+      getLog().info("Generating TypeScript DTO d.ts");
+      generateDTs();
+    } else {
+      getLog().info("Generating TypeScript DTO");
+      generateTs();
+    }
+  }
 
-    getLog().info("Generating TypeScript DTO");
+  private void generateDTs() throws MojoExecutionException {
+    TypeScriptDtoDTSGenerator typeScriptDtoGenerator = new TypeScriptDtoDTSGenerator();
 
+    typeScriptDtoGenerator.setUseClassPath(useClassPath);
+
+    // define output path for the file to write with typescript definition
+    String output = typeScriptDtoGenerator.execute();
+
+    this.typescriptFile = new File(targetDirectory, project.getArtifactId() + ".d.ts");
+    File parentDir = this.typescriptFile.getParentFile();
+    if (!parentDir.exists() && !parentDir.mkdirs()) {
+      throw new MojoExecutionException(
+          "Unable to create a directory for writing DTO typescript file '" + parentDir + "'.");
+    }
+
+    try (Writer fileWriter =
+        Files.newBufferedWriter(this.typescriptFile.toPath(), StandardCharsets.UTF_8)) {
+      fileWriter.write(output);
+    } catch (IOException e) {
+      throw new MojoExecutionException("Cannot write DTO typescript file");
+    }
+
+    // attach this typescript file as maven artifact
+    projectHelper.attachArtifact(project, "ts", typescriptFile);
+  }
+
+  private void generateTs() throws MojoExecutionException {
     TypeScriptDtoGenerator typeScriptDtoGenerator = new TypeScriptDtoGenerator();
 
     typeScriptDtoGenerator.setUseClassPath(useClassPath);

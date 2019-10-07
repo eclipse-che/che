@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
-import org.eclipse.che.api.workspace.server.wsplugins.model.PluginBase;
+import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 
 @Singleton
 public class KubernetesPluginsToolingValidator {
@@ -26,8 +26,8 @@ public class KubernetesPluginsToolingValidator {
   // Pattern is from K8S Container class
   private static final Pattern namePattern = Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?");
 
-  public void validatePluginNames(List<? extends PluginBase> plugins) throws ValidationException {
-    for (PluginBase plugin : plugins) {
+  public void validatePluginNames(List<? extends ChePlugin> plugins) throws ValidationException {
+    for (ChePlugin plugin : plugins) {
       if (plugin.getName() != null) {
         final String formattedPluginName = plugin.getName().toLowerCase();
         checkValid(

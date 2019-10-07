@@ -1,7 +1,0 @@
-[[override]]
- name = "github.com/gorilla/websocket"
- revision = "361d4c0ffd78338ebe0a9e6320cdbe115d7dc026"
-
-[prune]
-  go-tests = true
-  unused-packages = true
