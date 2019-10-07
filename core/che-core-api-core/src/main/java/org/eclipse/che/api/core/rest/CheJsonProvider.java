@@ -57,7 +57,8 @@ import org.everrest.core.impl.provider.JsonEntityProvider;
 public class CheJsonProvider<T> implements MessageBodyReader<T>, MessageBodyWriter<T> {
   private Set<Class> ignoredClasses;
   private final JsonEntityProvider delegate = new JsonEntityProvider<>();
-  private final Type listOfJsonSerializable = new TypeToken<List<JsonSerializable>>() {}.getType();
+  private final Type listOfJsonSerializableType =
+      new TypeToken<List<JsonSerializable>>() {}.getType();
 
   @Inject
   public CheJsonProvider(@Nullable @Named("che.json.ignored_classes") Set<Class> ignoredClasses) {
@@ -99,7 +100,7 @@ public class CheJsonProvider<T> implements MessageBodyReader<T>, MessageBodyWrit
       }
     } else if (isDtoList(type, genericType, t)) {
       try (Writer w = new OutputStreamWriter(entityStream, StandardCharsets.UTF_8)) {
-        DtoFactory.getInstance().getGson().toJson(t, listOfJsonSerializable, w);
+        DtoFactory.getInstance().getGson().toJson(t, listOfJsonSerializableType, w);
       }
     } else {
       delegate.writeTo(t, type, genericType, annotations, mediaType, httpHeaders, entityStream);
