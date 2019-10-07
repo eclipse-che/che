@@ -99,7 +99,6 @@ public class CheJsonProvider<T> implements MessageBodyReader<T>, MessageBodyWrit
       }
     } else if (isDtoList(type, genericType, t)) {
       try (Writer w = new OutputStreamWriter(entityStream, StandardCharsets.UTF_8)) {
-
         DtoFactory.getInstance().getGson().toJson(t, listOfJsonSerializable, w);
       }
     } else {
@@ -129,7 +128,6 @@ public class CheJsonProvider<T> implements MessageBodyReader<T>, MessageBodyWrit
     if (type.isAnnotationPresent(DTO.class)) {
       return DtoFactory.getInstance().createDtoFromJson(entityStream, type);
     } else if (isDtoList(type, genericType, null)) {
-      new Exception().printStackTrace();
       ParameterizedType parameterizedType = (ParameterizedType) genericType;
       Type elementType = parameterizedType.getActualTypeArguments()[0];
       return (T) DtoFactory.getInstance().createListDtoFromJson(entityStream, (Class) elementType);
@@ -146,35 +144,19 @@ public class CheJsonProvider<T> implements MessageBodyReader<T>, MessageBodyWrit
     return ignoredClasses;
   }
 
-  /**
-   * TODO DOCS
-   *
-   * @param genericType
-   * @param <T>
-   * @return
-   */
-  public static <T> boolean isDtoList(Class<?> type, Type genericType, T t) {
-    if (List.class.isAssignableFrom(type)) {
-      if (genericType instanceof ParameterizedType) {
-        ParameterizedType parameterizedType = (ParameterizedType) genericType;
-        Type elementType = parameterizedType.getActualTypeArguments()[0];
-        if (elementType instanceof Class) {
-          Class elementClass = (Class) elementType;
-          if (elementClass.isAnnotationPresent(DTO.class)) {
-            return true;
-          }
-        }
-      } else if (t != null && type.equals(genericType)) {
-        List list = (List) t;
-        if (!list.isEmpty()) {
-          Object element = list.iterator().next();
-          if (element instanceof JsonSerializable) {
-            return true;
-          }
-        }
-      }
+  /** Checks if provided object is a list of DTO or serializable objects. */
+  private static <T> boolean isDtoList(Class<?> type, Type genericType, T t) {
+    if (!List.class.isAssignableFrom(type)) {
+      return false;
     }
-
+    if (genericType instanceof ParameterizedType) {
+      ParameterizedType parameterizedType = (ParameterizedType) genericType;
+      Type elementType = parameterizedType.getActualTypeArguments()[0];
+      return elementType instanceof Class && ((Class) elementType).isAnnotationPresent(DTO.class);
+    } else if (t instanceof List && type.equals(genericType)) {
+      List list = (List) t;
+      return !list.isEmpty() && list.iterator().next() instanceof JsonSerializable;
+    }
     return false;
   }
 }
