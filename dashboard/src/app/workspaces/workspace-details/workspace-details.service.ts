@@ -17,6 +17,8 @@ import {IObservable, IObservableCallbackFn, Observable} from '../../../component
 import {WorkspaceDetailsProjectsService} from './workspace-projects/workspace-details-projects.service';
 import {CheWorkspace, WorkspaceStatus} from '../../../components/api/workspace/che-workspace.factory';
 import {CheService} from '../../../components/api/che-service.factory';
+import {PluginRegistry} from '../../../components/api/plugin-registry.factory';
+import {WorkspaceDataManager} from '../../../components/api/workspace/workspace-data-manager';
 
 interface IPage {
   title: string;
@@ -39,7 +41,7 @@ interface ISection {
  */
 export class WorkspaceDetailsService {
 
-  static $inject = ['$log', '$q', 'cheWorkspace', 'cheNotification', 'ideSvc', 'createWorkspaceSvc', 'workspaceDetailsProjectsService', 'cheService', 'chePermissions'];
+  static $inject = ['$log', '$q', 'cheWorkspace', 'cheNotification', 'ideSvc', 'createWorkspaceSvc', 'workspaceDetailsProjectsService', 'cheService', 'chePermissions', 'pluginRegistry'];
 
   /**
    * Logging service.
@@ -80,6 +82,22 @@ export class WorkspaceDetailsService {
    * This workspaces should be restarted for new config to be applied.
    */
   private restartToApply: string[] = [];
+  /**
+   * Array of deprecated editors.
+   */
+  private deprecatedEditors: string[] = [];
+  /**
+   * Array of deprecated plugins.
+   */
+  private deprecatedPlugins: string[] = [];
+  /**
+   * Plugin registry API interaction.
+   */
+  private pluginRegistry: PluginRegistry;
+  /**
+   * Workspace data manager.
+   */
+  private workspaceDataManager: WorkspaceDataManager;
 
   /**
    * Default constructor that is using resource
@@ -93,7 +111,8 @@ export class WorkspaceDetailsService {
     createWorkspaceSvc: CreateWorkspaceSvc,
     workspaceDetailsProjectsService: WorkspaceDetailsProjectsService,
     cheService: CheService,
-    chePermissions: che.api.IChePermissions
+    chePermissions: che.api.IChePermissions,
+    pluginRegistry: PluginRegistry
   ) {
     this.$log = $log;
     this.$q = $q;
@@ -101,6 +120,7 @@ export class WorkspaceDetailsService {
     this.cheNotification = cheNotification;
     this.ideSvc = ideSvc;
     this.createWorkspaceSvc = createWorkspaceSvc;
+    this.pluginRegistry = pluginRegistry;
     this.workspaceDetailsProjectsService = workspaceDetailsProjectsService;
 
     this.observable =  new Observable<any>();
@@ -114,6 +134,49 @@ export class WorkspaceDetailsService {
         this.addPage('Share', '<share-workspace></share-workspace>', 'icon-ic_folder_shared_24px');
       }
     });
+
+    this.cheWorkspace.fetchWorkspaceSettings().then(workspaceSettings => {
+      this.pluginRegistry.fetchPlugins(workspaceSettings.cheWorkspacePluginRegistryUrl).then(items => {
+        if (angular.isArray(items)) {
+          items.filter(item => !!item.deprecate).forEach(item => {
+            const target = item.type === PluginRegistry.EDITOR_TYPE ? this.deprecatedEditors : this.deprecatedPlugins;
+            target.push(item.id);
+          });
+        }
+      });
+    });
+    this.workspaceDataManager = this.cheWorkspace.getWorkspaceDataManager();
+  }
+
+  /**
+   * Returns selected deprecated editor.
+   *
+   * @param {che.IWorkspace} workspace
+   * @returns {string}
+   */
+  getSelectedDeprecatedEditor(workspace: che.IWorkspace): string {
+    if (this.workspaceDataManager && workspace) {
+      const editor = this.workspaceDataManager.getEditor(workspace);
+      if (this.deprecatedEditors.indexOf(editor) !== -1) {
+        return editor;
+      }
+    }
+    return '';
+  }
+
+  /**
+   * Returns selected deprecated plugins.
+   *
+   * @param {che.IWorkspace} workspace
+   * @returns {Array<string>}
+   */
+  getSelectedDeprecatedPlugins(workspace: che.IWorkspace): Array<string> {
+    if (this.workspaceDataManager && workspace) {
+      return this.workspaceDataManager.getPlugins(workspace).filter(plugin => {
+        return this.deprecatedPlugins.indexOf(plugin) !== -1
+      });
+    }
+    return [];
   }
 
   /**

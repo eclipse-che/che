@@ -11,6 +11,7 @@
  */
 'use strict';
 import {CheAPIBuilder} from '../builder/che-api-builder.factory';
+import {IPlugin} from '../plugin-registry.factory';
 
 /**
  * This class is providing helper methods for simulating a fake HTTP backend simulating
@@ -49,6 +50,9 @@ export class CheHttpBackend {
   private installersMap: Map<string, che.IAgent> = new Map();
   private installersList: Array<che.IAgent> = [];
 
+  private plugins: Array<IPlugin>;
+  private pluginRegistryUrl: string;
+
   /**
    * Constructor to use
    */
@@ -86,6 +90,9 @@ export class CheHttpBackend {
     this.defaultProfile = cheAPIBuilder.getProfileBuilder().withId('idDefaultUser').withEmail('eclipseChe@eclipse.org').withFirstName('FirstName').withLastName('LastName').build();
     this.defaultProfilePrefs = {};
     this.defaultBranding = {};
+
+    this.plugins = [];
+    this.pluginRegistryUrl = 'http://plugin-registry-che/v3';
   }
 
 
@@ -93,6 +100,11 @@ export class CheHttpBackend {
    * Setup all data that should be retrieved on calls
    */
   setup(): void {
+    this.$httpBackend.when('GET', '/api/workspace/settings').respond(200, {
+      cheWorkspacePluginRegistryUrl: this.pluginRegistryUrl
+    });
+    this.$httpBackend.when('GET', this.pluginRegistryUrl + '/plugins/').respond(200, this.plugins);
+
     this.$httpBackend.when('GET', '/api/oauth/').respond(200, []);
     this.$httpBackend.when('GET', 'https://api.github.com/user/orgs').respond(200, {});
     this.$httpBackend.when('GET', 'https://api.github.com/user').respond(200, {});
@@ -118,8 +130,6 @@ export class CheHttpBackend {
 
       this.$httpBackend.when('DELETE', '/api/workspace/' + key).respond(200);
     }
-
-    this.$httpBackend.when('GET', '/api/workspace/settings').respond({});
 
     this.$httpBackend.when('GET', '/api/workspace').respond(workspaceReturn);
 
@@ -150,7 +160,7 @@ export class CheHttpBackend {
     }
 
     // branding
-    this.$httpBackend.when('GET', 'assets/branding/product.json').respond(this.defaultBranding);
+    this.$httpBackend.when('GET', 'assets/branding/product.json').respond(200, this.defaultBranding);
 
     this.$httpBackend.when('POST', '/api/analytics/log/session-usage').respond(200, {});
 
@@ -176,6 +186,22 @@ export class CheHttpBackend {
       this.$httpBackend.when('GET', '/api/user/find?email=' + key).respond(this.userEmailMap.get(key));
     }
     this.$httpBackend.when('GET', /\/_app\/compilation-mappings(\?.*$)?/).respond(200, '');
+  }
+
+  /**
+   * Sets plugins
+   * @param plugins
+   */
+  setPlugins(plugins: Array<IPlugin>) {
+    this.plugins = plugins;
+  }
+
+  /**
+   * Sets plugin registry URL
+   * @param pluginRegistryUrl
+   */
+  setPluginRegistryUrl(pluginRegistryUrl: string) {
+     this.pluginRegistryUrl = pluginRegistryUrl;
   }
 
   /**

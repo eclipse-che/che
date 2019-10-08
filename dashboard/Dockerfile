@@ -14,16 +14,18 @@
 #  $ docker run --rm eclipse-che-dashboard | tar -C target/ -zxf -
 FROM node:8.16.0
 
-RUN apt-get update && \
-    apt-get install -y git \
+RUN apt-get update \
+    && apt-get install -y git \
     && apt-get -y clean \
     && rm -rf /var/lib/apt/lists/*
+
 COPY package.json /dashboard/
 COPY yarn.lock /dashboard/
 COPY typings.json /dashboard/
 WORKDIR /dashboard
 RUN yarn install --ignore-optional
 COPY . /dashboard/
+
 RUN yarn build && yarn test
 RUN cd /dashboard/target/ && tar zcf /tmp/dashboard.tar.gz dist/
 
