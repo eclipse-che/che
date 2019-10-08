@@ -17,12 +17,14 @@ import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.server.WorkspaceKeyValidator.validateKey;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
@@ -64,13 +66,16 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.rest.Service;
+import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.token.MachineAccessForbidden;
 import org.eclipse.che.api.workspace.server.token.MachineTokenException;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
@@ -84,7 +89,6 @@ import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
 import org.eclipse.che.api.workspace.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
@@ -106,6 +110,7 @@ public class WorkspaceService extends Service {
   private final String apiEndpoint;
   private final boolean cheWorkspaceAutoStart;
   private final FileContentProvider devfileContentProvider;
+  private final DevfileManager devfileManager;
 
   @Inject
   public WorkspaceService(
@@ -116,7 +121,8 @@ public class WorkspaceService extends Service {
       WorkspaceLinksGenerator linksGenerator,
       @Named(CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY) @Nullable String pluginRegistryUrl,
       @Named(CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY) @Nullable String devfileRegistryUrl,
-      URLFetcher urlFetcher) {
+      URLFetcher urlFetcher,
+      DevfileManager devfileManager) {
     this.apiEndpoint = apiEndpoint;
     this.cheWorkspaceAutoStart = cheWorkspaceAutoStart;
     this.workspaceManager = workspaceManager;
@@ -125,6 +131,7 @@ public class WorkspaceService extends Service {
     this.pluginRegistryUrl = pluginRegistryUrl;
     this.devfileRegistryUrl = devfileRegistryUrl;
     this.devfileContentProvider = new URLFileContentProvider(null, urlFetcher);
+    this.devfileManager = devfileManager;
   }
 
   @POST
@@ -189,12 +196,16 @@ public class WorkspaceService extends Service {
     return Response.status(201).entity(asDtoWithLinksAndToken(workspace)).build();
   }
 
+  @Beta
   @Path("/devfile")
   @POST
   @Consumes({APPLICATION_JSON, "text/yaml", "text/x-yaml"})
   @Produces(APPLICATION_JSON)
   @ApiOperation(
       value = "Creates a new workspace based on the Devfile.",
+      notes =
+          "This method is in beta phase. It's strongly recommended to use `POST /devfile` instead"
+              + " to get a workspace from Devfile. Workspaces created with this method are not stable yet.",
       consumes = "application/json, text/yaml, text/x-yaml",
       produces = APPLICATION_JSON,
       nickname = "createFromDevfile",
@@ -211,8 +222,7 @@ public class WorkspaceService extends Service {
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public Response create(
-      @ApiParam(value = "The devfile of the workspace to create", required = true)
-          DevfileDto devfile,
+      @ApiParam(value = "The devfile of the workspace to create", required = true) String devfile,
       @ApiParam(
               value =
                   "Workspace attribute defined in 'attrName:attrValue' format. "
@@ -232,15 +242,29 @@ public class WorkspaceService extends Service {
       throws ConflictException, BadRequestException, ForbiddenException, NotFoundException,
           ServerException {
     requiredNotNull(devfile, "Devfile");
+
+    DevfileImpl devfileModel;
+    try {
+      if (APPLICATION_JSON_TYPE.isCompatible(contentType)) {
+        devfileModel = devfileManager.parseJson(devfile);
+      } else {
+        devfileModel = devfileManager.parseYaml(devfile);
+      }
+    } catch (DevfileException e) {
+      throw new BadRequestException(e.getMessage());
+    }
+
     final Map<String, String> attributes = parseAttrs(attrsList);
+
     if (namespace == null) {
       namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
     }
+
     WorkspaceImpl workspace;
     try {
       workspace =
           workspaceManager.createWorkspace(
-              devfile,
+              devfileModel,
               namespace,
               attributes,
               // create a new cache for each request so that we don't have to care about lifetime
