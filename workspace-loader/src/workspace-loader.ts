@@ -28,7 +28,7 @@ export class WorkspaceLoader {
 
     // `false` if workspace has been stopped intentionally
     // and workspace-loader should not restart it
-    private doRestart: boolean = true;
+    private allowRestart: boolean = true;
 
     constructor(
         private readonly loader: Loader,
@@ -210,7 +210,7 @@ export class WorkspaceLoader {
 
         if (message.status === 'STOPPING') {
             if (message.prevStatus === 'STARTING') {
-                this.doRestart = false;
+                this.allowRestart = false;
             }
         }
 
@@ -219,14 +219,14 @@ export class WorkspaceLoader {
                 this.loader.error('Workspace stopped.');
                 this.runtimeIsAccessible.reject('Workspace stopped.');
             }
-            if (message.prevStatus === 'STOPPING' && this.doRestart) {
+            if (message.prevStatus === 'STOPPING' && this.allowRestart) {
                 try {
                     await this.startWorkspace();
                 } catch (e) {
                     this.runtimeIsAccessible.reject(e);
                 }
             }
-            this.doRestart = true;
+            this.allowRestart = true;
         }
     }
 
