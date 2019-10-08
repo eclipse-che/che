@@ -8,6 +8,9 @@ projects:
       type: git
       location: 'https://github.com/spring-projects/spring-petclinic.git'
 components:
+  - type: cheEditor
+    id: eclipse/che-theia/next
+    memoryLimit: 768Mi
   - type: kubernetes
     alias: petclinic-web
     reference: https://raw.githubusercontent.com/eclipse/che/master/e2e/files/happy-path/containers-happy-path.yaml
@@ -30,7 +33,7 @@ components:
     env:
       - name: MAVEN_CONFIG
         value: /home/user/.m2
-    memoryLimit: 4Gi
+    memoryLimit: 3Gi
     mountSources: true
   - type: chePlugin
     id: redhat/java/latest

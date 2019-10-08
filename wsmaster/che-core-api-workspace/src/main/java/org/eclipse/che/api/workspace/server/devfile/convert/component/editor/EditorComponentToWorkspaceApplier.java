@@ -71,12 +71,18 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     final String registryUrl = editorComponent.getRegistryUrl();
     final String memoryLimit = editorComponent.getMemoryLimit();
 
+    final ExtendedPluginFQN fqn = componentFQNParser.evaluateFQN(editorComponent, contentProvider);
     if (editorComponentAlias != null) {
       workspaceConfig
           .getAttributes()
-          .put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorComponentAlias);
+          .put(
+              EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE,
+              componentFQNParser.getCompositeId(
+                      fqn.getRegistry() != null ? fqn.getRegistry().toString() : null, fqn.getId())
+                  + "="
+                  + editorComponentAlias);
     }
-    final ExtendedPluginFQN fqn = componentFQNParser.evaluateFQN(editorComponent, contentProvider);
+
     if (!isNullOrEmpty(fqn.getReference())) {
       workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, fqn.getReference());
     } else {

@@ -12,11 +12,11 @@
 package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.ERROR_NOTIFICATION_MESSAGE_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.PROGRESS_BAR_XPATH;
@@ -139,7 +139,7 @@ public class Workspaces {
 
   public void waitWorkspaceStatus(String workspaceName, String workspaceStatus) {
     // we need long timeout for OCP
-    new WebDriverWait(seleniumWebDriver, PREPARING_WS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, APPLICATION_START_TIMEOUT_SEC)
         .until(
             new ExpectedCondition<Boolean>() {
               @Override

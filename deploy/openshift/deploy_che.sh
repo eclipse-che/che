@@ -513,6 +513,7 @@ deployMetrics(){
     if [ "${CHE_METRICS_ENABLED}" == "true" ]; then
       echo "Deploying Grafana and Prometheus..."
       ${OC_BINARY} apply -f ${BASE_DIR}/templates/monitoring/grafana-dashboards.yaml
+      ${OC_BINARY} apply -f ${BASE_DIR}/templates/monitoring/grafana-dashboard-provider.yaml
       ${OC_BINARY} apply -f ${BASE_DIR}/templates/monitoring/grafana-datasources.yaml
       ${OC_BINARY} apply -f ${BASE_DIR}/templates/monitoring/prometheus-config.yaml
       ${OC_BINARY} new-app -f ${BASE_DIR}/templates/monitoring/che-monitoring.yaml

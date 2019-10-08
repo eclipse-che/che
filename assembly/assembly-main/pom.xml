@@ -25,7 +25,17 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che</groupId>
+            <artifactId>assembly-che-tomcat8</artifactId>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-root-war</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>assembly-swagger-war</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
@@ -47,16 +57,6 @@
             <groupId>org.eclipse.che.docs</groupId>
             <artifactId>che-docs</artifactId>
             <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>che-swagger-war</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>che-tomcat8-slf4j-logback</artifactId>
-            <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -100,8 +100,8 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.lib</groupId>
-                                    <artifactId>che-tomcat8-slf4j-logback</artifactId>
+                                    <groupId>org.eclipse.che</groupId>
+                                    <artifactId>assembly-che-tomcat8</artifactId>
                                     <type>zip</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/dependency</outputDirectory>
