@@ -18,13 +18,8 @@ import { Logger } from '../../utils/Logger';
 @injectable()
 export class OcpWebConsolePage {
 
-    private static readonly OPERATOR_LOGO_NAME: string = `//h1[text()='${TestConstants.TS_SELENIUM_OPERATOR_LOGO_NAME}']`;
-    private static readonly INSTALLED_APP_URL: string = `${TestConstants.TS_SELENIUM_INSTALL_APP_PREFIX_URL}-${TestConstants.TS_SELENIUM_INSTALL_PROJECT_NAME}`;
-    private static readonly CATALOG_SOURCE_NAME: string = `${TestConstants.TS_SELENIUM_CATALOG_SOURCE_NAME}-${TestConstants.TS_SELENIUM_INSTALL_PROJECT_NAME}`;
-    private static readonly NAMESPACE_ITEM: string = `${TestConstants.TS_SELENIUM_INSTALL_PROJECT_NAME}-Project-link`;
-    private static readonly CATALOG_OPERATOR_NAME: string = `${TestConstants.TS_SELENIUM_CATALOG_TILE_OPERATOR_NAME}`;
-    private static readonly OPENSHIFT_OAUTH_FIELD_LINE: string = `${TestConstants.TS_SELENIUM_OPENSHIFT_OAUTH_FIELD_LINE}`;
-    private static readonly OPREATOR_CHANNEL_NAME: string = `${TestConstants.TS_OCP_OPERATOR_UPDATE_CHANNEL}`;
+    private static readonly OPERATOR_LOGO_NAME_XPATH: string = `//h1[text()='${TestConstants.TS_SELENIUM_OPERATOR_LOGO_NAME}']`;
+    private static readonly INSTALLED_APP_URL_XPATH: string = `${TestConstants.TS_SELENIUM_INSTALL_APP_PREFIX_URL}-${TestConstants.TS_SELENIUM_INSTALL_PROJECT_NAME}`;
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
@@ -60,7 +55,8 @@ export class OcpWebConsolePage {
     async clickOnCatalogOperatorIcon() {
         Logger.debug('OcpWebConsolePage.clickOnCatalogOperatorIcon');
 
-        const catalogTileOperatorNameLocator: By = By.css(`a[data-test^=${OcpWebConsolePage.CATALOG_OPERATOR_NAME}]`);
+        const catalogTileOperatorNameCss: string = `${TestConstants.TS_SELENIUM_CATALOG_TILE_OPERATOR_NAME}`;
+        const catalogTileOperatorNameLocator: By = By.css(`a[data-test^=${catalogTileOperatorNameCss}]`);
         await this.driverHelper.waitAndClick(catalogTileOperatorNameLocator, TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
     async clickOnInstallButton() {
@@ -80,7 +76,7 @@ export class OcpWebConsolePage {
     async selectUpdateChannelOnSubscriptionPage() {
         Logger.debug('OcpWebConsolePage.selectUpdateChannelOnSubscriptionPage');
 
-        const updateChannelOperatorLocator: By = By.css(`input[value=${OcpWebConsolePage.OPREATOR_CHANNEL_NAME}]`);
+        const updateChannelOperatorLocator: By = By.css(`input[value=${TestConstants.TS_OCP_OPERATOR_UPDATE_CHANNEL}]`);
         await this.driverHelper.waitAndClick(updateChannelOperatorLocator);
     }
 
@@ -101,7 +97,8 @@ export class OcpWebConsolePage {
     async selectDefinedNamespaceOnSubscriptionPage() {
         Logger.debug('OcpWebConsolePage.selectDefinedNamespaceOnSubscriptionPage');
 
-        const namespaceItemInDropDownLocator: By = By.id(OcpWebConsolePage.NAMESPACE_ITEM);
+        const namespaceItemInDropDownId: string = `${TestConstants.TS_SELENIUM_INSTALL_PROJECT_NAME}-Project-link`;
+        const namespaceItemInDropDownLocator: By = By.id(namespaceItemInDropDownId);
         await this.driverHelper.waitAndClick(namespaceItemInDropDownLocator);
     }
 
@@ -122,7 +119,7 @@ export class OcpWebConsolePage {
     async waitChannelNameOnSubscriptionOverviewPage() {
         Logger.debug('OcpWebConsolePage.waitChannelNameOnSubscriptionOverviewPage');
 
-        const channelNameOnSubscriptionOverviewLocator: By = By.xpath(`//button[@type='button' and text()='${OcpWebConsolePage.OPREATOR_CHANNEL_NAME}']`);
+        const channelNameOnSubscriptionOverviewLocator: By = By.xpath(`//button[@type='button' and text()='${TestConstants.TS_OCP_OPERATOR_UPDATE_CHANNEL}']`);
         await this.driverHelper.waitVisibility(channelNameOnSubscriptionOverviewLocator);
     }
 
@@ -136,7 +133,8 @@ export class OcpWebConsolePage {
     async waitCatalogSourceNameOnSubscriptionOverviewPage() {
         Logger.debug('OcpWebConsolePage.waitCatalogSourceNameOnSubscriptionOverviewPage');
 
-        const catalogSourceNameLolcator: By = By.css(`a[title='${OcpWebConsolePage.CATALOG_SOURCE_NAME}']`);
+        const catalogSourceNameCss: string = `${TestConstants.TS_SELENIUM_CATALOG_SOURCE_NAME}-${TestConstants.TS_SELENIUM_INSTALL_PROJECT_NAME}`;
+        const catalogSourceNameLolcator: By = By.css(`a[title='${catalogSourceNameCss}']`);
         await this.driverHelper.waitVisibility(catalogSourceNameLolcator);
     }
 
@@ -150,7 +148,7 @@ export class OcpWebConsolePage {
     async waitInstalledOperatorLogoName() {
         Logger.debug('OcpWebConsolePage.waitInstalledOperatorLogoName');
 
-        await this.driverHelper.waitVisibility(By.xpath(OcpWebConsolePage.OPERATOR_LOGO_NAME));
+        await this.driverHelper.waitVisibility(By.xpath(OcpWebConsolePage.OPERATOR_LOGO_NAME_XPATH));
     }
 
     async waitStatusInstalledOperator() {
@@ -163,13 +161,13 @@ export class OcpWebConsolePage {
     async clickOnInstalledOperatorLogoName() {
         Logger.debug('OcpWebConsolePage.clickOnInstalledOperatorLogoName');
 
-        await this.driverHelper.waitAndClick(By.xpath(OcpWebConsolePage.OPERATOR_LOGO_NAME));
+        await this.driverHelper.waitAndClick(By.xpath(OcpWebConsolePage.OPERATOR_LOGO_NAME_XPATH));
     }
 
     async waitOverviewCsvEclipseCheOperator() {
         Logger.debug('OcpWebConsolePage.waitOverviewCsvEclipseCheOperator');
 
-        await this.driverHelper.waitVisibility(By.xpath(OcpWebConsolePage.OPERATOR_LOGO_NAME));
+        await this.driverHelper.waitVisibility(By.xpath(OcpWebConsolePage.OPERATOR_LOGO_NAME_XPATH));
     }
 
     async clickCreateNewCheClusterLink() {
@@ -189,7 +187,7 @@ export class OcpWebConsolePage {
     async selectOpenShiftOAuthFieldInYaml() {
         Logger.debug('OcpWebConsolePage.selectOpenShiftOAuthFieldInYaml');
 
-        const openShiftOAuthFieldLocator: By = By.xpath(`//div[@class=\'ace_gutter-cell \' and text()=\'${OcpWebConsolePage.OPENSHIFT_OAUTH_FIELD_LINE}\']`);
+        const openShiftOAuthFieldLocator: By = By.xpath(`//div[@class=\'ace_gutter-cell \' and text()=\'${TestConstants.TS_SELENIUM_OPENSHIFT_OAUTH_FIELD_LINE}\']`);
         await this.driverHelper.waitAndClick(openShiftOAuthFieldLocator);
     }
 
@@ -238,14 +236,14 @@ export class OcpWebConsolePage {
     async waitInstalledAppUrl() {
         Logger.debug('OcpWebConsolePage.waitInstalledAppUrl');
 
-        const installedAppUrlLocator: By = By.partialLinkText(`${OcpWebConsolePage.INSTALLED_APP_URL}`);
+        const installedAppUrlLocator: By = By.partialLinkText(`${OcpWebConsolePage.INSTALLED_APP_URL_XPATH}`);
         await this.driverHelper.waitVisibility(installedAppUrlLocator, TestConstants.TS_SELENIUM_INSTALL_ECLIPSE_CHE_TIMEOUT);
     }
 
     async clickOnInstalledAppUrl() {
         Logger.debug('OcpWebConsolePage.clickOnInstalledAppUrl');
 
-        const installedAppUrlLocator: By = By.partialLinkText(`${OcpWebConsolePage.INSTALLED_APP_URL}`);
+        const installedAppUrlLocator: By = By.partialLinkText(`${OcpWebConsolePage.INSTALLED_APP_URL_XPATH}`);
         await this.driverHelper.waitAndClick(installedAppUrlLocator);
     }
 }
