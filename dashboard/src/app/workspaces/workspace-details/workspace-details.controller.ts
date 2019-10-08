@@ -16,6 +16,7 @@ import {WorkspaceDetailsService} from './workspace-details.service';
 import IdeSvc from '../../ide/ide.service';
 import {WorkspacesService} from '../workspaces.service';
 import {ICheEditModeOverlayConfig} from '../../../components/widget/edit-mode-overlay/che-edit-mode-overlay.directive';
+import {CheBranding} from '../../../components/branding/che-branding.factory';
 
 export  interface IInitData {
   namespaceId: string;
@@ -33,7 +34,7 @@ export  interface IInitData {
  */
 export class WorkspaceDetailsController {
 
-  static $inject = ['$location', '$log', '$scope', 'lodash', 'cheNotification', 'cheWorkspace', 'ideSvc', 'workspaceDetailsService', 'initData', '$timeout', 'workspacesService'];
+  static $inject = ['$location', '$log', '$sce', '$scope', 'lodash', 'cheNotification', 'cheWorkspace', 'ideSvc', 'workspaceDetailsService', 'initData', '$timeout', 'cheBranding', 'workspacesService'];
 
   /**
    * Overlay panel configuration.
@@ -43,6 +44,7 @@ export class WorkspaceDetailsController {
   workspacesService: WorkspacesService;
   private lodash: any;
   private $scope: ng.IScope;
+  private $sce: ng.ISCEService;
   private $log: ng.ILogService;
   private $location: ng.ILocationService;
   private $timeout: ng.ITimeoutService;
@@ -64,17 +66,27 @@ export class WorkspaceDetailsController {
   private tabsValidationTimeout: ng.IPromise<any>;
   private pluginRegistry: string;
   private TAB: Array<string>;
+  private cheBranding: CheBranding;
 
   /**
    * There are unsaved changes to apply (with restart) when is't <code>true</code>.
    */
   private unsavedChangesToApply: boolean;
+  /**
+   * There is selected deprecated editor when is't <code>true</code>.
+   */
+  private hasSelectedDeprecatedEditor: boolean;
+  /**
+   * There are selected deprecated plugins when is't <code>true</code>.
+   */
+  private hasSelectedDeprecatedPlugins: boolean;
 
   /**
    * Default constructor that is using resource injection
    */
   constructor($location: ng.ILocationService,
               $log: ng.ILogService,
+              $sce: ng.ISCEService,
               $scope: ng.IScope,
               lodash: any,
               cheNotification: CheNotification,
@@ -83,8 +95,10 @@ export class WorkspaceDetailsController {
               workspaceDetailsService: WorkspaceDetailsService,
               initData: IInitData,
               $timeout: ng.ITimeoutService,
+              cheBranding: CheBranding,
               workspacesService: WorkspacesService) {
     this.$log = $log;
+    this.$sce = $sce;
     this.$scope = $scope;
     this.$timeout = $timeout;
     this.$location = $location;
@@ -94,6 +108,7 @@ export class WorkspaceDetailsController {
     this.ideSvc = ideSvc;
     this.workspaceDetailsService = workspaceDetailsService;
     this.workspacesService = workspacesService;
+    this.cheBranding = cheBranding;
     this.pluginRegistry = cheWorkspace.getWorkspaceSettings() != null ? cheWorkspace.getWorkspaceSettings().cheWorkspacePluginRegistryUrl : null;
 
     if (!initData.workspaceDetails) {
@@ -116,12 +131,14 @@ export class WorkspaceDetailsController {
         this.workspaceDetails = angular.copy(newWorkspaceDetails);
       }
       this.checkEditMode();
+      this.updateDeprecatedInfo();
     };
     this.cheWorkspace.subscribeOnWorkspaceChange(initData.workspaceDetails.id, action);
 
     this.originWorkspaceDetails = angular.copy(initData.workspaceDetails);
     this.workspaceDetails = angular.copy(initData.workspaceDetails);
     this.checkEditMode();
+    this.updateDeprecatedInfo();
     this.TAB = this.workspaceDetails.config ? ['Overview', 'Projects', 'Containers', 'Servers', 'Env_Variables', 'Volumes', 'Config', 'SSH', 'Plugins', 'Editors'] : ['Overview', 'Projects', 'Plugins', 'Editors', 'Devfile'];
     this.updateTabs();
 
@@ -181,11 +198,11 @@ export class WorkspaceDetailsController {
     return this.workspacesService.isSupported(this.workspaceDetails);
   }
 
-  isSupportedVersion(): boolean {
+  get isSupportedVersion(): boolean {
     return this.workspacesService.isSupportedVersion(this.workspaceDetails);
   }
 
-  isSupportedRecipeType(): boolean {
+  get isSupportedRecipeType(): boolean {
     return this.workspacesService.isSupportedRecipeType(this.workspaceDetails);
   }
 
@@ -366,11 +383,11 @@ export class WorkspaceDetailsController {
    * @returns {string}
    */
   getOverlayMessage(failedTabs?: string[]): string {
-    if (!this.isSupportedRecipeType()) {
+    if (!this.isSupportedRecipeType) {
       return `Current infrastructure doesn't support this workspace recipe type.`;
     }
 
-    if (!this.isSupportedVersion()) {
+    if (!this.isSupportedVersion) {
       return `This workspace is using old definition format which is not compatible anymore.`;
     }
 
@@ -447,6 +464,8 @@ export class WorkspaceDetailsController {
       const failedTabs = this.checkForFailedTabs();
       // update overlay
       this.updateEditModeOverlayConfig(configIsDiffer, failedTabs);
+      // update info(editor and plugins)
+      this.updateDeprecatedInfo();
       // publish changes
       this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
     }, 500);
@@ -585,5 +604,38 @@ export class WorkspaceDetailsController {
     });
 
     return tabs.some((tabKey: string) => this.checkFormsNotValid(tabKey));
+  }
+
+  /**
+   * Builds and returns the warning message for che-description(warning info) component.
+   *
+   * @returns {string}
+   */
+  get warningMessage(): any {
+    let message = '';
+
+    if (!this.isSupportedVersion) {
+      message += `This workspace is using old definition format which is not compatible anymore.
+      Please follow the <a href="${this.cheBranding.getDocs().converting}" target="_blank">documentation</a>
+      to update the definition of the workspace and benefits from the latest capabilities.`;
+    } else if (this.hasSelectedDeprecatedPlugins) {
+      message += `The workspace uses deprecated plugins${this.hasSelectedDeprecatedEditor ? ' and editor' : ''}.`;
+    } else if (this.hasSelectedDeprecatedEditor) {
+      message += `The workspace uses deprecated editor.`
+    }
+
+    return this.$sce.trustAsHtml(message);
+  }
+
+  get hasWarningMessage(): boolean {
+    return !this.isSupportedVersion || this.hasSelectedDeprecatedEditor || this.hasSelectedDeprecatedPlugins;
+  }
+
+  private updateDeprecatedInfo() {
+    const deprecatedEditor = this.workspaceDetailsService.getSelectedDeprecatedEditor(this.workspaceDetails);
+    this.hasSelectedDeprecatedEditor = deprecatedEditor !== '';
+
+    const deprecatedPlugins = this.workspaceDetailsService.getSelectedDeprecatedPlugins(this.workspaceDetails);
+    this.hasSelectedDeprecatedPlugins = deprecatedPlugins.length > 0;
   }
 }

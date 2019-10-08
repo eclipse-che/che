@@ -11,12 +11,11 @@
  */
 'use strict';
 
-import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
 import {WorkspacesService} from './workspaces.service';
 
 /**
  * WorkspacesService tests.
- * 
+ *
  * @author Oleksii Orel
  */
 describe(`WorkspacesService >`, () => {
@@ -25,7 +24,6 @@ describe(`WorkspacesService >`, () => {
    * Service to test.
    */
   let workspacesService: WorkspacesService;
-  let cheWorkspace: CheWorkspace;
 
   function getCHE6Workspace(recipeType?: string): che.IWorkspace {
     return {
@@ -36,7 +34,7 @@ describe(`WorkspacesService >`, () => {
         'environments': {
           'default': {
             'recipe': {
-              'type': recipeType ? recipeType : 'dockerimage', 
+              'type': recipeType ? recipeType : 'dockerimage',
               'content': 'eclipse/ubuntu_jdk8'
             },
             'machines': {
@@ -120,14 +118,30 @@ describe(`WorkspacesService >`, () => {
       .service('cheWorkspace', function () {
         this.getSupportedRecipeTypes = (): string[] => {
           return ['kubernetes','dockerimage','no-environment'];
-        }
+        };
+        this.fetchWorkspaceSettings = (): any => {
+          // todo: rework to use Angular promise instead of native one
+          return Promise.resolve({
+            cheWorkspacePluginRegistryUrl: 'cheWorkspacePluginRegistryUrl'
+          });
+        };
+        this.getWorkspaceDataManager = () => {
+          return {
+            getEditor() {
+              return '';
+            },
+            getPlugins() {
+              return [];
+            }
+          };
+        };
       });
     angular.mock.module('workspacesServiceMock');
   });
 
-  beforeEach(inject((_workspacesService_: WorkspacesService,
-                     _cheWorkspace_: CheWorkspace) => {
-    cheWorkspace = _cheWorkspace_;
+  beforeEach(inject((
+    _workspacesService_: WorkspacesService
+  ) => {
     workspacesService = _workspacesService_;
   }));
 
