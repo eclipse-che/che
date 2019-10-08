@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.core.rest;
 
+import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -56,6 +57,8 @@ import org.everrest.core.impl.provider.JsonEntityProvider;
 public class CheJsonProvider<T> implements MessageBodyReader<T>, MessageBodyWriter<T> {
   private Set<Class> ignoredClasses;
   private final JsonEntityProvider delegate = new JsonEntityProvider<>();
+  private final Type listOfJsonSerializableType =
+      new TypeToken<List<JsonSerializable>>() {}.getType();
 
   @Inject
   public CheJsonProvider(@Nullable @Named("che.json.ignored_classes") Set<Class> ignoredClasses) {
@@ -95,6 +98,10 @@ public class CheJsonProvider<T> implements MessageBodyReader<T>, MessageBodyWrit
       try (Writer w = new OutputStreamWriter(entityStream, StandardCharsets.UTF_8)) {
         ((JsonSerializable) t).toJson(w);
       }
+    } else if (isDtoList(type, genericType, t)) {
+      try (Writer w = new OutputStreamWriter(entityStream, StandardCharsets.UTF_8)) {
+        DtoFactory.getInstance().getGson().toJson(t, listOfJsonSerializableType, w);
+      }
     } else {
       delegate.writeTo(t, type, genericType, annotations, mediaType, httpHeaders, entityStream);
     }
@@ -121,15 +128,10 @@ public class CheJsonProvider<T> implements MessageBodyReader<T>, MessageBodyWrit
       throws IOException, WebApplicationException {
     if (type.isAnnotationPresent(DTO.class)) {
       return DtoFactory.getInstance().createDtoFromJson(entityStream, type);
-    } else if (type.isAssignableFrom(List.class) && genericType instanceof ParameterizedType) {
+    } else if (isDtoList(type, genericType, null)) {
       ParameterizedType parameterizedType = (ParameterizedType) genericType;
       Type elementType = parameterizedType.getActualTypeArguments()[0];
-      if (elementType instanceof Class) {
-        Class elementClass = (Class) elementType;
-        if (elementClass.isAnnotationPresent(DTO.class)) {
-          return (T) DtoFactory.getInstance().createListDtoFromJson(entityStream, elementClass);
-        }
-      }
+      return (T) DtoFactory.getInstance().createListDtoFromJson(entityStream, (Class) elementType);
     }
     return (T)
         delegate.readFrom(type, genericType, annotations, mediaType, httpHeaders, entityStream);
@@ -141,5 +143,21 @@ public class CheJsonProvider<T> implements MessageBodyReader<T>, MessageBodyWrit
    */
   public Set<Class> getIgnoredClasses() {
     return ignoredClasses;
+  }
+
+  /** Checks if provided object is a list of DTO or serializable objects. */
+  private static <T> boolean isDtoList(Class<?> type, Type genericType, T t) {
+    if (!List.class.isAssignableFrom(type)) {
+      return false;
+    }
+    if (genericType instanceof ParameterizedType) {
+      ParameterizedType parameterizedType = (ParameterizedType) genericType;
+      Type elementType = parameterizedType.getActualTypeArguments()[0];
+      return elementType instanceof Class && ((Class) elementType).isAnnotationPresent(DTO.class);
+    } else if (t instanceof List && type.equals(genericType)) {
+      List list = (List) t;
+      return !list.isEmpty() && list.iterator().next() instanceof JsonSerializable;
+    }
+    return false;
   }
 }
