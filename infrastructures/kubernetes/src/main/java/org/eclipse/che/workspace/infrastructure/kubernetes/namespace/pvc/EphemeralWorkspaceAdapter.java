@@ -11,24 +11,15 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
-import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolumeMount;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner.LOGS_VOLUME_NAME;
-
-import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EmptyDirVolumeSource;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PodSpec;
-import io.fabric8.kubernetes.api.model.VolumeBuilder;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
-import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.slf4j.Logger;
@@ -51,95 +42,43 @@ public class EphemeralWorkspaceAdapter {
 
   private static final Logger LOG = LoggerFactory.getLogger(CommonPVCStrategy.class);
 
-  private static final String EPHEMERAL_VOLUME_NAME_PREFIX = "ephemeral-che-workspace-";
+  private final PVCProvisioner pvcProvisioner;
+  private final SubPathPrefixes subPathPrefixes;
+
+  @Inject
+  public EphemeralWorkspaceAdapter(PVCProvisioner pvcProvisioner, SubPathPrefixes subPathPrefixes) {
+    this.pvcProvisioner = pvcProvisioner;
+    this.subPathPrefixes = subPathPrefixes;
+  }
 
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     LOG.debug("Provisioning PVC strategy for workspace '{}'", identity.getWorkspaceId());
+
+    Map<String, PersistentVolumeClaim> userDefinedPVCs =
+        new HashMap<>(k8sEnv.getPersistentVolumeClaims());
+
     k8sEnv.getPersistentVolumeClaims().clear();
+    pvcProvisioner.provision(k8sEnv, userDefinedPVCs);
+    pvcProvisioner.convertCheVolumes(k8sEnv, identity.getWorkspaceId());
+    subPathPrefixes.prefixVolumeMountsSubpaths(k8sEnv, identity.getWorkspaceId());
+
+    replacePVCsWithEmptyDir(k8sEnv);
+    k8sEnv.getPersistentVolumeClaims().clear();
+  }
+
+  private void replacePVCsWithEmptyDir(KubernetesEnvironment k8sEnv) {
     for (PodData pod : k8sEnv.getPodsData().values()) {
       PodSpec podSpec = pod.getSpec();
-
-      // To ensure same volumes get mounted correctly in different containers, we need to track
-      // which volumes have been "created"
-      Map<String, String> cheVolumeNameToPodVolumeName = new HashMap<>();
-
       podSpec
           .getVolumes()
           .stream()
           .filter(v -> v.getPersistentVolumeClaim() != null)
           .forEach(
               v -> {
-                String claimName = v.getPersistentVolumeClaim().getClaimName();
-                cheVolumeNameToPodVolumeName.put(claimName, v.getName());
                 v.setPersistentVolumeClaim(null);
                 v.setEmptyDir(new EmptyDirVolumeSource());
               });
-
-      List<Container> containers = new ArrayList<>();
-      containers.addAll(podSpec.getContainers());
-      containers.addAll(podSpec.getInitContainers());
-      for (Container container : containers) {
-        String machineName = Names.machineName(pod, container);
-        InternalMachineConfig machineConfig = k8sEnv.getMachines().get(machineName);
-        if (machineConfig == null) {
-          return;
-        }
-        Map<String, Volume> volumes = machineConfig.getVolumes();
-        if (volumes.isEmpty()) {
-          continue;
-        }
-
-        for (Entry<String, Volume> volumeEntry : volumes.entrySet()) {
-          final String volumePath = volumeEntry.getValue().getPath();
-          final String cheVolumeName =
-              LOGS_VOLUME_NAME.equals(volumeEntry.getKey())
-                  ? volumeEntry.getKey() + '-' + pod.getMetadata().getName()
-                  : volumeEntry.getKey();
-
-          final String uniqueVolumeName;
-          if (cheVolumeNameToPodVolumeName.containsKey(cheVolumeName)) {
-            uniqueVolumeName = cheVolumeNameToPodVolumeName.get(cheVolumeName);
-          } else {
-            uniqueVolumeName = Names.generateName(EPHEMERAL_VOLUME_NAME_PREFIX);
-            cheVolumeNameToPodVolumeName.put(cheVolumeName, uniqueVolumeName);
-          }
-          // binds volume to pod and container
-          container
-              .getVolumeMounts()
-              .add(
-                  newVolumeMount(
-                      uniqueVolumeName,
-                      volumePath,
-                      getSubPath(identity.getWorkspaceId(), cheVolumeName, machineName)));
-          addEmptyDirVolumeIfAbsent(pod.getSpec(), uniqueVolumeName);
-        }
-      }
     }
-  }
-
-  private void addEmptyDirVolumeIfAbsent(PodSpec podSpec, String uniqueVolumeName) {
-    if (podSpec
-        .getVolumes()
-        .stream()
-        .noneMatch(volume -> volume.getName().equals(uniqueVolumeName))) {
-      podSpec
-          .getVolumes()
-          .add(
-              new VolumeBuilder()
-                  .withName(uniqueVolumeName)
-                  .withNewEmptyDir()
-                  .endEmptyDir()
-                  .build());
-    }
-  }
-
-  private String getSubPath(String workspaceId, String volumeName, String machineName) {
-    // logs must be located inside the folder related to the machine because few machines can
-    // contain the identical agents and in this case, a conflict is possible.
-    if (LOGS_VOLUME_NAME.equals(volumeName)) {
-      return workspaceId + '/' + volumeName + '/' + machineName;
-    }
-    return workspaceId + '/' + volumeName;
   }
 }
