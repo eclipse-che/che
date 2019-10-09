@@ -88,9 +88,9 @@ suite('E2E', async () => {
             await ocpWebConsole.waitCreateCheClusterYaml();
         });
 
-        test('Change value of OpenShiftOauth field', async () => {
+        test('Set value of OpenShiftOauth field', async () => {
             await ocpWebConsole.selectOpenShiftOAuthFieldInYaml();
-            await ocpWebConsole.changeValueOpenShiftOAuthField();
+            await ocpWebConsole.setValueOpenShiftOAuthField();
         });
 
         test('Create Che Cluster ', async () => {

@@ -187,15 +187,17 @@ export class OcpWebConsolePage {
     async selectOpenShiftOAuthFieldInYaml() {
         Logger.debug('OcpWebConsolePage.selectOpenShiftOAuthFieldInYaml');
 
-        const openShiftOAuthFieldLocator: By = By.xpath(`//div[@class=\'ace_gutter-cell \' and text()=\'${TestConstants.TS_SELENIUM_OPENSHIFT_OAUTH_FIELD_LINE}\']`);
-        await this.driverHelper.waitAndClick(openShiftOAuthFieldLocator);
+        const openShiftOAuthLineLocator: By = By.xpath(`//div[@class=\'ace_gutter-cell \' and text()=\'${TestConstants.TS_SELENIUM_OPENSHIFT_OAUTH_FIELD_LINE}\']`);
+        await this.driverHelper.waitAndClick(openShiftOAuthLineLocator);
     }
 
-    async changeValueOpenShiftOAuthField() {
-        Logger.debug('OcpWebConsolePage.changeValueOpenShiftOAuthField');
+    async setValueOpenShiftOAuthField() {
+        Logger.debug('OcpWebConsolePage.setValueOpenShiftOAuthField');
 
-        await this.driverHelper.getAction().sendKeys(Key.DELETE.toString()).sendKeys(Key.ENTER.toString()).sendKeys(Key.UP.toString()).perform();
-        await this.driverHelper.getAction().sendKeys('    openShiftoAuth: false');
+        const openShiftOAuthEditorLocator: By = By.css('textarea[class=\'ace_text-input\']');
+        await this.driverHelper.clearInvisible(openShiftOAuthEditorLocator);
+        await this.driverHelper.typeToInvisible(openShiftOAuthEditorLocator, `    openShiftoAuth: ${TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH}`);
+        await this.driverHelper.typeToInvisible(openShiftOAuthEditorLocator, Key.ENTER);
     }
 
     async clickOnCreateCheClusterButton() {
