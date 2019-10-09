@@ -81,7 +81,7 @@ export class CheBranding {
   private $rootScope: che.IRootScopeService;
   private $http: ng.IHttpService;
   private cheService: CheService;
-  private brandingData: IBranding;
+  private branding: IBranding;
   private callbacks: Map<string, Function> = new Map();
 
   /**
@@ -91,9 +91,27 @@ export class CheBranding {
     this.$http = $http;
     this.$rootScope = $rootScope;
     this.cheService = cheService;
-    this.brandingData = {};
+    this.branding = {};
     this.updateData();
     this.updateVersion();
+
+    this.$rootScope.branding = {
+      title: this.getProductName(),
+      name: this.getName(),
+      logoURL: this.getProductLogo(),
+      logoText: this.getProductLogoText(),
+      favicon: this.getProductFavicon(),
+      loaderURL: this.getLoaderUrl(),
+      websocketContext: this.getWebsocketContext(),
+      helpPath: this.getProductHelpPath(),
+      helpTitle: this.getProductHelpTitle(),
+      footer: this.getFooter(),
+      supportEmail: this.getProductSupportEmail(),
+      oauthDocs: this.getOauthDocs(),
+      cli: this.getCLI(),
+      docs: this.getDocs(),
+      workspace: this.getWorkspace()
+    };
   }
 
   /**
@@ -110,30 +128,9 @@ export class CheBranding {
    * Update branding data.
    */
   updateData(): void {
-    this.$http.get(ASSET_PREFIX + 'product.json').then((branding: { data: any }) => {
-      return branding && branding.data ? branding.data : {};
-    }, () => {
-      return {};
-    }).then((brandingData: IBranding) => {
-      this.brandingData = brandingData;
-      this.$rootScope.branding = {
-        title: this.getProductName(),
-        name: this.getName(),
-        logoURL: this.getProductLogo(),
-        logoText: this.getProductLogoText(),
-        favicon: this.getProductFavicon(),
-        loaderURL: this.getLoaderUrl(),
-        websocketContext: this.getWebsocketContext(),
-        helpPath: this.getProductHelpPath(),
-        helpTitle: this.getProductHelpTitle(),
-        footer: this.getFooter(),
-        supportEmail: this.getProductSupportEmail(),
-        oauthDocs: this.getOauthDocs(),
-        cli: this.getCLI(),
-        docs: this.getDocs(),
-        workspace: this.getWorkspace()
-      };
-      this.callbacks.forEach((callback: Function) => {
+    this.$http.get(ASSET_PREFIX + 'product.json').then(res => res.data).then((branding: IBranding) => {
+      this.branding = branding;
+      this.callbacks.forEach(callback => {
         if (angular.isFunction(callback)) {
           callback(this.$rootScope.branding);
         }
@@ -169,7 +166,7 @@ export class CheBranding {
    * @returns {string}
    */
   getName(): string {
-    return this.brandingData.name ? this.brandingData.name : DEFAULT_NAME;
+    return this.branding.name ? this.branding.name : DEFAULT_NAME;
   }
 
   /**
@@ -177,7 +174,7 @@ export class CheBranding {
    * @returns {string}
    */
   getProductName(): string {
-    return  this.brandingData.title ? this.brandingData.title : DEFAULT_PRODUCT_NAME;
+    return  this.branding.title ? this.branding.title : DEFAULT_PRODUCT_NAME;
   }
 
   /**
@@ -185,7 +182,7 @@ export class CheBranding {
    * @returns {string}
    */
   getProductLogo(): string {
-    return this.brandingData.logoFile ? ASSET_PREFIX + this.brandingData.logoFile : ASSET_PREFIX + DEFAULT_PRODUCT_LOGO;
+    return this.branding.logoFile ? ASSET_PREFIX + this.branding.logoFile : ASSET_PREFIX + DEFAULT_PRODUCT_LOGO;
   }
 
   /**
@@ -193,7 +190,7 @@ export class CheBranding {
    * @returns {string}
    */
   getProductFavicon(): string {
-    return this.brandingData.favicon ? ASSET_PREFIX + this.brandingData.favicon : ASSET_PREFIX + DEFAULT_PRODUCT_FAVICON;
+    return this.branding.favicon ? ASSET_PREFIX + this.branding.favicon : ASSET_PREFIX + DEFAULT_PRODUCT_FAVICON;
   }
 
   /**
@@ -201,7 +198,7 @@ export class CheBranding {
    * @returns {string}
    */
   getLoaderUrl(): string {
-    return this.brandingData.loader ? ASSET_PREFIX + this.brandingData.loader : ASSET_PREFIX + DEFAULT_LOADER;
+    return this.branding.loader ? ASSET_PREFIX + this.branding.loader : ASSET_PREFIX + DEFAULT_LOADER;
   }
 
   /**
@@ -209,7 +206,7 @@ export class CheBranding {
    * @returns {string}
    */
   getWebsocketContext(): string {
-    return this.brandingData.websocketContext ? this.brandingData.websocketContext : DEFAULT_WEBSOCKET_CONTEXT;
+    return this.branding.websocketContext ? this.branding.websocketContext : DEFAULT_WEBSOCKET_CONTEXT;
   }
 
   /**
@@ -217,7 +214,7 @@ export class CheBranding {
    * @returns {string}
    */
   getProductHelpPath(): string {
-    return this.brandingData.helpPath ? this.brandingData.helpPath : null;
+    return this.branding.helpPath ? this.branding.helpPath : null;
   }
 
   /**
@@ -225,7 +222,7 @@ export class CheBranding {
    * @returns {string}
    */
   getProductHelpTitle(): string {
-    return this.brandingData.helpTitle ? this.brandingData.helpTitle : null;
+    return this.branding.helpTitle ? this.branding.helpTitle : null;
   }
 
   /**
@@ -233,7 +230,7 @@ export class CheBranding {
    * @returns {string}
    */
   getProductLogoText(): string {
-    return this.brandingData.logoTextFile ? ASSET_PREFIX + this.brandingData.logoTextFile : ASSET_PREFIX + DEFAULT_PRODUCT_LOGO_TEXT;
+    return this.branding.logoTextFile ? ASSET_PREFIX + this.branding.logoTextFile : ASSET_PREFIX + DEFAULT_PRODUCT_LOGO_TEXT;
   }
 
   /**
@@ -241,7 +238,7 @@ export class CheBranding {
    * @returns {string}
    */
   getOauthDocs(): string {
-    return this.brandingData.oauthDocs ? this.brandingData.oauthDocs : DEFAULT_OAUTH_DOCS;
+    return this.branding.oauthDocs ? this.branding.oauthDocs : DEFAULT_OAUTH_DOCS;
   }
 
   /**
@@ -249,7 +246,7 @@ export class CheBranding {
    * @returns {string}
    */
   getProductSupportEmail(): string {
-    return this.brandingData.supportEmail ? this.brandingData.supportEmail : null;
+    return this.branding.supportEmail ? this.branding.supportEmail : null;
   }
 
   /**
@@ -259,9 +256,9 @@ export class CheBranding {
    */
   getFooter():  {content?: string; links?: Array<{title: string, location: string}>; email: {title: string, address: string, subject: string}} {
     return {
-      content: this.brandingData.footer && this.brandingData.footer.content ? this.brandingData.footer.content : '',
-      links: this.brandingData.footer && this.brandingData.footer.links ? this.brandingData.footer.links : [],
-      email: this.brandingData.footer && this.brandingData.footer.email ? this.brandingData.footer.email : null
+      content: this.branding.footer && this.branding.footer.content ? this.branding.footer.content : '',
+      links: this.branding.footer && this.branding.footer.links ? this.branding.footer.links : [],
+      email: this.branding.footer && this.branding.footer.email ? this.branding.footer.email : null
     };
   }
 
@@ -271,8 +268,8 @@ export class CheBranding {
    */
   getCLI(): { configName: string; name: string } {
     return {
-      configName: this.brandingData.cli && this.brandingData.cli.configName ? this.brandingData.cli.configName : DEFAULT_CLI_CONFIG_NAME,
-      name: this.brandingData.cli && this.brandingData.cli.name ? this.brandingData.cli.name : DEFAULT_CLI_NAME
+      configName: this.branding.cli && this.branding.cli.configName ? this.branding.cli.configName : DEFAULT_CLI_CONFIG_NAME,
+      name: this.branding.cli && this.branding.cli.name ? this.branding.cli.name : DEFAULT_CLI_NAME
     };
   }
 
@@ -282,12 +279,12 @@ export class CheBranding {
    */
   getDocs(): { devfile: string; workspace: string; factory: string; organization: string; general: string, converting: string} {
     return {
-      devfile: this.brandingData.docs && this.brandingData.docs.devfile ? this.brandingData.docs.devfile : DEFAULT_DOCS_DEVFILE,
-      workspace: this.brandingData.docs && this.brandingData.docs.workspace ? this.brandingData.docs.workspace : DEFAULT_DOCS_WORKSPACE,
-      factory: this.brandingData.docs && this.brandingData.docs.factory ? this.brandingData.docs.factory : DEFAULT_DOCS_FACTORY,
-      organization: this.brandingData.docs && this.brandingData.docs.organization ? this.brandingData.docs.organization : DEFAULT_DOCS_ORGANIZATION,
-      general: this.brandingData.docs && this.brandingData.docs.general ? this.brandingData.docs.general : DEFAULT_DOCS_GENERAL,
-      converting: this.brandingData.docs && this.brandingData.docs.converting ? this.brandingData.docs.converting : DEFAULT_DOCS_CONVERTING
+      devfile: this.branding.docs && this.branding.docs.devfile ? this.branding.docs.devfile : DEFAULT_DOCS_DEVFILE,
+      workspace: this.branding.docs && this.branding.docs.workspace ? this.branding.docs.workspace : DEFAULT_DOCS_WORKSPACE,
+      factory: this.branding.docs && this.branding.docs.factory ? this.branding.docs.factory : DEFAULT_DOCS_FACTORY,
+      organization: this.branding.docs && this.branding.docs.organization ? this.branding.docs.organization : DEFAULT_DOCS_ORGANIZATION,
+      general: this.branding.docs && this.branding.docs.general ? this.branding.docs.general : DEFAULT_DOCS_GENERAL,
+      converting: this.branding.docs && this.branding.docs.converting ? this.branding.docs.converting : DEFAULT_DOCS_CONVERTING
     };
   }
 
@@ -297,9 +294,9 @@ export class CheBranding {
    */
   getWorkspace(): { priorityStacks: Array<string>; defaultStack: string, creationLink: string} {
     return {
-      priorityStacks: this.brandingData.workspace && this.brandingData.workspace.priorityStacks ? this.brandingData.workspace.priorityStacks : DEFAULT_WORKSPACE_PRIORITY_STACKS,
-      defaultStack: this.brandingData.workspace && this.brandingData.workspace.defaultStack ? this.brandingData.workspace.defaultStack : DEFAULT_WORKSPACE_DEFAULT_STACK,
-      creationLink: this.brandingData.workspace && this.brandingData.workspace.creationLink ? this.brandingData.workspace.creationLink : DEFAULT_WORKSPACE_CREATION_LINK
+      priorityStacks: this.branding.workspace && this.branding.workspace.priorityStacks ? this.branding.workspace.priorityStacks : DEFAULT_WORKSPACE_PRIORITY_STACKS,
+      defaultStack: this.branding.workspace && this.branding.workspace.defaultStack ? this.branding.workspace.defaultStack : DEFAULT_WORKSPACE_DEFAULT_STACK,
+      creationLink: this.branding.workspace && this.branding.workspace.creationLink ? this.branding.workspace.creationLink : DEFAULT_WORKSPACE_CREATION_LINK
     };
   }
 }

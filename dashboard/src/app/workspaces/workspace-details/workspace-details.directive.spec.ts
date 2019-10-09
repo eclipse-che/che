@@ -210,17 +210,43 @@ describe(`WorkspaceDetailsController >`, () => {
         this.getSupportedRecipeTypes = () => {
           return ['dockerimage', 'dockerfile', 'compose'];
         };
+        this.fetchWorkspaceSettings = (): any => {
+          // todo: rework to use Angular promise instead of native one
+          return Promise.resolve({
+            cheWorkspacePluginRegistryUrl: 'cheWorkspacePluginRegistryUrl'
+          });
+        };
         this.getWorkspaceSettings = () => {
           return {};
         };
-
         this.getWorkspaceDataManager = () => {
           return {
             getName(data: che.IWorkspace): string {
               return 'name';
+            },
+            getEditor() {
+              return '';
+            },
+            getPlugins() {
+              return [];
             }
           };
         };
+      })
+      .factory('pluginRegistry', function () {
+        return {
+          fetchPlugins: (url: string) => {
+            return $q.when([]);
+          }
+        }
+      })
+      .factory('cheBranding', function () {
+        return {
+          getDocs: () => {
+            const converting = 'converting-a-che-6-workspace-to-a-che-7-devfile';
+            return {converting};
+          }
+        }
       })
       // terminal directives which prevent to execute an original ones
       .directive('mdTab', function () {

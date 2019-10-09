@@ -40,6 +40,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.InconsistentRuntimesD
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientTermination;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.KubernetesNamespaceService;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.DockerimageComponentToWorkspaceApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentToWorkspaceApplier;
@@ -83,6 +84,8 @@ import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases
 public class OpenShiftInfraModule extends AbstractModule {
   @Override
   protected void configure() {
+    bind(KubernetesNamespaceService.class);
+
     MapBinder<String, InternalEnvironmentFactory> factories =
         MapBinder.newMapBinder(binder(), String.class, InternalEnvironmentFactory.class);
 
