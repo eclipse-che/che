@@ -12,14 +12,9 @@
 package org.eclipse.che.api.workspace.server;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -42,7 +37,6 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
-import org.eclipse.che.api.workspace.server.dto.DtoServerImpls.WorkspaceDtoImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -66,9 +60,6 @@ public class WorkspaceEntityProvider
   @Inject
   public WorkspaceEntityProvider(DevfileManager devfileManager) {
     this.devfileManager = devfileManager;
-    SimpleModule module = new SimpleModule();
-    module.addDeserializer(DevfileDto.class, new DevfileDtoDeserializer());
-    mapper.registerModule(module);
   }
 
   @Override
@@ -86,10 +77,18 @@ public class WorkspaceEntityProvider
       MultivaluedMap<String, String> httpHeaders,
       InputStream entityStream)
       throws IOException, WebApplicationException {
-    return mapper
-        .readerFor(WorkspaceDtoImpl.class)
-        .without(DeserializationFeature.WRAP_EXCEPTIONS)
-        .readValue(entityStream);
+    try {
+      JsonNode wsNode = mapper.readTree(entityStream);
+      JsonNode devfileNode = wsNode.path("devfile");
+      if (!devfileNode.isNull()) {
+        devfileManager.parseJson(devfileNode.toString());
+      }
+      return DtoFactory.getInstance().createDtoFromJson(wsNode.toString(), WorkspaceDto.class);
+    } catch (DevfileFormatException e) {
+      throw new BadRequestException(e.getMessage());
+    } catch (IOException e) {
+      throw new WebApplicationException(e.getMessage(), e);
+    }
   }
 
   @Override
@@ -122,17 +121,6 @@ public class WorkspaceEntityProvider
     try (Writer w = new OutputStreamWriter(entityStream, StandardCharsets.UTF_8)) {
       w.write(DtoFactory.getInstance().toJson(workspaceDto));
       w.flush();
-    }
-  }
-
-  class DevfileDtoDeserializer extends JsonDeserializer<DevfileDto> {
-    @Override
-    public DevfileDto deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-      try {
-        return asDto(devfileManager.parseJson(p.readValueAsTree().toString()));
-      } catch (DevfileFormatException e) {
-        throw new BadRequestException(e.getMessage());
-      }
     }
   }
 }
