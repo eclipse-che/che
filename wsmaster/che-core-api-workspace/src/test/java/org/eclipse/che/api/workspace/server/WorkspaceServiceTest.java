@@ -22,6 +22,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
+import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
@@ -58,6 +59,7 @@ import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
@@ -758,7 +760,7 @@ public class WorkspaceServiceTest {
     final WorkspaceImpl workspace = createWorkspace(createConfigDto());
     when(wsManager.updateWorkspace(any(), any())).thenReturn(workspace);
     when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
-    final WorkspaceDto workspaceDto = DtoConverter.asDto(workspace);
+    final WorkspaceDto workspaceDto = asDto(workspace);
 
     final Response response =
         given()
@@ -772,6 +774,29 @@ public class WorkspaceServiceTest {
     assertEquals(response.getStatusCode(), 200);
     assertEquals(
         new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
+  }
+
+  @Test
+  public void shouldUpdateWorkspaceWithRuntime() throws Exception {
+    final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+    MachineImpl machine = new MachineImpl(emptyMap(), emptyMap(), MachineStatus.STARTING);
+    RuntimeImpl runtime = new RuntimeImpl("myenv", singletonMap("machine1", machine), "owner");
+    workspace.setRuntime(runtime);
+    when(wsManager.updateWorkspace(any(), any())).thenReturn(workspace);
+    // when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+    final WorkspaceDto workspaceDto = asDto(workspace);
+
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .body(workspaceDto)
+            .when()
+            .put(SECURE_PATH + "/workspace/" + workspace.getId());
+
+    assertEquals(response.getStatusCode(), 200);
+    assertEquals(unwrapDto(response, WorkspaceDto.class).getRuntime(), asDto(runtime));
   }
 
   @Test
@@ -864,7 +889,7 @@ public class WorkspaceServiceTest {
     final WorkspaceImpl workspace = createWorkspace(createConfigDto());
     when(wsManager.startWorkspace(any(), anyString(), anyBoolean(), any())).thenReturn(workspace);
     when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
-    final WorkspaceDto workspaceDto = DtoConverter.asDto(workspace);
+    final WorkspaceDto workspaceDto = asDto(workspace);
 
     final Response response =
         given()
@@ -885,7 +910,7 @@ public class WorkspaceServiceTest {
     final WorkspaceImpl workspace = createWorkspace(createConfigDto());
     when(wsManager.startWorkspace(any(), anyString(), anyBoolean(), any())).thenReturn(workspace);
     when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
-    final WorkspaceDto workspaceDto = DtoConverter.asDto(workspace);
+    final WorkspaceDto workspaceDto = asDto(workspace);
 
     final Response response =
         given()
@@ -1312,7 +1337,7 @@ public class WorkspaceServiceTest {
   }
 
   private static CommandDto createCommandDto() {
-    return DtoConverter.asDto(new CommandImpl("MCI", "mvn clean install", "maven"));
+    return asDto(new CommandImpl("MCI", "mvn clean install", "maven"));
   }
 
   private static ProjectConfigDto createProjectDto() {
@@ -1334,7 +1359,7 @@ public class WorkspaceServiceTest {
             singletonMap(MEMORY_LIMIT_ATTRIBUTE, "10000"),
             emptyMap());
 
-    return DtoConverter.asDto(
+    return asDto(
         new EnvironmentImpl(
             new RecipeImpl("type", "content-type", "content", null),
             singletonMap("dev-machine", devMachine)));
@@ -1349,7 +1374,7 @@ public class WorkspaceServiceTest {
             .setCommands(singletonList(createCommandDto()))
             .setProjects(singletonList(createProjectDto()))
             .build();
-    return DtoConverter.asDto(config);
+    return asDto(config);
   }
 
   private ServerImpl createInternalServer() {
