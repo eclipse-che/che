@@ -35,6 +35,7 @@
     "apiVersion": {
       "type": "string",
       "title": "Devfile API Version",
+      "pattern": "1\\.0\\.0",
       "examples": [
         "1.0.0"
       ]

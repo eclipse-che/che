@@ -85,6 +85,19 @@ public class DevfileSchemaValidatorTest {
     fail("DevfileFormatException expected to be thrown but is was not");
   }
 
+  @Test
+  public void shouldThrowExceptionWhenDevfileHasUnsupportedApiVersion() throws Exception {
+    try {
+      String devfile =
+          "---\n" + "apiVersion: 111.111\n" + "metadata:\n" + "  name: test-invalid-apiversion\n";
+      schemaValidator.validateYaml(devfile);
+    } catch (DevfileFormatException e) {
+      assertEquals(e.getMessage(), "version '111.111' of the devfile is not supported");
+      return;
+    }
+    fail("DevfileFormatException expected to be thrown but is was not");
+  }
+
   @DataProvider
   public Object[][] invalidDevfiles() {
     return new Object[][] {
