@@ -12,7 +12,6 @@ import { e2eContainer } from '../../inversify.config';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { IOcpLoginPage } from '../../pageobjects/login/IOcpLoginPage';
 import { CLASSES, TYPES } from '../../inversify.types';
-import { TestConstants } from '../../TestConstants';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { OcpLoginPage } from '../../pageobjects/openshift/OcpLoginPage';
 import { OcpWebConsolePage } from '../../pageobjects/openshift/OcpWebConsolePage';
@@ -22,9 +21,6 @@ const ocpLogin: IOcpLoginPage = e2eContainer.get<IOcpLoginPage>(TYPES.OcpLogin);
 const ocpLoginPage: OcpLoginPage = e2eContainer.get(CLASSES.OcpLoginPage);
 const ocpWebConsole: OcpWebConsolePage = e2eContainer.get(CLASSES.OcpWebConsolePage);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
-const projectName: string = TestConstants.TS_INSTALL_CHE_PROJECT_NAME;
-const channelName = TestConstants.TS_OCP_UPDATE_CHANNEL_OPERATOR;
-const openShiftOAuthLine = '21';
 
 suite('E2E', async () => {
 
@@ -38,7 +34,7 @@ suite('E2E', async () => {
         });
     });
 
-    suite('Subscribe Eclipse Che Operator to defined namespace', async () => {
+    suite('Subscribe Operator to defined namespace', async () => {
         test('Open Catalog, select OperatorHub', async () => {
             await ocpWebConsole.waitNavpanelOpenShift();
             await ocpWebConsole.clickOnCatalogListNavPanelOpenShift();
@@ -47,42 +43,42 @@ suite('E2E', async () => {
         });
 
 
-        test('Select eclipse Che Operator and install it', async () => {
-            await ocpWebConsole.clickOnEclipseCheOperatorIcon();
-            await ocpWebConsole.clickOnInstallEclipseCheButton();
+        test('Select Operator from catalog and install it', async () => {
+            await ocpWebConsole.clickOnCatalogOperatorIcon();
+            await ocpWebConsole.clickOnInstallButton();
         });
 
-        test('Select a namespace and subscribe Eclipse Che Operator', async () => {
+        test('Select a namespace and subscribe Operator', async () => {
             await ocpWebConsole.waitCreateOperatorSubscriptionPage();
-            await ocpWebConsole.selectUpdateChannelOnSubscriptionPage(channelName);
+            await ocpWebConsole.selectUpdateChannelOnSubscriptionPage();
             await ocpWebConsole.clickOnDropdownNamespaceListOnSubscriptionPage();
             await ocpWebConsole.waitListBoxNamespacesOnSubscriptionPage();
-            await ocpWebConsole.selectDefinedNamespaceOnSubscriptionPage(projectName);
+            await ocpWebConsole.selectDefinedNamespaceOnSubscriptionPage();
             await ocpWebConsole.clickOnSubscribeButtonOnSubscriptionPage();
         });
 
         test('Wait the Subscription Overview', async () => {
             await ocpWebConsole.waitSubscriptionOverviewPage();
-            await ocpWebConsole.waitChannelNameOnSubscriptionOverviewPage(channelName);
+            await ocpWebConsole.waitChannelNameOnSubscriptionOverviewPage();
             await ocpWebConsole.waitUpgradeStatusOnSubscriptionOverviewPage();
-            await ocpWebConsole.waitCatalogSourceNameOnSubscriptionOverviewPage(projectName);
+            await ocpWebConsole.waitCatalogSourceNameOnSubscriptionOverviewPage();
         });
     });
 
-    suite('Wait the Eclipse Che operator is represented by CSV', async () => {
+    suite('Wait the operator is represented by CSV', async () => {
         test('Select the Installed Operators in the nav panel', async () => {
             await ocpWebConsole.selectInstalledOperatorsOnNavPanel();
         });
 
-        test('Wait installed Eclipse Che operator', async () => {
-            await ocpWebConsole.waitEclipseCheOperatorLogoName();
-            await ocpWebConsole.waitStatusInstalledEclipseCheOperator();
+        test('Wait installed Operator', async () => {
+            await ocpWebConsole.waitInstalledOperatorLogoName();
+            await ocpWebConsole.waitStatusInstalledOperator();
         });
     });
 
-    suite('Create new Eclipse Che cluster', async () => {
-        test('Click on the logo-name Eclipse Che operator', async () => {
-            await ocpWebConsole.clickOnEclipseCheOperatorLogoName();
+    suite('Create new Che cluster', async () => {
+        test('Click on the logo-name Che operator', async () => {
+            await ocpWebConsole.clickOnInstalledOperatorLogoName();
             await ocpWebConsole.waitOverviewCsvEclipseCheOperator();
         });
 
@@ -92,9 +88,9 @@ suite('E2E', async () => {
             await ocpWebConsole.waitCreateCheClusterYaml();
         });
 
-        test('Change value of OpenShiftOauth field', async () => {
-            await ocpWebConsole.selectOpenShiftOAuthFieldInYaml(openShiftOAuthLine);
-            await ocpWebConsole.changeValueOpenShiftOAuthField();
+        test('Set value of OpenShiftOauth field', async () => {
+            await ocpWebConsole.selectOpenShiftOAuthFieldInYaml();
+            await ocpWebConsole.setValueOpenShiftOAuthField();
         });
 
         test('Create Che Cluster ', async () => {
@@ -105,27 +101,26 @@ suite('E2E', async () => {
         });
     });
 
-    suite('Check the Eclipse Che is ready', async () => {
+    suite('Check the Che is ready', async () => {
         test('Wait Keycloak Admin Console URL', async () => {
-            await ocpWebConsole.clickCheClusterOverviewExpandButton();
-            await ocpWebConsole.waitKeycloakAdminConsoleUrl(projectName);
+            await ocpWebConsole.waitKeycloakAdminConsoleUrl();
         });
 
-        test('Wait Eclipse Che URL', async () => {
-            await ocpWebConsole.waitEclipseCheUrl(projectName);
+        test('Wait installed application URL', async () => {
+            await ocpWebConsole.waitInstalledAppUrl();
         });
     });
 
-    suite('Log into Eclipse Che', async () => {
-        test('Click on the Eclipse Che URL ', async () => {
-            await ocpWebConsole.clickOnEclipseCHeUrl(projectName);
+    suite('Log into installed application', async () => {
+        test('Click on the insatalled application URL ', async () => {
+            await ocpWebConsole.clickOnInstalledAppUrl();
         });
 
-        test('Login to Eclipse Che', async () => {
+        test('Login to application', async () => {
             await cheLogin.login();
         });
 
-        test('Wait Eclipse Che dashboard', async () => {
+        test('Wait application dashboard', async () => {
             await dashboard.waitPage();
         });
     });
