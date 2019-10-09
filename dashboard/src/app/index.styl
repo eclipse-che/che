@@ -75,7 +75,7 @@ label
   font-weight normal !important
 
 md-divider
-  border-top-color #353E5D !important
+  border-top-color #353E5D
   margin 0 10px
 
 md-toolbar
@@ -107,11 +107,15 @@ md-option:hover
       max-height calc(100vh - 30px)
 
 .progress-line
-  position absolute
-  left 0
-  right 0
-  height 5px
+  position relative
   z-index 80
+  width 100%
+  max-height 5px
+  md-progress-linear
+   position absolute
+   left 0
+   right 0
+   height 5px
 
 .main-page-loader
   position absolute

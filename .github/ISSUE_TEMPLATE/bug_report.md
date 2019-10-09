@@ -2,7 +2,7 @@
 name: Bug report 🐞
 about: Report a bug found in Eclipse Che
 title: ''
-labels: 'king/bug'
+labels: 'kind/bug'
 assignees: ''
 
 ---

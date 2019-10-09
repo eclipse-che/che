@@ -5,7 +5,7 @@ pipeline {
 
     options {
         timestamps()
-        timeout(time: 20, unit: 'MINUTES')
+        timeout(time: 15, unit: 'MINUTES')
         buildDiscarder(logRotator(artifactDaysToKeepStr: '',
                 artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '100'))
     }
@@ -19,6 +19,8 @@ pipeline {
 
         CHE_IMAGE_REPO = "maxura/che-server"
         CHE_IMAGE_TAG = "${ghprbPullId}"
+
+        LOGS_AND_CONFIGS="${WORKSPACE}/logs-and-configs"
     }
 
     stages {
@@ -88,7 +90,6 @@ pipeline {
                           docker push docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
                         """
                     }
-
                 }
             }
         }
@@ -160,6 +161,7 @@ pipeline {
                            -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \\
                            -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \\
                            -e TS_SELENIUM_BASE_URL=\${CHE_URL} \\
+                           -e TS_SELENIUM_LOG_LEVEL='DEBUG' \\
                            -v ${WORKSPACE}/e2e:/tmp/e2e:Z \\
                            eclipse/che-e2e:nightly
                     """
@@ -188,12 +190,28 @@ pipeline {
         }
 
         cleanup {
-            archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**"
-
             script {
+                sh """                      
+                      mkdir -p $LOGS_AND_CONFIGS/kubectl
+                      kubectl --namespace=che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
+
+                      mkdir -p $LOGS_AND_CONFIGS/che-config
+                      kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
+                      kubectl get ingresses --namespace=che > $LOGS_AND_CONFIGS/che-config/ingresses.txt || true
+                      kubectl get all -n che -o yaml > $LOGS_AND_CONFIGS/che-config/all.yaml || true
+
+                      mkdir -p $LOGS_AND_CONFIGS/che-logs
+                      kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep che- | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/che-server.log || true
+                      kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep devfile-registry- | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/devfile-registry.log || true
+                      kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep plugin-registry- | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/plugin-registry.log || true
+                        
+                      mkdir -p $LOGS_AND_CONFIGS/workspace-logs
+                      export WS_POD=\$(kubectl get pod --namespace=che | grep  workspace | awk '{print \$1}')
+                      for c in \$(kubectl get pod --namespace=che \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do kubectl logs \$(kubectl get pod --namespace=che | grep  workspace | awk '{print \$1}') "\${c}" -n che > $LOGS_AND_CONFIGS/workspace-logs/"\${c}"-container.log || true; done
+                      kubectl describe pod --namespace=che \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
+                """
+
                 sh """
-                      kubectl get configmaps --namespace=che che -o yaml || true
-                      
                       /usr/local/bin/minikube stop || true
                     
                       sudo umount \$(mount | grep "kubelet" | awk '{if(NR>0) print \$3}') || true
@@ -206,9 +224,12 @@ pipeline {
                       if [[ \$(docker images | grep '${CHE_IMAGE_REPO}') != "" ]]; then
                         docker rmi -f \$(docker images | grep '${CHE_IMAGE_REPO}') || true
                       fi
-                 """
+                """
+
+                archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**, logs-and-configs/**"
 
                 sh "sudo rm -rf ${WORKSPACE}/e2e"
+                sh "sudo rm -rf ${WORKSPACE}/logs-and-configs"
             }
 
             cleanWs notFailBuild: true, disableDeferredWipeout: true, deleteDirs: true
