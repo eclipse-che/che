@@ -110,6 +110,11 @@ export const TestConstants = {
     TS_SELENIUM_OPENSHIFT_OAUTH_FIELD_LINE: process.env.TS_SELENIUM_OPENSHIFT_OAUTH_FIELD_LINE || '21',
 
     /**
+     * Value of OpenShift OAuth field in the 'Create Che Cluster' yaml using OperatorHub
+     */
+    TS_SELENIUM_VALUE_OPENSHIFT_OAUTH: process.env.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH || 'false',
+
+    /**
      * Catalog Source name on Subscription Overview.
      */
     TS_SELENIUM_CATALOG_SOURCE_NAME: process.env.TS_SELENIUM_CATALOG_SOURCE_NAME || 'installed-custom',
