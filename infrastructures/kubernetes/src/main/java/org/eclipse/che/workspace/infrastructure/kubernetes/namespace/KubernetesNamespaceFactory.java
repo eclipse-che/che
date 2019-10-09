@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
@@ -30,7 +31,14 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Named;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -38,6 +46,8 @@ import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.impls.KubernetesNamespaceMetaImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helps to create {@link KubernetesNamespace} instances.
@@ -46,23 +56,26 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.Kubernetes
  */
 @Singleton
 public class KubernetesNamespaceFactory {
+  private static final Logger LOG = LoggerFactory.getLogger(KubernetesNamespaceFactory.class);
 
-  private static final Map<String, Function<Subject, String>> NAMESPACE_NAME_PLACEHOLDERS =
-      new HashMap<>();
+  private static final Map<String, Function<PlaceholderResolutionContext, String>>
+      NAMESPACE_NAME_PLACEHOLDERS = new HashMap<>();
 
   static {
-    NAMESPACE_NAME_PLACEHOLDERS.put("<username>", Subject::getUserName);
-    NAMESPACE_NAME_PLACEHOLDERS.put("<userid>", Subject::getUserId);
+    NAMESPACE_NAME_PLACEHOLDERS.put("<username>", ctx -> ctx.user.getUserName());
+    NAMESPACE_NAME_PLACEHOLDERS.put("<userid>", ctx -> ctx.user.getUserId());
+    NAMESPACE_NAME_PLACEHOLDERS.put("<workspaceid>", ctx -> ctx.workspaceId);
   }
 
   private final String defaultNamespaceName;
   private final boolean allowUserDefinedNamespaces;
 
   private final String namespaceName;
-  private final boolean isPredefined;
+  private final boolean isStatic;
   private final String serviceAccountName;
   private final String clusterRoleName;
   private final KubernetesClientFactory clientFactory;
+  private final WorkspaceManager workspaceManager;
 
   @Inject
   public KubernetesNamespaceFactory(
@@ -72,15 +85,27 @@ public class KubernetesNamespaceFactory {
       @Nullable @Named("che.infra.kubernetes.namespace.default") String defaultNamespaceName,
       @Named("che.infra.kubernetes.namespace.allow_user_defined")
           boolean allowUserDefinedNamespaces,
-      KubernetesClientFactory clientFactory)
+      KubernetesClientFactory clientFactory,
+      WorkspaceManager workspaceManager)
       throws ConfigurationException {
     this.namespaceName = namespaceName;
-    this.isPredefined = !isNullOrEmpty(namespaceName) && hasNoPlaceholders(this.namespaceName);
+    this.isStatic = !isNullOrEmpty(namespaceName) && hasNoPlaceholders(namespaceName);
     this.serviceAccountName = serviceAccountName;
     this.clusterRoleName = clusterRoleName;
     this.clientFactory = clientFactory;
     this.defaultNamespaceName = defaultNamespaceName;
     this.allowUserDefinedNamespaces = allowUserDefinedNamespaces;
+    this.workspaceManager = workspaceManager;
+
+    // This will disappear once we support user selection of workspaces...
+    if (allowUserDefinedNamespaces) {
+      LOG.warn(
+          "'che.infra.kubernetes.namespace.allow_user_defined' is not supported yet. It currently has no"
+              + " effect.");
+    }
+
+    // right now allowUserDefinedNamespaces can't be true, but eventually we will implement it.
+    // noinspection ConstantConditions
     if (isNullOrEmpty(defaultNamespaceName) && !allowUserDefinedNamespaces) {
       throw new ConfigurationException(
           "che.infra.kubernetes.namespace.default or "
@@ -96,8 +121,8 @@ public class KubernetesNamespaceFactory {
    * True if namespace is predefined for all workspaces. False if each workspace will be provided
    * with a new namespace or provided for each user when using placeholders.
    */
-  public boolean isPredefined() {
-    return isPredefined;
+  public boolean isNamespaceStatic() {
+    return isStatic;
   }
 
   /**
@@ -141,8 +166,7 @@ public class KubernetesNamespaceFactory {
     // the default namespace must be configured if user defined are not allowed
     // so return only it
     String evaluatedName =
-        evalDefaultNamespaceName(
-            defaultNamespaceName, EnvironmentContext.getCurrent().getSubject());
+        evalPlaceholders(defaultNamespaceName, EnvironmentContext.getCurrent().getSubject(), null);
 
     Optional<KubernetesNamespaceMeta> defaultNamespaceOpt = fetchNamespace(evaluatedName);
 
@@ -164,8 +188,7 @@ public class KubernetesNamespaceFactory {
    */
   private void provisionDefaultNamespace(List<KubernetesNamespaceMeta> namespaces) {
     String evaluatedName =
-        evalDefaultNamespaceName(
-            defaultNamespaceName, EnvironmentContext.getCurrent().getSubject());
+        evalPlaceholders(defaultNamespaceName, EnvironmentContext.getCurrent().getSubject(), null);
 
     Optional<KubernetesNamespaceMeta> defaultNamespaceOpt =
         namespaces.stream().filter(n -> evaluatedName.equals(n.getName())).findAny();
@@ -244,12 +267,18 @@ public class KubernetesNamespaceFactory {
    * @throws InfrastructureException if any exception occurs during namespace preparing
    */
   public KubernetesNamespace create(String workspaceId) throws InfrastructureException {
-    final String namespaceName =
-        evalNamespaceName(workspaceId, EnvironmentContext.getCurrent().getSubject());
+    final String namespaceName;
+    try {
+      namespaceName = evalNamespaceName(workspaceId, EnvironmentContext.getCurrent().getSubject());
+    } catch (NotFoundException | ServerException | ConflictException | ValidationException e) {
+      throw new InfrastructureException(
+          format("Failed to determine the namespace to put the workspace %s to", workspaceId), e);
+    }
+
     KubernetesNamespace namespace = doCreateNamespace(workspaceId, namespaceName);
     namespace.prepare();
 
-    if (!isPredefined() && !isNullOrEmpty(serviceAccountName)) {
+    if (!isNamespaceStatic() && !isNullOrEmpty(serviceAccountName)) {
       // prepare service account for workspace only if account name is configured
       // and project is not predefined
       // since predefined project should be prepared during Che deployment
@@ -261,29 +290,67 @@ public class KubernetesNamespaceFactory {
     return namespace;
   }
 
-  protected String evalNamespaceName(String workspaceId, Subject currentUser) {
-    if (isPredefined) {
-      return this.namespaceName;
-    } else if (isNullOrEmpty(this.namespaceName)) {
-      return workspaceId;
+  protected String evalNamespaceName(String workspaceId, Subject currentUser)
+      throws NotFoundException, ServerException, InfrastructureException, ConflictException,
+          ValidationException {
+    // This, my friend, is a hack of magnificent proportions put forth as a result of dire time
+    // constraints imposed on the tears shedding developer writing these unfortunate lines.
+    // The effort required to propagate the full workspace, including the attributes (or some
+    // alternative thereof) from the callers (all of which happen to already possess the
+    // information) down to this sad place is too effing much to do with confidence in the
+    // couple of days left until the release. Let's pretend we will have time to fix this later
+    // in the better times...
+    Workspace wkspc = workspaceManager.getWorkspace(workspaceId);
+    String ns = wkspc.getAttributes().get(Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
+
+    if (ns != null) {
+      return ns;
     } else {
-      String tmpNamespaceName = this.namespaceName;
-      for (String placeholder : NAMESPACE_NAME_PLACEHOLDERS.keySet()) {
-        tmpNamespaceName =
-            tmpNamespaceName.replaceAll(
-                placeholder, NAMESPACE_NAME_PLACEHOLDERS.get(placeholder).apply(currentUser));
+      String effectiveOldLogicNamespace =
+          isNullOrEmpty(namespaceName) ? "<workspaceid>" : namespaceName;
+      String namespace = evalPlaceholders(effectiveOldLogicNamespace, currentUser, workspaceId);
+
+      if (clientFactory.create().namespaces().withName(namespace).get() == null) {
+        // ok, the namespace pointed to by the legacy config doesn't exist.. that means there can be
+        // no damage done by storing the workspace in the namespace designated by the new way of
+        // doing things...
+
+        if (isNullOrEmpty(defaultNamespaceName)) {
+          throw new InfrastructureException(
+              format(
+                  "'che.infra.kubernetes.namespace.default' is not"
+                      + " defined and no explicit namespace configured for workspace %s",
+                  workspaceId));
+        }
+
+        namespace = evalPlaceholders(defaultNamespaceName, currentUser, workspaceId);
       }
-      return tmpNamespaceName;
+
+      // Now, believe it or not, the horror continues - since the callers are as of now unaware
+      // of the namespaces being stored within the workspace, we need to do it all here. Hopefully,
+      // one day, when the callers (and workspace manager in particular) support workspace namespace
+      // selection, things will make more sense again because this logic will have to move up a
+      // layer or two and become infrastructure independent.
+      wkspc.getAttributes().put(Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
+      workspaceManager.updateWorkspace(workspaceId, wkspc);
+
+      return namespace;
     }
   }
 
-  protected String evalDefaultNamespaceName(String defaultNamespace, Subject currentUser) {
-    checkArgument(!isNullOrEmpty(defaultNamespace));
-    String evaluated = defaultNamespace;
-    for (Entry<String, Function<Subject, String>> placeHolder :
+  protected String evalPlaceholders(String namespace, Subject currentUser, String workspaceId) {
+    checkArgument(!isNullOrEmpty(namespace));
+    String evaluated = namespace;
+    PlaceholderResolutionContext ctx = new PlaceholderResolutionContext(currentUser, workspaceId);
+    for (Entry<String, Function<PlaceholderResolutionContext, String>> placeHolder :
         NAMESPACE_NAME_PLACEHOLDERS.entrySet()) {
-      evaluated =
-          evaluated.replaceAll(placeHolder.getKey(), placeHolder.getValue().apply(currentUser));
+
+      String key = placeHolder.getKey();
+      String value = placeHolder.getValue().apply(ctx);
+
+      if (value != null) {
+        evaluated = evaluated.replaceAll(key, value);
+      }
     }
     return evaluated;
   }
@@ -301,5 +368,15 @@ public class KubernetesNamespaceFactory {
 
   protected String getClusterRoleName() {
     return clusterRoleName;
+  }
+
+  private static final class PlaceholderResolutionContext {
+    final Subject user;
+    final String workspaceId;
+
+    private PlaceholderResolutionContext(Subject user, String workspaceId) {
+      this.user = user;
+      this.workspaceId = workspaceId;
+    }
   }
 }

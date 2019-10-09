@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
@@ -64,6 +65,7 @@ public class OpenShiftProjectFactoryTest {
 
   @Mock private OpenShiftClientConfigFactory configFactory;
   @Mock private OpenShiftClientFactory clientFactory;
+  @Mock private WorkspaceManager workspaceManager;
 
   @Mock
   private NonNamespaceOperation<
@@ -90,7 +92,7 @@ public class OpenShiftProjectFactoryTest {
           throws Exception {
     projectFactory =
         new OpenShiftProjectFactory(
-            "projectName", "", "", null, false, clientFactory, configFactory);
+            "projectName", "", "", null, false, clientFactory, configFactory, workspaceManager);
   }
 
   @Test
@@ -112,7 +114,14 @@ public class OpenShiftProjectFactoryTest {
 
     projectFactory =
         new OpenShiftProjectFactory(
-            "predefined", "", "", "che-default", false, clientFactory, configFactory);
+            "predefined",
+            "",
+            "",
+            "che-default",
+            false,
+            clientFactory,
+            configFactory,
+            workspaceManager);
 
     List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
     assertEquals(availableNamespaces.size(), 1);
@@ -135,7 +144,14 @@ public class OpenShiftProjectFactoryTest {
 
     projectFactory =
         new OpenShiftProjectFactory(
-            "predefined", "", "", "che-default", false, clientFactory, configFactory);
+            "predefined",
+            "",
+            "",
+            "che-default",
+            false,
+            clientFactory,
+            configFactory,
+            workspaceManager);
 
     List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
     assertEquals(availableNamespaces.size(), 1);
@@ -158,7 +174,14 @@ public class OpenShiftProjectFactoryTest {
 
     projectFactory =
         new OpenShiftProjectFactory(
-            "predefined", "", "", "che-default", false, clientFactory, configFactory);
+            "predefined",
+            "",
+            "",
+            "che-default",
+            false,
+            clientFactory,
+            configFactory,
+            workspaceManager);
 
     projectFactory.list();
   }
@@ -171,7 +194,8 @@ public class OpenShiftProjectFactoryTest {
             createProject("experimental", null, null, "Terminating")));
 
     projectFactory =
-        new OpenShiftProjectFactory("predefined", "", "", null, true, clientFactory, configFactory);
+        new OpenShiftProjectFactory(
+            "predefined", "", "", null, true, clientFactory, configFactory, workspaceManager);
 
     List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
     assertEquals(availableNamespaces.size(), 2);
@@ -197,7 +221,7 @@ public class OpenShiftProjectFactoryTest {
 
     projectFactory =
         new OpenShiftProjectFactory(
-            "predefined", "", "", "default", true, clientFactory, configFactory);
+            "predefined", "", "", "default", true, clientFactory, configFactory, workspaceManager);
 
     List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
 
@@ -228,7 +252,7 @@ public class OpenShiftProjectFactoryTest {
 
     projectFactory =
         new OpenShiftProjectFactory(
-            "predefined", "", "", "default", true, clientFactory, configFactory);
+            "predefined", "", "", "default", true, clientFactory, configFactory, workspaceManager);
 
     List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
     assertEquals(availableNamespaces.size(), 2);
@@ -253,7 +277,8 @@ public class OpenShiftProjectFactoryTest {
   public void shouldThrownExceptionWhenFailedToGetNamespaces() throws Exception {
     throwOnTryToGetProjectsList(new KubernetesClientException("connection refused"));
     projectFactory =
-        new OpenShiftProjectFactory("predefined", "", "", "", true, clientFactory, configFactory);
+        new OpenShiftProjectFactory(
+            "predefined", "", "", "", true, clientFactory, configFactory, workspaceManager);
 
     projectFactory.list();
   }
@@ -264,7 +289,14 @@ public class OpenShiftProjectFactoryTest {
     projectFactory =
         spy(
             new OpenShiftProjectFactory(
-                "projectName", "", "", "che", false, clientFactory, configFactory));
+                "projectName",
+                "",
+                "",
+                "che",
+                false,
+                clientFactory,
+                configFactory,
+                workspaceManager));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
@@ -282,7 +314,9 @@ public class OpenShiftProjectFactoryTest {
       throws Exception {
     // given
     projectFactory =
-        spy(new OpenShiftProjectFactory("", "", "", "che", false, clientFactory, configFactory));
+        spy(
+            new OpenShiftProjectFactory(
+                "", "", "", "che", false, clientFactory, configFactory, workspaceManager));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
@@ -302,7 +336,14 @@ public class OpenShiftProjectFactoryTest {
     projectFactory =
         spy(
             new OpenShiftProjectFactory(
-                "", "serviceAccount", "", "che", false, clientFactory, configFactory));
+                "",
+                "serviceAccount",
+                "",
+                "che",
+                false,
+                clientFactory,
+                configFactory,
+                workspaceManager));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
@@ -330,7 +371,8 @@ public class OpenShiftProjectFactoryTest {
                 "che",
                 false,
                 clientFactory,
-                configFactory));
+                configFactory,
+                workspaceManager));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
@@ -346,7 +388,9 @@ public class OpenShiftProjectFactoryTest {
       throws Exception {
     // given
     projectFactory =
-        spy(new OpenShiftProjectFactory("", "", "", "che", false, clientFactory, configFactory));
+        spy(
+            new OpenShiftProjectFactory(
+                "", "", "", "che", false, clientFactory, configFactory, workspaceManager));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
@@ -371,7 +415,8 @@ public class OpenShiftProjectFactoryTest {
                 "che",
                 false,
                 clientFactory,
-                configFactory));
+                configFactory,
+                workspaceManager));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 

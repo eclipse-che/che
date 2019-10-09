@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -26,6 +27,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Named;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -58,14 +64,16 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
       @Named("che.infra.kubernetes.namespace.allow_user_defined")
           boolean allowUserDefinedNamespaces,
       OpenShiftClientFactory clientFactory,
-      OpenShiftClientConfigFactory clientConfigFactory) {
+      OpenShiftClientConfigFactory clientConfigFactory,
+      WorkspaceManager workspaceManager) {
     super(
         projectName,
         serviceAccountName,
         clusterRoleName,
         defaultNamespaceName,
         allowUserDefinedNamespaces,
-        clientFactory);
+        clientFactory,
+        workspaceManager);
     if (allowUserDefinedNamespaces && !clientConfigFactory.isPersonalized()) {
       LOG.warn(
           "Users are allowed to list projects but Che server is configured with a service account. "
@@ -86,12 +94,17 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
    * @throws InfrastructureException if any exception occurs during project preparing
    */
   public OpenShiftProject create(String workspaceId) throws InfrastructureException {
-    final String projectName =
-        evalNamespaceName(workspaceId, EnvironmentContext.getCurrent().getSubject());
+    final String projectName;
+    try {
+      projectName = evalNamespaceName(workspaceId, EnvironmentContext.getCurrent().getSubject());
+    } catch (NotFoundException | ServerException | ConflictException | ValidationException e) {
+      throw new InfrastructureException(
+          format("Failed to evaluate the project name to use for workspace %s.", workspaceId), e);
+    }
     OpenShiftProject osProject = doCreateProject(workspaceId, projectName);
     osProject.prepare();
 
-    if (!isPredefined() && !isNullOrEmpty(getServiceAccountName())) {
+    if (!isNamespaceStatic() && !isNullOrEmpty(getServiceAccountName())) {
       // prepare service account for workspace only if account name is configured
       // and project is not predefined
       // since predefined project should be prepared during Che deployment
