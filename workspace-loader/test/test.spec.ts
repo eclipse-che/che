@@ -241,6 +241,63 @@ describe('If workspace status is STOPPED then workspace-loader', () => {
 
 });
 
+// test intensional stopping of a workspace
+describe.only('If workspace status is changed from STARTING to STOPPING then workspace-loader', () => {
+    let statusChangeCallback: (event: che.workspace.event.WorkspaceStatusEvent) => {};
+    const statusStoppingEvent: che.workspace.event.WorkspaceStatusEvent = {
+        status: 'STOPPING',
+        prevStatus: 'STARTING'
+    };
+
+    beforeEach(done => {
+        spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue('foo/bar');
+        spyOn(workspaceLoader, 'getWorkspace').and.callFake(() =>
+            new Promise(resolve => {
+                workspaceConfig.status = 'STARTING';
+                resolve(workspaceConfig);
+            }));
+        spyOn(<any>workspaceLoader, 'subscribeWorkspaceEvents').and.callThrough();
+        spyOn(workspaceLoader, 'startWorkspace').and.callFake(() => Promise.resolve());
+        spyOn(<any>workspaceLoader, 'connectMasterApi').and.callFake(() => {
+            done();
+            return Promise.resolve({
+                addListener: () => { },
+                subscribeEnvironmentOutput: () => { },
+                subscribeInstallerOutput: () => { },
+                subscribeWorkspaceStatus: (_workspaceId, callback) => {
+                    statusChangeCallback = callback;
+                }
+            });
+        });
+        spyOn(workspaceLoader, 'openIDE').and.callFake(() => Promise.resolve());
+
+        workspaceLoader.load();
+    });
+
+    beforeEach(() => {
+        spyOn((<any>workspaceLoader), 'onWorkspaceStatus').and.callThrough();
+
+        statusChangeCallback(statusStoppingEvent);
+        statusChangeCallback(statusStoppedEvent);
+    });
+
+    it('should not open an IDE', () => {
+        expect(workspaceLoader.openIDE).not.toHaveBeenCalled();
+    });
+
+    it('should handle workspace status change', () => {
+        expect((<any>workspaceLoader).onWorkspaceStatus).toHaveBeenCalledWith(statusStoppingEvent);
+    });
+
+    const statusStoppedEvent: che.workspace.event.WorkspaceStatusEvent = {
+        status: 'STOPPED',
+        prevStatus: 'STOPPING'
+    };
+    it.only('should not start the workspace', () => {
+        expect(workspaceLoader.startWorkspace).not.toHaveBeenCalled();
+    });
+});
+
 describe('If workspace status is changed from STOPPING to STOPPED then workspace-loader', () => {
     let statusChangeCallback: (event: che.workspace.event.WorkspaceStatusEvent) => {};
     const statusStoppedEvent: che.workspace.event.WorkspaceStatusEvent = {
