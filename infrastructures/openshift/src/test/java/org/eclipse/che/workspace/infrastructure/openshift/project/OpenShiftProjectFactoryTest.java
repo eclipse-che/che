@@ -458,7 +458,7 @@ public class OpenShiftProjectFactoryTest {
             configFactory,
             workspaceManager);
 
-    when(projectResource.get()).thenReturn(null);
+    when(projectResource.get()).thenThrow(new KubernetesClientException("", 403, null));
 
     String namespace =
         projectFactory.evalNamespaceName(null, new SubjectImpl("JonDoe", "123", null, false));

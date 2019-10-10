@@ -127,7 +127,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
 
   @Override
   protected boolean checkNamespaceExists(String namespaceName) throws InfrastructureException {
-    return clientFactory.createOC().projects().withName(namespaceName).get() != null;
+    return fetchNamespaceObject(namespaceName).isPresent();
   }
 
   /**
@@ -156,9 +156,13 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   @Override
   protected Optional<KubernetesNamespaceMeta> fetchNamespace(String name)
       throws InfrastructureException {
+    return fetchNamespaceObject(name).map(this::asNamespaceMeta);
+  }
+
+  private Optional<Project> fetchNamespaceObject(String name) throws InfrastructureException {
     try {
       Project project = clientFactory.createOC().projects().withName(name).get();
-      return Optional.of(asNamespaceMeta(project));
+      return Optional.ofNullable(project);
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {
         // 403 means that the project does not exist
