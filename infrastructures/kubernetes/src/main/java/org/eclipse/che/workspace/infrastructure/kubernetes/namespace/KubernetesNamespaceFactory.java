@@ -118,8 +118,8 @@ public class KubernetesNamespaceFactory {
   }
 
   /**
-   * True if namespace is predefined for all workspaces. False if each workspace will be provided
-   * with a new namespace or provided for each user when using placeholders.
+   * True if namespace is the same (static) for all workspaces. False if each workspace will be
+   * provided with a new namespace or provided for each user when using placeholders.
    */
   public boolean isNamespaceStatic() {
     return isStatic;
