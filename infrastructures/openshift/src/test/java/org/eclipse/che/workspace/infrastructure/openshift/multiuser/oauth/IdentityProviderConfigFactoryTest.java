@@ -20,7 +20,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Provider;
@@ -49,7 +49,7 @@ import org.testng.annotations.Test;
 
 /** @author David Festal */
 @Listeners(MockitoTestNGListener.class)
-public class IdentityProviderConfigBuilderTest {
+public class IdentityProviderConfigFactoryTest {
   private static final String PROVIDER = "openshift-v3";
   private static final String THE_USER_ID = "a_user_id";
   private static final String ANOTHER_USER_ID = "another_user_id";
@@ -73,14 +73,14 @@ public class IdentityProviderConfigBuilderTest {
           + "/account/identity?referrer="
           + CLIENT_ID
           + "&referrer_uri="
-          + "http%3A%2F%2Fche-host%2Fdashboard%2F?redirect_fragment%3D%2Fworkspaces"
-          + "' target='_blank' rel='noopener noreferrer'><strong>Federated Identities</strong></a> page of your Che account";
+          + "http%3A%2F%2Fche-host%2Fdashboard%2F%3Fredirect_fragment%3D%2Fworkspaces'"
+          + " target='_blank' rel='noopener noreferrer'><strong>Federated Identities</strong></a> page of your Che account";
 
   private static final String SESSION_EXPIRED_MESSAGE =
       "Your session has expired. \nPlease "
           + "<a href='javascript:location.reload();' target='_top'>"
           + "login"
-          + "</a> to Che again to get access to your Openshift account";
+          + "</a> to Che again to get access to your OpenShift account";
 
   private static final Map<String, String> keycloakSettingsMap = new HashMap<String, String>();
 
@@ -138,14 +138,14 @@ public class IdentityProviderConfigBuilderTest {
     configBuilder =
         new IdentityProviderConfigFactory(
             keycloakServiceClient, keycloakSettings, workspaceRuntimeProvider, null, API_ENDPOINT);
-    assertTrue(defaultConfig == configBuilder.buildConfig(defaultConfig, A_WORKSPACE_ID));
+    assertSame(defaultConfig, configBuilder.buildConfig(defaultConfig, A_WORKSPACE_ID));
   }
 
   @Test
   public void testFallbackToDefaultConfigWhenSubjectIsAnonymous() throws Exception {
     when(keycloakServiceClient.getIdentityProviderToken(anyString())).thenReturn(tokenResponse);
     doReturn(Subject.ANONYMOUS).when(context).getSubject();
-    assertTrue(defaultConfig == configBuilder.buildConfig(defaultConfig, A_WORKSPACE_ID));
+    assertSame(defaultConfig, configBuilder.buildConfig(defaultConfig, A_WORKSPACE_ID));
   }
 
   @Test
@@ -153,15 +153,14 @@ public class IdentityProviderConfigBuilderTest {
       throws Exception {
     when(keycloakServiceClient.getIdentityProviderToken(anyString())).thenReturn(tokenResponse);
     when(runtimeIdentity.getOwnerId()).thenReturn(ANOTHER_USER_ID);
-    assertTrue(defaultConfig == configBuilder.buildConfig(defaultConfig, A_WORKSPACE_ID));
+    assertSame(defaultConfig, configBuilder.buildConfig(defaultConfig, A_WORKSPACE_ID));
   }
 
   @SuppressWarnings("rawtypes")
   @Test
   public void testCreateUserConfigWhenNoRuntimeContext() throws Exception {
     when(keycloakServiceClient.getIdentityProviderToken(anyString())).thenReturn(tokenResponse);
-    when(workspaceRuntimes.getRuntimeContext(anyString()))
-        .thenReturn(Optional.<RuntimeContext>empty());
+    when(workspaceRuntimes.getRuntimeContext(anyString())).thenReturn(Optional.empty());
 
     Config resultConfig = configBuilder.buildConfig(defaultConfig, A_WORKSPACE_ID);
     assertEquals(resultConfig.getOauthToken(), ACCESS_TOKEN);

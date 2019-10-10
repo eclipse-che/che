@@ -90,9 +90,39 @@ export const TestConstants = {
     TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: process.env.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME || 'petclinic-dev-environment',
 
     /**
-     * Name of namespace created for 'Install Che' on OCP by OperatorHub UI.
+     * Catalog tile operator name on OperatorHub UI.
      */
-    TS_INSTALL_CHE_PROJECT_NAME: process.env.TS_INSTALL_CHE_PROJECT_NAME || 'test-che-operator',
+    TS_SELENIUM_CATALOG_TILE_OPERATOR_NAME: process.env.TS_SELENIUM_CATALOG_TILE_OPERATOR_NAME || 'eclipse-che-preview',
+
+    /**
+     * Operator logo name by installation using OperatorHub
+     */
+    TS_SELENIUM_OPERATOR_LOGO_NAME: process.env.TS_SELENIUM_OPERATOR_LOGO_NAME || 'Eclipse Che',
+
+    /**
+     * Name of namespace created on OCP for installation CHE by using OperatorHub UI.
+     */
+    TS_SELENIUM_INSTALL_PROJECT_NAME: process.env.TS_SELENIUM_INSTALL_PROJECT_NAME || 'test-che-operator',
+
+    /**
+     * OpenShift OAuth field line in 'Create Che Cluster' yaml.
+     */
+    TS_SELENIUM_OPENSHIFT_OAUTH_FIELD_LINE: process.env.TS_SELENIUM_OPENSHIFT_OAUTH_FIELD_LINE || '21',
+
+    /**
+     * Value of OpenShift OAuth field in the 'Create Che Cluster' yaml using OperatorHub
+     */
+    TS_SELENIUM_VALUE_OPENSHIFT_OAUTH: process.env.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH || 'false',
+
+    /**
+     * Catalog Source name on Subscription Overview.
+     */
+    TS_SELENIUM_CATALOG_SOURCE_NAME: process.env.TS_SELENIUM_CATALOG_SOURCE_NAME || 'installed-custom',
+
+    /**
+     * Prefix URL on deployed application by installation using OperatorHub.
+     */
+    TS_SELENIUM_INSTALL_APP_PREFIX_URL: process.env.TS_SELENIUM_INSTALL_APP_PREFIX_URL || 'che',
 
     /**
      * Username used to log in MultiUser Che.
@@ -147,7 +177,7 @@ export const TestConstants = {
     /**
      * Update Channel name on 'Create Operator Subscription' page on OCP, "nightly" or "stable".
      */
-    TS_OCP_UPDATE_CHANNEL_OPERATOR: process.env.TS_OCP_UPDATE_CHANNEL_OPERATOR || 'nightly',
+    TS_OCP_OPERATOR_UPDATE_CHANNEL: process.env.TS_OCP_OPERATOR_UPDATE_CHANNEL || 'nightly',
 
     /**
      * Remote driver URL.
