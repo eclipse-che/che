@@ -145,10 +145,13 @@
               },
               "sparseCheckoutDir": {
                 "type": "string",
-                "description": "The directory which will be created with sparse checkout.",
+                "description": "Part of project to populate in the working directory.",
                 "examples": [
+                  "/core/",
                   "core/",
-                  "wsmaster/che-core-api-workspace/"
+                  "core",
+                  "/wsmaster/che-core-api-workspace/",
+                  "/d*"
                 ]
               }
             }

@@ -59,6 +59,7 @@ public class GithubSourceStorageBuilder {
     return newDto(SourceDto.class)
         .withLocation(githubUrl.repositoryLocation())
         .withType("github")
-        .withBranch(githubUrl.getBranch());
+        .withBranch(githubUrl.getBranch())
+        .withSparseCheckoutDir(githubUrl.getSubfolder());
   }
 }
