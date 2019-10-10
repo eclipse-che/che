@@ -89,7 +89,9 @@ public class DevfileSchemaValidator {
 
       if (!schemasByVersion.containsKey(apiVersion)) {
         throw new DevfileFormatException(
-            String.format("version '%s' of the devfile is not supported", apiVersion));
+            String.format(
+                "Version '%s' of the devfile is not supported. Supported versions are '%s'.",
+                apiVersion, SUPPORTED_VERSIONS));
       }
       JsonSchema schema = schemasByVersion.get(apiVersion);
       try (JsonReader reader =
