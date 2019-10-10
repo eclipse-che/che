@@ -35,7 +35,7 @@ export class DevfileSelector implements ng.IDirective {
    */
   constructor() {
     this.scope = {
-      devfileIdSelected: '=',
+      stackName: '=',
       onDevfileSelect: '&'
     };
   }

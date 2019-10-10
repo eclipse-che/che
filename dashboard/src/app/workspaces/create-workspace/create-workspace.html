@@ -53,7 +53,8 @@
 
     <che-label-container che-label-name="Select Stack"
                          che-label-description="Choose your workspace runtime environment used to build and run your projects.">
-      <devfile-selector on-devfile-select="createWorkspaceController.onDevfileSelected(devfile)">
+      <devfile-selector on-devfile-select="createWorkspaceController.onDevfileSelected(devfile)"
+                        stack-name="createWorkspaceController.stackName">
       </devfile-selector>
     </che-label-container>
     <!-- Project source selector -->
