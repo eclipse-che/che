@@ -426,6 +426,7 @@ export class Editor {
 
             await this.waitSuggestionContainer();
             await this.driverHelper.waitDisappearance(loadingLocator);
+            await this.driverHelper.wait(1000);
 
             if (await this.driverHelper.isVisible(suggestionLocator)) {
                 return true;
