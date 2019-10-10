@@ -27,7 +27,7 @@ components:
       app.kubernetes.io/component: database
   - type: dockerimage
     alias: maven-container
-    image: bujhtr5555/maven-with-artifacts:latest
+    image: quay.io/eclipse/happy-path:nightly
     command: ["sleep"]
     args: ["infinity"]
     env:
@@ -50,7 +50,7 @@ commands:
     actions:
       - type: exec
         component: maven-container
-        command: "mkdir -p /projects/petclinic/?/.m2/repository && cp -r /.m2/* /projects/petclinic/?/.m2/repository && cd /projects/petclinic && mvn package >> build-output.txt"
+        command: "mkdir -p /projects/petclinic/?/.m2 && cp -r /home/user/.m2/* /projects/petclinic/?/.m2/repository && cd /projects/petclinic && mvn package >> build-output.txt"
         workdir: /projects/petclinic
   - name: run
     actions:
