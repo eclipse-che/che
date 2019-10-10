@@ -11,7 +11,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJECT_DESCRIPTION_ANNOTATION;
@@ -19,6 +21,7 @@ import static org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJE
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJECT_DISPLAY_NAME_ANNOTATION;
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJECT_DISPLAY_NAME_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -43,7 +46,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.shared.Constants;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -72,6 +78,8 @@ public class OpenShiftProjectFactoryTest {
           Project, ProjectList, DoneableProject, Resource<Project, DoneableProject>>
       projectOperation;
 
+  @Mock private Resource<Project, DoneableProject> projectResource;
+
   @Mock private OpenShiftClient osClient;
 
   private OpenShiftProjectFactory projectFactory;
@@ -80,6 +88,12 @@ public class OpenShiftProjectFactoryTest {
   public void setUp() throws Exception {
     lenient().when(clientFactory.createOC()).thenReturn(osClient);
     lenient().when(osClient.projects()).thenReturn(projectOperation);
+
+    when(workspaceManager.getWorkspace(any()))
+        .thenReturn(WorkspaceImpl.builder().setId("1").setAttributes(emptyMap()).build());
+
+    when(projectOperation.withName(any())).thenReturn(projectResource);
+    when(projectResource.get()).thenReturn(mock(Project.class));
   }
 
   @Test(
@@ -427,6 +441,111 @@ public class OpenShiftProjectFactoryTest {
     assertEquals(toReturnProject, namespace);
     verify(projectFactory).doCreateProject("workspace123", "name");
     verify(toReturnProject, never()).prepare();
+  }
+
+  @Test
+  public void
+      testEvalNamespaceUsesNamespaceDefaultIfWorkspaceDoesntRecordNamespaceAndLegacyNamespaceDoesntExist()
+          throws Exception {
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "blabol-<userid>-<username>-<userid>-<username>--",
+            "",
+            "",
+            "che-<userid>",
+            false,
+            clientFactory,
+            configFactory,
+            workspaceManager);
+
+    when(projectResource.get()).thenReturn(null);
+
+    String namespace =
+        projectFactory.evalNamespaceName(null, new SubjectImpl("JonDoe", "123", null, false));
+
+    assertEquals(namespace, "che-123");
+  }
+
+  @Test
+  public void
+      testEvalNamespaceUsesLegacyNamespaceIfWorkspaceDoesntRecordNamespaceAndLegacyNamespaceExists()
+          throws Exception {
+
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "blabol-<userid>-<username>-<userid>-<username>--",
+            "",
+            "",
+            "che-<userid>",
+            false,
+            clientFactory,
+            configFactory,
+            workspaceManager);
+
+    String namespace =
+        projectFactory.evalNamespaceName(null, new SubjectImpl("JonDoe", "123", null, false));
+
+    assertEquals(namespace, "blabol-123-JonDoe-123-JonDoe--");
+  }
+
+  @Test
+  public void testEvalNamespaceUsesWorkspaceRecordedNamespaceIfWorkspaceRecordsIt()
+      throws Exception {
+
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "blabol-<userid>-<username>-<userid>-<username>--",
+            "",
+            "",
+            "che-<userid>",
+            false,
+            clientFactory,
+            configFactory,
+            workspaceManager);
+
+    when(workspaceManager.getWorkspace(eq("42")))
+        .thenReturn(
+            WorkspaceImpl.builder()
+                .setId("42")
+                .setAttributes(
+                    singletonMap(
+                        Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "wkspcprj"))
+                .build());
+
+    String namespace =
+        projectFactory.evalNamespaceName("42", new SubjectImpl("JonDoe", "123", null, false));
+
+    assertEquals(namespace, "wkspcprj");
+  }
+
+  @Test
+  public void testEvalNamespaceTreatsWorkspaceRecordedNamespaceLiterally() throws Exception {
+
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "blabol-<userid>-<username>-<userid>-<username>--",
+            "",
+            "",
+            "che-<userid>",
+            false,
+            clientFactory,
+            configFactory,
+            workspaceManager);
+
+    when(workspaceManager.getWorkspace(eq("42")))
+        .thenReturn(
+            WorkspaceImpl.builder()
+                .setId("42")
+                .setAttributes(
+                    singletonMap(
+                        Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "<userid>"))
+                .build());
+
+    String namespace =
+        projectFactory.evalNamespaceName("42", new SubjectImpl("JonDoe", "123", null, false));
+
+    // this is an invalid name, but that is not a purpose of this test.
+    assertEquals(namespace, "<userid>");
   }
 
   private void prepareNamespaceToBeFoundByName(String name, Project project) throws Exception {

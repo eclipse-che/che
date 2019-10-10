@@ -310,7 +310,7 @@ public class KubernetesNamespaceFactory {
           isNullOrEmpty(namespaceName) ? "<workspaceid>" : namespaceName;
       String namespace = evalPlaceholders(effectiveOldLogicNamespace, currentUser, workspaceId);
 
-      if (clientFactory.create().namespaces().withName(namespace).get() == null) {
+      if (!checkNamespaceExists(namespace)) {
         // ok, the namespace pointed to by the legacy config doesn't exist.. that means there can be
         // no damage done by storing the workspace in the namespace designated by the new way of
         // doing things...
@@ -336,6 +336,10 @@ public class KubernetesNamespaceFactory {
 
       return namespace;
     }
+  }
+
+  protected boolean checkNamespaceExists(String namespaceName) throws InfrastructureException {
+    return clientFactory.create().namespaces().withName(namespaceName).get() != null;
   }
 
   protected String evalPlaceholders(String namespace, Subject currentUser, String workspaceId) {

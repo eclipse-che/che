@@ -35,6 +35,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.impls.KubernetesNamespaceMetaImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -114,6 +115,19 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
     }
 
     return osProject;
+  }
+
+  @VisibleForTesting
+  @Override
+  protected String evalNamespaceName(String workspaceId, Subject currentUser)
+      throws NotFoundException, ServerException, InfrastructureException, ConflictException,
+          ValidationException {
+    return super.evalNamespaceName(workspaceId, currentUser);
+  }
+
+  @Override
+  protected boolean checkNamespaceExists(String namespaceName) throws InfrastructureException {
+    return clientFactory.createOC().projects().withName(namespaceName).get() != null;
   }
 
   /**
