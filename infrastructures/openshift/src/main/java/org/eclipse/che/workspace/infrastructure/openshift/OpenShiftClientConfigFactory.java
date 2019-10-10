@@ -33,4 +33,12 @@ public class OpenShiftClientConfigFactory {
       throws InfrastructureException {
     return defaultConfig;
   }
+
+  /**
+   * Returns true if implementation personalizes config to the current subject, otherwise returns
+   * false if default config is always used.
+   */
+  public boolean isPersonalized() {
+    return false;
+  }
 }

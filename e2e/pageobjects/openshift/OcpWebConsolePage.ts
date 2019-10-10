@@ -18,8 +18,8 @@ import { Logger } from '../../utils/Logger';
 @injectable()
 export class OcpWebConsolePage {
 
-    private static readonly CHE_OPERATOR_LOGO_NAME: string = '//h1[text()=\'Eclipse Che\']';
-    private static readonly ECLIPSE_CHE_PREFIX_URL: string = 'che-';
+    private static readonly OPERATOR_LOGO_NAME_XPATH: string = `//h1[text()='${TestConstants.TS_SELENIUM_OPERATOR_LOGO_NAME}']`;
+    private static readonly INSTALLED_APP_URL_XPATH: string = `${TestConstants.TS_SELENIUM_INSTALL_APP_PREFIX_URL}-${TestConstants.TS_SELENIUM_INSTALL_PROJECT_NAME}`;
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
@@ -52,17 +52,18 @@ export class OcpWebConsolePage {
         await this.driverHelper.waitVisibility(catalogOperatorHubPageLocator);
     }
 
-    async clickOnEclipseCheOperatorIcon() {
-        Logger.debug('OcpWebConsolePage.clickOnEclipseCheOperatorIcon');
+    async clickOnCatalogOperatorIcon() {
+        Logger.debug('OcpWebConsolePage.clickOnCatalogOperatorIcon');
 
-        const catalogEclipseCheOperatorTitleLocator: By = By.css('a[data-test^=eclipse-che-preview-openshift]');
-        await this.driverHelper.waitAndClick(catalogEclipseCheOperatorTitleLocator, TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+        const catalogTileOperatorNameCss: string = `${TestConstants.TS_SELENIUM_CATALOG_TILE_OPERATOR_NAME}`;
+        const catalogTileOperatorNameLocator: By = By.css(`a[data-test^=${catalogTileOperatorNameCss}]`);
+        await this.driverHelper.waitAndClick(catalogTileOperatorNameLocator, TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
-    async clickOnInstallEclipseCheButton() {
-        Logger.debug('OcpWebConsolePage.clickOnInstallEclipseCheButton');
+    async clickOnInstallButton() {
+        Logger.debug('OcpWebConsolePage.clickOnInstallButton');
 
-        const installEclipsCheOperatorButtonLocator: By = By.xpath('//button[text()=\'Install\']');
-        await this.driverHelper.waitAndClick(installEclipsCheOperatorButtonLocator);
+        const installOperatorButtonLocator: By = By.xpath('//button[text()=\'Install\']');
+        await this.driverHelper.waitAndClick(installOperatorButtonLocator);
     }
 
     async waitCreateOperatorSubscriptionPage() {
@@ -72,10 +73,10 @@ export class OcpWebConsolePage {
         await this.driverHelper.waitVisibility(createOperatorSubscriptionPageLocator);
     }
 
-    async selectUpdateChannelOnSubscriptionPage(channelName: string) {
-        Logger.debug(`OcpWebConsolePage.selectUpdateChannelOnSubscriptionPage "${channelName}"`);
+    async selectUpdateChannelOnSubscriptionPage() {
+        Logger.debug('OcpWebConsolePage.selectUpdateChannelOnSubscriptionPage');
 
-        const updateChannelOperatorLocator: By = By.css(`input[value=${channelName}]`);
+        const updateChannelOperatorLocator: By = By.css(`input[value=${TestConstants.TS_OCP_OPERATOR_UPDATE_CHANNEL}]`);
         await this.driverHelper.waitAndClick(updateChannelOperatorLocator);
     }
 
@@ -93,10 +94,11 @@ export class OcpWebConsolePage {
         await this.driverHelper.waitVisibility(listBoxNamespaceLocator);
     }
 
-    async selectDefinedNamespaceOnSubscriptionPage(projectName: string) {
+    async selectDefinedNamespaceOnSubscriptionPage() {
         Logger.debug('OcpWebConsolePage.selectDefinedNamespaceOnSubscriptionPage');
 
-        const namespaceItemInDropDownLocator: By = By.id(`${projectName}-Project-link`);
+        const namespaceItemInDropDownId: string = `${TestConstants.TS_SELENIUM_INSTALL_PROJECT_NAME}-Project-link`;
+        const namespaceItemInDropDownLocator: By = By.id(namespaceItemInDropDownId);
         await this.driverHelper.waitAndClick(namespaceItemInDropDownLocator);
     }
 
@@ -114,10 +116,10 @@ export class OcpWebConsolePage {
         await this.driverHelper.waitVisibility(subscriptionOverviewPageLocator);
     }
 
-    async waitChannelNameOnSubscriptionOverviewPage(channelName: string) {
-        Logger.debug(`OcpWebConsolePage.waitChannelNameOnSubscriptionOverviewPage "${channelName}"`);
+    async waitChannelNameOnSubscriptionOverviewPage() {
+        Logger.debug('OcpWebConsolePage.waitChannelNameOnSubscriptionOverviewPage');
 
-        const channelNameOnSubscriptionOverviewLocator: By = By.xpath(`//button[@type='button' and text()='${channelName}']`);
+        const channelNameOnSubscriptionOverviewLocator: By = By.xpath(`//button[@type='button' and text()='${TestConstants.TS_OCP_OPERATOR_UPDATE_CHANNEL}']`);
         await this.driverHelper.waitVisibility(channelNameOnSubscriptionOverviewLocator);
     }
 
@@ -128,10 +130,11 @@ export class OcpWebConsolePage {
         await this.driverHelper.waitVisibility(upgradeStatuslocator, TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
-    async waitCatalogSourceNameOnSubscriptionOverviewPage(projectName: string) {
-        Logger.debug(`OcpWebConsolePage.waitCatalogSourceNameOnSubscriptionOverviewPage "${projectName}"`);
+    async waitCatalogSourceNameOnSubscriptionOverviewPage() {
+        Logger.debug('OcpWebConsolePage.waitCatalogSourceNameOnSubscriptionOverviewPage');
 
-        const catalogSourceNameLolcator: By = By.css(`a[title=\'installed-custom-${projectName}\']`);
+        const catalogSourceNameCss: string = `${TestConstants.TS_SELENIUM_CATALOG_SOURCE_NAME}-${TestConstants.TS_SELENIUM_INSTALL_PROJECT_NAME}`;
+        const catalogSourceNameLolcator: By = By.css(`a[title='${catalogSourceNameCss}']`);
         await this.driverHelper.waitVisibility(catalogSourceNameLolcator);
     }
 
@@ -142,29 +145,29 @@ export class OcpWebConsolePage {
         await this.driverHelper.waitAndClick(installedOperatorsItemNavPanelLocator);
     }
 
-    async waitEclipseCheOperatorLogoName() {
-        Logger.debug('OcpWebConsolePage.waitEclipseCheOperatorLogoName');
+    async waitInstalledOperatorLogoName() {
+        Logger.debug('OcpWebConsolePage.waitInstalledOperatorLogoName');
 
-        await this.driverHelper.waitVisibility(By.xpath(OcpWebConsolePage.CHE_OPERATOR_LOGO_NAME));
+        await this.driverHelper.waitVisibility(By.xpath(OcpWebConsolePage.OPERATOR_LOGO_NAME_XPATH));
     }
 
-    async waitStatusInstalledEclipseCheOperator() {
-        Logger.debug('OcpWebConsolePage.waitStatusInstalledEclipseCheOperator');
+    async waitStatusInstalledOperator() {
+        Logger.debug('OcpWebConsolePage.waitStatusInstalledOperator');
 
-        const statusInstalledCheOperatorLocator: By = By.xpath('//span[text()=\'InstallSucceeded\']');
-        await this.driverHelper.waitVisibility(statusInstalledCheOperatorLocator, TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+        const statusInstalledOperatorLocator: By = By.xpath('//span[text()=\'InstallSucceeded\']');
+        await this.driverHelper.waitVisibility(statusInstalledOperatorLocator, TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
-    async clickOnEclipseCheOperatorLogoName() {
-        Logger.debug('OcpWebConsolePage.clickOnEclipseCheOperatorLogoName');
+    async clickOnInstalledOperatorLogoName() {
+        Logger.debug('OcpWebConsolePage.clickOnInstalledOperatorLogoName');
 
-        await this.driverHelper.waitAndClick(By.xpath(OcpWebConsolePage.CHE_OPERATOR_LOGO_NAME));
+        await this.driverHelper.waitAndClick(By.xpath(OcpWebConsolePage.OPERATOR_LOGO_NAME_XPATH));
     }
 
     async waitOverviewCsvEclipseCheOperator() {
         Logger.debug('OcpWebConsolePage.waitOverviewCsvEclipseCheOperator');
 
-        await this.driverHelper.waitVisibility(By.xpath(OcpWebConsolePage.CHE_OPERATOR_LOGO_NAME));
+        await this.driverHelper.waitVisibility(By.xpath(OcpWebConsolePage.OPERATOR_LOGO_NAME_XPATH));
     }
 
     async clickCreateNewCheClusterLink() {
@@ -181,18 +184,20 @@ export class OcpWebConsolePage {
         await this.driverHelper.waitVisibility(createCheClusterYamlLocator);
     }
 
-    async selectOpenShiftOAuthFieldInYaml(line: string) {
-        Logger.debug(`OcpWebConsolePage.selectOpenShiftOAuthFieldInYaml line: "${line}"`);
+    async selectOpenShiftOAuthFieldInYaml() {
+        Logger.debug('OcpWebConsolePage.selectOpenShiftOAuthFieldInYaml');
 
-        const openShiftOAuthFieldLocator: By = By.xpath(`//div[@class=\'ace_gutter-cell \' and text()=\'${line}\']`);
-        await this.driverHelper.waitAndClick(openShiftOAuthFieldLocator);
+        const openShiftOAuthLineLocator: By = By.xpath(`//div[@class=\'ace_gutter-cell \' and text()=\'${TestConstants.TS_SELENIUM_OPENSHIFT_OAUTH_FIELD_LINE}\']`);
+        await this.driverHelper.waitAndClick(openShiftOAuthLineLocator);
     }
 
-    async changeValueOpenShiftOAuthField() {
-        Logger.debug('OcpWebConsolePage.changeValueOpenShiftOAuthField');
+    async setValueOpenShiftOAuthField() {
+        Logger.debug('OcpWebConsolePage.setValueOpenShiftOAuthField');
 
-        await this.driverHelper.getAction().sendKeys(Key.DELETE.toString()).sendKeys(Key.ENTER.toString()).sendKeys(Key.UP.toString()).perform();
-        await this.driverHelper.getAction().sendKeys('    openShiftoAuth: false');
+        const openShiftOAuthEditorLocator: By = By.css('textarea[class=\'ace_text-input\']');
+        await this.driverHelper.clearInvisible(openShiftOAuthEditorLocator);
+        await this.driverHelper.typeToInvisible(openShiftOAuthEditorLocator, `    openShiftoAuth: ${TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH}`);
+        await this.driverHelper.typeToInvisible(openShiftOAuthEditorLocator, Key.ENTER);
     }
 
     async clickOnCreateCheClusterButton() {
@@ -223,31 +228,24 @@ export class OcpWebConsolePage {
         await this.driverHelper.waitAndClick(cheClusterResourcesNameLocator);
     }
 
-    async clickCheClusterOverviewExpandButton() {
-        Logger.debug('OcpWebConsolePage.clickCheClusterOverviewExpandButton');
-
-        const cheClusterOverviewExpandButton: By = By.css('label[class=\'btn compaction-btn btn-default\']');
-        await this.driverHelper.waitAndClick(cheClusterOverviewExpandButton);
-    }
-
-    async waitKeycloakAdminConsoleUrl(projectName: string) {
+    async waitKeycloakAdminConsoleUrl() {
         Logger.debug('OcpWebConsolePage.waitKeycloakAdminConsoleUrl');
 
-        const keyCloakAdminWebConsoleUrl: By = By.partialLinkText(`keycloak-${projectName}`);
+        const keyCloakAdminWebConsoleUrl: By = By.partialLinkText(`keycloak-${TestConstants.TS_SELENIUM_INSTALL_PROJECT_NAME}`);
         await this.driverHelper.waitVisibility(keyCloakAdminWebConsoleUrl, TestConstants.TS_SELENIUM_INSTALL_ECLIPSE_CHE_TIMEOUT);
     }
 
-    async waitEclipseCheUrl(projectName: string) {
-        Logger.debug('OcpWebConsolePage.waitEclipseCheUrl');
+    async waitInstalledAppUrl() {
+        Logger.debug('OcpWebConsolePage.waitInstalledAppUrl');
 
-        const eclipseCheUrlLocator: By = By.partialLinkText(`${OcpWebConsolePage.ECLIPSE_CHE_PREFIX_URL}${projectName}`);
-        await this.driverHelper.waitVisibility(eclipseCheUrlLocator, TestConstants.TS_SELENIUM_INSTALL_ECLIPSE_CHE_TIMEOUT);
+        const installedAppUrlLocator: By = By.partialLinkText(`${OcpWebConsolePage.INSTALLED_APP_URL_XPATH}`);
+        await this.driverHelper.waitVisibility(installedAppUrlLocator, TestConstants.TS_SELENIUM_INSTALL_ECLIPSE_CHE_TIMEOUT);
     }
 
-    async clickOnEclipseCHeUrl(projectName: string) {
-        Logger.debug('OcpWebConsolePage.clickOnEclipseCHeUrl');
+    async clickOnInstalledAppUrl() {
+        Logger.debug('OcpWebConsolePage.clickOnInstalledAppUrl');
 
-        const eclipseCheUrlLocator: By = By.partialLinkText(`${OcpWebConsolePage.ECLIPSE_CHE_PREFIX_URL}${projectName}`);
-        await this.driverHelper.waitAndClick(eclipseCheUrlLocator);
+        const installedAppUrlLocator: By = By.partialLinkText(`${OcpWebConsolePage.INSTALLED_APP_URL_XPATH}`);
+        await this.driverHelper.waitAndClick(installedAppUrlLocator);
     }
 }

@@ -1,5 +1,5 @@
 <md-progress-linear ng-show="workspaceEditorsController.isLoading" md-mode="indeterminate"></md-progress-linear>
-<div flex layout="column" md-theme="maincontent-theme" class="plugins-page">
+<div flex layout="column" md-theme="maincontent-theme" class="workspace-editors-page">
   <div class="che-scroll-list" ng-hide="workspaceEditorsController.editors.length === 0">
     <div>
       <div>
@@ -37,7 +37,11 @@
                    plugin-item-name="{{editor.displayName}}"
                    plugin-item-version="{{editor.version}}"
                    class="che-list-item-row">
-                <div layout="row" layout-align="center center" class="che-list-item-checkbox"></div>
+                <div layout="row" layout-align="center center" class="che-list-item-checkbox">
+                   <span ng-show="(editor.isEnabled && editor.isDeprecated)===true" class="fa fa-warning"
+                         tooltip-append-to-body="true"
+                         uib-tooltip-html="workspaceEditorsController.getWarningMessage()"></span>
+                </div>
                 <div flex layout="row" layout-align="start center">
                   <!-- isEnabled -->
                   <div flex="10">
@@ -58,7 +62,7 @@
                   <div flex="15">
                     <select class="che-version-dropdown" ng-model="editor.selected"
                             ng-change="workspaceEditorsController.updateSelectedEditorVersion(editor)"
-                            ng-init="editor.selected" ng-options="ver for ver in editor.versions">
+                            ng-init="editor.selected" ng-options="ver.value as ver.label for ver in editor.versions">
                     </select>
                   </div>
                   <!-- Description -->

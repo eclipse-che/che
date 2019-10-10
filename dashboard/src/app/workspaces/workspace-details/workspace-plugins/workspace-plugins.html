@@ -46,7 +46,11 @@
                    plugin-item-name="{{plugin.displayName}}"
                    plugin-item-version="{{plugin.version}}"
                    class="che-list-item-row">
-                <div layout="row" layout-align="center center" class="che-list-item-checkbox"></div>
+                <div layout="row" layout-align="center center" class="che-list-item-checkbox">
+                    <span ng-show="(plugin.isEnabled && plugin.isDeprecated)===true" class="fa fa-warning"
+                          uib-tooltip-html="workspacePluginsController.getWarningMessage(plugin.id)"
+                          tooltip-append-to-body="true"></span>
+                </div>
                 <div flex layout="row" layout-align="start center">
                   <!-- isEnabled -->
                   <div flex="10">
@@ -67,7 +71,7 @@
                   <div flex="15">
                     <select class="che-version-dropdown" ng-model="plugin.selected"
                             ng-change="workspacePluginsController.updateSelectedPlugin(plugin)"
-                            ng-init="plugin.selected" ng-options="ver for ver in plugin.versions">
+                            ng-init="plugin.selected" ng-options="ver.value as ver.label for ver in plugin.versions">
                     </select>
                   </div>
                   <!-- Description -->

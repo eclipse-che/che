@@ -44,14 +44,13 @@ commands:
     actions:
       - type: exec
         component: maven-container
-        command: mvn clean package >> build.txt
+        command: mvn clean package >> build.txt && tail -n 40 /projects/petclinic/build.txt | grep 'BUILD SUCCESS' > /projects/petclinic/result-build.txt
         workdir: /projects/petclinic
   - name: build-file-output
     actions:
       - type: exec
         component: maven-container
-        command: "mkdir -p /projects/petclinic/?/.m2 && cp -r /home/user/.m2/* /projects/petclinic/?/.m2/repository && cd /projects/petclinic && mvn package >> build-output.txt"
-        workdir: /projects/petclinic
+        command: mkdir -p /projects/petclinic/?/.m2 && cp -r /home/user/.m2/* /projects/petclinic/?/.m2/repository && cd /projects/petclinic && mvn package >> build-output.txt && tail -n 40 /projects/petclinic/build-output.txt | grep 'BUILD SUCCESS' > /projects/petclinic/result-build-output.txt
   - name: run
     actions:
       - type: exec
