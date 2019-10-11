@@ -85,9 +85,9 @@ spec:
               optional: false
         {{- end }}
 
-        # If workspaces are created in different namespace than Che Server's one
+        # If workspaces are created in a separate precreated namespace
         # then configure Che Server to propagate TLS secret to workspaces' namespaces
-        {{- if ne .Release.Namespace .Values.global.cheWorkspacesNamespace }}
+        {{- if not (contains "<" .Values.global.cheWorkspacesNamespace) }}
         - name: "CHE_INFRA_KUBERNETES_TLS__CERT"
           valueFrom:
             secretKeyRef:
