@@ -589,9 +589,10 @@ public class WorkspaceManagerTest {
     final WorkspaceImpl workspace = createAndMockWorkspace(workspaceConfig, NAMESPACE_1);
     mockAnyWorkspaceStartFailed(new ServerException("start failed"));
 
-    workspaceManager.startWorkspace(workspaceConfig, workspace.getNamespace(), false, emptyMap());
-    verify(workspaceDao).update(workspaceCaptor.capture());
-    Workspace ws = workspaceCaptor.getAllValues().get(workspaceCaptor.getAllValues().size() - 1);
+    workspaceManager.startWorkspace(workspace.getId(), null, null);
+    // the first update is capturing the start time, the second update is capturing the error
+    verify(workspaceDao, times(2)).update(workspaceCaptor.capture());
+    Workspace ws = workspaceCaptor.getAllValues().get(1);
     assertNotNull(ws.getAttributes().get(STOPPED_ATTRIBUTE_NAME));
     assertTrue(Boolean.valueOf(ws.getAttributes().get(STOPPED_ABNORMALLY_ATTRIBUTE_NAME)));
     assertEquals(ws.getAttributes().get(ERROR_MESSAGE_ATTRIBUTE_NAME), "start failed");
