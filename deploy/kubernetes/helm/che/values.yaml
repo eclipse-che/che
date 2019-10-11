@@ -53,7 +53,7 @@ global:
   gitHubClientID: ""
   gitHubClientSecret: ""
   pvcClaim: "1Gi"
-  cheWorkspacesNamespace: ""
+  cheWorkspacesNamespace: "<username>-che"
   # Service account name that will be mounted to workspaces pods
   # Note that:
   # if `cheWorkspacesNamespace` is configured then service account with configured name will be created by helm chart during deploying Che
