@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.server.devfile.schema;
 
 import static org.eclipse.che.api.workspace.server.devfile.Constants.SCHEMAS_LOCATION;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.SCHEMA_FILENAME;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.SUPPORTED_VERSIONS;
 import static org.eclipse.che.commons.lang.IoUtil.getResource;
 import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 
@@ -47,7 +48,15 @@ public class DevfileSchemaProvider {
   }
 
   private String loadFile(String version) throws IOException {
-    return readAndCloseQuietly(getResource(SCHEMAS_LOCATION + version + "/" + SCHEMA_FILENAME));
+    try {
+      return readAndCloseQuietly(getResource(SCHEMAS_LOCATION + version + "/" + SCHEMA_FILENAME));
+    } catch (IOException ioe) {
+      throw new IOException(
+          String.format(
+              "Unable to load devfile schema with version '%s'. Supported versions are '%s'",
+              version, SUPPORTED_VERSIONS),
+          ioe);
+    }
   }
 
   private String loadAndPut(String version) throws IOException {

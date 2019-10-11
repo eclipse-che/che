@@ -49,6 +49,6 @@ public class DevfileSchemaProviderTest {
 
   @Test(expectedExceptions = IOException.class)
   public void shouldThrowExceptionWhenInvalidVersionRequested() throws IOException {
-    devfileSchemaProvider.getSchemaContent("2");
+    devfileSchemaProvider.getSchemaContent("this_is_clearly_not_a_valid_schema_version");
   }
 }
