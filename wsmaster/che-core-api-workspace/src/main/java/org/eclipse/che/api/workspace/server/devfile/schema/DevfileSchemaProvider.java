@@ -11,35 +11,57 @@
  */
 package org.eclipse.che.api.workspace.server.devfile.schema;
 
-import static org.eclipse.che.api.workspace.server.devfile.Constants.SCHEMA_LOCATION;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.SCHEMAS_LOCATION;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.SCHEMA_FILENAME;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.SUPPORTED_VERSIONS;
 import static org.eclipse.che.commons.lang.IoUtil.getResource;
 import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.ref.SoftReference;
+import java.util.HashMap;
+import java.util.Map;
 import javax.inject.Singleton;
 
 /** Loads a schema content and stores it in soft reference. */
 @Singleton
 public class DevfileSchemaProvider {
 
-  private SoftReference<String> schemaRef = new SoftReference<>(null);
+  private Map<String, SoftReference<String>> schemas = new HashMap<>();
 
-  public String getSchemaContent() throws IOException {
-    String schema = schemaRef.get();
-    if (schema == null) {
-      schema = loadFile();
-      schemaRef = new SoftReference<>(schema);
+  public String getSchemaContent(String version) throws IOException {
+    if (schemas.containsKey(version)) {
+      String schema = schemas.get(version).get();
+      if (schema != null) {
+        return schema;
+      } else {
+        return loadAndPut(version);
+      }
+    } else {
+      return loadAndPut(version);
     }
+  }
+
+  public StringReader getAsReader(String version) throws IOException {
+    return new StringReader(getSchemaContent(version));
+  }
+
+  private String loadFile(String version) throws IOException {
+    try {
+      return readAndCloseQuietly(getResource(SCHEMAS_LOCATION + version + "/" + SCHEMA_FILENAME));
+    } catch (IOException ioe) {
+      throw new IOException(
+          String.format(
+              "Unable to load devfile schema with version '%s'. Supported versions are '%s'",
+              version, SUPPORTED_VERSIONS),
+          ioe);
+    }
+  }
+
+  private String loadAndPut(String version) throws IOException {
+    final String schema = loadFile(version);
+    schemas.put(version, new SoftReference<>(schema));
     return schema;
-  }
-
-  public StringReader getAsReader() throws IOException {
-    return new StringReader(getSchemaContent());
-  }
-
-  private String loadFile() throws IOException {
-    return readAndCloseQuietly(getResource(SCHEMA_LOCATION));
   }
 }
