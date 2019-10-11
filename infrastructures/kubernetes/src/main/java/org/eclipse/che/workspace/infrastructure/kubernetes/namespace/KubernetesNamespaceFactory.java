@@ -61,10 +61,14 @@ public class KubernetesNamespaceFactory {
   private static final Map<String, Function<PlaceholderResolutionContext, String>>
       NAMESPACE_NAME_PLACEHOLDERS = new HashMap<>();
 
+  private static final String USERNAME_PLACEHOLDER = "<username>";
+  private static final String USERID_PLACEHOLDER = "<userid>";
+  private static final String WORKSPACEID_PLACEHOLDER = "<workspaceid>";
+
   static {
-    NAMESPACE_NAME_PLACEHOLDERS.put("<username>", ctx -> ctx.user.getUserName());
-    NAMESPACE_NAME_PLACEHOLDERS.put("<userid>", ctx -> ctx.user.getUserId());
-    NAMESPACE_NAME_PLACEHOLDERS.put("<workspaceid>", ctx -> ctx.workspaceId);
+    NAMESPACE_NAME_PLACEHOLDERS.put(USERNAME_PLACEHOLDER, ctx -> ctx.user.getUserName());
+    NAMESPACE_NAME_PLACEHOLDERS.put(USERID_PLACEHOLDER, ctx -> ctx.user.getUserId());
+    NAMESPACE_NAME_PLACEHOLDERS.put(WORKSPACEID_PLACEHOLDER, ctx -> ctx.workspaceId);
   }
 
   private final String defaultNamespaceName;
@@ -304,13 +308,22 @@ public class KubernetesNamespaceFactory {
     String ns = wkspc.getAttributes().get(Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
 
     if (ns != null) {
+      LOG.debug(
+          "Found target namespace in workspace attributes. Using namespace {} for workspace {}",
+          ns,
+          workspaceId);
       return ns;
     } else {
       String effectiveOldLogicNamespace =
-          isNullOrEmpty(namespaceName) ? "<workspaceid>" : namespaceName;
+          isNullOrEmpty(namespaceName) ? WORKSPACEID_PLACEHOLDER : namespaceName;
       String namespace = evalPlaceholders(effectiveOldLogicNamespace, currentUser, workspaceId);
 
-      if (!checkNamespaceExists(namespace)) {
+      if (checkNamespaceExists(namespace)) {
+        LOG.debug(
+            "The namespace specified using the legacy config exists: {}. Using it for workspace {}.",
+            namespace,
+            workspaceId);
+      } else {
         // ok, the namespace pointed to by the legacy config doesn't exist.. that means there can be
         // no damage done by storing the workspace in the namespace designated by the new way of
         // doing things...
@@ -324,6 +337,11 @@ public class KubernetesNamespaceFactory {
         }
 
         namespace = evalPlaceholders(defaultNamespaceName, currentUser, workspaceId);
+
+        LOG.debug(
+            "Evaluated the namespace for workspace {} using the namespace default to {}",
+            workspaceId,
+            namespace);
       }
 
       // Now, believe it or not, the horror continues - since the callers are as of now unaware
