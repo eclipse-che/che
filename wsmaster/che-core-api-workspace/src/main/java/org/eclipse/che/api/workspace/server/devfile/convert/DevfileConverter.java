@@ -13,9 +13,8 @@ package org.eclipse.che.api.workspace.server.devfile.convert;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
-import static java.util.Collections.singleton;
 import static org.eclipse.che.api.workspace.server.devfile.Components.getIdentifiableComponentName;
-import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.SUPPORTED_VERSIONS;
 
 import com.google.common.base.Strings;
 import java.util.Map;
@@ -138,12 +137,12 @@ public class DevfileConverter {
     if (Strings.isNullOrEmpty(devFile.getApiVersion())) {
       throw new DevfileFormatException("Provided Devfile has no API version specified");
     }
-    if (!CURRENT_API_VERSION.equals(devFile.getApiVersion())) {
+    if (SUPPORTED_VERSIONS.stream().noneMatch(v -> v.equals(devFile.getApiVersion()))) {
       throw new DevfileFormatException(
           format(
               "Provided Devfile has unsupported version '%s'. The following versions are"
                   + " supported: %s",
-              devFile.getApiVersion(), singleton(CURRENT_API_VERSION)));
+              devFile.getApiVersion(), SUPPORTED_VERSIONS));
     }
   }
 }
