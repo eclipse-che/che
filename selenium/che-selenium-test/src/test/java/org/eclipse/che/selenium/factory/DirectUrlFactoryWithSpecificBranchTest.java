@@ -37,7 +37,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {GITHUB, OPENSHIFT, UNDER_REPAIR})
+@Test(groups = {GITHUB, OPENSHIFT})
 public class DirectUrlFactoryWithSpecificBranchTest {
   private static final Logger LOG =
       LoggerFactory.getLogger(DirectUrlFactoryWithSpecificBranchTest.class);
