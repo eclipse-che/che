@@ -14,7 +14,6 @@ package org.eclipse.che.selenium.factory;
 import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.AUXILIARY;
 import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.testng.AssertJUnit.assertEquals;
 
