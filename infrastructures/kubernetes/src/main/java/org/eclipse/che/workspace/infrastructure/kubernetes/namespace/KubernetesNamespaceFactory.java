@@ -357,7 +357,18 @@ public class KubernetesNamespaceFactory {
   }
 
   protected boolean checkNamespaceExists(String namespaceName) throws InfrastructureException {
-    return clientFactory.create().namespaces().withName(namespaceName).get() != null;
+    try {
+      return clientFactory.create().namespaces().withName(namespaceName).get() != null;
+    } catch (KubernetesClientException e) {
+      if (e.getCode() == 403) {
+        // 403 means that the project does not exist
+        // or a user really is not permitted to access it which is Che Server misconfiguration
+        return false;
+      } else {
+        throw new InfrastructureException(
+            "Error occurred when tried to fetch default project. Cause: " + e.getMessage(), e);
+      }
+    }
   }
 
   protected String evalPlaceholders(String namespace, Subject currentUser, String workspaceId) {
