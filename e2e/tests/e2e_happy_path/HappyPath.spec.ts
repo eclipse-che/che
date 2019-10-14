@@ -146,7 +146,7 @@ suite('Language server validation', async () => {
 
 suite('Validation of workspace build and run', async () => {
     test('Build application', async () => {
-        await runTask('che: build-file-output');
+        await runTask('build-file-output');
 
         //workaround for issue: https://github.com/eclipse/che/issues/14771
         
@@ -157,7 +157,7 @@ suite('Validation of workspace build and run', async () => {
     });
 
     test('Run application', async () => {
-        await runTask('che: run');
+        await runTask('run');
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
     });
@@ -192,7 +192,7 @@ suite('Display source code changes in the running application', async () => {
     });
 
     test('Build application with changes', async () => {
-        await runTask('che: build');
+        await runTask('build');
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'result-build.txt', 300000);
         await editor.waitText('result-build.txt', '[INFO] BUILD SUCCESS');
         
@@ -208,7 +208,7 @@ suite('Display source code changes in the running application', async () => {
     });
 
     test('Run application with changes', async () => {
-        await runTask('che: run-with-changes');
+        await runTask('run-with-changes');
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
     });
@@ -237,7 +237,7 @@ suite('Validation of debug functionality', async () => {
     });
 
     test('Launch debug', async () => {
-        await runTask('che: run-debug');
+        await runTask('run-debug');
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 180000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 180000);
     });
