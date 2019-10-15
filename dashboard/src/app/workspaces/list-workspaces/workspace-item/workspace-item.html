@@ -52,7 +52,7 @@
       </div>
 
       <!-- RAM -->
-      <div flex-gt-xs="15"
+      <div flex-gt-xs="10"
            class="che-list-item-name workspace-item-ram"
            ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>RAM</span>
@@ -60,20 +60,24 @@
       </div>
 
       <!-- Projects -->
-      <div flex-gt-xs="15"
+      <div flex-gt-xs="10"
            class="che-list-item-name workspace-item-projects"
            ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>Projects</span>
-        <span class="che-hover" name="workspace-projects-value">{{workspaceItemCtrl.workspace.config.projects.length}}
-          <span ng-if="workspaceItemCtrl.displayLabels"> project<span ng-if="workspaceItemCtrl.workspace.config.projects.length > 1">s</span></span></span>
+        <span class="che-hover" name="workspace-projects-value">
+          {{workspaceItemCtrl.projects.length > 0 ? workspaceItemCtrl.projects.length : '-'}}
+          <span ng-show="workspaceItemCtrl.displayLabels && (workspaceItemCtrl.projects.length > 0) === true">
+            project<span ng-if="workspaceItemCtrl.workspace.config.projects.length > 1">s</span>
+          </span>
+        </span>
       </div>
 
       <!-- Stack ID -->
-      <div flex-gt-xs="30"
+      <div flex-gt-xs="40"
            class="che-list-item-name workspace-item-stack"
            ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>Stack</span>
-        <span class="che-hover" name="workspace-stacks-name">{{workspaceItemCtrl.workspace.attributes.stackId}}</span>
+        <span class="che-hover" name="workspace-stacks-name">{{workspaceItemCtrl.stackDescription}}</span>
       </div>
 
       <!-- Actions -->

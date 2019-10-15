@@ -16,6 +16,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
+import org.eclipse.che.api.workspace.server.devfile.Constants;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.testng.annotations.BeforeClass;
@@ -80,6 +81,24 @@ public class DevfileSchemaValidatorTest {
           e.getMessage(),
           format("Devfile schema validation failed. Error: %s", expectedMessage),
           "DevfileFormatException thrown with message that doesn't match expected message:");
+      return;
+    }
+    fail("DevfileFormatException expected to be thrown but is was not");
+  }
+
+  @Test
+  public void shouldThrowExceptionWhenDevfileHasUnsupportedApiVersion() throws Exception {
+    try {
+      String devfile =
+          "---\n" + "apiVersion: 111.111\n" + "metadata:\n" + "  name: test-invalid-apiversion\n";
+      schemaValidator.validateYaml(devfile);
+    } catch (DevfileFormatException e) {
+      assertEquals(
+          e.getMessage(),
+          "Version '111.111' of the devfile is not supported. "
+              + "Supported versions are '"
+              + Constants.SUPPORTED_VERSIONS
+              + "'.");
       return;
     }
     fail("DevfileFormatException expected to be thrown but is was not");

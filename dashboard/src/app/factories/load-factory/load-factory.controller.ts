@@ -11,12 +11,15 @@
  */
 'use strict';
 import {CheAPI} from '../../../components/api/che-api.factory';
-import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
+import {CheWorkspace, WorkspaceStatus} from '../../../components/api/workspace/che-workspace.factory';
 import {LoadFactoryService, FactoryLoadingStep} from './load-factory.service';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {RouteHistory} from '../../../components/routing/route-history.service';
 import {CheJsonRpcApi} from '../../../components/api/json-rpc/che-json-rpc-api.factory';
 import {CheJsonRpcMasterApi} from '../../../components/api/json-rpc/che-json-rpc-master-api';
+
+const STARTING = WorkspaceStatus[WorkspaceStatus.STARTING];
+const RUNNING = WorkspaceStatus[WorkspaceStatus.RUNNING];
 
 const WS_AGENT_STEP: number = 4;
 
@@ -29,7 +32,7 @@ export class LoadFactoryController {
   static $inject = ['cheAPI', 'cheWorkspace','cheJsonRpcApi', '$route', '$timeout', '$mdDialog', 'loadFactoryService', 'lodash', 'cheNotification', '$location', 'routeHistory', '$window', 'loadFactoryService'];
 
   private cheAPI: CheAPI;
-  cheWorkspace: CheWorkspace;
+  private cheWorkspace: CheWorkspace;
   private $timeout: ng.ITimeoutService;
   private $mdDialog: ng.material.IDialogService;
   private loadFactoryService: LoadFactoryService;
@@ -242,9 +245,34 @@ export class LoadFactoryController {
       case 'peruser' :
         workspace = this.lodash.find(this.workspaces, (w: che.IWorkspace) => {
           if (this.factory.id) {
-            return this.factory.id === (w.attributes as any).factoryId;
-          } else if (this.routeParams.url){
-            return this.routeParams.url === (w.attributes as any).factoryurl;
+            return this.factory.id === w.attributes.factoryId;
+          } else if (this.routeParams.url) {
+            const factoryUrl = w.attributes.factoryurl;
+            // compare factory URL and route params
+            if (angular.isDefined(factoryUrl)) {
+              const factoryUrlObj = new (window as any).URL(factoryUrl);
+              const isPathCorrect = `${factoryUrlObj.origin}${factoryUrlObj.pathname}` === this.routeParams.url;
+              if (isPathCorrect === false) {
+                return false;
+              }
+
+              let factoryUrlParamsNumber = 0;
+              let hasExtraKey = false;
+              for (const [key, value] of factoryUrlObj.searchParams) {
+                if (hasExtraKey) {
+                  return false;
+                }
+                factoryUrlParamsNumber++;
+                hasExtraKey = this.routeParams[key] !== value;
+              }
+              if (hasExtraKey) {
+                return false;
+              }
+
+              // `routeParams` contains the `url` param which is not in `factoryUrl`
+              const paramsNumber = Object.keys(this.routeParams).length - 1;
+              return factoryUrlParamsNumber === paramsNumber;
+            }
           }
           return false;
         });
@@ -296,8 +324,18 @@ export class LoadFactoryController {
       creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, config, attrs);
     } else if (this.factory.devfile) {
       let devfile = this.factory.devfile;
-      // set devfile attribute:
-      let attrs = {factoryurl: this.routeParams.url};
+      // set devfile attributes
+      let url = '';
+      let params = '';
+      for (const key in this.routeParams) {
+        if (key === 'url') {
+          url = this.routeParams[key];
+        } else {
+          params += `${!params ? '?' : '&'}${key}=${this.routeParams[key]}`;
+        }
+      }
+
+      const attrs = {factoryurl: `${url}${params}`};
       creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromDevfile(null, devfile, attrs);
     }
     creationPromise.then((data: any) => {
@@ -342,10 +380,14 @@ export class LoadFactoryController {
   startWorkspace(workspace: che.IWorkspace): void {
     this.workspace = workspace;
 
-    if (workspace.status === 'RUNNING') {
-      this.loadFactoryService.setCurrentProgressStep(4);
-      this.importProjects();
-      return;
+    if (workspace.status === RUNNING) {
+      if(workspace.config && workspace.config.projects) {
+        this.loadFactoryService.setCurrentProgressStep(4);
+        this.importProjects();
+      } else {
+        this.finish();
+      }
+        return;
     }
 
     this.subscribeOnEvents(workspace);
@@ -361,31 +403,34 @@ export class LoadFactoryController {
    * @param workspace
    */
   doStartWorkspace(workspace: che.IWorkspace): void {
-    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id);
-    this.loadFactoryService.goToNextStep();
+    this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id).then(() => {
+      const workspaceStatus = this.cheAPI.getWorkspace().getWorkspacesById().get(workspace.id).status;
+      if ((workspaceStatus !== RUNNING) && (workspaceStatus !== STARTING)) {
+        this.cheAPI.getWorkspace().startWorkspace(workspace.id).then((data: any) => {
+          console.log('Workspace started', data);
+        }, (error: any) => {
+          let errorMessage;
 
-    startWorkspacePromise.then((data:  any) => {
-      console.log('Workspace started', data);
-    }, (error: any) => {
-      let errorMessage;
+          if (!error || !error.data) {
+            errorMessage = 'This factory is unable to start a new workspace.';
+          } else if (error.data.errorCode === 10000 && error.data.attributes) {
+            let attributes = error.data.attributes;
 
-      if (!error || !error.data) {
-        errorMessage = 'This factory is unable to start a new workspace.';
-      } else if (error.data.errorCode === 10000 && error.data.attributes) {
-        let attributes = error.data.attributes;
+            errorMessage = 'This factory is unable to start a new workspace.' +
+              ' Your running workspaces are consuming ' +
+              attributes.used_ram + attributes.ram_unit + ' RAM.' +
+              ' Your current RAM limit is ' + attributes.limit_ram + attributes.ram_unit +
+              '. This factory requested an additional ' +
+              attributes.required_ram + attributes.ram_unit + '.' +
+              '  You can stop other workspaces to free resources.';
+          } else {
+            errorMessage = error.data.message;
+          }
 
-        errorMessage = 'This factory is unable to start a new workspace.' +
-        ' Your running workspaces are consuming ' +
-        attributes.used_ram + attributes.ram_unit + ' RAM.' +
-        ' Your current RAM limit is ' + attributes.limit_ram + attributes.ram_unit +
-        '. This factory requested an additional ' +
-        attributes.required_ram + attributes.ram_unit + '.' +
-        '  You can stop other workspaces to free resources.';
-      } else {
-        errorMessage = error.data.message;
+          this.handleError({data: {message: errorMessage}});
+        });
       }
-
-      this.handleError({data: {message: errorMessage}});
+      this.loadFactoryService.goToNextStep();
     });
   }
 
@@ -422,7 +467,6 @@ export class LoadFactoryController {
     this.jsonRpcMasterApi.subscribeEnvironmentStatus(workspaceId, environmentStatusHandler);
 
     let environmentOutputHandler = (message: any) => {
-      // skip displaying machine logs after workspace agent:
       if (this.loadFactoryService.getCurrentProgressStep() === WS_AGENT_STEP) {
         return;
       }
@@ -449,7 +493,7 @@ export class LoadFactoryController {
         this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
       }
 
-      if (message.status === 'RUNNING' && message.workspaceId === workspaceId) {
+      if (message.status === RUNNING && message.workspaceId === workspaceId) {
         this.finish();
       }
     };
@@ -597,8 +641,8 @@ export class LoadFactoryController {
     // people should go back to the dashboard after factory is initialized
     this.routeHistory.pushPath('/');
 
-    var ideParams = [];
-    if (this.routeParams) {
+    const ideParams = [];
+    if (this.routeParams && this.workspace.devfile) {
       if (this.routeParams.id || (this.routeParams.name && this.routeParams.user)) {
         ideParams.push('factory-id:' + this.factory.id);
       } else {

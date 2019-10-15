@@ -27,6 +27,7 @@ export class DevfileSelectorController {
   devfileOrderBy: string;
   onDevfileSelect: Function;
   selectedDevfile: any;
+  stackName: string;
 
   /**
    * Default constructor that is using resource injection
@@ -54,6 +55,7 @@ export class DevfileSelectorController {
 
   devfileOnClick(devfile: any): void {
     this.selectedDevfile = devfile;
+    this.stackName = devfile.displayName;
 
     let location = this.cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
 
