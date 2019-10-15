@@ -90,7 +90,7 @@ public class OpenShiftEnvironmentProvisioner
       CertificateProvisioner certificateProvisioner,
       VcsSshKeysProvisioner vcsSshKeysProvisioner,
       GitUserProfileProvisioner gitUserProfileProvisioner,
-      OpenShiftPreviewUrlEndpointProvisioner<OpenShiftEnvironment> previewUrlEndpointsProvisioner) {
+      OpenShiftPreviewUrlEndpointProvisioner previewUrlEndpointsProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;

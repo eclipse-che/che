@@ -16,13 +16,12 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlEndpointsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 @Singleton
-public class OpenShiftPreviewUrlEndpointProvisioner<T extends KubernetesEnvironment>
+public class OpenShiftPreviewUrlEndpointProvisioner
     extends PreviewUrlEndpointsProvisioner<OpenShiftEnvironment> {
 
   @Inject

@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
-import static org.eclipse.che.api.core.model.workspace.config.Command.PREVIEW_URL_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.CHECK_SERVERS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_MACHINES_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_RUNNING_ASYNC;
@@ -27,12 +26,8 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodTemplateSpec;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
-import io.fabric8.kubernetes.api.model.extensions.IngressRule;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
@@ -69,7 +64,6 @@ import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult.ProbeStatus;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbes;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
-import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
@@ -88,11 +82,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRunti
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
-import org.eclipse.che.workspace.infrastructure.kubernetes.util.Services;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.slf4j.Logger;
@@ -125,6 +119,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final SidecarToolingProvisioner<E> toolingProvisioner;
   private final IngressPathTransformInverter ingressPathTransformInverter;
   private final RuntimeHangingDetector runtimeHangingDetector;
+  private final PreviewUrlCommandProvisioner<E> previewUrlCommandProvisioner;
   protected final Tracer tracer;
 
   @Inject
@@ -147,6 +142,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       SidecarToolingProvisioner<E> toolingProvisioner,
       IngressPathTransformInverter ingressPathTransformInverter,
       RuntimeHangingDetector runtimeHangingDetector,
+      PreviewUrlCommandProvisioner<E> previewUrlCommandProvisioner,
       Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace) {
@@ -169,6 +165,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.ingressPathTransformInverter = ingressPathTransformInverter;
     this.runtimeHangingDetector = runtimeHangingDetector;
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
+    this.previewUrlCommandProvisioner = previewUrlCommandProvisioner;
     this.tracer = tracer;
   }
 
@@ -210,7 +207,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
       startMachines();
 
-      injectsPreviewUrlToCommands(context.getEnvironment());
+      previewUrlCommandProvisioner.provision(context.getEnvironment(), namespace);
       runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
 
       startSynchronizer.checkFailure();
@@ -276,60 +273,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     } finally {
       namespace.deployments().stopWatch();
     }
-  }
-
-  private void injectsPreviewUrlToCommands(E env) throws InfrastructureException {
-    for (CommandImpl command :
-        env.getCommands()
-            .stream()
-            .filter(c -> c.getPreviewUrl() != null)
-            .collect(Collectors.toList())) {
-      Optional<Service> foundService =
-          Services.findServiceWithPort(
-              namespace.services().get(), command.getPreviewUrl().getPort());
-      if (foundService.isPresent()) {
-        Optional<String> foundHost =
-            findHostForServicePort(foundService.get(), command.getPreviewUrl().getPort());
-        if (foundHost.isPresent()) {
-          updateCommandWithPreviewUrl(command, foundHost.get());
-        } else {
-          LOG.warn(
-              "unable to find ingress for service [{}] and port [{}]",
-              foundService.get(),
-              command.getPreviewUrl().getPort());
-        }
-      } else {
-        LOG.warn(
-            "unable to find service for port [{}] for command [{}]",
-            command.getPreviewUrl().getPort(),
-            command.getName());
-      }
-    }
-  }
-
-  protected Optional<String> findHostForServicePort(Service service, int port)
-      throws InfrastructureException {
-    Optional<ServicePort> foundPort = Services.findPort(service, port);
-    if (!foundPort.isPresent()) {
-      return Optional.empty();
-    }
-
-    for (Ingress ingress : namespace.ingresses().get()) {
-      for (IngressRule rule : ingress.getSpec().getRules()) {
-        for (HTTPIngressPath path : rule.getHttp().getPaths()) {
-          IngressBackend backend = path.getBackend();
-          if (backend.getServiceName().equals(service.getMetadata().getName())
-              && backend.getServicePort().getStrVal().equals(foundPort.get().getName())) {
-            return Optional.of(rule.getHost());
-          }
-        }
-      }
-    }
-    return Optional.empty();
-  }
-
-  private void updateCommandWithPreviewUrl(CommandImpl command, String host) {
-    command.getAttributes().put(PREVIEW_URL_ATTRIBUTE, host + command.getPreviewUrl().getPath());
   }
 
   /**
