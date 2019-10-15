@@ -75,6 +75,7 @@ public class KubernetesNamespaceFactory {
   private final boolean allowUserDefinedNamespaces;
 
   private final String namespaceName;
+  private final boolean isStatic;
   private final String serviceAccountName;
   private final String clusterRoleName;
   private final KubernetesClientFactory clientFactory;
@@ -92,6 +93,7 @@ public class KubernetesNamespaceFactory {
       WorkspaceManager workspaceManager)
       throws ConfigurationException {
     this.namespaceName = namespaceName;
+    this.isStatic = !isNullOrEmpty(namespaceName) && hasNoPlaceholders(namespaceName);
     this.serviceAccountName = serviceAccountName;
     this.clusterRoleName = clusterRoleName;
     this.clientFactory = clientFactory;
@@ -107,11 +109,24 @@ public class KubernetesNamespaceFactory {
     }
 
     // right now allowUserDefinedNamespaces can't be true, but eventually we will implement it.
+    // noinspection ConstantConditions
     if (isNullOrEmpty(defaultNamespaceName) && !allowUserDefinedNamespaces) {
       throw new ConfigurationException(
           "che.infra.kubernetes.namespace.default or "
               + "che.infra.kubernetes.namespace.allow_user_defined must be configured");
     }
+  }
+
+  private boolean hasNoPlaceholders(String namespaceName) {
+    return NAMESPACE_NAME_PLACEHOLDERS.keySet().stream().noneMatch(namespaceName::contains);
+  }
+
+  /**
+   * True if namespace is the same (static) for all workspaces. False if each workspace will be
+   * provided with a new namespace or provided for each user when using placeholders.
+   */
+  public boolean isNamespaceStatic() {
+    return isStatic;
   }
 
   /**
@@ -267,7 +282,7 @@ public class KubernetesNamespaceFactory {
     KubernetesNamespace namespace = doCreateNamespace(workspaceId, namespaceName);
     namespace.prepare();
 
-    if (!checkNamespaceExists(namespaceName) && !isNullOrEmpty(serviceAccountName)) {
+    if (!isNamespaceStatic() && !isNullOrEmpty(serviceAccountName)) {
       // prepare service account for workspace only if account name is configured
       // and project is not predefined
       // since predefined project should be prepared during Che deployment
