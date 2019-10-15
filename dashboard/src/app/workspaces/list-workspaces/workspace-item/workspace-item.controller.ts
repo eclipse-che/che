@@ -71,6 +71,27 @@ export class WorkspaceItemCtrl {
     this.workspaceName = this.cheWorkspace.getWorkspaceDataManager().getName(this.workspace);
   }
 
+  get stackDescription(): string {
+    const attributes = this.workspace.attributes;
+    let description = attributes.stackId ? attributes.stackId : attributes.stackName;
+    if (!description) {
+      description = attributes.factoryId ? attributes.factoryId : attributes.factoryurl;
+    }
+    return description;
+  }
+
+  /**
+   * Returns workspace projects.
+   *
+   * @returns {Array<che.IProject>}
+   */
+  get projects(): Array<che.IProject> {
+    if (this.workspace.devfile) {
+      return this.workspace.devfile.projects || [];
+    }
+    return this.workspace.config.projects || [];
+  }
+
   /**
    * Returns `true` if supported.
    *

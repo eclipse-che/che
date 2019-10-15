@@ -313,6 +313,9 @@ declare namespace che {
     created: number;
     updated?: number;
     stackId?: string;
+    stackName?: string;
+    factoryId?: string;
+    factoryurl?: string;
     errorMessage?: string;
     [propName: string]: string | number;
   }
