@@ -26,9 +26,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 import io.fabric8.kubernetes.api.model.DoneableNamespace;
 import io.fabric8.kubernetes.api.model.Namespace;
@@ -240,46 +238,6 @@ public class KubernetesNamespaceFactoryTest {
     throwOnTryToGetNamespacesList(new KubernetesClientException("connection refused"));
 
     namespaceFactory.list();
-  }
-
-  @Test
-  public void shouldReturnTrueIfNamespaceIsNotEmptyOnCheckingIfNamespaceIsPredefined() {
-    // given
-    namespaceFactory =
-        new KubernetesNamespaceFactory(
-            "predefined", "", "", "che", false, clientFactory, workspaceManager);
-
-    // when
-    boolean isPredefined = namespaceFactory.isNamespaceStatic();
-
-    // then
-    assertTrue(isPredefined);
-  }
-
-  @Test
-  public void shouldReturnTrueIfNamespaceIsEmptyOnCheckingIfNamespaceIsPredefined() {
-    // given
-    namespaceFactory =
-        new KubernetesNamespaceFactory("", "", "", "che", false, clientFactory, workspaceManager);
-
-    // when
-    boolean isPredefined = namespaceFactory.isNamespaceStatic();
-
-    // then
-    assertFalse(isPredefined);
-  }
-
-  @Test
-  public void shouldReturnTrueIfNamespaceIsNullOnCheckingIfNamespaceIsPredefined() {
-    // given
-    namespaceFactory =
-        new KubernetesNamespaceFactory(null, "", "", "che", false, clientFactory, workspaceManager);
-
-    // when
-    boolean isPredefined = namespaceFactory.isNamespaceStatic();
-
-    // then
-    assertFalse(isPredefined);
   }
 
   @Test

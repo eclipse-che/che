@@ -50,22 +50,11 @@ public class WorkspacePVCCleanerTest {
 
   @BeforeMethod
   public void setUp() {
-    when(namespaceFactory.isNamespaceStatic()).thenReturn(true);
     workspacePVCCleaner = new WorkspacePVCCleaner(true, namespaceFactory, pvcStrategy);
   }
 
   @Test
   public void testDoNotSubscribesCleanerWhenPVCDisabled() {
-    workspacePVCCleaner = spy(new WorkspacePVCCleaner(false, namespaceFactory, pvcStrategy));
-
-    workspacePVCCleaner.subscribe(eventService);
-
-    verify(eventService, never()).subscribe(any(), eq(WorkspaceRemovedEvent.class));
-  }
-
-  @Test
-  public void testDoNotSubscribesCleanerWhenPVCEnabledAndNamespaceIsNotPredefined() {
-    when(namespaceFactory.isNamespaceStatic()).thenReturn(false);
     workspacePVCCleaner = spy(new WorkspacePVCCleaner(false, namespaceFactory, pvcStrategy));
 
     workspacePVCCleaner.subscribe(eventService);

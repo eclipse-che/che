@@ -52,7 +52,7 @@ public class WorkspacePVCCleaner {
 
   @Inject
   public void subscribe(EventService eventService) {
-    if (pvcEnabled && namespaceFactory.isNamespaceStatic())
+    if (pvcEnabled)
       eventService.subscribe(
           event -> {
             final Workspace workspace = event.getWorkspace();
