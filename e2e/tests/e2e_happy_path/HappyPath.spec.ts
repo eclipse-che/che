@@ -193,7 +193,7 @@ suite('Display source code changes in the running application', async () => {
 
     test('Build application with changes', async () => {
         await runTask('build');
-        await projectTree.collapseAssociatedWorkspaceProjectTree(projectName, 'src');
+        await projectTree.collapseAssociatedWorkspaceProjectTree(projectName + '/src', 'main');
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'result-build.txt', 300000);
         await editor.waitText('result-build.txt', '[INFO] BUILD SUCCESS');
 
