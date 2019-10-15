@@ -75,7 +75,6 @@ public class KubernetesNamespaceFactory {
   private final boolean allowUserDefinedNamespaces;
 
   private final String namespaceName;
-  private final boolean isStatic;
   private final String serviceAccountName;
   private final String clusterRoleName;
   private final KubernetesClientFactory clientFactory;
@@ -93,7 +92,6 @@ public class KubernetesNamespaceFactory {
       WorkspaceManager workspaceManager)
       throws ConfigurationException {
     this.namespaceName = namespaceName;
-    this.isStatic = !isNullOrEmpty(namespaceName) && hasNoPlaceholders(namespaceName);
     this.serviceAccountName = serviceAccountName;
     this.clusterRoleName = clusterRoleName;
     this.clientFactory = clientFactory;
@@ -126,7 +124,18 @@ public class KubernetesNamespaceFactory {
    * provided with a new namespace or provided for each user when using placeholders.
    */
   public boolean isNamespaceStatic() {
-    return isStatic;
+    try {
+      if (!isNullOrEmpty(namespaceName)
+          && hasNoPlaceholders(namespaceName)
+          && checkNamespaceExists(namespaceName)) {
+        return true;
+      } else if (hasNoPlaceholders(defaultNamespaceName)) {
+        return true;
+      }
+    } catch (InfrastructureException e) {
+      LOG.debug("Failed to check whether workspace namespace is static.", e);
+    }
+    return false;
   }
 
   /**

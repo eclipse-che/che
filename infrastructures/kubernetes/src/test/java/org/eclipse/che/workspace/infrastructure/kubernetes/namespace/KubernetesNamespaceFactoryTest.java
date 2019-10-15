@@ -79,11 +79,12 @@ public class KubernetesNamespaceFactoryTest {
   public void setUp() throws Exception {
     lenient().when(clientFactory.create()).thenReturn(k8sClient);
     lenient().when(k8sClient.namespaces()).thenReturn(namespaceOperation);
-    when(workspaceManager.getWorkspace(any()))
+    lenient()
+        .when(workspaceManager.getWorkspace(any()))
         .thenReturn(WorkspaceImpl.builder().setId("1").setAttributes(emptyMap()).build());
 
-    when(namespaceOperation.withName(any())).thenReturn(namespaceResource);
-    when(namespaceResource.get()).thenReturn(mock(Namespace.class));
+    lenient().when(namespaceOperation.withName(any())).thenReturn(namespaceResource);
+    lenient().when(namespaceResource.get()).thenReturn(mock(Namespace.class));
   }
 
   @Test(
@@ -257,10 +258,40 @@ public class KubernetesNamespaceFactoryTest {
   }
 
   @Test
-  public void shouldReturnTrueIfNamespaceIsEmptyOnCheckingIfNamespaceIsPredefined() {
+  public void
+      shouldReturnTrueIfNamespaceIsEmptyAndDefaultNamespaceIsNotEmptyOnCheckingIfNamespaceIsPredefined() {
     // given
     namespaceFactory =
         new KubernetesNamespaceFactory("", "", "", "che", false, clientFactory, workspaceManager);
+
+    // when
+    boolean isPredefined = namespaceFactory.isNamespaceStatic();
+
+    // then
+    assertTrue(isPredefined);
+  }
+
+  @Test
+  public void
+      shouldReturnTrueIfNamespaceIsNullAndDefaultNamespaceIsNotEmptyOnCheckingIfNamespaceIsPredefined() {
+    // given
+    namespaceFactory =
+        new KubernetesNamespaceFactory(null, "", "", "che", false, clientFactory, workspaceManager);
+
+    // when
+    boolean isPredefined = namespaceFactory.isNamespaceStatic();
+
+    // then
+    assertTrue(isPredefined);
+  }
+
+  @Test
+  public void
+      shouldReturnFalseIfBothNamespaceAndDefaultNamespaceAreTemplatizedOnCheckingIfNamespaceIsPredefined() {
+    // given
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "<username>", "", "", "<workspaceid>", false, clientFactory, workspaceManager);
 
     // when
     boolean isPredefined = namespaceFactory.isNamespaceStatic();
@@ -270,16 +301,69 @@ public class KubernetesNamespaceFactoryTest {
   }
 
   @Test
-  public void shouldReturnTrueIfNamespaceIsNullOnCheckingIfNamespaceIsPredefined() {
+  public void
+      shouldReturnFalseIfNamespaceIsEmptyAndDefaultNamespaceIsTemplatizedOnCheckingIfNamespaceIsPredefined() {
     // given
     namespaceFactory =
-        new KubernetesNamespaceFactory(null, "", "", "che", false, clientFactory, workspaceManager);
+        new KubernetesNamespaceFactory(
+            "", "", "", "<username>", false, clientFactory, workspaceManager);
 
     // when
     boolean isPredefined = namespaceFactory.isNamespaceStatic();
 
     // then
     assertFalse(isPredefined);
+  }
+
+  @Test
+  public void
+      shouldReturnFalseIfNamespaceIsNullAndDefaultNamespaceIsTemplatizedOnCheckingIfNamespaceIsPredefined() {
+    // given
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            null, "", "", "<username>", false, clientFactory, workspaceManager);
+
+    // when
+    boolean isPredefined = namespaceFactory.isNamespaceStatic();
+
+    // then
+    assertFalse(isPredefined);
+  }
+
+  @Test
+  public void
+      shouldReturnFalseIfNamespacePointsToNonExistingOneAndDefaultNamespaceIsTemplatizedOnCheckingIfNamespaceIsPredefined() {
+    // given
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "nonexisting", "", "", "<username>", false, clientFactory, workspaceManager);
+
+    // this is modelling the non-existence of the namespace
+    when(namespaceResource.get()).thenReturn(null);
+
+    // when
+    boolean isPredefined = namespaceFactory.isNamespaceStatic();
+
+    // then
+    assertFalse(isPredefined);
+  }
+
+  @Test
+  public void
+      shouldReturnTrueIfNamespacePointsToNonExistingOneAndDefaultNamespaceIsNotTemplatizedOnCheckingIfNamespaceIsPredefined() {
+    // given
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "nonexisting", "", "", "che", false, clientFactory, workspaceManager);
+
+    // this is modelling the non-existence of the namespace
+    when(namespaceResource.get()).thenReturn(null);
+
+    // when
+    boolean isPredefined = namespaceFactory.isNamespaceStatic();
+
+    // then
+    assertTrue(isPredefined);
   }
 
   @Test
@@ -349,7 +433,7 @@ public class KubernetesNamespaceFactoryTest {
     namespaceFactory =
         spy(
             new KubernetesNamespaceFactory(
-                "", "serviceAccount", "", "che", false, clientFactory, workspaceManager));
+                "", "serviceAccount", "", "<workspaceid>", false, clientFactory, workspaceManager));
     KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
     doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespace(any(), any());
 
