@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.server.devfile;
 
 import static com.jayway.restassured.RestAssured.given;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 import static org.everrest.assured.JettyHttpServer.*;
 import static org.testng.Assert.assertEquals;
 
@@ -54,6 +55,7 @@ public class DevfileServiceTest {
             .get(SECURE_PATH + "/devfile");
 
     assertEquals(response.getStatusCode(), 200);
-    assertEquals(response.getBody().asString(), schemaProvider.getSchemaContent());
+    assertEquals(
+        response.getBody().asString(), schemaProvider.getSchemaContent(CURRENT_API_VERSION));
   }
 }

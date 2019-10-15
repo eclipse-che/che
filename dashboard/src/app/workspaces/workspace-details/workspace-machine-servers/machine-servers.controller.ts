@@ -54,7 +54,6 @@ export class MachineServersController {
     this.$mdDialog = $mdDialog;
     this.confirmDialogService = confirmDialogService;
 
-    this.buildServersList(this.selectedMachine);
     const deRegistrationFn = $scope.$watch(() => {
       return this.selectedMachine;
     }, (selectedMachine: IEnvironmentManagerMachine) => {
@@ -64,6 +63,10 @@ export class MachineServersController {
     $scope.$on('$destroy', () => {
       deRegistrationFn();
     });
+  }
+
+  $onInit(): void {
+    this.buildServersList(this.selectedMachine);
   }
 
   /**

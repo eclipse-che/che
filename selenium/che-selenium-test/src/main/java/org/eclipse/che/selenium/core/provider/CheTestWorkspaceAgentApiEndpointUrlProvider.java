@@ -11,8 +11,8 @@
  */
 package org.eclipse.che.selenium.core.provider;
 
-import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
+import static org.eclipse.che.workspace.infrastructure.docker.environment.WsAgentMachineFinderUtil.containsWsAgentServer;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

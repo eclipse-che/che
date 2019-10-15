@@ -7,7 +7,7 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
@@ -80,8 +80,8 @@ spec:
         - name: CHE_SELF__SIGNED__CERT
           valueFrom:
             secretKeyRef:
-              key: tls.crt
-              name: {{ .Values.global.tls.secretName  }}
+              key: ca.crt
+              name: {{ .Values.global.tls.selfSignedCertSecretName }}
               optional: false
         {{- end }}
 

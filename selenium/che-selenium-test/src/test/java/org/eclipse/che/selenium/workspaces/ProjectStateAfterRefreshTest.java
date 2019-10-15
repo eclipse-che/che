@@ -11,112 +11,82 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
-import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 
 import com.google.inject.Inject;
-import java.net.URL;
-import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
+import java.util.Collections;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.Consoles;
-import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
+import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
+import org.eclipse.che.selenium.pageobject.theia.TheiaEditor;
+import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
+import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** @author Andrey chizhikov TODO rewrite to use che7 workspace */
-@Test(groups = UNDER_REPAIR)
+/** @author Andrey chizhikov */
 public class ProjectStateAfterRefreshTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("project", 5);
+  private static final String WORKSPACE_NAME =
+      generate(ProjectStateAfterRefreshTest.class.getSimpleName(), 5);
+  private static final String PATH_TO_POM_FILE = CONSOLE_JAVA_SIMPLE + "/" + "pom.xml";
+  private static final String PATH_TO_README_FILE = CONSOLE_JAVA_SIMPLE + "/" + "README.md";
 
-  @Inject private TestWorkspace workspace;
-  @Inject private Ide ide;
-  @Inject private ProjectExplorer projectExplorer;
-  @Inject private Consoles consoles;
-  @Inject private CodenvyEditor editor;
-  @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Dashboard dashboard;
+  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private DefaultTestUser defaultTestUser;
+  @Inject private CreateWorkspaceHelper createWorkspaceHelper;
+  @Inject private TheiaIde theiaIde;
+  @Inject private TheiaProjectTree theiaProjectTree;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private TheiaEditor theiaEditor;
 
   @BeforeClass
   public void setUp() throws Exception {
-    URL resource =
-        ProjectStateAfterRefreshTest.this.getClass().getResource("/projects/guess-project");
-    testProjectServiceClient.importProject(
-        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
-    ide.open(workspace);
+    dashboard.open();
+    createWorkspaceHelper.createAndStartWorkspaceFromStack(
+        Devfile.JAVA_MAVEN, WORKSPACE_NAME, Collections.emptyList(), null);
+  }
+
+  @AfterClass
+  public void tearDown() throws Exception {
+    workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
   }
 
   @Test
   public void checkRestoreStateOfProjectAfterRefreshTest() {
-    ide.waitOpenedWorkspaceIsReadyToUse();
-    projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
+    theiaIde.waitOpenedWorkspaceIsReadyToUse();
+
+    theiaProjectTree.waitFilesTab();
+    theiaProjectTree.clickOnFilesTab();
+    theiaProjectTree.waitProjectAreaOpened();
+    theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
+    theiaIde.waitAllNotificationsClosed();
 
     openFilesInEditor();
     checkFilesAreOpened();
 
     seleniumWebDriver.navigate().refresh();
-    ide.waitOpenedWorkspaceIsReadyToUse();
-    projectExplorer.waitItem(PROJECT_NAME);
+    theiaIde.waitOpenedWorkspaceIsReadyToUse();
 
     checkFilesAreOpened();
-
-    editor.closeAllTabsByContextMenu();
-  }
-
-  @Test
-  public void checkRestoreStateOfProjectIfPomXmlFileOpened() {
-    ide.waitOpenedWorkspaceIsReadyToUse();
-    projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
-
-    projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF");
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsp");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
-    editor.waitActive();
-
-    seleniumWebDriver.navigate().refresh();
-    ide.waitOpenedWorkspaceIsReadyToUse();
-    projectExplorer.waitItem(PROJECT_NAME);
-    editor.waitTabIsPresent("qa-spring-sample");
-    projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF");
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsp");
-
-    editor.closeAllTabsByContextMenu();
-  }
-
-  private void checkFilesAreOpened() {
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF");
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsp");
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
-    projectExplorer.waitItem(
-        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitTabIsPresent("index.jsp");
-    editor.waitTabIsPresent("AppController");
-    editor.waitTabIsPresent("guess_num.jsp");
-    editor.waitTabIsPresent("web.xml");
-    editor.waitTabIsPresent("qa-spring-sample");
   }
 
   private void openFilesInEditor() {
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
-    editor.waitActive();
-    projectExplorer.openItemByPath(
-        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActive();
-    projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
-    editor.waitActive();
-    projectExplorer.openItemByPath(
-        PROJECT_NAME + "/src/main/webapp/WEB-INF/jsp" + "/guess_num.jsp");
-    editor.waitActive();
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/WEB-INF" + "/web.xml");
-    editor.waitActive();
+    theiaProjectTree.expandItem(CONSOLE_JAVA_SIMPLE);
+    theiaProjectTree.waitItem(PATH_TO_POM_FILE);
+    theiaProjectTree.waitItem(PATH_TO_README_FILE);
+
+    theiaProjectTree.openItem(PATH_TO_POM_FILE);
+    theiaProjectTree.openItem(PATH_TO_README_FILE);
+  }
+
+  private void checkFilesAreOpened() {
+    theiaEditor.waitEditorTab("pom.xml");
+    theiaEditor.waitEditorTab("README.md");
   }
 }

@@ -11,10 +11,13 @@
  */
 package org.eclipse.che.api.workspace.activity;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,6 +32,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
@@ -54,12 +58,21 @@ public class WorkspaceActivityCheckerTest {
   @Mock private EventService eventService;
 
   @BeforeMethod
-  public void setUp() {
+  public void setUp() throws Exception {
     clock = new ManualClock();
 
     WorkspaceActivityManager activityManager =
         new WorkspaceActivityManager(
             workspaceManager, workspaceActivityDao, eventService, DEFAULT_TIMEOUT, clock);
+
+    when(workspaceActivityDao.getAll(anyInt(), anyLong()))
+        .thenAnswer(
+            inv -> {
+              int maxItems = inv.getArgument(0);
+              long skipCount = inv.getArgument(1);
+
+              return new Page<WorkspaceActivity>(emptyList(), skipCount, maxItems, 0);
+            });
 
     checker =
         new WorkspaceActivityChecker(
@@ -70,7 +83,7 @@ public class WorkspaceActivityCheckerTest {
   public void shouldStopAllExpiredWorkspaces() throws Exception {
     when(workspaceActivityDao.findExpired(anyLong())).thenReturn(Arrays.asList("1", "2", "3"));
 
-    checker.validate();
+    checker.expire();
 
     verify(workspaceActivityDao, times(3)).removeExpiration(anyString());
     verify(workspaceActivityDao).removeExpiration(eq("1"));
@@ -93,7 +106,7 @@ public class WorkspaceActivityCheckerTest {
 
     // when
     clock.forward(Duration.of(1, ChronoUnit.SECONDS));
-    checker.validate();
+    checker.cleanup();
 
     // then
     ArgumentCaptor<WorkspaceActivity> captor = ArgumentCaptor.forClass(WorkspaceActivity.class);
@@ -124,7 +137,7 @@ public class WorkspaceActivityCheckerTest {
                 .build());
 
     // when
-    checker.validate();
+    checker.cleanup();
 
     // then
     verify(workspaceActivityDao).setCreatedTime(eq(id), eq(15L));
@@ -143,7 +156,7 @@ public class WorkspaceActivityCheckerTest {
 
     // when
     clock.forward(Duration.of(1, ChronoUnit.SECONDS));
-    checker.validate();
+    checker.cleanup();
 
     // then
     verify(workspaceActivityDao, never()).setCreatedTime(eq(id), anyLong());
@@ -170,7 +183,7 @@ public class WorkspaceActivityCheckerTest {
 
     // when
     clock.forward(Duration.of(1, ChronoUnit.SECONDS));
-    checker.validate();
+    checker.cleanup();
 
     // then
     verify(workspaceActivityDao).setCreatedTime(eq(id), eq(15L));
@@ -191,7 +204,7 @@ public class WorkspaceActivityCheckerTest {
 
     // when
     clock.forward(Duration.of(1500, ChronoUnit.MILLIS));
-    checker.validate();
+    checker.cleanup();
 
     // then
     verify(workspaceActivityDao).setExpirationTime(eq(id), eq(lastRunning + DEFAULT_TIMEOUT));
@@ -209,10 +222,43 @@ public class WorkspaceActivityCheckerTest {
 
     // when
     clock.forward(Duration.of(900, ChronoUnit.MILLIS));
-    checker.validate();
+    checker.cleanup();
 
     // then
     verify(workspaceActivityDao, never()).setExpirationTime(anyString(), anyLong());
+  }
+
+  @Test
+  public void shouldRestoreTrueStateOfWorkspaceIfActivityDoesntReflectThat() throws Exception {
+    // given
+    String wsId = "1";
+    WorkspaceActivity activity = new WorkspaceActivity();
+    activity.setCreated(clock.millis());
+    activity.setWorkspaceId(wsId);
+    activity.setStatus(WorkspaceStatus.STARTING);
+    activity.setLastStarting(clock.millis());
+    doAnswer(
+            inv -> {
+              int maxItems = inv.getArgument(0);
+              long skipCount = inv.getArgument(1);
+
+              if (skipCount < 1) {
+                return new Page<>(singleton(activity), skipCount, maxItems, 1);
+              } else {
+                return new Page<>(emptyList(), skipCount, maxItems, 1);
+              }
+            })
+        .when(workspaceActivityDao)
+        .getAll(anyInt(), anyLong());
+
+    when(workspaceRuntimes.getStatus(eq(wsId))).thenReturn(WorkspaceStatus.STOPPED);
+
+    // when
+    checker.cleanup();
+
+    // then
+    verify(workspaceActivityDao)
+        .setStatusChangeTime(eq(wsId), eq(WorkspaceStatus.STOPPED), eq(clock.millis()));
   }
 
   private static final class ManualClock extends Clock {

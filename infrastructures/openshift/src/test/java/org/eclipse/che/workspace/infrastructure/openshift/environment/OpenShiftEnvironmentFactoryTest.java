@@ -97,7 +97,7 @@ public class OpenShiftEnvironmentFactoryTest {
   public void setup() throws Exception {
     osEnvFactory =
         new OpenShiftEnvironmentFactory(
-            null, null, null, openShiftEnvValidator, k8sRecipeParser, memoryProvisioner, podMerger);
+            null, null, openShiftEnvValidator, k8sRecipeParser, memoryProvisioner, podMerger);
     machines = ImmutableMap.of(MACHINE_NAME_1, machineConfig1, MACHINE_NAME_2, machineConfig2);
   }
 

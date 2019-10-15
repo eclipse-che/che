@@ -18,6 +18,7 @@ declare namespace che {
   export interface IRootScopeService extends ng.IRootScopeService {
     hideLoader: boolean;
     showIDE: boolean;
+    hideNavbar: boolean;
     wantTokeepLoader: boolean;
     waitingLoaded: boolean;
     currentPage: string;
@@ -312,6 +313,9 @@ declare namespace che {
     created: number;
     updated?: number;
     stackId?: string;
+    stackName?: string;
+    factoryId?: string;
+    factoryurl?: string;
     errorMessage?: string;
     [propName: string]: string | number;
   }

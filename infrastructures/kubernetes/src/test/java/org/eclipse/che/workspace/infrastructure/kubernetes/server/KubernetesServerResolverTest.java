@@ -37,6 +37,7 @@ import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.Serializer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 import org.testng.annotations.Test;
 
 /**
@@ -54,7 +55,7 @@ public class KubernetesServerResolverTest {
 
   @Test
   public void
-      testResolvingServersWhenThereIsNoTheCorrespondingServiceAndingressForTheSpecifiedMachine() {
+      testResolvingServersWhenThereIsNoTheCorrespondingServiceAndIngressForTheSpecifiedMachine() {
     // given
     Service nonMatchedByPodService =
         createService("nonMatched", "foreignMachine", CONTAINER_PORT, null);
@@ -65,7 +66,10 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", "/api", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(singletonList(nonMatchedByPodService), singletonList(ingress));
+        new KubernetesServerResolver(
+            new NoopPathTransformInverter(),
+            singletonList(nonMatchedByPodService),
+            singletonList(ingress));
 
     // when
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
@@ -75,15 +79,16 @@ public class KubernetesServerResolverTest {
   }
 
   @Test
-  public void testResolvingServersWhenThereIsMatchedingressForTheSpecifiedMachine() {
+  public void testResolvingServersWhenThereIsMatchedIngressForTheSpecifiedMachine() {
     Ingress ingress =
         createIngress(
             "matched",
             "machine",
-            Pair.of("http-server", new ServerConfigImpl("3054", "http", "/api", ATTRIBUTES_MAP)));
+            Pair.of("http-server", new ServerConfigImpl("3054", "http", "/api/", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(
+            new NoopPathTransformInverter(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -91,7 +96,7 @@ public class KubernetesServerResolverTest {
     assertEquals(
         resolved.get("http-server"),
         new ServerImpl()
-            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/api")
+            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/api/")
             .withStatus(ServerStatus.UNKNOWN)
             .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
@@ -105,7 +110,8 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", null, ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(
+            new NoopPathTransformInverter(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -113,7 +119,7 @@ public class KubernetesServerResolverTest {
     assertEquals(
         resolved.get("http-server"),
         new ServerImpl()
-            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX)
+            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/")
             .withStatus(ServerStatus.UNKNOWN)
             .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
@@ -127,7 +133,8 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", "", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(
+            new NoopPathTransformInverter(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -135,13 +142,13 @@ public class KubernetesServerResolverTest {
     assertEquals(
         resolved.get("http-server"),
         new ServerImpl()
-            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX)
+            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/")
             .withStatus(ServerStatus.UNKNOWN)
             .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
-  public void testResolvingServersWhenThereIsMatchedingressForMachineAndServerPathIsRelative() {
+  public void testResolvingServersWhenThereIsMatchedIngressForMachineAndServerPathIsRelative() {
     Ingress ingress =
         createIngress(
             "matched",
@@ -149,7 +156,8 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", "api", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(
+            new NoopPathTransformInverter(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -157,7 +165,7 @@ public class KubernetesServerResolverTest {
     assertEquals(
         resolved.get("http-server"),
         new ServerImpl()
-            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/api")
+            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/api/")
             .withStatus(ServerStatus.UNKNOWN)
             .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
@@ -173,7 +181,8 @@ public class KubernetesServerResolverTest {
                 "http-server", new ServerConfigImpl("3054", "http", "api", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(singletonList(service), emptyList());
+        new KubernetesServerResolver(
+            new NoopPathTransformInverter(), singletonList(service), emptyList());
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -197,7 +206,8 @@ public class KubernetesServerResolverTest {
                 "http-server", new ServerConfigImpl("3054/udp", "xxx", "api", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(singletonList(service), emptyList());
+        new KubernetesServerResolver(
+            new NoopPathTransformInverter(), singletonList(service), emptyList());
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -270,5 +280,11 @@ public class KubernetesServerResolverTest {
     HashMap<String, String> attributes = new HashMap<>(ATTRIBUTES_MAP);
     attributes.put(key, value);
     return attributes;
+  }
+
+  private static final class NoopPathTransformInverter extends IngressPathTransformInverter {
+    NoopPathTransformInverter() {
+      super("%s");
+    }
   }
 }

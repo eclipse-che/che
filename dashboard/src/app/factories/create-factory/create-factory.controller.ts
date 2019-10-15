@@ -96,6 +96,11 @@ export class CreateFactoryCtrl {
     });
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Clear factory content
    */

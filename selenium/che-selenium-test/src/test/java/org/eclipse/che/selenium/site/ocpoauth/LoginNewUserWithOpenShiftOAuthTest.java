@@ -26,7 +26,7 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.ocp.AuthorizeOpenShiftAccessPage;
 import org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage;
@@ -103,10 +103,8 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     // (we can't use dashboard.open() here to login with OAuth)
     seleniumWebDriver.navigate().to(testDashboardUrlProvider.get());
 
-    // click on button to login with OpenShift OAuth
-    cheLoginPage.loginWithOpenShiftOAuth();
-
     // login to OCP from login page with new test user credentials
+    openShiftLoginPage.waitOnOpen();
     openShiftLoginPage.login(NEW_TEST_USER.getName(), NEW_TEST_USER.getPassword());
 
     // authorize ocp-client to access OpenShift account
@@ -121,7 +119,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
-    newWorkspace.selectStack(Stack.JAVA_MAVEN);
+    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     // switch to the IDE and wait for workspace is ready to use

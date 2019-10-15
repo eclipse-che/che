@@ -13,6 +13,8 @@ package org.eclipse.che.api.workspace.server.model.impl.devfile;
 
 import static java.util.stream.Collectors.toCollection;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -35,6 +38,8 @@ import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Env;
 import org.eclipse.che.api.core.model.workspace.devfile.Volume;
+import org.eclipse.che.api.workspace.server.devfile.PreferencesDeserializer;
+import org.eclipse.che.api.workspace.server.devfile.SerializableConverter;
 
 /** @author Sergii Leshchenko */
 @Entity(name = "DevfileComponent")
@@ -54,8 +59,10 @@ public class ComponentImpl implements Component {
       name = "devfile_component_preferences",
       joinColumns = @JoinColumn(name = "devfile_component_id"))
   @MapKeyColumn(name = "preference_key")
+  @Convert(converter = SerializableConverter.class)
   @Column(name = "preference")
-  private Map<String, String> preferences;
+  @JsonDeserialize(using = PreferencesDeserializer.class)
+  private Map<String, Serializable> preferences;
 
   @Column(name = "alias")
   private String alias;
@@ -190,7 +197,7 @@ public class ComponentImpl implements Component {
       String type,
       String alias,
       String id,
-      Map<String, String> preferences,
+      Map<String, Serializable> preferences,
       String registryUrl,
       String reference,
       String referenceContent,
@@ -294,14 +301,14 @@ public class ComponentImpl implements Component {
     this.registryUrl = registryUrl;
   }
 
-  public Map<String, String> getPreferences() {
+  public Map<String, Serializable> getPreferences() {
     if (preferences == null) {
       preferences = new HashMap<>();
     }
     return preferences;
   }
 
-  public void setPreferences(Map<String, String> preferences) {
+  public void setPreferences(Map<String, Serializable> preferences) {
     this.preferences = preferences;
   }
 

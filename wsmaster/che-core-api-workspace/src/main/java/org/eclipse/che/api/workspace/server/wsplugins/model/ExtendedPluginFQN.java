@@ -34,8 +34,9 @@ public class ExtendedPluginFQN extends PluginFQN {
     this.version = version;
   }
 
+  /** In this constructor, id is composed from given params */
   public ExtendedPluginFQN(String reference, String publisher, String name, String version) {
-    super(reference);
+    super(reference, publisher + "/" + name + "/" + version);
     this.publisher = publisher;
     this.name = name;
     this.version = version;

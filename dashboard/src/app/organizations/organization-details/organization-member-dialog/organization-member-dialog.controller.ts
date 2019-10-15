@@ -143,6 +143,11 @@ export class OrganizationMemberDialogController {
     }
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Returns title of specified role.
    *

@@ -12,8 +12,9 @@
 package org.eclipse.che.selenium.pageobject.theia;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.EXPAND_ITEM_ICON_XPATH_TEMPLATE;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.FILES_TAB_XPATH;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.FILES_TAB_ID;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.OPEN_WORKSPACE_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.PROJECT_TREE_CONTAINER_ID;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree.Locators.ROOT_PROJECTS_FOLDER_ID;
@@ -62,8 +63,7 @@ public class TheiaProjectTree {
     String COLLAPSED_ITEM_XPATH_TEMPLATE =
         "//div[@data-node-id='/projects:/projects/%s' and contains(@class, 'theia-mod-collapsed')]";
     String EXPAND_ITEM_ICON_XPATH_TEMPLATE = "//div[@data-node-id='/projects:/projects/%s']";
-    String FILES_TAB_XPATH =
-        "//div[contains(@class, 'theia-app-left')]//ul[@class='p-TabBar-content']//li[@title='Explorer']";
+    String FILES_TAB_ID = "shell-tab-explorer-view-container";
     String OPEN_WORKSPACE_BUTTON_XPATH = "//button[@class='open-workspace-button']";
   }
 
@@ -77,12 +77,11 @@ public class TheiaProjectTree {
 
   public void clickOnFilesTab() {
     seleniumWebDriverHelper.waitNoExceptions(
-        () -> seleniumWebDriverHelper.waitAndClick(By.xpath(FILES_TAB_XPATH)),
-        WebDriverException.class);
+        () -> seleniumWebDriverHelper.waitAndClick(By.id(FILES_TAB_ID)), WebDriverException.class);
   }
 
   public void waitFilesTab() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(FILES_TAB_XPATH));
+    seleniumWebDriverHelper.waitVisibility(By.id(FILES_TAB_ID));
   }
 
   public void waitProjectAreaOpened() {
@@ -100,7 +99,7 @@ public class TheiaProjectTree {
 
   public void waitItem(String itemPath) {
     String itemId = getProjectItemId(itemPath);
-    seleniumWebDriverHelper.waitVisibility(By.id(itemId));
+    seleniumWebDriverHelper.waitVisibility(By.id(itemId), ELEMENT_TIMEOUT_SEC);
   }
 
   public void waitItemDisappearance(String itemPath) {

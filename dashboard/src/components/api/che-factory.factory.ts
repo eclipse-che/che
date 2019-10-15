@@ -97,7 +97,7 @@ export class CheFactory {
   _getPageFromResponse(data: any, headersLink: any): any {
     let links = new Map();
     if (!headersLink) {
-      // todo remove it after adding headers paging links on server side
+      // TODO remove it after adding headers paging links on server side
       let user = this.cheUser.getUser();
       if (!this.itemsPerPage || !user) {
         return {factories: data};

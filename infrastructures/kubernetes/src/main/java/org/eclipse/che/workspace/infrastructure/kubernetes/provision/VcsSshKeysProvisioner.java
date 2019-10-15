@@ -12,6 +12,8 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
@@ -25,11 +27,13 @@ import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.ssh.server.SshManager;
@@ -95,31 +99,40 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
       throws InfrastructureException {
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
+    List<SshPairImpl> sshPairs = emptyList();
     try {
-      List<SshPairImpl> sshPairs = sshManager.getPairs(identity.getOwnerId(), "vcs");
-      if (sshPairs.isEmpty()) {
+      sshPairs = sshManager.getPairs(identity.getOwnerId(), "vcs");
+    } catch (ServerException e) {
+      LOG.warn("Unable to get SSH Keys. Cause: {}", e.getMessage());
+      return;
+    }
+    if (sshPairs.isEmpty()) {
+      try {
+        sshPairs =
+            singletonList(
+                sshManager.generatePair(
+                    identity.getOwnerId(), "vcs", "default-" + new Date().getTime()));
+      } catch (ServerException | ConflictException e) {
+        LOG.warn("Unable to generate the initial SSH key. Cause: {}", e.getMessage());
         return;
       }
-
-      StringBuilder sshConfigData = new StringBuilder();
-
-      for (SshPair sshPair : sshPairs) {
-        doProvisionSshKey(sshPair, k8sEnv, identity.getWorkspaceId());
-
-        sshConfigData.append(buildConfig(sshPair.getName()));
-      }
-
-      String sshConfigMapName = identity.getWorkspaceId() + SSH_CONFIG_MAP_NAME_SUFFIX;
-      doProvisionSshConfig(sshConfigMapName, sshConfigData.toString(), k8sEnv);
-    } catch (ServerException e) {
-      LOG.warn("Unable get SSH Keys. Cause: %s", e.getMessage(), e);
     }
+
+    StringBuilder sshConfigData = new StringBuilder();
+    for (SshPair sshPair : sshPairs) {
+      doProvisionSshKey(sshPair, k8sEnv, identity.getWorkspaceId());
+      sshConfigData.append(buildConfig(sshPair.getName()));
+    }
+
+    String sshConfigMapName = identity.getWorkspaceId() + SSH_CONFIG_MAP_NAME_SUFFIX;
+    doProvisionSshConfig(sshConfigMapName, sshConfigData.toString(), k8sEnv);
   }
 
   private void doProvisionSshKey(SshPair sshPair, KubernetesEnvironment k8sEnv, String wsId) {
     if (isNullOrEmpty(sshPair.getName()) || isNullOrEmpty(sshPair.getPrivateKey())) {
       return;
     }
+    String validNameForSecret = getValidNameForSecret(sshPair.getName());
     Secret secret =
         new SecretBuilder()
             .addToData(
@@ -127,7 +140,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
                 Base64.getEncoder().encodeToString(sshPair.getPrivateKey().getBytes()))
             .withType(SECRET_TYPE_SSH)
             .withNewMetadata()
-            .withName(wsId + "-" + getValidNameForSecret(sshPair.getName()))
+            .withName(wsId + "-" + validNameForSecret)
             .endMetadata()
             .build();
 
@@ -137,7 +150,8 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
         .getPodsData()
         .values()
         .forEach(
-            p -> mountSshKeySecret(secret.getMetadata().getName(), sshPair.getName(), p.getSpec()));
+            p ->
+                mountSshKeySecret(secret.getMetadata().getName(), validNameForSecret, p.getSpec()));
   }
 
   private void mountSshKeySecret(String secretName, String sshKeyName, PodSpec podSpec) {
@@ -146,7 +160,11 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
         .add(
             new VolumeBuilder()
                 .withName(secretName)
-                .withSecret(new SecretVolumeSourceBuilder().withSecretName(secretName).build())
+                .withSecret(
+                    new SecretVolumeSourceBuilder()
+                        .withSecretName(secretName)
+                        .withDefaultMode(0600)
+                        .build())
                 .build());
     List<Container> containers = podSpec.getContainers();
     containers.forEach(
@@ -205,13 +223,15 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
   }
 
   /**
-   * Returns the ssh configuration entry which includes host and identity file location
+   * Returns the ssh configuration entry which includes host, identity file location and Host Key
+   * checking policy
    *
    * <p>Example of provided configuration:
    *
    * <pre>
    * host github.com
    * IdentityFile /etc/ssh/github-com/ssh-privatekey
+   * StrictHostKeyChecking = no
    * </pre>
    *
    * or
@@ -219,6 +239,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
    * <pre>
    * host *
    * IdentityFile /etc/ssh/default-123456/ssh-privatekey
+   * StrictHostKeyChecking = no
    * </pre>
    *
    * @param name the of key given during generate for vcs service we will consider it as host of
@@ -228,7 +249,8 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
    *     provide own name. Details see here:
    *     https://github.com/eclipse/che/issues/13494#issuecomment-512761661. Note: behavior can be
    *     improved in 7.x releases after 7.0.0
-   * @return the ssh configuration which include host and identity file location
+   * @return the ssh configuration which include host, identity file location and Host Key checking
+   *     policy
    */
   private String buildConfig(@NotNull String name) {
     String host = name.startsWith("default-") ? "*" : name;
@@ -239,6 +261,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
         + getValidNameForSecret(name)
         + "/"
         + SSH_PRIVATE_KEY
+        + "\nStrictHostKeyChecking = no"
         + "\n";
   }
 

@@ -32,7 +32,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.RuntimeServerB
  *
  * @author Sergii Leshchenko
  * @author Alexander Garagatyi
- * @see OpenShiftExternalServerExposer
  * @see Annotations
  */
 public class OpenShiftServerResolver extends KubernetesServerResolver {
@@ -40,7 +39,7 @@ public class OpenShiftServerResolver extends KubernetesServerResolver {
   private final Multimap<String, Route> routes;
 
   public OpenShiftServerResolver(List<Service> services, List<Route> routes) {
-    super(services, Collections.emptyList());
+    super(null, services, Collections.emptyList());
 
     this.routes = ArrayListMultimap.create();
     for (Route route : routes) {

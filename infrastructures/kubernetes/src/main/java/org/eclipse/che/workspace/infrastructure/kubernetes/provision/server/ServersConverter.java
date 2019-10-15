@@ -27,7 +27,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
 
@@ -44,14 +44,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureS
 public class ServersConverter<T extends KubernetesEnvironment>
     implements ConfigurationProvisioner<T> {
 
-  private final ExternalServerExposerStrategy<T> externalServerExposerStrategy;
+  private final ExternalServerExposer<T> externalServerExposer;
   private final SecureServerExposerFactoryProvider<T> secureServerExposerFactoryProvider;
 
   @Inject
   public ServersConverter(
-      ExternalServerExposerStrategy<T> externalServerExposerStrategy,
+      ExternalServerExposer<T> externalServerExposer,
       SecureServerExposerFactoryProvider<T> secureServerExposerFactoryProvider) {
-    this.externalServerExposerStrategy = externalServerExposerStrategy;
+    this.externalServerExposer = externalServerExposer;
     this.secureServerExposerFactoryProvider = secureServerExposerFactoryProvider;
   }
 
@@ -72,7 +72,7 @@ public class ServersConverter<T extends KubernetesEnvironment>
         if (!machineConfig.getServers().isEmpty()) {
           KubernetesServerExposer kubernetesServerExposer =
               new KubernetesServerExposer<>(
-                  externalServerExposerStrategy,
+                  externalServerExposer,
                   secureServerExposer,
                   machineName,
                   podConfig,

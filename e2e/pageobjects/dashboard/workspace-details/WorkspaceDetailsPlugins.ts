@@ -10,38 +10,48 @@
 import { DriverHelper } from '../../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
 import 'reflect-metadata';
-import { CLASSES } from '../../../inversify.types';
+import { CLASSES, TYPES } from '../../../inversify.types';
 import { TestConstants } from '../../../TestConstants';
 import { By } from 'selenium-webdriver';
 import { WorkspaceDetails } from './WorkspaceDetails';
-import { TestWorkspaceUtil, WorkspaceStatus } from '../../../utils/workspace/TestWorkspaceUtil';
+import { ITestWorkspaceUtil } from '../../../utils/workspace/ITestWorkspaceUtil';
+import { WorkspaceStatus } from '../../../utils/workspace/WorkspaceStatus';
+import { Logger } from '../../../utils/Logger';
 
 
 @injectable()
 export class WorkspaceDetailsPlugins {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.WorkspaceDetails) private readonly workspaceDetails: WorkspaceDetails,
-        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil) { }
+        @inject(TYPES.WorkspaceUtil) private readonly testWorkspaceUtil: ITestWorkspaceUtil) { }
 
     async waitPluginListItem(pluginName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`WorkspaceDetailsPlugins.waitPluginListItem ${pluginName}`);
+
         const pluginListItemLocator: By = By.css(this.getPluginListItemCssLocator(pluginName));
 
         await this.driverHelper.waitVisibility(pluginListItemLocator, timeout);
     }
 
     async enablePlugin(pluginName: string, pluginVersion?: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`WorkspaceDetailsPlugins.enablePlugin ${pluginName}:${pluginVersion}`);
+
         await this.waitPluginDisabling(pluginName, pluginVersion, timeout);
         await this.clickOnPluginListItemSwitcher(pluginName, pluginVersion, timeout);
         await this.waitPluginEnabling(pluginName, pluginVersion, timeout);
     }
 
     async disablePlugin(pluginName: string, pluginVersion?: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`WorkspaceDetailsPlugins.disablePlugin ${pluginName}:${pluginVersion}`);
+
         await this.waitPluginEnabling(pluginName, pluginVersion, timeout);
         await this.clickOnPluginListItemSwitcher(pluginName, pluginVersion, timeout);
         await this.waitPluginDisabling(pluginName, pluginVersion, timeout);
     }
 
     async addPluginAndOpenWorkspace(namespace: string, workspaceName: string, pluginName: string, pluginId: string, pluginVersion?: string) {
+        Logger.debug(`WorkspaceDetailsPlugins.addPluginAndOpenWorkspace ${namespace}/${workspaceName} plugin: ${pluginName}:${pluginVersion}`);
+
         await this.workspaceDetails.selectTab('Plugins');
         await this.enablePlugin(pluginName, pluginVersion);
         await this.workspaceDetails.saveChanges();

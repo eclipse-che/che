@@ -46,6 +46,8 @@ export class ListAgentsController {
     });
   }
 
+  $onInit(): void { }
+
   buildAgentsList(): void {
     this.agentsList = [];
     this.allAgents = this.cheAgent.getAgents();

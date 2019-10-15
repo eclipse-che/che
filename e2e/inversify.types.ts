@@ -1,3 +1,4 @@
+
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
  *
@@ -10,7 +11,9 @@
 
 const TYPES = {
     Driver: Symbol.for('Driver'),
-    LoginPage: Symbol.for('LoginPage')
+    CheLogin: Symbol.for('CheLogin'),
+    OcpLogin: Symbol.for('OcpLogin'),
+    WorkspaceUtil: Symbol.for('WorkspaceUtil')
 };
 
 const CLASSES = {
@@ -21,7 +24,6 @@ const CLASSES = {
     WorkspaceDetails: 'WorkspaceDetails',
     WorkspaceDetailsPlugins: 'WorkspaceDetailsPlugins',
     Ide: 'Ide',
-    TestWorkspaceUtil: 'TestWorkspaceUtil',
     ProjectTree: 'ProjectTree',
     Editor: 'Editor',
     TopMenu: 'TopMenu',
@@ -31,7 +33,12 @@ const CLASSES = {
     RightToolbar: 'RightToolbar',
     Terminal: 'Terminal',
     DebugView: 'DebugView',
-    WarningDialog: 'WarningDialog'
+    WarningDialog: 'WarningDialog',
+    ScreenCatcher: 'ScreenCatcher',
+    OcpLoginPage: 'OcpLoginPage',
+    OcpWebConsolePage: 'OcpWebConsolePage',
+    OpenWorkspaceWidget: 'OpenWorkspaceWidget',
+    ContextMenu: 'ContextMenu'
 };
 
 export { TYPES, CLASSES };

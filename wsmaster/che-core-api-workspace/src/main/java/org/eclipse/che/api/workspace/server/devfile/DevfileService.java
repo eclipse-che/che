@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.server.devfile;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -52,7 +53,7 @@ public class DevfileService extends Service {
   })
   public Response getSchema() throws ServerException {
     try {
-      return Response.ok(schemaCachedProvider.getSchemaContent()).build();
+      return Response.ok(schemaCachedProvider.getSchemaContent(CURRENT_API_VERSION)).build();
     } catch (IOException e) {
       throw new ServerException(e);
     }

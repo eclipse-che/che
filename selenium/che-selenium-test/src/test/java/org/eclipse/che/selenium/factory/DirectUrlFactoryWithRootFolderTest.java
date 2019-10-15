@@ -90,14 +90,13 @@ public class DirectUrlFactoryWithRootFolderTest {
     theiaIde.switchToIdeFrame();
     theiaIde.waitTheiaIde();
     theiaIde.waitLoaderInvisibility();
-    theiaIde.waitNotificationEqualsTo("Che Workspace: Finished cloning projects.");
     theiaIde.waitNotificationDisappearance(
         "Che Workspace: Finished cloning projects.", UPDATING_PROJECT_TIMEOUT_SEC);
 
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
-    theiaProjectTree.waitProjectsRootItem();
     theiaProjectTree.waitItem(repositoryName);
+    theiaIde.waitAllNotificationsClosed();
     theiaProjectTree.expandItem(repositoryName);
 
     expectedItemsAfterCloning.forEach(

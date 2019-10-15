@@ -12,6 +12,7 @@ import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { By, Key } from 'selenium-webdriver';
 import { Ide } from './Ide';
+import { Logger } from '../../utils/Logger';
 
 
 @injectable()
@@ -20,10 +21,14 @@ export class DebugView {
         @inject(CLASSES.Ide) private readonly ide: Ide) { }
 
     async clickOnDebugConfigurationDropDown() {
+        Logger.debug('DebugView.clickOnDebugConfigurationDropDown');
+
         await this.driverHelper.waitAndClick(By.css('select.debug-configuration'));
     }
 
     async clickOnDebugConfigurationItem(itemText: string) {
+        Logger.debug(`DebugView.clickOnDebugConfigurationItem "${itemText}"`);
+
         const configurationItemLocator: By = By.xpath(`//select[@class='debug-configuration']//option[text()=\'${itemText}\']`);
 
         await this.driverHelper.waitAndClick(configurationItemLocator);
@@ -31,6 +36,8 @@ export class DebugView {
     }
 
     async clickOnRunDebugButton() {
+        Logger.debug('DebugView.clickOnRunDebugButton');
+
         const runDebugButtonLocator: By = By.xpath('//span[@title=\'Start Debugging\']');
 
         await this.driverHelper.waitAndClick(runDebugButtonLocator);

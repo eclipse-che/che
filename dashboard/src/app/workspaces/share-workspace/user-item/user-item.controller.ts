@@ -36,6 +36,8 @@ export class UserItemController {
     this.$mdDialog = $mdDialog;
   }
 
+  $onInit(): void { }
+
   /**
    * Call user permissions removal. Show the dialog.
    */

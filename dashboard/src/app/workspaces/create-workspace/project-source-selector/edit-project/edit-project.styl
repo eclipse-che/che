@@ -1,32 +1,22 @@
 .edit-project
-
   md-divider
-    border-top-color $box-border-color !important
-    margin 0
-    margin-top 21px
-
-.edit-project
-
+    border-top-color $box-border-color
   .edit-project-button
+    button
+      margin 6px
 
-    che-button-primary button.md-button.che-button.md-accent,
-    che-button-cancel-flat button.md-button.che-button.md-accent,
-    che-button-danger button.md-button.md-danger-theme.md-accent
-      padding-top 2px
-      margin 6px !important
+    che-button-cancel-flat,
+    che-button-danger
+      button
+        background-color $white-color !important
+        box-shadow none !important
+        border none
+        &[disabled]
+          color $disabled-color
 
-    che-button-cancel-flat button.md-button.che-button.md-accent,
-    che-button-danger button.md-button.md-danger-theme.md-accent
-      background-color $che-white-color !important
-      border none !important
-      box-shadow none !important
+    che-button-cancel-flat button
+      color $grey-input-label-color
 
-      &[disabled] span
-        color $disabled-color !important
-
-    che-button-cancel-flat button.md-button.che-button.md-accent span
-      color $grey-input-label-color !important
-
-    che-button-danger button.md-button.md-danger-theme.md-accent span
+    che-button-danger button
       color $error-color !important
 

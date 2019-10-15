@@ -57,6 +57,11 @@ export class EditVariableDialogController {
     }
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Check if name is unique.
    *

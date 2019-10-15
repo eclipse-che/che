@@ -24,8 +24,10 @@ export class DevfileSelectorController {
   private devfileRegistry: DevfileRegistry;
   private cheWorkspace: CheWorkspace;
   private devfiles: Array<IDevfileMetaData>;
+  devfileOrderBy: string;
   onDevfileSelect: Function;
   selectedDevfile: any;
+  stackName: string;
 
   /**
    * Default constructor that is using resource injection
@@ -33,6 +35,10 @@ export class DevfileSelectorController {
   constructor(devfileRegistry: DevfileRegistry, cheWorkspace: CheWorkspace) {
     this.devfileRegistry = devfileRegistry;
     this.cheWorkspace = cheWorkspace;
+    this.devfileOrderBy = 'displayName';
+  }
+
+  $onInit(): void {
     this.loadDevfiles();
   }
 
@@ -49,7 +55,8 @@ export class DevfileSelectorController {
 
   devfileOnClick(devfile: any): void {
     this.selectedDevfile = devfile;
-    
+    this.stackName = devfile.displayName;
+
     let location = this.cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
 
     let devfileContent = this.devfileRegistry.getDevfile(location, devfile.links.self);

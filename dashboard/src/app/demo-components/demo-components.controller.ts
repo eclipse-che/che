@@ -67,12 +67,6 @@ export class DemoComponentsController {
     this.$location = $location;
     this.cheNotification = cheNotification;
 
-    const tab = $location.search().tab;
-    if (Tab[tab]) {
-      this.selectedIndex = parseInt(Tab[tab], 10);
-    } else {
-      this.selectedIndex = Tab.Font;
-    }
     this.placement = {
       options: [
         'top',
@@ -105,6 +99,16 @@ export class DemoComponentsController {
         orderNumber: 1
       }]
     };
+  }
+
+  $onInit(): void {
+    const tab = this.$location.search().tab;
+    if (Tab[tab]) {
+      this.selectedIndex = parseInt(Tab[tab], 10);
+    } else {
+      this.selectedIndex = Tab.Font;
+    }
+
     this.init();
   }
 

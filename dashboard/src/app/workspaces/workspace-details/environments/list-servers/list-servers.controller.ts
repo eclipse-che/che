@@ -55,7 +55,9 @@ export class ListServersController {
     this.$mdDialog = $mdDialog;
     this.lodash = lodash;
     this.confirmDialogService = confirmDialogService;
+  }
 
+  $onInit(): void {
     this.buildServersList();
   }
 

@@ -33,6 +33,8 @@ export class ExportWorkspaceController {
     this.$mdDialog = $mdDialog;
   }
 
+  $onInit(): void { }
+
   showExport($event: MouseEvent, destination: string) {
     this.$mdDialog.show({
       targetEvent: $event,
@@ -49,6 +51,5 @@ export class ExportWorkspaceController {
       templateUrl: 'app/workspaces/workspace-details/export-workspace/dialog/export-tab-dialog.html'
     });
   }
-
 
 }

@@ -17,7 +17,7 @@
     <parent>
         <artifactId>integration-tests-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.0.0-rc-5.0-SNAPSHOT</version>
+        <version>7.3.0-SNAPSHOT</version>
     </parent>
     <artifactId>postgresql-tck</artifactId>
     <packaging>jar</packaging>
@@ -78,17 +78,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-account</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-installer</artifactId>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-installer</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -231,7 +220,6 @@
                                     che-core-api-user,
                                     che-core-api-ssh,
                                     che-core-api-workspace,
-                                    che-core-api-installer,
                                     infrastructure-kubernetes</includeArtifactIds>
                             <includeScope>test</includeScope>
                             <includeClassifiers>tests</includeClassifiers>

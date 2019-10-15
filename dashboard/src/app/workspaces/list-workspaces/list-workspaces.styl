@@ -7,6 +7,11 @@
 .workspace-resources-locked
   background-color red
 
+.che-list che-workspace-item
+  @-moz-document url-prefix()
+    .che-list-item
+      height 40px
+
 .che-list che-workspace-item:not(:last-of-type) .che-list-item
   border-bottom 1px solid $list-separator-color
 

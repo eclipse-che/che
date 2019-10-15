@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-infrastructures-parent</artifactId>
         <groupId>org.eclipse.che.infrastructure</groupId>
-        <version>7.0.0-rc-5.0-SNAPSHOT</version>
+        <version>7.3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>infrastructure-openshift</artifactId>
@@ -60,12 +60,12 @@
             <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-core</artifactId>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-installer</artifactId>
+            <artifactId>che-core-api-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -86,6 +86,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-inject</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

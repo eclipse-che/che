@@ -39,6 +39,8 @@ export class CheEditorController {
 
   static $inject = ['$timeout'];
 
+  $timeout: ng.ITimeoutService;
+
   setEditorValue: (content: string) => void;
   /**
    * Editor options object.
@@ -57,7 +59,7 @@ export class CheEditorController {
   /**
    * Editor state object.
    */
-  private editorState: IEditorState = {isValid: true, errors: []};
+  private editorState: IEditorState;
   /**
    * Custom validator callback.
    */
@@ -77,19 +79,24 @@ export class CheEditorController {
   /**
    * Cursor position.
    */
-  private cursorPos: ICursorPos = {line: 0, ch: 0};
+  private cursorPos: ICursorPos = { line: 0, ch: 0 };
 
   /**
    * Default constructor that is using resource injection
    */
   constructor($timeout: ng.ITimeoutService) {
+    this.$timeout = $timeout;
+  }
+
+  $onInit(): void {
+    this.editorState = { isValid: true, errors: [] };
     this.editorOptions = {
       mode: angular.isString(this.editorMode) ? this.editorMode : 'application/json',
       readOnly: this.editorReadOnly ? this.editorReadOnly : false,
       lineWrapping: true,
       lineNumbers: true,
       onLoad: (editor: IEditor) => {
-        $timeout(() => {
+        this.$timeout(() => {
           //to avoid Ctrl+Z clear the content
           editor.getDoc().clearHistory();
           editor.refresh();
@@ -99,14 +106,14 @@ export class CheEditorController {
           doc.setValue(content);
         };
         editor.on('change', () => {
-          const {line, ch} = editor.getCursor();
+          const { line, ch } = editor.getCursor();
           if (line === 0 && ch === 0) {
             editor.setCursor(this.cursorPos);
           } else {
             this.cursorPos.ch = ch;
             this.cursorPos.line = line;
           }
-          $timeout(() => {
+          this.$timeout(() => {
             this.editorState.errors.length = 0;
             let editorErrors: Array<{ id: string; message: string }> = doc.getAllMarks().filter((mark: any) => {
               return mark.className && mark.className.includes('error');
@@ -120,7 +127,7 @@ export class CheEditorController {
               } else {
                 message = 'Parse error';
               }
-              return {id: mark.id, message: message};
+              return { id: mark.id, message: message };
             });
             editorErrors.forEach((editorError: { id: string; message: string }) => {
               if (!editorError || !editorError.message) {
@@ -142,7 +149,7 @@ export class CheEditorController {
             }
             this.editorState.isValid = this.editorState.errors.length === 0;
             if (angular.isFunction(this.onContentChange)) {
-              this.onContentChange({editorState: this.editorState});
+              this.onContentChange({ editorState: this.editorState });
             }
 
             this.editorForm.$setValidity('custom-validator', this.editorState.isValid, null);

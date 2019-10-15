@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa;
 
 import com.google.inject.TypeLiteral;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.workspace.server.devfile.SerializableConverter;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
@@ -91,6 +92,7 @@ public class JpaTckModule extends TckModule {
                 org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl.class)
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
+            .addClass(SerializableConverter.class)
             .setExceptionHandler(H2ExceptionHandler.class)
             .build());
 

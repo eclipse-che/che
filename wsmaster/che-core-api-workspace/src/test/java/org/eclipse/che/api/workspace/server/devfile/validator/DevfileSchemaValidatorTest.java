@@ -16,6 +16,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
+import org.eclipse.che.api.workspace.server.devfile.Constants;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.testng.annotations.BeforeClass;
@@ -64,7 +65,9 @@ public class DevfileSchemaValidatorTest {
       {"dockerimage_component/devfile_dockerimage_component_without_entry_point.yaml"},
       {"editor_plugin_component/devfile_editor_component_with_custom_registry.yaml"},
       {"editor_plugin_component/devfile_editor_plugins_components_with_memory_limit.yaml"},
-      {"editor_plugin_component/devfile_plugin_component_with_reference.yaml"}
+      {"editor_plugin_component/devfile_plugin_component_with_reference.yaml"},
+      {"devfile/devfile_just_generatename.yaml"},
+      {"devfile/devfile_name_and_generatename.yaml"}
     };
   }
 
@@ -83,13 +86,31 @@ public class DevfileSchemaValidatorTest {
     fail("DevfileFormatException expected to be thrown but is was not");
   }
 
+  @Test
+  public void shouldThrowExceptionWhenDevfileHasUnsupportedApiVersion() throws Exception {
+    try {
+      String devfile =
+          "---\n" + "apiVersion: 111.111\n" + "metadata:\n" + "  name: test-invalid-apiversion\n";
+      schemaValidator.validateYaml(devfile);
+    } catch (DevfileFormatException e) {
+      assertEquals(
+          e.getMessage(),
+          "Version '111.111' of the devfile is not supported. "
+              + "Supported versions are '"
+              + Constants.SUPPORTED_VERSIONS
+              + "'.");
+      return;
+    }
+    fail("DevfileFormatException expected to be thrown but is was not");
+  }
+
   @DataProvider
   public Object[][] invalidDevfiles() {
     return new Object[][] {
       // Devfile model testing
       {
         "devfile/devfile_empty_metadata.yaml",
-        "(/metadata):The object must have a property whose name is \"name\"."
+        "At least one of the following sets of problems must be resolved.: [(/metadata):The object must have a property whose name is \"name\".(/metadata):The object must have a property whose name is \"generateName\".]"
       },
       {
         "devfile/devfile_null_metadata.yaml",
@@ -100,8 +121,8 @@ public class DevfileSchemaValidatorTest {
         "The object must have a property whose name is \"metadata\"."
       },
       {
-        "devfile/devfile_missing_name.yaml",
-        "(/metadata/something):The object must not have a property whose name is \"something\".(/metadata):The object must have a property whose name is \"name\"."
+        "devfile/devfile_missing_name_and_generatename.yaml",
+        "(/metadata/something):The object must not have a property whose name is \"something\".At least one of the following sets of problems must be resolved.: [(/metadata):The object must have a property whose name is \"name\".(/metadata):The object must have a property whose name is \"generateName\".]"
       },
       {
         "devfile/devfile_missing_api_version.yaml",

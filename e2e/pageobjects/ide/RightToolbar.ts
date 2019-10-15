@@ -12,16 +12,21 @@ import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../TestConstants';
 import { By } from 'selenium-webdriver';
+import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class RightToolbar {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitToolbar(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('RightToolbar.waitToolbar');
+
         await this.driverHelper.waitVisibility(By.css('div.theia-app-right'), timeout);
     }
 
     async clickOnToolIcon(iconTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`RightToolbar.clickOnToolIcon "${iconTitle}"`);
+
         const toolIconLocator: By = By.css(`div.theia-app-right .p-TabBar-content li[title='${iconTitle}']`);
 
         await this.driverHelper.waitAndClick(toolIconLocator, timeout);

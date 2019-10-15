@@ -90,15 +90,13 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     theiaIde.switchToIdeFrame();
     theiaIde.waitTheiaIde();
     theiaIde.waitLoaderInvisibility();
-    theiaIde.waitNotificationEqualsTo("Che Workspace: Finished cloning projects.");
     theiaIde.waitNotificationDisappearance(
         "Che Workspace: Finished cloning projects.", UPDATING_PROJECT_TIMEOUT_SEC);
 
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
-    theiaProjectTree.waitProjectsRootItem();
-
     theiaProjectTree.waitItem(repositoryName);
+    theiaIde.waitAllNotificationsClosed();
     theiaProjectTree.expandItem(repositoryName);
     theiaProjectTree.expandItem(repositoryName + "/my-lib");
     theiaProjectTree.waitItem(repositoryName + "/my-lib/src");

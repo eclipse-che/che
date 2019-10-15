@@ -251,11 +251,11 @@ public class UniqueWorkspacePVCStrategyTest {
     verify(pvcs, never()).delete(any());
   }
 
-  private static PersistentVolumeClaim newPVC(String name) {
+  static PersistentVolumeClaim newPVC(String name) {
     return newPVC(name, new HashMap<>());
   }
 
-  private static PersistentVolumeClaim newPVC(String name, Map<String, String> labels) {
+  static PersistentVolumeClaim newPVC(String name, Map<String, String> labels) {
     return new PersistentVolumeClaimBuilder()
         .withNewMetadata()
         .withName(name)

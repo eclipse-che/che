@@ -40,6 +40,11 @@ export class FactoryActionDialogEditController {
     this.isFile = angular.isDefined(this.selectedValue.file);
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Callback of the edit button of the dialog.
    */

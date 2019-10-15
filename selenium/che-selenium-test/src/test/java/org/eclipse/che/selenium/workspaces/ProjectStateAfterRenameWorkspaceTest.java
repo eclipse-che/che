@@ -11,100 +11,102 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
-import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 
 import com.google.inject.Inject;
-import java.net.URL;
-import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import java.util.Collections;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.eclipse.che.selenium.pageobject.theia.TheiaEditor;
+import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
+import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
-/** TODO rewrite to use che7 workspace */
-@Test(groups = UNDER_REPAIR)
 public class ProjectStateAfterRenameWorkspaceTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
-  private static final String WORKSPACE_NEW_NAME = NameGenerator.generate("rename_ws", 4);
+  private static final String WORKSPACE_NAME =
+      generate(ProjectStateAfterRenameWorkspaceTest.class.getSimpleName(), 5);
+  private static final String WORKSPACE_NEW_NAME = generate("rename_ws", 4);
+  private static final String PATH_TO_POM_FILE = CONSOLE_JAVA_SIMPLE + "/" + "pom.xml";
+  private static final String PATH_TO_README_FILE = CONSOLE_JAVA_SIMPLE + "/" + "README.md";
 
-  @Inject private TestWorkspace testWorkspace;
-  @Inject private Ide ide;
-  @Inject private ProjectExplorer projectExplorer;
-  @Inject private CodenvyEditor editor;
   @Inject private Dashboard dashboard;
+  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private DefaultTestUser defaultTestUser;
+  @Inject private CreateWorkspaceHelper createWorkspaceHelper;
+  @Inject private TheiaIde theiaIde;
+  @Inject private TheiaProjectTree theiaProjectTree;
+  @Inject private TheiaEditor theiaEditor;
   @Inject private WorkspaceDetails workspaceDetails;
-  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
-  @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private Workspaces workspaces;
   @Inject private WorkspaceOverview workspaceOverview;
 
   @BeforeClass
   public void setUp() throws Exception {
-    URL resource =
-        ProjectStateAfterRenameWorkspaceTest.this.getClass().getResource("/projects/guess-project");
-    testProjectServiceClient.importProject(
-        testWorkspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
-    ide.open(testWorkspace);
+    dashboard.open();
+    createWorkspaceHelper.createAndStartWorkspaceFromStack(
+        Devfile.JAVA_MAVEN, WORKSPACE_NAME, Collections.emptyList(), null);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    testWorkspaceServiceClient.delete(WORKSPACE_NEW_NAME, testWorkspace.getOwner().getName());
+    workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
+    workspaceServiceClient.delete(WORKSPACE_NEW_NAME, defaultTestUser.getName());
   }
 
   @Test
-  public void checkProjectAfterRenameWs() throws Exception {
-    ide.waitOpenedWorkspaceIsReadyToUse();
-    projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
-    projectExplorer.waitItem(
-        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
-    projectExplorer.openItemByPath(
-        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActive();
+  public void checkProjectAfterRenameWs() {
+    theiaIde.waitOpenedWorkspaceIsReadyToUse();
+
+    theiaProjectTree.waitFilesTab();
+    theiaProjectTree.clickOnFilesTab();
+    theiaProjectTree.waitProjectAreaOpened();
+    theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
+    theiaIde.waitAllNotificationsClosed();
+
+    openFilesInEditor();
+    checkFilesAreOpened();
 
     // go to dashboard and rename ws
     dashboard.open();
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
-
-    workspaces.selectWorkspaceItemName(testWorkspace.getName());
+    workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
     workspaceOverview.enterNameWorkspace(WORKSPACE_NEW_NAME);
     workspaceDetails.clickOnSaveChangesBtn();
     dashboard.waitNotificationMessage("Workspace updated");
     dashboard.waitNotificationIsClosed();
     workspaceOverview.checkNameWorkspace(WORKSPACE_NEW_NAME);
-
-    // open the IDE, check state of the project
     workspaceDetails.clickOpenInIdeWsBtn();
 
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+    theiaIde.waitOpenedWorkspaceIsReadyToUse();
 
-    ide.waitOpenedWorkspaceIsReadyToUse();
-    projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
-    projectExplorer.waitItem(
-        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitTabIsPresent("index.jsp");
-    editor.waitTabIsPresent("AppController");
-    editor.waitActive();
+    checkFilesAreOpened();
+  }
+
+  private void openFilesInEditor() {
+    theiaProjectTree.expandItem(CONSOLE_JAVA_SIMPLE);
+    theiaProjectTree.waitItem(PATH_TO_POM_FILE);
+    theiaProjectTree.waitItem(PATH_TO_README_FILE);
+
+    theiaProjectTree.openItem(PATH_TO_POM_FILE);
+    theiaProjectTree.openItem(PATH_TO_README_FILE);
+    theiaEditor.waitEditorTab("pom.xml");
+    theiaEditor.waitEditorTab("README.md");
+  }
+
+  private void checkFilesAreOpened() {
+    theiaEditor.waitEditorTab("pom.xml");
+    theiaEditor.waitEditorTab("README.md");
   }
 }

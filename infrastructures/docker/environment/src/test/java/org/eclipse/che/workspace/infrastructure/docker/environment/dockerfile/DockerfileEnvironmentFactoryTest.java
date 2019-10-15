@@ -20,7 +20,6 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.Map;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.environment.*;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -35,7 +34,6 @@ public class DockerfileEnvironmentFactoryTest {
   private static final String MACHINE_NAME = "machine";
 
   @Mock private InternalRecipe recipe;
-  @Mock private InstallerRegistry installerRegistry;
   @Mock private RecipeRetriever recipeRetriever;
   @Mock private MachineConfigsValidator machinesValidator;
   @Mock private MemoryAttributeProvisioner memoryProvisioner;
@@ -45,8 +43,7 @@ public class DockerfileEnvironmentFactoryTest {
   @BeforeMethod
   public void setUp() throws Exception {
     factory =
-        new DockerfileEnvironmentFactory(
-            installerRegistry, recipeRetriever, machinesValidator, memoryProvisioner);
+        new DockerfileEnvironmentFactory(recipeRetriever, machinesValidator, memoryProvisioner);
 
     when(recipe.getType()).thenReturn(DockerfileEnvironment.TYPE);
     when(recipe.getContent()).thenReturn("");

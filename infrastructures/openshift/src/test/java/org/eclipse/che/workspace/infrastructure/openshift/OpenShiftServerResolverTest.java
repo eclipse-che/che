@@ -32,6 +32,8 @@ import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.Serializer;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerResolver;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
@@ -39,6 +41,7 @@ import org.testng.annotations.Test;
  *
  * @author Sergii Leshchenko
  */
+@Listeners(MockitoTestNGListener.class)
 public class OpenShiftServerResolverTest {
 
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");

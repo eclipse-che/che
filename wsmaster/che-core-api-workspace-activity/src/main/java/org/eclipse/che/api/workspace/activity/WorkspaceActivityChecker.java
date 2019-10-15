@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import java.time.Clock;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -32,9 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Is in charge of checking the validity of the workspace activity records. The sole important
- * method is {@link #validate()} which is run on a schedule to periodically check the validity of
- * the records and report the potential error conditions.
+ * Is in charge of checking the validity of the workspace activity records. The important methods
+ * are {@link #expire()} which is run on a schedule to periodically stop the expired workspaces and
+ * {@link #cleanup()} which will try to clean up and reconcile the possibly invalid activity
+ * records.
  *
  * @author Lukas Krejci
  */
@@ -83,15 +85,27 @@ public class WorkspaceActivityChecker {
       initialDelayParameterName = "che.workspace.activity_check_scheduler_delay_s",
       delayParameterName = "che.workspace.activity_check_scheduler_period_s")
   @VisibleForTesting
-  void validate() {
+  void expire() {
     try {
       stopAllExpired();
     } catch (ServerException e) {
       LOG.error(e.getLocalizedMessage(), e);
     }
+  }
 
+  @ScheduleDelay(
+      initialDelayParameterName = "che.workspace.activity_cleanup_scheduler_initial_delay_s",
+      delayParameterName = "che.workspace.activity_cleanup_scheduler_period_s")
+  @VisibleForTesting
+  void cleanup() {
     try {
       checkActivityRecordValidity();
+    } catch (ServerException e) {
+      LOG.error(e.getLocalizedMessage(), e);
+    }
+
+    try {
+      reconcileActivityStatuses();
     } catch (ServerException e) {
       LOG.error(e.getLocalizedMessage(), e);
     }
@@ -149,6 +163,29 @@ public class WorkspaceActivityChecker {
         boolean noLastRunningTime = rectifyLastRunningTime(activity, now, latestActivityTime);
 
         rectifyExpirationTime(activity, now, noLastRunningTime, latestActivityTime, idleTimeout);
+      }
+    }
+  }
+
+  /**
+   * Makes sure that any activity records are rectified if they do not reflect the true state of the
+   * workspace anymore.
+   *
+   * @throws ServerException or error
+   */
+  private void reconcileActivityStatuses() throws ServerException {
+    for (WorkspaceActivity a : Pages.iterateLazily(activityDao::getAll, 200)) {
+      WorkspaceStatus status = workspaceRuntimes.getStatus(a.getWorkspaceId());
+      if (a.getStatus() != status) {
+        if (LOG.isWarnEnabled()) {
+          LOG.warn(
+              "Activity record for workspace {} was registering {} status while the workspace was {} in reality."
+                  + " Rectifying the activity record to reflect the true state of the workspace.",
+              a.getWorkspaceId(),
+              a.getStatus(),
+              status);
+        }
+        activityDao.setStatusChangeTime(a.getWorkspaceId(), status, clock.millis());
       }
     }
   }
@@ -337,7 +374,7 @@ public class WorkspaceActivityChecker {
   /**
    * Makes sure the activity of a running workspace has a last running time. The activity won't have
    * a last running time very shortly after it was found running by the runtime before our event
-   * handler updated the activity record. If the schedule of the {@link #validate()} method precedes
+   * handler updated the activity record. If the schedule of the {@link #cleanup()} method precedes
    * or coincides with the event handler we might not see the value. Otherwise this can
    * theoretically also happen when the server is stopped at an unfortunate point in time while the
    * workspace is starting and/or running and before the event handler had a chance of updating the
@@ -362,7 +399,7 @@ public class WorkspaceActivityChecker {
       LOG.warn(
           "Workspace '{}' has been found running yet there is an activity on it newer than the"
               + " last running time. This should not happen. Resetting the last running time to"
-              + " the newest activity time. The activity record is this: ",
+              + " the newest activity time. The activity record is this: {}",
           wsId,
           activity.toString());
       activityDao.setStatusChangeTime(wsId, WorkspaceStatus.RUNNING, latestActivityTime);

@@ -102,6 +102,9 @@ export class CreateWorkspaceController {
    * Hide progress loader if <code>true</code>.
    */
   private hideLoader: boolean;
+
+  private stackName: string;
+
   /**
    * Default constructor that is using resource injection
    */
@@ -161,6 +164,11 @@ export class CreateWorkspaceController {
         orderNumber: 1
       }]
     };
+  }
+
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   /**
@@ -299,7 +307,7 @@ export class CreateWorkspaceController {
     // update workspace name
     let devfileSource = angular.copy(this.selectedDevfile);
     devfileSource.metadata.name = this.workspaceName;
-    return this.createWorkspaceSvc.createWorkspaceFromDevfile(devfileSource, null);
+    return this.createWorkspaceSvc.createWorkspaceFromDevfile(devfileSource, {stackName: this.stackName});
   }
 
   /**

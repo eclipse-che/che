@@ -33,6 +33,7 @@ export class WorkspaceDetailsOverviewController {
 
   onChange: Function;
 
+  private $scope: ng.IScope;
   private $q: ng.IQService;
   private $route: ng.route.IRouteService;
   private $location: ng.ILocationService;
@@ -60,6 +61,7 @@ export class WorkspaceDetailsOverviewController {
   constructor($scope: ng.IScope, $q: ng.IQService, $route: ng.route.IRouteService, $timeout: ng.ITimeoutService, $location: ng.ILocationService,
               cheWorkspace: CheWorkspace, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService,
               namespaceSelectorSvc: NamespaceSelectorSvc, workspaceDetailsService: WorkspaceDetailsService) {
+    this.$scope = $scope;
     this.$q = $q;
     this.$route = $route;
     this.$timeout = $timeout;
@@ -69,13 +71,14 @@ export class WorkspaceDetailsOverviewController {
     this.confirmDialogService = confirmDialogService;
     this.namespaceSelectorSvc = namespaceSelectorSvc;
     this.workspaceDetailsService = workspaceDetailsService;
+  }
 
-    const routeParams = $route.current.params;
+  $onInit(): void {
+    const routeParams = this.$route.current.params;
     this.namespaceId = routeParams.namespace;
     this.workspaceName = routeParams.workspaceName;
-    this.init();
 
-    const deRegistrationFn = $scope.$watch(() => {
+    const deRegistrationFn = this.$scope.$watch(() => {
       return this.workspaceDetails;
     }, (workspace: che.IWorkspace) => {
       if (!workspace) {
@@ -84,9 +87,11 @@ export class WorkspaceDetailsOverviewController {
       this.init();
     }, true);
 
-    $scope.$on('$destroy', () => {
+    this.$scope.$on('$destroy', () => {
       deRegistrationFn();
     });
+
+    this.init();
   }
 
   init(): void {

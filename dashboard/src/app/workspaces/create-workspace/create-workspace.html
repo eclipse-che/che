@@ -53,7 +53,8 @@
 
     <che-label-container che-label-name="Select Stack"
                          che-label-description="Choose your workspace runtime environment used to build and run your projects.">
-      <devfile-selector on-devfile-select="createWorkspaceController.onDevfileSelected(devfile)">
+      <devfile-selector on-devfile-select="createWorkspaceController.onDevfileSelected(devfile)"
+                        stack-name="createWorkspaceController.stackName">
       </devfile-selector>
     </che-label-container>
     <!-- Project source selector -->
@@ -61,7 +62,7 @@
       <project-source-selector devfile="createWorkspaceController.selectedDevfile"></project-source-selector>
     </che-label-container>
     <che-label-container>
-      <che-button-save-flat class="create-workspace-footer-button"
+      <che-button-save-flat id="create-workspace-footer-button"
                             name="saveButton"
                             che-button-title="Create & Open"
                             ng-click="createWorkspaceController.createWorkspaceAndOpenIDE()"

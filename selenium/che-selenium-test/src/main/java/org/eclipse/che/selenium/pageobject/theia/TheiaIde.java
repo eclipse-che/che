@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.pageobject.theia;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_CLOSE_BUTTON;
@@ -28,6 +29,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -56,12 +58,14 @@ public class TheiaIde {
     String ABOUT_DIALOG_TITLE_XPATH = ABOUT_DIALOG_XPATH + "//div[@class='dialogTitle']";
     String ABOUT_DIALOG_CONTENT_XPATH = ABOUT_DIALOG_XPATH + "//div[@class='dialogContent']";
     String ABOUT_DIALOG_OK_BUTTON_XPATH = ABOUT_DIALOG_XPATH + "//button";
+    String NOTIFICATION_ITEM_XPATH =
+        "//div[@class='theia-notification-list-item']//div[@class='theia-notification-message']";
     String NOTIFICATION_MESSAGE_EQUALS_TO_XPATH_TEMPLATE =
-        "//div[@class='theia-NotificationsContainer']//p[text()='%s']";
+        "//div[@class='theia-notification-list-item']//div[@class='theia-notification-message']//span[text()='%s']";
     String NOTIFICATION_MESSAGE_CONTAINS_XPATH_TEMPLATE =
-        "//div[@class='theia-NotificationsContainer']//p[contains(text(), '%s')]";
+        "//div[@class='theia-notification-list-item']//div[@class='theia-notification-message']//span[contains(text(), '%s')]";
     String NOTIFICATION_CLOSE_BUTTON =
-        "//div[@class='theia-NotificationsContainer']//button[text()='Close']";
+        "//div[@class='theia-notification-buttons']//button[@data-action='Close']";
     String BRANCH_NAME_XPATH = "//div[@id='theia-statusBar']//div[contains(@title,'Git')]";
   }
 
@@ -150,8 +154,18 @@ public class TheiaIde {
     seleniumWebDriverHelper.waitInvisibility(By.className("theia-Notification"));
   }
 
+  public void waitAllNotificationsClosed() {
+    seleniumWebDriverHelper.waitInvisibility(
+        By.xpath((Locators.NOTIFICATION_ITEM_XPATH)), LOADER_TIMEOUT_SEC);
+  }
+
   public void waitTheiaIde() {
-    seleniumWebDriverHelper.waitVisibility(theiaIde, PREPARING_WS_TIMEOUT_SEC);
+    try {
+      seleniumWebDriverHelper.waitVisibility(theiaIde, PREPARING_WS_TIMEOUT_SEC);
+    } catch (TimeoutException ex) {
+      switchToIdeFrame();
+      seleniumWebDriverHelper.waitVisibility(theiaIde, PREPARING_WS_TIMEOUT_SEC);
+    }
   }
 
   public void waitTheiaIdeTopPanel() {
@@ -218,6 +232,15 @@ public class TheiaIde {
     WaitUtils.sleepQuietly(1);
 
     seleniumWebDriverHelper.sendKeys(keyCombination);
+  }
+
+  public void waitOpenedWorkspaceIsReadyToUse() {
+    // switch to the IDE and wait for workspace is ready to use
+    switchToIdeFrame();
+    waitTheiaIde();
+    waitLoaderInvisibility();
+    waitTheiaIdeTopPanel();
+    waitAllNotificationsClosed();
   }
 
   @PreDestroy

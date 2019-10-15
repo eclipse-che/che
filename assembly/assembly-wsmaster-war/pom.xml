@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>7.0.0-rc-5.0-SNAPSHOT</version>
+        <version>7.3.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-wsmaster-war</artifactId>
     <packaging>war</packaging>
@@ -34,6 +34,10 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -80,12 +84,32 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-jaxrs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-models</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -113,27 +137,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-installer</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-installer-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-logger</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-metrics</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-project-templates</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-project-templates-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -232,10 +240,6 @@
             <artifactId>infrastructure-openshift</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>che-swagger-module</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-api-authorization</artifactId>
         </dependency>
@@ -286,10 +290,6 @@
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-permission-infra-kubernetes</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.multiuser</groupId>
-            <artifactId>che-multiuser-permission-installer</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
@@ -431,7 +431,6 @@
                                 <dep>org.eclipse.che.core:che-core-db-vendor-mysql</dep>
                                 <dep>org.eclipse.che.core:che-core-sql-schema</dep>
                                 <dep>org.eclipse.che.core:che-core-api-ssh-shared</dep>
-                                <dep>org.eclipse.che.core:che-core-api-project-templates-shared</dep>
                                 <dep>org.eclipse.che.multiuser:che-multiuser-sql-schema</dep>
                                 <dep>org.jgroups:jgroups</dep>
                                 <dep>io.jaegertracing:jaeger-core</dep>

@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
@@ -41,7 +40,6 @@ public class DockerImageEnvironmentFactoryTest {
   private static final String MACHINE_NAME = "machine";
 
   @Mock private InternalRecipe recipe;
-  @Mock private InstallerRegistry installerRegistry;
   @Mock private RecipeRetriever recipeRetriever;
   @Mock private MachineConfigsValidator machinesValidator;
   @Mock private MemoryAttributeProvisioner memoryProvisioner;
@@ -51,8 +49,7 @@ public class DockerImageEnvironmentFactoryTest {
   @BeforeMethod
   public void setUp() throws Exception {
     factory =
-        new DockerImageEnvironmentFactory(
-            installerRegistry, recipeRetriever, machinesValidator, memoryProvisioner);
+        new DockerImageEnvironmentFactory(recipeRetriever, machinesValidator, memoryProvisioner);
 
     when(recipe.getType()).thenReturn(DockerImageEnvironment.TYPE);
     when(recipe.getContent()).thenReturn("");
