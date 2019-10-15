@@ -353,7 +353,7 @@ public class OpenShiftProjectFactoryTest {
                 "",
                 "serviceAccount",
                 "",
-                "che",
+                "<workspaceid>",
                 false,
                 clientFactory,
                 configFactory,
