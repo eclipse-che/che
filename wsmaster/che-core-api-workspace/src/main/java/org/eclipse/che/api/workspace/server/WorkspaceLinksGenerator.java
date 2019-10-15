@@ -11,15 +11,19 @@
  */
 package org.eclipse.che.api.workspace.server;
 
+import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_ENVIRONMENT_STATUS_CHANNEL;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_IDE_URL;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_SELF;
 
 import java.net.URI;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.zip.CRC32;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -77,6 +81,8 @@ public class WorkspaceLinksGenerator {
       addRuntimeLinks(links, workspace.getId(), serviceContext);
     }
 
+    links.putAll(addPreviewUrlLinks(workspace));
+
     return links;
   }
 
@@ -103,5 +109,34 @@ public class WorkspaceLinksGenerator {
         throw new ServerException(x.getMessage(), x);
       }
     }
+  }
+
+  private Map<String, String> addPreviewUrlLinks(WorkspaceImpl workspace) {
+    if (workspace.getRuntime() != null && workspace.getRuntime().getCommands() != null) {
+      Map<String, String> links = new HashMap<>();
+      workspace
+          .getRuntime()
+          .getCommands()
+          .stream()
+          .filter(c -> c.getAttributes().containsKey(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME))
+          .forEach(
+              c -> {
+                String previewUrlKey = createPreviewUrlLinkKeyFromCommandName(c.getName());
+                links.put(
+                    previewUrlKey, c.getAttributes().remove(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME));
+                c.getAttributes()
+                    .put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, "${" + previewUrlKey + "}");
+              });
+      return links;
+    }
+    return Collections.emptyMap();
+  }
+
+  private String createPreviewUrlLinkKeyFromCommandName(String commandName) {
+    CRC32 crc32 = new CRC32();
+    for (byte b : commandName.getBytes()) {
+      crc32.update(b);
+    }
+    return "previewurl/" + commandName.replaceAll(" ", "") + "_" + crc32.getValue();
   }
 }
