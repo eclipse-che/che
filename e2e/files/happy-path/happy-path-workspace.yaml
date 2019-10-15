@@ -28,8 +28,6 @@ components:
   - type: dockerimage
     alias: maven-container
     image: quay.io/eclipse/happy-path:nightly
-    command: ["sleep"]
-    args: ["infinity"]
     env:
       - name: MAVEN_CONFIG
         value: /home/user/.m2
@@ -50,7 +48,7 @@ commands:
     actions:
       - type: exec
         component: maven-container
-        command: mkdir -p /projects/petclinic/?/.m2 && cp -r /home/user/.m2/* /projects/petclinic/?/.m2/repository && cd /projects/petclinic && mvn package >> build-output.txt && tail -n 40 /projects/petclinic/build-output.txt | grep 'BUILD SUCCESS' > /projects/petclinic/result-build-output.txt
+        command: cd /projects/petclinic && mvn package >> build-output.txt && tail -n 40 /projects/petclinic/build-output.txt | grep 'BUILD SUCCESS' > /projects/petclinic/result-build-output.txt
   - name: run
     actions:
       - type: exec
