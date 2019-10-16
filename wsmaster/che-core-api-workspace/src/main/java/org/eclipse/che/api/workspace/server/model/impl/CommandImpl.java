@@ -69,6 +69,15 @@ public class CommandImpl implements Command {
     this.type = type;
   }
 
+  public CommandImpl(String name, String commandLine, String type, PreviewUrlImpl previewUrl,
+      Map<String, String> attributes) {
+    this.name = name;
+    this.commandLine = commandLine;
+    this.type = type;
+    this.previewUrl = previewUrl;
+    this.attributes = new HashMap<>(attributes);
+  }
+
   public CommandImpl(Command command) {
     this.name = command.getName();
     this.commandLine = command.getCommandLine();

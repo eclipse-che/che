@@ -20,6 +20,7 @@ import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
 import io.fabric8.kubernetes.api.model.extensions.IngressRule;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
@@ -60,6 +61,9 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
    */
   private void injectsPreviewUrlToCommands(E env, KubernetesNamespace namespace)
       throws InfrastructureException {
+    if (env.getCommands() == null) {
+      return;
+    }
     for (CommandImpl command :
         env.getCommands()
             .stream()
@@ -101,7 +105,7 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
         for (HTTPIngressPath path : rule.getHttp().getPaths()) {
           IngressBackend backend = path.getBackend();
           if (backend.getServiceName().equals(service.getMetadata().getName())
-              && backend.getServicePort().getStrVal().equals(foundPort.get().getName())) {
+              && backend.getServicePort().getStrVal().equals("" + foundPort.get().getPort())) {
             return Optional.of(rule.getHost());
           }
         }
