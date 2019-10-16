@@ -25,13 +25,14 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 
 /**
  * Helps to generate links for Preview URLs and update commands with these links.
- * <p>
- * For preview URLs, we need to include following data in {@link org.eclipse.che.api.workspace.shared.dto.WorkspaceDto}:
+ *
+ * <p>For preview URLs, we need to include following data in {@link
+ * org.eclipse.che.api.workspace.shared.dto.WorkspaceDto}:
  * <li>Map with final preview url links where keys are composed from prefix {@link
- * PreviewUrlLinksVariableGenerator#PREVIEW_URL_VARIABLE_PREFIX}, modified command name and CRC
- * hash.</li>
+ *     PreviewUrlLinksVariableGenerator#PREVIEW_URL_VARIABLE_PREFIX}, modified command name and CRC
+ *     hash.
  * <li>Each command that has defined Preview url must have attribute `previewUrl` referencing to
- * correct key in the map in format that IDE will understand.</li>
+ *     correct key in the map in format that IDE will understand.
  */
 @Singleton
 class PreviewUrlLinksVariableGenerator {
@@ -43,6 +44,7 @@ class PreviewUrlLinksVariableGenerator {
    * creates variable name in defined format and final preview url link. It updates the command so
    * it's `previewUrl` attribute will contain variable in proper format. Method then returns map of
    * all preview url links with these variables as keys:
+   *
    * <pre>
    *   links:
    *     "previewURl/run_123": http://your.domain/some/path
@@ -83,7 +85,8 @@ class PreviewUrlLinksVariableGenerator {
   }
 
   /**
-   * Creates link key for given command in format `previewUrl/<commandName_withoutSpaces>_<crc(command.name)>`
+   * Creates link key for given command in format
+   * `previewUrl/<commandName_withoutSpaces>_<crc(command.name)>`
    */
   private String createPreviewUrlLinkKeyForCommand(Command command) {
     return PREVIEW_URL_VARIABLE_PREFIX

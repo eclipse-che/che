@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.PreviewUrlImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -49,15 +48,10 @@ import org.testng.annotations.Test;
 public class PreviewUrlCommandProvisionerTest {
 
   private PreviewUrlCommandProvisioner<KubernetesEnvironment> previewUrlCommandProvisioner;
-  @Mock
-  private KubernetesEnvironment mockEnvironment;
-  @Mock
-  private KubernetesNamespace mockNamespace;
-  @Mock
-  private KubernetesServices mockServices;
-  @Mock
-  private KubernetesIngresses mockIngresses;
-
+  @Mock private KubernetesEnvironment mockEnvironment;
+  @Mock private KubernetesNamespace mockNamespace;
+  @Mock private KubernetesServices mockServices;
+  @Mock private KubernetesIngresses mockIngresses;
 
   @BeforeMethod
   public void setUp() {
@@ -80,11 +74,10 @@ public class PreviewUrlCommandProvisionerTest {
 
   @Test
   public void shouldDoNothingWhenCommandsWithoutPreviewUrlDefined() throws InfrastructureException {
-    List<CommandImpl> commands = Arrays.asList(new CommandImpl("a", "a", "a"),
-        new CommandImpl("b", "b", "b"));
-    KubernetesEnvironment env = KubernetesEnvironment.builder()
-        .setCommands(new ArrayList<>(commands))
-        .build();
+    List<CommandImpl> commands =
+        Arrays.asList(new CommandImpl("a", "a", "a"), new CommandImpl("b", "b", "b"));
+    KubernetesEnvironment env =
+        KubernetesEnvironment.builder().setCommands(new ArrayList<>(commands)).build();
 
     previewUrlCommandProvisioner.provision(env, mockNamespace);
 
@@ -94,11 +87,11 @@ public class PreviewUrlCommandProvisionerTest {
 
   @Test
   public void shouldDoNothingWhenCantFindServiceForPreviewurl() throws InfrastructureException {
-    List<CommandImpl> commands = Collections.singletonList(
-        new CommandImpl("a", "a", "a", new PreviewUrlImpl(8080, null), Collections.emptyMap()));
-    KubernetesEnvironment env = KubernetesEnvironment.builder()
-        .setCommands(new ArrayList<>(commands))
-        .build();
+    List<CommandImpl> commands =
+        Collections.singletonList(
+            new CommandImpl("a", "a", "a", new PreviewUrlImpl(8080, null), Collections.emptyMap()));
+    KubernetesEnvironment env =
+        KubernetesEnvironment.builder().setCommands(new ArrayList<>(commands)).build();
 
     Mockito.when(mockNamespace.services()).thenReturn(mockServices);
     Mockito.when(mockServices.get()).thenReturn(Collections.emptyList());
@@ -112,11 +105,11 @@ public class PreviewUrlCommandProvisionerTest {
   @Test
   public void shouldDoNothingWhenCantFindIngressForPreviewUrl() throws InfrastructureException {
     int port = 8080;
-    List<CommandImpl> commands = Collections.singletonList(
-        new CommandImpl("a", "a", "a", new PreviewUrlImpl(port, null), Collections.emptyMap()));
-    KubernetesEnvironment env = KubernetesEnvironment.builder()
-        .setCommands(new ArrayList<>(commands))
-        .build();
+    List<CommandImpl> commands =
+        Collections.singletonList(
+            new CommandImpl("a", "a", "a", new PreviewUrlImpl(port, null), Collections.emptyMap()));
+    KubernetesEnvironment env =
+        KubernetesEnvironment.builder().setCommands(new ArrayList<>(commands)).build();
 
     Mockito.when(mockNamespace.services()).thenReturn(mockServices);
     Service service = new Service();
@@ -138,11 +131,11 @@ public class PreviewUrlCommandProvisionerTest {
   @Test
   public void shouldUpdateCommandWhenServiceAndIngressFound() throws InfrastructureException {
     int port = 8080;
-    List<CommandImpl> commands = Collections.singletonList(
-        new CommandImpl("a", "a", "a", new PreviewUrlImpl(port, null), Collections.emptyMap()));
-    KubernetesEnvironment env = KubernetesEnvironment.builder()
-        .setCommands(new ArrayList<>(commands))
-        .build();
+    List<CommandImpl> commands =
+        Collections.singletonList(
+            new CommandImpl("a", "a", "a", new PreviewUrlImpl(port, null), Collections.emptyMap()));
+    KubernetesEnvironment env =
+        KubernetesEnvironment.builder().setCommands(new ArrayList<>(commands)).build();
 
     Mockito.when(mockNamespace.services()).thenReturn(mockServices);
     Service service = new Service();
@@ -157,10 +150,13 @@ public class PreviewUrlCommandProvisionerTest {
 
     Ingress ingress = new Ingress();
     IngressSpec ingressSpec = new IngressSpec();
-    IngressRule rule = new IngressRule("testhost", new HTTPIngressRuleValue(Collections
-        .singletonList(
-            new HTTPIngressPath(new IngressBackend("servicename", new IntOrString("" + port)),
-                null))));
+    IngressRule rule =
+        new IngressRule(
+            "testhost",
+            new HTTPIngressRuleValue(
+                Collections.singletonList(
+                    new HTTPIngressPath(
+                        new IngressBackend("servicename", new IntOrString("" + port)), null))));
     ingressSpec.setRules(Collections.singletonList(rule));
     ingress.setSpec(ingressSpec);
     Mockito.when(mockNamespace.ingresses()).thenReturn(mockIngresses);

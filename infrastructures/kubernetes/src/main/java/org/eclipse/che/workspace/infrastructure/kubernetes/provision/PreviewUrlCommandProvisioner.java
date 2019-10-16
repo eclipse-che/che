@@ -20,7 +20,6 @@ import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
 import io.fabric8.kubernetes.api.model.extensions.IngressRule;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
