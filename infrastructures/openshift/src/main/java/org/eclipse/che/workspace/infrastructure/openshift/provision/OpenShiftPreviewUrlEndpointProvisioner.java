@@ -20,6 +20,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlE
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
+/**
+ * Extends {@link PreviewUrlEndpointsProvisioner} with OpenShift capabilities. We work with {@link
+ * Route} and {@link OpenShiftEnvironment}.
+ */
 @Singleton
 public class OpenShiftPreviewUrlEndpointProvisioner
     extends PreviewUrlEndpointsProvisioner<OpenShiftEnvironment> {

@@ -31,6 +31,17 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.Services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Updates commands with proper Preview URL attribute.
+ *
+ * <p>Goes through all {@link CommandImpl}s in given {@link KubernetesEnvironment} and for ones that
+ * have defined Preview URL tries to find matching {@link Service} and {@link Ingress} from given
+ * {@link KubernetesNamespace}. When found, it composes full URL and set it as attribute of a
+ * command with key {@link
+ * org.eclipse.che.api.core.model.workspace.config.Command#PREVIEW_URL_ATTRIBUTE}.
+ *
+ * @param <E> type of the environment
+ */
 @Singleton
 public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
 
@@ -40,6 +51,13 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
     injectsPreviewUrlToCommands(env, namespace);
   }
 
+  /**
+   * Go through all commands, find matching service and exposed host. Then construct full preview
+   * url from this data and set it as Command's parameter under `previewUrl` key.
+   *
+   * @param env environment to get commands
+   * @param namespace current kubernetes namespace where we're looking for services and ingresses
+   */
   private void injectsPreviewUrlToCommands(E env, KubernetesNamespace namespace)
       throws InfrastructureException {
     for (CommandImpl command :
@@ -55,7 +73,7 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
             findHostForServicePort(
                 namespace, foundService.get(), command.getPreviewUrl().getPort());
         if (foundHost.isPresent()) {
-          updateCommandWithPreviewUrl(command, foundHost.get());
+          command.getAttributes().put(PREVIEW_URL_ATTRIBUTE, foundHost.get());
         } else {
           LOG.warn(
               "unable to find ingress for service [{}] and port [{}]",
@@ -90,9 +108,5 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
       }
     }
     return Optional.empty();
-  }
-
-  private void updateCommandWithPreviewUrl(CommandImpl command, String host) {
-    command.getAttributes().put(PREVIEW_URL_ATTRIBUTE, host + command.getPreviewUrl().getPath());
   }
 }

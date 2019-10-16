@@ -25,6 +25,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.Services;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 
+/**
+ * Extends {@link PreviewUrlCommandProvisioner} where needed. For OpenShift, we work with {@link
+ * Route}s and {@link OpenShiftProject}. Other than that, logic is the same as for k8s.
+ */
 @Singleton
 public class OpenShiftPreviewUrlCommandProvisioner
     extends PreviewUrlCommandProvisioner<OpenShiftEnvironment> {

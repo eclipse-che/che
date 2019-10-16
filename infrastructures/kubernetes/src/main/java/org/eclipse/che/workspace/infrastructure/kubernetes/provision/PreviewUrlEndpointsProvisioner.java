@@ -38,6 +38,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.ServerServiceB
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Services;
 
+/**
+ * For Commands that have defined Preview URL, tries to find existing {@link Service} and {@link
+ * Ingress}. When not found, we create new ones and put them into given {@link
+ * KubernetesEnvironment}.
+ *
+ * @param <T> type of the environment
+ */
 @Singleton
 public class PreviewUrlEndpointsProvisioner<T extends KubernetesEnvironment>
     implements ConfigurationProvisioner<T> {
