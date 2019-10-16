@@ -281,12 +281,14 @@ describe(`WorkspaceDetailsController >`, () => {
     angular.mock.module('workspaceDetailsMock');
   });
 
-  beforeEach(inject((_$rootScope_: ng.IRootScopeService,
-                     _$compile_: ng.ICompileService,
-                     _cheHttpBackend_: CheHttpBackend,
-                     _$timeout_: ng.ITimeoutService,
-                     _$q_: ng.IQService,
-                     _cheWorkspace_: CheWorkspace) => {
+  beforeEach(inject((
+    _$rootScope_: ng.IRootScopeService,
+    _$compile_: ng.ICompileService,
+    _cheHttpBackend_: CheHttpBackend,
+    _$timeout_: ng.ITimeoutService,
+    _$q_: ng.IQService,
+    _cheWorkspace_: CheWorkspace
+  ) => {
     $scope = _$rootScope_.$new();
     $compile = _$compile_;
     $timeout = _$timeout_;
@@ -320,6 +322,12 @@ describe(`WorkspaceDetailsController >`, () => {
     $httpBackend.verifyNoOutstandingRequest();
   });
 
+  afterEach(() => {
+    compiledDirective = undefined;
+    cheWorkspace = undefined;
+    newWorkspace = undefined;
+  });
+
   describe(`overflow panel >`, () => {
 
     function getOverlayPanelEl(): ng.IAugmentedJQuery {
@@ -335,9 +343,20 @@ describe(`WorkspaceDetailsController >`, () => {
       return compiledDirective.find('.cancel-button button');
     }
 
-    it(`should be hidden initially >`, () => {
-      compileDirective();
-      expect(getOverlayPanelEl().children().length).toEqual(0);
+    describe('initially >', () => {
+
+      beforeEach(() => {
+        compileDirective();
+      });
+
+      it(`should be hidden >`, () => {
+        expect(getOverlayPanelEl().children().length).toEqual(0);
+      });
+
+      it('should not prevent to leave page', () => {
+        expect((controller as any).editOverlayConfig.preventPageLeave).toBeFalsy();
+      });
+
     });
 
     describe(`when config is changed >`, () => {
@@ -349,10 +368,14 @@ describe(`WorkspaceDetailsController >`, () => {
           beforeEach(() => {
             compileDirective();
 
-            controller.workspaceDetails.config.name = 'wksp-new-name';
-            controller.checkEditMode(false);
+            (controller as any).workspaceDetails.config.name = 'wksp-new-name';
+            controller.checkEditMode();
             $scope.$digest();
             $timeout.flush();
+          });
+
+          it('should prevent to leave page', () => {
+            expect((controller as any).editOverlayConfig.preventPageLeave).toBeTruthy();
           });
 
           it(`the overflow panel should be shown >`, () => {
@@ -376,7 +399,10 @@ describe(`WorkspaceDetailsController >`, () => {
             beforeEach(() => {
               getCancelButton().click();
               $scope.$digest();
-              $timeout.flush();
+            });
+
+            it('should not prevent to leave page', () => {
+              expect((controller as any).editOverlayConfig.preventPageLeave).toBeFalsy();
             });
 
             it(`the overlay panel should be hidden >`, () => {
@@ -389,11 +415,15 @@ describe(`WorkspaceDetailsController >`, () => {
 
             beforeEach(() => {
               // set new workspace to publish
-              newWorkspace = angular.copy(controller.workspaceDetails);
+              newWorkspace = angular.copy((controller as any).workspaceDetails);
 
               getSaveButton().click();
               $scope.$digest();
               $timeout.flush();
+            });
+
+            it('should not prevent to leave page', () => {
+              expect((controller as any).editOverlayConfig.preventPageLeave).toBeFalsy();
             });
 
             it(`the overlay panel should be hidden >`, () => {
@@ -409,10 +439,14 @@ describe(`WorkspaceDetailsController >`, () => {
           beforeEach(() => {
             compileDirective();
 
-            controller.workspaceDetails.config.name = 'wksp-new-name';
-            controller.checkEditMode(true);
+            (controller as any).workspaceDetails.config.defaultEnv = 'new-env';
+            controller.checkEditMode();
             $scope.$digest();
             $timeout.flush();
+          });
+
+          it('should prevent to leave page', () => {
+            expect((controller as any).editOverlayConfig.preventPageLeave).toBeTruthy();
           });
 
           it(`the overflow panel should be shown >`, () => {
@@ -436,7 +470,10 @@ describe(`WorkspaceDetailsController >`, () => {
             beforeEach(() => {
               getCancelButton().click();
               $scope.$digest();
-              $timeout.flush();
+            });
+
+            it('should not prevent to leave page', () => {
+              expect((controller as any).editOverlayConfig.preventPageLeave).toBeFalsy();
             });
 
             it(`the overlay panel should be hidden >`, () => {
@@ -448,9 +485,14 @@ describe(`WorkspaceDetailsController >`, () => {
           describe(`and saveButton is clicked >`, () => {
 
             beforeEach(() => {
+              newWorkspace = angular.copy((controller as any).workspaceDetails);
               getSaveButton().click();
               $scope.$digest();
               $timeout.flush();
+            });
+
+            it('should not prevent to leave page', () => {
+              expect((controller as any).editOverlayConfig.preventPageLeave).toBeFalsy();
             });
 
             it(`the overlay panel should remain visible >`, () => {
@@ -475,11 +517,15 @@ describe(`WorkspaceDetailsController >`, () => {
 
             beforeEach(() => {
               // set new workspace to publish
-              newWorkspace = angular.copy(controller.workspaceDetails);
+              newWorkspace = angular.copy((controller as any).workspaceDetails);
 
               getApplyButton().click();
               $scope.$digest();
               $timeout.flush();
+            });
+
+            it('should not prevent to leave page', () => {
+              expect((controller as any).editOverlayConfig.preventPageLeave).toBeFalsy();
             });
 
             it(`the overlay panel should be hidden >`, () => {
@@ -498,15 +544,19 @@ describe(`WorkspaceDetailsController >`, () => {
           compileDirective();
 
           controller.stopWorkspace();
-          controller.workspaceDetails.config.name = 'wksp-new-name';
+          (controller as any).workspaceDetails.config.name = 'wksp-new-name';
         });
 
         describe(`and restart is not necessary >`, () => {
 
           beforeEach(() => {
-            controller.checkEditMode(false);
+            controller.checkEditMode();
             $scope.$digest();
             $timeout.flush();
+          });
+
+          it('should prevent to leave page', () => {
+            expect((controller as any).editOverlayConfig.preventPageLeave).toBeTruthy();
           });
 
           it(`the overflow panel should be shown >`, () => {
@@ -530,7 +580,10 @@ describe(`WorkspaceDetailsController >`, () => {
             beforeEach(() => {
               getCancelButton().click();
               $scope.$digest();
-              $timeout.flush();
+            });
+
+            it('should not prevent to leave page', () => {
+              expect((controller as any).editOverlayConfig.preventPageLeave).toBeFalsy();
             });
 
             it(`the overlay panel should be hidden >`, () => {
@@ -543,11 +596,15 @@ describe(`WorkspaceDetailsController >`, () => {
 
             beforeEach(() => {
               // set new workspace to publish
-              newWorkspace = angular.copy(controller.workspaceDetails);
+              newWorkspace = angular.copy((controller as any).workspaceDetails);
 
               getSaveButton().click();
               $scope.$digest();
               $timeout.flush();
+            });
+
+            it('should not prevent to leave page', () => {
+              expect((controller as any).editOverlayConfig.preventPageLeave).toBeFalsy();
             });
 
             it(`the overlay panel should be hidden >`, () => {
@@ -561,9 +618,13 @@ describe(`WorkspaceDetailsController >`, () => {
         describe(`and restart is necessary >`, () => {
 
           beforeEach(() => {
-            controller.checkEditMode(true);
+            controller.checkEditMode();
             $scope.$digest();
             $timeout.flush();
+          });
+
+          it('should prevent to leave page', () => {
+            expect((controller as any).editOverlayConfig.preventPageLeave).toBeTruthy();
           });
 
           it(`the overflow panel should be shown >`, () => {
@@ -587,7 +648,10 @@ describe(`WorkspaceDetailsController >`, () => {
             beforeEach(() => {
               getCancelButton().click();
               $scope.$digest();
-              $timeout.flush();
+            });
+
+            it('should not prevent to leave page', () => {
+              expect((controller as any).editOverlayConfig.preventPageLeave).toBeFalsy();
             });
 
             it(`the overlay panel should be hidden >`, () => {
@@ -600,11 +664,15 @@ describe(`WorkspaceDetailsController >`, () => {
 
             beforeEach(() => {
               // set new workspace to publish
-              newWorkspace = angular.copy(controller.workspaceDetails);
+              newWorkspace = angular.copy((controller as any).workspaceDetails);
 
               getSaveButton().click();
               $scope.$digest();
               $timeout.flush();
+            });
+
+            it('should not prevent to leave page', () => {
+              expect((controller as any).editOverlayConfig.preventPageLeave).toBeFalsy();
             });
 
             it(`the overlay panel should be hidden >`, () => {
@@ -622,21 +690,25 @@ describe(`WorkspaceDetailsController >`, () => {
         beforeEach(() => {
           compileDirective();
 
-          controller.workspacesService.isSupported = jasmine.createSpy('workspaceDetailsController.isSupported')
+          (controller as any).workspacesService.isSupported = jasmine.createSpy('workspaceDetailsController.isSupported')
             .and
             .callFake(() => {
               return false;
             });
-          controller.workspacesService.isSupportedRecipeType = jasmine.createSpy('workspaceDetailsController.isSupportedRecipeType')
+          (controller as any).workspacesService.isSupportedRecipeType = jasmine.createSpy('workspaceDetailsController.isSupportedRecipeType')
             .and
             .callFake(() => {
               return false;
             });
 
-          controller.workspaceDetails.config.name = 'wksp-new-name';
-          controller.checkEditMode(false);
+          (controller as any).workspaceDetails.config.name = 'wksp-new-name';
+          controller.checkEditMode();
           $scope.$digest();
           $timeout.flush();
+        });
+
+        it('should not prevent to leave page', () => {
+          expect((controller as any).editOverlayConfig.preventPageLeave).toBeFalsy();
         });
 
         it(`the overflow panel should be shown >`, () => {
@@ -660,7 +732,10 @@ describe(`WorkspaceDetailsController >`, () => {
           beforeEach(() => {
             getCancelButton().click();
             $scope.$digest();
-            $timeout.flush();
+          });
+
+          it('should not prevent to leave page', () => {
+            expect((controller as any).editOverlayConfig.preventPageLeave).toBeFalsy();
           });
 
           it(`the overlay panel should be hidden >`, () => {
