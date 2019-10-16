@@ -26,6 +26,41 @@ export class ProjectTree {
         @inject(CLASSES.Ide) private readonly ide: Ide,
         @inject(CLASSES.Editor) private readonly editor: Editor) { }
 
+    async clickCollapseAllButton() {
+        Logger.debug('ProjectTree.clickCollapseAllButton');
+
+        const collapseAllButtonLocator: By = By.css('div.theia-sidepanel-toolbar div.collapse-all');
+        await this.driverHelper.waitAndClick(collapseAllButtonLocator);
+    }
+
+    async waitTreeCollapsed(projectName: string, rootSubItem: string) {
+        Logger.debug(`ProjectTree.waitTreeCollapsed project: "${projectName}", subitem: "${rootSubItem}"`);
+
+        const rootSubitemLocator: By = By.css(this.getTreeItemCssLocator(`${projectName}/${rootSubItem}`));
+        await this.driverHelper.waitDisappearanceWithTimeout(rootSubitemLocator);
+    }
+
+    async collapseProjectTree(projectName: string, rootSubItem: string) {
+        Logger.debug(`ProjectTree.collapseProjectTree project: "${projectName}", subitem: "${rootSubItem}"`);
+
+        await this.clickCollapseAllButton();
+        await this.waitTreeCollapsed(projectName, rootSubItem);
+    }
+
+    async waitAssociatedWorkspaceProjectTreeCollapsed(projectName: string, expandedRootItem: string) {
+        Logger.debug(`ProjectTree.waitTreeCollapsed project name: "${projectName}", expanded root item: "${expandedRootItem}"`);
+
+        // const rootSubitemLocator: By = By.css(this.getTreeItemCssLocator(`${projectName}/${expandedRootItem}`));
+        await this.waitItemCollapsed(`${projectName}/${expandedRootItem}`);
+    }
+
+    async collapseAssociatedWorkspaceProjectTree(projectName: string, rootSubItem: string) {
+        Logger.debug(`ProjectTree.collapseProjectTree project: "${projectName}", subitem: "${rootSubItem}"`);
+
+        await this.clickCollapseAllButton();
+        await this.waitTreeCollapsed(projectName, rootSubItem);
+    }
+
     async openProjectTreeContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('ProjectTree.openProjectTreeContainer');
 

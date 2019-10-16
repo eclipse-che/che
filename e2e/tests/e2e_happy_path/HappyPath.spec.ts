@@ -116,7 +116,7 @@ suite('Language server validation', async () => {
     test('Suggestion', async () => {
         await editor.moveCursorToLineAndChar(javaFileName, 32, 27);
         await editor.pressControlSpaceCombination(javaFileName);
-        await editor.waitSuggestion(javaFileName, 'run(Class<?> primarySource, String... args) : ConfigurableApplicationContext', 120000);
+        await editor.waitSuggestionWithScrolling(javaFileName, 'run(Class<?> primarySource, String... args) : ConfigurableApplicationContext', 120000);
     });
 
 
@@ -148,8 +148,8 @@ suite('Validation of workspace build and run', async () => {
     test('Build application', async () => {
         await runTask('build-file-output');
 
-        //workaround for issue: https://github.com/eclipse/che/issues/14771
-        
+        // workaround for issue: https://github.com/eclipse/che/issues/14771
+
         // await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'build-output.txt');
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'result-build-output.txt', 220000);
         await editor.waitText('result-build-output.txt', '[INFO] BUILD SUCCESS');
@@ -193,10 +193,11 @@ suite('Display source code changes in the running application', async () => {
 
     test('Build application with changes', async () => {
         await runTask('build');
+        await projectTree.collapseAssociatedWorkspaceProjectTree(projectName + '/src', 'main');
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'result-build.txt', 300000);
         await editor.waitText('result-build.txt', '[INFO] BUILD SUCCESS');
-        
-        //workaround for issue: https://github.com/eclipse/che/issues/14771
+
+        // workaround for issue: https://github.com/eclipse/che/issues/14771
 
         /*await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'build.txt');
         await editor.waitEditorAvailable('build.txt');
