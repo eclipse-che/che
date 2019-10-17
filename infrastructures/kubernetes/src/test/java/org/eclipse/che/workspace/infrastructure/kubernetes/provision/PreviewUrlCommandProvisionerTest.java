@@ -145,7 +145,8 @@ public class PreviewUrlCommandProvisionerTest {
     service.setMetadata(metadata);
     ServiceSpec spec = new ServiceSpec();
     spec.setPorts(
-        Collections.singletonList(new ServicePort(SERVICE_PORT_NAME, null, PORT, "TCP", new IntOrString(PORT))));
+        Collections.singletonList(
+            new ServicePort(SERVICE_PORT_NAME, null, PORT, "TCP", new IntOrString(PORT))));
     service.setSpec(spec);
     Mockito.when(mockServices.get()).thenReturn(Collections.singletonList(service));
 
@@ -157,7 +158,8 @@ public class PreviewUrlCommandProvisionerTest {
             new HTTPIngressRuleValue(
                 Collections.singletonList(
                     new HTTPIngressPath(
-                        new IngressBackend("servicename", new IntOrString(SERVICE_PORT_NAME)), null))));
+                        new IngressBackend("servicename", new IntOrString(SERVICE_PORT_NAME)),
+                        null))));
     ingressSpec.setRules(Collections.singletonList(rule));
     ingress.setSpec(ingressSpec);
     Mockito.when(mockNamespace.ingresses()).thenReturn(mockIngresses);
