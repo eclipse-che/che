@@ -104,7 +104,7 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
         for (HTTPIngressPath path : rule.getHttp().getPaths()) {
           IngressBackend backend = path.getBackend();
           if (backend.getServiceName().equals(service.getMetadata().getName())
-              && backend.getServicePort().getStrVal().equals("" + foundPort.get().getPort())) {
+              && backend.getServicePort().getStrVal().equals(foundPort.get().getName())) {
             return Optional.of(rule.getHost());
           }
         }
