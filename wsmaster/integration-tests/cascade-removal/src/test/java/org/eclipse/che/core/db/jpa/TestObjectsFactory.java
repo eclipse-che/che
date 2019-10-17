@@ -154,7 +154,8 @@ public final class TestObjectsFactory {
   }
 
   private static SourceImpl createDevfileSource() {
-    return new SourceImpl("type", "http://location", "branch1", "point1", "tag1", "commit1");
+    return new SourceImpl(
+        "type", "http://location", "branch1", "point1", "tag1", "commit1", "sparseCheckoutDir1");
   }
 
   public static CommandImpl createCommand() {

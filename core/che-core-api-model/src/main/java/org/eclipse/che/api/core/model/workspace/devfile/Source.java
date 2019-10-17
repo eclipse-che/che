@@ -39,4 +39,10 @@ public interface Source {
    * 'startPoint' and provided for convenience.
    */
   String getCommitId();
+
+  /**
+   * The directory which is kept by sparse checkout. If this parameter is not null then the only
+   * given directory will be present after clone.
+   */
+  String getSparseCheckoutDir();
 }

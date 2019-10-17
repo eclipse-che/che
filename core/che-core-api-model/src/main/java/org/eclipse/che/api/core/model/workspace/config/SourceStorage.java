@@ -40,6 +40,12 @@ public interface SourceStorage {
    */
   String START_POINT_PARAMETER_NAME = "startPoint";
 
+  /**
+   * The key with this name in the parameters designates the directory that should be used for
+   * sparse checkout, i.e. the only directory of repository which should be created by git.
+   */
+  String SPARSE_CHECKOUT_DIR_PARAMETER_NAME = "sparseCheckoutDir";
+
   String getType();
 
   String getLocation();
