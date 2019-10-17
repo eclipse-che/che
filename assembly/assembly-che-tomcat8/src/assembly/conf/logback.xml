@@ -30,5 +30,4 @@
     <logger name="org.apache.catalina.loader" level="OFF"/>
     <logger name="org.apache.catalina.session.PersistentManagerBase" level="OFF"/>
     <logger name="org.apache.jasper.servlet.TldScanner" level="OFF"/>
-    <logger name="org.jgroups" level="ERROR" />
 </configuration>

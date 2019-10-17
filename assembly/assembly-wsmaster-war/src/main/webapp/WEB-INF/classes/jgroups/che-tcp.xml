@@ -21,6 +21,7 @@
     send_buf_size="1M"
     max_bundle_size="64K"
     enable_diagnostics="true"
+    log_discard_msgs="false"
     thread_naming_pattern="cl"
 
     thread_pool.min_threads="0"
