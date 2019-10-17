@@ -19,10 +19,12 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.openshift.api.model.Route;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
@@ -137,6 +139,12 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
     @Override
     public Builder setWarnings(List<Warning> warnings) {
       super.setWarnings(warnings);
+      return this;
+    }
+
+    @Override
+    public Builder setCommands(List<? extends Command> commands) {
+      super.setCommands(new ArrayList<>(commands));
       return this;
     }
 
