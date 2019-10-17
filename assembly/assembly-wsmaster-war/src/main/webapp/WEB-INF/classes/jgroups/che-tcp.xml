@@ -27,8 +27,11 @@
     thread_pool.max_threads="500"
     thread_pool.keep_alive_time="30000" />
 
-  <kubernetes.KUBE_PING
-    labels="app=che" />
+  <org.jgroups.protocols.kubernetes.KUBE_PING
+    port_range="3"
+    namespace="${KUBERNETES_NAMESPACE:che}"
+    labels="${KUBERNETES_LABEL:app=che,component=che}"
+  />
 
   <MERGE3 min_interval="10000"
     max_interval="30000"/>
@@ -40,9 +43,7 @@
     discard_delivered_msgs="true"/>
   <pbcast.STABLE stability_delay="1000" desired_avg_gossip="50000"
     max_bytes="4M"/>
-  <pbcast.GMS print_local_addr="true" join_timeout="3000"
-
-    view_bundling="true"/>
+  <pbcast.GMS print_local_addr="true" join_timeout="3000" />
   <MFC max_credits="2M"
     min_threshold="0.4"/>
   <FRAG2 frag_size="60K"/>
