@@ -101,6 +101,7 @@ public class PreviewUrlLinksVariableGeneratorTest {
             .get();
 
     assertTrue(aCommand.getAttributes().get(Command.PREVIEW_URL_ATTRIBUTE).contains(varKey));
+    assertEquals(aCommand.getAttributes().get(Command.PREVIEW_URL_ATTRIBUTE), "${" + varKey + "}");
   }
 
   @Test
