@@ -27,7 +27,15 @@ public class Services {
    *     found.
    */
   public static Optional<ServicePort> findPort(Service service, int port) {
-    return service.getSpec().getPorts().stream().filter(p -> p.getPort() == port).findFirst();
+    if (service == null || service.getSpec() == null || service.getSpec().getPorts() == null) {
+      return Optional.empty();
+    }
+    return service
+        .getSpec()
+        .getPorts()
+        .stream()
+        .filter(p -> p.getPort() != null && p.getPort() == port)
+        .findFirst();
   }
 
   /**
@@ -36,6 +44,9 @@ public class Services {
    * @return {@link Optional} of found {@link Service}, or {@link Optional#empty()} when not found.
    */
   public static Optional<Service> findServiceWithPort(Collection<Service> services, int port) {
+    if (services == null) {
+      return Optional.empty();
+    }
     return services.stream().filter(s -> Services.findPort(s, port).isPresent()).findFirst();
   }
 }
