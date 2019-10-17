@@ -17,7 +17,6 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.PREVIEW_UR
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.CRC32;
 import javax.inject.Singleton;
 import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.model.workspace.config.Command;
@@ -92,15 +91,7 @@ class PreviewUrlLinksVariableGenerator {
     return PREVIEW_URL_VARIABLE_PREFIX
         + command.getName().replaceAll(" ", "")
         + "_"
-        + calculateCrcFromCommandName(command.getName());
-  }
-
-  private String calculateCrcFromCommandName(String commandName) {
-    CRC32 crc32 = new CRC32();
-    for (byte b : commandName.getBytes()) {
-      crc32.update(b);
-    }
-    return "" + crc32.getValue();
+        + command.getName().hashCode();
   }
 
   private String formatVariable(String var) {
