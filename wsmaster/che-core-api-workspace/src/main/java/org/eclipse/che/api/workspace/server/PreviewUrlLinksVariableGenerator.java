@@ -55,32 +55,36 @@ class PreviewUrlLinksVariableGenerator {
    * @return map of all <commandPreviewUrlVariable, previewUrlFullLink>
    */
   Map<String, String> genLinksMapAndUpdateCommands(WorkspaceImpl workspace, UriBuilder uriBuilder) {
-    if (workspace.getRuntime() != null && workspace.getRuntime().getCommands() != null) {
-
-      Map<String, String> links = new HashMap<>();
-      for (Command command : workspace.getRuntime().getCommands()) {
-        Map<String, String> commandAttributes = command.getAttributes();
-
-        if (command.getPreviewUrl() != null
-            && commandAttributes.containsKey(PREVIEW_URL_ATTRIBUTE)) {
-          String previewUrlKey = createPreviewUrlLinkKeyForCommand(command);
-
-          String previewUrlFinalUri =
-              uriBuilder
-                  .clone()
-                  .host(commandAttributes.remove(PREVIEW_URL_ATTRIBUTE))
-                  .replacePath(command.getPreviewUrl().getPath())
-                  .build()
-                  .toString();
-
-          links.put(previewUrlKey, previewUrlFinalUri);
-
-          commandAttributes.put(PREVIEW_URL_ATTRIBUTE, formatVariable(previewUrlKey));
-        }
-      }
-      return links;
+    if (workspace == null
+        || workspace.getRuntime() == null
+        || workspace.getRuntime().getCommands() == null
+        || uriBuilder == null) {
+      return Collections.emptyMap();
     }
-    return Collections.emptyMap();
+
+    Map<String, String> links = new HashMap<>();
+    for (Command command : workspace.getRuntime().getCommands()) {
+      Map<String, String> commandAttributes = command.getAttributes();
+
+      if (command.getPreviewUrl() != null
+          && commandAttributes != null
+          && commandAttributes.containsKey(PREVIEW_URL_ATTRIBUTE)) {
+        String previewUrlKey = createPreviewUrlLinkKeyForCommand(command);
+
+        String previewUrlFinalUri =
+            uriBuilder
+                .clone()
+                .host(commandAttributes.remove(PREVIEW_URL_ATTRIBUTE))
+                .replacePath(command.getPreviewUrl().getPath())
+                .build()
+                .toString();
+
+        links.put(previewUrlKey, previewUrlFinalUri);
+
+        commandAttributes.put(PREVIEW_URL_ATTRIBUTE, formatVariable(previewUrlKey));
+      }
+    }
+    return links;
   }
 
   /**
@@ -91,7 +95,7 @@ class PreviewUrlLinksVariableGenerator {
     return PREVIEW_URL_VARIABLE_PREFIX
         + command.getName().replaceAll(" ", "")
         + "_"
-        + command.getName().hashCode();
+        + Math.abs(command.getName().hashCode());
   }
 
   private String formatVariable(String var) {
