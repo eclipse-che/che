@@ -406,7 +406,7 @@ export class OrganizationDetailsController {
    */
   deleteOrganization(): void {
     let promise = this.confirmDialogService.showConfirmDialog('Delete organization',
-      'Would you like to delete organization \'' + this.organization.name + '\'?', 'Delete');
+      'Would you like to delete organization \'' + this.organization.name + '\'?', { resolve: 'Delete' });
 
     promise.then(() => {
       let promise = this.cheOrganization.deleteOrganization(this.organization.id);

@@ -12,7 +12,7 @@
 'use strict';
 
 import { ICheEditModeOverlayConfig } from './che-edit-mode-overlay.directive';
-import { ConfirmDialogService } from '../../../../target/dist/components/service/confirm-dialog/confirm-dialog.service';
+import { ConfirmDialogService } from '../../service/confirm-dialog/confirm-dialog.service';
 
 export class CheEditModeOverlayController {
 
@@ -63,7 +63,7 @@ export class CheEditModeOverlayController {
   }
 
   discardUnsavedChangesDialog(): ng.IPromise<void> {
-    return this.confirmDialogService.showConfirmDialog('Unsaved Changes', 'You have unsaved changes. You may go ahead and discard all changes, or close this window and save them.', 'Discard Changes', 'Cancel');
+    return this.confirmDialogService.showConfirmDialog('Unsaved Changes', 'You have unsaved changes. You may go ahead and discard all changes, or close this window and save them.', { resolve: 'Discard Changes', reject: 'Cancel' });
   }
 
 

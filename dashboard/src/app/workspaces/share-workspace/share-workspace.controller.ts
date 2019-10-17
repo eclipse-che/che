@@ -344,7 +344,7 @@ export class ShareWorkspaceController {
       content += 'this selected member?';
     }
 
-    return this.confirmDialogService.showConfirmDialog('Remove members', content, 'Delete');
+    return this.confirmDialogService.showConfirmDialog('Remove members', content, { resolve: 'Delete' });
   }
 
   /**

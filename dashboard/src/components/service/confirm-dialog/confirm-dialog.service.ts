@@ -34,12 +34,12 @@ export class ConfirmDialogService {
    *
    * @param title{string} popup title
    * @param content{string} dialog content
-   * @param resolveButtonTitle{string} title for resolve button
-   * @param rejectButtonTitle{string} title for reject button
+   * @param buttonTitles dialog buttons titles
    *
    * @returns {ng.IPromise<any>}
    */
-  showConfirmDialog(title: string, content: string, resolveButtonTitle: string, rejectButtonTitle?: string): ng.IPromise<any> {
+  showConfirmDialog(title: string, content: string, buttonTitles?: { resolve?: string, reject?: string }): ng.IPromise<any> {
+    buttonTitles.reject = buttonTitles.reject || 'Close';
     return this.$mdDialog.show({
       bindToController: true,
       clickOutsideToClose: true,
@@ -49,8 +49,7 @@ export class ConfirmDialogService {
         content: content,
         $mdDialog: this.$mdDialog,
         title: title,
-        resolveButtonTitle: resolveButtonTitle,
-        rejectButtonTitle: rejectButtonTitle ? rejectButtonTitle : 'Close'
+        buttons: buttonTitles
       },
       templateUrl: 'components/service/confirm-dialog/che-confirm-dialog.html'
     });

@@ -359,6 +359,6 @@ export class ListTeamsController {
       content += 'this selected team?';
     }
 
-    return this.confirmDialogService.showConfirmDialog('Delete teams', content, 'Delete');
+    return this.confirmDialogService.showConfirmDialog('Delete teams', content, { resolve: 'Delete' });
   }
 }

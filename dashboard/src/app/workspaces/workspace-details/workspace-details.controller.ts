@@ -495,15 +495,21 @@ export class WorkspaceDetailsController {
     this.$scope.$broadcast('edit-workspace-details', { status: 'cancelled' });
   }
 
-  runWorkspace(): ng.IPromise<any> {
+  runWorkspace(): ng.IPromise<void> {
     this.errorMessage = '';
 
+    if (this.workspaceDetailsService.isWorkspaceModified(this.workspaceId)) {
+      return this.workspaceDetailsService.notifyUnsavedChangesDialog();
+    }
     return this.workspaceDetailsService.runWorkspace(this.workspaceDetails).catch((error: any) => {
       this.errorMessage = error.message;
     });
   }
 
-  stopWorkspace(): ng.IPromise<any> {
+  stopWorkspace(): ng.IPromise<void> {
+    if (this.workspaceDetailsService.isWorkspaceModified(this.workspaceId)) {
+      return this.workspaceDetailsService.notifyUnsavedChangesDialog();
+    }
     return this.workspaceDetailsService.stopWorkspace(this.workspaceDetails.id);
   }
 

@@ -18,7 +18,7 @@ import {CheWorkspace, WorkspaceStatus} from '../../../components/api/workspace/c
 import {CheService} from '../../../components/api/che-service.factory';
 import {PluginRegistry} from '../../../components/api/plugin-registry.factory';
 import {WorkspaceDataManager} from '../../../components/api/workspace/workspace-data-manager';
-import {ConfirmDialogService} from '../../../../target/dist/components/service/confirm-dialog/confirm-dialog.service';
+import { ConfirmDialogService } from '../../../components/service/confirm-dialog/confirm-dialog.service';
 
 interface IPage {
   title: string;
@@ -462,7 +462,7 @@ export class WorkspaceDetailsService {
    * Shows modal window with notification about unsaved changes.
    */
   notifyUnsavedChangesDialog(): ng.IPromise<void> {
-    return this.confirmDialogService.showConfirmDialog('Unsaved Changes', `You're editing this workspace configuration. Please save or discard changes to be able to run or stop the workspace.`, 'Close');
+    return this.confirmDialogService.showConfirmDialog('Unsaved Changes', `You're editing this workspace configuration. Please save or discard changes to be able to run or stop the workspace.`, { reject: 'Close' });
   }
 
 }
