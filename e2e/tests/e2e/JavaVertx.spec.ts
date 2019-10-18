@@ -122,7 +122,7 @@ suite('Java Vert.x test', async () => {
 
     suite('Validation of project build', async () => {
         test('Build application', async () => {
-            let taskName: string = 'che: maven build';
+            let taskName: string = 'maven build';
             await runTask(taskName);
             await quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
             await ide.waitNotification('Task ' + taskName + ' has exited with code 0.', 60000);
