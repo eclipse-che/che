@@ -85,7 +85,7 @@ public class BrokerStatusListener implements EventSubscriber<BrokerEvent> {
         brokersResult.error(
             new InfrastructureException(
                 format(
-                    "Plugin broking process for workspace %s failed with error: %s",
+                    "Plugin brokering process for workspace %s failed with error: %s",
                     workspaceId, event.getError())));
         break;
       case STARTED:
