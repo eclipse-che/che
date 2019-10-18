@@ -81,8 +81,6 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     }
   }
 
-
-
   @Test
   public void factoryWithDirectUrlWithSpecificBranch() {
     String repositoryName = testAuxiliaryRepo.getName();
