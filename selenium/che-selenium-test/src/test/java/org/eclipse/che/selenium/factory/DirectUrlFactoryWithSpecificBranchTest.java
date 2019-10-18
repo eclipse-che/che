@@ -23,7 +23,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.factory.TestFactory;
@@ -48,13 +47,14 @@ public class DirectUrlFactoryWithSpecificBranchTest {
 
   @Inject
   @Named(AUXILIARY)
-  private         TestGitHubRepository   testAuxiliaryRepo;
-  @Inject private   SeleniumWebDriver      seleniumWebDriver;
+  private TestGitHubRepository testAuxiliaryRepo;
+
+  @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestFactoryInitializer testFactoryInitializer;
-  @Inject private TheiaIde               theiaIde;
-  @Inject private TheiaProjectTree       theiaProjectTree;
-  @Inject private TheiaTerminal          theiaTerminal;
-  @Inject private TheiaProposalForm      theiaProposalForm;
+  @Inject private TheiaIde theiaIde;
+  @Inject private TheiaProjectTree theiaProjectTree;
+  @Inject private TheiaTerminal theiaTerminal;
+  @Inject private TheiaProposalForm theiaProposalForm;
 
   private TestFactory testFactoryWithSpecificBranch;
 
@@ -108,8 +108,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
         name -> {
           try {
             theiaProjectTree.waitItem(repositoryName + "/" + name);
-          }
-          catch (TimeoutException ex){
+          } catch (TimeoutException ex) {
             seleniumWebDriver.navigate().refresh();
             theiaProjectTree.waitItem(repositoryName + "/" + name);
           }
