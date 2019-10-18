@@ -59,4 +59,11 @@ public interface SourceDto extends Source {
   void setCommitId(String commitId);
 
   SourceDto withCommitId(String commitId);
+
+  @Override
+  String getSparseCheckoutDir();
+
+  void setSparseCheckoutDir(String sparseCheckoutDir);
+
+  SourceDto withSparseCheckoutDir(String sparseCheckoutDir);
 }

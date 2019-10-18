@@ -56,10 +56,10 @@ public class GithubSourceStorageBuilder {
    * @return newly created source DTO object
    */
   public SourceDto buildDevfileSource(GithubUrl githubUrl) {
-    // T_O_D_O add keepDir support when Devfile will support it
     return newDto(SourceDto.class)
         .withLocation(githubUrl.repositoryLocation())
         .withType("github")
-        .withBranch(githubUrl.getBranch());
+        .withBranch(githubUrl.getBranch())
+        .withSparseCheckoutDir(githubUrl.getSubfolder());
   }
 }

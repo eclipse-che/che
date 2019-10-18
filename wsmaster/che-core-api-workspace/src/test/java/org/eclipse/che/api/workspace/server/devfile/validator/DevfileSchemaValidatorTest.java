@@ -67,7 +67,8 @@ public class DevfileSchemaValidatorTest {
       {"editor_plugin_component/devfile_editor_plugins_components_with_memory_limit.yaml"},
       {"editor_plugin_component/devfile_plugin_component_with_reference.yaml"},
       {"devfile/devfile_just_generatename.yaml"},
-      {"devfile/devfile_name_and_generatename.yaml"}
+      {"devfile/devfile_name_and_generatename.yaml"},
+      {"devfile/devfile_with_sparse_checkout_dir.yaml"}
     };
   }
 
