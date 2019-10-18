@@ -52,8 +52,8 @@ public class WsMasterServletModule extends ServletModule {
   private boolean isCheCorsEnabled() {
     String cheCorsEnabledEnvVar = System.getenv("CHE_CORS_ENABLED");
     if (cheCorsEnabledEnvVar == null) {
-      // by default CORS should be enabled
-      return true;
+      // by default CORS should be disabled
+      return false;
     } else {
       return Boolean.valueOf(cheCorsEnabledEnvVar);
     }
