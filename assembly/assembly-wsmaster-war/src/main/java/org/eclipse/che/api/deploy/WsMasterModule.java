@@ -60,9 +60,6 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.LegacyEnvVarProvid
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MavenOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.ProjectsRootEnvVariableProvider;
-import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentCorsAllowCredentialsEnvVarProvider;
-import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentCorsAllowedOriginsEnvVarProvider;
-import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentCorsEnabledEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentJavaOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceIdEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNameEnvVarProvider;
@@ -179,14 +176,6 @@ public class WsMasterModule extends AbstractModule {
     legacyEnvVarProviderMultibinders
         .addBinding()
         .to(WorkspaceAgentJavaOptsEnvVariableProvider.class);
-
-    legacyEnvVarProviderMultibinders
-        .addBinding()
-        .to(WorkspaceAgentCorsAllowedOriginsEnvVarProvider.class);
-    legacyEnvVarProviderMultibinders
-        .addBinding()
-        .to(WorkspaceAgentCorsAllowCredentialsEnvVarProvider.class);
-    legacyEnvVarProviderMultibinders.addBinding().to(WorkspaceAgentCorsEnabledEnvVarProvider.class);
 
     bind(org.eclipse.che.api.workspace.server.event.WorkspaceJsonRpcMessenger.class)
         .asEagerSingleton();
