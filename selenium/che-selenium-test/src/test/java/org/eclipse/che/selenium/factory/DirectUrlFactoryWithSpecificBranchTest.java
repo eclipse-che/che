@@ -104,12 +104,14 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     theiaProjectTree.waitItem(repositoryName + "/pom.xml");
     theiaProjectTree.expandItem(repositoryName + "/my-lib");
     theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
-      expectedItemsAfterCloning.forEach(
+    expectedItemsAfterCloning.forEach(
         name -> {
           try {
             theiaProjectTree.waitItem(repositoryName + "/" + name);
           } catch (TimeoutException ex) {
-            LOG.info("Refresh browser for #####" + DirectUrlFactoryWithSpecificBranchTest.class.getSimpleName());
+            LOG.info(
+                "Refresh browser for #####"
+                    + DirectUrlFactoryWithSpecificBranchTest.class.getSimpleName());
             seleniumWebDriver.navigate().refresh();
             theiaProjectTree.waitItem(repositoryName + "/" + name);
           }
