@@ -142,6 +142,17 @@
                 "examples": [
                   "349d3ad"
                 ]
+              },
+              "sparseCheckoutDir": {
+                "type": "string",
+                "description": "Part of project to populate in the working directory.",
+                "examples": [
+                  "/core/",
+                  "core/",
+                  "core",
+                  "/wsmaster/che-core-api-workspace/",
+                  "/d*"
+                ]
               }
             }
           },

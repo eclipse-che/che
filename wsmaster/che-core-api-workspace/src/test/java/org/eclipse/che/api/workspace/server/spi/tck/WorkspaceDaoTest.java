@@ -535,7 +535,14 @@ public class WorkspaceDaoTest {
     workspace.getDevfile().getProjects().remove(1);
 
     final SourceImpl source3 =
-        new SourceImpl("type3", "http://location", "branch3", "point3", "tag3", "commit3");
+        new SourceImpl(
+            "type3",
+            "http://location",
+            "branch3",
+            "point3",
+            "tag3",
+            "commit3",
+            "sparseCheckoutDir3");
     ProjectImpl newProject = new ProjectImpl("project3", source3, "path3");
     workspace.getDevfile().getProjects().add(newProject);
 
@@ -544,9 +551,10 @@ public class WorkspaceDaoTest {
     projectCfg.getSource().setLocation("new-location");
     projectCfg.getSource().setType("new-type");
     projectCfg.getSource().setBranch("new-branch");
-    projectCfg.getSource().setCommitId(("new-commit"));
-    projectCfg.getSource().setTag(("new-tag"));
-    projectCfg.getSource().setStartPoint(("new-point"));
+    projectCfg.getSource().setCommitId("new-commit");
+    projectCfg.getSource().setTag("new-tag");
+    projectCfg.getSource().setStartPoint("new-point");
+    projectCfg.getSource().setSparseCheckoutDir("new-sparse-checkout-dir");
 
     // Remove an existing command
     workspace.getDevfile().getCommands().remove(1);
@@ -854,11 +862,25 @@ public class WorkspaceDaoTest {
   private static DevfileImpl createDevfile(String name) {
 
     SourceImpl source1 =
-        new SourceImpl("type1", "http://location", "branch1", "point1", "tag1", "commit1");
+        new SourceImpl(
+            "type1",
+            "http://location",
+            "branch1",
+            "point1",
+            "tag1",
+            "commit1",
+            "sparseCheckoutDir1");
     ProjectImpl project1 = new ProjectImpl("project1", source1, "path1");
 
     SourceImpl source2 =
-        new SourceImpl("type2", "http://location", "branch2", "point2", "tag2", "commit2");
+        new SourceImpl(
+            "type2",
+            "http://location",
+            "branch2",
+            "point2",
+            "tag2",
+            "commit2",
+            "sparseCheckoutDir2");
     ProjectImpl project2 = new ProjectImpl("project2", source2, "path2");
 
     ActionImpl action1 =

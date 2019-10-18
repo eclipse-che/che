@@ -79,7 +79,7 @@ suite('E2E', async () => {
             await editor.waitTabFocused(tabTitle);
             await editor.moveCursorToLineAndChar(tabTitle, 6, 20);
             await editor.pressControlSpaceCombination(tabTitle);
-            await editor.waitSuggestion(tabTitle, 'append(CharSequence csq, int start, int end) : PrintStream');
+            await editor.waitSuggestionWithScrolling(tabTitle, 'append(CharSequence csq, int start, int end) : PrintStream');
         });
 
     });

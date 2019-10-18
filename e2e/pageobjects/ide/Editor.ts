@@ -40,18 +40,31 @@ export class Editor {
         await this.driverHelper.waitDisappearanceWithTimeout(By.css(Editor.SUGGESTION_WIDGET_BODY_CSS));
     }
 
-    public async scrollAndSearchSuggestion(editorTabTitle: string, suggestionLocator: By, timeout: number = 10000) {
-        await this.driverHelper.getDriver().wait(async () => {
-            await this.waitSuggestionContainer();
-            if (await this.driverHelper.isVisible(suggestionLocator)) {
-                return true;
-            }
+    public async waitSuggestion(editorTabTitle: string,
+        suggestionText: string,
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
 
-            await this.performKeyCombination(editorTabTitle, Key.ARROW_DOWN);
+        Logger.debug(`Editor.waitSuggestion tabTitle: "${editorTabTitle}" suggestion: "${suggestionText}"`);
+
+        const suggestionLocator: By = this.getSuggestionLineXpathLocator(suggestionText);
+
+        await this.driverHelper.getDriver().wait(async () => {
+            try {
+                await this.driverHelper.waitVisibility(suggestionLocator, 5000);
+                return true;
+            } catch (err) {
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err;
+                }
+
+                await this.pressEscapeButton(editorTabTitle);
+                await this.waitSuggestionContainerClosed();
+                await this.pressControlSpaceCombination(editorTabTitle);
+            }
         }, timeout);
     }
 
-    public async waitSuggestion(editorTabTitle: string,
+    public async waitSuggestionWithScrolling(editorTabTitle: string,
         suggestionText: string,
         timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
 
@@ -405,6 +418,22 @@ export class Editor {
             mouseMove({ x: char + Editor.ADDITIONAL_SHIFTING_TO_X, y: yPosition }).
             click(Button.RIGHT).
             perform();
+    }
+
+    private async scrollAndSearchSuggestion(editorTabTitle: string, suggestionLocator: By, timeout: number = 10000) {
+        await this.driverHelper.getDriver().wait(async () => {
+            const loadingLocator: By = this.getSuggestionLineXpathLocator('Loading');
+
+            await this.waitSuggestionContainer();
+            await this.driverHelper.waitDisappearance(loadingLocator);
+            await this.driverHelper.wait(1000);
+
+            if (await this.driverHelper.isVisible(suggestionLocator)) {
+                return true;
+            }
+
+            await this.performKeyCombination(editorTabTitle, Key.ARROW_DOWN);
+        }, timeout);
     }
 
     private getTabWithUnsavedStatus(tabTitle: string): By {
