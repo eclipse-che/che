@@ -49,23 +49,13 @@ public class WorkspacePVCCleanerTest {
   private WorkspacePVCCleaner workspacePVCCleaner;
 
   @BeforeMethod
-  public void setUp() {
-    when(namespaceFactory.isNamespaceStatic()).thenReturn(true);
+  public void setUp() throws Exception {
+    when(namespaceFactory.isManagingNamespaces(any())).thenReturn(false);
     workspacePVCCleaner = new WorkspacePVCCleaner(true, namespaceFactory, pvcStrategy);
   }
 
   @Test
-  public void testDoNotSubscribesCleanerWhenPVCDisabled() {
-    workspacePVCCleaner = spy(new WorkspacePVCCleaner(false, namespaceFactory, pvcStrategy));
-
-    workspacePVCCleaner.subscribe(eventService);
-
-    verify(eventService, never()).subscribe(any(), eq(WorkspaceRemovedEvent.class));
-  }
-
-  @Test
-  public void testDoNotSubscribesCleanerWhenPVCEnabledAndNamespaceIsNotPredefined() {
-    when(namespaceFactory.isNamespaceStatic()).thenReturn(false);
+  public void testDoNotSubscribesCleanerWhenPVCDisabled() throws Exception {
     workspacePVCCleaner = spy(new WorkspacePVCCleaner(false, namespaceFactory, pvcStrategy));
 
     workspacePVCCleaner.subscribe(eventService);
@@ -81,7 +71,8 @@ public class WorkspacePVCCleanerTest {
   }
 
   @Test
-  public void testInvokeCleanupWhenWorkspaceRemovedEventPublished() throws Exception {
+  public void testInvokeCleanupWhenWorkspaceRemovedEventPublishedAndNamespaceIsManaged()
+      throws Exception {
     doAnswer(
             invocationOnMock -> {
               final EventSubscriber<WorkspaceRemovedEvent> argument =
@@ -93,10 +84,32 @@ public class WorkspacePVCCleanerTest {
             })
         .when(eventService)
         .subscribe(any(), eq(WorkspaceRemovedEvent.class));
+    when(namespaceFactory.isManagingNamespaces(any())).thenReturn(true);
 
     workspacePVCCleaner.subscribe(eventService);
 
     verify(pvcStrategy).cleanup(workspace);
+  }
+
+  @Test
+  public void testDontInvokeCleanupWhenWorkspaceRemovedEventPublishedAndNamespaceIsNotManaged()
+      throws Exception {
+    doAnswer(
+            invocationOnMock -> {
+              final EventSubscriber<WorkspaceRemovedEvent> argument =
+                  invocationOnMock.getArgument(0);
+              final WorkspaceRemovedEvent event = mock(WorkspaceRemovedEvent.class);
+              when(event.getWorkspace()).thenReturn(workspace);
+              argument.onEvent(event);
+              return invocationOnMock;
+            })
+        .when(eventService)
+        .subscribe(any(), eq(WorkspaceRemovedEvent.class));
+    when(namespaceFactory.isManagingNamespaces(any())).thenReturn(true);
+
+    workspacePVCCleaner.subscribe(eventService);
+
+    verify(pvcStrategy, never()).cleanup(workspace);
   }
 
   @Test

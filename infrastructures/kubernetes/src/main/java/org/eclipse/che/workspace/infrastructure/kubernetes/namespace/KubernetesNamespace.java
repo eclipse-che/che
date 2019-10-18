@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static java.lang.String.format;
+
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
@@ -117,6 +119,14 @@ public class KubernetesNamespace {
     }
   }
 
+  void delete() throws InfrastructureException {
+    String workspaceId = getWorkspaceId();
+    String projectName = getName();
+
+    KubernetesClient client = clientFactory.create(workspaceId);
+    delete(projectName, client);
+  }
+
   /** Returns namespace name */
   public String getName() {
     return name;
@@ -211,6 +221,23 @@ public class KubernetesNamespace {
                 + "When using workspace namespace placeholders, service account with lenient permissions (cluster-admin) must be used.");
       }
       throw new KubernetesInfrastructureException(e);
+    }
+  }
+
+  private void delete(String namespaceName, KubernetesClient client)
+      throws InfrastructureException {
+    try {
+      client.namespaces().withName(namespaceName).delete();
+    } catch (KubernetesClientException e) {
+      if (e.getCode() == 404) {
+        LOG.warn(
+            format(
+                "Tried to delete namespace '%s' but it doesn't exist in the cluster.",
+                namespaceName),
+            e);
+      } else {
+        throw new KubernetesInfrastructureException(e);
+      }
     }
   }
 

@@ -105,7 +105,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
     OpenShiftProject osProject = doCreateProject(workspaceId, projectName);
     osProject.prepare();
 
-    if (!isNamespaceStatic() && !isNullOrEmpty(getServiceAccountName())) {
+    if (isCreatingNamespaces(workspaceId) && !isNullOrEmpty(getServiceAccountName())) {
       // prepare service account for workspace only if account name is configured
       // and project is not predefined
       // since predefined project should be prepared during Che deployment
@@ -115,6 +115,20 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
     }
 
     return osProject;
+  }
+
+  @Override
+  public void delete(String workspaceId) throws InfrastructureException {
+    String projectName;
+    try {
+      projectName = evalNamespaceName(workspaceId, EnvironmentContext.getCurrent().getSubject());
+    } catch (NotFoundException | ServerException | ConflictException | ValidationException e) {
+      throw new InfrastructureException(
+          format("Failed to evaluate the project name to use for workspace %s.", workspaceId), e);
+    }
+
+    OpenShiftProject osProject = doCreateProject(workspaceId, projectName);
+    osProject.delete();
   }
 
   @VisibleForTesting

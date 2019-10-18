@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import io.fabric8.kubernetes.api.model.DoneableNamespace;
 import io.fabric8.kubernetes.api.model.Namespace;
@@ -51,6 +52,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.Kubernetes
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -243,127 +245,125 @@ public class KubernetesNamespaceFactoryTest {
     namespaceFactory.list();
   }
 
-  @Test
-  public void shouldReturnTrueIfNamespaceIsNotEmptyOnCheckingIfNamespaceIsPredefined() {
+  @DataProvider
+  public static Object[][] creatingNamespaceConditions() {
+    // Whether or not the factory potentially creates a namespace depends on the 3 conditions:
+    // 1) the value of the legacy property 'che.infra.kubernetes.namespace'
+    // 2) legacy property pointing to the existing namespace
+    // 3) value of the new property 'che.infra.kubernetes.namespace.default'
+    // the output is either true, false, or error (represented as a null here)
+
+    // this is the truth table we need to follow
+    // ...namespace    | ...namespace exists | ...namespace.default | creating?
+    // no-placeholders |       no            |       null           | error
+    // no-placeholders |       no            |   no-placeholders    | no
+    // no-placeholders |       no            |    placeholders      | yes
+    // no-placeholders |      yes            |       null           | no
+    // no-placeholders |      yes            |   no-placeholders    | no
+    // no-placeholders |      yes            |    placeholders      | no
+    //  placeholders   |       no            |        null          | error
+    //  placeholders   |       no            |   no-placeholders    | no
+    //  placeholders   |       no            |    placeholders      | yes
+    //  placeholders   |      yes            |        null          | yes
+    //  placeholders   |      yes            |   no-placeholders    | yes
+    //  placeholders   |      yes            |    placeholders      | yes
+
+    // additionally, we want to test that if the legacy property is null, it behaves exactly
+    // the same as having a placeholder, because it should default to <workspaceid>
+    return new Object[][] {
+      new Object[] {"some", false, null, null},
+      new Object[] {"some", false, "some", false},
+      new Object[] {"some", false, "<userid>", true},
+      new Object[] {"some", true, null, false},
+      new Object[] {"some", true, "some", false},
+      new Object[] {"some", true, "<userid>", false},
+      new Object[] {"<workspaceid>", false, null, null},
+      new Object[] {"<workspaceid>", false, "some", false},
+      new Object[] {"<workspaceid>", false, "<userid>", true},
+      new Object[] {"<workspaceid>", true, null, true},
+      new Object[] {"<workspaceid>", true, "some", true},
+      new Object[] {"<workspaceid>", true, "<userid>", true},
+      new Object[] {null, false, null, null},
+      new Object[] {null, false, "some", false},
+      new Object[] {null, false, "<userid>", true},
+      new Object[] {null, true, null, true},
+      new Object[] {null, true, "some", true},
+      new Object[] {null, true, "<userid>", true},
+    };
+  }
+
+  @Test(dataProvider = "creatingNamespaceConditions")
+  public void shouldDetermineWhenNamespaceCanBeCreated(
+      String legacyProperty,
+      boolean legacyNamespaceExists,
+      String namespaceProperty,
+      Boolean expectedOutcome) {
+
     // given
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined", "", "", "che", false, clientFactory, workspaceManager);
+            legacyProperty, "", "", namespaceProperty, true, clientFactory, workspaceManager);
+
+    Namespace existingLegacyNamespace = legacyNamespaceExists ? mock(Namespace.class) : null;
+    when(namespaceResource.get()).thenReturn(existingLegacyNamespace);
 
     // when
-    boolean isPredefined = namespaceFactory.isNamespaceStatic();
+    Boolean result;
+    try {
+      result = namespaceFactory.isCreatingNamespaces("123");
+    } catch (InfrastructureException e) {
+      // this can happen and we test for it below...
+      result = null;
+    }
 
     // then
-    assertTrue(isPredefined);
+    assertEquals(result, expectedOutcome);
   }
 
-  @Test
-  public void
-      shouldReturnTrueIfNamespaceIsEmptyAndDefaultNamespaceIsNotEmptyOnCheckingIfNamespaceIsPredefined() {
-    // given
-    namespaceFactory =
-        new KubernetesNamespaceFactory("", "", "", "che", false, clientFactory, workspaceManager);
+  @Test(dataProvider = "creatingNamespaceConditions")
+  public void testNotManagingNamespacesWheneverNotCreatingThem(
+      String legacyProperty,
+      boolean legacyNamespaceExists,
+      String namespaceProperty,
+      Boolean expectedCreating)
+      throws InfrastructureException {
 
-    // when
-    boolean isPredefined = namespaceFactory.isNamespaceStatic();
+    // it is possible that we are creating namespaces that we are not fully managing, e.g. <user*>
+    // namespaces are created but not fully deleted afterwards. We just clean them.
+    // However, whenever a namespace is NOT being created, we should never claim we're managing the
+    // namespace.
+    // This is what this test asserts.
 
-    // then
-    assertTrue(isPredefined);
-  }
-
-  @Test
-  public void
-      shouldReturnTrueIfNamespaceIsNullAndDefaultNamespaceIsNotEmptyOnCheckingIfNamespaceIsPredefined() {
-    // given
-    namespaceFactory =
-        new KubernetesNamespaceFactory(null, "", "", "che", false, clientFactory, workspaceManager);
-
-    // when
-    boolean isPredefined = namespaceFactory.isNamespaceStatic();
-
-    // then
-    assertTrue(isPredefined);
-  }
-
-  @Test
-  public void
-      shouldReturnFalseIfBothNamespaceAndDefaultNamespaceAreTemplatizedOnCheckingIfNamespaceIsPredefined() {
     // given
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "<username>", "", "", "<workspaceid>", false, clientFactory, workspaceManager);
+            legacyProperty, "", "", namespaceProperty, true, clientFactory, workspaceManager);
+
+    Namespace existingLegacyNamespace = legacyNamespaceExists ? mock(Namespace.class) : null;
+    when(namespaceResource.get()).thenReturn(existingLegacyNamespace);
 
     // when
-    boolean isPredefined = namespaceFactory.isNamespaceStatic();
+    boolean creating;
+    try {
+      creating = namespaceFactory.isCreatingNamespaces("123");
+    } catch (InfrastructureException e) {
+      // if we can't determine whether we're potentially creating a namespace, we shouldn't claim
+      // we're managing it
+      if (expectedCreating != null) {
+        fail("Shouldn't have failed.");
+      }
+      creating = false;
+    }
+    boolean managing = namespaceFactory.isManagingNamespaces("123");
 
     // then
-    assertFalse(isPredefined);
-  }
-
-  @Test
-  public void
-      shouldReturnFalseIfNamespaceIsEmptyAndDefaultNamespaceIsTemplatizedOnCheckingIfNamespaceIsPredefined() {
-    // given
-    namespaceFactory =
-        new KubernetesNamespaceFactory(
-            "", "", "", "<username>", false, clientFactory, workspaceManager);
-
-    // when
-    boolean isPredefined = namespaceFactory.isNamespaceStatic();
-
-    // then
-    assertFalse(isPredefined);
-  }
-
-  @Test
-  public void
-      shouldReturnFalseIfNamespaceIsNullAndDefaultNamespaceIsTemplatizedOnCheckingIfNamespaceIsPredefined() {
-    // given
-    namespaceFactory =
-        new KubernetesNamespaceFactory(
-            null, "", "", "<username>", false, clientFactory, workspaceManager);
-
-    // when
-    boolean isPredefined = namespaceFactory.isNamespaceStatic();
-
-    // then
-    assertFalse(isPredefined);
-  }
-
-  @Test
-  public void
-      shouldReturnFalseIfNamespacePointsToNonExistingOneAndDefaultNamespaceIsTemplatizedOnCheckingIfNamespaceIsPredefined() {
-    // given
-    namespaceFactory =
-        new KubernetesNamespaceFactory(
-            "nonexisting", "", "", "<username>", false, clientFactory, workspaceManager);
-
-    // this is modelling the non-existence of the namespace
-    when(namespaceResource.get()).thenReturn(null);
-
-    // when
-    boolean isPredefined = namespaceFactory.isNamespaceStatic();
-
-    // then
-    assertFalse(isPredefined);
-  }
-
-  @Test
-  public void
-      shouldReturnTrueIfNamespacePointsToNonExistingOneAndDefaultNamespaceIsNotTemplatizedOnCheckingIfNamespaceIsPredefined() {
-    // given
-    namespaceFactory =
-        new KubernetesNamespaceFactory(
-            "nonexisting", "", "", "che", false, clientFactory, workspaceManager);
-
-    // this is modelling the non-existence of the namespace
-    when(namespaceResource.get()).thenReturn(null);
-
-    // when
-    boolean isPredefined = namespaceFactory.isNamespaceStatic();
-
-    // then
-    assertTrue(isPredefined);
+    if (!creating) {
+      assertFalse(
+          managing,
+          format(
+              "legacyProp=%s, legacyExists=%s, namespaceProp=%s, expectedCreating=%s",
+              legacyProperty, legacyNamespaceExists, namespaceProperty, expectedCreating));
+    }
   }
 
   @Test

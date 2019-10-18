@@ -52,11 +52,15 @@ public class WorkspacePVCCleaner {
 
   @Inject
   public void subscribe(EventService eventService) {
-    if (pvcEnabled && namespaceFactory.isNamespaceStatic())
+    if (pvcEnabled) {
       eventService.subscribe(
           event -> {
             final Workspace workspace = event.getWorkspace();
             try {
+              if (namespaceFactory.isManagingNamespaces(workspace.getId())) {
+                // the namespaces of managed workspaces are deleted, so no need to do the cleanup
+                return;
+              }
               strategy.cleanup(workspace);
             } catch (InfrastructureException ex) {
               LOG.error(
@@ -66,5 +70,6 @@ public class WorkspacePVCCleaner {
             }
           },
           WorkspaceRemovedEvent.class);
+    }
   }
 }
