@@ -81,6 +81,8 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     }
   }
 
+
+
   @Test
   public void factoryWithDirectUrlWithSpecificBranch() {
     String repositoryName = testAuxiliaryRepo.getName();
@@ -103,6 +105,11 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     theiaProjectTree.expandItem(repositoryName);
     theiaProjectTree.expandItem(repositoryName + "/my-lib");
     theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
+    try {
+      Thread.sleep(3600);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
 
     expectedItemsAfterCloning.forEach(
         name -> {
