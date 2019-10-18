@@ -47,7 +47,19 @@
         <che.lib.version>7.4.0-SNAPSHOT</che.lib.version>
         <che.ls.jdt.version>0.0.3</che.ls.jdt.version>
         <che.version>7.4.0-SNAPSHOT</che.version>
+        <!-- TODO remove before merge see https://github.com/eclipse/che-parent/pull/133 -->
+        <io.jaegertracing.micrometer.version>1.0.0</io.jaegertracing.micrometer.version>
+        <io.jaegertracing.version>1.0.0</io.jaegertracing.version>
+        <io.micrometer.version>1.3.0</io.micrometer.version>
+        <io.opentracing.api.extensions.version>0.5.0</io.opentracing.api.extensions.version>
+        <io.opentracing.concurrent.version>0.4.0</io.opentracing.concurrent.version>
+        <io.opentracing.jdbc.version>0.1.8</io.opentracing.jdbc.version>
+        <io.opentracing.tracerresolver.version>0.1.8</io.opentracing.tracerresolver.version>
+        <io.opentracing.version>0.33.0</io.opentracing.version>
+        <io.opentracing.web-servlet-filter.version>0.4.0</io.opentracing.web-servlet-filter.version>
+        <io.prometheus.simpleclient.version>0.7.0</io.prometheus.simpleclient.version>
         <specification.version>1.0-beta2</specification.version>
+        <!-- end TODO remove before merge https://github.com/eclipse/che-parent/pull/133 -->
     </properties>
     <dependencyManagement>
         <dependencies>
