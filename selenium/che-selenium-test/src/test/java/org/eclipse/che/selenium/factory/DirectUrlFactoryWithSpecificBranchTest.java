@@ -104,7 +104,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     theiaProjectTree.expandItem(repositoryName + "/my-lib");
     theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
     try {
-      Thread.sleep(3600);
+      Thread.sleep(3600000);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
