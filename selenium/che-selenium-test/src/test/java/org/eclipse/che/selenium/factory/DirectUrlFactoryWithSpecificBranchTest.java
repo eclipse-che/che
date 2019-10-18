@@ -109,9 +109,6 @@ public class DirectUrlFactoryWithSpecificBranchTest {
           try {
             theiaProjectTree.waitItem(repositoryName + "/" + name);
           } catch (TimeoutException ex) {
-            LOG.info(
-                "Refresh browser for #####"
-                    + DirectUrlFactoryWithSpecificBranchTest.class.getSimpleName());
             seleniumWebDriver.navigate().refresh();
             theiaProjectTree.waitItem(repositoryName + "/" + name);
           }
