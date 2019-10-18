@@ -13,9 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -23,7 +21,6 @@ import static org.mockito.Mockito.when;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -42,9 +39,10 @@ import org.testng.annotations.Test;
 public class WorkspacePVCCleanerTest {
 
   @Mock private WorkspaceVolumesStrategy pvcStrategy;
-  @Mock private EventService eventService;
+  private EventService eventService;
   @Mock private KubernetesNamespaceFactory namespaceFactory;
   @Mock private Workspace workspace;
+  @Mock WorkspaceRemovedEvent event;
 
   private WorkspacePVCCleaner workspacePVCCleaner;
 
@@ -52,6 +50,10 @@ public class WorkspacePVCCleanerTest {
   public void setUp() throws Exception {
     when(namespaceFactory.isManagingNamespaces(any())).thenReturn(false);
     workspacePVCCleaner = new WorkspacePVCCleaner(true, namespaceFactory, pvcStrategy);
+    when(workspace.getId()).thenReturn("123");
+    when(event.getWorkspace()).thenReturn(workspace);
+
+    eventService = spy(new EventService());
   }
 
   @Test
@@ -71,63 +73,34 @@ public class WorkspacePVCCleanerTest {
   }
 
   @Test
-  public void testInvokeCleanupWhenWorkspaceRemovedEventPublishedAndNamespaceIsManaged()
+  public void testInvokeCleanupWhenWorkspaceRemovedEventPublishedAndNamespaceIsNotManaged()
       throws Exception {
-    doAnswer(
-            invocationOnMock -> {
-              final EventSubscriber<WorkspaceRemovedEvent> argument =
-                  invocationOnMock.getArgument(0);
-              final WorkspaceRemovedEvent event = mock(WorkspaceRemovedEvent.class);
-              when(event.getWorkspace()).thenReturn(workspace);
-              argument.onEvent(event);
-              return invocationOnMock;
-            })
-        .when(eventService)
-        .subscribe(any(), eq(WorkspaceRemovedEvent.class));
-    when(namespaceFactory.isManagingNamespaces(any())).thenReturn(true);
-
     workspacePVCCleaner.subscribe(eventService);
+
+    eventService.publish(event);
 
     verify(pvcStrategy).cleanup(workspace);
   }
 
   @Test
-  public void testDontInvokeCleanupWhenWorkspaceRemovedEventPublishedAndNamespaceIsNotManaged()
+  public void testNotInvokeCleanupWhenWorkspaceRemovedEventPublishedAndNamespaceIsManaged()
       throws Exception {
-    doAnswer(
-            invocationOnMock -> {
-              final EventSubscriber<WorkspaceRemovedEvent> argument =
-                  invocationOnMock.getArgument(0);
-              final WorkspaceRemovedEvent event = mock(WorkspaceRemovedEvent.class);
-              when(event.getWorkspace()).thenReturn(workspace);
-              argument.onEvent(event);
-              return invocationOnMock;
-            })
-        .when(eventService)
-        .subscribe(any(), eq(WorkspaceRemovedEvent.class));
     when(namespaceFactory.isManagingNamespaces(any())).thenReturn(true);
 
     workspacePVCCleaner.subscribe(eventService);
+
+    eventService.publish(event);
 
     verify(pvcStrategy, never()).cleanup(workspace);
   }
 
   @Test
   public void testDoNotRethrowExceptionWhenErrorOnCleanupOccurs() throws Exception {
-    doAnswer(
-            invocationOnMock -> {
-              final EventSubscriber<WorkspaceRemovedEvent> argument =
-                  invocationOnMock.getArgument(0);
-              final WorkspaceRemovedEvent event = mock(WorkspaceRemovedEvent.class);
-              when(event.getWorkspace()).thenReturn(workspace);
-              argument.onEvent(event);
-              return invocationOnMock;
-            })
-        .when(eventService)
-        .subscribe(any(), eq(WorkspaceRemovedEvent.class));
     doThrow(InfrastructureException.class).when(pvcStrategy).cleanup(workspace);
 
     workspacePVCCleaner.subscribe(eventService);
+
+    eventService.publish(event);
 
     verify(pvcStrategy).cleanup(workspace);
   }
