@@ -23,9 +23,15 @@ public interface PreviewUrl {
   /**
    * {@code port} specifies where application, that is executed by command, listens. It is used to
    * create service+ingress/route pair to make application accessible.
+   *
+   * @return applications's listen port
    */
   int getPort();
 
-  /** specifies path that should be opened after command execution. */
+  /**
+   * Specifies path and/or query parameters that should be opened after command execution.
+   *
+   * @return path and/or query params to open or {@code null} when not defined
+   */
   String getPath();
 }
