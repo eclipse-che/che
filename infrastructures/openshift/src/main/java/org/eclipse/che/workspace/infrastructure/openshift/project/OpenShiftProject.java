@@ -147,6 +147,8 @@ public class OpenShiftProject extends KubernetesNamespace {
             format(
                 "Tried to delete project '%s' but it doesn't exist in the cluster.", projectName),
             e);
+      } else if (e.getCode() == 409) {
+        LOG.info(format("The project '%s' is currently being deleted.", projectName), e);
       } else {
         throw new KubernetesInfrastructureException(e);
       }

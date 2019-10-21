@@ -250,6 +250,21 @@ public class KubernetesNamespaceTest {
     // and no exception is thrown
   }
 
+  @Test
+  public void testDoesntFailIfDeletedNamespaceIsBeingDeleted() throws Exception {
+    // given
+    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
+    Resource resource = prepareNamespaceResource(NAMESPACE);
+    when(resource.delete()).thenThrow(new KubernetesClientException("err", 409, null));
+
+    // when
+    namespace.delete();
+
+    // then
+    verify(resource).delete();
+    // and no exception is thrown
+  }
+
   private MetadataNested prepareCreateNamespaceRequest() {
     DoneableNamespace namespace = mock(DoneableNamespace.class);
     MetadataNested metadataNested = mock(MetadataNested.class);

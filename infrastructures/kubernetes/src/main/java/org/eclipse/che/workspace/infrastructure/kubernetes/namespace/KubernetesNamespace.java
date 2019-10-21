@@ -120,11 +120,9 @@ public class KubernetesNamespace {
   }
 
   void delete() throws InfrastructureException {
-    String workspaceId = getWorkspaceId();
-    String projectName = getName();
 
     KubernetesClient client = clientFactory.create(workspaceId);
-    delete(projectName, client);
+    delete(name, client);
   }
 
   /** Returns namespace name */
@@ -235,6 +233,8 @@ public class KubernetesNamespace {
                 "Tried to delete namespace '%s' but it doesn't exist in the cluster.",
                 namespaceName),
             e);
+      } else if (e.getCode() == 409) {
+        LOG.info(format("The namespace '%s' is currently being deleted.", namespaceName), e);
       } else {
         throw new KubernetesInfrastructureException(e);
       }

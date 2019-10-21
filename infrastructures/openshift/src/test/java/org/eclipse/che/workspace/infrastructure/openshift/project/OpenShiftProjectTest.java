@@ -189,6 +189,21 @@ public class OpenShiftProjectTest {
     // and no exception is thrown
   }
 
+  @Test
+  public void testDoesntFailIfDeletedProjectIsBeingDeleted() throws Exception {
+    // given
+    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    Resource resource = prepareProjectResource(PROJECT_NAME);
+    when(resource.delete()).thenThrow(new KubernetesClientException("err", 409, null));
+
+    // when
+    project.delete();
+
+    // then
+    verify(resource).delete();
+    // and no exception is thrown
+  }
+
   private MetadataNested prepareProjectRequest() {
     ProjectRequestOperation projectRequestOperation = mock(ProjectRequestOperation.class);
     DoneableProjectRequest projectRequest = mock(DoneableProjectRequest.class);
