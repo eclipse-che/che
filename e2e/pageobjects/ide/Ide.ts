@@ -213,26 +213,8 @@ export class Ide {
 
     async checkLsInitializationStart(expectedTextInStatusBar: string) {
         Logger.debug('Ide.checkLsInitializationStart');
-
-        try {
-            await this.waitStatusBarContains(expectedTextInStatusBar, 20000);
-        } catch (err) {
-            if (!(err instanceof error.TimeoutError)) {
-                throw err;
-            }
-
-            const workaroundReportText: string = '\n############################## \n\n' +
-                'Known issue: https://github.com/eclipse/che/issues/14944 \n' +
-                '"Java LS server initialization failed" \n' +
-                '############################## \n';
-
-            console.log(workaroundReportText);
-
-            await this.driverHelper.getDriver().navigate().refresh();
-            await this.waitAndSwitchToIdeFrame();
-            await this.waitStatusBarContains(expectedTextInStatusBar);
-        }
-
+        
+        await this.waitStatusBarContains(expectedTextInStatusBar, 20000);
     }
 
     async closeAllNotifications() {
