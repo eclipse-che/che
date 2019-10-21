@@ -40,8 +40,7 @@ public class JGroupsWorkspaceStatusCache implements WorkspaceStatusCache {
   @Inject
   public JGroupsWorkspaceStatusCache(@Named("jgroups.config.file") String confFile) {
     try {
-      JChannel channel = new JChannel(confFile);
-      channel.connect(CHANNEL_NAME);
+      JChannel channel = new JChannel(confFile).connect(CHANNEL_NAME);
       delegate = new ReplicatedHashMap<>(channel);
       delegate.setBlockingUpdates(true);
       delegate.start(5000);
