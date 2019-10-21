@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.server.devfile.convert;
 
 import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.BRANCH_PARAMETER_NAME;
 import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.COMMIT_ID_PARAMETER_NAME;
+import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.SPARSE_CHECKOUT_DIR_PARAMETER_NAME;
 import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.START_POINT_PARAMETER_NAME;
 import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.TAG_PARAMETER_NAME;
 import static org.testng.Assert.assertEquals;
@@ -46,7 +47,7 @@ public class ProjectConverterTest {
         new ProjectImpl(
             "myProject",
             new SourceImpl(
-                "git", "https://github.com/eclipse/che.git", "master", "3434d", null, null),
+                "git", "https://github.com/eclipse/che.git", "master", "3434d", null, null, "core"),
             null);
 
     ProjectConfigImpl workspaceProject = projectConverter.toWorkspaceProject(devfileProject);
@@ -58,6 +59,7 @@ public class ProjectConverterTest {
     assertEquals(source.getLocation(), "https://github.com/eclipse/che.git");
     assertEquals(source.getParameters().get(BRANCH_PARAMETER_NAME), "master");
     assertEquals(source.getParameters().get(START_POINT_PARAMETER_NAME), "3434d");
+    assertEquals(source.getParameters().get("keepDir"), "core");
   }
 
   @Test
@@ -88,7 +90,8 @@ public class ProjectConverterTest {
     ProjectImpl devfileProject =
         new ProjectImpl(
             "myProject",
-            new SourceImpl("git", "https://github.com/eclipse/che.git", "master", null, null, null),
+            new SourceImpl(
+                "git", "https://github.com/eclipse/che.git", "master", null, null, null, null),
             "down/the/rabbit/hole/myProject");
 
     ProjectConfigImpl workspaceProject = projectConverter.toWorkspaceProject(devfileProject);
@@ -105,7 +108,8 @@ public class ProjectConverterTest {
     ProjectImpl devfileProject =
         new ProjectImpl(
             "myProject",
-            new SourceImpl("git", "https://github.com/eclipse/che.git", "master", null, null, null),
+            new SourceImpl(
+                "git", "https://github.com/eclipse/che.git", "master", null, null, null, null),
             "cant/hack/../../../usr/bin");
 
     projectConverter.toWorkspaceProject(devfileProject);
@@ -116,7 +120,8 @@ public class ProjectConverterTest {
     ProjectImpl devfileProject =
         new ProjectImpl(
             "myProject",
-            new SourceImpl("git", "https://github.com/eclipse/che.git", "master", null, null, null),
+            new SourceImpl(
+                "git", "https://github.com/eclipse/che.git", "master", null, null, null, null),
             "/usr/bin");
 
     projectConverter.toWorkspaceProject(devfileProject);
@@ -127,7 +132,8 @@ public class ProjectConverterTest {
     ProjectImpl devfileProject =
         new ProjectImpl(
             "myProject",
-            new SourceImpl("git", "https://github.com/eclipse/che.git", "master", null, null, null),
+            new SourceImpl(
+                "git", "https://github.com/eclipse/che.git", "master", null, null, null, null),
             "cant/hack/../../usr/bin");
 
     ProjectConfigImpl workspaceProject = projectConverter.toWorkspaceProject(devfileProject);
@@ -140,7 +146,8 @@ public class ProjectConverterTest {
     ProjectImpl devfileProject =
         new ProjectImpl(
             "myProject",
-            new SourceImpl("git", "https://github.com/eclipse/che.git", "master", null, null, null),
+            new SourceImpl(
+                "git", "https://github.com/eclipse/che.git", "master", null, null, null, null),
             "not/../in/root/../..");
 
     projectConverter.toWorkspaceProject(devfileProject);
@@ -163,7 +170,7 @@ public class ProjectConverterTest {
         new ProjectImpl(
             "myProject",
             new SourceImpl(
-                "git", "https://github.com/eclipse/che.git", null, startPoint, tag, commitId),
+                "git", "https://github.com/eclipse/che.git", null, startPoint, tag, commitId, null),
             null);
 
     projectConverter.toWorkspaceProject(devfileProject);
@@ -184,7 +191,8 @@ public class ProjectConverterTest {
     ProjectImpl devfileProject =
         new ProjectImpl(
             "myProject",
-            new SourceImpl("git", "https://github.com/eclipse/che.git", null, null, null, null),
+            new SourceImpl(
+                "git", "https://github.com/eclipse/che.git", null, null, null, null, null),
             null);
 
     ProjectConfigImpl wsProject = projectConverter.toWorkspaceProject(devfileProject);
@@ -194,5 +202,6 @@ public class ProjectConverterTest {
     assertFalse(wsSource.getParameters().containsKey(START_POINT_PARAMETER_NAME));
     assertFalse(wsSource.getParameters().containsKey(TAG_PARAMETER_NAME));
     assertFalse(wsSource.getParameters().containsKey(COMMIT_ID_PARAMETER_NAME));
+    assertFalse(wsSource.getParameters().containsKey(SPARSE_CHECKOUT_DIR_PARAMETER_NAME));
   }
 }

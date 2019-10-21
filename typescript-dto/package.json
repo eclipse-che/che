@@ -1,10 +1,13 @@
 {
   "name": "@eclipse-che/api",
-  "version": "6.17.0",
+  "version": "7.4.0-7a47579",
   "description": "Eclipse Che DTO API",
   "types": "index.d.ts",
   "license": "EPL-2.0",
   "files": [
     "index.d.ts"
-  ]
+  ],
+  "devDependencies": {
+    "util.timestamp": "^0.0.42"
+  }
 }

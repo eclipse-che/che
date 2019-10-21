@@ -128,7 +128,8 @@ public final class DtoConverter {
                 .withBranch(source.getBranch())
                 .withStartPoint(source.getStartPoint())
                 .withTag(source.getTag())
-                .withCommitId(source.getCommitId()));
+                .withCommitId(source.getCommitId())
+                .withSparseCheckoutDir(source.getSparseCheckoutDir()));
   }
 
   private static ComponentDto asDto(Component component) {

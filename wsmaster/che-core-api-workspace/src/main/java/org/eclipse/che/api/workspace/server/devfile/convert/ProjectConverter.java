@@ -14,6 +14,7 @@ package org.eclipse.che.api.workspace.server.devfile.convert;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.BRANCH_PARAMETER_NAME;
 import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.COMMIT_ID_PARAMETER_NAME;
+import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.SPARSE_CHECKOUT_DIR_PARAMETER_NAME;
 import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.START_POINT_PARAMETER_NAME;
 import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.TAG_PARAMETER_NAME;
 
@@ -46,6 +47,8 @@ public class ProjectConverter {
     String startPoint = projectConfig.getSource().getParameters().get(START_POINT_PARAMETER_NAME);
     String tag = projectConfig.getSource().getParameters().get(TAG_PARAMETER_NAME);
     String commitId = projectConfig.getSource().getParameters().get(COMMIT_ID_PARAMETER_NAME);
+    String sparseCheckoutDir =
+        projectConfig.getSource().getParameters().get(SPARSE_CHECKOUT_DIR_PARAMETER_NAME);
 
     SourceImpl source =
         new SourceImpl(
@@ -54,7 +57,8 @@ public class ProjectConverter {
             branch,
             startPoint,
             tag,
-            commitId);
+            commitId,
+            sparseCheckoutDir);
 
     String path = projectConfig.getPath();
     while (path != null && path.startsWith("/")) {
@@ -185,6 +189,10 @@ public class ProjectConverter {
       sourceStorage.getParameters().put(TAG_PARAMETER_NAME, tag);
     } else if (commitId != null) {
       sourceStorage.getParameters().put(COMMIT_ID_PARAMETER_NAME, commitId);
+    }
+
+    if (devfileSource.getSparseCheckoutDir() != null) {
+      sourceStorage.getParameters().put("keepDir", devfileSource.getSparseCheckoutDir());
     }
   }
 }
