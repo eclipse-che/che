@@ -221,6 +221,13 @@ export class Ide {
                 throw err;
             }
 
+            const workaroundReportText: string = '\n############################## \n\n' +
+                'Known issue: https://github.com/eclipse/che/issues/14944 \n' +
+                '"Java LS server initialization failed" \n' +
+                '############################## \n';
+
+            console.log(workaroundReportText);
+
             await this.driverHelper.getDriver().navigate().refresh();
             await this.waitAndSwitchToIdeFrame();
             await this.waitStatusBarContains(expectedTextInStatusBar);
