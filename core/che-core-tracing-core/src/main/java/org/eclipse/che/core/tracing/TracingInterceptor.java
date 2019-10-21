@@ -14,6 +14,7 @@ package org.eclipse.che.core.tracing;
 import com.google.common.annotations.Beta;
 import com.google.inject.Inject;
 import io.opentracing.Scope;
+import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.tag.Tags;
 import java.lang.reflect.Method;
@@ -47,45 +48,46 @@ public class TracingInterceptor implements MethodInterceptor {
   @Override
   public Object invoke(MethodInvocation invocation) throws Throwable {
     String spanName = getSpanName(invocation);
-    try (Scope scope =
+
+    Span span =
         tracer
             .buildSpan(spanName)
             .asChildOf(tracer.activeSpan())
             .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)
-            .startActive(true)) {
-
+            .start();
+    try (Scope scope = tracer.scopeManager().activate(span)) {
       Traced.TagsStack.push();
 
-      try {
-        return invocation.proceed();
-      } finally {
-        for (Map.Entry<String, Supplier<?>> e : Traced.TagsStack.pop().entrySet()) {
-          Object val;
-          try {
-            val = e.getValue().get();
-          } catch (Exception ex) {
-            if (LOG.isDebugEnabled()) {
-              // we want to know the exception in case the tag extraction failed.
-              // Slf4j doesn't seem to provide a method overload that could both provide formatting
-              // arguments and the cause.
-              LOG.debug(
-                  "Could not get the value for a tag called {} when tracing {}.",
-                  e.getKey(),
-                  spanName,
-                  ex);
-            }
-            continue;
+      return invocation.proceed();
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      span.log(e.getMessage());
+      throw e;
+    } finally {
+      for (Map.Entry<String, Supplier<?>> e : Traced.TagsStack.pop().entrySet()) {
+        Object val;
+        try {
+          val = e.getValue().get();
+        } catch (Exception ex) {
+          if (LOG.isDebugEnabled()) {
+            LOG.debug(
+                "Could not get the value for a tag called {} when tracing {}.",
+                e.getKey(),
+                spanName,
+                ex);
           }
+          continue;
+        }
 
-          if (val instanceof String) {
-            scope.span().setTag(e.getKey(), (String) val);
-          } else if (val instanceof Boolean) {
-            scope.span().setTag(e.getKey(), (Boolean) val);
-          } else if (val instanceof Number) {
-            scope.span().setTag(e.getKey(), (Number) val);
-          }
+        if (val instanceof String) {
+          span.setTag(e.getKey(), (String) val);
+        } else if (val instanceof Boolean) {
+          span.setTag(e.getKey(), (Boolean) val);
+        } else if (val instanceof Number) {
+          span.setTag(e.getKey(), (Number) val);
         }
       }
+      span.finish();
     }
   }
 

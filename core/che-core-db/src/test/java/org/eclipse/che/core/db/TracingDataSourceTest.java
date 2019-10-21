@@ -17,6 +17,7 @@ import com.google.common.collect.ImmutableMap;
 import io.opentracing.contrib.jdbc.TracingConnection;
 import java.lang.reflect.Field;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,6 +35,8 @@ import org.testng.annotations.Test;
 public class TracingDataSourceTest {
 
   @Mock DataSource dataSource;
+  @Mock Connection connection;
+  @Mock DatabaseMetaData databaseMetaData;
 
   @BeforeMethod
   @AfterMethod
@@ -41,6 +44,8 @@ public class TracingDataSourceTest {
     HashMap<String, String> newEnv = new HashMap<>(System.getenv());
     newEnv.remove("CHE_DB_TRACING_ENABLED");
     setEnv(newEnv);
+    Mockito.when(dataSource.getConnection()).thenReturn(connection);
+    Mockito.when(connection.getMetaData()).thenReturn(databaseMetaData);
   }
 
   @Test
@@ -49,7 +54,7 @@ public class TracingDataSourceTest {
 
     Connection actual = ds.getConnection();
     assertEquals(actual.getClass(), TracingConnection.class);
-    Mockito.verify(dataSource).getConnection();
+    Mockito.verify(dataSource, Mockito.times(2)).getConnection();
   }
 
   @Test
