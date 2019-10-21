@@ -65,7 +65,7 @@ public class RemoveProjectOnWorkspaceRemoveTest {
   @Test
   public void shouldRemoveProjectOnWorkspaceRemovedEventIfFactoryIsManagingNamespaces()
       throws Exception {
-    when(projectFactory.isManagingNamespaces(any())).thenReturn(true);
+    when(projectFactory.isManagingNamespace(any())).thenReturn(true);
 
     removeProjectOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
 
@@ -75,7 +75,7 @@ public class RemoveProjectOnWorkspaceRemoveTest {
   @Test
   public void shouldNotRemoveProjectOnWorkspaceRemovedEventIfFactoryIsNotManagingNamespaces()
       throws Exception {
-    when(projectFactory.isManagingNamespaces(any())).thenReturn(false);
+    when(projectFactory.isManagingNamespace(any())).thenReturn(false);
 
     removeProjectOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
 

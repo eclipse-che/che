@@ -45,7 +45,7 @@ public class RemoveNamespaceOnWorkspaceRemove implements EventSubscriber<Workspa
   public void onEvent(WorkspaceRemovedEvent event) {
     String workspaceId = event.getWorkspace().getId();
     try {
-      if (namespaceFactory.isManagingNamespaces(workspaceId)) {
+      if (namespaceFactory.isManagingNamespace(workspaceId)) {
         namespaceFactory.delete(workspaceId);
       }
     } catch (InfrastructureException e) {

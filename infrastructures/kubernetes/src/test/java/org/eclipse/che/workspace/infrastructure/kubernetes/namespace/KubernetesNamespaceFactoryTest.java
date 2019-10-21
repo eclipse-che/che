@@ -310,7 +310,7 @@ public class KubernetesNamespaceFactoryTest {
     // when
     Boolean result;
     try {
-      result = namespaceFactory.isCreatingNamespaces("123");
+      result = namespaceFactory.isCreatingNamespace("123");
     } catch (InfrastructureException e) {
       // this can happen and we test for it below...
       result = null;
@@ -345,7 +345,7 @@ public class KubernetesNamespaceFactoryTest {
     // when
     boolean creating;
     try {
-      creating = namespaceFactory.isCreatingNamespaces("123");
+      creating = namespaceFactory.isCreatingNamespace("123");
     } catch (InfrastructureException e) {
       // if we can't determine whether we're potentially creating a namespace, we shouldn't claim
       // we're managing it
@@ -354,7 +354,7 @@ public class KubernetesNamespaceFactoryTest {
       }
       creating = false;
     }
-    boolean managing = namespaceFactory.isManagingNamespaces("123");
+    boolean managing = namespaceFactory.isManagingNamespace("123");
 
     // then
     if (!creating) {

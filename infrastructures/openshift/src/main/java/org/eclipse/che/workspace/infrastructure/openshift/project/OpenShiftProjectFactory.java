@@ -105,7 +105,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
     OpenShiftProject osProject = doCreateProject(workspaceId, projectName);
     osProject.prepare();
 
-    if (isCreatingNamespaces(workspaceId) && !isNullOrEmpty(getServiceAccountName())) {
+    if (isCreatingNamespace(workspaceId) && !isNullOrEmpty(getServiceAccountName())) {
       // prepare service account for workspace only if account name is configured
       // and project is not predefined
       // since predefined project should be prepared during Che deployment

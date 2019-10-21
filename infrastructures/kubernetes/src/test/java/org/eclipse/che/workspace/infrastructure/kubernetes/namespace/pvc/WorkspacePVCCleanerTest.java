@@ -48,7 +48,7 @@ public class WorkspacePVCCleanerTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(namespaceFactory.isManagingNamespaces(any())).thenReturn(false);
+    when(namespaceFactory.isManagingNamespace(any())).thenReturn(false);
     workspacePVCCleaner = new WorkspacePVCCleaner(true, namespaceFactory, pvcStrategy);
     when(workspace.getId()).thenReturn("123");
     when(event.getWorkspace()).thenReturn(workspace);
@@ -85,7 +85,7 @@ public class WorkspacePVCCleanerTest {
   @Test
   public void testNotInvokeCleanupWhenWorkspaceRemovedEventPublishedAndNamespaceIsManaged()
       throws Exception {
-    when(namespaceFactory.isManagingNamespaces(any())).thenReturn(true);
+    when(namespaceFactory.isManagingNamespace(any())).thenReturn(true);
 
     workspacePVCCleaner.subscribe(eventService);
 

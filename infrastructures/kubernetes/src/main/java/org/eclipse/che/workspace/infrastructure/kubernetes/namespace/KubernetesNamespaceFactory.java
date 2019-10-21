@@ -120,7 +120,7 @@ public class KubernetesNamespaceFactory {
   }
 
   /** True if namespace is potentially created for the workspaces, false otherwise. */
-  protected boolean isCreatingNamespaces(String workspaceId) throws InfrastructureException {
+  protected boolean isCreatingNamespace(String workspaceId) throws InfrastructureException {
     // ...namespace    | ...namespace exists | ...namespace.default | creating?
     // no-placeholders |       no            |       null           | error
     // no-placeholders |       no            |   no-placeholders    | no
@@ -156,7 +156,7 @@ public class KubernetesNamespaceFactory {
    * @return true if the namespaces are fully managed by Che (e.g. created, used and deleted), false
    *     otherwise
    */
-  public boolean isManagingNamespaces(String workspaceId) throws InfrastructureException {
+  public boolean isManagingNamespace(String workspaceId) throws InfrastructureException {
     boolean canBeManaged =
         isNullOrEmpty(namespaceName)
             ? defaultNamespaceName != null && defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)
@@ -329,7 +329,7 @@ public class KubernetesNamespaceFactory {
     KubernetesNamespace namespace = doCreateNamespace(workspaceId, namespaceName);
     namespace.prepare();
 
-    if (isCreatingNamespaces(workspaceId) && !isNullOrEmpty(serviceAccountName)) {
+    if (isCreatingNamespace(workspaceId) && !isNullOrEmpty(serviceAccountName)) {
       // prepare service account for workspace only if account name is configured
       // and project is not predefined
       // since predefined project should be prepared during Che deployment

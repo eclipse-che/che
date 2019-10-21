@@ -57,7 +57,7 @@ public class WorkspacePVCCleaner {
           event -> {
             final Workspace workspace = event.getWorkspace();
             try {
-              if (namespaceFactory.isManagingNamespaces(workspace.getId())) {
+              if (namespaceFactory.isManagingNamespace(workspace.getId())) {
                 // the namespaces of managed workspaces are deleted, so no need to do the cleanup
                 return;
               }

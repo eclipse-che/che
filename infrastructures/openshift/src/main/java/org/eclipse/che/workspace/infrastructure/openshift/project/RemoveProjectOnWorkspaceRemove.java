@@ -46,7 +46,7 @@ public class RemoveProjectOnWorkspaceRemove implements EventSubscriber<Workspace
   public void onEvent(WorkspaceRemovedEvent event) {
     String workspaceId = event.getWorkspace().getId();
     try {
-      if (projectFactory.isManagingNamespaces(workspaceId)) {
+      if (projectFactory.isManagingNamespace(workspaceId)) {
         projectFactory.delete(workspaceId);
       }
     } catch (InfrastructureException e) {
