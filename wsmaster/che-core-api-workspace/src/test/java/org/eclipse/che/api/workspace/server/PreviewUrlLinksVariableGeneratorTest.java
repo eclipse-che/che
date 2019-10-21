@@ -158,6 +158,52 @@ public class PreviewUrlLinksVariableGeneratorTest {
     assertTrue(linkMap.values().iterator().next().endsWith("testpath"));
   }
 
+  @Test
+  public void shouldAppendQueryParamsWhenDefinedInPreviewUrl() {
+    Map<String, String> commandAttrs = new HashMap<>();
+    commandAttrs.put(Command.PREVIEW_URL_ATTRIBUTE, "preview_url_host");
+
+    CommandImpl command =
+        new CommandImpl("run command", "a", "a", new PreviewUrlImpl(123, "?a=b"), commandAttrs);
+
+    Map<String, String> linkMap =
+        generator.genLinksMapAndUpdateCommands(
+            createWorkspaceWithCommands(singletonList(command)), uriBuilder);
+
+    assertTrue(linkMap.values().iterator().next().endsWith("?a=b"));
+  }
+
+  @Test
+  public void shouldAppendMultipleQueryParamsWhenDefinedInPreviewUrl() {
+    Map<String, String> commandAttrs = new HashMap<>();
+    commandAttrs.put(Command.PREVIEW_URL_ATTRIBUTE, "preview_url_host");
+
+    CommandImpl command =
+        new CommandImpl("run command", "a", "a", new PreviewUrlImpl(123, "?a=b&c=d"), commandAttrs);
+
+    Map<String, String> linkMap =
+        generator.genLinksMapAndUpdateCommands(
+            createWorkspaceWithCommands(singletonList(command)), uriBuilder);
+
+    assertTrue(linkMap.values().iterator().next().endsWith("?a=b&c=d"));
+  }
+
+  @Test
+  public void shouldAppendPathWithQueryParamsWhenDefinedInPreviewUrl() {
+    Map<String, String> commandAttrs = new HashMap<>();
+    commandAttrs.put(Command.PREVIEW_URL_ATTRIBUTE, "preview_url_host");
+
+    CommandImpl command =
+        new CommandImpl(
+            "run command", "a", "a", new PreviewUrlImpl(123, "/hello?a=b"), commandAttrs);
+
+    Map<String, String> linkMap =
+        generator.genLinksMapAndUpdateCommands(
+            createWorkspaceWithCommands(singletonList(command)), uriBuilder);
+
+    assertTrue(linkMap.values().iterator().next().endsWith("/hello?a=b"));
+  }
+
   private WorkspaceImpl createWorkspaceWithCommands(List<CommandImpl> commands) {
     RuntimeImpl runtime =
         new RuntimeImpl("", Collections.emptyMap(), "", commands, new ArrayList<>());

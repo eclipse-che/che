@@ -69,22 +69,34 @@ class PreviewUrlLinksVariableGenerator {
       if (command.getPreviewUrl() != null
           && commandAttributes != null
           && commandAttributes.containsKey(PREVIEW_URL_ATTRIBUTE)) {
+        String previewUrl = createPreviewUrl(uriBuilder, command);
         String previewUrlKey = createPreviewUrlLinkKeyForCommand(command);
+        links.put(previewUrlKey, previewUrl);
 
-        String previewUrlFinalUri =
-            uriBuilder
-                .clone()
-                .host(commandAttributes.remove(PREVIEW_URL_ATTRIBUTE))
-                .replacePath(command.getPreviewUrl().getPath())
-                .build()
-                .toString();
-
-        links.put(previewUrlKey, previewUrlFinalUri);
-
-        commandAttributes.put(PREVIEW_URL_ATTRIBUTE, formatVariable(previewUrlKey));
+        commandAttributes.replace(PREVIEW_URL_ATTRIBUTE, formatVariable(previewUrlKey));
       }
     }
     return links;
+  }
+
+  private String createPreviewUrl(UriBuilder uriBuilder, Command command) {
+    UriBuilder previewUriBuilder =
+        uriBuilder.clone().host(command.getAttributes().get(PREVIEW_URL_ATTRIBUTE));
+
+    if (command.getPreviewUrl().getPath() != null) {
+      // split query params
+      String[] path = command.getPreviewUrl().getPath().split("\\?");
+      if (path.length >= 1) {
+        previewUriBuilder.replacePath(path[0]);
+      }
+      if (path.length >= 2) {
+        previewUriBuilder.replaceQuery(path[1]);
+      }
+    } else {
+      previewUriBuilder.replacePath(null);
+    }
+
+    return previewUriBuilder.build().toString();
   }
 
   /**
