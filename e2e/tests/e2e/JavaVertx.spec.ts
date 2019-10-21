@@ -95,7 +95,7 @@ suite('Java Vert.x test', async () => {
             await editor.waitTabFocused(tabTitle);
             await editor.moveCursorToLineAndChar(tabTitle, 19, 11);
             await editor.pressControlSpaceCombination(tabTitle);
-            await editor.waitSuggestion(tabTitle, 'cancelTimer(long arg0) : boolean');
+            await editor.waitSuggestionWithScrolling(tabTitle, 'cancelTimer(long arg0) : boolean');
         });
 
         test('Error highlighting', async () => {
@@ -109,7 +109,7 @@ suite('Java Vert.x test', async () => {
             await editor.moveCursorToLineAndChar(tabTitle, 18, 15);
             await editor.pressControlSpaceCombination(tabTitle);
             await editor.waitSuggestionContainer();
-            await editor.waitSuggestion(tabTitle, 'Vertx - io.vertx.core');
+            await editor.waitSuggestionWithScrolling(tabTitle, 'Vertx - io.vertx.core');
         });
 
         test('Codenavigation', async () => {
@@ -122,7 +122,7 @@ suite('Java Vert.x test', async () => {
 
     suite('Validation of project build', async () => {
         test('Build application', async () => {
-            let taskName: string = 'che: maven build';
+            let taskName: string = 'maven build';
             await runTask(taskName);
             await quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
             await ide.waitNotification('Task ' + taskName + ' has exited with code 0.', 60000);
