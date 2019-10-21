@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
+import org.eclipse.che.commons.observability.NoopExecutorServiceWrapper;
 import org.testng.ITestContext;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -71,7 +72,9 @@ public class MailSenderTest {
             " mail.smtp.auth",
             "false");
 
-    mailSender = new MailSender(new MailSessionProvider(mailConfiguration));
+    mailSender =
+        new MailSender(
+            new MailSessionProvider(mailConfiguration), new NoopExecutorServiceWrapper());
   }
 
   @AfterMethod

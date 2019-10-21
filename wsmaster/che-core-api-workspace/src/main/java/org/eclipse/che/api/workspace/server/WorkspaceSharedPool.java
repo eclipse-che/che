@@ -14,8 +14,6 @@ package org.eclipse.che.api.workspace.server;
 import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
-import io.opentracing.Tracer;
-import io.opentracing.contrib.concurrent.TracedExecutorService;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -28,6 +26,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
+import org.eclipse.che.commons.observability.ExecutorServiceWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +45,7 @@ public class WorkspaceSharedPool {
       @Named("che.workspace.pool.type") String poolType,
       @Named("che.workspace.pool.exact_size") @Nullable String exactSizeProp,
       @Named("che.workspace.pool.cores_multiplier") @Nullable String coresMultiplierProp,
-      Tracer tracer) {
+      ExecutorServiceWrapper wrapper) {
 
     ThreadFactory factory =
         new ThreadFactoryBuilder()
@@ -56,7 +55,9 @@ public class WorkspaceSharedPool {
             .build();
     switch (poolType.toLowerCase()) {
       case "cached":
-        executor = new TracedExecutorService(Executors.newCachedThreadPool(factory), tracer);
+        executor =
+            wrapper.wrap(
+                Executors.newCachedThreadPool(factory), WorkspaceSharedPool.class.getName());
         break;
       case "fixed":
         Integer exactSize = exactSizeProp == null ? null : Ints.tryParse(exactSizeProp);
@@ -71,7 +72,9 @@ public class WorkspaceSharedPool {
             size *= coresMultiplier;
           }
         }
-        executor = new TracedExecutorService(Executors.newFixedThreadPool(size, factory), tracer);
+        executor =
+            wrapper.wrap(
+                Executors.newFixedThreadPool(size, factory), WorkspaceSharedPool.class.getName());
         break;
       default:
         throw new IllegalArgumentException(

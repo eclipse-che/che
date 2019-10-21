@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class ThreadPullLauncher implements Launcher {
   private static final Logger LOG = LoggerFactory.getLogger(CronThreadPoolExecutor.class);
-  private final CronThreadPoolExecutor service;
+  private final CronExecutorService service;
 
   /**
    * @param corePoolSize the number of threads to keep in the pool, even if they are idle, unless
@@ -41,14 +41,18 @@ public class ThreadPullLauncher implements Launcher {
    */
   @Inject
   public ThreadPullLauncher(@Named("schedule.core_pool_size") Integer corePoolSize) {
-    this.service =
+    this(
         new CronThreadPoolExecutor(
             corePoolSize,
             new ThreadFactoryBuilder()
                 .setNameFormat("Annotated-scheduler-%d")
                 .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
                 .setDaemon(false)
-                .build());
+                .build()));
+  }
+
+  protected ThreadPullLauncher(CronExecutorService service) {
+    this.service = service;
   }
 
   @PreDestroy
