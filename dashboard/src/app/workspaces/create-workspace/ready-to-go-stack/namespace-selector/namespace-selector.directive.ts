@@ -12,33 +12,30 @@
 'use strict';
 
 /**
- * Defines a directive for displaying devfile editor widget.
- * @author Anna Shumilova
+ * Defines a directive for displaying stack selector widget.
+ *
+ * @author Oleksii Kurinnyi
  */
-export class WorkspaceDevfileEditor {
+export class NamespaceSelector implements ng.IDirective {
   restrict: string = 'E';
-  templateUrl: string = 'app/workspaces/workspace-details/devfile/workspace-devfile-editor.html';
-  replace: boolean = false;
+  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stack/namespace-selector/namespace-selector.html';
+  replace: boolean = true;
 
-  controller: string = 'WorkspaceDevfileEditorController';
-  controllerAs: string = 'workspaceDevfileEditorController';
+  controller: string = 'NamespaceSelectorController';
+  controllerAs: string = 'namespaceSelectorController';
 
   bindToController: boolean = true;
 
   scope: {
-    [paramName: string]: string;
+    [propName: string]: string
   };
 
   /**
    * Default constructor that is using resource
    */
   constructor() {
-    // scope values
     this.scope = {
-      isActive: '=?',
-      workspaceDevfile: '=',
-      workspaceDevfileOnChange: '&'
+      onNamespaceChange: '&'
     };
   }
-
 }

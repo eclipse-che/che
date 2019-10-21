@@ -1,0 +1,28 @@
+<!--
+
+    Copyright (c) 2015-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<div class="import-devfile-by-url">
+  <form name="importDevfileByUrlForm">
+    <che-input-box che-form="importDevfileByUrlForm"
+                   id="git-url-input"
+                   che-name="importDevfileByUrl"
+                   che-width="auto"
+                   ng-model="devfileByUrlController.location"
+                   git-url
+                   required>
+      <div ng-message="gitUrl" ng-if="devfileByUrlController.location && devfileByUrlController.location.length > 0">
+        Invalid Git URL
+      </div>
+    </che-input-box>
+  </form>
+</div>

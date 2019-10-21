@@ -16,10 +16,25 @@
   .area-dropdown.dropdown-menu
     top 36px
 
-
 md-content.create-workspace-content
-  background-color $very-light-grey-background-color
-  padding 15px
+  padding 0 0 10px 0
+  height 100%
+  md-tabs-canvas
+    height 50px
+    & *
+      height inherit
+    md-pagination-wrapper
+      md-tab-item:not(.md-active)
+        border-bottom none
+      md-tab-item
+        border-bottom 1px solid $primary-color
+  md-tab-content > *
+    background-color $very-light-grey-background-color
+  .che-input-box > div
+    min-height 55px
+
+  .che-label-container
+    padding 20px 0
 
   .che-label-container-label-name
     text-transform uppercase

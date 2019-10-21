@@ -11,8 +11,8 @@
  */
 'use strict';
 
-import {NamespaceSelectorSvc} from './namespace-selector/namespace-selector.service';
-import {ProjectSourceSelectorService} from './project-source-selector/project-source-selector.service';
+import {NamespaceSelectorSvc} from './ready-to-go-stack/namespace-selector/namespace-selector.service';
+import {ProjectSourceSelectorService} from './ready-to-go-stack/project-source-selector/project-source-selector.service';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
@@ -197,8 +197,8 @@ export class CreateWorkspaceSvc {
       });
 
       projects.push(template);
-    });     
-    
+    });
+
     return this.checkEditingProgress().then(() => {
       sourceDevfile.projects = projects;
 
@@ -206,7 +206,7 @@ export class CreateWorkspaceSvc {
       if (noProjectsFromDevfile) {
         sourceDevfile.commands = [];
       }
-      
+
       return this.cheWorkspace.createWorkspaceFromDevfile(namespaceId, sourceDevfile, attributes).then((workspace: che.IWorkspace) => {
         return this.cheWorkspace.fetchWorkspaces().then(() => this.cheWorkspace.getWorkspaceById(workspace.id));
       })
@@ -289,7 +289,7 @@ export class CreateWorkspaceSvc {
 
   /**
    * Returns name of the pointed workspace.
-   * 
+   *
    * @param workspace workspace
    */
   getWorkspaceName(workspace: che.IWorkspace): string {

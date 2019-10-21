@@ -1,0 +1,25 @@
+.devfile-source-selector
+  width 100%
+  & > div
+      width 240px
+      margin-right 50px
+      border 1px solid $grey-input-label-color
+      float left
+      vertical-align middle
+      line-height 110px
+      display inline-block
+      position relative
+      text-align right
+      padding-right 60px
+      &:not(.selected)
+        color $grey-input-label-color
+      &.selected
+        color $default-dark-color
+        border-color $primary-color
+      i
+        position absolute
+        left 30px
+        top 30px
+        font-size 60px
+      span
+        font-size 20px

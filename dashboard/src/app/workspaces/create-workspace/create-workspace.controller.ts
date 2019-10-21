@@ -13,9 +13,8 @@
 
 import {CheEnvironmentRegistry} from '../../../components/api/environment/che-environment-registry.factory';
 import {EnvironmentManager} from '../../../components/api/environment/environment-manager';
-import {IEnvironmentManagerMachine} from '../../../components/api/environment/environment-manager-machine';
 import {CreateWorkspaceSvc} from './create-workspace.service';
-import {NamespaceSelectorSvc} from './namespace-selector/namespace-selector.service';
+import {NamespaceSelectorSvc} from './ready-to-go-stack/namespace-selector/namespace-selector.service';
 import {RandomSvc} from '../../../components/utils/random.service';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {
@@ -104,6 +103,22 @@ export class CreateWorkspaceController {
   private hideLoader: boolean;
 
   private stackName: string;
+  /**
+   * Selected tab index.
+   */
+  private selectedTabIndex: number = 0;
+  private isImportDevfileActive: boolean = false;
+  /**
+   * The imported devfile.
+   */
+  private importedDevfile: che.IWorkspaceDevfile = {
+    apiVersion: '1.0.0',
+    components: [],
+    metadata: {
+      name: 'custom-wksp'
+    }
+  };
+  private selectedSource: string;
 
   /**
    * Default constructor that is using resource injection
@@ -169,6 +184,10 @@ export class CreateWorkspaceController {
   $onInit(): void {
     // this method won't be called here
     // place all initialization code in constructor
+  }
+
+  updateImportedDevfile(devfile: che.IWorkspaceDevfile): void {
+    this.importedDevfile = devfile;
   }
 
   /**
@@ -304,36 +323,18 @@ export class CreateWorkspaceController {
    * @returns {angular.IPromise<che.IWorkspace>}
    */
   createWorkspace(): ng.IPromise<che.IWorkspace> {
-    // update workspace name
-    let devfileSource = angular.copy(this.selectedDevfile);
-    devfileSource.metadata.name = this.workspaceName;
+    let devfileSource: che.IWorkspaceDevfile;
+    if (this.isImportDevfileActive) {
+      devfileSource = this.importedDevfile;
+      this.stackName = `custom-${devfileSource.metadata.name}`
+    } else {
+      // update workspace name
+      devfileSource = angular.copy(this.selectedDevfile);
+      devfileSource.metadata.name = this.workspaceName;
+    }
     return this.createWorkspaceSvc.createWorkspaceFromDevfile(devfileSource, {stackName: this.stackName});
   }
 
-  /**
-   * Creates a workspace and shows a dialogue window for a user to select
-   * whether to open Workspace Details page or the IDE.
-   *
-   * @param {MouseEvent} $event
-   */
-  createWorkspaceAndShowDialog($event: MouseEvent): void {
-    this.createWorkspace().then((workspace: che.IWorkspace) => {
-      this.$mdDialog.show({
-        targetEvent: $event,
-        controller: 'AfterCreationDialogController',
-        controllerAs: 'afterCreationDialogController',
-        bindToController: true,
-        clickOutsideToClose: true,
-        templateUrl: 'app/workspaces/create-workspace/after-creation-dialog/after-creation-dialog.html'
-      }).then(() => {
-        // when promise is resolved then open workspace in IDE
-        this.createWorkspaceSvc.redirectToIDE(workspace);
-      }, () => {
-        // when promise is rejected then open Workspace Details page
-        this.createWorkspaceSvc.redirectToDetails(workspace);
-      });
-    });
-  }
 
   /**
    * Creates a workspace and redirects to the IDE.

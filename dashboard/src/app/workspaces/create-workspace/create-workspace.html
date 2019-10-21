@@ -10,64 +10,105 @@
 <md-progress-linear md-mode="indeterminate"
                     class="create-workspace-progress"
                     ng-hide="createWorkspaceController.hideLoader"></md-progress-linear>
-
 <md-content md-scroll-y flex
             md-theme="default"
             class="create-workspace-content">
   <div ng-class="{'create-workspace-content-hidden': !createWorkspaceController.hideLoader}">
-
-    <!-- Name -->
-    <che-label-container che-label-name="Name"
-                         che-label-description="Define a name for your workspace.">
-      <ng-form flex layout="column"
-               name="workspaceNameForm"
-               class="create-workspace-name-form">
-        <che-input-box ng-init="createWorkspaceController.registerForm('name', workspaceNameForm)"
-                       che-form="workspaceNameForm"
-                       che-name="workspaceName"
-                       id="workspace-name-input"
-                       che-place-holder="Name of the workspace"
-                       aria-label="Name of the workspace"
-                       ng-model="createWorkspaceController.workspaceName"
-                       ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 }, allowInvalid: false }"
-                       required
-                       custom-validator="createWorkspaceController.isNameUnique($value)"
-                       ng-minlength="3"
-                       ng-maxlength="100"
-                       ng-pattern="/^[a-z\d][a-z\d-.]+[a-z\d]$/i">
-          <div ng-message="required">A name is required.</div>
-          <div ng-message="minlength">The name has to be more than 3 characters long.</div>
-          <div ng-message="pattern">The name should not contain special characters like space, dollar, etc. and should start and end only with digits, latin letters or underscores.</div>
-          <div ng-message="maxlength">The name has to be less than 100 characters long.</div>
-          <div ng-message="customValidator">This workspace name is already used.</div>
-        </che-input-box>
-      </ng-form>
-    </che-label-container>
-
-    <!-- Namespace -->
-    <che-label-container che-label-name="{{createWorkspaceController.getNamespaceCaption()}}"
-                         ng-if="createWorkspaceController.getNamespaces().length > 0 || createWorkspaceController.getNamespaceEmptyMessage()">
-      <namespace-selector
-        on-namespace-change="createWorkspaceController.onNamespaceChanged(namespaceId)"></namespace-selector>
-    </che-label-container>
-
-    <che-label-container che-label-name="Select Stack"
-                         che-label-description="Choose your workspace runtime environment used to build and run your projects.">
-      <devfile-selector on-devfile-select="createWorkspaceController.onDevfileSelected(devfile)"
-                        stack-name="createWorkspaceController.stackName">
-      </devfile-selector>
-    </che-label-container>
-    <!-- Project source selector -->
-    <che-label-container che-label-name="Projects">
-      <project-source-selector devfile="createWorkspaceController.selectedDevfile"></project-source-selector>
-    </che-label-container>
+    <md-tabs md-dynamic-height md-stretch-tabs="auto"
+             md-selected="createWorkspaceController.selectedTabIndex"
+             class="create-workspace-content"
+             md-no-ink-bar>
+      <!-- READY-TO-GO STACK -->
+      <md-tab>
+        <md-tab-label>
+          <span class="che-tab-label-title">READY-TO-GO STACK</span>
+        </md-tab-label>
+        <md-tab-body>
+          <!-- Name -->
+          <che-label-container che-label-name="Name"
+                               che-label-description="Define a name for your workspace.">
+            <ng-form flex layout="column"
+                     name="workspaceNameForm"
+                     class="create-workspace-name-form">
+              <che-input-box ng-init="createWorkspaceController.registerForm('name', workspaceNameForm)"
+                             che-form="workspaceNameForm"
+                             che-name="workspaceName"
+                             id="workspace-name-input"
+                             che-place-holder="Name of the workspace"
+                             aria-label="Name of the workspace"
+                             ng-model="createWorkspaceController.workspaceName"
+                             ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 }, allowInvalid: false }"
+                             required
+                             custom-validator="createWorkspaceController.isNameUnique($value)"
+                             ng-minlength="3"
+                             ng-maxlength="100"
+                             ng-pattern="/^[a-z\d][a-z\d-.]+[a-z\d]$/i">
+                <div ng-message="required">A name is required.</div>
+                <div ng-message="minlength">The name has to be more than 3 characters long.</div>
+                <div ng-message="pattern">The name should not contain special characters like space, dollar, etc. and
+                  should start and end only with digits, latin letters or underscores.
+                </div>
+                <div ng-message="maxlength">The name has to be less than 100 characters long.</div>
+                <div ng-message="customValidator">This workspace name is already used.</div>
+              </che-input-box>
+            </ng-form>
+          </che-label-container>
+          <!-- Namespace selector -->
+          <che-label-container che-label-name="{{createWorkspaceController.getNamespaceCaption()}}"
+                               ng-if="createWorkspaceController.getNamespaces().length > 0 || createWorkspaceController.getNamespaceEmptyMessage()">
+            <namespace-selector
+              on-namespace-change="createWorkspaceController.onNamespaceChanged(namespaceId)"></namespace-selector>
+          </che-label-container>
+          <!-- Stack devfile selector -->
+          <che-label-container che-label-name="Select Stack"
+                               che-label-description="Choose your workspace runtime environment used to build and run your projects.">
+            <devfile-selector on-devfile-select="createWorkspaceController.onDevfileSelected(devfile)"
+                              stack-name="createWorkspaceController.stackName">
+            </devfile-selector>
+          </che-label-container>
+          <!-- Project source selector -->
+          <che-label-container che-label-name="Projects">
+            <project-source-selector devfile="createWorkspaceController.selectedDevfile"></project-source-selector>
+          </che-label-container>
+        </md-tab-body>
+      </md-tab>
+      <!-- IMPORT CUSTOM STACK -->
+      <md-tab md-on-select="createWorkspaceController.isImportDevfileActive = true"
+              md-on-deselect="createWorkspaceController.isImportDevfileActive = false">
+        <md-tab-label>
+          <span class="che-tab-label-title">IMPORT DEVFILE</span>
+        </md-tab-label>
+        <md-tab-body>
+          <!-- Devfile source selector  -->
+          <che-label-container che-label-name="Source"
+                               che-label-description="Define a source for your workspace.">
+            <devfile-source-selector selected-source="createWorkspaceController.selectedSource"></devfile-source-selector>
+          </che-label-container>
+            <!-- URL -->
+            <che-label-container ng-show="createWorkspaceController.selectedSource === 'url'" che-label-name="URL">
+              <ng-form flex layout="column"
+                       name="workspaceNameForm"
+                       class="create-workspace-name-form">
+                <devfile-by-url></devfile-by-url>
+              </ng-form>
+            </che-label-container>
+          <!-- YAML -->
+          <che-label-container ng-show="createWorkspaceController.selectedSource === 'yaml'" che-label-name="YAML">
+            <ng-form name="importDevfileForm">
+              <!-- ng-init="createWorkspaceController.registerForm('importDevfile', importDevfileForm)" -->
+              <workspace-devfile-editor
+                workspace-devfile="createWorkspaceController.importedDevfile"
+                workspace-devfile-on-change="createWorkspaceController.updateImportedDevfile(devfile)"></workspace-devfile-editor>
+          </ng-form>
+        </che-label-container>
+      </md-tab-body>
+    </md-tab>
+  </md-tabs>
+  <!-- Create workspace button -->
     <che-label-container>
-      <che-button-save-flat id="create-workspace-footer-button"
-                            name="saveButton"
-                            che-button-title="Create & Open"
+      <che-button-save-flat id="create-workspace-footer-button" name="saveButton" che-button-title="Create & Open"
                             ng-click="createWorkspaceController.createWorkspaceAndOpenIDE()"
                             ng-disabled="createWorkspaceController.isCreateButtonDisabled()"></che-button-save-flat>
     </che-label-container>
-
   </div>
 </md-content>
