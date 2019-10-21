@@ -224,7 +224,7 @@ public class DevfileSchemaValidatorTest {
         "(/components/0/selector):The object must not have a property whose name is \"selector\"."
       },
       {
-        "command/devfile_command_with_preview_url_without_params.yaml",
+        "command/devfile_command_with_empty_preview_url.yaml",
         "(/commands/0/previewUrl):The value must be of object type, but actual type is null."
       },
       {
