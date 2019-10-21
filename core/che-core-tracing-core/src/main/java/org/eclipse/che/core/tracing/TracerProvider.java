@@ -37,7 +37,7 @@ public class TracerProvider implements Provider<Tracer> {
 
   public TracerProvider(Tracer tracer) {
     this.tracer = tracer;
-    GlobalTracer.register(tracer);
+    GlobalTracer.registerIfAbsent(tracer);
   }
 
   @Override

@@ -12,14 +12,17 @@
 package org.eclipse.che.core.db;
 
 import com.google.common.annotations.Beta;
+import io.opentracing.contrib.jdbc.ConnectionInfo;
 import io.opentracing.contrib.jdbc.TracingConnection;
+import io.opentracing.contrib.jdbc.parser.URLParser;
+import io.opentracing.util.GlobalTracer;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.Collections;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
+import org.slf4j.LoggerFactory;
 
 /**
  * Adding tracing support for existing @{@link javax.sql.DataSource}. DbType and DbUser information
@@ -30,23 +33,34 @@ import javax.sql.DataSource;
  */
 @Beta
 public class TracingDataSource implements DataSource {
+  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(TracingDataSource.class);
 
   private final DataSource delegate;
+  private final ConnectionInfo connectionInfo;
 
   public TracingDataSource(DataSource delegate) {
     this.delegate = delegate;
+    try (Connection connection = delegate.getConnection()) {
+      connectionInfo = URLParser.parser(connection.getMetaData().getURL());
+      LOG.debug(
+          "URL {} connectionInfo {}",
+          connection.getMetaData().getURL(),
+          connectionInfo.getPeerService());
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
   public Connection getConnection() throws SQLException {
     return new TracingConnection(
-        delegate.getConnection(), "che_db", null, true, Collections.emptySet());
+        delegate.getConnection(), connectionInfo, true, null, GlobalTracer.get());
   }
 
   @Override
   public Connection getConnection(String username, String password) throws SQLException {
     return new TracingConnection(
-        delegate.getConnection(username, password), "che_db", null, true, Collections.emptySet());
+        delegate.getConnection(username, password), connectionInfo, true, null, GlobalTracer.get());
   }
 
   @Override
