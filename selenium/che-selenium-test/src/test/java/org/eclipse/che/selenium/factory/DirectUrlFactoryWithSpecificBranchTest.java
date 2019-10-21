@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
@@ -30,6 +31,7 @@ import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
 import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
+import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -47,6 +49,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   @Named(AUXILIARY)
   private TestGitHubRepository testAuxiliaryRepo;
 
+  @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestFactoryInitializer testFactoryInitializer;
   @Inject private TheiaIde theiaIde;
   @Inject private TheiaProjectTree theiaProjectTree;
@@ -98,12 +101,17 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     theiaProjectTree.waitItem(repositoryName);
     theiaIde.waitAllNotificationsClosed();
     theiaProjectTree.expandItem(repositoryName);
+    theiaProjectTree.waitItem(repositoryName + "/pom.xml");
     theiaProjectTree.expandItem(repositoryName + "/my-lib");
     theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
-
     expectedItemsAfterCloning.forEach(
         name -> {
-          theiaProjectTree.waitItem(repositoryName + "/" + name);
+          try {
+            theiaProjectTree.waitItem(repositoryName + "/" + name);
+          } catch (TimeoutException ex) {
+            seleniumWebDriver.navigate().refresh();
+            theiaProjectTree.waitItem(repositoryName + "/" + name);
+          }
         });
 
     // check specific branch
