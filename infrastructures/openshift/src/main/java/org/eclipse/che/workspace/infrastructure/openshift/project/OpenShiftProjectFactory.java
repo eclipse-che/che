@@ -100,7 +100,11 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
       projectName = evalNamespaceName(workspaceId, EnvironmentContext.getCurrent().getSubject());
     } catch (NotFoundException | ServerException | ConflictException | ValidationException e) {
       throw new InfrastructureException(
-          format("Failed to evaluate the project name to use for workspace %s.", workspaceId), e);
+          format(
+              "Failed to evaluate the project name to use for workspace %s. The error message"
+                  + " was: %s",
+              workspaceId, e.getMessage()),
+          e);
     }
     OpenShiftProject osProject = doCreateProject(workspaceId, projectName);
     osProject.prepare();

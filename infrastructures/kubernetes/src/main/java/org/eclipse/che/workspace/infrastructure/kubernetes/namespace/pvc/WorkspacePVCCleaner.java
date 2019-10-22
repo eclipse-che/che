@@ -59,6 +59,9 @@ public class WorkspacePVCCleaner {
             try {
               if (namespaceFactory.isManagingNamespace(workspace.getId())) {
                 // the namespaces of managed workspaces are deleted, so no need to do the cleanup
+                LOG.debug(
+                    "Not cleaning up the PVCs of workspace %s, because its namespace is"
+                        + " going to be deleted.");
                 return;
               }
               strategy.cleanup(workspace);
