@@ -210,9 +210,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       final List<CompletableFuture<?>> toCancelFutures = new CopyOnWriteArrayList<>();
       final EnvironmentContext currentContext = EnvironmentContext.getCurrent();
       CompletableFuture<Void> startFailure = startSynchronizer.getStartFailure();
-
-      try (Scope waitRunningAsyncScope = tracer.buildSpan(WAIT_MACHINES_START).startActive(true)) {
-        TracingTags.WORKSPACE_ID.set(waitRunningAsyncScope.span(), workspaceId);
+      Span waitRunningAsyncSpan = tracer.buildSpan(WAIT_MACHINES_START).start();
+      try (Scope waitRunningAsyncScope = tracer.scopeManager().activate(waitRunningAsyncSpan)) {
+        TracingTags.WORKSPACE_ID.set(waitRunningAsyncSpan, workspaceId);
         for (KubernetesMachineImpl machine : machines.getMachines(context.getIdentity()).values()) {
           String machineName = machine.getName();
           final CompletableFuture<Void> machineBootChain =
@@ -228,6 +228,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           machinesFutures.put(machineName, machineBootChain);
         }
         waitMachines(machinesFutures, toCancelFutures, startFailure);
+      } finally {
+        waitRunningAsyncSpan.finish();
       }
 
       startSynchronizer.complete();
