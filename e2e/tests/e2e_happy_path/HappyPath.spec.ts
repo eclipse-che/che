@@ -93,7 +93,19 @@ suite('Language server validation', async () => {
     test('Java LS initialization', async () => {
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToJavaFolder, javaFileName);
         await editor.selectTab(javaFileName);
-        await ide.checkLsInitializationStart('Starting Java Language Server');
+
+        try {
+            await ide.checkLsInitializationStart('Starting Java Language Server');
+        } catch (err) {
+            if (!(err instanceof error.TimeoutError)) {
+                throw err;
+            }
+
+            console.log("Known flakiness has occurred https://github.com/eclipse/che/issues/14944");
+            await driverHelper.reloadPage();
+            await ide.waitStatusBarContains('Starting Java Language Server');
+        }
+
         await ide.waitStatusBarTextAbsence('Starting Java Language Server', 1800000);
         await checkJavaPathCompletion();
         await ide.waitStatusBarTextAbsence('Building workspace', 360000);
