@@ -74,7 +74,7 @@ public class KubernetesNamespaceFactory {
   private final String defaultNamespaceName;
   private final boolean allowUserDefinedNamespaces;
 
-  private final String namespaceName;
+  private final String legacyNamespaceName;
   private final String serviceAccountName;
   private final String clusterRoleName;
   private final KubernetesClientFactory clientFactory;
@@ -82,7 +82,7 @@ public class KubernetesNamespaceFactory {
 
   @Inject
   public KubernetesNamespaceFactory(
-      @Nullable @Named("che.infra.kubernetes.namespace") String namespaceName,
+      @Nullable @Named("che.infra.kubernetes.namespace") String legacyNamespaceName,
       @Nullable @Named("che.infra.kubernetes.service_account_name") String serviceAccountName,
       @Nullable @Named("che.infra.kubernetes.cluster_role_name") String clusterRoleName,
       @Nullable @Named("che.infra.kubernetes.namespace.default") String defaultNamespaceName,
@@ -91,7 +91,7 @@ public class KubernetesNamespaceFactory {
       KubernetesClientFactory clientFactory,
       WorkspaceManager workspaceManager)
       throws ConfigurationException {
-    this.namespaceName = namespaceName;
+    this.legacyNamespaceName = legacyNamespaceName;
     this.serviceAccountName = serviceAccountName;
     this.clusterRoleName = clusterRoleName;
     this.clientFactory = clientFactory;
@@ -119,22 +119,32 @@ public class KubernetesNamespaceFactory {
         && NAMESPACE_NAME_PLACEHOLDERS.keySet().stream().anyMatch(namespaceName::contains);
   }
 
-  /** True if namespace is potentially created for the workspaces, false otherwise. */
+  /**
+   * True if namespace is potentially created for the workspace, false otherwise.
+   *
+   * <p>The logic is a little bit non-trivial and best expressed by just fully evaluting the truth
+   * table as below ({@code ...namespace} stands for the legacy namespace property, {@code
+   * ...namespace.default} stands for the namespace default property):
+   *
+   * <pre>{@code
+   * ...namespace    | ...namespace exists | ...namespace.default | creating?
+   * no-placeholders |       no            |       null           | error
+   * no-placeholders |       no            |   no-placeholders    | no
+   * no-placeholders |       no            |    placeholders      | yes
+   * no-placeholders |      yes            |       null           | no
+   * no-placeholders |      yes            |   no-placeholders    | no
+   * no-placeholders |      yes            |    placeholders      | no
+   *  placeholders   |       no            |        null          | error
+   *  placeholders   |       no            |   no-placeholders    | no
+   *  placeholders   |       no            |    placeholders      | yes
+   *  placeholders   |      yes            |        null          | yes
+   *  placeholders   |      yes            |   no-placeholders    | yes
+   *  placeholders   |      yes            |    placeholders      | yes
+   * }</pre>
+   */
   protected boolean isCreatingNamespace(String workspaceId) throws InfrastructureException {
-    // ...namespace    | ...namespace exists | ...namespace.default | creating?
-    // no-placeholders |       no            |       null           | error
-    // no-placeholders |       no            |   no-placeholders    | no
-    // no-placeholders |       no            |    placeholders      | yes
-    // no-placeholders |      yes            |       null           | no
-    // no-placeholders |      yes            |   no-placeholders    | no
-    // no-placeholders |      yes            |    placeholders      | no
-    //  placeholders   |       no            |        null          | error
-    //  placeholders   |       no            |   no-placeholders    | no
-    //  placeholders   |       no            |    placeholders      | yes
-    //  placeholders   |      yes            |        null          | yes
-    //  placeholders   |      yes            |   no-placeholders    | yes
-    //  placeholders   |      yes            |    placeholders      | yes
-    boolean legacyWithPlaceholders = isNullOrEmpty(namespaceName) || hasPlaceholders(namespaceName);
+    boolean legacyWithPlaceholders =
+        isNullOrEmpty(legacyNamespaceName) || hasPlaceholders(legacyNamespaceName);
     boolean legacyExists =
         checkNamespaceExists(
             resolveLegacyNamespaceName(EnvironmentContext.getCurrent().getSubject(), workspaceId));
@@ -153,26 +163,29 @@ public class KubernetesNamespaceFactory {
   }
 
   /**
-   * @return true if the namespaces are fully managed by Che (e.g. created, used and deleted), false
-   *     otherwise
+   * Returns true if the namespace is fully managed by Che (e.g. created, used and deleted), false
+   * otherwise.
    */
   public boolean isManagingNamespace(String workspaceId) throws InfrastructureException {
-    boolean canBeManaged =
-        isNullOrEmpty(namespaceName)
-            ? defaultNamespaceName != null && defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)
-            : namespaceName.contains(WORKSPACEID_PLACEHOLDER);
+    // the new logic is quite simple.
+    boolean newLogic =
+        defaultNamespaceName != null && defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER);
 
-    if (!canBeManaged) {
-      return false;
-    }
+    // but we must follow the same logic as #evalNamespaceName - we need to make sure that the old
+    // logic can't be used first...
+    // empty legacy namespace name ~ <workspaceid>
+    if (isNullOrEmpty(legacyNamespaceName)
+        || legacyNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
 
-    if (isNullOrEmpty(namespaceName)) {
-      // if we're using the new logic, we don't have to check if the namespace exists
-      return true;
-    } else {
-      // the legacy prop is only applied if the namespace actually exists...
+      // there's a chance of using the old logic - if the namespace exists, we're managing it.
+      // if it doesn't, we're using the new logic.
       return checkNamespaceExists(
-          resolveLegacyNamespaceName(EnvironmentContext.getCurrent().getSubject(), workspaceId));
+              resolveLegacyNamespaceName(EnvironmentContext.getCurrent().getSubject(), workspaceId))
+          || newLogic;
+    } else {
+      // there's no way the namespace of the workspace is managed using the old logic. Let's just
+      // use the result of the new logic.
+      return newLogic;
     }
   }
 
@@ -416,7 +429,7 @@ public class KubernetesNamespaceFactory {
 
   private String resolveLegacyNamespaceName(Subject user, String workspaceId) {
     String effectiveOldLogicNamespace =
-        isNullOrEmpty(namespaceName) ? WORKSPACEID_PLACEHOLDER : namespaceName;
+        isNullOrEmpty(legacyNamespaceName) ? WORKSPACEID_PLACEHOLDER : legacyNamespaceName;
 
     return evalPlaceholders(effectiveOldLogicNamespace, user, workspaceId);
   }
