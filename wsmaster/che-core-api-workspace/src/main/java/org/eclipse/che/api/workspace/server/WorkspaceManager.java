@@ -471,8 +471,10 @@ public class WorkspaceManager {
     try {
       workspaceDao.remove(workspaceId);
     } catch (ServerException x) {
-      LOG.error("Unable to remove temporary workspace '{}'. Error message was: {}", workspaceId,
-              x.getMessage());
+      LOG.error(
+          "Unable to remove temporary workspace '{}'. Error message was: {}",
+          workspaceId,
+          x.getMessage());
     }
   }
 
