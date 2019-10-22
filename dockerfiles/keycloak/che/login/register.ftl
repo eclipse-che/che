@@ -1,10 +1,6 @@
 <#import "template.ftl" as layout>
 <@layout.registrationLayout; section>
-    <#if section = "title">
-        ${msg("registerWithTitle",(realm.displayName!''))}
-    <#elseif section = "header">
-        ${msg("registerWithTitleHtml",(realm.displayNameHtml!''))?no_esc}
-    <#elseif section = "form">
+    <#if section = "form">
         <#include "logo.ftl">
 
         <form id="kc-register-form" class="${properties.kcFormClass!}" action="${url.registrationAction}" method="post">

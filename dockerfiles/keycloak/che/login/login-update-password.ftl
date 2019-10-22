@@ -1,10 +1,6 @@
 <#import "template.ftl" as layout>
 <@layout.registrationLayout displayInfo=true; section>
-    <#if section = "title">
-        ${msg("updatePasswordTitle")}
-    <#elseif section = "header">
-        ${msg("updatePasswordTitle")}
-    <#elseif section = "form">
+    <#if section = "form">
         <#include "logo.ftl">
 
         <form id="kc-passwd-update-form" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
