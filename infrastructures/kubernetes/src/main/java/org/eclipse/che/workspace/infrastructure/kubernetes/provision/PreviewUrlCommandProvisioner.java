@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Ingresses;
@@ -97,10 +98,16 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
     return namespace.ingresses().get();
   }
 
-  protected Optional<String> findHostForServicePort(
-      List<?> ingressList, Service service, int port) {
-    List<Ingress> ingresses =
-        ingressList.stream().map(i -> (Ingress) i).collect(Collectors.toList());
+  protected Optional<String> findHostForServicePort(List<?> ingressList, Service service, int port)
+      throws InternalInfrastructureException {
+    final List<Ingress> ingresses;
+    try {
+      ingresses = ingressList.stream().map(i -> (Ingress) i).collect(Collectors.toList());
+    } catch (ClassCastException cce) {
+      throw new InternalInfrastructureException(
+          "Failed casting to Kubernetes Ingress. This is not expected. Please report a bug!");
+    }
+
     return Ingresses.findIngressRuleForServicePort(ingresses, service, port)
         .map(IngressRule::getHost);
   }

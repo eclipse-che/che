@@ -33,6 +33,7 @@ import java.util.List;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.PreviewUrlImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -173,5 +174,10 @@ public class PreviewUrlCommandProvisionerTest {
 
     assertTrue(env.getCommands().get(0).getAttributes().containsKey("previewUrl"));
     assertEquals(env.getCommands().get(0).getAttributes().get("previewUrl"), "testhost");
+  }
+
+  @Test(expectedExceptions = InternalInfrastructureException.class)
+  public void throwsInfrastructureExceptionWhenCantCastToIngress() throws InfrastructureException {
+    previewUrlCommandProvisioner.findHostForServicePort(Arrays.asList("1", "2", "3"), null, 1);
   }
 }

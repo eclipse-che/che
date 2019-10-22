@@ -48,9 +48,15 @@ public class OpenShiftPreviewUrlCommandProvisioner
   }
 
   @Override
-  protected Optional<String> findHostForServicePort(List<?> routesList, Service service, int port) {
-    List<Route> routes = routesList.stream().map(i -> (Route) i).collect(Collectors.toList());
-
+  protected Optional<String> findHostForServicePort(List<?> routesList, Service service, int port)
+      throws InternalInfrastructureException {
+    final List<Route> routes;
+    try {
+      routes = routesList.stream().map(i -> (Route) i).collect(Collectors.toList());
+    } catch (ClassCastException cce) {
+      throw new InternalInfrastructureException(
+          "Failed casting to OpenShift Route. This is not expected. Please report a bug!");
+    }
     return Routes.findRouteForServicePort(routes, service, port).map(r -> r.getSpec().getHost());
   }
 }
