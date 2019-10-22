@@ -29,10 +29,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import org.eclipse.che.commons.schedule.executor.CronExecutorService;
 import org.eclipse.che.commons.schedule.executor.CronExpression;
 import org.eclipse.che.commons.schedule.executor.CronThreadPoolExecutor;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -155,14 +156,14 @@ public class MeteredExecutorServiceWrapperTest {
             .timer()
             .count(),
         1);
-    assertTrue(
+    assertEquals(
         registry
-                .get("executor.queue.remaining")
-                .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-                .tags(userTags)
-                .gauge()
-                .value()
-            > 0.0);
+            .get("executor.queue.remaining")
+            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
+            .tags(userTags)
+            .gauge()
+            .value(),
+        new Double(Integer.MAX_VALUE));
     assertEquals(
         registry
             .get("executor")
@@ -181,7 +182,7 @@ public class MeteredExecutorServiceWrapperTest {
         0.0);
   }
 
-  @Test(enabled = false)
+  @Test
   public void shouldRecordScheduledExecutorServiceMetrics() throws InterruptedException {
     // given
     executor =
@@ -241,14 +242,18 @@ public class MeteredExecutorServiceWrapperTest {
             .gauge()
             .value(),
         1.0);
-    assertEquals(
-        registry
-            .get("executor.completed")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .functionCounter()
-            .count(),
-        1.0);
+    assertWithRetry(
+        () ->
+            registry
+                .get("executor.completed")
+                .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
+                .tags(userTags)
+                .functionCounter()
+                .count(),
+        1.0,
+        10,
+        50);
+
     assertEquals(
         registry
             .get("executor.queued")
@@ -265,14 +270,14 @@ public class MeteredExecutorServiceWrapperTest {
             .timer()
             .count(),
         0);
-    assertTrue(
+    assertEquals(
         registry
-                .get("executor.queue.remaining")
-                .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-                .tags(userTags)
-                .gauge()
-                .value()
-            > 0.0);
+            .get("executor.queue.remaining")
+            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
+            .tags(userTags)
+            .gauge()
+            .value(),
+        new Double(Integer.MAX_VALUE));
     assertEquals(
         registry
             .get("executor")
@@ -307,7 +312,7 @@ public class MeteredExecutorServiceWrapperTest {
         1.0);
   }
 
-  @Test(enabled = false)
+  @Test
   public void shouldRecordCronExecutorServiceMetrics() throws InterruptedException, ParseException {
     // given
     CronExecutorService executor =
@@ -317,18 +322,10 @@ public class MeteredExecutorServiceWrapperTest {
             "userTagKey",
             "userTagValue");
     CountDownLatch runnableTaskStart = new CountDownLatch(1);
-    final AtomicInteger i = new AtomicInteger(0);
     // when
     executor.schedule(
         () -> {
           runnableTaskStart.countDown();
-          if (i.getAndIncrement() > 0) {
-            try {
-              Thread.sleep(1000000);
-            } catch (InterruptedException e) {
-              e.printStackTrace();
-            }
-          }
         },
         new CronExpression(" * * * ? * * *"));
     // then
@@ -378,14 +375,17 @@ public class MeteredExecutorServiceWrapperTest {
             .functionCounter()
             .count(),
         1.0);
-    assertTrue(
-        registry
+    assertWithRetry(
+        () ->
+            registry
                 .get("executor.queued")
                 .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
                 .tags(userTags)
                 .gauge()
-                .value()
-            >= 1.0);
+                .value(),
+        1.0,
+        10,
+        50);
     assertEquals(
         registry
             .get("executor.idle")
@@ -410,14 +410,14 @@ public class MeteredExecutorServiceWrapperTest {
             .timer()
             .count(),
         1);
-    assertTrue(
+    assertEquals(
         registry
-                .get("executor.active")
-                .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-                .tags(userTags)
-                .gauge()
-                .value()
-            >= 1.0);
+            .get("executor.active")
+            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
+            .tags(userTags)
+            .gauge()
+            .value(),
+        1.0);
     assertEquals(
         registry
             .get("executor.scheduled.once")
@@ -442,5 +442,18 @@ public class MeteredExecutorServiceWrapperTest {
             .counter()
             .count(),
         1.0);
+  }
+
+  public <V> void assertWithRetry(Supplier<V> predicate, V expected, int times, int pause_millis)
+      throws InterruptedException {
+    for (int i = 0; i <= times; i++) {
+      V actual = predicate.get();
+      if (expected.equals(actual)) {
+        return;
+      } else if (i + 1 <= times) {
+        Thread.sleep(pause_millis);
+      }
+    }
+    Assert.fail("Not able to get expected value " + expected + " with " + times + " retries");
   }
 }

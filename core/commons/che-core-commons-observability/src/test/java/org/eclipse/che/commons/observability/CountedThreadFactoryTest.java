@@ -12,6 +12,8 @@
 package org.eclipse.che.commons.observability;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 
 import io.micrometer.core.instrument.MockClock;
 import io.micrometer.core.instrument.Tag;
@@ -112,6 +114,11 @@ public class CountedThreadFactoryTest {
             .gauge()
             .value(),
         0.0);
+
+    // put here to ensure that thread are not GCd
+    assertFalse(thread.isAlive());
+    // put here to ensure that factory are not GCd
+    assertNotNull(factory);
   }
 
   @Test
@@ -185,6 +192,8 @@ public class CountedThreadFactoryTest {
             .counter()
             .count(),
         10.0);
+    // put here to ensure that factory are not GCd
+    assertNotNull(factory);
   }
 
   public static class JoinableThreadFactory implements ThreadFactory {
