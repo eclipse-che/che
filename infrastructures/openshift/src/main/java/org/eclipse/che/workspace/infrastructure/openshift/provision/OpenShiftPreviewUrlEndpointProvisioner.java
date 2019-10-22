@@ -19,6 +19,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlEndpointsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.util.Routes;
 
 /**
  * Extends {@link PreviewUrlEndpointsProvisioner} with OpenShift capabilities. We work with {@link
@@ -36,12 +37,6 @@ public class OpenShiftPreviewUrlEndpointProvisioner
 
   @Override
   protected boolean hasMatchingEndpoint(OpenShiftEnvironment env, Service service, int port) {
-    for (Route route : env.getRoutes().values()) {
-      if (route.getSpec().getTo().getName().equals(service.getMetadata().getName())
-          && route.getSpec().getPort().getTargetPort().getStrVal().equals("server-" + port)) {
-        return true;
-      }
-    }
-    return false;
+    return Routes.findRouteForServicePort(env.getRoutes().values(), service, port).isPresent();
   }
 }

@@ -13,17 +13,17 @@
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
 import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Route;
-import io.fabric8.openshift.api.model.RouteSpec;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.util.Services;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
+import org.eclipse.che.workspace.infrastructure.openshift.util.Routes;
 
 /**
  * Extends {@link PreviewUrlCommandProvisioner} where needed. For OpenShift, we work with {@link
@@ -34,25 +34,19 @@ public class OpenShiftPreviewUrlCommandProvisioner
     extends PreviewUrlCommandProvisioner<OpenShiftEnvironment> {
 
   @Override
-  protected Optional<String> findHostForServicePort(
-      KubernetesNamespace namespace, Service service, int port) throws InfrastructureException {
+  protected List<?> loadIngresses(KubernetesNamespace namespace) throws InfrastructureException {
     if (!(namespace instanceof OpenShiftProject)) {
       throw new InfrastructureException("namespace is not OpenShiftProject. Why???");
     }
     OpenShiftProject project = (OpenShiftProject) namespace;
 
-    Optional<ServicePort> foundPort = Services.findPort(service, port);
-    if (!foundPort.isPresent()) {
-      return Optional.empty();
-    }
+    return project.routes().get();
+  }
 
-    for (Route route : project.routes().get()) {
-      RouteSpec spec = route.getSpec();
-      if (spec.getTo().getName().equals(service.getMetadata().getName())
-          && spec.getPort().getTargetPort().getStrVal().equals(foundPort.get().getName())) {
-        return Optional.of(route.getSpec().getHost());
-      }
-    }
-    return Optional.empty();
+  @Override
+  protected Optional<String> findHostForServicePort(List<?> routesList, Service service, int port) {
+    List<Route> routes = routesList.stream().map(i -> (Route) i).collect(Collectors.toList());
+
+    return Routes.findRouteForServicePort(routes, service, port).map(r -> r.getSpec().getHost());
   }
 }

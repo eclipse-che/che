@@ -15,11 +15,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 import static org.eclipse.che.api.core.model.workspace.config.Command.PREVIEW_URL_ATTRIBUTE;
 
 import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServicePort;
-import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
 import io.fabric8.kubernetes.api.model.extensions.IngressRule;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
@@ -27,6 +25,7 @@ import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.Ingresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +62,8 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
     if (env.getCommands() == null) {
       return;
     }
+
+    List<?> ingresses = loadIngresses(namespace);
     for (CommandImpl command :
         env.getCommands()
             .stream()
@@ -74,7 +75,7 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
       if (foundService.isPresent()) {
         Optional<String> foundHost =
             findHostForServicePort(
-                namespace, foundService.get(), command.getPreviewUrl().getPort());
+                ingresses, foundService.get(), command.getPreviewUrl().getPort());
         if (foundHost.isPresent()) {
           command.getAttributes().put(PREVIEW_URL_ATTRIBUTE, foundHost.get());
         } else {
@@ -92,24 +93,15 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
     }
   }
 
-  protected Optional<String> findHostForServicePort(
-      KubernetesNamespace namespace, Service service, int port) throws InfrastructureException {
-    Optional<ServicePort> foundPort = Services.findPort(service, port);
-    if (!foundPort.isPresent()) {
-      return Optional.empty();
-    }
+  protected List<?> loadIngresses(KubernetesNamespace namespace) throws InfrastructureException {
+    return namespace.ingresses().get();
+  }
 
-    for (Ingress ingress : namespace.ingresses().get()) {
-      for (IngressRule rule : ingress.getSpec().getRules()) {
-        for (HTTPIngressPath path : rule.getHttp().getPaths()) {
-          IngressBackend backend = path.getBackend();
-          if (backend.getServiceName().equals(service.getMetadata().getName())
-              && backend.getServicePort().getStrVal().equals(foundPort.get().getName())) {
-            return Optional.of(rule.getHost());
-          }
-        }
-      }
-    }
-    return Optional.empty();
+  protected Optional<String> findHostForServicePort(
+      List<?> ingressList, Service service, int port) {
+    List<Ingress> ingresses =
+        ingressList.stream().map(i -> (Ingress) i).collect(Collectors.toList());
+    return Ingresses.findIngressRuleForServicePort(ingresses, service, port)
+        .map(IngressRule::getHost);
   }
 }

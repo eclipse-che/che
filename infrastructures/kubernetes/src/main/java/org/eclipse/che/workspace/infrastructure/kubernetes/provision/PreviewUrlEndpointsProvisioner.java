@@ -19,10 +19,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.server.Kuberne
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
-import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
-import io.fabric8.kubernetes.api.model.extensions.IngressRule;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +33,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ServerServiceBuilder;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.Ingresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Services;
 
 /**
@@ -106,22 +104,7 @@ public class PreviewUrlEndpointsProvisioner<T extends KubernetesEnvironment>
   }
 
   protected boolean hasMatchingEndpoint(T env, Service service, int port) {
-    Optional<ServicePort> foundPort = Services.findPort(service, port);
-    if (!foundPort.isPresent()) {
-      return false;
-    }
-
-    for (Ingress ingress : env.getIngresses().values()) {
-      for (IngressRule rule : ingress.getSpec().getRules()) {
-        for (HTTPIngressPath path : rule.getHttp().getPaths()) {
-          IngressBackend backend = path.getBackend();
-          if (backend.getServiceName().equals(service.getMetadata().getName())
-              && backend.getServicePort().getStrVal().equals(foundPort.get().getName())) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
+    return Ingresses.findIngressRuleForServicePort(env.getIngresses().values(), service, port)
+        .isPresent();
   }
 }
