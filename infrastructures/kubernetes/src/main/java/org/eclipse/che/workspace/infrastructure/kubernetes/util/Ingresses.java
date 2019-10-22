@@ -42,18 +42,25 @@ public class Ingresses {
       for (IngressRule rule : ingress.getSpec().getRules()) {
         for (HTTPIngressPath path : rule.getHttp().getPaths()) {
           IngressBackend backend = path.getBackend();
-          if (backend.getServiceName().equals(service.getMetadata().getName())) {
-            IntOrString servicePort = backend.getServicePort();
-            if ((servicePort.getKind() == IntOrStringConstants.KIND_STRING
-                    && backend.getServicePort().getStrVal().equals(foundPort.get().getName()))
-                || (servicePort.getKind() == IntOrStringConstants.KIND_INT
-                    && backend.getServicePort().getIntVal().equals(foundPort.get().getPort()))) {
-              return Optional.of(rule);
-            }
+          if (backend.getServiceName().equals(service.getMetadata().getName())
+              && matchesServicePort(backend.getServicePort(), foundPort.get())) {
+            return Optional.of(rule);
           }
         }
       }
     }
     return Optional.empty();
+  }
+
+  private static boolean matchesServicePort(IntOrString backendPort, ServicePort servicePort) {
+    if (backendPort.getKind() == IntOrStringConstants.KIND_STRING
+        && backendPort.getStrVal().equals(servicePort.getName())) {
+      return true;
+    }
+    if (backendPort.getKind() == IntOrStringConstants.KIND_INT
+        && backendPort.getIntVal().equals(servicePort.getPort())) {
+      return true;
+    }
+    return false;
   }
 }

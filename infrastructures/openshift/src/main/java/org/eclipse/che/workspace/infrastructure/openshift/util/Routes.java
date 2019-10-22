@@ -12,6 +12,7 @@
 
 package org.eclipse.che.workspace.infrastructure.openshift.util;
 
+import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Route;
@@ -38,15 +39,25 @@ public class Routes {
 
     for (Route route : routes) {
       RouteSpec spec = route.getSpec();
-      if (spec.getTo().getName().equals(service.getMetadata().getName())) {
-        if ((spec.getPort().getTargetPort().getKind() == IntOrStringConstants.KIND_STRING
-                && spec.getPort().getTargetPort().getStrVal().equals(foundPort.get().getName()))
-            || (spec.getPort().getTargetPort().getKind() == IntOrStringConstants.KIND_INT
-                && spec.getPort().getTargetPort().getIntVal().equals(foundPort.get().getPort()))) {
-          return Optional.of(route);
-        }
+      if (spec.getTo().getName().equals(service.getMetadata().getName())
+          && matchesPort(foundPort.get(), spec.getPort().getTargetPort())) {
+        return Optional.of(route);
       }
     }
     return Optional.empty();
+  }
+
+  private static boolean matchesPort(ServicePort servicePort, IntOrString routePort) {
+    if (routePort.getKind() == IntOrStringConstants.KIND_STRING
+        && routePort.getStrVal().equals(servicePort.getName())) {
+      return true;
+    }
+
+    if (routePort.getKind() == IntOrStringConstants.KIND_INT
+        && routePort.getIntVal().equals(servicePort.getPort())) {
+      return true;
+    }
+
+    return false;
   }
 }
