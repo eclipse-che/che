@@ -97,8 +97,13 @@ suite('Language server validation', async () => {
         try {
             await ide.checkLsInitializationStart('Starting Java Language Server');
         } catch (err) {
-            console.log("Known flakiness https://github.com/eclipse/che/issues/14944");
-            throw err;
+            if (!(err instanceof error.TimeoutError)) {
+                throw err;
+            }
+
+            console.log("Known flakiness has occurred https://github.com/eclipse/che/issues/14944");
+            await driverHelper.reloadPage();
+            await ide.waitStatusBarContains(expectedTextInStatusBar);
         }
 
         await ide.waitStatusBarTextAbsence('Starting Java Language Server', 1800000);
