@@ -129,7 +129,9 @@ export class WorkspaceDetailsController {
     this.workspaceId = initData.workspaceDetails.id;
 
     const action = (newWorkspaceDetails: che.IWorkspace) => {
-      if (angular.equals(newWorkspaceDetails, this.initialWorkspaceDetails)) {
+      if (this.initialWorkspaceDetails.config && angular.equals(newWorkspaceDetails.config, this.initialWorkspaceDetails.config)) {
+        return;
+      } else if (this.initialWorkspaceDetails.devfile && angular.equals(newWorkspaceDetails.devfile, this.initialWorkspaceDetails.devfile)) {
         return;
       }
 
@@ -160,8 +162,8 @@ export class WorkspaceDetailsController {
     const failedTabsDeregistrationFn = $scope.$watch(() => {
       return this.checkForFailedTabs();
     }, () => {
-      const isModified = this.workspaceDetailsService.isWorkspaceModified(this.workspaceId);
-      this.updateEditModeOverlayConfig(isModified);
+      const isSaved = this.workspaceDetailsService.isWorkspaceConfigSaved(this.workspaceId);
+      this.updateEditModeOverlayConfig(isSaved === false);
     }, true);
     $scope.$on('$destroy', () => {
       this.cheWorkspace.unsubscribeOnWorkspaceChange(this.workspaceId, action);
@@ -406,10 +408,16 @@ export class WorkspaceDetailsController {
     } else {
       ({ isModified, needRestart } = this.isModifiedDevfile());
     }
-    needRestart = needRestart || this.workspaceDetailsService.doesWorkspaceConfigNeedRestart(this.workspaceId);
+
+    if (this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.STARTING]
+      || this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.RUNNING]) {
+      needRestart = needRestart || this.workspaceDetailsService.doesWorkspaceConfigNeedRestart(this.workspaceId);
+    } else {
+      needRestart = false;
+    }
 
     if (isModified || needRestart) {
-      this.workspaceDetailsService.setModified(this.workspaceId, needRestart);
+      this.workspaceDetailsService.setModified(this.workspaceId, { isSaved: isModified === false, needRestart });
     } else {
       this.workspaceDetailsService.removeModified(this.workspaceId);
     }
@@ -438,14 +446,16 @@ export class WorkspaceDetailsController {
         this.workspaceDetailsService.removeModified(this.workspaceId);
         this.cheNotification.showInfo('Workspace updated.');
         this.$scope.$broadcast('edit-workspace-details', { status: 'saved' });
-
-        return this.cheWorkspace.fetchWorkspaceDetails(this.initialWorkspaceDetails.id).then(() => {
-          this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceDetails.config.name).search({ tab: this.tab[this.selectedTabIndex] });
-        });
       })
       .catch((error: any) => {
         this.$scope.$broadcast('edit-workspace-details', { status: 'failed' });
         this.cheNotification.showError('Update workspace failed.', error);
+      })
+      .then(() => {
+        return this.cheWorkspace.fetchWorkspaceDetails(this.initialWorkspaceDetails.id);
+      })
+      .then(() => {
+        this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceDataManager.getName(this.workspaceDetails)).search({ tab: this.tab[this.selectedTabIndex] });
       })
       .finally(() => {
         this.loading = false;
@@ -468,6 +478,8 @@ export class WorkspaceDetailsController {
 
     this.workspaceDetailsService.saveConfigChanges(this.workspaceDetails)
       .then(() => {
+        this.workspaceDetailsService.setModified(this.workspaceId, { isSaved: true });
+
         let message = 'Workspace updated.';
         message += notifyRestart ? '<br/>To apply changes in running workspace - need to restart it.' : '';
         this.cheNotification.showInfo(message);

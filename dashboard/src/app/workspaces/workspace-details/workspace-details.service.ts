@@ -41,11 +41,16 @@ export interface IModifiedWorkspace {
 class ModifiedWorkspaces {
   workspaces: { [id: string]: IModifiedWorkspace } = {};
 
-  set(id: string, needRestart: boolean): void {
+  set(id: string, attrs: { isSaved?: boolean, needRestart?: boolean }): void {
     if (this.workspaces[id] === undefined) {
       this.workspaces[id] = { isSaved: false };
     }
-    this.workspaces[id].needRestart = needRestart;
+    if (angular.isDefined(attrs.isSaved)) {
+      this.workspaces[id].isSaved = attrs.isSaved;
+    }
+    if (angular.isDefined(attrs.needRestart)) {
+      this.workspaces[id].needRestart = attrs.needRestart;
+    }
   }
 
   isSaved(id: string): boolean {
@@ -337,7 +342,8 @@ export class WorkspaceDetailsService {
         return this.saveConfigChanges(workspace);
       })
       .then(() => {
-        this.cheWorkspace.startWorkspace(workspace.id, workspace.config.defaultEnv);
+        const envName = workspace.config ? workspace.config.defaultEnv : undefined;
+        this.cheWorkspace.startWorkspace(workspace.id, envName);
         return this.cheWorkspace.fetchStatusChange(workspace.id, WorkspaceStatus[WorkspaceStatus.RUNNING]);
       })
       .catch((error: any) => {
@@ -348,10 +354,9 @@ export class WorkspaceDetailsService {
 
   /**
    * Keep a workspace as one that is modified and may need restarting to apply changes.
-   * @param {string} id a workspace ID
    */
-  setModified(id: string, needRestart: boolean): void {
-    this.modifiedWorkspaces.set(id, needRestart);
+  setModified(id: string, attrs: { isSaved?: boolean, needRestart?: boolean }): void {
+    this.modifiedWorkspaces.set(id, attrs);
   }
 
   removeModified(id: string): void {

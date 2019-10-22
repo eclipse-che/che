@@ -37,7 +37,7 @@ export class CheEditModeOverlayController {
     this.confirmDialogService = confirmDialogService;
 
     this.$scope.$on('$locationChangeStart', (event: ng.IAngularEvent, newUrl: string, oldUrl: string) => {
-      if (this.config.preventPageLeave === false) {
+      if (this.config && this.config.preventPageLeave === false) {
         return;
       }
 
