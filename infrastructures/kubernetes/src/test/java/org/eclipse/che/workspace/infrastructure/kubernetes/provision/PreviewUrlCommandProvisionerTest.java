@@ -34,6 +34,7 @@ import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.PreviewUrlImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -87,6 +88,7 @@ public class PreviewUrlCommandProvisionerTest {
 
     assertTrue(commands.containsAll(env.getCommands()));
     assertTrue(env.getCommands().containsAll(commands));
+    assertTrue(env.getWarnings().isEmpty());
   }
 
   @Test
@@ -105,6 +107,8 @@ public class PreviewUrlCommandProvisionerTest {
 
     assertTrue(commands.containsAll(env.getCommands()));
     assertTrue(env.getCommands().containsAll(commands));
+    assertEquals(
+        env.getWarnings().get(0).getCode(), Warnings.NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL);
   }
 
   @Test
@@ -131,6 +135,8 @@ public class PreviewUrlCommandProvisionerTest {
 
     assertTrue(commands.containsAll(env.getCommands()));
     assertTrue(env.getCommands().containsAll(commands));
+    assertEquals(
+        env.getWarnings().get(0).getCode(), Warnings.NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL);
   }
 
   @Test
@@ -174,6 +180,7 @@ public class PreviewUrlCommandProvisionerTest {
 
     assertTrue(env.getCommands().get(0).getAttributes().containsKey("previewUrl"));
     assertEquals(env.getCommands().get(0).getAttributes().get("previewUrl"), "testhost");
+    assertTrue(env.getWarnings().isEmpty());
   }
 
   @Test(expectedExceptions = InternalInfrastructureException.class)

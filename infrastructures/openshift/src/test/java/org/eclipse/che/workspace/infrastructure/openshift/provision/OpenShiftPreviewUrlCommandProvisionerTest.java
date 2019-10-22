@@ -33,6 +33,7 @@ import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.PreviewUrlImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
@@ -93,6 +94,7 @@ public class OpenShiftPreviewUrlCommandProvisionerTest {
 
     assertTrue(commands.containsAll(env.getCommands()));
     assertTrue(env.getCommands().containsAll(commands));
+    assertTrue(env.getWarnings().isEmpty());
   }
 
   @Test
@@ -111,10 +113,12 @@ public class OpenShiftPreviewUrlCommandProvisionerTest {
 
     assertTrue(commands.containsAll(env.getCommands()));
     assertTrue(env.getCommands().containsAll(commands));
+    assertEquals(
+        env.getWarnings().get(0).getCode(), Warnings.NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL);
   }
 
   @Test
-  public void shouldDoNothingWhenCantFindIngressForPreviewUrl() throws InfrastructureException {
+  public void shouldDoNothingWhenCantFindRouteForPreviewUrl() throws InfrastructureException {
     int port = 8080;
     List<CommandImpl> commands =
         Collections.singletonList(
@@ -137,6 +141,8 @@ public class OpenShiftPreviewUrlCommandProvisionerTest {
 
     assertTrue(commands.containsAll(env.getCommands()));
     assertTrue(env.getCommands().containsAll(commands));
+    assertEquals(
+        env.getWarnings().get(0).getCode(), Warnings.NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL);
   }
 
   @Test
@@ -174,6 +180,7 @@ public class OpenShiftPreviewUrlCommandProvisionerTest {
 
     assertTrue(env.getCommands().get(0).getAttributes().containsKey("previewUrl"));
     assertEquals(env.getCommands().get(0).getAttributes().get("previewUrl"), "testhost");
+    assertTrue(env.getWarnings().isEmpty());
   }
 
   @Test(expectedExceptions = InternalInfrastructureException.class)

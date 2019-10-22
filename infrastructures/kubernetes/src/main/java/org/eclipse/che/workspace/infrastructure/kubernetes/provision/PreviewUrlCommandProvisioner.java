@@ -13,6 +13,8 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static org.eclipse.che.api.core.model.workspace.config.Command.PREVIEW_URL_ATTRIBUTE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL_MESSAGE;
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -80,16 +83,26 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
         if (foundHost.isPresent()) {
           command.getAttributes().put(PREVIEW_URL_ATTRIBUTE, foundHost.get());
         } else {
-          LOG.warn(
-              "unable to find ingress for service [{}] and port [{}]",
-              foundService.get(),
-              command.getPreviewUrl().getPort());
+          String message =
+              String.format(
+                  "unable to find ingress for service '%s' and port '%s'",
+                  foundService.get(), command.getPreviewUrl().getPort());
+          LOG.warn(message);
+          env.addWarning(
+              new WarningImpl(
+                  NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL,
+                  String.format(NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL_MESSAGE, message)));
         }
       } else {
-        LOG.warn(
-            "unable to find service for port [{}] for command [{}]",
-            command.getPreviewUrl().getPort(),
-            command.getName());
+        String message =
+            String.format(
+                "unable to find service for port '%s' for command '%s'",
+                command.getPreviewUrl().getPort(), command.getName());
+        LOG.warn(message);
+        env.addWarning(
+            new WarningImpl(
+                NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL,
+                String.format(NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL_MESSAGE, message)));
       }
     }
   }
