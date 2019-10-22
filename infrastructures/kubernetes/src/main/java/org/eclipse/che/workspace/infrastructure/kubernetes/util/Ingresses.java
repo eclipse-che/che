@@ -53,12 +53,10 @@ public class Ingresses {
   }
 
   private static boolean matchesServicePort(IntOrString backendPort, ServicePort servicePort) {
-    if (backendPort.getKind() == IntOrStringConstants.KIND_STRING
-        && backendPort.getStrVal().equals(servicePort.getName())) {
+    if (backendPort.getStrVal() != null && backendPort.getStrVal().equals(servicePort.getName())) {
       return true;
     }
-    if (backendPort.getKind() == IntOrStringConstants.KIND_INT
-        && backendPort.getIntVal().equals(servicePort.getPort())) {
+    if (backendPort.getIntVal() != null && backendPort.getIntVal().equals(servicePort.getPort())) {
       return true;
     }
     return false;

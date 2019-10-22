@@ -19,7 +19,6 @@ import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteSpec;
 import java.util.Collection;
 import java.util.Optional;
-import org.eclipse.che.workspace.infrastructure.kubernetes.util.IntOrStringConstants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Services;
 
 /** Util class that helps working with OpenShift Routes */
@@ -48,13 +47,11 @@ public class Routes {
   }
 
   private static boolean matchesPort(ServicePort servicePort, IntOrString routePort) {
-    if (routePort.getKind() == IntOrStringConstants.KIND_STRING
-        && routePort.getStrVal().equals(servicePort.getName())) {
+    if (routePort.getStrVal() != null && routePort.getStrVal().equals(servicePort.getName())) {
       return true;
     }
 
-    if (routePort.getKind() == IntOrStringConstants.KIND_INT
-        && routePort.getIntVal().equals(servicePort.getPort())) {
+    if (routePort.getIntVal() != null && routePort.getIntVal().equals(servicePort.getPort())) {
       return true;
     }
 
