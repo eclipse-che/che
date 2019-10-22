@@ -336,7 +336,11 @@ public class KubernetesNamespaceFactory {
       namespaceName = evalNamespaceName(workspaceId, EnvironmentContext.getCurrent().getSubject());
     } catch (NotFoundException | ServerException | ConflictException | ValidationException e) {
       throw new InfrastructureException(
-          format("Failed to determine the namespace to put the workspace %s to", workspaceId), e);
+          format(
+              "Failed to determine the namespace to put the workspace %s to."
+                  + " The error message was: %s",
+              workspaceId, e.getMessage()),
+          e);
     }
 
     KubernetesNamespace namespace = doCreateNamespace(workspaceId, namespaceName);
