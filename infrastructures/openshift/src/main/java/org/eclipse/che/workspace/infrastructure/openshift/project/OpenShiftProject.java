@@ -96,6 +96,12 @@ public class OpenShiftProject extends KubernetesNamespace {
     }
   }
 
+  /**
+   * Deletes the project. Deleting a non-existent projects is not an error as is not an attempt to
+   * delete a project that is already being deleted.
+   *
+   * @throws InfrastructureException if any unexpected exception occurs during project deletion
+   */
   void delete() throws InfrastructureException {
     String workspaceId = getWorkspaceId();
     String projectName = getName();

@@ -143,23 +143,26 @@ public class KubernetesNamespaceFactory {
    * }</pre>
    */
   protected boolean isCreatingNamespace(String workspaceId) throws InfrastructureException {
-    boolean legacyWithPlaceholders =
-        isNullOrEmpty(legacyNamespaceName) || hasPlaceholders(legacyNamespaceName);
     boolean legacyExists =
         checkNamespaceExists(
             resolveLegacyNamespaceName(EnvironmentContext.getCurrent().getSubject(), workspaceId));
 
-    if (isNullOrEmpty(defaultNamespaceName) && !legacyExists) {
-      throw new InfrastructureException(
-          "Cannot determine whether a new namespace and service account should be"
-              + " created for workspace %s. There is no pre-existing workspace namespace to be found using the legacy"
-              + " `che.infra.kubernetes.namespace` property yet the `che.infra.kubernetes.namespace.default` property"
-              + " is undefined.");
+    // legacy namespace exists and should be used
+    if (legacyExists) {
+      // if it contains any placeholder("" is <workspaceid>) - it indicates that Che created
+      // namespace by itself
+      return isNullOrEmpty(legacyNamespaceName) || hasPlaceholders(legacyNamespaceName);
     }
 
-    boolean defaultHasPlaceholders = hasPlaceholders(defaultNamespaceName);
+    if (isNullOrEmpty(defaultNamespaceName)) {
+      throw new InfrastructureException(
+          "Cannot determine whether a new namespace and service account should be"
+              + " created for workspace %s. There is no pre-existing workspace namespace to be"
+              + " found using the legacy `che.infra.kubernetes.namespace` property yet the"
+              + " `che.infra.kubernetes.namespace.default` property is undefined.");
+    }
 
-    return (legacyWithPlaceholders && legacyExists) || (!legacyExists && defaultHasPlaceholders);
+    return hasPlaceholders(defaultNamespaceName);
   }
 
   /**

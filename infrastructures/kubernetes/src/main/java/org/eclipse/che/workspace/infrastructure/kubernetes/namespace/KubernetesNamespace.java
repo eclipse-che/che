@@ -119,8 +119,13 @@ public class KubernetesNamespace {
     }
   }
 
+  /**
+   * Deletes the namespace. Deleting a non-existent namespace is not an error as is not an attempt
+   * to delete a namespace that is already being deleted.
+   *
+   * @throws InfrastructureException if any unexpected exception occurs during namespace deletion
+   */
   void delete() throws InfrastructureException {
-
     KubernetesClient client = clientFactory.create(workspaceId);
     delete(name, client);
   }

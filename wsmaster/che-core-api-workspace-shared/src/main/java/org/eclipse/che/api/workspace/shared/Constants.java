@@ -186,8 +186,8 @@ public final class Constants {
   public static final int WORKSPACE_GENERATE_NAME_CHARS_APPEND = 5;
 
   /**
-   * The attribute in the workspace config where we store the infrastructure namespace the workspace
-   * is deployed to
+   * The attribute of the workspace where we store the infrastructure namespace the workspace is
+   * deployed to
    */
   public static final String WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE =
       "infrastructureNamespace";
