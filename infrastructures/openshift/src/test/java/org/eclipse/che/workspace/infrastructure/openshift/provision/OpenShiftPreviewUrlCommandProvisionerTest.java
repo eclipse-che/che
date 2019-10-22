@@ -31,6 +31,8 @@ import java.util.List;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.PreviewUrlImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
@@ -61,6 +63,12 @@ public class OpenShiftPreviewUrlCommandProvisionerTest {
     Mockito.when(mockEnvironment.getCommands()).thenReturn(null);
 
     previewUrlCommandProvisioner.provision(mockEnvironment, mockProject);
+  }
+
+  @Test(expectedExceptions = InternalInfrastructureException.class)
+  public void throwsInfrastructureExceptionWhenK8sNamespaces() throws InfrastructureException {
+    KubernetesNamespace namespace = Mockito.mock(KubernetesNamespace.class);
+    previewUrlCommandProvisioner.provision(mockEnvironment, namespace);
   }
 
   @Test

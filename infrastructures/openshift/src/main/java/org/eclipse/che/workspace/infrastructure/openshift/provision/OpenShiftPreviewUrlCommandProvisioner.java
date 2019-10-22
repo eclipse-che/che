@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
@@ -36,7 +37,10 @@ public class OpenShiftPreviewUrlCommandProvisioner
   @Override
   protected List<?> loadIngresses(KubernetesNamespace namespace) throws InfrastructureException {
     if (!(namespace instanceof OpenShiftProject)) {
-      throw new InfrastructureException("namespace is not OpenShiftProject. Why???");
+      throw new InternalInfrastructureException(
+          String.format(
+              "OpenShiftProject instance expected, but got '%s'. Please report a bug!",
+              namespace.getClass().getCanonicalName()));
     }
     OpenShiftProject project = (OpenShiftProject) namespace;
 
