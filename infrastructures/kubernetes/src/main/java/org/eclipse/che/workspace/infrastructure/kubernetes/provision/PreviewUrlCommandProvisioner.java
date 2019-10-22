@@ -76,28 +76,28 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
       Optional<Service> foundService =
           Services.findServiceWithPort(
               namespace.services().get(), command.getPreviewUrl().getPort());
-      if (foundService.isPresent()) {
-        Optional<String> foundHost =
-            findHostForServicePort(
-                ingresses, foundService.get(), command.getPreviewUrl().getPort());
-        if (foundHost.isPresent()) {
-          command.getAttributes().put(PREVIEW_URL_ATTRIBUTE, foundHost.get());
-        } else {
-          String message =
-              String.format(
-                  "unable to find ingress for service '%s' and port '%s'",
-                  foundService.get(), command.getPreviewUrl().getPort());
-          LOG.warn(message);
-          env.addWarning(
-              new WarningImpl(
-                  NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL,
-                  String.format(NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL_MESSAGE, message)));
-        }
-      } else {
+      if (!foundService.isPresent()) {
         String message =
             String.format(
                 "unable to find service for port '%s' for command '%s'",
                 command.getPreviewUrl().getPort(), command.getName());
+        LOG.warn(message);
+        env.addWarning(
+            new WarningImpl(
+                NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL,
+                String.format(NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL_MESSAGE, message)));
+        continue;
+      }
+
+      Optional<String> foundHost =
+          findHostForServicePort(ingresses, foundService.get(), command.getPreviewUrl().getPort());
+      if (foundHost.isPresent()) {
+        command.getAttributes().put(PREVIEW_URL_ATTRIBUTE, foundHost.get());
+      } else {
+        String message =
+            String.format(
+                "unable to find ingress for service '%s' and port '%s'",
+                foundService.get(), command.getPreviewUrl().getPort());
         LOG.warn(message);
         env.addWarning(
             new WarningImpl(
