@@ -10,27 +10,26 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
-package org.eclipse.che.workspace.infrastructure.openshift.provision;
+package org.eclipse.che.workspace.infrastructure.openshift.server;
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlEndpointsProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.util.Routes;
 
 /**
- * Extends {@link PreviewUrlEndpointsProvisioner} with OpenShift capabilities. We work with {@link
- * Route} and {@link OpenShiftEnvironment}.
+ * Extends {@link PreviewUrlExposer} with OpenShift capabilities. We work with {@link Route} and
+ * {@link OpenShiftEnvironment}.
  */
 @Singleton
-public class OpenShiftPreviewUrlEndpointProvisioner
-    extends PreviewUrlEndpointsProvisioner<OpenShiftEnvironment> {
+public class OpenShiftPreviewUrlExposer extends PreviewUrlExposer<OpenShiftEnvironment> {
 
   @Inject
-  public OpenShiftPreviewUrlEndpointProvisioner(
+  public OpenShiftPreviewUrlExposer(
       ExternalServerExposer<OpenShiftEnvironment> externalServerExposer) {
     super(externalServerExposer);
   }

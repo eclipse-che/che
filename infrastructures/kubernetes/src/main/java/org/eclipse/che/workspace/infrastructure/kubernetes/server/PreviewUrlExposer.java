@@ -10,7 +10,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
-package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
+package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
@@ -27,11 +27,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.ServerServiceBuilder;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Ingresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Services;
@@ -44,18 +41,16 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.Services;
  * @param <T> type of the environment
  */
 @Singleton
-public class PreviewUrlEndpointsProvisioner<T extends KubernetesEnvironment>
-    implements ConfigurationProvisioner<T> {
+public class PreviewUrlExposer<T extends KubernetesEnvironment> {
 
   private final ExternalServerExposer<T> externalServerExposer;
 
   @Inject
-  public PreviewUrlEndpointsProvisioner(ExternalServerExposer<T> externalServerExposer) {
+  public PreviewUrlExposer(ExternalServerExposer<T> externalServerExposer) {
     this.externalServerExposer = externalServerExposer;
   }
 
-  @Override
-  public void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException {
+  public void expose(T k8sEnv) {
     createEndpointsForPreviewUrls(k8sEnv);
   }
 

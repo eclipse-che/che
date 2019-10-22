@@ -24,7 +24,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSe
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlEndpointsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
@@ -34,6 +33,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVars
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -67,7 +67,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private CertificateProvisioner certificateProvisioner;
   @Mock private VcsSshKeysProvisioner vcsSshKeysProvisioner;
   @Mock private GitUserProfileProvisioner gitUserProfileProvisioner;
-  @Mock private PreviewUrlEndpointsProvisioner previewUrlEndpointsProvisioner;
+  @Mock private PreviewUrlExposer previewUrlExposer;
 
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> k8sInfraProvisioner;
 
@@ -94,7 +94,7 @@ public class KubernetesEnvironmentProvisionerTest {
             certificateProvisioner,
             vcsSshKeysProvisioner,
             gitUserProfileProvisioner,
-            previewUrlEndpointsProvisioner);
+            previewUrlExposer);
     provisionOrder =
         inOrder(
             logsVolumeMachineProvisioner,
@@ -112,7 +112,7 @@ public class KubernetesEnvironmentProvisionerTest {
             serviceAccountProvisioner,
             certificateProvisioner,
             gitUserProfileProvisioner,
-            previewUrlEndpointsProvisioner);
+            previewUrlExposer);
   }
 
   @Test

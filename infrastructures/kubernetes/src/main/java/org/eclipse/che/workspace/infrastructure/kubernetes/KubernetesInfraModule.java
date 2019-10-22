@@ -58,10 +58,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiExternalEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiInternalEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlEndpointsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressAnnotationsProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.DefaultHostExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServiceExposureStrategyProvider;
@@ -135,8 +135,8 @@ public class KubernetesInfraModule extends AbstractModule {
         .toProvider(IngressServiceExposureStrategyProvider.class);
 
     bind(ServersConverter.class).to(new TypeLiteral<ServersConverter<KubernetesEnvironment>>() {});
-    bind(PreviewUrlEndpointsProvisioner.class)
-        .to(new TypeLiteral<PreviewUrlEndpointsProvisioner<KubernetesEnvironment>>() {});
+    bind(PreviewUrlExposer.class)
+        .to(new TypeLiteral<PreviewUrlExposer<KubernetesEnvironment>>() {});
     bind(PreviewUrlCommandProvisioner.class)
         .to(new TypeLiteral<PreviewUrlCommandProvisioner<KubernetesEnvironment>>() {});
 

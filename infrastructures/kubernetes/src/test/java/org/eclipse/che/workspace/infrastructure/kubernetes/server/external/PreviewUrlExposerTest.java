@@ -10,7 +10,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
-package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
+package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
@@ -30,13 +30,10 @@ import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.PreviewUrlImpl;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
@@ -45,25 +42,24 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
-public class PreviewUrlEndpointsProvisionerTest {
+public class PreviewUrlExposerTest {
 
-  private PreviewUrlEndpointsProvisioner<KubernetesEnvironment> previewUrlEndpointsProvisioner;
+  private PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer;
 
   @Mock private ExternalServiceExposureStrategy externalServiceExposureStrategy;
-  @Mock private RuntimeIdentity identity;
 
   @BeforeMethod
   public void setUp() {
     ExternalServerExposer<KubernetesEnvironment> externalServerExposer =
         new ExternalServerExposer<>(externalServiceExposureStrategy, Collections.emptyMap(), null);
-    previewUrlEndpointsProvisioner = new PreviewUrlEndpointsProvisioner<>(externalServerExposer);
+    previewUrlExposer = new PreviewUrlExposer<>(externalServerExposer);
   }
 
   @Test
-  public void shouldDoNothingWhenNoCommandsDefined() throws InfrastructureException {
+  public void shouldDoNothingWhenNoCommandsDefined() {
     KubernetesEnvironment env = KubernetesEnvironment.builder().build();
 
-    previewUrlEndpointsProvisioner.provision(env, identity);
+    previewUrlExposer.expose(env);
 
     assertTrue(env.getCommands().isEmpty());
     assertTrue(env.getServices().isEmpty());
@@ -71,14 +67,14 @@ public class PreviewUrlEndpointsProvisionerTest {
   }
 
   @Test
-  public void shouldDoNothingWhenNoCommandWithPreviewUrlDefined() throws InfrastructureException {
+  public void shouldDoNothingWhenNoCommandWithPreviewUrlDefined() {
     CommandImpl command = new CommandImpl("a", "a", "a");
     KubernetesEnvironment env =
         KubernetesEnvironment.builder()
             .setCommands(singletonList(new CommandImpl(command)))
             .build();
 
-    previewUrlEndpointsProvisioner.provision(env, identity);
+    previewUrlExposer.expose(env);
 
     assertEquals(env.getCommands().get(0), command);
     assertTrue(env.getServices().isEmpty());
@@ -86,7 +82,7 @@ public class PreviewUrlEndpointsProvisionerTest {
   }
 
   @Test
-  public void shouldNotProvisionWhenServiceAndIngressFound() throws InfrastructureException {
+  public void shouldNotProvisionWhenServiceAndIngressFound() {
     final int PORT = 8080;
     final String SERVER_PORT_NAME = "server-" + PORT;
 
@@ -129,12 +125,12 @@ public class PreviewUrlEndpointsProvisionerTest {
             .build();
 
     assertEquals(env.getIngresses().size(), 1);
-    previewUrlEndpointsProvisioner.provision(env, identity);
+    previewUrlExposer.expose(env);
     assertEquals(env.getIngresses().size(), 1);
   }
 
   @Test
-  public void shouldProvisionIngressWhenNotFound() throws InfrastructureException {
+  public void shouldProvisionIngressWhenNotFound() {
     Mockito.when(
             externalServiceExposureStrategy.getExternalPath(Mockito.anyString(), Mockito.any()))
         .thenReturn("some-server-path");
@@ -167,7 +163,7 @@ public class PreviewUrlEndpointsProvisionerTest {
             .build();
 
     assertTrue(env.getIngresses().isEmpty());
-    previewUrlEndpointsProvisioner.provision(env, identity);
+    previewUrlExposer.expose(env);
     assertEquals(env.getIngresses().size(), 1);
     Ingress provisionedIngress = env.getIngresses().values().iterator().next();
     IngressBackend provisionedIngressBackend =
@@ -177,7 +173,7 @@ public class PreviewUrlEndpointsProvisionerTest {
   }
 
   @Test
-  public void shouldProvisionServiceAndIngressWhenNotFound() throws InfrastructureException {
+  public void shouldProvisionServiceAndIngressWhenNotFound() {
     Mockito.when(
             externalServiceExposureStrategy.getExternalPath(Mockito.anyString(), Mockito.any()))
         .thenReturn("some-server-path");
@@ -196,7 +192,7 @@ public class PreviewUrlEndpointsProvisionerTest {
     assertTrue(env.getIngresses().isEmpty());
     assertTrue(env.getServices().isEmpty());
 
-    previewUrlEndpointsProvisioner.provision(env, identity);
+    previewUrlExposer.expose(env);
 
     assertEquals(env.getIngresses().size(), 1);
     assertEquals(env.getServices().size(), 1);

@@ -25,7 +25,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitUserProf
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlEndpointsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
@@ -34,10 +33,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVars
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftPreviewUrlEndpointProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftUniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftPreviewUrlExposer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +70,7 @@ public class OpenShiftEnvironmentProvisioner
   private final CertificateProvisioner certificateProvisioner;
   private final VcsSshKeysProvisioner vcsSshKeysProvisioner;
   private final GitUserProfileProvisioner gitUserProfileProvisioner;
-  private final PreviewUrlEndpointsProvisioner<OpenShiftEnvironment> previewUrlEndpointsProvisioner;
+  private final PreviewUrlExposer<OpenShiftEnvironment> previewUrlExposer;
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
@@ -90,7 +90,7 @@ public class OpenShiftEnvironmentProvisioner
       CertificateProvisioner certificateProvisioner,
       VcsSshKeysProvisioner vcsSshKeysProvisioner,
       GitUserProfileProvisioner gitUserProfileProvisioner,
-      OpenShiftPreviewUrlEndpointProvisioner previewUrlEndpointsProvisioner) {
+      OpenShiftPreviewUrlExposer previewUrlEndpointsProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -107,7 +107,7 @@ public class OpenShiftEnvironmentProvisioner
     this.certificateProvisioner = certificateProvisioner;
     this.vcsSshKeysProvisioner = vcsSshKeysProvisioner;
     this.gitUserProfileProvisioner = gitUserProfileProvisioner;
-    this.previewUrlEndpointsProvisioner = previewUrlEndpointsProvisioner;
+    this.previewUrlExposer = previewUrlEndpointsProvisioner;
   }
 
   @Override
@@ -126,7 +126,7 @@ public class OpenShiftEnvironmentProvisioner
 
     // 2 stage - converting Che model env to OpenShift env
     serversConverter.provision(osEnv, identity);
-    previewUrlEndpointsProvisioner.provision(osEnv, identity);
+    previewUrlExposer.expose(osEnv);
     envVarsConverter.provision(osEnv, identity);
     if (pvcEnabled) {
       volumesStrategy.provision(osEnv, identity);

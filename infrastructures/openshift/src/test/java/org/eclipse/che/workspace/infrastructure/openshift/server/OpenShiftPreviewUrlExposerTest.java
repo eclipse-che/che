@@ -10,7 +10,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
-package org.eclipse.che.workspace.infrastructure.openshift.provision;
+package org.eclipse.che.workspace.infrastructure.openshift.server;
 
 import static java.util.Collections.singletonList;
 import static org.testng.Assert.*;
@@ -27,40 +27,34 @@ import io.fabric8.openshift.api.model.RouteTargetReference;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.PreviewUrlImpl;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
-public class OpenShiftPreviewUrlEndpointProvisionerTest {
+public class OpenShiftPreviewUrlExposerTest {
 
-  private OpenShiftPreviewUrlEndpointProvisioner previewUrlEndpointsProvisioner;
+  private OpenShiftPreviewUrlExposer previewUrlEndpointsProvisioner;
 
   @Mock private ExternalServiceExposureStrategy externalServiceExposureStrategy;
-  @Mock private RuntimeIdentity identity;
 
   @BeforeMethod
   public void setUp() {
     OpenShiftExternalServerExposer externalServerExposer = new OpenShiftExternalServerExposer();
-    previewUrlEndpointsProvisioner =
-        new OpenShiftPreviewUrlEndpointProvisioner(externalServerExposer);
+    previewUrlEndpointsProvisioner = new OpenShiftPreviewUrlExposer(externalServerExposer);
   }
 
   @Test
-  public void shouldDoNothingWhenNoCommandsDefined() throws InfrastructureException {
+  public void shouldDoNothingWhenNoCommandsDefined() {
     OpenShiftEnvironment env = OpenShiftEnvironment.builder().build();
 
-    previewUrlEndpointsProvisioner.provision(env, identity);
+    previewUrlEndpointsProvisioner.expose(env);
 
     assertTrue(env.getCommands().isEmpty());
     assertTrue(env.getServices().isEmpty());
@@ -68,12 +62,12 @@ public class OpenShiftPreviewUrlEndpointProvisionerTest {
   }
 
   @Test
-  public void shouldDoNothingWhenNoCommandWithPreviewUrlDefined() throws InfrastructureException {
+  public void shouldDoNothingWhenNoCommandWithPreviewUrlDefined() {
     CommandImpl command = new CommandImpl("a", "a", "a");
     OpenShiftEnvironment env =
         OpenShiftEnvironment.builder().setCommands(singletonList(new CommandImpl(command))).build();
 
-    previewUrlEndpointsProvisioner.provision(env, identity);
+    previewUrlEndpointsProvisioner.expose(env);
 
     assertEquals(env.getCommands().get(0), command);
     assertTrue(env.getServices().isEmpty());
@@ -81,7 +75,7 @@ public class OpenShiftPreviewUrlEndpointProvisionerTest {
   }
 
   @Test
-  public void shouldNotProvisionWhenServiceAndRouteFound() throws InfrastructureException {
+  public void shouldNotProvisionWhenServiceAndRouteFound() {
     final int PORT = 8080;
     final String SERVER_PORT_NAME = "server-" + PORT;
 
@@ -116,12 +110,12 @@ public class OpenShiftPreviewUrlEndpointProvisionerTest {
             .build();
 
     assertEquals(env.getRoutes().size(), 1);
-    previewUrlEndpointsProvisioner.provision(env, identity);
+    previewUrlEndpointsProvisioner.expose(env);
     assertEquals(env.getRoutes().size(), 1);
   }
 
   @Test
-  public void shouldProvisionRouteWhenNotFound() throws InfrastructureException {
+  public void shouldProvisionRouteWhenNotFound() {
     final int PORT = 8080;
     final String SERVER_PORT_NAME = "server-" + PORT;
     final String SERVICE_NAME = "servicename";
@@ -150,7 +144,7 @@ public class OpenShiftPreviewUrlEndpointProvisionerTest {
             .build();
 
     assertTrue(env.getRoutes().isEmpty());
-    previewUrlEndpointsProvisioner.provision(env, identity);
+    previewUrlEndpointsProvisioner.expose(env);
     assertEquals(env.getRoutes().size(), 1);
     Route provisionedRoute = env.getRoutes().values().iterator().next();
     assertEquals(provisionedRoute.getSpec().getTo().getName(), SERVICE_NAME);
@@ -159,11 +153,7 @@ public class OpenShiftPreviewUrlEndpointProvisionerTest {
   }
 
   @Test
-  public void shouldProvisionServiceAndRouteWhenNotFound() throws InfrastructureException {
-    Mockito.when(
-            externalServiceExposureStrategy.getExternalPath(Mockito.anyString(), Mockito.any()))
-        .thenReturn("some-server-path");
-
+  public void shouldProvisionServiceAndRouteWhenNotFound() {
     final int PORT = 8080;
     final String SERVER_PORT_NAME = "server-" + PORT;
 
@@ -176,7 +166,7 @@ public class OpenShiftPreviewUrlEndpointProvisionerTest {
     assertTrue(env.getRoutes().isEmpty());
     assertTrue(env.getServices().isEmpty());
 
-    previewUrlEndpointsProvisioner.provision(env, identity);
+    previewUrlEndpointsProvisioner.expose(env);
 
     assertEquals(env.getRoutes().size(), 1);
     assertEquals(env.getServices().size(), 1);
