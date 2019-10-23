@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.PreviewUrlImpl;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
 import org.mockito.Mock;
@@ -56,7 +57,7 @@ public class PreviewUrlExposerTest {
   }
 
   @Test
-  public void shouldDoNothingWhenNoCommandsDefined() {
+  public void shouldDoNothingWhenNoCommandsDefined() throws InternalInfrastructureException {
     KubernetesEnvironment env = KubernetesEnvironment.builder().build();
 
     previewUrlExposer.expose(env);
@@ -67,7 +68,8 @@ public class PreviewUrlExposerTest {
   }
 
   @Test
-  public void shouldDoNothingWhenNoCommandWithPreviewUrlDefined() {
+  public void shouldDoNothingWhenNoCommandWithPreviewUrlDefined()
+      throws InternalInfrastructureException {
     CommandImpl command = new CommandImpl("a", "a", "a");
     KubernetesEnvironment env =
         KubernetesEnvironment.builder()
@@ -82,7 +84,8 @@ public class PreviewUrlExposerTest {
   }
 
   @Test
-  public void shouldNotProvisionWhenServiceAndIngressFound() {
+  public void shouldNotProvisionWhenServiceAndIngressFound()
+      throws InternalInfrastructureException {
     final int PORT = 8080;
     final String SERVER_PORT_NAME = "server-" + PORT;
 
@@ -130,7 +133,7 @@ public class PreviewUrlExposerTest {
   }
 
   @Test
-  public void shouldProvisionIngressWhenNotFound() {
+  public void shouldProvisionIngressWhenNotFound() throws InternalInfrastructureException {
     Mockito.when(
             externalServiceExposureStrategy.getExternalPath(Mockito.anyString(), Mockito.any()))
         .thenReturn("some-server-path");
@@ -171,7 +174,8 @@ public class PreviewUrlExposerTest {
   }
 
   @Test
-  public void shouldProvisionServiceAndIngressWhenNotFound() {
+  public void shouldProvisionServiceAndIngressWhenNotFound()
+      throws InternalInfrastructureException {
     Mockito.when(
             externalServiceExposureStrategy.getExternalPath(Mockito.anyString(), Mockito.any()))
         .thenReturn("some-server-path");

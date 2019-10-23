@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Ingresses;
@@ -50,11 +51,11 @@ public class PreviewUrlExposer<T extends KubernetesEnvironment> {
     this.externalServerExposer = externalServerExposer;
   }
 
-  public void expose(T k8sEnv) {
+  public void expose(T k8sEnv) throws InternalInfrastructureException {
     createEndpointsForPreviewUrls(k8sEnv);
   }
 
-  private void createEndpointsForPreviewUrls(T env) {
+  private void createEndpointsForPreviewUrls(T env) throws InternalInfrastructureException {
     List<CommandImpl> previewUrlCommands =
         env.getCommands()
             .stream()
@@ -68,11 +69,19 @@ public class PreviewUrlExposer<T extends KubernetesEnvironment> {
           Services.findServiceWithPort(env.getServices().values(), port);
       if (foundService.isPresent()) {
         if (!hasMatchingEndpoint(env, foundService.get(), port)) {
+          ServicePort servicePort =
+              Services.findPort(foundService.get(), port)
+                  .orElseThrow(
+                      () ->
+                          new InternalInfrastructureException(
+                              String.format(
+                                  "Port '%d' in service '%s' not found. This is not expected, please report a bug!",
+                                  port, foundService.get().getMetadata().getName())));
           externalServerExposer.expose(
               env,
               null,
               foundService.get().getMetadata().getName(),
-              createServicePort(port),
+              servicePort,
               Collections.emptyMap());
         }
       } else {
