@@ -29,9 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.PreviewUrlImpl;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -42,8 +41,6 @@ public class OpenShiftPreviewUrlExposerTest {
 
   private OpenShiftPreviewUrlExposer previewUrlEndpointsProvisioner;
 
-  @Mock private ExternalServiceExposureStrategy externalServiceExposureStrategy;
-
   @BeforeMethod
   public void setUp() {
     OpenShiftExternalServerExposer externalServerExposer = new OpenShiftExternalServerExposer();
@@ -51,7 +48,7 @@ public class OpenShiftPreviewUrlExposerTest {
   }
 
   @Test
-  public void shouldDoNothingWhenNoCommandsDefined() {
+  public void shouldDoNothingWhenNoCommandsDefined() throws InternalInfrastructureException {
     OpenShiftEnvironment env = OpenShiftEnvironment.builder().build();
 
     previewUrlEndpointsProvisioner.expose(env);
@@ -62,7 +59,8 @@ public class OpenShiftPreviewUrlExposerTest {
   }
 
   @Test
-  public void shouldDoNothingWhenNoCommandWithPreviewUrlDefined() {
+  public void shouldDoNothingWhenNoCommandWithPreviewUrlDefined()
+      throws InternalInfrastructureException {
     CommandImpl command = new CommandImpl("a", "a", "a");
     OpenShiftEnvironment env =
         OpenShiftEnvironment.builder().setCommands(singletonList(new CommandImpl(command))).build();
@@ -75,7 +73,7 @@ public class OpenShiftPreviewUrlExposerTest {
   }
 
   @Test
-  public void shouldNotProvisionWhenServiceAndRouteFound() {
+  public void shouldNotProvisionWhenServiceAndRouteFound() throws InternalInfrastructureException {
     final int PORT = 8080;
     final String SERVER_PORT_NAME = "server-" + PORT;
 
@@ -115,7 +113,7 @@ public class OpenShiftPreviewUrlExposerTest {
   }
 
   @Test
-  public void shouldProvisionRouteWhenNotFound() {
+  public void shouldProvisionRouteWhenNotFound() throws InternalInfrastructureException {
     final int PORT = 8080;
     final String SERVER_PORT_NAME = "server-" + PORT;
     final String SERVICE_NAME = "servicename";
@@ -134,16 +132,14 @@ public class OpenShiftPreviewUrlExposerTest {
 
     Map<String, Service> services = new HashMap<>();
     services.put(SERVICE_NAME, service);
-    Map<String, Route> routes = new HashMap<>();
 
     OpenShiftEnvironment env =
         OpenShiftEnvironment.builder()
             .setCommands(singletonList(new CommandImpl(command)))
             .setServices(services)
-            .setRoutes(routes)
+            .setRoutes(new HashMap<>())
             .build();
 
-    assertTrue(env.getRoutes().isEmpty());
     previewUrlEndpointsProvisioner.expose(env);
     assertEquals(env.getRoutes().size(), 1);
     Route provisionedRoute = env.getRoutes().values().iterator().next();
@@ -153,7 +149,7 @@ public class OpenShiftPreviewUrlExposerTest {
   }
 
   @Test
-  public void shouldProvisionServiceAndRouteWhenNotFound() {
+  public void shouldProvisionServiceAndRouteWhenNotFound() throws InternalInfrastructureException {
     final int PORT = 8080;
     final String SERVER_PORT_NAME = "server-" + PORT;
 
@@ -161,10 +157,11 @@ public class OpenShiftPreviewUrlExposerTest {
         new CommandImpl("a", "a", "a", new PreviewUrlImpl(PORT, null), Collections.emptyMap());
 
     OpenShiftEnvironment env =
-        OpenShiftEnvironment.builder().setCommands(singletonList(new CommandImpl(command))).build();
-
-    assertTrue(env.getRoutes().isEmpty());
-    assertTrue(env.getServices().isEmpty());
+        OpenShiftEnvironment.builder()
+            .setCommands(singletonList(new CommandImpl(command)))
+            .setRoutes(new HashMap<>())
+            .setServices(new HashMap<>())
+            .build();
 
     previewUrlEndpointsProvisioner.expose(env);
 
