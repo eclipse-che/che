@@ -49,7 +49,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class PreviewUrlCommandProvisionerTest {
 
-  private PreviewUrlCommandProvisioner<KubernetesEnvironment> previewUrlCommandProvisioner;
+  private IngressPreviewUrlCommandProvisioner<KubernetesEnvironment> previewUrlCommandProvisioner;
   @Mock private KubernetesEnvironment mockEnvironment;
   @Mock private KubernetesNamespace mockNamespace;
   @Mock private KubernetesServices mockServices;
@@ -57,7 +57,7 @@ public class PreviewUrlCommandProvisionerTest {
 
   @BeforeMethod
   public void setUp() {
-    previewUrlCommandProvisioner = new PreviewUrlCommandProvisioner<>();
+    previewUrlCommandProvisioner = new IngressPreviewUrlCommandProvisioner<>();
   }
 
   @Test

@@ -16,9 +16,9 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.PREVIEW_UR
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL_MESSAGE;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import io.fabric8.kubernetes.api.model.extensions.IngressRule;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,7 +29,6 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
-import org.eclipse.che.workspace.infrastructure.kubernetes.util.Ingresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * @param <E> type of the environment
  */
 @Singleton
-public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
+public abstract class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment, T extends HasMetadata> {
 
   private static final Logger LOG = LoggerFactory.getLogger(PreviewUrlCommandProvisioner.class);
 
@@ -67,7 +66,7 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
       return;
     }
 
-    List<?> ingresses = loadIngresses(namespace);
+    List<T> exposureObjects = loadExposureObjects(namespace);
     List<Service> services = loadServices(namespace);
     for (CommandImpl command :
         env.getCommands()
@@ -89,8 +88,7 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
         continue;
       }
 
-      Optional<String> foundHost =
-          findHostForServicePort(ingresses, foundService.get(), command.getPreviewUrl().getPort());
+      Optional<String> foundHost = findHostForServicePort(exposureObjects, foundService.get(), command.getPreviewUrl().getPort());
       if (foundHost.isPresent()) {
         command.getAttributes().put(PREVIEW_URL_ATTRIBUTE, foundHost.get());
       } else {
@@ -111,21 +109,8 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
     return namespace.services().get();
   }
 
-  protected List<?> loadIngresses(KubernetesNamespace namespace) throws InfrastructureException {
-    return namespace.ingresses().get();
-  }
+  protected abstract List<T> loadExposureObjects(KubernetesNamespace namespace) throws InfrastructureException;
 
-  protected Optional<String> findHostForServicePort(List<?> ingressList, Service service, int port)
-      throws InternalInfrastructureException {
-    final List<Ingress> ingresses;
-    try {
-      ingresses = ingressList.stream().map(i -> (Ingress) i).collect(Collectors.toList());
-    } catch (ClassCastException cce) {
-      throw new InternalInfrastructureException(
-          "Failed casting to Kubernetes Ingress. This is not expected. Please report a bug!");
-    }
-
-    return Ingresses.findIngressRuleForServicePort(ingresses, service, port)
-        .map(IngressRule::getHost);
-  }
+  protected abstract Optional<String> findHostForServicePort(List<?> ingressList, Service service, int port)
+      throws InternalInfrastructureException;
 }
