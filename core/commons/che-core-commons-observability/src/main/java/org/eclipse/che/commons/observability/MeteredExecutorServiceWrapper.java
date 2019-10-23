@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.commons.schedule.executor.CronExecutorService;
 
 /**
@@ -30,6 +31,7 @@ import org.eclipse.che.commons.schedule.executor.CronExecutorService;
  * <p>Also in case if provided executor is instance of {@code ThreadPoolExecutor} it will add
  * metrics provided by {@code CountedThreadFactory} and {@code CountedRejectedExecutionHandler}.
  */
+@Singleton
 public class MeteredExecutorServiceWrapper implements ExecutorServiceWrapper {
   private final MeterRegistry meterRegistry;
 

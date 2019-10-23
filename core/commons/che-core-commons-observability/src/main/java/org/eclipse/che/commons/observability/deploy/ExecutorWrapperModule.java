@@ -22,15 +22,24 @@ public class ExecutorWrapperModule extends AbstractModule {
 
     if (Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
       if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))) {
-        bind(ExecutorServiceWrapper.class).to(MeteredAndTracedExecutorServiceWrapper.class);
+        bind(ExecutorServiceWrapper.class)
+            .to(MeteredAndTracedExecutorServiceWrapper.class)
+            .asEagerSingleton();
       } else {
-        bind(ExecutorServiceWrapper.class).to(MeteredExecutorServiceWrapper.class);
+        bind(ExecutorServiceWrapper.class)
+            .to(MeteredExecutorServiceWrapper.class)
+            .asEagerSingleton();
+        ;
       }
     } else {
       if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))) {
-        bind(ExecutorServiceWrapper.class).to(TracedExecutorServiceWrapper.class);
+        bind(ExecutorServiceWrapper.class)
+            .to(TracedExecutorServiceWrapper.class)
+            .asEagerSingleton();
+        ;
       } else {
-        bind(ExecutorServiceWrapper.class).to(NoopExecutorServiceWrapper.class);
+        bind(ExecutorServiceWrapper.class).to(NoopExecutorServiceWrapper.class).asEagerSingleton();
+        ;
       }
     }
 

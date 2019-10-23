@@ -17,12 +17,14 @@ import io.opentracing.contrib.concurrent.TracedScheduledExecutorService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.commons.schedule.executor.CronExecutorService;
 
 /**
  * Implementation of {@code ExecutorServiceWrapper} that add all sort of tracing capabilities with
  * help of traced implementation.
  */
+@Singleton
 public class TracedExecutorServiceWrapper implements ExecutorServiceWrapper {
 
   private final Tracer tracer;

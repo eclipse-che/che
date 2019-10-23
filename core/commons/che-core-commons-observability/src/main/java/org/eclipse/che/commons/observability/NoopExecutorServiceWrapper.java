@@ -13,6 +13,7 @@ package org.eclipse.che.commons.observability;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
+import javax.inject.Singleton;
 import org.eclipse.che.commons.schedule.executor.CronExecutorService;
 
 /**
@@ -21,6 +22,7 @@ import org.eclipse.che.commons.schedule.executor.CronExecutorService;
  *
  * @author Sergii Kabashniuk
  */
+@Singleton
 public class NoopExecutorServiceWrapper implements ExecutorServiceWrapper {
 
   @Override

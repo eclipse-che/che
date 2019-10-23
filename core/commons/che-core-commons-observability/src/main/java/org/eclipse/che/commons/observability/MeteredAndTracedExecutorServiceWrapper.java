@@ -14,12 +14,14 @@ package org.eclipse.che.commons.observability;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.commons.schedule.executor.CronExecutorService;
 
 /**
  * Implementation of {@code ExecutorServiceWrapper} that add all sort of monitoring and tracing
  * capabilities. Monitoring allayed first, tracing second.
  */
+@Singleton
 public class MeteredAndTracedExecutorServiceWrapper implements ExecutorServiceWrapper {
 
   private final MeteredExecutorServiceWrapper meteredExecutorServiceWrapper;

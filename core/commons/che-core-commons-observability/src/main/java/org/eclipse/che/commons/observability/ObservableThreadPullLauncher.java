@@ -14,11 +14,13 @@ package org.eclipse.che.commons.observability;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.schedule.executor.CronThreadPoolExecutor;
 import org.eclipse.che.commons.schedule.executor.ThreadPullLauncher;
 
 /** Monitored and traced implementation of {@code ThreadPullLauncher}. */
+@Singleton
 public class ObservableThreadPullLauncher extends ThreadPullLauncher {
 
   @Inject
