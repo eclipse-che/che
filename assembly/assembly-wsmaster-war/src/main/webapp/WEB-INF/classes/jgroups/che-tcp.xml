@@ -21,16 +21,20 @@
     send_buf_size="1M"
     max_bundle_size="64K"
     enable_diagnostics="true"
+    log_discard_msgs="false"
     thread_naming_pattern="cl"
 
     thread_pool.min_threads="0"
     thread_pool.max_threads="500"
     thread_pool.keep_alive_time="30000" />
 
-  <kubernetes.KUBE_PING
-    labels="app=che" />
+  <org.jgroups.protocols.kubernetes.KUBE_PING
+    port_range="3"
+    namespace="${KUBERNETES_NAMESPACE:che}"
+    labels="${KUBERNETES_LABEL:app=che,component=che}"
+  />
 
-  <MERGE2 min_interval="10000"
+  <MERGE3 min_interval="10000"
     max_interval="30000"/>
   <FD_SOCK/>
   <FD timeout="3000" max_tries="3"/>
@@ -38,12 +42,9 @@
   <BARRIER/>
   <pbcast.NAKACK2 use_mcast_xmit="false"
     discard_delivered_msgs="true"/>
-  <UNICAST/>
   <pbcast.STABLE stability_delay="1000" desired_avg_gossip="50000"
     max_bytes="4M"/>
-  <pbcast.GMS print_local_addr="true" join_timeout="3000"
-
-    view_bundling="true"/>
+  <pbcast.GMS print_local_addr="true" join_timeout="3000" />
   <MFC max_credits="2M"
     min_threshold="0.4"/>
   <FRAG2 frag_size="60K"/>
