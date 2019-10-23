@@ -7941,7 +7941,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Plugin Brokerring Execution Max",
+          "title": "Plugin Brokering Execution Max",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -8030,7 +8030,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Plugin Brokerring Execution Avg",
+          "title": "Plugin Brokering Execution Avg",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -8417,7 +8417,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Plugin Brokerring Execution Max",
+          "title": "Plugin Brokering Execution Max",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -8526,7 +8526,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Plugin Brokerring Execution Avg",
+          "title": "Plugin Brokering Execution Avg",
           "tooltip": {
             "shared": true,
             "sort": 0,
