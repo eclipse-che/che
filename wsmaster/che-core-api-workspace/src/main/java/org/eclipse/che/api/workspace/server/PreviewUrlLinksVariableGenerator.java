@@ -46,10 +46,10 @@ class PreviewUrlLinksVariableGenerator {
    *
    * <pre>
    *   links:
-   *     "previewURl/run_123": http://your.domain/some/path
+   *     "previewURl/run_123": http://your.domain
    *   command:
    *     attributes:
-   *       previewUrl: '${previewUrl/run_123}'
+   *       previewUrl: '${previewUrl/run_123}/some/path'
    * </pre>
    *
    * @return map of all <commandPreviewUrlVariable, previewUrlFullLink>
@@ -69,48 +69,41 @@ class PreviewUrlLinksVariableGenerator {
       if (command.getPreviewUrl() != null
           && commandAttributes != null
           && commandAttributes.containsKey(PREVIEW_URL_ATTRIBUTE)) {
-        String previewUrl = createPreviewUrl(uriBuilder, command);
-        String previewUrlKey = createPreviewUrlLinkKeyForCommand(command);
-        links.put(previewUrlKey, previewUrl);
+        String previewUrlLinkValue = createPreviewUrlLinkValue(uriBuilder, command);
+        String previewUrlLinkKey = createPreviewUrlLinkKey(command);
+        links.put(previewUrlLinkKey, previewUrlLinkValue);
 
-        commandAttributes.replace(PREVIEW_URL_ATTRIBUTE, formatVariable(previewUrlKey));
+        commandAttributes.replace(
+            PREVIEW_URL_ATTRIBUTE,
+            formatAttributeValue(previewUrlLinkKey, command.getPreviewUrl().getPath()));
       }
     }
     return links;
   }
 
-  private String createPreviewUrl(UriBuilder uriBuilder, Command command) {
+  private String createPreviewUrlLinkValue(UriBuilder uriBuilder, Command command) {
     UriBuilder previewUriBuilder =
         uriBuilder.clone().host(command.getAttributes().get(PREVIEW_URL_ATTRIBUTE));
-
-    if (command.getPreviewUrl().getPath() != null) {
-      // split query params
-      String[] path = command.getPreviewUrl().getPath().split("\\?");
-      if (path.length >= 1) {
-        previewUriBuilder.replacePath(path[0]);
-      }
-      if (path.length >= 2) {
-        previewUriBuilder.replaceQuery(path[1]);
-      }
-    } else {
-      previewUriBuilder.replacePath(null);
-    }
-
+    previewUriBuilder.replacePath(null);
     return previewUriBuilder.build().toString();
   }
 
   /**
    * Creates link key for given command in format
-   * `previewUrl/<commandName_withoutSpaces>_<crc(command.name)>`
+   * `previewUrl/<commandName_withoutSpaces>_<hash(command.name)>`
    */
-  private String createPreviewUrlLinkKeyForCommand(Command command) {
+  private String createPreviewUrlLinkKey(Command command) {
     return PREVIEW_URL_VARIABLE_PREFIX
         + command.getName().replaceAll(" ", "")
         + "_"
         + Math.abs(command.getName().hashCode());
   }
 
-  private String formatVariable(String var) {
-    return "${" + var + "}";
+  private String formatAttributeValue(String var, String path) {
+    String previewUrlAttributeValue = "${" + var + "}";
+    if (path != null) {
+      previewUrlAttributeValue += path;
+    }
+    return previewUrlAttributeValue;
   }
 }

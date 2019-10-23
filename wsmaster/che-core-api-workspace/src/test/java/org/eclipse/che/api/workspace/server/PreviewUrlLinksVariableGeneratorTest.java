@@ -151,11 +151,20 @@ public class PreviewUrlLinksVariableGeneratorTest {
     CommandImpl command =
         new CommandImpl("run command", "a", "a", new PreviewUrlImpl(123, "testpath"), commandAttrs);
 
-    Map<String, String> linkMap =
-        generator.genLinksMapAndUpdateCommands(
-            createWorkspaceWithCommands(singletonList(command)), uriBuilder);
+    WorkspaceImpl workspace = createWorkspaceWithCommands(singletonList(command));
 
-    assertTrue(linkMap.values().iterator().next().endsWith("testpath"));
+    Map<String, String> linkMap = generator.genLinksMapAndUpdateCommands(workspace, uriBuilder);
+
+    assertTrue(linkMap.values().iterator().next().endsWith("preview_url_host"));
+    String linkKey = linkMap.keySet().iterator().next();
+    assertEquals(
+        workspace
+            .getRuntime()
+            .getCommands()
+            .get(0)
+            .getAttributes()
+            .get(Command.PREVIEW_URL_ATTRIBUTE),
+        "${" + linkKey + "}testpath");
   }
 
   @Test
@@ -166,11 +175,20 @@ public class PreviewUrlLinksVariableGeneratorTest {
     CommandImpl command =
         new CommandImpl("run command", "a", "a", new PreviewUrlImpl(123, "?a=b"), commandAttrs);
 
-    Map<String, String> linkMap =
-        generator.genLinksMapAndUpdateCommands(
-            createWorkspaceWithCommands(singletonList(command)), uriBuilder);
+    WorkspaceImpl workspace = createWorkspaceWithCommands(singletonList(command));
 
-    assertTrue(linkMap.values().iterator().next().endsWith("?a=b"));
+    Map<String, String> linkMap = generator.genLinksMapAndUpdateCommands(workspace, uriBuilder);
+
+    assertTrue(linkMap.values().iterator().next().endsWith("preview_url_host"));
+    String linkKey = linkMap.keySet().iterator().next();
+    assertEquals(
+        workspace
+            .getRuntime()
+            .getCommands()
+            .get(0)
+            .getAttributes()
+            .get(Command.PREVIEW_URL_ATTRIBUTE),
+        "${" + linkKey + "}?a=b");
   }
 
   @Test
@@ -181,11 +199,19 @@ public class PreviewUrlLinksVariableGeneratorTest {
     CommandImpl command =
         new CommandImpl("run command", "a", "a", new PreviewUrlImpl(123, "?a=b&c=d"), commandAttrs);
 
-    Map<String, String> linkMap =
-        generator.genLinksMapAndUpdateCommands(
-            createWorkspaceWithCommands(singletonList(command)), uriBuilder);
+    WorkspaceImpl workspace = createWorkspaceWithCommands(singletonList(command));
+    Map<String, String> linkMap = generator.genLinksMapAndUpdateCommands(workspace, uriBuilder);
 
-    assertTrue(linkMap.values().iterator().next().endsWith("?a=b&c=d"));
+    assertTrue(linkMap.values().iterator().next().endsWith("preview_url_host"));
+    String linkKey = linkMap.keySet().iterator().next();
+    assertEquals(
+        workspace
+            .getRuntime()
+            .getCommands()
+            .get(0)
+            .getAttributes()
+            .get(Command.PREVIEW_URL_ATTRIBUTE),
+        "${" + linkKey + "}?a=b&c=d");
   }
 
   @Test
@@ -197,11 +223,20 @@ public class PreviewUrlLinksVariableGeneratorTest {
         new CommandImpl(
             "run command", "a", "a", new PreviewUrlImpl(123, "/hello?a=b"), commandAttrs);
 
-    Map<String, String> linkMap =
-        generator.genLinksMapAndUpdateCommands(
-            createWorkspaceWithCommands(singletonList(command)), uriBuilder);
+    WorkspaceImpl workspace = createWorkspaceWithCommands(singletonList(command));
 
-    assertTrue(linkMap.values().iterator().next().endsWith("/hello?a=b"));
+    Map<String, String> linkMap = generator.genLinksMapAndUpdateCommands(workspace, uriBuilder);
+
+    assertTrue(linkMap.values().iterator().next().endsWith("preview_url_host"));
+    String linkKey = linkMap.keySet().iterator().next();
+    assertEquals(
+        workspace
+            .getRuntime()
+            .getCommands()
+            .get(0)
+            .getAttributes()
+            .get(Command.PREVIEW_URL_ATTRIBUTE),
+        "${" + linkKey + "}/hello?a=b");
   }
 
   private WorkspaceImpl createWorkspaceWithCommands(List<CommandImpl> commands) {
