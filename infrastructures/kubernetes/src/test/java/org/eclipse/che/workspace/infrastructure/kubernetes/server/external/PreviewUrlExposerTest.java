@@ -153,16 +153,14 @@ public class PreviewUrlExposerTest {
 
     Map<String, Service> services = new HashMap<>();
     services.put(SERVICE_NAME, service);
-    Map<String, Ingress> ingresses = new HashMap<>();
 
     KubernetesEnvironment env =
         KubernetesEnvironment.builder()
             .setCommands(singletonList(new CommandImpl(command)))
             .setServices(services)
-            .setIngresses(ingresses)
+            .setIngresses(new HashMap<>())
             .build();
 
-    assertTrue(env.getIngresses().isEmpty());
     previewUrlExposer.expose(env);
     assertEquals(env.getIngresses().size(), 1);
     Ingress provisionedIngress = env.getIngresses().values().iterator().next();
@@ -187,10 +185,9 @@ public class PreviewUrlExposerTest {
     KubernetesEnvironment env =
         KubernetesEnvironment.builder()
             .setCommands(singletonList(new CommandImpl(command)))
+            .setIngresses(new HashMap<>())
+            .setServices(new HashMap<>())
             .build();
-
-    assertTrue(env.getIngresses().isEmpty());
-    assertTrue(env.getServices().isEmpty());
 
     previewUrlExposer.expose(env);
 
