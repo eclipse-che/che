@@ -64,25 +64,22 @@ public class MeteredExecutorServiceWrapper implements ExecutorServiceWrapper {
 
   private void monitorThreadPoolExecutor(ExecutorService executor, String name, String... tags) {
     String className = executor.getClass().getName();
+    ThreadPoolExecutor unwrappedThreadPoolExecutor = null;
     if (executor instanceof ThreadPoolExecutor) {
-      CountedThreadFactory.monitorThreads(
-          meterRegistry, (ThreadPoolExecutor) executor, name, Tags.of(tags));
-      CountedRejectedExecutionHandler.monitorRejections(
-          meterRegistry, (ThreadPoolExecutor) executor, name, Tags.of(tags));
+      unwrappedThreadPoolExecutor = (ThreadPoolExecutor) executor;
     } else if (className.equals(
         "java.util.concurrent.Executors$DelegatedScheduledExecutorService")) {
-      ThreadPoolExecutor unwrappedExecutor =
-          unwrapThreadPoolExecutor(executor, executor.getClass());
-      CountedThreadFactory.monitorThreads(meterRegistry, unwrappedExecutor, name, Tags.of(tags));
-      CountedRejectedExecutionHandler.monitorRejections(
-          meterRegistry, unwrappedExecutor, name, Tags.of(tags));
+      unwrappedThreadPoolExecutor = unwrapThreadPoolExecutor(executor, executor.getClass());
     } else if (className.equals(
         "java.util.concurrent.Executors$FinalizableDelegatedExecutorService")) {
-      ThreadPoolExecutor unwrappedExecutor =
+      unwrappedThreadPoolExecutor =
           unwrapThreadPoolExecutor(executor, executor.getClass().getSuperclass());
-      CountedThreadFactory.monitorThreads(meterRegistry, unwrappedExecutor, name, Tags.of(tags));
+    }
+    if (unwrappedThreadPoolExecutor != null) {
+      CountedThreadFactory.monitorThreads(
+          meterRegistry, unwrappedThreadPoolExecutor, name, Tags.of(tags));
       CountedRejectedExecutionHandler.monitorRejections(
-          meterRegistry, unwrappedExecutor, name, Tags.of(tags));
+          meterRegistry, unwrappedThreadPoolExecutor, name, Tags.of(tags));
     }
   }
   /**
