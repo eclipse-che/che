@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 Red Hat, Inc.
+ * Copyright (c) 2015-2019 Red Hat, Inc.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -77,32 +77,7 @@ export class CreateWorkspaceController {
    * The environment manager.
    */
   private environmentManager: EnvironmentManager;
-  /**
-   * The selected devfile.
-   */
-  private selectedDevfile: che.IWorkspaceDevfile;
-  /**
-   * The selected namespace ID.
-   */
-  private namespaceId: string;
-  /**
-   * The map of forms.
-   */
-  private forms: Map<string, ng.IFormController>;
-  /**
-   * The list of names of existing workspaces.
-   */
-  private usedNamesList: string[];
-  /**
-   * The name of workspace.
-   */
-  private workspaceName: string;
-  /**
-   * Hide progress loader if <code>true</code>.
-   */
-  private hideLoader: boolean;
 
-  private stackName: string;
   /**
    * Selected tab index.
    */
@@ -142,20 +117,6 @@ export class CreateWorkspaceController {
     this.cheNotification = cheNotification;
     this.devfileRegistry = devfileRegistry;
 
-    this.usedNamesList = [];
-    this.forms = new Map();
-
-    this.namespaceId = this.namespaceSelectorSvc.getNamespaceId();
-    this.buildListOfUsedNames().then(() => {
-      this.workspaceName = this.randomSvc.getRandString({prefix: 'wksp-', list: this.usedNamesList});
-      this.reValidateName();
-    });
-
-    // loader should be hidden and page content shown
-    // when stacks selector is rendered
-    // and default stack is selected
-    this.hideLoader = false;
-
     // header toolbar
     // dropdown button config
     this.headerCreateButtonConfig = {
@@ -191,130 +152,13 @@ export class CreateWorkspaceController {
   }
 
   /**
-   * Callback which is called when stack is selected.
-   *
-   * @param {string} stackId the stack ID
-   */
-  onDevfileSelected(devfile: che.IWorkspaceDevfile): void {
-    // tiny timeout for templates selector to be rendered
-    this.$timeout(() => {
-      this.hideLoader = true;
-    }, 10);
-    this.selectedDevfile = devfile;
-  }
-
-  /**
-   * Callback which is called when namespace is selected.
-   *
-   * @param {string} namespaceId a namespace ID
-   */
-  onNamespaceChanged(namespaceId: string) {
-    this.namespaceId = namespaceId;
-
-    this.buildListOfUsedNames().then(() => {
-      this.reValidateName();
-    });
-  }
-
-  /**
-   * Returns list of namespaces.
-   *
-   * @return {Array<che.INamespace>}
-   */
-  getNamespaces(): Array<che.INamespace> {
-    return this.namespaceSelectorSvc.getNamespaces();
-  }
-
-  /**
-   * Returns namespaces empty message if set.
-   *
-   * @returns {string}
-   */
-  getNamespaceEmptyMessage(): string {
-    return this.namespaceSelectorSvc.getNamespaceEmptyMessage();
-  }
-
-  /**
-   * Returns namespaces caption.
-   *
-   * @returns {string}
-   */
-  getNamespaceCaption(): string {
-    return this.namespaceSelectorSvc.getNamespaceCaption();
-  }
-
-  /**
    * Returns <code>true</code> when 'Create' button should be disabled.
    *
    * @return {boolean}
    */
+  // TODO
   isCreateButtonDisabled(): boolean {
-    if (!this.namespaceId || !this.selectedDevfile) {
-      return true;
-    }
-
-    for (const form of this.forms.values()) {
-      if (form.$valid !== true) {
-        return true;
-      }
-    }
-
     return false;
-  }
-
-  /**
-   * Stores forms in list.
-   *
-   * @param {string} inputName
-   * @param {ng.IFormController} form
-   */
-  registerForm(inputName: string, form: ng.IFormController) {
-    this.forms.set(inputName, form);
-  }
-
-  /**
-   * Returns <code>false</code> if workspace's name is not unique in the namespace.
-   * Only member with 'manageWorkspaces' permission can definitely know whether
-   * name is unique or not.
-   *
-   * @param {string} name workspace's name
-   */
-  isNameUnique(name: string): boolean {
-    return this.usedNamesList.indexOf(name) === -1;
-  }
-
-  /**
-   * Filters list of workspaces by current namespace and
-   * builds list of names for current namespace.
-   *
-   * @return {IPromise<any>}
-   */
-  buildListOfUsedNames(): ng.IPromise<any> {
-    return this.createWorkspaceSvc.fetchWorkspacesByNamespace(this.namespaceId).then((workspaces: Array<che.IWorkspace>) => {
-      this.usedNamesList = workspaces.filter((workspace: che.IWorkspace) => {
-        return workspace.namespace === this.namespaceId;
-      }).map((workspace: che.IWorkspace) => {
-        return this.createWorkspaceSvc.getWorkspaceName(workspace);
-      });
-    });
-  }
-
-  /**
-   * Triggers form validation on Settings tab.
-   */
-  reValidateName(): void {
-    const form: ng.IFormController = this.forms.get('name');
-
-    if (!form) {
-      return;
-    }
-
-    ['name', 'deskname'].forEach((inputName: string) => {
-      const model = form[inputName] as ng.INgModelController;
-      if (model) {
-        model.$validate();
-      }
-    });
   }
 
   /**
@@ -322,17 +166,19 @@ export class CreateWorkspaceController {
    *
    * @returns {angular.IPromise<che.IWorkspace>}
    */
+  // TODO
   createWorkspace(): ng.IPromise<che.IWorkspace> {
-    let devfileSource: che.IWorkspaceDevfile;
-    if (this.isImportDevfileActive) {
-      devfileSource = this.importedDevfile;
-      this.stackName = `custom-${devfileSource.metadata.name}`
-    } else {
-      // update workspace name
-      devfileSource = angular.copy(this.selectedDevfile);
-      devfileSource.metadata.name = this.workspaceName;
-    }
-    return this.createWorkspaceSvc.createWorkspaceFromDevfile(devfileSource, {stackName: this.stackName});
+    return {} as any;
+    // let devfileSource: che.IWorkspaceDevfile;
+    // if (this.isImportDevfileActive) {
+    //   devfileSource = this.importedDevfile;
+    //   this.stackName = `custom-${devfileSource.metadata.name}`
+    // } else {
+    //   // update workspace name
+    //   devfileSource = angular.copy(this.selectedDevfile);
+    //   devfileSource.metadata.name = this.workspaceName;
+    // }
+    // return this.createWorkspaceSvc.createWorkspaceFromDevfile(devfileSource, {stackName: this.stackName});
   }
 
 
