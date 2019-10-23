@@ -35,12 +35,12 @@ export class WorkspaceEnvironmentsController {
   $mdDialog: ng.material.IDialogService;
 
   editorOptions: {
-    lineWrapping: boolean,
-    lineNumbers: boolean,
+    wordWrap: string,
+    lineNumbers: string,
     readOnly: boolean,
-    mode?: string,
-    gutters: any[],
-    onLoad: Function
+    lineDecorationsWidth: number,
+    lineNumbersMinChars: number,
+    mode?: string
   };
 
   stackId: string;
@@ -83,15 +83,11 @@ export class WorkspaceEnvironmentsController {
     this.cheRecipeService = cheRecipeService;
 
     this.editorOptions = {
-      lineWrapping: true,
-      lineNumbers: false,
+      wordWrap: 'on',
+      lineNumbers: 'on',
       readOnly: true,
-      gutters: [],
-      onLoad: (editor: any) => {
-        $timeout(() => {
-          editor.refresh();
-        }, 500);
-      }
+      lineDecorationsWidth: 0,
+      lineNumbersMinChars: 0,
     };
 
     $scope.$watch(() => {

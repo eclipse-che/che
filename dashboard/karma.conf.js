@@ -16,6 +16,7 @@ module.exports = function (config) {
       'node_modules/angular-mocks/angular-mocks.js',
       'node_modules/babel-polyfill/dist/polyfill.js',
       conf.paths.tmp + '/serve/app/index.module.js',
+      conf.paths.tmp + '/serve/app/editor.worker.module.js'
     ].concat(pathSrcHtml),
 
     singleRun: true,

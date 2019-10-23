@@ -84,6 +84,7 @@
     "protractor-jasmine2-screenshot-reporter": "^0.3.3",
     "proxy-middleware": "^0.15.0",
     "raw-loader": "^0.5.1",
+    "regenerator-runtime": "0.13.3",
     "style-loader": "^0.20.1",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.1",
@@ -123,11 +124,17 @@
     "angular-uuid4": "0.3.1",
     "angular-websocket": "1.0.9",
     "bootstrap-styl": "4.0.5",
-    "codemirror": "5.19.0",
     "font-awesome": "4.5.0",
+    "glob": "7.1.5",
     "jquery": "3.4.1",
     "js-yaml": "3.13.1",
     "jsonlint": "1.6.0",
-    "ng-lodash": "0.2.3"
+    "monaco-editor-core": "0.14.6",
+    "monaco-languageclient": "0.9.0",
+    "monaco-languages": "1.8.0",
+    "ng-lodash": "0.2.3",
+    "umd-compat-loader": "2.1.1",
+    "vscode-languageserver-types": "3.10.0",
+    "yaml-language-server": "0.5.8"
   }
 }

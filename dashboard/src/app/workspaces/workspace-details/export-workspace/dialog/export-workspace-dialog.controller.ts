@@ -66,12 +66,13 @@ export class ExportWorkspaceDialogController {
     this.$window = $window;
 
     this.editorOptions = {
-      lineWrapping : true,
-      lineNumbers: false,
+      wordWrap : 'on',
+      lineNumbers: 'off',
       matchBrackets: true,
       readOnly: true,
       mode: 'application/json'
     };
+
     this.privateCloudUrl = '';
     this.privateCloudLogin = '';
     this.privateCloudPassword = '';

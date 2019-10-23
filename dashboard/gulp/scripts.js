@@ -18,7 +18,9 @@ var conf = require('./conf');
 var bootstrap = require('bootstrap-styl');
 
 var browserSync = require('browser-sync');
-var webpack = require('webpack-stream');
+var webpackstream = require('webpack-stream');
+var webpack = require('webpack');
+var glob = require("glob")
 
 var $ = require('gulp-load-plugins')();
 
@@ -31,6 +33,10 @@ function webpackWrapper(watch, test, callback) {
       noParse: [/jsonlint/],
       loaders: [
         {
+          test: /node_modules[\\\\|\/](vscode-languageserver-types|vscode-uri|jsonc-parser|vscode-json-languageservice)/,
+          loader: 'umd-compat-loader'
+        },
+        {
           test: /\.min\.js\.map$/,
           include: /node_modules\/angular-websocket\/dist/,
           loader: 'file-loader'
@@ -39,6 +45,11 @@ function webpackWrapper(watch, test, callback) {
           test: /\.ts$/,
           exclude: /node_modules/,
           loaders: ['babel-loader', 'awesome-typescript-loader']
+        },
+        {
+          test: /\.js$/,
+          include: /node_modules\/(monaco-editor-core|monaco-languages|vscode-languageserver|vscode-languageserver-types|yaml-language-server)/,
+          loaders: ['babel-loader']
         },
         {
           test: /\.css$/,
@@ -73,7 +84,20 @@ function webpackWrapper(watch, test, callback) {
         }
       ]
     },
-    output: {filename: 'index.module.js'}
+    output: {filename: '[name].module.js', globalObject: 'self'},
+    target: 'web',
+    node: {
+      fs: 'empty',
+      net: 'empty',
+      module: 'empty'
+    },
+    entry: {
+      index: [path.resolve(__dirname, '..', 'src', 'index.ts')],
+      "editor.worker": 'monaco-editor-core/esm/vs/editor/editor.worker.js'
+    },
+    plugins: [
+      new webpack.IgnorePlugin(/prettier/)
+    ]
   };
 
   if (watch) {
@@ -104,10 +128,16 @@ function webpackWrapper(watch, test, callback) {
   var sources = [path.join(conf.paths.src, '/index.ts')];
   if (test) {
     sources.push(path.join(conf.paths.src, '/{app,components}/**/*.spec.ts'));
+
+    const appTestGlob = glob.sync(path.resolve(__dirname, '..', path.join(conf.paths.src, '/app/**/*.spec.ts')));
+    webpackOptions.entry.index.push(...appTestGlob);
+
+    const componentsTestGlob = glob.sync(path.resolve(__dirname, '..', path.join(conf.paths.src, '/components/**/*.spec.ts')));
+    webpackOptions.entry.index.push(...componentsTestGlob);
   }
 
   return gulp.src(sources)
-    .pipe(webpack(webpackOptions, null, webpackChangeHandler))
+    .pipe(webpackstream(webpackOptions, null, webpackChangeHandler))
     .pipe(gulp.dest(path.join(conf.paths.tmp, '/serve/app')));
 }
 

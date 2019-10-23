@@ -28,8 +28,8 @@ export class WorkspaceConfigImportController {
   errorMessagesService: CheErrorMessagesService;
 
   editorOptions: {
-    lineWrapping: boolean,
-    lineNumbers: boolean,
+    wordWrap: string,
+    lineNumbers: string,
     matchBrackets: boolean,
     mode: string,
     onLoad: Function

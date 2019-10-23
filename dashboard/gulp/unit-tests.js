@@ -23,7 +23,8 @@ var pathSrcHtml = [
 ];
 
 var pathSrcJs = [
-  path.join(conf.paths.tmp, '/serve/app/index.module.js')
+  path.join(conf.paths.tmp, '/serve/app/index.module.js'),
+  path.join(conf.paths.tmp, '/serve/app/editor.worker.module.js')
 ];
 
 function runTests (singleRun, done) {

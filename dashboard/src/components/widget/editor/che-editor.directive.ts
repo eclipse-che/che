@@ -75,12 +75,12 @@ export class CheEditor implements ng.IDirective {
                            </div>`;
     }
 
-    return `<div class="che-codemirror-editor">
+    return `<div class="che-monaco-editor">
               <ng-form name="cheEditorController.editorForm">
-                <textarea ui-codemirror="cheEditorController.editorOptions"
+                <div ui-monaco="cheEditorController.editorOptions"
                           aria-label="editor"
                           ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 100, 'blur': 0 }, allowInvalid: true }"
-                          ng-model="cheEditorController.editorContent"></textarea>
+                          ng-model="cheEditorController.editorContent"></div>
                 <div class="validator-checks">
                   <div ng-messages="cheEditorController.editorForm.$invalid">
                     <div ng-repeat="error in cheEditorController.editorState.errors">{{error}}</div>
