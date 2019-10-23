@@ -5560,7 +5560,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "executor_thread_running",
+              "expr": "thread_factory_running_threads",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -5651,7 +5651,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "executor_thread_terminated_total",
+              "expr": "thread_factory_terminated_threads_total",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{name}}",
@@ -5745,7 +5745,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "executor_thread_created_total",
+              "expr": "thread_factory_created_threads_total",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -5839,7 +5839,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "increase(executor_thread_created_total[1m])",
+              "expr": "increase(thread_factory_created_threads_total[1m])",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -6173,7 +6173,7 @@ data:
         "dashLength": 10,
         "dashes": false,
         "datasource": "$datasource",
-        "description": "Queue remaining tasks  that is less than 1 000 000 elements",
+        "description": "",
         "fill": 1,
         "fillGradient": 0,
         "gridPos": {
@@ -6212,7 +6212,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "executor_queue_remaining_tasks<1000000",
+          "expr": "100*(1-executor_queue_remaining_tasks/ (executor_queue_remaining_tasks + executor_queued_tasks ))",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 1,
@@ -6224,7 +6224,7 @@ data:
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "Queue remaining tasks",
+        "title": "Queue occupancy",
         "tooltip": {
           "shared": true,
           "sort": 0,
@@ -6240,18 +6240,18 @@ data:
         },
         "yaxes": [
         {
-          "format": "short",
+          "format": "percent",
           "label": null,
           "logBase": 1,
-          "max": null,
+          "max": 100,
           "min": "0",
           "show": true
         },
         {
-          "format": "short",
+          "format": "percentunit",
           "label": null,
           "logBase": 1,
-          "max": null,
+          "max": 100,
           "min": "0",
           "show": false
         }
@@ -6305,7 +6305,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "executor_rejected_total",
+          "expr": "executor_rejected_tasks_total",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 1,
@@ -6398,7 +6398,7 @@ data:
         "steppedLine": false,
         "targets": [
         {
-          "expr": "increase(executor_rejected_total[1m])",
+          "expr": "increase(executor_rejected_tasks_total[1m])",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 1,

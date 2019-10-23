@@ -59,7 +59,7 @@ public class CountedThreadFactoryTest {
     // then
     assertEquals(
         registry
-            .get("executor.thread.created")
+            .get("thread.factory.created")
             .tags(userTags)
             .tag("name", CountedThreadFactoryTest.class.getName())
             .counter()
@@ -97,7 +97,7 @@ public class CountedThreadFactoryTest {
     runnableTaskStart.await();
     assertEquals(
         registry
-            .get("executor.thread.running")
+            .get("thread.factory.running")
             .tags(userTags)
             .tag("name", CountedThreadFactoryTest.class.getName())
             .gauge()
@@ -108,7 +108,7 @@ public class CountedThreadFactoryTest {
     thread.join();
     assertEquals(
         registry
-            .get("executor.thread.running")
+            .get("thread.factory.running")
             .tags(userTags)
             .tag("name", CountedThreadFactoryTest.class.getName())
             .gauge()
@@ -153,7 +153,7 @@ public class CountedThreadFactoryTest {
     runnableTaskStart.await();
     assertEquals(
         registry
-            .get("executor.thread.running")
+            .get("thread.factory.running")
             .tags(userTags)
             .tag("name", CountedThreadFactoryTest.class.getName())
             .gauge()
@@ -161,7 +161,7 @@ public class CountedThreadFactoryTest {
         10.0);
     assertEquals(
         registry
-            .get("executor.thread.terminated")
+            .get("thread.factory.terminated")
             .tags(userTags)
             .tag("name", CountedThreadFactoryTest.class.getName())
             .counter()
@@ -178,7 +178,7 @@ public class CountedThreadFactoryTest {
     factory.joinAll();
     assertEquals(
         registry
-            .get("executor.thread.running")
+            .get("thread.factory.running")
             .tags(userTags)
             .tag("name", CountedThreadFactoryTest.class.getName())
             .gauge()
@@ -186,7 +186,7 @@ public class CountedThreadFactoryTest {
         0.0);
     assertEquals(
         registry
-            .get("executor.thread.terminated")
+            .get("thread.factory.terminated")
             .tags(userTags)
             .tag("name", CountedThreadFactoryTest.class.getName())
             .counter()

@@ -12,9 +12,11 @@
 package org.eclipse.che.commons.observability;
 
 import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
+import io.micrometer.core.instrument.binder.BaseUnits;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,7 +27,7 @@ public class CountedThreadFactory implements ThreadFactory {
 
   private final ThreadFactory delegate;
   private final Counter created;
-  private final AtomicInteger running;
+  private final AtomicInteger running = new AtomicInteger(0);
   private final Counter terminated;
 
   /**
@@ -41,16 +43,23 @@ public class CountedThreadFactory implements ThreadFactory {
       ThreadFactory delegate, MeterRegistry registry, String name, Iterable<Tag> tags) {
     this.delegate = delegate;
     this.created =
-        Counter.builder("executor.thread.created")
+        Counter.builder("thread.factory.created")
             .tags(Tags.concat(tags, "name", name))
+            .description("The approximate number of threads that create with thread factory")
+            .baseUnit(BaseUnits.THREADS)
             .register(registry);
     this.terminated =
-        Counter.builder("executor.thread.terminated")
+        Counter.builder("thread.factory.terminated")
             .tags(Tags.concat(tags, "name", name))
+            .description("The approximate number of threads that is finished execution")
+            .baseUnit(BaseUnits.THREADS)
             .register(registry);
-    this.running =
-        registry.gauge(
-            "executor.thread.running", Tags.concat(tags, "name", name), new AtomicInteger(0));
+    Gauge.builder("thread.factory.running", running, AtomicInteger::get)
+        .tags(Tags.concat(tags, "name", name))
+        .description(
+            "The approximate number of threads that are started executing, but not terminated")
+        .baseUnit(BaseUnits.THREADS)
+        .register(registry);
   }
 
   /** {@inheritDoc} */

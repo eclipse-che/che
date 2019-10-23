@@ -15,6 +15,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
+import io.micrometer.core.instrument.binder.BaseUnits;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -30,7 +31,12 @@ public class CountedRejectedExecutionHandler implements RejectedExecutionHandler
   public CountedRejectedExecutionHandler(
       RejectedExecutionHandler delegate, MeterRegistry registry, String name, Iterable<Tag> tags) {
     this.delegate = delegate;
-    this.counter = registry.counter("executor.rejected", Tags.concat(tags, "name", name));
+    this.counter =
+        Counter.builder("executor.rejected")
+            .tags(Tags.concat(tags, "name", name))
+            .description("The number of tasks that was not accepted for execution")
+            .baseUnit(BaseUnits.TASKS)
+            .register(registry);
   }
 
   @Override

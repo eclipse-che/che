@@ -97,21 +97,21 @@ public class MeteredExecutorServiceWrapperTest {
 
     assertEquals(
         registry
-            .get("executor.thread.terminated")
+            .get("thread.factory.terminated")
             .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
             .counter()
             .count(),
         0.0);
     assertEquals(
         registry
-            .get("executor.thread.running")
+            .get("thread.factory.running")
             .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
             .gauge()
             .value(),
         1.0);
     assertEquals(
         registry
-            .get("executor.thread.created")
+            .get("thread.factory.created")
             .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
             .counter()
             .count(),
@@ -207,21 +207,21 @@ public class MeteredExecutorServiceWrapperTest {
 
     assertEquals(
         registry
-            .get("executor.thread.terminated")
+            .get("thread.factory.terminated")
             .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
             .counter()
             .count(),
         0.0);
     assertEquals(
         registry
-            .get("executor.thread.running")
+            .get("thread.factory.running")
             .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
             .gauge()
             .value(),
         1.0);
     assertEquals(
         registry
-            .get("executor.thread.created")
+            .get("thread.factory.created")
             .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
             .counter()
             .count(),
@@ -332,21 +332,21 @@ public class MeteredExecutorServiceWrapperTest {
     runnableTaskStart.await(10, TimeUnit.SECONDS);
     assertEquals(
         registry
-            .get("executor.thread.terminated")
+            .get("thread.factory.terminated")
             .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
             .counter()
             .count(),
         0.0);
     assertEquals(
         registry
-            .get("executor.thread.running")
+            .get("thread.factory.running")
             .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
             .gauge()
             .value(),
         2.0);
     assertEquals(
         registry
-            .get("executor.thread.created")
+            .get("thread.factory.created")
             .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
             .counter()
             .count(),
