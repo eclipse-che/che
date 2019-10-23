@@ -17,6 +17,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -158,6 +159,49 @@ public class OpenShiftProjectTest {
     String message = error.getMessage();
     assertEquals(message, "Error(s) occurs while cleaning up the namespace. err1. err2.");
     verify(routes).delete();
+  }
+
+  @Test
+  public void testDeletesExistingProject() throws Exception {
+    // given
+    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    Resource resource = prepareProjectResource(PROJECT_NAME);
+
+    // when
+    project.delete();
+
+    // then
+    verify(resource).delete();
+  }
+
+  @Test
+  public void testDoesntFailIfDeletedProjectDoesntExist() throws Exception {
+    // given
+    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    Resource resource = prepareProjectResource(PROJECT_NAME);
+    when(resource.delete()).thenThrow(new KubernetesClientException("err", 404, null));
+
+    // when
+    project.delete();
+
+    // then
+    verify(resource).delete();
+    // and no exception is thrown
+  }
+
+  @Test
+  public void testDoesntFailIfDeletedProjectIsBeingDeleted() throws Exception {
+    // given
+    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    Resource resource = prepareProjectResource(PROJECT_NAME);
+    when(resource.delete()).thenThrow(new KubernetesClientException("err", 409, null));
+
+    // when
+    project.delete();
+
+    // then
+    verify(resource).delete();
+    // and no exception is thrown
   }
 
   private MetadataNested prepareProjectRequest() {

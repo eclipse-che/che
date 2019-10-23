@@ -53,11 +53,11 @@ global:
   gitHubClientID: ""
   gitHubClientSecret: ""
   pvcClaim: "1Gi"
-  cheWorkspacesNamespace: ""
+  cheWorkspacesNamespace: "<username>-che"
   # Service account name that will be mounted to workspaces pods
   # Note that:
-  # if `cheWorkspacesNamespace` is configured then service account with configured name will be created by helm chart during deploying Che
-  # if `cheWorkspacesNamespace` is empty then Che Server creates new namespace for each workspace and ensures that configured SA exists there
+  # if `cheWorkspacesNamespace` doesn't contain placeholders then service account with configured name will be created by helm chart during deploying Che
+  # if `cheWorkspacesNamespace` contains placeholders then Che Server creates new namespaces accordingly and ensures that configured SA exists there
   cheWorkspaceServiceAccount: "che-workspace"
   # If set, Che will bind the specified cluster role to the workspace service account when creating a workspace.
   cheWorkspaceClusterRole: ""
