@@ -121,7 +121,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesS
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressPreviewUrlCommandProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesPreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -193,7 +193,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private InternalEnvironmentProvisioner internalEnvironmentProvisioner;
   @Mock private IngressPathTransformInverter pathTransformInverter;
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
-  @Mock private IngressPreviewUrlCommandProvisioner<KubernetesEnvironment> previewUrlCommandProvisioner;
+  @Mock private KubernetesPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
 
   @Mock
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> kubernetesEnvironmentProvisioner;

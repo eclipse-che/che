@@ -20,7 +20,6 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServiceSpec;
-import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RoutePort;
 import io.fabric8.openshift.api.model.RouteSpec;
@@ -183,11 +182,5 @@ public class OpenShiftPreviewUrlCommandProvisionerTest {
     assertTrue(env.getCommands().get(0).getAttributes().containsKey("previewUrl"));
     assertEquals(env.getCommands().get(0).getAttributes().get("previewUrl"), "testhost");
     assertTrue(env.getWarnings().isEmpty());
-  }
-
-  @Test(expectedExceptions = InternalInfrastructureException.class)
-  public void throwsInfrastructureExceptionWhenCantCastToIngress() throws InfrastructureException {
-    previewUrlCommandProvisioner.findHostForServicePort(
-        Arrays.asList(new Ingress(), new Ingress()), null, 1);
   }
 }

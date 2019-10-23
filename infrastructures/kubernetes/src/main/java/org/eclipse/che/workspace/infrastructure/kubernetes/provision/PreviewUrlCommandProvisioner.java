@@ -22,7 +22,6 @@ import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -44,8 +43,8 @@ import org.slf4j.LoggerFactory;
  *
  * @param <E> type of the environment
  */
-@Singleton
-public abstract class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment, T extends HasMetadata> {
+public abstract class PreviewUrlCommandProvisioner<
+    E extends KubernetesEnvironment, T extends HasMetadata> {
 
   private static final Logger LOG = LoggerFactory.getLogger(PreviewUrlCommandProvisioner.class);
 
@@ -67,7 +66,7 @@ public abstract class PreviewUrlCommandProvisioner<E extends KubernetesEnvironme
     }
 
     List<T> exposureObjects = loadExposureObjects(namespace);
-    List<Service> services = loadServices(namespace);
+    List<Service> services = namespace.services().get();
     for (CommandImpl command :
         env.getCommands()
             .stream()
@@ -88,7 +87,9 @@ public abstract class PreviewUrlCommandProvisioner<E extends KubernetesEnvironme
         continue;
       }
 
-      Optional<String> foundHost = findHostForServicePort(exposureObjects, foundService.get(), command.getPreviewUrl().getPort());
+      Optional<String> foundHost =
+          findHostForServicePort(
+              exposureObjects, foundService.get(), command.getPreviewUrl().getPort());
       if (foundHost.isPresent()) {
         command.getAttributes().put(PREVIEW_URL_ATTRIBUTE, foundHost.get());
       } else {
@@ -105,12 +106,13 @@ public abstract class PreviewUrlCommandProvisioner<E extends KubernetesEnvironme
     }
   }
 
-  private List<Service> loadServices(KubernetesNamespace namespace) throws InfrastructureException {
-    return namespace.services().get();
-  }
+  /**
+   * Loads exposure objects of running infrastructure. Kubernetes implementation should return
+   * `List<Ingress>`, OpenShift implementation `List<Route>`.
+   */
+  protected abstract List<T> loadExposureObjects(KubernetesNamespace namespace)
+      throws InfrastructureException;
 
-  protected abstract List<T> loadExposureObjects(KubernetesNamespace namespace) throws InfrastructureException;
-
-  protected abstract Optional<String> findHostForServicePort(List<?> ingressList, Service service, int port)
-      throws InternalInfrastructureException;
+  protected abstract Optional<String> findHostForServicePort(
+      List<T> ingressList, Service service, int port) throws InternalInfrastructureException;
 }

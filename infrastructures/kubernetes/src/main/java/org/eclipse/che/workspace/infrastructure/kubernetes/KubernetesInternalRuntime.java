@@ -82,7 +82,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRunti
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressPreviewUrlCommandProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -119,7 +119,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final SidecarToolingProvisioner<E> toolingProvisioner;
   private final IngressPathTransformInverter ingressPathTransformInverter;
   private final RuntimeHangingDetector runtimeHangingDetector;
-  private final IngressPreviewUrlCommandProvisioner<E> previewUrlCommandProvisioner;
+  private final PreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   protected final Tracer tracer;
 
   @Inject
@@ -142,7 +142,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       SidecarToolingProvisioner<E> toolingProvisioner,
       IngressPathTransformInverter ingressPathTransformInverter,
       RuntimeHangingDetector runtimeHangingDetector,
-      IngressPreviewUrlCommandProvisioner<E> previewUrlCommandProvisioner,
+      PreviewUrlCommandProvisioner previewUrlCommandProvisioner,
       Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace) {

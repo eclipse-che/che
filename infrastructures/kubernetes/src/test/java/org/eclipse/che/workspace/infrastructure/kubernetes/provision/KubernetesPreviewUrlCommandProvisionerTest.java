@@ -33,7 +33,6 @@ import java.util.List;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.PreviewUrlImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
@@ -47,9 +46,9 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
-public class PreviewUrlCommandProvisionerTest {
+public class KubernetesPreviewUrlCommandProvisionerTest {
 
-  private IngressPreviewUrlCommandProvisioner<KubernetesEnvironment> previewUrlCommandProvisioner;
+  private KubernetesPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   @Mock private KubernetesEnvironment mockEnvironment;
   @Mock private KubernetesNamespace mockNamespace;
   @Mock private KubernetesServices mockServices;
@@ -57,7 +56,7 @@ public class PreviewUrlCommandProvisionerTest {
 
   @BeforeMethod
   public void setUp() {
-    previewUrlCommandProvisioner = new IngressPreviewUrlCommandProvisioner<>();
+    previewUrlCommandProvisioner = new KubernetesPreviewUrlCommandProvisioner();
   }
 
   @Test
@@ -183,10 +182,5 @@ public class PreviewUrlCommandProvisionerTest {
     assertTrue(env.getCommands().get(0).getAttributes().containsKey("previewUrl"));
     assertEquals(env.getCommands().get(0).getAttributes().get("previewUrl"), "testhost");
     assertTrue(env.getWarnings().isEmpty());
-  }
-
-  @Test(expectedExceptions = InternalInfrastructureException.class)
-  public void throwsInfrastructureExceptionWhenCantCastToIngress() throws InfrastructureException {
-    previewUrlCommandProvisioner.findHostForServicePort(Arrays.asList("1", "2", "3"), null, 1);
   }
 }

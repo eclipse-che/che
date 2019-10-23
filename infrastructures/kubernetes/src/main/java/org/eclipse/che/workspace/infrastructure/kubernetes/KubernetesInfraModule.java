@@ -55,10 +55,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueW
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspacePVCCleaner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumeStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiExternalEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiInternalEnvVarProvider;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressPreviewUrlCommandProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesPreviewUrlCommandProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressAnnotationsProvider;
@@ -139,7 +139,7 @@ public class KubernetesInfraModule extends AbstractModule {
     bind(PreviewUrlExposer.class)
         .to(new TypeLiteral<PreviewUrlExposer<KubernetesEnvironment>>() {});
     bind(PreviewUrlCommandProvisioner.class)
-        .to(new TypeLiteral<IngressPreviewUrlCommandProvisioner>() {});
+        .to(new TypeLiteral<KubernetesPreviewUrlCommandProvisioner>() {});
 
     Multibinder<EnvVarProvider> envVarProviders =
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);
