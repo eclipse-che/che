@@ -20,6 +20,7 @@ import {CheService} from './che-service.factory';
 import {CheOAuthProvider} from './che-o-auth-provider.factory';
 import {CheAgent} from './che-agent.factory';
 import {CheUser} from './che-user.factory';
+import { CheDevfile } from './che-devfile.factory';
 
 
 /**
@@ -31,7 +32,7 @@ export class CheAPI {
 
   static $inject = ['cheWorkspace', 'cheFactory', 'cheFactoryTemplate',
                'cheProfile', 'chePreferences', 'cheService', 'cheOAuthProvider', 'cheAgent',
-            'cheSsh', 'cheUser', 'chePermissions', 'cheOrganization'];
+            'cheSsh', 'cheUser', 'chePermissions', 'cheOrganization', 'cheDevfile'];
 
   private cheWorkspace: CheWorkspace;
   private cheProfile: CheProfile;
@@ -45,13 +46,15 @@ export class CheAPI {
   private cheUser: CheUser;
   private chePermissions: che.api.IChePermissions;
   private cheOrganization: che.api.ICheOrganization;
+  private cheDevfile: CheDevfile;
 
   /**
    * Default constructor that is using resource
    */
   constructor(cheWorkspace: CheWorkspace, cheFactory: CheFactory, cheFactoryTemplate: CheFactoryTemplate,
               cheProfile: CheProfile, chePreferences: ChePreferences, cheService: CheService, cheOAuthProvider: CheOAuthProvider, cheAgent: CheAgent,
-              cheSsh: CheSsh, cheUser: CheUser, chePermissions: che.api.IChePermissions, cheOrganization: che.api.ICheOrganization) {
+              cheSsh: CheSsh, cheUser: CheUser, chePermissions: che.api.IChePermissions, cheOrganization: che.api.ICheOrganization,
+              cheDevfile: CheDevfile) {
     this.cheWorkspace = cheWorkspace;
     this.cheProfile = cheProfile;
     this.cheFactory = cheFactory;
@@ -64,6 +67,7 @@ export class CheAPI {
     this.cheUser = cheUser;
     this.chePermissions = chePermissions;
     this.cheOrganization = cheOrganization;
+    this.cheDevfile = cheDevfile;
   }
 
   /**
@@ -161,5 +165,13 @@ export class CheAPI {
    */
   getOrganization(): che.api.ICheOrganization {
     return this.cheOrganization;
+  }
+
+  /**
+   * The Che Devfile API
+   * @returns {che.api.ICheDevfile}
+   */
+  getDevfile(): che.api.ICheDevfile {
+    return this.cheDevfile;
   }
 }
