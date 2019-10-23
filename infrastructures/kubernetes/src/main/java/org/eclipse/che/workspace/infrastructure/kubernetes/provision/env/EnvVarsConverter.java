@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.commons.annotation.Traced;
@@ -45,10 +45,10 @@ public class EnvVarsConverter implements ConfigurationProvisioner {
 
   @Override
   @Traced
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
+  public void provision(KubernetesEnvironment k8sEnv, RuntimeTarget target)
       throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
+    TracingTags.WORKSPACE_ID.set(target.getIdentity()::getWorkspaceId);
 
     for (PodData pod : k8sEnv.getPodsData().values()) {
       for (Container container : pod.getSpec().getContainers()) {

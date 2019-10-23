@@ -12,8 +12,8 @@
 package org.eclipse.che.api.workspace.server.spi;
 
 import java.net.URI;
-import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 
 /**
@@ -24,14 +24,13 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 public abstract class RuntimeContext<T extends InternalEnvironment> {
 
   private final T environment;
-  private final RuntimeIdentity identity;
+  private final RuntimeTarget target;
   private final RuntimeInfrastructure infrastructure;
 
   public RuntimeContext(
-      T internalEnvironment, RuntimeIdentity identity, RuntimeInfrastructure infrastructure)
-      throws ValidationException, InfrastructureException {
+      T internalEnvironment, RuntimeTarget target, RuntimeInfrastructure infrastructure) {
     this.environment = internalEnvironment;
-    this.identity = identity;
+    this.target = target;
     this.infrastructure = infrastructure;
   }
 
@@ -76,9 +75,21 @@ public abstract class RuntimeContext<T extends InternalEnvironment> {
    * practice workspace ID looks like enough)
    *
    * @return the RuntimeIdentityImpl
+   * @see #getTarget()
    */
   public RuntimeIdentity getIdentity() {
-    return identity;
+    return target.getIdentity();
+  }
+
+  /**
+   * The runtime target is a superset of {@link #getIdentity() runtime identity} which in addition
+   * to providing the identifying information of the workspace's runtime, contains information about
+   * the user configuration of the workspace deployment in the runtime.
+   *
+   * @return the runtime target
+   */
+  public RuntimeTarget getTarget() {
+    return target;
   }
 
   /** @return RuntimeInfrastructure the Context created from */

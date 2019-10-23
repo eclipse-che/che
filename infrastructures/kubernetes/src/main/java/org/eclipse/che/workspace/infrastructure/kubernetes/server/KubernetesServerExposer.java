@@ -32,12 +32,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
@@ -133,7 +134,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
    * UniqueNamesProvisioner}.
    *
    * @param servers servers to expose
-   * @see UniqueNamesProvisioner#provision(KubernetesEnvironment, RuntimeIdentity)
+   * @see ConfigurationProvisioner#provision(KubernetesEnvironment, RuntimeTarget)
    */
   public void expose(Map<String, ? extends ServerConfig> servers) throws InfrastructureException {
     Map<String, ServerConfig> internalServers = new HashMap<>();

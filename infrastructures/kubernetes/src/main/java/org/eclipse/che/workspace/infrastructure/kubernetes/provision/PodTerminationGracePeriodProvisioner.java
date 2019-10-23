@@ -14,7 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
@@ -41,10 +41,10 @@ public class PodTerminationGracePeriodProvisioner implements ConfigurationProvis
 
   @Override
   @Traced
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
+  public void provision(KubernetesEnvironment k8sEnv, RuntimeTarget target)
       throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
+    TracingTags.WORKSPACE_ID.set(target.getIdentity()::getWorkspaceId);
 
     for (PodData pod : k8sEnv.getPodsData().values()) {
       if (!isTerminationGracePeriodSet(pod.getSpec())) {
@@ -54,7 +54,7 @@ public class PodTerminationGracePeriodProvisioner implements ConfigurationProvis
   }
 
   /**
-   * @param pod
+   * @param podSpec
    * @return true if 'terminationGracePeriodSeconds' have been explicitly set in Kubernetes /
    *     OpenShift recipe, false otherwise
    */

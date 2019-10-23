@@ -18,7 +18,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Names.machineN
 import io.fabric8.kubernetes.api.model.Container;
 import java.util.Map;
 import javax.inject.Inject;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
@@ -46,10 +46,10 @@ public class RamLimitRequestProvisioner implements ConfigurationProvisioner {
 
   @Override
   @Traced
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
+  public void provision(KubernetesEnvironment k8sEnv, RuntimeTarget target)
       throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
+    TracingTags.WORKSPACE_ID.set(target.getIdentity()::getWorkspaceId);
 
     final Map<String, InternalMachineConfig> machines = k8sEnv.getMachines();
     for (PodData pod : k8sEnv.getPodsData().values()) {

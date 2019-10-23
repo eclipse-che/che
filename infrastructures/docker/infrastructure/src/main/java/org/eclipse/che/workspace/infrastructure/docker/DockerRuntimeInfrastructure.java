@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
@@ -64,19 +65,18 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
   }
 
   @Override
-  protected RuntimeContext internalPrepare(
-      RuntimeIdentity identity, InternalEnvironment environment)
+  protected RuntimeContext internalPrepare(RuntimeTarget target, InternalEnvironment environment)
       throws ValidationException, InfrastructureException {
     DockerEnvironment dockerEnvironment = convertToDockerEnv(environment);
 
     // modify environment with everything needed to use docker machines on particular (cloud)
     // infrastructure
-    dockerEnvProvisioner.provision(dockerEnvironment, identity);
+    dockerEnvProvisioner.provision(dockerEnvironment, target.getIdentity());
 
     // normalize env to provide environment description with absolutely everything expected in
-    dockerEnvNormalizer.normalize(dockerEnvironment, identity);
+    dockerEnvNormalizer.normalize(dockerEnvironment, target.getIdentity());
 
-    return contextFactory.create(this, identity, dockerEnvironment);
+    return contextFactory.create(this, target, dockerEnvironment);
   }
 
   @Override

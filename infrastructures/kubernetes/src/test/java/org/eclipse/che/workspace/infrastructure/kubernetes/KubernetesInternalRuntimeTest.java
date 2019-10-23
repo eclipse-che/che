@@ -86,6 +86,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
@@ -169,6 +170,7 @@ public class KubernetesInternalRuntimeTest {
 
   private static final RuntimeIdentity IDENTITY =
       new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
+  private static final RuntimeTarget TARGET = new RuntimeTarget(IDENTITY, null, "nmspc");
 
   @Mock private EventService eventService;
   @Mock private StartSynchronizerFactory startSynchronizerFactory;
@@ -378,9 +380,9 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.start(emptyMap());
 
-    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
+    verify(toolingProvisioner).provision(TARGET, startSynchronizer, k8sEnv);
     verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
-    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
+    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, TARGET);
     verify(deployments).deploy(any(Pod.class));
     verify(ingresses).create(any());
     verify(services).create(any());
@@ -415,9 +417,9 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.start(emptyMap());
 
-    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
+    verify(toolingProvisioner).provision(TARGET, startSynchronizer, k8sEnv);
     verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
-    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
+    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, TARGET);
     verify(deployments).deploy(any(Deployment.class));
     verify(ingresses).create(any());
     verify(services).create(any());
@@ -451,9 +453,9 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.start(emptyMap());
 
-    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
+    verify(toolingProvisioner).provision(TARGET, startSynchronizer, k8sEnv);
     verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
-    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
+    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, TARGET);
     verify(deployments).deploy(any(Deployment.class));
     verify(deployments).deploy(any(Pod.class));
     verify(ingresses).create(any());

@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
@@ -59,14 +59,16 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
 
   @Traced
   @Beta
-  public void provision(RuntimeIdentity id, StartSynchronizer startSynchronizer, E environment)
+  public void provision(RuntimeTarget target, StartSynchronizer startSynchronizer, E environment)
       throws InfrastructureException {
 
     Collection<PluginFQN> pluginFQNs = pluginFQNParser.parsePlugins(environment.getAttributes());
     if (pluginFQNs.isEmpty()) {
       return;
     }
-    LOG.debug("Started sidecar tooling provisioning workspace '{}'", id.getWorkspaceId());
+    LOG.debug(
+        "Started sidecar tooling provisioning workspace '{}'",
+        target.getIdentity().getWorkspaceId());
     String recipeType = environment.getType();
     ChePluginsApplier pluginsApplier = workspaceNextAppliers.get(recipeType);
     if (pluginsApplier == null) {
@@ -76,12 +78,14 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
 
     boolean isEphemeral = EphemeralWorkspaceUtility.isEphemeral(environment.getAttributes());
     List<ChePlugin> chePlugins =
-        pluginBrokerManager.getTooling(id, startSynchronizer, pluginFQNs, isEphemeral);
+        pluginBrokerManager.getTooling(target, startSynchronizer, pluginFQNs, isEphemeral);
 
-    pluginsApplier.apply(id, environment, chePlugins);
+    pluginsApplier.apply(target.getIdentity(), environment, chePlugins);
     if (isEphemeral) {
-      brokerApplier.apply(environment, id, pluginFQNs);
+      brokerApplier.apply(environment, target.getIdentity(), pluginFQNs);
     }
-    LOG.debug("Finished sidecar tooling provisioning workspace '{}'", id.getWorkspaceId());
+    LOG.debug(
+        "Finished sidecar tooling provisioning workspace '{}'",
+        target.getIdentity().getWorkspaceId());
   }
 }

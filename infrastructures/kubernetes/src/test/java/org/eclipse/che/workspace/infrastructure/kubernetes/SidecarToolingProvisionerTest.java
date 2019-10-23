@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
@@ -56,6 +57,7 @@ public class SidecarToolingProvisionerTest {
   @Mock private KubernetesEnvironment ephemeralEnvironment;
   @Mock private RuntimeIdentity runtimeId;
   @Mock private ChePluginsApplier chePluginsApplier;
+  private RuntimeTarget runtimeTarget;
 
   private static Map<String, String> environmentAttributesBase =
       ImmutableMap.of(
@@ -87,11 +89,13 @@ public class SidecarToolingProvisionerTest {
     provisioner =
         new SidecarToolingProvisioner<>(
             workspaceNextAppliers, brokerApplier, pluginFQNParser, brokerManager);
+
+    runtimeTarget = new RuntimeTarget(runtimeId, null, "nmspc");
   }
 
   @Test
   public void shouldNotAddInitContainerWhenWorkspaceIsNotEphemeral() throws Exception {
-    provisioner.provision(runtimeId, startSynchronizer, nonEphemeralEnvironment);
+    provisioner.provision(runtimeTarget, startSynchronizer, nonEphemeralEnvironment);
 
     verify(chePluginsApplier, times(1)).apply(any(), any(), any());
     verify(brokerApplier, times(0)).apply(any(), any(), any());
@@ -99,7 +103,7 @@ public class SidecarToolingProvisionerTest {
 
   @Test
   public void shouldIncludeInitContainerWhenWorkspaceIsEphemeral() throws Exception {
-    provisioner.provision(runtimeId, startSynchronizer, ephemeralEnvironment);
+    provisioner.provision(runtimeTarget, startSynchronizer, ephemeralEnvironment);
 
     verify(chePluginsApplier, times(1)).apply(any(), any(), any());
     verify(brokerApplier, times(1)).apply(any(), any(), any());

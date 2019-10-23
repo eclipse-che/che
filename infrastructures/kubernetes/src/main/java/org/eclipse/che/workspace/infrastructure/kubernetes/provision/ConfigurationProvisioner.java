@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructure;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -28,8 +28,8 @@ public interface ConfigurationProvisioner<T extends KubernetesEnvironment> {
    * Configures the Kubernetes environment and workspace environment with infrastructure needs.
    *
    * @param k8sEnv Kubernetes environment
-   * @param identity runtime identity
+   * @param target runtime target
    * @throws InfrastructureException when any error occurs
    */
-  void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException;
+  void provision(T k8sEnv, RuntimeTarget target) throws InfrastructureException;
 }

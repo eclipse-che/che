@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -45,13 +45,13 @@ public class ProxySettingsProvisionerTest {
   private static final String HTTPS_PROXY_VALUE = "https.proxy2.somewhere.com:8080";
   private static final String NO_PROXY_VALUE = "localhost,127.0.0.1";
 
-  @Mock private RuntimeIdentity runtimeId;
+  @Mock private RuntimeTarget runtimeTarget;
 
   private ProxySettingsProvisioner provisioner;
 
   @BeforeMethod
   public void setUp() {
-    lenient().when(runtimeId.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+    lenient().when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn(WORKSPACE_ID);
     provisioner = new ProxySettingsProvisioner(HTTPS_PROXY_VALUE, HTTP_PROXY_VALUE, NO_PROXY_VALUE);
   }
 
@@ -63,7 +63,7 @@ public class ProxySettingsProvisionerTest {
     pods.put("pod2", buildPod("pod2", buildContainers(3)));
 
     KubernetesEnvironment k8sEnv = KubernetesEnvironment.builder().setPods(pods).build();
-    provisioner.provision(k8sEnv, runtimeId);
+    provisioner.provision(k8sEnv, runtimeTarget);
 
     assertTrue(
         k8sEnv
@@ -89,7 +89,7 @@ public class ProxySettingsProvisionerTest {
     pods.put(JWT_PROXY_POD_NAME, buildPod(JWT_PROXY_POD_NAME, buildContainers(2)));
 
     KubernetesEnvironment k8sEnv = KubernetesEnvironment.builder().setPods(pods).build();
-    provisioner.provision(k8sEnv, runtimeId);
+    provisioner.provision(k8sEnv, runtimeTarget);
 
     assertTrue(
         k8sEnv

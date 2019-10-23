@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
@@ -47,7 +48,7 @@ import org.slf4j.LoggerFactory;
  */
 public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironment> {
 
-  void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException;
+  void provision(T k8sEnv, RuntimeTarget target) throws InfrastructureException;
 
   @Singleton
   class KubernetesEnvironmentProvisionerImpl
@@ -113,41 +114,42 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     }
 
     @Traced
-    public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
+    public void provision(KubernetesEnvironment k8sEnv, RuntimeTarget target)
         throws InfrastructureException {
-      final String workspaceId = identity.getWorkspaceId();
+      final RuntimeIdentity identity = target.getIdentity();
 
+      final String workspaceId = identity.getWorkspaceId();
       TracingTags.WORKSPACE_ID.set(workspaceId);
 
       LOG.debug("Start provisioning Kubernetes environment for workspace '{}'", workspaceId);
       // 1 stage - update environment according Infrastructure specific
       if (pvcEnabled) {
         LOG.debug("Provisioning logs volume for workspace '{}'", workspaceId);
-        logsVolumeMachineProvisioner.provision(k8sEnv, identity);
+        logsVolumeMachineProvisioner.provision(k8sEnv, target);
       }
 
       // 2 stage - converting Che model env to Kubernetes env
       LOG.debug("Provisioning servers & env vars converters for workspace '{}'", workspaceId);
-      serversConverter.provision(k8sEnv, identity);
-      envVarsConverter.provision(k8sEnv, identity);
+      serversConverter.provision(k8sEnv, target);
+      envVarsConverter.provision(k8sEnv, target);
       if (pvcEnabled) {
-        volumesStrategy.provision(k8sEnv, identity);
+        volumesStrategy.provision(k8sEnv, target);
       }
 
       // 3 stage - add Kubernetes env items
       LOG.debug("Provisioning environment items for workspace '{}'", workspaceId);
-      restartPolicyRewriter.provision(k8sEnv, identity);
-      uniqueNamesProvisioner.provision(k8sEnv, identity);
-      ramLimitProvisioner.provision(k8sEnv, identity);
-      externalServerIngressTlsProvisioner.provision(k8sEnv, identity);
-      securityContextProvisioner.provision(k8sEnv, identity);
-      podTerminationGracePeriodProvisioner.provision(k8sEnv, identity);
-      imagePullSecretProvisioner.provision(k8sEnv, identity);
-      proxySettingsProvisioner.provision(k8sEnv, identity);
-      serviceAccountProvisioner.provision(k8sEnv, identity);
-      certificateProvisioner.provision(k8sEnv, identity);
-      vcsSshKeysProvisioner.provision(k8sEnv, identity);
-      gitUserProfileProvisioner.provision(k8sEnv, identity);
+      restartPolicyRewriter.provision(k8sEnv, target);
+      uniqueNamesProvisioner.provision(k8sEnv, target);
+      ramLimitProvisioner.provision(k8sEnv, target);
+      externalServerIngressTlsProvisioner.provision(k8sEnv, target);
+      securityContextProvisioner.provision(k8sEnv, target);
+      podTerminationGracePeriodProvisioner.provision(k8sEnv, target);
+      imagePullSecretProvisioner.provision(k8sEnv, target);
+      proxySettingsProvisioner.provision(k8sEnv, target);
+      serviceAccountProvisioner.provision(k8sEnv, target);
+      certificateProvisioner.provision(k8sEnv, target);
+      vcsSshKeysProvisioner.provision(k8sEnv, target);
+      gitUserProfileProvisioner.provision(k8sEnv, target);
       LOG.debug("Provisioning Kubernetes environment done for workspace '{}'", workspaceId);
     }
   }

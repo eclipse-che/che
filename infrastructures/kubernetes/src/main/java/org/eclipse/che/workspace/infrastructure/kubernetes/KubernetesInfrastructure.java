@@ -19,6 +19,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.NoEnvironmentFactory.NoEnvInternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -69,8 +70,8 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
 
   @Override
   protected KubernetesRuntimeContext internalPrepare(
-      RuntimeIdentity id, InternalEnvironment environment) throws InfrastructureException {
-    return runtimeContextFactory.create(asKubernetesEnv(environment), id, this);
+      RuntimeTarget target, InternalEnvironment environment) throws InfrastructureException {
+    return runtimeContextFactory.create(asKubernetesEnv(environment), target, this);
   }
 
   private KubernetesEnvironment asKubernetesEnv(InternalEnvironment source)

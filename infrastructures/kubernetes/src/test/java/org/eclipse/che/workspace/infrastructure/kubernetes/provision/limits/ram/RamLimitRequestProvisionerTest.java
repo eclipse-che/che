@@ -25,7 +25,7 @@ import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.ResourceRequirementsBuilder;
 import java.util.Collections;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -53,7 +53,7 @@ public class RamLimitRequestProvisionerTest {
   public static final String RAM_REQUEST_ATTRIBUTE = "1234567890";
 
   @Mock private KubernetesEnvironment k8sEnv;
-  @Mock private RuntimeIdentity identity;
+  @Mock private RuntimeTarget target;
   @Mock private InternalMachineConfig internalMachineConfig;
   @Mock private MemoryAttributeProvisioner memoryAttributeProvisioner;
 
@@ -84,7 +84,7 @@ public class RamLimitRequestProvisionerTest {
 
   @Test
   public void testProvisionRamLimitAttributeToContainer() throws Exception {
-    ramProvisioner.provision(k8sEnv, identity);
+    ramProvisioner.provision(k8sEnv, target);
 
     assertEquals(
         container.getResources().getLimits().get("memory").getAmount(), RAM_LIMIT_ATTRIBUTE);
@@ -98,7 +98,7 @@ public class RamLimitRequestProvisionerTest {
             .build();
     container.setResources(resourceRequirements);
 
-    ramProvisioner.provision(k8sEnv, identity);
+    ramProvisioner.provision(k8sEnv, target);
 
     assertEquals(
         container.getResources().getLimits().get("memory").getAmount(), RAM_LIMIT_ATTRIBUTE);
@@ -106,7 +106,7 @@ public class RamLimitRequestProvisionerTest {
 
   @Test
   public void testProvisionRamRequestAttributeToContainer() throws Exception {
-    ramProvisioner.provision(k8sEnv, identity);
+    ramProvisioner.provision(k8sEnv, target);
 
     assertEquals(
         container.getResources().getRequests().get("memory").getAmount(), RAM_REQUEST_ATTRIBUTE);
@@ -120,7 +120,7 @@ public class RamLimitRequestProvisionerTest {
             .build();
     container.setResources(resourceRequirements);
 
-    ramProvisioner.provision(k8sEnv, identity);
+    ramProvisioner.provision(k8sEnv, target);
 
     assertEquals(
         container.getResources().getRequests().get("memory").getAmount(), RAM_REQUEST_ATTRIBUTE);

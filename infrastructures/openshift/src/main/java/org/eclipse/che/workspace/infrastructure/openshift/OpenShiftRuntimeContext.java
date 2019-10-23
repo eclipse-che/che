@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesRuntimeContext;
@@ -43,7 +44,7 @@ public class OpenShiftRuntimeContext extends KubernetesRuntimeContext<OpenShiftE
       OpenShiftRuntimeFactory runtimeFactory,
       KubernetesRuntimeStateCache runtimeStatuses,
       @Assisted OpenShiftEnvironment openShiftEnvironment,
-      @Assisted RuntimeIdentity identity,
+      @Assisted RuntimeTarget target,
       @Assisted RuntimeInfrastructure infrastructure)
       throws ValidationException, InfrastructureException {
     super(
@@ -52,7 +53,7 @@ public class OpenShiftRuntimeContext extends KubernetesRuntimeContext<OpenShiftE
         null, // should not be used by super class since getRuntime method is overridden
         runtimeStatuses,
         openShiftEnvironment,
-        identity,
+        target,
         infrastructure);
     this.runtimeStatuses = runtimeStatuses;
     this.runtimeFactory = runtimeFactory;
@@ -62,7 +63,7 @@ public class OpenShiftRuntimeContext extends KubernetesRuntimeContext<OpenShiftE
   @Override
   public OpenShiftInternalRuntime getRuntime() throws InfrastructureException {
     Optional<KubernetesRuntimeState> runtimeStateOpt = runtimeStatuses.get(getIdentity());
-    String workspaceId = getIdentity().getWorkspaceId();
+    String workspaceId = getTarget().getIdentity().getWorkspaceId();
 
     if (!runtimeStateOpt.isPresent()) {
       // there is no cached runtime, create a new one

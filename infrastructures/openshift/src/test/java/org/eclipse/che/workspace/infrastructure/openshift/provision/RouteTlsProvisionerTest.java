@@ -24,7 +24,7 @@ import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteBuilder;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
@@ -43,7 +43,7 @@ import org.testng.annotations.Test;
 public class RouteTlsProvisionerTest {
 
   @Mock private OpenShiftEnvironment osEnv;
-  @Mock private RuntimeIdentity runtimeIdentity;
+  @Mock private RuntimeTarget runtimeTarget;
 
   @Test
   public void doNothingWhenTlsDisabled() throws Exception {
@@ -51,7 +51,7 @@ public class RouteTlsProvisionerTest {
     RouteTlsProvisioner tlsProvisioner = new RouteTlsProvisioner(false);
 
     // when
-    tlsProvisioner.provision(osEnv, runtimeIdentity);
+    tlsProvisioner.provision(osEnv, runtimeTarget);
 
     // then
     verify(osEnv, never()).getRoutes();
@@ -71,7 +71,7 @@ public class RouteTlsProvisionerTest {
     when(osEnv.getRoutes()).thenReturn(routes);
 
     // when
-    tlsProvisioner.provision(osEnv, runtimeIdentity);
+    tlsProvisioner.provision(osEnv, runtimeTarget);
 
     // then
     assertEquals(route.getSpec().getTls().getTermination(), TERMINATION_EDGE);

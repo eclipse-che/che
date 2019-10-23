@@ -25,7 +25,7 @@ import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteBuilder;
 import java.util.HashMap;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.mockito.Mock;
@@ -47,7 +47,7 @@ public class OpenShiftUniqueNamesProvisionerTest {
   private static final String ROUTE_NAME = "testRoute";
 
   @Mock private OpenShiftEnvironment osEnv;
-  @Mock private RuntimeIdentity runtimeIdentity;
+  @Mock private RuntimeTarget runtimeTarget;
 
   private OpenShiftUniqueNamesProvisioner uniqueNamesProvisioner;
 
@@ -58,12 +58,12 @@ public class OpenShiftUniqueNamesProvisionerTest {
 
   @Test
   public void provideUniquePodsNames() throws Exception {
-    when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn(WORKSPACE_ID);
     Pod pod = newPod();
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     doReturn(ImmutableMap.of(POD_NAME, podData)).when(osEnv).getPodsData();
 
-    uniqueNamesProvisioner.provision(osEnv, runtimeIdentity);
+    uniqueNamesProvisioner.provision(osEnv, runtimeTarget);
 
     ObjectMeta podMetadata = pod.getMetadata();
     assertNotEquals(podMetadata.getName(), POD_NAME);
@@ -77,7 +77,7 @@ public class OpenShiftUniqueNamesProvisionerTest {
     routes.put(POD_NAME, route);
     doReturn(routes).when(osEnv).getRoutes();
 
-    uniqueNamesProvisioner.provision(osEnv, runtimeIdentity);
+    uniqueNamesProvisioner.provision(osEnv, runtimeTarget);
 
     final ObjectMeta routeData = route.getMetadata();
     assertNotEquals(routeData.getName(), ROUTE_NAME);

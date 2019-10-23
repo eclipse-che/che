@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -66,8 +66,8 @@ public class UniqueWorkspacePVCStrategyTest {
   private static final String WORKSPACE_ID = "workspace123";
   private static final String PVC_NAME_PREFIX = "che-claim";
 
-  private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
+  private static final RuntimeTarget TARGET =
+      new RuntimeTarget(new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1"), null, "namespace");
 
   private KubernetesEnvironment k8sEnv;
 
@@ -111,7 +111,7 @@ public class UniqueWorkspacePVCStrategyTest {
         .thenReturn(singletonList(existingPVC));
 
     // when
-    strategy.provision(k8sEnv, IDENTITY);
+    strategy.provision(k8sEnv, TARGET);
 
     // then
     provisionOrder
@@ -133,7 +133,7 @@ public class UniqueWorkspacePVCStrategyTest {
         .thenReturn(singletonList(existingPVC));
 
     // when
-    strategy.provision(k8sEnv, IDENTITY);
+    strategy.provision(k8sEnv, TARGET);
 
     // then
     assertEquals(k8sEnv.getPersistentVolumeClaims().size(), 1);

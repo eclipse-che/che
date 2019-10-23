@@ -15,6 +15,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
 
@@ -37,6 +39,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -359,6 +362,47 @@ public class KubernetesNamespaceFactory {
     }
 
     return namespace;
+  }
+
+  public KubernetesNamespace create(RuntimeTarget target) throws InfrastructureException {
+    String workspaceId = target.getIdentity().getWorkspaceId();
+    final String namespaceName;
+    try {
+      namespaceName = evalNamespaceName(workspaceId, EnvironmentContext.getCurrent().getSubject());
+    } catch (NotFoundException | ServerException | ConflictException | ValidationException e) {
+      throw new InfrastructureException(
+          format(
+              "Failed to determine the namespace to put the workspace %s to."
+                  + " The error message was: %s",
+              workspaceId, e.getMessage()),
+          e);
+    }
+
+    KubernetesNamespace namespace = doCreateNamespace(workspaceId, namespaceName);
+    namespace.prepare();
+
+    if (isCreatingNamespace(workspaceId) && !isNullOrEmpty(serviceAccountName)) {
+      // prepare service account for workspace only if account name is configured
+      // and project is not predefined
+      // since predefined project should be prepared during Che deployment
+      KubernetesWorkspaceServiceAccount workspaceServiceAccount =
+          doCreateServiceAccount(workspaceId, namespaceName);
+      workspaceServiceAccount.prepare();
+    }
+
+    return namespace;
+  }
+
+  /**
+   * Gets a namespace the workspace is deployed to.
+   *
+   * @param workspace the workspace
+   * @return the namespace
+   */
+  public KubernetesNamespace get(Workspace workspace) {
+    String namespace = workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
+    return doCreateNamespace(workspace.getId(),
+            namespace);
   }
 
   public void delete(String workspaceId) throws InfrastructureException {

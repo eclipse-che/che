@@ -31,7 +31,7 @@ import io.fabric8.kubernetes.api.model.PodSpecBuilder;
 import java.util.Iterator;
 import java.util.List;
 import org.eclipse.che.api.core.model.workspace.Warning;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
@@ -51,7 +51,7 @@ public class RestartPolicyRewriterTest {
   private static final String ALWAYS_RESTART_POLICY = "Always";
 
   @Mock private KubernetesEnvironment k8sEnv;
-  @Mock private RuntimeIdentity runtimeIdentity;
+  @Mock private RuntimeTarget runtimeTarget;
   @InjectMocks private RestartPolicyRewriter restartPolicyRewriter;
 
   @Captor private ArgumentCaptor<Warning> warningCaptor;
@@ -62,7 +62,7 @@ public class RestartPolicyRewriterTest {
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     when(k8sEnv.getPodsData()).thenReturn(singletonMap(TEST_POD_NAME, podData));
 
-    restartPolicyRewriter.provision(k8sEnv, runtimeIdentity);
+    restartPolicyRewriter.provision(k8sEnv, runtimeTarget);
 
     assertEquals(pod.getSpec().getRestartPolicy(), DEFAULT_RESTART_POLICY);
     verifyWarnings(

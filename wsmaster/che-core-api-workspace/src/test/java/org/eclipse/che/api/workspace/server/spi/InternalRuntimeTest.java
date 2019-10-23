@@ -45,6 +45,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
@@ -626,7 +627,9 @@ public class InternalRuntimeTest {
         throws ValidationException, InfrastructureException {
       super(
           new TestRuntimeContext(
-              new InternalEnvironment() {}, new RuntimeIdentityImpl("ws", "env", "id"), null),
+              new InternalEnvironment() {},
+              new RuntimeTarget(new RuntimeIdentityImpl("ws", "env", "id"), null, "nmspc"),
+              null),
           urlRewriter,
           running ? WorkspaceStatus.RUNNING : null);
     }
@@ -656,11 +659,9 @@ public class InternalRuntimeTest {
   private static class TestRuntimeContext extends RuntimeContext {
 
     public TestRuntimeContext(
-        InternalEnvironment environment,
-        RuntimeIdentity identity,
-        RuntimeInfrastructure infrastructure)
+        InternalEnvironment environment, RuntimeTarget target, RuntimeInfrastructure infrastructure)
         throws ValidationException, InfrastructureException {
-      super(environment, identity, infrastructure);
+      super(environment, target, infrastructure);
     }
 
     @Override

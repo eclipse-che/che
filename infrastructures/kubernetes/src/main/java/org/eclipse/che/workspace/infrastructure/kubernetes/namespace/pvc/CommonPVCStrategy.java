@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
@@ -139,11 +140,11 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   }
 
   @Override
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
+  public void provision(KubernetesEnvironment k8sEnv, RuntimeTarget target)
       throws InfrastructureException {
-    final String workspaceId = identity.getWorkspaceId();
+    final String workspaceId = target.getIdentity().getWorkspaceId();
     if (EphemeralWorkspaceUtility.isEphemeral(k8sEnv.getAttributes())) {
-      ephemeralWorkspaceAdapter.provision(k8sEnv, identity);
+      ephemeralWorkspaceAdapter.provision(k8sEnv, target.getIdentity());
       return;
     }
     log.debug("Provisioning PVC strategy for workspace '{}'", workspaceId);
@@ -152,9 +153,9 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
 
     // Note that PVC name is used during prefixing
     // It MUST be done before changing all PVCs references to common PVC
-    subpathPrefixes.prefixVolumeMountsSubpaths(k8sEnv, identity.getWorkspaceId());
+    subpathPrefixes.prefixVolumeMountsSubpaths(k8sEnv, target.getIdentity().getWorkspaceId());
 
-    PersistentVolumeClaim commonPVC = replacePVCsWithCommon(k8sEnv, identity);
+    PersistentVolumeClaim commonPVC = replacePVCsWithCommon(k8sEnv, target.getIdentity());
 
     podsVolumes.replacePVCVolumesWithCommon(
         k8sEnv.getPodsData(), commonPVC.getMetadata().getName());
@@ -172,8 +173,10 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
 
   @Override
   @Traced
-  public void prepare(KubernetesEnvironment k8sEnv, String workspaceId, long timeoutMillis)
+  public void prepare(KubernetesEnvironment k8sEnv, RuntimeTarget target, long timeoutMillis)
       throws InfrastructureException {
+    String workspaceId = target.getIdentity().getWorkspaceId();
+
     TracingTags.WORKSPACE_ID.set(workspaceId);
 
     if (EphemeralWorkspaceUtility.isEphemeral(k8sEnv.getAttributes())) {

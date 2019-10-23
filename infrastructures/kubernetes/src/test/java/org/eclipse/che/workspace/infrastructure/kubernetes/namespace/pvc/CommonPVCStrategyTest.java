@@ -41,7 +41,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -73,8 +73,8 @@ public class CommonPVCStrategyTest {
 
   private static final String[] WORKSPACE_SUBPATHS = {"/projects", "/logs"};
 
-  private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
+  private static final RuntimeTarget TARGET =
+      new RuntimeTarget(new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1"), null, "namespace");
 
   private KubernetesEnvironment k8sEnv;
 
@@ -133,7 +133,7 @@ public class CommonPVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().put("pvc2", newPVC("pvc2"));
 
     // when
-    commonPVCStrategy.provision(k8sEnv, IDENTITY);
+    commonPVCStrategy.provision(k8sEnv, TARGET);
 
     // then
     provisionOrder.verify(volumeConverter).convertCheVolumes(k8sEnv, WORKSPACE_ID);
@@ -154,7 +154,7 @@ public class CommonPVCStrategyTest {
     PersistentVolumeClaim provisioned = newPVC(PVC_NAME);
     k8sEnv.getPersistentVolumeClaims().put(PVC_NAME, provisioned);
 
-    commonPVCStrategy.provision(k8sEnv, IDENTITY);
+    commonPVCStrategy.provision(k8sEnv, TARGET);
 
     assertNotEquals(k8sEnv.getPersistentVolumeClaims().get(PVC_NAME), provisioned);
   }
@@ -176,7 +176,7 @@ public class CommonPVCStrategyTest {
             podsVolumes,
             subpathPrefixes);
 
-    commonPVCStrategy.provision(k8sEnv, IDENTITY);
+    commonPVCStrategy.provision(k8sEnv, TARGET);
 
     final Map<String, PersistentVolumeClaim> actual = k8sEnv.getPersistentVolumeClaims();
     assertFalse(actual.isEmpty());

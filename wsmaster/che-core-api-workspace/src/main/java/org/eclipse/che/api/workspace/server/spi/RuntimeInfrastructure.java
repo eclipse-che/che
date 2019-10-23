@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
@@ -90,31 +91,31 @@ public abstract class RuntimeInfrastructure {
    * </ul>
    * </pre>
    *
-   * @param id the RuntimeIdentity
+   * @param target the Runtime target to deploy to
    * @param environment incoming internal environment
    * @return new RuntimeContext object
    * @throws ValidationException if incoming environment is not valid
    * @throws InfrastructureException if any other error occurred
    */
-  public RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
+  public RuntimeContext prepare(RuntimeTarget target, InternalEnvironment environment)
       throws ValidationException, InfrastructureException {
     for (InternalEnvironmentProvisioner provisioner : internalEnvironmentProvisioners) {
-      provisioner.provision(id, environment);
+      provisioner.provision(target.getIdentity(), environment);
     }
-    return internalPrepare(id, environment);
+    return internalPrepare(target, environment);
   }
 
   /**
    * An Infrastructure implementation should be able to prepare RuntimeContext. This method is not
    * supposed to be called by clients of class {@link RuntimeInfrastructure}.
    *
-   * @param id the RuntimeIdentity
+   * @param target the Runtime target
    * @param environment incoming internal environment
    * @return new RuntimeContext object
    * @throws ValidationException if incoming environment is not valid
    * @throws InfrastructureException if any other error occurred
    */
   protected abstract RuntimeContext internalPrepare(
-      RuntimeIdentity id, InternalEnvironment environment)
+      RuntimeTarget target, InternalEnvironment environment)
       throws ValidationException, InfrastructureException;
 }

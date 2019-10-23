@@ -20,7 +20,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
@@ -48,10 +48,10 @@ public class RouteTlsProvisioner implements ConfigurationProvisioner<OpenShiftEn
 
   @Override
   @Traced
-  public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
+  public void provision(OpenShiftEnvironment osEnv, RuntimeTarget target)
       throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
+    TracingTags.WORKSPACE_ID.set(target.getIdentity()::getWorkspaceId);
 
     if (!isTlsEnabled) {
       return;

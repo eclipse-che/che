@@ -35,7 +35,7 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.ssh.server.SshManager;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.shared.model.SshPair;
@@ -95,13 +95,13 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
 
   @Override
   @Traced
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
+  public void provision(KubernetesEnvironment k8sEnv, RuntimeTarget target)
       throws InfrastructureException {
-    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
+    TracingTags.WORKSPACE_ID.set(target.getIdentity()::getWorkspaceId);
 
     List<SshPairImpl> sshPairs = emptyList();
     try {
-      sshPairs = sshManager.getPairs(identity.getOwnerId(), "vcs");
+      sshPairs = sshManager.getPairs(target.getIdentity().getOwnerId(), "vcs");
     } catch (ServerException e) {
       LOG.warn("Unable to get SSH Keys. Cause: {}", e.getMessage());
       return;
@@ -111,7 +111,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
         sshPairs =
             singletonList(
                 sshManager.generatePair(
-                    identity.getOwnerId(), "vcs", "default-" + new Date().getTime()));
+                    target.getIdentity().getOwnerId(), "vcs", "default-" + new Date().getTime()));
       } catch (ServerException | ConflictException e) {
         LOG.warn("Unable to generate the initial SSH key. Cause: {}", e.getMessage());
         return;
@@ -120,11 +120,11 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
 
     StringBuilder sshConfigData = new StringBuilder();
     for (SshPair sshPair : sshPairs) {
-      doProvisionSshKey(sshPair, k8sEnv, identity.getWorkspaceId());
+      doProvisionSshKey(sshPair, k8sEnv, target.getIdentity().getWorkspaceId());
       sshConfigData.append(buildConfig(sshPair.getName()));
     }
 
-    String sshConfigMapName = identity.getWorkspaceId() + SSH_CONFIG_MAP_NAME_SUFFIX;
+    String sshConfigMapName = target.getIdentity().getWorkspaceId() + SSH_CONFIG_MAP_NAME_SUFFIX;
     doProvisionSshConfig(sshConfigMapName, sshConfigData.toString(), k8sEnv);
   }
 

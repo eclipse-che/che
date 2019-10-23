@@ -39,6 +39,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
@@ -71,7 +72,7 @@ public class GitUserProfileProvisioner implements ConfigurationProvisioner<Kuber
   }
 
   @Override
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
+  public void provision(KubernetesEnvironment k8sEnv, RuntimeTarget target)
       throws InfrastructureException {
 
     try {
@@ -82,7 +83,7 @@ public class GitUserProfileProvisioner implements ConfigurationProvisioner<Kuber
       }
 
       prepareAndProvisionGitConfiguration(
-          userAndEmail.first, userAndEmail.second, k8sEnv, identity);
+          userAndEmail.first, userAndEmail.second, k8sEnv, target.getIdentity());
     } catch (ServerException | NotFoundException e) {
       reportWarning(
           k8sEnv,

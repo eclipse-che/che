@@ -19,7 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.PodSecurityContext;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -35,7 +35,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class SecurityContextProvisionerTest {
 
-  @Mock private RuntimeIdentity runtimeIdentity;
+  @Mock private RuntimeTarget runtimeTarget;
 
   private KubernetesEnvironment kubernetesEnvironment;
   private Pod pod;
@@ -56,7 +56,7 @@ public class SecurityContextProvisionerTest {
     securityContextProvisioner = new SecurityContextProvisioner(null, null);
 
     // when
-    securityContextProvisioner.provision(kubernetesEnvironment, runtimeIdentity);
+    securityContextProvisioner.provision(kubernetesEnvironment, runtimeTarget);
 
     // then
     assertNull(pod.getSpec().getSecurityContext());
@@ -68,7 +68,7 @@ public class SecurityContextProvisionerTest {
     securityContextProvisioner = new SecurityContextProvisioner("1", "2");
 
     // when
-    securityContextProvisioner.provision(kubernetesEnvironment, runtimeIdentity);
+    securityContextProvisioner.provision(kubernetesEnvironment, runtimeTarget);
 
     // then
     PodSecurityContext securityContext = pod.getSpec().getSecurityContext();

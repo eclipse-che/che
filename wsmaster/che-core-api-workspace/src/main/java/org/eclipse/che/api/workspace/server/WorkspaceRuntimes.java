@@ -25,6 +25,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_RUNTIMES_ID_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOP_REASON;
@@ -58,6 +59,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
@@ -409,13 +411,22 @@ public class WorkspaceRuntimes {
     }
 
     final String ownerId = EnvironmentContext.getCurrent().getSubject().getUserId();
+    final String ownerName = EnvironmentContext.getCurrent().getSubject().getUserName();
     final RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, ownerId);
+    final RuntimeTarget target =
+        new RuntimeTarget(
+            runtimeId,
+                ownerName, workspace
+                .getConfig()
+                .getAttributes()
+                .get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE));
+
     try {
       InternalEnvironment internalEnv =
           createInternalEnvironment(
               config.getEnvironments().get(envName), config.getAttributes(), config.getCommands());
 
-      RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);
+      RuntimeContext runtimeContext = infrastructure.prepare(target, internalEnv);
       InternalRuntime runtime = runtimeContext.getRuntime();
 
       try (Unlocker ignored = lockService.writeLock(workspaceId)) {
@@ -617,6 +628,10 @@ public class WorkspaceRuntimes {
       return;
     }
 
+    Set<RuntimeTarget> targets = identities.stream().map(identity -> {
+
+    }).collect(toSet());
+
     for (RuntimeIdentity identity : identities) {
       String workspaceId = identity.getWorkspaceId();
 
@@ -625,7 +640,7 @@ public class WorkspaceRuntimes {
       }
     }
 
-    sharedPool.execute(new RecoverRuntimesTask(identities));
+    sharedPool.execute(new RecoverRuntimesTask(targets));
   }
 
   @VisibleForTesting
@@ -669,7 +684,13 @@ public class WorkspaceRuntimes {
       InternalEnvironment internalEnv =
           createInternalEnvironment(
               environment, workspaceConfig.getAttributes(), workspaceConfig.getCommands());
-      runtime = infra.prepare(identity, internalEnv).getRuntime();
+
+      RuntimeTarget target =
+          new RuntimeTarget(
+              identity,
+                  null, workspaceConfig.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE));
+
+      runtime = infra.prepare(target, internalEnv).getRuntime();
       WorkspaceStatus runtimeStatus = runtime.getStatus();
       try (Unlocker ignored = lockService.writeLock(workspace.getId())) {
         statuses.replace(identity.getWorkspaceId(), runtimeStatus);

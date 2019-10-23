@@ -19,6 +19,7 @@ import java.util.List;
 import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -49,7 +50,7 @@ public class DockerRuntimeContext extends RuntimeContext<DockerEnvironment> {
   @AssistedInject
   public DockerRuntimeContext(
       @Assisted DockerRuntimeInfrastructure infrastructure,
-      @Assisted RuntimeIdentity identity,
+      @Assisted RuntimeTarget target,
       @Assisted DockerEnvironment dockerEnv,
       DockerRuntimeFactory runtimeFactory,
       DockerContainers containers,
@@ -59,7 +60,7 @@ public class DockerRuntimeContext extends RuntimeContext<DockerEnvironment> {
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint)
       throws InfrastructureException, ValidationException {
 
-    super(dockerEnv, identity, infrastructure);
+    super(dockerEnv, target, infrastructure);
     this.urlRewriter = urlRewriter;
     this.websocketOutputEndpoint = cheWebsocketEndpoint;
     this.runtimeFactory = runtimeFactory;

@@ -14,7 +14,7 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitUserProfileProvisioner;
@@ -49,7 +49,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
   @Mock private OpenShiftUniqueNamesProvisioner uniqueNamesProvisioner;
   @Mock private OpenShiftEnvironment osEnv;
-  @Mock private RuntimeIdentity runtimeIdentity;
+  @Mock private RuntimeTarget runtimeTarget;
   @Mock private RouteTlsProvisioner tlsRouteProvisioner;
   @Mock private EnvVarsConverter envVarsProvisioner;
   @Mock private ServersConverter<OpenShiftEnvironment> serversProvisioner;
@@ -109,25 +109,25 @@ public class OpenShiftEnvironmentProvisionerTest {
 
   @Test
   public void performsOrderedProvisioning() throws Exception {
-    osInfraProvisioner.provision(osEnv, runtimeIdentity);
+    osInfraProvisioner.provision(osEnv, runtimeTarget);
 
-    provisionOrder.verify(logsVolumeMachineProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(serversProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(envVarsProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(volumesStrategy).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(restartPolicyRewriter).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(uniqueNamesProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(tlsRouteProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(ramLimitProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(logsVolumeMachineProvisioner).provision(eq(osEnv), eq(runtimeTarget));
+    provisionOrder.verify(serversProvisioner).provision(eq(osEnv), eq(runtimeTarget));
+    provisionOrder.verify(envVarsProvisioner).provision(eq(osEnv), eq(runtimeTarget));
+    provisionOrder.verify(volumesStrategy).provision(eq(osEnv), eq(runtimeTarget));
+    provisionOrder.verify(restartPolicyRewriter).provision(eq(osEnv), eq(runtimeTarget));
+    provisionOrder.verify(uniqueNamesProvisioner).provision(eq(osEnv), eq(runtimeTarget));
+    provisionOrder.verify(tlsRouteProvisioner).provision(eq(osEnv), eq(runtimeTarget));
+    provisionOrder.verify(ramLimitProvisioner).provision(eq(osEnv), eq(runtimeTarget));
     provisionOrder
         .verify(podTerminationGracePeriodProvisioner)
-        .provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(imagePullSecretProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(proxySettingsProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(serviceAccountProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(certificateProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(vcsSshKeysProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(gitUserProfileProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+        .provision(eq(osEnv), eq(runtimeTarget));
+    provisionOrder.verify(imagePullSecretProvisioner).provision(eq(osEnv), eq(runtimeTarget));
+    provisionOrder.verify(proxySettingsProvisioner).provision(eq(osEnv), eq(runtimeTarget));
+    provisionOrder.verify(serviceAccountProvisioner).provision(eq(osEnv), eq(runtimeTarget));
+    provisionOrder.verify(certificateProvisioner).provision(eq(osEnv), eq(runtimeTarget));
+    provisionOrder.verify(vcsSshKeysProvisioner).provision(eq(osEnv), eq(runtimeTarget));
+    provisionOrder.verify(gitUserProfileProvisioner).provision(eq(osEnv), eq(runtimeTarget));
     provisionOrder.verifyNoMoreInteractions();
   }
 }
