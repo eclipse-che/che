@@ -18,7 +18,7 @@
  */
 export class AddImportProject implements ng.IDirective {
   restrict: string = 'E';
-  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stack/project-source-selector/add-import-project/add-import-project.html';
+  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/add-import-project.html';
 
   bindToController: boolean = true;
   controller: string = 'AddImportProjectController';

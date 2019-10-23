@@ -12,17 +12,17 @@
 'use strict';
 
 /**
- * Defines a directive for the github project import.
+ * Defines a directive for the Zip project import.
  *
  * @author Oleksii Kurinnyi
  */
-export class ImportGithubProject implements ng.IDirective {
+export class ImportZipProject implements ng.IDirective {
   restrict: string = 'E';
-  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stack/project-source-selector/add-import-project/import-github-project/import-github-project.html';
+  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-zip-project/import-zip-project.html';
   replace: boolean = true;
 
-  controller: string = 'ImportGithubProjectController';
-  controllerAs: string = 'importGithubProjectController';
+  controller: string = 'ImportZipProjectController';
+  controllerAs: string = 'importZipProjectController';
 
   bindToController: boolean = true;
 

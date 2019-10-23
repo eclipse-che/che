@@ -12,17 +12,17 @@
 'use strict';
 
 /**
- * Defines a directive for the template selector.
+ * Defines a directive for the project's metadata.
  *
  * @author Oleksii Kurinnyi
  */
-export class TemplateSelector implements ng.IDirective {
+export class ProjectMetadata implements ng.IDirective {
   restrict: string = 'E';
-  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stack/project-source-selector/add-import-project/template-selector/template-selector.html';
+  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stacks/project-source-selector/edit-project/project-metadata/project-metadata.html';
   replace: boolean = true;
 
-  controller: string = 'TemplateSelectorController';
-  controllerAs: string = 'templateSelectorController';
+  controller: string = 'ProjectMetadataController';
+  controllerAs: string = 'projectMetadataController';
 
   bindToController: boolean = true;
 
@@ -31,11 +31,14 @@ export class TemplateSelector implements ng.IDirective {
   };
 
   /**
-   * Default constructor that is using resource injection
+   * Default constructor that is using resource
    */
   constructor() {
     this.scope = {
-      devfile: '='
+      origTemplate: '=template',
+      templateName: '@',
+      isProjectNameUnique: '&',
+      projectForm: '='
     };
   }
 

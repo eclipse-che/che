@@ -13,7 +13,7 @@
 import {CheWorkspace, WorkspaceStatus} from '../../../../components/api/workspace/che-workspace.factory';
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
 import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
-import {NamespaceSelectorSvc} from '../../create-workspace/ready-to-go-stack/namespace-selector/namespace-selector.service';
+import {NamespaceSelectorSvc} from '../../create-workspace/ready-to-go-stacks/namespace-selector/namespace-selector.service';
 import {WorkspaceDetailsService} from '../workspace-details.service';
 
 const STARTING = WorkspaceStatus[WorkspaceStatus.STARTING];

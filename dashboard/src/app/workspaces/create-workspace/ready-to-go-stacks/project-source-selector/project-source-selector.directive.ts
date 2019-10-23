@@ -26,7 +26,7 @@ export class ProjectSourceSelector implements ng.IDirective {
   static $inject = ['$timeout'];
 
   restrict: string = 'E';
-  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stack/project-source-selector/project-source-selector.html';
+  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stacks/project-source-selector/project-source-selector.html';
   replace: boolean = true;
 
   controller: string = 'ProjectSourceSelectorController';

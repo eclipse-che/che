@@ -12,22 +12,22 @@
 'use strict';
 
 /**
- * Defines a directive for the blank project import.
+ * Defines a directive for displaying stack selector widget.
  *
  * @author Oleksii Kurinnyi
  */
-export class ImportBlankProject implements ng.IDirective {
+export class NamespaceSelector implements ng.IDirective {
   restrict: string = 'E';
-  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stack/project-source-selector/add-import-project/import-blank-project/import-blank-project.html';
+  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stacks/namespace-selector/namespace-selector.html';
   replace: boolean = true;
 
-  controller: string = 'ImportBlankProjectController';
-  controllerAs: string = 'importBlankProjectController';
+  controller: string = 'NamespaceSelectorController';
+  controllerAs: string = 'namespaceSelectorController';
 
   bindToController: boolean = true;
 
   scope: {
-    [propName: string]: string;
+    [propName: string]: string
   };
 
   /**
@@ -35,8 +35,7 @@ export class ImportBlankProject implements ng.IDirective {
    */
   constructor() {
     this.scope = {
-      isProjectNameUnique: '&'
+      onNamespaceChange: '&'
     };
   }
-
 }

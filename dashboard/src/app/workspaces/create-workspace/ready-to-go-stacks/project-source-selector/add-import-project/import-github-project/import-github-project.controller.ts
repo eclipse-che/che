@@ -226,7 +226,7 @@ export class ImportGithubProjectController {
         controllerAs: 'noGithubOauthDialogController',
         bindToController: true,
         clickOutsideToClose: true,
-        templateUrl: 'app/workspaces/create-workspace/ready-to-go-stack/project-source-selector/add-import-project/import-github-project/oauth-dialog/no-github-oauth-dialog.html'
+        templateUrl: 'app/workspaces/create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-github-project/oauth-dialog/no-github-oauth-dialog.html'
       });
 
       return;

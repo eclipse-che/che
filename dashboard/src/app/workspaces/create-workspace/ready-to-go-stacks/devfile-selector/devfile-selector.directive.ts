@@ -18,7 +18,7 @@
  */
 export class DevfileSelector implements ng.IDirective {
   restrict: string = 'E';
-  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stack/devfile-selector/devfile-selector.html';
+  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stacks/devfile-selector/devfile-selector.html';
   replace: boolean = true;
 
   controller: string = 'DevfileSelectorController';

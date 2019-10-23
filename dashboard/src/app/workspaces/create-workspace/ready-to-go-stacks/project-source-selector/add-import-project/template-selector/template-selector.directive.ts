@@ -11,13 +11,23 @@
  */
 'use strict';
 
-export class GithubRepositoryItem implements ng.IDirective {
+/**
+ * Defines a directive for the template selector.
+ *
+ * @author Oleksii Kurinnyi
+ */
+export class TemplateSelector implements ng.IDirective {
   restrict: string = 'E';
-  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stack/project-source-selector/add-import-project/import-github-project/github-repository-item/github-repository-item.html';
+  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/template-selector/template-selector.html';
   replace: boolean = true;
 
+  controller: string = 'TemplateSelectorController';
+  controllerAs: string = 'templateSelectorController';
+
+  bindToController: boolean = true;
+
   scope: {
-    [propName: string]: string
+    [propName: string]: string;
   };
 
   /**
@@ -25,9 +35,7 @@ export class GithubRepositoryItem implements ng.IDirective {
    */
   constructor() {
     this.scope = {
-      gitHubRepository: '=',
-      checkedRepositories: '=',
-      onRepositoryClick: '&'
+      devfile: '='
     };
   }
 

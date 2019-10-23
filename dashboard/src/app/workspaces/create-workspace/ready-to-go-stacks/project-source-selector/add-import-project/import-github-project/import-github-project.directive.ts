@@ -12,17 +12,17 @@
 'use strict';
 
 /**
- * Defines a directive for the project's metadata.
+ * Defines a directive for the github project import.
  *
  * @author Oleksii Kurinnyi
  */
-export class ProjectMetadata implements ng.IDirective {
+export class ImportGithubProject implements ng.IDirective {
   restrict: string = 'E';
-  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stack/project-source-selector/edit-project/project-metadata/project-metadata.html';
+  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-github-project/import-github-project.html';
   replace: boolean = true;
 
-  controller: string = 'ProjectMetadataController';
-  controllerAs: string = 'projectMetadataController';
+  controller: string = 'ImportGithubProjectController';
+  controllerAs: string = 'importGithubProjectController';
 
   bindToController: boolean = true;
 
@@ -34,12 +34,7 @@ export class ProjectMetadata implements ng.IDirective {
    * Default constructor that is using resource
    */
   constructor() {
-    this.scope = {
-      origTemplate: '=template',
-      templateName: '@',
-      isProjectNameUnique: '&',
-      projectForm: '='
-    };
+    this.scope = {};
   }
 
 }

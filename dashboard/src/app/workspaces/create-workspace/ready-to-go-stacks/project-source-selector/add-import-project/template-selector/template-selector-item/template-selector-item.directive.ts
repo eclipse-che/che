@@ -12,19 +12,13 @@
 'use strict';
 
 /**
- * Defines a directive for the Git project import.
+ * Defines a directive for displaying template item.
  *
  * @author Oleksii Kurinnyi
  */
-export class ImportGitProject implements ng.IDirective {
+export class TemplateSelectorItem implements ng.IDirective {
   restrict: string = 'E';
-  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stack/project-source-selector/add-import-project/import-git-project/import-git-project.html';
-  replace: boolean = true;
-
-  controller: string = 'ImportGitProjectController';
-  controllerAs: string = 'importGitProjectController';
-
-  bindToController: boolean = true;
+  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/template-selector/template-selector-item/template-selector-item.html';
 
   scope: {
     [propName: string]: string;
@@ -34,7 +28,11 @@ export class ImportGitProject implements ng.IDirective {
    * Default constructor that is using resource
    */
   constructor() {
-    this.scope = {};
+    this.scope = {
+      template: '=',
+      templateIsChecked: '=',
+      onTemplateClick: '&'
+    };
   }
 
 }

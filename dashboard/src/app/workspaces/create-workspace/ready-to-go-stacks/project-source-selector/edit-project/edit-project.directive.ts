@@ -18,7 +18,7 @@
  */
 export class EditProject implements ng.IDirective {
   restrict: string = 'E';
-  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stack/project-source-selector/edit-project/edit-project.html';
+  templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stacks/project-source-selector/edit-project/edit-project.html';
 
   bindToController: boolean = true;
   controller: string = 'EditProjectController';
