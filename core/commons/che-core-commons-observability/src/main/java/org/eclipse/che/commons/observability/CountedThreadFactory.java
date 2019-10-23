@@ -18,6 +18,7 @@ import io.micrometer.core.instrument.Tags;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.validation.constraints.NotNull;
 
 /** A {@link ThreadFactory} that monitors the number of threads created, running and terminated. */
 public class CountedThreadFactory implements ThreadFactory {
@@ -53,7 +54,7 @@ public class CountedThreadFactory implements ThreadFactory {
 
   /** {@inheritDoc} */
   @Override
-  public Thread newThread(Runnable runnable) {
+  public Thread newThread(@NotNull Runnable runnable) {
 
     Thread thread =
         delegate.newThread(
