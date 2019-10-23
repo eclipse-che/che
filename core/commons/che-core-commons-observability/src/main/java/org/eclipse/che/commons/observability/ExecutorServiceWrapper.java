@@ -18,7 +18,7 @@ import org.eclipse.che.commons.schedule.executor.CronExecutorService;
 
 /**
  * Wrapper of different implemntations of {@link ExecutorService}. At this moment supported: {@link
- * ExecutorService}, {@link ScheduledExecutorService} amd {@link CronExecutorService}.
+ * ExecutorService}, {@link ScheduledExecutorService} and {@link CronExecutorService}.
  *
  * <p>Depending on implementation and environment configuration wrapper can add to the original
  * class different capabilities like monitoring or tracing.
