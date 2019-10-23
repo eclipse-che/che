@@ -35,6 +35,7 @@ public class CountedThreadFactory implements ThreadFactory {
    * @param delegate {@link ThreadFactory} to wrap.
    * @param registry {@link MeterRegistry} that will contain the metrics.
    * @param name name for this delegate.
+   * @param tags tags that can provide additional context.
    */
   public CountedThreadFactory(
       ThreadFactory delegate, MeterRegistry registry, String name, Iterable<Tag> tags) {

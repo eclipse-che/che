@@ -31,30 +31,30 @@ public interface ExecutorServiceWrapper {
   /**
    * Creates wrapper for the given executor.
    *
-   * @param executor - {@link ExecutorService} that has to be wrapped.
-   * @param name - unique name that can identify concrete instance of executor.
-   * @param tags - key/value pairs that gives some context about provided executor.
-   * @return - wrapped instance of given executor.
+   * @param executor {@link ExecutorService} that has to be wrapped.
+   * @param name unique name that can identify concrete instance of executor.
+   * @param tags key/value pairs that gives some context about provided executor.
+   * @return wrapped instance of given executor.
    */
   ExecutorService wrap(ExecutorService executor, String name, String... tags);
 
   /**
    * Creates wrapper for the given executor.
    *
-   * @param executor - {@link ScheduledExecutorService} that has to be wrapped.
-   * @param name - unique name that can identify concrete instance of executor.
-   * @param tags - key/value pairs that gives some context about provided executor.
-   * @return - wrapped instance of given executor.
+   * @param executor {@link ScheduledExecutorService} that has to be wrapped.
+   * @param name unique name that can identify concrete instance of executor.
+   * @param tags key/value pairs that gives some context about provided executor.
+   * @return wrapped instance of given executor.
    */
   ScheduledExecutorService wrap(ScheduledExecutorService executor, String name, String... tags);
 
   /**
    * Creates wrapper for the given executor.
    *
-   * @param executor - {@link CronExecutorService} that has to be wrapped.
-   * @param name - unique name that can identify concrete instance of executor.
-   * @param tags - key/value pairs that gives some context about provided executor.
-   * @return - wrapped instance of given executor.
+   * @param executor {@link CronExecutorService} that has to be wrapped.
+   * @param name unique name that can identify concrete instance of executor.
+   * @param tags key/value pairs that gives some context about provided executor.
+   * @return wrapped instance of given executor.
    */
   CronExecutorService wrap(CronExecutorService executor, String name, String... tags);
 }
