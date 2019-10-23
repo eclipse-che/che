@@ -77,6 +77,7 @@ public class OpenShiftPreviewUrlCommandProvisionerTest {
   public void shouldDoNothingWhenNoCommandsDefined() throws InfrastructureException {
     Mockito.when(mockEnvironment.getCommands()).thenReturn(Collections.emptyList());
     Mockito.when(mockProject.routes()).thenReturn(mockRoutes);
+    Mockito.when(mockProject.services()).thenReturn(mockServices);
 
     previewUrlCommandProvisioner.provision(mockEnvironment, mockProject);
   }
@@ -89,6 +90,7 @@ public class OpenShiftPreviewUrlCommandProvisionerTest {
         OpenShiftEnvironment.builder().setCommands(new ArrayList<>(commands)).build();
 
     Mockito.when(mockProject.routes()).thenReturn(mockRoutes);
+    Mockito.when(mockProject.services()).thenReturn(mockServices);
 
     previewUrlCommandProvisioner.provision(env, mockProject);
 

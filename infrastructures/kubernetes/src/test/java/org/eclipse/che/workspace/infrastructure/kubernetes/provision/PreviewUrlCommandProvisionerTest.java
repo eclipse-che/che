@@ -71,6 +71,7 @@ public class PreviewUrlCommandProvisionerTest {
   public void shouldDoNothingWhenNoCommandsDefined() throws InfrastructureException {
     Mockito.when(mockEnvironment.getCommands()).thenReturn(Collections.emptyList());
     Mockito.when(mockNamespace.ingresses()).thenReturn(mockIngresses);
+    Mockito.when(mockNamespace.services()).thenReturn(mockServices);
 
     previewUrlCommandProvisioner.provision(mockEnvironment, mockNamespace);
   }
@@ -83,6 +84,7 @@ public class PreviewUrlCommandProvisionerTest {
         KubernetesEnvironment.builder().setCommands(new ArrayList<>(commands)).build();
 
     Mockito.when(mockNamespace.ingresses()).thenReturn(mockIngresses);
+    Mockito.when(mockNamespace.services()).thenReturn(mockServices);
 
     previewUrlCommandProvisioner.provision(env, mockNamespace);
 

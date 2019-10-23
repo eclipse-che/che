@@ -68,14 +68,14 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
     }
 
     List<?> ingresses = loadIngresses(namespace);
+    List<Service> services = loadServices(namespace);
     for (CommandImpl command :
         env.getCommands()
             .stream()
             .filter(c -> c.getPreviewUrl() != null)
             .collect(Collectors.toList())) {
       Optional<Service> foundService =
-          Services.findServiceWithPort(
-              namespace.services().get(), command.getPreviewUrl().getPort());
+          Services.findServiceWithPort(services, command.getPreviewUrl().getPort());
       if (!foundService.isPresent()) {
         String message =
             String.format(
@@ -105,6 +105,10 @@ public class PreviewUrlCommandProvisioner<E extends KubernetesEnvironment> {
                 String.format(NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL_MESSAGE, message)));
       }
     }
+  }
+
+  private List<Service> loadServices(KubernetesNamespace namespace) throws InfrastructureException {
+    return namespace.services().get();
   }
 
   protected List<?> loadIngresses(KubernetesNamespace namespace) throws InfrastructureException {
