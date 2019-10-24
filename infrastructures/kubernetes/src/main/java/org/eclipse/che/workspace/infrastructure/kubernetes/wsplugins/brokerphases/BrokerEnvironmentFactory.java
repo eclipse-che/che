@@ -153,6 +153,11 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     return NameGenerator.generate(suffix, 6);
   }
 
+  /**
+   * Generate a container name from an image reference. Since full image references can
+   * be over 63 characters, we need to strip registry and organization from the image
+   * reference to limit name length.
+   */
   @VisibleForTesting
   protected String generateContainerNameFromImageRef(String image) {
     return image.toLowerCase().replaceAll("[^/]*/", "").replaceAll("[^\\d\\w-]", "-");
@@ -163,8 +168,6 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       List<EnvVar> envVars,
       String image,
       @Nullable String brokerVolumeName) {
-    // There's a chance the full image reference may be over the name limit of 63 chars
-    // so we need to remove registry hostname
     String containerName = generateContainerNameFromImageRef(image);
     final ContainerBuilder cb =
         new ContainerBuilder()
