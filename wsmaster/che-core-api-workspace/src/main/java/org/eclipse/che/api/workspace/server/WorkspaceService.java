@@ -22,6 +22,7 @@ import static org.eclipse.che.api.workspace.server.WorkspaceKeyValidator.validat
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
@@ -226,13 +227,18 @@ public class WorkspaceService extends Service {
           @QueryParam("start-after-create")
           @DefaultValue("false")
           Boolean startAfterCreate,
-      @ApiParam("Namespace where workspace should be created") @QueryParam("namespace")
+      @ApiParam("Che namespace where workspace should be created") @QueryParam("namespace")
           String namespace,
+      @ApiParam("K8s namespace where workspace should be run") @QueryParam("metadata.namespace")
+          String k8sNamespace,
       @HeaderParam(CONTENT_TYPE) MediaType contentType)
       throws ConflictException, BadRequestException, ForbiddenException, NotFoundException,
           ServerException {
     requiredNotNull(devfile, "Devfile");
     final Map<String, String> attributes = parseAttrs(attrsList);
+    if (!isNullOrEmpty(k8sNamespace)) {
+      attributes.put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, k8sNamespace);
+    }
     if (namespace == null) {
       namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
     }
@@ -813,7 +819,7 @@ public class WorkspaceService extends Service {
   private static Map<String, String> parseAttrs(List<String> attributes)
       throws BadRequestException, ForbiddenException {
     if (attributes == null) {
-      return emptyMap();
+      return new HashMap<>();
     }
     final Map<String, String> res = Maps.newHashMapWithExpectedSize(attributes.size());
     for (String attribute : attributes) {

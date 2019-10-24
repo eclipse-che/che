@@ -25,6 +25,7 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.workspace.server.NoEnvironmentFactory;
+import org.eclipse.che.api.workspace.server.WorkspaceAttributeValidator;
 import org.eclipse.che.api.workspace.server.devfile.DevfileBindings;
 import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator.NoopComponentIntegrityValidator;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -37,6 +38,7 @@ import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.InconsistentRuntimesDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientTermination;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesWorkspaceAttributesValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.KubernetesNamespaceService;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
@@ -86,6 +88,10 @@ import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases
 public class OpenShiftInfraModule extends AbstractModule {
   @Override
   protected void configure() {
+    Multibinder.newSetBinder(binder(), WorkspaceAttributeValidator.class)
+        .addBinding()
+        .to(KubernetesWorkspaceAttributesValidator.class);
+
     bind(KubernetesNamespaceService.class);
 
     MapBinder<String, InternalEnvironmentFactory> factories =

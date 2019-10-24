@@ -20,7 +20,9 @@ import static org.eclipse.che.api.workspace.server.SidecarToolingWorkspaceUtil.i
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
@@ -50,6 +52,13 @@ public class WorkspaceValidator {
   private static final Pattern VOLUME_NAME =
       Pattern.compile("[a-zA-Z][a-zA-Z0-9-_.]{0,18}[a-zA-Z0-9]");
   private static final Pattern VOLUME_PATH = Pattern.compile("/.+");
+
+  private Set<WorkspaceAttributeValidator> attributeValidators;
+
+  @Inject
+  public WorkspaceValidator(Set<WorkspaceAttributeValidator> attributeValidators) {
+    this.attributeValidators = attributeValidators;
+  }
 
   /**
    * Checks whether given workspace configuration object is in application valid state, so it
@@ -109,6 +118,10 @@ public class WorkspaceValidator {
               && !attributeName.toLowerCase().startsWith("codenvy"),
           "Attribute name '%s' is not valid",
           attributeName);
+    }
+
+    for (WorkspaceAttributeValidator attributeValidator : attributeValidators) {
+      attributeValidator.validate(attributes);
     }
   }
 
