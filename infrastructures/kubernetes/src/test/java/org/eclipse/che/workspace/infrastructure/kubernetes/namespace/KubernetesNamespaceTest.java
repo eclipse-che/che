@@ -18,6 +18,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -98,11 +99,16 @@ public class KubernetesNamespaceTest {
   @Test
   public void testKubernetesNamespacePreparingWhenNamespaceExists() throws Exception {
     // given
+    MetadataNested namespaceMeta = prepareCreateNamespaceRequest();
+
     prepareNamespace(NAMESPACE);
     KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
 
     // when
     namespace.prepare();
+
+    // then
+    verify(namespaceMeta, never()).withName(NAMESPACE);
   }
 
   @Test
@@ -214,6 +220,49 @@ public class KubernetesNamespaceTest {
 
     verify(serviceAccountResource).get();
     verify(serviceAccountResource).watch(any());
+  }
+
+  @Test
+  public void testDeletesExistingNamespace() throws Exception {
+    // given
+    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
+    Resource resource = prepareNamespaceResource(NAMESPACE);
+
+    // when
+    namespace.delete();
+
+    // then
+    verify(resource).delete();
+  }
+
+  @Test
+  public void testDoesntFailIfDeletedNamespaceDoesntExist() throws Exception {
+    // given
+    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
+    Resource resource = prepareNamespaceResource(NAMESPACE);
+    when(resource.delete()).thenThrow(new KubernetesClientException("err", 404, null));
+
+    // when
+    namespace.delete();
+
+    // then
+    verify(resource).delete();
+    // and no exception is thrown
+  }
+
+  @Test
+  public void testDoesntFailIfDeletedNamespaceIsBeingDeleted() throws Exception {
+    // given
+    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
+    Resource resource = prepareNamespaceResource(NAMESPACE);
+    when(resource.delete()).thenThrow(new KubernetesClientException("err", 409, null));
+
+    // when
+    namespace.delete();
+
+    // then
+    verify(resource).delete();
+    // and no exception is thrown
   }
 
   private MetadataNested prepareCreateNamespaceRequest() {

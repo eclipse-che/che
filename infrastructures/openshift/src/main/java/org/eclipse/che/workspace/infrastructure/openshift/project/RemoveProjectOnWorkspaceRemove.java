@@ -11,20 +11,12 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-
-import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import io.fabric8.kubernetes.client.KubernetesClientException;
-import javax.inject.Named;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
-import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,45 +30,30 @@ public class RemoveProjectOnWorkspaceRemove implements EventSubscriber<Workspace
 
   private static final Logger LOG = LoggerFactory.getLogger(RemoveProjectOnWorkspaceRemove.class);
 
-  private final OpenShiftClientFactory clientFactory;
-  private final String projectName;
+  private final OpenShiftProjectFactory projectFactory;
 
   @Inject
-  public RemoveProjectOnWorkspaceRemove(
-      @Nullable @Named("che.infra.kubernetes.namespace") String projectName,
-      OpenShiftClientFactory clientFactory) {
-    this.projectName = projectName;
-    this.clientFactory = clientFactory;
+  public RemoveProjectOnWorkspaceRemove(OpenShiftProjectFactory projectFactory) {
+    this.projectFactory = projectFactory;
   }
 
   @Inject
   public void subscribe(EventService eventService) {
-    if (isNullOrEmpty(projectName)) {
-      eventService.subscribe(this);
-    }
+    eventService.subscribe(this);
   }
 
   @Override
   public void onEvent(WorkspaceRemovedEvent event) {
+    String workspaceId = event.getWorkspace().getId();
     try {
-      doRemoveProject(event.getWorkspace().getId());
+      if (projectFactory.isManagingNamespace(workspaceId)) {
+        projectFactory.delete(workspaceId);
+      }
     } catch (InfrastructureException e) {
       LOG.warn(
           "Fail to remove OpenShift project for workspace with id {}. Cause: {}",
-          event.getWorkspace().getId(),
+          workspaceId,
           e.getMessage());
-    }
-  }
-
-  @VisibleForTesting
-  void doRemoveProject(String projectName) throws InfrastructureException {
-    try {
-      clientFactory.createOC(projectName).projects().withName(projectName).delete();
-    } catch (KubernetesClientException e) {
-      if (!(e.getCode() == 403)) {
-        throw new KubernetesInfrastructureException(e);
-      }
-      // project doesn't exist
     }
   }
 }
