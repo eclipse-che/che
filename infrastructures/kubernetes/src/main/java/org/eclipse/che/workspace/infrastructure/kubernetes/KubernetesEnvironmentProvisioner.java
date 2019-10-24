@@ -35,6 +35,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVars
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +74,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final CertificateProvisioner certificateProvisioner;
     private final VcsSshKeysProvisioner vcsSshKeysProvisioner;
     private final GitUserProfileProvisioner gitUserProfileProvisioner;
+    private final PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer;
 
     @Inject
     public KubernetesEnvironmentProvisionerImpl(
@@ -92,7 +94,8 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         ServiceAccountProvisioner serviceAccountProvisioner,
         CertificateProvisioner certificateProvisioner,
         VcsSshKeysProvisioner vcsSshKeysProvisioner,
-        GitUserProfileProvisioner gitUserProfileProvisioner) {
+        GitUserProfileProvisioner gitUserProfileProvisioner,
+        PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer) {
       this.pvcEnabled = pvcEnabled;
       this.volumesStrategy = volumesStrategy;
       this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -110,6 +113,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.certificateProvisioner = certificateProvisioner;
       this.vcsSshKeysProvisioner = vcsSshKeysProvisioner;
       this.gitUserProfileProvisioner = gitUserProfileProvisioner;
+      this.previewUrlExposer = previewUrlExposer;
     }
 
     @Traced
@@ -129,6 +133,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       // 2 stage - converting Che model env to Kubernetes env
       LOG.debug("Provisioning servers & env vars converters for workspace '{}'", workspaceId);
       serversConverter.provision(k8sEnv, identity);
+      previewUrlExposer.expose(k8sEnv);
       envVarsConverter.provision(k8sEnv, identity);
       if (pvcEnabled) {
         volumesStrategy.provision(k8sEnv, identity);
