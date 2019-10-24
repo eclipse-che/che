@@ -34,8 +34,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -73,8 +71,6 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   private static final String CONF_FOLDER = "/broker-config";
   private static final String PLUGINS_VOLUME_NAME = "plugins";
   private static final String BROKERS_POD_NAME = "che-plugin-broker";
-  private static final Pattern IMAGE_PATTERN =
-      Pattern.compile("(?<registry>[^/]+/)?(?<org>[^/]+)/(?<image>[^/]+)");
 
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final String cheWebsocketEndpoint;
@@ -157,6 +153,11 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     return NameGenerator.generate(suffix, 6);
   }
 
+  @VisibleForTesting
+  protected String generateContainerNameFromImageRef(String image) {
+    return image.toLowerCase().replaceAll("[^/]*/", "").replaceAll("[^\\d\\w-]", "-");
+  }
+
   private Container newContainer(
       RuntimeIdentity runtimeId,
       List<EnvVar> envVars,
@@ -164,14 +165,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       @Nullable String brokerVolumeName) {
     // There's a chance the full image reference may be over the name limit of 63 chars
     // so we need to remove registry hostname
-    Matcher matcher = IMAGE_PATTERN.matcher(image);
-    String containerName;
-    if (matcher.matches()) {
-      containerName = String.format("%s/%s", matcher.group("org"), matcher.group("image"));
-    } else {
-      containerName = image;
-    }
-    containerName = containerName.toLowerCase().replaceAll("[^\\d\\w-]", "-");
+    String containerName = generateContainerNameFromImageRef(image);
     final ContainerBuilder cb =
         new ContainerBuilder()
             .withName(containerName)
