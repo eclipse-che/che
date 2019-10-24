@@ -7,30 +7,28 @@
                        class="create-workspace-header-button"></che-button-dropdown>
 </che-toolbar>
 
-<md-progress-linear md-mode="indeterminate"
-                    class="create-workspace-progress"
-                    ng-hide="createWorkspaceController.hideLoader"></md-progress-linear>
 <md-content md-scroll-y flex
             md-theme="default"
             class="create-workspace-content">
-  <div ng-class="{'create-workspace-content-hidden': !createWorkspaceController.hideLoader}">
-    <md-tabs md-dynamic-height md-stretch-tabs="auto"
-             md-selected="createWorkspaceController.selectedTabIndex"
+  <div>
+    <md-tabs md-dynamic-height
+             md-stretch-tabs="auto"
+             md-selected="createWorkspaceController.selectedTab"
              class="create-workspace-content"
              md-no-ink-bar>
 
       <!-- READY-TO-GO STACK -->
-      <md-tab>
+      <md-tab md-on-select="createWorkspaceController.onSelectTab(createWorkspaceController.tabs.READY_TO_GO)">
         <md-tab-label>
           <span class="che-tab-label-title">READY-TO-GO STACK</span>
         </md-tab-label>
         <md-tab-body>
-          <ready-to-go-stacks on-change="onChange()"></ready-to-go-stacks>
+          <ready-to-go-stacks on-change="createWorkspaceController.onDevfileChange(createWorkspaceController.tabs.READY_TO_GO, devfile, attrs)"></ready-to-go-stacks>
         </md-tab-body>
       </md-tab>
 
       <!-- IMPORT CUSTOM STACK -->
-      <md-tab md-on-select="createWorkspaceController.isImportDevfileActive = true"
+      <md-tab md-on-select="createWorkspaceController.isImportDevfileActive = true; createWorkspaceController.onSelectTab(createWorkspaceController.tabs.IMPORT_DEVFILE)"
               md-on-deselect="createWorkspaceController.isImportDevfileActive = false">
         <md-tab-label>
           <span class="che-tab-label-title">IMPORT DEVFILE</span>

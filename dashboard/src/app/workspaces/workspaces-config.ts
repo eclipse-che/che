@@ -75,6 +75,8 @@ import {DevfileSelectorController} from './create-workspace/ready-to-go-stacks/d
 import {DevfileSourceSelector} from './create-workspace/import-custom-stack/devfile-source-selector/devfile-source-selector.directive';
 import {DevfileByUrl} from './create-workspace/import-custom-stack/devfile-by-url/devfile-by-url.directive';
 import {DevfileByUrlController} from './create-workspace/import-custom-stack/devfile-by-url/devfile-by-url.controller';
+import { ReadyToGoStacksController } from './create-workspace/ready-to-go-stacks/ready-to-go-stacks.controller';
+import { ReadyToGoStacks } from './create-workspace/ready-to-go-stacks/ready-to-go-stacks.directive';
 
 
 /**
@@ -154,6 +156,8 @@ export class WorkspacesConfig {
     register.directive('devfileSourceSelector', DevfileSourceSelector);
     register.directive('devfileByUrl', DevfileByUrl);
     register.controller('DevfileByUrlController', DevfileByUrlController);
+    register.controller('ReadyToGoStacksController', ReadyToGoStacksController);
+    register.directive('readyToGoStacks', ReadyToGoStacks);
 
     // config routes
     register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
@@ -168,6 +172,7 @@ export class WorkspacesConfig {
           templateUrl: 'app/workspaces/create-workspace/create-workspace.html',
           controller: 'CreateWorkspaceController',
           controllerAs: 'createWorkspaceController',
+          reloadOnSearch: false,
           resolve: {
             initData: ['workspaceConfigService', (workspaceConfigService: WorkspaceConfigService) => {
               return workspaceConfigService.resolveWorkspaceRoute();

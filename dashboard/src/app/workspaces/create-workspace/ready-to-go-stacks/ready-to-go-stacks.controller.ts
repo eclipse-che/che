@@ -11,18 +11,17 @@
  */
 'use strict';
 
-import { CheEnvironmentRegistry } from '../../../../components/api/environment/che-environment-registry.factory';
-import { CheNotification } from '../../../../components/notification/che-notification.factory';
 import { CreateWorkspaceSvc } from '../create-workspace.service';
-import { DevfileRegistry } from '../../../../components/api/devfile-registry.factory';
 import { NamespaceSelectorSvc } from './namespace-selector/namespace-selector.service';
 import { RandomSvc } from '../../../../components/utils/random.service';
 import { IReadyToGoStacksScopeBindings } from './ready-to-go-stacks.directive';
 
+const WORKSPACE_NAME_FORM = 'workspaceName';
+
 /**
  * TODO
  */
-export class ReadyStacksController implements IReadyToGoStacksScopeBindings {
+export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings {
 
   static $inject = [
     '$timeout',
@@ -34,7 +33,7 @@ export class ReadyStacksController implements IReadyToGoStacksScopeBindings {
   /**
    * Directive scope bindings.
    */
-  onChange: Function;
+  onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs: { [key: string]: string } }) => void;
 
   /**
    * Injected dependencies.
@@ -96,7 +95,7 @@ export class ReadyStacksController implements IReadyToGoStacksScopeBindings {
   $onInit(): void {
     this.namespaceId = this.namespaceSelectorSvc.getNamespaceId();
     this.buildListOfUsedNames().then(() => {
-      this.workspaceName = this.randomSvc.getRandString({prefix: 'wksp-', list: this.usedNamesList});
+      this.workspaceName = this.randomSvc.getRandString({ prefix: 'wksp-', list: this.usedNamesList });
       this.reValidateName();
     });
   }
@@ -104,11 +103,11 @@ export class ReadyStacksController implements IReadyToGoStacksScopeBindings {
   /**
    * Stores forms in list.
    *
-   * @param inputName name attribute of an input tag.
-   * @param form form controller
+   * @param name a name to register form controller.
+   * @param form a form controller.
    */
-  registerForm(inputName: string, form: ng.IFormController) {
-    this.forms.set(inputName, form);
+  registerForm(name: string, form: ng.IFormController) {
+    this.forms.set(name, form);
   }
 
   /**
@@ -153,6 +152,10 @@ export class ReadyStacksController implements IReadyToGoStacksScopeBindings {
       this.hideLoader = true;
     }, 10);
     this.selectedDevfile = devfile;
+    this.onChange({
+      devfile,
+      attrs: { stackName: this.stackName }
+    });
   }
 
   /**

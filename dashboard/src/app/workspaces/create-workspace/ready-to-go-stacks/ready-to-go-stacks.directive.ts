@@ -12,10 +12,10 @@
 'use strict';
 
 export interface IReadyToGoStacksScopeBindings {
-  onChange: Function;
+  onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs?: { [key: string]: string} }) => void;
 }
 
-export class ReadyStacksDirective implements ng.IDirective {
+export class ReadyToGoStacks implements ng.IDirective {
 
   restrict: string = 'E';
   templateUrl: string = 'app/workspaces/create-workspace/ready-to-go-stacks/ready-to-go-stacks.html';
@@ -23,14 +23,12 @@ export class ReadyStacksDirective implements ng.IDirective {
   controllerAs: string = 'readyToGoStacksController';
   bindToController: boolean = true;
 
-  // TODO specify scope properties
   scope: {
     onChange: string;
   };
 
   constructor() {
     this.scope = {
-      // TODO
       onChange: '&onChange'
     };
   }

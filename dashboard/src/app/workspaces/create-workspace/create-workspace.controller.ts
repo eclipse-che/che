@@ -11,17 +11,32 @@
  */
 'use strict';
 
-import {CheEnvironmentRegistry} from '../../../components/api/environment/che-environment-registry.factory';
-import {EnvironmentManager} from '../../../components/api/environment/environment-manager';
-import {CreateWorkspaceSvc} from './create-workspace.service';
-import {NamespaceSelectorSvc} from './ready-to-go-stacks/namespace-selector/namespace-selector.service';
-import {RandomSvc} from '../../../components/utils/random.service';
-import {CheNotification} from '../../../components/notification/che-notification.factory';
+import { CheEnvironmentRegistry } from '../../../components/api/environment/che-environment-registry.factory';
+import { CreateWorkspaceSvc } from './create-workspace.service';
+import { NamespaceSelectorSvc } from './ready-to-go-stacks/namespace-selector/namespace-selector.service';
+import { RandomSvc } from '../../../components/utils/random.service';
+import { CheNotification } from '../../../components/notification/che-notification.factory';
 import {
   ICheButtonDropdownMainAction,
   ICheButtonDropdownOtherAction
 } from '../../../components/widget/button-dropdown/che-button-dropdown.directive';
-import {DevfileRegistry} from '../../../components/api/devfile-registry.factory';
+import { DevfileRegistry } from '../../../components/api/devfile-registry.factory';
+
+/**
+ * View tabs.
+ */
+enum TABS {
+  READY_TO_GO,
+  IMPORT_DEVFILE
+}
+
+/**
+ *
+ */
+type DevfileChangeEventData = {
+  devfile: che.IWorkspaceDevfile,
+  attrs?: { [key: string]: string }
+};
 
 /**
  * This class is handling the controller for workspace creation.
@@ -30,92 +45,72 @@ import {DevfileRegistry} from '../../../components/api/devfile-registry.factory'
  */
 export class CreateWorkspaceController {
 
-  static $inject = ['$mdDialog', '$timeout', 'cheEnvironmentRegistry', 'createWorkspaceSvc', 'namespaceSelectorSvc',
-   'randomSvc', '$log', 'cheNotification', 'devfileRegistry'];
+  static $inject = [
+    '$location',
+    '$scope',
+    'createWorkspaceSvc',
+  ];
 
   /**
-   * Dropdown button config.
+   * Selected tab index.
    */
-  headerCreateButtonConfig: {
-    mainAction: ICheButtonDropdownMainAction,
-    otherActions: Array<ICheButtonDropdownOtherAction>
-  };
-  private $mdDialog: ng.material.IDialogService;
+  selectedTab: number = 0;
   /**
-   * Timeout service.
+   * View tabs.
    */
-  private $timeout: ng.ITimeoutService;
+  tabs: typeof TABS;
+
   /**
-   * The registry of environment managers.
+   * Location service.
    */
-  private cheEnvironmentRegistry: CheEnvironmentRegistry;
+  private $location: ng.ILocationService;
+  /**
+   * Directive scope service.
+   */
+  private $scope: ng.IScope;
   /**
    * Workspace creation service.
    */
   private createWorkspaceSvc: CreateWorkspaceSvc;
   /**
-   * Namespace selector service.
+   * Dropdown button config.
    */
-  private namespaceSelectorSvc: NamespaceSelectorSvc;
-  /**
-   * Generator for random strings.
-   */
-  private randomSvc: RandomSvc;
-  /**
-   * Logging service.
-   */
-  private $log: ng.ILogService;
-  /**
-   * Notification factory.
-   */
-  private cheNotification: CheNotification;
-  /**
-   * Devfile registry.
-   */
-  private devfileRegistry: DevfileRegistry;
-  /**
-   * The environment manager.
-   */
-  private environmentManager: EnvironmentManager;
-
-  /**
-   * Selected tab index.
-   */
-  private selectedTabIndex: number = 0;
-  private isImportDevfileActive: boolean = false;
-  /**
-   * The imported devfile.
-   */
-  private importedDevfile: che.IWorkspaceDevfile = {
-    apiVersion: '1.0.0',
-    components: [],
-    metadata: {
-      name: 'custom-wksp'
-    }
+  private headerCreateButtonConfig: {
+    mainAction: ICheButtonDropdownMainAction,
+    otherActions: Array<ICheButtonDropdownOtherAction>
   };
-  private selectedSource: string;
+  /**
+   * Devfiles by view.
+   */
+  private devfiles: Map<TABS, DevfileChangeEventData> = new Map();
 
   /**
    * Default constructor that is using resource injection
    */
-  constructor($mdDialog: ng.material.IDialogService,
-              $timeout: ng.ITimeoutService,
-              cheEnvironmentRegistry: CheEnvironmentRegistry,
-              createWorkspaceSvc: CreateWorkspaceSvc,
-              namespaceSelectorSvc: NamespaceSelectorSvc,
-              randomSvc: RandomSvc,
-              $log: ng.ILogService,
-              cheNotification: CheNotification,
-              devfileRegistry: DevfileRegistry) {
-    this.$mdDialog = $mdDialog;
-    this.$timeout = $timeout;
-    this.cheEnvironmentRegistry = cheEnvironmentRegistry;
+  constructor(
+    $location: ng.ILocationService,
+    $scope: ng.IScope,
+    createWorkspaceSvc: CreateWorkspaceSvc,
+  ) {
+    this.$location = $location;
+    this.$scope = $scope;
     this.createWorkspaceSvc = createWorkspaceSvc;
-    this.namespaceSelectorSvc = namespaceSelectorSvc;
-    this.randomSvc = randomSvc;
-    this.$log = $log;
-    this.cheNotification = cheNotification;
-    this.devfileRegistry = devfileRegistry;
+
+    this.tabs = TABS;
+    this.updateSelectedTab(this.$location.search().tab);
+    const locationWatcherDeregistration = $scope.$watch(() => {
+      return $location.search().tab;
+    }, (newTab: string, oldTab: string) => {
+      if (newTab === oldTab) {
+        return;
+      }
+      if (angular.isDefined(newTab)) {
+        this.updateSelectedTab(newTab);
+      }
+    });
+    $scope.$on('$destroy', () => {
+      locationWatcherDeregistration();
+    });
 
     // header toolbar
     // dropdown button config
@@ -147,8 +142,30 @@ export class CreateWorkspaceController {
     // place all initialization code in constructor
   }
 
-  updateImportedDevfile(devfile: che.IWorkspaceDevfile): void {
-    this.importedDevfile = devfile;
+  /**
+   * Changes search part of URL.
+   * @param index a tab index.
+   */
+  onSelectTab(index?: number): void {
+    let param: { tab?: string } = {};
+    if (angular.isDefined(index)) {
+      param.tab = TABS[index];
+    }
+    if (angular.isUndefined(this.$location.search().tab)) {
+      this.$location.replace().search(param);
+    } else {
+      this.$location.search(param);
+    }
+  }
+
+  /**
+   * Update selected tab index by search part of URL.
+   *
+   * @param tab a tab name
+   */
+  updateSelectedTab(tab: string): void {
+    const index = parseInt(TABS[tab], 10);
+    this.selectedTab = isNaN(index) ? 0 : index;
   }
 
   /**
@@ -163,22 +180,10 @@ export class CreateWorkspaceController {
 
   /**
    * Creates workspace.
-   *
-   * @returns {angular.IPromise<che.IWorkspace>}
    */
-  // TODO
   createWorkspace(): ng.IPromise<che.IWorkspace> {
-    return {} as any;
-    // let devfileSource: che.IWorkspaceDevfile;
-    // if (this.isImportDevfileActive) {
-    //   devfileSource = this.importedDevfile;
-    //   this.stackName = `custom-${devfileSource.metadata.name}`
-    // } else {
-    //   // update workspace name
-    //   devfileSource = angular.copy(this.selectedDevfile);
-    //   devfileSource.metadata.name = this.workspaceName;
-    // }
-    // return this.createWorkspaceSvc.createWorkspaceFromDevfile(devfileSource, {stackName: this.stackName});
+    const { devfile, attrs } = this.devfiles.get(this.selectedTab);
+    return this.createWorkspaceSvc.createWorkspaceFromDevfile(devfile, attrs);
   }
 
 
@@ -190,4 +195,9 @@ export class CreateWorkspaceController {
       this.createWorkspaceSvc.redirectToIDE(workspace);
     });
   }
+
+  onDevfileChange(tab: number, devfile: che.IWorkspaceDevfile, attrs: { [key: string]: string }): void {
+    this.devfiles.set(tab, { devfile, attrs });
+  }
+
 }
