@@ -95,6 +95,10 @@ export class CheBranding {
     this.updateData();
     this.updateVersion();
 
+    this.initialize();
+  }
+
+  initialize(): void {
     this.$rootScope.branding = {
       title: this.getProductName(),
       name: this.getName(),
@@ -130,6 +134,7 @@ export class CheBranding {
   updateData(): void {
     this.$http.get(ASSET_PREFIX + 'product.json').then(res => res.data).then((branding: IBranding) => {
       this.branding = branding;
+      this.initialize();
       this.callbacks.forEach(callback => {
         if (angular.isFunction(callback)) {
           callback(this.$rootScope.branding);
@@ -145,7 +150,7 @@ export class CheBranding {
    */
   registerCallback(callbackId: string, callback: Function): void {
     this.callbacks.set(callbackId, callback);
-    if (this.$rootScope.branding) {
+    if (Object.keys(this.branding).length !== 0) {
       callback(this.$rootScope.branding);
     }
   }
