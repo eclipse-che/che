@@ -51,11 +51,7 @@ public class PreviewUrlExposer<T extends KubernetesEnvironment> {
     this.externalServerExposer = externalServerExposer;
   }
 
-  public void expose(T k8sEnv) throws InternalInfrastructureException {
-    createEndpointsForPreviewUrls(k8sEnv);
-  }
-
-  private void createEndpointsForPreviewUrls(T env) throws InternalInfrastructureException {
+  public void expose(T env) throws InternalInfrastructureException {
     List<CommandImpl> previewUrlCommands =
         env.getCommands()
             .stream()
