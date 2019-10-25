@@ -154,9 +154,9 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   }
 
   /**
-   * Generate a container name from an image reference. Since full image references can
-   * be over 63 characters, we need to strip registry and organization from the image
-   * reference to limit name length.
+   * Generate a container name from an image reference. Since full image references can be over 63
+   * characters, we need to strip registry and organization from the image reference to limit name
+   * length.
    */
   @VisibleForTesting
   protected String generateContainerNameFromImageRef(String image) {
