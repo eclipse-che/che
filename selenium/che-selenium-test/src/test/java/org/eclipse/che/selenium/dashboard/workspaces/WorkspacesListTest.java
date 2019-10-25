@@ -46,11 +46,9 @@ import org.testng.annotations.Test;
 public class WorkspacesListTest {
   private static final String EXPECTED_JAVA_PROJECT_NAME = "console-java-simple";
   private static final String NEWEST_CREATED_WORKSPACE_NAME = "just-created-workspace";
-  private static final int EXPECTED_SORTED_WORKSPACES_COUNT = 1;
-
-  private static final String WORKSPACE_NAME = generate("test-workspace", 4); // blank
-  private static final String WORKSPACE_NAME2 = generate("test-workspace", 4); // java
-  private static final String WORKSPACE_NAME3 = generate("test-workspace", 4); // to delete
+  private static final String WORKSPACE_NAME = generate("test-workspace", 4);
+  private static final String WORKSPACE_NAME2 = generate("test-workspace", 4);
+  private static final int EXPECTED_SEARCHED_WORKSPACES_COUNT = 1;
 
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceProjects workspaceProjects;
@@ -87,13 +85,13 @@ public class WorkspacesListTest {
   public void tearDown() throws Exception {
     workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
     workspaceServiceClient.delete(WORKSPACE_NAME2, defaultTestUser.getName());
-    workspaceServiceClient.delete(WORKSPACE_NAME3, defaultTestUser.getName());
+    workspaceServiceClient.delete(NEWEST_CREATED_WORKSPACE_NAME, defaultTestUser.getName());
   }
 
   @Test
   public void shouldDisplayElements() throws Exception {
     workspaces.waitPageLoading();
-    dashboard.waitWorkspacesCountInWorkspacesItem(getWorkspacesCount());
+    dashboard.waitWorkspacesCountInWorkspacesItem(testWorkspaceServiceClient.getWorkspacesCount());
 
     workspaces.waitWorkspaceIsPresent(WORKSPACE_NAME);
     Assert.assertEquals(workspaces.getWorkspaceProjectsValue(WORKSPACE_NAME), "1");
@@ -178,14 +176,14 @@ public class WorkspacesListTest {
   @Test(groups = UNDER_REPAIR)
   public void checkSearchField() throws Exception {
     int nameLength = WORKSPACE_NAME.length();
-    int existingWorkspacesCount = getWorkspacesCount();
+    int existingWorkspacesCount = testWorkspaceServiceClient.getWorkspacesCount();
     String sequenceForSearch = WORKSPACE_NAME.substring(nameLength - 5, nameLength);
 
     workspaces.waitVisibleWorkspacesCount(existingWorkspacesCount);
     workspaces.typeToSearchInput(sequenceForSearch);
 
     try {
-      workspaces.waitVisibleWorkspacesCount(EXPECTED_SORTED_WORKSPACES_COUNT);
+      workspaces.waitVisibleWorkspacesCount(EXPECTED_SEARCHED_WORKSPACES_COUNT);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known permanent failure https://github.com/eclipse/che/issues/13950");
@@ -196,7 +194,7 @@ public class WorkspacesListTest {
 
     // check displaying list size
     workspaces.typeToSearchInput("");
-    workspaces.waitVisibleWorkspacesCount(getWorkspacesCount());
+    workspaces.waitVisibleWorkspacesCount(testWorkspaceServiceClient.getWorkspacesCount());
 
     workspaces.waitWorkspaceIsPresent(WORKSPACE_NAME);
     Assert.assertEquals(workspaces.getWorkspaceProjectsValue(WORKSPACE_NAME), "1");
@@ -262,7 +260,7 @@ public class WorkspacesListTest {
     dashboard.selectWorkspacesItemOnDashboard();
 
     workspaces.waitPageLoading();
-    workspaces.waitVisibleWorkspacesCount(getWorkspacesCount());
+    workspaces.waitVisibleWorkspacesCount(testWorkspaceServiceClient.getWorkspacesCount());
   }
 
   @Test(priority = 1)
@@ -274,9 +272,5 @@ public class WorkspacesListTest {
     workspaces.clickOnDeleteButtonInDialogWindow();
 
     workspaces.waitWorkspaceIsNotPresent(NEWEST_CREATED_WORKSPACE_NAME);
-  }
-
-  private int getWorkspacesCount() throws Exception {
-    return testWorkspaceServiceClient.getWorkspacesCount();
   }
 }
