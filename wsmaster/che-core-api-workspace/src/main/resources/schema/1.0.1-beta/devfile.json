@@ -33,7 +33,7 @@
   "additionalProperties": false,
   "properties": {
     "apiVersion": {
-      "const": "1.0.0",
+      "const": "1.0.1-beta",
       "title": "Devfile API Version"
     },
     "metadata": {
@@ -141,17 +141,6 @@
                 "description": "The id of the commit to reset the checked out branch to. Note that this is equivalent to 'startPoint' and provided for convenience.",
                 "examples": [
                   "349d3ad"
-                ]
-              },
-              "sparseCheckoutDir": {
-                "type": "string",
-                "description": "Part of project to populate in the working directory.",
-                "examples": [
-                  "/core/",
-                  "core/",
-                  "core",
-                  "/wsmaster/che-core-api-workspace/",
-                  "/d*"
                 ]
               }
             }
@@ -725,6 +714,20 @@
                     "{\"version\": \"2.0.0\",\n    \"tasks\": [\n        {\n            \"type\": \"typescript\",\n            \"tsconfig\": \"tsconfig.json\",\n            \"problemMatcher\": [\n                \"$tsc\"\n            ],\n            \"group\": {\n                \"kind\": \"build\",\n                \"isDefault\": true\n            }\n        }\n    ]}"
                   ]
                 }
+              }
+            }
+          },
+          "previewUrl": {
+            "type": "object",
+            "required": ["port"],
+            "properties": {
+              "port": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 65535
+              },
+              "path":  {
+                "type": "string"
               }
             }
           }
