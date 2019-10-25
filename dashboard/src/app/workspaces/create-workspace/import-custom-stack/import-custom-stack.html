@@ -1,0 +1,22 @@
+<div class="import-custom-stack">
+  <!-- Devfile source selector  -->
+  <che-label-container che-label-name="Source"
+                       che-label-description="Define a source for your devfile.">
+    <devfile-source-selector
+      selected-source="importStackController.selectedSource"
+      on-change="importStackController.onSourceChange(source)"></devfile-source-selector>
+  </che-label-container>
+  <!-- URL -->
+  <che-label-container ng-if="importStackController.isUrlSelected()" che-label-name="URL">
+    <devfile-by-url
+      workspace-devfile="devfile"
+      workspace-devfile-on-change="importStackController.updateDevfile(devfile, attributes)"></devfile-by-url>
+  </che-label-container>
+  <!-- YAML -->
+  <che-label-container ng-if="importStackController.isYamlSelected()" che-label-name="YAML">
+    <workspace-devfile-editor
+      is-active="true"
+      workspace-devfile="importStackController.draftDevfile"
+      workspace-devfile-on-change="importStackController.updateDevfile(devfile)"></workspace-devfile-editor>
+  </che-label-container>
+</div>

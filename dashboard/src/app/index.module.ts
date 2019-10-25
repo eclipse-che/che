@@ -235,7 +235,7 @@ initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) 
 
 }]);
 
-const DEV = false;
+const DEV = true;
 
 // configs
 initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {

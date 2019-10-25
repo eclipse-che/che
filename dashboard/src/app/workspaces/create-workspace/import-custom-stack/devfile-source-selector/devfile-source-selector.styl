@@ -1,25 +1,37 @@
-.devfile-source-selector
-  width 100%
-  & > div
-      width 240px
-      margin-right 50px
-      border 1px solid $grey-input-label-color
-      float left
-      vertical-align middle
-      line-height 110px
-      display inline-block
-      position relative
-      text-align right
-      padding-right 60px
-      &:not(.selected)
-        color $grey-input-label-color
-      &.selected
-        color $default-dark-color
-        border-color $primary-color
-      i
-        position absolute
-        left 30px
-        top 30px
-        font-size 60px
-      span
-        font-size 20px
+.devfile-source-selector .source-item
+  float left
+  width 195px
+  line-height 85px
+  margin-right 50px
+  text-align center
+  display inline-block
+  vertical-align middle
+  border 1px solid $grey-input-label-color
+  color $grey-input-label-color
+  user-select none
+  &.selected
+    border-color $primary-color
+    span
+      color: $black-color
+  div
+   float left
+   width 75px
+   height 85px
+   i
+    width 100%
+    font-size 55px
+    float inherit
+    text-align end
+    line-height inherit
+    &.fa-file
+     margin-top 2px
+    &.fa-link
+     width initial
+     height initial
+     transform rotate(90deg)
+     &:before
+      position absolute
+      left 17px
+      bottom 4px
+  span
+    font-size 18px

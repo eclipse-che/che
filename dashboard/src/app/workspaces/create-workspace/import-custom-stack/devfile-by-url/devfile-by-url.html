@@ -12,16 +12,26 @@
 
 -->
 <div class="import-devfile-by-url">
-  <form name="importDevfileByUrlForm">
-    <che-input-box che-form="importDevfileByUrlForm"
-                   id="git-url-input"
-                   che-name="importDevfileByUrl"
+  <form name="devfileUrlForm">
+    <che-input-box che-form="devfileUrlForm"
+                   che-name="devfileURL"
+                   che-place-holder="Url of the devfile"
+                   aria-label="Url of the devfile"
                    che-width="auto"
                    ng-model="devfileByUrlController.location"
-                   git-url
-                   required>
-      <div ng-message="gitUrl" ng-if="devfileByUrlController.location && devfileByUrlController.location.length > 0">
-        Invalid Git URL
+                   che-on-change="devfileByUrlController.onUrlChanged($value)"
+                   required
+                   custom-validator="devfileByUrlController.validInfo.isValid === true"
+                   ng-maxlength="512"
+                   ng-pattern="/^http[s]?:\/\/[a-z0-9][a-z0-9\-\.\/]+[a-z0-9](\:[0-9]{1,6})?[\?[a-zA-Z0-9\-\.\=\&%]+]?$/i">
+      <div ng-message="pattern">
+        Invalid URL
+      </div>
+      <div ng-message="maxlength">
+        The URL has to be less than 512 characters long.
+      </div>
+      <div ng-message="customValidator">
+        ---{{devfileByUrlController.validInfo.errors[0]}}
       </div>
     </che-input-box>
   </form>

@@ -41,7 +41,7 @@ export class DevfileByUrl implements ng.IDirective {
 
     // scope values
     this.scope = {
-      location: '=cdvyGitLocation'
+      workspaceDevfileOnChange: '&'
     };
   }
 

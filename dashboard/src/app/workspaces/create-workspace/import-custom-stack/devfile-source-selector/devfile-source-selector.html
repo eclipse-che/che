@@ -1,12 +1,18 @@
 <div class="devfile-source-selector">
-    <div ng-class="{'selected': selectedSource === 'url'}"
-         ng-click="onSelectSource('url');">
+  <div ng-class="{'selected': selectedSource === url}"
+       ng-click="onSelectSource(url);"
+       class="source-item">
+    <div>
       <i class="fa fa-link"></i>
-      <span>URL </span>
     </div>
-    <div ng-class="{'selected': selectedSource === 'yaml'}"
-         ng-click="onSelectSource('yaml');">
+    <span>URL</span>
+  </div>
+  <div ng-class="{'selected': selectedSource === yaml}"
+       ng-click="onSelectSource(yaml);"
+       class="source-item">
+    <div>
       <i class="fa fa-file"></i>
-      <span>YAML</span>
     </div>
+    <span>YAML</span>
+  </div>
 </div>

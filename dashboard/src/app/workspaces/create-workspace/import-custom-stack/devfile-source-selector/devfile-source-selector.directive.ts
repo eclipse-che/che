@@ -12,9 +12,13 @@
 'use strict';
 
 interface IDevfileSourceSelectorScope extends ng.IScope {
-  onSelectSource: (source: string) => void;
   selectedSource: string;
+  onSelectSource: (source: string) => void;
+  onChange?: Function;
 }
+
+export const URL = 'url';
+export const YAML = 'yaml';
 
 /**
  * Defines a directive for displaying devfile source selector widget.
@@ -35,14 +39,20 @@ export class DevfileSourceSelector implements ng.IDirective {
    */
   constructor() {
     this.scope = {
-      selectedSource: '='
+      selectedSource: '=',
+      onChange: '&?'
     };
   }
 
   link($scope: IDevfileSourceSelectorScope) {
-    $scope.selectedSource = 'url';
+    $scope[URL]= URL;
+    $scope[YAML] = YAML;
+    $scope.selectedSource = URL;
     $scope.onSelectSource = (source: string) => {
       $scope.selectedSource = source;
+      if($scope.onChange !== undefined) {
+        $scope.onChange({source});
+      }
     };
   }
 

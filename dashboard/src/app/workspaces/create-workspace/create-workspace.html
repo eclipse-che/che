@@ -16,7 +16,6 @@
              md-selected="createWorkspaceController.selectedTab"
              class="create-workspace-content"
              md-no-ink-bar>
-
       <!-- READY-TO-GO STACK -->
       <md-tab md-on-select="createWorkspaceController.onSelectTab(createWorkspaceController.tabs.READY_TO_GO)">
         <md-tab-label>
@@ -26,7 +25,6 @@
           <ready-to-go-stacks on-change="createWorkspaceController.onDevfileChange(createWorkspaceController.tabs.READY_TO_GO, devfile, attrs)"></ready-to-go-stacks>
         </md-tab-body>
       </md-tab>
-
       <!-- IMPORT CUSTOM STACK -->
       <md-tab md-on-select="createWorkspaceController.isImportDevfileActive = true; createWorkspaceController.onSelectTab(createWorkspaceController.tabs.IMPORT_DEVFILE)"
               md-on-deselect="createWorkspaceController.isImportDevfileActive = false">
@@ -34,33 +32,11 @@
           <span class="che-tab-label-title">IMPORT DEVFILE</span>
         </md-tab-label>
         <md-tab-body>
-          <!-- Devfile source selector  -->
-          <che-label-container che-label-name="Source"
-                               che-label-description="Define a source for your workspace.">
-            <devfile-source-selector selected-source="createWorkspaceController.selectedSource"></devfile-source-selector>
-          </che-label-container>
-            <!-- URL -->
-            <che-label-container ng-show="createWorkspaceController.selectedSource === 'url'" che-label-name="URL">
-              <ng-form flex layout="column"
-                       name="workspaceNameForm"
-                       class="create-workspace-name-form">
-                <devfile-by-url></devfile-by-url>
-              </ng-form>
-            </che-label-container>
-          <!-- YAML -->
-          <che-label-container ng-show="createWorkspaceController.selectedSource === 'yaml'" che-label-name="YAML">
-            <ng-form name="importDevfileForm">
-              <!-- ng-init="createWorkspaceController.registerForm('importDevfile', importDevfileForm)" -->
-              <workspace-devfile-editor
-                workspace-devfile="createWorkspaceController.importedDevfile"
-                workspace-devfile-on-change="createWorkspaceController.updateImportedDevfile(devfile)"></workspace-devfile-editor>
-          </ng-form>
-        </che-label-container>
-      </md-tab-body>
-    </md-tab>
-  </md-tabs>
-
-  <!-- Create workspace button -->
+          <import-stack on-change="createWorkspaceController.updateImportedDevfile(devfile)"></import-stack>
+        </md-tab-body>
+      </md-tab>
+    </md-tabs>
+<!-- Create workspace button -->
     <che-label-container>
       <che-button-save-flat id="create-workspace-footer-button" name="saveButton" che-button-title="Create & Open"
                             ng-click="createWorkspaceController.createWorkspaceAndOpenIDE()"

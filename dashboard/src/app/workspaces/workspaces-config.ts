@@ -77,7 +77,8 @@ import {DevfileByUrl} from './create-workspace/import-custom-stack/devfile-by-ur
 import {DevfileByUrlController} from './create-workspace/import-custom-stack/devfile-by-url/devfile-by-url.controller';
 import { ReadyToGoStacksController } from './create-workspace/ready-to-go-stacks/ready-to-go-stacks.controller';
 import { ReadyToGoStacks } from './create-workspace/ready-to-go-stacks/ready-to-go-stacks.directive';
-
+import {ImportStackController} from './create-workspace/import-custom-stack/import-custom-stack.controller';
+import {ImportStack} from './create-workspace/import-custom-stack/import-custom-stack.directive';
 
 /**
  * @ngdoc controller
@@ -158,6 +159,8 @@ export class WorkspacesConfig {
     register.controller('DevfileByUrlController', DevfileByUrlController);
     register.controller('ReadyToGoStacksController', ReadyToGoStacksController);
     register.directive('readyToGoStacks', ReadyToGoStacks);
+    register.controller('ImportStackController', ImportStackController);
+    register.directive('importStack', ImportStack);
 
     // config routes
     register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
