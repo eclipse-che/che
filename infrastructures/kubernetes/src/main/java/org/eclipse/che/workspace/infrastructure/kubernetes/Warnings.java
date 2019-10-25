@@ -51,5 +51,9 @@ public final class Warnings {
       "Unable to provision git configuration into runtime. "
           + "Internal server error occurred during operating with user management: '%s'";
 
+  public static final int NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL = 4110;
+  public static final String NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL_MESSAGE =
+      "Not able to provision objects for PreviewUrl. Message: '%s'";
+
   private Warnings() {}
 }

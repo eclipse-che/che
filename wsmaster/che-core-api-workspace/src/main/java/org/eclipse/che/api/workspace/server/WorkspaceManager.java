@@ -415,7 +415,7 @@ public class WorkspaceManager {
         .whenComplete(
             (aVoid, throwable) -> {
               if (workspace.isTemporary()) {
-                removeWorkspaceQuietly(workspace);
+                removeWorkspaceQuietly(workspace.getId());
               }
             });
   }
@@ -441,13 +441,13 @@ public class WorkspaceManager {
 
     runtimes
         .startAsync(workspace, envName, firstNonNull(options, Collections.emptyMap()))
-        .thenAccept(aVoid -> handleStartupSuccess(workspace))
+        .thenAccept(aVoid -> handleStartupSuccess(workspace.getId()))
         .exceptionally(
             ex -> {
               if (workspace.isTemporary()) {
-                removeWorkspaceQuietly(workspace);
+                removeWorkspaceQuietly(workspace.getId());
               } else {
-                handleStartupError(workspace, ex.getCause());
+                handleStartupError(workspace.getId(), ex.getCause());
               }
               return null;
             });
@@ -467,11 +467,14 @@ public class WorkspaceManager {
     }
   }
 
-  private void removeWorkspaceQuietly(Workspace workspace) {
+  private void removeWorkspaceQuietly(String workspaceId) {
     try {
-      workspaceDao.remove(workspace.getId());
+      workspaceDao.remove(workspaceId);
     } catch (ServerException x) {
-      LOG.error("Unable to remove temporary workspace '{}'", workspace.getId());
+      LOG.error(
+          "Unable to remove temporary workspace '{}'. Error message was: {}",
+          workspaceId,
+          x.getMessage());
     }
   }
 
@@ -493,35 +496,41 @@ public class WorkspaceManager {
     return workspace;
   }
 
-  private void handleStartupError(Workspace workspace, Throwable t) {
-    workspace
-        .getAttributes()
-        .put(
-            ERROR_MESSAGE_ATTRIBUTE_NAME,
-            t instanceof RuntimeException ? t.getCause().getMessage() : t.getMessage());
-    workspace.getAttributes().put(STOPPED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
-    workspace.getAttributes().put(STOPPED_ABNORMALLY_ATTRIBUTE_NAME, Boolean.toString(true));
+  private void handleStartupError(String workspaceId, Throwable t) {
     try {
+      // we need to reload the workspace because the runtimes might have updated it
+      Workspace workspace = getWorkspace(workspaceId);
+      workspace
+          .getAttributes()
+          .put(
+              ERROR_MESSAGE_ATTRIBUTE_NAME,
+              t instanceof RuntimeException ? t.getCause().getMessage() : t.getMessage());
+      workspace.getAttributes().put(STOPPED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
+      workspace.getAttributes().put(STOPPED_ABNORMALLY_ATTRIBUTE_NAME, Boolean.toString(true));
       updateWorkspace(workspace.getId(), workspace);
     } catch (NotFoundException | ServerException | ValidationException | ConflictException e) {
       LOG.warn(
           String.format(
               "Cannot set error status of the workspace %s. Error is: %s",
-              workspace.getId(), e.getMessage()));
+              workspaceId, e.getMessage()));
     }
   }
 
-  private void handleStartupSuccess(Workspace workspace) {
-    workspace.getAttributes().remove(STOPPED_ATTRIBUTE_NAME);
-    workspace.getAttributes().remove(STOPPED_ABNORMALLY_ATTRIBUTE_NAME);
-    workspace.getAttributes().remove(ERROR_MESSAGE_ATTRIBUTE_NAME);
+  private void handleStartupSuccess(String workspaceId) {
     try {
+      // we need to reload the workspace because the runtimes might have updated it
+      Workspace workspace = getWorkspace(workspaceId);
+
+      workspace.getAttributes().remove(STOPPED_ATTRIBUTE_NAME);
+      workspace.getAttributes().remove(STOPPED_ABNORMALLY_ATTRIBUTE_NAME);
+      workspace.getAttributes().remove(ERROR_MESSAGE_ATTRIBUTE_NAME);
+
       updateWorkspace(workspace.getId(), workspace);
     } catch (NotFoundException | ServerException | ValidationException | ConflictException e) {
       LOG.warn(
           String.format(
               "Cannot clear error status status of the workspace %s. Error is: %s",
-              workspace.getId(), e.getMessage()));
+              workspaceId, e.getMessage()));
     }
   }
 

@@ -41,13 +41,16 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 public class WorkspaceLinksGenerator {
 
   private final WorkspaceRuntimes workspaceRuntimes;
+  private final PreviewUrlLinksVariableGenerator previewUrlLinksVariableGenerator;
   private final String cheWebsocketEndpoint;
 
   @Inject
   public WorkspaceLinksGenerator(
       WorkspaceRuntimes workspaceRuntimes,
+      PreviewUrlLinksVariableGenerator previewUrlLinksVariableGenerator,
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint) {
     this.workspaceRuntimes = workspaceRuntimes;
+    this.previewUrlLinksVariableGenerator = previewUrlLinksVariableGenerator;
     this.cheWebsocketEndpoint = cheWebsocketEndpoint;
   }
 
@@ -76,6 +79,10 @@ public class WorkspaceLinksGenerator {
     if (workspace.getStatus() != WorkspaceStatus.STOPPED) {
       addRuntimeLinks(links, workspace.getId(), serviceContext);
     }
+
+    links.putAll(
+        previewUrlLinksVariableGenerator.genLinksMapAndUpdateCommands(
+            workspace, uriBuilder.clone()));
 
     return links;
   }

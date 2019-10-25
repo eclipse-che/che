@@ -617,6 +617,7 @@
       "description": "Description of the predefined commands to be available in workspace",
       "items": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "name",
           "actions"

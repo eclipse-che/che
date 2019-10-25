@@ -566,7 +566,7 @@ public class WorkspaceDaoTest {
     // Add a new command
     final org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl newCmd =
         new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
-            "command-3", singletonList(action3), singletonMap("attr3", "value3"));
+            "command-3", singletonList(action3), singletonMap("attr3", "value3"), null);
     workspace.getDevfile().getCommands().add(newCmd);
 
     // Update an existing command
@@ -890,10 +890,10 @@ public class WorkspaceDaoTest {
 
     org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl command1 =
         new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
-            name + "-1", singletonList(action1), singletonMap("attr1", "value1"));
+            name + "-1", singletonList(action1), singletonMap("attr1", "value1"), null);
     org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl command2 =
         new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
-            name + "-2", singletonList(action2), singletonMap("attr2", "value2"));
+            name + "-2", singletonList(action2), singletonMap("attr2", "value2"), null);
 
     EntrypointImpl entrypoint1 =
         new EntrypointImpl(

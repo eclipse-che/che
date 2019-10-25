@@ -95,6 +95,7 @@ public class CommandConverter {
     command.setName(devCommand.getName());
     command.setType(commandAction.getType());
     command.setCommandLine(commandAction.getCommand());
+    command.setPreviewUrl(devCommand.getPreviewUrl());
 
     if (commandAction.getWorkdir() != null) {
       command.getAttributes().put(WORKING_DIRECTORY_ATTRIBUTE, commandAction.getWorkdir());

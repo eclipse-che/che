@@ -122,6 +122,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesS
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesPreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -193,6 +194,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private InternalEnvironmentProvisioner internalEnvironmentProvisioner;
   @Mock private IngressPathTransformInverter pathTransformInverter;
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
+  @Mock private KubernetesPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
 
   @Mock
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> kubernetesEnvironmentProvisioner;
@@ -239,7 +241,7 @@ public class KubernetesInternalRuntimeTest {
     when(startSynchronizerFactory.create(any())).thenReturn(startSynchronizer);
 
     internalRuntime =
-        new KubernetesInternalRuntime<>(
+        new KubernetesInternalRuntime<KubernetesEnvironment>(
             13,
             5,
             new URLRewriter.NoOpURLRewriter(),
@@ -258,6 +260,7 @@ public class KubernetesInternalRuntimeTest {
             toolingProvisioner,
             pathTransformInverter,
             runtimeHangingDetector,
+            previewUrlCommandProvisioner,
             tracer,
             context,
             namespace);
