@@ -23,6 +23,8 @@ export class ReadyToGoStacks implements ng.IDirective {
   controllerAs: string = 'readyToGoStacksController';
   bindToController: boolean = true;
 
+  transclude: boolean = true;
+
   scope: {
     onChange: string;
   };

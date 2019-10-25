@@ -1,30 +1,38 @@
+<ng-form name="createWorkspaceForm" id="create-workspace-form">
+
 <che-toolbar che-title="New Workspace"
              class="create-workspace-toolbar">
   <che-button-dropdown button-style="che-button-save-flat"
-                       button-disabled="createWorkspaceController.isCreateButtonDisabled()"
+                       button-disabled="createWorkspaceForm.$invalid"
                        main-action-config="createWorkspaceController.headerCreateButtonConfig.mainAction"
                        other-actions-config="createWorkspaceController.headerCreateButtonConfig.otherActions"
                        class="create-workspace-header-button"></che-button-dropdown>
 </che-toolbar>
 
-<md-content md-scroll-y flex
-            md-theme="default"
-            class="create-workspace-content">
+<md-content md-theme="default" class="create-workspace-content">
   <div>
+
     <md-tabs md-dynamic-height
              md-stretch-tabs="auto"
              md-selected="createWorkspaceController.selectedTab"
              class="create-workspace-content"
              md-no-ink-bar>
+
       <!-- READY-TO-GO STACK -->
       <md-tab md-on-select="createWorkspaceController.onSelectTab(createWorkspaceController.tabs.READY_TO_GO)">
         <md-tab-label>
           <span class="che-tab-label-title">READY-TO-GO STACK</span>
         </md-tab-label>
         <md-tab-body>
-          <ready-to-go-stacks on-change="createWorkspaceController.onDevfileChange(createWorkspaceController.tabs.READY_TO_GO, devfile, attrs)"></ready-to-go-stacks>
+          <ready-to-go-stacks
+            on-change="createWorkspaceController.onDevfileChange(createWorkspaceController.tabs.READY_TO_GO, devfile, attrs)">
+              <che-button-save-flat id="create-workspace-footer-button" name="saveButton" che-button-title="Create & Open"
+                ng-click="createWorkspaceController.createWorkspaceAndOpenIDE()" ng-disabled="createWorkspaceForm.$invalid">
+              </che-button-save-flat>
+            </ready-to-go-stacks>
         </md-tab-body>
       </md-tab>
+
       <!-- IMPORT CUSTOM STACK -->
       <md-tab md-on-select="createWorkspaceController.isImportDevfileActive = true; createWorkspaceController.onSelectTab(createWorkspaceController.tabs.IMPORT_DEVFILE)"
               md-on-deselect="createWorkspaceController.isImportDevfileActive = false">
@@ -32,15 +40,17 @@
           <span class="che-tab-label-title">IMPORT DEVFILE</span>
         </md-tab-label>
         <md-tab-body>
-          <import-stack on-change="createWorkspaceController.updateImportedDevfile(devfile)"></import-stack>
+          <import-stack on-change="createWorkspaceController.updateImportedDevfile(devfile)">
+            <che-button-save-flat id="create-workspace-footer-button" name="saveButton" che-button-title="Create & Open"
+              ng-click="createWorkspaceController.createWorkspaceAndOpenIDE()" ng-disabled="createWorkspaceForm.$invalid">
+            </che-button-save-flat>
+          </import-stack>
         </md-tab-body>
       </md-tab>
+
     </md-tabs>
-<!-- Create workspace button -->
-    <che-label-container>
-      <che-button-save-flat id="create-workspace-footer-button" name="saveButton" che-button-title="Create & Open"
-                            ng-click="createWorkspaceController.createWorkspaceAndOpenIDE()"
-                            ng-disabled="createWorkspaceController.isCreateButtonDisabled()"></che-button-save-flat>
-    </che-label-container>
+
   </div>
 </md-content>
+
+</ng-form>

@@ -15,6 +15,7 @@ import { CreateWorkspaceSvc } from '../create-workspace.service';
 import { NamespaceSelectorSvc } from './namespace-selector/namespace-selector.service';
 import { RandomSvc } from '../../../../components/utils/random.service';
 import { IReadyToGoStacksScopeBindings } from './ready-to-go-stacks.directive';
+import { ProjectSourceSelectorService } from './project-source-selector/project-source-selector.service';
 
 const WORKSPACE_NAME_FORM = 'workspaceName';
 
@@ -27,6 +28,7 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
     '$timeout',
     'createWorkspaceSvc',
     'namespaceSelectorSvc',
+    'projectSourceSelectorService',
     'randomSvc'
   ];
 
@@ -34,6 +36,14 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
    * Directive scope bindings.
    */
   onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs: { [key: string]: string } }) => void;
+  /**
+   * The selected devfile.
+   */
+  selectedDevfile: che.IWorkspaceDevfile;
+  /**
+   * The workspace name model.
+   */
+  workspaceName: string;
 
   /**
    * Injected dependencies.
@@ -41,12 +51,9 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
   private $timeout: ng.ITimeoutService;
   private createWorkspaceSvc: CreateWorkspaceSvc;
   private namespaceSelectorSvc: NamespaceSelectorSvc;
+  private projectSourceSelectorService: ProjectSourceSelectorService;
   private randomSvc: RandomSvc;
 
-  /**
-   * The selected devfile.
-   */
-  private selectedDevfile: che.IWorkspaceDevfile;
   /**
    * The selected namespace ID.
    */
@@ -59,10 +66,6 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
    * The list of names of existing workspaces.
    */
   private usedNamesList: string[];
-  /**
-   * The name of workspace.
-   */
-  private workspaceName: string;
   /**
    * Hide progress loader if <code>true</code>.
    */
@@ -79,11 +82,13 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
     $timeout: ng.ITimeoutService,
     createWorkspaceSvc: CreateWorkspaceSvc,
     namespaceSelectorSvc: NamespaceSelectorSvc,
+    projectSourceSelectorService: ProjectSourceSelectorService,
     randomSvc: RandomSvc
   ) {
     this.$timeout = $timeout;
     this.createWorkspaceSvc = createWorkspaceSvc;
     this.namespaceSelectorSvc = namespaceSelectorSvc;
+    this.projectSourceSelectorService = projectSourceSelectorService;
     this.randomSvc = randomSvc;
 
     this.usedNamesList = [];
@@ -153,9 +158,42 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
     }, 10);
     this.selectedDevfile = devfile;
     this.onChange({
-      devfile,
+      devfile: this.updateDevfileProjects(),
       attrs: { stackName: this.stackName }
     });
+  }
+
+  /**
+   * Callback which is called when a project template is added, updated or removed.
+   */
+  onProjectSelectorChange(): void {
+    this.onChange({
+      devfile: this.updateDevfileProjects(),
+      attrs: { stackName: this.stackName }
+    });
+  }
+
+  /**
+   * Populates initial devfile with chosen projects
+   */
+  updateDevfileProjects(): che.IWorkspaceDevfile {
+    // projects to add to current devfile
+    const projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
+
+    const devfile = angular.copy(this.selectedDevfile);
+    devfile.projects = projectTemplates;
+
+    // check if some of added projects are defined in initial devfile
+    const projectDefinedInDevfile = projectTemplates.some((template: che.IProjectTemplate) =>
+      devfile.projects.some((devfileProject: any) => devfileProject.name === template.name)
+    );
+
+    // if no projects defined in devfile were added - remove the commands from devfile as well:
+    if (projectDefinedInDevfile === false) {
+      devfile.commands = [];
+    }
+
+    return devfile;
   }
 
   /**

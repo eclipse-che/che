@@ -90,7 +90,7 @@ export class CreateWorkspaceController {
   constructor(
     $location: ng.ILocationService,
     $scope: ng.IScope,
-    createWorkspaceSvc: CreateWorkspaceSvc,
+    createWorkspaceSvc: CreateWorkspaceSvc
   ) {
     this.$location = $location;
     this.$scope = $scope;

@@ -15,6 +15,11 @@ export interface IProjectSourceSelectorScope extends ng.IScope {
   updateWidget: (activeButtonId: string, scrollWidgetInView: boolean) => void;
 }
 
+export interface IProjectSourceSelectorScopeBindings {
+  devfile: che.IWorkspaceDevfile;
+  onChange: () => void;
+}
+
 /**
  * Defines a directive for the project selector.
  *
@@ -35,7 +40,8 @@ export class ProjectSourceSelector implements ng.IDirective {
   bindToController: boolean = true;
 
   scope = {
-    devfile: '='
+    devfile: '=',
+    onChange: '&'
   };
 
   private $timeout: ng.ITimeoutService;

@@ -11,7 +11,7 @@
  */
 'use strict';
 import {ProjectSourceSelectorService} from './project-source-selector.service';
-import {IProjectSourceSelectorScope} from './project-source-selector.directive';
+import {IProjectSourceSelectorScope, IProjectSourceSelectorScopeBindings} from './project-source-selector.directive';
 import {ActionType} from './project-source-selector-action-type.enum';
 
 /**
@@ -20,21 +20,27 @@ import {ActionType} from './project-source-selector-action-type.enum';
  * @author Oleksii Kurinnyi
  * @author Oleksii Orel
  */
-export class ProjectSourceSelectorController {
+export class ProjectSourceSelectorController implements IProjectSourceSelectorScopeBindings {
 
-  static $inject = ['$scope', 'projectSourceSelectorService'];
+  static $inject = [
+    '$scope',
+    'projectSourceSelectorService'
+  ];
 
   /**
-   * Directive's scope.
+   * Directive scope bindings.
+   */
+  devfile: che.IWorkspaceDevfile;
+  onChange: () => {};
+
+  /**
+   * Injected dependencies.
    */
   private $scope: IProjectSourceSelectorScope;
+  private projectSourceSelectorService: ProjectSourceSelectorService;
+
   private devfileProjectsCopy: Array<any>;
   private devfileProjects: Array<any>;
-  private devfile: che.IWorkspaceDevfile;
-  /**
-   * Project selector service.
-   */
-  private projectSourceSelectorService: ProjectSourceSelectorService;
   /**
    * State of a button.
    */
@@ -86,7 +92,7 @@ export class ProjectSourceSelectorController {
           this.projectSourceSelectorService.removeProjectTemplate(project.name);
         });
         this.projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
-        this.updateData({buttonState: true, actionType: ActionType.ADD_PROJECT});
+        this.updateWidget({buttonState: true, actionType: ActionType.ADD_PROJECT});
       }
 
       if (this.devfileProjects && this.devfileProjects.length > 0) {
@@ -96,10 +102,11 @@ export class ProjectSourceSelectorController {
 
         // update list of templates to redraw the projects section
         this.projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
-        this.updateData({buttonState: true, actionType: ActionType.EDIT_PROJECT, template: this.devfileProjects[0]});
+        this.updateWidget({buttonState: true, actionType: ActionType.EDIT_PROJECT, template: this.devfileProjects[0]});
       }
 
       this.devfileProjectsCopy = angular.copy(this.devfileProjects);
+      this.onChange();
     }, true);
 
     $scope.$watch('$destroy', () => {
@@ -127,7 +134,9 @@ export class ProjectSourceSelectorController {
 
     // update list of templates to redraw the projects section
     this.projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
-    this.updateData({buttonState: true, actionType: ActionType.EDIT_PROJECT, template: projectTemplate});
+    this.updateWidget({buttonState: true, actionType: ActionType.EDIT_PROJECT, template: projectTemplate});
+
+    this.onChange();
   }
 
   /**
@@ -138,7 +147,9 @@ export class ProjectSourceSelectorController {
 
     // update list of templates to redraw the projects section
     this.projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
-    this.updateData({buttonState: true, actionType: ActionType.ADD_PROJECT});
+    this.updateWidget({buttonState: true, actionType: ActionType.ADD_PROJECT});
+
+    this.onChange();
   }
 
   /**
@@ -150,7 +161,9 @@ export class ProjectSourceSelectorController {
     // update list of templates to redraw the projects section
     this.projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
-    this.updateData({buttonState: true, actionType: ActionType.EDIT_PROJECT, template: projectTemplate});
+    this.updateWidget({buttonState: true, actionType: ActionType.EDIT_PROJECT, template: projectTemplate});
+
+    this.onChange();
   }
 
   /**
@@ -160,7 +173,7 @@ export class ProjectSourceSelectorController {
    * @param actionType {ActionType} current action type
    * @param template {che.IProjectTemplate} the project's template
    */
-  updateData({buttonState, actionType, template = null}: { buttonState: boolean, actionType: ActionType, template?: che.IProjectTemplate }): void {
+  updateWidget({buttonState, actionType, template = null}: { buttonState: boolean, actionType: ActionType, template?: che.IProjectTemplate }): void {
 
     const buttonId = template
       ? template.name
