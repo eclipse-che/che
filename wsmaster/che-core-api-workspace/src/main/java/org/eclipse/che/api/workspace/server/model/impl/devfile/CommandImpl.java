@@ -18,10 +18,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -32,6 +34,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Action;
 import org.eclipse.che.api.core.model.workspace.devfile.Command;
+import org.eclipse.che.api.core.model.workspace.devfile.PreviewUrl;
 
 /** @author Sergii Leshchenko */
 @Entity(name = "DevfileCommand")
@@ -45,6 +48,8 @@ public class CommandImpl implements Command {
 
   @Column(name = "name", nullable = false)
   private String name;
+
+  @Embedded private PreviewUrlImpl previewUrl;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   @JoinColumn(name = "devfile_command_id")
@@ -60,7 +65,11 @@ public class CommandImpl implements Command {
 
   public CommandImpl() {}
 
-  public CommandImpl(String name, List<? extends Action> actions, Map<String, String> attributes) {
+  public CommandImpl(
+      String name,
+      List<? extends Action> actions,
+      Map<String, String> attributes,
+      PreviewUrl previewUrl) {
     this.name = name;
     if (actions != null) {
       this.actions = actions.stream().map(ActionImpl::new).collect(toCollection(ArrayList::new));
@@ -68,10 +77,13 @@ public class CommandImpl implements Command {
     if (attributes != null) {
       this.attributes = new HashMap<>(attributes);
     }
+    if (previewUrl != null) {
+      this.previewUrl = new PreviewUrlImpl(previewUrl.getPort(), previewUrl.getPath());
+    }
   }
 
   public CommandImpl(Command command) {
-    this(command.getName(), command.getActions(), command.getAttributes());
+    this(command.getName(), command.getActions(), command.getAttributes(), command.getPreviewUrl());
   }
 
   @Override
@@ -81,6 +93,15 @@ public class CommandImpl implements Command {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  @Override
+  public PreviewUrlImpl getPreviewUrl() {
+    return previewUrl;
+  }
+
+  public void setPreviewUrl(PreviewUrlImpl previewUrl) {
+    this.previewUrl = previewUrl;
   }
 
   @Override
@@ -108,38 +129,34 @@ public class CommandImpl implements Command {
   }
 
   @Override
+  public String toString() {
+    return new StringJoiner(", ", CommandImpl.class.getSimpleName() + "[", "]")
+        .add("id=" + id)
+        .add("name='" + name + "'")
+        .add("previewURL=" + previewUrl)
+        .add("actions=" + actions)
+        .add("attributes=" + attributes)
+        .toString();
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof CommandImpl)) {
+    if (o == null || getClass() != o.getClass()) {
       return false;
     }
     CommandImpl command = (CommandImpl) o;
     return Objects.equals(id, command.id)
         && Objects.equals(name, command.name)
-        && Objects.equals(getActions(), command.getActions())
-        && Objects.equals(getAttributes(), command.getAttributes());
+        && Objects.equals(previewUrl, command.previewUrl)
+        && Objects.equals(actions, command.actions)
+        && Objects.equals(attributes, command.attributes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, getActions(), getAttributes());
-  }
-
-  @Override
-  public String toString() {
-    return "CommandImpl{"
-        + "id='"
-        + id
-        + '\''
-        + ", name='"
-        + name
-        + '\''
-        + ", actions="
-        + actions
-        + ", attributes="
-        + attributes
-        + '}';
+    return Objects.hash(id, name, previewUrl, actions, attributes);
   }
 }
