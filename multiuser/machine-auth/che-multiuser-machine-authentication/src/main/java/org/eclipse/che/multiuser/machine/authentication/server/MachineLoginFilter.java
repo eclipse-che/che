@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.security.Principal;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
@@ -42,6 +41,8 @@ import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
+import org.eclipse.che.multiuser.api.auth.filter.SessionCachingFilter;
+import org.eclipse.che.multiuser.api.auth.filter.SessionStore;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * @author Anton Korneta
  */
 @Singleton
-public class MachineLoginFilter implements Filter {
+public class MachineLoginFilter extends SessionCachingFilter {
 
   private static final Logger LOG = LoggerFactory.getLogger(MachineLoginFilter.class);
 
@@ -64,10 +65,12 @@ public class MachineLoginFilter implements Filter {
 
   @Inject
   public MachineLoginFilter(
+      SessionStore sessionStore,
       RequestTokenExtractor tokenExtractor,
       UserManager userManager,
       MachineSigningKeyResolver machineKeyResolver,
       PermissionChecker permissionChecker) {
+    super(sessionStore);
     this.tokenExtractor = tokenExtractor;
     this.userManager = userManager;
     this.permissionChecker = permissionChecker;
@@ -80,15 +83,16 @@ public class MachineLoginFilter implements Filter {
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
-    final HttpServletRequest httpRequest = (HttpServletRequest) request;
+    HttpServletRequest httpRequest = new SessionCachedHttpRequest(request);
     final String token = tokenExtractor.getToken(httpRequest);
     if (isNullOrEmpty(token)) {
+      // note that unmodified request returned
       chain.doFilter(request, response);
       return;
     }
     // check token signature and verify is this token machine or not
     try {
-      HttpSession session = ((HttpServletRequest) request).getSession(true);
+      HttpSession session = (httpRequest).getSession(true);
       Subject sessionSubject = (Subject) session.getAttribute("che_subject");
       if (sessionSubject == null || !sessionSubject.getToken().equals(token)) {
         try {
@@ -128,6 +132,16 @@ public class MachineLoginFilter implements Filter {
     final String workspaceId = claims.get(WORKSPACE_ID_CLAIM, String.class);
     return new MachineTokenAuthorizedSubject(
         new SubjectImpl(userName, userId, token, false), permissionChecker, workspaceId);
+  }
+
+  @Override
+  protected String getUserId(HttpServletRequest httpRequest) {
+    return getUserId(tokenExtractor.getToken(httpRequest));
+  }
+
+  private String getUserId(String token) {
+    final Claims claims = jwtParser.parseClaimsJws(token).getBody();
+    return claims.get(USER_ID_CLAIM, String.class);
   }
 
   /** Sets given error code with err message into give response. */

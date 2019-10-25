@@ -25,7 +25,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpSession;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -50,11 +49,7 @@ public class EnvironmentInitializationFilter implements Filter {
       throws IOException, ServletException {
     final HttpServletRequest httpRequest = (HttpServletRequest) request;
     Subject subject = new SubjectImpl("che", "che", "dummy_token", false);
-    HttpSession session = httpRequest.getSession();
-    session.setAttribute("codenvy_user", subject);
-
     final EnvironmentContext environmentContext = EnvironmentContext.getCurrent();
-
     try {
       environmentContext.setSubject(subject);
       Span activeSpan = tracer.activeSpan();

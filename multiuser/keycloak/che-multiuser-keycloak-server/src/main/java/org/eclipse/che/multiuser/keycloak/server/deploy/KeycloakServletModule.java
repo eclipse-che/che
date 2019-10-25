@@ -12,9 +12,7 @@
 package org.eclipse.che.multiuser.keycloak.server.deploy;
 
 import com.google.inject.servlet.ServletModule;
-import javax.inject.Singleton;
 import org.eclipse.che.commons.logback.filter.IdentityIdLoggerFilter;
-import org.eclipse.che.multiuser.keycloak.server.KeycloakAuthenticationFilter;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakEnvironmentInitalizationFilter;
 import org.eclipse.che.multiuser.keycloak.server.UnavailableResourceInMultiUserFilter;
 
@@ -33,9 +31,6 @@ public class KeycloakServletModule extends ServletModule {
 
   @Override
   protected void configureServlets() {
-    bind(KeycloakAuthenticationFilter.class).in(Singleton.class);
-
-    filterRegex(KEYCLOAK_FILTER_PATHS).through(KeycloakAuthenticationFilter.class);
     filterRegex(KEYCLOAK_FILTER_PATHS).through(KeycloakEnvironmentInitalizationFilter.class);
     filterRegex(KEYCLOAK_FILTER_PATHS).through(IdentityIdLoggerFilter.class);
 

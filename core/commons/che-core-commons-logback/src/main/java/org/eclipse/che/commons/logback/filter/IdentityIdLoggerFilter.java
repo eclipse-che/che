@@ -42,11 +42,12 @@ public class IdentityIdLoggerFilter implements Filter {
       ServletRequest request, ServletResponse response, FilterChain filterChain)
       throws IOException, ServletException {
     final HttpServletRequest httpRequest = (HttpServletRequest) request;
-    final HttpSession session = httpRequest.getSession();
-    Subject subject = (Subject) session.getAttribute("che_subject");
-
-    if (subject != null && subject.getUserId() != null) {
-      MDC.put(IDENTITY_ID_MDC_KEY, subject.getUserId());
+    final HttpSession session = httpRequest.getSession(false);
+    if (session != null) {
+      Subject subject = (Subject) session.getAttribute("che_subject");
+      if (subject != null && subject.getUserId() != null) {
+        MDC.put(IDENTITY_ID_MDC_KEY, subject.getUserId());
+      }
     }
 
     try {

@@ -12,6 +12,7 @@
 package org.eclipse.che.multiuser.keycloak.server;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -25,10 +26,9 @@ import static org.testng.AssertJUnit.assertEquals;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.impl.DefaultClaims;
-import io.jsonwebtoken.impl.DefaultHeader;
-import io.jsonwebtoken.impl.DefaultJwt;
+import io.jsonwebtoken.impl.DefaultJws;
+import io.jsonwebtoken.impl.DefaultJwsHeader;
 import io.opentracing.Tracer;
-import java.lang.reflect.Field;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -45,6 +45,7 @@ import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
+import org.eclipse.che.multiuser.api.auth.filter.SessionStore;
 import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
@@ -73,6 +74,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
   @Mock private ServletOutputStream servletOutputStream;
   @Mock private HttpSession session;
   @Mock private JwtParser jwtParser;
+  @Mock private SessionStore sessionStore;
 
   @Mock(answer = Answers.RETURNS_MOCKS)
   private Tracer tracer;
@@ -85,21 +87,20 @@ public class KeycloakEnvironmentInitalizationFilterTest {
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
     lenient().when(request.getScheme()).thenReturn("http");
-    when(request.getSession()).thenReturn(session);
+    when(request.getSession(anyBoolean())).thenReturn(session);
     lenient().when(response.getOutputStream()).thenReturn(servletOutputStream);
     EnvironmentContext context = spy(EnvironmentContext.getCurrent());
     EnvironmentContext.setCurrent(context);
     filter =
         new KeycloakEnvironmentInitalizationFilter(
+            sessionStore,
+            jwtParser,
             userManager,
             keycloakProfileRetriever,
             tokenExtractor,
             permissionChecker,
             keycloakSettings,
             tracer);
-    Field parser = filter.getClass().getSuperclass().getDeclaredField("jwtParser");
-    parser.setAccessible(true);
-    parser.set(filter, jwtParser);
     final KeyPair kp = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
     lenient().when(keyManager.getOrCreateKeyPair(anyString())).thenReturn(kp);
     keycloakAttributes.clear();
@@ -128,10 +129,10 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     Map<String, Object> claimParams = new HashMap<>();
     claimParams.put("preferred_username", "username");
     Claims claims = new DefaultClaims(claimParams).setSubject("id2");
-    DefaultJwt<Claims> jwt = new DefaultJwt<>(new DefaultHeader(), claims);
+    DefaultJws<Claims> jws = new DefaultJws<>(new DefaultJwsHeader(), claims, "");
     // given
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token2");
-    when(request.getAttribute("token")).thenReturn(jwt);
+    when(jwtParser.parseClaimsJws(anyString())).thenReturn(jws);
     when(userManager.getById(anyString())).thenThrow(NotFoundException.class);
 
     // when
@@ -143,7 +144,6 @@ public class KeycloakEnvironmentInitalizationFilterTest {
             eq(
                 "Unable to authenticate user because email address is not set in keycloak profile"
                     .getBytes()));
-    verifyNoMoreInteractions(chain);
   }
 
   @Test
@@ -152,12 +152,12 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     Map<String, Object> claimParams = new HashMap<>();
     claimParams.put("preferred_username", "username");
     Claims claims = new DefaultClaims(claimParams).setSubject("id");
-    DefaultJwt<Claims> jwt = new DefaultJwt<>(new DefaultHeader(), claims);
+    DefaultJws<Claims> jws = new DefaultJws<>(new DefaultJwsHeader(), claims, "");
     UserImpl user = new UserImpl("id", "test@test.com", "username");
     keycloakSettingsMap.put(KeycloakConstants.USERNAME_CLAIM_SETTING, "preferred_username");
     // given
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token");
-    when(request.getAttribute("token")).thenReturn(jwt);
+    when(jwtParser.parseClaimsJws(anyString())).thenReturn(jws);
     when(userManager.getById(anyString())).thenThrow(NotFoundException.class);
     when(userManager.getOrCreateUser(anyString(), anyString(), anyString())).thenReturn(user);
     keycloakAttributes.put("email", "test@test.com");
@@ -180,11 +180,11 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     UserImpl user = new UserImpl("id2", "test2@test.com", "username2");
 
     ArgumentCaptor<AuthorizedSubject> captor = ArgumentCaptor.forClass(AuthorizedSubject.class);
-    DefaultJwt<Claims> claims = createJwt();
+    DefaultJws<Claims> claims = createJws();
     Subject expectedSubject = new SubjectImpl(user.getName(), user.getId(), "token2", false);
     // given
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token2");
-    when(request.getAttribute("token")).thenReturn(claims);
+    when(jwtParser.parseClaimsJws(anyString())).thenReturn(claims);
     when(session.getAttribute(eq("che_subject"))).thenReturn(existingSubject);
     when(userManager.getOrCreateUser(anyString(), anyString(), anyString())).thenReturn(user);
     EnvironmentContext context = spy(EnvironmentContext.getCurrent());
@@ -204,11 +204,11 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     assertEquals(expectedSubject.getUserName(), captor.getAllValues().get(1).getUserName());
   }
 
-  private DefaultJwt<Claims> createJwt() {
+  private DefaultJws<Claims> createJws() {
     Map<String, Object> claimParams = new HashMap<>();
     claimParams.put("email", "test@test.com");
     claimParams.put("preferred_username", "username");
     Claims claims = new DefaultClaims(claimParams).setSubject("id2");
-    return new DefaultJwt<>(new DefaultHeader(), claims);
+    return new DefaultJws<>(new DefaultJwsHeader(), claims, "");
   }
 }

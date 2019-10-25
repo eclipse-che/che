@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -41,6 +42,7 @@ import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
+import org.eclipse.che.multiuser.api.auth.filter.SessionStore;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.eclipse.che.multiuser.machine.authentication.shared.Constants;
@@ -83,6 +85,7 @@ public class MachineLoginFilterTest {
   @Mock private SignatureKeyManager keyManagerMock;
   @Mock private PermissionChecker permissionCheckerMock;
   @Mock private FilterChain chainMock;
+  @Mock private SessionStore sessionStore;
   @Mock private HttpSession sessionMock;
   @Mock private HttpServletResponse responseMock;
 
@@ -102,6 +105,7 @@ public class MachineLoginFilterTest {
             .compact();
     machineLoginFilter =
         new MachineLoginFilter(
+            sessionStore,
             tokenExtractorMock,
             userManagerMock,
             new MachineSigningKeyResolver(keyManagerMock),
@@ -118,7 +122,7 @@ public class MachineLoginFilterTest {
   public void testProcessRequestWithValidToken() throws Exception {
     machineLoginFilter.doFilter(getRequestMock(), responseMock, chainMock);
 
-    verify(keyManagerMock).getOrCreateKeyPair(eq(WORKSPACE_ID));
+    verify(keyManagerMock, atLeastOnce()).getOrCreateKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verifyZeroInteractions(responseMock);
   }
@@ -133,7 +137,7 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(requestMock, responseMock, chainMock);
 
-    verify(tokenExtractorMock).getToken(any(HttpServletRequest.class));
+    verify(tokenExtractorMock, atLeastOnce()).getToken(any(HttpServletRequest.class));
     verify(responseMock)
         .sendError(
             401,
@@ -160,7 +164,7 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(requestMock, responseMock, chainMock);
 
-    verify(tokenExtractorMock).getToken(any(HttpServletRequest.class));
+    verify(tokenExtractorMock, atLeastOnce()).getToken(any(HttpServletRequest.class));
     verify(responseMock)
         .sendError(
             401,
@@ -174,7 +178,7 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(requestMock, responseMock, chainMock);
 
-    verify(tokenExtractorMock).getToken(any(HttpServletRequest.class));
+    verify(tokenExtractorMock, atLeastOnce()).getToken(any(HttpServletRequest.class));
     verify(chainMock).doFilter(requestMock, responseMock);
     verifyZeroInteractions(keyManagerMock);
     verifyZeroInteractions(userManagerMock);
@@ -187,7 +191,7 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(getRequestMock(), responseMock, chainMock);
 
-    verify(keyManagerMock).getOrCreateKeyPair(eq(WORKSPACE_ID));
+    verify(keyManagerMock, atLeastOnce()).getOrCreateKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verify(responseMock)
         .sendError(
@@ -201,7 +205,7 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(getRequestMock(), responseMock, chainMock);
 
-    verify(keyManagerMock).getOrCreateKeyPair(eq(WORKSPACE_ID));
+    verify(keyManagerMock, atLeastOnce()).getOrCreateKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verify(responseMock)
         .sendError(
