@@ -92,10 +92,10 @@ export class CheBranding {
     this.$rootScope = $rootScope;
     this.cheService = cheService;
     this.branding = {};
-    this.updateData();
-    this.updateVersion();
 
     this.initialize();
+    this.updateData();
+    this.updateVersion();
   }
 
   initialize(): void {
