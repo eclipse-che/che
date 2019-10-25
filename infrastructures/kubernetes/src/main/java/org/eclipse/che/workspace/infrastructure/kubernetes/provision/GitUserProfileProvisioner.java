@@ -63,11 +63,16 @@ public class GitUserProfileProvisioner implements ConfigurationProvisioner<Kuber
 
   private PreferenceManager preferenceManager;
   private UserManager userManager;
+  private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
 
   @Inject
-  public GitUserProfileProvisioner(PreferenceManager preferenceManager, UserManager userManager) {
+  public GitUserProfileProvisioner(
+      PreferenceManager preferenceManager,
+      UserManager userManager,
+      VcsSslCertificateProvisioner vcsSslCertificateProvisioner) {
     this.preferenceManager = preferenceManager;
     this.userManager = userManager;
+    this.vcsSslCertificateProvisioner = vcsSslCertificateProvisioner;
   }
 
   @Override
@@ -176,6 +181,15 @@ public class GitUserProfileProvisioner implements ConfigurationProvisioner<Kuber
 
     if (userEmail != null) {
       config.append('\t').append("email = ").append(userEmail).append('\n');
+    }
+
+    if (vcsSslCertificateProvisioner.isConfigured()) {
+      config
+          .append("[http]")
+          .append('\n')
+          .append('\t')
+          .append("sslCAInfo = ")
+          .append(vcsSslCertificateProvisioner.getCertPath());
     }
 
     return of(config.toString());

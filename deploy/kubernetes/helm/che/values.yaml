@@ -50,6 +50,12 @@ global:
     useSelfSignedCerts: false
     selfSignedCertSecretName: self-signed-cert
 
+
+  ## If self-signed certificate is enabled
+  ## then certificate from `tls.selfSignedCertSecretName` will be propagated to Che components' trust stores
+  useGitSelfSignedCerts: true
+  gitSelfSignedCertConfigName: che-git-self-signed-cert
+
   gitHubClientID: ""
   gitHubClientSecret: ""
   pvcClaim: "1Gi"

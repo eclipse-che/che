@@ -11,47 +11,42 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Collections.singletonMap;
+
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
-import io.fabric8.kubernetes.api.model.ConfigMapVolumeSource;
 import io.fabric8.kubernetes.api.model.ConfigMapVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.SecretBuilder;
-import io.fabric8.kubernetes.api.model.SecretVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
+import java.util.Optional;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.util.Optional;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.util.Collections.singletonMap;
-
 /**
- * Mount configured self-signed certificate as file in each workspace machines if configured.
+ * Mount configured self-signed certificate for git provider as file in each workspace machines if
+ * configured.
  *
  * @author Vitalii Parfonov
  */
 @Singleton
-public class VcsSslCertificateProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
-
-  public static final String CHE_SELF_SIGNED_CERT_SECRET_SUFFIX = "-che-self-signed-cert";
-  public static final String CHE_SELF_SIGNED_CERT_VOLUME = "che-self-signed-cert";
-  public static final String CERT_MOUNT_PATH = "/tmp/che/secret/";
-  public static final String CA_CERT_FILE = "ca.crt";
+public class VcsSslCertificateProvisioner
+    implements ConfigurationProvisioner<KubernetesEnvironment> {
+  static final String CHE_GIT_SELF_SIGNED_CERT_CONFIG_MAP_SUFFIX = "-che-git-self-signed-cert";
+  static final String CHE_GIT_SELF_SIGNED_CERT_VOLUME = "che-git-self-signed-cert";
+  static final String CERT_MOUNT_PATH = "/etc/che/git/cert/";
+  static final String CA_CERT_FILE = "ca.crt";
 
   @Inject(optional = true)
-  @Named("che.self_signed_cert")
+  @Named("che.git.self_signed_cert")
   private String certificate;
 
   public VcsSslCertificateProvisioner() {}
@@ -76,13 +71,13 @@ public class VcsSslCertificateProvisioner implements ConfigurationProvisioner<Ku
       return;
     }
     String selfSignedCertSecretName =
-        identity.getWorkspaceId() + CHE_SELF_SIGNED_CERT_SECRET_SUFFIX;
+        identity.getWorkspaceId() + CHE_GIT_SELF_SIGNED_CERT_CONFIG_MAP_SUFFIX;
     k8sEnv
         .getConfigMaps()
         .put(
             selfSignedCertSecretName,
-
-            new ConfigMapBuilder().withNewMetadata()
+            new ConfigMapBuilder()
+                .withNewMetadata()
                 .withName(selfSignedCertSecretName)
                 .endMetadata()
                 .withData(singletonMap(CA_CERT_FILE, certificate))
@@ -93,11 +88,11 @@ public class VcsSslCertificateProvisioner implements ConfigurationProvisioner<Ku
           pod.getSpec()
               .getVolumes()
               .stream()
-              .filter(v -> v.getName().equals(CHE_SELF_SIGNED_CERT_VOLUME))
+              .filter(v -> v.getName().equals(CHE_GIT_SELF_SIGNED_CERT_VOLUME))
               .findAny();
 
       if (!certVolume.isPresent()) {
-        pod.getSpec().getVolumes().add(buildCertSecretVolume(selfSignedCertSecretName));
+        pod.getSpec().getVolumes().add(buildCertVolume(selfSignedCertSecretName));
       }
 
       for (Container container : pod.getSpec().getInitContainers()) {
@@ -114,7 +109,7 @@ public class VcsSslCertificateProvisioner implements ConfigurationProvisioner<Ku
         container
             .getVolumeMounts()
             .stream()
-            .filter(vm -> vm.getName().equals(CHE_SELF_SIGNED_CERT_VOLUME))
+            .filter(vm -> vm.getName().equals(CHE_GIT_SELF_SIGNED_CERT_VOLUME))
             .findAny();
     if (!certVolumeMount.isPresent()) {
       container.getVolumeMounts().add(buildCertVolumeMount());
@@ -123,16 +118,20 @@ public class VcsSslCertificateProvisioner implements ConfigurationProvisioner<Ku
 
   private VolumeMount buildCertVolumeMount() {
     return new VolumeMountBuilder()
-        .withName(CHE_SELF_SIGNED_CERT_VOLUME)
+        .withName(CHE_GIT_SELF_SIGNED_CERT_VOLUME)
         .withNewReadOnly(true)
         .withMountPath(CERT_MOUNT_PATH)
         .build();
   }
 
-  private Volume buildCertSecretVolume(String secretName) {
+  private Volume buildCertVolume(String secretName) {
     return new VolumeBuilder()
-        .withName(CHE_SELF_SIGNED_CERT_VOLUME)
+        .withName(CHE_GIT_SELF_SIGNED_CERT_VOLUME)
         .withConfigMap(new ConfigMapVolumeSourceBuilder().withName(secretName).build())
         .build();
+  }
+
+  public static String getCertMountPath() {
+    return CERT_MOUNT_PATH;
   }
 }

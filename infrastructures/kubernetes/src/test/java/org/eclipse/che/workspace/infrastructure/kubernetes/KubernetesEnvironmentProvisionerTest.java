@@ -29,6 +29,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityCon
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSshKeysProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
@@ -66,6 +67,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private CertificateProvisioner certificateProvisioner;
   @Mock private VcsSshKeysProvisioner vcsSshKeysProvisioner;
   @Mock private GitUserProfileProvisioner gitUserProfileProvisioner;
+  @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
 
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> k8sInfraProvisioner;
 
@@ -91,7 +93,8 @@ public class KubernetesEnvironmentProvisionerTest {
             serviceAccountProvisioner,
             certificateProvisioner,
             vcsSshKeysProvisioner,
-            gitUserProfileProvisioner);
+            gitUserProfileProvisioner,
+            vcsSslCertificateProvisioner);
     provisionOrder =
         inOrder(
             logsVolumeMachineProvisioner,

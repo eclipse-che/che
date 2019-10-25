@@ -72,6 +72,19 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+
+
+        # If git-self-signed-cert is used then configure Che Server with certificate content
+        # to propagate it to trust store
+        {{- if .Values.global.useGitSelfSignedCerts }}
+        - name: CHE_GIT_SELF__SIGNED__CERT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Values.global.gitSelfSignedCertConfigName }}
+              key: ca.crt
+              optional: false
+        {{- end }}
+
         {{- if .Values.global.tls.enabled }}
 
         # If self-signed-cert is used then configure Che Server with certificate content
