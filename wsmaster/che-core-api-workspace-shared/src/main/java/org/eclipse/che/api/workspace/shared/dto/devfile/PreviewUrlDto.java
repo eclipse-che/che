@@ -9,21 +9,26 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.auth.shared.dto;
 
+package org.eclipse.che.api.workspace.shared.dto.devfile;
+
+import org.eclipse.che.api.core.model.workspace.devfile.PreviewUrl;
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * Authentication token.
- *
- * @author gazarenkov
- */
 @DTO
-public interface Token {
-  /** "Authentication token obtained after login" */
-  String getValue();
+public interface PreviewUrlDto extends PreviewUrl {
 
-  void setValue(String value);
+  @Override
+  int getPort();
 
-  Token withValue(String value);
+  @Override
+  String getPath();
+
+  void setPort(int port);
+
+  PreviewUrlDto withPort(int port);
+
+  void setPath(String path);
+
+  PreviewUrlDto withPath(String path);
 }

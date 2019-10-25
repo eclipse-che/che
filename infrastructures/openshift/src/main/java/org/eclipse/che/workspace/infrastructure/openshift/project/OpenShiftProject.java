@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
+import static java.lang.String.format;
+
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -94,6 +96,20 @@ public class OpenShiftProject extends KubernetesNamespace {
     }
   }
 
+  /**
+   * Deletes the project. Deleting a non-existent projects is not an error as is not an attempt to
+   * delete a project that is already being deleted.
+   *
+   * @throws InfrastructureException if any unexpected exception occurs during project deletion
+   */
+  void delete() throws InfrastructureException {
+    String workspaceId = getWorkspaceId();
+    String projectName = getName();
+
+    OpenShiftClient osClient = clientFactory.createOC(workspaceId);
+    delete(projectName, osClient);
+  }
+
   /** Returns object for managing {@link Route} instances inside project. */
   public OpenShiftRoutes routes() {
     return routes;
@@ -125,6 +141,23 @@ public class OpenShiftProject extends KubernetesNamespace {
                 + "HINT: When using workspace project name placeholders, os-oauth or service account with more lenient permissions (cluster-admin) must be used.");
       }
       throw new KubernetesInfrastructureException(e);
+    }
+  }
+
+  private void delete(String projectName, OpenShiftClient osClient) throws InfrastructureException {
+    try {
+      osClient.projects().withName(projectName).delete();
+    } catch (KubernetesClientException e) {
+      if (e.getCode() == 404) {
+        LOG.warn(
+            format(
+                "Tried to delete project '%s' but it doesn't exist in the cluster.", projectName),
+            e);
+      } else if (e.getCode() == 409) {
+        LOG.info(format("The project '%s' is currently being deleted.", projectName), e);
+      } else {
+        throw new KubernetesInfrastructureException(e);
+      }
     }
   }
 

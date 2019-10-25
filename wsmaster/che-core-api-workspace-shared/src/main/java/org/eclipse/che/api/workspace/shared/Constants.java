@@ -185,5 +185,12 @@ public final class Constants {
   /** When generating workspace name from generateName, append this many characters. */
   public static final int WORKSPACE_GENERATE_NAME_CHARS_APPEND = 5;
 
+  /**
+   * The attribute of the workspace where we store the infrastructure namespace the workspace is
+   * deployed to
+   */
+  public static final String WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE =
+      "infrastructureNamespace";
+
   private Constants() {}
 }

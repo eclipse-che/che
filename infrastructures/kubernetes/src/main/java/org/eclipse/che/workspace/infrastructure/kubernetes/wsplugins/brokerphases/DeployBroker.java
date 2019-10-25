@@ -134,7 +134,7 @@ public class DeployBroker extends BrokerPhase {
     String reason = podEvent.getReason();
     String message = podEvent.getMessage();
     LOG.error(
-        "Unrecoverable event occurred during plugin broking for workspace '{}' startup: {}, {}, {}",
+        "Unrecoverable event occurred during plugin brokering for workspace '{}' startup: {}, {}, {}",
         workspaceId,
         reason,
         message,

@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -26,9 +27,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Named;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.impls.KubernetesNamespaceMetaImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -58,14 +65,16 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
       @Named("che.infra.kubernetes.namespace.allow_user_defined")
           boolean allowUserDefinedNamespaces,
       OpenShiftClientFactory clientFactory,
-      OpenShiftClientConfigFactory clientConfigFactory) {
+      OpenShiftClientConfigFactory clientConfigFactory,
+      WorkspaceManager workspaceManager) {
     super(
         projectName,
         serviceAccountName,
         clusterRoleName,
         defaultNamespaceName,
         allowUserDefinedNamespaces,
-        clientFactory);
+        clientFactory,
+        workspaceManager);
     if (allowUserDefinedNamespaces && !clientConfigFactory.isPersonalized()) {
       LOG.warn(
           "Users are allowed to list projects but Che server is configured with a service account. "
@@ -86,12 +95,21 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
    * @throws InfrastructureException if any exception occurs during project preparing
    */
   public OpenShiftProject create(String workspaceId) throws InfrastructureException {
-    final String projectName =
-        evalNamespaceName(workspaceId, EnvironmentContext.getCurrent().getSubject());
+    final String projectName;
+    try {
+      projectName = evalNamespaceName(workspaceId, EnvironmentContext.getCurrent().getSubject());
+    } catch (NotFoundException | ServerException | ConflictException | ValidationException e) {
+      throw new InfrastructureException(
+          format(
+              "Failed to evaluate the project name to use for workspace %s. The error message"
+                  + " was: %s",
+              workspaceId, e.getMessage()),
+          e);
+    }
     OpenShiftProject osProject = doCreateProject(workspaceId, projectName);
     osProject.prepare();
 
-    if (!isPredefined() && !isNullOrEmpty(getServiceAccountName())) {
+    if (isCreatingNamespace(workspaceId) && !isNullOrEmpty(getServiceAccountName())) {
       // prepare service account for workspace only if account name is configured
       // and project is not predefined
       // since predefined project should be prepared during Che deployment
@@ -101,6 +119,37 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
     }
 
     return osProject;
+  }
+
+  @Override
+  public void delete(String workspaceId) throws InfrastructureException {
+    String projectName;
+    try {
+      projectName = evalNamespaceName(workspaceId, EnvironmentContext.getCurrent().getSubject());
+    } catch (NotFoundException | ServerException | ConflictException | ValidationException e) {
+      throw new InfrastructureException(
+          format(
+              "Failed to evaluate the project name to use for workspace %s."
+                  + " The error message was: %s",
+              workspaceId, e.getMessage()),
+          e);
+    }
+
+    OpenShiftProject osProject = doCreateProject(workspaceId, projectName);
+    osProject.delete();
+  }
+
+  @VisibleForTesting
+  @Override
+  protected String evalNamespaceName(String workspaceId, Subject currentUser)
+      throws NotFoundException, ServerException, InfrastructureException, ConflictException,
+          ValidationException {
+    return super.evalNamespaceName(workspaceId, currentUser);
+  }
+
+  @Override
+  protected boolean checkNamespaceExists(String namespaceName) throws InfrastructureException {
+    return fetchNamespaceObject(namespaceName).isPresent();
   }
 
   /**
@@ -129,9 +178,13 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   @Override
   protected Optional<KubernetesNamespaceMeta> fetchNamespace(String name)
       throws InfrastructureException {
+    return fetchNamespaceObject(name).map(this::asNamespaceMeta);
+  }
+
+  private Optional<Project> fetchNamespaceObject(String name) throws InfrastructureException {
     try {
       Project project = clientFactory.createOC().projects().withName(name).get();
-      return Optional.of(asNamespaceMeta(project));
+      return Optional.ofNullable(project);
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {
         // 403 means that the project does not exist

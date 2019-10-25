@@ -11,9 +11,11 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,14 +40,15 @@ public class RemoveNamespaceOnWorkspaceRemoveTest {
   private static final String WORKSPACE_ID = "workspace123";
 
   @Mock private Workspace workspace;
+  @Mock private KubernetesNamespaceFactory namespaceFactory;
 
   private RemoveNamespaceOnWorkspaceRemove removeNamespaceOnWorkspaceRemove;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    removeNamespaceOnWorkspaceRemove = spy(new RemoveNamespaceOnWorkspaceRemove(null, null));
+    removeNamespaceOnWorkspaceRemove = spy(new RemoveNamespaceOnWorkspaceRemove(namespaceFactory));
 
-    doNothing().when(removeNamespaceOnWorkspaceRemove).doRemoveNamespace(anyString());
+    lenient().doNothing().when(namespaceFactory).delete(anyString());
 
     when(workspace.getId()).thenReturn(WORKSPACE_ID);
   }
@@ -60,9 +63,21 @@ public class RemoveNamespaceOnWorkspaceRemoveTest {
   }
 
   @Test
-  public void shouldRemoveNamespaceOnWorkspaceRemovedEvent() throws Exception {
+  public void shouldRemoveNamespaceOnWorkspaceRemovedEventIfNamespaceIsManaged() throws Exception {
+    when(namespaceFactory.isManagingNamespace(any())).thenReturn(true);
+
     removeNamespaceOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
 
-    verify(removeNamespaceOnWorkspaceRemove).doRemoveNamespace(WORKSPACE_ID);
+    verify(namespaceFactory).delete(WORKSPACE_ID);
+  }
+
+  @Test
+  public void shouldNotRemoveNamespaceOnWorkspaceRemovedEventIfNamespaceIsNotManaged()
+      throws Exception {
+    when(namespaceFactory.isManagingNamespace(any())).thenReturn(false);
+
+    removeNamespaceOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
+
+    verify(namespaceFactory, never()).delete(any());
   }
 }
