@@ -7,14 +7,14 @@
                           che-title="Add or Import Project"
                           che-multiline-title
                           che-font-icon="material-design icon-ic_add_24px"
-                          che-on-change="projectSourceSelectorController.updateData({buttonState: state, actionType: projectSourceSelectorController.actionType.ADD_PROJECT})"
+                          che-on-change="projectSourceSelectorController.updateWidget({buttonState: state, actionType: projectSourceSelectorController.actionType.ADD_PROJECT})"
                           che-state="projectSourceSelectorController.buttonState['ADD_PROJECT']"></toggle-single-button>
     <toggle-single-button class="edit-project-toggle-button"
                           ng-repeat="projectTemplate in projectSourceSelectorController.projectTemplates"
                           id="{{projectTemplate.name}}"
                           che-title="{{projectTemplate.name}}"
                           che-font-icon="chefont cheico-project"
-                          che-on-change="projectSourceSelectorController.updateData({buttonState: state, actionType: projectSourceSelectorController.actionType.EDIT_PROJECT, template: projectTemplate})"
+                          che-on-change="projectSourceSelectorController.updateWidget({buttonState: state, actionType: projectSourceSelectorController.actionType.EDIT_PROJECT, template: projectTemplate})"
                           che-state="projectSourceSelectorController.buttonState[projectTemplate.name]"
                           uib-tooltip="{{projectTemplate.name}}"></toggle-single-button>
   </div>
