@@ -13,6 +13,8 @@
 
 import {CheFactory} from '../../../../../components/api/che-factory.factory';
 
+const ATTR_URL = 'factoryurl';
+
 /**
  * This class is handling the controller for the import devfile by URL
  *
@@ -20,38 +22,36 @@ import {CheFactory} from '../../../../../components/api/che-factory.factory';
  */
 export class DevfileByUrlController {
 
-  static $inject = ['cheFactory'];
+  static $inject = ['cheFactory', '$q'];
 
   workspaceDevfileOnChange: Function;
 
   private cheFactory: CheFactory;
-
-  private validInfo: { isValid: boolean; errors: string[]};
+  private $q: ng.IQService;
 
   /**
    * Default constructor that is using resource injection
    */
-  constructor(cheFactory: CheFactory) {
+  constructor(cheFactory: CheFactory, $q: ng.IQService) {
     this.cheFactory = cheFactory;
-
-    this.validInfo = { isValid: true, errors: [] };
+    this.$q = $q;
   }
 
-  $onInit(): void { }
+  $onInit(): void {
+  }
 
   onUrlChanged(url: string): void {
-    this.cheFactory.fetchParameterFactory({url}).then((res: { devfile: che.IWorkspaceDevfile }) => {
-      const {devfile} = res;
-      this.validInfo = { isValid: true, errors: [] };
+    if (this.cheFactory.hasDevfile(url)) {
+      const devfile = this.cheFactory.getDevfile(url);
+      const attributes = {};
+      attributes[ATTR_URL] = url;
       if (angular.isFunction(this.workspaceDevfileOnChange) && devfile) {
-        this.workspaceDevfileOnChange({devfile});
+        this.workspaceDevfileOnChange({devfile, attributes});
       }
-    }, (error: any) => {
-      this.validInfo.isValid = false;
-      let message = error && error.data && error.data.message ? error.data.message : 'Error. HTTP request failed';
-      this.validInfo.errors.push(message);
-      console.log('>>>>>>>>>>> DevfileByUrlController error', error);
-    });
+    }
   }
 
+  isUrlValid(url: string): ng.IPromise<void> {
+    return this.cheFactory.fetchDevfile(url);
+  }
 }

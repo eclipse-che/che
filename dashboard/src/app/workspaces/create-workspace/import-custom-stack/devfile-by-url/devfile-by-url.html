@@ -18,20 +18,21 @@
                    che-place-holder="Url of the devfile"
                    aria-label="Url of the devfile"
                    che-width="auto"
-                   ng-model="devfileByUrlController.location"
+                   ng-model="devfileByUrlController.workspaceDevfileLocation"
                    che-on-change="devfileByUrlController.onUrlChanged($value)"
+                   ng-model-options="{ debounce: { 'default': 1000, 'blur': 0 }}"
                    required
-                   custom-validator="devfileByUrlController.validInfo.isValid === true"
+                   custom-async-validator="devfileByUrlController.isUrlValid($value)"
                    ng-maxlength="512"
-                   ng-pattern="/^http[s]?:\/\/[a-z0-9][a-z0-9\-\.\/]+[a-z0-9](\:[0-9]{1,6})?[\?[a-zA-Z0-9\-\.\=\&%]+]?$/i">
+                   ng-pattern="/^http[s]?:\/\/[a-z0-9][a-z0-9\-\.\/]+[a-z0-9](?:\:[0-9]{1,6}\/?)?[\?[a-z0-9\-\.\=\[\]\&%]+]?$/i">
       <div ng-message="pattern">
         Invalid URL
       </div>
       <div ng-message="maxlength">
         The URL has to be less than 512 characters long.
       </div>
-      <div ng-message="customValidator">
-        ---{{devfileByUrlController.validInfo.errors[0]}}
+      <div ng-message="customAsyncValidator">
+        Unknown Content Type or no Content Type found in URL
       </div>
     </che-input-box>
   </form>

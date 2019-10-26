@@ -14,7 +14,9 @@ import {IImportStackScopeBindings} from './import-custom-stack.directive';
 import {YAML, URL} from './devfile-source-selector/devfile-source-selector.directive';
 
 /**
- * TODO
+ * This class is handling the controller for the import stack directive
+ *
+ * @author Oleksii Orel
  */
 export class ImportStackController implements IImportStackScopeBindings {
 
@@ -22,16 +24,16 @@ export class ImportStackController implements IImportStackScopeBindings {
 
   onChange: Function;
 
+  devfile: che.IWorkspaceDevfile;
+
+  devfileLocation: string;
+
   /**
    * The imported devfile.
    */
   private draftDevfile: che.IWorkspaceDevfile;
 
-  private devfile: che.IWorkspaceDevfile;
-
   private selectedSource: string;
-
-  private attributes: { factoryurl?: string };
 
   /**
    * Default constructor that is using resource injection
@@ -47,20 +49,20 @@ export class ImportStackController implements IImportStackScopeBindings {
     };
   }
 
-  $onInit(): void { }
+  $onInit(): void {
+  }
 
-  updateDevfile(devfile: che.IWorkspaceDevfile, attributes: { factoryurl?: string } = {}): void {
+  updateDevfile(devfile: che.IWorkspaceDevfile, attrs: {factoryurl?: string} = {}): void {
     this.devfile = devfile;
     if (angular.isFunction(this.onChange)) {
-      this.onChange({devfile, attributes});
+      this.onChange({devfile, attrs});
     }
   }
 
   onSourceChange(source: string): void {
-     if(source === YAML && this.devfile) {
-       this.draftDevfile = angular.copy(this.devfile);
-       console.log('>>>>>>>>>>> ImportStackController source', source, this.draftDevfile);
-     }
+    if (source === YAML && this.devfile) {
+      this.draftDevfile = angular.copy(this.devfile);
+    }
   }
 
   isUrlSelected(): boolean {

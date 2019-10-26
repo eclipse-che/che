@@ -41,6 +41,7 @@ export class DevfileByUrl implements ng.IDirective {
 
     // scope values
     this.scope = {
+      workspaceDevfileLocation: '=',
       workspaceDevfileOnChange: '&'
     };
   }

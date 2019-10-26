@@ -15,6 +15,11 @@ export interface IImportStackScopeBindings {
   onChange: Function;
 }
 
+/**
+ * Defines a directive for displaying import stack widget.
+ *
+ * @author Oleksii Orel
+ */
 export class ImportStack implements ng.IDirective {
 
   restrict: string = 'E';
@@ -22,6 +27,8 @@ export class ImportStack implements ng.IDirective {
   controller: string = 'ImportStackController';
   controllerAs: string = 'importStackController';
   bindToController: boolean = true;
+
+  transclude: boolean = true;
 
   scope: {
     onChange: string;

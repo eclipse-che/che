@@ -11,16 +11,16 @@
  */
 'use strict';
 
-interface IModelValidators extends ng.IModelValidators {
-  customValidator: (modelValue: any) => boolean;
+interface IModelValidators extends ng.IAsyncModelValidators {
+  customAsyncValidator: (modelValue: string) => ng.IPromise<boolean>;
 }
 
 interface INgModelController extends ng.INgModelController {
-  $validators: IModelValidators;
+  $asyncValidators: IModelValidators;
 }
 
 interface IAttributes extends ng.IAttributes {
-  customValidator: string;
+  customAsyncValidator: string;
 }
 
 /**
@@ -41,15 +41,11 @@ export class CustomAsyncValidator implements ng.IDirective {
       return;
     }
 
-      ngModel.$asyncValidators.customAsyncValidator = (modelValue: string) => {
-        // parent scope ?
-        let scopingTest = $scope.$parent;
-        if (!scopingTest) {
-          scopingTest = $scope;
-        }
+    const $testScope = $scope.$parent ? $scope.$parent : $scope;
 
-        return scopingTest.$eval(attrs.customAsyncValidator, {$value: modelValue});
-      };
+    ctrl.$asyncValidators.customAsyncValidator = modelValue => {
+      return $testScope.$eval(attrs.customAsyncValidator, {$value: modelValue});
+    };
   }
 
 }

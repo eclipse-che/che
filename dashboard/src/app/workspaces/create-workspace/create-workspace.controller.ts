@@ -183,7 +183,7 @@ export class CreateWorkspaceController {
    */
   createWorkspace(): ng.IPromise<che.IWorkspace> {
     const { devfile, attrs } = this.devfiles.get(this.selectedTab);
-    return this.createWorkspaceSvc.createWorkspaceFromDevfile(devfile, attrs);
+    return this.createWorkspaceSvc.createWorkspaceFromDevfile(devfile, attrs, this.selectedTab === TABS.IMPORT_DEVFILE);
   }
 
 

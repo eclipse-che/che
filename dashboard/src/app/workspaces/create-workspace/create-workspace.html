@@ -26,7 +26,7 @@
         <md-tab-body>
           <ready-to-go-stacks
             on-change="createWorkspaceController.onDevfileChange(createWorkspaceController.tabs.READY_TO_GO, devfile, attrs)">
-              <che-button-save-flat id="create-workspace-footer-button" name="saveButton" che-button-title="Create & Open"
+              <che-button-save-flat id="ready-to-go-stack-create-workspace-footer-button" name="saveButton" che-button-title="Create & Open"
                 ng-click="createWorkspaceController.createWorkspaceAndOpenIDE()" ng-disabled="createWorkspaceForm.$invalid">
               </che-button-save-flat>
             </ready-to-go-stacks>
@@ -40,8 +40,8 @@
           <span class="che-tab-label-title">IMPORT DEVFILE</span>
         </md-tab-label>
         <md-tab-body>
-          <import-stack on-change="createWorkspaceController.updateImportedDevfile(devfile)">
-            <che-button-save-flat id="create-workspace-footer-button" name="saveButton" che-button-title="Create & Open"
+          <import-stack on-change="createWorkspaceController.onDevfileChange(createWorkspaceController.tabs.IMPORT_DEVFILE, devfile, attrs)">
+            <che-button-save-flat id="import-custom-stack-create-workspace-footer-button" name="saveButton" che-button-title="Create & Open"
               ng-click="createWorkspaceController.createWorkspaceAndOpenIDE()" ng-disabled="createWorkspaceForm.$invalid">
             </che-button-save-flat>
           </import-stack>
