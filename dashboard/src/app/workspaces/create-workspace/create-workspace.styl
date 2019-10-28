@@ -1,12 +1,13 @@
 #create-workspace
-  height 100%
+  display flex
+  flex-direction column
+  flex 1
 
 .che-toolbar-header > div:last-child
   bottom 9px
 
 .create-workspace-header-button .che-button-dropdown
-  button.che-button,
-  .fa-caret-down
+  button.che-button, .fa-caret-down
     min-height 36px
     height 36px
 
@@ -14,19 +15,26 @@
     top 36px
 
 md-content.create-workspace-content
-  padding 0 0 10px 0
-  height 100%
+  padding 0
+  height 0
+  flex-grow 1
+
   md-tabs-canvas
     height 50px
+
     & *
       height inherit
+
     md-pagination-wrapper
       md-tab-item:not(.md-active)
         border-bottom none
+
       md-tab-item
         border-bottom 1px solid $primary-color
+
   md-tab-content > *
     background-color $very-light-grey-background-color
+
   .che-input-box > div
     min-height 55px
 
@@ -41,12 +49,9 @@ md-content.create-workspace-content
   .che-label-container-content
     min-width 850px
 
-  #create-workspace-ready-to-go-button,
-  #create-workspace-import-stack-form-button
+  #create-workspace-ready-to-go-button, #create-workspace-import-stack-form-button
     width 100%
 
     button
       margin 0 !important
       width 100% !important
-
-
