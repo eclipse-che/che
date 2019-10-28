@@ -45,7 +45,7 @@ import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
-import org.eclipse.che.multiuser.api.auth.filter.SessionStore;
+import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
 import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;

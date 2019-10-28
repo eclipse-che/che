@@ -42,7 +42,7 @@ import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
-import org.eclipse.che.multiuser.api.auth.filter.SessionStore;
+import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.eclipse.che.multiuser.machine.authentication.shared.Constants;

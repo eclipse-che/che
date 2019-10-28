@@ -241,7 +241,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
-            <artifactId>che-multiuser-api-auth</artifactId>
+            <artifactId>che-multiuser-api-authentication-commons</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
@@ -435,7 +435,7 @@
                                 <dep>org.eclipse.che.core:che-core-db-vendor-mysql</dep>
                                 <dep>org.eclipse.che.core:che-core-sql-schema</dep>
                                 <dep>org.eclipse.che.core:che-core-api-ssh-shared</dep>
-                                <dep>org.eclipse.che.multiuser:che-multiuser-api-auth</dep>
+                                <dep>org.eclipse.che.multiuser:che-multiuser-api-authentications-commons</dep>
                                 <dep>org.eclipse.che.multiuser:che-multiuser-sql-schema</dep>
                                 <dep>org.jgroups:jgroups</dep>
                                 <dep>io.jaegertracing:jaeger-core</dep>
