@@ -18,6 +18,9 @@ public interface Command {
   /** Returns the name of the command. It is mandatory and unique per commands set. */
   String getName();
 
+  /** Returns preview url of the command. Optional parameter, can be null if not specified. */
+  PreviewUrl getPreviewUrl();
+
   /**
    * Returns the command actions. Now the only one command must be specified in list but there are
    * plans to implement supporting multiple actions commands. It is mandatory.

@@ -43,7 +43,7 @@ public class VcsSslCertificateProvisioner
   static final String CHE_GIT_SELF_SIGNED_CERT_CONFIG_MAP_SUFFIX = "-che-git-self-signed-cert";
   static final String CHE_GIT_SELF_SIGNED_CERT_VOLUME = "che-git-self-signed-cert";
   static final String CERT_MOUNT_PATH = "/etc/che/git/cert/";
-  static final String CA_CERT_FILE = "ca.crt";
+  static final String CA_CERT_FILE = "cert.pem";
 
   @Inject(optional = true)
   @Named("che.git.self_signed_cert")

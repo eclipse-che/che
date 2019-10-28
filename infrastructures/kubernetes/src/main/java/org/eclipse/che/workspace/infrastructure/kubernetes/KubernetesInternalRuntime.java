@@ -82,6 +82,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRunti
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -118,6 +119,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final SidecarToolingProvisioner<E> toolingProvisioner;
   private final IngressPathTransformInverter ingressPathTransformInverter;
   private final RuntimeHangingDetector runtimeHangingDetector;
+  private final PreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   protected final Tracer tracer;
 
   @Inject
@@ -140,6 +142,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       SidecarToolingProvisioner<E> toolingProvisioner,
       IngressPathTransformInverter ingressPathTransformInverter,
       RuntimeHangingDetector runtimeHangingDetector,
+      PreviewUrlCommandProvisioner previewUrlCommandProvisioner,
       Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace) {
@@ -162,6 +165,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.ingressPathTransformInverter = ingressPathTransformInverter;
     this.runtimeHangingDetector = runtimeHangingDetector;
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
+    this.previewUrlCommandProvisioner = previewUrlCommandProvisioner;
     this.tracer = tracer;
   }
 
@@ -202,6 +206,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       startSynchronizer.checkFailure();
 
       startMachines();
+
+      previewUrlCommandProvisioner.provision(context.getEnvironment(), namespace);
+      runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
 
       startSynchronizer.checkFailure();
 

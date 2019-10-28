@@ -68,6 +68,8 @@ public class GitUserProfileProvisionerTest {
 
   @Mock private UserManager userManager;
 
+  @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
+
   private GitUserProfileProvisioner gitUserProfileProvisioner;
 
   @BeforeMethod
@@ -77,7 +79,8 @@ public class GitUserProfileProvisionerTest {
     when(pod.getMetadata()).thenReturn(podMeta);
     when(pod.getSpec()).thenReturn(podSpec);
     k8sEnv.addPod(pod);
-    gitUserProfileProvisioner = new GitUserProfileProvisioner(preferenceManager, userManager);
+    gitUserProfileProvisioner =
+        new GitUserProfileProvisioner(preferenceManager, userManager, vcsSslCertificateProvisioner);
 
     Subject subject = new SubjectImpl(null, "id", null, false);
     EnvironmentContext environmentContext = new EnvironmentContext();

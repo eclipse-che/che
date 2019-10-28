@@ -34,6 +34,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVars
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -67,6 +68,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private CertificateProvisioner certificateProvisioner;
   @Mock private VcsSshKeysProvisioner vcsSshKeysProvisioner;
   @Mock private GitUserProfileProvisioner gitUserProfileProvisioner;
+  @Mock private PreviewUrlExposer previewUrlExposer;
   @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
 
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> k8sInfraProvisioner;
@@ -94,6 +96,7 @@ public class KubernetesEnvironmentProvisionerTest {
             certificateProvisioner,
             vcsSshKeysProvisioner,
             gitUserProfileProvisioner,
+            previewUrlExposer,
             vcsSslCertificateProvisioner);
     provisionOrder =
         inOrder(
@@ -111,7 +114,8 @@ public class KubernetesEnvironmentProvisionerTest {
             proxySettingsProvisioner,
             serviceAccountProvisioner,
             certificateProvisioner,
-            gitUserProfileProvisioner);
+            gitUserProfileProvisioner,
+            previewUrlExposer);
   }
 
   @Test

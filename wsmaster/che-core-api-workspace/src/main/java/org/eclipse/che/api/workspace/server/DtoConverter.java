@@ -35,6 +35,7 @@ import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Env;
 import org.eclipse.che.api.core.model.workspace.devfile.Metadata;
+import org.eclipse.che.api.core.model.workspace.devfile.PreviewUrl;
 import org.eclipse.che.api.core.model.workspace.devfile.Project;
 import org.eclipse.che.api.core.model.workspace.devfile.Source;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
@@ -64,6 +65,7 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.EndpointDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.EntrypointDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.EnvDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.PreviewUrlDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 
@@ -188,10 +190,30 @@ public final class DtoConverter {
       org.eclipse.che.api.core.model.workspace.devfile.Command command) {
     List<DevfileActionDto> actions =
         command.getActions().stream().map(DtoConverter::asDto).collect(toList());
-    return newDto(DevfileCommandDto.class)
-        .withName(command.getName())
-        .withActions(actions)
-        .withAttributes(command.getAttributes());
+
+    DevfileCommandDto commandDto =
+        newDto(DevfileCommandDto.class)
+            .withName(command.getName())
+            .withActions(actions)
+            .withAttributes(command.getAttributes());
+
+    if (command.getPreviewUrl() != null) {
+      commandDto.setPreviewUrl(asDto(command.getPreviewUrl()));
+    }
+    return commandDto;
+  }
+
+  private static PreviewUrlDto asDto(PreviewUrl previewUrl) {
+    final PreviewUrlDto previewUrlDto = newDto(PreviewUrlDto.class);
+    if (previewUrl != null) {
+      if (previewUrl.getPath() != null) {
+        previewUrlDto.setPath(previewUrl.getPath());
+      }
+      if (previewUrl.getPort() != 0) {
+        previewUrlDto.setPort(previewUrl.getPort());
+      }
+    }
+    return previewUrlDto;
   }
 
   private static DevfileActionDto asDto(Action action) {

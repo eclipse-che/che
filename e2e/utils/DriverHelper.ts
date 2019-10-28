@@ -460,7 +460,7 @@ export class DriverHelper {
     }
 
     public async reloadPage() {
-        Logger.trace('DriverHelper.reloadPage');
+        Logger.debug('DriverHelper.reloadPage');
 
         await this.driver.navigate().refresh();
     }
@@ -473,7 +473,7 @@ export class DriverHelper {
     }
 
     public async navigateToUrl(url: string) {
-        Logger.trace(`DriverHelper.navigateToUrl ${url}`);
+        Logger.debug(`DriverHelper.navigateToUrl ${url}`);
 
         await this.driver.navigate().to(url);
     }
@@ -534,7 +534,7 @@ export class DriverHelper {
     }
 
     async switchToSecondWindow(mainWindowHandle: string) {
-        Logger.trace('DriverHelper.switchToSecondWindow');
+        Logger.debug('DriverHelper.switchToSecondWindow');
 
         await this.waitOpenningSecondWindow();
         const handles: string[] = await this.driver.getAllWindowHandles();

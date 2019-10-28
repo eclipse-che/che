@@ -26,6 +26,12 @@ public interface DevfileCommandDto extends Command {
 
   DevfileCommandDto withName(String name);
 
+  void setPreviewUrl(PreviewUrlDto previewUrl);
+
+  DevfileCommandDto withPreviewUrl(PreviewUrlDto previewUrl);
+
+  PreviewUrlDto getPreviewUrl();
+
   @Override
   List<DevfileActionDto> getActions();
 

@@ -14,9 +14,11 @@ package org.eclipse.che.api.workspace.server.model.impl;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -25,6 +27,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.config.Command;
+import org.eclipse.che.api.core.model.workspace.devfile.PreviewUrl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.PreviewUrlImpl;
 
 /**
  * Data object for {@link Command}.
@@ -49,6 +53,8 @@ public class CommandImpl implements Command {
   @Column(name = "type", nullable = false)
   private String type;
 
+  @Embedded private PreviewUrlImpl previewUrl;
+
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "command_attributes", joinColumns = @JoinColumn(name = "command_id"))
   @MapKeyColumn(name = "name")
@@ -63,10 +69,26 @@ public class CommandImpl implements Command {
     this.type = type;
   }
 
+  public CommandImpl(
+      String name,
+      String commandLine,
+      String type,
+      PreviewUrlImpl previewUrl,
+      Map<String, String> attributes) {
+    this.name = name;
+    this.commandLine = commandLine;
+    this.type = type;
+    this.previewUrl = previewUrl;
+    this.attributes = new HashMap<>(attributes);
+  }
+
   public CommandImpl(Command command) {
     this.name = command.getName();
     this.commandLine = command.getCommandLine();
     this.type = command.getType();
+    if (command.getPreviewUrl() != null) {
+      this.previewUrl = new PreviewUrlImpl(command.getPreviewUrl());
+    }
     this.attributes = new HashMap<>(command.getAttributes());
   }
 
@@ -86,6 +108,18 @@ public class CommandImpl implements Command {
 
   public void setCommandLine(String commandLine) {
     this.commandLine = commandLine;
+  }
+
+  public PreviewUrlImpl getPreviewUrl() {
+    return previewUrl;
+  }
+
+  public void setPreviewUrl(PreviewUrl previewUrl) {
+    if (previewUrl != null) {
+      this.previewUrl = new PreviewUrlImpl(previewUrl);
+    } else {
+      this.previewUrl = null;
+    }
   }
 
   @Override
@@ -110,48 +144,36 @@ public class CommandImpl implements Command {
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
+  public boolean equals(Object o) {
+    if (this == o) {
       return true;
     }
-    if (!(obj instanceof CommandImpl)) {
+    if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final CommandImpl that = (CommandImpl) obj;
-    return Objects.equals(id, that.id)
-        && Objects.equals(name, that.name)
-        && Objects.equals(commandLine, that.commandLine)
-        && Objects.equals(type, that.type)
-        && getAttributes().equals(that.getAttributes());
+    CommandImpl command = (CommandImpl) o;
+    return Objects.equals(id, command.id)
+        && Objects.equals(name, command.name)
+        && Objects.equals(commandLine, command.commandLine)
+        && Objects.equals(type, command.type)
+        && Objects.equals(previewUrl, command.previewUrl)
+        && Objects.equals(attributes, command.attributes);
   }
 
   @Override
   public int hashCode() {
-    int hash = 7;
-    hash = 31 * hash + Objects.hashCode(id);
-    hash = 31 * hash + Objects.hashCode(name);
-    hash = 31 * hash + Objects.hashCode(commandLine);
-    hash = 31 * hash + Objects.hashCode(type);
-    hash = 31 * hash + getAttributes().hashCode();
-    return hash;
+    return Objects.hash(id, name, commandLine, type, previewUrl, attributes);
   }
 
   @Override
   public String toString() {
-    return "CommandImpl{"
-        + "id="
-        + id
-        + ", name='"
-        + name
-        + '\''
-        + ", commandLine='"
-        + commandLine
-        + '\''
-        + ", type='"
-        + type
-        + '\''
-        + ", attributes="
-        + attributes
-        + '}';
+    return new StringJoiner(", ", CommandImpl.class.getSimpleName() + "[", "]")
+        .add("id=" + id)
+        .add("name='" + name + "'")
+        .add("commandLine='" + commandLine + "'")
+        .add("type='" + type + "'")
+        .add("previewUrl=" + previewUrl)
+        .add("attributes=" + attributes)
+        .toString();
   }
 }

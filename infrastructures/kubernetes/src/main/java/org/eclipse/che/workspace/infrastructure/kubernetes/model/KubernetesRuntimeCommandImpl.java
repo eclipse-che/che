@@ -14,9 +14,11 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.model;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -25,6 +27,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.config.Command;
+import org.eclipse.che.api.core.model.workspace.devfile.PreviewUrl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.PreviewUrlImpl;
 
 /**
  * Data object for {@link Command}.
@@ -49,6 +53,8 @@ public class KubernetesRuntimeCommandImpl implements Command {
   @Column(name = "type", nullable = false)
   private String type;
 
+  @Embedded private PreviewUrlImpl previewUrl;
+
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
       name = "k8s_runtime_command_attributes",
@@ -69,6 +75,9 @@ public class KubernetesRuntimeCommandImpl implements Command {
     this.name = command.getName();
     this.commandLine = command.getCommandLine();
     this.type = command.getType();
+    if (command.getPreviewUrl() != null) {
+      this.previewUrl = new PreviewUrlImpl(command.getPreviewUrl());
+    }
     this.attributes = command.getAttributes();
   }
 
@@ -88,6 +97,15 @@ public class KubernetesRuntimeCommandImpl implements Command {
 
   public void setCommandLine(String commandLine) {
     this.commandLine = commandLine;
+  }
+
+  @Override
+  public PreviewUrl getPreviewUrl() {
+    return previewUrl;
+  }
+
+  public void setPreviewUrl(PreviewUrlImpl previewUrl) {
+    this.previewUrl = previewUrl;
   }
 
   @Override
@@ -112,48 +130,36 @@ public class KubernetesRuntimeCommandImpl implements Command {
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
+  public boolean equals(Object o) {
+    if (this == o) {
       return true;
     }
-    if (!(obj instanceof KubernetesRuntimeCommandImpl)) {
+    if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final KubernetesRuntimeCommandImpl that = (KubernetesRuntimeCommandImpl) obj;
+    KubernetesRuntimeCommandImpl that = (KubernetesRuntimeCommandImpl) o;
     return Objects.equals(id, that.id)
         && Objects.equals(name, that.name)
         && Objects.equals(commandLine, that.commandLine)
         && Objects.equals(type, that.type)
-        && getAttributes().equals(that.getAttributes());
+        && Objects.equals(previewUrl, that.previewUrl)
+        && Objects.equals(attributes, that.attributes);
   }
 
   @Override
   public int hashCode() {
-    int hash = 7;
-    hash = 31 * hash + Objects.hashCode(id);
-    hash = 31 * hash + Objects.hashCode(name);
-    hash = 31 * hash + Objects.hashCode(commandLine);
-    hash = 31 * hash + Objects.hashCode(type);
-    hash = 31 * hash + getAttributes().hashCode();
-    return hash;
+    return Objects.hash(id, name, commandLine, type, previewUrl, attributes);
   }
 
   @Override
   public String toString() {
-    return "KubernetesRuntimeCommandImpl{"
-        + "id="
-        + id
-        + ", name='"
-        + name
-        + '\''
-        + ", commandLine='"
-        + commandLine
-        + '\''
-        + ", type='"
-        + type
-        + '\''
-        + ", attributes="
-        + attributes
-        + '}';
+    return new StringJoiner(", ", KubernetesRuntimeCommandImpl.class.getSimpleName() + "[", "]")
+        .add("id=" + id)
+        .add("name='" + name + "'")
+        .add("commandLine='" + commandLine + "'")
+        .add("type='" + type + "'")
+        .add("previewUrl=" + previewUrl)
+        .add("attributes=" + attributes)
+        .toString();
   }
 }

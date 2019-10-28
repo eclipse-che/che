@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static java.lang.String.format;
+
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
@@ -117,6 +119,17 @@ public class KubernetesNamespace {
     }
   }
 
+  /**
+   * Deletes the namespace. Deleting a non-existent namespace is not an error as is not an attempt
+   * to delete a namespace that is already being deleted.
+   *
+   * @throws InfrastructureException if any unexpected exception occurs during namespace deletion
+   */
+  void delete() throws InfrastructureException {
+    KubernetesClient client = clientFactory.create(workspaceId);
+    delete(name, client);
+  }
+
   /** Returns namespace name */
   public String getName() {
     return name;
@@ -211,6 +224,25 @@ public class KubernetesNamespace {
                 + "When using workspace namespace placeholders, service account with lenient permissions (cluster-admin) must be used.");
       }
       throw new KubernetesInfrastructureException(e);
+    }
+  }
+
+  private void delete(String namespaceName, KubernetesClient client)
+      throws InfrastructureException {
+    try {
+      client.namespaces().withName(namespaceName).delete();
+    } catch (KubernetesClientException e) {
+      if (e.getCode() == 404) {
+        LOG.warn(
+            format(
+                "Tried to delete namespace '%s' but it doesn't exist in the cluster.",
+                namespaceName),
+            e);
+      } else if (e.getCode() == 409) {
+        LOG.info(format("The namespace '%s' is currently being deleted.", namespaceName), e);
+      } else {
+        throw new KubernetesInfrastructureException(e);
+      }
     }
   }
 

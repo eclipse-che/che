@@ -11,9 +11,11 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,14 +40,15 @@ public class RemoveProjectOnWorkspaceRemoveTest {
   private static final String WORKSPACE_ID = "workspace123";
 
   @Mock private Workspace workspace;
+  @Mock private OpenShiftProjectFactory projectFactory;
 
   private RemoveProjectOnWorkspaceRemove removeProjectOnWorkspaceRemove;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    removeProjectOnWorkspaceRemove = spy(new RemoveProjectOnWorkspaceRemove(null, null));
+    removeProjectOnWorkspaceRemove = spy(new RemoveProjectOnWorkspaceRemove(projectFactory));
 
-    doNothing().when(removeProjectOnWorkspaceRemove).doRemoveProject(anyString());
+    lenient().doNothing().when(projectFactory).delete(anyString());
 
     when(workspace.getId()).thenReturn(WORKSPACE_ID);
   }
@@ -60,9 +63,22 @@ public class RemoveProjectOnWorkspaceRemoveTest {
   }
 
   @Test
-  public void shouldRemoveProjectOnWorkspaceRemovedEvent() throws Exception {
+  public void shouldRemoveProjectOnWorkspaceRemovedEventIfFactoryIsManagingNamespaces()
+      throws Exception {
+    when(projectFactory.isManagingNamespace(any())).thenReturn(true);
+
     removeProjectOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
 
-    verify(removeProjectOnWorkspaceRemove).doRemoveProject(WORKSPACE_ID);
+    verify(projectFactory).delete(WORKSPACE_ID);
+  }
+
+  @Test
+  public void shouldNotRemoveProjectOnWorkspaceRemovedEventIfFactoryIsNotManagingNamespaces()
+      throws Exception {
+    when(projectFactory.isManagingNamespace(any())).thenReturn(false);
+
+    removeProjectOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
+
+    verify(projectFactory, never()).delete(any());
   }
 }

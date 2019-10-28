@@ -43,6 +43,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePod
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftPreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerResolver;
 
 /**
@@ -72,6 +73,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       OpenShiftEnvironmentProvisioner kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<OpenShiftEnvironment> toolingProvisioner,
       RuntimeHangingDetector runtimeHangingDetector,
+      OpenShiftPreviewUrlCommandProvisioner previewUrlCommandProvisioner,
       Tracer tracer,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project) {
@@ -94,6 +96,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         toolingProvisioner,
         null,
         runtimeHangingDetector,
+        previewUrlCommandProvisioner,
         tracer,
         context,
         project);
