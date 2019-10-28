@@ -14,7 +14,7 @@
 interface IDevfileSourceSelectorScope extends ng.IScope {
   selectedSource: string;
   onSelectSource: (source: string) => void;
-  onChange?: Function;
+  onChange: (eventData: {source: string}) => void;
 }
 
 export const URL = 'url';
@@ -45,12 +45,12 @@ export class DevfileSourceSelector implements ng.IDirective {
   }
 
   link($scope: IDevfileSourceSelectorScope) {
-    $scope[URL]= URL;
+    $scope[URL] = URL;
     $scope[YAML] = YAML;
     $scope.selectedSource = URL;
     $scope.onSelectSource = (source: string) => {
       $scope.selectedSource = source;
-      if($scope.onChange !== undefined) {
+      if ($scope.onChange !== undefined) {
         $scope.onChange({source});
       }
     };

@@ -22,26 +22,24 @@ const ATTR_URL = 'factoryurl';
  */
 export class DevfileByUrlController {
 
-  static $inject = ['cheFactory', '$q'];
+  static $inject = ['cheFactory'];
 
   workspaceDevfileOnChange: Function;
   workspaceDevfileLocation: string;
 
   private cheFactory: CheFactory;
-  private $q: ng.IQService;
 
   /**
    * Default constructor that is using resource injection
    */
   constructor(cheFactory: CheFactory, $q: ng.IQService) {
     this.cheFactory = cheFactory;
-    this.$q = $q;
   }
 
   $onInit(): void {
   }
 
-  onUrlChanged(url: string, form): void {
+  onUrlChanged(url: string): void {
     if (this.cheFactory.hasDevfile(url)) {
       const devfile = this.cheFactory.getDevfile(url);
       const attributes = {};

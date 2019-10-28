@@ -12,7 +12,7 @@
 'use strict';
 
 export interface IImportStackScopeBindings {
-  onChange: Function;
+  onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs?: { [key: string]: any} }) => void;
 }
 
 /**

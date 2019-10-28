@@ -12,7 +12,7 @@
 'use strict';
 
 export interface IReadyToGoStacksScopeBindings {
-  onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs?: { [key: string]: string} }) => void;
+  onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs?: { [key: string]: any} }) => void;
 }
 
 export class ReadyToGoStacks implements ng.IDirective {

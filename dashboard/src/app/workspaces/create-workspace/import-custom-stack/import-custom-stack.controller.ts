@@ -22,7 +22,7 @@ export class ImportStackController implements IImportStackScopeBindings {
 
   static $inject = [];
 
-  onChange: Function;
+  onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs?: { [key: string]: any} }) => void;
 
   devfile: che.IWorkspaceDevfile;
 

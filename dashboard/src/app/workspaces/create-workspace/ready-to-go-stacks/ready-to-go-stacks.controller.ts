@@ -35,7 +35,7 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
   /**
    * Directive scope bindings.
    */
-  onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs: { [key: string]: string } }) => void;
+  onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs: { [key: string]: any } }) => void;
   /**
    * The selected devfile.
    */
