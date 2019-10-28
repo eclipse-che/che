@@ -25,6 +25,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.ActionButton;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.AfterClass;
@@ -77,12 +78,14 @@ public class RenameWorkspaceTest {
 
     // type name with 1 characters and check error message that this name is too short
     workspaceOverview.enterNameWorkspace("w");
+    workspaceDetails.waitAllDisabled(ActionButton.SAVE_BUTTON, ActionButton.APPLY_BUTTON);
     assertTrue(workspaceOverview.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
     workspaceDetails.clickOnCancelChangesBtn();
     workspaceOverview.checkNameWorkspace(WORKSPACE_NAME);
 
     // type name with 101 characters and check error message that this name is too long
     workspaceOverview.enterNameWorkspace(MAX_WORKSPACE_NAME + "a");
+    workspaceDetails.waitAllDisabled(ActionButton.SAVE_BUTTON, ActionButton.APPLY_BUTTON);
     assertTrue(workspaceOverview.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
     workspaceDetails.clickOnCancelChangesBtn();
     workspaceOverview.checkNameWorkspace(WORKSPACE_NAME);

@@ -75,6 +75,14 @@ public abstract class AbstractTestWorkspaceServiceClient implements TestWorkspac
     return workspaces.stream().map(ws -> ws.getConfig().getName()).collect(Collectors.toList());
   }
 
+  /** Returns the number of workspaces that belongs to the user. */
+  @Override
+  public int getWorkspacesCount() throws Exception {
+    List<WorkspaceDto> workspaces =
+        requestFactory.fromUrl(getBaseUrl()).request().asList(WorkspaceDto.class);
+    return workspaces.size();
+  }
+
   /** Stops workspace. */
   @Override
   public void stop(String workspaceName, String userName) throws Exception {

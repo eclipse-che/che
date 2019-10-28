@@ -437,10 +437,8 @@ public class Workspaces {
       String fullName = getFullNameOfWorkspacesListItem(i);
       String ownerName = Arrays.asList(fullName.split("/")).get(0);
       String workspaceName = Arrays.asList(fullName.split("/")).get(1);
-      int ramCount =
-          Integer.parseInt(Arrays.asList(getWorkspaceRamValue(workspaceName).split(" ")).get(0));
       int projectsCount = Integer.parseInt(getWorkspaceProjectsValue(workspaceName));
-      items.add(new WorkspaceListItem(ownerName, workspaceName, ramCount, projectsCount));
+      items.add(new WorkspaceListItem(ownerName, workspaceName, 0, projectsCount));
     }
 
     return items;

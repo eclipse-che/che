@@ -25,6 +25,8 @@ public interface TestWorkspaceServiceClient {
 
   List<String> getAll() throws Exception;
 
+  int getWorkspacesCount() throws Exception;
+
   void stop(String workspaceName, String userName) throws Exception;
 
   Workspace getByName(String workspace, String username) throws Exception;
