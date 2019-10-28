@@ -25,6 +25,7 @@ export class DevfileByUrlController {
   static $inject = ['cheFactory', '$q'];
 
   workspaceDevfileOnChange: Function;
+  workspaceDevfileLocation: string;
 
   private cheFactory: CheFactory;
   private $q: ng.IQService;
@@ -40,7 +41,7 @@ export class DevfileByUrlController {
   $onInit(): void {
   }
 
-  onUrlChanged(url: string): void {
+  onUrlChanged(url: string, form): void {
     if (this.cheFactory.hasDevfile(url)) {
       const devfile = this.cheFactory.getDevfile(url);
       const attributes = {};

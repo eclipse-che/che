@@ -11,16 +11,11 @@
  */
 'use strict';
 
-import { CheEnvironmentRegistry } from '../../../components/api/environment/che-environment-registry.factory';
 import { CreateWorkspaceSvc } from './create-workspace.service';
-import { NamespaceSelectorSvc } from './ready-to-go-stacks/namespace-selector/namespace-selector.service';
-import { RandomSvc } from '../../../components/utils/random.service';
-import { CheNotification } from '../../../components/notification/che-notification.factory';
 import {
   ICheButtonDropdownMainAction,
   ICheButtonDropdownOtherAction
 } from '../../../components/widget/button-dropdown/che-button-dropdown.directive';
-import { DevfileRegistry } from '../../../components/api/devfile-registry.factory';
 
 /**
  * View tabs.
@@ -83,6 +78,10 @@ export class CreateWorkspaceController {
    * Devfiles by view.
    */
   private devfiles: Map<TABS, DevfileChangeEventData> = new Map();
+  /**
+   * Forms by view.
+   */
+  private forms: Map<TABS, ng.IFormController> = new Map();
 
   /**
    * Default constructor that is using resource injection
@@ -169,13 +168,24 @@ export class CreateWorkspaceController {
   }
 
   /**
+   * Stores forms in list.
+   *
+   * @param {number} tab
+   * @param {ng.IFormController} form
+   */
+  registerForm(tab: number, form: ng.IFormController) {
+    this.forms.set(tab, form);
+  }
+
+  /**
    * Returns <code>true</code> when 'Create' button should be disabled.
    *
    * @return {boolean}
    */
-  // TODO
   isCreateButtonDisabled(): boolean {
-    return false;
+    const form = this.forms.get(this.selectedTab);
+
+    return !form || form.$valid !== true;
   }
 
   /**

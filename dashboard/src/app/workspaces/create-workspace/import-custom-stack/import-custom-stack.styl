@@ -1,6 +1,35 @@
-import-stack
-  .che-label-container:not(:last-child)
+.import-custom-stack
+  .che-label-container:first-child
     border-bottom none
+  .config-import
+    margin-left 0
+    .config-editor
+      margin-top 0
+    .saving-message
+      display none
 
-  .saving-message
-    display none
+md-tab-content.md-active .import-custom-stack
+  .import-devfile-by-url,
+  .config-import
+    animation-iteration-count 1
+    animation-duration .5s
+    animation-delay 0s
+
+  .config-import
+    animation-name devfile-by-url-height
+    overflow hidden
+
+  .import-devfile-by-url
+    animation-name devfile-by-url-margin
+
+@keyframes devfile-by-url-margin
+  0%
+    margin-bottom 250px
+  100%
+    margin-bottom 0
+
+@keyframes devfile-by-url-height
+  0%
+    max-height 55px
+  100%
+    max-height 330px
