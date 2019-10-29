@@ -104,7 +104,7 @@ objects:
             value: "openshift"
           - name: CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL
             value: "${PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}/agent-binaries/linux_amd64/bootstrapper/bootstrapper"
-          - name: CHE_INFRA_KUBERNETES_MACHINE__START__TIMEOUT__MIN
+          - name: CHE_INFRA_KUBERNETES_WORKSPACE__START__TIMEOUT__MIN
             value: "5"
           - name: CHE_INFRA_KUBERNETES_MASTER__URL
             value: "${CHE_INFRA_KUBERNETES_MASTER__URL}"
