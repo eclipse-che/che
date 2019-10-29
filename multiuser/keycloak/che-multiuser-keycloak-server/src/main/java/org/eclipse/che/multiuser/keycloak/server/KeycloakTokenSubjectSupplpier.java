@@ -9,9 +9,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import java.io.IOException;
 import java.util.Map;
-import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.che.api.core.ConflictException;
@@ -52,8 +50,8 @@ public class KeycloakTokenSubjectSupplpier implements SubjectSupplier {
   }
 
   @Override
-  public Subject getSubject(ServletRequest request, ServletResponse response, FilterChain chain,
-      String token) throws IOException, ServletException {
+  public Subject getSubject(String token, ServletResponse response)
+      throws IOException, ServletException {
     Claims claims;
     try {
       Jws<Claims> jwt = jwtParser.parseClaimsJws(token);

@@ -95,15 +95,13 @@ public abstract class SessionCachingFilter implements Filter {
     HttpSession session = httpRequest.getSession(true);
     Subject sessionSubject = (Subject) session.getAttribute(CHE_SUBJECT_ATTRIBUTE);
     if (sessionSubject == null) {
-      sessionSubject = subjectSupplier.getSubject(httpRequest, response, chain, token);
-      session.setAttribute(CHE_SUBJECT_ATTRIBUTE, sessionSubject);
-
+      sessionSubject = subjectSupplier.getSubject(token,response);
     }
-
     if (sessionSubject == null) {
       // nothing to do else, we probably meet error and have response object fulfilled with details
       return;
     }
+    session.setAttribute(CHE_SUBJECT_ATTRIBUTE, sessionSubject);
 
     try {
       EnvironmentContext.getCurrent().setSubject(sessionSubject);

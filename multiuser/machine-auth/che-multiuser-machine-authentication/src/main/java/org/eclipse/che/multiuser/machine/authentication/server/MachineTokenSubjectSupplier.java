@@ -9,9 +9,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import java.io.IOException;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.che.api.core.NotFoundException;
@@ -37,12 +34,12 @@ public class MachineTokenSubjectSupplier implements SubjectSupplier {
   }
 
   @Override
-    public Subject getSubject(ServletRequest request, ServletResponse response, FilterChain chain, String token) throws IOException, ServletException {
+    public Subject getSubject(String token, ServletResponse response) throws IOException {
       try {
         return extractSubject(token);
       } catch (NotMachineTokenJwtException ex) {
         // not a machine token, bypass
-        chain.doFilter(request, response);
+       return null;
       } catch (NotFoundException e) {
         sendErr(
             response,
