@@ -24,15 +24,15 @@ public class SessionStore {
     this.userIdToSession = new ConcurrentHashMap<>();
   }
 
-  public synchronized HttpSession getSession(String userId) {
+  public HttpSession getSession(String userId) {
     return userIdToSession.get(userId);
   }
 
-  public synchronized HttpSession saveSession(String userId, HttpSession session) {
+  public HttpSession saveSession(String userId, HttpSession session) {
     return userIdToSession.put(userId, session);
   }
 
-  public synchronized void remove(String userId) {
+  public void remove(String userId) {
     userIdToSession.remove(userId);
   }
 }
