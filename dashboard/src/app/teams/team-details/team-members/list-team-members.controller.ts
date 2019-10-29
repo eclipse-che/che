@@ -554,6 +554,6 @@ export class ListTeamMembersController {
       confirmTitle += 'the selected member?';
     }
 
-    return this.confirmDialogService.showConfirmDialog('Remove members', confirmTitle, 'Delete');
+    return this.confirmDialogService.showConfirmDialog('Remove members', confirmTitle, { resolve: 'Delete' });
   }
 }

@@ -315,7 +315,7 @@ tab: Object = Tab;
    */
   deleteTeam(event: MouseEvent): void {
     let promise = this.confirmDialogService.showConfirmDialog('Delete team',
-      'Would you like to delete team \'' + this.team.name + '\'?', 'Delete');
+      'Would you like to delete team \'' + this.team.name + '\'?', { resolve: 'Delete' });
 
     promise.then(() => {
       let promise = this.cheTeam.deleteTeam(this.team.id);
@@ -334,7 +334,7 @@ tab: Object = Tab;
    */
   leaveTeam(): void {
     let promise = this.confirmDialogService.showConfirmDialog('Leave team',
-      'Would you like to leave team \'' + this.team.name + '\'?', 'Leave');
+      'Would you like to leave team \'' + this.team.name + '\'?', { resolve: 'Leave' });
 
     promise.then(() => {
       let promise = this.chePermissions.removeOrganizationPermissions(this.team.id, this.cheUser.getUser().id);

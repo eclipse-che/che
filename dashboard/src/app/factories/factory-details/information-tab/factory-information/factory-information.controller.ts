@@ -218,7 +218,7 @@ export class FactoryInformationController {
 
     const title = 'Warning',
       content = `You have unsaved changes in JSON configuration. Would you like to save changes now?`;
-    return this.confirmDialogService.showConfirmDialog(title, content, 'Continue').then(() => {
+    return this.confirmDialogService.showConfirmDialog(title, content, { resolve: 'Continue' }).then(() => {
       this.updateFactoryContent();
     });
   }
@@ -296,7 +296,7 @@ export class FactoryInformationController {
    */
   deleteFactory(): void {
     let content = 'Please confirm removal for the factory \'' + (this.factory.name ? this.factory.name : this.factory.id) + '\'.';
-    let promise = this.confirmDialogService.showConfirmDialog('Remove the factory', content, 'Delete');
+    let promise = this.confirmDialogService.showConfirmDialog('Remove the factory', content, { resolve: 'Delete' });
 
     promise.then(() => {
       // remove it !

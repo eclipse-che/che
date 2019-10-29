@@ -94,7 +94,7 @@ export class TeamItemController {
    */
   confirmRemoval(): ng.IPromise<any> {
     let promise = this.confirmDialogService.showConfirmDialog('Delete team',
-      'Would you like to delete team \'' + this.team.name + '\'?', 'Delete');
+      'Would you like to delete team \'' + this.team.name + '\'?', { resolve: 'Delete' });
     return promise;
   }
 }
