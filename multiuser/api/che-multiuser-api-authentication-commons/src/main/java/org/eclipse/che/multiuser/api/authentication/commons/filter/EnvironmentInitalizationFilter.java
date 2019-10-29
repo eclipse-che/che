@@ -11,6 +11,9 @@
  */
 package org.eclipse.che.multiuser.api.authentication.commons.filter;
 
+import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
+
+import io.jsonwebtoken.JwtException;
 import java.io.IOException;
 import java.security.Principal;
 import javax.servlet.Filter;
@@ -20,25 +23,23 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
-import org.eclipse.che.multiuser.api.authentication.commons.SubjectSupplier;
 
-public abstract class SessionCachingFilter implements Filter {
+public abstract class EnvironmentInitalizationFilter implements Filter {
 
   public static final String CHE_SUBJECT_ATTRIBUTE = "che_subject";
-  private SessionStore sessionStore;
-  private SubjectSupplier subjectSupplier;
-  private RequestTokenExtractor tokenExtractor;
+  private final SessionStore sessionStore;
+  private final RequestTokenExtractor tokenExtractor;
 
-  public SessionCachingFilter(SessionStore sessionStore,
-      RequestTokenExtractor tokenExtractor,
-      SubjectSupplier subjectSupplier) {
+
+  public EnvironmentInitalizationFilter(SessionStore sessionStore,
+      RequestTokenExtractor tokenExtractor) {
     this.sessionStore = sessionStore;
-    this.subjectSupplier = subjectSupplier;
     this.tokenExtractor = tokenExtractor;
   }
 
@@ -49,8 +50,12 @@ public abstract class SessionCachingFilter implements Filter {
      *
      * @throws IllegalArgumentException if the request is null
      */
-    public SessionCachedHttpRequest(ServletRequest request) {
+
+    private final String userId;
+
+    public SessionCachedHttpRequest(ServletRequest request, String userId) {
       super((HttpServletRequest) request);
+      this.userId = userId;
     }
 
     @Override
@@ -68,12 +73,6 @@ public abstract class SessionCachingFilter implements Filter {
       if (session != null) {
         return session;
       }
-
-      String userId = getUserId(this);
-      if (userId == null) {
-        // fallback to default
-        return super.getSession(createNew);
-      }
       session = sessionStore.getSession(userId);
       if (session == null && createNew) {
         session = super.getSession(true);
@@ -84,25 +83,26 @@ public abstract class SessionCachingFilter implements Filter {
 
   }
 
-  protected abstract String getUserId(HttpServletRequest request);
-
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
 
     final String token = tokenExtractor.getToken((HttpServletRequest) request);
-    HttpServletRequest httpRequest = new SessionCachedHttpRequest(request);
+    String userId = getUserId(token); // make sure token still valid before continue
+    // retrieve cached session if any or create new
+    HttpServletRequest httpRequest = new SessionCachedHttpRequest(request, userId);
     HttpSession session = httpRequest.getSession(true);
+    // retrieve and check / create new subject
     Subject sessionSubject = (Subject) session.getAttribute(CHE_SUBJECT_ATTRIBUTE);
-    if (sessionSubject == null) {
-      sessionSubject = subjectSupplier.getSubject(token,response);
+    if (sessionSubject == null || !sessionSubject.getToken().equals(token)) {
+      try {
+        sessionSubject = extractSubject(token);
+        session.setAttribute(CHE_SUBJECT_ATTRIBUTE, sessionSubject);
+      } catch (JwtException e) {
+        sendError(response, SC_UNAUTHORIZED, e.getMessage());
+      }
     }
-    if (sessionSubject == null) {
-      // nothing to do else, we probably meet error and have response object fulfilled with details
-      return;
-    }
-    session.setAttribute(CHE_SUBJECT_ATTRIBUTE, sessionSubject);
-
+    // set current subject
     try {
       EnvironmentContext.getCurrent().setSubject(sessionSubject);
       chain.doFilter(addUserInRequest(httpRequest, sessionSubject), response);
@@ -110,6 +110,11 @@ public abstract class SessionCachingFilter implements Filter {
       EnvironmentContext.reset();
     }
   }
+
+  protected abstract String getUserId(String token);
+
+  protected abstract Subject extractSubject(String token) throws ServletException;
+
 
   private HttpServletRequest addUserInRequest(
       final HttpServletRequest httpRequest, final Subject subject) {
@@ -124,6 +129,12 @@ public abstract class SessionCachingFilter implements Filter {
         return subject::getUserName;
       }
     };
+  }
+
+  protected void sendError(ServletResponse res, int errorCode, String message) throws IOException {
+    HttpServletResponse response = (HttpServletResponse) res;
+    response.getOutputStream().write(message.getBytes());
+    response.setStatus(errorCode);
   }
 
   @Override

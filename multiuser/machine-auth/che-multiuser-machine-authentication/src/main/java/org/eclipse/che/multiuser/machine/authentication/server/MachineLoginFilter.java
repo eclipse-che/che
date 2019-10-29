@@ -12,9 +12,12 @@
 package org.eclipse.che.multiuser.machine.authentication.server;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.USER_ID_CLAIM;
+import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.WORKSPACE_ID_CLAIM;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import java.io.IOException;
@@ -26,10 +29,14 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
+import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
-import org.eclipse.che.multiuser.api.authentication.commons.filter.SessionCachingFilter;
+import org.eclipse.che.multiuser.api.authentication.commons.filter.EnvironmentInitalizationFilter;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 
 /**
@@ -39,10 +46,12 @@ import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
  * @author Anton Korneta
  */
 @Singleton
-public class MachineLoginFilter extends SessionCachingFilter {
+public class MachineLoginFilter extends EnvironmentInitalizationFilter {
 
   private final RequestTokenExtractor tokenExtractor;
+  private final UserManager userManager;
   private final JwtParser jwtParser;
+  private final PermissionChecker permissionChecker;
 
   @Inject
   public MachineLoginFilter(
@@ -51,10 +60,11 @@ public class MachineLoginFilter extends SessionCachingFilter {
       UserManager userManager,
       MachineSigningKeyResolver machineKeyResolver,
       PermissionChecker permissionChecker) {
-    super(sessionStore, tokenExtractor, new MachineTokenSubjectSupplier(Jwts.parser().setSigningKeyResolver(machineKeyResolver), userManager,
-        permissionChecker));
+    super(sessionStore, tokenExtractor);
     this.tokenExtractor = tokenExtractor;
+    this.userManager = userManager;
     this.jwtParser = Jwts.parser().setSigningKeyResolver(machineKeyResolver);
+    this.permissionChecker = permissionChecker;
   }
 
   @Override
@@ -67,17 +77,37 @@ public class MachineLoginFilter extends SessionCachingFilter {
 
     final String token = tokenExtractor.getToken((HttpServletRequest) request);
     if (isNullOrEmpty(token)) {
-      // note that unmodified request returned
       chain.doFilter(request, response);
       return;
     }
-
-    super.doFilter(request, response, chain);
+    try {
+      super.doFilter(request, response, chain);
+    } catch (NotMachineTokenJwtException e) {
+      chain.doFilter(request, response);
+    }
   }
 
   @Override
-  protected String getUserId(HttpServletRequest httpRequest) {
-    final Claims claims = jwtParser.parseClaimsJws(tokenExtractor.getToken(httpRequest)).getBody();
+  public Subject extractSubject(String token) {
+    try {
+      final Claims claims = jwtParser.parseClaimsJws(token).getBody();
+      final String userId = claims.get(USER_ID_CLAIM, String.class);
+      // check if user with such id exists
+      final String userName = userManager.getById(userId).getName();
+      final String workspaceId = claims.get(WORKSPACE_ID_CLAIM, String.class);
+      return new MachineTokenAuthorizedSubject(
+          new SubjectImpl(userName, userId, token, false), permissionChecker, workspaceId);
+    } catch (NotFoundException e) {
+      throw new JwtException("Authentication with machine token failed because user for this token no longer exist.");
+    } catch (ServerException | JwtException e) {
+      throw new JwtException(format("Authentication with machine token failed cause: %s", e.getMessage()), e);
+    }
+  }
+
+
+  @Override
+  protected String getUserId(String token) {
+    final Claims claims = jwtParser.parseClaimsJws(token).getBody();
     return claims.get(USER_ID_CLAIM, String.class);
   }
 
