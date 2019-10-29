@@ -12,7 +12,7 @@
 'use strict';
 
 /**
- * Defines a directive for import devfiles.
+ * Defines a directive for import devfile from a URL.
  *
  * @author Oleksii Orel
  */

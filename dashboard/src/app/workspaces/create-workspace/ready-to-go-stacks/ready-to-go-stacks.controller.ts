@@ -99,7 +99,8 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
 
   $onInit(): void {
     this.namespaceId = this.namespaceSelectorSvc.getNamespaceId();
-    this.buildListOfUsedNames().then(() => {
+    this.createWorkspaceSvc.buildListOfUsedNames(this.namespaceId).then((namesList: string[]) => {
+      this.usedNamesList = namesList;
       this.workspaceName = this.randomSvc.getRandString({ prefix: 'wksp-', list: this.usedNamesList });
       this.reValidateName();
     });
@@ -202,7 +203,8 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
   onNamespaceChanged(namespaceId: string) {
     this.namespaceId = namespaceId;
 
-    this.buildListOfUsedNames().then(() => {
+    this.createWorkspaceSvc.buildListOfUsedNames(namespaceId).then((namesList: string[]) => {
+      this.usedNamesList = namesList;
       this.reValidateName();
     });
   }
@@ -222,21 +224,6 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
       if (model) {
         model.$validate();
       }
-    });
-  }
-
-  /**
-   * Filters list of workspaces by current namespace and
-   * builds list of names for current namespace.
-   * TODO move this implementation into createWorkspaceSvc because it may be used by other nested directives
-   */
-  private buildListOfUsedNames(): ng.IPromise<void> {
-    return this.createWorkspaceSvc.fetchWorkspacesByNamespace(this.namespaceId).then((workspaces: Array<che.IWorkspace>) => {
-      this.usedNamesList = workspaces.filter((workspace: che.IWorkspace) => {
-        return workspace.namespace === this.namespaceId;
-      }).map((workspace: che.IWorkspace) => {
-        return this.createWorkspaceSvc.getWorkspaceName(workspace);
-      });
     });
   }
 

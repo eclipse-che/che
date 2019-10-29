@@ -21,7 +21,7 @@ export const URL = 'url';
 export const YAML = 'yaml';
 
 /**
- * Defines a directive for displaying devfile source selector widget.
+ * Defines a directive for source selector widget.
  *
  * @author Oleksii Orel
  */

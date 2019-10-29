@@ -16,7 +16,7 @@ import {CheFactory} from '../../../../../components/api/che-factory.factory';
 const ATTR_URL = 'factoryurl';
 
 /**
- * This class is handling the controller for the import devfile by URL
+ * This class is handling the controller for import devfile from a URL.
  *
  * @author Oleksii Orel
  */

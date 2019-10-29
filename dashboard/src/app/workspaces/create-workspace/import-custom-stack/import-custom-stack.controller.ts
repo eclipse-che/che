@@ -12,18 +12,33 @@
 'use strict';
 import {IImportStackScopeBindings} from './import-custom-stack.directive';
 import {YAML, URL} from './devfile-source-selector/devfile-source-selector.directive';
+import {CreateWorkspaceSvc} from '../create-workspace.service';
+import {RandomSvc} from '../../../../components/utils/random.service';
+import {NamespaceSelectorSvc} from '../ready-to-go-stacks/namespace-selector/namespace-selector.service';
 
 /**
- * This class is handling the controller for the import stack directive
+ * This class is handling the controller for stack importing directive.
  *
  * @author Oleksii Orel
  */
 export class ImportStackController implements IImportStackScopeBindings {
 
-  static $inject = [];
+  static $inject = ['namespaceSelectorSvc', 'createWorkspaceSvc', 'randomSvc'];
 
   onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs?: { [key: string]: any } }) => void;
 
+  /**
+   * Namespace selector service.
+   */
+  private namespaceSelectorSvc: NamespaceSelectorSvc;
+  /**
+   * Generator for random strings.
+   */
+  private randomSvc: RandomSvc;
+  /**
+   * Workspace creation service.
+   */
+  private createWorkspaceSvc: CreateWorkspaceSvc;
   /**
    * The selected source for devfile importing(URL or YAML).
    */
@@ -40,7 +55,10 @@ export class ImportStackController implements IImportStackScopeBindings {
   /**
    * Default constructor that is using resource injection
    */
-  constructor() {
+  constructor(namespaceSelectorSvc: NamespaceSelectorSvc, createWorkspaceSvc: CreateWorkspaceSvc, randomSvc: RandomSvc) {
+    this.namespaceSelectorSvc = namespaceSelectorSvc;
+    this.createWorkspaceSvc = createWorkspaceSvc;
+    this.randomSvc = randomSvc;
   }
 
   $onInit(): void {
@@ -52,9 +70,17 @@ export class ImportStackController implements IImportStackScopeBindings {
       components: [],
       projects: [],
       metadata: {
-        name: 'custom-wksp'
+        name: 'wksp-custom'
       }
     };
+
+    if (this.devfile) {
+      const prefix = `${this.devfile.metadata.name}-`;
+      const namespaceId = this.namespaceSelectorSvc.getNamespaceId();
+      this.createWorkspaceSvc.buildListOfUsedNames(namespaceId).then((list: string[]) => {
+        this.devfile.metadata.name = this.randomSvc.getRandString({prefix, list});
+      });
+    }
   }
 
   updateDevfile(devfile: che.IWorkspaceDevfile, attrs: { factoryurl?: string } = {}): void {

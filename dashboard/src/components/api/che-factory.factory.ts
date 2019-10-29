@@ -496,7 +496,10 @@ export class CheFactory {
   fetchDevfile(url: string): ng.IPromise<void> {
     return this.remoteFactoryAPI.getFactoryParameters({}, {url}).$promise.then((res: che.IFactory) => {
       if (!res || !res.devfile) {
-        return this.$q.reject({data: {message: 'Unknown Content Type or no Content Type found in URL'}});
+        return this.$q.reject({data: {message: 'The specified link does not contain a valid Devfile.'}});
+      }
+      if (res.source === 'repo') {
+        return this.$q.reject({data: {message: 'devfile.yaml not found in the specified GitHub repository root.'}});
       }
       const {devfile} = res;
       this.devfilesByUrl.set(url, devfile);

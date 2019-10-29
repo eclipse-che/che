@@ -255,6 +255,22 @@ export class CreateWorkspaceSvc {
   }
 
   /**
+   * Returns workspaces names for a namespace.
+   *
+   * @param namespace namespace
+   */
+  buildListOfUsedNames(namespace: string): ng.IPromise<string[]> {
+    return this.fetchWorkspacesByNamespace(namespace).then((workspaces: Array<che.IWorkspace>) => {
+      const names = workspaces.filter((workspace: che.IWorkspace) => {
+        return workspace.namespace === namespace;
+      }).map((workspace: che.IWorkspace) => {
+        return this.getWorkspaceName(workspace);
+      });
+      return this.$q.when(names);
+    });
+  }
+
+  /**
    * Returns name of the pointed workspace.
    *
    * @param workspace workspace

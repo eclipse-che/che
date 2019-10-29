@@ -8,27 +8,14 @@
     .saving-message
       display none
 
-md-tab-content.md-active .import-custom-stack
-  .import-devfile-by-url,
-  .config-import
+md-tab-content.md-active .import-custom-stack .config-import
     animation-iteration-count 1
     animation-duration .5s
     animation-delay 0s
-
-  .config-import
     animation-name devfile-by-url-height
     overflow hidden
     .CodeMirror
       height 345px
-
-  .import-devfile-by-url
-    animation-name devfile-by-url-margin
-
-@keyframes devfile-by-url-margin
-  0%
-    margin-bottom 250px
-  100%
-    margin-bottom 0
 
 @keyframes devfile-by-url-height
   0%
