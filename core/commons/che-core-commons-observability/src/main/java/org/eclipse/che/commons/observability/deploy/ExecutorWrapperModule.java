@@ -20,8 +20,8 @@ public class ExecutorWrapperModule extends AbstractModule {
   @Override
   protected void configure() {
 
-    if (Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
-      if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))) {
+    if (Boolean.parseBoolean(System.getenv("CHE_METRICS_ENABLED"))) {
+      if (Boolean.parseBoolean(System.getenv("CHE_TRACING_ENABLED"))) {
         bind(ExecutorServiceWrapper.class)
             .to(MeteredAndTracedExecutorServiceWrapper.class)
             .asEagerSingleton();
@@ -32,14 +32,12 @@ public class ExecutorWrapperModule extends AbstractModule {
         ;
       }
     } else {
-      if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))) {
+      if (Boolean.parseBoolean(System.getenv("CHE_TRACING_ENABLED"))) {
         bind(ExecutorServiceWrapper.class)
             .to(TracedExecutorServiceWrapper.class)
             .asEagerSingleton();
-        ;
       } else {
         bind(ExecutorServiceWrapper.class).to(NoopExecutorServiceWrapper.class).asEagerSingleton();
-        ;
       }
     }
 

@@ -62,7 +62,6 @@ public class TimedCronExecutorService extends TimedScheduledExecutorService
       e.setAccessible(true);
       return (Timer) e.get(this);
     } catch (NoSuchFieldException | IllegalAccessException e) {
-      // Do nothing. We simply can't get to the underlying Timer.
       throw new RuntimeException(e.getMessage(), e);
     }
   }
