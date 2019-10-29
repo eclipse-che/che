@@ -29,7 +29,6 @@ public class ExecutorWrapperModule extends AbstractModule {
         bind(ExecutorServiceWrapper.class)
             .to(MeteredExecutorServiceWrapper.class)
             .asEagerSingleton();
-        ;
       }
     } else {
       if (Boolean.parseBoolean(System.getenv("CHE_TRACING_ENABLED"))) {
