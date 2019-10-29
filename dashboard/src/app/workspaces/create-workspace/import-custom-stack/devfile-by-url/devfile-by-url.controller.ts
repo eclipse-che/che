@@ -27,16 +27,20 @@ export class DevfileByUrlController {
   workspaceDevfileOnChange: Function;
   workspaceDevfileLocation: string;
 
+  private workspaceDevfile: che.IWorkspaceDevfile | {} = {};
   private cheFactory: CheFactory;
 
   /**
    * Default constructor that is using resource injection
    */
-  constructor(cheFactory: CheFactory, $q: ng.IQService) {
+  constructor(cheFactory: CheFactory) {
     this.cheFactory = cheFactory;
   }
 
   $onInit(): void {
+    if (this.workspaceDevfileLocation) {
+      this.onUrlChanged(this.workspaceDevfileLocation);
+    }
   }
 
   onUrlChanged(url: string): void {
@@ -47,6 +51,7 @@ export class DevfileByUrlController {
       if (angular.isFunction(this.workspaceDevfileOnChange) && devfile) {
         this.workspaceDevfileOnChange({devfile, attributes});
       }
+      this.workspaceDevfile = devfile;
     }
   }
 

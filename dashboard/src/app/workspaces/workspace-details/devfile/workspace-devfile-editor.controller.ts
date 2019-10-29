@@ -10,6 +10,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheBranding} from '../../../../components/branding/che-branding.factory';
 /**
  * @ngdoc controller
  * @name workspaces.devfile-editor.controller:WorkspaceDevfileEditorController
@@ -18,7 +19,7 @@
  */
 export class WorkspaceDevfileEditorController {
 
-  static $inject = ['$log', '$scope', '$timeout'];
+  static $inject = ['$log', '$scope', '$timeout', 'cheBranding'];
 
   $log: ng.ILogService;
   $scope: ng.IScope;
@@ -38,16 +39,19 @@ export class WorkspaceDevfileEditorController {
   newWorkspaceDevfile: che.IWorkspaceDevfile;
   workspaceDevfileOnChange: Function;
   private saveTimeoutPromise: ng.IPromise<any>;
+  private cheBranding: CheBranding;
+  private devfileDockUrl: string;
   private isSaving: boolean;
 
 
   /**
    * Default constructor that is using resource
    */
-  constructor($log: ng.ILogService, $scope: ng.IScope, $timeout: ng.ITimeoutService) {
+  constructor($log: ng.ILogService, $scope: ng.IScope, $timeout: ng.ITimeoutService, cheBranding: CheBranding) {
     this.$log = $log;
     this.$scope = $scope;
     this.$timeout = $timeout;
+    this.cheBranding = cheBranding;//  .getDocs().devfile
     this.isSaving = false;
     this.devfileYaml = jsyaml.dump(this.workspaceDevfile);
 
@@ -67,7 +71,9 @@ export class WorkspaceDevfileEditorController {
     }, true);
   }
 
-  $onInit(): void { }
+  $onInit(): void {
+    this.devfileDockUrl = this.cheBranding.getDocs().devfile;
+  }
 
   /**
    * Callback when editor content is changed.

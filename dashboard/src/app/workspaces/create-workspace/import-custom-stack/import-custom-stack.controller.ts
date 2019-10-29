@@ -22,24 +22,32 @@ export class ImportStackController implements IImportStackScopeBindings {
 
   static $inject = [];
 
-  onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs?: { [key: string]: any} }) => void;
-
-  devfile: che.IWorkspaceDevfile;
-
-  devfileLocation: string;
+  onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs?: { [key: string]: any } }) => void;
 
   /**
-   * The imported devfile.
+   * The selected source for devfile importing(URL or YAML).
    */
-  private draftDevfile: che.IWorkspaceDevfile;
-
   private selectedSource: string;
+  /**
+   * The imported devfile location(URL).
+   */
+  private devfileLocation: string;
+  /**
+   * The imported devfile(YAML).
+   */
+  private devfile: che.IWorkspaceDevfile;
 
   /**
    * Default constructor that is using resource injection
    */
   constructor() {
-    this.draftDevfile = {
+  }
+
+  $onInit(): void {
+  }
+
+  private initializeMinDevfile() {
+    this.devfile = {
       apiVersion: '1.0.0',
       components: [],
       projects: [],
@@ -49,19 +57,20 @@ export class ImportStackController implements IImportStackScopeBindings {
     };
   }
 
-  $onInit(): void {
-  }
-
-  updateDevfile(devfile: che.IWorkspaceDevfile, attrs: {factoryurl?: string} = {}): void {
-    this.devfile = devfile;
+  updateDevfile(devfile: che.IWorkspaceDevfile, attrs: { factoryurl?: string } = {}): void {
+    if (this.isYamlSelected()) {
+      this.devfile = devfile;
+    } else if (attrs.factoryurl) {
+      this.devfileLocation = attrs.factoryurl;
+    }
     if (angular.isFunction(this.onChange)) {
       this.onChange({devfile, attrs});
     }
   }
 
   onSourceChange(source: string): void {
-    if (source === YAML && this.devfile) {
-      this.draftDevfile = angular.copy(this.devfile);
+    if (source === YAML && !this.devfile) {
+      this.initializeMinDevfile();
     }
   }
 

@@ -37,4 +37,12 @@
       </div>
     </che-input-box>
   </form>
+  <div class="devfile-show-content" ng-if="devfileUrlForm.$valid && devfileByUrlController.workspaceDevfile">
+    <che-show-area show-title="Show content" hide-title="Hide content">
+      <workspace-devfile-editor is-active="false"
+                                editor-read-only="true"
+                                workspace-devfile="devfileByUrlController.workspaceDevfile"></workspace-devfile-editor>
+    </che-show-area>
+    <span class="additional-info">The content is read-only</span>
+  </div>
 </div>
