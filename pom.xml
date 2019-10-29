@@ -496,26 +496,6 @@
                 <version>${che.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.infrastructure.docker</groupId>
-                <artifactId>docker-auth</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.infrastructure.docker</groupId>
-                <artifactId>docker-client</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.infrastructure.docker</groupId>
-                <artifactId>docker-environment</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.infrastructure.docker</groupId>
-                <artifactId>infrastructure-docker</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.eclipse.che.multiuser</groupId>
                 <artifactId>che-multiuser-api-authorization</artifactId>
                 <version>${che.version}</version>

@@ -15,7 +15,6 @@ import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
-import static org.eclipse.che.workspace.infrastructure.docker.environment.WsAgentMachineFinderUtil.containsWsAgentServer;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +26,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
@@ -352,5 +352,15 @@ public abstract class AbstractTestWorkspaceServiceClient implements TestWorkspac
         break;
     }
     return calculatedValue;
+  }
+
+  /**
+   * Checks whether provided {@link Machine} contains wsagent server.
+   *
+   * @param machine machine to check
+   * @return true when wsagent server is found in provided machine, false otherwise
+   */
+  public static boolean containsWsAgentServer(Machine machine) {
+    return machine.getServers().keySet().contains(Constants.SERVER_WS_AGENT_HTTP_REFERENCE);
   }
 }

@@ -27,10 +27,8 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.Constants;
-import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /** @author Sergii Leshchenko */
@@ -39,7 +37,6 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
 
   public static final String NAME = "openshift";
 
-  private final DockerImageEnvironmentConverter dockerImageEnvConverter;
   private final OpenShiftRuntimeContextFactory runtimeContextFactory;
   private final KubernetesRuntimeStateCache runtimeStatusesCache;
 
@@ -48,19 +45,16 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
       EventService eventService,
       OpenShiftRuntimeContextFactory runtimeContextFactory,
       Set<InternalEnvironmentProvisioner> internalEnvProvisioners,
-      DockerImageEnvironmentConverter dockerImageEnvConverter,
       KubernetesRuntimeStateCache runtimeStatusesCache) {
     super(
         NAME,
         ImmutableSet.of(
             OpenShiftEnvironment.TYPE,
             KubernetesEnvironment.TYPE,
-            DockerImageEnvironment.TYPE,
             Constants.NO_ENVIRONMENT_RECIPE_TYPE),
         eventService,
         internalEnvProvisioners);
     this.runtimeContextFactory = runtimeContextFactory;
-    this.dockerImageEnvConverter = dockerImageEnvConverter;
     this.runtimeStatusesCache = runtimeStatusesCache;
   }
 
@@ -83,10 +77,6 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
       return (OpenShiftEnvironment) source;
     } else if (source instanceof KubernetesEnvironment) {
       return new OpenShiftEnvironment((KubernetesEnvironment) source);
-    } else if (source instanceof DockerImageEnvironment) {
-      KubernetesEnvironment k8sEnv =
-          dockerImageEnvConverter.convert((DockerImageEnvironment) source);
-      return new OpenShiftEnvironment(k8sEnv);
     }
 
     throw new InternalInfrastructureException(

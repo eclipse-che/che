@@ -29,9 +29,9 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
-import org.eclipse.che.infrastructure.docker.auth.UserSpecificDockerRegistryCredentialsProvider;
-import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfig;
-import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfigs;
+import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.dto.DockerAuthConfig;
+import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.dto.DockerAuthConfigs;
+import org.eclipse.che.workspace.infrastructure.kubernetes.docker.auth.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
@@ -68,12 +68,12 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
 
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
-    AuthConfigs credentials = credentialsProvider.getCredentials();
+    DockerAuthConfigs credentials = credentialsProvider.getCredentials();
     if (credentials == null) {
       return;
     }
 
-    Map<String, AuthConfig> authConfigs = credentials.getConfigs();
+    Map<String, DockerAuthConfig> authConfigs = credentials.getConfigs();
 
     if (authConfigs == null || authConfigs.isEmpty()) {
       return;
@@ -122,16 +122,16 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
    *   }
    * </code></pre>
    */
-  private String generateDockerCfg(Map<String, AuthConfig> authConfigs)
+  private String generateDockerCfg(Map<String, DockerAuthConfig> authConfigs)
       throws InfrastructureException {
     try (StringWriter strWriter = new StringWriter();
         JsonWriter jsonWriter = new Gson().newJsonWriter(strWriter)) {
       Base64.Encoder encoder = Base64.getEncoder();
 
       jsonWriter.beginObject();
-      for (Map.Entry<String, AuthConfig> entry : authConfigs.entrySet()) {
+      for (Map.Entry<String, DockerAuthConfig> entry : authConfigs.entrySet()) {
         String name = entry.getKey();
-        AuthConfig authConfig = entry.getValue();
+        DockerAuthConfig dockerAuthConfig = entry.getValue();
         try {
           if (!name.startsWith("https://") && !name.startsWith("http://")) {
             name = "https://" + name;
@@ -139,12 +139,12 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
           jsonWriter.name(name);
           jsonWriter.beginObject();
           jsonWriter.name("username");
-          jsonWriter.value(authConfig.getUsername());
+          jsonWriter.value(dockerAuthConfig.getUsername());
           jsonWriter.name("password");
-          jsonWriter.value(authConfig.getPassword());
+          jsonWriter.value(dockerAuthConfig.getPassword());
           jsonWriter.name("email");
           jsonWriter.value("email@email");
-          String auth = authConfig.getUsername() + ':' + authConfig.getPassword();
+          String auth = dockerAuthConfig.getUsername() + ':' + dockerAuthConfig.getPassword();
           jsonWriter.name("auth");
           jsonWriter.value(encoder.encodeToString(auth.getBytes()));
           jsonWriter.endObject();

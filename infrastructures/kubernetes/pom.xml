@@ -163,14 +163,6 @@
             <artifactId>che-core-db</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.infrastructure.docker</groupId>
-            <artifactId>docker-auth</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.infrastructure.docker</groupId>
-            <artifactId>docker-environment</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-machine-authentication</artifactId>
         </dependency>
