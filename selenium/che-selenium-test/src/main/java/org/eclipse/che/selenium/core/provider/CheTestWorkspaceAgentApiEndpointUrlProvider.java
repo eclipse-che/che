@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.core.provider;
 
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
-import static org.eclipse.che.workspace.infrastructure.docker.environment.WsAgentMachineFinderUtil.containsWsAgentServer;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -21,6 +20,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
 
 @Singleton
@@ -47,5 +47,15 @@ public class CheTestWorkspaceAgentApiEndpointUrlProvider
       }
     }
     throw new RuntimeException("Cannot find dev machine on workspace with id " + workspaceId);
+  }
+
+  /**
+   * Checks whether provided {@link Machine} contains wsagent server.
+   *
+   * @param machine machine to check
+   * @return true when wsagent server is found in provided machine, false otherwise
+   */
+  public static boolean containsWsAgentServer(Machine machine) {
+    return machine.getServers().keySet().contains(Constants.SERVER_WS_AGENT_HTTP_REFERENCE);
   }
 }

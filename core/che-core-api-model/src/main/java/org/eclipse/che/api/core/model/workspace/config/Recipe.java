@@ -17,7 +17,7 @@ package org.eclipse.che.api.core.model.workspace.config;
  * @author Alexander Garagatyi
  */
 public interface Recipe {
-  /** Type of the environment, e.g. docker compose. */
+  /** Type of the environment. */
   String getType();
 
   /** Content type of the environment recipe, e.g. application/x-yaml. */
