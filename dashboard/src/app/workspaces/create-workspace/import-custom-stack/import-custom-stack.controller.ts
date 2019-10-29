@@ -95,8 +95,11 @@ export class ImportStackController implements IImportStackScopeBindings {
   }
 
   onSourceChange(source: string): void {
-    if (source === YAML && !this.devfile) {
-      this.initializeMinDevfile();
+    if (source === YAML) {
+      if (!this.devfile) {
+        this.initializeMinDevfile();
+      }
+      this.updateDevfile(this.devfile);
     }
   }
 

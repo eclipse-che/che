@@ -48,7 +48,7 @@ export class DevfileByUrlController {
       const devfile = this.cheFactory.getDevfile(url);
       const attributes = {};
       attributes[ATTR_URL] = url;
-      if (angular.isFunction(this.workspaceDevfileOnChange) && devfile) {
+      if (angular.isFunction(this.workspaceDevfileOnChange) ) {
         this.workspaceDevfileOnChange({devfile, attributes});
       }
       this.workspaceDevfile = devfile;
