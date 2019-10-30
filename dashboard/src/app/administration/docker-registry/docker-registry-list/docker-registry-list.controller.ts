@@ -163,7 +163,7 @@ export class DockerRegistryListController {
     } else {
       content += 'this selected registry?';
     }
-    return this.confirmDialogService.showConfirmDialog('Remove registries', content, 'Delete');
+    return this.confirmDialogService.showConfirmDialog('Remove registries', content, { resolve: 'Delete' });
   }
 
   /**
