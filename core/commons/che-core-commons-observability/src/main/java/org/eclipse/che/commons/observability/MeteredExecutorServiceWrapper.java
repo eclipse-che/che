@@ -14,6 +14,7 @@ package org.eclipse.che.commons.observability;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
+import io.micrometer.core.instrument.internal.TimedCronExecutorService;
 import io.micrometer.core.lang.Nullable;
 import java.lang.reflect.Field;
 import java.util.concurrent.ExecutorService;
@@ -23,16 +24,27 @@ import java.util.concurrent.ThreadPoolExecutor;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.commons.schedule.executor.CronExecutorService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of {@code ExecutorServiceWrapper} that add all sort of monitoring capabilities
  * from {@code ExecutorServiceMetrics}.
  *
- * <p>Also in case if provided executor is instance of {@code ThreadPoolExecutor} it will add
- * metrics provided by {@code CountedThreadFactory} and {@code CountedRejectedExecutionHandler}.
+ * <p>Also in case if a provided executor is an instance of {@code ThreadPoolExecutor} it will add
+ * metrics provided by {@code CountedThreadFactory} and {@code CountedRejectedExecutionHandler}. In
+ * case if {@code ExecutorService} provided by {@code Executors} class are the instances of
+ * java.util.concurrent.Executors$DelegatedScheduledExecutorService or
+ * java.util.concurrent.Executors$FinalizableDelegatedExecutorService there would be an attempt to
+ * unwrap them to get underlying {@code ThreadPoolExecutor} to be able to provide {@code
+ * CountedThreadFactory} and {@code CountedRejectedExecutionHandler} statistics. Failed unwrapping
+ * attempt would be only logged, no exception would be raised and no additional statistic would be
+ * published.
  */
 @Singleton
 public class MeteredExecutorServiceWrapper implements ExecutorServiceWrapper {
+  private static final Logger LOG = LoggerFactory.getLogger(MeteredExecutorServiceWrapper.class);
+
   private final MeterRegistry meterRegistry;
 
   @Inject
@@ -84,6 +96,7 @@ public class MeteredExecutorServiceWrapper implements ExecutorServiceWrapper {
           meterRegistry, unwrappedThreadPoolExecutor, name, Tags.of(tags));
     }
   }
+
   /**
    * Every ScheduledThreadPoolExecutor created by {@link Executors} is wrapped. Also, {@link
    * Executors#newSingleThreadExecutor()} wrap a regular {@link ThreadPoolExecutor}.
@@ -95,7 +108,12 @@ public class MeteredExecutorServiceWrapper implements ExecutorServiceWrapper {
       e.setAccessible(true);
       return (ThreadPoolExecutor) e.get(executor);
     } catch (NoSuchFieldException | IllegalAccessException e) {
-      // Do nothing. We simply can't get to the underlying ThreadPoolExecutor.
+      LOG.error(
+          String.format(
+              "Unable to unwrap ThreadPoolExecutor from %s instance of %s."
+                  + " CountedThreadFactory and CountedThreadFactory statistic would be omitted",
+              executor, wrapper),
+          e);
     }
     return null;
   }

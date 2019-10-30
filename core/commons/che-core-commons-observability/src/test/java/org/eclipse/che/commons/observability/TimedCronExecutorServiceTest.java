@@ -16,6 +16,7 @@ import static org.testng.Assert.assertEquals;
 import io.micrometer.core.instrument.MockClock;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
+import io.micrometer.core.instrument.internal.TimedCronExecutorService;
 import io.micrometer.core.instrument.simple.SimpleConfig;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.text.ParseException;
