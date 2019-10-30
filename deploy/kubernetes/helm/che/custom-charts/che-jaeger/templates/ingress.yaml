@@ -37,4 +37,4 @@ spec:
         - path: /
           backend:
               serviceName: jaeger-query
-              servicePort: 16686
+              servicePort: 80
