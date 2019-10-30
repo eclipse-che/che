@@ -16,6 +16,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import io.github.mweirauch.micrometer.jvm.extras.ProcessMemoryMetrics;
 import io.github.mweirauch.micrometer.jvm.extras.ProcessThreadMetrics;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
@@ -38,6 +39,7 @@ public class MetricsModule extends AbstractModule {
     bind(PrometheusMeterRegistry.class)
         .toProvider(PrometheusMeterRegistryProvider.class)
         .asEagerSingleton();
+    bind(MeterRegistry.class).to(PrometheusMeterRegistry.class);
 
     Multibinder<MeterBinder> meterMultibinder =
         Multibinder.newSetBinder(binder(), MeterBinder.class);
