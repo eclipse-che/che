@@ -86,11 +86,7 @@ public class MeteredExecutorServiceWrapperTest {
             "userTagValue");
     CountDownLatch runnableTaskStart = new CountDownLatch(1);
     // when
-    Future<?> future =
-        executor.submit(
-            () -> {
-              runnableTaskStart.countDown();
-            });
+    Future<?> future = executor.submit(runnableTaskStart::countDown);
     // then
     runnableTaskStart.await(10, TimeUnit.SECONDS);
     future.get(1, TimeUnit.MINUTES);
@@ -132,14 +128,17 @@ public class MeteredExecutorServiceWrapperTest {
             .gauge()
             .value(),
         1.0);
-    assertEquals(
-        registry
-            .get("executor.completed")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .functionCounter()
-            .count(),
-        1.0);
+    assertWithRetry(
+        () ->
+            registry
+                .get("executor.completed")
+                .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
+                .tags(userTags)
+                .functionCounter()
+                .count(),
+        1.0,
+        10,
+        50);
     assertEquals(
         registry
             .get("executor.queued")
@@ -163,7 +162,7 @@ public class MeteredExecutorServiceWrapperTest {
             .tags(userTags)
             .gauge()
             .value(),
-        new Double(Integer.MAX_VALUE));
+        (double) Integer.MAX_VALUE);
     assertEquals(
         registry
             .get("executor")
@@ -194,13 +193,7 @@ public class MeteredExecutorServiceWrapperTest {
     CountDownLatch runnableTaskStart = new CountDownLatch(1);
     // when
     ((ScheduledExecutorService) executor)
-        .scheduleAtFixedRate(
-            () -> {
-              runnableTaskStart.countDown();
-            },
-            0,
-            100,
-            TimeUnit.SECONDS);
+        .scheduleAtFixedRate(runnableTaskStart::countDown, 0, 100, TimeUnit.SECONDS);
     // then
 
     runnableTaskStart.await(10, TimeUnit.SECONDS);
@@ -277,7 +270,7 @@ public class MeteredExecutorServiceWrapperTest {
             .tags(userTags)
             .gauge()
             .value(),
-        new Double(Integer.MAX_VALUE));
+        (double) Integer.MAX_VALUE);
     assertEquals(
         registry
             .get("executor")
@@ -323,11 +316,7 @@ public class MeteredExecutorServiceWrapperTest {
             "userTagValue");
     CountDownLatch runnableTaskStart = new CountDownLatch(1);
     // when
-    executor.schedule(
-        () -> {
-          runnableTaskStart.countDown();
-        },
-        new CronExpression(" * * * ? * * *"));
+    executor.schedule(runnableTaskStart::countDown, new CronExpression(" * * * ? * * *"));
     // then
     runnableTaskStart.await(10, TimeUnit.SECONDS);
     assertEquals(
@@ -444,7 +433,7 @@ public class MeteredExecutorServiceWrapperTest {
         1.0);
   }
 
-  public <V> void assertWithRetry(Supplier<V> predicate, V expected, int times, int pause_millis)
+  <V> void assertWithRetry(Supplier<V> predicate, V expected, int times, int pause_millis)
       throws InterruptedException {
     for (int i = 0; i <= times; i++) {
       V actual = predicate.get();
