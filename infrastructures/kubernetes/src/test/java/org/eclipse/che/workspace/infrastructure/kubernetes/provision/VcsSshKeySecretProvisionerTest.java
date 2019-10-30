@@ -22,11 +22,14 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Secret;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
@@ -44,6 +47,7 @@ import org.testng.annotations.Test;
  * Tests {@link VcsSshKeysProvisioner}.
  *
  * @author Vitalii Parfonov
+ * @author Vlad Zhukovskyi
  */
 @Listeners(MockitoTestNGListener.class)
 public class VcsSshKeySecretProvisionerTest {
@@ -57,6 +61,8 @@ public class VcsSshKeySecretProvisionerTest {
 
   @Mock private PodSpec podSpec;
 
+  @Mock private Container container;
+
   private final String someUser = "someuser";
 
   private VcsSshKeysProvisioner vcsSshKeysProvisioner;
@@ -69,6 +75,9 @@ public class VcsSshKeySecretProvisionerTest {
     ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
     when(pod.getMetadata()).thenReturn(podMeta);
     when(pod.getSpec()).thenReturn(podSpec);
+    when(podSpec.getVolumes()).thenReturn(new ArrayList<>());
+    when(podSpec.getContainers()).thenReturn(Collections.singletonList(container));
+    when(container.getVolumeMounts()).thenReturn(new ArrayList<>());
     k8sEnv.addPod(pod);
     vcsSshKeysProvisioner = new VcsSshKeysProvisioner(sshManager);
   }
@@ -100,20 +109,24 @@ public class VcsSshKeySecretProvisionerTest {
 
     vcsSshKeysProvisioner.provision(k8sEnv, runtimeIdentity);
 
-    verify(podSpec, times(4)).getVolumes();
-    verify(podSpec, times(4)).getContainers();
+    verify(podSpec, times(2)).getVolumes();
+    verify(podSpec, times(2)).getContainers();
 
-    Secret secret = k8sEnv.getSecrets().get("wksp-" + keyName1);
+    Secret secret = k8sEnv.getSecrets().get("wksp-sshprivatekeys");
     assertNotNull(secret);
-    assertEquals(secret.getType(), "kubernetes.io/ssh-auth");
+    assertEquals(secret.getType(), "opaque");
 
-    String key = secret.getData().get("ssh-privatekey");
-    assertNotNull(key);
+    String key1 = secret.getData().get(keyName1);
+    assertNotNull(key1);
+    assertEquals("private", new String(Base64.getDecoder().decode(key1)));
 
-    // check if key nave valid name '.' replaced to the '-'
-    Secret secret3 = k8sEnv.getSecrets().get("wksp-" + keyName3.replace('.', '-'));
-    assertNotNull(secret3);
-    assertEquals(secret3.getType(), "kubernetes.io/ssh-auth");
+    String key2 = secret.getData().get(keyName2);
+    assertNotNull(key2);
+    assertEquals("private", new String(Base64.getDecoder().decode(key2)));
+
+    String key3 = secret.getData().get(keyName3);
+    assertNotNull(key3);
+    assertEquals("private", new String(Base64.getDecoder().decode(key3)));
 
     Map<String, ConfigMap> configMaps = k8sEnv.getConfigMaps();
     assertNotNull(configMaps);
@@ -128,12 +141,12 @@ public class VcsSshKeySecretProvisionerTest {
 
     String sshConfig = mapData.get("ssh_config");
     assertTrue(sshConfig.contains("host " + keyName1));
-    assertTrue(sshConfig.contains("IdentityFile " + "/etc/ssh/" + keyName1 + "/ssh-privatekey"));
+    assertTrue(sshConfig.contains("IdentityFile " + "/etc/ssh/private/" + keyName1));
 
     assertTrue(sshConfig.contains("host *"));
-    assertTrue(sshConfig.contains("IdentityFile " + "/etc/ssh/" + keyName2 + "/ssh-privatekey"));
+    assertTrue(sshConfig.contains("IdentityFile " + "/etc/ssh/private/" + keyName2));
 
     assertTrue(sshConfig.contains("host github.com"));
-    assertTrue(sshConfig.contains("IdentityFile /etc/ssh/github-com/ssh-privatekey"));
+    assertTrue(sshConfig.contains("IdentityFile /etc/ssh/private/github.com"));
   }
 }
