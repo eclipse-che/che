@@ -11,20 +11,19 @@
  */
 package io.micrometer.core.instrument.internal;
 
+import static org.testng.Assert.assertEquals;
+
 import io.micrometer.core.instrument.MockClock;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.simple.SimpleConfig;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import java.text.ParseException;
+import java.util.concurrent.CountDownLatch;
 import org.eclipse.che.commons.schedule.executor.CronExpression;
 import org.eclipse.che.commons.schedule.executor.CronThreadPoolExecutor;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.text.ParseException;
-import java.util.concurrent.CountDownLatch;
-
-import static org.testng.Assert.assertEquals;
 
 public class TimedCronExecutorServiceTest {
 
