@@ -15,6 +15,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newPVC;
 
 import com.google.inject.Inject;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
@@ -198,7 +199,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
 
     PersistentVolumeClaim commonPVC = claims.values().iterator().next();
 
-    final KubernetesNamespace namespace = factory.create(workspaceId);
+    final KubernetesNamespace namespace = factory.getOrCreate(target);
     final KubernetesPersistentVolumeClaims pvcs = namespace.persistentVolumeClaims();
     final Set<String> existing =
         pvcs.get().stream().map(p -> p.getMetadata().getName()).collect(toSet());
@@ -215,7 +216,11 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
         (String[])
             commonPVC.getAdditionalProperties().remove(format(SUBPATHS_PROPERTY_FMT, workspaceId));
     if (preCreateDirs && subpaths != null) {
-      pvcSubPathHelper.createDirs(workspaceId, commonPVC.getMetadata().getName(), subpaths);
+      pvcSubPathHelper.createDirs(
+          workspaceId,
+          target.getInfrastructureNamespace(),
+          commonPVC.getMetadata().getName(),
+          subpaths);
     }
 
     log.debug("Preparing PVC done for workspace '{}'", workspaceId);
@@ -229,7 +234,10 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     String workspaceId = workspace.getId();
     PersistentVolumeClaim pvc = createCommonPVC(workspaceId);
     pvcSubPathHelper.removeDirsAsync(
-        workspaceId, pvc.getMetadata().getName(), subpathPrefixes.getWorkspaceSubPath(workspaceId));
+        workspaceId,
+        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE),
+        pvc.getMetadata().getName(),
+        subpathPrefixes.getWorkspaceSubPath(workspaceId));
   }
 
   private PersistentVolumeClaim replacePVCsWithCommon(

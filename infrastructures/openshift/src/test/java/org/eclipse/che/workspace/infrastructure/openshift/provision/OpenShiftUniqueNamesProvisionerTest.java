@@ -25,7 +25,7 @@ import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteBuilder;
 import java.util.HashMap;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.mockito.Mock;

@@ -58,8 +58,8 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
 import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppedEvent;
 import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppingEvent;
@@ -70,6 +70,7 @@ import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -118,6 +119,8 @@ public class WorkspaceRuntimesTest {
 
   @Mock private InternalEnvironmentFactory<InternalEnvironment> testEnvFactory;
 
+  @Mock private UserManager userManager;
+
   private WorkspaceRuntimes runtimes;
 
   @BeforeMethod
@@ -135,7 +138,8 @@ public class WorkspaceRuntimesTest {
             probeScheduler,
             statuses,
             lockService,
-            devfileConverter);
+            devfileConverter,
+            userManager);
   }
 
   @Test(
@@ -168,7 +172,8 @@ public class WorkspaceRuntimesTest {
             probeScheduler,
             statuses,
             lockService,
-            devfileConverter);
+            devfileConverter,
+            userManager);
     InternalEnvironment expectedEnvironment = mock(InternalEnvironment.class);
     when(noEnvFactory.create(eq(null))).thenReturn(expectedEnvironment);
 
@@ -435,7 +440,8 @@ public class WorkspaceRuntimesTest {
             probeScheduler,
             statuses,
             lockService,
-            devfileConverter);
+            devfileConverter,
+            userManager);
     localRuntimes.init();
     RuntimeIdentityDto identity =
         DtoFactory.newDto(RuntimeIdentityDto.class)
@@ -479,7 +485,8 @@ public class WorkspaceRuntimesTest {
             probeScheduler,
             statuses,
             lockService,
-            devfileConverter);
+            devfileConverter,
+            userManager);
     localRuntimes.init();
     RuntimeIdentityDto identity =
         DtoFactory.newDto(RuntimeIdentityDto.class)
@@ -533,7 +540,8 @@ public class WorkspaceRuntimesTest {
             probeScheduler,
             statuses,
             lockService,
-            devfileConverter);
+            devfileConverter,
+            userManager);
 
     // when
     localRuntimes.injectRuntime(workspace);

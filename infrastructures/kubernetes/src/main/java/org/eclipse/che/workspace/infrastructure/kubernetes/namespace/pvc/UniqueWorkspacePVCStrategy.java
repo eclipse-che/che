@@ -22,7 +22,7 @@ import java.util.function.Function;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
@@ -144,7 +144,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
     }
 
     final KubernetesPersistentVolumeClaims k8sClaims =
-        factory.create(workspaceId).persistentVolumeClaims();
+        factory.getOrCreate(target).persistentVolumeClaims();
     LOG.debug("Creating PVCs for workspace '{}'", workspaceId);
     k8sClaims.createIfNotExist(k8sEnv.getPersistentVolumeClaims().values());
 
@@ -172,7 +172,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       throws InfrastructureException {
     Map<String, PersistentVolumeClaim> existingPVCs =
         factory
-            .create(target.getIdentity().getWorkspaceId())
+            .getOrCreate(target)
             .persistentVolumeClaims()
             .getByLabel(CHE_WORKSPACE_ID_LABEL, target.getIdentity().getWorkspaceId())
             .stream()

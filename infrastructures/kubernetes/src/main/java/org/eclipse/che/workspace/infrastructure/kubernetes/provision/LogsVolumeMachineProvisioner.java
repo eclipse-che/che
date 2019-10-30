@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import com.google.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;

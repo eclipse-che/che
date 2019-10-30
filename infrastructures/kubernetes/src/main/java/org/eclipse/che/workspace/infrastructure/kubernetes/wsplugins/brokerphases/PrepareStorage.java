@@ -17,8 +17,7 @@ import com.google.common.annotations.Beta;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import java.util.List;
-
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.commons.tracing.TracingTags;
@@ -61,8 +60,7 @@ public class PrepareStorage extends BrokerPhase {
     TracingTags.WORKSPACE_ID.set(tracingSpan, target.getIdentity().getWorkspaceId());
 
     try {
-      volumesStrategy.prepare(
-          brokerEnvironment, target, startSynchronizer.getStartTimeoutMillis());
+      volumesStrategy.prepare(brokerEnvironment, target, startSynchronizer.getStartTimeoutMillis());
     } catch (InfrastructureException e) {
       TracingTags.setErrorStatus(tracingSpan, e);
       throw e;

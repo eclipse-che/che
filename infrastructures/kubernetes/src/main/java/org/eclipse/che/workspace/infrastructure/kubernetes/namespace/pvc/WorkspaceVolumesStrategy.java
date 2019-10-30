@@ -12,7 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
@@ -40,7 +40,7 @@ public interface WorkspaceVolumesStrategy extends ConfigurationProvisioner {
    *
    * @param k8sEnv Kubernetes environment that changes as a result of preparation
    * @param target the target into which the workspace is being provisioned and where the volumes
-   *               will be prepared.
+   *     will be prepared.
    * @param timeoutMillis timeout in milliseconds
    * @throws InfrastructureException when any error while preparation occurs
    */

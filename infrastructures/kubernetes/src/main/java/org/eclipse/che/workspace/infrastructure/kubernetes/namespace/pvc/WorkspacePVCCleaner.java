@@ -15,12 +15,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +57,7 @@ public class WorkspacePVCCleaner {
           event -> {
             final Workspace workspace = event.getWorkspace();
             try {
-              if (namespaceFactory.isManagingNamespace(workspace.getId())) {
+              if (namespaceFactory.isManagingNamespace(workspace)) {
                 // the namespaces of managed workspaces are deleted, so no need to do the cleanup
                 LOG.debug(
                     "Not cleaning up the PVCs of workspace %s, because its namespace is"

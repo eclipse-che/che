@@ -36,6 +36,7 @@ import io.fabric8.kubernetes.api.model.ResourceRequirementsBuilder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -63,6 +64,7 @@ public class PVCSubPathHelperTest {
   private static final String jobImage = "centos:centos7";
   private static final String PROJECTS_PATH = "/projects";
   private static final String M2_PATH = "/.m2";
+  private static final RuntimeTarget TARGET = new RuntimeTarget(WORKSPACE_ID, null, null);
 
   @Mock private SecurityContextProvisioner securityContextProvisioner;
   @Mock private KubernetesNamespaceFactory k8sNamespaceFactory;
@@ -80,7 +82,7 @@ public class PVCSubPathHelperTest {
     pvcSubPathHelper =
         new PVCSubPathHelper(
             jobMemoryLimit, jobImage, k8sNamespaceFactory, securityContextProvisioner);
-    lenient().when(k8sNamespaceFactory.create(anyString())).thenReturn(k8sNamespace);
+    lenient().when(k8sNamespaceFactory.getOrCreate(any())).thenReturn(k8sNamespace);
     lenient().when(k8sNamespace.deployments()).thenReturn(osDeployments);
     lenient().when(pod.getStatus()).thenReturn(podStatus);
     lenient().when(osDeployments.deploy(nullable(Pod.class))).thenReturn(pod);
@@ -105,7 +107,7 @@ public class PVCSubPathHelperTest {
   public void testSuccessfullyCreatesWorkspaceDirs() throws Exception {
     when(podStatus.getPhase()).thenReturn(POD_PHASE_SUCCEEDED);
 
-    pvcSubPathHelper.createDirs(WORKSPACE_ID, PVC_NAME, WORKSPACE_ID + PROJECTS_PATH);
+    pvcSubPathHelper.createDirs(WORKSPACE_ID, null, PVC_NAME, WORKSPACE_ID + PROJECTS_PATH);
 
     verify(osDeployments).create(podCaptor.capture());
     final List<String> actual = podCaptor.getValue().getSpec().getContainers().get(0).getCommand();
@@ -125,7 +127,7 @@ public class PVCSubPathHelperTest {
   public void testSetMemoryLimitAndRequest() throws Exception {
     when(podStatus.getPhase()).thenReturn(POD_PHASE_SUCCEEDED);
 
-    pvcSubPathHelper.createDirs(WORKSPACE_ID, PVC_NAME, WORKSPACE_ID + PROJECTS_PATH);
+    pvcSubPathHelper.createDirs(WORKSPACE_ID, null, PVC_NAME, WORKSPACE_ID + PROJECTS_PATH);
 
     verify(osDeployments).create(podCaptor.capture());
     ResourceRequirements actual =
@@ -147,7 +149,7 @@ public class PVCSubPathHelperTest {
     when(podStatus.getPhase()).thenReturn(POD_PHASE_FAILED);
 
     pvcSubPathHelper.execute(
-        WORKSPACE_ID, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
+        WORKSPACE_ID, null, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
 
     verify(osDeployments).create(any());
     verify(osDeployments).wait(anyString(), anyInt(), any());
@@ -158,13 +160,13 @@ public class PVCSubPathHelperTest {
 
   @Test
   public void testLogErrorWhenKubernetesProjectCreationFailed() throws Exception {
-    when(k8sNamespaceFactory.create(WORKSPACE_ID))
+    when(k8sNamespaceFactory.getOrCreate(TARGET))
         .thenThrow(new InfrastructureException("Kubernetes namespace creation failed"));
 
     pvcSubPathHelper.execute(
-        WORKSPACE_ID, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
+        WORKSPACE_ID, null, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
 
-    verify(k8sNamespaceFactory).create(WORKSPACE_ID);
+    verify(k8sNamespaceFactory).getOrCreate(TARGET);
     verify(k8sNamespace, never()).deployments();
   }
 
@@ -174,9 +176,9 @@ public class PVCSubPathHelperTest {
         .thenThrow(new InfrastructureException("Kubernetes pod creation failed"));
 
     pvcSubPathHelper.execute(
-        WORKSPACE_ID, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
+        WORKSPACE_ID, null, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
 
-    verify(k8sNamespaceFactory).create(WORKSPACE_ID);
+    verify(k8sNamespaceFactory).getOrCreate(TARGET);
     verify(k8sNamespace).deployments();
     verify(osDeployments).create(any());
     verify(osDeployments, never()).wait(anyString(), anyInt(), any());
@@ -188,7 +190,7 @@ public class PVCSubPathHelperTest {
     doThrow(InfrastructureException.class).when(osDeployments).delete(anyString());
 
     pvcSubPathHelper.execute(
-        WORKSPACE_ID, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
+        WORKSPACE_ID, null, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
 
     verify(osDeployments).create(any());
     verify(osDeployments).wait(anyString(), anyInt(), any());

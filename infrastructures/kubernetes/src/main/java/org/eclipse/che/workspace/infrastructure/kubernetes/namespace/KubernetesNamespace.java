@@ -17,6 +17,7 @@ import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -110,13 +111,18 @@ public class KubernetesNamespace {
    *
    * <p>Preparing includes creating if needed and waiting for default service account.
    *
+   * @param markManaged mark the namespace as managed by Che if it is newly created in this method
+   * @return true if the namespace has been created, false if it's already existed
    * @throws InfrastructureException if any exception occurs during namespace preparing
    */
-  void prepare() throws InfrastructureException {
+  boolean prepare(boolean markManaged) throws InfrastructureException {
     KubernetesClient client = clientFactory.create(workspaceId);
     if (get(name, client) == null) {
-      create(name, client);
+      create(name, client, markManaged);
+      return true;
     }
+
+    return false;
   }
 
   /**
@@ -125,9 +131,54 @@ public class KubernetesNamespace {
    *
    * @throws InfrastructureException if any unexpected exception occurs during namespace deletion
    */
-  void delete() throws InfrastructureException {
+  void deleteIfManaged() throws InfrastructureException {
     KubernetesClient client = clientFactory.create(workspaceId);
-    delete(name, client);
+
+    if (!isManagedInternal(client)) {
+      throw new InfrastructureException(
+          format(
+              "Can't delete namespace '%s' that contains"
+                  + " runtime of workspace '%s' because it doesn't have the 'che-managed'"
+                  + " label equal to 'true'.",
+              name, workspaceId));
+    }
+
+    try {
+      delete(name, client);
+    } catch (KubernetesClientException e) {
+      if (e.getCode() == 403) {
+        throw new InfrastructureException(
+            format(
+                "Could not access the namespace %s when deleting it for workspace %s",
+                name, workspaceId),
+            e);
+      }
+
+      throw new KubernetesInfrastructureException(e);
+    }
+  }
+
+  boolean isMarkedManaged() throws InfrastructureException {
+    KubernetesClient client = clientFactory.create(workspaceId);
+    return isManagedInternal(client);
+  }
+
+  private boolean isManagedInternal(KubernetesClient client) throws InfrastructureException {
+    try {
+      Namespace object = client.namespaces().withName(name).get();
+      return "true".equals(object.getMetadata().getLabels().get("che-managed"));
+    } catch (KubernetesClientException e) {
+      if (e.getCode() == 403) {
+        throw new InfrastructureException(
+            format(
+                "Could not access the namespace %s when trying to determine if it is managed "
+                    + "for workspace %s",
+                name, workspaceId),
+            e);
+      }
+
+      throw new KubernetesInfrastructureException(e);
+    }
   }
 
   /** Returns namespace name */
@@ -206,16 +257,17 @@ public class KubernetesNamespace {
     }
   }
 
-  private void create(String namespaceName, KubernetesClient client)
+  private void create(String namespaceName, KubernetesClient client, boolean markManaged)
       throws InfrastructureException {
     try {
-      client
-          .namespaces()
-          .createNew()
-          .withNewMetadata()
-          .withName(namespaceName)
-          .endMetadata()
-          .done();
+      ObjectMetaBuilder metadata = new ObjectMetaBuilder().withName(namespaceName);
+
+      if (markManaged) {
+        metadata.addToLabels("che-managed", "true");
+      }
+
+      client.namespaces().createNew().withMetadata(metadata.build()).done();
+
       waitDefaultServiceAccount(namespaceName, client);
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {

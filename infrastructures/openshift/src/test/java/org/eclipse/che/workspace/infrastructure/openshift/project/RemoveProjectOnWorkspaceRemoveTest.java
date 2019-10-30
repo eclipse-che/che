@@ -12,7 +12,6 @@
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -48,7 +47,7 @@ public class RemoveProjectOnWorkspaceRemoveTest {
   public void setUp() throws Exception {
     removeProjectOnWorkspaceRemove = spy(new RemoveProjectOnWorkspaceRemove(projectFactory));
 
-    lenient().doNothing().when(projectFactory).delete(anyString());
+    lenient().doNothing().when(projectFactory).deleteIfManaged(any());
 
     when(workspace.getId()).thenReturn(WORKSPACE_ID);
   }
@@ -69,7 +68,7 @@ public class RemoveProjectOnWorkspaceRemoveTest {
 
     removeProjectOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
 
-    verify(projectFactory).delete(WORKSPACE_ID);
+    verify(projectFactory).deleteIfManaged(workspace);
   }
 
   @Test
@@ -79,6 +78,6 @@ public class RemoveProjectOnWorkspaceRemoveTest {
 
     removeProjectOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
 
-    verify(projectFactory, never()).delete(any());
+    verify(projectFactory, never()).deleteIfManaged(any());
   }
 }

@@ -17,8 +17,8 @@ import java.util.Collection;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
@@ -100,7 +100,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
       throws InfrastructureException {
 
     String workspaceId = target.getIdentity().getWorkspaceId();
-    KubernetesNamespace kubernetesNamespace = factory.create(workspaceId);
+    KubernetesNamespace kubernetesNamespace = factory.getOrCreate(target);
     BrokersResult brokersResult = new BrokersResult();
 
     E brokerEnvironment = brokerEnvironmentFactory.create(pluginFQNs, target.getIdentity());

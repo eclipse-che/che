@@ -9,21 +9,41 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.core.model.workspace.runtime;
+package org.eclipse.che.api.workspace.server.model.impl;
 
 import java.util.Objects;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.subject.Subject;
 
 public final class RuntimeTarget {
   private final RuntimeIdentity identity;
   private final String infrastructureNamespace;
   private final String ownerName;
 
-  public RuntimeTarget(RuntimeIdentity identity, @Nullable String ownerName,
-          @Nullable String infrastructureNamespace) {
+  public RuntimeTarget(
+      RuntimeIdentity identity,
+      @Nullable String ownerName,
+      @Nullable String infrastructureNamespace) {
     this.identity = identity;
     this.ownerName = ownerName;
     this.infrastructureNamespace = infrastructureNamespace;
+  }
+
+  public RuntimeTarget(
+      String workspaceId, Subject owner, @Nullable String infrastructureNamespace) {
+    this(workspaceId, owner, infrastructureNamespace, null);
+  }
+
+  public RuntimeTarget(
+      String workspaceId,
+      Subject owner,
+      @Nullable String infrastructureNamespace,
+      @Nullable String environment) {
+    this(
+        new RuntimeIdentityImpl(workspaceId, environment, owner.getUserId()),
+        owner.getUserName(),
+        infrastructureNamespace);
   }
 
   public RuntimeIdentity getIdentity() {
@@ -45,9 +65,9 @@ public final class RuntimeTarget {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     RuntimeTarget that = (RuntimeTarget) o;
-    return identity.equals(that.identity) &&
-            Objects.equals(infrastructureNamespace, that.infrastructureNamespace) &&
-            Objects.equals(ownerName, that.ownerName);
+    return identity.equals(that.identity)
+        && Objects.equals(infrastructureNamespace, that.infrastructureNamespace)
+        && Objects.equals(ownerName, that.ownerName);
   }
 
   @Override

@@ -14,7 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpol
 import static java.lang.String.format;
 
 import io.fabric8.kubernetes.api.model.PodSpec;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;

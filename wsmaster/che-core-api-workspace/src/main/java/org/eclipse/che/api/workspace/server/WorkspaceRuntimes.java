@@ -53,15 +53,16 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
 import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppedEvent;
 import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppingEvent;
@@ -69,6 +70,7 @@ import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -118,6 +120,7 @@ public class WorkspaceRuntimes {
   private final DevfileConverter devfileConverter;
   // Unique identifier for this workspace runtimes
   private final String workspaceRuntimesId;
+  private final UserManager userManager;
 
   @VisibleForTesting
   WorkspaceRuntimes(
@@ -131,7 +134,8 @@ public class WorkspaceRuntimes {
       ProbeScheduler probeScheduler,
       WorkspaceStatusCache statuses,
       WorkspaceLockService lockService,
-      DevfileConverter devfileConverter) {
+      DevfileConverter devfileConverter,
+      UserManager userManager) {
     this(
         eventService,
         envFactories,
@@ -142,7 +146,8 @@ public class WorkspaceRuntimes {
         probeScheduler,
         statuses,
         lockService,
-        devfileConverter);
+        devfileConverter,
+        userManager);
     this.runtimes = runtimes;
   }
 
@@ -157,7 +162,8 @@ public class WorkspaceRuntimes {
       ProbeScheduler probeScheduler,
       WorkspaceStatusCache statuses,
       WorkspaceLockService lockService,
-      DevfileConverter devfileConverter) {
+      DevfileConverter devfileConverter,
+      UserManager userManager) {
     this.probeScheduler = probeScheduler;
     this.runtimes = new ConcurrentHashMap<>();
     this.statuses = statuses;
@@ -169,6 +175,7 @@ public class WorkspaceRuntimes {
     this.environmentFactories = ImmutableMap.copyOf(envFactories);
     this.lockService = lockService;
     this.devfileConverter = devfileConverter;
+    this.userManager = userManager;
     LOG.info("Configured factories for environments: '{}'", envFactories.keySet());
     LOG.info("Registered infrastructure '{}'", infra.getName());
     SetView<String> notSupportedByInfra =
@@ -416,7 +423,8 @@ public class WorkspaceRuntimes {
     final RuntimeTarget target =
         new RuntimeTarget(
             runtimeId,
-                ownerName, workspace
+            ownerName,
+            workspace
                 .getConfig()
                 .getAttributes()
                 .get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE));
@@ -628,10 +636,6 @@ public class WorkspaceRuntimes {
       return;
     }
 
-    Set<RuntimeTarget> targets = identities.stream().map(identity -> {
-
-    }).collect(toSet());
-
     for (RuntimeIdentity identity : identities) {
       String workspaceId = identity.getWorkspaceId();
 
@@ -640,7 +644,7 @@ public class WorkspaceRuntimes {
       }
     }
 
-    sharedPool.execute(new RecoverRuntimesTask(targets));
+    sharedPool.execute(new RecoverRuntimesTask(identities));
   }
 
   @VisibleForTesting
@@ -679,6 +683,14 @@ public class WorkspaceRuntimes {
       }
     }
 
+    User user;
+    try {
+      user = userManager.getById(identity.getOwnerId());
+    } catch (NotFoundException e) {
+      throw new ServerException(
+          format("Could not find the user referred to by runtime identity: %s", identity), e);
+    }
+
     InternalRuntime runtime;
     try {
       InternalEnvironment internalEnv =
@@ -688,7 +700,8 @@ public class WorkspaceRuntimes {
       RuntimeTarget target =
           new RuntimeTarget(
               identity,
-                  null, workspaceConfig.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE));
+              user.getName(),
+              workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE));
 
       runtime = infra.prepare(target, internalEnv).getRuntime();
       WorkspaceStatus runtimeStatus = runtime.getStatus();

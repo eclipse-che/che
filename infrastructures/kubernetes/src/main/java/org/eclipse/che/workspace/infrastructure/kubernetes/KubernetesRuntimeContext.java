@@ -18,7 +18,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
@@ -74,7 +74,7 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
 
     if (!runtimeStateOpt.isPresent()) {
       // there is no cached runtime, create a new one
-      return runtimeFactory.create(this, namespaceFactory.create(workspaceId));
+      return runtimeFactory.create(this, namespaceFactory.getOrCreate(getTarget()));
     }
 
     // there is cached runtime, restore cached one
@@ -87,7 +87,7 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
         runtimeId.getOwnerId());
     KubernetesInternalRuntime runtime =
         runtimeFactory.create(
-            this, namespaceFactory.create(workspaceId, runtimeState.getNamespace()));
+            this, namespaceFactory.access(workspaceId, runtimeState.getNamespace()));
 
     runtime.scheduleRuntimeStateChecks();
 

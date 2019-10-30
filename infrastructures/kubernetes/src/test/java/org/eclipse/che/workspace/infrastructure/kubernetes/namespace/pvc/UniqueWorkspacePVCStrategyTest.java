@@ -38,8 +38,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -94,7 +94,7 @@ public class UniqueWorkspacePVCStrategyTest {
 
     provisionOrder = inOrder(pvcProvisioner, subpathPrefixes, podsVolumes);
 
-    when(factory.create(WORKSPACE_ID)).thenReturn(k8sNamespace);
+    when(factory.getOrCreate(eq(TARGET))).thenReturn(k8sNamespace);
     when(k8sNamespace.persistentVolumeClaims()).thenReturn(pvcs);
   }
 
@@ -150,7 +150,7 @@ public class UniqueWorkspacePVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().putAll(singletonMap(uniqueName, pvc));
     doReturn(pvc).when(pvcs).create(any());
 
-    strategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    strategy.prepare(k8sEnv, TARGET, 100);
 
     verify(pvcs).createIfNotExist(any());
     verify(pvcs).waitBound(uniqueName, 100);
@@ -172,7 +172,7 @@ public class UniqueWorkspacePVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().putAll(singletonMap(uniqueName, pvc));
     doReturn(pvc).when(pvcs).create(any());
 
-    strategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    strategy.prepare(k8sEnv, TARGET, 100);
 
     verify(pvcs).createIfNotExist(any());
     verify(pvcs, never()).waitBound(anyString(), anyLong());
@@ -186,7 +186,7 @@ public class UniqueWorkspacePVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().put(PVC_NAME_PREFIX, pvc);
     doThrow(InfrastructureException.class).when(pvcs).createIfNotExist(any());
 
-    strategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    strategy.prepare(k8sEnv, TARGET, 100);
   }
 
   @Test

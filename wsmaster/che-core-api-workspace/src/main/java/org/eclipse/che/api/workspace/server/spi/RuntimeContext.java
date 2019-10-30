@@ -13,7 +13,7 @@ package org.eclipse.che.api.workspace.server.spi;
 
 import java.net.URI;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 
 /**
