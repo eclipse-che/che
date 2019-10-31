@@ -125,10 +125,12 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     theiaIde.switchToIdeFrame();
     theiaIde.waitTheiaIde();
 
-    // go to OCP and check if there is a project with name starts from "workspace"
+    // go to OCP and check if there a user project has expected resources
     openShiftProjectCatalogPage.open();
     openShiftLoginPage.login(NEW_TEST_USER.getName(), NEW_TEST_USER.getPassword());
     openShiftProjectCatalogPage.waitProject(USER_PROJECT_NAME);
+    openShiftProjectCatalogPage.clickOnProject(USER_PROJECT_NAME);
+    openShiftProjectCatalogPage.waitResource("workspace");
 
     // remove test workspace from Eclipse Che Dashboard
     seleniumWebDriver.navigate().to(testDashboardUrlProvider.get());
@@ -138,9 +140,11 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     workspaces.clickOnDeleteButtonInDialogWindow();
     workspaces.waitWorkspaceIsNotPresent(WORKSPACE_NAME);
 
-    // go to OCP and check if there is no project with name starts from "workspace"
+    // go to OCP and check that workspace resources deleted
     openShiftProjectCatalogPage.open();
-    openShiftProjectCatalogPage.waitProjectAbsence(USER_PROJECT_NAME);
+    openShiftProjectCatalogPage.waitProject(USER_PROJECT_NAME);
+    openShiftProjectCatalogPage.clickOnProject(USER_PROJECT_NAME);
+    openShiftProjectCatalogPage.waitResourceAbsence("workspace");
   }
 
   private static TestUser getTestUser() {

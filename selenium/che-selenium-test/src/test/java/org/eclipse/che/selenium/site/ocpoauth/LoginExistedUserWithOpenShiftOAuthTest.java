@@ -100,6 +100,7 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
 
   @Test
   public void checkExistedCheUserOcpProjectCreationAndRemoval() throws Exception {
+    String projectName = defaultTestUser.getName() + "-che";
     // go to login page of Eclipse Che
     // (we can't use dashboard.open() here to login with OAuth)
     seleniumWebDriver.navigate().to(testDashboardUrlProvider.get());
@@ -140,7 +141,7 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
     theiaIde.switchToIdeFrame();
     theiaIde.waitTheiaIde();
 
-    // go to OCP and check if there is a project with name equals to test workspace id
+    // go to OCP and check if there a user project has expected resources
     openShiftProjectCatalogPage.open();
     openShiftLoginPage.login(defaultTestUser.getName(), defaultTestUser.getPassword());
     Workspace testWorkspace =
@@ -155,8 +156,10 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
     workspaces.clickOnDeleteButtonInDialogWindow();
     workspaces.waitWorkspaceIsNotPresent(WORKSPACE_NAME);
 
-    // go to OCP and check if there is no project with name equals to test workspace id
+    // go to OCP and check that workspace resources deleted
     openShiftProjectCatalogPage.open();
-    openShiftProjectCatalogPage.waitProjectAbsence(defaultTestUser.getName() + "-che");
+    openShiftProjectCatalogPage.waitProject(projectName);
+    openShiftProjectCatalogPage.clickOnProject(projectName);
+    openShiftProjectCatalogPage.waitResourceAbsence("workspace");
   }
 }
