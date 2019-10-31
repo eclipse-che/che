@@ -33,6 +33,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRunti
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 
 /** @author Sergii Leshchenko */
 @Singleton
@@ -43,6 +44,7 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
   private final DockerImageEnvironmentConverter dockerImageEnvConverter;
   private final OpenShiftRuntimeContextFactory runtimeContextFactory;
   private final KubernetesRuntimeStateCache runtimeStatusesCache;
+  private final OpenShiftProjectFactory projectFactory;
 
   @Inject
   public OpenShiftInfrastructure(
@@ -50,7 +52,8 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
       OpenShiftRuntimeContextFactory runtimeContextFactory,
       Set<InternalEnvironmentProvisioner> internalEnvProvisioners,
       DockerImageEnvironmentConverter dockerImageEnvConverter,
-      KubernetesRuntimeStateCache runtimeStatusesCache) {
+      KubernetesRuntimeStateCache runtimeStatusesCache,
+      OpenShiftProjectFactory projectFactory) {
     super(
         NAME,
         ImmutableSet.of(
@@ -63,11 +66,17 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
     this.runtimeContextFactory = runtimeContextFactory;
     this.dockerImageEnvConverter = dockerImageEnvConverter;
     this.runtimeStatusesCache = runtimeStatusesCache;
+    this.projectFactory = projectFactory;
   }
 
   @Override
   public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
     return runtimeStatusesCache.getIdentities();
+  }
+
+  @Override
+  public String getInfrastructureNamespace(RuntimeTarget target) throws InfrastructureException {
+    return projectFactory.getDefaultNamespaceName(target);
   }
 
   @Override

@@ -389,7 +389,7 @@ public class KubernetesNamespaceFactory {
     return namespace;
   }
 
-  private String getDefaultNamespaceName(RuntimeTarget target) throws InfrastructureException {
+  public String getDefaultNamespaceName(RuntimeTarget target) throws InfrastructureException {
     String workspaceId = target.getIdentity().getWorkspaceId();
     String ownerId = target.getIdentity().getOwnerId();
     String ownerName = target.getOwnerName();

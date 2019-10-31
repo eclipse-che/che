@@ -796,6 +796,11 @@ public class WorkspaceRuntimesTest {
     }
 
     @Override
+    public String getInfrastructureNamespace(RuntimeTarget target) throws InfrastructureException {
+      return null;
+    }
+
+    @Override
     public RuntimeContext internalPrepare(RuntimeTarget target, InternalEnvironment environment) {
       throw new UnsupportedOperationException();
     }

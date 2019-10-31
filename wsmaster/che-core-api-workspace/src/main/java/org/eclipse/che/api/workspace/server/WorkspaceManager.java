@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.server;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
@@ -24,6 +25,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_GENERATE_NAME_CHARS_APPEND;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 
 import com.google.inject.Inject;
 import java.util.Collections;
@@ -46,10 +48,12 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
@@ -312,7 +316,22 @@ public class WorkspaceManager {
     if (workspace.getDevfile() != null) {
       workspace.setDevfile(new DevfileImpl(update.getDevfile()));
     }
+
+    // do not allow infrastructure namespace updates
+    String namespace = workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
+    String updateNamespace =
+        update.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
+
+    if (!namespace.equals(updateNamespace)) {
+      throw new ServerException(
+          format(
+              "Unable to update the infrastructure namespace of the"
+                  + " workspace '%s'. This property is read-only.",
+              id));
+    }
+
     workspace.setAttributes(update.getAttributes());
+
     workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
     workspace.setTemporary(update.isTemporary());
 
@@ -564,6 +583,17 @@ public class WorkspaceManager {
             .setStatus(STOPPED)
             .build();
     workspace.getAttributes().put(CREATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
+
+    if (isNullOrEmpty(attributes.get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE))) {
+      Subject requester = EnvironmentContext.getCurrent().getSubject();
+      RuntimeTarget target = new RuntimeTarget(workspace.getId(), requester, null);
+      try {
+        String namespace = runtimes.getInfrastructureNamespace(target);
+        attributes.put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
+      } catch (InfrastructureException e) {
+        throw new ServerException(e);
+      }
+    }
 
     workspaceDao.create(workspace);
     LOG.info(

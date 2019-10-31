@@ -276,6 +276,10 @@ public class WorkspaceRuntimes {
     }
   }
 
+  public String getInfrastructureNamespace(RuntimeTarget target) throws InfrastructureException {
+    return infrastructure.getInfrastructureNamespace(target);
+  }
+
   /**
    * Injects runtime information such as status and {@link
    * org.eclipse.che.api.core.model.workspace.Runtime} into the workspace object, if the workspace

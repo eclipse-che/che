@@ -87,6 +87,12 @@ public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
     throw new UnsupportedOperationException("Runtimes tracking currently does not supported.");
   }
 
+  @Override
+  public String getInfrastructureNamespace(RuntimeTarget target) {
+    // well, in docker we don't really care, so let's just use "something"
+    return target.getInfrastructureNamespace();
+  }
+
   private DockerEnvironment convertToDockerEnv(InternalEnvironment sourceEnv)
       throws ValidationException {
     String recipeType = sourceEnv.getRecipe().getType();

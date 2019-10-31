@@ -106,6 +106,17 @@ public abstract class RuntimeInfrastructure {
   }
 
   /**
+   * Returns the namespace a workspace should be deployed into. This method should honor the {@link
+   * RuntimeTarget#getInfrastructureNamespace()} if specified. Otherwise it should figure out the
+   * default namespace based on the information in the target.
+   *
+   * @param target the runtime target specifying where the workspace should be deployed.
+   * @throws InfrastructureException on any error
+   */
+  public abstract String getInfrastructureNamespace(RuntimeTarget target)
+      throws InfrastructureException;
+
+  /**
    * An Infrastructure implementation should be able to prepare RuntimeContext. This method is not
    * supposed to be called by clients of class {@link RuntimeInfrastructure}.
    *

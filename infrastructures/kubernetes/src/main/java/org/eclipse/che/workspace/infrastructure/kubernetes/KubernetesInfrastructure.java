@@ -32,6 +32,7 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.D
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
 /** @author Sergii Leshchenko */
 @Singleton
@@ -42,6 +43,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
   private final DockerImageEnvironmentConverter dockerImageEnvConverter;
   private final KubernetesRuntimeContextFactory runtimeContextFactory;
   private final KubernetesRuntimeStateCache runtimeStatusesCache;
+  private final KubernetesNamespaceFactory namespaceFactory;
 
   @Inject
   public KubernetesInfrastructure(
@@ -49,7 +51,8 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
       KubernetesRuntimeContextFactory runtimeContextFactory,
       Set<InternalEnvironmentProvisioner> internalEnvProvisioners,
       DockerImageEnvironmentConverter dockerImageEnvConverter,
-      KubernetesRuntimeStateCache runtimeStatusesCache) {
+      KubernetesRuntimeStateCache runtimeStatusesCache,
+      KubernetesNamespaceFactory namespaceFactory) {
     super(
         NAME,
         ImmutableSet.of(
@@ -61,11 +64,17 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
     this.runtimeContextFactory = runtimeContextFactory;
     this.dockerImageEnvConverter = dockerImageEnvConverter;
     this.runtimeStatusesCache = runtimeStatusesCache;
+    this.namespaceFactory = namespaceFactory;
   }
 
   @Override
   public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
     return runtimeStatusesCache.getIdentities();
+  }
+
+  @Override
+  public String getInfrastructureNamespace(RuntimeTarget target) throws InfrastructureException {
+    return namespaceFactory.getDefaultNamespaceName(target);
   }
 
   @Override
