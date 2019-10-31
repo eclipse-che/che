@@ -50,8 +50,8 @@ import org.slf4j.LoggerFactory;
  * @author Max Shaposhnik (mshaposhnik@redhat.com)
  */
 @Singleton
-public class KeycloakEnvironmentInitalizationFilter extends
-    MultiuserEnvironmentInitializationFilter {
+public class KeycloakEnvironmentInitalizationFilter
+    extends MultiuserEnvironmentInitializationFilter {
 
   private static final Logger LOG =
       LoggerFactory.getLogger(KeycloakEnvironmentInitalizationFilter.class);
