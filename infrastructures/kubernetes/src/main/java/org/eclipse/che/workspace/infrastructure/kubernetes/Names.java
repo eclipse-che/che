@@ -124,8 +124,8 @@ public class Names {
     if (containerName != null && containerName.length() > MAX_CONTAINER_NAME_LENGTH) {
       throw new IllegalArgumentException(
           format(
-              "The container name exceeds the allowed limit of %s characters.",
-              MAX_CONTAINER_NAME_LENGTH));
+              "The container name '%s' exceeds the allowed limit of %s characters.",
+              containerName, MAX_CONTAINER_NAME_LENGTH));
     }
 
     if (annotations != null

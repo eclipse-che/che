@@ -218,7 +218,7 @@ export class WorkspaceMachinesController {
       content += 'these ' + selectedItems.length + ' machines?';
     }
 
-    return this.confirmDialogService.showConfirmDialog('Remove machines', content, 'Delete').then(() => {
+    return this.confirmDialogService.showConfirmDialog('Remove machines', content, { resolve: 'Delete' }).then(() => {
       return selectedItems;
     });
   }
@@ -276,7 +276,7 @@ export class WorkspaceMachinesController {
    * @param name {string}
    */
   deleteMachine(name: string): void {
-    this.confirmDialogService.showConfirmDialog('Remove machine', 'Would you like to delete this machine?', 'Delete').then(() => {
+    this.confirmDialogService.showConfirmDialog('Remove machine', 'Would you like to delete this machine?', { resolve: 'Delete' }).then(() => {
       this.machineOnDelete(name);
     });
   }

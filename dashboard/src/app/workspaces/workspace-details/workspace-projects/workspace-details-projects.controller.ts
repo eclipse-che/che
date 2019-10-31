@@ -256,7 +256,7 @@ export class WorkspaceDetailsProjectsCtrl {
       content += 'this selected project?';
     }
 
-    return this.confirmDialogService.showConfirmDialog('Remove projects', content, 'Delete');
+    return this.confirmDialogService.showConfirmDialog('Remove projects', content, { resolve: 'Delete' });
   }
 
   workspaceIsRunning(): boolean {

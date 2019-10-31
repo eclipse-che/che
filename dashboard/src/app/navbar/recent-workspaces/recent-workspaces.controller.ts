@@ -10,11 +10,12 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
+import { CheWorkspace } from '../../../components/api/workspace/che-workspace.factory';
 import IdeSvc from '../../../app/ide/ide.service';
-import {CheBranding} from '../../../components/branding/che-branding.factory';
-import {WorkspacesService} from '../../workspaces/workspaces.service';
-import {CheNotification} from '../../../components/notification/che-notification.factory';
+import { CheBranding } from '../../../components/branding/che-branding.factory';
+import { WorkspacesService } from '../../workspaces/workspaces.service';
+import { CheNotification } from '../../../components/notification/che-notification.factory';
+import { WorkspaceDetailsService } from '../../workspaces/workspace-details/workspace-details.service';
 
 
 const MAX_RECENT_WORKSPACES_ITEMS: number = 5;
@@ -27,7 +28,18 @@ const MAX_RECENT_WORKSPACES_ITEMS: number = 5;
  */
 export class NavbarRecentWorkspacesController {
 
-  static $inject = ['ideSvc', 'cheWorkspace', 'cheBranding', '$window', '$log', '$scope', '$rootScope', 'workspacesService', 'cheNotification'];
+  static $inject = [
+    'ideSvc',
+    'cheWorkspace',
+    'cheBranding',
+    '$window',
+    '$log',
+    '$scope',
+    '$rootScope',
+    'workspacesService',
+    'cheNotification',
+    'workspaceDetailsService'
+  ];
 
   cheWorkspace: CheWorkspace;
   dropdownItemTempl: Array<any>;
@@ -45,19 +57,23 @@ export class NavbarRecentWorkspacesController {
   workspacesService: WorkspacesService;
   cheNotification: CheNotification;
   cheBranding: CheBranding;
+  workspaceDetailsService: WorkspaceDetailsService;
 
   /**
    * Default constructor
    */
-  constructor(ideSvc: IdeSvc,
-              cheWorkspace: CheWorkspace,
-              cheBranding: CheBranding,
-              $window: ng.IWindowService,
-              $log: ng.ILogService,
-              $scope: ng.IScope,
-              $rootScope: ng.IRootScopeService,
-              workspacesService: WorkspacesService,
-              cheNotification: CheNotification) {
+  constructor(
+    ideSvc: IdeSvc,
+    cheWorkspace: CheWorkspace,
+    cheBranding: CheBranding,
+    $window: ng.IWindowService,
+    $log: ng.ILogService,
+    $scope: ng.IScope,
+    $rootScope: ng.IRootScopeService,
+    workspacesService: WorkspacesService,
+    cheNotification: CheNotification,
+    workspaceDetailsService: WorkspaceDetailsService
+  ) {
     this.ideSvc = ideSvc;
     this.cheWorkspace = cheWorkspace;
     this.$log = $log;
@@ -66,6 +82,7 @@ export class NavbarRecentWorkspacesController {
     this.workspacesService = workspacesService;
     this.cheNotification = cheNotification;
     this.cheBranding = cheBranding;
+    this.workspaceDetailsService = workspaceDetailsService;
 
     // workspace updated time map by id
     this.workspaceUpdated = new Map();
@@ -320,6 +337,11 @@ export class NavbarRecentWorkspacesController {
    * @param workspaceId {String} workspace id
    */
   stopRecentWorkspace(workspaceId: string): void {
+    if (this.checkUnsavedChanges(workspaceId)) {
+      this.workspaceDetailsService.notifyUnsavedChangesDialog();
+      return;
+    }
+
     this.cheWorkspace.stopWorkspace(workspaceId).then(() => {
       angular.noop();
     }, (error: any) => {
@@ -333,11 +355,16 @@ export class NavbarRecentWorkspacesController {
    * @param workspaceId {String} workspace id
    */
   runRecentWorkspace(workspaceId: string): void {
+    if (this.checkUnsavedChanges(workspaceId)) {
+      this.workspaceDetailsService.notifyUnsavedChangesDialog();
+      return;
+    }
+
     let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
 
     this.updateRecentWorkspace(workspaceId);
 
-    this.cheWorkspace.startWorkspace(workspace.id, workspace.config ? workspace.config.defaultEnv: null).catch((error: any) => {
+    this.cheWorkspace.startWorkspace(workspace.id, workspace.config ? workspace.config.defaultEnv : null).catch((error: any) => {
       this.$log.error(error);
       this.cheNotification.showError('Run workspace error.', error);
     });
@@ -352,4 +379,13 @@ export class NavbarRecentWorkspacesController {
   updateRecentWorkspace(workspaceId: string): void {
     this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
   }
+
+  /**
+   * Returns `true` if workspace configuration has unsaved changes.
+   * @param id a workspace ID
+   */
+  checkUnsavedChanges(id: string): ng.IPromise<any> | any {
+    return this.workspaceDetailsService.isWorkspaceConfigSaved(id) === false;
+  }
+
 }

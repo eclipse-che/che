@@ -12,7 +12,6 @@
 package org.eclipse.che.api.workspace.server.hc;
 
 import static java.lang.String.format;
-import static org.mockito.Mockito.timeout;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -34,7 +33,7 @@ public class ServerCheckerTest {
   private static final String SERVER_REF = "ref1";
   private static final long PERIOD_MS = 10;
   private static final long CHECKER_TIMEOUT_MS = 5000;
-  private static final long TEST_TIMEOUT_MS = CHECKER_TIMEOUT_MS + 1000;
+  private static final long TEST_TIMEOUT_MS = CHECKER_TIMEOUT_MS + 5000;
   private static final int SUCCESS_THRESHOLD = 1;
 
   private Timer timer;

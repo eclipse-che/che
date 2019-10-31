@@ -18,11 +18,8 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.Locators.CHECKBOX_BY_SAMPLE_NAME_ID_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.Locators.SAMPLE_ITEM_TEMPLATE_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.Locators.TAB_STATE_TEMPLATE_XPATH;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.TabButton.BLANK_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.TabButton.GITHUB_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.TabButton.GIT_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.TabButton.SAMPLES_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjectsSamples.TabButton.ZIP_BUTTON;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -88,15 +85,7 @@ public class WorkspaceProjectsSamples {
   }
 
   public void waitSamplesForm() {
-    waitButtons(
-        asList(
-            SAMPLES_BUTTON,
-            BLANK_BUTTON,
-            GIT_BUTTON,
-            GITHUB_BUTTON,
-            ZIP_BUTTON,
-            CANCEL_BUTTON,
-            ADD_BUTTON));
+    waitButtons(asList(GIT_BUTTON, GITHUB_BUTTON, CANCEL_BUTTON, ADD_BUTTON));
   }
 
   public WebElement waitButton(Button button) {
@@ -166,7 +155,7 @@ public class WorkspaceProjectsSamples {
   }
 
   private void waitButtonState(ActionButton actionButton, boolean state) {
-    final String buttonXpath = format("//*[@id='%s']/button", actionButton.get());
+    final String buttonXpath = format("//*[@id='%s']", actionButton.get());
     seleniumWebDriverHelper.waitAttributeEqualsTo(
         By.xpath(buttonXpath), "aria-disabled", Boolean.toString(!state));
   }

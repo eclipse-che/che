@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects.Locators.ADD_NEW_PROJECT_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects.Locators.CHECKBOX_BY_PROJECT_NAME_XPATH_TEMPLATE;
@@ -76,7 +77,7 @@ public class WorkspaceProjects {
     }
 
     public By getLocator() {
-      return By.name(this.buttonNameAttribute);
+      return By.className(this.buttonNameAttribute);
     }
   }
 
@@ -158,7 +159,7 @@ public class WorkspaceProjects {
    * @param projectName name of project
    */
   public void waitProjectIsPresent(String projectName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
             visibilityOfElementLocated(
                 By.xpath(String.format(Locators.PROJECT_BY_NAME, projectName))));
@@ -170,7 +171,7 @@ public class WorkspaceProjects {
    * @param projectName name of project
    */
   public void waitProjectIsNotPresent(String projectName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
             invisibilityOfElementLocated(
                 By.xpath(String.format(Locators.PROJECT_BY_NAME, projectName))));

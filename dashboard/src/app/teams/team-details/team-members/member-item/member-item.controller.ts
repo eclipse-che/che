@@ -73,7 +73,7 @@ export class MemberItemController {
    * @param  event - the $event
    */
   removeMember(event: MouseEvent): void {
-    let promise = this.confirmDialogService.showConfirmDialog('Remove member', 'Would you like to remove member  ' + this.member.email + ' ?', 'Delete');
+    let promise = this.confirmDialogService.showConfirmDialog('Remove member', 'Would you like to remove member  ' + this.member.email + ' ?', { resolve: 'Delete' });
 
     promise.then(() => {
       if (this.member.isPending) {

@@ -197,8 +197,8 @@ export class CreateWorkspaceSvc {
       });
 
       projects.push(template);
-    });     
-    
+    });
+
     return this.checkEditingProgress().then(() => {
       sourceDevfile.projects = projects;
 
@@ -206,7 +206,7 @@ export class CreateWorkspaceSvc {
       if (noProjectsFromDevfile) {
         sourceDevfile.commands = [];
       }
-      
+
       return this.cheWorkspace.createWorkspaceFromDevfile(namespaceId, sourceDevfile, attributes).then((workspace: che.IWorkspace) => {
         return this.cheWorkspace.fetchWorkspaces().then(() => this.cheWorkspace.getWorkspaceById(workspace.id));
       })
@@ -246,7 +246,7 @@ export class CreateWorkspaceSvc {
 
     const title = 'Warning',
           content = `You have project editing, that is not completed. Would you like to proceed to workspace creation without these changes?`;
-    return this.confirmDialogService.showConfirmDialog(title, content, 'Continue');
+    return this.confirmDialogService.showConfirmDialog(title, content, { resolve: 'Continue' });
   }
 
   /**
@@ -289,7 +289,7 @@ export class CreateWorkspaceSvc {
 
   /**
    * Returns name of the pointed workspace.
-   * 
+   *
    * @param workspace workspace
    */
   getWorkspaceName(workspace: che.IWorkspace): string {
