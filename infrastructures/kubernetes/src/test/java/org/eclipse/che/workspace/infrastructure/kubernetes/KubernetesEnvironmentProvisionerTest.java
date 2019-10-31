@@ -19,7 +19,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironment
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitUserProfileProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
@@ -67,7 +67,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private ServiceAccountProvisioner serviceAccountProvisioner;
   @Mock private CertificateProvisioner certificateProvisioner;
   @Mock private VcsSshKeysProvisioner vcsSshKeysProvisioner;
-  @Mock private GitUserProfileProvisioner gitUserProfileProvisioner;
+  @Mock private GitConfigProvisioner gitConfigProvisioner;
   @Mock private PreviewUrlExposer previewUrlExposer;
   @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
 
@@ -95,7 +95,7 @@ public class KubernetesEnvironmentProvisionerTest {
             serviceAccountProvisioner,
             certificateProvisioner,
             vcsSshKeysProvisioner,
-            gitUserProfileProvisioner,
+            gitConfigProvisioner,
             previewUrlExposer,
             vcsSslCertificateProvisioner);
     provisionOrder =
@@ -114,7 +114,7 @@ public class KubernetesEnvironmentProvisionerTest {
             proxySettingsProvisioner,
             serviceAccountProvisioner,
             certificateProvisioner,
-            gitUserProfileProvisioner,
+            gitConfigProvisioner,
             previewUrlExposer);
   }
 
@@ -140,7 +140,7 @@ public class KubernetesEnvironmentProvisionerTest {
     provisionOrder.verify(proxySettingsProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(serviceAccountProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(certificateProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
-    provisionOrder.verify(gitUserProfileProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(gitConfigProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }

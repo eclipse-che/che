@@ -83,6 +83,12 @@ spec:
               name: {{ .Values.global.gitSelfSignedCertConfigName }}
               key: ca.crt
               optional: false
+        - name: CHE_GIT_SELF__SIGNED__CERT__HOST
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Values.global.gitSelfSignedCertConfigName }}
+              key: host
+              optional: false
         {{- end }}
 
         {{- if .Values.global.tls.enabled }}

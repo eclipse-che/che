@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.base.Strings.nullToEmpty;
 import static java.util.Collections.singletonMap;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -49,6 +50,10 @@ public class VcsSslCertificateProvisioner
   @Named("che.git.self_signed_cert")
   private String certificate;
 
+  @Inject(optional = true)
+  @Named("che.git.self_signed_cert_host")
+  private String host;
+
   public VcsSslCertificateProvisioner() {}
 
   @VisibleForTesting
@@ -62,6 +67,19 @@ public class VcsSslCertificateProvisioner
 
   public String getCertPath() {
     return CERT_MOUNT_PATH + CA_CERT_FILE;
+  }
+
+  public String getGitServerHost() {
+    if (isNullOrEmpty(host)) {
+      return nullToEmpty(host);
+    }
+
+    StringBuilder gitServerHosts = new StringBuilder("\"");
+    if (!host.startsWith("https://")) {
+      gitServerHosts.append("https://").append(host);
+    }
+    gitServerHosts.append("\"");
+    return gitServerHosts.toString();
   }
 
   @Override
@@ -129,9 +147,5 @@ public class VcsSslCertificateProvisioner
         .withName(CHE_GIT_SELF_SIGNED_CERT_VOLUME)
         .withConfigMap(new ConfigMapVolumeSourceBuilder().withName(secretName).build())
         .build();
-  }
-
-  public static String getCertMountPath() {
-    return CERT_MOUNT_PATH;
   }
 }

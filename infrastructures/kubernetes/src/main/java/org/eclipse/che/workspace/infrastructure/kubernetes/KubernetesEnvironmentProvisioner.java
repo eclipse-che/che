@@ -21,7 +21,7 @@ import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitUserProfileProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
@@ -74,7 +74,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final ServiceAccountProvisioner serviceAccountProvisioner;
     private final CertificateProvisioner certificateProvisioner;
     private final VcsSshKeysProvisioner vcsSshKeysProvisioner;
-    private final GitUserProfileProvisioner gitUserProfileProvisioner;
+    private final GitConfigProvisioner gitConfigProvisioner;
     private final PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer;
     private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
 
@@ -96,7 +96,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         ServiceAccountProvisioner serviceAccountProvisioner,
         CertificateProvisioner certificateProvisioner,
         VcsSshKeysProvisioner vcsSshKeysProvisioner,
-        GitUserProfileProvisioner gitUserProfileProvisioner,
+        GitConfigProvisioner gitConfigProvisioner,
         PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer,
         VcsSslCertificateProvisioner vcsSslCertificateProvisioner) {
       this.pvcEnabled = pvcEnabled;
@@ -115,7 +115,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.serviceAccountProvisioner = serviceAccountProvisioner;
       this.certificateProvisioner = certificateProvisioner;
       this.vcsSshKeysProvisioner = vcsSshKeysProvisioner;
-      this.gitUserProfileProvisioner = gitUserProfileProvisioner;
+      this.gitConfigProvisioner = gitConfigProvisioner;
       this.vcsSslCertificateProvisioner = vcsSslCertificateProvisioner;
       this.previewUrlExposer = previewUrlExposer;
     }
@@ -157,7 +157,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       certificateProvisioner.provision(k8sEnv, identity);
       vcsSshKeysProvisioner.provision(k8sEnv, identity);
       vcsSslCertificateProvisioner.provision(k8sEnv, identity);
-      gitUserProfileProvisioner.provision(k8sEnv, identity);
+      gitConfigProvisioner.provision(k8sEnv, identity);
       LOG.debug("Provisioning Kubernetes environment done for workspace '{}'", workspaceId);
     }
   }

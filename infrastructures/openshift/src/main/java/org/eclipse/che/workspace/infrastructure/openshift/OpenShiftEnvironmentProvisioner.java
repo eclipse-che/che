@@ -21,7 +21,7 @@ import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitUserProfileProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
@@ -69,7 +69,7 @@ public class OpenShiftEnvironmentProvisioner
   private final ServiceAccountProvisioner serviceAccountProvisioner;
   private final CertificateProvisioner certificateProvisioner;
   private final VcsSshKeysProvisioner vcsSshKeysProvisioner;
-  private final GitUserProfileProvisioner gitUserProfileProvisioner;
+  private final GitConfigProvisioner gitConfigProvisioner;
   private final PreviewUrlExposer<OpenShiftEnvironment> previewUrlExposer;
 
   @Inject
@@ -89,7 +89,7 @@ public class OpenShiftEnvironmentProvisioner
       ServiceAccountProvisioner serviceAccountProvisioner,
       CertificateProvisioner certificateProvisioner,
       VcsSshKeysProvisioner vcsSshKeysProvisioner,
-      GitUserProfileProvisioner gitUserProfileProvisioner,
+      GitConfigProvisioner gitConfigProvisioner,
       OpenShiftPreviewUrlExposer previewUrlEndpointsProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
@@ -106,7 +106,7 @@ public class OpenShiftEnvironmentProvisioner
     this.serviceAccountProvisioner = serviceAccountProvisioner;
     this.certificateProvisioner = certificateProvisioner;
     this.vcsSshKeysProvisioner = vcsSshKeysProvisioner;
-    this.gitUserProfileProvisioner = gitUserProfileProvisioner;
+    this.gitConfigProvisioner = gitConfigProvisioner;
     this.previewUrlExposer = previewUrlEndpointsProvisioner;
   }
 
@@ -143,7 +143,7 @@ public class OpenShiftEnvironmentProvisioner
     serviceAccountProvisioner.provision(osEnv, identity);
     certificateProvisioner.provision(osEnv, identity);
     vcsSshKeysProvisioner.provision(osEnv, identity);
-    gitUserProfileProvisioner.provision(osEnv, identity);
+    gitConfigProvisioner.provision(osEnv, identity);
     LOG.debug(
         "Provisioning OpenShift environment done for workspace '{}'", identity.getWorkspaceId());
   }
