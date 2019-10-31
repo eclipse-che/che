@@ -66,10 +66,9 @@ import org.testng.annotations.Test;
 @Test(groups = {TestGroup.OPENSHIFT, TestGroup.K8S, TestGroup.MULTIUSER})
 public class LoginNewUserWithOpenShiftOAuthTest {
 
-  private static final String WORKSPACE_NAME = NameGenerator.generate("workspace", 4);
-  private static final String WORKSPACE_ID_PREFIX = "workspace";
-
   private static final TestUser NEW_TEST_USER = getTestUser();
+  private static final String WORKSPACE_NAME = NameGenerator.generate("workspace", 4);
+  private static final String USER_PROJECT_NAME = NEW_TEST_USER.getName() + "-che";
 
   @Inject private CheLoginPage cheLoginPage;
   @Inject private OpenShiftLoginPage openShiftLoginPage;
@@ -129,7 +128,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     // go to OCP and check if there is a project with name starts from "workspace"
     openShiftProjectCatalogPage.open();
     openShiftLoginPage.login(NEW_TEST_USER.getName(), NEW_TEST_USER.getPassword());
-    openShiftProjectCatalogPage.waitProject(WORKSPACE_ID_PREFIX);
+    openShiftProjectCatalogPage.waitProject(USER_PROJECT_NAME);
 
     // remove test workspace from Eclipse Che Dashboard
     seleniumWebDriver.navigate().to(testDashboardUrlProvider.get());
@@ -141,7 +140,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
 
     // go to OCP and check if there is no project with name starts from "workspace"
     openShiftProjectCatalogPage.open();
-    openShiftProjectCatalogPage.waitProjectAbsence(WORKSPACE_ID_PREFIX);
+    openShiftProjectCatalogPage.waitProjectAbsence(USER_PROJECT_NAME);
   }
 
   private static TestUser getTestUser() {

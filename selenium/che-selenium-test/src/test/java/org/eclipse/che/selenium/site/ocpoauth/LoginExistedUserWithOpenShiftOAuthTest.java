@@ -12,11 +12,11 @@
 package org.eclipse.che.selenium.site.ocpoauth;
 
 import static java.lang.String.format;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -68,12 +68,12 @@ import org.testng.annotations.Test;
 @Test(groups = {TestGroup.OPENSHIFT, TestGroup.K8S, TestGroup.MULTIUSER})
 public class LoginExistedUserWithOpenShiftOAuthTest {
 
-  private static final String WORKSPACE_NAME = NameGenerator.generate("workspace", 4);
+  private static final String WORKSPACE_NAME = generate("workspace", 4);
 
-  public static final String LOGIN_TO_CHE_WITH_OPENSHIFT_OAUTH_MESSAGE_TEMPLATE =
+  private static final String LOGIN_TO_CHE_WITH_OPENSHIFT_OAUTH_MESSAGE_TEMPLATE =
       "Authenticate as %s to link your account with openshift-v3";
 
-  public static final String USER_ALREADY_EXISTS_ERROR_MESSAGE_TEMPLATE =
+  private static final String USER_ALREADY_EXISTS_ERROR_MESSAGE_TEMPLATE =
       "User with email %s already exists. How do you want to continue?";
 
   @Inject private CheLoginPage cheLoginPage;
@@ -145,7 +145,7 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
     openShiftLoginPage.login(defaultTestUser.getName(), defaultTestUser.getPassword());
     Workspace testWorkspace =
         defaultUserWorkspaceServiceClient.getByName(WORKSPACE_NAME, defaultTestUser.getName());
-    openShiftProjectCatalogPage.waitProject(testWorkspace.getId());
+    openShiftProjectCatalogPage.waitProject(defaultTestUser.getName() + "-che");
 
     // remove test workspace from Eclipse Che Dashboard
     seleniumWebDriver.navigate().to(testDashboardUrlProvider.get());
@@ -157,6 +157,6 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
 
     // go to OCP and check if there is no project with name equals to test workspace id
     openShiftProjectCatalogPage.open();
-    openShiftProjectCatalogPage.waitProjectAbsence(testWorkspace.getId());
+    openShiftProjectCatalogPage.waitProjectAbsence(defaultTestUser.getName() + "-che");
   }
 }
