@@ -60,7 +60,6 @@ public class KeycloakEnvironmentInitalizationFilter extends EnvironmentInitaliza
   private final RequestTokenExtractor tokenExtractor;
   private final PermissionChecker permissionChecker;
   private final KeycloakSettings keycloakSettings;
-  private final Tracer tracer;
   private final JwtParser jwtParser;
 
   @Inject
@@ -80,12 +79,10 @@ public class KeycloakEnvironmentInitalizationFilter extends EnvironmentInitaliza
     this.tokenExtractor = tokenExtractor;
     this.permissionChecker = permissionChecker;
     this.keycloakSettings = settings;
-    this.tracer = tracer;
   }
 
   @Override
-  public void init(FilterConfig filterConfig) {
-  }
+  public void init(FilterConfig filterConfig) {}
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
@@ -101,9 +98,12 @@ public class KeycloakEnvironmentInitalizationFilter extends EnvironmentInitaliza
       filterChain.doFilter(request, response);
       return;
     }
-    super.doFilter(request, response, filterChain);
+    try {
+      super.doFilter(request, response, filterChain);
+    } catch (JwtException e) {
+      sendError(response, 401, e.getMessage());
+    }
   }
-
 
   @Override
   protected String getUserId(String token) {
@@ -122,8 +122,7 @@ public class KeycloakEnvironmentInitalizationFilter extends EnvironmentInitaliza
     try {
       String username =
           claims.get(
-              keycloakSettings.get().get(KeycloakConstants.USERNAME_CLAIM_SETTING),
-              String.class);
+              keycloakSettings.get().get(KeycloakConstants.USERNAME_CLAIM_SETTING), String.class);
       if (username == null) { // fallback to unique id promised by spec
         // https://openid.net/specs/openid-connect-basic-1_0.html#ClaimStability
         username = claims.getIssuer() + ":" + claims.getSubject();
@@ -132,20 +131,20 @@ public class KeycloakEnvironmentInitalizationFilter extends EnvironmentInitaliza
 
       String email = retrieveEmail(token, claims, username, id);
       if (email == null) {
-        throw new JwtException("Unable to authenticate user because email address is not set in keycloak profile");
+        throw new JwtException(
+            "Unable to authenticate user because email address is not set in keycloak profile");
       }
       User user = userManager.getOrCreateUser(id, email, username);
-      return
-          new AuthorizedSubject(
-              new SubjectImpl(user.getName(), user.getId(), token, false), permissionChecker);
+      return new AuthorizedSubject(
+          new SubjectImpl(user.getName(), user.getId(), token, false), permissionChecker);
     } catch (ServerException | ConflictException e) {
       throw new ServletException(
           "Unable to identify user " + claims.getSubject() + " in Che database", e);
     }
   }
 
-  private String retrieveEmail(String token, Claims claims,
-      String username, String id) throws ServerException {
+  private String retrieveEmail(String token, Claims claims, String username, String id)
+      throws ServerException {
     String email = claims.get("email", String.class);
 
     if (isNullOrEmpty(email)) {
@@ -157,8 +156,7 @@ public class KeycloakEnvironmentInitalizationFilter extends EnvironmentInitaliza
       }
       if (userNotFound) {
         try {
-          EnvironmentContext.getCurrent()
-              .setSubject(new SubjectImpl(username, id, token, true));
+          EnvironmentContext.getCurrent().setSubject(new SubjectImpl(username, id, token, true));
           Map<String, String> profileAttributes =
               keycloakProfileRetriever.retrieveKeycloakAttributes();
           email = profileAttributes.get("email");
@@ -170,9 +168,7 @@ public class KeycloakEnvironmentInitalizationFilter extends EnvironmentInitaliza
     return email;
   }
 
-  /**
-   * when a request came from a machine with valid token then auth is not required
-   */
+  /** when a request came from a machine with valid token then auth is not required */
   private boolean shouldSkipAuthentication(String token) {
     try {
       jwtParser.parse(token);
@@ -181,5 +177,4 @@ public class KeycloakEnvironmentInitalizationFilter extends EnvironmentInitaliza
       return true;
     }
   }
-
 }

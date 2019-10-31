@@ -11,9 +11,8 @@
  */
 package org.eclipse.che.multiuser.api.authentication.commons.filter;
 
-import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
+import static org.eclipse.che.multiuser.api.authentication.commons.Constants.CHE_SUBJECT_ATTRIBUTE;
 
-import io.jsonwebtoken.JwtException;
 import java.io.IOException;
 import java.security.Principal;
 import javax.servlet.Filter;
@@ -32,13 +31,11 @@ import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
 
 public abstract class EnvironmentInitalizationFilter implements Filter {
 
-  public static final String CHE_SUBJECT_ATTRIBUTE = "che_subject";
   private final SessionStore sessionStore;
   private final RequestTokenExtractor tokenExtractor;
 
-
-  public EnvironmentInitalizationFilter(SessionStore sessionStore,
-      RequestTokenExtractor tokenExtractor) {
+  public EnvironmentInitalizationFilter(
+      SessionStore sessionStore, RequestTokenExtractor tokenExtractor) {
     this.sessionStore = sessionStore;
     this.tokenExtractor = tokenExtractor;
   }
@@ -50,7 +47,6 @@ public abstract class EnvironmentInitalizationFilter implements Filter {
      *
      * @throws IllegalArgumentException if the request is null
      */
-
     private final String userId;
 
     public SessionCachedHttpRequest(ServletRequest request, String userId) {
@@ -73,34 +69,33 @@ public abstract class EnvironmentInitalizationFilter implements Filter {
       if (session != null) {
         return session;
       }
-      session = sessionStore.getSession(userId);
-      if (session == null && createNew) {
-        session = super.getSession(true);
-        sessionStore.saveSession(userId, session);
+      synchronized (userId) {
+        session = sessionStore.getSession(userId);
+        if (session == null && createNew) {
+          session = super.getSession(true);
+          sessionStore.saveSession(userId, session);
+        }
       }
       return session;
     }
-
   }
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
 
-    final String token = tokenExtractor.getToken((HttpServletRequest) request);
+    Subject sessionSubject;
+    HttpServletRequest httpRequest = (HttpServletRequest) request;
+    final String token = tokenExtractor.getToken(httpRequest);
     String userId = getUserId(token); // make sure token still valid before continue
     // retrieve cached session if any or create new
-    HttpServletRequest httpRequest = new SessionCachedHttpRequest(request, userId);
+    httpRequest = new SessionCachedHttpRequest(request, userId);
     HttpSession session = httpRequest.getSession(true);
     // retrieve and check / create new subject
-    Subject sessionSubject = (Subject) session.getAttribute(CHE_SUBJECT_ATTRIBUTE);
+    sessionSubject = (Subject) session.getAttribute(CHE_SUBJECT_ATTRIBUTE);
     if (sessionSubject == null || !sessionSubject.getToken().equals(token)) {
-      try {
-        sessionSubject = extractSubject(token);
-        session.setAttribute(CHE_SUBJECT_ATTRIBUTE, sessionSubject);
-      } catch (JwtException e) {
-        sendError(response, SC_UNAUTHORIZED, e.getMessage());
-      }
+      sessionSubject = extractSubject(token);
+      session.setAttribute(CHE_SUBJECT_ATTRIBUTE, sessionSubject);
     }
     // set current subject
     try {
@@ -114,7 +109,6 @@ public abstract class EnvironmentInitalizationFilter implements Filter {
   protected abstract String getUserId(String token);
 
   protected abstract Subject extractSubject(String token) throws ServletException;
-
 
   private HttpServletRequest addUserInRequest(
       final HttpServletRequest httpRequest, final Subject subject) {
@@ -133,8 +127,7 @@ public abstract class EnvironmentInitalizationFilter implements Filter {
 
   protected void sendError(ServletResponse res, int errorCode, String message) throws IOException {
     HttpServletResponse response = (HttpServletResponse) res;
-    response.getOutputStream().write(message.getBytes());
-    response.setStatus(errorCode);
+    response.sendError(errorCode, message);
   }
 
   @Override

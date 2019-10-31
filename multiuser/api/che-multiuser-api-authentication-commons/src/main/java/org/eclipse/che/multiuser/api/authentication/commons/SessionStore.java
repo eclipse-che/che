@@ -15,10 +15,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpSession;
 
+/**
+ * HttpSessions storage. Sessions are stored by user Id.
+ *
+ */
 @Singleton
 public class SessionStore {
 
-  private ConcurrentHashMap<String, HttpSession> userIdToSession;
+  private final ConcurrentHashMap<String, HttpSession> userIdToSession;
 
   public SessionStore() {
     this.userIdToSession = new ConcurrentHashMap<>();

@@ -138,12 +138,10 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     // when
     filter.doFilter(request, response, chain);
 
-    verify(response).setStatus(400);
-    verify(servletOutputStream)
-        .write(
-            eq(
-                "Unable to authenticate user because email address is not set in keycloak profile"
-                    .getBytes()));
+    verify(response)
+        .sendError(
+            eq(401),
+            eq("Unable to authenticate user because email address is not set in keycloak profile"));
   }
 
   @Test

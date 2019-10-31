@@ -196,7 +196,7 @@ public class MachineLoginFilterTest {
     verify(responseMock)
         .sendError(
             401,
-            "Authentication with machine token failed because user for this token no longer exist.");
+            "Authentication with machine token failed cause: User for this token no longer exist.");
   }
 
   @Test

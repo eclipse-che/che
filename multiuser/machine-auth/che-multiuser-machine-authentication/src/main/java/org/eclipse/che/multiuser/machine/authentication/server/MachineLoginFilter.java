@@ -13,6 +13,7 @@ package org.eclipse.che.multiuser.machine.authentication.server;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.USER_ID_CLAIM;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.WORKSPACE_ID_CLAIM;
 
@@ -68,8 +69,7 @@ public class MachineLoginFilter extends EnvironmentInitalizationFilter {
   }
 
   @Override
-  public void init(FilterConfig filterConfig) {
-  }
+  public void init(FilterConfig filterConfig) {}
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -83,7 +83,13 @@ public class MachineLoginFilter extends EnvironmentInitalizationFilter {
     try {
       super.doFilter(request, response, chain);
     } catch (NotMachineTokenJwtException e) {
+      // bypass - not our token
       chain.doFilter(request, response);
+    } catch (JwtException e) {
+      sendError(
+          response,
+          SC_UNAUTHORIZED,
+          format("Authentication with machine token failed cause: %s", e.getMessage()));
     }
   }
 
@@ -98,12 +104,11 @@ public class MachineLoginFilter extends EnvironmentInitalizationFilter {
       return new MachineTokenAuthorizedSubject(
           new SubjectImpl(userName, userId, token, false), permissionChecker, workspaceId);
     } catch (NotFoundException e) {
-      throw new JwtException("Authentication with machine token failed because user for this token no longer exist.");
+      throw new JwtException("User for this token no longer exist.");
     } catch (ServerException | JwtException e) {
-      throw new JwtException(format("Authentication with machine token failed cause: %s", e.getMessage()), e);
+      throw new JwtException(e.getMessage(), e);
     }
   }
-
 
   @Override
   protected String getUserId(String token) {
@@ -112,6 +117,5 @@ public class MachineLoginFilter extends EnvironmentInitalizationFilter {
   }
 
   @Override
-  public void destroy() {
-  }
+  public void destroy() {}
 }
