@@ -11,6 +11,10 @@ import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Purges deleted sessions from sessions cache store.
+ *
+ */
 public class DestroySessionListener implements HttpSessionListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(DestroySessionListener.class);

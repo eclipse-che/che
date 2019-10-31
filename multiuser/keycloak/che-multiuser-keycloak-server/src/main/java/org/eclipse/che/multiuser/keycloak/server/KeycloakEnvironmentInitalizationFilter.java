@@ -37,7 +37,7 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
-import org.eclipse.che.multiuser.api.authentication.commons.filter.EnvironmentInitalizationFilter;
+import org.eclipse.che.multiuser.api.authentication.commons.filter.MultiuserEnvironmentInitializationFilter;
 import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
@@ -50,7 +50,8 @@ import org.slf4j.LoggerFactory;
  * @author Max Shaposhnik (mshaposhnik@redhat.com)
  */
 @Singleton
-public class KeycloakEnvironmentInitalizationFilter extends EnvironmentInitalizationFilter {
+public class KeycloakEnvironmentInitalizationFilter extends
+    MultiuserEnvironmentInitializationFilter {
 
   private static final Logger LOG =
       LoggerFactory.getLogger(KeycloakEnvironmentInitalizationFilter.class);

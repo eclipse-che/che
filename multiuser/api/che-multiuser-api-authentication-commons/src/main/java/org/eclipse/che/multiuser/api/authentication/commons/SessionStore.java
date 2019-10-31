@@ -16,8 +16,8 @@ import javax.inject.Singleton;
 import javax.servlet.http.HttpSession;
 
 /**
- * HttpSessions storage. Sessions are stored by user Id.
- *
+ * Thread safe {@link HttpSession} storage based on {@link ConcurrentHashMap}.
+ * Sessions are stored per user Id.
  */
 @Singleton
 public class SessionStore {

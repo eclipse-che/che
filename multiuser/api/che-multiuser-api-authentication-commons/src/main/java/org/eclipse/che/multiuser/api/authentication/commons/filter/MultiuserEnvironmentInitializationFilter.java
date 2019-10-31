@@ -29,12 +29,12 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
 
-public abstract class EnvironmentInitalizationFilter implements Filter {
+public abstract class MultiuserEnvironmentInitializationFilter implements Filter {
 
   private final SessionStore sessionStore;
   private final RequestTokenExtractor tokenExtractor;
 
-  public EnvironmentInitalizationFilter(
+  public MultiuserEnvironmentInitializationFilter(
       SessionStore sessionStore, RequestTokenExtractor tokenExtractor) {
     this.sessionStore = sessionStore;
     this.tokenExtractor = tokenExtractor;
