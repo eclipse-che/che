@@ -140,7 +140,7 @@ export class MachineVolumesController {
    * @param variableName {string}
    */
   deleteMachineVolume(variableName: string): void {
-    const promise = this.confirmDialogService.showConfirmDialog('Remove variable', 'Would you like to delete this variable?', 'Delete');
+    const promise = this.confirmDialogService.showConfirmDialog('Remove variable', 'Would you like to delete this variable?', { resolve: 'Delete' });
     promise.then(() => {
       delete this.machineVolumes[variableName];
       this.environmentManager.setMachineVolumes(this.selectedMachine, this.machineVolumes);
@@ -162,6 +162,6 @@ export class MachineVolumesController {
       content += 'this selected variable?';
     }
 
-    return this.confirmDialogService.showConfirmDialog('Remove variables', content, 'Delete');
+    return this.confirmDialogService.showConfirmDialog('Remove variables', content, { resolve: 'Delete' });
   }
 }

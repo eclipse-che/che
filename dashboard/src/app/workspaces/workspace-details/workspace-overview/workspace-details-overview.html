@@ -7,7 +7,7 @@
       che-name="name"
       che-place-holder="Name of the workspace"
       aria-label="Name of the workspace"
-      ng-model-options="{ allowInvalid: true }"
+      ng-model-options="{ allowInvalid: true, debounce: 300 }"
       ng-model="workspaceDetailsOverviewController.name"
       che-on-change="workspaceDetailsOverviewController.onNameChange()"
       required

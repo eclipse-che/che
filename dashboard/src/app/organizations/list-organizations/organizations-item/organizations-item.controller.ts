@@ -140,6 +140,6 @@ export class OrganizationsItemController {
    */
   confirmRemoval(): ng.IPromise<any> {
     return this.confirmDialogService.showConfirmDialog('Delete organization',
-      'Would you like to delete organization \'' + this.organization.name + '\'?', 'Delete');
+      'Would you like to delete organization \'' + this.organization.name + '\'?', { resolve: 'Delete' });
   }
 }

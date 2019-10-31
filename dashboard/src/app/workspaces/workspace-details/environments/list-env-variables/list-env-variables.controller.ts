@@ -191,7 +191,7 @@ export class ListEnvVariablesController {
       content += 'this selected variable?';
     }
 
-    return this.confirmDialogService.showConfirmDialog('Remove variables', content, 'Delete');
+    return this.confirmDialogService.showConfirmDialog('Remove variables', content, { resolve: 'Delete' });
   }
 
 }

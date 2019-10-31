@@ -45,7 +45,7 @@ public class WorkspaceConfig {
   }
 
   public interface Locators {
-    String CONFIG_FORM = "//ng-form[@name='workspaceConfigForm']";
+    String CONFIG_FORM = "//ng-form[@name='workspaceDevfileForm']";
     String CONFIG_EDITOR = "//ng-form[@name='workspaceConfigForm']//div[@class='CodeMirror-code']";
   }
 

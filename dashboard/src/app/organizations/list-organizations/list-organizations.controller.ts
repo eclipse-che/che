@@ -338,7 +338,7 @@ export class ListOrganizationsController {
       content += 'this selected organization?';
     }
 
-    return this.confirmDialogService.showConfirmDialog('Delete organizations', content, 'Delete');
+    return this.confirmDialogService.showConfirmDialog('Delete organizations', content, { resolve: 'Delete' });
   }
 
 }

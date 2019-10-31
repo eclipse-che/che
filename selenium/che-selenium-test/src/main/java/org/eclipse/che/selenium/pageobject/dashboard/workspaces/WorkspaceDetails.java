@@ -108,9 +108,9 @@ public class WorkspaceDetails {
   }
 
   public enum ActionButton {
-    SAVE_BUTTON(By.name("save-button")),
-    APPLY_BUTTON(By.name("apply-button")),
-    CANCEL_BUTTON(By.name("cancel-button"));
+    SAVE_BUTTON(By.className("save-button")),
+    APPLY_BUTTON(By.className("apply-button")),
+    CANCEL_BUTTON(By.className("cancel-button"));
 
     private By buttonLocator;
 

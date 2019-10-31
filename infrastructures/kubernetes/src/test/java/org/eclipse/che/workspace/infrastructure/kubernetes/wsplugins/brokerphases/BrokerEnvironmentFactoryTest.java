@@ -42,6 +42,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -237,5 +238,25 @@ public class BrokerEnvironmentFactoryTest {
           String.format(
               "Missing field from serialized config: expected '%s' in '%s'", expect, config));
     }
+  }
+
+  @Test(dataProvider = "imageRefs")
+  public void testImageToContainerNameConversion(Object image, Object expected) {
+    String actual = factory.generateContainerNameFromImageRef((String) image);
+    assertEquals(
+        actual,
+        expected,
+        String.format("Should remove registry and organization from image '%s'.", image));
+  }
+
+  @DataProvider(name = "imageRefs")
+  public Object[][] imageRefs() {
+    return new Object[][] {
+      {"quay.io/eclipse/che-unified-plugin-broker:v0.20", "che-unified-plugin-broker-v0-20"},
+      {"very-long-registry-hostname-url.service/eclipse/image:tag", "image-tag"},
+      {"eclipse/che-unified-plugin-broker:v0.20", "che-unified-plugin-broker-v0-20"},
+      {"very-long-organization.name-eclipse-che/image:tag", "image-tag"},
+      {"very-long-registry-hostname-url.service/very-long-organization/image:tag", "image-tag"}
+    };
   }
 }
