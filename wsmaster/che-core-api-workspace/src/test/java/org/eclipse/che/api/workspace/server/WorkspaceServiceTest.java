@@ -242,7 +242,7 @@ public class WorkspaceServiceTest {
                 SECURE_PATH
                     + "/workspace/devfile"
                     + "?namespace=test"
-                    + "&metadata.namespace=che-workspaces");
+                    + "&attribute=infrastructureNamespace:che-workspaces");
 
     assertEquals(response.getStatusCode(), 201);
     assertEquals(
