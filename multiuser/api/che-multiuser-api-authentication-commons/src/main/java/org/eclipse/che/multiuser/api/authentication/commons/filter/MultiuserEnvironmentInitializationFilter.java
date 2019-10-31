@@ -29,6 +29,19 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
 
+/**
+ * Performs basic environment initialization actions as follows:
+ *
+ * <ul>
+ *   <li>Extracts token from request
+ *   <li>Checks token for validity and fetch user Id (implementation specific)
+ *   <li>Fetch cached {@link HttpSession} and {@link Subject} or construct new (implementation
+ *       specific))
+ *   <li>Set subject for current request into {@link EnvironmentContext}
+ * </ul>
+ *
+ * @author Max Shaposhnyk (mshaposh@redhat.com)
+ */
 public abstract class MultiuserEnvironmentInitializationFilter implements Filter {
 
   private final SessionStore sessionStore;
@@ -40,6 +53,10 @@ public abstract class MultiuserEnvironmentInitializationFilter implements Filter
     this.tokenExtractor = tokenExtractor;
   }
 
+  /**
+   * Wraps {@link HttpServletRequest} to handle HTTP session creation requests and return cached one
+   * if possible.
+   */
   protected class SessionCachedHttpRequest extends HttpServletRequestWrapper {
 
     /**
@@ -64,6 +81,7 @@ public abstract class MultiuserEnvironmentInitializationFilter implements Filter
       return getOrCreateSession(create);
     }
 
+    /* Finds cached session or creates new if allowed */
     private HttpSession getOrCreateSession(boolean createNew) {
       HttpSession session = super.getSession(false);
       if (session != null) {

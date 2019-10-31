@@ -1,4 +1,4 @@
-package org.eclipse.che.multiuser.api.authentication.commons.filter;
+package org.eclipse.che.multiuser.api.authentication.commons;
 
 import static org.eclipse.che.multiuser.api.authentication.commons.Constants.CHE_SUBJECT_ATTRIBUTE;
 
@@ -7,21 +7,16 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Purges deleted sessions from sessions cache store.
- *
- */
+/** Purges deleted sessions from sessions cache store. */
 public class DestroySessionListener implements HttpSessionListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(DestroySessionListener.class);
 
   @Override
-  public final void sessionCreated(HttpSessionEvent se) {
-  }
+  public final void sessionCreated(HttpSessionEvent se) {}
 
   @Override
   public void sessionDestroyed(HttpSessionEvent se) {
