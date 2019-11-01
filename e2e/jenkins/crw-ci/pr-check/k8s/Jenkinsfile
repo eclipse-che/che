@@ -117,8 +117,8 @@ pipeline {
                         sh """
                             wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml
                             
-                            sed -i "s|cheImage: ''|cheImage: '${CHE_IMAGE_REPO}'|" ${WORKSPACE}/org_v1_che_cr.yaml
-                            sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${CHE_IMAGE_TAG}'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                            #sed -i "s|cheImage: ''|cheImage: '${CHE_IMAGE_REPO}'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                            #sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${CHE_IMAGE_TAG}'|" ${WORKSPACE}/org_v1_che_cr.yaml
                         """
                     }
                 }
@@ -145,12 +145,13 @@ pipeline {
                     --k8spodreadytimeout=180000 \\
                     --installer=operator \\
                     --listr-renderer=verbose \\
-                    --platform=minikube
+                    --platform=minikube \\
+                    --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml
                 """
 
                 // wait che-server to be available
                 sh """
-                     CHE_URL=\$(kubectl get ingress che-ingress -n=che -o=jsonpath={'.spec.rules[0].host'})
+                     CHE_URL=\$(kubectl get ingress che -n=che -o=jsonpath={'.spec.rules[0].host'})
                      
                      COUNTER=0;
                      SUCCESS_RATE_COUNTER=0;
@@ -193,7 +194,7 @@ pipeline {
                        -d "grant_type=password" \\
                        -d "client_id=che-public" | jq -r .access_token)
 
-                  ${WORKSPACE}/chectl workspace:start --devfile=$DEVFILE_URL --access-token "${USER_ACCESS_TOKEN}"
+                    ${WORKSPACE}/chectl workspace:start --devfile=$DEVFILE_URL --access-token "${USER_ACCESS_TOKEN}"
                 """
             }
         }
@@ -203,7 +204,7 @@ pipeline {
                 sh """
                      docker pull eclipse/che-e2e:nightly
                      
-                     CHE_HOST=\$(kubectl get ingress che-ingress -n=che -o=jsonpath={'.spec.rules[0].host'})
+                     CHE_HOST=\$(kubectl get ingress che -n=che -o=jsonpath={'.spec.rules[0].host'})
                      CHE_URL=http://\${CHE_HOST}
                      docker run --shm-size=256m --net=host --ipc=host \\
                        -e TS_SELENIUM_HEADLESS='true' \\
