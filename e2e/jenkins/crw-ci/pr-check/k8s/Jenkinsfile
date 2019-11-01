@@ -5,7 +5,7 @@ pipeline {
 
     options {
         timestamps()
-        timeout(time: 30, unit: 'MINUTES')
+        timeout(time: 60, unit: 'MINUTES')
         buildDiscarder(logRotator(artifactDaysToKeepStr: '',
                 artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '100'))
     }
@@ -142,7 +142,7 @@ pipeline {
             steps {
                 sh """
                     ${WORKSPACE}/chectl server:start \\
-                    --k8spodreadytimeout=350000 \\
+                    --k8spodreadytimeout=800000 \\
                     --installer=operator \\
                     --listr-renderer=verbose \\
                     --platform=minikube \\
