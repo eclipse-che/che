@@ -146,7 +146,6 @@ pipeline {
                     --installer=operator \\
                     --listr-renderer=verbose \\
                     --platform=minikube \\
-                    --multiuser \\
                     --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml
                 """
 
