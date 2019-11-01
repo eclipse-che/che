@@ -48,6 +48,7 @@ public class DestroySessionListener implements HttpSessionListener {
   }
 
   /** Searches component in servlet context when with help of guice injector. */
+  @SuppressWarnings("unchecked")
   private <T> T getInstance(Class<T> type, ServletContext servletContext) {
     T result = (T) servletContext.getAttribute(type.getName());
     if (result == null) {
