@@ -100,7 +100,7 @@ pipeline {
                                 if [[ \$result == *"refs"* ]]; then
                                     echo "[PRE-BUILD CHECK] found upstream project: \${project} with same branch name: ${ghprbSourceBranch}"
                                     git clone -b ${ghprbSourceBranch} https://github.com/\${project} \${project}
-                                    mvn clean install -f ${WORKSPACE}/\${project}/pom.xml -Dmaven.repo.local=${WORKSPACE}/.repository
+                                    mvn clean install -f ${WORKSPACE}/\${project}/pom.xml -DskipTests
                                 else
                                     echo "[PRE-BUILD CHECK] skip build upstream project: \$project, unable to find branch: ${ghprbSourceBranch}."
                                 fi
