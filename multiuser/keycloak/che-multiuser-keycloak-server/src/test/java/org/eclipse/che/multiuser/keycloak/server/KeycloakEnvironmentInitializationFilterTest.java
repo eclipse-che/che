@@ -108,7 +108,7 @@ public class KeycloakEnvironmentInitializationFilterTest {
   @Test
   public void shouldSkipRequestsWithMachineTokens() throws Exception {
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("not_null_token");
-    when(jwtParser.parse(anyString())).thenThrow(MachineTokenJwtException.class);
+    when(jwtParser.parseClaimsJws(anyString())).thenThrow(MachineTokenJwtException.class);
     // when
     filter.doFilter(request, response, chain);
 

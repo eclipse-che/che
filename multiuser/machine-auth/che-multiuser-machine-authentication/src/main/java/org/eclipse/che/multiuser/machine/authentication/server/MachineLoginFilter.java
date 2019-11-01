@@ -70,6 +70,23 @@ public class MachineLoginFilter extends MultiuserEnvironmentInitializationFilter
   public void init(FilterConfig filterConfig) {}
 
   @Override
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
+      throws IOException, ServletException {
+    try {
+      super.doFilter(request, response, filterChain);
+    } catch (NotMachineTokenJwtException mte) {
+      filterChain.doFilter(request, response);
+      return;
+    } catch (JwtException e) {
+      sendError(
+          response,
+          SC_UNAUTHORIZED,
+          format("Authentication with machine token failed cause: %s", e.getMessage()));
+      return;
+    }
+  }
+
+  @Override
   public Subject extractSubject(String token) {
     try {
       final Claims claims = jwtParser.parseClaimsJws(token).getBody();
@@ -97,26 +114,6 @@ public class MachineLoginFilter extends MultiuserEnvironmentInitializationFilter
       ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
     chain.doFilter(request, response);
-  }
-
-  @Override
-  protected void handleTokenParsingException(
-      RuntimeException exception,
-      ServletRequest request,
-      ServletResponse response,
-      FilterChain chain)
-      throws IOException, ServletException {
-    if (exception instanceof NotMachineTokenJwtException) {
-      chain.doFilter(request, response);
-      return;
-    } else if (exception instanceof JwtException) {
-      sendError(
-          response,
-          SC_UNAUTHORIZED,
-          format("Authentication with machine token failed cause: %s", exception.getMessage()));
-      return;
-    }
-    throw exception;
   }
 
   @Override

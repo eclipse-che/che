@@ -12,6 +12,7 @@
 package org.eclipse.che.multiuser.keycloak.server;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -27,7 +28,6 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -87,14 +87,15 @@ public class KeycloakEnvironmentInitializationFilter
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
       throws IOException, ServletException {
-
-    final String token = tokenExtractor.getToken((HttpServletRequest) request);
-    if (shouldSkipAuthentication(token)) {
-      // note that unmodified request returned
+    try {
+      super.doFilter(request, response, filterChain);
+    } catch (MachineTokenJwtException mte) {
       filterChain.doFilter(request, response);
       return;
+    } catch (JwtException e) {
+      sendError(response, SC_UNAUTHORIZED, e.getMessage());
+      return;
     }
-    super.doFilter(request, response, filterChain);
   }
 
   @Override
@@ -142,23 +143,6 @@ public class KeycloakEnvironmentInitializationFilter
     sendError(response, 401, "Authorization token is missed");
   }
 
-  @Override
-  protected void handleTokenParsingException(
-      RuntimeException exception,
-      ServletRequest request,
-      ServletResponse response,
-      FilterChain chain)
-      throws IOException, ServletException {
-    if (exception instanceof MachineTokenJwtException) {
-      chain.doFilter(request, response);
-      return;
-    } else if (exception instanceof JwtException) {
-      sendError(response, 401, exception.getMessage());
-      return;
-    }
-    throw exception;
-  }
-
   private Optional<String> retrieveEmail(String token, Claims claims, String username, String id)
       throws ServerException {
     String email = claims.get("email", String.class);
@@ -182,15 +166,5 @@ public class KeycloakEnvironmentInitializationFilter
       }
     }
     return Optional.ofNullable(email);
-  }
-
-  /** when a request came from a machine with valid token then auth is not required */
-  private boolean shouldSkipAuthentication(String token) {
-    try {
-      jwtParser.parse(token);
-      return false;
-    } catch (MachineTokenJwtException e) {
-      return true;
-    }
   }
 }

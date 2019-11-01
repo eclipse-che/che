@@ -32,11 +32,11 @@ public class SessionStore {
 
   public HttpSession getSession(
       String userId, Function<? super String, ? extends HttpSession> createSessionFunction) {
-    if (createSessionFunction == null) {
-      return userIdToSession.get(userId);
-    } else {
-      return userIdToSession.computeIfAbsent(userId, createSessionFunction);
-    }
+    return userIdToSession.computeIfAbsent(userId, createSessionFunction);
+  }
+
+  public HttpSession getSession(String userId) {
+    return userIdToSession.get(userId);
   }
 
   public void remove(String userId) {

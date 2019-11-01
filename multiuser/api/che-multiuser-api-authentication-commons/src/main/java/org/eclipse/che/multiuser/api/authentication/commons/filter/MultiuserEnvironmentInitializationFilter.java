@@ -87,8 +87,12 @@ public abstract class MultiuserEnvironmentInitializationFilter implements Filter
       if (session != null) {
         return session;
       }
-      return sessionStore.getSession(
-          userId, createNew ? s -> SessionCachedHttpRequest.super.getSession(true) : null);
+      if (!createNew) {
+        return sessionStore.getSession(userId);
+      } else {
+        return sessionStore.getSession(
+            userId, s -> SessionCachedHttpRequest.super.getSession(true));
+      }
     }
   }
 
@@ -103,20 +107,15 @@ public abstract class MultiuserEnvironmentInitializationFilter implements Filter
       handleMissingToken(request, response, chain);
       return;
     }
-    try {
-      String userId = getUserId(token); // make sure token still valid before continue
-      // retrieve cached session if any or create new
-      httpRequest = new SessionCachedHttpRequest(request, userId);
-      HttpSession session = httpRequest.getSession(true);
-      // retrieve and check / create new subject
-      sessionSubject = (Subject) session.getAttribute(CHE_SUBJECT_ATTRIBUTE);
-      if (sessionSubject == null || !sessionSubject.getToken().equals(token)) {
-        sessionSubject = extractSubject(token);
-        session.setAttribute(CHE_SUBJECT_ATTRIBUTE, sessionSubject);
-      }
-    } catch (RuntimeException e) {
-      handleTokenParsingException(e, request, response, chain);
-      return;
+    String userId = getUserId(token); // make sure token still valid before continue
+    // retrieve cached session if any or create new
+    httpRequest = new SessionCachedHttpRequest(request, userId);
+    HttpSession session = httpRequest.getSession(true);
+    // retrieve and check / create new subject
+    sessionSubject = (Subject) session.getAttribute(CHE_SUBJECT_ATTRIBUTE);
+    if (sessionSubject == null || !sessionSubject.getToken().equals(token)) {
+      sessionSubject = extractSubject(token);
+      session.setAttribute(CHE_SUBJECT_ATTRIBUTE, sessionSubject);
     }
     // set current subject
     try {
@@ -133,13 +132,6 @@ public abstract class MultiuserEnvironmentInitializationFilter implements Filter
 
   protected abstract void handleMissingToken(
       ServletRequest request, ServletResponse response, FilterChain chain)
-      throws IOException, ServletException;
-
-  protected abstract void handleTokenParsingException(
-      RuntimeException exception,
-      ServletRequest request,
-      ServletResponse response,
-      FilterChain chain)
       throws IOException, ServletException;
 
   protected void sendError(ServletResponse res, int errorCode, String message) throws IOException {
