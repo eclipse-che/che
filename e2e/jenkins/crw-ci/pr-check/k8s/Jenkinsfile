@@ -1,7 +1,7 @@
 #!groovy
 
 pipeline {
-    agent { label "${jenkinsNodeLabel}" }
+    agent { label "minikube-rhel7-24gb" }
 
     options {
         timestamps()
@@ -24,10 +24,6 @@ pipeline {
     }
 
     parameters {
-        string(name: 'jenkinsNodeLabel',
-                defaultValue: 'minikube-rhel7-24gb',
-                description: 'Label of Jenkins node which will be used to run the tests')
-
         string(name: 'ghprbPullId',
                 defaultValue: "master",
                 description: 'Tag of Che images')
