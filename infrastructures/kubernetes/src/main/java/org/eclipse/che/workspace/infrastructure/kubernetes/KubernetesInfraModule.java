@@ -83,7 +83,7 @@ public class KubernetesInfraModule extends AbstractModule {
   protected void configure() {
     Multibinder.newSetBinder(binder(), WorkspaceAttributeValidator.class)
         .addBinding()
-        .to(KubernetesWorkspaceAttributesValidator.class);
+        .to(K8sInfraNamespaceWsAttributeValidator.class);
 
     bind(KubernetesNamespaceService.class);
 

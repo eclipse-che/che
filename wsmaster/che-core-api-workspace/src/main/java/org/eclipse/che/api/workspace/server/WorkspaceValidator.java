@@ -125,6 +125,23 @@ public class WorkspaceValidator {
     }
   }
 
+  /**
+   * Checks whether workspace attributes are valid on updating. The attribute is valid if it's key
+   * is not null & not empty & is not prefixed with 'codenvy'.
+   *
+   * @param existing actual attributes
+   * @param update new attributes that are going to be stored instead of existing
+   * @throws ValidationException when attributes are not valid
+   */
+  public void validateUpdateAttributes(Map<String, String> existing, Map<String, String> update)
+      throws ValidationException {
+    validateAttributes(update);
+
+    for (WorkspaceAttributeValidator attributeValidator : attributeValidators) {
+      attributeValidator.validateUpdate(existing, update);
+    }
+  }
+
   private void validateEnvironments(WorkspaceConfig config) throws ValidationException {
     boolean environmentIsNotSet =
         (config.getEnvironments() == null || config.getEnvironments().isEmpty())

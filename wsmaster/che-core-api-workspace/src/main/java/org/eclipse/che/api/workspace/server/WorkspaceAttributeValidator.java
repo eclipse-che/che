@@ -32,4 +32,26 @@ public interface WorkspaceAttributeValidator {
    * @throws ValidationException when the specified workspace attributes is not valid
    */
   void validate(Map<String, String> attributes) throws ValidationException;
+
+  /**
+   * Validates if the specified workspace attributes can be updated with new values.
+   *
+   * <p>This check includes:
+   *
+   * <ul>
+   *   <li>format checking;
+   *   <li>checking if unmodifiable attributes are not changed,<br>
+   *       if they are two scenarios depending on the implementation:
+   *       <ul>
+   *         <li>error is thrown;
+   *         <li>the needed value is provisioned into update;
+   *       </ul>
+   * </ul>
+   *
+   * @param existing workspace attributes to validate
+   * @param update new workspace attributes
+   * @throws ValidationException when the specified workspace attributes is not valid
+   */
+  void validateUpdate(Map<String, String> existing, Map<String, String> update)
+      throws ValidationException;
 }

@@ -38,7 +38,7 @@ import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.InconsistentRuntimesDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientTermination;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesWorkspaceAttributesValidator;
+import org.eclipse.che.workspace.infrastructure.kubernetes.K8sInfraNamespaceWsAttributeValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.KubernetesNamespaceService;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
@@ -90,7 +90,7 @@ public class OpenShiftInfraModule extends AbstractModule {
   protected void configure() {
     Multibinder.newSetBinder(binder(), WorkspaceAttributeValidator.class)
         .addBinding()
-        .to(KubernetesWorkspaceAttributesValidator.class);
+        .to(K8sInfraNamespaceWsAttributeValidator.class);
 
     bind(KubernetesNamespaceService.class);
 

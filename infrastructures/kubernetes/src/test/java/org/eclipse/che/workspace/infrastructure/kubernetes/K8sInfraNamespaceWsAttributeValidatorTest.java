@@ -31,17 +31,17 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link KubernetesWorkspaceAttributesValidator}.
+ * Tests {@link K8sInfraNamespaceWsAttributeValidator}.
  *
  * @author Sergii Leshchenko
  */
 @Listeners(MockitoTestNGListener.class)
-public class KubernetesWorkspaceAttributesValidatorTest {
+public class K8sInfraNamespaceWsAttributeValidatorTest {
 
   @Mock private KubernetesNamespaceFactory namespaceFactory;
   @Mock private Provider<KubernetesNamespaceFactory> namespaceFactoryProvider;
 
-  @InjectMocks private KubernetesWorkspaceAttributesValidator validator;
+  @InjectMocks private K8sInfraNamespaceWsAttributeValidator validator;
 
   @BeforeMethod
   public void setUp() {
@@ -90,6 +90,26 @@ public class KubernetesWorkspaceAttributesValidatorTest {
     validator.validate(emptyMap());
 
     verifyZeroInteractions(namespaceFactory);
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "The namespace from the provided object \"new\" does not match the actual namespace \"actual\"")
+  public void shouldDoNotAllowToChangeNamespaceAttribute() throws ValidationException {
+    validator.validateUpdate(
+        ImmutableMap.of(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "actual"),
+        ImmutableMap.of(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "new"));
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "The namespace information must not be updated or deleted. You must provide \"infrastructureNamespace\" attribute with \"che-workspaces\" as a value")
+  public void shouldDoNotAllowToRemoveNamespaceAttribute() throws ValidationException {
+    validator.validateUpdate(
+        ImmutableMap.of(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "che-workspaces"),
+        emptyMap());
   }
 
   @DataProvider
