@@ -96,10 +96,6 @@
             <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.infrastructure.docker</groupId>
-            <artifactId>docker-environment</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.selenium</groupId>
             <artifactId>che-selenium-core</artifactId>
         </dependency>

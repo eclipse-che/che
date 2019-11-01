@@ -68,6 +68,7 @@ import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
+import org.eclipse.che.commons.observability.deploy.ExecutorWrapperModule;
 import org.eclipse.che.core.db.DBTermination;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.tracing.metrics.TracingMetricsModule;
@@ -260,12 +261,12 @@ public class WsMasterModule extends AbstractModule {
     if (Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
       install(new org.eclipse.che.core.metrics.MetricsModule());
       install(new WsMasterMetricsModule());
-      install(new MetricsOverrideBinding());
     }
     if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))
         && Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
       install(new TracingMetricsModule());
     }
+    install(new ExecutorWrapperModule());
   }
 
   private void configureSingleUserMode(Map<String, String> persistenceProperties) {

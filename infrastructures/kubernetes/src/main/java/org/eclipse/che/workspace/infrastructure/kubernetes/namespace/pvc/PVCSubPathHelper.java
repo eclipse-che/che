@@ -36,6 +36,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
+import org.eclipse.che.commons.observability.ExecutorServiceWrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
@@ -85,19 +86,22 @@ public class PVCSubPathHelper {
       @Named("che.infra.kubernetes.pvc.jobs.memorylimit") String jobMemoryLimit,
       @Named("che.infra.kubernetes.pvc.jobs.image") String jobImage,
       KubernetesNamespaceFactory factory,
-      SecurityContextProvisioner securityContextProvisioner) {
+      SecurityContextProvisioner securityContextProvisioner,
+      ExecutorServiceWrapper executorServiceWrapper) {
     this.jobMemoryLimit = jobMemoryLimit;
     this.jobImage = jobImage;
     this.factory = factory;
     this.securityContextProvisioner = securityContextProvisioner;
     this.executor =
-        Executors.newFixedThreadPool(
-            COUNT_THREADS,
-            new ThreadFactoryBuilder()
-                .setNameFormat("PVCSubPathHelper-ThreadPool-%d")
-                .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
-                .setDaemon(false)
-                .build());
+        executorServiceWrapper.wrap(
+            Executors.newFixedThreadPool(
+                COUNT_THREADS,
+                new ThreadFactoryBuilder()
+                    .setNameFormat("PVCSubPathHelper-ThreadPool-%d")
+                    .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+                    .setDaemon(false)
+                    .build()),
+            PVCSubPathHelper.class.getName());
   }
 
   /**

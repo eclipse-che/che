@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.observability.NoopExecutorServiceWrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -81,7 +82,11 @@ public class PVCSubPathHelperTest {
   public void setup() throws Exception {
     pvcSubPathHelper =
         new PVCSubPathHelper(
-            jobMemoryLimit, jobImage, k8sNamespaceFactory, securityContextProvisioner);
+            jobMemoryLimit,
+            jobImage,
+            k8sNamespaceFactory,
+            securityContextProvisioner,
+            new NoopExecutorServiceWrapper());
     lenient().when(k8sNamespaceFactory.getOrCreate(any())).thenReturn(k8sNamespace);
     lenient().when(k8sNamespace.deployments()).thenReturn(osDeployments);
     lenient().when(pod.getStatus()).thenReturn(podStatus);

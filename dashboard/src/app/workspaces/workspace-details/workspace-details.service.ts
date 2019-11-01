@@ -12,13 +12,13 @@
 'use strict';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import IdeSvc from '../../ide/ide.service';
-import {CreateWorkspaceSvc} from '../create-workspace/create-workspace.service';
 import {IObservable, IObservableCallbackFn, Observable} from '../../../components/utils/observable';
 import {WorkspaceDetailsProjectsService} from './workspace-projects/workspace-details-projects.service';
 import {CheWorkspace, WorkspaceStatus} from '../../../components/api/workspace/che-workspace.factory';
 import {CheService} from '../../../components/api/che-service.factory';
 import {PluginRegistry} from '../../../components/api/plugin-registry.factory';
 import {WorkspaceDataManager} from '../../../components/api/workspace/workspace-data-manager';
+import { ConfirmDialogService } from '../../../components/service/confirm-dialog/confirm-dialog.service';
 
 interface IPage {
   title: string;
@@ -28,9 +28,49 @@ interface IPage {
 }
 
 interface ISection {
- title: string;
- description: string;
- content: string;
+  title: string;
+  description: string;
+  content: string;
+}
+
+export interface IModifiedWorkspace {
+  isSaved: boolean;
+  needRestart?: boolean;
+}
+
+class ModifiedWorkspaces {
+  workspaces: { [id: string]: IModifiedWorkspace } = {};
+
+  set(id: string, attrs: { isSaved?: boolean, needRestart?: boolean }): void {
+    if (this.workspaces[id] === undefined) {
+      this.workspaces[id] = { isSaved: false };
+    }
+    if (angular.isDefined(attrs.isSaved)) {
+      this.workspaces[id].isSaved = attrs.isSaved;
+    }
+    if (angular.isDefined(attrs.needRestart)) {
+      this.workspaces[id].needRestart = attrs.needRestart;
+    }
+  }
+
+  isSaved(id: string): boolean {
+    if (this.workspaces[id] === undefined) {
+      return true;
+    }
+    return this.workspaces[id].isSaved;
+  }
+
+  needRestart(id: string): boolean {
+    if (this.workspaces[id] === undefined) {
+      return false;
+    }
+    return this.workspaces[id].needRestart;
+  }
+
+  remove(id: string): void {
+    delete this.workspaces[id];
+  }
+
 }
 
 /**
@@ -41,7 +81,18 @@ interface ISection {
  */
 export class WorkspaceDetailsService {
 
-  static $inject = ['$log', '$q', 'cheWorkspace', 'cheNotification', 'ideSvc', 'createWorkspaceSvc', 'workspaceDetailsProjectsService', 'cheService', 'chePermissions', 'pluginRegistry'];
+  static $inject = [
+    '$log',
+    '$q',
+    'cheWorkspace',
+    'cheNotification',
+    'ideSvc',
+    'workspaceDetailsProjectsService',
+    'cheService',
+    'chePermissions',
+    'confirmDialogService',
+    'pluginRegistry'
+  ];
 
   /**
    * Logging service.
@@ -64,13 +115,13 @@ export class WorkspaceDetailsService {
    */
   private ideSvc: IdeSvc;
   /**
-   * Workspace creation service.
-   */
-  private createWorkspaceSvc: CreateWorkspaceSvc;
-  /**
    * Service for projects of workspace.
    */
   private workspaceDetailsProjectsService: WorkspaceDetailsProjectsService;
+  /**
+   * Confirm dialog service.
+   */
+  private confirmDialogService: ConfirmDialogService;
   /**
    * Instance of Observable.
    */
@@ -79,9 +130,9 @@ export class WorkspaceDetailsService {
   private pages: IPage[];
   private sections: ISection[];
   /**
-   * This workspaces should be restarted for new config to be applied.
+   * These workspaces should be restarted for new config to be applied.
    */
-  private restartToApply: string[] = [];
+  private modifiedWorkspaces: ModifiedWorkspaces = new ModifiedWorkspaces();
   /**
    * Array of deprecated editors.
    */
@@ -108,10 +159,10 @@ export class WorkspaceDetailsService {
     cheWorkspace: CheWorkspace,
     cheNotification: CheNotification,
     ideSvc: IdeSvc,
-    createWorkspaceSvc: CreateWorkspaceSvc,
     workspaceDetailsProjectsService: WorkspaceDetailsProjectsService,
     cheService: CheService,
     chePermissions: che.api.IChePermissions,
+    confirmDialogService: ConfirmDialogService,
     pluginRegistry: PluginRegistry
   ) {
     this.$log = $log;
@@ -119,9 +170,9 @@ export class WorkspaceDetailsService {
     this.cheWorkspace = cheWorkspace;
     this.cheNotification = cheNotification;
     this.ideSvc = ideSvc;
-    this.createWorkspaceSvc = createWorkspaceSvc;
     this.pluginRegistry = pluginRegistry;
     this.workspaceDetailsProjectsService = workspaceDetailsProjectsService;
+    this.confirmDialogService = confirmDialogService;
 
     this.observable =  new Observable<any>();
 
@@ -288,12 +339,11 @@ export class WorkspaceDetailsService {
         return this.cheWorkspace.fetchStatusChange(workspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
       })
       .then(() => {
-        this.removeRestartToApply(workspace.id);
-
         return this.saveConfigChanges(workspace);
       })
       .then(() => {
-        this.cheWorkspace.startWorkspace(workspace.id, workspace.config.defaultEnv);
+        const envName = workspace.config ? workspace.config.defaultEnv : undefined;
+        this.cheWorkspace.startWorkspace(workspace.id, envName);
         return this.cheWorkspace.fetchStatusChange(workspace.id, WorkspaceStatus[WorkspaceStatus.RUNNING]);
       })
       .catch((error: any) => {
@@ -303,39 +353,39 @@ export class WorkspaceDetailsService {
   }
 
   /**
-   * Add workspace ID to the list of workspaces that should be restarted.
-   *
-   * @param {string} workspaceId
+   * Keep a workspace as one that is modified and may need restarting to apply changes.
    */
-  addRestartToApply(workspaceId: string): void {
-    if (this.restartToApply.indexOf(workspaceId) === -1) {
-      this.restartToApply.push(workspaceId);
-    }
+  setModified(id: string, attrs: { isSaved?: boolean, needRestart?: boolean }): void {
+    this.modifiedWorkspaces.set(id, attrs);
+  }
+
+  removeModified(id: string): void {
+    this.modifiedWorkspaces.remove(id);
   }
 
   /**
-   * Remove workspace ID from the list of workspaces that should be restarted.
-   *
-   * @param {string} workspaceId
+   * Returns `true` if workspace configuration has been already saved.
+   * @param id a workspace ID
    */
-  removeRestartToApply(workspaceId: string): void {
-    const index = this.restartToApply.indexOf(workspaceId);
-    if (index === -1) {
-      return;
-    }
-    this.restartToApply.splice(index, 1);
+  isWorkspaceConfigSaved(id: string): boolean {
+    return this.modifiedWorkspaces.isSaved(id);
   }
 
   /**
-   * Returns <code>true</code> if workspace ID belongs to the list of
-   * workspaces that should be restarted.
-   *
-   * @param {string} workspaceId
-   * @returns {boolean}
+   * Returns `true` if workspace configuration has been already applied.
+   * @param id a workspace ID
    */
-  getRestartToApply(workspaceId: string): boolean {
-    const index = this.restartToApply.indexOf(workspaceId);
-    return index !== -1;
+  doesWorkspaceConfigNeedRestart(id: string): boolean {
+    return this.modifiedWorkspaces.needRestart(id);
+  }
+
+  /**
+   * Returns `true` if workspace configuration was changed.
+   * @param id a workspace ID
+   */
+  isWorkspaceModified(id: string): boolean {
+    return this.modifiedWorkspaces.isSaved(id) === false
+      || this.modifiedWorkspaces.needRestart(id) === true;
   }
 
   /**
@@ -411,6 +461,13 @@ export class WorkspaceDetailsService {
 
       return this.$q.reject(error);
     });
+  }
+
+  /**
+   * Shows modal window with notification about unsaved changes.
+   */
+  notifyUnsavedChangesDialog(): ng.IPromise<void> {
+    return this.confirmDialogService.showConfirmDialog('Unsaved Changes', `You're editing this workspace configuration. Please save or discard changes to be able to run or stop the workspace.`, { reject: 'Close' });
   }
 
 }

@@ -23,6 +23,8 @@ spec:
     matchLabels:
       app: che
       component: postgres
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:

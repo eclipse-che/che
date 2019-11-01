@@ -68,7 +68,10 @@ public class DevfileSchemaValidatorTest {
       {"editor_plugin_component/devfile_plugin_component_with_reference.yaml"},
       {"devfile/devfile_just_generatename.yaml"},
       {"devfile/devfile_name_and_generatename.yaml"},
-      {"devfile/devfile_with_sparse_checkout_dir.yaml"}
+      {"devfile/devfile_with_sparse_checkout_dir.yaml"},
+      {"devfile/devfile_name_and_generatename.yaml"},
+      {"command/devfile_command_with_preview_url.yaml"},
+      {"command/devfile_command_with_preview_url_only_port.yaml"},
     };
   }
 
@@ -219,6 +222,26 @@ public class DevfileSchemaValidatorTest {
       {
         "dockerimage_component/devfile_dockerimage_component_with_indistinctive_field_selector.yaml",
         "(/components/0/selector):The object must not have a property whose name is \"selector\"."
+      },
+      {
+        "command/devfile_command_with_empty_preview_url.yaml",
+        "(/commands/0/previewUrl):The value must be of object type, but actual type is null."
+      },
+      {
+        "command/devfile_command_with_preview_url_port_is_string.yaml",
+        "(/commands/0/previewUrl/port):The value must be of number type, but actual type is string."
+      },
+      {
+        "command/devfile_command_with_preview_url_port_is_too_high.yaml",
+        "(/commands/0/previewUrl/port):The numeric value must be less than or equal to 65535."
+      },
+      {
+        "command/devfile_command_with_preview_url_port_is_negative.yaml",
+        "(/commands/0/previewUrl/port):The numeric value must be greater than or equal to 0."
+      },
+      {
+        "command/devfile_command_with_preview_url_only_path.yaml",
+        "(/commands/0/previewUrl):The object must have a property whose name is \"port\"."
       },
     };
   }

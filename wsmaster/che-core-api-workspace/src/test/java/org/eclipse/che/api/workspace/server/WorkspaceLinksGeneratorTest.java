@@ -50,6 +50,8 @@ public class WorkspaceLinksGeneratorTest {
 
   @Mock private RuntimeContext runtimeCtx;
 
+  @Mock private PreviewUrlLinksVariableGenerator previewUrlGenerator;
+
   private Map<String, String> expectedStoppedLinks;
   private Map<String, String> expectedRunningLinks;
   private WorkspaceLinksGenerator linksGenerator;
@@ -68,7 +70,7 @@ public class WorkspaceLinksGeneratorTest {
     lenient().when(serviceContextMock.getServiceUriBuilder()).thenReturn(uriBuilder);
     lenient().when(serviceContextMock.getBaseUriBuilder()).thenReturn(uriBuilder);
 
-    linksGenerator = new WorkspaceLinksGenerator(runtimes, "ws://localhost");
+    linksGenerator = new WorkspaceLinksGenerator(runtimes, previewUrlGenerator, "ws://localhost");
 
     expectedStoppedLinks = new HashMap<>();
     expectedStoppedLinks.put(LINK_REL_SELF, "http://localhost/api/workspace/wside-123877234580");
@@ -101,7 +103,7 @@ public class WorkspaceLinksGeneratorTest {
     uriBuilder.uri("https://mydomain:7345/api/workspace");
     doReturn(uriBuilder).when(serviceContextMock).getServiceUriBuilder();
 
-    linksGenerator = new WorkspaceLinksGenerator(runtimes, "ws://localhost");
+    linksGenerator = new WorkspaceLinksGenerator(runtimes, previewUrlGenerator, "ws://localhost");
     // when
     Map<String, String> actual = linksGenerator.genLinks(workspace, serviceContextMock);
     // then

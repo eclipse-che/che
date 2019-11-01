@@ -17,11 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -30,6 +26,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult.ProbeStatus;
+import org.eclipse.che.commons.observability.ExecutorServiceWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +40,7 @@ import org.slf4j.LoggerFactory;
 public class ProbeScheduler {
   private static final Logger LOG = LoggerFactory.getLogger(ProbeScheduler.class);
 
-  private final ScheduledThreadPoolExecutor probesExecutor;
+  private final ScheduledExecutorService probesExecutor;
   /**
    * Use single thread for a scheduling of tasks interruption by timeout. Single thread can be used
    * since it is supposed that interruption is a very quick call. Separate thread is needed to
@@ -55,11 +52,18 @@ public class ProbeScheduler {
   private final Map<String, List<ScheduledFuture>> probesFutures;
 
   @Inject
-  public ProbeScheduler(@Named("che.workspace.probe_pool_size") int probeSchedulerPoolSize) {
+  public ProbeScheduler(
+      @Named("che.workspace.probe_pool_size") int probeSchedulerPoolSize,
+      ExecutorServiceWrapper executorServiceWrapper) {
     probesExecutor =
-        new ScheduledThreadPoolExecutor(
-            probeSchedulerPoolSize,
-            new ThreadFactoryBuilder().setDaemon(true).setNameFormat("ServerProbes-%s").build());
+        executorServiceWrapper.wrap(
+            new ScheduledThreadPoolExecutor(
+                probeSchedulerPoolSize,
+                new ThreadFactoryBuilder()
+                    .setDaemon(true)
+                    .setNameFormat("ServerProbes-%s")
+                    .build()),
+            ProbeScheduler.class.getName());
     timeouts = new Timer("ServerProbesTimeouts", true);
     probesFutures = new ConcurrentHashMap<>();
   }
