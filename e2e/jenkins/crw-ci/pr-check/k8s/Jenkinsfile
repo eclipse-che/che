@@ -117,8 +117,8 @@ pipeline {
                         sh """
                             wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml
                             
-                            sed -i "s|cheImage: ''|cheImage: '${CHE_IMAGE_REPO}'|"
-                            sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${CHE_IMAGE_TAG}'|"
+                            sed -i "s|cheImage: ''|cheImage: '${CHE_IMAGE_REPO}'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                            sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${CHE_IMAGE_TAG}'|" ${WORKSPACE}/org_v1_che_cr.yaml
                         """
                     }
                 }
