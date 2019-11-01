@@ -318,19 +318,6 @@ public class WorkspaceManager {
       workspace.setDevfile(new DevfileImpl(update.getDevfile()));
     }
 
-    // do not allow infrastructure namespace updates
-    String namespace = workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
-    String updateNamespace =
-        update.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
-
-    if (!namespace.equals(updateNamespace)) {
-      throw new ServerException(
-          format(
-              "Unable to update the infrastructure namespace of the"
-                  + " workspace '%s'. This property is read-only.",
-              id));
-    }
-
     workspace.setAttributes(update.getAttributes());
 
     workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
@@ -454,6 +441,20 @@ public class WorkspaceManager {
       runtimes.validate(workspace, envName);
     } catch (ValidationException e) {
       throw new ConflictException(e.getMessage(), e);
+    }
+
+    // handle the situation where a workspace created by a previous Che version doesn't have a
+    // namespace stored for it. In this case, we just store the default namespace for it.
+    if (isNullOrEmpty(workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE))) {
+      RuntimeTarget target = new RuntimeTarget(workspace.getId(),
+              EnvironmentContext.getCurrent().getSubject(), null);
+
+      try {
+        String namespace = runtimes.getInfrastructureNamespace(target);
+        workspace.getAttributes().put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
+      } catch (InfrastructureException e) {
+        throw new ServerException(e);
+      }
     }
 
     workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
