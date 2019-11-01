@@ -142,7 +142,7 @@ pipeline {
             steps {
                 sh """
                     ${WORKSPACE}/chectl server:start \\
-                    --k8spodreadytimeout=180000 \\
+                    --k8spodreadytimeout=350000 \\
                     --installer=operator \\
                     --listr-renderer=verbose \\
                     --platform=minikube \\
