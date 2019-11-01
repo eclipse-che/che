@@ -12,6 +12,7 @@
 package org.eclipse.che.multiuser.api.authentication.commons;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpSession;
 
@@ -29,12 +30,13 @@ public class SessionStore {
     this.userIdToSession = new ConcurrentHashMap<>();
   }
 
-  public HttpSession getSession(String userId) {
-    return userIdToSession.get(userId);
-  }
-
-  public HttpSession saveSession(String userId, HttpSession session) {
-    return userIdToSession.put(userId, session);
+  public HttpSession getSession(
+      String userId, Function<? super String, ? extends HttpSession> createSessionFunction) {
+    if (createSessionFunction == null) {
+      return userIdToSession.get(userId);
+    } else {
+      return userIdToSession.computeIfAbsent(userId, createSessionFunction);
+    }
   }
 
   public void remove(String userId) {

@@ -85,7 +85,6 @@ public class MachineLoginFilterTest {
   @Mock private SignatureKeyManager keyManagerMock;
   @Mock private PermissionChecker permissionCheckerMock;
   @Mock private FilterChain chainMock;
-  @Mock private SessionStore sessionStore;
   @Mock private HttpSession sessionMock;
   @Mock private HttpServletResponse responseMock;
 
@@ -105,7 +104,7 @@ public class MachineLoginFilterTest {
             .compact();
     machineLoginFilter =
         new MachineLoginFilter(
-            sessionStore,
+            new SessionStore(),
             tokenExtractorMock,
             userManagerMock,
             new MachineSigningKeyResolver(keyManagerMock),

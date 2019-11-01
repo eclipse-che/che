@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.USER_ID_CLAIM;
@@ -29,7 +28,6 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;
@@ -72,28 +70,6 @@ public class MachineLoginFilter extends MultiuserEnvironmentInitializationFilter
   public void init(FilterConfig filterConfig) {}
 
   @Override
-  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-      throws IOException, ServletException {
-
-    final String token = tokenExtractor.getToken((HttpServletRequest) request);
-    if (isNullOrEmpty(token)) {
-      chain.doFilter(request, response);
-      return;
-    }
-    try {
-      super.doFilter(request, response, chain);
-    } catch (NotMachineTokenJwtException e) {
-      // bypass - not our token
-      chain.doFilter(request, response);
-    } catch (JwtException e) {
-      sendError(
-          response,
-          SC_UNAUTHORIZED,
-          format("Authentication with machine token failed cause: %s", e.getMessage()));
-    }
-  }
-
-  @Override
   public Subject extractSubject(String token) {
     try {
       final Claims claims = jwtParser.parseClaimsJws(token).getBody();
@@ -114,6 +90,33 @@ public class MachineLoginFilter extends MultiuserEnvironmentInitializationFilter
   protected String getUserId(String token) {
     final Claims claims = jwtParser.parseClaimsJws(token).getBody();
     return claims.get(USER_ID_CLAIM, String.class);
+  }
+
+  @Override
+  protected void handleMissingToken(
+      ServletRequest request, ServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
+    chain.doFilter(request, response);
+  }
+
+  @Override
+  protected void handleTokenParsingException(
+      RuntimeException exception,
+      ServletRequest request,
+      ServletResponse response,
+      FilterChain chain)
+      throws IOException, ServletException {
+    if (exception instanceof NotMachineTokenJwtException) {
+      chain.doFilter(request, response);
+      return;
+    } else if (exception instanceof JwtException) {
+      sendError(
+          response,
+          SC_UNAUTHORIZED,
+          format("Authentication with machine token failed cause: %s", exception.getMessage()));
+      return;
+    }
+    throw exception;
   }
 
   @Override

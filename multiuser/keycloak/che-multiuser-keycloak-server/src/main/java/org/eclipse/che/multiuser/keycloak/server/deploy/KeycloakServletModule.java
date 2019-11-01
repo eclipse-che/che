@@ -13,7 +13,7 @@ package org.eclipse.che.multiuser.keycloak.server.deploy;
 
 import com.google.inject.servlet.ServletModule;
 import org.eclipse.che.commons.logback.filter.IdentityIdLoggerFilter;
-import org.eclipse.che.multiuser.keycloak.server.KeycloakEnvironmentInitalizationFilter;
+import org.eclipse.che.multiuser.keycloak.server.KeycloakEnvironmentInitializationFilter;
 import org.eclipse.che.multiuser.keycloak.server.UnavailableResourceInMultiUserFilter;
 
 public class KeycloakServletModule extends ServletModule {
@@ -31,7 +31,7 @@ public class KeycloakServletModule extends ServletModule {
 
   @Override
   protected void configureServlets() {
-    filterRegex(KEYCLOAK_FILTER_PATHS).through(KeycloakEnvironmentInitalizationFilter.class);
+    filterRegex(KEYCLOAK_FILTER_PATHS).through(KeycloakEnvironmentInitializationFilter.class);
     filterRegex(KEYCLOAK_FILTER_PATHS).through(IdentityIdLoggerFilter.class);
 
     // Ban change password (POST /user/password) and create a user (POST /user/) methods

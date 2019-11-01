@@ -28,7 +28,6 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.impl.DefaultClaims;
 import io.jsonwebtoken.impl.DefaultJws;
 import io.jsonwebtoken.impl.DefaultJwsHeader;
-import io.opentracing.Tracer;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -50,7 +49,6 @@ import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
-import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -60,7 +58,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(value = {MockitoTestNGListener.class})
-public class KeycloakEnvironmentInitalizationFilterTest {
+public class KeycloakEnvironmentInitializationFilterTest {
 
   @Mock private SignatureKeyManager keyManager;
   @Mock private KeycloakUserManager userManager;
@@ -76,10 +74,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
   @Mock private JwtParser jwtParser;
   @Mock private SessionStore sessionStore;
 
-  @Mock(answer = Answers.RETURNS_MOCKS)
-  private Tracer tracer;
-
-  private KeycloakEnvironmentInitalizationFilter filter;
+  private KeycloakEnvironmentInitializationFilter filter;
   private Map<String, String> keycloakAttributes = new HashMap<>();
   private Map<String, String> keycloakSettingsMap = new HashMap<>();
 
@@ -92,15 +87,14 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     EnvironmentContext context = spy(EnvironmentContext.getCurrent());
     EnvironmentContext.setCurrent(context);
     filter =
-        new KeycloakEnvironmentInitalizationFilter(
+        new KeycloakEnvironmentInitializationFilter(
             sessionStore,
             jwtParser,
             userManager,
             keycloakProfileRetriever,
             tokenExtractor,
             permissionChecker,
-            keycloakSettings,
-            tracer);
+            keycloakSettings);
     final KeyPair kp = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
     lenient().when(keyManager.getOrCreateKeyPair(anyString())).thenReturn(kp);
     keycloakAttributes.clear();
