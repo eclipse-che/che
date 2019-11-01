@@ -19,10 +19,10 @@
         <groupId>org.eclipse.che</groupId>
         <version>7.6.0-SNAPSHOT</version>
     </parent>
-    <groupId>org.eclipse.che.selenium</groupId>
+    <groupId>org.eclipse.che.tests.legacy-e2e</groupId>
     <artifactId>che-selenium-parent</artifactId>
     <packaging>pom</packaging>
-    <name>Che Selenium :: Parent</name>
+    <name>Che Legacy E2E :: Parent</name>
     <modules>
         <module>che-selenium-core</module>
         <module>che-selenium-test</module>
