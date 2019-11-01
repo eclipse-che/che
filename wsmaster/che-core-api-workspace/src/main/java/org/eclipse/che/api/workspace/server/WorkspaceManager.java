@@ -445,9 +445,10 @@ public class WorkspaceManager {
 
     // handle the situation where a workspace created by a previous Che version doesn't have a
     // namespace stored for it. In this case, we just store the default namespace for it.
-    if (isNullOrEmpty(workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE))) {
-      RuntimeTarget target = new RuntimeTarget(workspace.getId(),
-              EnvironmentContext.getCurrent().getSubject(), null);
+    if (isNullOrEmpty(
+        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE))) {
+      RuntimeTarget target =
+          new RuntimeTarget(workspace.getId(), EnvironmentContext.getCurrent().getSubject(), null);
 
       try {
         String namespace = runtimes.getInfrastructureNamespace(target);

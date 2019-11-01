@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,6 +40,7 @@ import java.util.stream.Stream;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.observability.NoopExecutorServiceWrapper;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -65,7 +67,8 @@ public class PVCSubPathHelperTest {
   private static final String jobImage = "centos:centos7";
   private static final String PROJECTS_PATH = "/projects";
   private static final String M2_PATH = "/.m2";
-  private static final RuntimeTarget TARGET = new RuntimeTarget(WORKSPACE_ID, null, null);
+  private static final RuntimeTarget TARGET =
+      new RuntimeTarget(WORKSPACE_ID, mock(Subject.class), null);
 
   @Mock private SecurityContextProvisioner securityContextProvisioner;
   @Mock private KubernetesNamespaceFactory k8sNamespaceFactory;

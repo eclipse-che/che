@@ -32,6 +32,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -57,7 +58,8 @@ public class PerWorkspacePVCStrategyTest {
   private static final String PVC_ACCESS_MODE = "RWO";
   private static final String PVC_STORAGE_CLASS_NAME = "special";
 
-  private static final RuntimeTarget TARGET = new RuntimeTarget(WORKSPACE_ID, null, null);
+  private static final RuntimeTarget TARGET =
+      new RuntimeTarget(WORKSPACE_ID, mock(Subject.class), null);
 
   @Mock private PVCSubPathHelper pvcSubPathHelper;
   @Mock private KubernetesNamespaceFactory factory;

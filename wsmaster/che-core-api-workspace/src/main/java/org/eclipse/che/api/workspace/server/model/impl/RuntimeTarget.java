@@ -18,9 +18,9 @@ import org.eclipse.che.commons.subject.Subject;
 
 /**
  * A runtime target is a description of where the workspace API imagines a workspace runtime should
- * be placed in the infrastructure. This can either be explicitly set using the
- * {@link #getInfrastructureNamespace()} or the default value can be deduced by the infrastructure
- * from the runtime identity and other information contained in the instances of this class.
+ * be placed in the infrastructure. This can either be explicitly set using the {@link
+ * #getInfrastructureNamespace()} or the default value can be deduced by the infrastructure from the
+ * runtime identity and other information contained in the instances of this class.
  */
 public final class RuntimeTarget {
   private final RuntimeIdentity identity;
