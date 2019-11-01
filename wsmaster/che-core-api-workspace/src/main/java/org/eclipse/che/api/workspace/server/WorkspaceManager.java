@@ -307,9 +307,10 @@ public class WorkspaceManager {
     if (update.getConfig() != null) {
       validator.validateConfig(update.getConfig());
     }
-    validator.validateAttributes(update.getAttributes());
-
     WorkspaceImpl workspace = workspaceDao.get(id);
+
+    validator.validateUpdateAttributes(workspace.getAttributes(), update.getAttributes());
+
     if (workspace.getConfig() != null) {
       workspace.setConfig(new WorkspaceConfigImpl(update.getConfig()));
     }

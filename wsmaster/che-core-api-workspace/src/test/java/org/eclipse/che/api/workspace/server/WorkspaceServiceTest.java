@@ -23,6 +23,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
@@ -219,6 +220,38 @@ public class WorkspaceServiceTest {
                 ImmutableMap.of(
                     "factoryId", "factory123",
                     "custom", "custom:value")),
+            any());
+  }
+
+  @Test
+  public void shouldPropagateK8sNamespaceOnCreationWorkspaceFromDevfile() throws Exception {
+    final DevfileDto devfileDto = createDevfileDto();
+    final WorkspaceImpl workspace = createWorkspace(devfileDto);
+
+    when(wsManager.createWorkspace(any(Devfile.class), anyString(), any(), any()))
+        .thenReturn(workspace);
+
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .body(devfileDto)
+            .when()
+            .post(
+                SECURE_PATH
+                    + "/workspace/devfile"
+                    + "?namespace=test"
+                    + "&attribute=infrastructureNamespace:che-workspaces");
+
+    assertEquals(response.getStatusCode(), 201);
+    assertEquals(
+        new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
+    verify(wsManager)
+        .createWorkspace(
+            any(Devfile.class),
+            eq("test"),
+            eq(ImmutableMap.of(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "che-workspaces")),
             any());
   }
 

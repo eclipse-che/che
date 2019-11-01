@@ -40,6 +40,7 @@ import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import java.util.Arrays;
 import java.util.List;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.subject.Subject;
@@ -80,6 +81,38 @@ public class KubernetesNamespaceFactoryTest {
     lenient().when(k8sClient.namespaces()).thenReturn(namespaceOperation);
     lenient().when(namespaceOperation.withName(any())).thenReturn(namespaceResource);
     lenient().when(namespaceResource.get()).thenReturn(mock(Namespace.class));
+  }
+
+  @Test
+  public void shouldNotThrowExceptionIfDefaultNamespaceIsSpecifiedOnCheckingIfNamespaceIsAllowed()
+      throws Exception {
+    namespaceFactory =
+        new KubernetesNamespaceFactory("legacy", "", "", "defaultNs", false, clientFactory);
+
+    namespaceFactory.checkIfNamespaceIsAllowed("defaultNs");
+  }
+
+  @Test
+  public void
+      shouldNotThrowExceptionIfNonDefaultNamespaceIsSpecifiedAndUserDefinedAreAllowedOnCheckingIfNamespaceIsAllowed()
+          throws Exception {
+    namespaceFactory =
+        new KubernetesNamespaceFactory("legacy", "", "", "defaultNs", true, clientFactory);
+
+    namespaceFactory.checkIfNamespaceIsAllowed("any-namespace");
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "User defined namespaces are not allowed. You're able to specify only admin configured which is 'defaultNs'")
+  public void
+      shouldThrowExceptionIfNonDefaultNamespaceIsSpecifiedAndUserDefinedAreNotAllowedOnCheckingIfNamespaceIsAllowed()
+          throws Exception {
+    namespaceFactory =
+        new KubernetesNamespaceFactory("legacy", "", "", "defaultNs", false, clientFactory);
+
+    namespaceFactory.checkIfNamespaceIsAllowed("any-namespace");
   }
 
   @Test(

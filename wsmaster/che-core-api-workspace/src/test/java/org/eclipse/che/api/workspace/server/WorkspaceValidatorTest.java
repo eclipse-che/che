@@ -16,8 +16,11 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,8 +34,9 @@ import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.ServerConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.VolumeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -45,7 +49,14 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class WorkspaceValidatorTest {
 
-  @InjectMocks private WorkspaceValidator wsValidator;
+  @Mock private WorkspaceAttributeValidator attributeValidator;
+
+  private WorkspaceValidator wsValidator;
+
+  @BeforeMethod
+  public void setUp() {
+    wsValidator = new WorkspaceValidator(ImmutableSet.of(attributeValidator));
+  }
 
   @Test
   public void shouldValidateCorrectWorkspace() throws Exception {
@@ -122,6 +133,22 @@ public class WorkspaceValidatorTest {
   public void shouldFailValidationIfAttributeNameIsNull() throws Exception {
     Map<String, String> attributes = new HashMap<>();
     attributes.put(null, "value1");
+
+    wsValidator.validateAttributes(attributes);
+  }
+
+  @Test
+  public void shouldInvokeWorkspaceAttributesValidators() throws Exception {
+    ImmutableMap<String, String> attributes = ImmutableMap.of("attr", "value");
+    wsValidator.validateAttributes(attributes);
+
+    verify(attributeValidator).validate(attributes);
+  }
+
+  @Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "invalid")
+  public void shouldRethrowWorkspaceAttributesValidatorException() throws Exception {
+    ImmutableMap<String, String> attributes = ImmutableMap.of("attr", "value");
+    doThrow(new ValidationException("invalid")).when(attributeValidator).validate(attributes);
 
     wsValidator.validateAttributes(attributes);
   }

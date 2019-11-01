@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Named;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -52,6 +53,7 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class KubernetesNamespaceFactory {
+
   private static final Logger LOG = LoggerFactory.getLogger(KubernetesNamespaceFactory.class);
 
   private static final Map<String, Function<PlaceholderResolutionContext, String>>
@@ -215,6 +217,28 @@ public class KubernetesNamespaceFactory {
   @VisibleForTesting
   KubernetesNamespace doCreateNamespaceAccess(String workspaceId, String name) {
     return new KubernetesNamespace(clientFactory, name, workspaceId);
+  }
+
+  /**
+   * Checks if the current user is able to use the specified namespace for their new workspaces.
+   *
+   * @param namespaceName namespace name to check
+   * @throws ValidationException if the specified namespace is not permitted for the current user
+   */
+  public void checkIfNamespaceIsAllowed(String namespaceName) throws ValidationException {
+    if (allowUserDefinedNamespaces) {
+      // any namespace name is allowed but workspace start may fail
+      return;
+    }
+
+    String defaultNamespace =
+        evalPlaceholders(defaultNamespaceName, EnvironmentContext.getCurrent().getSubject(), null);
+    if (!namespaceName.equals(defaultNamespace)) {
+      throw new ValidationException(
+          "User defined namespaces are not allowed. You're able to specify only admin configured which is '"
+              + defaultNamespaceName
+              + '\'');
+    }
   }
 
   /** Returns list of k8s namespaces names where a user is able to run workspaces. */

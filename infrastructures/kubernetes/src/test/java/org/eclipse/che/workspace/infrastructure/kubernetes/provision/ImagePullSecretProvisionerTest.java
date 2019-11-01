@@ -32,7 +32,7 @@ import io.fabric8.kubernetes.api.model.Secret;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeTarget;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.dto.DockerAuthConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.dto.DockerAuthConfigs;
 import org.eclipse.che.workspace.infrastructure.kubernetes.docker.auth.UserSpecificDockerRegistryCredentialsProvider;

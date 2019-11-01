@@ -226,7 +226,7 @@ public class WorkspaceService extends Service {
           @QueryParam("start-after-create")
           @DefaultValue("false")
           Boolean startAfterCreate,
-      @ApiParam("Namespace where workspace should be created") @QueryParam("namespace")
+      @ApiParam("Che namespace where workspace should be created") @QueryParam("namespace")
           String namespace,
       @HeaderParam(CONTENT_TYPE) MediaType contentType)
       throws ConflictException, BadRequestException, ForbiddenException, NotFoundException,
@@ -813,7 +813,7 @@ public class WorkspaceService extends Service {
   private static Map<String, String> parseAttrs(List<String> attributes)
       throws BadRequestException, ForbiddenException {
     if (attributes == null) {
-      return emptyMap();
+      return new HashMap<>();
     }
     final Map<String, String> res = Maps.newHashMapWithExpectedSize(attributes.size());
     for (String attribute : attributes) {
