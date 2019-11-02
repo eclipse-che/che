@@ -11,8 +11,8 @@
  */
 'use strict';
 
-import {NamespaceSelectorSvc} from './namespace-selector/namespace-selector.service';
-import {ProjectSourceSelectorService} from './project-source-selector/project-source-selector.service';
+import {NamespaceSelectorSvc} from './ready-to-go-stacks/namespace-selector/namespace-selector.service';
+import {ProjectSourceSelectorService} from './ready-to-go-stacks/project-source-selector/project-source-selector.service';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
 import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';

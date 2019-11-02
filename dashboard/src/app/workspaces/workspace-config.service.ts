@@ -12,10 +12,10 @@
 'use strict';
 
 import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
-import {NamespaceSelectorSvc} from './create-workspace/namespace-selector/namespace-selector.service';
+import {NamespaceSelectorSvc} from './create-workspace/ready-to-go-stacks/namespace-selector/namespace-selector.service';
 import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
-import {TemplateSelectorSvc} from './create-workspace/project-source-selector/add-import-project/template-selector/template-selector.service';
-import {ImportGithubProjectService} from './create-workspace/project-source-selector/add-import-project/import-github-project/import-github-project.service';
+import {TemplateSelectorSvc} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/template-selector/template-selector.service';
+import {ImportGithubProjectService} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-github-project/import-github-project.service';
 
 /**
  * This class is handling the service for routes resolving.
