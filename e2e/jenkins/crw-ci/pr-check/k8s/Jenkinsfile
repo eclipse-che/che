@@ -251,6 +251,10 @@ pipeline {
                   export WS_POD=\$(kubectl get pod --namespace=che | grep  workspace | awk '{print \$1}')
                   for c in \$(kubectl get pod --namespace=che \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do kubectl logs \$(kubectl get pod --namespace=che | grep  workspace | awk '{print \$1}') "\${c}" -n che > $LOGS_AND_CONFIGS/workspace-logs/"\${c}"-container.log || true; done
                   kubectl describe pod --namespace=che \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
+
+                  mkdir -p $LOGS_AND_CONFIGS/docker
+                  docker image ls > $LOGS_AND_CONFIGS/docker/images.txt || true
+                  docker ps -a > $LOGS_AND_CONFIGS/docker/containers.txt || true
             """
 
             archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**, logs-and-configs/**"
