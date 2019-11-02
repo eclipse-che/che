@@ -85,47 +85,59 @@ pipeline {
                     }
                 }
 
-                stage("Build Che including upstream projects") {
-                    steps {
-                        echo "Build branch ${ghprbSourceBranch} of upstream projects"
-                        sh """
-                            project_list=(
-                                eclipse/che-parent
-                                eclipse/che-docs
-                            )
+                // stage("Build Che including upstream projects") {
+                //     steps {
+                //         echo "Build branch ${ghprbSourceBranch} of upstream projects"
+                //         sh """
+                //             project_list=(
+                //                 eclipse/che-parent
+                //                 eclipse/che-docs
+                //             )
                             
-                            for project in \${project_list[@]};
-                            do
-                                result=\$(git ls-remote --heads https://github.com/\${project}.git ${ghprbSourceBranch})
-                                if [[ \$result == *"refs"* ]]; then
-                                    echo "[PRE-BUILD CHECK] found upstream project: \${project} with same branch name: ${ghprbSourceBranch}"
-                                    git clone -b ${ghprbSourceBranch} https://github.com/\${project} \${project}
-                                    mvn clean install -f ${WORKSPACE}/\${project}/pom.xml -DskipTests
-                                else
-                                    echo "[PRE-BUILD CHECK] skip build upstream project: \$project, unable to find branch: ${ghprbSourceBranch}."
-                                fi
-                            done
-                        """
+                //             for project in \${project_list[@]};
+                //             do
+                //                 result=\$(git ls-remote --heads https://github.com/\${project}.git ${ghprbSourceBranch})
+                //                 if [[ \$result == *"refs"* ]]; then
+                //                     echo "[PRE-BUILD CHECK] found upstream project: \${project} with same branch name: ${ghprbSourceBranch}"
+                //                     git clone -b ${ghprbSourceBranch} https://github.com/\${project} \${project}
+                //                     mvn clean install -f ${WORKSPACE}/\${project}/pom.xml -DskipTests
+                //                 else
+                //                     echo "[PRE-BUILD CHECK] skip build upstream project: \$project, unable to find branch: ${ghprbSourceBranch}."
+                //                 fi
+                //             done
+                //         """
 
-                        echo "Build Che"
-                        sh "mvn clean install -f ${WORKSPACE}/pom.xml -T 4 -U -DskipTests -Dskip-enforce -Dskip-validate-sources"
+                //         echo "Build Che"
+                //         sh "mvn clean install -f ${WORKSPACE}/pom.xml -T 4 -U -DskipTests -Dskip-enforce -Dskip-validate-sources"
+                //     }
+                // }
+
+                stage("Download and patch Che custom-resource.yaml") {
+                    steps {
+                        sh """
+                            wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml
+                            
+                            sed -i "s|cheImage: ''|cheImage: '${CHE_IMAGE_REPO}'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                            sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${CHE_IMAGE_TAG}'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                            sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" ${WORKSPACE}/org_v1_che_cr.yaml
+                        """
                     }
                 }
             }
         }
 
-        stage("Build and push che-server image") {
-            steps {
-                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
-                    sh """
-                        ${WORKSPACE}/dockerfiles/che/build.sh --dockerfile:Dockerfile
-                        # docker tag \$(docker images | grep 'eclipse/che-server' | awk '{print \$3}') docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
-                        # docker login -u maxura -p ${maxura_docker_password}
-                        # docker push docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
-                    """
-                }
-            }
-        }
+        // stage("Build and push che-server image") {
+        //     steps {
+        //         withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
+        //             sh """
+        //                 ${WORKSPACE}/dockerfiles/che/build.sh --organization:maxura --tag:nightly --dockerfile:Dockerfile
+        //                 docker tag ${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG} docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
+        //                 docker login -u maxura -p ${maxura_docker_password}
+        //                 docker push docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
+        //             """
+        //         }
+        //     }
+        // }
 
         stage("Start Single Che") {
             steps {
@@ -134,7 +146,8 @@ pipeline {
                     --k8spodreadytimeout=180000 \\
                     --installer=operator \\
                     --listr-renderer=verbose \\
-                    --platform=minikube
+                    --platform=minikube \\
+                    --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml
                 """
 
                 // wait che-server to be available
