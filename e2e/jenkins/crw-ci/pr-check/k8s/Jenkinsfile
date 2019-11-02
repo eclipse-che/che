@@ -145,7 +145,8 @@ pipeline {
                     --k8spodreadytimeout=180000 \\
                     --installer=operator \\
                     --listr-renderer=verbose \\
-                    --platform=minikube
+                    --platform=minikube \\
+                    --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml
                 """
 
                 // wait che-server to be available
@@ -253,7 +254,7 @@ pipeline {
                   kubectl get all -n che -o yaml > $LOGS_AND_CONFIGS/che-config/all.yaml || true
     
                   mkdir -p $LOGS_AND_CONFIGS/che-logs
-                  kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep che- | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/che-server.log || true
+                  kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep che- | grep -v "che-operator" | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/che-server.log || true
                   kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep che-operator- | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/che-operator.log || true
                   kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep devfile-registry- | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/devfile-registry.log || true
                   kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep plugin-registry- | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/plugin-registry.log || true
