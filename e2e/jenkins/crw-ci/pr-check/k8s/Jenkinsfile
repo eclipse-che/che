@@ -115,10 +115,10 @@ pipeline {
                 stage("Patch Che custom-resource.yaml") {
                     steps {
                         sh """
-                            crYamlPath=${WORKSPACE}/chectl/templates/che-operator/crds/org_v1_che_cr.yaml 
-                            cat \$crYamlPath                           
-                            sed -i "s|cheImage: ''|cheImage: '${CHE_IMAGE_REPO}'|" \$crYamlPath
-                            sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${CHE_IMAGE_TAG}'|" \$crYamlPath
+                            wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml
+                            
+                            sed -i "s|cheImage: ''|cheImage: '${CHE_IMAGE_REPO}'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                            sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${CHE_IMAGE_TAG}'|" ${WORKSPACE}/org_v1_che_cr.yaml
                         """
                     }
                 }
@@ -246,6 +246,7 @@ pipeline {
                   kubectl --namespace=che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
     
                   mkdir -p $LOGS_AND_CONFIGS/che-config
+                  cp ${WORKSPACE}/org_v1_che_cr.yaml $LOGS_AND_CONFIGS/che-config || true
                   kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
                   kubectl get ingresses --namespace=che > $LOGS_AND_CONFIGS/che-config/ingresses.txt || true
                   kubectl get pods --namespace=che >$LOGS_AND_CONFIGS/che-config/pods.txt || true
