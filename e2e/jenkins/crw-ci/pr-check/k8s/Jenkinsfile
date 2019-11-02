@@ -193,7 +193,7 @@ pipeline {
                        -d "grant_type=password" \\
                        -d "client_id=che-public" | jq -r .access_token)
 
-                    ${WORKSPACE}/chectl workspace:start --devfile=$DEVFILE_URL --access-token "${USER_ACCESS_TOKEN}"
+                    ${WORKSPACE}/chectl workspace:start --devfile=$DEVFILE_URL --access-token "\$USER_ACCESS_TOKEN"
                 """
             }
         }
@@ -254,7 +254,7 @@ pipeline {
     
                   mkdir -p $LOGS_AND_CONFIGS/che-logs
                   kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep che- | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/che-server.log || true
-                  kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep che-operator | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/che-operator.log || true
+                  kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep che-operator- | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/che-operator.log || true
                   kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep devfile-registry- | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/devfile-registry.log || true
                   kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep plugin-registry- | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/plugin-registry.log || true
                     
