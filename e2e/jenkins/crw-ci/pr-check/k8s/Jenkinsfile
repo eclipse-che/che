@@ -146,8 +146,7 @@ pipeline {
                     --k8spodreadytimeout=180000 \\
                     --installer=operator \\
                     --listr-renderer=verbose \\
-                    --platform=minikube \\
-                    --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml
+                    --platform=minikube
                 """
 
                 // wait che-server to be available
@@ -256,7 +255,7 @@ pipeline {
                   kubectl get all -n che -o yaml > $LOGS_AND_CONFIGS/che-config/all.yaml || true
     
                   mkdir -p $LOGS_AND_CONFIGS/che-logs
-                  export WS_POD=\$(kubectl get pod --namespace=che | awk 'NR>0 {print \$1}')
+                  export WS_POD=\$(kubectl get pod --namespace=che | awk 'NR>1 {print \$1}')
                   for c in \$(kubectl get pod --namespace=che \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do kubectl logs \$(kubectl get pod --namespace=che | awk '{print \$1}') "\${c}" -n che > $LOGS_AND_CONFIGS/che-logs/"\${c}"-pod.log || true; done
                   kubectl describe pod --namespace=che \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
 
