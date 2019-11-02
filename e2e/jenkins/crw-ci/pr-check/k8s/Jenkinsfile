@@ -114,14 +114,14 @@ pipeline {
             }
         }
 
-        stage("Push Che artifacts to docker.io") {
+        stage("Build and push che-server image") {
             steps {
                 withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
                     sh """
                         ${WORKSPACE}/dockerfiles/che/build.sh --dockerfile:Dockerfile
-                        docker tag \$(docker images | grep 'eclipse/che-server' | awk '{print \$3}') docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
-                        docker login -u maxura -p ${maxura_docker_password}
-                        docker push docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
+                        # docker tag \$(docker images | grep 'eclipse/che-server' | awk '{print \$3}') docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
+                        # docker login -u maxura -p ${maxura_docker_password}
+                        # docker push docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
                     """
                 }
             }
@@ -236,6 +236,7 @@ pipeline {
     
                   mkdir -p $LOGS_AND_CONFIGS/che-config
                   cp ${WORKSPACE}/org_v1_che_cr.yaml $LOGS_AND_CONFIGS/che-config || true
+                  kubectl get checluster --namespace=che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml
                   kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
                   kubectl get ingresses --namespace=che > $LOGS_AND_CONFIGS/che-config/ingresses.txt || true
                   kubectl get pods --namespace=che >$LOGS_AND_CONFIGS/che-config/pods.txt || true
