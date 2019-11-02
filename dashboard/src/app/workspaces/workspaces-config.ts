@@ -19,10 +19,6 @@ import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
 import {WorkspaceEditModeOverlay} from './workspace-edit-mode/workspace-edit-mode-overlay.directive';
 import {WorkspaceEditModeToolbarButton} from './workspace-edit-mode/workspace-edit-mode-toolbar-button.directive';
-import {RamSettingsController} from './create-workspace/ram-settings/ram-settings.controller';
-import {RamSettings} from './create-workspace/ram-settings/ram-settings.directive';
-import {RamSettingsMachineItemController} from './create-workspace/ram-settings/ram-settings-machine-item/ram-settings-machine-item.controller';
-import {RamSettingsMachineItem} from './create-workspace/ram-settings/ram-settings-machine-item/ram-settings-machine-item.directive';
 import {NamespaceSelectorController} from './create-workspace/namespace-selector/namespace-selector.controller';
 import {NamespaceSelectorSvc} from './create-workspace/namespace-selector/namespace-selector.service';
 import {NamespaceSelector} from './create-workspace/namespace-selector/namespace-selector.directive';
@@ -61,7 +57,6 @@ import {WorkspaceStatus} from './workspace-status/workspace-status.directive';
 import {WorkspaceStatusIndicator} from './workspace-status/workspace-status-indicator.directive';
 import {CreateWorkspaceController} from './create-workspace/create-workspace.controller';
 import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
-import {AfterCreationDialogController} from './create-workspace/after-creation-dialog/after-creation-dialog.controller';
 import {ShareWorkspaceController} from './share-workspace/share-workspace.controller';
 import {ShareWorkspace} from './share-workspace/share-workspace.directive';
 import {AddDeveloperController} from './share-workspace/add-developers/add-developers.controller';
@@ -110,10 +105,6 @@ export class WorkspacesConfig {
     register.controller('WorkspaceWarningsController', WorkspaceWarningsController);
     register.directive('devfileSelector', DevfileSelector);
     register.controller('DevfileSelectorController', DevfileSelectorController);
-    register.controller('RamSettingsController', RamSettingsController);
-    register.directive('ramSettings', RamSettings);
-    register.controller('RamSettingsMachineItemController', RamSettingsMachineItemController);
-    register.directive('ramSettingsMachineItem', RamSettingsMachineItem);
     register.controller('NamespaceSelectorController', NamespaceSelectorController);
     register.service('namespaceSelectorSvc', NamespaceSelectorSvc);
     register.directive('namespaceSelector', NamespaceSelector);
@@ -148,7 +139,6 @@ export class WorkspacesConfig {
     register.directive('projectMetadata', ProjectMetadata);
     register.controller('CreateWorkspaceController', CreateWorkspaceController);
     register.service('createWorkspaceSvc', CreateWorkspaceSvc);
-    register.controller('AfterCreationDialogController', AfterCreationDialogController);
     register.controller('ShareWorkspaceController', ShareWorkspaceController);
     register.directive('shareWorkspace', ShareWorkspace);
     register.controller('AddDeveloperController', AddDeveloperController);
