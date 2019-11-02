@@ -125,18 +125,18 @@ pipeline {
             }
         }
 
-        stage("Push Che artifacts to docker.io") {
-            steps {
-                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
-                    sh """
-                        ${WORKSPACE}/dockerfiles/che/build.sh --organization:maxura --tag:${CHE_IMAGE_TAG} --dockerfile:Dockerfile
-                        docker tag ${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG} docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
-                        docker login -u maxura -p ${maxura_docker_password}
-                        docker push docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
-                    """
-                }
-            }
-        }
+        // stage("Push Che artifacts to docker.io") {
+        //     steps {
+        //         withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
+        //             sh """
+        //                 ${WORKSPACE}/dockerfiles/che/build.sh --organization:maxura --tag:${CHE_IMAGE_TAG} --dockerfile:Dockerfile
+        //                 docker tag ${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG} docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
+        //                 docker login -u maxura -p ${maxura_docker_password}
+        //                 docker push docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
+        //             """
+        //         }
+        //     }
+        // }
 
         stage("Start Single Che") {
             steps {
