@@ -146,7 +146,7 @@ pipeline {
                     --installer=operator \\
                     --listr-renderer=verbose \\
                     --platform=minikube \\
-                    --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml
+                    --cheimage=${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
                 """
 
                 // wait che-server to be available
