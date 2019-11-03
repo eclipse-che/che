@@ -263,6 +263,8 @@ pipeline {
                   mkdir -p $LOGS_AND_CONFIGS/docker
                   docker image ls > $LOGS_AND_CONFIGS/docker/images.txt || true
                   docker ps -a > $LOGS_AND_CONFIGS/docker/containers.txt || true
+
+                  sleep 30000
             """
 
             archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**, logs-and-configs/**"
