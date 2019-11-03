@@ -146,8 +146,7 @@ pipeline {
                     --k8spodreadytimeout=180000 \\
                     --installer=operator \\
                     --listr-renderer=verbose \\
-                    --platform=minikube \\
-                    --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml
+                    --platform=minikube
                 """
 
                 // wait che-server to be available
@@ -271,8 +270,6 @@ pipeline {
                 mkdir -p $LOGS_AND_CONFIGS/docker
                 docker image ls > $LOGS_AND_CONFIGS/docker/images.txt || true
                 docker ps -a > $LOGS_AND_CONFIGS/docker/containers.txt || true
-
-                sleep 30000
             """
 
             archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**, logs-and-configs/**"
