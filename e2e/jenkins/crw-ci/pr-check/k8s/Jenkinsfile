@@ -146,7 +146,8 @@ pipeline {
                     --k8spodreadytimeout=180000 \\
                     --installer=operator \\
                     --listr-renderer=verbose \\
-                    --platform=minikube
+                    --platform=minikube \\
+                    --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml
                 """
 
                 // wait che-server to be available
