@@ -244,27 +244,35 @@ pipeline {
 
         cleanup {
             sh """                      
-                  mkdir -p $LOGS_AND_CONFIGS/kubectl
-                  kubectl --namespace=che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
-    
-                  mkdir -p $LOGS_AND_CONFIGS/che-config
-                  cp ${WORKSPACE}/org_v1_che_cr.yaml $LOGS_AND_CONFIGS/che-config || true
-                  kubectl get checluster --namespace=che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml
-                  kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
-                  kubectl get ingresses --namespace=che > $LOGS_AND_CONFIGS/che-config/ingresses.txt || true
-                  kubectl get pods --namespace=che >$LOGS_AND_CONFIGS/che-config/pods.txt || true
-                  kubectl get all -n che -o yaml > $LOGS_AND_CONFIGS/che-config/all.yaml || true
-    
-                  mkdir -p $LOGS_AND_CONFIGS/che-logs
-                  export WS_POD=\$(kubectl get pod --namespace=che | awk 'NR>1 {print \$1}')
-                  for c in \$(kubectl get pod --namespace=che \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do kubectl logs \$(kubectl get pod --namespace=che | awk '{print \$1}') "\${c}" -n che > $LOGS_AND_CONFIGS/che-logs/"\${c}"-pod.log || true; done
-                  kubectl describe pod --namespace=che \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
+                mkdir -p $LOGS_AND_CONFIGS/kubectl
+                kubectl --namespace=che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
 
-                  mkdir -p $LOGS_AND_CONFIGS/docker
-                  docker image ls > $LOGS_AND_CONFIGS/docker/images.txt || true
-                  docker ps -a > $LOGS_AND_CONFIGS/docker/containers.txt || true
+                mkdir -p $LOGS_AND_CONFIGS/che-config
+                cp ${WORKSPACE}/org_v1_che_cr.yaml $LOGS_AND_CONFIGS/che-config || true
+                kubectl get checluster --namespace=che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml
+                kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
+                kubectl get ingresses --namespace=che > $LOGS_AND_CONFIGS/che-config/ingresses.txt || true
+                kubectl get pods --namespace=che >$LOGS_AND_CONFIGS/che-config/pods.txt || true
+                kubectl get all -n che -o yaml > $LOGS_AND_CONFIGS/che-config/all.yaml || true
 
-                  sleep 30000
+                mkdir -p $LOGS_AND_CONFIGS/che-logs
+                export PODS=\$(kubectl get pod --namespace=che | awk 'NR>1 {print \$1}')
+                for pod in \$PODS ; do \
+                    kubectl logs --namespace=che "\${pod}" -n che > $LOGS_AND_CONFIGS/che-logs/"\${pod}".pod.log || true; \
+                done
+
+                mkdir -p $LOGS_AND_CONFIGS/workspace-logs
+                export WS_POD=\$(kubectl get pod --namespace=che | grep  workspace | awk '{print \$1}')
+                for c in \$(kubectl get pod --namespace=che \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do \\
+                    kubectl logs \$(kubectl get pod --namespace=che | grep  workspace | awk '{print \$1}') "\${c}" -n che > $LOGS_AND_CONFIGS/workspace-logs/"\${c}".container.log || true; \\
+                done
+                kubectl describe pod --namespace=che \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
+
+                mkdir -p $LOGS_AND_CONFIGS/docker
+                docker image ls > $LOGS_AND_CONFIGS/docker/images.txt || true
+                docker ps -a > $LOGS_AND_CONFIGS/docker/containers.txt || true
+
+                sleep 30000
             """
 
             archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**, logs-and-configs/**"
