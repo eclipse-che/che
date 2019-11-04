@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.plugin.typescript.dto;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -139,6 +140,8 @@ public class DTOHelper {
       return "number";
     } else if (Boolean.class.equals(type) || Boolean.TYPE.equals(type)) {
       return "boolean";
+    } else if (Serializable.class.equals(type)) {
+      return "string | number | boolean";
     }
 
     return type.getTypeName();
@@ -210,6 +213,8 @@ public class DTOHelper {
       return "number";
     } else if (Boolean.class.equals(type) || Boolean.TYPE.equals(type)) {
       return "boolean";
+    } else if (Serializable.class.equals(type)) {
+      return "string | number | boolean";
     }
 
     String declarationPackage = convertToDTSPackageName((Class) containerType);
