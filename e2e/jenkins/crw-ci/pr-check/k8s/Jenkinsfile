@@ -131,7 +131,10 @@ pipeline {
                             
                             sed -i "s|cheImage: ''|cheImage: '${cheImageRepo}'|" ${WORKSPACE}/org_v1_che_cr.yaml
                             sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${cheImageTag}'|" ${WORKSPACE}/org_v1_che_cr.yaml
+
                             sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" ${WORKSPACE}/org_v1_che_cr.yaml
+
+                            sed -i "s|ingressDomain: '192.168.99.101.nip.io'|ingressDomain: '\$(minikube ip).nip.io'|" ${WORKSPACE}/org_v1_che_cr.yaml
                         """
                     }
                 }
@@ -163,8 +166,7 @@ pipeline {
                     --installer=operator \\
                     --listr-renderer=verbose \\
                     --platform=minikube \\
-                    --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml \\
-                    --domain="\$(minikube ip).nip.io"
+                    --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml
                 """
 
                 // wait che-server to be available
