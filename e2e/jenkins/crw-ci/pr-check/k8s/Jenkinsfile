@@ -14,27 +14,35 @@ pipeline {
         PATH = "/tmp:/qa/tools/opt/apache-maven-3.5.4/bin:$PATH"
         JENKINS_BUILD = "true"
 
-        DEVFILE_URL = "${WORKSPACE}/e2e/files/happy-path/happy-path-workspace.yaml"
         SUCCESS_THRESHOLD = 5
-
-        CHE_IMAGE_REPO = "maxura/che-server"
-        CHE_IMAGE_TAG = "${ghprbPullId}"
 
         LOGS_AND_CONFIGS="${WORKSPACE}/logs-and-configs"
     }
 
     parameters {
-        string(name: 'ghprbPullId',
-                defaultValue: "master",
-                description: 'Tag of Che images')
+        string(name: 'cheImageRepo',
+                defaultValue: "maxura/che-server",
+                description: 'Repo of Che server image')
 
-        string(name: 'ghprbSourceBranch',
-                defaultValue: "master",
-                description: 'Branch of Che to check')
+        string(name: 'cheImageTag',
+                defaultValue: "$ghprbPullId",
+                description: 'Tag of Che server image')
+
+        booleanParam(name: 'buildChe',
+                defaultValue: true,
+                description: 'Should build Che server')
 
         string(name: 'e2eTestToRun',
                 defaultValue: "test-happy-path",
                 description: 'TypeScript E2E test to run')
+        
+        string(name: 'testWorkspaceDevfileUrl',
+                defaultValue: "https://raw.githubusercontent.com/eclipse/che/${ghprbSourceBranch}/e2e/files/happy-path/happy-path-workspace.yaml",
+                description: 'URL of devfile of test workspace')
+
+        string(name: 'cheCustomResourceUrl',
+                defaultValue: "http://raw.githubusercontent.com/eclipse/che-operator/${ghprbSourceBranch}/deploy/crds/org_v1_che_cr.yaml",
+                description: 'URL of Che custom resource yaml')
     }
 
     stages {
@@ -86,6 +94,10 @@ pipeline {
                 }
 
                 stage("Build Che including upstream projects") {
+                    when {
+                        expression { return $buildChe }
+                    }
+
                     steps {
                         echo "Build branch ${ghprbSourceBranch} of upstream projects"
                         sh """
@@ -117,8 +129,8 @@ pipeline {
                         sh """
                             wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml
                             
-                            sed -i "s|cheImage: ''|cheImage: '${CHE_IMAGE_REPO}'|" ${WORKSPACE}/org_v1_che_cr.yaml
-                            sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${CHE_IMAGE_TAG}'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                            sed -i "s|cheImage: ''|cheImage: '${cheImageRepo}'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                            sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${cheImageTag}'|" ${WORKSPACE}/org_v1_che_cr.yaml
                             sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" ${WORKSPACE}/org_v1_che_cr.yaml
                         """
                     }
@@ -127,13 +139,17 @@ pipeline {
         }
 
         stage("Build and push che-server image") {
+            when {
+                expression { return $buildChe }
+            }
+
             steps {
                 withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
                     sh """
                         ${WORKSPACE}/dockerfiles/che/build.sh --organization:maxura --tag:nightly --dockerfile:Dockerfile
-                        docker tag ${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG} docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
+                        docker tag ${cheImageRepo}:${cheImageTag} docker.io/${cheImageRepo}:${cheImageTag}
                         docker login -u maxura -p ${maxura_docker_password}
-                        docker push docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
+                        docker push docker.io/${cheImageRepo}:${cheImageTag}
                     """
                 }
             }
@@ -183,6 +199,10 @@ pipeline {
         }
 
         stage("Create test workspace") {
+            when {
+                expression { return $testWorkspaceDevfileUrl != null && $testWorkspaceDevfileUrl != "" }
+            }
+
             steps {
                 sh """
                     KEYCLOAK_URL=\$(kubectl get ingress/keycloak -n che -o jsonpath='{.spec.rules[0].host}')
@@ -195,7 +215,9 @@ pipeline {
                        -d "grant_type=password" \\
                        -d "client_id=che-public" | jq -r .access_token)
 
-                    ${WORKSPACE}/chectl workspace:start --devfile=$DEVFILE_URL --access-token "\$USER_ACCESS_TOKEN"
+                    wget $testWorkspaceDevfileUrl -O ${WORKSPACE}/test-workspace-devfile.yaml
+
+                    ${WORKSPACE}/chectl workspace:start --devfile=${WORKSPACE}/test-workspace-devfile.yaml --access-token "\$USER_ACCESS_TOKEN"
                 """
             }
         }
@@ -248,7 +270,10 @@ pipeline {
                 kubectl --namespace=che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
 
                 mkdir -p $LOGS_AND_CONFIGS/che-config
+
                 cp ${WORKSPACE}/org_v1_che_cr.yaml $LOGS_AND_CONFIGS/che-config || true
+                cp ${WORKSPACE}/test-workspace-devfile.yaml $LOGS_AND_CONFIGS/che-config || true
+
                 kubectl get checluster --namespace=che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml
                 kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
                 kubectl get ingresses --namespace=che > $LOGS_AND_CONFIGS/che-config/ingresses.txt || true
@@ -262,9 +287,9 @@ pipeline {
                 done
 
                 mkdir -p $LOGS_AND_CONFIGS/workspace-logs
-                export WS_POD=\$(kubectl get pod --namespace=che | grep  workspace | awk '{print \$1}')
+                export WS_POD=\$(kubectl get pod --namespace=che | grep ".workspace-" | awk '{print \$1}')
                 for c in \$(kubectl get pod --namespace=che \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do \\
-                    kubectl logs \$(kubectl get pod --namespace=che | grep  workspace | awk '{print \$1}') "\${c}" -n che > $LOGS_AND_CONFIGS/workspace-logs/"\${c}".container.log || true; \\
+                    kubectl logs \$(kubectl get pod --namespace=che | grep ".workspace-" | awk '{print \$1}') "\${c}" -n che > $LOGS_AND_CONFIGS/workspace-logs/"\${c}".container.log || true; \\
                 done
                 kubectl describe pod --namespace=che \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
 
