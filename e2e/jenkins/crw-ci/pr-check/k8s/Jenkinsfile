@@ -54,9 +54,7 @@ pipeline {
                     steps {
                         // TO-DO use option "--install-path" https://github.com/eclipse/che/pull/14182
                         sh """
-                           env
-
-                           curl -sL  https://www.eclipse.org/che/chectl/ > install_chectl.sh
+                           curl -sL https://www.eclipse.org/che/chectl/ > install_chectl.sh
                            chmod +x install_chectl.sh
                            sudo PATH=$PATH ./install_chectl.sh --channel=next
                            sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
@@ -97,7 +95,7 @@ pipeline {
 
                 stage("Build Che including upstream projects") {
                     when {
-                        expression { return $buildChe }
+                        expression { return buildChe }
                     }
 
                     steps {
@@ -142,7 +140,7 @@ pipeline {
 
         stage("Build and push che-server image") {
             when {
-                expression { return $buildChe }
+                expression { return buildChe }
             }
 
             steps {
@@ -203,7 +201,7 @@ pipeline {
 
         stage("Create test workspace") {
             when {
-                expression { return $testWorkspaceDevfileUrl != null && $testWorkspaceDevfileUrl != "" }
+                expression { return testWorkspaceDevfileUrl != null && testWorkspaceDevfileUrl != "" }
             }
 
             steps {
@@ -299,6 +297,8 @@ pipeline {
                 mkdir -p $LOGS_AND_CONFIGS/docker
                 docker image ls > $LOGS_AND_CONFIGS/docker/images.txt || true
                 docker ps -a > $LOGS_AND_CONFIGS/docker/containers.txt || true
+
+                env
             """
 
             archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**, logs-and-configs/**"
