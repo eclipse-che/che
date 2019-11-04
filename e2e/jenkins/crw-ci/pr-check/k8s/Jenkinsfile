@@ -95,7 +95,7 @@ pipeline {
 
                 stage("Build Che including upstream projects") {
                     when {
-                        expression { return buildChe }
+                        expression { params.buildChe }
                     }
 
                     steps {
@@ -140,7 +140,7 @@ pipeline {
 
         stage("Build and push che-server image") {
             when {
-                expression { return buildChe }
+                expression { params.buildChe }
             }
 
             steps {
@@ -201,7 +201,8 @@ pipeline {
 
         stage("Create test workspace") {
             when {
-                expression { return testWorkspaceDevfileUrl != null && testWorkspaceDevfileUrl != "" }
+                expression { return params.testWorkspaceDevfileUrl != null 
+                                && params.testWorkspaceDevfileUrl != "" }
             }
 
             steps {
