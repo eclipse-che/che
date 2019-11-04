@@ -123,21 +123,6 @@ pipeline {
                         sh "mvn clean install -f ${WORKSPACE}/pom.xml -T 4 -U -DskipTests -Dskip-enforce -Dskip-validate-sources"
                     }
                 }
-
-                stage("Download and patch Che custom-resource.yaml") {
-                    steps {
-                        sh """
-                            wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml
-                            
-                            sed -i "s|cheImage: ''|cheImage: '${cheImageRepo}'|" ${WORKSPACE}/org_v1_che_cr.yaml
-                            sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${cheImageTag}'|" ${WORKSPACE}/org_v1_che_cr.yaml
-
-                            sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" ${WORKSPACE}/org_v1_che_cr.yaml
-
-                            sed -i "s|ingressDomain: '192.168.99.101.nip.io'|ingressDomain: '\$(minikube ip).nip.io'|" ${WORKSPACE}/org_v1_che_cr.yaml
-                        """
-                    }
-                }
             }
         }
 
@@ -158,8 +143,21 @@ pipeline {
             }
         }
 
-        stage("Start Single Che") {
+        stage("Start Che") {
             steps {
+                echo "Download and patch Che custom-resource.yaml"
+                sh """
+                    wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml
+                    
+                    sed -i "s|cheImage: ''|cheImage: '${cheImageRepo}'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                    sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${cheImageTag}'|" ${WORKSPACE}/org_v1_che_cr.yaml
+
+                    sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" ${WORKSPACE}/org_v1_che_cr.yaml
+
+                    sed -i "s|ingressDomain: '192.168.99.101.nip.io'|ingressDomain: '\$(minikube ip).nip.io'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                """
+
+                echo "Install Che"
                 sh """
                     ${WORKSPACE}/chectl server:start \\
                     --k8spodreadytimeout=180000 \\
@@ -169,7 +167,7 @@ pipeline {
                     --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml
                 """
 
-                // wait che-server to be available
+                echo "Wait che-server to be available"
                 sh """
                      CHE_URL=\$(kubectl get ingress che -n=che -o=jsonpath={'.spec.rules[0].host'})
                      
