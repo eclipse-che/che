@@ -87,7 +87,7 @@ spec:
           valueFrom:
             configMapKeyRef:
               name: {{ .Values.global.gitSelfSignedCertConfigName }}
-              key: host
+              key: githost
               optional: false
         {{- end }}
 

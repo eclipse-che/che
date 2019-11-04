@@ -412,4 +412,53 @@ public class GitConfigProvisionerTest {
 
     assertEquals(gitconfig, expectedGitconfig);
   }
+
+  @Test
+  public void testShouldProvisionConfigForHttpsServer() throws Exception {
+    when(vcsSslCertificateProvisioner.isConfigured()).thenReturn(true);
+    when(vcsSslCertificateProvisioner.getGitServerHost()).thenReturn(" https://localhost");
+    when(vcsSslCertificateProvisioner.getCertPath()).thenReturn("/some/path");
+
+    when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
+
+    ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
+    when(pod.getMetadata()).thenReturn(podMeta);
+    when(pod.getSpec()).thenReturn(podSpec);
+    when(podSpec.getContainers()).thenReturn(singletonList(container));
+
+    User userMock = mock(User.class);
+    when(userMock.getName()).thenReturn("userMockName");
+    when(userMock.getEmail()).thenReturn("userMockEmail");
+    when(userManager.getById(eq("id"))).thenReturn(userMock);
+
+    List<VolumeMount> volumeMounts = new ArrayList<>();
+
+    when(container.getVolumeMounts()).thenReturn(volumeMounts);
+    k8sEnv.addPod(pod);
+
+    gitConfigProvisioner.provision(k8sEnv, runtimeIdentity);
+
+    assertEquals(volumeMounts.size(), 1);
+
+    VolumeMount mount = volumeMounts.get(0);
+
+    assertEquals(mount.getMountPath(), "/etc/gitconfig");
+    assertEquals(mount.getName(), "gitconfigvolume");
+    assertFalse(mount.getReadOnly());
+    assertEquals(mount.getSubPath(), "gitconfig");
+
+    assertEquals(k8sEnv.getConfigMaps().size(), 1);
+    assertTrue(k8sEnv.getConfigMaps().containsKey("wksp-gitconfig"));
+
+    ConfigMap configMap = k8sEnv.getConfigMaps().get("wksp-gitconfig");
+
+    assertEquals(configMap.getData().size(), 1);
+    assertTrue(configMap.getData().containsKey("gitconfig"));
+
+    String gitconfig = configMap.getData().get("gitconfig");
+    String expectedGitconfig =
+        "[user]\n\tname = userMockName\n\temail = userMockEmail\n[http https://localhost]\n\tsslCAInfo = /some/path";
+
+    assertEquals(gitconfig, expectedGitconfig);
+  }
 }

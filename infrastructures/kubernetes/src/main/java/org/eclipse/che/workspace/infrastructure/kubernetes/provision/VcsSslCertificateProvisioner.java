@@ -42,9 +42,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 public class VcsSslCertificateProvisioner
     implements ConfigurationProvisioner<KubernetesEnvironment> {
   static final String CHE_GIT_SELF_SIGNED_CERT_CONFIG_MAP_SUFFIX = "-che-git-self-signed-cert";
-  static final String CHE_GIT_SELF_SIGNED_CERT_VOLUME = "che-git-self-signed-cert";
+  static final String CHE_GIT_SELF_SIGNED_VOLUME = "che-git-self-signed-cert";
   static final String CERT_MOUNT_PATH = "/etc/che/git/cert/";
   static final String CA_CERT_FILE = "cert.pem";
+
+  private static final String HTTPS = "https://";
 
   @Inject(optional = true)
   @Named("che.git.self_signed_cert")
@@ -57,10 +59,12 @@ public class VcsSslCertificateProvisioner
   public VcsSslCertificateProvisioner() {}
 
   @VisibleForTesting
-  VcsSslCertificateProvisioner(String certificate) {
+  VcsSslCertificateProvisioner(String certificate, String host) {
     this.certificate = certificate;
+    this.host = host;
   }
 
+  /** @return true only if */
   public boolean isConfigured() {
     return !isNullOrEmpty(certificate);
   }
@@ -74,10 +78,11 @@ public class VcsSslCertificateProvisioner
       return nullToEmpty(host);
     }
 
-    StringBuilder gitServerHosts = new StringBuilder("\"");
-    if (!host.startsWith("https://")) {
-      gitServerHosts.append("https://").append(host);
+    StringBuilder gitServerHosts = new StringBuilder(" \"");
+    if (!host.startsWith(HTTPS)) {
+      gitServerHosts.append(HTTPS);
     }
+    gitServerHosts.append(host);
     gitServerHosts.append("\"");
     return gitServerHosts.toString();
   }
@@ -88,15 +93,15 @@ public class VcsSslCertificateProvisioner
     if (!isConfigured()) {
       return;
     }
-    String selfSignedCertSecretName =
+    String selfSignedCertConfigMapName =
         identity.getWorkspaceId() + CHE_GIT_SELF_SIGNED_CERT_CONFIG_MAP_SUFFIX;
     k8sEnv
         .getConfigMaps()
         .put(
-            selfSignedCertSecretName,
+            selfSignedCertConfigMapName,
             new ConfigMapBuilder()
                 .withNewMetadata()
-                .withName(selfSignedCertSecretName)
+                .withName(selfSignedCertConfigMapName)
                 .endMetadata()
                 .withData(singletonMap(CA_CERT_FILE, certificate))
                 .build());
@@ -106,11 +111,11 @@ public class VcsSslCertificateProvisioner
           pod.getSpec()
               .getVolumes()
               .stream()
-              .filter(v -> v.getName().equals(CHE_GIT_SELF_SIGNED_CERT_VOLUME))
+              .filter(v -> v.getName().equals(CHE_GIT_SELF_SIGNED_VOLUME))
               .findAny();
 
       if (!certVolume.isPresent()) {
-        pod.getSpec().getVolumes().add(buildCertVolume(selfSignedCertSecretName));
+        pod.getSpec().getVolumes().add(buildCertVolume(selfSignedCertConfigMapName));
       }
 
       for (Container container : pod.getSpec().getInitContainers()) {
@@ -127,7 +132,7 @@ public class VcsSslCertificateProvisioner
         container
             .getVolumeMounts()
             .stream()
-            .filter(vm -> vm.getName().equals(CHE_GIT_SELF_SIGNED_CERT_VOLUME))
+            .filter(vm -> vm.getName().equals(CHE_GIT_SELF_SIGNED_VOLUME))
             .findAny();
     if (!certVolumeMount.isPresent()) {
       container.getVolumeMounts().add(buildCertVolumeMount());
@@ -136,16 +141,16 @@ public class VcsSslCertificateProvisioner
 
   private VolumeMount buildCertVolumeMount() {
     return new VolumeMountBuilder()
-        .withName(CHE_GIT_SELF_SIGNED_CERT_VOLUME)
+        .withName(CHE_GIT_SELF_SIGNED_VOLUME)
         .withNewReadOnly(true)
         .withMountPath(CERT_MOUNT_PATH)
         .build();
   }
 
-  private Volume buildCertVolume(String secretName) {
+  private Volume buildCertVolume(String configMapName) {
     return new VolumeBuilder()
-        .withName(CHE_GIT_SELF_SIGNED_CERT_VOLUME)
-        .withConfigMap(new ConfigMapVolumeSourceBuilder().withName(secretName).build())
+        .withName(CHE_GIT_SELF_SIGNED_VOLUME)
+        .withConfigMap(new ConfigMapVolumeSourceBuilder().withName(configMapName).build())
         .build();
   }
 }
