@@ -54,6 +54,8 @@ pipeline {
                     steps {
                         // TO-DO use option "--install-path" https://github.com/eclipse/che/pull/14182
                         sh """
+                           env
+
                            curl -sL  https://www.eclipse.org/che/chectl/ > install_chectl.sh
                            chmod +x install_chectl.sh
                            sudo PATH=$PATH ./install_chectl.sh --channel=next
@@ -163,7 +165,8 @@ pipeline {
                     --installer=operator \\
                     --listr-renderer=verbose \\
                     --platform=minikube \\
-                    --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml
+                    --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml \\
+                    --domain="\$(minikube ip).nip.io"
                 """
 
                 // wait che-server to be available
@@ -274,7 +277,7 @@ pipeline {
                 cp ${WORKSPACE}/org_v1_che_cr.yaml $LOGS_AND_CONFIGS/che-config || true
                 cp ${WORKSPACE}/test-workspace-devfile.yaml $LOGS_AND_CONFIGS/che-config || true
 
-                kubectl get checluster --namespace=che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml
+                kubectl get checluster --namespace=che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml || true
                 kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
                 kubectl get ingresses --namespace=che > $LOGS_AND_CONFIGS/che-config/ingresses.txt || true
                 kubectl get pods --namespace=che >$LOGS_AND_CONFIGS/che-config/pods.txt || true
