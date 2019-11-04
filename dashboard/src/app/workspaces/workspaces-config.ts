@@ -175,6 +175,7 @@ export class WorkspacesConfig {
           templateUrl: 'app/workspaces/create-workspace/create-workspace.html',
           controller: 'CreateWorkspaceController',
           controllerAs: 'createWorkspaceController',
+          reloadOnSearch: false,
           resolve: {
             initData: ['workspaceConfigService', (workspaceConfigService: WorkspaceConfigService) => {
               return workspaceConfigService.resolveWorkspaceRoute();

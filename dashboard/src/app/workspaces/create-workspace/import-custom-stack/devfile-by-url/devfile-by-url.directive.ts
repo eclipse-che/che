@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 Red Hat, Inc.
+ * Copyright (c) 2015-2019 Red Hat, Inc.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -37,7 +37,6 @@ export class DevfileByUrl implements ng.IDirective {
 
     this.restrict = 'E';
     this.templateUrl = 'app/workspaces/create-workspace/import-custom-stack/devfile-by-url/devfile-by-url.html';
-
 
     // scope values
     this.scope = {

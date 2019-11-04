@@ -150,40 +150,7 @@ export class CreateWorkspaceSvc {
     return defer.promise;
   }
 
-  createWorkspaceFromConfig(workspaceConfig: che.IWorkspaceConfig, attributes: any): ng.IPromise<che.IWorkspace> {
-    const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
-          projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
-
-    return this.checkEditingProgress().then(() => {
-      workspaceConfig.projects = projectTemplates;
-      this.addProjectCommands({config: workspaceConfig}, projectTemplates);
-      return this.cheWorkspace.createWorkspaceFromConfig(namespaceId, workspaceConfig, attributes).then((workspace: che.IWorkspace) => {
-        return this.cheWorkspace.fetchWorkspaces().then(() => this.cheWorkspace.getWorkspaceById(workspace.id));
-      })
-      .then((workspace: che.IWorkspace) => {
-        this.projectSourceSelectorService.clearTemplatesList();
-        const workspaces = this.cheWorkspace.getWorkspaces();
-        if (workspaces.findIndex((_workspace: che.IWorkspace) => {
-            return _workspace.id === workspace.id;
-          }) === -1) {
-          workspaces.push(workspace);
-        }
-        this.cheWorkspace.startUpdateWorkspaceStatus(workspace.id);
-
-        return workspace;
-      }, (error: any) => {
-        let errorMessage = 'Creation workspace failed.';
-        if (error && error.data && error.data.message) {
-          errorMessage = error.data.message;
-        }
-        this.cheNotification.showError(errorMessage);
-
-        return this.$q.reject(error);
-      });
-    });
-  }
-
-  createWorkspaceFromDevfile(sourceDevfile: che.IWorkspaceDevfile, attributes: any): ng.IPromise<che.IWorkspace> {
+  createWorkspaceFromDevfile(sourceDevfile: che.IWorkspaceDevfile, attributes: any, skipProjectTemplates?: boolean): ng.IPromise<che.IWorkspace> {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
           projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
@@ -200,13 +167,13 @@ export class CreateWorkspaceSvc {
     });
 
     return this.checkEditingProgress().then(() => {
-      sourceDevfile.projects = projects;
-
-      // If no projects defined in devfile were added - remove the commands from devfile as well:
-      if (noProjectsFromDevfile) {
-        sourceDevfile.commands = [];
+      if (!skipProjectTemplates) {
+        sourceDevfile.projects = projects;
+        // If no projects defined in devfile were added - remove the commands from devfile as well:
+        if (noProjectsFromDevfile) {
+          sourceDevfile.commands = [];
+        }
       }
-
       return this.cheWorkspace.createWorkspaceFromDevfile(namespaceId, sourceDevfile, attributes).then((workspace: che.IWorkspace) => {
         return this.cheWorkspace.fetchWorkspaces().then(() => this.cheWorkspace.getWorkspaceById(workspace.id));
       })
@@ -284,6 +251,22 @@ export class CreateWorkspaceSvc {
         command.name = projectName + ':' + command.name;
         this.cheWorkspace.getWorkspaceDataManager().addCommand(workspace, command);
       });
+    });
+  }
+
+  /**
+   * Returns workspaces names for a namespace.
+   *
+   * @param namespace namespace
+   */
+  buildListOfUsedNames(namespace: string): ng.IPromise<string[]> {
+    return this.fetchWorkspacesByNamespace(namespace).then((workspaces: Array<che.IWorkspace>) => {
+      const names = workspaces.filter((workspace: che.IWorkspace) => {
+        return workspace.namespace === namespace;
+      }).map((workspace: che.IWorkspace) => {
+        return this.getWorkspaceName(workspace);
+      });
+      return this.$q.when(names);
     });
   }
 
