@@ -201,8 +201,7 @@ pipeline {
 
         stage("Create test workspace") {
             when {
-                expression { return params.testWorkspaceDevfileUrl != null 
-                                && params.testWorkspaceDevfileUrl != "" }
+                expression { return params.testWorkspaceDevfileUrl != null && params.testWorkspaceDevfileUrl != "" }
             }
 
             steps {
