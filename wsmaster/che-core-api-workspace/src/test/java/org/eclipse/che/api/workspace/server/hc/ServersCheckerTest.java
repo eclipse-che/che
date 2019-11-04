@@ -37,7 +37,6 @@ import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -65,7 +64,6 @@ public class ServersCheckerTest {
   @Mock private RuntimeIdentity runtimeIdentity;
   private Map<String, ServerImpl> servers;
 
-  private CompletableFuture<String> compFuture;
   private ServersChecker checker;
 
   @BeforeMethod
@@ -77,7 +75,7 @@ public class ServersCheckerTest {
             EXEC_AGENT_HTTP_SERVER, new ServerImpl().withUrl("http://localhost/exec-agent/process"),
             TERMINAL_SERVER, new ServerImpl().withUrl("http://localhost/terminal/pty")));
 
-    compFuture = new CompletableFuture<>();
+    CompletableFuture<String> compFuture = new CompletableFuture<>();
 
     when(connectionChecker.getReportCompFuture()).thenReturn(compFuture);
 
@@ -99,15 +97,7 @@ public class ServersCheckerTest {
     when(machineTokenProvider.getToken(anyString(), anyString())).thenReturn(MACHINE_TOKEN);
   }
 
-  @AfterMethod(timeOut = 1000)
-  public void tearDown() throws Exception {
-    try {
-      checker.await();
-    } catch (Exception ignored) {
-    }
-  }
-
-  @Test(timeOut = 1000)
+  @Test(timeOut = 5000)
   public void shouldUseMachineTokenWhenCallChecker() throws Exception {
     servers.clear();
     servers.put("wsagent/http", new ServerImpl().withUrl("http://localhost"));
@@ -123,7 +113,7 @@ public class ServersCheckerTest {
     assertEquals(tokenCaptor.getValue(), MACHINE_TOKEN);
   }
 
-  @Test(timeOut = 1000)
+  @Test(timeOut = 5000)
   public void shouldNotifyReadinessHandlerAboutEachServerReadiness() throws Exception {
     checker.startAsync(readinessHandler);
 
@@ -134,7 +124,7 @@ public class ServersCheckerTest {
     verify(readinessHandler, times(3)).accept("test_ref");
   }
 
-  @Test(timeOut = 1000)
+  @Test(timeOut = 5000)
   public void shouldThrowExceptionIfAServerIsUnavailable() throws Exception {
     checker.startAsync(readinessHandler);
 
@@ -149,7 +139,7 @@ public class ServersCheckerTest {
     }
   }
 
-  @Test(timeOut = 1000)
+  @Test(timeOut = 5000)
   public void shouldNotCheckNotConfiguredServers() throws Exception {
     servers.clear();
     servers.putAll(
@@ -164,7 +154,7 @@ public class ServersCheckerTest {
     verify(readinessHandler).accept("test_ref");
   }
 
-  @Test(timeOut = 1000)
+  @Test(timeOut = 5000)
   public void awaitShouldReturnOnFirstUnavailability() throws Exception {
     CompletableFuture<String> future1 = spy(new CompletableFuture<>());
     CompletableFuture<String> future2 = spy(new CompletableFuture<>());

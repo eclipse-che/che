@@ -227,6 +227,6 @@ export class ListFactoriesController {
     } else {
       content += 'this selected factory?';
     }
-    return this.confirmDialogService.showConfirmDialog('Remove factories', content, 'Delete');
+    return this.confirmDialogService.showConfirmDialog('Remove factories', content, { resolve: 'Delete' });
   }
 }

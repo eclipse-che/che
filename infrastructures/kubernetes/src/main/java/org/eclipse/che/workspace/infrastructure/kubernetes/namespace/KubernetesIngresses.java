@@ -20,6 +20,7 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -58,6 +59,21 @@ public class KubernetesIngresses {
           .inNamespace(namespace)
           .withName(ingress.getMetadata().getName())
           .create(ingress);
+    } catch (KubernetesClientException e) {
+      throw new KubernetesInfrastructureException(e);
+    }
+  }
+
+  public List<Ingress> get() throws InfrastructureException {
+    try {
+      return clientFactory
+          .create(workspaceId)
+          .extensions()
+          .ingresses()
+          .inNamespace(namespace)
+          .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
+          .list()
+          .getItems();
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
     }

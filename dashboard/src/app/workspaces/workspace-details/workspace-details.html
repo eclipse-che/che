@@ -42,7 +42,7 @@
         <ng-form name="workspaceOverviewForm">
           <workspace-details-overview ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Overview, workspaceOverviewForm)"
                                       overview-form="workspaceOverviewForm"
-                                      on-change="workspaceDetailsController.checkEditMode(false)"
+                                      on-change="workspaceDetailsController.onWorkspaceChanged()"
                                       workspace-details="workspaceDetailsController.workspaceDetails"></workspace-details-overview>
         </ng-form>
       </md-tab-body>
@@ -56,7 +56,7 @@
       <md-tab-body>
         <workspace-details-projects
           workspace-details="workspaceDetailsController.workspaceDetails"
-          projects-on-change="workspaceDetailsController.checkEditMode(true)"></workspace-details-projects>
+          projects-on-change="workspaceDetailsController.checkEditMode()"></workspace-details-projects>
       </md-tab-body>
     </md-tab>
 
@@ -68,7 +68,7 @@
       </md-tab-label>
       <md-tab-body>
         <workspace-machines workspace-details="workspaceDetailsController.workspaceDetails"
-                            on-change="workspaceDetailsController.checkEditMode(true)"></workspace-machines>
+                            on-change="workspaceDetailsController.checkEditMode()"></workspace-machines>
       </md-tab-body>
     </md-tab>
 
@@ -81,7 +81,7 @@
       <md-tab-body>
         <che-machine-selector content-title="Servers"
                               workspace-details="workspaceDetailsController.workspaceDetails"
-                              on-change="workspaceDetailsController.checkEditMode(true)">
+                              on-change="workspaceDetailsController.checkEditMode()">
           <che-machine-servers environment-manager="environmentManager"
                                selected-machine="machine"
                                on-change="onChange()"></che-machine-servers>
@@ -98,7 +98,7 @@
       <md-tab-body>
         <che-machine-selector content-title="Environment variables"
                               workspace-details="workspaceDetailsController.workspaceDetails"
-                              on-change="workspaceDetailsController.checkEditMode(true)">
+                              on-change="workspaceDetailsController.checkEditMode()">
           <che-env-variables environment-manager="environmentManager"
                              selected-machine="machine"
                              on-change="onChange()"></che-env-variables>
@@ -115,7 +115,7 @@
       <md-tab-body>
         <che-machine-selector content-title="Volumes"
                               workspace-details="workspaceDetailsController.workspaceDetails"
-                              on-change="workspaceDetailsController.checkEditMode(true)">
+                              on-change="workspaceDetailsController.checkEditMode()">
           <che-machine-volumes environment-manager="environmentManager"
                              selected-machine="machine"
                              on-change="onChange()"></che-machine-volumes>
@@ -167,7 +167,7 @@
       <md-tab-body>
         <workspace-plugins workspace="workspaceDetailsController.workspaceDetails"
                            plugin-registry-location="workspaceDetailsController.pluginRegistry"
-                           on-change="workspaceDetailsController.checkEditMode(true)">
+                           on-change="workspaceDetailsController.checkEditMode()">
         </workspace-plugins>
       </md-tab-body>
     </md-tab>
@@ -183,31 +183,31 @@
       <md-tab-body>
         <workspace-editors workspace="workspaceDetailsController.workspaceDetails"
                            plugin-registry-location="workspaceDetailsController.pluginRegistry"
-                           on-change="workspaceDetailsController.checkEditMode(true)">
+                           on-change="workspaceDetailsController.checkEditMode()">
         </workspace-editors>
       </md-tab-body>
     </md-tab>
 
-     <!-- Devfile tab -->
-     <md-tab ng-if="workspaceDetailsController.workspaceDetails.devfile"
-     md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Devfile); isDevfileActive = true"
-     md-on-deselect="isDevfileActive = false">
-     <md-tab-label>
-       <i ng-show="workspaceDetailsController.checkFormsNotValid(workspaceDetailsController.tab.Devfile)"
-          class="error-state fa fa-exclamation-circle" aria-hidden="true"></i>
-       <span class="che-tab-label-title">Devfile</span>
-     </md-tab-label>
-     <md-tab-body>
-        <che-label-container che-label-name="Workspace">
-            <ng-form name="workspaceDevfileForm">
-              <workspace-devfile-editor
-                is-active="isDevfileActive"
-                workspace-devfile="workspaceDetailsController.workspaceDetails.devfile"
-                workspace-devfile-on-change="workspaceDetailsController.updateWorkspaceDevfile(devfile)"></workspace-devfile-editor>
-            </ng-form>
-          </che-label-container>
-     </md-tab-body>
-   </md-tab>
+    <!-- Devfile tab -->
+    <md-tab ng-if="workspaceDetailsController.workspaceDetails.devfile"
+            md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Devfile); isDevfileActive = true"
+            md-on-deselect="isDevfileActive = false">
+    <md-tab-label>
+      <i ng-show="workspaceDetailsController.checkFormsNotValid(workspaceDetailsController.tab.Devfile)"
+        class="error-state fa fa-exclamation-circle" aria-hidden="true"></i>
+      <span class="che-tab-label-title">Devfile</span>
+    </md-tab-label>
+    <md-tab-body>
+      <che-label-container che-label-name="Workspace">
+        <ng-form name="workspaceDevfileForm">
+          <workspace-devfile-editor
+            is-active="isDevfileActive"
+            workspace-devfile="workspaceDetailsController.workspaceDetails.devfile"
+            workspace-devfile-on-change="workspaceDetailsController.onWorkspaceChanged()"></workspace-devfile-editor>
+          </ng-form>
+        </che-label-container>
+      </md-tab-body>
+    </md-tab>
 
     <!-- Other tabs -->
     <md-tab ng-repeat="section in workspaceDetailsController.getPages()"

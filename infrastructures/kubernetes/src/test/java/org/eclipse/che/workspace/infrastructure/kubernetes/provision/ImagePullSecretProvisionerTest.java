@@ -33,9 +33,9 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.infrastructure.docker.auth.UserSpecificDockerRegistryCredentialsProvider;
-import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfig;
-import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfigs;
+import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.dto.DockerAuthConfig;
+import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.dto.DockerAuthConfigs;
+import org.eclipse.che.workspace.infrastructure.kubernetes.docker.auth.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -58,7 +58,7 @@ public class ImagePullSecretProvisionerTest {
 
   @Mock private UserSpecificDockerRegistryCredentialsProvider credentialsProvider;
 
-  @Mock private AuthConfigs authConfigs;
+  @Mock private DockerAuthConfigs dockerAuthConfigs;
 
   @Mock private Pod pod;
 
@@ -83,13 +83,13 @@ public class ImagePullSecretProvisionerTest {
     when(podSpec.getImagePullSecrets()).thenReturn(ImmutableList.of(existingImagePullSecretRef));
     k8sEnv.addPod(pod);
 
-    when(credentialsProvider.getCredentials()).thenReturn(authConfigs);
+    when(credentialsProvider.getCredentials()).thenReturn(dockerAuthConfigs);
     imagePullSecretProvisioner = new ImagePullSecretProvisioner(credentialsProvider);
   }
 
   @Test
   public void doNotDoAnythingIfNoPrivateRegistries() throws Exception {
-    when(authConfigs.getConfigs()).thenReturn(Collections.emptyMap());
+    when(dockerAuthConfigs.getConfigs()).thenReturn(Collections.emptyMap());
 
     imagePullSecretProvisioner.provision(k8sEnv, runtimeIdentity);
 
@@ -99,13 +99,13 @@ public class ImagePullSecretProvisionerTest {
 
   @Test
   public void addSecretAndReferenceInPod() throws Exception {
-    when(authConfigs.getConfigs())
+    when(dockerAuthConfigs.getConfigs())
         .thenReturn(
             ImmutableMap.of(
                 "reg1",
-                new TestAuthConfig().withUsername("username1").withPassword("password1"),
+                new TestDockerAuthConfig().withUsername("username1").withPassword("password1"),
                 "reg2",
-                new TestAuthConfig().withUsername("username2").withPassword("password2")));
+                new TestDockerAuthConfig().withUsername("username2").withPassword("password2")));
 
     imagePullSecretProvisioner.provision(k8sEnv, runtimeIdentity);
 
@@ -136,7 +136,7 @@ public class ImagePullSecretProvisionerTest {
                 Map.class)));
   }
 
-  private static class TestAuthConfig implements AuthConfig {
+  private static class TestDockerAuthConfig implements DockerAuthConfig {
 
     private String username;
     private String password;
@@ -152,7 +152,7 @@ public class ImagePullSecretProvisionerTest {
     }
 
     @Override
-    public AuthConfig withUsername(String username) {
+    public DockerAuthConfig withUsername(String username) {
       setUsername(username);
       return this;
     }
@@ -168,7 +168,7 @@ public class ImagePullSecretProvisionerTest {
     }
 
     @Override
-    public AuthConfig withPassword(String password) {
+    public DockerAuthConfig withPassword(String password) {
       setPassword(password);
       return this;
     }

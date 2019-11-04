@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.commons.observability.ExecutorServiceWrapper;
 
 /**
  * Provides single {@link ExecutorService} instance with daemon threads for Kubernetes/Openshfit
@@ -30,13 +31,15 @@ public class KubernetesSharedPool {
   private final ExecutorService executor;
 
   @Inject
-  public KubernetesSharedPool() {
+  public KubernetesSharedPool(ExecutorServiceWrapper executorServiceWrapper) {
     final ThreadFactory factory =
         new ThreadFactoryBuilder()
             .setNameFormat("KubernetesMachineSharedPool-%d")
             .setDaemon(true)
             .build();
-    this.executor = Executors.newCachedThreadPool(factory);
+    this.executor =
+        executorServiceWrapper.wrap(
+            Executors.newCachedThreadPool(factory), KubernetesSharedPool.class.getName());
   }
 
   public ExecutorService getExecutor() {

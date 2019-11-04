@@ -81,6 +81,8 @@ import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.observability.ExecutorServiceWrapper;
+import org.eclipse.che.commons.observability.NoopExecutorServiceWrapper;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
@@ -218,6 +220,7 @@ public class JpaEntitiesCascadeRemovalTest {
                 install(new MultiuserWorkspaceJpaModule());
                 install(new MachineAuthModule());
                 install(new DevfileModule());
+                bind(ExecutorServiceWrapper.class).to(NoopExecutorServiceWrapper.class);
 
                 bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
                 bind(RemoveFreeResourcesLimitSubscriber.class).asEagerSingleton();
@@ -236,7 +239,9 @@ public class JpaEntitiesCascadeRemovalTest {
                     .annotatedWith(Names.named("che.workspace.auto_restore"))
                     .toInstance(false);
                 bind(WorkspaceSharedPool.class)
-                    .toInstance(new WorkspaceSharedPool("cached", null, null, null));
+                    .toInstance(
+                        new WorkspaceSharedPool(
+                            "cached", null, null, new NoopExecutorServiceWrapper()));
 
                 bind(String[].class)
                     .annotatedWith(Names.named("che.auth.reserved_user_names"))

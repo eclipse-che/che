@@ -404,7 +404,7 @@ export class ListOrganizationMembersController {
    * @param member
    */
   removeMember(member: che.IMember): void {
-    let promise = this.confirmDialogService.showConfirmDialog('Remove member', 'Would you like to remove member  ' + member.email + ' ?', 'Delete');
+    let promise = this.confirmDialogService.showConfirmDialog('Remove member', 'Would you like to remove member  ' + member.email + ' ?', { resolve: 'Delete' });
 
     promise.then(() => {
       this.removePermissions(member);
@@ -507,6 +507,6 @@ export class ListOrganizationMembersController {
       confirmTitle += 'the selected member?';
     }
 
-    return this.confirmDialogService.showConfirmDialog('Remove members', confirmTitle, 'Delete');
+    return this.confirmDialogService.showConfirmDialog('Remove members', confirmTitle, { resolve: 'Delete' });
   }
 }
