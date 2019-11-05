@@ -62,7 +62,7 @@ describe('If recipe has content', () => {
       let memoryLimit = envManager.getMemoryLimit(machines[0]);
 
       let expectedMemoryLimit = environment.machines['dev-machine'].attributes.memoryLimitBytes;
-      expect(memoryLimit.toString()).toEqual(expectedMemoryLimit);
+      expect(memoryLimit.toString()).toEqual(expectedMemoryLimit.toString());
     });
 
     it('should return source', () => {

@@ -55,12 +55,12 @@ export class Register implements che.IRegisterService {
   }
 
 
-  filter(name: string, constructorFn: Function): che.IRegisterService {
+  filter(name: string, constructorFn: any): che.IRegisterService {
     this.app.filter(name, constructorFn);
     return this;
   }
 
-  controller(name: string, constructorFn: Function): che.IRegisterService {
+  controller(name: string, constructorFn: any): che.IRegisterService {
     this.app.controller(name, constructorFn);
     return this;
   }

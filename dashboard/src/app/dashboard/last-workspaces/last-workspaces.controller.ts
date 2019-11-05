@@ -43,7 +43,7 @@ export class DashboardLastWorkspacesController {
   /**
    * Load workspaces
    */
-  loadData(): void {
+  loadData(): ng.IPromise<void> {
     this.workspaces = this.cheWorkspace.getWorkspaces();
 
     if (this.workspaces.length > 0) {
@@ -53,7 +53,7 @@ export class DashboardLastWorkspacesController {
 
     let promise = this.cheWorkspace.fetchWorkspaces();
 
-    promise.then((result) => {
+    return promise.then((result) => {
       this.workspaces = result;
       this.isLoading = false;
     }, (error: any) => {
