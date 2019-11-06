@@ -11,6 +11,10 @@
  */
 'use strict';
 
+export interface IChangeMemoryUnit {
+  (memoryLimit: number, unitsFromTo: [string, string]): string;
+}
+
 export enum MemoryUnit {'B', 'KB', 'MB', 'GB', 'TB'}
 export namespace MemoryUnit {
   export function keys(): string[] {

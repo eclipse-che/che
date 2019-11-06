@@ -12,7 +12,7 @@
 'use strict';
 import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
 import {IEnvironmentManagerMachine} from '../../../../components/api/environment/environment-manager-machine';
-import {MemoryUnit} from '../../../../components/filter/change-memory-unit/change-memory-unit.filter';
+import {MemoryUnit, IChangeMemoryUnit} from '../../../../components/filter/change-memory-unit/change-memory-unit.filter';
 
 type machine = {
   name: string;
@@ -74,7 +74,7 @@ export class RamSettingsController {
       this.machinesList = this.machines.map((machine: IEnvironmentManagerMachine) => {
         const source: any = this.environmentManager.getSource(machine),
               memoryLimitBytes = this.environmentManager.getMemoryLimit(machine),
-              memoryLimitGBytesWithUnit = this.$filter('changeMemoryUnit')(memoryLimitBytes, [MemoryUnit[MemoryUnit.B], MemoryUnit[MemoryUnit.GB]]);
+              memoryLimitGBytesWithUnit = this.$filter<IChangeMemoryUnit>('changeMemoryUnit')(memoryLimitBytes, [MemoryUnit[MemoryUnit.B], MemoryUnit[MemoryUnit.GB]]);
         return <machine>{
           image: source && source.image ? source.image : '',
           name: machine.name,
@@ -91,7 +91,7 @@ export class RamSettingsController {
    * @param {number} memoryLimitGBytes amount of ram in GB
    */
   onRamChanged(name: string, memoryLimitGBytes: number): void {
-    const memoryLimitBytesWithUnit = this.$filter('changeMemoryUnit')(memoryLimitGBytes, [MemoryUnit[MemoryUnit.GB], MemoryUnit[MemoryUnit.B]]);
+    const memoryLimitBytesWithUnit = this.$filter<IChangeMemoryUnit>('changeMemoryUnit')(memoryLimitGBytes, [MemoryUnit[MemoryUnit.GB], MemoryUnit[MemoryUnit.B]]);
     this.onRamChange({name: name, memoryLimitBytes: this.getNumber(memoryLimitBytesWithUnit)});
   }
 
@@ -107,4 +107,3 @@ export class RamSettingsController {
   }
 
 }
-
