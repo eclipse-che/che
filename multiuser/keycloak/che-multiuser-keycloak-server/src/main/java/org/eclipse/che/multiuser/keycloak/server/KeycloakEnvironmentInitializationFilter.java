@@ -37,7 +37,7 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
-import org.eclipse.che.multiuser.api.authentication.commons.filter.MultiuserEnvironmentInitializationFilter;
+import org.eclipse.che.multiuser.api.authentication.commons.filter.MultiUserEnvironmentInitializationFilter;
 import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class KeycloakEnvironmentInitializationFilter
-    extends MultiuserEnvironmentInitializationFilter {
+    extends MultiUserEnvironmentInitializationFilter {
 
   private static final Logger LOG =
       LoggerFactory.getLogger(KeycloakEnvironmentInitializationFilter.class);
@@ -91,7 +91,6 @@ public class KeycloakEnvironmentInitializationFilter
       super.doFilter(request, response, filterChain);
     } catch (MachineTokenJwtException mte) {
       filterChain.doFilter(request, response);
-      return;
     } catch (JwtException e) {
       sendError(response, SC_UNAUTHORIZED, e.getMessage());
       return;
@@ -167,4 +166,7 @@ public class KeycloakEnvironmentInitializationFilter
     }
     return Optional.ofNullable(email);
   }
+
+  @Override
+  public void destroy() {}
 }

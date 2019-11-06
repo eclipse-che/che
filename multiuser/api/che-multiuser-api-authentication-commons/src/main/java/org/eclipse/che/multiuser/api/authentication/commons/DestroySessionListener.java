@@ -14,6 +14,7 @@ package org.eclipse.che.multiuser.api.authentication.commons;
 import static org.eclipse.che.multiuser.api.authentication.commons.Constants.CHE_SUBJECT_ATTRIBUTE;
 
 import com.google.inject.Injector;
+import java.util.Optional;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
@@ -34,32 +35,33 @@ public class DestroySessionListener implements HttpSessionListener {
 
     ServletContext servletContext = se.getSession().getServletContext();
 
-    SessionStore sessionStore = getInstance(SessionStore.class, servletContext);
-    if (sessionStore == null) {
+    Optional<SessionStore> sessionStoreOptional = getSessionStoreInstance(servletContext);
+    if (!sessionStoreOptional.isPresent()) {
       LOG.error(
           "Unable to remove session from store. Session store is not configured in servlet context.");
       return;
     }
-
+    SessionStore sessionStore = sessionStoreOptional.get();
     Subject subject = (Subject) se.getSession().getAttribute(CHE_SUBJECT_ATTRIBUTE);
     if (subject != null) {
       sessionStore.remove(subject.getUserId());
     }
   }
 
-  /** Searches component in servlet context when with help of guice injector. */
+  /** Searches session store component in servlet context when with help of guice injector. */
   @SuppressWarnings("unchecked")
-  private <T> T getInstance(Class<T> type, ServletContext servletContext) {
-    T result = (T) servletContext.getAttribute(type.getName());
+  private Optional<SessionStore> getSessionStoreInstance(ServletContext servletContext) {
+    String attributeName = SessionStore.class.getName();
+    SessionStore result = (SessionStore) servletContext.getAttribute(attributeName);
     if (result == null) {
       Injector injector = (Injector) servletContext.getAttribute(Injector.class.getName());
       if (injector != null) {
-        result = injector.getInstance(type);
+        result = injector.getInstance(SessionStore.class);
         if (result != null) {
-          servletContext.setAttribute(type.getName(), result);
+          servletContext.setAttribute(attributeName, result);
         }
       }
     }
-    return result;
+    return Optional.ofNullable(result);
   }
 }

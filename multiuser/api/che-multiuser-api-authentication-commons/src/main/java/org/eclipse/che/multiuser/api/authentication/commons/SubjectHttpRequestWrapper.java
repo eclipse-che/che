@@ -16,6 +16,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import org.eclipse.che.commons.subject.Subject;
 
+/**
+ * Wraps {@link HttpServletRequest} and overrides {@link HttpServletRequest#getRemoteUser} and
+ * {@link HttpServletRequest#getUserPrincipal} to return an values based on current {@link Subject}
+ * which is calculated during request authentication process.
+ */
 public class SubjectHttpRequestWrapper extends HttpServletRequestWrapper {
 
   public SubjectHttpRequestWrapper(HttpServletRequest request, Subject subject) {

@@ -35,7 +35,7 @@ import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
-import org.eclipse.che.multiuser.api.authentication.commons.filter.MultiuserEnvironmentInitializationFilter;
+import org.eclipse.che.multiuser.api.authentication.commons.filter.MultiUserEnvironmentInitializationFilter;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 
 /**
@@ -45,7 +45,7 @@ import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
  * @author Anton Korneta
  */
 @Singleton
-public class MachineLoginFilter extends MultiuserEnvironmentInitializationFilter {
+public class MachineLoginFilter extends MultiUserEnvironmentInitializationFilter {
 
   private final RequestTokenExtractor tokenExtractor;
   private final UserManager userManager;
@@ -76,7 +76,6 @@ public class MachineLoginFilter extends MultiuserEnvironmentInitializationFilter
       super.doFilter(request, response, filterChain);
     } catch (NotMachineTokenJwtException mte) {
       filterChain.doFilter(request, response);
-      return;
     } catch (JwtException e) {
       sendError(
           response,

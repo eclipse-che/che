@@ -42,12 +42,12 @@ import org.eclipse.che.multiuser.api.authentication.commons.SubjectHttpRequestWr
  *
  * @author Max Shaposhnyk (mshaposh@redhat.com)
  */
-public abstract class MultiuserEnvironmentInitializationFilter implements Filter {
+public abstract class MultiUserEnvironmentInitializationFilter implements Filter {
 
   private final SessionStore sessionStore;
   private final RequestTokenExtractor tokenExtractor;
 
-  public MultiuserEnvironmentInitializationFilter(
+  public MultiUserEnvironmentInitializationFilter(
       SessionStore sessionStore, RequestTokenExtractor tokenExtractor) {
     this.sessionStore = sessionStore;
     this.tokenExtractor = tokenExtractor;
@@ -126,19 +126,48 @@ public abstract class MultiuserEnvironmentInitializationFilter implements Filter
     }
   }
 
+  /**
+   * Calculates id of the user from given authentication token. This <b>may</b> also imply
+   * verification of token signature or encryption for encrypted/signed tokens (like JWT etc)
+   *
+   * @param token authentication token
+   * @return user id given token belongs to
+   */
   protected abstract String getUserId(String token);
 
+  /**
+   * Calculates user {@link Subject} from given authentication token.
+   *
+   * @param token authentication token
+   * @return constructed subject
+   */
   protected abstract Subject extractSubject(String token) throws ServletException;
 
+  /**
+   * Describes behavior when the token is missed. In case if performing authentication by given
+   * implementing filter isn't required, it may be invocation of {@link FilterChain#doFilter} or
+   * throwing of appropriate exception otherwise.
+   *
+   * @param request http request
+   * @param response http response
+   * @param chain filter chain
+   * @throws IOException inherited from {@link FilterChain#doFilter}
+   * @throws ServletException inherited from {@link FilterChain#doFilter}
+   */
   protected abstract void handleMissingToken(
       ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException;
 
+  /**
+   * Sends appropriate error status code and message into response.
+   *
+   * @param res response to send error message
+   * @param errorCode status code to send
+   * @param message sessage to send
+   * @throws IOException inherited from {@link HttpServletResponse#sendError}
+   */
   protected void sendError(ServletResponse res, int errorCode, String message) throws IOException {
     HttpServletResponse response = (HttpServletResponse) res;
     response.sendError(errorCode, message);
   }
-
-  @Override
-  public void destroy() {}
 }
