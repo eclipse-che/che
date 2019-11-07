@@ -27,7 +27,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 public class K8sInfraNamespaceWsAttributeValidator implements WorkspaceAttributeValidator {
 
   private final int METADATA_NAME_MAX_LENGTH = 63;
-  private final Pattern METADATA_NAME_PATTERN = Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?");
+  private final String METADATA_NAME_REGEX = "[a-z0-9]([-a-z0-9]*[a-z0-9])?";
+  private final Pattern METADATA_NAME_PATTERN = Pattern.compile(METADATA_NAME_REGEX);
 
   private final Provider<KubernetesNamespaceFactory> namespaceFactoryProvider;
 
@@ -55,7 +56,7 @@ public class K8sInfraNamespaceWsAttributeValidator implements WorkspaceAttribute
                 + " is invalid: a DNS-1123 label must consist of lower case alphanumeric"
                 + " characters or '-', and must start and end with an"
                 + " alphanumeric character (e.g. 'my-name', or '123-abc', regex used for"
-                + " validation is '[a-z0-9]([-a-z0-9]*[a-z0-9])?')");
+                + " validation is '" + METADATA_NAME_REGEX + "')");
       }
 
       namespaceFactoryProvider.get().checkIfNamespaceIsAllowed(namespace);
