@@ -30,15 +30,18 @@ public class SessionStore {
     this.userIdToSession = new ConcurrentHashMap<>();
   }
 
+  /** Fetches stored session if present or created new using provided function */
   public HttpSession getSession(
       String userId, Function<? super String, ? extends HttpSession> createSessionFunction) {
     return userIdToSession.computeIfAbsent(userId, createSessionFunction);
   }
 
+  /** Fetches stored session if present or returns {@code null} otherwise */
   public HttpSession getSession(String userId) {
     return userIdToSession.get(userId);
   }
 
+  /** Removes stored session */
   public void remove(String userId) {
     userIdToSession.remove(userId);
   }
