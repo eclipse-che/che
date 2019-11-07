@@ -49,7 +49,6 @@ public class DestroySessionListener implements HttpSessionListener {
   }
 
   /** Searches session store component in servlet context when with help of guice injector. */
-  @SuppressWarnings("unchecked")
   private Optional<SessionStore> getSessionStoreInstance(ServletContext servletContext) {
     String attributeName = SessionStore.class.getName();
     SessionStore result = (SessionStore) servletContext.getAttribute(attributeName);
