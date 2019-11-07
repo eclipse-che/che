@@ -1,5 +1,49 @@
 # Change Log
 
+## [7.4.0](https://github.com/eclipse/che/tree/7.4.0) (2019-11-07)
+[Full Changelog](https://github.com/eclipse/che/compare/7.3.1...7.4.0)
+
+**Merged pull requests:**
+
+- Increate test timeouts for ServersCheckerTest [\#15032](https://github.com/eclipse/che/pull/15032) ([sleshchenko](https://github.com/sleshchenko))
+- RELEASE: Set next development version [\#15141](https://github.com/eclipse/che/pull/15141) ([vparfonov](https://github.com/vparfonov))
+- Improve docs and devfile on workspace loader development flow [\#15125](https://github.com/eclipse/che/pull/15125) ([mmorhun](https://github.com/mmorhun))
+- Fix UD build [\#15112](https://github.com/eclipse/che/pull/15112) ([akurinnoy](https://github.com/akurinnoy))
+- Fixing Vert.x test [\#15083](https://github.com/eclipse/che/pull/15083) ([Katka92](https://github.com/Katka92))
+-  Fix TypeScript DTO generator [\#15078](https://github.com/eclipse/che/pull/15078) ([evidolob](https://github.com/evidolob))
+- \[Selenium\] Adapt selenium tests from ocpoauth package [\#15058](https://github.com/eclipse/che/pull/15058) ([SkorikSergey](https://github.com/SkorikSergey))
+- Fixed MeteredExecutorServiceWrapperTest that is failing some Linux system [\#15034](https://github.com/eclipse/che/pull/15034) ([skabashnyuk](https://github.com/skabashnyuk))
+- Fix branding for UD [\#14984](https://github.com/eclipse/che/pull/14984) ([akurinnoy](https://github.com/akurinnoy))
+- \[Selenium\] Adapt selenium tests from dashboard package [\#14980](https://github.com/eclipse/che/pull/14980) ([SkorikSergey](https://github.com/SkorikSergey))
+- Do not use spy in ServerCheckerTest [\#14975](https://github.com/eclipse/che/pull/14975) ([skabashnyuk](https://github.com/skabashnyuk))
+- RELEASE: Update CHANGELOG [\#14972](https://github.com/eclipse/che/pull/14972) ([vparfonov](https://github.com/vparfonov))
+- Don't override entrypoint for remote binary. [\#14969](https://github.com/eclipse/che/pull/14969) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- Fix bug where broker container name can exceed 63 characters [\#14964](https://github.com/eclipse/che/pull/14964) ([amisevsk](https://github.com/amisevsk))
+- Remove deprecated docker infrastructure [\#14951](https://github.com/eclipse/che/pull/14951) ([skabashnyuk](https://github.com/skabashnyuk))
+- Mount each private key into single kubernetes secret [\#14950](https://github.com/eclipse/che/pull/14950) ([vzhukovskii](https://github.com/vzhukovskii))
+- Remove outaded agent auth filter and unused models; [\#14940](https://github.com/eclipse/che/pull/14940) ([mshaposhnik](https://github.com/mshaposhnik))
+- Add support endpoints for VSCode extensions and Theia plugins. [\#14937](https://github.com/eclipse/che/pull/14937) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- Change version of maven artifacts after updating the happy-path project [\#14936](https://github.com/eclipse/che/pull/14936) ([musienko-maxim](https://github.com/musienko-maxim))
+- Stabilize DirectUrlFactoryWithSpecificBranchTest [\#14929](https://github.com/eclipse/che/pull/14929) ([musienko-maxim](https://github.com/musienko-maxim))
+- Fix typo in plugin broker error messages [\#14928](https://github.com/eclipse/che/pull/14928) ([amisevsk](https://github.com/amisevsk))
+- Fix of Vert.x E2E test \(\#14924\) [\#14925](https://github.com/eclipse/che/pull/14925) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Upgrade metrics and tracing dependencies [\#14923](https://github.com/eclipse/che/pull/14923) ([skabashnyuk](https://github.com/skabashnyuk))
+- Use newer version of Jgroups and EclipseLink to prevent PKIX errors on OCP 4.x [\#14920](https://github.com/eclipse/che/pull/14920) ([mshaposhnik](https://github.com/mshaposhnik))
+- Remove old dependencies [\#14919](https://github.com/eclipse/che/pull/14919) ([vparfonov](https://github.com/vparfonov))
+- Disable autosave on Devfile editor page [\#14913](https://github.com/eclipse/che/pull/14913) ([akurinnoy](https://github.com/akurinnoy))
+- Use che.infrastructure.kubernetes.namespace.default during workspace namespace resolution [\#14828](https://github.com/eclipse/che/pull/14828) ([metlos](https://github.com/metlos))
+- Monitoring & Tracing capability for multiple Thread pools of Che Server  [\#14727](https://github.com/eclipse/che/pull/14727) ([skabashnyuk](https://github.com/skabashnyuk))
+
+## [7.3.1](https://github.com/eclipse/che/tree/7.3.1) (2019-10-29)
+[Full Changelog](https://github.com/eclipse/che/compare/7.3.0...7.3.1)
+
+**Merged pull requests:**
+
+- Get rid of non-working workaround to flakiness when Java LS server initialization failed [\#14945](https://github.com/eclipse/che/pull/14945) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Disable cors on master. Cleanup cors configuration on ws-agent [\#14921](https://github.com/eclipse/che/pull/14921) ([skabashnyuk](https://github.com/skabashnyuk))
+- Preview url on server [\#14713](https://github.com/eclipse/che/pull/14713) ([sparkoo](https://github.com/sparkoo))
+
+
 ## [7.3.0](https://github.com/eclipse/che/tree/7.3.0) (2019-10-18)
 [Full Changelog](https://github.com/eclipse/che/compare/7.2.0...7.3.0)
 
