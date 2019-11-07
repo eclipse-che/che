@@ -55,7 +55,9 @@ public abstract class MultiUserEnvironmentInitializationFilter implements Filter
 
   /**
    * Wraps {@link HttpServletRequest} to handle HTTP session creation requests and return cached one
-   * if possible.
+   * if possible, so the same user will always have single session despite the fact he is using
+   * different kind of tokens or several tokens of the same kind (for example logged in in different
+   * browsers)
    */
   protected class SessionCachedHttpRequest extends HttpServletRequestWrapper {
 
