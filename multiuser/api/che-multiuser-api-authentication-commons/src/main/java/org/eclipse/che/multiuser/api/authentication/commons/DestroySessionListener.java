@@ -28,12 +28,12 @@ public class DestroySessionListener implements HttpSessionListener {
   private static final Logger LOG = LoggerFactory.getLogger(DestroySessionListener.class);
 
   @Override
-  public final void sessionCreated(HttpSessionEvent se) {}
+  public final void sessionCreated(HttpSessionEvent sessionEvent) {}
 
   @Override
-  public void sessionDestroyed(HttpSessionEvent se) {
+  public void sessionDestroyed(HttpSessionEvent sessionEvent) {
 
-    ServletContext servletContext = se.getSession().getServletContext();
+    ServletContext servletContext = sessionEvent.getSession().getServletContext();
 
     Optional<SessionStore> sessionStoreOptional = getSessionStoreInstance(servletContext);
     if (!sessionStoreOptional.isPresent()) {
@@ -42,7 +42,7 @@ public class DestroySessionListener implements HttpSessionListener {
       return;
     }
     SessionStore sessionStore = sessionStoreOptional.get();
-    Subject subject = (Subject) se.getSession().getAttribute(CHE_SUBJECT_ATTRIBUTE);
+    Subject subject = (Subject) sessionEvent.getSession().getAttribute(CHE_SUBJECT_ATTRIBUTE);
     if (subject != null) {
       sessionStore.remove(subject.getUserId());
     }

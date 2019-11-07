@@ -23,9 +23,12 @@ import org.eclipse.che.commons.subject.Subject;
  */
 public class SubjectHttpRequestWrapper extends HttpServletRequestWrapper {
 
+  private final Principal principal;
+
   public SubjectHttpRequestWrapper(HttpServletRequest request, Subject subject) {
     super(request);
     this.subject = subject;
+    this.principal = subject::getUserName;
   }
 
   private final Subject subject;
@@ -37,6 +40,6 @@ public class SubjectHttpRequestWrapper extends HttpServletRequestWrapper {
 
   @Override
   public Principal getUserPrincipal() {
-    return subject::getUserName;
+    return principal;
   }
 }

@@ -35,8 +35,8 @@ import org.eclipse.che.multiuser.api.authentication.commons.SubjectHttpRequestWr
  * <ul>
  *   <li>Extracts token from request
  *   <li>Checks token for validity and fetch user Id (implementation specific)
- *   <li>Fetch cached {@link HttpSession} and {@link Subject} or construct new (implementation
- *       specific))
+ *   <li>Fetch cached {@link HttpSession} or requests to create new one
+ *   <li>Gets {@link Subject} stored in session or construct new (implementation specific))
  *   <li>Set subject for current request into {@link EnvironmentContext}
  * </ul>
  *
@@ -59,13 +59,13 @@ public abstract class MultiUserEnvironmentInitializationFilter implements Filter
    */
   protected class SessionCachedHttpRequest extends HttpServletRequestWrapper {
 
+    private final String userId;
+
     /**
      * Constructs a request object wrapping the given request.
      *
      * @throws IllegalArgumentException if the request is null
      */
-    private final String userId;
-
     public SessionCachedHttpRequest(ServletRequest request, String userId) {
       super((HttpServletRequest) request);
       this.userId = userId;

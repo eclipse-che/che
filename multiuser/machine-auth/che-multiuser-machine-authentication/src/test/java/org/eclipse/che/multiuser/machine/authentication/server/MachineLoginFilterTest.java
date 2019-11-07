@@ -140,7 +140,7 @@ public class MachineLoginFilterTest {
     verify(responseMock)
         .sendError(
             401,
-            "Authentication with machine token failed cause: JWT signature does not match locally computed signature."
+            "Machine token authentication failed: JWT signature does not match locally computed signature."
                 + " JWT validity cannot be asserted and should not be trusted.");
   }
 
@@ -167,7 +167,7 @@ public class MachineLoginFilterTest {
     verify(responseMock)
         .sendError(
             401,
-            "Authentication with machine token failed cause: Unable to fetch signature key pair: no workspace id present in token");
+            "Machine token authentication failed: Unable to fetch signature key pair: no workspace id present in token");
   }
 
   @Test
@@ -193,9 +193,7 @@ public class MachineLoginFilterTest {
     verify(keyManagerMock, atLeastOnce()).getOrCreateKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verify(responseMock)
-        .sendError(
-            401,
-            "Authentication with machine token failed cause: User for this token no longer exist.");
+        .sendError(401, "Machine token authentication failed: Corresponding user doesn't exist.");
   }
 
   @Test
@@ -207,8 +205,7 @@ public class MachineLoginFilterTest {
     verify(keyManagerMock, atLeastOnce()).getOrCreateKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verify(responseMock)
-        .sendError(
-            eq(401), argThat(s -> s.startsWith("Authentication with machine token failed cause:")));
+        .sendError(eq(401), argThat(s -> s.startsWith("Machine token authentication failed:")));
   }
 
   private HttpServletRequest getRequestMock() {

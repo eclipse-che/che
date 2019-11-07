@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
+import static org.eclipse.che.multiuser.api.authentication.commons.Constants.CHE_SUBJECT_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -177,7 +178,7 @@ public class KeycloakEnvironmentInitializationFilterTest {
     // given
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token2");
     when(jwtParser.parseClaimsJws(anyString())).thenReturn(claims);
-    when(session.getAttribute(eq("che_subject"))).thenReturn(existingSubject);
+    when(session.getAttribute(eq(CHE_SUBJECT_ATTRIBUTE))).thenReturn(existingSubject);
     when(userManager.getOrCreateUser(anyString(), anyString(), anyString())).thenReturn(user);
     EnvironmentContext context = spy(EnvironmentContext.getCurrent());
     EnvironmentContext.setCurrent(context);
@@ -186,7 +187,7 @@ public class KeycloakEnvironmentInitializationFilterTest {
     filter.doFilter(request, response, chain);
 
     // then
-    verify(session).setAttribute(eq("che_subject"), captor.capture());
+    verify(session).setAttribute(eq(CHE_SUBJECT_ATTRIBUTE), captor.capture());
     verify(context).setSubject(captor.capture());
     assertEquals(expectedSubject.getToken(), captor.getAllValues().get(0).getToken());
     assertEquals(expectedSubject.getToken(), captor.getAllValues().get(1).getToken());

@@ -15,6 +15,7 @@ import static org.eclipse.che.multiuser.api.authentication.commons.Constants.CHE
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -49,11 +50,17 @@ public class MultiUserEnvironmentInitializationFilterTest {
   @Mock private HttpSession session;
   @Mock private FilterChain chain;
 
+  private final String userId = "user-abc-123";
+  private final String token = "token-abc123";
+  private final Subject subject = new SubjectImpl("user", userId, token, false);
+
   private MultiUserEnvironmentInitializationFilter filter;
 
   @BeforeMethod
-  public void setUp() {
+  public void setUp() throws Exception {
     filter = spy(new MockMultiUserEnvironmentInitializationFilter(sessionStore, tokenExtractor));
+    lenient().when(filter.getUserId(anyString())).thenReturn(userId);
+    lenient().when(filter.extractSubject(anyString())).thenReturn(subject);
   }
 
   @Test
@@ -70,11 +77,9 @@ public class MultiUserEnvironmentInitializationFilterTest {
 
   @Test
   public void shouldGetSessionFromStoreWithCorrectUserId() throws Exception {
-    String userId = "user-abc-123";
-    String token = "token-abc123";
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn(token);
-    when(filter.getUserId(anyString())).thenReturn(userId);
     when(sessionStore.getSession(eq(userId), any())).thenReturn(session);
+
     // when
     filter.doFilter(request, response, chain);
     // then
@@ -85,11 +90,8 @@ public class MultiUserEnvironmentInitializationFilterTest {
   }
 
   @Test
-  public void shouldCreateSubjectIfSessionDinNotContainOne() throws Exception {
-    String userId = "user-abc-123";
-    String token = "token-abc123";
+  public void shouldCreateSubjectIfSessionDidNotContainOne() throws Exception {
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn(token);
-    when(filter.getUserId(anyString())).thenReturn(userId);
     when(sessionStore.getSession(eq(userId), any())).thenReturn(session);
     when(session.getAttribute(eq(CHE_SUBJECT_ATTRIBUTE))).thenReturn(null);
     // when
@@ -99,14 +101,11 @@ public class MultiUserEnvironmentInitializationFilterTest {
   }
 
   @Test
-  public void shouldReCreateSubjectIfTokensDidntMatch() throws Exception {
-    String userId = "user-abc-123";
-    String token = "token-abc123";
-    Subject subject = new SubjectImpl("another_user", "user987", "token111", false);
+  public void shouldReCreateSubjectIfTokensDidNotMatch() throws Exception {
+    Subject otherSubject = new SubjectImpl("another_user", "user987", "token111", false);
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn(token);
-    when(filter.getUserId(anyString())).thenReturn(userId);
     when(sessionStore.getSession(eq(userId), any())).thenReturn(session);
-    when(session.getAttribute(eq(CHE_SUBJECT_ATTRIBUTE))).thenReturn(subject);
+    when(session.getAttribute(eq(CHE_SUBJECT_ATTRIBUTE))).thenReturn(otherSubject);
     // when
     filter.doFilter(request, response, chain);
     // then
@@ -115,13 +114,9 @@ public class MultiUserEnvironmentInitializationFilterTest {
 
   @Test
   public void shouldSetSubjectIntoEnvironmentContext() throws Exception {
-    String userId = "user-abc-123";
-    String token = "token-abc123";
-    Subject subject = new SubjectImpl("user", userId, token, false);
     EnvironmentContext context = spy(EnvironmentContext.getCurrent());
     EnvironmentContext.setCurrent(context);
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn(token);
-    when(filter.getUserId(anyString())).thenReturn(userId);
     when(sessionStore.getSession(eq(userId), any())).thenReturn(session);
     when(session.getAttribute(eq(CHE_SUBJECT_ATTRIBUTE))).thenReturn(subject);
     // when
@@ -130,7 +125,7 @@ public class MultiUserEnvironmentInitializationFilterTest {
     verify(context).setSubject(eq(subject));
   }
 
-  private class MockMultiUserEnvironmentInitializationFilter
+  private static class MockMultiUserEnvironmentInitializationFilter
       extends MultiUserEnvironmentInitializationFilter {
 
     MockMultiUserEnvironmentInitializationFilter(

@@ -47,7 +47,6 @@ import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 @Singleton
 public class MachineLoginFilter extends MultiUserEnvironmentInitializationFilter {
 
-  private final RequestTokenExtractor tokenExtractor;
   private final UserManager userManager;
   private final JwtParser jwtParser;
   private final PermissionChecker permissionChecker;
@@ -60,7 +59,6 @@ public class MachineLoginFilter extends MultiUserEnvironmentInitializationFilter
       MachineSigningKeyResolver machineKeyResolver,
       PermissionChecker permissionChecker) {
     super(sessionStore, tokenExtractor);
-    this.tokenExtractor = tokenExtractor;
     this.userManager = userManager;
     this.jwtParser = Jwts.parser().setSigningKeyResolver(machineKeyResolver);
     this.permissionChecker = permissionChecker;
@@ -80,7 +78,7 @@ public class MachineLoginFilter extends MultiUserEnvironmentInitializationFilter
       sendError(
           response,
           SC_UNAUTHORIZED,
-          format("Authentication with machine token failed cause: %s", e.getMessage()));
+          format("Machine token authentication failed: %s", e.getMessage()));
       return;
     }
   }
@@ -96,7 +94,7 @@ public class MachineLoginFilter extends MultiUserEnvironmentInitializationFilter
       return new MachineTokenAuthorizedSubject(
           new SubjectImpl(userName, userId, token, false), permissionChecker, workspaceId);
     } catch (NotFoundException e) {
-      throw new JwtException("User for this token no longer exist.");
+      throw new JwtException("Corresponding user doesn't exist.");
     } catch (ServerException | JwtException e) {
       throw new JwtException(e.getMessage(), e);
     }

@@ -58,7 +58,6 @@ public class KeycloakEnvironmentInitializationFilter
 
   private final KeycloakUserManager userManager;
   private final KeycloakProfileRetriever keycloakProfileRetriever;
-  private final RequestTokenExtractor tokenExtractor;
   private final PermissionChecker permissionChecker;
   private final KeycloakSettings keycloakSettings;
   private final JwtParser jwtParser;
@@ -76,7 +75,6 @@ public class KeycloakEnvironmentInitializationFilter
     this.jwtParser = jwtParser;
     this.userManager = userManager;
     this.keycloakProfileRetriever = keycloakProfileRetriever;
-    this.tokenExtractor = tokenExtractor;
     this.permissionChecker = permissionChecker;
     this.keycloakSettings = settings;
   }
@@ -139,7 +137,7 @@ public class KeycloakEnvironmentInitializationFilter
   @Override
   protected void handleMissingToken(
       ServletRequest request, ServletResponse response, FilterChain chain) throws IOException {
-    sendError(response, 401, "Authorization token is missed");
+    sendError(response, 401, "Authorization token is missing");
   }
 
   private Optional<String> retrieveEmail(String token, Claims claims, String username, String id)
