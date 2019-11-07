@@ -234,7 +234,7 @@ export class GitHubService {
           return $http({
             url: nextUrl,
             method: 'GET',
-            transformResponse: $http.defaults.transformResponse.concat([function (data: any) {
+            transformResponse: (<ng.IHttpRequestTransformer[]>$http.defaults.transformResponse).concat([function (data: any) {
               return response.data.concat(data);
             }])
           });

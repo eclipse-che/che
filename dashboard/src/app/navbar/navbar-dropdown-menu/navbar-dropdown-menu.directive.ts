@@ -157,18 +157,18 @@ export class NavbarDropdownMenu implements ng.IDirective {
             delete this.$rootScope.navbarDropdownActiveMenu;
           } else {
             // open new menu by triggering mouse event
-            angular.element(nextTargetEl).trigger({
+            angular.element(nextTargetEl).trigger(angular.element.Event('custom', {
               type: eventType,
               which: eventWhich
-            } as JQueryEventObject);
+            }));
           }
         } else {
           // if menu isn't found
           // just trigger same mouse event on first found element
-          angular.element(nextTargetEl).trigger({
+          angular.element(nextTargetEl).trigger(angular.element.Event('custom', {
             type: eventType,
             which: eventWhich
-          } as JQueryEventObject);
+          }));
         }
 
         // clean pointer events

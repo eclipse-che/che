@@ -101,7 +101,7 @@ suite('Language server validation', async () => {
                 throw err;
             }
 
-            console.log("Known flakiness has occurred https://github.com/eclipse/che/issues/14944");
+            console.log('Known flakiness has occurred https://github.com/eclipse/che/issues/14944');
             await driverHelper.reloadPage();
             await ide.waitStatusBarContains('Starting Java Language Server');
         }

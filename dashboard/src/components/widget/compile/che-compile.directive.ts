@@ -34,7 +34,7 @@ export class CheCompile implements ng.IDirective {
   link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attrs: ng.IAttributes) {
     $scope.$watch(($attrs as any).cheCompile, (value: string) => {
       $element.html(value);
-      this.$compile($element.contents())($scope);
+      this.$compile($element.contents() as any)($scope);
     });
 
   }

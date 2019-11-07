@@ -58,7 +58,7 @@ export class CheLearnMoreTemplate implements ng.IDirective {
   link($scope: ICheLearmMoreTemplateScope, $element: ng.IAugmentedJQuery) {
     const compileScope = $scope.compileScope;
     $element.html($scope.template);
-    this.$compile($element.contents())(compileScope);
+    this.$compile($element.contents() as any)(compileScope);
   }
 
 }

@@ -83,7 +83,7 @@ export class CheLearnMoreCtrl {
     const data  = this.$element[ 0 ].getElementsByTagName('che-learn-more-data')[ 0 ];
     const element  = angular.element(data);
     element.html(template);
-    this.$compile(element.contents())(this.$scope.$parent);
+    this.$compile(element.contents() as any)(this.$scope.$parent);
 
     // delete it from attributes
     delete this.$attrs.$cheLearnMoreTemplate;

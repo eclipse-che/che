@@ -75,8 +75,8 @@ describe('OrganizationsConfig >', () => {
 
       // stub functions
       const callbacks = {
-        testResolve: () => { },
-        testReject: () => { }
+        testResolve: (...args: any[]) => { },
+        testReject: (...args: any[]) => { }
       };
 
       // create spies
@@ -160,8 +160,8 @@ describe('OrganizationsConfig >', () => {
 
       // stub functions
       const callbacks = {
-        testResolve: () => { },
-        testReject: () => { }
+        testResolve: (...args: any[]) => { },
+        testReject: (...args: any[]) => { }
       };
 
       // create spies
@@ -198,8 +198,8 @@ describe('OrganizationsConfig >', () => {
 
       // stub functions
       const callbacks = {
-        testResolve: () => { },
-        testReject: () => { }
+        testResolve: (...args: any[]) => { },
+        testReject: (...args: any[]) => { }
       };
 
       // create spies

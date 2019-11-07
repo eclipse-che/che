@@ -204,6 +204,7 @@
                                     <goal>test</goal>
                                 </goals>
                                 <configuration>
+                                    <forkCount>0</forkCount>
                                     <systemPropertyVariables>
                                         <buildDirectory>${project.build.directory}</buildDirectory>
                                     </systemPropertyVariables>

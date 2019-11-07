@@ -192,7 +192,7 @@ or
 $ yarn test
 ```
 
-#### Step 6: Start workspace loader server and preview
+#### Step 6: Start workspace loader server
 
 Use the command `[workspace loader] start dev server`
 
@@ -202,6 +202,40 @@ or
 # [ws-loader-dev]
 $ yarn start --disable-host-check --public=$(echo ${server.dev-server} | sed -e s/https:\\/\\/// -e s/http:\\/\\/// -e s/\\///) --host="0.0.0.0" --env.target=${CHE_API_EXTERNAL%????}
 ```
+
+#### Step 7: Testing new workspace loader
+
+When workspace loader server is run, one probably need to test introduced changes.
+
+To safely test the changes it is better to create a separate workspace which will be used by new loader.
+But by default, Che doesn't allow to run more than one workspace simultaneously.
+To change this behaviour one need to set `che.limits.user.workspaces.run.count` Che property to value greater than `1`.
+In development environment that could be reached by adding `CHE_LIMITS_USER_WORKSPACES_RUN_COUNT` environment variable for Che server deployment.
+Please note, after changing deployment config one need to apply changes by rolling out (or rescaling) the corresponding pod 
+(in case of Openshift just add the environment variable via Openshift dashboard in the `Environment` tab of the Che server deployment and the pod will be rolled out automatically).
+
+To be able to point new workspace loader to the test workspace it is required to add the the test workspace id to the path of workspace loader route.
+So, first, we need to retrieve the test workspace id.
+This could be done using swagger (please note, it might be disabled on production environment).
+To open swagger just open Che dashboard and replace the path with `swagger`.
+Then navigate to `workspace` section `GET /workspace` method.
+It will return all user workspaces.
+Find the test workspace id.
+Second, to modify the path of the workspace loader server uri, retrieve the route of the server.
+To do it, find workspace loader dev workspace id from the query in swagger above and use it as a key in `GET /workspace/{key}` method.
+From the response get the workspace loader server url
+(if using the given defile for workspace loader development it should be under `runtime.machines.ws-loader-dev.serevrs.dev-server.url` key).
+
+The uri of workspace loader pointed to the test workspace should look like: `<workspace-loader-route>/<test-workspace-id>`.
+For example: `http://server60zomi2d-dev-server-3000.192.168.99.100.nip.io/workspaceztcx9u432labmvxi` or `http://routeu5efcg53-che.apps-crc.testing/workspaceztcx9u432labmvxi` (depending on the infrastructure on which Che is run).
+
+In most cases multiuser Che is deployed.
+To permit all the required connections one need to edit Keycloak settings.
+Open keycloak dashboard (the route could be obtained via Kubernetes or Openshift dashboard) and navigate to `Clients`, select `che-public` and `Settings` tab.
+Then add the route with `/*` suffix into `Valid Redirect URIs` section and the original route without trailing slash into `Web Origins` section.
+Save changes.
+
+After this opening the obtained uri will open new workspace loader which will start (if not started yet) and open the test workspace. 
 
 ### Che server a.k.a WS master
 There is a [devfile](https://github.com/eclipse/che/blob/master/devfile.yaml) for development of Che server in Che.

@@ -21,7 +21,6 @@ RUN apt-get update \
 
 COPY package.json /dashboard/
 COPY yarn.lock /dashboard/
-COPY typings.json /dashboard/
 WORKDIR /dashboard
 RUN yarn install --ignore-optional
 COPY . /dashboard/

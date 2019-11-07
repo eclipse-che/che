@@ -445,7 +445,7 @@ export class LoadFactoryController {
         this.$mdDialog.show(
           this.$mdDialog.alert()
             .title('Unable to start workspace')
-            .content('Unable to start workspace. It may be linked to OutOfMemory or the container has been destroyed')
+            .textContent('Unable to start workspace. It may be linked to OutOfMemory or the container has been destroyed')
             .ariaLabel('Workspace start')
             .ok('OK')
         );
@@ -456,7 +456,7 @@ export class LoadFactoryController {
         this.$mdDialog.show(
           this.$mdDialog.alert()
             .title('Error when starting workspace')
-            .content('Unable to start workspace. Error when trying to start the workspace: ' + message.error)
+            .textContent('Unable to start workspace. Error when trying to start the workspace: ' + message.error)
             .ariaLabel('Workspace start')
             .ok('OK')
         );
@@ -486,7 +486,7 @@ export class LoadFactoryController {
         this.$mdDialog.show(
           this.$mdDialog.alert()
             .title('Error when starting workspace')
-            .content('Unable to start workspace. Error when trying to start the workspace: ' + message.error)
+            .textContent('Unable to start workspace. Error when trying to start the workspace: ' + message.error)
             .ariaLabel('Workspace start')
             .ok('OK')
         );
@@ -625,7 +625,7 @@ export class LoadFactoryController {
       this.$mdDialog.show(
         this.$mdDialog.alert()
           .title('Error while importing project')
-          .content(error.statusText + ': ' + error.data.message)
+          .textContent(error.statusText + ': ' + error.data.message)
           .ariaLabel('Import project')
           .ok('OK')
       );
