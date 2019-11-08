@@ -117,16 +117,14 @@ describe('CheListHelper >', () => {
         describe(`items are filtered by name which contains '3' >`, () => {
           let visibleItemName;
 
-          let filter;
-
           let visibleItems;
 
           beforeEach(() => {
             // apply filter by name
             visibleItemName = '3';
-            filter = mock.createFilterByName(visibleItemName); // not exact match
+            const [filterExpr] = mock.createFilterByName(visibleItemName); // not exact match
 
-            cheListHelper.applyFilter('name', ...filter);
+            cheListHelper.applyFilter('name', filterExpr);
 
             // calculate expected number of visible items
             const re = new RegExp(visibleItemName);
@@ -181,16 +179,14 @@ describe('CheListHelper >', () => {
 
           let visibleItemName;
 
-          let filter;
-
           let visibleItems;
 
           beforeEach(() => {
             // apply filter by name
             visibleItemName = '4';
-            filter = mock.createFilterByName(visibleItemName); // not exact match
+            const [filterExpr] = mock.createFilterByName(visibleItemName); // not exact match
 
-            cheListHelper.applyFilter('name', ...filter);
+            cheListHelper.applyFilter('name', filterExpr);
 
             // calculate expected number of visible items
             const re = new RegExp(visibleItemName);
@@ -366,16 +362,14 @@ describe('CheListHelper >', () => {
         describe(`items are filtered by name which contains '3' >`, () => {
           let visibleItemName;
 
-          let filter;
-
           let visibleItems;
 
           beforeEach(() => {
             // apply filter by name
             visibleItemName = '3';
-            filter = mock.createFilterByName(visibleItemName); // not exact match
+            const [filterExpr] = mock.createFilterByName(visibleItemName); // not exact match
 
-            cheListHelper.applyFilter('name', ...filter);
+            cheListHelper.applyFilter('name', filterExpr);
 
             // calculate expected number of visible items
             const re = new RegExp(visibleItemName);
@@ -430,16 +424,14 @@ describe('CheListHelper >', () => {
 
           let visibleItemName;
 
-          let filter;
-
           let visibleItems;
 
           beforeEach(() => {
             // apply filter by name
             visibleItemName = '1';
-            filter = mock.createFilterByName(visibleItemName); // not exact match
+            const [filterExpr] = mock.createFilterByName(visibleItemName); // not exact match
 
-            cheListHelper.applyFilter('name', ...filter);
+            cheListHelper.applyFilter('name', filterExpr);
 
             // calculate expected number of visible items
             const re = new RegExp(visibleItemName);

@@ -12,6 +12,8 @@
 set -e
 set -u
 
+rm -f ./index.d.ts
+
 docker run -i --rm -v "$HOME/.m2:/root/.m2" \
                    -v "$(pwd)/dto-pom.xml:/usr/src/mymaven/pom.xml" \
                    -w /usr/src/mymaven maven:3.3-jdk-8 \

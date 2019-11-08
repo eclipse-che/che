@@ -6,6 +6,7 @@ projects:
     source:
       type: git
       location: 'https://github.com/eclipse/che.git'
+      sparseCheckoutDir: /workspace-loader/
 components:
   - alias: theia-editor
     type: cheEditor

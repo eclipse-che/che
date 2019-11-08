@@ -17,6 +17,7 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIO
 import java.util.Map;
 import org.eclipse.che.api.core.factory.FactoryParameter;
 import org.eclipse.che.api.core.model.workspace.config.Command;
+import org.eclipse.che.api.workspace.shared.dto.devfile.PreviewUrlDto;
 import org.eclipse.che.dto.shared.DTO;
 
 /** @author Alexander Garagatyi */
@@ -54,4 +55,11 @@ public interface CommandDto extends Command {
   void setAttributes(Map<String, String> attributes);
 
   CommandDto withAttributes(Map<String, String> attributes);
+
+  @Override
+  PreviewUrlDto getPreviewUrl();
+
+  void setPreviewUrl(PreviewUrlDto previewUrl);
+
+  CommandDto withPreviewUrl(PreviewUrlDto previewUrl);
 }

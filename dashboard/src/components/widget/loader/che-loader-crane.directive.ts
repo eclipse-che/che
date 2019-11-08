@@ -1,3 +1,4 @@
+import { IAugmentedJQuery } from 'angular';
 /*
  * Copyright (c) 2015-2018 Red Hat, Inc.
  * This program and the accompanying materials are made
@@ -54,7 +55,7 @@ export class CheLoaderCrane implements ng.IDirective {
   link($scope: ICheLoaderCraneScope, $element: ng.IAugmentedJQuery): void {
     const jqCraneScaleWrap = $element.find('.che-loader-crane-scale-wrapper'),
       jqCreateProjectContentPage = angular.element('#create-project-content-page'),
-      jqBody = angular.element(document).find('body');
+      jqBody = $element.closest('body');
 
     const stepsNumber = $scope.allSteps.length - $scope.excludeSteps.length;
     const loader = new Loader(this.$q, this.$timeout, $element, stepsNumber, $scope.switchOnIteration);

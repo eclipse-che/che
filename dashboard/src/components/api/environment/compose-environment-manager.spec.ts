@@ -139,7 +139,7 @@ describe('ComposeEnvironmentManager', () => {
 
       // machine's attributes are more preferable than recipe to get memory limit
       let expectedMemoryLimit = environment.machines[testMachine.name].attributes.memoryLimitBytes;
-      expect(memoryLimit.toString()).toEqual(expectedMemoryLimit);
+      expect(memoryLimit.toString()).toEqual(expectedMemoryLimit.toString());
     });
 
     it('from recipe', () => {
@@ -209,7 +209,7 @@ describe('ComposeEnvironmentManager', () => {
       let memoryLimit = envManager.getMemoryLimit(machines[0]);
 
       let expectedMemoryLimit = environment.machines['dev-machine'].attributes.memoryLimitBytes;
-      expect(memoryLimit.toString()).toEqual(expectedMemoryLimit);
+      expect(memoryLimit.toString()).toEqual(expectedMemoryLimit.toString());
     });
 
   });
