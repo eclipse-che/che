@@ -119,7 +119,7 @@ public class KeycloakEnvironmentInitializationFilter
       String id = claims.getSubject();
 
       String email =
-          retrieveEmail(token, claims, username, id)
+          retrieveEmail(token, claims, id)
               .orElseThrow(
                   () ->
                       new JwtException(
@@ -139,7 +139,7 @@ public class KeycloakEnvironmentInitializationFilter
     sendError(response, 401, "Authorization token is missing");
   }
 
-  private Optional<String> retrieveEmail(String token, Claims claims, String username, String id)
+  private Optional<String> retrieveEmail(String token, Claims claims, String id)
       throws ServerException {
     String email = claims.get("email", String.class);
 
