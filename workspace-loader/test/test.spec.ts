@@ -154,7 +154,7 @@ describe('If an IDE server is not defined in workspace config then workspace-loa
         spyOn(workspaceLoader, 'getWorkspace').and.callFake(() =>
             new Promise(resolve => {
                 workspaceConfig.status = 'RUNNING';
-                workspaceConfig.config.environments['default'].machines = {};
+                workspaceConfig.config!.environments!['default'].machines = {};
                 workspaceConfig.runtime = {} as che.workspace.Runtime;
                 resolve(workspaceConfig);
             }));
@@ -165,7 +165,7 @@ describe('If an IDE server is not defined in workspace config then workspace-loa
     });
 
     it('should open IDE directly', () => {
-        expect(workspaceLoader.openURL).toHaveBeenCalledWith(workspaceConfig.links.ide);
+        expect(workspaceLoader.openURL).toHaveBeenCalledWith(workspaceConfig.links!.ide);
     });
 });
 
@@ -264,7 +264,7 @@ describe.only('If workspace status is changed from STARTING to STOPPING then wor
                 addListener: () => { },
                 subscribeEnvironmentOutput: () => { },
                 subscribeInstallerOutput: () => { },
-                subscribeWorkspaceStatus: (_workspaceId, callback) => {
+                subscribeWorkspaceStatus: (_workspaceId: string, callback: any) => {
                     statusChangeCallback = callback;
                 }
             });
@@ -320,7 +320,7 @@ describe('If workspace status is changed from STOPPING to STOPPED then workspace
                 addListener: () => { },
                 subscribeEnvironmentOutput: () => { },
                 subscribeInstallerOutput: () => { },
-                subscribeWorkspaceStatus: (_workspaceId, callback) => {
+                subscribeWorkspaceStatus: (_workspaceId: string, callback: any) => {
                     statusChangeCallback = callback;
                 }
             });
@@ -399,7 +399,7 @@ describe('If websocket connection to master API is established when workspace is
         });
         spyOn((<any>workspaceLoader), 'connectMasterApi').and.callFake(() =>
             Promise.resolve({
-                addListener: (_eventName, callback) => {
+                addListener: (_eventName: string, callback: any) => {
                     onOpenCallback = callback;
                 },
                 subscribeEnvironmentOutput: () => { },
@@ -439,7 +439,7 @@ describe('If workspace status is changed to RUNNING then workspace-loader', () =
                 addListener: () => { },
                 subscribeEnvironmentOutput: () => { },
                 subscribeInstallerOutput: () => { },
-                subscribeWorkspaceStatus: (_workspaceId, callback) => {
+                subscribeWorkspaceStatus: (_workspaceId: string, callback: any) => {
                     statusChangeCallback = callback;
                 }
             });
@@ -598,7 +598,7 @@ describe('If workspace gets an error status on start then workspace-loader', () 
                 addListener: () => { },
                 subscribeEnvironmentOutput: () => { },
                 subscribeInstallerOutput: () => { },
-                subscribeWorkspaceStatus: (_workspaceId, callback) => {
+                subscribeWorkspaceStatus: (_workspaceId: string, callback: any) => {
                     statusChangeCallback = callback;
                 }
             });
@@ -642,13 +642,17 @@ function testLoaderIsHidden() {
         const workspaceLoaderLabel = document.getElementById('workspace-loader-label');
 
         expect(workspaceLoaderLabel).toBeTruthy();
-        expect(workspaceLoaderLabel.style.display).toEqual('none');
+        expect(workspaceLoaderLabel!.style.display).toEqual('none');
     });
 }
 
 function testProgressBarIsHidden() {
     it('should hide loader and progress bar', () => {
         const workspaceLoaderProgress = document.getElementById('workspace-loader-progress');
+        if (!workspaceLoaderProgress) {
+            fail('Failed to get workspace-loader-progress element');
+            return;
+        }
 
         expect(workspaceLoaderProgress.style.display).toBeTruthy();
         expect(workspaceLoaderProgress.style.display).toEqual('none');
@@ -660,6 +664,6 @@ function testPromptIsShown() {
         const workspaceLoaderReload = document.getElementById('workspace-loader-reload');
 
         expect(workspaceLoaderReload).toBeTruthy();
-        expect(workspaceLoaderReload.style.display).not.toEqual('none');
+        expect(workspaceLoaderReload!.style.display).not.toEqual('none');
     });
 }

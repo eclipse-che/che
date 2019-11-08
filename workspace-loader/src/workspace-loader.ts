@@ -75,8 +75,8 @@ export class WorkspaceLoader {
      * Returns base websocket URL.
      */
     websocketBaseURL(): string {
-        const wsProtocol = 'http:' === document.location.protocol ? 'ws' : 'wss';
-        return wsProtocol + '://' + document.location.host;
+        const wsProtocol = 'http:' === document.location!.protocol ? 'ws' : 'wss';
+        return wsProtocol + '://' + document.location!.host;
     }
 
     /**
@@ -133,7 +133,7 @@ export class WorkspaceLoader {
     }
 
     private getRequestErrorMessage(xhr: XMLHttpRequest): string {
-        let errorMessage: string;
+        let errorMessage: string | undefined;
         try {
             const response = JSON.parse(xhr.responseText);
             errorMessage = response.message;
@@ -183,8 +183,10 @@ export class WorkspaceLoader {
      *
      * @param message
      */
-    private onLogOutput(message: che.workspace.event.RuntimeLogEvent | che.workspace.event.InstallerLogEvent): void {
-        this.loader.log(message.text);
+    private onLogOutput(message: che.workspace.event.RuntimeLogEvent): void {
+        if (message.text) {
+            this.loader.log(message.text);
+        }
     }
 
     /**
@@ -242,21 +244,17 @@ export class WorkspaceLoader {
      */
     private subscribeWorkspaceEvents(masterApi: CheJsonRpcMasterApi): void {
         masterApi.subscribeEnvironmentOutput(
-            this.workspace.id,
+            this.workspace.id!,
             (message: che.workspace.event.RuntimeLogEvent) => this.onLogOutput(message)
         );
-        masterApi.subscribeInstallerOutput(
-            this.workspace.id,
-            (message: che.workspace.event.InstallerLogEvent) => this.onLogOutput(message)
-        );
         masterApi.subscribeWorkspaceStatus(
-            this.workspace.id,
+            this.workspace.id!,
             (message: che.workspace.event.WorkspaceStatusEvent) => this.onWorkspaceStatus(message)
         );
     }
 
     private async checkWorkspaceRuntime(): Promise<void> {
-        const workspace = await this.getWorkspace(this.workspace.id);
+        const workspace = await this.getWorkspace(this.workspace.id!);
 
         if (workspace.status !== 'RUNNING') {
             throw new Error('Workspace is NOT RUNNING yet.');
@@ -270,19 +268,27 @@ export class WorkspaceLoader {
      * Opens IDE for the workspace.
      */
     async openIDE(): Promise<void> {
-        const workspace = await this.getWorkspace(this.workspace.id);
-        const machines = workspace.runtime.machines || [];
+        const workspace = await this.getWorkspace(this.workspace.id!);
+        if (!workspace.runtime) {
+            throw new Error('Running workspace is expected to be able to open an IDE');
+        }
+        const machines = workspace.runtime.machines || {};
         for (const machineName of Object.keys(machines)) {
-            const servers = machines[machineName].servers || [];
+            const servers = machines[machineName].servers || {};
             for (const serverId of Object.keys(servers)) {
                 const attributes = servers[serverId].attributes;
-                if (attributes['type'] === 'ide') {
+                if (attributes && attributes['type'] === 'ide') {
                     this.openURL(servers[serverId].url + this.getQueryString());
                     return;
                 }
             }
         }
-        this.openURL(workspace.links.ide + this.getQueryString());
+
+        if (workspace.links) {
+            this.openURL(workspace.links.ide + this.getQueryString());
+        }
+
+        throw new Error('Don\'t know what to open, IDE url is not defined.');
     }
 
     /**

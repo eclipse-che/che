@@ -205,6 +205,10 @@ export class JsonRpcClient {
      */
     private processResponseMessage(message: any): void {
         const promise = this.pendingRequests.get(message.id);
+        if (!promise) {
+            return;
+        }
+
         if (message.result) {
             promise.resolve(message.result);
             return;
