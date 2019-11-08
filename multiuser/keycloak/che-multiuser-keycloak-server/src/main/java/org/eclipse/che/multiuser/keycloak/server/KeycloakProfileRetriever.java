@@ -43,6 +43,13 @@ public class KeycloakProfileRetriever {
         keycloakSettings.get().get(KeycloakConstants.USERINFO_ENDPOINT_SETTING);
   }
 
+  /**
+   * Retrieves attributes from keycloak using default request factory assuming that there is an
+   * {@code Subject} present in {@code EnvironmentContext}
+   *
+   * @return map of user attributes from keycloak
+   * @throws ServerException in an error happened
+   */
   public Map<String, String> retrieveKeycloakAttributes() throws ServerException {
     try {
       return requestFactory.fromUrl(keyclockCurrentUserInfoUrl).request().asProperties();
@@ -52,6 +59,13 @@ public class KeycloakProfileRetriever {
     }
   }
 
+  /**
+   * Retrieves attributes from keycloak using default request factory and provided authorization
+   * header for cases when no {@code Subject} set {@code EnvironmentContext}
+   *
+   * @return map of user attributes from keycloak
+   * @throws ServerException in an error happened
+   */
   public Map<String, String> retrieveKeycloakAttributes(@NotNull String authorizationHeader)
       throws ServerException {
     try {
