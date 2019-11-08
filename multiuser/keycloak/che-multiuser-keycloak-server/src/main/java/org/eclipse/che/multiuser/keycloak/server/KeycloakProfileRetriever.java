@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
@@ -45,6 +46,20 @@ public class KeycloakProfileRetriever {
   public Map<String, String> retrieveKeycloakAttributes() throws ServerException {
     try {
       return requestFactory.fromUrl(keyclockCurrentUserInfoUrl).request().asProperties();
+    } catch (IOException | ApiException e) {
+      LOG.warn("Exception during retrieval of the Keycloak user profile", e);
+      throw new ServerException("Exception during retrieval of the Keycloak user profile", e);
+    }
+  }
+
+  public Map<String, String> retrieveKeycloakAttributes(@NotNull String authorizationHeader)
+      throws ServerException {
+    try {
+      return requestFactory
+          .fromUrl(keyclockCurrentUserInfoUrl)
+          .setAuthorizationHeader(authorizationHeader)
+          .request()
+          .asProperties();
     } catch (IOException | ApiException e) {
       LOG.warn("Exception during retrieval of the Keycloak user profile", e);
       throw new ServerException("Exception during retrieval of the Keycloak user profile", e);

@@ -21,7 +21,6 @@ import io.jsonwebtoken.JwtParser;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.FilterChain;
@@ -29,14 +28,10 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
-import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
-import org.eclipse.che.api.core.rest.HttpJsonRequest;
-import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -61,6 +56,7 @@ public class KeycloakEnvironmentInitializationFilter
       LoggerFactory.getLogger(KeycloakEnvironmentInitializationFilter.class);
 
   private final KeycloakUserManager userManager;
+  private final KeycloakProfileRetriever keycloakProfileRetriever;
   private final PermissionChecker permissionChecker;
   private final KeycloakSettings keycloakSettings;
   private final JwtParser jwtParser;
@@ -70,12 +66,14 @@ public class KeycloakEnvironmentInitializationFilter
       SessionStore sessionStore,
       JwtParser jwtParser,
       KeycloakUserManager userManager,
+      KeycloakProfileRetriever keycloakProfileRetriever,
       RequestTokenExtractor tokenExtractor,
       PermissionChecker permissionChecker,
       KeycloakSettings settings) {
     super(sessionStore, tokenExtractor);
     this.jwtParser = jwtParser;
     this.userManager = userManager;
+    this.keycloakProfileRetriever = keycloakProfileRetriever;
     this.permissionChecker = permissionChecker;
     this.keycloakSettings = settings;
   }
@@ -121,7 +119,7 @@ public class KeycloakEnvironmentInitializationFilter
       String id = claims.getSubject();
 
       String email =
-          retrieveEmail(token, claims, id)
+          retrieveEmail(token, claims, username, id)
               .orElseThrow(
                   () ->
                       new JwtException(
@@ -141,7 +139,7 @@ public class KeycloakEnvironmentInitializationFilter
     sendError(response, 401, "Authorization token is missing");
   }
 
-  private Optional<String> retrieveEmail(String token, Claims claims, String id)
+  private Optional<String> retrieveEmail(String token, Claims claims, String username, String id)
       throws ServerException {
     String email = claims.get("email", String.class);
 
@@ -149,12 +147,8 @@ public class KeycloakEnvironmentInitializationFilter
       try {
         userManager.getById(id);
       } catch (NotFoundException e) {
-        KeycloakProfileRetriever keycloakProfileRetriever =
-            new KeycloakProfileRetriever(
-                keycloakSettings,
-                new KeycloakTokenHttpJsonRequestFactory(() -> token));
         Map<String, String> profileAttributes =
-            keycloakProfileRetriever.retrieveKeycloakAttributes();
+            keycloakProfileRetriever.retrieveKeycloakAttributes("Bearer " + token);
         email = profileAttributes.get("email");
       }
     }
@@ -163,23 +157,4 @@ public class KeycloakEnvironmentInitializationFilter
 
   @Override
   public void destroy() {}
-
-  private static class KeycloakTokenHttpJsonRequestFactory extends DefaultHttpJsonRequestFactory {
-
-    private final Supplier<String> tokenSupplier;
-
-    private KeycloakTokenHttpJsonRequestFactory(Supplier<String> tokenSupplier) {
-      this.tokenSupplier = tokenSupplier;
-    }
-
-    @Override
-    public HttpJsonRequest fromUrl(@NotNull String url) {
-      return super.fromUrl(url).setAuthorizationHeader("Bearer " + tokenSupplier.get());
-    }
-
-    @Override
-    public HttpJsonRequest fromLink(@NotNull Link link) {
-      return super.fromLink(link).setAuthorizationHeader("Bearer " + tokenSupplier.get());
-    }
-  }
 }

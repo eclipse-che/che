@@ -92,6 +92,7 @@ public class KeycloakEnvironmentInitializationFilterTest {
             sessionStore,
             jwtParser,
             userManager,
+            keycloakProfileRetriever,
             tokenExtractor,
             permissionChecker,
             keycloakSettings);
@@ -100,7 +101,7 @@ public class KeycloakEnvironmentInitializationFilterTest {
     keycloakAttributes.clear();
     keycloakSettingsMap.clear();
     lenient()
-        .when(keycloakProfileRetriever.retrieveKeycloakAttributes())
+        .when(keycloakProfileRetriever.retrieveKeycloakAttributes(anyString()))
         .thenReturn(keycloakAttributes);
     lenient().when(keycloakSettings.get()).thenReturn(keycloakSettingsMap);
   }
