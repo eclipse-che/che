@@ -92,7 +92,6 @@ public class KeycloakEnvironmentInitializationFilterTest {
             sessionStore,
             jwtParser,
             userManager,
-            keycloakProfileRetriever,
             tokenExtractor,
             permissionChecker,
             keycloakSettings);
