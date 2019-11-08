@@ -40,9 +40,9 @@ public class IdentityIdLoggerFilter implements Filter {
   public final void doFilter(
       ServletRequest request, ServletResponse response, FilterChain filterChain)
       throws IOException, ServletException {
-      Subject subject = EnvironmentContext.getCurrent().getSubject();
-      if (subject != null && subject.getUserId() != null) {
-        MDC.put(IDENTITY_ID_MDC_KEY, subject.getUserId());
+    Subject subject = EnvironmentContext.getCurrent().getSubject();
+    if (subject != null && subject.getUserId() != null) {
+      MDC.put(IDENTITY_ID_MDC_KEY, subject.getUserId());
     }
 
     try {
