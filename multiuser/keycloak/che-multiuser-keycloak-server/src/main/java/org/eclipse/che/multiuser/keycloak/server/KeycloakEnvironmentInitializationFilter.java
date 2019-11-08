@@ -151,8 +151,7 @@ public class KeycloakEnvironmentInitializationFilter
       } catch (NotFoundException e) {
         KeycloakProfileRetriever keycloakProfileRetriever =
             new KeycloakProfileRetriever(
-                keycloakSettings,
-                new KeycloakTokenHttpJsonRequestFactory(() -> token));
+                keycloakSettings, new KeycloakTokenHttpJsonRequestFactory(() -> token));
         Map<String, String> profileAttributes =
             keycloakProfileRetriever.retrieveKeycloakAttributes();
         email = profileAttributes.get("email");
