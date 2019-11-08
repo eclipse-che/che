@@ -10,6 +10,7 @@
       che-form="workspaceNameForm" che-name="workspaceName" id="workspace-name-input"
       che-place-holder="Name of the workspace" aria-label="Name of the workspace"
       ng-model="readyToGoStacksController.workspaceName"
+      che-on-change="readyToGoStacksController.onDevfileNameChange($value)"
       ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 }, allowInvalid: false }"
       required custom-validator="readyToGoStacksController.isNameUnique($value)" ng-minlength="3" ng-maxlength="100"
       ng-pattern="/^[a-z\d][a-z\d-.]+[a-z\d]$/i">

@@ -17,8 +17,6 @@ import { RandomSvc } from '../../../../components/utils/random.service';
 import { IReadyToGoStacksScopeBindings } from './ready-to-go-stacks.directive';
 import { ProjectSourceSelectorService } from './project-source-selector/project-source-selector.service';
 
-const WORKSPACE_NAME_FORM = 'workspaceName';
-
 /**
  * This class is handling the controller for predefined stacks.
  *
@@ -46,6 +44,10 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
    * The workspace name model.
    */
   workspaceName: string;
+  /**
+   * Form name
+   */
+  WORKSPACE_NAME_FORM = 'workspaceName';
 
   /**
    * Injected dependencies.
@@ -116,6 +118,15 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
    */
   registerForm(name: string, form: ng.IFormController) {
     this.forms.set(name, form);
+  }
+
+  onDevfileNameChange(newWorkspaceName: string): void {
+    const devfile = angular.copy(this.selectedDevfile);
+    devfile.metadata.name = newWorkspaceName;
+    this.onChange({
+      devfile,
+      attrs: { stackName: this.stackName }
+    });
   }
 
   /**
