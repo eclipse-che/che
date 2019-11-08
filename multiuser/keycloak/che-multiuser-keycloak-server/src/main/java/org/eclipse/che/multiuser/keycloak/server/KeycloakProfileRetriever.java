@@ -45,7 +45,7 @@ public class KeycloakProfileRetriever {
 
   /**
    * Retrieves attributes from keycloak using default request factory assuming that there is an
-   * {@code Subject} present in {@code EnvironmentContext}
+   * {@code Subject} with authorization token  present in {@code EnvironmentContext}
    *
    * @return map of user attributes from keycloak
    * @throws ServerException in an error happened
@@ -61,7 +61,7 @@ public class KeycloakProfileRetriever {
 
   /**
    * Retrieves attributes from keycloak using default request factory and provided authorization
-   * header for cases when no {@code Subject} set {@code EnvironmentContext}
+   * header for cases when no {@code Subject} set in {@code EnvironmentContext}
    *
    * @return map of user attributes from keycloak
    * @throws ServerException in an error happened
