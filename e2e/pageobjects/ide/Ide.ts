@@ -213,7 +213,7 @@ export class Ide {
 
     async checkLsInitializationStart(expectedTextInStatusBar: string) {
         Logger.debug('Ide.checkLsInitializationStart');
-        
+
         await this.waitStatusBarContains(expectedTextInStatusBar, 20000);
     }
 
