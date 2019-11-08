@@ -85,12 +85,12 @@ export class CheUIElementsInjectorService {
 
   /**
    *  Inject an additional elements if it possible.
-   * @param parentElement {string | ng.IRootElementService} - the parent DOM element for injection
-   * @param additionalElement {string | ng.IRootElementService} - the jqLite additional element
+   * @param parentElement {string | ng.IAugmentedJQuery} - the parent DOM element for injection
+   * @param additionalElement {string | ng.IAugmentedJQuery} - the jqLite additional element
    * @param scope? {ng.IScope}
    * @returns {boolean} - true if successful
    */
-  injectAdditionalElement(parentElement: string | ng.IRootElementService, additionalElement: string | ng.IRootElementService, scope?: ng.IScope): boolean {
+  injectAdditionalElement(parentElement: string | ng.IAugmentedJQuery, additionalElement: string | ng.IAugmentedJQuery, scope?: ng.IScope): boolean {
     if (!additionalElement || !parentElement) {
       return false;
     }
@@ -114,7 +114,7 @@ export class CheUIElementsInjectorService {
 
     this.deleteElementById(additionalElementId);
 
-    jqParentElement.append(compileAdditionalElement);
+    jqParentElement.append(compileAdditionalElement as any);
 
     return true;
   }

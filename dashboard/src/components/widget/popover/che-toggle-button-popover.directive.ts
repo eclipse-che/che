@@ -97,7 +97,7 @@ export class CheToggleButtonPopover implements ng.IDirective {
         }
         if (state) {
           $transclude((clonedElement: ng.IAugmentedJQuery) => {
-            $element.find('.che-transclude').replaceWith(clonedElement);
+            $element.find('.che-transclude').replaceWith(clonedElement as any);
           });
         }
       });
