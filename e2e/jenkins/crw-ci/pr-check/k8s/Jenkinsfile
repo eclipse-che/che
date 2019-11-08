@@ -43,6 +43,10 @@ pipeline {
         string(name: 'cheCustomResourceUrl',
                 defaultValue: "http://raw.githubusercontent.com/eclipse/che-operator/${ghprbSourceBranch}/deploy/crds/org_v1_che_cr.yaml",
                 description: 'URL of Che custom resource yaml')
+
+        text(name: 'customResource',
+              description: 'Custom resource yaml content'
+        )
     }
 
     stages {
