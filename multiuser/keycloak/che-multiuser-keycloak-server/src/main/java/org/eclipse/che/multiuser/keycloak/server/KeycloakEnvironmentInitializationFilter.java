@@ -145,14 +145,11 @@ public class KeycloakEnvironmentInitializationFilter
     String email = claims.get("email", String.class);
 
     if (isNullOrEmpty(email)) {
-      boolean userNotFound = false;
       try {
         userManager.getById(id);
       } catch (NotFoundException e) {
-        userNotFound = true;
-      }
-      if (userNotFound) {
         try {
+          // prepare context to make correctly signed request to the keycloak ro retrieve profile
           EnvironmentContext.getCurrent().setSubject(new SubjectImpl(username, id, token, true));
           Map<String, String> profileAttributes =
               keycloakProfileRetriever.retrieveKeycloakAttributes();
