@@ -9,7 +9,7 @@
 # Build step: $ docker build -t eclipse-che-workspace-loader .
 # It builds an archive file that can be used by doing later
 #  $ docker run --rm eclipse-che-workspace-loader | tar -C target/ -zxf -
-FROM node:6.11.5
+FROM node:8.16.2
 
 RUN npm i -g yarn@1.9.4
 

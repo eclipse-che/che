@@ -19,25 +19,25 @@ export class Loader {
     constructor() {
         /** Show the loader */
         setTimeout(() => {
-            document.getElementById('workspace-loader').style.display = 'block';
+            document.getElementById('workspace-loader')!.style.display = 'block';
             setTimeout(() => {
-                document.getElementById('workspace-loader').style.opacity = '1';
+                document.getElementById('workspace-loader')!.style.opacity = '1';
             }, 1);
         }, 1);
 
         /** Add click handler to maximize output */
-        document.getElementById('workspace-console').onclick = () => this.onclickConsole();
+        document.getElementById('workspace-console')!.onclick = () => this.onclickConsole();
 
-        document.getElementById('workspace-loader-reload').onclick = () => this.onclickReload();
+        document.getElementById('workspace-loader-reload')!.onclick = () => this.onclickReload();
     }
 
     hideLoader(): void {
-        document.getElementById('workspace-loader-label').style.display = 'none';
-        document.getElementById('workspace-loader-progress').style.display = 'none';
+        document.getElementById('workspace-loader-label')!.style.display = 'none';
+        document.getElementById('workspace-loader-progress')!.style.display = 'none';
     }
 
     showReload(): void {
-        document.getElementById('workspace-loader-reload').style.display = 'block';
+        document.getElementById('workspace-loader-reload')!.style.display = 'block';
     }
 
     /**
@@ -46,8 +46,8 @@ export class Loader {
      * @param message message to log
      */
     log(message: string): HTMLElement {
-        const container = document.getElementById('workspace-console-container');
-        if (container.childElementCount > 500) {
+        const container = document.getElementById('workspace-console-container')!;
+        if (container.firstChild && container.childElementCount > 500) {
             container.removeChild(container.firstChild);
         }
 
@@ -71,12 +71,12 @@ export class Loader {
     }
 
     onclickConsole(): void {
-        if (document.getElementById('workspace-loader').hasAttribute('max')) {
-            document.getElementById('workspace-loader').removeAttribute('max');
-            document.getElementById('workspace-console').removeAttribute('max');
+        if (document.getElementById('workspace-loader')!.hasAttribute('max')) {
+            document.getElementById('workspace-loader')!.removeAttribute('max');
+            document.getElementById('workspace-console')!.removeAttribute('max');
         } else {
-            document.getElementById('workspace-loader').setAttribute('max', '');
-            document.getElementById('workspace-console').setAttribute('max', '');
+            document.getElementById('workspace-loader')!.setAttribute('max', '');
+            document.getElementById('workspace-console')!.setAttribute('max', '');
         }
     }
 
