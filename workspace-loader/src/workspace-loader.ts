@@ -305,7 +305,7 @@ export class WorkspaceLoader {
         }, 100);
     }
 
-    setAuthorizationHeader(xhr: XMLHttpRequest): Promise<XMLHttpRequest> {
+    async setAuthorizationHeader(xhr: XMLHttpRequest): Promise<XMLHttpRequest> {
         return new Promise((resolve, reject) => {
             if (this.keycloak && this.keycloak.token) {
                 this.keycloak.updateToken(5).success(() => {
