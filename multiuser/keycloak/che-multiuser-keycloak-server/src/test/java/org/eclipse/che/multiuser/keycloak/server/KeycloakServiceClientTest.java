@@ -20,6 +20,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import com.jayway.restassured.RestAssured;
+import io.jsonwebtoken.JwtParser;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.GET;
@@ -52,6 +53,7 @@ import org.testng.annotations.Test;
 public class KeycloakServiceClientTest {
 
   @Mock private KeycloakSettings keycloakSettings;
+  @Mock private JwtParser jwtParser;
 
   private KeycloakServiceClient keycloakServiceClient;
 
@@ -63,7 +65,7 @@ public class KeycloakServiceClientTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    keycloakServiceClient = new KeycloakServiceClient(keycloakSettings);
+    keycloakServiceClient = new KeycloakServiceClient(keycloakSettings, jwtParser);
     Map<String, String> conf = new HashMap<>();
     conf.put(
         AUTH_SERVER_URL_SETTING,

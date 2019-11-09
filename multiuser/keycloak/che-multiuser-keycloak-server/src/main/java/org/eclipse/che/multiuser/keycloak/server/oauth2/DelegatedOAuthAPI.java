@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.multiuser.keycloak.server.oauth2;
 
-import io.jsonwebtoken.Jwt;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
@@ -26,6 +25,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakServiceClient;
 import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
@@ -57,7 +57,7 @@ public class DelegatedOAuthAPI implements OAuthAPI {
       HttpServletRequest request)
       throws BadRequestException {
 
-    Jwt jwtToken = (Jwt) request.getAttribute("token");
+    String jwtToken = EnvironmentContext.getCurrent().getSubject().getToken();
     if (jwtToken == null) {
       throw new BadRequestException("No token provided.");
     }

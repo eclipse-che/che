@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -41,6 +42,7 @@ import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
+import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.eclipse.che.multiuser.machine.authentication.shared.Constants;
@@ -102,6 +104,7 @@ public class MachineLoginFilterTest {
             .compact();
     machineLoginFilter =
         new MachineLoginFilter(
+            new SessionStore(),
             tokenExtractorMock,
             userManagerMock,
             new MachineSigningKeyResolver(keyManagerMock),
@@ -118,7 +121,7 @@ public class MachineLoginFilterTest {
   public void testProcessRequestWithValidToken() throws Exception {
     machineLoginFilter.doFilter(getRequestMock(), responseMock, chainMock);
 
-    verify(keyManagerMock).getOrCreateKeyPair(eq(WORKSPACE_ID));
+    verify(keyManagerMock, atLeastOnce()).getOrCreateKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verifyZeroInteractions(responseMock);
   }
@@ -133,11 +136,11 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(requestMock, responseMock, chainMock);
 
-    verify(tokenExtractorMock).getToken(any(HttpServletRequest.class));
+    verify(tokenExtractorMock, atLeastOnce()).getToken(any(HttpServletRequest.class));
     verify(responseMock)
         .sendError(
             401,
-            "Authentication with machine token failed cause: JWT signature does not match locally computed signature."
+            "Machine token authentication failed: JWT signature does not match locally computed signature."
                 + " JWT validity cannot be asserted and should not be trusted.");
   }
 
@@ -160,11 +163,11 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(requestMock, responseMock, chainMock);
 
-    verify(tokenExtractorMock).getToken(any(HttpServletRequest.class));
+    verify(tokenExtractorMock, atLeastOnce()).getToken(any(HttpServletRequest.class));
     verify(responseMock)
         .sendError(
             401,
-            "Authentication with machine token failed cause: Unable to fetch signature key pair: no workspace id present in token");
+            "Machine token authentication failed: Unable to fetch signature key pair: no workspace id present in token");
   }
 
   @Test
@@ -174,7 +177,7 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(requestMock, responseMock, chainMock);
 
-    verify(tokenExtractorMock).getToken(any(HttpServletRequest.class));
+    verify(tokenExtractorMock, atLeastOnce()).getToken(any(HttpServletRequest.class));
     verify(chainMock).doFilter(requestMock, responseMock);
     verifyZeroInteractions(keyManagerMock);
     verifyZeroInteractions(userManagerMock);
@@ -187,12 +190,10 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(getRequestMock(), responseMock, chainMock);
 
-    verify(keyManagerMock).getOrCreateKeyPair(eq(WORKSPACE_ID));
+    verify(keyManagerMock, atLeastOnce()).getOrCreateKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verify(responseMock)
-        .sendError(
-            401,
-            "Authentication with machine token failed because user for this token no longer exist.");
+        .sendError(401, "Machine token authentication failed: Corresponding user doesn't exist.");
   }
 
   @Test
@@ -201,11 +202,10 @@ public class MachineLoginFilterTest {
 
     machineLoginFilter.doFilter(getRequestMock(), responseMock, chainMock);
 
-    verify(keyManagerMock).getOrCreateKeyPair(eq(WORKSPACE_ID));
+    verify(keyManagerMock, atLeastOnce()).getOrCreateKeyPair(eq(WORKSPACE_ID));
     verify(userManagerMock).getById(anyString());
     verify(responseMock)
-        .sendError(
-            eq(401), argThat(s -> s.startsWith("Authentication with machine token failed cause:")));
+        .sendError(eq(401), argThat(s -> s.startsWith("Machine token authentication failed:")));
   }
 
   private HttpServletRequest getRequestMock() {
