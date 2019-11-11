@@ -71,13 +71,13 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
    */
   private usedNamesList: string[];
   /**
-   * Hide progress loader if <code>true</code>.
+   * Selected stack name.
    */
   private stackName: string;
   /**
-   * Progress loader is hidden if it's `true`.
+   * Workspace name provided by user.
    */
-  private hideLoader: boolean;
+  private providedWorkspaceName: string;
 
   /**
    * Default constructor that is using resource injection
@@ -97,8 +97,6 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
 
     this.usedNamesList = [];
     this.forms = new Map();
-
-    this.hideLoader = false;
   }
 
   $onInit(): void {
@@ -106,6 +104,7 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
     this.createWorkspaceSvc.buildListOfUsedNames(this.namespaceId).then((namesList: string[]) => {
       this.usedNamesList = namesList;
       this.workspaceName = this.randomSvc.getRandString({ prefix: 'wksp-', list: this.usedNamesList });
+      this.providedWorkspaceName = this.workspaceName;
       this.reValidateName();
     });
   }
@@ -120,13 +119,9 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
     this.forms.set(name, form);
   }
 
-  onDevfileNameChange(newWorkspaceName: string): void {
-    const devfile = angular.copy(this.selectedDevfile);
-    devfile.metadata.name = newWorkspaceName;
-    this.onChange({
-      devfile,
-      attrs: { stackName: this.stackName }
-    });
+  onDevfileNameChange(newName: string): void {
+    this.providedWorkspaceName = newName;
+    this.onDevfileChange();
   }
 
   /**
@@ -166,35 +161,36 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
    * Callback which is called when stack is selected.
    */
   onDevfileSelected(devfile: che.IWorkspaceDevfile): void {
-    // tiny timeout for templates selector to be rendered
-    this.$timeout(() => {
-      this.hideLoader = true;
-    }, 10);
     this.selectedDevfile = devfile;
-    this.onChange({
-      devfile: this.updateDevfileProjects(),
-      attrs: { stackName: this.stackName }
-    });
+    this.onDevfileChange();
   }
 
   /**
    * Callback which is called when a project template is added, updated or removed.
    */
   onProjectSelectorChange(): void {
+    this.onDevfileChange();
+  }
+
+  onDevfileChange(): void {
+    const devfile = angular.copy(this.selectedDevfile);
+
+    this.updateDevfileProjects(devfile);
+    devfile.metadata.name = this.providedWorkspaceName;
+
     this.onChange({
-      devfile: this.updateDevfileProjects(),
+      devfile: devfile,
       attrs: { stackName: this.stackName }
     });
   }
 
   /**
-   * Populates initial devfile with chosen projects
+   * Populates a devfile with chosen projects
    */
-  updateDevfileProjects(): che.IWorkspaceDevfile {
+  updateDevfileProjects(devfile: che.IWorkspaceDevfile): che.IWorkspaceDevfile {
     // projects to add to current devfile
     const projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
-    const devfile = angular.copy(this.selectedDevfile);
     devfile.projects = projectTemplates;
 
     // check if some of added projects are defined in initial devfile
