@@ -17,7 +17,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.commons.annotation.Traced;
@@ -57,12 +57,12 @@ public class ServersConverter<T extends KubernetesEnvironment>
 
   @Override
   @Traced
-  public void provision(T k8sEnv, RuntimeTarget target) throws InfrastructureException {
+  public void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(target.getIdentity()::getWorkspaceId);
+    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     SecureServerExposer<T> secureServerExposer =
-        secureServerExposerFactoryProvider.get(k8sEnv).create(target.getIdentity());
+        secureServerExposerFactoryProvider.get(k8sEnv).create(identity);
 
     for (PodData podConfig : k8sEnv.getPodsData().values()) {
       final PodSpec podSpec = podConfig.getSpec();

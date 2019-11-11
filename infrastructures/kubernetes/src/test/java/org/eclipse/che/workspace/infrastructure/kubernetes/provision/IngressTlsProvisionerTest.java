@@ -27,7 +27,7 @@ import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
@@ -51,7 +51,7 @@ public class IngressTlsProvisionerTest {
 
   public static final String WORKSPACE_ID = "workspace123";
   @Mock private KubernetesEnvironment k8sEnv;
-  @Mock private RuntimeTarget runtimeTarget;
+  @Mock private RuntimeIdentity runtimeIdentity;
 
   private final ServerConfigImpl httpServer =
       new ServerConfigImpl("8080/tpc", "http", "/api", emptyMap());
@@ -82,7 +82,7 @@ public class IngressTlsProvisionerTest {
 
   @BeforeMethod
   public void setUp() {
-    lenient().when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn(WORKSPACE_ID);
+    lenient().when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
   }
 
   @Test
@@ -91,7 +91,7 @@ public class IngressTlsProvisionerTest {
     IngressTlsProvisioner ingressTlsProvisioner = new IngressTlsProvisioner(false, "", "", "");
 
     // when
-    ingressTlsProvisioner.provision(k8sEnv, runtimeTarget);
+    ingressTlsProvisioner.provision(k8sEnv, runtimeIdentity);
 
     // then
     verify(k8sEnv, never()).getIngresses();
@@ -108,7 +108,7 @@ public class IngressTlsProvisionerTest {
     when(k8sEnv.getIngresses()).thenReturn(ingresses);
 
     // when
-    ingressTlsProvisioner.provision(k8sEnv, runtimeTarget);
+    ingressTlsProvisioner.provision(k8sEnv, runtimeIdentity);
 
     // then
     assertEquals(ingress.getSpec().getTls().size(), 1);
@@ -129,7 +129,7 @@ public class IngressTlsProvisionerTest {
     when(k8sEnv.getIngresses()).thenReturn(ingresses);
 
     // when
-    ingressTlsProvisioner.provision(k8sEnv, runtimeTarget);
+    ingressTlsProvisioner.provision(k8sEnv, runtimeIdentity);
 
     // then
     assertEquals(ingress.getSpec().getTls().size(), 1);
@@ -150,7 +150,7 @@ public class IngressTlsProvisionerTest {
     when(k8sEnv.getIngresses()).thenReturn(ingresses);
 
     // when
-    ingressTlsProvisioner.provision(k8sEnv, runtimeTarget);
+    ingressTlsProvisioner.provision(k8sEnv, runtimeIdentity);
 
     // then
     assertEquals(ingress.getSpec().getTls().size(), 1);
@@ -171,12 +171,11 @@ public class IngressTlsProvisionerTest {
     when(k8sEnv.getSecrets()).thenReturn(secrets);
 
     // when
-    ingressTlsProvisioner.provision(k8sEnv, runtimeTarget);
+    ingressTlsProvisioner.provision(k8sEnv, runtimeIdentity);
 
     // then
     assertEquals(k8sEnv.getSecrets().size(), 1);
-    Secret tlsSecret =
-        k8sEnv.getSecrets().get(runtimeTarget.getIdentity().getWorkspaceId() + "-ws-tls-secret");
+    Secret tlsSecret = k8sEnv.getSecrets().get(runtimeIdentity.getWorkspaceId() + "-ws-tls-secret");
     assertNotNull(tlsSecret);
     assertEquals(tlsSecret.getStringData().get("tls.crt"), "cert");
     assertEquals(tlsSecret.getStringData().get("tls.key"), "key");

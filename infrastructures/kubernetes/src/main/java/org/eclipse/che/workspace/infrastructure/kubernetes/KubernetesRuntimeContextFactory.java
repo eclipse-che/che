@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
@@ -19,6 +19,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 public interface KubernetesRuntimeContextFactory {
   KubernetesRuntimeContext<KubernetesEnvironment> create(
       KubernetesEnvironment kubernetesEnvironment,
-      RuntimeTarget target,
+      RuntimeIdentity identity,
       RuntimeInfrastructure infrastructure);
 }

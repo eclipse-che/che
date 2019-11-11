@@ -32,4 +32,9 @@ public interface RuntimeIdentityDto extends RuntimeIdentity {
   String getOwnerId();
 
   RuntimeIdentityDto withOwnerId(String ownerId);
+
+  @Override
+  String getInfrastructureNamespace();
+
+  RuntimeIdentityDto withInfrastructureNamespace(String infrastructureNamespace);
 }

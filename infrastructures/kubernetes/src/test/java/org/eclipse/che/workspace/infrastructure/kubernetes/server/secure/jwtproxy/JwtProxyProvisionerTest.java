@@ -68,7 +68,7 @@ public class JwtProxyProvisionerTest {
   private static final Pattern JWTPROXY_SERVICE_NAME_PATTERN =
       Pattern.compile(SERVER_PREFIX + "\\w{" + SERVER_UNIQUE_PART_SIZE + "}-jwtproxy");
   private final RuntimeIdentity runtimeId =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env123", "owner123");
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env123", "owner123", "infraNamespace");
 
   @Mock private SignatureKeyManager signatureKeyManager;
   @Mock private PublicKey publicKey;

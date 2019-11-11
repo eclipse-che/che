@@ -18,7 +18,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
@@ -47,10 +46,10 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
       KubernetesRuntimeFactory<T> runtimeFactory,
       KubernetesRuntimeStateCache runtimeStatuses,
       @Assisted T kubernetesEnvironment,
-      @Assisted RuntimeTarget target,
+      @Assisted RuntimeIdentity identity,
       @Assisted RuntimeInfrastructure infrastructure)
       throws ValidationException, InfrastructureException {
-    super(kubernetesEnvironment, target, infrastructure);
+    super(kubernetesEnvironment, identity, infrastructure);
     this.namespaceFactory = namespaceFactory;
     this.runtimeFactory = runtimeFactory;
     this.websocketOutputEndpoint = cheWebsocketEndpoint;
@@ -74,7 +73,7 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
 
     if (!runtimeStateOpt.isPresent()) {
       // there is no cached runtime, create a new one
-      return runtimeFactory.create(this, namespaceFactory.getOrCreate(getTarget()));
+      return runtimeFactory.create(this, namespaceFactory.getOrCreate(getIdentity()));
     }
 
     // there is cached runtime, restore cached one

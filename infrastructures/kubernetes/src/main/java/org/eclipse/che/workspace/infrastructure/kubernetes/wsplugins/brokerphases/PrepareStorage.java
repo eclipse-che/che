@@ -17,7 +17,7 @@ import com.google.common.annotations.Beta;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import java.util.List;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.commons.tracing.TracingTags;
@@ -35,19 +35,19 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 @Beta
 public class PrepareStorage extends BrokerPhase {
 
-  private final RuntimeTarget target;
+  private final RuntimeIdentity identity;
   private final KubernetesEnvironment brokerEnvironment;
   private final WorkspaceVolumesStrategy volumesStrategy;
   private final StartSynchronizer startSynchronizer;
   private final Tracer tracer;
 
   public PrepareStorage(
-      RuntimeTarget target,
+      RuntimeIdentity identity,
       KubernetesEnvironment brokerEnvironment,
       WorkspaceVolumesStrategy volumesStrategy,
       StartSynchronizer startSynchronizer,
       Tracer tracer) {
-    this.target = target;
+    this.identity = identity;
     this.brokerEnvironment = brokerEnvironment;
     this.volumesStrategy = volumesStrategy;
     this.startSynchronizer = startSynchronizer;
@@ -57,10 +57,11 @@ public class PrepareStorage extends BrokerPhase {
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
     Span tracingSpan = tracer.buildSpan(PREPARE_STORAGE_PHASE).start();
-    TracingTags.WORKSPACE_ID.set(tracingSpan, target.getIdentity().getWorkspaceId());
+    TracingTags.WORKSPACE_ID.set(tracingSpan, identity.getWorkspaceId());
 
     try {
-      volumesStrategy.prepare(brokerEnvironment, target, startSynchronizer.getStartTimeoutMillis());
+      volumesStrategy.prepare(
+          brokerEnvironment, identity, startSynchronizer.getStartTimeoutMillis());
     } catch (InfrastructureException e) {
       TracingTags.setErrorStatus(tracingSpan, e);
       throw e;

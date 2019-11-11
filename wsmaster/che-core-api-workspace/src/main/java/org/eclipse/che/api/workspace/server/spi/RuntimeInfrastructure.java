@@ -19,7 +19,6 @@ import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 
@@ -91,42 +90,44 @@ public abstract class RuntimeInfrastructure {
    * </ul>
    * </pre>
    *
-   * @param target the Runtime target to deploy to
+   * @param identity the runtime identity
    * @param environment incoming internal environment
    * @return new RuntimeContext object
    * @throws ValidationException if incoming environment is not valid
    * @throws InfrastructureException if any other error occurred
    */
-  public RuntimeContext prepare(RuntimeTarget target, InternalEnvironment environment)
+  public RuntimeContext prepare(RuntimeIdentity identity, InternalEnvironment environment)
       throws ValidationException, InfrastructureException {
     for (InternalEnvironmentProvisioner provisioner : internalEnvironmentProvisioners) {
-      provisioner.provision(target.getIdentity(), environment);
+      provisioner.provision(identity, environment);
     }
-    return internalPrepare(target, environment);
+    return internalPrepare(identity, environment);
   }
 
   /**
-   * Returns the namespace a workspace should be deployed into. This method should honor the {@link
-   * RuntimeTarget#getInfrastructureNamespace()} if specified. Otherwise it should figure out the
-   * default namespace based on the information in the target.
+   * Returns the namespace a workspace should be deployed into when user do not specify it.
    *
-   * @param target the runtime target specifying where the workspace should be deployed.
-   * @throws InfrastructureException on any error
+   * <p>May be used for evaluating a default namespace or for workspaces that does not have stored
+   * infrastructure namespace info(legacy workspaces).
+   *
+   * @param resolutionCtx the runtime holder specifying which user and workspace runtime targets.
+   * @throws InfrastructureException when there is no configured default namespace
+   * @throws InfrastructureException on any other error
    */
-  public abstract String getInfrastructureNamespace(RuntimeTarget target)
+  public abstract String evaluateInfraNamespace(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException;
 
   /**
    * An Infrastructure implementation should be able to prepare RuntimeContext. This method is not
    * supposed to be called by clients of class {@link RuntimeInfrastructure}.
    *
-   * @param target the Runtime target
+   * @param identity the runtime identity
    * @param environment incoming internal environment
    * @return new RuntimeContext object
    * @throws ValidationException if incoming environment is not valid
    * @throws InfrastructureException if any other error occurred
    */
   protected abstract RuntimeContext internalPrepare(
-      RuntimeTarget target, InternalEnvironment environment)
+      RuntimeIdentity identity, InternalEnvironment environment)
       throws ValidationException, InfrastructureException;
 }

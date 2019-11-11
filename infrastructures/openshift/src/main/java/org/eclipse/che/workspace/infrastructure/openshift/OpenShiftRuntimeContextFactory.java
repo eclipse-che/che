@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
@@ -19,6 +19,6 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 public interface OpenShiftRuntimeContextFactory {
   OpenShiftRuntimeContext create(
       OpenShiftEnvironment openShiftEnvironment,
-      RuntimeTarget target,
+      RuntimeIdentity identity,
       RuntimeInfrastructure infrastructure);
 }

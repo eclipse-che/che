@@ -15,7 +15,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
@@ -113,39 +112,37 @@ public class OpenShiftEnvironmentProvisioner
 
   @Override
   @Traced
-  public void provision(OpenShiftEnvironment osEnv, RuntimeTarget target)
+  public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-
-    RuntimeIdentity identity = target.getIdentity();
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     LOG.debug(
         "Start provisioning OpenShift environment for workspace '{}'", identity.getWorkspaceId());
     // 1 stage - update environment according Infrastructure specific
     if (pvcEnabled) {
-      logsVolumeMachineProvisioner.provision(osEnv, target);
+      logsVolumeMachineProvisioner.provision(osEnv, identity);
     }
 
     // 2 stage - converting Che model env to OpenShift env
-    serversConverter.provision(osEnv, target);
+    serversConverter.provision(osEnv, identity);
     previewUrlExposer.expose(osEnv);
-    envVarsConverter.provision(osEnv, target);
+    envVarsConverter.provision(osEnv, identity);
     if (pvcEnabled) {
-      volumesStrategy.provision(osEnv, target);
+      volumesStrategy.provision(osEnv, identity);
     }
 
     // 3 stage - add OpenShift env items
-    restartPolicyRewriter.provision(osEnv, target);
-    uniqueNamesProvisioner.provision(osEnv, target);
-    routeTlsProvisioner.provision(osEnv, target);
-    ramLimitProvisioner.provision(osEnv, target);
-    podTerminationGracePeriodProvisioner.provision(osEnv, target);
-    imagePullSecretProvisioner.provision(osEnv, target);
-    proxySettingsProvisioner.provision(osEnv, target);
-    serviceAccountProvisioner.provision(osEnv, target);
-    certificateProvisioner.provision(osEnv, target);
-    vcsSshKeysProvisioner.provision(osEnv, target);
-    gitUserProfileProvisioner.provision(osEnv, target);
+    restartPolicyRewriter.provision(osEnv, identity);
+    uniqueNamesProvisioner.provision(osEnv, identity);
+    routeTlsProvisioner.provision(osEnv, identity);
+    ramLimitProvisioner.provision(osEnv, identity);
+    podTerminationGracePeriodProvisioner.provision(osEnv, identity);
+    imagePullSecretProvisioner.provision(osEnv, identity);
+    proxySettingsProvisioner.provision(osEnv, identity);
+    serviceAccountProvisioner.provision(osEnv, identity);
+    certificateProvisioner.provision(osEnv, identity);
+    vcsSshKeysProvisioner.provision(osEnv, identity);
+    gitUserProfileProvisioner.provision(osEnv, identity);
     LOG.debug(
         "Provisioning OpenShift environment done for workspace '{}'", identity.getWorkspaceId());
   }

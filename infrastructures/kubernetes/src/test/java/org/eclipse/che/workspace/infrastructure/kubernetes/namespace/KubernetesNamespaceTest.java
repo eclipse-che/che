@@ -27,6 +27,7 @@ import static org.testng.Assert.assertNotNull;
 import io.fabric8.kubernetes.api.model.DoneableNamespace;
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.NamespaceFluent.MetadataNested;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -279,6 +280,9 @@ public class KubernetesNamespaceTest {
   private Resource prepareNamespaceResource(String namespaceName) {
     Resource namespaceResource = mock(Resource.class);
     doReturn(namespaceResource).when(namespaceOperation).withName(namespaceName);
+    when(namespaceResource.get())
+        .thenReturn(
+            new NamespaceBuilder().withNewMetadata().withName(namespaceName).endMetadata().build());
     kubernetesClient.namespaces().withName(namespaceName).get();
     return namespaceResource;
   }

@@ -62,14 +62,11 @@ public class KubernetesRuntimeState {
   public KubernetesRuntimeState() {}
 
   public KubernetesRuntimeState(
-      RuntimeIdentity runtimeIdentity,
-      String namespace,
-      WorkspaceStatus status,
-      List<? extends Command> commands) {
+      RuntimeIdentity runtimeIdentity, WorkspaceStatus status, List<? extends Command> commands) {
     this.envName = runtimeIdentity.getEnvName();
     this.workspaceId = runtimeIdentity.getWorkspaceId();
     this.ownerId = runtimeIdentity.getOwnerId();
-    this.namespace = namespace;
+    this.namespace = runtimeIdentity.getInfrastructureNamespace();
     this.status = status;
     if (commands != null) {
       this.commands =
@@ -78,7 +75,7 @@ public class KubernetesRuntimeState {
   }
 
   public KubernetesRuntimeState(KubernetesRuntimeState entity) {
-    this(entity.getRuntimeId(), entity.getNamespace(), entity.getStatus(), entity.getCommands());
+    this(entity.getRuntimeId(), entity.getStatus(), entity.getCommands());
   }
 
   public String getNamespace() {
@@ -86,7 +83,7 @@ public class KubernetesRuntimeState {
   }
 
   public RuntimeIdentity getRuntimeId() {
-    return new RuntimeIdentityImpl(workspaceId, envName, ownerId);
+    return new RuntimeIdentityImpl(workspaceId, envName, ownerId, namespace);
   }
 
   public WorkspaceStatus getStatus() {
@@ -122,13 +119,13 @@ public class KubernetesRuntimeState {
     return Objects.equals(workspaceId, that.workspaceId)
         && Objects.equals(envName, that.envName)
         && Objects.equals(ownerId, that.ownerId)
-        && Objects.equals(getNamespace(), that.getNamespace())
+        && Objects.equals(namespace, that.namespace)
         && getStatus() == that.getStatus();
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(workspaceId, envName, ownerId, getNamespace(), getStatus());
+    return Objects.hash(workspaceId, envName, ownerId, namespace, getStatus());
   }
 
   @Override

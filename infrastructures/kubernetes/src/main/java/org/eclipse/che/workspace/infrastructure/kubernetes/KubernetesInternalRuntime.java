@@ -180,29 +180,30 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // Tooling side car provisioner should be applied before other provisioners
       // because new machines may be provisioned there
       toolingProvisioner.provision(
-          context.getTarget(), startSynchronizer, context.getEnvironment());
+          context.getIdentity(), startSynchronizer, context.getEnvironment());
 
       startSynchronizer.checkFailure();
 
       // Workspace API provisioners should be reapplied here to bring needed
       // changed into new machines that came during tooling provisioning
       for (InternalEnvironmentProvisioner envProvisioner : internalEnvironmentProvisioners) {
-        envProvisioner.provision(context.getTarget().getIdentity(), context.getEnvironment());
+        envProvisioner.provision(context.getIdentity(), context.getEnvironment());
       }
 
       // commands might be updated during provisioning
-      runtimeStates.updateCommands(
-          context.getTarget().getIdentity(), context.getEnvironment().getCommands());
+      runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
 
       // Infrastructure specific provisioner should be applied last
       // because it converts all Workspace API model objects that comes
       // from previous provisioners into infrastructure specific objects
-      kubernetesEnvironmentProvisioner.provision(context.getEnvironment(), context.getTarget());
+      kubernetesEnvironmentProvisioner.provision(context.getEnvironment(), context.getIdentity());
 
       LOG.debug("Provisioning of workspace '{}' completed.", workspaceId);
 
       volumesStrategy.prepare(
-          context.getEnvironment(), context.getTarget(), startSynchronizer.getStartTimeoutMillis());
+          context.getEnvironment(),
+          context.getIdentity(),
+          startSynchronizer.getStartTimeoutMillis());
 
       startSynchronizer.checkFailure();
 
@@ -732,7 +733,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     if (!runtimeStates.putIfAbsent(
         new KubernetesRuntimeState(
             getContext().getIdentity(),
-            namespace.getName(),
             WorkspaceStatus.STARTING,
             getContext().getEnvironment().getCommands()))) {
       throw new StateException("Runtime is already started");

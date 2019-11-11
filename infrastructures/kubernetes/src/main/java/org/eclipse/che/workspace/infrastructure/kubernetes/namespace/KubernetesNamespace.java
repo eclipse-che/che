@@ -165,8 +165,9 @@ public class KubernetesNamespace {
 
   private boolean isManagedInternal(KubernetesClient client) throws InfrastructureException {
     try {
-      Namespace object = client.namespaces().withName(name).get();
-      return "true".equals(object.getMetadata().getLabels().get("che-managed"));
+      Namespace namespace = client.namespaces().withName(name).get();
+      return namespace.getMetadata().getLabels() != null
+          && "true".equals(namespace.getMetadata().getLabels().get("che-managed"));
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {
         throw new InfrastructureException(

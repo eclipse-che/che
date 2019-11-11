@@ -134,7 +134,7 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
    */
   @Traced
   public void start(Map<String, String> startOptions) throws InfrastructureException {
-    TracingTags.WORKSPACE_ID.set(getContext().getTarget().getIdentity()::getWorkspaceId);
+    TracingTags.WORKSPACE_ID.set(getContext().getIdentity()::getWorkspaceId);
 
     markStarting();
     try {

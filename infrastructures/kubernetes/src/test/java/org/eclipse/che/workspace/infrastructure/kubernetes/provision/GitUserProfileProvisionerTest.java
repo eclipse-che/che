@@ -35,9 +35,9 @@ import java.util.Map;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.user.server.UserManager;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -56,7 +56,7 @@ public class GitUserProfileProvisionerTest {
 
   private KubernetesEnvironment k8sEnv;
 
-  @Mock private RuntimeTarget runtimeTarget;
+  @Mock private RuntimeIdentity runtimeIdentity;
 
   @Mock private Pod pod;
 
@@ -95,9 +95,9 @@ public class GitUserProfileProvisionerTest {
     when(user.getName()).thenReturn(null);
     when(user.getEmail()).thenReturn(null);
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeTarget);
+    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
 
-    verifyZeroInteractions(runtimeTarget);
+    verifyZeroInteractions(runtimeIdentity);
   }
 
   @Test
@@ -105,9 +105,9 @@ public class GitUserProfileProvisionerTest {
     when(preferenceManager.find(eq("id"), eq("theia-user-preferences")))
         .thenThrow(new ServerException("message"));
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeTarget);
+    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
 
-    verifyZeroInteractions(runtimeTarget);
+    verifyZeroInteractions(runtimeIdentity);
 
     List<Warning> warnings = k8sEnv.getWarnings();
 
@@ -128,9 +128,9 @@ public class GitUserProfileProvisionerTest {
     Map<String, String> preferences = singletonMap("theia-user-preferences", "{#$%}");
     when(preferenceManager.find(eq("id"), eq("theia-user-preferences"))).thenReturn(preferences);
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeTarget);
+    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
 
-    verifyZeroInteractions(runtimeTarget);
+    verifyZeroInteractions(runtimeIdentity);
 
     List<Warning> warnings = k8sEnv.getWarnings();
 
@@ -153,9 +153,9 @@ public class GitUserProfileProvisionerTest {
   public void testShouldExpectWarningWhenUserManagerThrowsServerException() throws Exception {
     when(userManager.getById(eq("id"))).thenThrow(new ServerException("message"));
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeTarget);
+    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
 
-    verifyZeroInteractions(runtimeTarget);
+    verifyZeroInteractions(runtimeIdentity);
 
     List<Warning> warnings = k8sEnv.getWarnings();
 
@@ -176,7 +176,7 @@ public class GitUserProfileProvisionerTest {
     String json = "{\"git.user.name\":\"user\",\"git.user.email\":\"email\"}";
     Map<String, String> preferences = singletonMap("theia-user-preferences", json);
     when(preferenceManager.find(eq("id"), eq("theia-user-preferences"))).thenReturn(preferences);
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn("wksp");
+    when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
 
     ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
     when(pod.getMetadata()).thenReturn(podMeta);
@@ -188,7 +188,7 @@ public class GitUserProfileProvisionerTest {
     when(container.getVolumeMounts()).thenReturn(volumeMounts);
     k8sEnv.addPod(pod);
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeTarget);
+    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
 
     assertEquals(volumeMounts.size(), 1);
 
@@ -228,7 +228,7 @@ public class GitUserProfileProvisionerTest {
   public void testShouldParseOnlyNameWhenEmailIsNotAString(String json) throws Exception {
     Map<String, String> preferences = singletonMap("theia-user-preferences", json);
     when(preferenceManager.find(eq("id"), eq("theia-user-preferences"))).thenReturn(preferences);
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn("wksp");
+    when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
 
     ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
     when(pod.getMetadata()).thenReturn(podMeta);
@@ -240,7 +240,7 @@ public class GitUserProfileProvisionerTest {
     when(container.getVolumeMounts()).thenReturn(volumeMounts);
     k8sEnv.addPod(pod);
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeTarget);
+    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
 
     assertEquals(volumeMounts.size(), 1);
 
@@ -280,7 +280,7 @@ public class GitUserProfileProvisionerTest {
   public void testShouldParseOnlyEmailWhenNameIsNotAString(String json) throws Exception {
     Map<String, String> preferences = singletonMap("theia-user-preferences", json);
     when(preferenceManager.find(eq("id"), eq("theia-user-preferences"))).thenReturn(preferences);
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn("wksp");
+    when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
 
     ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
     when(pod.getMetadata()).thenReturn(podMeta);
@@ -292,7 +292,7 @@ public class GitUserProfileProvisionerTest {
     when(container.getVolumeMounts()).thenReturn(volumeMounts);
     k8sEnv.addPod(pod);
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeTarget);
+    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
 
     assertEquals(volumeMounts.size(), 1);
 
@@ -325,7 +325,7 @@ public class GitUserProfileProvisionerTest {
         "{\"chePlugins.repositories\":{\"Plugins\":\"http://url/\",\"my\":\"https://url/plugins.json\"}, \"git.user.name\":\"user\",\"git.user.email\":\"email\"}";
     Map<String, String> preferences = singletonMap("theia-user-preferences", json);
     when(preferenceManager.find(eq("id"), eq("theia-user-preferences"))).thenReturn(preferences);
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn("wksp");
+    when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
 
     ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
     when(pod.getMetadata()).thenReturn(podMeta);
@@ -337,7 +337,7 @@ public class GitUserProfileProvisionerTest {
     when(container.getVolumeMounts()).thenReturn(volumeMounts);
     k8sEnv.addPod(pod);
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeTarget);
+    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
 
     assertEquals(volumeMounts.size(), 1);
 
@@ -368,7 +368,7 @@ public class GitUserProfileProvisionerTest {
     String json = "{}";
     Map<String, String> preferences = singletonMap("theia-user-preferences", json);
     when(preferenceManager.find(eq("id"), eq("theia-user-preferences"))).thenReturn(preferences);
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn("wksp");
+    when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
 
     ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
     when(pod.getMetadata()).thenReturn(podMeta);
@@ -385,7 +385,7 @@ public class GitUserProfileProvisionerTest {
     when(container.getVolumeMounts()).thenReturn(volumeMounts);
     k8sEnv.addPod(pod);
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeTarget);
+    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
 
     assertEquals(volumeMounts.size(), 1);
 

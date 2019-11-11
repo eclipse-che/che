@@ -32,7 +32,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Constants;
@@ -134,7 +134,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
    * UniqueNamesProvisioner}.
    *
    * @param servers servers to expose
-   * @see ConfigurationProvisioner#provision(KubernetesEnvironment, RuntimeTarget)
+   * @see ConfigurationProvisioner#provision(KubernetesEnvironment, RuntimeIdentity)
    */
   public void expose(Map<String, ? extends ServerConfig> servers) throws InfrastructureException {
     Map<String, ServerConfig> internalServers = new HashMap<>();

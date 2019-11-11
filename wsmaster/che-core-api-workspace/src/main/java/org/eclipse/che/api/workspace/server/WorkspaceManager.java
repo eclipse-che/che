@@ -48,12 +48,12 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
@@ -447,11 +447,13 @@ public class WorkspaceManager {
     // namespace stored for it. In this case, we just store the default namespace for it.
     if (isNullOrEmpty(
         workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE))) {
-      RuntimeTarget target =
-          new RuntimeTarget(workspace.getId(), EnvironmentContext.getCurrent().getSubject(), null);
+      Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
+      NamespaceResolutionContext resolutionCtx =
+          new NamespaceResolutionContext(
+              workspace.getId(), currentSubject.getUserId(), currentSubject.getUserName());
 
       try {
-        String namespace = runtimes.getInfrastructureNamespace(target);
+        String namespace = runtimes.evalInfrastructureNamespace(resolutionCtx);
         workspace.getAttributes().put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
       } catch (InfrastructureException e) {
         throw new ServerException(e);
@@ -587,12 +589,15 @@ public class WorkspaceManager {
             .build();
     workspace.getAttributes().put(CREATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
 
-    if (isNullOrEmpty(attributes.get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE))) {
-      Subject requester = EnvironmentContext.getCurrent().getSubject();
-      RuntimeTarget target = new RuntimeTarget(workspace.getId(), requester, null);
+    if (isNullOrEmpty(
+        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE))) {
+      Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
+      NamespaceResolutionContext resolutionCtx =
+          new NamespaceResolutionContext(
+              workspace.getId(), currentSubject.getUserId(), currentSubject.getUserName());
       try {
-        String namespace = runtimes.getInfrastructureNamespace(target);
-        attributes.put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
+        String namespace = runtimes.evalInfrastructureNamespace(resolutionCtx);
+        workspace.getAttributes().put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
       } catch (InfrastructureException e) {
         throw new ServerException(e);
       }

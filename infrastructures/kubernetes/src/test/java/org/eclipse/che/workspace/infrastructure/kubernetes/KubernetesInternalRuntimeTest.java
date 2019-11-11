@@ -97,7 +97,6 @@ import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbes;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
@@ -171,8 +170,7 @@ public class KubernetesInternalRuntimeTest {
   private static final String M2_NAME = WORKSPACE_POD_NAME + '/' + CONTAINER_NAME_2;
 
   private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
-  private static final RuntimeTarget TARGET = new RuntimeTarget(IDENTITY, null, "nmspc");
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1", "infraNamespace");
 
   @Mock private EventService eventService;
   @Mock private StartSynchronizerFactory startSynchronizerFactory;
@@ -384,9 +382,9 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.start(emptyMap());
 
-    verify(toolingProvisioner).provision(TARGET, startSynchronizer, k8sEnv);
+    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
     verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
-    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, TARGET);
+    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
     verify(deployments).deploy(any(Pod.class));
     verify(ingresses).create(any());
     verify(services).create(any());
@@ -421,9 +419,9 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.start(emptyMap());
 
-    verify(toolingProvisioner).provision(TARGET, startSynchronizer, k8sEnv);
+    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
     verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
-    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, TARGET);
+    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
     verify(deployments).deploy(any(Deployment.class));
     verify(ingresses).create(any());
     verify(services).create(any());
@@ -457,9 +455,9 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.start(emptyMap());
 
-    verify(toolingProvisioner).provision(TARGET, startSynchronizer, k8sEnv);
+    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
     verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
-    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, TARGET);
+    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
     verify(deployments).deploy(any(Deployment.class));
     verify(deployments).deploy(any(Pod.class));
     verify(ingresses).create(any());
@@ -747,10 +745,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(),
-            "test",
-            WorkspaceStatus.STARTING,
-            emptyList()));
+            internalRuntime.getContext().getIdentity(), WorkspaceStatus.STARTING, emptyList()));
 
     // when
     internalRuntime.markStarting();
@@ -761,10 +756,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(),
-            "test",
-            WorkspaceStatus.STARTING,
-            emptyList()));
+            internalRuntime.getContext().getIdentity(), WorkspaceStatus.STARTING, emptyList()));
 
     // when
     internalRuntime.markRunning();
@@ -778,10 +770,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(),
-            "test",
-            WorkspaceStatus.RUNNING,
-            emptyList()));
+            internalRuntime.getContext().getIdentity(), WorkspaceStatus.RUNNING, emptyList()));
 
     // when
     internalRuntime.markStopping();
@@ -799,7 +788,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(), "test", status, emptyList()));
+            internalRuntime.getContext().getIdentity(), status, emptyList()));
 
     // when
     internalRuntime.markStopping();
@@ -815,10 +804,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(),
-            "test",
-            WorkspaceStatus.STOPPING,
-            emptyList()));
+            internalRuntime.getContext().getIdentity(), WorkspaceStatus.STOPPING, emptyList()));
 
     // when
     internalRuntime.markStopped();
@@ -832,10 +818,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(),
-            "test",
-            WorkspaceStatus.RUNNING,
-            emptyList()));
+            internalRuntime.getContext().getIdentity(), WorkspaceStatus.RUNNING, emptyList()));
 
     // when
     internalRuntime.scheduleServersCheckers();
@@ -849,10 +832,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(),
-            "test",
-            WorkspaceStatus.STARTING,
-            emptyList()));
+            internalRuntime.getContext().getIdentity(), WorkspaceStatus.STARTING, emptyList()));
 
     // when
     internalRuntime.scheduleServersCheckers();
@@ -867,7 +847,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(), "test", status, emptyList()));
+            internalRuntime.getContext().getIdentity(), status, emptyList()));
 
     // when
     internalRuntime.scheduleServersCheckers();

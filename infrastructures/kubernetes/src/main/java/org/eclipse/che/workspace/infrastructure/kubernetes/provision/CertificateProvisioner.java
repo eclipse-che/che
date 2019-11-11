@@ -26,7 +26,7 @@ import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import java.util.Optional;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
@@ -64,13 +64,13 @@ public class CertificateProvisioner implements ConfigurationProvisioner<Kubernet
   }
 
   @Override
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeTarget target)
+  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     if (!isConfigured()) {
       return;
     }
     String selfSignedCertSecretName =
-        target.getIdentity().getWorkspaceId() + CHE_SELF_SIGNED_CERT_SECRET_SUFFIX;
+        identity.getWorkspaceId() + CHE_SELF_SIGNED_CERT_SECRET_SUFFIX;
     k8sEnv
         .getSecrets()
         .put(

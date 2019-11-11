@@ -25,7 +25,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
@@ -63,10 +63,10 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
 
   @Override
   @Traced
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeTarget target)
+  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(target.getIdentity()::getWorkspaceId);
+    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     DockerAuthConfigs credentials = credentialsProvider.getCredentials();
     if (credentials == null) {
@@ -87,7 +87,7 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
             .addToData(".dockercfg", encodedConfig)
             .withType("kubernetes.io/dockercfg")
             .withNewMetadata()
-            .withName(target.getIdentity().getWorkspaceId() + SECRET_NAME_SUFFIX)
+            .withName(identity.getWorkspaceId() + SECRET_NAME_SUFFIX)
             .endMetadata()
             .build();
 

@@ -12,7 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
@@ -28,23 +28,24 @@ public interface WorkspaceVolumesStrategy extends ConfigurationProvisioner {
    * Configures the workspace PVCs, volumes, claim bindings with a strategy specific options.
    *
    * @param k8sEnv Kubernetes environment
-   * @param target runtime identity
+   * @param identity runtime identity
    * @throws InfrastructureException when any error occurs while provisioning volumes
    */
   @Override
-  void provision(KubernetesEnvironment k8sEnv, RuntimeTarget target) throws InfrastructureException;
+  void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
+      throws InfrastructureException;
 
   /**
    * Prepares volumes for backup of workspace data on a specific machine in a strategy specific way.
    * Note that this step, depending on the strategy, may take some time.
    *
    * @param k8sEnv Kubernetes environment that changes as a result of preparation
-   * @param target the target into which the workspace is being provisioned and where the volumes
+   * @param identity the target into which the workspace is being provisioned and where the volumes
    *     will be prepared.
    * @param timeoutMillis timeout in milliseconds
    * @throws InfrastructureException when any error while preparation occurs
    */
-  void prepare(KubernetesEnvironment k8sEnv, RuntimeTarget target, long timeoutMillis)
+  void prepare(KubernetesEnvironment k8sEnv, RuntimeIdentity identity, long timeoutMillis)
       throws InfrastructureException;
 
   /**

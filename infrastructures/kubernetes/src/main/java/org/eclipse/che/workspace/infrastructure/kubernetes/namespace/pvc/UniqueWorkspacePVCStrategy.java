@@ -22,7 +22,7 @@ import java.util.function.Function;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
@@ -98,11 +98,11 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   }
 
   @Override
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeTarget target)
+  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-    final String workspaceId = target.getIdentity().getWorkspaceId();
+    final String workspaceId = identity.getWorkspaceId();
     if (EphemeralWorkspaceUtility.isEphemeral(k8sEnv.getAttributes())) {
-      ephemeralWorkspaceAdapter.provision(k8sEnv, target.getIdentity());
+      ephemeralWorkspaceAdapter.provision(k8sEnv, identity);
       return;
     }
 
@@ -112,25 +112,24 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
         new HashMap<>(k8sEnv.getPersistentVolumeClaims());
 
     k8sEnv.getPersistentVolumeClaims().clear();
-    fillInExistingPVCs(k8sEnv, target);
+    fillInExistingPVCs(k8sEnv, identity);
 
     pvcProvisioner.provision(k8sEnv, userDefinedPVCs);
 
     pvcProvisioner.convertCheVolumes(k8sEnv, workspaceId);
 
-    subpathPrefixes.prefixVolumeMountsSubpaths(k8sEnv, target.getIdentity().getWorkspaceId());
+    subpathPrefixes.prefixVolumeMountsSubpaths(k8sEnv, identity.getWorkspaceId());
 
-    provisionWorkspaceIdLabel(
-        k8sEnv.getPersistentVolumeClaims(), target.getIdentity().getWorkspaceId());
+    provisionWorkspaceIdLabel(k8sEnv.getPersistentVolumeClaims(), identity.getWorkspaceId());
 
     LOG.debug("PVC strategy provisioning done for workspace '{}'", workspaceId);
   }
 
   @Traced
   @Override
-  public void prepare(KubernetesEnvironment k8sEnv, RuntimeTarget target, long timeoutMillis)
+  public void prepare(KubernetesEnvironment k8sEnv, RuntimeIdentity identity, long timeoutMillis)
       throws InfrastructureException {
-    String workspaceId = target.getIdentity().getWorkspaceId();
+    String workspaceId = identity.getWorkspaceId();
 
     TracingTags.WORKSPACE_ID.set(workspaceId);
 
@@ -144,7 +143,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
     }
 
     final KubernetesPersistentVolumeClaims k8sClaims =
-        factory.getOrCreate(target).persistentVolumeClaims();
+        factory.getOrCreate(identity).persistentVolumeClaims();
     LOG.debug("Creating PVCs for workspace '{}'", workspaceId);
     k8sClaims.createIfNotExist(k8sEnv.getPersistentVolumeClaims().values());
 
@@ -168,13 +167,13 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
         .delete(ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, workspace.getId()));
   }
 
-  private void fillInExistingPVCs(KubernetesEnvironment k8sEnv, RuntimeTarget target)
+  private void fillInExistingPVCs(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     Map<String, PersistentVolumeClaim> existingPVCs =
         factory
-            .getOrCreate(target)
+            .getOrCreate(identity)
             .persistentVolumeClaims()
-            .getByLabel(CHE_WORKSPACE_ID_LABEL, target.getIdentity().getWorkspaceId())
+            .getByLabel(CHE_WORKSPACE_ID_LABEL, identity.getWorkspaceId())
             .stream()
             .collect(toMap(pvc -> pvc.getMetadata().getName(), Function.identity()));
 

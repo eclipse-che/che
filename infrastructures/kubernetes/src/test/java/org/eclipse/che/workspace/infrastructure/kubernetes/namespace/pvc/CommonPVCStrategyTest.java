@@ -41,8 +41,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -73,8 +73,8 @@ public class CommonPVCStrategyTest {
 
   private static final String[] WORKSPACE_SUBPATHS = {"/projects", "/logs"};
 
-  private static final RuntimeTarget TARGET =
-      new RuntimeTarget(new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1"), null, "namespace");
+  private static final RuntimeIdentity IDENTITY =
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1", "namespace");
 
   private KubernetesEnvironment k8sEnv;
 
@@ -120,7 +120,7 @@ public class CommonPVCStrategyTest {
         .when(pvcSubPathHelper)
         .removeDirsAsync(anyString(), null, any(String.class));
 
-    lenient().when(factory.getOrCreate(TARGET)).thenReturn(k8sNamespace);
+    lenient().when(factory.getOrCreate(IDENTITY)).thenReturn(k8sNamespace);
     lenient().when(k8sNamespace.persistentVolumeClaims()).thenReturn(pvcs);
 
     lenient().when(subpathPrefixes.getWorkspaceSubPath(WORKSPACE_ID)).thenReturn(WORKSPACE_ID);
@@ -133,7 +133,7 @@ public class CommonPVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().put("pvc2", newPVC("pvc2"));
 
     // when
-    commonPVCStrategy.provision(k8sEnv, TARGET);
+    commonPVCStrategy.provision(k8sEnv, IDENTITY);
 
     // then
     provisionOrder.verify(volumeConverter).convertCheVolumes(k8sEnv, WORKSPACE_ID);
@@ -154,7 +154,7 @@ public class CommonPVCStrategyTest {
     PersistentVolumeClaim provisioned = newPVC(PVC_NAME);
     k8sEnv.getPersistentVolumeClaims().put(PVC_NAME, provisioned);
 
-    commonPVCStrategy.provision(k8sEnv, TARGET);
+    commonPVCStrategy.provision(k8sEnv, IDENTITY);
 
     assertNotEquals(k8sEnv.getPersistentVolumeClaims().get(PVC_NAME), provisioned);
   }
@@ -176,7 +176,7 @@ public class CommonPVCStrategyTest {
             podsVolumes,
             subpathPrefixes);
 
-    commonPVCStrategy.provision(k8sEnv, TARGET);
+    commonPVCStrategy.provision(k8sEnv, IDENTITY);
 
     final Map<String, PersistentVolumeClaim> actual = k8sEnv.getPersistentVolumeClaims();
     assertFalse(actual.isEmpty());
@@ -196,7 +196,7 @@ public class CommonPVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().put(PVC_NAME, pvc);
     doNothing().when(pvcSubPathHelper).createDirs(WORKSPACE_ID, null, PVC_NAME, WORKSPACE_SUBPATHS);
 
-    commonPVCStrategy.prepare(k8sEnv, TARGET, 100);
+    commonPVCStrategy.prepare(k8sEnv, IDENTITY, 100);
 
     verify(pvcs).get();
     verify(pvcs).create(pvc);
@@ -226,7 +226,7 @@ public class CommonPVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().put(PVC_NAME, pvc);
     doNothing().when(pvcSubPathHelper).createDirs(WORKSPACE_ID, null, PVC_NAME, WORKSPACE_SUBPATHS);
 
-    commonPVCStrategy.prepare(k8sEnv, TARGET, 100);
+    commonPVCStrategy.prepare(k8sEnv, IDENTITY, 100);
 
     verify(pvcs).get();
     verify(pvcs).create(pvc);
@@ -244,7 +244,7 @@ public class CommonPVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().put("pvc1", pvc1);
     k8sEnv.getPersistentVolumeClaims().put("pvc2", pvc2);
 
-    commonPVCStrategy.prepare(k8sEnv, TARGET, 100);
+    commonPVCStrategy.prepare(k8sEnv, IDENTITY, 100);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -252,7 +252,7 @@ public class CommonPVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().put(PVC_NAME, mock(PersistentVolumeClaim.class));
     doThrow(InfrastructureException.class).when(pvcs).get();
 
-    commonPVCStrategy.prepare(k8sEnv, TARGET, 100);
+    commonPVCStrategy.prepare(k8sEnv, IDENTITY, 100);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -262,7 +262,7 @@ public class CommonPVCStrategyTest {
     when(pvcs.get()).thenReturn(emptyList());
     doThrow(InfrastructureException.class).when(pvcs).create(any());
 
-    commonPVCStrategy.prepare(k8sEnv, TARGET, 100);
+    commonPVCStrategy.prepare(k8sEnv, IDENTITY, 100);
   }
 
   @Test

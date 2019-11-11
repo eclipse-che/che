@@ -56,7 +56,9 @@ public class K8sInfraNamespaceWsAttributeValidator implements WorkspaceAttribute
                 + " is invalid: a DNS-1123 label must consist of lower case alphanumeric"
                 + " characters or '-', and must start and end with an"
                 + " alphanumeric character (e.g. 'my-name', or '123-abc', regex used for"
-                + " validation is '" + METADATA_NAME_REGEX + "')");
+                + " validation is '"
+                + METADATA_NAME_REGEX
+                + "')");
       }
 
       namespaceFactoryProvider.get().checkIfNamespaceIsAllowed(namespace);

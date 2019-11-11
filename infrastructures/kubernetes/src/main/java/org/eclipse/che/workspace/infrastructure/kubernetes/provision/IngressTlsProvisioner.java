@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.inject.ConfigurationException;
@@ -66,7 +66,7 @@ public class IngressTlsProvisioner implements ConfigurationProvisioner<Kubernete
   }
 
   @Override
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeTarget target)
+  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws KubernetesInfrastructureException {
     if (!isTlsEnabled) {
       return;
@@ -75,7 +75,7 @@ public class IngressTlsProvisioner implements ConfigurationProvisioner<Kubernete
     String wsTlsSecretName = tlsSecretName;
 
     if (!isNullOrEmpty(tlsCert) && !isNullOrEmpty(tlsKey)) {
-      wsTlsSecretName = target.getIdentity().getWorkspaceId() + '-' + tlsSecretName;
+      wsTlsSecretName = identity.getWorkspaceId() + '-' + tlsSecretName;
       provisionTlsSecret(k8sEnv, wsTlsSecretName);
     }
 

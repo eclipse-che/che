@@ -400,16 +400,14 @@ public class WorkspaceManagerTest {
 
   @Test
   public void updatesWorkspace() throws Exception {
-    WorkspaceImpl original = new WorkspaceImpl(createAndMockWorkspace());
-    final WorkspaceImpl update = new WorkspaceImpl(original);
-    update.setTemporary(true);
-    update.getAttributes().put("new attribute", "attribute");
+    final WorkspaceImpl workspace = new WorkspaceImpl(createAndMockWorkspace());
+    workspace.setTemporary(true);
+    workspace.getAttributes().put("new attribute", "attribute");
     when(workspaceDao.update(any())).thenAnswer(inv -> inv.getArguments()[0]);
 
-    workspaceManager.updateWorkspace(update.getId(), update);
+    workspaceManager.updateWorkspace(workspace.getId(), workspace);
 
-    verify(workspaceDao).update(update);
-    verify(validator).validateUpdateAttributes(original.getAttributes(), update.getAttributes());
+    verify(workspaceDao).update(workspace);
   }
 
   @Test

@@ -15,7 +15,7 @@ import io.fabric8.kubernetes.api.model.PodSecurityContextBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -35,7 +35,7 @@ public class SecurityContextProvisioner implements ConfigurationProvisioner<Kube
   }
 
   @Override
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeTarget target)
+  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     if (runAsUser != null) {
       k8sEnv.getPodsData().values().forEach(p -> provision(p.getSpec()));

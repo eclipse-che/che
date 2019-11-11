@@ -31,7 +31,7 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -52,13 +52,13 @@ public class CertificateProvisionerTest {
       WORKSPACE_ID + CHE_SELF_SIGNED_CERT_SECRET_SUFFIX;
 
   public static final String CERT_CONTENT = "--BEGIN FJASBNDF END";
-  @Mock private RuntimeTarget runtimeTarget;
+  @Mock private RuntimeIdentity runtimeId;
   private CertificateProvisioner provisioner;
   private KubernetesEnvironment k8sEnv;
 
   @BeforeMethod
   public void setUp() {
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn(WORKSPACE_ID);
+    when(runtimeId.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
     provisioner = new CertificateProvisioner("--BEGIN FJASBNDF END");
     k8sEnv = KubernetesEnvironment.builder().build();
@@ -100,7 +100,7 @@ public class CertificateProvisionerTest {
   @Test
   public void shouldAddSecretWithCertificateIntoEnvironment() throws Exception {
     // when
-    provisioner.provision(k8sEnv, runtimeTarget);
+    provisioner.provision(k8sEnv, runtimeId);
 
     // then
     Map<String, Secret> secrets = k8sEnv.getSecrets();
@@ -119,7 +119,7 @@ public class CertificateProvisionerTest {
     k8sEnv.addPod(createPod("pod2"));
 
     // when
-    provisioner.provision(k8sEnv, runtimeTarget);
+    provisioner.provision(k8sEnv, runtimeId);
 
     // then
     for (Pod pod : k8sEnv.getPodsCopy().values()) {
@@ -145,7 +145,7 @@ public class CertificateProvisionerTest {
     k8sEnv.addPod(createPod("pod2"));
 
     // when
-    provisioner.provision(k8sEnv, runtimeTarget);
+    provisioner.provision(k8sEnv, runtimeId);
 
     // then
     for (Pod pod : k8sEnv.getPodsCopy().values()) {

@@ -20,9 +20,9 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.NoEnvironmentFactory.NoEnvInternalEnvironment;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
@@ -64,14 +64,15 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
   }
 
   @Override
-  public String getInfrastructureNamespace(RuntimeTarget target) throws InfrastructureException {
-    return namespaceFactory.getDefaultNamespaceName(target);
+  public String evaluateInfraNamespace(NamespaceResolutionContext resolutionCtx)
+      throws InfrastructureException {
+    return namespaceFactory.evaluateNamespaceName(resolutionCtx);
   }
 
   @Override
   protected KubernetesRuntimeContext internalPrepare(
-      RuntimeTarget target, InternalEnvironment environment) throws InfrastructureException {
-    return runtimeContextFactory.create(asKubernetesEnv(environment), target, this);
+      RuntimeIdentity id, InternalEnvironment environment) throws InfrastructureException {
+    return runtimeContextFactory.create(asKubernetesEnv(environment), id, this);
   }
 
   private KubernetesEnvironment asKubernetesEnv(InternalEnvironment source)

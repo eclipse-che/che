@@ -15,7 +15,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -63,21 +62,10 @@ public class RemoveNamespaceOnWorkspaceRemoveTest {
   }
 
   @Test
-  public void shouldRemoveNamespaceOnWorkspaceRemovedEventIfNamespaceIsManaged() throws Exception {
-    when(namespaceFactory.isManagingNamespace(any())).thenReturn(true);
-
+  public void shouldRemoveNamespaceIfManagedOnWorkspaceRemovedEventIfNamespaceIsManaged()
+      throws Exception {
     removeNamespaceOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
 
     verify(namespaceFactory).deleteIfManaged(eq(workspace));
-  }
-
-  @Test
-  public void shouldNotRemoveNamespaceOnWorkspaceRemovedEventIfNamespaceIsNotManaged()
-      throws Exception {
-    when(namespaceFactory.isManagingNamespace(any())).thenReturn(false);
-
-    removeNamespaceOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
-
-    verify(namespaceFactory, never()).deleteIfManaged(any());
   }
 }

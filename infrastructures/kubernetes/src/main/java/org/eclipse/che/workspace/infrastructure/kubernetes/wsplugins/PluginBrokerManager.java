@@ -17,8 +17,8 @@ import java.util.Collection;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
@@ -93,32 +93,29 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   @Beta
   @Traced
   public List<ChePlugin> getTooling(
-      RuntimeTarget target,
+      RuntimeIdentity identity,
       StartSynchronizer startSynchronizer,
       Collection<PluginFQN> pluginFQNs,
       boolean isEphemeral)
       throws InfrastructureException {
 
-    String workspaceId = target.getIdentity().getWorkspaceId();
-    KubernetesNamespace kubernetesNamespace = factory.getOrCreate(target);
+    String workspaceId = identity.getWorkspaceId();
+    KubernetesNamespace kubernetesNamespace = factory.getOrCreate(identity);
     BrokersResult brokersResult = new BrokersResult();
 
-    E brokerEnvironment = brokerEnvironmentFactory.create(pluginFQNs, target.getIdentity());
+    E brokerEnvironment = brokerEnvironmentFactory.create(pluginFQNs, identity);
     if (isEphemeral) {
       EphemeralWorkspaceUtility.makeEphemeral(brokerEnvironment.getAttributes());
     }
-    environmentProvisioner.provision(brokerEnvironment, target);
+    environmentProvisioner.provision(brokerEnvironment, identity);
 
     ListenBrokerEvents listenBrokerEvents = getListenEventPhase(workspaceId, brokersResult);
     PrepareStorage prepareStorage =
-        getPrepareStoragePhase(target, startSynchronizer, brokerEnvironment);
+        getPrepareStoragePhase(identity, startSynchronizer, brokerEnvironment);
     WaitBrokerResult waitBrokerResult = getWaitBrokerPhase(workspaceId, brokersResult);
     DeployBroker deployBroker =
         getDeployBrokerPhase(
-            target.getIdentity().getWorkspaceId(),
-            kubernetesNamespace,
-            brokerEnvironment,
-            brokersResult);
+            identity.getWorkspaceId(), kubernetesNamespace, brokerEnvironment, brokersResult);
     LOG.debug("Entering plugin brokers deployment chain workspace '{}'", workspaceId);
     listenBrokerEvents.then(prepareStorage).then(deployBroker).then(waitBrokerResult);
     return listenBrokerEvents.execute();
@@ -129,11 +126,11 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   }
 
   private PrepareStorage getPrepareStoragePhase(
-      RuntimeTarget target,
+      RuntimeIdentity identity,
       StartSynchronizer startSynchronizer,
       KubernetesEnvironment brokerEnvironment) {
     return new PrepareStorage(
-        target, brokerEnvironment, volumesStrategy, startSynchronizer, tracer);
+        identity, brokerEnvironment, volumesStrategy, startSynchronizer, tracer);
   }
 
   private DeployBroker getDeployBrokerPhase(

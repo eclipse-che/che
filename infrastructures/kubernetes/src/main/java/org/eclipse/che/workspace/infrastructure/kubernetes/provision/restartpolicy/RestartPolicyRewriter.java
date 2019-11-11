@@ -14,7 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpol
 import static java.lang.String.format;
 
 import io.fabric8.kubernetes.api.model.PodSpec;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
@@ -35,10 +35,10 @@ public class RestartPolicyRewriter implements ConfigurationProvisioner {
 
   @Override
   @Traced
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeTarget target)
+  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(target.getIdentity()::getWorkspaceId);
+    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     for (PodData podConfig : k8sEnv.getPodsData().values()) {
       final String podName = podConfig.getMetadata().getName();

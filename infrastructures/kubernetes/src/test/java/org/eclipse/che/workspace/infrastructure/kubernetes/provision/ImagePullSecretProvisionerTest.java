@@ -32,7 +32,7 @@ import io.fabric8.kubernetes.api.model.Secret;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.dto.DockerAuthConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.dto.DockerAuthConfigs;
 import org.eclipse.che.workspace.infrastructure.kubernetes.docker.auth.UserSpecificDockerRegistryCredentialsProvider;
@@ -54,7 +54,7 @@ public class ImagePullSecretProvisionerTest {
   private static final String WORKSPACE_ID = "workspace123";
 
   private KubernetesEnvironment k8sEnv;
-  @Mock private RuntimeTarget runtimeTarget;
+  @Mock private RuntimeIdentity runtimeIdentity;
 
   @Mock private UserSpecificDockerRegistryCredentialsProvider credentialsProvider;
 
@@ -74,7 +74,7 @@ public class ImagePullSecretProvisionerTest {
 
   @BeforeMethod
   public void setup() {
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn(WORKSPACE_ID);
+    when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
     k8sEnv = KubernetesEnvironment.builder().build();
     ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
@@ -91,7 +91,7 @@ public class ImagePullSecretProvisionerTest {
   public void doNotDoAnythingIfNoPrivateRegistries() throws Exception {
     when(dockerAuthConfigs.getConfigs()).thenReturn(Collections.emptyMap());
 
-    imagePullSecretProvisioner.provision(k8sEnv, runtimeTarget);
+    imagePullSecretProvisioner.provision(k8sEnv, runtimeIdentity);
 
     assertTrue(k8sEnv.getSecrets().isEmpty());
     verifyZeroInteractions(podSpec);
@@ -107,7 +107,7 @@ public class ImagePullSecretProvisionerTest {
                 "reg2",
                 new TestDockerAuthConfig().withUsername("username2").withPassword("password2")));
 
-    imagePullSecretProvisioner.provision(k8sEnv, runtimeTarget);
+    imagePullSecretProvisioner.provision(k8sEnv, runtimeIdentity);
 
     verify(podSpec)
         .setImagePullSecrets(ImmutableList.of(newImagePullSecretRef, existingImagePullSecretRef));

@@ -18,7 +18,7 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
@@ -41,7 +41,7 @@ public class LogsVolumeMachineProvisionerTest {
   private static final String MACHINE_NAME_2 = "db/main";
 
   @Mock private OpenShiftEnvironment openShiftEnvironment;
-  @Mock private RuntimeTarget target;
+  @Mock private RuntimeIdentity identity;
   @Mock private InternalMachineConfig machine1;
   @Mock private InternalMachineConfig machine2;
 
@@ -58,7 +58,7 @@ public class LogsVolumeMachineProvisionerTest {
 
   @Test
   public void testProvisionLogsVolumeToAllMachineInEnvironment() throws Exception {
-    logsVolumeProvisioner.provision(openShiftEnvironment, target);
+    logsVolumeProvisioner.provision(openShiftEnvironment, identity);
 
     InternalMachineConfig m1 = openShiftEnvironment.getMachines().get(MACHINE_NAME_1);
     InternalMachineConfig m2 = openShiftEnvironment.getMachines().get(MACHINE_NAME_2);

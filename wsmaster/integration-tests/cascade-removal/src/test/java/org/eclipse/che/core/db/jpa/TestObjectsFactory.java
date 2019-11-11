@@ -223,8 +223,7 @@ public final class TestObjectsFactory {
 
   public static KubernetesRuntimeState createK8sRuntimeState(String workspaceId) {
     return new KubernetesRuntimeState(
-        new RuntimeIdentityImpl(workspaceId, "envName", "ownerId"),
-        "test-namespace",
+        new RuntimeIdentityImpl(workspaceId, "envName", "ownerId", "test-namespace"),
         WorkspaceStatus.RUNNING,
         asList(createCommand(), createCommand()));
   }

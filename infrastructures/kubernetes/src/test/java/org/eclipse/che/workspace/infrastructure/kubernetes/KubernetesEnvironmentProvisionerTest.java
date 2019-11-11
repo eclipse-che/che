@@ -14,7 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner.KubernetesEnvironmentProvisionerImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
@@ -52,7 +52,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
   @Mock private UniqueNamesProvisioner<KubernetesEnvironment> uniqueNamesProvisioner;
   @Mock private KubernetesEnvironment k8sEnv;
-  @Mock private RuntimeTarget runtimeTarget;
+  @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private EnvVarsConverter envVarsProvisioner;
   @Mock private ServersConverter<KubernetesEnvironment> serversProvisioner;
   @Mock private RestartPolicyRewriter restartPolicyRewriter;
@@ -117,27 +117,27 @@ public class KubernetesEnvironmentProvisionerTest {
 
   @Test
   public void performsOrderedProvisioning() throws Exception {
-    k8sInfraProvisioner.provision(k8sEnv, runtimeTarget);
+    k8sInfraProvisioner.provision(k8sEnv, runtimeIdentity);
 
-    provisionOrder.verify(logsVolumeMachineProvisioner).provision(eq(k8sEnv), eq(runtimeTarget));
-    provisionOrder.verify(serversProvisioner).provision(eq(k8sEnv), eq(runtimeTarget));
-    provisionOrder.verify(envVarsProvisioner).provision(eq(k8sEnv), eq(runtimeTarget));
-    provisionOrder.verify(volumesStrategy).provision(eq(k8sEnv), eq(runtimeTarget));
-    provisionOrder.verify(restartPolicyRewriter).provision(eq(k8sEnv), eq(runtimeTarget));
-    provisionOrder.verify(uniqueNamesProvisioner).provision(eq(k8sEnv), eq(runtimeTarget));
-    provisionOrder.verify(ramLimitProvisioner).provision(eq(k8sEnv), eq(runtimeTarget));
+    provisionOrder.verify(logsVolumeMachineProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(serversProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(envVarsProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(volumesStrategy).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(restartPolicyRewriter).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(uniqueNamesProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(ramLimitProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder
         .verify(externalServerIngressTlsProvisioner)
-        .provision(eq(k8sEnv), eq(runtimeTarget));
-    provisionOrder.verify(securityContextProvisioner).provision(eq(k8sEnv), eq(runtimeTarget));
+        .provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(securityContextProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder
         .verify(podTerminationGracePeriodProvisioner)
-        .provision(eq(k8sEnv), eq(runtimeTarget));
-    provisionOrder.verify(imagePullSecretProvisioner).provision(eq(k8sEnv), eq(runtimeTarget));
-    provisionOrder.verify(proxySettingsProvisioner).provision(eq(k8sEnv), eq(runtimeTarget));
-    provisionOrder.verify(serviceAccountProvisioner).provision(eq(k8sEnv), eq(runtimeTarget));
-    provisionOrder.verify(certificateProvisioner).provision(eq(k8sEnv), eq(runtimeTarget));
-    provisionOrder.verify(gitUserProfileProvisioner).provision(eq(k8sEnv), eq(runtimeTarget));
+        .provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(imagePullSecretProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(proxySettingsProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(serviceAccountProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(certificateProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(gitUserProfileProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }

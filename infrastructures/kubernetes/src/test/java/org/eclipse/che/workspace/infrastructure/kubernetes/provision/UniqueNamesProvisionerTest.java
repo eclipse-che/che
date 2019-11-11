@@ -38,7 +38,7 @@ import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressBuilder;
 import java.util.HashMap;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.mockito.Mock;
@@ -64,7 +64,7 @@ public class UniqueNamesProvisionerTest {
   private static final String INGRESS_NAME = "testIngress";
 
   @Mock private KubernetesEnvironment k8sEnv;
-  @Mock private RuntimeTarget runtimeTarget;
+  @Mock private RuntimeIdentity runtimeIdentity;
 
   private UniqueNamesProvisioner<KubernetesEnvironment> uniqueNamesProvisioner;
 
@@ -75,13 +75,13 @@ public class UniqueNamesProvisionerTest {
 
   @Test
   public void provideUniquePodsNames() throws Exception {
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn(WORKSPACE_ID);
+    when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
     Pod pod = newPod();
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     doReturn(ImmutableMap.of(POD_NAME, podData)).when(k8sEnv).getPodsData();
 
-    uniqueNamesProvisioner.provision(k8sEnv, runtimeTarget);
+    uniqueNamesProvisioner.provision(k8sEnv, runtimeIdentity);
 
     ObjectMeta podMetadata = pod.getMetadata();
     assertNotEquals(podMetadata.getName(), POD_NAME);
@@ -90,12 +90,12 @@ public class UniqueNamesProvisionerTest {
 
   @Test
   public void provideUniqueDeploymentsName() throws Exception {
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn(WORKSPACE_ID);
+    when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
     Deployment deployment = newDeployment();
     doReturn(ImmutableMap.of(DEPLOYMENT_NAME, deployment)).when(k8sEnv).getDeploymentsCopy();
 
-    uniqueNamesProvisioner.provision(k8sEnv, runtimeTarget);
+    uniqueNamesProvisioner.provision(k8sEnv, runtimeIdentity);
 
     ObjectMeta deploymentMetadata = deployment.getMetadata();
     assertNotEquals(deploymentMetadata.getName(), DEPLOYMENT_NAME);
@@ -104,12 +104,12 @@ public class UniqueNamesProvisionerTest {
 
   @Test
   public void provideUniqueConfigMapName() throws Exception {
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn(WORKSPACE_ID);
+    when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
     ConfigMap configMap = newConfigMap();
     doReturn(ImmutableMap.of(CONFIGMAP_NAME, configMap)).when(k8sEnv).getConfigMaps();
 
-    uniqueNamesProvisioner.provision(k8sEnv, runtimeTarget);
+    uniqueNamesProvisioner.provision(k8sEnv, runtimeIdentity);
 
     ObjectMeta configMapMetadata = configMap.getMetadata();
     assertNotEquals(configMapMetadata.getName(), CONFIGMAP_NAME);
@@ -118,7 +118,7 @@ public class UniqueNamesProvisionerTest {
 
   @Test
   public void rewritePodConfigMapEnv() throws Exception {
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn(WORKSPACE_ID);
+    when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
     ConfigMap configMap = newConfigMap();
     doReturn(ImmutableMap.of(CONFIGMAP_NAME, configMap)).when(k8sEnv).getConfigMaps();
@@ -138,7 +138,7 @@ public class UniqueNamesProvisionerTest {
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     doReturn(ImmutableMap.of(POD_NAME, podData)).when(k8sEnv).getPodsData();
 
-    uniqueNamesProvisioner.provision(k8sEnv, runtimeTarget);
+    uniqueNamesProvisioner.provision(k8sEnv, runtimeIdentity);
 
     String newConfigMapName = configMap.getMetadata().getName();
     EnvVar newEnvVar = container.getEnv().iterator().next();
@@ -147,7 +147,7 @@ public class UniqueNamesProvisionerTest {
 
   @Test
   public void doesNotRewritePodConfigMapEnvWhenNoConfigMap() throws Exception {
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn(WORKSPACE_ID);
+    when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
     EnvVar envVar =
         new EnvVarBuilder()
@@ -164,7 +164,7 @@ public class UniqueNamesProvisionerTest {
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     doReturn(ImmutableMap.of(POD_NAME, podData)).when(k8sEnv).getPodsData();
 
-    uniqueNamesProvisioner.provision(k8sEnv, runtimeTarget);
+    uniqueNamesProvisioner.provision(k8sEnv, runtimeIdentity);
 
     EnvVar newEnvVar = container.getEnv().iterator().next();
     assertEquals(newEnvVar.getValueFrom().getConfigMapKeyRef().getName(), CONFIGMAP_NAME);
@@ -172,7 +172,7 @@ public class UniqueNamesProvisionerTest {
 
   @Test
   public void rewritePodConfigMapEnvFrom() throws Exception {
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn(WORKSPACE_ID);
+    when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
     ConfigMap configMap = newConfigMap();
     doReturn(ImmutableMap.of(CONFIGMAP_NAME, configMap)).when(k8sEnv).getConfigMaps();
@@ -189,7 +189,7 @@ public class UniqueNamesProvisionerTest {
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     doReturn(ImmutableMap.of(POD_NAME, podData)).when(k8sEnv).getPodsData();
 
-    uniqueNamesProvisioner.provision(k8sEnv, runtimeTarget);
+    uniqueNamesProvisioner.provision(k8sEnv, runtimeIdentity);
 
     String newConfigMapName = configMap.getMetadata().getName();
     EnvFromSource newEnvFromSource = container.getEnvFrom().iterator().next();
@@ -198,7 +198,7 @@ public class UniqueNamesProvisionerTest {
 
   @Test
   public void doesNotRewritePodConfigMapEnvFromWhenNoConfigMap() throws Exception {
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn(WORKSPACE_ID);
+    when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
     EnvFromSource envFrom =
         new EnvFromSourceBuilder()
@@ -212,7 +212,7 @@ public class UniqueNamesProvisionerTest {
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     doReturn(ImmutableMap.of(POD_NAME, podData)).when(k8sEnv).getPodsData();
 
-    uniqueNamesProvisioner.provision(k8sEnv, runtimeTarget);
+    uniqueNamesProvisioner.provision(k8sEnv, runtimeIdentity);
 
     EnvFromSource newEnvFromSource = container.getEnvFrom().iterator().next();
     assertEquals(newEnvFromSource.getConfigMapRef().getName(), CONFIGMAP_NAME);
@@ -220,7 +220,7 @@ public class UniqueNamesProvisionerTest {
 
   @Test
   public void rewritePodConfigMapVolumes() throws Exception {
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn(WORKSPACE_ID);
+    when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
     ConfigMap configMap = newConfigMap();
     doReturn(ImmutableMap.of(CONFIGMAP_NAME, configMap)).when(k8sEnv).getConfigMaps();
@@ -232,7 +232,7 @@ public class UniqueNamesProvisionerTest {
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     doReturn(ImmutableMap.of(POD_NAME, podData)).when(k8sEnv).getPodsData();
 
-    uniqueNamesProvisioner.provision(k8sEnv, runtimeTarget);
+    uniqueNamesProvisioner.provision(k8sEnv, runtimeIdentity);
 
     String newConfigMapName = configMap.getMetadata().getName();
     Volume newVolume = pod.getSpec().getVolumes().iterator().next();
@@ -241,7 +241,7 @@ public class UniqueNamesProvisionerTest {
 
   @Test
   public void doesNotRewritePodConfigMapVolumesWhenNoConfigMap() throws Exception {
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn(WORKSPACE_ID);
+    when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
     Volume volume =
         new VolumeBuilder().withNewConfigMap().withName(CONFIGMAP_NAME).endConfigMap().build();
@@ -250,7 +250,7 @@ public class UniqueNamesProvisionerTest {
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     doReturn(ImmutableMap.of(POD_NAME, podData)).when(k8sEnv).getPodsData();
 
-    uniqueNamesProvisioner.provision(k8sEnv, runtimeTarget);
+    uniqueNamesProvisioner.provision(k8sEnv, runtimeIdentity);
 
     Volume newVolume = pod.getSpec().getVolumes().iterator().next();
     assertEquals(newVolume.getConfigMap().getName(), CONFIGMAP_NAME);
@@ -263,7 +263,7 @@ public class UniqueNamesProvisionerTest {
     ingresses.put(POD_NAME, ingress);
     doReturn(ingresses).when(k8sEnv).getIngresses();
 
-    uniqueNamesProvisioner.provision(k8sEnv, runtimeTarget);
+    uniqueNamesProvisioner.provision(k8sEnv, runtimeIdentity);
 
     final ObjectMeta ingressMetadata = ingress.getMetadata();
     assertNotEquals(ingressMetadata.getName(), INGRESS_NAME);

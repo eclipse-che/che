@@ -33,9 +33,9 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.ssh.server.SshManager;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -53,7 +53,7 @@ import org.testng.annotations.Test;
 public class VcsSshKeySecretProvisionerTest {
 
   private KubernetesEnvironment k8sEnv;
-  @Mock private RuntimeTarget runtimeTarget;
+  @Mock private RuntimeIdentity runtimeIdentity;
 
   @Mock private SshManager sshManager;
 
@@ -69,8 +69,8 @@ public class VcsSshKeySecretProvisionerTest {
 
   @BeforeMethod
   public void setup() {
-    when(runtimeTarget.getIdentity().getOwnerId()).thenReturn(someUser);
-    when(runtimeTarget.getIdentity().getWorkspaceId()).thenReturn("wksp");
+    when(runtimeIdentity.getOwnerId()).thenReturn(someUser);
+    when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
     k8sEnv = KubernetesEnvironment.builder().build();
     ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
     when(pod.getMetadata()).thenReturn(podMeta);
@@ -90,7 +90,7 @@ public class VcsSshKeySecretProvisionerTest {
             new SshPairImpl(
                 someUser, "vcs", "default-" + UUID.randomUUID().toString(), "public", "private"));
 
-    vcsSshKeysProvisioner.provision(k8sEnv, runtimeTarget);
+    vcsSshKeysProvisioner.provision(k8sEnv, runtimeIdentity);
 
     assertEquals(k8sEnv.getSecrets().size(), 1);
   }
@@ -107,7 +107,7 @@ public class VcsSshKeySecretProvisionerTest {
                 new SshPairImpl(someUser, "vcs", keyName2, "public", "private"),
                 new SshPairImpl(someUser, "vcs", keyName3, "public", "private")));
 
-    vcsSshKeysProvisioner.provision(k8sEnv, runtimeTarget);
+    vcsSshKeysProvisioner.provision(k8sEnv, runtimeIdentity);
 
     verify(podSpec, times(2)).getVolumes();
     verify(podSpec, times(2)).getContainers();

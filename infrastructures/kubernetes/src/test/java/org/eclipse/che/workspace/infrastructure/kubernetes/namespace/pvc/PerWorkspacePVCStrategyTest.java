@@ -31,8 +31,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
-import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -58,8 +58,8 @@ public class PerWorkspacePVCStrategyTest {
   private static final String PVC_ACCESS_MODE = "RWO";
   private static final String PVC_STORAGE_CLASS_NAME = "special";
 
-  private static final RuntimeTarget TARGET =
-      new RuntimeTarget(WORKSPACE_ID, mock(Subject.class), null);
+  private static final RuntimeIdentity IDENTITY =
+      new RuntimeIdentityImpl(WORKSPACE_ID, "userid", null, "infraNamespace");
 
   @Mock private PVCSubPathHelper pvcSubPathHelper;
   @Mock private KubernetesNamespaceFactory factory;
@@ -90,7 +90,7 @@ public class PerWorkspacePVCStrategyTest {
             podsVolumes,
             subpathPrefixes);
 
-    lenient().when(factory.getOrCreate(TARGET)).thenReturn(k8sNamespace);
+    lenient().when(factory.getOrCreate(IDENTITY)).thenReturn(k8sNamespace);
     lenient().when(k8sNamespace.persistentVolumeClaims()).thenReturn(pvcs);
   }
 
@@ -107,7 +107,7 @@ public class PerWorkspacePVCStrategyTest {
     pvc.getAdditionalProperties().put(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID), subPaths);
 
     // when
-    strategy.prepare(k8sEnv, TARGET, 100);
+    strategy.prepare(k8sEnv, IDENTITY, 100);
 
     // then
     verify(pvcs).get();
@@ -143,7 +143,7 @@ public class PerWorkspacePVCStrategyTest {
     pvc.getAdditionalProperties().put(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID), subPaths);
 
     // when
-    strategy.prepare(k8sEnv, TARGET, 100);
+    strategy.prepare(k8sEnv, IDENTITY, 100);
 
     // then
     verify(pvcs).get();

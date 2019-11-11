@@ -25,8 +25,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
@@ -47,7 +47,7 @@ public class EnvVarsConverterTest {
   private static final String C_VAL = "c";
 
   private KubernetesEnvironment environment;
-  private RuntimeTarget target;
+  private RuntimeIdentity identity;
   private Container testContainer;
   private InternalMachineConfig machine;
 
@@ -75,7 +75,7 @@ public class EnvVarsConverterTest {
     environment.setMachines(
         Collections.singletonMap(Names.machineName(podMeta, testContainer), machine));
 
-    target = new RuntimeTarget(new RuntimeIdentityImpl("wsId", "blah", "bleh"), null, "namespace");
+    identity = new RuntimeIdentityImpl("wsId", "blah", "bleh", "infraNamespace");
   }
 
   @Test
@@ -92,7 +92,7 @@ public class EnvVarsConverterTest {
 
     // when
     EnvVarsConverter converter = new EnvVarsConverter();
-    converter.provision(environment, target);
+    converter.provision(environment, identity);
 
     // then
     EnvVar expectedA = new EnvVar(A_VAR, A_VAL, null);

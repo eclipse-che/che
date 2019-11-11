@@ -17,7 +17,7 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.openshift.api.model.Route;
 import java.util.HashSet;
 import java.util.Set;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
@@ -28,9 +28,9 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 public class OpenShiftUniqueNamesProvisioner extends UniqueNamesProvisioner<OpenShiftEnvironment> {
 
   @Override
-  public void provision(OpenShiftEnvironment osEnv, RuntimeTarget target)
+  public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-    super.provision(osEnv, target);
+    super.provision(osEnv, identity);
 
     final Set<Route> routes = new HashSet<>(osEnv.getRoutes().values());
     osEnv.getRoutes().clear();

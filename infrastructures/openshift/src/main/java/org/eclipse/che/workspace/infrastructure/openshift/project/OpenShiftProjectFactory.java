@@ -27,7 +27,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeTarget;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.impls.KubernetesNamespaceMetaImpl;
@@ -59,14 +60,16 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
       @Named("che.infra.kubernetes.namespace.allow_user_defined")
           boolean allowUserDefinedNamespaces,
       OpenShiftClientFactory clientFactory,
-      OpenShiftClientConfigFactory clientConfigFactory) {
+      OpenShiftClientConfigFactory clientConfigFactory,
+      UserManager userManager) {
     super(
         projectName,
         serviceAccountName,
         clusterRoleName,
         defaultNamespaceName,
         allowUserDefinedNamespaces,
-        clientFactory);
+        clientFactory,
+        userManager);
     if (allowUserDefinedNamespaces && !clientConfigFactory.isPersonalized()) {
       LOG.warn(
           "Users are allowed to list projects but Che server is configured with a service account. "
@@ -76,10 +79,10 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
     this.clientFactory = clientFactory;
   }
 
-  public OpenShiftProject getOrCreate(RuntimeTarget target) throws InfrastructureException {
-    OpenShiftProject osProject = get(target);
+  public OpenShiftProject getOrCreate(RuntimeIdentity identity) throws InfrastructureException {
+    OpenShiftProject osProject = get(identity);
 
-    if (isCreatingNamespace(target) && !isNullOrEmpty(getServiceAccountName())) {
+    if (isCreatingNamespace(identity) && !isNullOrEmpty(getServiceAccountName())) {
       osProject.prepare();
       // prepare service account for workspace only if account name is configured
       // and project is not predefined
@@ -97,10 +100,8 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
     return doCreateProjectAccess(workspace.getId(), getNamespaceName(workspace));
   }
 
-  public OpenShiftProject get(RuntimeTarget target) throws InfrastructureException {
-    String workspaceId = target.getIdentity().getWorkspaceId();
-    String projectName = getNamespaceName(target);
-    return doCreateProjectAccess(workspaceId, projectName);
+  public OpenShiftProject get(RuntimeIdentity identity) throws InfrastructureException {
+    return doCreateProjectAccess(identity.getWorkspaceId(), identity.getInfrastructureNamespace());
   }
 
   @Override
