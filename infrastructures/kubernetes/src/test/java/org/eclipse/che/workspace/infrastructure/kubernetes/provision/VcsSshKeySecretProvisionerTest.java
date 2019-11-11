@@ -26,6 +26,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodSecurityContext;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Secret;
 import java.util.ArrayList;
@@ -61,6 +62,8 @@ public class VcsSshKeySecretProvisionerTest {
 
   @Mock private PodSpec podSpec;
 
+  @Mock private PodSecurityContext podSecurityContext;
+
   @Mock private Container container;
 
   private final String someUser = "someuser";
@@ -77,6 +80,9 @@ public class VcsSshKeySecretProvisionerTest {
     when(pod.getSpec()).thenReturn(podSpec);
     when(podSpec.getVolumes()).thenReturn(new ArrayList<>());
     when(podSpec.getContainers()).thenReturn(Collections.singletonList(container));
+    when(podSecurityContext.getFsGroup()).thenReturn((long) 999);
+    when(podSecurityContext.getRunAsUser()).thenReturn((long) 999);
+    when(podSpec.getSecurityContext()).thenReturn(podSecurityContext);
     when(container.getVolumeMounts()).thenReturn(new ArrayList<>());
     k8sEnv.addPod(pod);
     vcsSshKeysProvisioner = new VcsSshKeysProvisioner(sshManager);

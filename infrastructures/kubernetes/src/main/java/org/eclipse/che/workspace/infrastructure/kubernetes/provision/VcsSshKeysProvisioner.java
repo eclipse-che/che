@@ -12,6 +12,8 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toMap;
 
@@ -19,6 +21,8 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.ContainerBuilder;
+import io.fabric8.kubernetes.api.model.PodSecurityContext;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
@@ -121,7 +125,21 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
 
     StringBuilder sshConfigData = new StringBuilder();
     for (SshPair sshPair : sshPairs) {
-      sshConfigData.append(buildConfig(sshPair.getName()));
+      sshConfigData.append(
+          buildConfig(
+              sshPair.getName(),
+              k8sEnv
+                  .getPodsData()
+                  .values()
+                  .stream()
+                  .anyMatch(
+                      p -> {
+                        PodSecurityContext securityContext = p.getSpec().getSecurityContext();
+                        return p.getMetadata().getName().startsWith(identity.getWorkspaceId())
+                            && securityContext != null
+                            && securityContext.getRunAsUser() == 0
+                            && securityContext.getFsGroup() == 0;
+                      })));
     }
 
     String sshConfigMapName = identity.getWorkspaceId() + SSH_CONFIG_MAP_NAME_SUFFIX;
@@ -171,17 +189,64 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
                         .build())
                 .build());
     List<Container> containers = podSpec.getContainers();
-    containers.forEach(
-        container -> {
-          VolumeMount volumeMount =
-              new VolumeMountBuilder()
-                  .withName(secretName)
-                  .withNewReadOnly(true)
-                  .withReadOnly(true)
-                  .withMountPath(SSH_PRIVATE_KEYS_PATH)
-                  .build();
-          container.getVolumeMounts().add(volumeMount);
-        });
+    VolumeMount sshKeysVolumeMount =
+        new VolumeMountBuilder()
+            .withName(secretName)
+            .withNewReadOnly(true)
+            .withReadOnly(true)
+            .withMountPath(SSH_PRIVATE_KEYS_PATH)
+            .build();
+    containers.forEach(container -> container.getVolumeMounts().add(sshKeysVolumeMount));
+
+    PodSecurityContext securityContext = podSpec.getSecurityContext();
+
+    /* The OpenSSH daemon requires 600 file mode access permissions for private keys.
+    Mounted keys have 640 permissions despite setting 'DefaultMode' to 600.
+    As a workaround copy the SSH keys and manually set them needed permissions.
+    The copy operation can be applied, if the primary group ID of the containers will be root (0).
+    TODO rework this when https://github.com/kubernetes/kubernetes/issues/81089 will be resolved */
+    if (securityContext != null
+        && securityContext.getFsGroup() == 0
+        && securityContext.getRunAsUser() == 0) {
+      copyPrivateKeysWithPermissions(podSpec, sshKeysVolumeMount);
+    }
+  }
+
+  // TODO remove this when https://github.com/kubernetes/kubernetes/issues/81089 will be resolved
+  private void copyPrivateKeysWithPermissions(PodSpec podSpec, VolumeMount sshKeysVolumeMount) {
+    String copiedSshKeysVolumeName = "copied-private-keys";
+    podSpec
+        .getVolumes()
+        .add(
+            new VolumeBuilder()
+                .withName(copiedSshKeysVolumeName)
+                .withNewEmptyDir()
+                .endEmptyDir()
+                .build());
+
+    VolumeMount copiedSshKeysVolumeMount =
+        new VolumeMountBuilder()
+            .withName(copiedSshKeysVolumeName)
+            .withMountPath(SSH_PRIVATE_KEYS_PATH + "-copy")
+            .build();
+
+    Container initContainer =
+        new ContainerBuilder()
+            .withName("ssh-private-keys-modifier")
+            .withImage("centos:centos7")
+            .withVolumeMounts(sshKeysVolumeMount, copiedSshKeysVolumeMount)
+            .withCommand(
+                asList(
+                    "/bin/sh",
+                    "-c",
+                    format(
+                        "(cp -r %1$s/. %1$s-copy && chmod -R 600 %1$s-copy) || exit 0",
+                        SSH_PRIVATE_KEYS_PATH)))
+            .build();
+    podSpec
+        .getContainers()
+        .forEach(container -> container.getVolumeMounts().add(copiedSshKeysVolumeMount));
+    podSpec.getInitContainers().add(initContainer);
   }
 
   private void doProvisionSshConfig(
@@ -253,15 +318,20 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
    *     provide own name. Details see here:
    *     https://github.com/eclipse/che/issues/13494#issuecomment-512761661. Note: behavior can be
    *     improved in 7.x releases after 7.0.0
+   * @param useCopiedKeys use the copied keys with the proper permissions, see the description in
+   *     the {@link #mountSshKeySecret}
    * @return the ssh configuration which include host, identity file location and Host Key checking
    *     policy
    */
-  private String buildConfig(@NotNull String name) {
+  private String buildConfig(@NotNull String name, boolean useCopiedKeys) {
     String host = name.startsWith("default-") ? "*" : name;
     return "host "
         + host
         + "\nIdentityFile "
         + SSH_PRIVATE_KEYS_PATH
+        // TODO remove this when https://github.com/kubernetes/kubernetes/issues/81089 will be
+        // resolved
+        + (useCopiedKeys ? "-copy" : "")
         + "/"
         + name
         + "\nStrictHostKeyChecking = no"
