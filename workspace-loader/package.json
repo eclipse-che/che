@@ -25,7 +25,7 @@
     "ts-loader": "^5.3.3",
     "tslint": "5.9.1",
     "tslint-loader": "^3.5.4",
-    "typescript": "^2.7.1",
+    "typescript": "3.4.5",
     "typescript-formatter": "7.2.2",
     "uglifyjs-webpack-plugin": "^1.1.8",
     "webpack": "^4.0.0",
@@ -34,7 +34,7 @@
     "webpack-merge": "^4.1.1"
   },
   "dependencies": {
-    "@eclipse-che/api": "^7.0.0-beta-4.0-80162ea6d2",
+    "@eclipse-che/api": "latest",    
     "lodash": "4.17.15",
     "reconnecting-websocket": "3.2.2"
   },

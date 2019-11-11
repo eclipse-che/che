@@ -15,6 +15,12 @@
 
 declare const Keycloak: Function;
 
+declare global {
+    interface Window {
+        _keycloak: any
+    }
+}
+
 export class KeycloakLoader {
     /**
      * Load keycloak settings
@@ -67,7 +73,10 @@ export class KeycloakLoader {
                 reject('Cannot load ' + script.src);
             };
 
-            document.head.appendChild(script);
+            if (!document.head) {
+                document.createElement('head');
+            }
+            document.head!.appendChild(script);
         });
     }
 

@@ -19,8 +19,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.MDC;
 
@@ -41,10 +40,7 @@ public class IdentityIdLoggerFilter implements Filter {
   public final void doFilter(
       ServletRequest request, ServletResponse response, FilterChain filterChain)
       throws IOException, ServletException {
-    final HttpServletRequest httpRequest = (HttpServletRequest) request;
-    final HttpSession session = httpRequest.getSession();
-    Subject subject = (Subject) session.getAttribute("che_subject");
-
+    Subject subject = EnvironmentContext.getCurrent().getSubject();
     if (subject != null && subject.getUserId() != null) {
       MDC.put(IDENTITY_ID_MDC_KEY, subject.getUserId());
     }

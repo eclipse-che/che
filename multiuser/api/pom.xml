@@ -24,6 +24,7 @@
     <packaging>pom</packaging>
     <name>Che Multiuser :: API Parent</name>
     <modules>
+        <module>che-multiuser-api-authentication-commons</module>
         <module>che-multiuser-api-permission-shared</module>
         <module>che-multiuser-api-permission</module>
         <module>che-multiuser-api-authorization</module>
