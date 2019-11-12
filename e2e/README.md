@@ -1,4 +1,4 @@
-
+* dummy-pr
 # Module for launch E2E tests related to Che 7
 
 ## Requirements
