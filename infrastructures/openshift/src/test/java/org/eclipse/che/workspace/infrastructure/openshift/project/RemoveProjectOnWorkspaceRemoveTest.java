@@ -14,10 +14,8 @@ package org.eclipse.che.workspace.infrastructure.openshift.project;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
@@ -36,8 +34,6 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class RemoveProjectOnWorkspaceRemoveTest {
 
-  private static final String WORKSPACE_ID = "workspace123";
-
   @Mock private Workspace workspace;
   @Mock private OpenShiftProjectFactory projectFactory;
 
@@ -48,8 +44,6 @@ public class RemoveProjectOnWorkspaceRemoveTest {
     removeProjectOnWorkspaceRemove = spy(new RemoveProjectOnWorkspaceRemove(projectFactory));
 
     lenient().doNothing().when(projectFactory).deleteIfManaged(any());
-
-    when(workspace.getId()).thenReturn(WORKSPACE_ID);
   }
 
   @Test
@@ -62,22 +56,9 @@ public class RemoveProjectOnWorkspaceRemoveTest {
   }
 
   @Test
-  public void shouldRemoveProjectOnWorkspaceRemovedEventIfFactoryIsManagingNamespaces()
-      throws Exception {
-    when(projectFactory.isManagingNamespace(any())).thenReturn(true);
-
+  public void shouldInvokeDeleteIfManagedMethodOnWorkspaceRemovedEvent() throws Exception {
     removeProjectOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
 
     verify(projectFactory).deleteIfManaged(workspace);
-  }
-
-  @Test
-  public void shouldNotRemoveProjectOnWorkspaceRemovedEventIfFactoryIsNotManagingNamespaces()
-      throws Exception {
-    when(projectFactory.isManagingNamespace(any())).thenReturn(false);
-
-    removeProjectOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
-
-    verify(projectFactory, never()).deleteIfManaged(any());
   }
 }

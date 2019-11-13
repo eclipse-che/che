@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -67,6 +68,9 @@ import org.testng.annotations.Test;
  */
 @Listeners(MockitoTestNGListener.class)
 public class OpenShiftProjectFactoryTest {
+
+  private static final String USER_ID = "userid";
+  private static final String USER_NAME = "username";
 
   @Mock private OpenShiftClientConfigFactory configFactory;
   @Mock private OpenShiftClientFactory clientFactory;
@@ -94,6 +98,10 @@ public class OpenShiftProjectFactoryTest {
 
     when(projectOperation.withName(any())).thenReturn(projectResource);
     when(projectResource.get()).thenReturn(mock(Project.class));
+
+    lenient()
+        .when(userManager.getById(USER_ID))
+        .thenReturn(new UserImpl(USER_ID, "test@mail.com", USER_NAME));
   }
 
   @Test(
@@ -287,7 +295,7 @@ public class OpenShiftProjectFactoryTest {
     doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
 
     // when
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", null, null, null);
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", null, USER_ID, null);
     OpenShiftProject project = projectFactory.getOrCreate(identity);
 
     // then
@@ -308,7 +316,7 @@ public class OpenShiftProjectFactoryTest {
     doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
 
     // when
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", null, null, null);
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", null, USER_ID, null);
     OpenShiftProject project = projectFactory.getOrCreate(identity);
 
     // then
@@ -339,7 +347,7 @@ public class OpenShiftProjectFactoryTest {
     doReturn(serviceAccount).when(projectFactory).doCreateServiceAccount(any(), any());
 
     // when
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", null, null, null);
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", null, USER_ID, null);
     projectFactory.getOrCreate(identity);
 
     // then
@@ -366,7 +374,7 @@ public class OpenShiftProjectFactoryTest {
     doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
 
     // when
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", null, null, null);
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", null, USER_ID, null);
     projectFactory.getOrCreate(identity);
 
     // then
@@ -385,7 +393,7 @@ public class OpenShiftProjectFactoryTest {
     doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
 
     // when
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", null, null, null);
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", null, USER_ID, null);
     projectFactory.getOrCreate(identity);
 
     // then

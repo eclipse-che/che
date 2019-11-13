@@ -64,10 +64,11 @@ import org.testng.annotations.Test;
 public class UniqueWorkspacePVCStrategyTest {
 
   private static final String WORKSPACE_ID = "workspace123";
+  private static final String NAMESPACE = "infraNamespace";
   private static final String PVC_NAME_PREFIX = "che-claim";
 
   private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1", "namespace");
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1", NAMESPACE);
 
   private KubernetesEnvironment k8sEnv;
 
@@ -94,7 +95,8 @@ public class UniqueWorkspacePVCStrategyTest {
 
     provisionOrder = inOrder(pvcProvisioner, subpathPrefixes, podsVolumes);
 
-    when(factory.getOrCreate(eq(IDENTITY))).thenReturn(k8sNamespace);
+    lenient().when(factory.getOrCreate(eq(IDENTITY))).thenReturn(k8sNamespace);
+    lenient().when(factory.get(any(Workspace.class))).thenReturn(k8sNamespace);
     when(k8sNamespace.persistentVolumeClaims()).thenReturn(pvcs);
   }
 

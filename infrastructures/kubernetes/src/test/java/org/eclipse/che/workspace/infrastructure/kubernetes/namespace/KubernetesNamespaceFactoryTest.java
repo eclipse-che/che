@@ -45,6 +45,7 @@ import java.util.List;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl.WorkspaceImplBuilder;
@@ -69,6 +70,10 @@ import org.testng.annotations.Test;
  */
 @Listeners(MockitoTestNGListener.class)
 public class KubernetesNamespaceFactoryTest {
+
+  private static final String USER_ID = "userid";
+  private static final String USER_NAME = "username";
+
   @Mock private KubernetesClientFactory clientFactory;
 
   @Mock private KubernetesClient k8sClient;
@@ -89,6 +94,10 @@ public class KubernetesNamespaceFactoryTest {
     lenient().when(k8sClient.namespaces()).thenReturn(namespaceOperation);
     lenient().when(namespaceOperation.withName(any())).thenReturn(namespaceResource);
     lenient().when(namespaceResource.get()).thenReturn(mock(Namespace.class));
+
+    lenient()
+        .when(userManager.getById(USER_ID))
+        .thenReturn(new UserImpl(USER_ID, "test@mail.com", USER_NAME));
   }
 
   @Test
@@ -347,7 +356,7 @@ public class KubernetesNamespaceFactoryTest {
     // when
     Boolean result;
     try {
-      RuntimeIdentity identity = new RuntimeIdentityImpl("123", "userid", null, "infraNamespace");
+      RuntimeIdentity identity = new RuntimeIdentityImpl("123", null, USER_ID, "infraNamespace");
       result = namespaceFactory.isCreatingNamespace(identity);
     } catch (InfrastructureException e) {
       // this can happen and we test for it below...
@@ -380,7 +389,7 @@ public class KubernetesNamespaceFactoryTest {
     Namespace existingLegacyNamespace = legacyNamespaceExists ? mock(Namespace.class) : null;
     when(namespaceResource.get()).thenReturn(existingLegacyNamespace);
 
-    RuntimeIdentity identity = new RuntimeIdentityImpl("123", "userid", null, "infraNamespace");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("123", null, USER_ID, "infraNamespace");
 
     // when
     boolean creating;
@@ -418,7 +427,7 @@ public class KubernetesNamespaceFactoryTest {
 
     // when
     RuntimeIdentity identity =
-        new RuntimeIdentityImpl("workspace123", "userid", null, "infraNamespace");
+        new RuntimeIdentityImpl("workspace123", null, USER_ID, "infraNamespace");
     KubernetesNamespace namespace = namespaceFactory.getOrCreate(identity);
 
     // then
@@ -438,7 +447,7 @@ public class KubernetesNamespaceFactoryTest {
 
     // when
     RuntimeIdentity identity =
-        new RuntimeIdentityImpl("workspace123", "userid", null, "infraNamespace");
+        new RuntimeIdentityImpl("workspace123", null, USER_ID, "infraNamespace");
     KubernetesNamespace namespace = namespaceFactory.getOrCreate(identity);
 
     // then
@@ -483,7 +492,7 @@ public class KubernetesNamespaceFactoryTest {
 
     // when
     RuntimeIdentity identity =
-        new RuntimeIdentityImpl("workspace123", "userid", null, "infraNamespace");
+        new RuntimeIdentityImpl("workspace123", null, USER_ID, "infraNamespace");
     namespaceFactory.getOrCreate(identity);
 
     // then
@@ -514,7 +523,7 @@ public class KubernetesNamespaceFactoryTest {
 
     // when
     RuntimeIdentity identity =
-        new RuntimeIdentityImpl("workspace123", "userid", null, "infraNamespace");
+        new RuntimeIdentityImpl("workspace123", null, USER_ID, "infraNamespace");
     namespaceFactory.getOrCreate(identity);
 
     // then
@@ -536,7 +545,7 @@ public class KubernetesNamespaceFactoryTest {
 
     // when
     RuntimeIdentity identity =
-        new RuntimeIdentityImpl("workspace123", "userid", null, "infraNamespace");
+        new RuntimeIdentityImpl("workspace123", null, USER_ID, "infraNamespace");
     namespaceFactory.getOrCreate(identity);
 
     // then
