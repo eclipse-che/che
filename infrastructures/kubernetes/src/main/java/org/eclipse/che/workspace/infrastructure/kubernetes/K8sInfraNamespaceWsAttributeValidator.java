@@ -23,7 +23,13 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.WorkspaceAttributeValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
-/** @author Sergii Leshchenko */
+/**
+ * Validates the values of {@link
+ * org.eclipse.che.api.workspace.shared.Constants#WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE}
+ * before workspace creation and updating.
+ *
+ * @author Sergii Leshchenko
+ */
 public class K8sInfraNamespaceWsAttributeValidator implements WorkspaceAttributeValidator {
 
   private final int METADATA_NAME_MAX_LENGTH = 63;
@@ -38,6 +44,15 @@ public class K8sInfraNamespaceWsAttributeValidator implements WorkspaceAttribute
     this.namespaceFactoryProvider = namespaceFactoryProvider;
   }
 
+  /**
+   * Validates value of {@link
+   * org.eclipse.che.api.workspace.shared.Constants#WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE}.
+   *
+   * @param attributes workspace attributes to validate
+   * @throws ValidationException when infra namespace value has wrong format
+   * @throws ValidationException when the current user is not permitted to use the specified infra
+   *     namespace
+   */
   @Override
   public void validate(Map<String, String> attributes) throws ValidationException {
     String namespace = attributes.get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
@@ -65,6 +80,15 @@ public class K8sInfraNamespaceWsAttributeValidator implements WorkspaceAttribute
     }
   }
 
+  /**
+   * Validates value of {@link
+   * org.eclipse.che.api.workspace.shared.Constants#WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE}
+   * before updating.
+   *
+   * @param existing actual workspace attributes
+   * @param update new workspace attributes to validate
+   * @throws ValidationException when new attributes removes or updates infra namespace value
+   */
   @Override
   public void validateUpdate(Map<String, String> existing, Map<String, String> update)
       throws ValidationException {

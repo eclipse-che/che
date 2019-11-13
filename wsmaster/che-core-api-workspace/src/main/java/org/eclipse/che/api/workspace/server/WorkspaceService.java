@@ -813,7 +813,7 @@ public class WorkspaceService extends Service {
   private static Map<String, String> parseAttrs(List<String> attributes)
       throws BadRequestException, ForbiddenException {
     if (attributes == null) {
-      return new HashMap<>();
+      return emptyMap();
     }
     final Map<String, String> res = Maps.newHashMapWithExpectedSize(attributes.size());
     for (String attribute : attributes) {

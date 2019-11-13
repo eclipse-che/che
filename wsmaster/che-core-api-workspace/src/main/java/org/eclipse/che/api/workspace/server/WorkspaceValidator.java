@@ -53,7 +53,7 @@ public class WorkspaceValidator {
       Pattern.compile("[a-zA-Z][a-zA-Z0-9-_.]{0,18}[a-zA-Z0-9]");
   private static final Pattern VOLUME_PATH = Pattern.compile("/.+");
 
-  private Set<WorkspaceAttributeValidator> attributeValidators;
+  private final Set<WorkspaceAttributeValidator> attributeValidators;
 
   @Inject
   public WorkspaceValidator(Set<WorkspaceAttributeValidator> attributeValidators) {
