@@ -430,6 +430,18 @@ public class KubernetesNamespaceFactory {
     return namespace;
   }
 
+  /**
+   * Evaluates namespace according to the specified context.
+   *
+   * <p>Kubernetes infrastructure use checks is evaluated legacy namespace exists, if it does - use
+   * it. Otherwise evaluated new default namespace name;
+   *
+   * @param resolutionCtx context for namespace evaluation
+   * @return evaluated namespace name
+   * @throws InfrastructureException when there legacy namespace doesn't exist and default namespace
+   *     is not configured
+   * @throws InfrastructureException when any exception occurs during evaluation
+   */
   public String evaluateNamespaceName(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
     String namespace = resolveLegacyNamespaceName(resolutionCtx);
@@ -464,8 +476,7 @@ public class KubernetesNamespaceFactory {
   }
 
   public void deleteIfManaged(Workspace workspace) throws InfrastructureException {
-    KubernetesNamespace namespace =
-        doCreateNamespaceAccess(workspace.getId(), getNamespaceName(workspace));
+    KubernetesNamespace namespace = get(workspace);
     namespace.deleteIfManaged();
   }
 

@@ -270,9 +270,10 @@ public class WorkspaceRuntimes {
   }
 
   /**
-   * Evaluates infrastructure namespace
+   * Evaluates infrastructure namespace.
    *
-   * <p>TODO
+   * @param resolutionCtx context that holds info needed for namespace resolution
+   * @throws InfrastructureException when any exception occurs during namespace resolution
    */
   public String evalInfrastructureNamespace(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {

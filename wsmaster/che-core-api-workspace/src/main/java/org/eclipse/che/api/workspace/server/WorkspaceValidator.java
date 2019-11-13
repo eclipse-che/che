@@ -95,9 +95,6 @@ public class WorkspaceValidator {
           config.getName());
     }
 
-    // projects
-    // TODO
-
     // ensure using either plugins or installers but not both
     validatePlugins(config);
   }
