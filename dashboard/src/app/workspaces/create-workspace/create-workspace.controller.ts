@@ -11,18 +11,27 @@
  */
 'use strict';
 
-import {CheEnvironmentRegistry} from '../../../components/api/environment/che-environment-registry.factory';
-import {EnvironmentManager} from '../../../components/api/environment/environment-manager';
-import {IEnvironmentManagerMachine} from '../../../components/api/environment/environment-manager-machine';
-import {CreateWorkspaceSvc} from './create-workspace.service';
-import {NamespaceSelectorSvc} from './namespace-selector/namespace-selector.service';
-import {RandomSvc} from '../../../components/utils/random.service';
-import {CheNotification} from '../../../components/notification/che-notification.factory';
+import { CreateWorkspaceSvc } from './create-workspace.service';
 import {
   ICheButtonDropdownMainAction,
   ICheButtonDropdownOtherAction
 } from '../../../components/widget/button-dropdown/che-button-dropdown.directive';
-import {DevfileRegistry} from '../../../components/api/devfile-registry.factory';
+
+/**
+ * View tabs.
+ */
+enum TABS {
+  READY_TO_GO,
+  IMPORT_DEVFILE
+}
+
+/**
+ *
+ */
+type DevfileChangeEventData = {
+  devfile: che.IWorkspaceDevfile,
+  attrs?: { [key: string]: string }
+};
 
 /**
  * This class is handling the controller for workspace creation.
@@ -31,115 +40,76 @@ import {DevfileRegistry} from '../../../components/api/devfile-registry.factory'
  */
 export class CreateWorkspaceController {
 
-  static $inject = ['$mdDialog', '$timeout', 'cheEnvironmentRegistry', 'createWorkspaceSvc', 'namespaceSelectorSvc',
-   'randomSvc', '$log', 'cheNotification', 'devfileRegistry'];
+  static $inject = [
+    '$location',
+    '$scope',
+    'createWorkspaceSvc',
+  ];
 
   /**
-   * Dropdown button config.
+   * Selected tab index.
    */
-  headerCreateButtonConfig: {
-    mainAction: ICheButtonDropdownMainAction,
-    otherActions: Array<ICheButtonDropdownOtherAction>
-  };
-  private $mdDialog: ng.material.IDialogService;
+  selectedTab: number = 0;
   /**
-   * Timeout service.
+   * View tabs.
    */
-  private $timeout: ng.ITimeoutService;
+  tabs: typeof TABS;
+
   /**
-   * The registry of environment managers.
+   * Location service.
    */
-  private cheEnvironmentRegistry: CheEnvironmentRegistry;
+  private $location: ng.ILocationService;
+  /**
+   * Directive scope service.
+   */
+  private $scope: ng.IScope;
   /**
    * Workspace creation service.
    */
   private createWorkspaceSvc: CreateWorkspaceSvc;
   /**
-   * Namespace selector service.
+   * Dropdown button config.
    */
-  private namespaceSelectorSvc: NamespaceSelectorSvc;
+  private headerCreateButtonConfig: {
+    mainAction: ICheButtonDropdownMainAction,
+    otherActions: Array<ICheButtonDropdownOtherAction>
+  };
   /**
-   * Generator for random strings.
+   * Devfiles by view.
    */
-  private randomSvc: RandomSvc;
+  private devfiles: Map<TABS, DevfileChangeEventData> = new Map();
   /**
-   * Logging service.
+   * Forms by view.
    */
-  private $log: ng.ILogService;
-  /**
-   * Notification factory.
-   */
-  private cheNotification: CheNotification;
-  /**
-   * Devfile registry.
-   */
-  private devfileRegistry: DevfileRegistry;
-  /**
-   * The environment manager.
-   */
-  private environmentManager: EnvironmentManager;
-  /**
-   * The selected devfile.
-   */
-  private selectedDevfile: che.IWorkspaceDevfile;
-  /**
-   * The selected namespace ID.
-   */
-  private namespaceId: string;
-  /**
-   * The map of forms.
-   */
-  private forms: Map<string, ng.IFormController>;
-  /**
-   * The list of names of existing workspaces.
-   */
-  private usedNamesList: string[];
-  /**
-   * The name of workspace.
-   */
-  private workspaceName: string;
-  /**
-   * Hide progress loader if <code>true</code>.
-   */
-  private hideLoader: boolean;
-
-  private stackName: string;
+  private forms: Map<TABS, ng.IFormController> = new Map();
 
   /**
    * Default constructor that is using resource injection
    */
-  constructor($mdDialog: ng.material.IDialogService,
-              $timeout: ng.ITimeoutService,
-              cheEnvironmentRegistry: CheEnvironmentRegistry,
-              createWorkspaceSvc: CreateWorkspaceSvc,
-              namespaceSelectorSvc: NamespaceSelectorSvc,
-              randomSvc: RandomSvc,
-              $log: ng.ILogService,
-              cheNotification: CheNotification,
-              devfileRegistry: DevfileRegistry) {
-    this.$mdDialog = $mdDialog;
-    this.$timeout = $timeout;
-    this.cheEnvironmentRegistry = cheEnvironmentRegistry;
+  constructor(
+    $location: ng.ILocationService,
+    $scope: ng.IScope,
+    createWorkspaceSvc: CreateWorkspaceSvc
+  ) {
+    this.$location = $location;
+    this.$scope = $scope;
     this.createWorkspaceSvc = createWorkspaceSvc;
-    this.namespaceSelectorSvc = namespaceSelectorSvc;
-    this.randomSvc = randomSvc;
-    this.$log = $log;
-    this.cheNotification = cheNotification;
-    this.devfileRegistry = devfileRegistry;
 
-    this.usedNamesList = [];
-    this.forms = new Map();
-
-    this.namespaceId = this.namespaceSelectorSvc.getNamespaceId();
-    this.buildListOfUsedNames().then(() => {
-      this.workspaceName = this.randomSvc.getRandString({prefix: 'wksp-', list: this.usedNamesList});
-      this.reValidateName();
+    this.tabs = TABS;
+    this.updateSelectedTab(this.$location.search().tab);
+    const locationWatcherDeregistration = $scope.$watch(() => {
+      return $location.search().tab;
+    }, (newTab: string, oldTab: string) => {
+      if (newTab === oldTab) {
+        return;
+      }
+      if (angular.isDefined(newTab)) {
+        this.updateSelectedTab(newTab);
+      }
     });
-
-    // loader should be hidden and page content shown
-    // when stacks selector is rendered
-    // and default stack is selected
-    this.hideLoader = false;
+    $scope.$on('$destroy', () => {
+      locationWatcherDeregistration();
+    });
 
     // header toolbar
     // dropdown button config
@@ -172,56 +142,39 @@ export class CreateWorkspaceController {
   }
 
   /**
-   * Callback which is called when stack is selected.
-   *
-   * @param {string} stackId the stack ID
+   * Changes search part of URL.
+   * @param index a tab index.
    */
-  onDevfileSelected(devfile: che.IWorkspaceDevfile): void {
-    // tiny timeout for templates selector to be rendered
-    this.$timeout(() => {
-      this.hideLoader = true;
-    }, 10);
-    this.selectedDevfile = devfile;
+  onSelectTab(index?: number): void {
+    let param: { tab?: string } = {};
+    if (angular.isDefined(index)) {
+      param.tab = TABS[index];
+    }
+    if (angular.isUndefined(this.$location.search().tab)) {
+      this.$location.replace().search(param);
+    } else {
+      this.$location.search(param);
+    }
   }
 
   /**
-   * Callback which is called when namespace is selected.
+   * Update selected tab index by search part of URL.
    *
-   * @param {string} namespaceId a namespace ID
+   * @param tab a tab name
    */
-  onNamespaceChanged(namespaceId: string) {
-    this.namespaceId = namespaceId;
-
-    this.buildListOfUsedNames().then(() => {
-      this.reValidateName();
-    });
+  updateSelectedTab(tab: string): void {
+    const index = parseInt(TABS[tab], 10);
+    this.selectedTab = isNaN(index) ? 0 : index;
   }
 
   /**
-   * Returns list of namespaces.
+   * Stores forms in map.
    *
-   * @return {Array<che.INamespace>}
+   * @param {number} tab
+   * @param {ng.IFormController} form
    */
-  getNamespaces(): Array<che.INamespace> {
-    return this.namespaceSelectorSvc.getNamespaces();
-  }
-
-  /**
-   * Returns namespaces empty message if set.
-   *
-   * @returns {string}
-   */
-  getNamespaceEmptyMessage(): string {
-    return this.namespaceSelectorSvc.getNamespaceEmptyMessage();
-  }
-
-  /**
-   * Returns namespaces caption.
-   *
-   * @returns {string}
-   */
-  getNamespaceCaption(): string {
-    return this.namespaceSelectorSvc.getNamespaceCaption();
+  registerForm(tab: number, form: ng.IFormController) {
+    this.forms.set(tab, form);
   }
 
   /**
@@ -230,110 +183,19 @@ export class CreateWorkspaceController {
    * @return {boolean}
    */
   isCreateButtonDisabled(): boolean {
-    if (!this.namespaceId || !this.selectedDevfile) {
-      return true;
-    }
+    const form = this.forms.get(this.selectedTab);
 
-    for (const form of this.forms.values()) {
-      if (form.$valid !== true) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * Stores forms in list.
-   *
-   * @param {string} inputName
-   * @param {ng.IFormController} form
-   */
-  registerForm(inputName: string, form: ng.IFormController) {
-    this.forms.set(inputName, form);
-  }
-
-  /**
-   * Returns <code>false</code> if workspace's name is not unique in the namespace.
-   * Only member with 'manageWorkspaces' permission can definitely know whether
-   * name is unique or not.
-   *
-   * @param {string} name workspace's name
-   */
-  isNameUnique(name: string): boolean {
-    return this.usedNamesList.indexOf(name) === -1;
-  }
-
-  /**
-   * Filters list of workspaces by current namespace and
-   * builds list of names for current namespace.
-   *
-   * @return {IPromise<any>}
-   */
-  buildListOfUsedNames(): ng.IPromise<any> {
-    return this.createWorkspaceSvc.fetchWorkspacesByNamespace(this.namespaceId).then((workspaces: Array<che.IWorkspace>) => {
-      this.usedNamesList = workspaces.filter((workspace: che.IWorkspace) => {
-        return workspace.namespace === this.namespaceId;
-      }).map((workspace: che.IWorkspace) => {
-        return this.createWorkspaceSvc.getWorkspaceName(workspace);
-      });
-    });
-  }
-
-  /**
-   * Triggers form validation on Settings tab.
-   */
-  reValidateName(): void {
-    const form: ng.IFormController = this.forms.get('name');
-
-    if (!form) {
-      return;
-    }
-
-    ['name', 'deskname'].forEach((inputName: string) => {
-      const model = form[inputName] as ng.INgModelController;
-      if (model) {
-        model.$validate();
-      }
-    });
+    return !form || form.$valid !== true;
   }
 
   /**
    * Creates workspace.
-   *
-   * @returns {angular.IPromise<che.IWorkspace>}
    */
   createWorkspace(): ng.IPromise<che.IWorkspace> {
-    // update workspace name
-    let devfileSource = angular.copy(this.selectedDevfile);
-    devfileSource.metadata.name = this.workspaceName;
-    return this.createWorkspaceSvc.createWorkspaceFromDevfile(devfileSource, {stackName: this.stackName});
+    const { devfile, attrs } = this.devfiles.get(this.selectedTab);
+    return this.createWorkspaceSvc.createWorkspaceFromDevfile(devfile, attrs, this.selectedTab === TABS.IMPORT_DEVFILE);
   }
 
-  /**
-   * Creates a workspace and shows a dialogue window for a user to select
-   * whether to open Workspace Details page or the IDE.
-   *
-   * @param {MouseEvent} $event
-   */
-  createWorkspaceAndShowDialog($event: MouseEvent): void {
-    this.createWorkspace().then((workspace: che.IWorkspace) => {
-      this.$mdDialog.show({
-        targetEvent: $event,
-        controller: 'AfterCreationDialogController',
-        controllerAs: 'afterCreationDialogController',
-        bindToController: true,
-        clickOutsideToClose: true,
-        templateUrl: 'app/workspaces/create-workspace/after-creation-dialog/after-creation-dialog.html'
-      }).then(() => {
-        // when promise is resolved then open workspace in IDE
-        this.createWorkspaceSvc.redirectToIDE(workspace);
-      }, () => {
-        // when promise is rejected then open Workspace Details page
-        this.createWorkspaceSvc.redirectToDetails(workspace);
-      });
-    });
-  }
 
   /**
    * Creates a workspace and redirects to the IDE.
@@ -343,4 +205,9 @@ export class CreateWorkspaceController {
       this.createWorkspaceSvc.redirectToIDE(workspace);
     });
   }
+
+  onDevfileChange(tab: number, devfile: che.IWorkspaceDevfile, attrs: { [key: string]: string }): void {
+    this.devfiles.set(tab, { devfile, attrs });
+  }
+
 }

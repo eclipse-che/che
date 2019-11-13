@@ -99,7 +99,7 @@ export class CheNotification {
     }
   }
 
-  _removeNotification(jqNotificationElement: JQuery): void {
+  _removeNotification(jqNotificationElement: ng.IAugmentedJQuery): void {
     const elementId = jqNotificationElement[0].id;
 
     jqNotificationElement.addClass('hide-notification');

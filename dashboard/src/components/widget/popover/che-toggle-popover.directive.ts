@@ -144,9 +144,9 @@ export class CheTogglePopover implements ng.IDirective {
         if (isOpen) {
           $transclude(($clonedElement: ng.IAugmentedJQuery, $clonedScope: ng.IScope) => {
             childScope = $clonedScope;
-            const popover = angular.element('<div></div>').append($clonedElement).find('[che-multi-transclude-part="popover"]'),
+            const popover = angular.element('<div></div>').append($clonedElement as any).find('[che-multi-transclude-part="popover"]'),
                   popoverCompiled = this.$compile(angular.element(popover.html()))($clonedScope);
-            $element.find('.che-transclude').replaceWith(popoverCompiled);
+            $element.find('.che-transclude').replaceWith(popoverCompiled as any);
           });
         } else {
           if (childScope) {

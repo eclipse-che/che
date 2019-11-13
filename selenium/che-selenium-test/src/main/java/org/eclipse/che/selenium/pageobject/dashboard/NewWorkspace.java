@@ -83,7 +83,7 @@ public class NewWorkspace {
     String TOP_CREATE_BUTTON_XPATH = "//button[@name='split-button']";
     String TOP_DROPDOWN_BUTTON_XPATH = "//button[@name='dropdown-toggle']";
     String TOP_EDIT_BUTTON_XPATH = "//span[text()='Create & Proceed Editing']";
-    String BOTTOM_CREATE_BUTTON_XPATH = "//*[@id='create-workspace-footer-button']";
+    String BOTTOM_CREATE_BUTTON_XPATH = "//*[@id='create-workspace-ready-to-go-button']";
   }
 
   public enum Devfile {

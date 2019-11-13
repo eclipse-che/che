@@ -10,6 +10,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheBranding} from '../../../../components/branding/che-branding.factory';
 /**
  * @ngdoc controller
  * @name workspaces.devfile-editor.controller:WorkspaceDevfileEditorController
@@ -21,34 +22,38 @@ export class WorkspaceDevfileEditorController {
   static $inject = [
     '$log',
     '$scope',
-    '$timeout'
+    '$timeout',
+    'cheBranding'
   ];
   private $log: ng.ILogService;
   private $scope: ng.IScope;
   private $timeout: ng.ITimeoutService;
+  private cheBranding: CheBranding;
 
   private isActive: boolean;
   private workspaceDevfile: che.IWorkspaceDevfile;
   private workspaceDevfileOnChange: Function;
+  private devfileDocsUrl: string;
 
-  private editorOptions: {
-    lineWrapping: boolean,
-    lineNumbers: boolean,
-    matchBrackets: boolean,
-    mode: string,
-    onLoad: Function
-  };
   private validationErrors: string[] = [];
   private devfileYaml: string;
   private saveTimeoutPromise: ng.IPromise<any>;
 
+
   /**
    * Default constructor that is using resource
    */
-  constructor($log: ng.ILogService, $scope: ng.IScope, $timeout: ng.ITimeoutService) {
+  constructor(
+    $log: ng.ILogService,
+    $scope: ng.IScope,
+    $timeout: ng.ITimeoutService,
+    cheBranding: CheBranding
+  ) {
     this.$log = $log;
     this.$scope = $scope;
     this.$timeout = $timeout;
+    this.cheBranding = cheBranding;
+    this.devfileYaml = jsyaml.dump(this.workspaceDevfile);
 
     this.$scope.$on('edit-workspace-details', (event: ng.IAngularEvent, attrs: { status: string }) => {
       if (attrs.status === 'cancelled') {
@@ -76,6 +81,7 @@ export class WorkspaceDevfileEditorController {
 
   $onInit(): void {
     this.devfileYaml = jsyaml.safeDump(this.workspaceDevfile);
+    this.devfileDocsUrl = this.cheBranding.getDocs().devfile;
   }
 
   validate() {
@@ -114,7 +120,7 @@ export class WorkspaceDevfileEditorController {
       }
 
       angular.extend(this.workspaceDevfile, jsyaml.safeLoad(this.devfileYaml));
-      this.workspaceDevfileOnChange();
+      this.workspaceDevfileOnChange({devfile: this.workspaceDevfile});
     }, 200);
   }
 
