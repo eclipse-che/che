@@ -68,6 +68,8 @@ public class VcsSshKeySecretProvisionerTest {
 
   private final String someUser = "someuser";
 
+  private final String jobImage = "centos:centos7";
+
   private VcsSshKeysProvisioner vcsSshKeysProvisioner;
 
   @BeforeMethod
@@ -85,7 +87,7 @@ public class VcsSshKeySecretProvisionerTest {
     when(podSpec.getSecurityContext()).thenReturn(podSecurityContext);
     when(container.getVolumeMounts()).thenReturn(new ArrayList<>());
     k8sEnv.addPod(pod);
-    vcsSshKeysProvisioner = new VcsSshKeysProvisioner(sshManager);
+    vcsSshKeysProvisioner = new VcsSshKeysProvisioner(sshManager, jobImage);
   }
 
   @Test

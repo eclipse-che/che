@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
@@ -90,10 +91,13 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
   private static final Logger LOG = LoggerFactory.getLogger(VcsSshKeysProvisioner.class);
 
   private final SshManager sshManager;
+  private String jobImage;
 
   @Inject
-  public VcsSshKeysProvisioner(SshManager sshManager) {
+  public VcsSshKeysProvisioner(
+      SshManager sshManager, @Named("che.infra.kubernetes.pvc.jobs.image") String jobImage) {
     this.sshManager = sshManager;
+    this.jobImage = jobImage;
   }
 
   @Override
@@ -233,7 +237,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
     Container initContainer =
         new ContainerBuilder()
             .withName("ssh-private-keys-modifier")
-            .withImage("centos:centos7")
+            .withImage(jobImage)
             .withVolumeMounts(sshKeysVolumeMount, copiedSshKeysVolumeMount)
             .withCommand(
                 asList(
