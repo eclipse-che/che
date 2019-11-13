@@ -195,6 +195,17 @@ class IdeSvc {
   }
 
   /**
+   * Reloads frame with IDE
+   */
+  reloadIdeFrame(): void {
+    let iframe = angular.element('#ide-application-iframe');
+    if (iframe) {
+      const src = iframe.attr('src');
+      iframe.attr('src', src);
+    }
+  }
+
+  /**
    * Emit event to move workspace immediately
    * to top of the recent workspaces list
    *
