@@ -417,8 +417,8 @@ export class CheWorkspace {
     const defer = this.$q.defer();
 
     const promise: ng.IHttpPromise<any> = this.$http.get(`/api/workspace/${workspaceId}`, {
-      params: {
-        token: token
+      headers: {
+        'Authorization': `Bearer ${token}`
       }
     });
 
