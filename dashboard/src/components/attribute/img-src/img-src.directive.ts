@@ -11,8 +11,16 @@
  */
 'use strict';
 
+export type ImgSrcOnloadResult = {
+  loaded: boolean;
+};
+
 /**
  * Fetches images using the $http service.
+ *
+ * @usage
+ *   <img img-src="ctrl.imageSrc"
+ *        img-src-onload="ctrl.onImageLoad($result)">
  *
  * @author Oleksii Kurinnyi
  */
@@ -34,6 +42,13 @@ export class ImgSrc implements ng.IDirective {
   }
 
   link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attrs: ng.IAttributes): void {
+    const onload = (loaded: boolean) => {
+      if (!$attrs.imgSrcOnload) {
+        return;
+      }
+      $scope.$eval($attrs.imgSrcOnload, { $result: { loaded } });
+    };
+
     $attrs.$observe('imgSrc', (url: string) => {
       if (this.isDev) {
         url = url.replace(/https?:\/\/[^\/]+/, '');
@@ -44,9 +59,12 @@ export class ImgSrc implements ng.IDirective {
         url: url,
         cache: 'true'
       };
-      this.$http(requestConfig).then((response: any) => {
+      this.$http<string>(requestConfig).then((response: ng.IHttpResponse<string>) => {
         const blob = new Blob([response.data], {type: response.headers('Content-Type')});
         $attrs.$set('src', (window.URL || (window as any).webkitURL).createObjectURL(blob));
+        onload(true);
+      }, () => {
+        onload(false);
       });
     });
   }
