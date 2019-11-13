@@ -35,4 +35,8 @@
         <resource-env-ref-type>javax.sql.DataSource</resource-env-ref-type>
     </resource-env-ref>
 
+    <listener>
+        <listener-class>org.eclipse.che.multiuser.api.authentication.commons.DestroySessionListener</listener-class>
+    </listener>
+
 </web-app>

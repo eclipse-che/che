@@ -33,6 +33,7 @@ public class OpenShiftProjectCatalogPage {
     String TITLE_XPATH = "//h1[contains(text(), 'Browse Catalog')]";
     String PROJECT_ITEM_XPATH_TEMPLATE =
         "//div[@id='catalog-projects-summary-list']//a[contains(text(),'%s')]";
+    String RESOURCE_ITEM_XPATH_TEMPLATE = "//overview-list-row//span[contains(text(), '%s')]";
   }
 
   @FindBy(xpath = Locators.TITLE_XPATH)
@@ -70,6 +71,21 @@ public class OpenShiftProjectCatalogPage {
     String logoutUrl = format("%sconsole/logout", openShiftWebConsoleUrlProvider.get().toString());
     seleniumWebDriver.navigate().to(logoutUrl);
     waitOnClose();
+  }
+
+  public void clickOnProject(String projectName) {
+    String projectItemXpath = format(Locators.PROJECT_ITEM_XPATH_TEMPLATE, projectName);
+    seleniumWebDriverHelper.waitAndClick(By.xpath(projectItemXpath));
+  }
+
+  public void waitResource(String resourceName) {
+    String resourceItemXpath = format(Locators.RESOURCE_ITEM_XPATH_TEMPLATE, resourceName);
+    seleniumWebDriverHelper.waitVisibility(By.xpath(resourceItemXpath));
+  }
+
+  public void waitResourceAbsence(String resourceName) {
+    String resourceItemXpath = format(Locators.RESOURCE_ITEM_XPATH_TEMPLATE, resourceName);
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(resourceItemXpath));
   }
 
   private void waitOnOpen() {

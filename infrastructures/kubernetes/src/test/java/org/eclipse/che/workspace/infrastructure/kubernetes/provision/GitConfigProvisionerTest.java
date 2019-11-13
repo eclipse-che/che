@@ -416,7 +416,7 @@ public class GitConfigProvisionerTest {
   @Test
   public void testShouldProvisionConfigForHttpsServer() throws Exception {
     when(vcsSslCertificateProvisioner.isConfigured()).thenReturn(true);
-    when(vcsSslCertificateProvisioner.getGitServerHost()).thenReturn(" https://localhost");
+    when(vcsSslCertificateProvisioner.getGitServerHost()).thenReturn("https://localhost");
     when(vcsSslCertificateProvisioner.getCertPath()).thenReturn("/some/path");
 
     when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
@@ -457,7 +457,7 @@ public class GitConfigProvisionerTest {
 
     String gitconfig = configMap.getData().get("gitconfig");
     String expectedGitconfig =
-        "[user]\n\tname = userMockName\n\temail = userMockEmail\n[http https://localhost]\n\tsslCAInfo = /some/path";
+        "[user]\n\tname = userMockName\n\temail = userMockEmail\n[http \"https://localhost\"]\n\tsslCAInfo = /some/path";
 
     assertEquals(gitconfig, expectedGitconfig);
   }

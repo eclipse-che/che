@@ -76,7 +76,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final VcsSshKeysProvisioner vcsSshKeysProvisioner;
     private final GitConfigProvisioner gitConfigProvisioner;
     private final PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer;
-    private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
+    private final VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
 
     @Inject
     public KubernetesEnvironmentProvisionerImpl(

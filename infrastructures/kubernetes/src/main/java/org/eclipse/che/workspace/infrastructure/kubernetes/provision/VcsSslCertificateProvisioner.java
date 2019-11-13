@@ -12,7 +12,6 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.base.Strings.nullToEmpty;
 import static java.util.Collections.singletonMap;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -44,9 +43,7 @@ public class VcsSslCertificateProvisioner
   static final String CHE_GIT_SELF_SIGNED_CERT_CONFIG_MAP_SUFFIX = "-che-git-self-signed-cert";
   static final String CHE_GIT_SELF_SIGNED_VOLUME = "che-git-self-signed-cert";
   static final String CERT_MOUNT_PATH = "/etc/che/git/cert/";
-  static final String CA_CERT_FILE = "cert.pem";
-
-  private static final String HTTPS = "https://";
+  static final String CA_CERT_FILE = "ca.crt";
 
   @Inject(optional = true)
   @Named("che.git.self_signed_cert")
@@ -64,27 +61,26 @@ public class VcsSslCertificateProvisioner
     this.host = host;
   }
 
-  /** @return true only if */
+  /**
+   * @return true only if system configured for using self-signed certificate fot https git
+   *     operation
+   */
   public boolean isConfigured() {
     return !isNullOrEmpty(certificate);
   }
 
+  /** @return path to the certificate file */
   public String getCertPath() {
     return CERT_MOUNT_PATH + CA_CERT_FILE;
   }
 
+  /**
+   * Return given in configuration git server host.
+   *
+   * @return git server host for git config it configured
+   */
   public String getGitServerHost() {
-    if (isNullOrEmpty(host)) {
-      return nullToEmpty(host);
-    }
-
-    StringBuilder gitServerHosts = new StringBuilder(" \"");
-    if (!host.startsWith(HTTPS)) {
-      gitServerHosts.append(HTTPS);
-    }
-    gitServerHosts.append(host);
-    gitServerHosts.append("\"");
-    return gitServerHosts.toString();
+    return host;
   }
 
   @Override

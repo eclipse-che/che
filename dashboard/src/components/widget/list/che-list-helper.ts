@@ -11,6 +11,9 @@
  */
 'use strict';
 
+export type FilterExpression = string | { [key: string]: string };
+export type FilterComparator = boolean;
+
 /**
  * This class is handling items selection and filtration.
  *
@@ -52,7 +55,7 @@ export class CheListHelper implements che.widget.ICheListHelper {
    * Filters.
    */
   private filters: {
-    [name: string]: any[];
+    [name: string]: [FilterExpression, FilterComparator];
   };
   /**
    * Callback to define if item can be selected or not.
@@ -224,8 +227,8 @@ export class CheListHelper implements che.widget.ICheListHelper {
    * @param {string} name a filter name
    * @param {any[]} filterProps a filter properties (expression, comparator, anyPropertyKey)
    */
-  applyFilter(name: string, ...filterProps: any[]): void {
-    this.filters[name] = filterProps;
+  applyFilter(name: string, expression: FilterExpression, comparator?: FilterComparator): void {
+    this.filters[name] = [expression, comparator];
 
     this.doFilterList();
   }
@@ -252,7 +255,8 @@ export class CheListHelper implements che.widget.ICheListHelper {
     }
 
     filterNames.forEach((name: string) => {
-      this.itemsList = this.$filter('filter')(this.itemsList, ...this.filters[name]);
+      const filterOptions = this.filters[name];
+      this.itemsList = this.$filter('filter')(this.itemsList, ...filterOptions);
     });
 
     const visibleItemIds = this.itemsList.map((item: any) => {

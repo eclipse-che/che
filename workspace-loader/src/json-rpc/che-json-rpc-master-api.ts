@@ -19,7 +19,6 @@ import { WorkspaceLoader } from '../workspace-loader';
 export enum MasterChannels {
     ENVIRONMENT_OUTPUT = 'runtime/log',
     ENVIRONMENT_STATUS = 'machine/statusChanged',
-    INSTALLER_OUTPUT = 'installer/log',
     WORKSPACE_STATUS = 'workspace/statusChanged'
 }
 const SUBSCRIBE: string = 'subscribe';
@@ -34,7 +33,7 @@ export class CheJsonRpcMasterApi {
     private cheJsonRpcApi: CheJsonRpcApiClient;
     private clientId: string;
 
-    private checkingInterval: number;
+    private checkingInterval: number | undefined;
     private checkingDelay = 10000;
     private fetchingClientIdTimeout = 5000;
 
@@ -60,7 +59,7 @@ export class CheJsonRpcMasterApi {
             this.checkingInterval = undefined;
         }
 
-        this.checkingInterval = setInterval(() => {
+        this.checkingInterval = window.setInterval(() => {
             let isAlive = false;
             const fetchClientPromise = new Promise(resolve => {
                 this.fetchClientId().then(() => {
@@ -84,7 +83,7 @@ export class CheJsonRpcMasterApi {
                     return;
                 }
 
-                clearInterval(this.checkingInterval);
+                window.clearInterval(this.checkingInterval);
                 this.checkingInterval = undefined;
 
                 this.client.disconnect(CODE_REQUEST_TIMEOUT);
@@ -160,26 +159,6 @@ export class CheJsonRpcMasterApi {
      */
     unSubscribeEnvironmentStatus(workspaceId: string, callback: Function): void {
         this.unsubscribe(MasterChannels.ENVIRONMENT_STATUS, workspaceId, callback);
-    }
-
-    /**
-     * Subscribes on workspace agent output.
-     *
-     * @param workspaceId workspace's id
-     * @param callback callback to process event
-     */
-    subscribeInstallerOutput(workspaceId: string, callback: Function): void {
-        this.subscribe(MasterChannels.INSTALLER_OUTPUT, workspaceId, callback);
-    }
-
-    /**
-     * Un-subscribes from workspace agent output.
-     *
-     * @param workspaceId workspace's id
-     * @param callback callback to process event
-     */
-    unSubscribeInstallerOutput(workspaceId: string, callback: Function): void {
-        this.unsubscribe(MasterChannels.INSTALLER_OUTPUT, workspaceId, callback);
     }
 
     /**

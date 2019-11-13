@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-machine-auth</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>7.4.0-SNAPSHOT</version>
+        <version>7.5.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-machine-authentication</artifactId>
     <packaging>jar</packaging>
@@ -97,6 +97,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-db</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-authentication-commons</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>

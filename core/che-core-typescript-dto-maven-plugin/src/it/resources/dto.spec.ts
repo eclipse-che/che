@@ -121,6 +121,10 @@ describe("DTO serialization tests", () => {
         expect(customDto.customMap["bar"].name).to.eql("foo");
     });
 
+    it("check Serializable type", () => {
+        const customDto: che.plugin.typescript.MyDtoWithSerializable = {
 
+        };
+    });
 
 });

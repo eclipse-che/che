@@ -11,6 +11,7 @@
  */
 'use strict';
 import {CheKeycloak} from './che-keycloak.factory';
+import {IChangeMemoryUnit} from '../filter/change-memory-unit/change-memory-unit.filter';
 
 export interface IDevfileMetaData {
   displayName: string;
@@ -66,7 +67,7 @@ export class DevfileRegistry {
         if (this.isKeycloackPresent) {
           globalMemoryLimitNumber += this.jwtproxyMemoryLimitNumber;
         }
-        devfileMetaData.globalMemoryLimit = this.$filter('changeMemoryUnit')(globalMemoryLimitNumber, ['B','GB']);
+        devfileMetaData.globalMemoryLimit = this.$filter<IChangeMemoryUnit>('changeMemoryUnit')(globalMemoryLimitNumber, ['B','GB']);
         return devfileMetaData;
       });
     });

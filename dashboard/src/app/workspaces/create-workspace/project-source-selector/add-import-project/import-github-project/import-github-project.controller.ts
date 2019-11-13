@@ -43,7 +43,7 @@ export class ImportGithubProjectController {
   /**
    * Browser service.
    */
-  private $browser: ng.IBrowserService;
+  private $browser: any;
   /**
    * GitHub authentication popup window.
    */

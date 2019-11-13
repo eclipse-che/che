@@ -72,8 +72,8 @@ export class PluginRegistry {
   }
 
   fetchPlugins(location: string): ng.IPromise<Array<IPlugin>> {
-    return this.$http({'method': 'GET', 'url': location + '/plugins/'}).then(result => {
-      this.plugins.set(location, <Array<IPlugin>>result.data);
+    return this.$http({'method': 'GET', 'url': location + '/plugins/'}).then((result: ng.IHttpResponse<IPlugin[]>) => {
+      this.plugins.set(location, result.data);
       return this.$q.when(result.data);
     }, (error: any) => {
       if (error && error.status === 304) {

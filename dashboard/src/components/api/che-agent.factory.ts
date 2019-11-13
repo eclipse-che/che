@@ -51,7 +51,7 @@ export class CheAgent {
    * Fetch the agents.
    */
   fetchAgents(): ng.IPromise<che.IAgent[]> {
-    const defer = this.$q.defer();
+    const defer = this.$q.defer<che.IAgent[]>();
     const promise = this.remoteAgentAPI.getAgents().$promise;
 
     promise.then((agents: che.IAgent[]) => {
@@ -90,7 +90,7 @@ export class CheAgent {
    * @returns {angular.IPromise<che.IAgent>}
    */
   fetchAgent(agentId: string): ng.IPromise<che.IAgent> {
-    let defer = this.$q.defer();
+    let defer = this.$q.defer<che.IAgent>();
     let promise = this.remoteAgentAPI.getAgent({id: agentId}).$promise;
     promise.then((agent: any) => {
       this.agentsMap.set(agentId, agent);

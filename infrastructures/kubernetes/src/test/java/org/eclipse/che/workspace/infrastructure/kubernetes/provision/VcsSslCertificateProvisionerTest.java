@@ -52,13 +52,16 @@ public class VcsSslCertificateProvisionerTest {
   private static final String EXPECTED_CERT_NAME =
       WORKSPACE_ID + CHE_GIT_SELF_SIGNED_CERT_CONFIG_MAP_SUFFIX;
 
-  public static final String CERT_CONTENT =
+  private static final String CERT_CONTENT =
       "-----BEGIN CERTIFICATE-----\n"
           + UUID.randomUUID().toString()
           + "\n-----END CERTIFICATE-----";
   @Mock private RuntimeIdentity runtimeId;
+
   private VcsSslCertificateProvisioner provisioner;
   private KubernetesEnvironment k8sEnv;
+
+  // private final static String HOST_NAME = UUID.randomUUID().toString();
 
   @BeforeMethod
   public void setUp() {
@@ -83,7 +86,7 @@ public class VcsSslCertificateProvisionerTest {
   @Test
   public void shouldReturnCertPathFile() {
     String certPath = provisioner.getCertPath();
-    assertEquals(certPath, "/etc/che/git/cert/cert.pem");
+    assertEquals(certPath, "/etc/che/git/cert/ca.crt");
   }
 
   @Test
@@ -135,18 +138,6 @@ public class VcsSslCertificateProvisionerTest {
         assertTrue(container.getVolumeMounts().isEmpty());
       }
     }
-  }
-
-  @Test
-  public void shouldReturnWellFormattedHostIfPresent() {
-    provisioner = new VcsSslCertificateProvisioner("", "localhost");
-    assertEquals(provisioner.getGitServerHost(), " \"https://localhost\"");
-
-    provisioner = new VcsSslCertificateProvisioner("", "https://localhost");
-    assertEquals(provisioner.getGitServerHost(), " \"https://localhost\"");
-
-    provisioner = new VcsSslCertificateProvisioner("", "localhost:8080");
-    assertEquals(provisioner.getGitServerHost(), " \"https://localhost:8080\"");
   }
 
   private void verifyVolumeIsPresent(Pod pod) {

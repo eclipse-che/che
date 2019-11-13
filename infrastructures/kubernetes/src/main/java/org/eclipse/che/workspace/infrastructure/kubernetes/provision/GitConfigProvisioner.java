@@ -60,6 +60,7 @@ public class GitConfigProvisioner implements ConfigurationProvisioner<Kubernetes
   private static final String GIT_USER_NAME_PROPERTY = "git.user.name";
   private static final String GIT_USER_EMAIL_PROPERTY = "git.user.email";
   private static final String CONFIG_MAP_VOLUME_NAME = "gitconfigvolume";
+  private static final String HTTPS = "https://";
 
   private PreferenceManager preferenceManager;
   private UserManager userManager;
@@ -184,9 +185,25 @@ public class GitConfigProvisioner implements ConfigurationProvisioner<Kubernetes
     }
 
     if (vcsSslCertificateProvisioner.isConfigured()) {
+      String host = vcsSslCertificateProvisioner.getGitServerHost();
+
+      // Will add leading scheme (https://) if it not provide in configuration.
+      // If host not configured wil return empty string, it will means that
+      // provided certificate will used for all https connections.
+
+      StringBuilder gitServerHosts = new StringBuilder();
+      if (!isNullOrEmpty(host)) {
+        gitServerHosts.append(" \"");
+        if (!host.startsWith(HTTPS)) {
+          gitServerHosts.append(HTTPS);
+        }
+        gitServerHosts.append(host);
+        gitServerHosts.append("\"");
+      }
+
       config
           .append("[http")
-          .append(vcsSslCertificateProvisioner.getGitServerHost())
+          .append(gitServerHosts.toString())
           .append("]")
           .append('\n')
           .append('\t')

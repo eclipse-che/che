@@ -23,7 +23,6 @@ import { By, Key, error } from 'selenium-webdriver';
 import { DebugView } from '../../pageobjects/ide/DebugView';
 import { WarningDialog } from '../../pageobjects/ide/WarningDialog';
 import { Terminal } from '../../pageobjects/ide/Terminal';
-import { OpenWorkspaceWidget } from '../../pageobjects/ide/OpenWorkspaceWidget';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import * as fs from 'fs';
 import { ContextMenu } from '../../pageobjects/ide/ContextMenu';
@@ -40,7 +39,6 @@ const rightToolbar: RightToolbar = e2eContainer.get(CLASSES.RightToolbar);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const warningDialog: WarningDialog = e2eContainer.get(CLASSES.WarningDialog);
-const openWorkspaceWidget: OpenWorkspaceWidget = e2eContainer.get(CLASSES.OpenWorkspaceWidget);
 const projectName: string = 'petclinic';
 const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
 const workspaceName: string = TestConstants.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME;
@@ -73,25 +71,18 @@ suite('Validation of workspace start', async () => {
 
     test('Wait workspace running state', async () => {
         await ide.waitWorkspaceAndIde(namespace, workspaceName);
-        await projectTree.openProjectTreeContainer();
-        await projectTree.waitProjectImported(projectName, 'src');
     });
 
     test('Wait until project is imported', async () => {
-        const rootWsName: string = 'projects';
-        const mainWindowHandle: string = await driverHelper.getDriver().getWindowHandle();
-        await topMenu.selectOption('File', 'Open Workspace...');
-        await openWorkspaceWidget.selectRootWorkspaceItemInDropDawn(rootWsName);
-        await openWorkspaceWidget.selectItemInTreeAndOpenWorkspace(`/${rootWsName}/${projectName}`);
-        await closeMainWindowAndSwitchToWorkspace(mainWindowHandle);
         await projectTree.openProjectTreeContainer();
+        await projectTree.waitProjectImported(projectName, 'src');
     });
 
 });
 
 suite('Language server validation', async () => {
     test('Java LS initialization', async () => {
-        await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToJavaFolder, javaFileName);
+        await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
         await editor.selectTab(javaFileName);
 
         try {
@@ -101,7 +92,7 @@ suite('Language server validation', async () => {
                 throw err;
             }
 
-            console.log("Known flakiness has occurred https://github.com/eclipse/che/issues/14944");
+            console.log('Known flakiness has occurred https://github.com/eclipse/che/issues/14944');
             await driverHelper.reloadPage();
             await ide.waitStatusBarContains('Starting Java Language Server');
         }
@@ -131,7 +122,6 @@ suite('Language server validation', async () => {
         await editor.waitSuggestionWithScrolling(javaFileName, 'run(Class<?> primarySource, String... args) : ConfigurableApplicationContext', 120000);
     });
 
-
     test('Codenavigation', async () => {
         await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
         try {
@@ -146,7 +136,7 @@ suite('Language server validation', async () => {
     });
 
     test.skip('Yaml LS initialization', async () => {
-        await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToYamlFolder, yamlFileName);
+        await projectTree.expandPathAndOpenFile(pathToYamlFolder, yamlFileName);
         await editor.waitEditorAvailable(yamlFileName);
         await editor.clickOnTab(yamlFileName);
         await editor.waitTabFocused(yamlFileName);
@@ -163,7 +153,7 @@ suite('Validation of workspace build and run', async () => {
         // workaround for issue: https://github.com/eclipse/che/issues/14771
 
         // await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'build-output.txt');
-        await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'result-build-output.txt', 220000);
+        await projectTree.expandPathAndOpenFile(projectName, 'result-build-output.txt', 220000);
         await editor.waitText('result-build-output.txt', '[INFO] BUILD SUCCESS');
         // await editor.followAndWaitForText('build-output.txt', '[INFO] BUILD SUCCESS', 300000, 10000);
     });
@@ -175,12 +165,13 @@ suite('Validation of workspace build and run', async () => {
     });
 
     test('Check the running application', async () => {
-        await previewWidget.waitContentAvailableInAssociatedWorkspace(SpringAppLocators.springTitleLocator, 60000, 10000);
+        await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60000, 10000);
     });
 
     test('Close preview widget', async () => {
         await rightToolbar.clickOnToolIcon('Preview');
         await previewWidget.waitPreviewWidgetAbsence();
+
     });
 
     test('Close the terminal running tasks', async () => {
@@ -193,7 +184,7 @@ suite('Validation of workspace build and run', async () => {
 
 suite('Display source code changes in the running application', async () => {
     test('Change source code', async () => {
-        await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToChangedJavaFileFolder, changedJavaFileName);
+        await projectTree.expandPathAndOpenFile(pathToChangedJavaFileFolder, changedJavaFileName);
         await editor.waitEditorAvailable(changedJavaFileName);
         await editor.clickOnTab(changedJavaFileName);
         await editor.waitTabFocused(changedJavaFileName);
@@ -205,8 +196,8 @@ suite('Display source code changes in the running application', async () => {
 
     test('Build application with changes', async () => {
         await runTask('build');
-        await projectTree.collapseAssociatedWorkspaceProjectTree(projectName + '/src', 'main');
-        await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'result-build.txt', 300000);
+        await projectTree.collapseProjectTree(projectName + '/src', 'main');
+        await projectTree.expandPathAndOpenFile(projectName, 'result-build.txt', 300000);
         await editor.waitText('result-build.txt', '[INFO] BUILD SUCCESS');
 
         // workaround for issue: https://github.com/eclipse/che/issues/14771
@@ -227,8 +218,8 @@ suite('Display source code changes in the running application', async () => {
     });
 
     test('Check changes are displayed', async () => {
-        await previewWidget.waitContentAvailableInAssociatedWorkspace(SpringAppLocators.springTitleLocator, 60000, 10000);
-        checkErrorMessageInApplicationController();
+        await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60000, 10000);
+        await checkErrorMessageInApplicationController();
     });
 
     test('Close preview widget', async () => {
@@ -245,7 +236,7 @@ suite('Display source code changes in the running application', async () => {
 
 suite('Validation of debug functionality', async () => {
     test('Open file and activate breakpoint', async () => {
-        await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToJavaFolder, javaFileName);
+        await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
         await editor.activateBreakpoint(javaFileName, 32);
     });
 
@@ -266,7 +257,7 @@ suite('Validation of debug functionality', async () => {
     });
 
     test('Add debug configuration options', async () => {
-        await editor.moveCursorToLineAndChar('launch.json', 6, 24);
+        await editor.moveCursorToLineAndChar('launch.json', 11, 7);
         await editor.performKeyCombination('launch.json', Key.chord(Key.CONTROL, Key.SPACE));
         await editor.clickOnSuggestion('Java: Launch Program in Current File');
         await editor.waitTabWithUnsavedStatus('launch.json');
@@ -295,17 +286,21 @@ async function checkErrorMessageInApplicationController() {
     await previewWidget.waitAndSwitchToWidgetFrame();
     await previewWidget.waitAndClick(SpringAppLocators.springMenuButtonLocator);
     await previewWidget.waitAndClick(SpringAppLocators.springErrorButtonLocator);
-    await previewWidget.waitVisibility(SpringAppLocators.springErrorMessageLocator);
-    await driverHelper.getDriver().switchTo().defaultContent();
-}
 
-async function closeMainWindowAndSwitchToWorkspace(mainWindowHandle: string) {
-    await driverHelper.switchToSecondWindow(mainWindowHandle);
-    const secondWindowHandle: string = await driverHelper.getDriver().getWindowHandle();
-    await driverHelper.getDriver().switchTo().window(mainWindowHandle);
-    await driverHelper.getDriver().close();
-    await driverHelper.getDriver().switchTo().window(secondWindowHandle);
-    await driverHelper.getDriver().manage().window().setSize(TestConstants.TS_SELENIUM_RESOLUTION_WIDTH, TestConstants.TS_SELENIUM_RESOLUTION_HEIGHT);
+    try {
+        await previewWidget.waitVisibility(SpringAppLocators.springErrorMessageLocator);
+    } catch (err) {
+
+        await driverHelper.getDriver().switchTo().defaultContent();
+        await ide.waitAndSwitchToIdeFrame();
+
+        await previewWidget.waitAndSwitchToWidgetFrame();
+        await previewWidget.waitVisibility(SpringAppLocators.springErrorMessageLocator);
+    }
+
+
+    await driverHelper.getDriver().switchTo().defaultContent();
+    await ide.waitAndSwitchToIdeFrame();
 }
 
 async function runTask(task: string) {
