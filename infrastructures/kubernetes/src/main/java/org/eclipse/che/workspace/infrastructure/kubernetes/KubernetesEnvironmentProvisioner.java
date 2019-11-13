@@ -115,8 +115,8 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.serviceAccountProvisioner = serviceAccountProvisioner;
       this.certificateProvisioner = certificateProvisioner;
       this.vcsSshKeysProvisioner = vcsSshKeysProvisioner;
-      this.gitConfigProvisioner = gitConfigProvisioner;
       this.vcsSslCertificateProvisioner = vcsSslCertificateProvisioner;
+      this.gitConfigProvisioner = gitConfigProvisioner;
       this.previewUrlExposer = previewUrlExposer;
     }
 

@@ -80,13 +80,13 @@ spec:
         - name: CHE_GIT_SELF__SIGNED__CERT
           valueFrom:
             configMapKeyRef:
-              name: {{ .Values.global.gitSelfSignedCertConfigName }}
+              name: {{ .Values.global.cheGitSelfSignedCertConfigMapName }}
               key: ca.crt
               optional: false
         - name: CHE_GIT_SELF__SIGNED__CERT__HOST
           valueFrom:
             configMapKeyRef:
-              name: {{ .Values.global.gitSelfSignedCertConfigName }}
+              name: {{ .Values.global.cheGitSelfSignedCertConfigMapName }}
               key: githost
               optional: false
         {{- end }}
