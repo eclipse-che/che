@@ -14,36 +14,26 @@ package org.eclipse.che.api.core.model.workspace.runtime;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
- * Holds meta information about where workspace is run, and to whom it belongs to
- * (workspace and user info).
+ * Holds meta information about where workspace is run, and to whom it belongs to (workspace and
+ * user info).
  *
  * @author gazarenkov
  */
 public interface RuntimeIdentity {
 
-  /**
-   * The id of workspace to which the runtime belongs to.
-   * Must not be null.
-   */
+  /** The id of workspace to which the runtime belongs to. Must not be null. */
   String getWorkspaceId();
 
   /**
-   * The workspace environment name that was used to start runtime.
-   * May be null if workspace does not contain stored environment configuration
-   * (it may me generated on fly).
+   * The workspace environment name that was used to start runtime. May be null if workspace does
+   * not contain stored environment configuration (it may me generated on fly).
    */
   @Nullable
   String getEnvName();
 
-  /**
-   * The id of user who initialized workspace start.
-   * Must not be null.
-   */
+  /** The id of user who initialized workspace start. Must not be null. */
   String getOwnerId();
 
-  /**
-   * Returns infrastructure namespace where runtime is run.
-   * Must not be null.
-   */
+  /** Returns infrastructure namespace where runtime is run. Must not be null. */
   String getInfrastructureNamespace();
 }

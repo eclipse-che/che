@@ -280,6 +280,10 @@ public class WorkspaceRuntimes {
     return infrastructure.evaluateInfraNamespace(resolutionCtx);
   }
 
+  public String evalLegacyInfrastructureNamespace(NamespaceResolutionContext resolutionContext)
+      throws InfrastructureException {
+    return infrastructure.evaluateLegacyInfraNamespace(resolutionContext);
+  }
   /**
    * Injects runtime information such as status and {@link
    * org.eclipse.che.api.core.model.workspace.Runtime} into the workspace object, if the workspace

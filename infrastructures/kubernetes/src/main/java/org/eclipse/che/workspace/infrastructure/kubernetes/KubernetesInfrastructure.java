@@ -70,6 +70,12 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
   }
 
   @Override
+  public String evaluateLegacyInfraNamespace(NamespaceResolutionContext resolutionContext)
+      throws InfrastructureException {
+    return namespaceFactory.evaluateLegacyNamespaceName(resolutionContext);
+  }
+
+  @Override
   protected KubernetesRuntimeContext internalPrepare(
       RuntimeIdentity id, InternalEnvironment environment) throws InfrastructureException {
     return runtimeContextFactory.create(asKubernetesEnv(environment), id, this);

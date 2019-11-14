@@ -774,6 +774,12 @@ public class WorkspaceRuntimesTest {
     }
 
     @Override
+    public String evaluateLegacyInfraNamespace(NamespaceResolutionContext resolutionContext)
+        throws InfrastructureException {
+      return "defaultLegacyNamespace";
+    }
+
+    @Override
     public RuntimeContext internalPrepare(RuntimeIdentity id, InternalEnvironment environment) {
       throw new UnsupportedOperationException();
     }

@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
@@ -103,18 +102,8 @@ public class KubernetesNamespaceFactory {
     this.defaultNamespaceName = defaultNamespaceName;
     this.allowUserDefinedNamespaces = allowUserDefinedNamespaces;
 
-    // This will disappear once we support user selection of workspaces...
-    if (allowUserDefinedNamespaces) {
-      LOG.warn(
-          "'che.infra.kubernetes.namespace.allow_user_defined' is not supported yet. It currently has no"
-              + " effect.");
-    }
-
-    // right now allowUserDefinedNamespaces can't be true, but eventually we will implement it.
-    if (isNullOrEmpty(defaultNamespaceName) && !allowUserDefinedNamespaces) {
-      throw new ConfigurationException(
-          "che.infra.kubernetes.namespace.default or "
-              + "che.infra.kubernetes.namespace.allow_user_defined must be configured");
+    if (isNullOrEmpty(defaultNamespaceName)) {
+      throw new ConfigurationException("che.infra.kubernetes.namespace.default must be configured");
     }
   }
 
@@ -389,8 +378,19 @@ public class KubernetesNamespaceFactory {
               workspace.getId(),
               EnvironmentContext.getCurrent().getSubject().getUserId(),
               EnvironmentContext.getCurrent().getSubject().getUserName());
+      namespace = evaluateLegacyNamespaceName(resolutionCtx);
+    }
+    return namespace;
+  }
+
+  public String evaluateLegacyNamespaceName(NamespaceResolutionContext resolutionCtx)
+      throws InfrastructureException {
+    String namespace = resolveLegacyNamespaceName(resolutionCtx);
+
+    if (!checkNamespaceExists(namespace)) {
       namespace = evaluateNamespaceName(resolutionCtx);
     }
+
     return namespace;
   }
 
@@ -408,33 +408,12 @@ public class KubernetesNamespaceFactory {
    */
   public String evaluateNamespaceName(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
-    String namespace = resolveLegacyNamespaceName(resolutionCtx);
+    String namespace = evalPlaceholders(defaultNamespaceName, resolutionCtx);
 
-    if (checkNamespaceExists(namespace)) {
-      LOG.debug(
-          "The namespace specified using the legacy config exists: {}. Using it for workspace {}.",
-          namespace,
-          resolutionCtx.getWorkspaceId());
-    } else {
-      // ok, the namespace pointed to by the legacy config doesn't exist.. that means there can be
-      // no damage done by storing the workspace in the namespace designated by the new way of
-      // doing things...
-
-      if (isNullOrEmpty(defaultNamespaceName)) {
-        throw new InfrastructureException(
-            format(
-                "'che.infra.kubernetes.namespace.default' is not"
-                    + " defined and no explicit namespace configured for workspace %s",
-                resolutionCtx.getWorkspaceId()));
-      }
-
-      namespace = evalPlaceholders(defaultNamespaceName, resolutionCtx);
-
-      LOG.debug(
-          "Evaluated the namespace for workspace {} using the namespace default to {}",
-          resolutionCtx.getWorkspaceId(),
-          namespace);
-    }
+    LOG.debug(
+        "Evaluated the namespace for workspace {} using the namespace default to {}",
+        resolutionCtx.getWorkspaceId(),
+        namespace);
 
     return namespace;
   }

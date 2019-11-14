@@ -444,7 +444,9 @@ public class WorkspaceManager {
     }
 
     // handle the situation where a workspace created by a previous Che version doesn't have a
-    // namespace stored for it. In this case, we just store the default namespace for it.
+    // namespace stored for it. We use the legacy-aware method to figure out the namespace to
+    // correctly capture the workspaces which have PVCs already in a namespace defined by the legacy
+    // configuration variable.
     if (isNullOrEmpty(
         workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE))) {
       Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
@@ -453,7 +455,7 @@ public class WorkspaceManager {
               workspace.getId(), currentSubject.getUserId(), currentSubject.getUserName());
 
       try {
-        String namespace = runtimes.evalInfrastructureNamespace(resolutionCtx);
+        String namespace = runtimes.evalLegacyInfrastructureNamespace(resolutionCtx);
         workspace.getAttributes().put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
       } catch (InfrastructureException e) {
         throw new ServerException(e);
