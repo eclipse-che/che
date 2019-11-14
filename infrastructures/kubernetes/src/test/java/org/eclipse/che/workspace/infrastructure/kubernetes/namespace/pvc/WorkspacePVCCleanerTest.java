@@ -70,8 +70,7 @@ public class WorkspacePVCCleanerTest {
   }
 
   @Test
-  public void testInvokeCleanupWhenWorkspaceRemovedEventPublished()
-      throws Exception {
+  public void testInvokeCleanupWhenWorkspaceRemovedEventPublished() throws Exception {
     workspacePVCCleaner.subscribe(eventService);
 
     eventService.publish(event);

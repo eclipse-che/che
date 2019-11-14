@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static java.lang.String.format;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.isLabeled;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -117,12 +118,18 @@ public class KubernetesNamespace {
    */
   boolean prepare(boolean markManaged) throws InfrastructureException {
     KubernetesClient client = clientFactory.create(workspaceId);
-    if (get(name, client) == null) {
+    Namespace namespace = get(name, client);
+
+    if (namespace == null) {
       create(name, client, markManaged);
       return true;
     }
 
-    //TODO Consider adding `che-managed` label if it's needed by absent
+    if (markManaged && !isLabeled(namespace, "che-managed", "true")) {
+      // provision managed label is marking is requested but label is missing
+      KubernetesObjectUtil.putLabel(namespace, "che-managed", "true");
+      update(namespace, client);
+    }
     return false;
   }
 
@@ -157,11 +164,6 @@ public class KubernetesNamespace {
 
       throw new KubernetesInfrastructureException(e);
     }
-  }
-
-  boolean isMarkedManaged() throws InfrastructureException {
-    KubernetesClient client = clientFactory.create(workspaceId);
-    return isManagedInternal(client);
   }
 
   private boolean isManagedInternal(KubernetesClient client) throws InfrastructureException {
@@ -281,6 +283,19 @@ public class KubernetesNamespace {
     }
   }
 
+  private void update(Namespace namespace, KubernetesClient client) throws InfrastructureException {
+    try {
+      client.namespaces().createOrReplace(namespace);
+    } catch (KubernetesClientException e) {
+      if (e.getCode() == 403) {
+        LOG.error(
+            "Unable to update new Kubernetes project due to lack of permissions."
+                + "When using workspace namespace placeholders, service account with lenient permissions (cluster-admin) must be used.");
+      }
+      throw new KubernetesInfrastructureException(e);
+    }
+  }
+
   private void delete(String namespaceName, KubernetesClient client)
       throws InfrastructureException {
     try {
@@ -373,6 +388,7 @@ public class KubernetesNamespace {
   }
 
   protected interface RemoveOperation {
+
     void perform() throws InfrastructureException;
   }
 }
