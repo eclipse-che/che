@@ -10,7 +10,9 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheUIElementsInjectorService} from '../../../components/service/injector/che-ui-elements-injector.service';
+
+import { CheWorkspace } from '../../../components/api/workspace/che-workspace.factory';
+import IdeSvc from '../ide.service';
 
 /*global $:false */
 
@@ -26,9 +28,14 @@ interface IIdeIFrameRootScope extends ng.IRootScopeService {
  * @author Florent Benoit
  */
 class IdeIFrameSvc {
-  static $inject = ['$window', '$location', '$rootScope', '$mdSidenav'];
+
+  static $inject = ['$window', '$location', '$rootScope', '$mdSidenav', 'cheWorkspace', 'ideSvc'];
 
   private $location: ng.ILocationService;
+  private $rootScope: IIdeIFrameRootScope;
+  private $mdSidenav: ng.material.ISidenavService;
+  private cheWorkspace: CheWorkspace;
+  private ideSvc: IdeSvc;
 
   /**
    * Default constructor that is using resource
@@ -36,34 +43,106 @@ class IdeIFrameSvc {
   constructor($window: ng.IWindowService,
               $location: ng.ILocationService,
               $rootScope: IIdeIFrameRootScope,
-              $mdSidenav: ng.material.ISidenavService) {
+              $mdSidenav: ng.material.ISidenavService,
+              cheWorkspace: CheWorkspace,
+              ideSvc: IdeSvc) {
     this.$location = $location;
+    this.$rootScope = $rootScope;
+    this.$mdSidenav = $mdSidenav;
+    this.cheWorkspace = cheWorkspace;
+    this.ideSvc = ideSvc;
 
     $window.addEventListener('message', (event: any) => {
-      if ('show-ide' === event.data) {
-        if (this.isWaitingIDE()) {
-          $rootScope.$apply(() => {
-            $rootScope.showIDE = true;
-            $rootScope.hideLoader = true;
-          });
-        }
-      } else if ('show-workspaces' === event.data) {
-        $rootScope.$apply(() => {
-          $location.path('/workspaces');
-        });
+      if (!event || typeof event.data !== "string") {
+        return;
+      }
 
-      } else if ('show-navbar' === event.data) {
-        $rootScope.hideNavbar = false;
-        $mdSidenav('left').open();
+      const msg: string = event.data;
 
-      } else if ('hide-navbar' === event.data) {
-        if (this.isWaitingIDE()) {
-          $rootScope.hideNavbar = true;
-          $mdSidenav('left').close();
-        }
+      if ('show-ide' === msg) {
+        this.showIDE();
+        return;
+      }
+      
+      if ('show-workspaces' === msg) {
+        this.showWorkspaces();
+        return;
+      }
+      
+      if ('show-navbar' === msg) {
+        this.showNavBar();
+        return;
+      }
+      
+      if ('hide-navbar' === msg) {
+        this.hideNavBar();
+        return;
+      }
+
+      if (msg.startsWith('restart-workspace:')) {
+        this.restartWorkspace(msg);
+        return;
       }
 
     }, false);
+  }
+
+  private showIDE(): void {
+    if (this.isWaitingIDE()) {
+      this.$rootScope.$apply(() => {
+        this.$rootScope.showIDE = true;
+        this.$rootScope.hideLoader = true;
+      });
+    }
+  }
+
+  private showWorkspaces(): void {
+    this.$rootScope.$apply(() => {
+      this.$location.path('/workspaces');
+    });
+  }
+
+  private showNavBar(): void {
+    this.$rootScope.hideNavbar = false;
+    this.$mdSidenav('left').open();
+  }
+
+  private hideNavBar(): void {
+    if (this.isWaitingIDE()) {
+      this.$rootScope.hideNavbar = true;
+      this.$mdSidenav('left').close();
+    }
+  }
+
+  /**
+   * Restarts the workspace
+   * 
+   * @param message message from Editor in format
+   *                restart-workspace:${workspaceId}:${token}
+   *                Where 
+   *                  'restart-workspace' - action name
+   *                  ${workspaceId} - workpsace ID
+   *                  ${token} - Che machine token to validate
+   */
+  private restartWorkspace(message: string): void {
+    // cut action name
+    message = message.substring(message.indexOf(':') + 1);
+
+    // get workpsace ID
+    const workspaceId = message.substring(0, message.indexOf(':'));
+
+    // get Che machine token
+    const token = message.substring(message.indexOf(':') + 1);
+
+    this.cheWorkspace.validateMachineToken(workspaceId, token).then(() => {
+      this.cheWorkspace.stopWorkspace(workspaceId).then(() => {
+        this.ideSvc.reloadIdeFrame();
+      }).catch((error) => {
+        console.error('Unable to stop workspace. ', error);
+      });
+    }).catch(() => {
+      console.error('Unable to stop workspace: token is not valid.');
+    });
   }
 
   /**
@@ -73,6 +152,7 @@ class IdeIFrameSvc {
   private isWaitingIDE(): boolean {
     return /\/ide\//.test(this.$location.path());
   }
+
 }
 
 export default IdeIFrameSvc;
