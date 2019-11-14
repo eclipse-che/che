@@ -21,11 +21,11 @@
               <che-list-header-column flex="50"
                                       che-sort-value="devfileSelectorController.devfileOrderBy"
                                       che-sort-item="description"
-                                      che-column-title="Description"></che-list-header-column>            
+                                      che-column-title="Description"></che-list-header-column>
               <che-list-header-column flex="10"
                                       che-sort-value="devfileSelectorController.devfileOrderBy"
                                       che-sort-item="globalMemoryLimit"
-                                      che-column-title="Required memory"></che-list-header-column>                                                
+                                      che-column-title="Required memory"></che-list-header-column>
             </div>
           </div>
         </che-list-header>
@@ -42,11 +42,12 @@
                   <!-- Icon -->
                   <div class="devfile-selector-icon-column"
                         layout="column" layout-align="center center">
-                    <div ng-if="devfile.icon" class="devfile-selector-item-icon">
-                      <img ng-src="{{devfile.icon}}"/>
-                    </div>
-                    <div ng-if="!devfile.icon" class="devfile-selector-item-icon blank-icon">
-                      <div class="chefont cheico-type-blank"></div>
+                    <div class="devfile-selector-item-icon">
+                      <img img-src="{{devfile.icon}}"
+                        img-src-onload="devfileSelectorController.iconOnLoad(devfile.icon, $result)"
+                        ng-show="devfileSelectorController.showIcon(devfile.icon)===true">
+                      <div class="chefont cheico-type-blank"
+                        ng-show="devfileSelectorController.showIcon(devfile.icon)===false"></div>
                     </div>
                   </div>
                   <!-- Name -->
@@ -57,8 +58,8 @@
                   <div flex="50">
                     <span class="che-list-item-secondary" devfile-description="{{devfile.description}}">{{devfile.description}}</span>
                   </div>
-                   <!-- Memory -->
-                   <div flex="10">
+                  <!-- Memory -->
+                  <div flex="10">
                     <span class="che-list-item-secondary" devfile-memory="{{devfile.globalMemoryLimit}}">{{devfile.globalMemoryLimit}}</span>
                   </div>
                 </div>
