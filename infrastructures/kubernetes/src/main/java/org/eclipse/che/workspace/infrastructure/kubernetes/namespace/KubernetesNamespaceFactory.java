@@ -179,32 +179,6 @@ public class KubernetesNamespaceFactory {
     return hasPlaceholders(defaultNamespaceName);
   }
 
-  @VisibleForTesting
-  boolean isManagingImpliedNamespace(String workspaceId) throws InfrastructureException {
-    // the new logic is quite simple.
-    boolean newLogic =
-        defaultNamespaceName != null && defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER);
-
-    // but we must follow the same logic as #evalNamespaceName - we need to make sure that the old
-    // logic can't be used first...
-    // empty legacy namespace name ~ <workspaceid>
-    if (isNullOrEmpty(legacyNamespaceName)
-        || legacyNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
-
-      // there's a chance of using the old logic - if the namespace exists, we're managing it.
-      // if it doesn't, we're using the new logic.
-
-      Subject subject = EnvironmentContext.getCurrent().getSubject();
-      NamespaceResolutionContext resolutionCtx =
-          new NamespaceResolutionContext(workspaceId, subject.getUserId(), subject.getUserName());
-      return checkNamespaceExists(resolveLegacyNamespaceName(resolutionCtx)) || newLogic;
-    } else {
-      // there's no way the namespace of the workspace is managed using the old logic. Let's just
-      // use the result of the new logic.
-      return newLogic;
-    }
-  }
-
   /**
    * Creates a Kubernetes namespace for the specified workspace.
    *
@@ -369,9 +343,11 @@ public class KubernetesNamespaceFactory {
 
     if (isCreatingNamespace(identity) && !isNullOrEmpty(serviceAccountName)) {
       boolean markManaged =
-          // TODO Rework it according to fact that infra namespace can not be null anymore
-          identity.getInfrastructureNamespace() != null
-              || isManagingImpliedNamespace(identity.getWorkspaceId());
+          // when infra namespace contains workspaceId that is generated
+          // it mean that Che Server provides unique namespace for each workspace
+          // and nothing else except workspace should be run there
+          // Che Server also removes such namespace after workspace is removed
+          identity.getInfrastructureNamespace().contains(identity.getWorkspaceId());
 
       namespace.prepare(markManaged);
 

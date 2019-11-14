@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
@@ -27,9 +26,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
-import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.DoneableNamespace;
@@ -365,54 +362,6 @@ public class KubernetesNamespaceFactoryTest {
 
     // then
     assertEquals(result, expectedOutcome);
-  }
-
-  @Test(dataProvider = "creatingNamespaceConditions")
-  public void testNotManagingNamespacesWheneverNotCreatingThem(
-      String legacyProperty,
-      boolean legacyNamespaceExists,
-      String namespaceProperty,
-      Boolean expectedCreating)
-      throws InfrastructureException {
-
-    // it is possible that we are creating namespaces that we are not fully managing, e.g. <user*>
-    // namespaces are created but not fully deleted afterwards. We just clean them.
-    // However, whenever a namespace is NOT being created, we should never claim we're managing the
-    // namespace.
-    // This is what this test asserts.
-
-    // given
-    namespaceFactory =
-        new KubernetesNamespaceFactory(
-            legacyProperty, "", "", namespaceProperty, true, clientFactory, userManager);
-
-    Namespace existingLegacyNamespace = legacyNamespaceExists ? mock(Namespace.class) : null;
-    when(namespaceResource.get()).thenReturn(existingLegacyNamespace);
-
-    RuntimeIdentity identity = new RuntimeIdentityImpl("123", null, USER_ID, "infraNamespace");
-
-    // when
-    boolean creating;
-    try {
-      creating = namespaceFactory.isCreatingNamespace(identity);
-    } catch (InfrastructureException e) {
-      // if we can't determine whether we're potentially creating a namespace, we shouldn't claim
-      // we're managing it
-      if (expectedCreating != null) {
-        fail("Shouldn't have failed.");
-      }
-      creating = false;
-    }
-    boolean managing = namespaceFactory.isManagingImpliedNamespace("123");
-
-    // then
-    if (!creating) {
-      assertFalse(
-          managing,
-          format(
-              "legacyProp=%s, legacyExists=%s, namespaceProp=%s, expectedCreating=%s",
-              legacyProperty, legacyNamespaceExists, namespaceProperty, expectedCreating));
-    }
   }
 
   @Test
