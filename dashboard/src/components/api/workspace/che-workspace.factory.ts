@@ -408,6 +408,34 @@ export class CheWorkspace {
   }
 
   /**
+   * Validates machine token for the workspace
+   * 
+   * @param workspaceId workspace ID
+   * @param token Che machine token
+   */
+  validateMachineToken(workspaceId: string, token: string): ng.IPromise<any> {
+    const defer = this.$q.defer();
+
+    const promise: ng.IHttpPromise<any> = this.$http.get(`/api/workspace/${workspaceId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    promise.then((response: ng.IHttpPromiseCallbackArg<che.IWorkspace>) => {
+      defer.resolve();
+    }, (error: any) => {
+      if (error && error.status === 304) {
+        defer.resolve();
+        return;
+      }
+      defer.reject(error);
+    });
+
+    return defer.promise;
+  }
+
+  /**
    * Adds a project on the workspace
    * @param workspaceId {string} the workspace ID required to add a project
    * @param project {che.IProject} the project JSON entry to add
