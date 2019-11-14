@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.server.spi;
 
 import java.util.Objects;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Infrastructure may be configured to use namespace value that should be evaluated. This objects
@@ -31,6 +32,11 @@ public class NamespaceResolutionContext {
     this.userName = userName;
   }
 
+  /**
+   * Returns a workspace id. May be null in case namespace should be evaluated for new workspace
+   * that is not created yet.
+   */
+  @Nullable
   public String getWorkspaceId() {
     return workspaceId;
   }

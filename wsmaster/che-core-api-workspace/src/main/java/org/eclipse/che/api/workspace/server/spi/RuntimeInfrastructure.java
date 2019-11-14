@@ -105,9 +105,18 @@ public abstract class RuntimeInfrastructure {
   }
 
   /**
+   * Returns the default namespace namespace a workspace should be deployed into when user do not
+   * specify it.
+   *
+   * @param resolutionCtx the runtime context that holds user and workspace info.
+   */
+  public abstract String evalDefaultInfrastructureNamespace(
+      NamespaceResolutionContext resolutionCtx);
+
+  /**
    * Returns the namespace a workspace should be deployed into when user do not specify it.
    *
-   * <p>May be used for evaluating a default namespace or for workspaces that does not have stored
+   * <p>May be used for evaluating a namespace for workspaces that does not have stored
    * infrastructure namespace info(legacy workspaces).
    *
    * @param resolutionCtx the runtime holder specifying which user and workspace runtime targets.

@@ -248,9 +248,12 @@ public class KubernetesNamespaceFactory {
             null,
             EnvironmentContext.getCurrent().getSubject().getUserId(),
             EnvironmentContext.getCurrent().getSubject().getUserName());
-    String evaluatedName = evaluateNamespaceName(resolutionCtx);
+    String evaluatedName = evalDefaultInfrastructureNamespace(resolutionCtx);
 
-    Optional<KubernetesNamespaceMeta> defaultNamespaceOpt = fetchNamespace(evaluatedName);
+    Optional<KubernetesNamespaceMeta> defaultNamespaceOpt =
+        evaluatedName.contains(WORKSPACEID_PLACEHOLDER)
+            ? Optional.empty()
+            : fetchNamespace(evaluatedName);
 
     KubernetesNamespaceMeta defaultNamespace =
         defaultNamespaceOpt
@@ -395,7 +398,24 @@ public class KubernetesNamespaceFactory {
   }
 
   /**
+   * Evaluates default namespace name according to the specified context.
+   *
+   * <p>If the context has some null fields - that unresolved placeholders (like
+   * &lt;workspaceid&gt;) will appear in resolved value.
+   *
+   * @param resolutionCtx context that should be used during namespace name resolution
+   * @return evaluated namespace name
+   */
+  public String evalDefaultInfrastructureNamespace(NamespaceResolutionContext resolutionCtx) {
+    return evalPlaceholders(defaultNamespaceName, resolutionCtx);
+  }
+
+  /**
    * Evaluates namespace according to the specified context.
+   *
+   * <p>Should be used during workspace start to resolve namespace name if it's missing. Use {@link
+   * #evalDefaultInfrastructureNamespace(NamespaceResolutionContext)} on workspace creation phase if
+   * user does not specify namespace explicitly.
    *
    * <p>Kubernetes infrastructure use checks is evaluated legacy namespace exists, if it does - use
    * it. Otherwise evaluated new default namespace name;

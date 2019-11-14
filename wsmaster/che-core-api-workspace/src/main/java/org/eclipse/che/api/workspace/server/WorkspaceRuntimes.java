@@ -281,6 +281,17 @@ public class WorkspaceRuntimes {
   }
 
   /**
+   * Evaluates infrastructure namespace.
+   *
+   * @param resolutionCtx context that holds info needed for namespace resolution
+   * @throws InfrastructureException when any exception occurs during namespace resolution
+   */
+  public String evalDefaultInfrastructureNamespace(NamespaceResolutionContext resolutionCtx)
+      throws InfrastructureException {
+    return infrastructure.evalDefaultInfrastructureNamespace(resolutionCtx);
+  }
+
+  /**
    * Injects runtime information such as status and {@link
    * org.eclipse.che.api.core.model.workspace.Runtime} into the workspace object, if the workspace
    * doesn't have runtime sets the status to {@link WorkspaceStatus#STOPPED}.
