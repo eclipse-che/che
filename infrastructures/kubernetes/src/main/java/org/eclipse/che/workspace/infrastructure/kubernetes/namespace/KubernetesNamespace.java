@@ -122,6 +122,7 @@ public class KubernetesNamespace {
       return true;
     }
 
+    //TODO Consider adding `che-managed` label if it's needed by absent
     return false;
   }
 

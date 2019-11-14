@@ -179,18 +179,6 @@ public class KubernetesNamespaceFactory {
     return hasPlaceholders(defaultNamespaceName);
   }
 
-  /**
-   * Returns true if the namespace is fully managed by Che (e.g. created, used and deleted), false
-   * otherwise.
-   */
-  public boolean isManagingNamespace(Workspace workspace) throws InfrastructureException {
-    // the namespace is managed if it is marked as managed or if we're using the legacy method
-    // on old workspaces lacking the explicit namespace attribute
-    return get(workspace).isMarkedManaged()
-        || (workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE) == null
-            && isManagingImpliedNamespace(workspace.getId()));
-  }
-
   @VisibleForTesting
   boolean isManagingImpliedNamespace(String workspaceId) throws InfrastructureException {
     // the new logic is quite simple.
