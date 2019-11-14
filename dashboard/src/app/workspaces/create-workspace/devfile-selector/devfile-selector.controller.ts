@@ -12,6 +12,7 @@
 'use strict';
 import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
 import {DevfileRegistry, IDevfileMetaData} from '../../../../components/api/devfile-registry.factory';
+import {ImgSrcOnloadResult} from '../../../../components/attribute/img-src/img-src.directive';
 
 /**
  * @description This class is handling the controller of devfile selector.
@@ -21,13 +22,17 @@ export class DevfileSelectorController {
 
   static $inject = ['devfileRegistry', 'cheWorkspace'];
 
-  private devfileRegistry: DevfileRegistry;
-  private cheWorkspace: CheWorkspace;
-  private devfiles: Array<IDevfileMetaData>;
+  devfiles: Array<IDevfileMetaData>;
   devfileOrderBy: string;
   onDevfileSelect: Function;
   selectedDevfile: any;
   stackName: string;
+  iconsLoaded: {
+    iconUrl?: boolean;
+  } = {};
+
+  private devfileRegistry: DevfileRegistry;
+  private cheWorkspace: CheWorkspace;
 
   /**
    * Default constructor that is using resource injection
@@ -68,4 +73,13 @@ export class DevfileSelectorController {
       });
     }
   }
+
+  iconOnLoad(iconUrl: string, result: ImgSrcOnloadResult): void {
+    this.iconsLoaded[iconUrl] = result.loaded;
+  }
+
+  showIcon(iconUrl: string): boolean {
+    return !!this.iconsLoaded[iconUrl];
+  }
+
 }
