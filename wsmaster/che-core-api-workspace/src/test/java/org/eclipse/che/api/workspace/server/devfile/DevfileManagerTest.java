@@ -27,53 +27,50 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
-import org.eclipse.che.commons.json.JsonHelper;
-import org.eclipse.che.commons.json.JsonParseException;
-import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.commons.subject.SubjectImpl;
-import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
-import org.testng.reporters.Files;
 
 @Listeners(MockitoTestNGListener.class)
 public class DevfileManagerTest {
 
-  private static final Subject TEST_SUBJECT = new SubjectImpl("name", "id", "token", false);
   private static final String DEVFILE_YAML_CONTENT = "devfile yaml stub";
 
   @Mock private DevfileSchemaValidator schemaValidator;
   @Mock private DevfileIntegrityValidator integrityValidator;
-  @Mock private ObjectMapper objectMapper;
+  @Mock private ObjectMapper jsonMapper;
+  @Mock private ObjectMapper yamlMapper;
   @Mock private FileContentProvider contentProvider;
 
   @Mock private JsonNode devfileJsonNode;
   private DevfileImpl devfile;
 
-  @InjectMocks private DevfileManager devfileManager;
+  private DevfileManager devfileManager;
 
   @BeforeMethod
   public void setUp() throws Exception {
     devfile = new DevfileImpl();
+    devfileManager =
+        new DevfileManager(schemaValidator, integrityValidator, yamlMapper, jsonMapper);
 
-    lenient().when(schemaValidator.validateYaml(any())).thenReturn(devfileJsonNode);
-    lenient().when(objectMapper.treeToValue(any(), eq(DevfileImpl.class))).thenReturn(devfile);
+    // lenient().when(schemaValidator.validate(any(Js))).thenReturn(devfileJsonNode);
+    lenient().when(jsonMapper.treeToValue(any(), eq(DevfileImpl.class))).thenReturn(devfile);
+    lenient().when(yamlMapper.treeToValue(any(), eq(DevfileImpl.class))).thenReturn(devfile);
+    lenient().when(yamlMapper.readTree(anyString())).thenReturn(devfileJsonNode);
   }
 
   @Test
@@ -83,8 +80,8 @@ public class DevfileManagerTest {
 
     // then
     assertEquals(parsed, devfile);
-    verify(schemaValidator).validateYaml(DEVFILE_YAML_CONTENT);
-    verify(objectMapper).treeToValue(devfileJsonNode, DevfileImpl.class);
+    verify(yamlMapper).treeToValue(devfileJsonNode, DevfileImpl.class);
+    verify(schemaValidator).validate(eq(devfileJsonNode));
     verify(integrityValidator).validateDevfile(devfile);
   }
 
@@ -151,7 +148,7 @@ public class DevfileManagerTest {
       expectedExceptionsMessageRegExp = "non valid")
   public void shouldThrowExceptionWhenExceptionOccurredDuringSchemaValidation() throws Exception {
     // given
-    doThrow(new DevfileFormatException("non valid")).when(schemaValidator).validateYaml(any());
+    doThrow(new DevfileFormatException("non valid")).when(schemaValidator).validate(any());
 
     // when
     devfileManager.parseYaml(DEVFILE_YAML_CONTENT);
@@ -164,25 +161,107 @@ public class DevfileManagerTest {
     // given
     JsonProcessingException jsonException = mock(JsonProcessingException.class);
     when(jsonException.getMessage()).thenReturn("non valid");
-    doThrow(jsonException).when(objectMapper).treeToValue(any(), any());
+    doThrow(jsonException).when(jsonMapper).treeToValue(any(), any());
 
     // when
-    devfileManager.parseYaml(DEVFILE_YAML_CONTENT);
+    devfileManager.parseJson(DEVFILE_YAML_CONTENT);
   }
 
-  private WorkspaceImpl createWorkspace(WorkspaceStatus status)
-      throws IOException, JsonParseException {
-    return WorkspaceImpl.builder()
-        .generateId()
-        .setConfig(createConfig())
-        .setAccount(new AccountImpl("anyId", TEST_SUBJECT.getUserName(), "test"))
-        .setStatus(status)
-        .build();
+  @Test
+  public void shouldOverrideExistingPropertiesInDevfile() throws Exception {
+
+    String json =
+        "{"
+            + "\"apiVersion\": \"1.0.0\","
+            + "\"metadata\": {"
+            + "   \"generateName\": \"python\""
+            + "  }"
+            + "}";
+    // instance with real json mappers
+    DevfileManager manager = new DevfileManager(schemaValidator, integrityValidator);
+    Map<String, String> overrides = new HashMap<>();
+    overrides.put("apiVersion", "2.0.0");
+    overrides.put("metadata.generateName", "go");
+    ArgumentCaptor<JsonNode> captor = ArgumentCaptor.forClass(JsonNode.class);
+    // when
+    manager.parseJson(json, overrides);
+    verify(schemaValidator).validate(captor.capture());
+
+    JsonNode result = captor.getValue();
+    assertEquals(result.get("apiVersion").textValue(), "2.0.0");
+    assertEquals(result.get("metadata").get("generateName").textValue(), "go");
   }
 
-  private WorkspaceConfigImpl createConfig() throws IOException, JsonParseException {
-    String jsonContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_config.json"));
-    return JsonHelper.fromJson(jsonContent, WorkspaceConfigImpl.class, null);
+  @Test
+  public void shouldCreateUnExistingOverridePropertiesInDevfile() throws Exception {
+    String json = "{" + "\"apiVersion\": \"1.0.0\"" + "}";
+    // instance with real json mappers
+    DevfileManager manager = new DevfileManager(schemaValidator, integrityValidator);
+    Map<String, String> overrides = new HashMap<>();
+    overrides.put("metadata.generateName", "go");
+    ArgumentCaptor<JsonNode> captor = ArgumentCaptor.forClass(JsonNode.class);
+    // when
+    manager.parseJson(json, overrides);
+    verify(schemaValidator).validate(captor.capture());
+
+    JsonNode result = captor.getValue();
+    assertEquals(result.get("metadata").get("generateName").textValue(), "go");
+  }
+
+  @Test
+  public void shouldRewriteValueInArrayTypesByName() throws Exception {
+    String json =
+        "{"
+            + "\"apiVersion\": \"1.0.0\","
+            + "\"projects\": ["
+            + "   {"
+            + "      \"name\": \"test1\","
+            + "      \"clonePath\": \"/foo/bar1\""
+            + "   },"
+            + "   {"
+            + "      \"name\": \"test2\","
+            + "      \"clonePath\": \"/foo/bar2\""
+            + "   }"
+            + "  ]"
+            + "}";
+    // instance with real json mappers
+    DevfileManager manager = new DevfileManager(schemaValidator, integrityValidator);
+    Map<String, String> overrides = new HashMap<>();
+    overrides.put("projects.test1.clonePath", "baz1");
+    overrides.put("projects.test2.clonePath", "baz2");
+    ArgumentCaptor<JsonNode> captor = ArgumentCaptor.forClass(JsonNode.class);
+    // when
+    manager.parseJson(json, overrides);
+    verify(schemaValidator).validate(captor.capture());
+
+    JsonNode result = captor.getValue();
+    assertEquals(result.get("projects").get(0).get("clonePath").textValue(), "baz1");
+    assertEquals(result.get("projects").get(1).get("clonePath").textValue(), "baz2");
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp = "Object with name 'test3' not found in array of projects.")
+  public void shouldThrowExceptionIfOverrideArrayObjectNotFoundByName() throws Exception {
+    String json =
+        "{"
+            + "\"apiVersion\": \"1.0.0\","
+            + "\"projects\": ["
+            + "   {"
+            + "      \"name\": \"test1\","
+            + "      \"clonePath\": \"/foo/bar1\""
+            + "   },"
+            + "   {"
+            + "      \"name\": \"test2\","
+            + "      \"clonePath\": \"/foo/bar2\""
+            + "   }"
+            + "  ]"
+            + "}";
+    // instance with real json mappers
+    DevfileManager manager = new DevfileManager(schemaValidator, integrityValidator);
+    Map<String, String> overrides = new HashMap<>();
+    overrides.put("projects.test3.clonePath", "baz1");
+    // when
+    manager.parseJson(json, overrides);
   }
 }

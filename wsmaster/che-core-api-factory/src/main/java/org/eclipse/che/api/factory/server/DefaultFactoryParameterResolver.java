@@ -59,14 +59,15 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
   public FactoryDto createFactory(@NotNull final Map<String, String> factoryParameters)
       throws BadRequestException, ServerException {
     // This should never be null, because our contract in #accept prohibits that
-    String devfileLocation = factoryParameters.get(URL_PARAMETER_NAME);
+    String devfileLocation = factoryParameters.remove(URL_PARAMETER_NAME);
 
     return urlFactoryBuilder
         .createFactoryFromDevfile(
             new DefaultFactoryUrl()
                 .withDevfileFileLocation(devfileLocation)
                 .withDevfileFilename(null),
-            new URLFileContentProvider(URI.create(devfileLocation), urlFetcher))
+            new URLFileContentProvider(URI.create(devfileLocation), urlFetcher),
+            factoryParameters)
         .orElse(null);
   }
 }

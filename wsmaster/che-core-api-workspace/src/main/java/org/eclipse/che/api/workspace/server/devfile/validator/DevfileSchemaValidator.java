@@ -58,26 +58,26 @@ public class DevfileSchemaValidator {
     }
   }
 
-  public JsonNode validateYaml(String yamlContent) throws DevfileFormatException {
-    return validate(yamlContent, yamlMapper);
-  }
+  //  public JsonNode validateYaml(String yamlContent) throws DevfileFormatException {
+  //    return validate(yamlContent, yamlMapper);
+  //  }
+  //
+  //  public JsonNode validateJson(String jsonContent) throws DevfileFormatException {
+  //    return validate(jsonContent, jsonMapper);
+  //  }
+  //
+  //  private JsonNode validate(String content, ObjectMapper mapper) throws DevfileFormatException {
+  //    JsonNode contentNode;
+  //    try {
+  //      contentNode = mapper.readTree(content);
+  //      validate(contentNode);
+  //      return contentNode;
+  //    } catch (IOException e) {
+  //      throw new DevfileFormatException("Unable to validate Devfile. Error: " + e.getMessage());
+  //    }
+  //  }
 
-  public JsonNode validateJson(String jsonContent) throws DevfileFormatException {
-    return validate(jsonContent, jsonMapper);
-  }
-
-  private JsonNode validate(String content, ObjectMapper mapper) throws DevfileFormatException {
-    JsonNode contentNode;
-    try {
-      contentNode = mapper.readTree(content);
-      validate(contentNode);
-      return contentNode;
-    } catch (IOException e) {
-      throw new DevfileFormatException("Unable to validate Devfile. Error: " + e.getMessage());
-    }
-  }
-
-  private void validate(JsonNode contentNode) throws DevfileFormatException {
+  public void validate(JsonNode contentNode) throws DevfileFormatException {
     try {
       List<Problem> validationErrors = new ArrayList<>();
       ProblemHandler handler = ProblemHandler.collectingTo(validationErrors);

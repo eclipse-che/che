@@ -91,13 +91,14 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
       throws BadRequestException, ServerException {
 
     // no need to check null value of url parameter as accept() method has performed the check
-    final GithubUrl githubUrl = githubUrlParser.parse(factoryParameters.get(URL_PARAMETER_NAME));
+    final GithubUrl githubUrl = githubUrlParser.parse(factoryParameters.remove(URL_PARAMETER_NAME));
 
     // create factory from the following location if location exists, else create default factory
     FactoryDto factory =
         urlFactoryBuilder
             .createFactoryFromDevfile(
-                githubUrl, fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)))
+                githubUrl, fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)),
+                factoryParameters)
             .orElseGet(
                 () ->
                     urlFactoryBuilder

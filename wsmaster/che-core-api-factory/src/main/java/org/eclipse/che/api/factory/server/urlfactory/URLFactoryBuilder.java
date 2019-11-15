@@ -99,10 +99,13 @@ public class URLFactoryBuilder {
    *
    * @param remoteFactoryUrl parsed factory URL object
    * @param fileContentProvider service-specific devfile related file content provider
+   * @param overrideProperties
    * @return a factory or null if devfile is not found
    */
   public Optional<FactoryDto> createFactoryFromDevfile(
-      RemoteFactoryUrl remoteFactoryUrl, FileContentProvider fileContentProvider)
+      RemoteFactoryUrl remoteFactoryUrl,
+      FileContentProvider fileContentProvider,
+      Map<String, String> overrideProperties)
       throws BadRequestException, ServerException {
     if (remoteFactoryUrl.devfileFileLocation() == null) {
       return Optional.empty();
@@ -113,7 +116,7 @@ public class URLFactoryBuilder {
       return Optional.empty();
     }
     try {
-      DevfileImpl devfile = devfileManager.parseYaml(devfileYamlContent);
+      DevfileImpl devfile = devfileManager.parseYaml(devfileYamlContent, overrideProperties);
       devfileManager.resolveReference(devfile, fileContentProvider);
       devfile = ensureToUseGenerateName(devfile);
 
@@ -135,7 +138,7 @@ public class URLFactoryBuilder {
   /**
    * Creates devfile with only `generateName` and no `name`. We take `generateName` with precedence.
    * See doc of {@link URLFactoryBuilder#createFactoryFromDevfile(RemoteFactoryUrl,
-   * FileContentProvider)} for explanation why.
+   * FileContentProvider, Map)} for explanation why.
    */
   private DevfileImpl ensureToUseGenerateName(DevfileImpl devfile) {
     MetadataImpl devfileMetadata = new MetadataImpl(devfile.getMetadata());

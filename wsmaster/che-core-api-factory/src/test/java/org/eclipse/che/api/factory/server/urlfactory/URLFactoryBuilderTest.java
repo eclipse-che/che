@@ -18,6 +18,7 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -126,7 +127,7 @@ public class URLFactoryBuilderTest {
     workspaceConfigImpl.setDefaultEnv("name");
 
     when(urlFetcher.fetchSafely(anyString())).thenReturn("random_content");
-    when(devfileManager.parseYaml(anyString())).thenReturn(devfile);
+    when(devfileManager.parseYaml(anyString(), anyMap())).thenReturn(devfile);
 
     FactoryDto factory =
         urlFactoryBuilder
@@ -134,7 +135,8 @@ public class URLFactoryBuilderTest {
                 new DefaultFactoryUrl()
                     .withDevfileFileLocation(myLocation)
                     .withDevfileFilename("devfile.yml"),
-                s -> myLocation + ".list")
+                s -> myLocation + ".list",
+                emptyMap())
             .get();
 
     assertEquals(factory.getSource(), "devfile.yml");
@@ -172,10 +174,12 @@ public class URLFactoryBuilderTest {
     DefaultFactoryUrl defaultFactoryUrl = mock(DefaultFactoryUrl.class);
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
     when(defaultFactoryUrl.devfileFileLocation()).thenReturn("anything");
-    when(devfileManager.parseYaml(anyString())).thenReturn(devfile);
+    when(devfileManager.parseYaml(anyString(), anyMap())).thenReturn(devfile);
     when(urlFetcher.fetchSafely(anyString())).thenReturn("anything");
     FactoryDto factory =
-        urlFactoryBuilder.createFactoryFromDevfile(defaultFactoryUrl, fileContentProvider).get();
+        urlFactoryBuilder
+            .createFactoryFromDevfile(defaultFactoryUrl, fileContentProvider, emptyMap())
+            .get();
 
     assertNull(factory.getDevfile().getMetadata().getName());
     assertEquals(factory.getDevfile().getMetadata().getGenerateName(), expectedGenerateName);
