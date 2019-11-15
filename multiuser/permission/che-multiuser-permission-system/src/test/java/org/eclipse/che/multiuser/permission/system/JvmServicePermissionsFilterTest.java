@@ -46,8 +46,6 @@ import org.testng.annotations.Test;
 
 /**
  * Tests {@link SystemServicePermissionsFilter}.
- *
- * @author Yevhenii Voevodin
  */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class JvmServicePermissionsFilterTest {
