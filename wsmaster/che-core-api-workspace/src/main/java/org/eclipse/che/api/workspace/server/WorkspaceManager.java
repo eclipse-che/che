@@ -596,7 +596,7 @@ public class WorkspaceManager {
           new NamespaceResolutionContext(
               workspace.getId(), currentSubject.getUserId(), currentSubject.getUserName());
       try {
-        String namespace = runtimes.evalDefaultInfrastructureNamespace(resolutionCtx);
+        String namespace = runtimes.evalInfrastructureNamespace(resolutionCtx);
         workspace.getAttributes().put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
       } catch (InfrastructureException e) {
         throw new ServerException(e);
