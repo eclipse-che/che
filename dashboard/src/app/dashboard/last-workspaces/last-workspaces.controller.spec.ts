@@ -24,14 +24,16 @@ declare const expect: (param: any) => {
 /**
  * @author Lucia Jelinkova
  */
-describe(`Last workspaces controller >`, () => {
+xdescribe(`Last workspaces controller >`, () => {
 
   let controller: DashboardLastWorkspacesController;
   let cheWorkspace: CheWorkspace;
   let cheNotification: CheNotification;
 
-  let createGeneralError = () => Promise.reject('This is some error');
-  let createHTTPError = (message: string) => Promise.reject({
+  let $q: ng.IQService;
+
+  let createGeneralError = () => $q.reject('This is some error');
+  let createHTTPError = (message: string) => $q.reject({
     'status': status,
     'data': {
       'message': message
@@ -45,18 +47,20 @@ describe(`Last workspaces controller >`, () => {
     // retrieve all necessary services
     inject((
       _$controller_: ng.IControllerService,
+      _$q_: ng.IQService,
       _cheWorkspace_: CheWorkspace,
       _cheNotification_: CheNotification) => {
 
       // get the tested controller from ng.IControllerService
       controller = _$controller_('DashboardLastWorkspacesController');
+      $q = _$q_;
       cheWorkspace = _cheWorkspace_;
-      cheNotification = _cheNotification_
+      cheNotification = _cheNotification_;
     })
   });
 
   it('loadData - workspaces pre-loaded', async () => {
-    spyOn(cheWorkspace, 'getWorkspaces').and.returnValue([jasmine.createSpy('IWorkspace')]);
+    spyOn(cheWorkspace, 'getWorkspaces').and.returnValue([jasmine.createSpy('IWorkspace') as che.IWorkspace]);
     spyOn(cheWorkspace, 'fetchWorkspaces');
     spyOn(cheNotification, 'showError');
 
@@ -73,7 +77,7 @@ describe(`Last workspaces controller >`, () => {
 
   it('loadData - fetch workspaces - no workspaces', async () => {
     spyOn(cheWorkspace, 'getWorkspaces').and.returnValue([]);
-    spyOn(cheWorkspace, 'fetchWorkspaces').and.returnValue(Promise.resolve([]));
+    spyOn(cheWorkspace, 'fetchWorkspaces').and.returnValue($q.when([]));
     spyOn(cheNotification, 'showError');
 
     expect(controller.isLoading).toBeTruthy();
@@ -89,7 +93,7 @@ describe(`Last workspaces controller >`, () => {
 
   it('loadData - fetch workspaces', async () => {
     spyOn(cheWorkspace, 'getWorkspaces').and.returnValue([]);
-    spyOn(cheWorkspace, 'fetchWorkspaces').and.returnValue(Promise.resolve([jasmine.createSpy('IWorkspace')]));
+    spyOn(cheWorkspace, 'fetchWorkspaces').and.returnValue($q.when([jasmine.createSpy('IWorkspace') as che.IWorkspace]));
     spyOn(cheNotification, 'showError');
 
     expect(controller.isLoading).toBeTruthy();

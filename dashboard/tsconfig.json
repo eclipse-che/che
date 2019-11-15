@@ -2,9 +2,12 @@
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "lib": ["es6", "dom"],
+    "typeRoots": [
+      "node_modules/@types"
+    ]
   },
-
   "exclude": [
     "node_modules",
     "target"

@@ -299,9 +299,9 @@ export class CheWorkspace {
    *
    * @param namespace namespace
    */
-  fetchWorkspacesByNamespace(namespace: string): ng.IPromise<any> {
+  fetchWorkspacesByNamespace(namespace: string): ng.IPromise<void> {
     let promise = this.$http.get('/api/workspace/namespace/' + namespace);
-    let resultPromise = promise.then((response: { data: che.IWorkspace[] }) => {
+    let resultPromise = promise.then((response: ng.IHttpResponse<che.IWorkspace[]>) => {
       const workspaces = this.getWorkspacesByNamespace(namespace);
 
       workspaces.length = 0;
@@ -402,6 +402,34 @@ export class CheWorkspace {
       defer.reject(error);
     }).finally(() => {
       this.workspacePromises.delete(workspacePromisesKey);
+    });
+
+    return defer.promise;
+  }
+
+  /**
+   * Validates machine token for the workspace
+   * 
+   * @param workspaceId workspace ID
+   * @param token Che machine token
+   */
+  validateMachineToken(workspaceId: string, token: string): ng.IPromise<any> {
+    const defer = this.$q.defer();
+
+    const promise: ng.IHttpPromise<any> = this.$http.get(`/api/workspace/${workspaceId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    promise.then((response: ng.IHttpPromiseCallbackArg<che.IWorkspace>) => {
+      defer.resolve();
+    }, (error: any) => {
+      if (error && error.status === 304) {
+        defer.resolve();
+        return;
+      }
+      defer.reject(error);
     });
 
     return defer.promise;

@@ -19,49 +19,44 @@ import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
 import {WorkspaceEditModeOverlay} from './workspace-edit-mode/workspace-edit-mode-overlay.directive';
 import {WorkspaceEditModeToolbarButton} from './workspace-edit-mode/workspace-edit-mode-toolbar-button.directive';
-import {RamSettingsController} from './create-workspace/ram-settings/ram-settings.controller';
-import {RamSettings} from './create-workspace/ram-settings/ram-settings.directive';
-import {RamSettingsMachineItemController} from './create-workspace/ram-settings/ram-settings-machine-item/ram-settings-machine-item.controller';
-import {RamSettingsMachineItem} from './create-workspace/ram-settings/ram-settings-machine-item/ram-settings-machine-item.directive';
-import {NamespaceSelectorController} from './create-workspace/namespace-selector/namespace-selector.controller';
-import {NamespaceSelectorSvc} from './create-workspace/namespace-selector/namespace-selector.service';
-import {NamespaceSelector} from './create-workspace/namespace-selector/namespace-selector.directive';
-import {ProjectSourceSelectorController} from './create-workspace/project-source-selector/project-source-selector.controller';
-import {ProjectSourceSelectorService} from './create-workspace/project-source-selector/project-source-selector.service';
-import {ProjectSourceSelector} from './create-workspace/project-source-selector/project-source-selector.directive';
-import {AddImportProjectController} from './create-workspace/project-source-selector/add-import-project/add-import-project.controller';
-import {AddImportProjectService} from './create-workspace/project-source-selector/add-import-project/add-import-project.service';
-import {AddImportProject} from './create-workspace/project-source-selector/add-import-project/add-import-project.directive';
-import {ImportBlankProjectController} from './create-workspace/project-source-selector/add-import-project/import-blank-project/import-blank-project.controller';
-import {ImportBlankProjectService} from './create-workspace/project-source-selector/add-import-project/import-blank-project/import-blank-project.service';
-import {ImportBlankProject} from './create-workspace/project-source-selector/add-import-project/import-blank-project/import-blank-project.directive';
-import {ImportGitProjectController} from './create-workspace/project-source-selector/add-import-project/import-git-project/import-git-project.controller';
-import {ImportGitProjectService} from './create-workspace/project-source-selector/add-import-project/import-git-project/import-git-project.service';
-import {ImportGitProject} from './create-workspace/project-source-selector/add-import-project/import-git-project/import-git-project.directive';
-import {ImportZipProjectController} from './create-workspace/project-source-selector/add-import-project/import-zip-project/import-zip-project.controller';
-import {ImportZipProjectService} from './create-workspace/project-source-selector/add-import-project/import-zip-project/import-zip-project.service';
-import {ImportZipProject} from './create-workspace/project-source-selector/add-import-project/import-zip-project/import-zip-project.directive';
-import {ImportGithubProjectController} from './create-workspace/project-source-selector/add-import-project/import-github-project/import-github-project.controller';
-import {ImportGithubProjectService} from './create-workspace/project-source-selector/add-import-project/import-github-project/import-github-project.service';
-import {ImportGithubProject} from './create-workspace/project-source-selector/add-import-project/import-github-project/import-github-project.directive';
-import {GithubRepositoryItem} from './create-workspace/project-source-selector/add-import-project/import-github-project/github-repository-item/github-repository-item.directive';
-import {TemplateSelectorController} from './create-workspace/project-source-selector/add-import-project/template-selector/template-selector.controller';
-import {TemplateSelectorSvc} from './create-workspace/project-source-selector/add-import-project/template-selector/template-selector.service';
-import {TemplateSelector} from './create-workspace/project-source-selector/add-import-project/template-selector/template-selector.directive';
-import {TemplateSelectorItem} from './create-workspace/project-source-selector/add-import-project/template-selector/template-selector-item/template-selector-item.directive';
-import {EditProjectController} from './create-workspace/project-source-selector/edit-project/edit-project.controller';
-import {EditProject} from './create-workspace/project-source-selector/edit-project/edit-project.directive';
-import {EditProjectService} from './create-workspace/project-source-selector/edit-project/edit-project.service';
-import {ProjectMetadataController} from './create-workspace/project-source-selector/edit-project/project-metadata/project-metadata.controller';
-import {ProjectMetadataService} from './create-workspace/project-source-selector/edit-project/project-metadata/project-metadata.service';
-import {ProjectMetadata} from './create-workspace/project-source-selector/edit-project/project-metadata/project-metadata.directive';
+import {NamespaceSelectorController} from './create-workspace/ready-to-go-stacks/namespace-selector/namespace-selector.controller';
+import {NamespaceSelectorSvc} from './create-workspace/ready-to-go-stacks/namespace-selector/namespace-selector.service';
+import {NamespaceSelector} from './create-workspace/ready-to-go-stacks/namespace-selector/namespace-selector.directive';
+import {ProjectSourceSelectorController} from './create-workspace/ready-to-go-stacks/project-source-selector/project-source-selector.controller';
+import {ProjectSourceSelectorService} from './create-workspace/ready-to-go-stacks/project-source-selector/project-source-selector.service';
+import {ProjectSourceSelector} from './create-workspace/ready-to-go-stacks/project-source-selector/project-source-selector.directive';
+import {AddImportProjectController} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/add-import-project.controller';
+import {AddImportProjectService} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/add-import-project.service';
+import {AddImportProject} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/add-import-project.directive';
+import {ImportBlankProjectController} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-blank-project/import-blank-project.controller';
+import {ImportBlankProjectService} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-blank-project/import-blank-project.service';
+import {ImportBlankProject} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-blank-project/import-blank-project.directive';
+import {ImportGitProjectController} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-git-project/import-git-project.controller';
+import {ImportGitProjectService} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-git-project/import-git-project.service';
+import {ImportGitProject} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-git-project/import-git-project.directive';
+import {ImportZipProjectController} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-zip-project/import-zip-project.controller';
+import {ImportZipProjectService} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-zip-project/import-zip-project.service';
+import {ImportZipProject} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-zip-project/import-zip-project.directive';
+import {ImportGithubProjectController} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-github-project/import-github-project.controller';
+import {ImportGithubProjectService} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-github-project/import-github-project.service';
+import {ImportGithubProject} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-github-project/import-github-project.directive';
+import {GithubRepositoryItem} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-github-project/github-repository-item/github-repository-item.directive';
+import {TemplateSelectorController} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/template-selector/template-selector.controller';
+import {TemplateSelectorSvc} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/template-selector/template-selector.service';
+import {TemplateSelector} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/template-selector/template-selector.directive';
+import {TemplateSelectorItem} from './create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/template-selector/template-selector-item/template-selector-item.directive';
+import {EditProjectController} from './create-workspace/ready-to-go-stacks/project-source-selector/edit-project/edit-project.controller';
+import {EditProject} from './create-workspace/ready-to-go-stacks/project-source-selector/edit-project/edit-project.directive';
+import {EditProjectService} from './create-workspace/ready-to-go-stacks/project-source-selector/edit-project/edit-project.service';
+import {ProjectMetadataController} from './create-workspace/ready-to-go-stacks/project-source-selector/edit-project/project-metadata/project-metadata.controller';
+import {ProjectMetadataService} from './create-workspace/ready-to-go-stacks/project-source-selector/edit-project/project-metadata/project-metadata.service';
+import {ProjectMetadata} from './create-workspace/ready-to-go-stacks/project-source-selector/edit-project/project-metadata/project-metadata.directive';
 import {CheWorkspaceRamAllocationSliderController} from './workspace-ram-slider/che-workspace-ram-allocation-slider.controller';
 import {CheWorkspaceRamAllocationSlider} from './workspace-ram-slider/che-workspace-ram-allocation-slider.directive';
 import {WorkspaceStatus} from './workspace-status/workspace-status.directive';
 import {WorkspaceStatusIndicator} from './workspace-status/workspace-status-indicator.directive';
 import {CreateWorkspaceController} from './create-workspace/create-workspace.controller';
 import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
-import {AfterCreationDialogController} from './create-workspace/after-creation-dialog/after-creation-dialog.controller';
 import {ShareWorkspaceController} from './share-workspace/share-workspace.controller';
 import {ShareWorkspace} from './share-workspace/share-workspace.directive';
 import {AddDeveloperController} from './share-workspace/add-developers/add-developers.controller';
@@ -75,8 +70,15 @@ import {WorkspaceWarningsController} from './workspace-details/warnings/workspac
 import {WorkspacesService} from './workspaces.service';
 import {WorkspacePluginsConfig} from './workspace-details/workspace-plugins/workspace-plugins-config';
 import {WorkspaceEditorsConfig} from './workspace-details/workspace-editors/workspace-editors-config';
-import {DevfileSelector} from './create-workspace/devfile-selector/devfile-selector.directive';
-import {DevfileSelectorController} from './create-workspace/devfile-selector/devfile-selector.controller';
+import {DevfileSelector} from './create-workspace/ready-to-go-stacks/devfile-selector/devfile-selector.directive';
+import {DevfileSelectorController} from './create-workspace/ready-to-go-stacks/devfile-selector/devfile-selector.controller';
+import {ReadyToGoStacksController} from './create-workspace/ready-to-go-stacks/ready-to-go-stacks.controller';
+import {ReadyToGoStacks} from './create-workspace/ready-to-go-stacks/ready-to-go-stacks.directive';
+import {DevfileSourceSelector} from './create-workspace/import-custom-stack/devfile-source-selector/devfile-source-selector.directive';
+import {DevfileByUrl} from './create-workspace/import-custom-stack/devfile-by-url/devfile-by-url.directive';
+import {DevfileByUrlController} from './create-workspace/import-custom-stack/devfile-by-url/devfile-by-url.controller';
+import {ImportStackController} from './create-workspace/import-custom-stack/import-custom-stack.controller';
+import {ImportStack} from './create-workspace/import-custom-stack/import-custom-stack.directive';
 
 /**
  * @ngdoc controller
@@ -110,10 +112,6 @@ export class WorkspacesConfig {
     register.controller('WorkspaceWarningsController', WorkspaceWarningsController);
     register.directive('devfileSelector', DevfileSelector);
     register.controller('DevfileSelectorController', DevfileSelectorController);
-    register.controller('RamSettingsController', RamSettingsController);
-    register.directive('ramSettings', RamSettings);
-    register.controller('RamSettingsMachineItemController', RamSettingsMachineItemController);
-    register.directive('ramSettingsMachineItem', RamSettingsMachineItem);
     register.controller('NamespaceSelectorController', NamespaceSelectorController);
     register.service('namespaceSelectorSvc', NamespaceSelectorSvc);
     register.directive('namespaceSelector', NamespaceSelector);
@@ -148,7 +146,6 @@ export class WorkspacesConfig {
     register.directive('projectMetadata', ProjectMetadata);
     register.controller('CreateWorkspaceController', CreateWorkspaceController);
     register.service('createWorkspaceSvc', CreateWorkspaceSvc);
-    register.controller('AfterCreationDialogController', AfterCreationDialogController);
     register.controller('ShareWorkspaceController', ShareWorkspaceController);
     register.directive('shareWorkspace', ShareWorkspace);
     register.controller('AddDeveloperController', AddDeveloperController);
@@ -157,6 +154,13 @@ export class WorkspacesConfig {
     register.directive('userItem', UserItem);
     register.service('workspaceConfigService', WorkspaceConfigService);
     register.service('workspacesService', WorkspacesService);
+    register.controller('ReadyToGoStacksController', ReadyToGoStacksController);
+    register.directive('readyToGoStacks', ReadyToGoStacks);
+    register.directive('devfileSourceSelector', DevfileSourceSelector);
+    register.directive('devfileByUrl', DevfileByUrl);
+    register.controller('DevfileByUrlController', DevfileByUrlController);
+    register.controller('ImportStackController', ImportStackController);
+    register.directive('importStack', ImportStack);
 
     // config routes
     register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
@@ -171,6 +175,7 @@ export class WorkspacesConfig {
           templateUrl: 'app/workspaces/create-workspace/create-workspace.html',
           controller: 'CreateWorkspaceController',
           controllerAs: 'createWorkspaceController',
+          reloadOnSearch: false,
           resolve: {
             initData: ['workspaceConfigService', (workspaceConfigService: WorkspaceConfigService) => {
               return workspaceConfigService.resolveWorkspaceRoute();

@@ -127,7 +127,7 @@ export class CheInput implements ng.IDirective {
     return template;
   }
 
-  compile(element: ng.IAugmentedJQuery, attrs: ng.IAttributes): ng.IDirectiveCompileFn {
+  compile(element: ng.IAugmentedJQuery, attrs: ng.IAttributes): ng.IDirectivePrePost {
     const tabindex = 'tabindex';
     const avoidAttrs = ['ng-model', 'ng-change'];
     const avoidStartWithAttrs: Array<string> = ['$', 'che-'];

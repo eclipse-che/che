@@ -77,7 +77,7 @@ export abstract class CheMultiTransclude implements ng.IDirective {
         }
 
         const partElementCompiled = this.$compile(angular.element($clone[i].innerHTML))($childScope);
-        targetJq.empty().append(partElementCompiled);
+        targetJq.empty().append(partElementCompiled as any);
       }
     });
   }

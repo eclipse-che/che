@@ -35,7 +35,8 @@ export class WorkspaceDevfileEditor {
   constructor() {
     // scope values
     this.scope = {
-      isActive: '=',
+      isActive: '=?',
+      editorReadOnly: '=?',
       workspaceDevfile: '=',
       workspaceDevfileOnChange: '&'
     };

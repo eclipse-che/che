@@ -42,13 +42,14 @@ export class CheFactory {
 
   private factoriesById: Map<string, che.IFactory>;
   private factoriesByName: Map<string, che.IFactory>;
-  private parametersFactories: Map<string, che.IFactory>;
   private factoryContentsByWorkspaceId: Map<string, any>;
   private pageFactories: Array<che.IFactory>;
   private factoryPagesMap: Map<number, any>;
   private pageInfo: any;
   private itemsPerPage: number;
   private cheUser: CheUser;
+
+  private devfilesByUrl: Map<string, che.IWorkspaceDevfile> =  new Map();
 
   /**
    * Default constructor that is using resource
@@ -65,7 +66,6 @@ export class CheFactory {
     this.factoriesById = new Map();
     // factories details by key: userID:factoryName
     this.factoriesByName = new Map();
-    this.parametersFactories = new Map();
     this.factoryContentsByWorkspaceId = new Map();
     // paging
     this.pageFactories = [];
@@ -484,25 +484,40 @@ export class CheFactory {
    * Ask for getting parameter the factory in asynchronous way
    * If there are no changes, it's not updated
    * @param parameters the factory parameters
-   * @returns {ng.IPromise<any>} the promise
+   * @returns {ng.IPromise<che.IFactory>} the promise
    */
-  fetchParameterFactory(parameters: any): ng.IPromise<any> {
-    let deferred = this.$q.defer();
-
-    let promise = this.remoteFactoryAPI.getFactoryParameters({}, parameters).$promise;
-    promise.then((factory: any) => {
+  fetchParameterFactory(parameters: any): ng.IPromise<che.IFactory> {
+    return this.remoteFactoryAPI.getFactoryParameters({}, parameters).$promise.then((factory: che.IFactory) => {
       factory.name = factory.name ? factory.name : '';
-      this.parametersFactories.set(parameters, factory);
-      deferred.resolve(factory);
+      return this.$q.when(factory);
+    });
+  }
+
+  fetchDevfile(url: string): ng.IPromise<void> {
+    return this.remoteFactoryAPI.getFactoryParameters({}, {url}).$promise.then((res: che.IFactory) => {
+      if (!res || !res.devfile) {
+        return this.$q.reject({data: {message: 'The specified link does not contain a valid Devfile.'}});
+      }
+      if (res.source === 'repo') {
+        return this.$q.reject({data: {message: 'devfile.yaml not found in the specified GitHub repository root.'}});
+      }
+      const {devfile} = res;
+      this.devfilesByUrl.set(url, devfile);
+      return this.$q.when(devfile);
     }, (error: any) => {
       if (error.status === 304) {
-        deferred.resolve(this.parametersFactories.get(parameters));
-      } else {
-        deferred.reject(error);
+        return this.$q.when(this.devfilesByUrl.get(url));
       }
+      return this.$q.reject(error);
     });
+  }
 
-    return deferred.promise;
+  hasDevfile(url: string): boolean {
+    return this.devfilesByUrl.has(url);
+  }
+
+  getDevfile(url: string): che.IWorkspaceDevfile {
+    return angular.copy(this.devfilesByUrl.get(url));
   }
 
   /**
