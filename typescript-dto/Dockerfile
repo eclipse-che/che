@@ -24,7 +24,7 @@ FROM node:6.11.2
 
 RUN npm i -g yarn@1.9.4
 
-ADD package.json /che/package.json
+ADD package.json README.md /che/
 
 COPY ./index.d.ts /che/index.d.ts
 
