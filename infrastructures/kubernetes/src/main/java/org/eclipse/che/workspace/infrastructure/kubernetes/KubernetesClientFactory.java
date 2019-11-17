@@ -72,7 +72,6 @@ public class KubernetesClientFactory {
         new ConnectionPool(maxIdleConnections, connectionPoolKeepAlive, TimeUnit.MINUTES));
     oldPool.evictAll();
     this.httpClient = builder.eventListener(eventListener).build();
-
     httpClient.dispatcher().setMaxRequests(maxConcurrentRequests);
     httpClient.dispatcher().setMaxRequestsPerHost(maxConcurrentRequestsPerHost);
   }
