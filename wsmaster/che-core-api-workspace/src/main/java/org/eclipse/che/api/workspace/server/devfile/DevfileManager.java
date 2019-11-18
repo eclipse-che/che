@@ -97,11 +97,12 @@ public class DevfileManager {
    * Creates {@link DevfileImpl} from given devfile content in YAML and provides possibility to
    * override its values using key-value map, where key is an json-pointer-like string and value is
    * desired property value. NOTE: unlike json pointers, objects in arrays should be pointed by
-   * their names, not by index. Examples:
+   * their name (or alias for components), not by index. Examples:
    *
    * <ul>
    *   <li>metadata.generateName : python-dev-
-   *   <li>projects.foo.source.type : git
+   *   <li>projects.foo.source.type : git // foo in an project name
+   *   <li>components.mysql.memoryLimit : 500Mi // mysql in an component alias
    * </ul>
    *
    * Performs schema and integrity validation of input data.
@@ -134,11 +135,12 @@ public class DevfileManager {
    * Creates {@link DevfileImpl} from given devfile content in JSON and provides possibility to
    * override its values using key-value map, where key is an json-pointer-like string and value is
    * desired property value. NOTE: unlike json pointers, objects in arrays should be pointed by
-   * their names, not by index. Examples:
+   * their name (or alias for components), not by index. Examples:
    *
    * <ul>
    *   <li>metadata.generateName : python-dev-
-   *   <li>projects.foo.source.type : git
+   *   <li>projects.foo.source.type : git // foo in an project name
+   *   <li>components.mysql.memoryLimit : 500Mi // mysql in an component alias
    * </ul>
    *
    * Performs schema and integrity validation of input data.
@@ -203,8 +205,8 @@ public class DevfileManager {
     return devfile;
   }
 
-  private JsonNode applyPropertiesOverride(JsonNode devfileNode, Map<String, String> overrideProperties)
-      throws DevfileFormatException {
+  private JsonNode applyPropertiesOverride(
+      JsonNode devfileNode, Map<String, String> overrideProperties) throws DevfileFormatException {
     for (Map.Entry<String, String> entry : overrideProperties.entrySet()) {
       // prepare stuff
       String[] pathSegments = entry.getKey().split("\\.");
@@ -245,7 +247,9 @@ public class DevfileManager {
 
   private Optional<JsonNode> findNodeByName(ArrayNode parentNode, String name) {
     return StreamSupport.stream(parentNode.spliterator(), false)
-        .filter(node -> node.path("name").asText().equals(name))
+        .filter(
+            node ->
+                node.path("name").asText().equals(name) || node.path("alias").asText().equals(name))
         .findFirst();
   }
 }

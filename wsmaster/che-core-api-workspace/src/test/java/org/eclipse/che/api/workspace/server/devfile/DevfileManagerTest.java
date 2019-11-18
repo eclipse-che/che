@@ -208,7 +208,7 @@ public class DevfileManagerTest {
   }
 
   @Test
-  public void shouldRewriteValueInArrayTypesByName() throws Exception {
+  public void shouldRewriteValueInProjectsArrayElementByName() throws Exception {
     String json =
         "{"
             + "\"apiVersion\": \"1.0.0\","
@@ -236,6 +236,37 @@ public class DevfileManagerTest {
     JsonNode result = captor.getValue();
     assertEquals(result.get("projects").get(0).get("clonePath").textValue(), "baz1");
     assertEquals(result.get("projects").get(1).get("clonePath").textValue(), "baz2");
+  }
+
+  @Test
+  public void shouldRewriteValueInComponentsArrayElementByAlias() throws Exception {
+    String json =
+        "{"
+            + "\"apiVersion\": \"1.0.0\","
+            + "\"components\": ["
+            + "   {"
+            + "      \"alias\": \"java\","
+            + "      \"memoryLimit\": \"300Mi\""
+            + "   },"
+            + "   {"
+            + "      \"alias\": \"mysql\","
+            + "      \"mountSources\": \"false\""
+            + "   }"
+            + "  ]"
+            + "}";
+    // instance with real json mappers
+    DevfileManager manager = new DevfileManager(schemaValidator, integrityValidator);
+    Map<String, String> overrides = new HashMap<>();
+    overrides.put("components.java.memoryLimit", "500Mi");
+    overrides.put("components.mysql.mountSources", "true");
+    ArgumentCaptor<JsonNode> captor = ArgumentCaptor.forClass(JsonNode.class);
+    // when
+    manager.parseJson(json, overrides);
+    verify(schemaValidator).validate(captor.capture());
+
+    JsonNode result = captor.getValue();
+    assertEquals(result.get("components").get(0).get("memoryLimit").textValue(), "500Mi");
+    assertEquals(result.get("components").get(1).get("mountSources").asBoolean(), true);
   }
 
   @Test(
