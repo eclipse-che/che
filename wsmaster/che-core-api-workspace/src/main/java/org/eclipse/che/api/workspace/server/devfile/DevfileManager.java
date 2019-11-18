@@ -226,7 +226,7 @@ public class DevfileManager {
           continue;
         } else if (result.isArray()) {
           String arrayObjectName = pathSegmentsIterator.next();
-          Optional<JsonNode> namedNode = findNodeByName((ArrayNode) result, arrayObjectName);
+          Optional<JsonNode> namedNode = findNodeByNameOrAlias((ArrayNode) result, arrayObjectName);
           currentNode =
               namedNode.orElseThrow(
                   () ->
@@ -245,7 +245,7 @@ public class DevfileManager {
     return devfileNode;
   }
 
-  private Optional<JsonNode> findNodeByName(ArrayNode parentNode, String name) {
+  private Optional<JsonNode> findNodeByNameOrAlias(ArrayNode parentNode, String name) {
     return StreamSupport.stream(parentNode.spliterator(), false)
         .filter(
             node ->
