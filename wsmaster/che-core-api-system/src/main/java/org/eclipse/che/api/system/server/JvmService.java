@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.system.server;
 
-import com.sun.management.HotSpotDiagnosticMXBean;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -19,25 +18,16 @@ import io.swagger.annotations.ApiResponses;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadInfo;
-import java.lang.management.ThreadMXBean;
 import java.nio.file.Files;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.zip.ZipOutputStream;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import org.eclipse.che.commons.lang.IoUtil;
-import org.eclipse.che.commons.lang.ZipUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * REST API for JVM manipulations.
@@ -48,94 +38,23 @@ import org.eclipse.che.commons.lang.ZipUtils;
 @Path("/jvm")
 public class JvmService {
 
-  public static final DateFormat MILLIS_FORMAT = new SimpleDateFormat("mm:ss:SSS");
+  private static final Logger LOG = LoggerFactory.getLogger(JvmService.class);
+
+  private final JvmManager manager;
+
+  @Inject
+  public JvmService(JvmManager manager) {
+    this.manager = manager;
+  }
 
   @GET
   @Path("/dump/thread")
   @Produces(MediaType.TEXT_PLAIN)
   @ApiOperation("Get thread dump of jvm")
   @ApiResponses(@ApiResponse(code = 200, message = "The response contains thread dump"))
+  @ApiResponse(code = 500, message = "Internal server error occurred")
   public StreamingOutput threadDump() {
-    return output -> {
-      OutputStreamWriter writer = new OutputStreamWriter(output);
-      ThreadMXBean mxBean = ManagementFactory.getThreadMXBean();
-      ThreadInfo[] threadInfos = mxBean.getThreadInfo(mxBean.getAllThreadIds(), Integer.MAX_VALUE);
-      Map<Long, ThreadInfo> threadInfoMap = new HashMap<>();
-      for (ThreadInfo threadInfo : threadInfos) {
-        threadInfoMap.put(threadInfo.getThreadId(), threadInfo);
-      }
-
-      try {
-        Map<Thread, StackTraceElement[]> stacks = Thread.getAllStackTraces();
-
-        writer.write(String.format("Dump of %d threads at %Tc\n", stacks.size(), new Date()));
-        for (Map.Entry<Thread, StackTraceElement[]> entry : stacks.entrySet()) {
-          Thread thread = entry.getKey();
-          writer.write(
-              String.format(
-                  "\"%s\" prio=%d tid=%d state=%s daemon=%s\n",
-                  thread.getName(),
-                  thread.getPriority(),
-                  thread.getId(),
-                  thread.getState(),
-                  thread.isDaemon()));
-          ThreadInfo threadInfo = threadInfoMap.get(thread.getId());
-          if (threadInfo != null) {
-            writer.write(
-                String.format(
-                    "    native=%s, suspended=%s, block=%d, wait=%s\n",
-                    threadInfo.isInNative(),
-                    threadInfo.isSuspended(),
-                    threadInfo.getBlockedCount(),
-                    threadInfo.getWaitedCount()));
-            writer.write(
-                String.format(
-                    "    lock=%s owned by %s (%s), cpu=%s, user=%s\n",
-                    threadInfo.getLockName(),
-                    threadInfo.getLockOwnerName(),
-                    threadInfo.getLockOwnerId(),
-                    MILLIS_FORMAT.format(
-                        new Date(mxBean.getThreadCpuTime(threadInfo.getThreadId()) / 1000000L)),
-                    MILLIS_FORMAT.format(
-                        new Date(mxBean.getThreadUserTime(threadInfo.getThreadId()) / 1000000L))));
-          }
-          for (StackTraceElement element : entry.getValue()) {
-            writer.append("        ").append(element.toString()).append(System.lineSeparator());
-          }
-          writer.write(System.lineSeparator());
-        }
-        writer.write("------------------------------------------------------");
-        writer.write(System.lineSeparator());
-        writer.write("Non-daemon threads: ");
-        writer.write(System.lineSeparator());
-
-        for (Thread thread : stacks.keySet()) {
-          if (!thread.isDaemon()) {
-            writer
-                .append("\"")
-                .append(thread.getName())
-                .append("\", ")
-                .append(System.lineSeparator());
-          }
-        }
-        writer.write("------------------------------------------------------");
-        writer.write(System.lineSeparator());
-        writer.write("Blocked threads: ");
-        writer.write(System.lineSeparator());
-        for (Thread thread : stacks.keySet()) {
-          if (thread.getState() == Thread.State.BLOCKED) {
-            writer
-                .append("\"")
-                .append(thread.getName())
-                .append("\", ")
-                .append(System.lineSeparator());
-          }
-        }
-        writer.write("------------------------------------------------------");
-      } finally {
-        writer.close();
-      }
-    };
+    return manager::writeThreadDump;
   }
 
   @GET
@@ -143,30 +62,23 @@ public class JvmService {
   @Produces("application/zip")
   @ApiOperation("Get heap dump of jvm")
   @ApiResponses(@ApiResponse(code = 200, message = "The response contains jvm heap dump"))
+  @ApiResponse(code = 500, message = "Internal server error occurred")
   public Response heapDump() throws IOException {
-    HotSpotDiagnosticMXBean mxBean =
-        ManagementFactory.getPlatformMXBean(HotSpotDiagnosticMXBean.class);
-    java.nio.file.Path tmpDir = Files.createTempDirectory("heapdump");
-    File heapFile = new File(tmpDir.toFile(), "heapdump.hprof");
-    mxBean.dumpHeap(heapFile.getAbsolutePath(), false);
-    File zip = new File(tmpDir.toFile(), "heapdump.hprof.zip");
-    try (ZipOutputStream out = ZipUtils.stream(zip.toPath())) {
-      out.setLevel(-1);
-      ZipUtils.add(out, heapFile.toPath());
-    }
-
+    File heapDump = manager.createZippedHeapDump();
+    heapDump.deleteOnExit();
     return Response.ok(
-            new FileInputStream(zip) {
+            new FileInputStream(heapDump) {
               @Override
               public void close() throws IOException {
                 super.close();
-                IoUtil.deleteRecursive(tmpDir.toFile());
+                if (!heapDump.delete()) {
+                  LOG.warn("Not able to delete temporary file {}", heapDump);
+                }
               }
             },
             "application/zip")
-        .header("Content-Length", String.valueOf(Files.size(zip.toPath())))
-        .header(
-            "Content-Disposition", "attachment; filename=" + zip.toPath().getFileName().toString())
+        .header("Content-Length", String.valueOf(Files.size(heapDump.toPath())))
+        .header("Content-Disposition", "attachment; filename=heapdump.hprof.zip")
         .build();
   }
 }

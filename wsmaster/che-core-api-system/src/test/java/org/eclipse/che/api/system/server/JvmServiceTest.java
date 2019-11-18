@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 @Listeners(EverrestJetty.class)
 public class JvmServiceTest {
 
-  JvmService service;
+  JvmService service = new JvmService(new JvmManager());
 
   @Test
   public void testThreadDump() {
