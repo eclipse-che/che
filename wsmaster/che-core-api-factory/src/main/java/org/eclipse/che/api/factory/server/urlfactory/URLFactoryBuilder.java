@@ -89,8 +89,8 @@ public class URLFactoryBuilder {
   }
 
   /**
-   * Build a factory using the provided devfile. Allows to override devfile properties
-   * using specially constructed map {@see DevfileManager#parseYaml(String, Map)}.
+   * Build a factory using the provided devfile. Allows to override devfile properties using
+   * specially constructed map {@see DevfileManager#parseYaml(String, Map)}.
    *
    * <p>We want factory to never fail due to name collision. Taking `generateName` with precedence.
    * <br>
