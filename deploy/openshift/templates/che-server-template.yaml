@@ -159,6 +159,18 @@ objects:
                 key: ca.crt
                 name: self-signed-certificate
                 optional: true
+          - name: CHE_GIT_SELF__SIGNED__CERT
+            valueFrom:
+              configMapKeyRef:
+                name: che-git-self-signed-cert
+                key: ca.crt
+                optional: true
+          - name: CHE_GIT_SELF__SIGNED__CERT__HOST
+            valueFrom:
+              configMapKeyRef:
+                name: che-git-self-signed-cert
+                key: githost
+                optional: true
           - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
             value: "${CHE_WORKSPACE_PLUGIN__REGISTRY__URL}"
           - name: CHE_WORKSPACE_DEVFILE__REGISTRY__URL

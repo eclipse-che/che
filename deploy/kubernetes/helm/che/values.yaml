@@ -50,6 +50,13 @@ global:
     useSelfSignedCerts: false
     selfSignedCertSecretName: self-signed-cert
 
+
+  ## If using git self-signed certificate is enabled
+  ## then certificate from `cheGitSelfSignedCertConfigMapName` will be propagated to Che components'
+  ## and provide particular configuration for Git
+  useGitSelfSignedCerts: true
+  cheGitSelfSignedCertConfigMapName: che-git-self-signed-cert
+
   gitHubClientID: ""
   gitHubClientSecret: ""
   pvcClaim: "1Gi"
