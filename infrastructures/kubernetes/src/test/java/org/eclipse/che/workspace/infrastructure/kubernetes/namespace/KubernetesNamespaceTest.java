@@ -106,7 +106,7 @@ public class KubernetesNamespaceTest {
     KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
 
     // when
-    namespace.prepare(false);
+    namespace.prepare(false, false);
 
     // then
     verify(namespaceMeta, never()).withName(NAMESPACE);
@@ -122,7 +122,7 @@ public class KubernetesNamespaceTest {
     KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
 
     // when
-    namespace.prepare(false);
+    namespace.prepare(false, false);
 
     // then
     verify(namespaceMeta).withName(NAMESPACE);
@@ -169,7 +169,7 @@ public class KubernetesNamespaceTest {
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     doThrow(KubernetesClientException.class).when(kubernetesClient).serviceAccounts();
 
-    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare(false);
+    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare(false, false);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -180,7 +180,7 @@ public class KubernetesNamespaceTest {
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     when(serviceAccountResource.get()).thenReturn(null);
 
-    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare(false);
+    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare(false, false);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -199,7 +199,7 @@ public class KubernetesNamespaceTest {
         .when(serviceAccountResource)
         .watch(any());
 
-    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare(false);
+    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare(false, false);
   }
 
   @Test
@@ -217,7 +217,7 @@ public class KubernetesNamespaceTest {
         .when(serviceAccountResource)
         .watch(any());
 
-    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare(false);
+    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare(false, false);
 
     verify(serviceAccountResource).get();
     verify(serviceAccountResource).watch(any());

@@ -113,62 +113,6 @@ public class KubernetesNamespaceFactory {
   }
 
   /**
-   * True if namespace is potentially created for the workspace, false otherwise.
-   *
-   * <p>The logic is a little bit non-trivial and best expressed by just fully evaluating the truth
-   * table as below ({@code ...namespace} stands for the legacy namespace property, {@code
-   * ...namespace.default} stands for the namespace default property):
-   *
-   * <pre>{@code
-   * ...namespace    | ...namespace exists | ...namespace.default | creating?
-   * no-placeholders |       no            |       null           | error
-   * no-placeholders |       no            |   no-placeholders    | no
-   * no-placeholders |       no            |    placeholders      | yes
-   * no-placeholders |      yes            |       null           | no
-   * no-placeholders |      yes            |   no-placeholders    | no
-   * no-placeholders |      yes            |    placeholders      | no
-   *  placeholders   |       no            |        null          | error
-   *  placeholders   |       no            |   no-placeholders    | no
-   *  placeholders   |       no            |    placeholders      | yes
-   *  placeholders   |      yes            |        null          | yes
-   *  placeholders   |      yes            |   no-placeholders    | yes
-   *  placeholders   |      yes            |    placeholders      | yes
-   * }</pre>
-   */
-  protected boolean isCreatingNamespace(RuntimeIdentity identity) throws InfrastructureException {
-    User owner;
-    try {
-      owner = userManager.getById(identity.getOwnerId());
-    } catch (NotFoundException | ServerException e) {
-      throw new InfrastructureException(
-          "Failed to resolve workspace owner. Cause: " + e.getMessage(), e);
-    }
-
-    boolean legacyExists =
-        checkNamespaceExists(
-            resolveLegacyNamespaceName(
-                new NamespaceResolutionContext(
-                    identity.getWorkspaceId(), identity.getOwnerId(), owner.getName())));
-
-    // legacy namespace exists and should be used
-    if (legacyExists) {
-      // if it contains any placeholder("" is <workspaceid>) - it indicates that Che created
-      // namespace by itself
-      return isNullOrEmpty(legacyNamespaceName) || hasPlaceholders(legacyNamespaceName);
-    }
-
-    if (isNullOrEmpty(defaultNamespaceName)) {
-      throw new InfrastructureException(
-          "Cannot determine whether a new namespace and service account should be"
-              + " created for workspace %s. There is no pre-existing workspace namespace to be"
-              + " found using the legacy `che.infra.kubernetes.namespace` property yet the"
-              + " `che.infra.kubernetes.namespace.default` property is undefined.");
-    }
-
-    return hasPlaceholders(defaultNamespaceName);
-  }
-
-  /**
    * Creates a Kubernetes namespace for the specified workspace.
    *
    * <p>Namespace won't be prepared. This method should be used only in case workspace recovering.
@@ -327,22 +271,45 @@ public class KubernetesNamespaceFactory {
     return new KubernetesNamespaceMetaImpl(namespace.getMetadata().getName(), attributes);
   }
 
+  private boolean canCreateNamespace(RuntimeIdentity identity) throws InfrastructureException {
+    if (allowUserDefinedNamespaces) {
+      return true;
+    } else {
+      // we need to make sure that the provided namespace is indeed the one provided by our
+      // configuration
+      User owner;
+      try {
+        owner = userManager.getById(identity.getOwnerId());
+      } catch (NotFoundException | ServerException e) {
+        throw new InfrastructureException(
+            "Failed to resolve workspace owner. Cause: " + e.getMessage(), e);
+      }
+
+      String requiredNamespace = identity.getInfrastructureNamespace();
+
+      NamespaceResolutionContext resolutionContext =
+          new NamespaceResolutionContext(
+              identity.getWorkspaceId(), identity.getOwnerId(), owner.getName());
+
+      String resolvedDefaultNamespace = evalPlaceholders(requiredNamespace, resolutionContext);
+
+      return resolvedDefaultNamespace.equals(requiredNamespace);
+    }
+  }
+
   public KubernetesNamespace getOrCreate(RuntimeIdentity identity) throws InfrastructureException {
     KubernetesNamespace namespace = get(identity);
 
-    if (isCreatingNamespace(identity) && !isNullOrEmpty(serviceAccountName)) {
-      boolean markManaged =
-          // when infra namespace contains workspaceId that is generated
-          // it mean that Che Server provides unique namespace for each workspace
-          // and nothing else except workspace should be run there
-          // Che Server also removes such namespace after workspace is removed
-          identity.getInfrastructureNamespace().contains(identity.getWorkspaceId());
+    boolean markManaged =
+        // when infra namespace contains workspaceId that is generated
+        // it mean that Che Server provides unique namespace for each workspace
+        // and nothing else except workspace should be run there
+        // Che Server also removes such namespace after workspace is removed
+        identity.getInfrastructureNamespace().contains(identity.getWorkspaceId());
 
-      namespace.prepare(markManaged);
+    namespace.prepare(markManaged, canCreateNamespace(identity));
 
-      // prepare service account for workspace only if account name is configured
-      // and project is not predefined
-      // since predefined project should be prepared during Che deployment
+    if (!isNullOrEmpty(serviceAccountName)) {
       KubernetesWorkspaceServiceAccount workspaceServiceAccount =
           doCreateServiceAccount(namespace.getWorkspaceId(), namespace.getName());
       workspaceServiceAccount.prepare();

@@ -56,7 +56,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.Kubernetes
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -288,82 +287,6 @@ public class KubernetesNamespaceFactoryTest {
     namespaceFactory.list();
   }
 
-  @DataProvider
-  public static Object[][] creatingNamespaceConditions() {
-    // Whether or not the factory potentially creates a namespace depends on the 3 conditions:
-    // 1) the value of the legacy property 'che.infra.kubernetes.namespace'
-    // 2) legacy property pointing to the existing namespace
-    // 3) value of the new property 'che.infra.kubernetes.namespace.default'
-    // the output is either true, false, or error (represented as a null here)
-
-    // this is the truth table we need to follow
-    // ...namespace    | ...namespace exists | ...namespace.default | creating?
-    // no-placeholders |       no            |       null           | error
-    // no-placeholders |       no            |   no-placeholders    | no
-    // no-placeholders |       no            |    placeholders      | yes
-    // no-placeholders |      yes            |       null           | no
-    // no-placeholders |      yes            |   no-placeholders    | no
-    // no-placeholders |      yes            |    placeholders      | no
-    //  placeholders   |       no            |        null          | error
-    //  placeholders   |       no            |   no-placeholders    | no
-    //  placeholders   |       no            |    placeholders      | yes
-    //  placeholders   |      yes            |        null          | yes
-    //  placeholders   |      yes            |   no-placeholders    | yes
-    //  placeholders   |      yes            |    placeholders      | yes
-
-    // additionally, we want to test that if the legacy property is null, it behaves exactly
-    // the same as having a placeholder, because it should default to <workspaceid>
-    return new Object[][] {
-      new Object[] {"some", false, null, null},
-      new Object[] {"some", false, "some", false},
-      new Object[] {"some", false, "<userid>", true},
-      new Object[] {"some", true, null, false},
-      new Object[] {"some", true, "some", false},
-      new Object[] {"some", true, "<userid>", false},
-      new Object[] {"<workspaceid>", false, null, null},
-      new Object[] {"<workspaceid>", false, "some", false},
-      new Object[] {"<workspaceid>", false, "<userid>", true},
-      new Object[] {"<workspaceid>", true, null, true},
-      new Object[] {"<workspaceid>", true, "some", true},
-      new Object[] {"<workspaceid>", true, "<userid>", true},
-      new Object[] {null, false, null, null},
-      new Object[] {null, false, "some", false},
-      new Object[] {null, false, "<userid>", true},
-      new Object[] {null, true, null, true},
-      new Object[] {null, true, "some", true},
-      new Object[] {null, true, "<userid>", true},
-    };
-  }
-
-  @Test(dataProvider = "creatingNamespaceConditions")
-  public void shouldDetermineWhenNamespaceCanBeCreated(
-      String legacyProperty,
-      boolean legacyNamespaceExists,
-      String namespaceProperty,
-      Boolean expectedOutcome) {
-
-    // given
-    namespaceFactory =
-        new KubernetesNamespaceFactory(
-            legacyProperty, "", "", namespaceProperty, true, clientFactory, userManager);
-
-    Namespace existingLegacyNamespace = legacyNamespaceExists ? mock(Namespace.class) : null;
-    when(namespaceResource.get()).thenReturn(existingLegacyNamespace);
-
-    // when
-    Boolean result;
-    try {
-      RuntimeIdentity identity = new RuntimeIdentityImpl("123", null, USER_ID, "infraNamespace");
-      result = namespaceFactory.isCreatingNamespace(identity);
-    } catch (InfrastructureException e) {
-      // this can happen and we test for it below...
-      result = null;
-    }
-
-    // then
-    assertEquals(result, expectedOutcome);
-  }
-
   @Test
   public void shouldCreateAndPrepareNamespaceWithPredefinedValueIfItIsNotEmpty() throws Exception {
     // given
@@ -382,7 +305,7 @@ public class KubernetesNamespaceFactoryTest {
     // then
     assertEquals(toReturnNamespace, namespace);
     verify(namespaceFactory).doCreateNamespaceAccess("workspace123", "predefined");
-    verify(toReturnNamespace).prepare(eq(false));
+    verify(toReturnNamespace).prepare(eq(false), anyBoolean());
   }
 
   @Test
@@ -402,7 +325,7 @@ public class KubernetesNamespaceFactoryTest {
     // then
     assertEquals(toReturnNamespace, namespace);
     verify(namespaceFactory).doCreateNamespaceAccess("workspace123", "workspace123");
-    verify(toReturnNamespace).prepare(eq(true));
+    verify(toReturnNamespace).prepare(eq(true), anyBoolean());
   }
 
   @Test
@@ -421,7 +344,7 @@ public class KubernetesNamespaceFactoryTest {
     // then
     assertEquals(toReturnNamespace, namespace);
     verify(namespaceFactory).doCreateNamespaceAccess("workspace123", "name");
-    verify(toReturnNamespace, never()).prepare(anyBoolean());
+    verify(toReturnNamespace, never()).prepare(anyBoolean(), anyBoolean());
   }
 
   @Test

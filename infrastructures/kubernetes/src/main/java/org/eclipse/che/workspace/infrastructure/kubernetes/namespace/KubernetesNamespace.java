@@ -113,14 +113,21 @@ public class KubernetesNamespace {
    * <p>Preparing includes creating if needed and waiting for default service account.
    *
    * @param markManaged mark the namespace as managed by Che if it is newly created in this method
+   * @param canCreate true if the namespace can be created during the prepare, false if the
+   *     namespace must already exist.
    * @return true if the namespace has been created, false if it's already existed
-   * @throws InfrastructureException if any exception occurs during namespace preparing
+   * @throws InfrastructureException if any exception occurs during namespace preparing or if the
+   *     namespace didn't exist yet it was not allowed to create it
    */
-  boolean prepare(boolean markManaged) throws InfrastructureException {
+  boolean prepare(boolean markManaged, boolean canCreate) throws InfrastructureException {
     KubernetesClient client = clientFactory.create(workspaceId);
     Namespace namespace = get(name, client);
 
     if (namespace == null) {
+      if (!canCreate) {
+        throw new InfrastructureException(
+            format("Creating the namespace '%s' is not allowed, yet" + " it was not found.", name));
+      }
       create(name, client, markManaged);
       return true;
     }

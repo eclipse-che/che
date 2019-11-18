@@ -82,11 +82,9 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   public OpenShiftProject getOrCreate(RuntimeIdentity identity) throws InfrastructureException {
     OpenShiftProject osProject = get(identity);
 
-    if (isCreatingNamespace(identity) && !isNullOrEmpty(getServiceAccountName())) {
-      osProject.prepare();
-      // prepare service account for workspace only if account name is configured
-      // and project is not predefined
-      // since predefined project should be prepared during Che deployment
+    osProject.prepare();
+
+    if (!isNullOrEmpty(getServiceAccountName())) {
       OpenShiftWorkspaceServiceAccount osWorkspaceServiceAccount =
           doCreateServiceAccount(osProject.getWorkspaceId(), osProject.getName());
       osWorkspaceServiceAccount.prepare();
