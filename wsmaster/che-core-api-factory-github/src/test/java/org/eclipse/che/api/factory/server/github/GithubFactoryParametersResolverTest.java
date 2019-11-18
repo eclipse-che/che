@@ -116,8 +116,8 @@ public class GithubFactoryParametersResolverTest {
 
     when(urlFactoryBuilder.createFactoryFromJson(any(RemoteFactoryUrl.class)))
         .thenReturn(Optional.empty());
-    when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any(),
-        overrideProperties))
+    when(urlFactoryBuilder.createFactoryFromDevfile(
+            any(RemoteFactoryUrl.class), any(), overrideProperties))
         .thenReturn(Optional.empty());
 
     FactoryDto factory =
@@ -134,8 +134,8 @@ public class GithubFactoryParametersResolverTest {
 
     FactoryDto computedFactory = generateDevfileFactory();
 
-    when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any(),
-        overrideProperties))
+    when(urlFactoryBuilder.createFactoryFromDevfile(
+            any(RemoteFactoryUrl.class), any(), overrideProperties))
         .thenReturn(Optional.of(computedFactory));
 
     FactoryDto factory =
@@ -145,8 +145,8 @@ public class GithubFactoryParametersResolverTest {
     assertNull(factory.getWorkspace());
 
     // check we called the builder with the following devfile file
-    verify(urlFactoryBuilder).createFactoryFromDevfile(factoryUrlArgumentCaptor.capture(), any(),
-        overrideProperties);
+    verify(urlFactoryBuilder)
+        .createFactoryFromDevfile(factoryUrlArgumentCaptor.capture(), any(), overrideProperties);
     verify(urlFactoryBuilder, never()).buildDefaultDevfile(eq("che"));
     assertEquals(
         factoryUrlArgumentCaptor.getValue().devfileFileLocation(),

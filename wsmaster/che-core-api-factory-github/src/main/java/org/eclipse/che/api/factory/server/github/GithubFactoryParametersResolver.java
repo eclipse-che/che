@@ -97,7 +97,8 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
     FactoryDto factory =
         urlFactoryBuilder
             .createFactoryFromDevfile(
-                githubUrl, fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)),
+                githubUrl,
+                fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)),
                 factoryParameters)
             .orElseGet(
                 () ->
