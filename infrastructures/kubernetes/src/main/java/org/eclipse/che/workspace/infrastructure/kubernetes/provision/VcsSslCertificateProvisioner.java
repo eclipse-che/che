@@ -75,9 +75,9 @@ public class VcsSslCertificateProvisioner
   }
 
   /**
-   * Return given in configuration git server host.
+   * Return given in configuration git server host (e.g. 110.23.0.1:3000).
    *
-   * @return git server host for git config it configured
+   * @return git server host for git config if it configured in che.git.self_signed_cert_host
    */
   public String getGitServerHost() {
     return host;
