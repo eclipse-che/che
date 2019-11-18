@@ -67,7 +67,6 @@ public class DevfileManagerTest {
     devfileManager =
         new DevfileManager(schemaValidator, integrityValidator, yamlMapper, jsonMapper);
 
-    // lenient().when(schemaValidator.validate(any(Js))).thenReturn(devfileJsonNode);
     lenient().when(jsonMapper.treeToValue(any(), eq(DevfileImpl.class))).thenReturn(devfile);
     lenient().when(yamlMapper.treeToValue(any(), eq(DevfileImpl.class))).thenReturn(devfile);
     lenient().when(yamlMapper.readTree(anyString())).thenReturn(devfileJsonNode);
