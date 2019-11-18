@@ -14,14 +14,11 @@ package org.eclipse.che.core.metrics;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.core.instrument.binder.db.PostgreSQLDatabaseMetrics;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.sql.DataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class PostgreSQLDatabaseMetricsProvider implements Provider<MeterBinder> {
@@ -30,7 +27,8 @@ public class PostgreSQLDatabaseMetricsProvider implements Provider<MeterBinder> 
   @Inject
   public PostgreSQLDatabaseMetricsProvider(DataSource dataSource) {
     try (Connection connection = dataSource.getConnection()) {
-      this.postgreSQLDatabaseMetrics = new PostgreSQLDatabaseMetrics(dataSource, connection.getCatalog());
+      this.postgreSQLDatabaseMetrics =
+          new PostgreSQLDatabaseMetrics(dataSource, connection.getCatalog());
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
