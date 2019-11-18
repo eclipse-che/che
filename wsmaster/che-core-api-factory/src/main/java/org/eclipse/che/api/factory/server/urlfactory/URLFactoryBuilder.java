@@ -89,7 +89,8 @@ public class URLFactoryBuilder {
   }
 
   /**
-   * Build a factory using the provided devfile.
+   * Build a factory using the provided devfile. Allows to override devfile properties
+   * using specially constructed map {@see DevfileManager#parseYaml(String, Map)}.
    *
    * <p>We want factory to never fail due to name collision. Taking `generateName` with precedence.
    * <br>
@@ -99,7 +100,7 @@ public class URLFactoryBuilder {
    *
    * @param remoteFactoryUrl parsed factory URL object
    * @param fileContentProvider service-specific devfile related file content provider
-   * @param overrideProperties
+   * @param overrideProperties map of overridden properties to apply in devfile
    * @return a factory or null if devfile is not found
    */
   public Optional<FactoryDto> createFactoryFromDevfile(

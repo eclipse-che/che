@@ -96,18 +96,18 @@ public class DevfileManager {
   /**
    * Creates {@link DevfileImpl} from given devfile content in YAML and provides possibility to
    * override its values using key-value map, where key is an json-pointer-like string and value is
-   * desired property value. NOTE: unlike json-pointers, objects in arrays should be pointed by
+   * desired property value. NOTE: unlike json pointers, objects in arrays should be pointed by
    * their names, not by index. Examples:
    *
    * <ul>
-   *   <li>metadata.generateName ; python-dev-
-   *   <li>projects.someproject.source.type : git
+   *   <li>metadata.generateName : python-dev-
+   *   <li>projects.foo.source.type : git
    * </ul>
    *
    * Performs schema and integrity validation of input data.
    *
    * @param devfileContent raw content of devfile
-   * @param overrideProperties map of overriden values
+   * @param overrideProperties map of overridden values
    * @return Devfile object created from the source content
    * @throws DevfileFormatException when any of schema or integrity validations fail
    * @throws DevfileFormatException when any yaml parsing error occurs
@@ -133,18 +133,18 @@ public class DevfileManager {
   /**
    * Creates {@link DevfileImpl} from given devfile content in JSON and provides possibility to
    * override its values using key-value map, where key is an json-pointer-like string and value is
-   * desired property value. NOTE: unlike json-pointers, objects in arrays should be pointed by
+   * desired property value. NOTE: unlike json pointers, objects in arrays should be pointed by
    * their names, not by index. Examples:
    *
    * <ul>
-   *   <li>metadata.generateName ; python-dev-
-   *   <li>projects.someproject.source.type : git
+   *   <li>metadata.generateName : python-dev-
+   *   <li>projects.foo.source.type : git
    * </ul>
    *
    * Performs schema and integrity validation of input data.
    *
    * @param devfileContent raw content of devfile
-   * @param overrideProperties map of overriden values
+   * @param overrideProperties map of overridden values
    * @return Devfile object created from the source content
    * @throws DevfileFormatException when any of schema or integrity validations fail
    * @throws DevfileFormatException when any yaml parsing error occurs
@@ -191,7 +191,7 @@ public class DevfileManager {
     DevfileImpl devfile;
     try {
       JsonNode parsed = mapper.readTree(content);
-      applyPropertiesOverride(parsed, overrideProperties);
+      parsed = applyPropertiesOverride(parsed, overrideProperties);
       schemaValidator.validate(parsed);
       devfile = mapper.treeToValue(parsed, DevfileImpl.class);
     } catch (JsonProcessingException e) {
@@ -203,7 +203,7 @@ public class DevfileManager {
     return devfile;
   }
 
-  private void applyPropertiesOverride(JsonNode devfileNode, Map<String, String> overrideProperties)
+  private JsonNode applyPropertiesOverride(JsonNode devfileNode, Map<String, String> overrideProperties)
       throws DevfileFormatException {
     for (Map.Entry<String, String> entry : overrideProperties.entrySet()) {
       // prepare stuff
@@ -240,6 +240,7 @@ public class DevfileManager {
       // end of path segments reached, now we can set value
       ((ObjectNode) currentNode).put(lastSegment, entry.getValue());
     }
+    return devfileNode;
   }
 
   private Optional<JsonNode> findNodeByName(ArrayNode parentNode, String name) {
