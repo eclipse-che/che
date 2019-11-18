@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
 
 import io.fabric8.kubernetes.api.model.DoneableNamespace;
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
@@ -122,7 +123,7 @@ public class KubernetesNamespaceTest {
     KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
 
     // when
-    namespace.prepare(false, false);
+    namespace.prepare(false, true);
 
     // then
     verify(namespaceMeta).withName(NAMESPACE);
@@ -217,17 +218,17 @@ public class KubernetesNamespaceTest {
         .when(serviceAccountResource)
         .watch(any());
 
-    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare(false, false);
+    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare(false, true);
 
     verify(serviceAccountResource).get();
     verify(serviceAccountResource).watch(any());
   }
 
   @Test
-  public void testDeletesExistingNamespace() throws Exception {
+  public void testDeletesExistingManagedNamespace() throws Exception {
     // given
     KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
-    Resource resource = prepareNamespaceResource(NAMESPACE);
+    Resource resource = prepareManagedNamespaceResource(NAMESPACE);
 
     // when
     namespace.deleteIfManaged();
@@ -237,10 +238,28 @@ public class KubernetesNamespaceTest {
   }
 
   @Test
-  public void testDoesntFailIfDeletedNamespaceDoesntExist() throws Exception {
+  public void testDoesntDeleteExistingNonManagedNamespace() throws Exception {
     // given
     KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
     Resource resource = prepareNamespaceResource(NAMESPACE);
+
+    // when
+    try {
+      namespace.deleteIfManaged();
+      fail("Deleting a non-managed namespace shouldn't have succeeded.");
+    } catch (InfrastructureException e) {
+      // good
+    }
+
+    // then
+    verify(resource, never()).delete();
+  }
+
+  @Test
+  public void testDoesntFailIfDeletedNamespaceDoesntExist() throws Exception {
+    // given
+    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
+    Resource resource = prepareManagedNamespaceResource(NAMESPACE);
     when(resource.delete()).thenThrow(new KubernetesClientException("err", 404, null));
 
     // when
@@ -255,7 +274,7 @@ public class KubernetesNamespaceTest {
   public void testDoesntFailIfDeletedNamespaceIsBeingDeleted() throws Exception {
     // given
     KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
-    Resource resource = prepareNamespaceResource(NAMESPACE);
+    Resource resource = prepareManagedNamespaceResource(NAMESPACE);
     when(resource.delete()).thenThrow(new KubernetesClientException("err", 409, null));
 
     // when
@@ -283,6 +302,21 @@ public class KubernetesNamespaceTest {
     when(namespaceResource.get())
         .thenReturn(
             new NamespaceBuilder().withNewMetadata().withName(namespaceName).endMetadata().build());
+    kubernetesClient.namespaces().withName(namespaceName).get();
+    return namespaceResource;
+  }
+
+  private Resource prepareManagedNamespaceResource(String namespaceName) {
+    Resource namespaceResource = mock(Resource.class);
+    doReturn(namespaceResource).when(namespaceOperation).withName(namespaceName);
+    when(namespaceResource.get())
+        .thenReturn(
+            new NamespaceBuilder()
+                .withNewMetadata()
+                .withName(namespaceName)
+                .addToLabels("che-managed", "true")
+                .endMetadata()
+                .build());
     kubernetesClient.namespaces().withName(namespaceName).get();
     return namespaceResource;
   }

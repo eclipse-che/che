@@ -16,9 +16,10 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.Kube
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.DoneableNamespace;
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.Namespace;
-import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.fabric8.kubernetes.api.model.NamespaceFluent;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -271,13 +272,16 @@ public class KubernetesNamespace {
   private void create(String namespaceName, KubernetesClient client, boolean markManaged)
       throws InfrastructureException {
     try {
-      ObjectMetaBuilder metadata = new ObjectMetaBuilder().withName(namespaceName);
+      NamespaceFluent.MetadataNested<DoneableNamespace> metadata =
+          client.namespaces().createNew().withNewMetadata();
+
+      metadata.withName(namespaceName);
 
       if (markManaged) {
         metadata.addToLabels("che-managed", "true");
       }
 
-      client.namespaces().createNew().withMetadata(metadata.build()).done();
+      metadata.endMetadata().done();
 
       waitDefaultServiceAccount(namespaceName, client);
     } catch (KubernetesClientException e) {
