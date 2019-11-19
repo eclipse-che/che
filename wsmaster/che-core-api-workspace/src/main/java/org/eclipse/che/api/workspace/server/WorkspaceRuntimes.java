@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.server;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.emptyList;
@@ -425,15 +426,23 @@ public class WorkspaceRuntimes {
       envName = config.getDefaultEnv();
     }
 
+    String infraNamespace =
+        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
+
+    if (isNullOrEmpty(infraNamespace)) {
+      throw new ServerException(
+          String.format(
+              "Workspace does not have infrastructure namespace "
+                  + "specified. Please set value of '%s' workspace attribute.",
+              WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE));
+    }
+
     final RuntimeIdentity runtimeId =
         new RuntimeIdentityImpl(
             workspaceId,
             envName,
             EnvironmentContext.getCurrent().getSubject().getUserId(),
-            workspace
-                .getConfig()
-                .getAttributes()
-                .get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE));
+            infraNamespace);
 
     try {
       InternalEnvironment internalEnv =
