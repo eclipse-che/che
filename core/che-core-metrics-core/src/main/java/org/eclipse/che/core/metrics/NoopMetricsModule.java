@@ -14,7 +14,8 @@ package org.eclipse.che.core.metrics;
 import com.google.inject.AbstractModule;
 import okhttp3.EventListener;
 
-public class NopMetricsModule extends AbstractModule {
+/** Provides dummy implementations of some classes in case if monitoring is turned off. */
+public class NoopMetricsModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(EventListener.class).toInstance(EventListener.NONE);

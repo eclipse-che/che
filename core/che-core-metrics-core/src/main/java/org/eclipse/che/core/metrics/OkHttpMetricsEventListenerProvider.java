@@ -16,7 +16,12 @@ import io.micrometer.core.instrument.binder.okhttp3.OkHttpMetricsEventListener;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+import okhttp3.OkHttpClient;
 
+/**
+ * Provider of {@link OkHttpMetricsEventListener} class instances that collect metrics from {@link
+ * OkHttpClient}.
+ */
 @Singleton
 public class OkHttpMetricsEventListenerProvider implements Provider<OkHttpMetricsEventListener> {
 
