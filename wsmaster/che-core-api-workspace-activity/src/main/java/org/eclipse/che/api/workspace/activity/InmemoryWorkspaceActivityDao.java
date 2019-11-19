@@ -100,11 +100,8 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
                 a -> {
                   switch (status) {
                     case STOPPED:
-                      return isGreater(a.getLastStopped(), timestamp);
                     case STOPPING:
-                      return isGreater(a.getLastStopped(), timestamp);
                     case RUNNING:
-                      return isGreater(a.getLastStopped(), timestamp);
                     case STARTING:
                       return isGreater(a.getLastStopped(), timestamp);
                     default:
