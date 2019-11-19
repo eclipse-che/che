@@ -301,7 +301,7 @@ public class OpenShiftProjectFactoryTest {
     // then
     assertEquals(toReturnProject, project);
     verify(projectFactory).doCreateProjectAccess("workspace123", "projectName");
-    verify(toReturnProject).prepare();
+    verify(toReturnProject).prepare(any(), any());
   }
 
   @Test
@@ -322,7 +322,7 @@ public class OpenShiftProjectFactoryTest {
     // then
     assertEquals(toReturnProject, project);
     verify(projectFactory).doCreateProjectAccess("workspace123", "workspace123");
-    verify(toReturnProject).prepare();
+    verify(toReturnProject).prepare(any(), any());
   }
 
   @Test
@@ -425,7 +425,7 @@ public class OpenShiftProjectFactoryTest {
     // then
     assertEquals(toReturnProject, namespace);
     verify(projectFactory).doCreateProjectAccess("workspace123", "name");
-    verify(toReturnProject, never()).prepare();
+    verify(toReturnProject, never()).prepare(any(), any());
   }
 
   private void prepareNamespaceToBeFoundByName(String name, Project project) throws Exception {

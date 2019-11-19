@@ -108,7 +108,7 @@ public class OpenShiftProjectTest {
         new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
 
     // when
-    openShiftProject.prepare();
+    openShiftProject.prepare(false, true);
   }
 
   @Test
@@ -122,7 +122,7 @@ public class OpenShiftProjectTest {
         new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
 
     // when
-    openShiftProject.prepare();
+    openShiftProject.prepare(false, true);
 
     // then
     verify(projectMetadata).withName(PROJECT_NAME);
@@ -168,7 +168,7 @@ public class OpenShiftProjectTest {
     Resource resource = prepareProjectResource(PROJECT_NAME);
 
     // when
-    project.delete();
+    project.deleteIfManaged();
 
     // then
     verify(resource).delete();
@@ -182,7 +182,7 @@ public class OpenShiftProjectTest {
     when(resource.delete()).thenThrow(new KubernetesClientException("err", 404, null));
 
     // when
-    project.delete();
+    project.deleteIfManaged();
 
     // then
     verify(resource).delete();
@@ -197,7 +197,7 @@ public class OpenShiftProjectTest {
     when(resource.delete()).thenThrow(new KubernetesClientException("err", 409, null));
 
     // when
-    project.delete();
+    project.deleteIfManaged();
 
     // then
     verify(resource).delete();

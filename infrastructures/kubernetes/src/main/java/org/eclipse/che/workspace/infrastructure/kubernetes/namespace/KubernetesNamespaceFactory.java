@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
@@ -271,7 +272,16 @@ public class KubernetesNamespaceFactory {
     return new KubernetesNamespaceMetaImpl(namespace.getMetadata().getName(), attributes);
   }
 
-  private boolean canCreateNamespace(RuntimeIdentity identity) throws InfrastructureException {
+  /**
+   * Tells the caller whether the namespace that is being prepared for the provided workspace
+   * runtime identity can be created or is expected to already be present.
+   *
+   * @param identity the identity of the workspace runtime
+   * @return boolean if the namespace can be created, false if the namespace is expected to already
+   *     exist
+   * @throws InfrastructureException on failure
+   */
+  protected boolean canCreateNamespace(RuntimeIdentity identity) throws InfrastructureException {
     if (allowUserDefinedNamespaces) {
       return true;
     } else {
@@ -297,17 +307,25 @@ public class KubernetesNamespaceFactory {
     }
   }
 
+  /**
+   * Tells the caller whether the namespace that is being prepared, should be marked as managed or
+   * not.
+   *
+   * @param identity the runtime identity of the workspace
+   * @return true if the workspace namespace should be marked managed, false otherwise
+   */
+  protected boolean shouldMarkNamespaceManaged(RuntimeIdentity identity) {
+    // when infra namespace contains workspaceId that is generated
+    // it mean that Che Server provides unique namespace for each workspace
+    // and nothing else except workspace should be run there
+    // Che Server also removes such namespace after workspace is removed
+    return identity.getInfrastructureNamespace().contains(identity.getWorkspaceId());
+  }
+
   public KubernetesNamespace getOrCreate(RuntimeIdentity identity) throws InfrastructureException {
     KubernetesNamespace namespace = get(identity);
 
-    boolean markManaged =
-        // when infra namespace contains workspaceId that is generated
-        // it mean that Che Server provides unique namespace for each workspace
-        // and nothing else except workspace should be run there
-        // Che Server also removes such namespace after workspace is removed
-        identity.getInfrastructureNamespace().contains(identity.getWorkspaceId());
-
-    namespace.prepare(markManaged, canCreateNamespace(identity));
+    namespace.prepare(shouldMarkNamespaceManaged(identity), canCreateNamespace(identity));
 
     if (!isNullOrEmpty(serviceAccountName)) {
       KubernetesWorkspaceServiceAccount workspaceServiceAccount =
@@ -407,7 +425,10 @@ public class KubernetesNamespaceFactory {
         return false;
       } else {
         throw new InfrastructureException(
-            "Error occurred when tried to fetch default project. Cause: " + e.getMessage(), e);
+            format(
+                "Error occurred while trying to fetch the namespace '%s'. Cause: %s",
+                namespaceName, e.getMessage()),
+            e);
       }
     }
   }

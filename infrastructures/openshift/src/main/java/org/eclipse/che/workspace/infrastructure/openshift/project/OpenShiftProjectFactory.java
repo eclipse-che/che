@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -82,7 +83,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   public OpenShiftProject getOrCreate(RuntimeIdentity identity) throws InfrastructureException {
     OpenShiftProject osProject = get(identity);
 
-    osProject.prepare();
+    osProject.prepare(shouldMarkNamespaceManaged(identity), canCreateNamespace(identity));
 
     if (!isNullOrEmpty(getServiceAccountName())) {
       OpenShiftWorkspaceServiceAccount osWorkspaceServiceAccount =
@@ -104,9 +105,8 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
 
   @Override
   public void deleteIfManaged(Workspace workspace) throws InfrastructureException {
-    String projectName = get(workspace).getName();
-    OpenShiftProject osProject = doCreateProjectAccess(workspace.getId(), projectName);
-    osProject.delete();
+    OpenShiftProject osProject = get(workspace);
+    osProject.deleteIfManaged();
   }
 
   @Override
@@ -154,7 +154,8 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
         return Optional.empty();
       } else {
         throw new InfrastructureException(
-            "Error occurred when tried to fetch default project. Cause: " + e.getMessage(), e);
+            format("Error while trying to fetch the project '%s'. Cause: %s", name, e.getMessage()),
+            e);
       }
     }
   }

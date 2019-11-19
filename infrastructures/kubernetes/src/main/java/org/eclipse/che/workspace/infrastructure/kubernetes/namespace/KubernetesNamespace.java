@@ -16,10 +16,8 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.Kube
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.DoneableNamespace;
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.Namespace;
-import io.fabric8.kubernetes.api.model.NamespaceFluent;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -61,6 +59,8 @@ public class KubernetesNamespace {
    * https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
    */
   private static final String DEFAULT_SERVICE_ACCOUNT_NAME = "default";
+
+  protected static final String MANAGED_NAMESPACE_LABEL = "che-managed";
 
   private final String workspaceId;
   private final String name;
@@ -116,29 +116,26 @@ public class KubernetesNamespace {
    * @param markManaged mark the namespace as managed by Che if it is newly created in this method
    * @param canCreate true if the namespace can be created during the prepare, false if the
    *     namespace must already exist.
-   * @return true if the namespace has been created, false if it's already existed
    * @throws InfrastructureException if any exception occurs during namespace preparing or if the
    *     namespace didn't exist yet it was not allowed to create it
    */
-  boolean prepare(boolean markManaged, boolean canCreate) throws InfrastructureException {
+  void prepare(boolean markManaged, boolean canCreate) throws InfrastructureException {
     KubernetesClient client = clientFactory.create(workspaceId);
     Namespace namespace = get(name, client);
 
     if (namespace == null) {
       if (!canCreate) {
         throw new InfrastructureException(
-            format("Creating the namespace '%s' is not allowed, yet" + " it was not found.", name));
+            format("Creating the namespace '%s' is not allowed, yet it was not found.", name));
       }
-      create(name, client, markManaged);
-      return true;
+      namespace = create(name, client);
     }
 
-    if (markManaged && !isLabeled(namespace, "che-managed", "true")) {
+    if (markManaged && !isLabeled(namespace, MANAGED_NAMESPACE_LABEL, "true")) {
       // provision managed label is marking is requested but label is missing
-      KubernetesObjectUtil.putLabel(namespace, "che-managed", "true");
+      KubernetesObjectUtil.putLabel(namespace, MANAGED_NAMESPACE_LABEL, "true");
       update(namespace, client);
     }
-    return false;
   }
 
   /**
@@ -154,9 +151,11 @@ public class KubernetesNamespace {
       throw new InfrastructureException(
           format(
               "Can't delete namespace '%s' that contains"
-                  + " runtime of workspace '%s' because it doesn't have the 'che-managed'"
-                  + " label equal to 'true'.",
-              name, workspaceId));
+                  + " runtime of workspace '%s' because it doesn't have the '"
+                  + MANAGED_NAMESPACE_LABEL
+                  + "' label equal to 'true'.",
+              name,
+              workspaceId));
     }
 
     try {
@@ -178,7 +177,7 @@ public class KubernetesNamespace {
     try {
       Namespace namespace = client.namespaces().withName(name).get();
       return namespace.getMetadata().getLabels() != null
-          && "true".equals(namespace.getMetadata().getLabels().get("che-managed"));
+          && "true".equals(namespace.getMetadata().getLabels().get(MANAGED_NAMESPACE_LABEL));
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {
         throw new InfrastructureException(
@@ -269,21 +268,20 @@ public class KubernetesNamespace {
     }
   }
 
-  private void create(String namespaceName, KubernetesClient client, boolean markManaged)
+  private Namespace create(String namespaceName, KubernetesClient client)
       throws InfrastructureException {
     try {
-      NamespaceFluent.MetadataNested<DoneableNamespace> metadata =
-          client.namespaces().createNew().withNewMetadata();
-
-      metadata.withName(namespaceName);
-
-      if (markManaged) {
-        metadata.addToLabels("che-managed", "true");
-      }
-
-      metadata.endMetadata().done();
-
+      Namespace ns =
+          client
+              .namespaces()
+              .createNew()
+              .withNewMetadata()
+              .withName(namespaceName)
+              .endMetadata()
+              .done();
       waitDefaultServiceAccount(namespaceName, client);
+
+      return ns;
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {
         LOG.error(
@@ -300,7 +298,7 @@ public class KubernetesNamespace {
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {
         LOG.error(
-            "Unable to update new Kubernetes project due to lack of permissions."
+            "Unable to update new Kubernetes namespace due to lack of permissions."
                 + "When using workspace namespace placeholders, service account with lenient permissions (cluster-admin) must be used.");
       }
       throw new KubernetesInfrastructureException(e);
