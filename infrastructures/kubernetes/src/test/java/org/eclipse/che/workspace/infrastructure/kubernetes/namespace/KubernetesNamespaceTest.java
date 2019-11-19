@@ -30,6 +30,7 @@ import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.NamespaceFluent.MetadataNested;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -39,6 +40,7 @@ import io.fabric8.kubernetes.client.Watcher.Action;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import java.util.Map;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.mockito.Mock;
@@ -107,7 +109,7 @@ public class KubernetesNamespaceTest {
     KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
 
     // when
-    namespace.prepare(false, false);
+    namespace.prepare(false, true);
 
     // then
     verify(namespaceMeta, never()).withName(NAMESPACE);
@@ -127,6 +129,66 @@ public class KubernetesNamespaceTest {
 
     // then
     verify(namespaceMeta).withName(NAMESPACE);
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void throwsExceptionIfNamespaceDoesntExistAndNotAllowedToCreateIt() throws Exception {
+    // given
+    MetadataNested namespaceMeta = prepareCreateNamespaceRequest();
+
+    Resource resource = prepareNamespaceResource(NAMESPACE);
+    doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
+    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
+
+    // when
+    namespace.prepare(false, false);
+
+    // then
+    // exception is thrown
+  }
+
+  @Test
+  public void testMarksNamespaceManaged() throws Exception {
+    // given
+    MetadataNested namespaceMeta = prepareCreateNamespaceRequest();
+
+    Namespace nsResource = prepareNamespace(NAMESPACE);
+    ObjectMeta metadata = mock(ObjectMeta.class);
+    @SuppressWarnings("unchecked")
+    Map<String, String> labels = mock(Map.class);
+    when(nsResource.getMetadata()).thenReturn(metadata);
+    when(metadata.getLabels()).thenReturn(labels);
+
+    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
+
+    // when
+    namespace.prepare(true, false);
+
+    // then
+    verify(namespaceMeta, never()).withName(NAMESPACE);
+    verify(labels).put("che-managed", "true");
+  }
+
+  @Test
+  public void testDoesntMarkNamespaceManaged() throws Exception {
+    // given
+    MetadataNested namespaceMeta = prepareCreateNamespaceRequest();
+
+    Namespace nsResource = prepareNamespace(NAMESPACE);
+    ObjectMeta metadata = mock(ObjectMeta.class);
+    @SuppressWarnings("unchecked")
+    Map<String, String> labels = mock(Map.class);
+    when(nsResource.getMetadata()).thenReturn(metadata);
+    when(metadata.getLabels()).thenReturn(labels);
+
+    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
+
+    // when
+    namespace.prepare(false, false);
+
+    // then
+    verify(namespaceMeta, never()).withName(NAMESPACE);
+    verify(labels, never()).put(anyString(), anyString());
   }
 
   @Test
@@ -321,9 +383,10 @@ public class KubernetesNamespaceTest {
     return namespaceResource;
   }
 
-  private void prepareNamespace(String namespaceName) {
+  private Namespace prepareNamespace(String namespaceName) {
     Namespace namespace = mock(Namespace.class);
     Resource namespaceResource = prepareNamespaceResource(namespaceName);
     doReturn(namespace).when(namespaceResource).get();
+    return namespace;
   }
 }
