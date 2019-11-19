@@ -161,10 +161,8 @@ public class KubernetesNamespaceFactory {
     // if user defined namespaces are allowed - fetch all available
     List<KubernetesNamespaceMeta> namespaces = fetchNamespaces();
 
-    // propagate default namespace if it's configured
-    if (!isNullOrEmpty(defaultNamespaceName)) {
-      provisionDefaultNamespace(namespaces);
-    }
+    provisionDefaultNamespace(namespaces);
+
     return namespaces;
   }
 
@@ -276,8 +274,15 @@ public class KubernetesNamespaceFactory {
    * Tells the caller whether the namespace that is being prepared for the provided workspace
    * runtime identity can be created or is expected to already be present.
    *
+   * <p>Note that this method cannot be reduced to merely checking if user-defined namespaces are
+   * allowed or not (and depending on prior validation using the {@link
+   * #checkIfNamespaceIsAllowed(String)} method during the workspace creation) because workspace
+   * start is a) async from workspace creation and the underlying namespaces might have disappeared
+   * and b) can be called during workspace recovery, where we don't even have the current user in
+   * the context.
+   *
    * @param identity the identity of the workspace runtime
-   * @return boolean if the namespace can be created, false if the namespace is expected to already
+   * @return true if the namespace can be created, false if the namespace is expected to already
    *     exist
    * @throws InfrastructureException on failure
    */
@@ -301,7 +306,7 @@ public class KubernetesNamespaceFactory {
           new NamespaceResolutionContext(
               identity.getWorkspaceId(), identity.getOwnerId(), owner.getName());
 
-      String resolvedDefaultNamespace = evalPlaceholders(requiredNamespace, resolutionContext);
+      String resolvedDefaultNamespace = evalPlaceholders(defaultNamespaceName, resolutionContext);
 
       return resolvedDefaultNamespace.equals(requiredNamespace);
     }
