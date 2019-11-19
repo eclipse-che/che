@@ -215,18 +215,31 @@ public class DevfileManager {
       }
       String lastSegment = pathSegments[pathSegments.length - 1];
       JsonNode currentNode = devfileNode;
-      // iterate until we reach last but one path segment
+      // iterate until we reach last but one path segment,
+      // because it's impossible to change value of the current Json node,
+      // so to set value to Json node, you should be 1 level up and do put(key, value).
       Iterator<String> pathSegmentsIterator =
-          asList(copyOf(pathSegments, pathSegments.length - 1)).iterator();
-      while (pathSegmentsIterator.hasNext()) {
+          asList(copyOf(pathSegments, pathSegments.length)).iterator();
+      do {
         String currentSegment = pathSegmentsIterator.next();
-        JsonNode result = currentNode.path(currentSegment);
-        if (result.isMissingNode()) {
+        JsonNode nextNode = currentNode.path(currentSegment);
+        if (nextNode.isMissingNode() && pathSegmentsIterator.hasNext()) {
+          // no such intermediate node, let's create it as a empty object
           currentNode = ((ObjectNode) currentNode).putObject(currentSegment);
           continue;
-        } else if (result.isArray()) {
+        } else if (nextNode.isArray()) {
+          // ok we have reference to array, so need to make sure that we have next path segment
+          // ant then try to retrieve it from array
+          if (!pathSegmentsIterator.hasNext()) {
+            throw new DevfileFormatException(
+                format(
+                    "Override property reference '%s' points to an array type object. Please add an item qualifier by name or alias.",
+                    entry.getKey()));
+          }
+          // retrieve object by name from array
           String arrayObjectName = pathSegmentsIterator.next();
-          Optional<JsonNode> namedNode = findNodeByNameOrAlias((ArrayNode) result, arrayObjectName);
+          Optional<JsonNode> namedNode =
+              findNodeByNameOrAlias((ArrayNode) nextNode, arrayObjectName);
           currentNode =
               namedNode.orElseThrow(
                   () ->
@@ -236,9 +249,12 @@ public class DevfileManager {
                               arrayObjectName, currentSegment)));
           continue;
         } else {
-          currentNode = result;
+          if (pathSegmentsIterator.hasNext()) {
+            // do not set last segment as current node, we need to be 1 level up
+            currentNode = nextNode;
+          }
         }
-      }
+      } while (pathSegmentsIterator.hasNext());
       // end of path segments reached, now we can set value
       ((ObjectNode) currentNode).put(lastSegment, entry.getValue());
     }

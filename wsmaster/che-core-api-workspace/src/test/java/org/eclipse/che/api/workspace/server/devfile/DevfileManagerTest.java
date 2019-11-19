@@ -20,8 +20,8 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -120,7 +120,7 @@ public class DevfileManagerTest {
 
     // then
     verify(contentProvider).fetchContent(eq("myfile.yaml"));
-    assertEquals(referenceContent, devfile.getComponents().get(0).getReferenceContent());
+    assertEquals(devfile.getComponents().get(0).getReferenceContent(), referenceContent);
   }
 
   @Test(
@@ -291,6 +291,58 @@ public class DevfileManagerTest {
     DevfileManager manager = new DevfileManager(schemaValidator, integrityValidator);
     Map<String, String> overrides = new HashMap<>();
     overrides.put("projects.test3.clonePath", "baz1");
+    // when
+    manager.parseJson(json, overrides);
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "Override property reference 'commands.test1.actions' points to an array type object. Please add an item qualifier by name or alias.")
+  public void shouldThrowExceptionIfOverrideReferenceEndsWithArray() throws Exception {
+    String json =
+        "{"
+            + "\"apiVersion\": \"1.0.0\","
+            + "\"commands\": ["
+            + "   {"
+            + "      \"name\": \"test1\","
+            + "      \"actions\": ["
+            + "       {"
+            + "          \"type\": \"exec\","
+            + "          \"component\": \"tools\","
+            + "          \"command\": \"mvn clean install\""
+            + "       }"
+            + "     ]"
+            + "   }"
+            + "  ]"
+            + "}";
+    // instance with real json mappers
+    DevfileManager manager = new DevfileManager(schemaValidator, integrityValidator);
+    Map<String, String> overrides = new HashMap<>();
+    overrides.put("commands.test1.actions", "baz1");
+    // when
+    manager.parseJson(json, overrides);
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "Override property reference 'projects' points to an array type object. Please add an item qualifier by name or alias.")
+  public void shouldThrowExceptionIfOverrideReferenceIsJustWithArray() throws Exception {
+    String json =
+        "{"
+            + "\"apiVersion\": \"1.0.0\","
+            + "\"projects\": ["
+            + "   {"
+            + "      \"name\": \"test1\","
+            + "      \"clonePath\": \"/foo/bar1\""
+            + "   }"
+            + "  ]"
+            + "}";
+    // instance with real json mappers
+    DevfileManager manager = new DevfileManager(schemaValidator, integrityValidator);
+    Map<String, String> overrides = new HashMap<>();
+    overrides.put("projects", "baz1");
     // when
     manager.parseJson(json, overrides);
   }
