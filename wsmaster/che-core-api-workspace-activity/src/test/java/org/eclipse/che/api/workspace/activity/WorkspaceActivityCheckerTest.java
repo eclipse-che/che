@@ -11,13 +11,18 @@
  */
 package org.eclipse.che.api.workspace.activity;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,13 +31,14 @@ import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
@@ -65,7 +71,8 @@ public class WorkspaceActivityCheckerTest {
         new WorkspaceActivityManager(
             workspaceManager, workspaceActivityDao, eventService, DEFAULT_TIMEOUT, clock);
 
-    when(workspaceActivityDao.getAll(anyInt(), anyLong()))
+    lenient()
+        .when(workspaceActivityDao.getAll(anyInt(), anyLong()))
         .thenAnswer(
             inv -> {
               int maxItems = inv.getArgument(0);
@@ -81,7 +88,7 @@ public class WorkspaceActivityCheckerTest {
 
   @Test
   public void shouldStopAllExpiredWorkspaces() throws Exception {
-    when(workspaceActivityDao.findExpired(anyLong())).thenReturn(Arrays.asList("1", "2", "3"));
+    when(workspaceActivityDao.findExpired(anyLong())).thenReturn(asList("1", "2", "3"));
 
     checker.expire();
 
@@ -129,6 +136,32 @@ public class WorkspaceActivityCheckerTest {
     invalidActivity.setWorkspaceId(id);
     when(workspaceRuntimes.getRunning()).thenReturn(singleton(id));
     when(workspaceActivityDao.findActivity(eq(id))).thenReturn(invalidActivity);
+    when(workspaceManager.getWorkspace(eq(id)))
+        .thenReturn(
+            WorkspaceImpl.builder()
+                .setId(id)
+                .setAttributes(ImmutableMap.of(Constants.CREATED_ATTRIBUTE_NAME, "15"))
+                .build());
+
+    // when
+    checker.cleanup();
+
+    // then
+    verify(workspaceActivityDao).setCreatedTime(eq(id), eq(15L));
+  }
+
+  @Test
+  public void shouldContinueCheckActivitiesValidityIfExceptionOccurredOnRestoringOne()
+      throws Exception {
+    // given
+    String id = "1";
+    WorkspaceActivity invalidActivity = new WorkspaceActivity();
+    invalidActivity.setWorkspaceId(id);
+    when(workspaceRuntimes.getRunning()).thenReturn(ImmutableSet.of("problematic", id));
+    doThrow(new ServerException("error"))
+        .when(workspaceActivityDao)
+        .findActivity(eq("problematic"));
+    doReturn(invalidActivity).when(workspaceActivityDao).findActivity(eq(id));
     when(workspaceManager.getWorkspace(eq(id)))
         .thenReturn(
             WorkspaceImpl.builder()
@@ -259,6 +292,62 @@ public class WorkspaceActivityCheckerTest {
     // then
     verify(workspaceActivityDao)
         .setStatusChangeTime(eq(wsId), eq(WorkspaceStatus.STOPPED), eq(clock.millis()));
+  }
+
+  @Test
+  public void shouldContinueReconcileStatusesWhenExceptionOccurredOnOne() throws Exception {
+    // given
+    String wsId1 = "1";
+    WorkspaceActivity activity1 = new WorkspaceActivity();
+    activity1.setCreated(clock.millis());
+    activity1.setWorkspaceId(wsId1);
+    activity1.setStatus(WorkspaceStatus.STARTING);
+    activity1.setLastStarting(clock.millis());
+
+    String wsId2 = "2";
+    WorkspaceActivity activity2 = new WorkspaceActivity();
+    activity2.setCreated(clock.millis());
+    activity2.setWorkspaceId(wsId2);
+    activity2.setStatus(WorkspaceStatus.STARTING);
+    activity2.setLastStarting(clock.millis());
+    doAnswer(
+            inv -> {
+              int maxItems = inv.getArgument(0);
+              long skipCount = inv.getArgument(1);
+
+              switch ((int) skipCount) {
+                case 0:
+                  return new Page<>(singleton(activity1), 0, 1, 2);
+                case 1:
+                  return new Page<>(singleton(activity2), 1, 1, 2);
+                default:
+                  return new Page<>(emptyList(), skipCount, maxItems, 2);
+              }
+            })
+        .when(workspaceActivityDao)
+        .getAll(anyInt(), anyLong());
+
+    doReturn(WorkspaceStatus.STOPPED).when(workspaceRuntimes).getStatus(any());
+    doThrow(new ServerException("Error"))
+        .when(workspaceActivityDao)
+        .setStatusChangeTime(eq(wsId1), any(WorkspaceStatus.class), anyLong());
+
+    // when
+    checker.cleanup();
+
+    // then
+    verify(workspaceActivityDao)
+        .setStatusChangeTime(eq(wsId2), eq(WorkspaceStatus.STOPPED), eq(clock.millis()));
+  }
+
+  @Test
+  public void shouldNotThrowExceptionWhenErrorOccurredDuringActivitiesListingOnReconciling()
+      throws Exception {
+    // given
+    doThrow(new ServerException("error")).when(workspaceActivityDao).getAll(anyInt(), anyLong());
+
+    // when
+    checker.cleanup();
   }
 
   private static final class ManualClock extends Clock {
