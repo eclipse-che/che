@@ -31,6 +31,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
+import okhttp3.EventListener;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -66,14 +67,16 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
           int maxConcurrentRequestsPerHost,
       @Named("che.infra.kubernetes.client.http.connection_pool.max_idle") int maxIdleConnections,
       @Named("che.infra.kubernetes.client.http.connection_pool.keep_alive_min")
-          int connectionPoolKeepAlive) {
+          int connectionPoolKeepAlive,
+      EventListener eventListener) {
     super(
         masterUrl,
         doTrustCerts,
         maxConcurrentRequests,
         maxConcurrentRequestsPerHost,
         maxIdleConnections,
-        connectionPoolKeepAlive);
+        connectionPoolKeepAlive,
+        eventListener);
     this.configBuilder = configBuilder;
   }
 
