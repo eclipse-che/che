@@ -11,7 +11,7 @@
  */
 'use strict';
 
-import { CheWorkspace } from '../../../components/api/workspace/che-workspace.factory';
+import { CheWorkspace, WorkspaceStatus } from '../../../components/api/workspace/che-workspace.factory';
 import IdeSvc from '../ide.service';
 
 /*global $:false */
@@ -135,9 +135,12 @@ class IdeIFrameSvc {
     const token = message.substring(message.indexOf(':') + 1);
 
     this.cheWorkspace.validateMachineToken(workspaceId, token).then(() => {
-      this.cheWorkspace.stopWorkspace(workspaceId).then(() => {
+
+      this.cheWorkspace.fetchStatusChange(workspaceId, WorkspaceStatus[WorkspaceStatus.STOPPING]).then(() => {
         this.ideSvc.reloadIdeFrame();
-      }).catch((error) => {
+      });
+
+      this.cheWorkspace.stopWorkspace(workspaceId).catch((error) => {
         console.error('Unable to stop workspace. ', error);
       });
     }).catch(() => {
