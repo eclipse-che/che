@@ -81,11 +81,16 @@ public class OpenShiftProject extends KubernetesNamespace {
   }
 
   /**
-   * Prepare project for using.
+   * Prepare a project for using.
    *
    * <p>Preparing includes creating if needed and waiting for default service account.
    *
-   * @throws InfrastructureException if any exception occurs during namespace preparing
+   * @param markManaged mark the project as managed by Che. Also applies for already existing
+   *                    projects.
+   * @param canCreate defines what to do when the project is not found. The project is created
+   *                  when {@code true}, otherwise an exception is thrown.
+   * @throws InfrastructureException if any exception occurs during project preparation or if the
+   *     project doesn't exist and {@code canCreate} is {@code false}.
    */
   void prepare(boolean markManaged, boolean canCreate) throws InfrastructureException {
     String workspaceId = getWorkspaceId();
