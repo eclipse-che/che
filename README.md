@@ -38,7 +38,7 @@ Here you can find links on how to get started with Eclipse Che:
 
 ### Using Eclipse Che
 Here you can find references to useful documentation and hands-on guides to learn how to get the most of Eclipse Che:
-- [Customize Che workspaces for your projects](https://www.eclipse.org/che/docs/che-7/using-developer-environments-workspaces.html#configuring-a-che-workspace-using-a-devfile_using-developer-environments-workspaces)
+- [Customize Che workspaces for your projects](https://www.eclipse.org/che/docs/che-7/configuring-a-workspace-using-a-devfile/)
 - [Run VSCode Extensions in Che workspaces](https://www.eclipse.org/che/docs/che-7/using-a-visual-studio-code-extension-in-che)
 - [Configure Che for your teams](https://www.eclipse.org/che/docs/che-7/building-and-running-a-custom-registry-image/)
 
