@@ -344,6 +344,7 @@
                   "type": {},
                   "alias": {},
                   "mountSources": {},
+                  "env":  {},
                   "reference": {
                     "description": "Describes absolute or devfile-relative location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type components",
                     "type": "string",
@@ -430,6 +431,7 @@
                   "type": {},
                   "alias": {},
                   "mountSources": {},
+                  "env":  {},
                   "image": {
                     "type": "string",
                     "description": "Specifies the docker image that should be used for component",
@@ -494,30 +496,6 @@
                           "examples": [
                             "/home/user/data"
                           ]
-                        }
-                      }
-                    }
-                  },
-                  "env": {
-                    "type": "array",
-                    "description": "The environment variables list that should be set to docker container",
-                    "items": {
-                      "type": "object",
-                      "description": "Describes environment variable",
-                      "required": [
-                        "name",
-                        "value"
-                      ],
-                      "properties": {
-                        "name": {
-                          "type": "string",
-                          "title": "The Environment Variable Name",
-                          "description": "The environment variable name"
-                        },
-                        "value": {
-                          "type": "string",
-                          "title": "The Environment Variable Value",
-                          "description": "The environment variable value"
                         }
                       }
                     }
@@ -606,6 +584,30 @@
             "type": "boolean",
             "description": "Describes whether projects sources should be mount to the component. `CHE_PROJECTS_ROOT` environment variable should contains a path where projects sources are mount",
             "default": "false"
+          },
+          "env": {
+            "type": "array",
+            "description": "The environment variables list that should be set to docker container",
+            "items": {
+              "type": "object",
+              "description": "Describes environment variable",
+              "required": [
+                "name",
+                "value"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "The Environment Variable Name",
+                  "description": "The environment variable name"
+                },
+                "value": {
+                  "type": "string",
+                  "title": "The Environment Variable Value",
+                  "description": "The environment variable value"
+                }
+              }
+            }
           }
         },
         "additionalProperties": true

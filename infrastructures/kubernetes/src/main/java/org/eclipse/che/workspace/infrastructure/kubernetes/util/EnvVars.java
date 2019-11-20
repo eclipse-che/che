@@ -11,18 +11,63 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.util;
 
+import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
+import org.eclipse.che.api.core.model.workspace.devfile.Env;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
 /** Utility class for dealing with environment variables */
 public class EnvVars {
 
   private static final Pattern REFERENCE_PATTERN = Pattern.compile("\\$\\(\\w+\\)");
 
-  private EnvVars() {}
+  /**
+   * Applies the specified env vars list to the specified pod data(containers and init containers).
+   *
+   * <p>If a container does not have the corresponding env - it will be provisioned, if it has - the
+   * value will be overridden.
+   *
+   * @param podData pod to apply env
+   * @param env env var to apply
+   */
+  public void apply(PodData podData, List<? extends Env> env) {
+    Stream.concat(
+            podData.getSpec().getInitContainers().stream(),
+            podData.getSpec().getContainers().stream())
+        .forEach(c -> apply(c, env));
+  }
+
+  private void apply(Container container, List<? extends Env> toApply) {
+    List<EnvVar> targetEnv = container.getEnv();
+    if (targetEnv == null) {
+      targetEnv = new ArrayList<>();
+      container.setEnv(targetEnv);
+    }
+
+    for (Env env : toApply) {
+      apply(targetEnv, env);
+    }
+  }
+
+  private void apply(List<EnvVar> targetEnv, Env env) {
+    Optional<EnvVar> existingOpt =
+        targetEnv.stream().filter(e -> e.getName().equals(env.getName())).findAny();
+    if (existingOpt.isPresent()) {
+      EnvVar envVar = existingOpt.get();
+      envVar.setValue(env.getValue());
+      envVar.setValueFrom(null);
+    } else {
+      targetEnv.add(new EnvVar(env.getName(), env.getValue(), null));
+    }
+  }
 
   /**
    * Looks at the value of the provided environment variable and returns a set of environment

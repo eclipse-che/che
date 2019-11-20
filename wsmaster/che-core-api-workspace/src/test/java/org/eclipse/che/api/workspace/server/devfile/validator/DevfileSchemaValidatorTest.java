@@ -57,6 +57,7 @@ public class DevfileSchemaValidatorTest {
       {
         "kubernetes_openshift_component/devfile_openshift_component_reference_and_content_as_block.yaml"
       },
+      {"kubernetes_openshift_component/devfile_k8s_openshift_component_with_env.yaml"},
       {"kubernetes_openshift_component/devfile_openshift_component_content_without_reference.yaml"},
       {
         "kubernetes_openshift_component/devfile_kubernetes_component_content_without_reference.yaml"

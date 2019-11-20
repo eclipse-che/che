@@ -37,7 +37,9 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -50,8 +52,11 @@ import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.EnvVars;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -74,6 +79,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
   private KubernetesComponentToWorkspaceApplier applier;
   @Mock private KubernetesRecipeParser k8sRecipeParser;
   @Mock private KubernetesEnvironmentProvisioner k8sEnvProvisioner;
+  @Mock private EnvVars envVars;
 
   @Captor private ArgumentCaptor<List<HasMetadata>> objectsCaptor;
 
@@ -86,6 +92,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
         new KubernetesComponentToWorkspaceApplier(
             k8sRecipeParser,
             k8sEnvProvisioner,
+            envVars,
             PROJECT_MOUNT_PATH,
             "1Gi",
             "ReadWriteOnce",
@@ -257,6 +264,44 @@ public class KubernetesComponentToWorkspaceApplierTest {
         }
       }
     }
+  }
+
+  @Test
+  public void shouldProvisionEnvIntoK8SList() throws Exception {
+    // given
+    List<HasMetadata> k8sList = new ArrayList<>();
+    Pod pod1 =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName("pod1")
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
+    Pod pod2 =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName("pod2")
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
+    k8sList.add(pod1);
+    k8sList.add(pod2);
+    doReturn(k8sList).when(k8sRecipeParser).parse(anyString());
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setAlias(COMPONENT_NAME);
+    List<EnvImpl> envToApply = singletonList(new EnvImpl("TEST_ENV", "anyValue"));
+    component.setEnv(envToApply);
+
+    // when
+    applier.apply(workspaceConfig, component, s -> "content");
+
+    // then
+    envVars.apply(new PodData(pod1), envToApply);
+    envVars.apply(new PodData(pod2), envToApply);
   }
 
   @Test
