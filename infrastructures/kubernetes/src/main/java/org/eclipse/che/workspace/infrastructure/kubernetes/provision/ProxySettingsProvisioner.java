@@ -16,6 +16,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.
 import io.fabric8.kubernetes.api.model.EnvVar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -68,7 +69,11 @@ public class ProxySettingsProvisioner implements ConfigurationProvisioner {
           // JWTProxy container doesn't need proxy settings since it never does any outbound
           // requests, and setting of it may fail accessing internal addresses.
           .filter(entry -> !entry.getKey().equals(JWT_PROXY_POD_NAME))
-          .flatMap(entry -> entry.getValue().getSpec().getContainers().stream())
+          .flatMap(
+              entry ->
+                  Stream.concat(
+                      entry.getValue().getSpec().getContainers().stream(),
+                      entry.getValue().getSpec().getInitContainers().stream()))
           .forEach(
               container ->
                   proxyEnvVars.forEach((k, v) -> container.getEnv().add(new EnvVar(k, v, null))));

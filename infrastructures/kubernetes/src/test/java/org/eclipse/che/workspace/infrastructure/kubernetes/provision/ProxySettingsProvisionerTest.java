@@ -25,9 +25,11 @@ import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.Mock;
@@ -59,7 +61,7 @@ public class ProxySettingsProvisionerTest {
   public void shouldApplyProxySettingsToAllContainers() throws Exception {
 
     Map<String, Pod> pods = new HashMap<>();
-    pods.put("pod1", buildPod("pod1", buildContainers(2)));
+    Pod pod1 = pods.put("pod1", buildPod("pod1", buildContainers(2)));
     pods.put("pod2", buildPod("pod2", buildContainers(3)));
 
     KubernetesEnvironment k8sEnv = KubernetesEnvironment.builder().setPods(pods).build();
@@ -105,6 +107,37 @@ public class ProxySettingsProvisionerTest {
                             .getEnv()
                             .contains(new EnvVar(HTTPS_PROXY, HTTPS_PROXY_VALUE, null))
                         || container
+                            .getEnv()
+                            .contains(new EnvVar(NO_PROXY, NO_PROXY_VALUE, null))));
+  }
+
+  @Test
+  public void shouldApplyProxySettingsToInitContainers() throws Exception {
+    Map<String, Pod> pods = new HashMap<>();
+    Pod pod1 = buildPod("pod1", buildContainers(3));
+    pod1.getSpec().setInitContainers(Arrays.asList(buildContainers(2)));
+    pods.put("pod1", pod1);
+
+    KubernetesEnvironment k8sEnv = KubernetesEnvironment.builder().setPods(pods).build();
+    provisioner.provision(k8sEnv, runtimeId);
+
+    assertTrue(
+        k8sEnv
+            .getPodsData()
+            .values()
+            .stream()
+            .flatMap(
+                pod ->
+                    Stream.concat(
+                        pod.getSpec().getContainers().stream(),
+                        pod.getSpec().getInitContainers().stream()))
+            .allMatch(
+                container ->
+                    container.getEnv().contains(new EnvVar(HTTP_PROXY, HTTP_PROXY_VALUE, null))
+                        && container
+                            .getEnv()
+                            .contains(new EnvVar(HTTPS_PROXY, HTTPS_PROXY_VALUE, null))
+                        && container
                             .getEnv()
                             .contains(new EnvVar(NO_PROXY, NO_PROXY_VALUE, null))));
   }
