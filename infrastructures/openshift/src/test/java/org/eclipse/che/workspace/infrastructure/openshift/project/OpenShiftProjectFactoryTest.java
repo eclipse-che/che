@@ -20,6 +20,7 @@ import static org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJE
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJECT_DISPLAY_NAME_ANNOTATION;
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJECT_DISPLAY_NAME_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -43,6 +44,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -93,22 +95,56 @@ public class OpenShiftProjectFactoryTest {
     lenient().when(clientFactory.createOC()).thenReturn(osClient);
     lenient().when(osClient.projects()).thenReturn(projectOperation);
 
-    when(workspaceManager.getWorkspace(any()))
+    lenient()
+        .when(workspaceManager.getWorkspace(any()))
         .thenReturn(WorkspaceImpl.builder().setId("1").setAttributes(emptyMap()).build());
 
-    when(projectOperation.withName(any())).thenReturn(projectResource);
-    when(projectResource.get()).thenReturn(mock(Project.class));
+    lenient().when(projectOperation.withName(any())).thenReturn(projectResource);
+    lenient().when(projectResource.get()).thenReturn(mock(Project.class));
 
     lenient()
         .when(userManager.getById(USER_ID))
         .thenReturn(new UserImpl(USER_ID, "test@mail.com", USER_NAME));
   }
 
+  @Test
+  public void shouldNotThrowExceptionIfDefaultNamespaceIsSpecifiedOnCheckingIfNamespaceIsAllowed()
+      throws Exception {
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "legacy", "", "", "defaultNs", false, clientFactory, configFactory, userManager);
+
+    projectFactory.checkIfNamespaceIsAllowed("defaultNs");
+  }
+
+  @Test
+  public void
+      shouldNotThrowExceptionIfNonDefaultNamespaceIsSpecifiedAndUserDefinedAreAllowedOnCheckingIfNamespaceIsAllowed()
+          throws Exception {
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "legacy", "", "", "defaultNs", true, clientFactory, configFactory, userManager);
+
+    projectFactory.checkIfNamespaceIsAllowed("any-namespace");
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "User defined namespaces are not allowed. You're able to specify only admin configured which is 'defaultNs'")
+  public void
+      shouldThrowExceptionIfNonDefaultNamespaceIsSpecifiedAndUserDefinedAreNotAllowedOnCheckingIfNamespaceIsAllowed()
+          throws Exception {
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "legacy", "", "", "defaultNs", false, clientFactory, configFactory, userManager);
+
+    projectFactory.checkIfNamespaceIsAllowed("any-namespace");
+  }
+
   @Test(
       expectedExceptions = ConfigurationException.class,
-      expectedExceptionsMessageRegExp =
-          "che.infra.kubernetes.namespace.default or "
-              + "che.infra.kubernetes.namespace.allow_user_defined must be configured")
+      expectedExceptionsMessageRegExp = "che.infra.kubernetes.namespace.default must be configured")
   public void
       shouldThrowExceptionIfNoDefaultNamespaceIsConfiguredAndUserDefinedNamespacesAreNotAllowed()
           throws Exception {
@@ -175,8 +211,8 @@ public class OpenShiftProjectFactoryTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Error occurred when tried to fetch default project. Cause: connection refused")
-  public void shouldThrownExceptionWhenFailedToGetInfoAboutDefaultNamespace() throws Exception {
+          "Error while trying to fetch the project 'che-default'. Cause: connection refused")
+  public void shouldThrowExceptionWhenFailedToGetInfoAboutDefaultNamespace() throws Exception {
     throwOnTryToGetProjectByName(
         "che-default", new KubernetesClientException("connection refused"));
 
@@ -185,31 +221,6 @@ public class OpenShiftProjectFactoryTest {
             "predefined", "", "", "che-default", false, clientFactory, configFactory, userManager);
 
     projectFactory.list();
-  }
-
-  @Test
-  public void shouldReturnListOfExistingProjectsIfUserDefinedIsAllowed() throws Exception {
-    prepareListedProjects(
-        Arrays.asList(
-            createProject("my-for-ws", "Project for Workspaces", "some description", "Active"),
-            createProject("experimental", null, null, "Terminating")));
-
-    projectFactory =
-        new OpenShiftProjectFactory(
-            "predefined", "", "", null, true, clientFactory, configFactory, userManager);
-
-    List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
-    assertEquals(availableNamespaces.size(), 2);
-    KubernetesNamespaceMeta forWS = availableNamespaces.get(0);
-    assertEquals(forWS.getName(), "my-for-ws");
-    assertEquals(
-        forWS.getAttributes().get(PROJECT_DISPLAY_NAME_ATTRIBUTE), "Project for Workspaces");
-    assertEquals(forWS.getAttributes().get(PROJECT_DESCRIPTION_ATTRIBUTE), "some description");
-    assertEquals(forWS.getAttributes().get(PHASE_ATTRIBUTE), "Active");
-
-    KubernetesNamespaceMeta experimental = availableNamespaces.get(1);
-    assertEquals(experimental.getName(), "experimental");
-    assertEquals(experimental.getAttributes().get(PHASE_ATTRIBUTE), "Terminating");
   }
 
   @Test
@@ -275,38 +286,79 @@ public class OpenShiftProjectFactoryTest {
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
           "Error occurred when tried to list all available projects. Cause: connection refused")
-  public void shouldThrownExceptionWhenFailedToGetNamespaces() throws Exception {
+  public void shouldThrowExceptionWhenFailedToGetNamespaces() throws Exception {
     throwOnTryToGetProjectsList(new KubernetesClientException("connection refused"));
     projectFactory =
         new OpenShiftProjectFactory(
-            "predefined", "", "", "", true, clientFactory, configFactory, userManager);
+            "predefined", "", "", "default-ns", true, clientFactory, configFactory, userManager);
 
     projectFactory.list();
   }
 
   @Test
-  public void shouldCreateAndPrepareProjectWithPredefinedValueIfItIsNotEmpty() throws Exception {
+  public void shouldMarkNamespaceManagedIfWorkspaceIdIsUsedInItsName() throws Exception {
     // given
     projectFactory =
         spy(
             new OpenShiftProjectFactory(
-                "projectName", "", "", "che", false, clientFactory, configFactory, userManager));
+                "", "", "", "<workspaceid>", false, clientFactory, configFactory, userManager));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
 
     // when
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", null, USER_ID, null);
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", null, USER_ID, "workspace123");
     OpenShiftProject project = projectFactory.getOrCreate(identity);
 
     // then
     assertEquals(toReturnProject, project);
-    verify(projectFactory).doCreateProjectAccess("workspace123", "projectName");
-    verify(toReturnProject).prepare(any(), any());
+    verify(projectFactory, never()).doCreateServiceAccount(any(), any());
+    verify(toReturnProject).prepare(eq(true), eq(true));
   }
 
   @Test
-  public void shouldCreateAndPrepareProjectWithWorkspaceIdAsNameIfConfiguredValueIsEmtpy()
+  public void shouldRequireNamespacePriorExistenceIfDifferentFromDefaultAndUserDefinedIsNotAllowed()
       throws Exception {
+    // There is only one scenario where this can happen. The workspace was created and started in
+    // some default namespace. Then server was reconfigured to use a different default namespace
+    // AND the namespace of the workspace was MANUALLY deleted in the cluster. In this case, we
+    // should NOT try to re-create the namespace because it would be created in a namespace that
+    // is not configured. We DO allow it to start if the namespace still exists though.
+
+    // given
+    projectFactory =
+        spy(
+            new OpenShiftProjectFactory(
+                "predefined",
+                "",
+                "",
+                "new-default",
+                false,
+                clientFactory,
+                configFactory,
+                userManager));
+    OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
+    doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
+
+    // when
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", null, USER_ID, "old-default");
+    OpenShiftProject project = projectFactory.getOrCreate(identity);
+
+    // then
+    assertEquals(toReturnProject, project);
+    verify(projectFactory, never()).doCreateServiceAccount(any(), any());
+    verify(toReturnProject).prepare(eq(false), eq(false));
+  }
+
+  @Test
+  public void
+      shouldHandleUpgradeOfManagedFlagAndRequireNamespacePriorExistenceIfDifferentFromDefaultAndUserDefinedIsNotAllowed()
+          throws Exception {
+    // This is a variation of the above test that checks the same scenario, but additionally checks
+    // that we correctly set the managed flag on the namespace if the namespace name contains
+    // the workspace id (and thus will be automatically deleted after workspace stop).
+
     // given
     projectFactory =
         spy(
@@ -316,13 +368,14 @@ public class OpenShiftProjectFactoryTest {
     doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
 
     // when
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", null, USER_ID, null);
-    OpenShiftProject project = projectFactory.getOrCreate(identity);
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", null, USER_ID, "che-ws-workspace123");
+    KubernetesNamespace namespace = projectFactory.getOrCreate(identity);
 
     // then
-    assertEquals(toReturnProject, project);
-    verify(projectFactory).doCreateProjectAccess("workspace123", "workspace123");
-    verify(toReturnProject).prepare(any(), any());
+    assertEquals(toReturnProject, namespace);
+    verify(projectFactory, never()).doCreateServiceAccount(any(), any());
+    verify(toReturnProject).prepare(eq(true), eq(false));
   }
 
   @Test
@@ -341,91 +394,21 @@ public class OpenShiftProjectFactoryTest {
                 configFactory,
                 userManager));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
+    when(toReturnProject.getWorkspaceId()).thenReturn("workspace123");
+    when(toReturnProject.getName()).thenReturn("workspace123");
     doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
 
     OpenShiftWorkspaceServiceAccount serviceAccount = mock(OpenShiftWorkspaceServiceAccount.class);
     doReturn(serviceAccount).when(projectFactory).doCreateServiceAccount(any(), any());
 
     // when
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", null, USER_ID, null);
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", null, USER_ID, "workspace123");
     projectFactory.getOrCreate(identity);
 
     // then
     verify(projectFactory).doCreateServiceAccount("workspace123", "workspace123");
     verify(serviceAccount).prepare();
-  }
-
-  @Test
-  public void shouldNotPrepareWorkspaceServiceAccountIfItIsConfiguredAndProjectIsPredefined()
-      throws Exception {
-    // given
-    projectFactory =
-        spy(
-            new OpenShiftProjectFactory(
-                "namespace",
-                "serviceAccount",
-                "clusterRole",
-                "che",
-                false,
-                clientFactory,
-                configFactory,
-                userManager));
-    OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
-    doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
-
-    // when
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", null, USER_ID, null);
-    projectFactory.getOrCreate(identity);
-
-    // then
-    verify(projectFactory, never()).doCreateServiceAccount(any(), any());
-  }
-
-  @Test
-  public void shouldNotPrepareWorkspaceServiceAccountIfItIsNotConfiguredAndProjectIsNotPredefined()
-      throws Exception {
-    // given
-    projectFactory =
-        spy(
-            new OpenShiftProjectFactory(
-                "", "", "", "che", false, clientFactory, configFactory, userManager));
-    OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
-    doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
-
-    // when
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", null, USER_ID, null);
-    projectFactory.getOrCreate(identity);
-
-    // then
-    verify(projectFactory, never()).doCreateServiceAccount(any(), any());
-  }
-
-  @Test
-  public void
-      shouldCreateProjectAndDoNotPrepareProjectOnCreatingProjectWithWorkspaceIdAndNameSpecified()
-          throws Exception {
-    // given
-    projectFactory =
-        spy(
-            new OpenShiftProjectFactory(
-                "projectName",
-                "serviceAccountName",
-                "clusterRole",
-                "che",
-                false,
-                clientFactory,
-                configFactory,
-                userManager));
-    OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
-    doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
-
-    // when
-    KubernetesNamespace namespace = projectFactory.access("workspace123", "name");
-
-    // then
-    assertEquals(toReturnProject, namespace);
-    verify(projectFactory).doCreateProjectAccess("workspace123", "name");
-    verify(toReturnProject, never()).prepare(any(), any());
   }
 
   private void prepareNamespaceToBeFoundByName(String name, Project project) throws Exception {

@@ -186,6 +186,10 @@ public class KubernetesNamespace {
                     + "for workspace %s",
                 name, workspaceId),
             e);
+      } else if (e.getCode() == 404) {
+        // we don't want to block whatever work the caller is doing on the namespace. The caller
+        // will fail anyway if the namespace doesn't exist.
+        return true;
       }
 
       throw new KubernetesInfrastructureException(e);

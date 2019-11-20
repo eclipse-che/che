@@ -234,6 +234,10 @@ public class OpenShiftProject extends KubernetesNamespace {
                     + "for workspace %s",
                 getName(), getWorkspaceId()),
             e);
+      } else if (e.getCode() == 404) {
+        // we don't want to block whatever work the caller is doing on the namespace. The caller
+        // will fail anyway if the project doesn't exist.
+        return true;
       }
 
       throw new KubernetesInfrastructureException(e);

@@ -134,8 +134,6 @@ public class KubernetesNamespaceTest {
   @Test(expectedExceptions = InfrastructureException.class)
   public void throwsExceptionIfNamespaceDoesntExistAndNotAllowedToCreateIt() throws Exception {
     // given
-    MetadataNested namespaceMeta = prepareCreateNamespaceRequest();
-
     Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
@@ -321,7 +319,8 @@ public class KubernetesNamespaceTest {
   public void testDoesntFailIfDeletedNamespaceDoesntExist() throws Exception {
     // given
     KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
-    Resource resource = prepareManagedNamespaceResource(NAMESPACE);
+    Resource resource = prepareNamespaceResource(NAMESPACE);
+    when(resource.get()).thenThrow(new KubernetesClientException("err", 404, null));
     when(resource.delete()).thenThrow(new KubernetesClientException("err", 404, null));
 
     // when
