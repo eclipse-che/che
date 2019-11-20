@@ -114,9 +114,9 @@ public class KubernetesNamespace {
    * <p>Preparing includes creating if needed and waiting for default service account.
    *
    * @param markManaged mark the namespace as managed by Che. Also applies for already existing
-   *                    namespaces.
+   *     namespaces.
    * @param canCreate defines what to do when the namespace is not found. The namespace is created
-   *                  when {@code true}, otherwise an exception is thrown.
+   *     when {@code true}, otherwise an exception is thrown.
    * @throws InfrastructureException if any exception occurs during namespace preparation or if the
    *     namespace doesn't exist and {@code canCreate} is {@code false}.
    */

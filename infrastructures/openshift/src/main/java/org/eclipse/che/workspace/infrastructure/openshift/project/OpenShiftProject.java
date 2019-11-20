@@ -86,9 +86,9 @@ public class OpenShiftProject extends KubernetesNamespace {
    * <p>Preparing includes creating if needed and waiting for default service account.
    *
    * @param markManaged mark the project as managed by Che. Also applies for already existing
-   *                    projects.
-   * @param canCreate defines what to do when the project is not found. The project is created
-   *                  when {@code true}, otherwise an exception is thrown.
+   *     projects.
+   * @param canCreate defines what to do when the project is not found. The project is created when
+   *     {@code true}, otherwise an exception is thrown.
    * @throws InfrastructureException if any exception occurs during project preparation or if the
    *     project doesn't exist and {@code canCreate} is {@code false}.
    */
