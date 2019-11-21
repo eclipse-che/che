@@ -52,7 +52,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
-public class GitUserProfileProvisionerTest {
+public class GitConfigProvisionerTest {
 
   private KubernetesEnvironment k8sEnv;
 
@@ -68,7 +68,9 @@ public class GitUserProfileProvisionerTest {
 
   @Mock private UserManager userManager;
 
-  private GitUserProfileProvisioner gitUserProfileProvisioner;
+  @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
+
+  private GitConfigProvisioner gitConfigProvisioner;
 
   @BeforeMethod
   public void setup() {
@@ -77,7 +79,8 @@ public class GitUserProfileProvisionerTest {
     when(pod.getMetadata()).thenReturn(podMeta);
     when(pod.getSpec()).thenReturn(podSpec);
     k8sEnv.addPod(pod);
-    gitUserProfileProvisioner = new GitUserProfileProvisioner(preferenceManager, userManager);
+    gitConfigProvisioner =
+        new GitConfigProvisioner(preferenceManager, userManager, vcsSslCertificateProvisioner);
 
     Subject subject = new SubjectImpl(null, "id", null, false);
     EnvironmentContext environmentContext = new EnvironmentContext();
@@ -95,7 +98,7 @@ public class GitUserProfileProvisionerTest {
     when(user.getName()).thenReturn(null);
     when(user.getEmail()).thenReturn(null);
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
+    gitConfigProvisioner.provision(k8sEnv, runtimeIdentity);
 
     verifyZeroInteractions(runtimeIdentity);
   }
@@ -105,7 +108,7 @@ public class GitUserProfileProvisionerTest {
     when(preferenceManager.find(eq("id"), eq("theia-user-preferences")))
         .thenThrow(new ServerException("message"));
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
+    gitConfigProvisioner.provision(k8sEnv, runtimeIdentity);
 
     verifyZeroInteractions(runtimeIdentity);
 
@@ -128,7 +131,7 @@ public class GitUserProfileProvisionerTest {
     Map<String, String> preferences = singletonMap("theia-user-preferences", "{#$%}");
     when(preferenceManager.find(eq("id"), eq("theia-user-preferences"))).thenReturn(preferences);
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
+    gitConfigProvisioner.provision(k8sEnv, runtimeIdentity);
 
     verifyZeroInteractions(runtimeIdentity);
 
@@ -153,7 +156,7 @@ public class GitUserProfileProvisionerTest {
   public void testShouldExpectWarningWhenUserManagerThrowsServerException() throws Exception {
     when(userManager.getById(eq("id"))).thenThrow(new ServerException("message"));
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
+    gitConfigProvisioner.provision(k8sEnv, runtimeIdentity);
 
     verifyZeroInteractions(runtimeIdentity);
 
@@ -188,7 +191,7 @@ public class GitUserProfileProvisionerTest {
     when(container.getVolumeMounts()).thenReturn(volumeMounts);
     k8sEnv.addPod(pod);
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
+    gitConfigProvisioner.provision(k8sEnv, runtimeIdentity);
 
     assertEquals(volumeMounts.size(), 1);
 
@@ -240,7 +243,7 @@ public class GitUserProfileProvisionerTest {
     when(container.getVolumeMounts()).thenReturn(volumeMounts);
     k8sEnv.addPod(pod);
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
+    gitConfigProvisioner.provision(k8sEnv, runtimeIdentity);
 
     assertEquals(volumeMounts.size(), 1);
 
@@ -292,7 +295,7 @@ public class GitUserProfileProvisionerTest {
     when(container.getVolumeMounts()).thenReturn(volumeMounts);
     k8sEnv.addPod(pod);
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
+    gitConfigProvisioner.provision(k8sEnv, runtimeIdentity);
 
     assertEquals(volumeMounts.size(), 1);
 
@@ -337,7 +340,7 @@ public class GitUserProfileProvisionerTest {
     when(container.getVolumeMounts()).thenReturn(volumeMounts);
     k8sEnv.addPod(pod);
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
+    gitConfigProvisioner.provision(k8sEnv, runtimeIdentity);
 
     assertEquals(volumeMounts.size(), 1);
 
@@ -385,7 +388,7 @@ public class GitUserProfileProvisionerTest {
     when(container.getVolumeMounts()).thenReturn(volumeMounts);
     k8sEnv.addPod(pod);
 
-    gitUserProfileProvisioner.provision(k8sEnv, runtimeIdentity);
+    gitConfigProvisioner.provision(k8sEnv, runtimeIdentity);
 
     assertEquals(volumeMounts.size(), 1);
 
@@ -406,6 +409,55 @@ public class GitUserProfileProvisionerTest {
 
     String gitconfig = configMap.getData().get("gitconfig");
     String expectedGitconfig = "[user]\n\tname = userMockName\n\temail = userMockEmail\n";
+
+    assertEquals(gitconfig, expectedGitconfig);
+  }
+
+  @Test
+  public void testShouldProvisionConfigForHttpsServer() throws Exception {
+    when(vcsSslCertificateProvisioner.isConfigured()).thenReturn(true);
+    when(vcsSslCertificateProvisioner.getGitServerHost()).thenReturn("https://localhost");
+    when(vcsSslCertificateProvisioner.getCertPath()).thenReturn("/some/path");
+
+    when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
+
+    ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
+    when(pod.getMetadata()).thenReturn(podMeta);
+    when(pod.getSpec()).thenReturn(podSpec);
+    when(podSpec.getContainers()).thenReturn(singletonList(container));
+
+    User userMock = mock(User.class);
+    when(userMock.getName()).thenReturn("userMockName");
+    when(userMock.getEmail()).thenReturn("userMockEmail");
+    when(userManager.getById(eq("id"))).thenReturn(userMock);
+
+    List<VolumeMount> volumeMounts = new ArrayList<>();
+
+    when(container.getVolumeMounts()).thenReturn(volumeMounts);
+    k8sEnv.addPod(pod);
+
+    gitConfigProvisioner.provision(k8sEnv, runtimeIdentity);
+
+    assertEquals(volumeMounts.size(), 1);
+
+    VolumeMount mount = volumeMounts.get(0);
+
+    assertEquals(mount.getMountPath(), "/etc/gitconfig");
+    assertEquals(mount.getName(), "gitconfigvolume");
+    assertFalse(mount.getReadOnly());
+    assertEquals(mount.getSubPath(), "gitconfig");
+
+    assertEquals(k8sEnv.getConfigMaps().size(), 1);
+    assertTrue(k8sEnv.getConfigMaps().containsKey("wksp-gitconfig"));
+
+    ConfigMap configMap = k8sEnv.getConfigMaps().get("wksp-gitconfig");
+
+    assertEquals(configMap.getData().size(), 1);
+    assertTrue(configMap.getData().containsKey("gitconfig"));
+
+    String gitconfig = configMap.getData().get("gitconfig");
+    String expectedGitconfig =
+        "[user]\n\tname = userMockName\n\temail = userMockEmail\n[http \"https://localhost\"]\n\tsslCAInfo = /some/path";
 
     assertEquals(gitconfig, expectedGitconfig);
   }

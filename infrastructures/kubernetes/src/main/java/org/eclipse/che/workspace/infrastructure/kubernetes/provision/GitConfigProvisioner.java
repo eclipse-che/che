@@ -49,7 +49,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 @Singleton
-public class GitUserProfileProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
+public class GitConfigProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
 
   private final String GIT_CONFIG_MAP_NAME_SUFFIX = "-gitconfig";
 
@@ -60,14 +60,20 @@ public class GitUserProfileProvisioner implements ConfigurationProvisioner<Kuber
   private static final String GIT_USER_NAME_PROPERTY = "git.user.name";
   private static final String GIT_USER_EMAIL_PROPERTY = "git.user.email";
   private static final String CONFIG_MAP_VOLUME_NAME = "gitconfigvolume";
+  private static final String HTTPS = "https://";
 
   private PreferenceManager preferenceManager;
   private UserManager userManager;
+  private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
 
   @Inject
-  public GitUserProfileProvisioner(PreferenceManager preferenceManager, UserManager userManager) {
+  public GitConfigProvisioner(
+      PreferenceManager preferenceManager,
+      UserManager userManager,
+      VcsSslCertificateProvisioner vcsSslCertificateProvisioner) {
     this.preferenceManager = preferenceManager;
     this.userManager = userManager;
+    this.vcsSslCertificateProvisioner = vcsSslCertificateProvisioner;
   }
 
   @Override
@@ -176,6 +182,33 @@ public class GitUserProfileProvisioner implements ConfigurationProvisioner<Kuber
 
     if (userEmail != null) {
       config.append('\t').append("email = ").append(userEmail).append('\n');
+    }
+
+    if (vcsSslCertificateProvisioner.isConfigured()) {
+      String host = vcsSslCertificateProvisioner.getGitServerHost();
+
+      // Will add leading scheme (https://) if it not provide in configuration.
+      // If host not configured wil return empty string, it will means that
+      // provided certificate will used for all https connections.
+
+      StringBuilder gitServerHosts = new StringBuilder();
+      if (!isNullOrEmpty(host)) {
+        gitServerHosts.append(" \"");
+        if (!host.startsWith(HTTPS)) {
+          gitServerHosts.append(HTTPS);
+        }
+        gitServerHosts.append(host);
+        gitServerHosts.append("\"");
+      }
+
+      config
+          .append("[http")
+          .append(gitServerHosts.toString())
+          .append("]")
+          .append('\n')
+          .append('\t')
+          .append("sslCAInfo = ")
+          .append(vcsSslCertificateProvisioner.getCertPath());
     }
 
     return of(config.toString());
