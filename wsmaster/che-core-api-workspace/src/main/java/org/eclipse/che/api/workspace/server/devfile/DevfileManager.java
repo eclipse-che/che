@@ -14,8 +14,6 @@ package org.eclipse.che.api.workspace.server.devfile;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
-import static java.util.Arrays.copyOf;
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
@@ -34,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -101,7 +100,7 @@ public class DevfileManager {
    *
    * <ul>
    *   <li>metadata.generateName : python-dev-
-   *   <li>projects.foo.source.type : git // foo in an project name
+   *   <li>projects.foo.source.type : git // foo is an project name
    *   <li>components.mysql.memoryLimit : 500Mi // mysql in an component alias
    * </ul>
    *
@@ -139,7 +138,7 @@ public class DevfileManager {
    *
    * <ul>
    *   <li>metadata.generateName : python-dev-
-   *   <li>projects.foo.source.type : git // foo in an project name
+   *   <li>projects.foo.source.type : git // foo is an project name
    *   <li>components.mysql.memoryLimit : 500Mi // mysql in an component alias
    * </ul>
    *
@@ -218,8 +217,7 @@ public class DevfileManager {
       // iterate until we reach last but one path segment,
       // because it's impossible to change value of the current Json node,
       // so to set value to Json node, you should be 1 level up and do put(key, value).
-      Iterator<String> pathSegmentsIterator =
-          asList(copyOf(pathSegments, pathSegments.length)).iterator();
+      Iterator<String> pathSegmentsIterator = Stream.of(pathSegments).iterator();
       do {
         String currentSegment = pathSegmentsIterator.next();
         JsonNode nextNode = currentNode.path(currentSegment);
