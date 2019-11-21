@@ -11,6 +11,14 @@
  */
 'use strict';
 
+interface IShowAreaScope extends ng.IScope {
+  toggleVisibility: () => void;
+  getButtonTitle: () => string;
+  isHide: boolean;
+  showTitle?: string;
+  hideTitle?: string;
+}
+
 /**
  * @ngdoc directive
  * @name components.directive:cheShowArea
@@ -23,21 +31,37 @@
  *
  * @author Oleksii Orel
  */
-export class CheShowArea {
-  restrict: string;
-  templateUrl: string;
-  transclude: boolean;
-  scope: Object;
+export class CheShowArea implements ng.IDirective {
+  restrict: string = 'E';
+  templateUrl: string = 'components/widget/show-area/che-show-area.html';
+
+  transclude: boolean = true;
+
+  scope: {
+    showTitle: string;
+    hideTitle: string;
+  };
 
   /**
    * Default constructor that is using resource
    */
   constructor() {
-    this.restrict = 'E';
-    this.transclude = true;
-    this.templateUrl = 'components/widget/show-area/che-show-area.html';
+    this.scope = {
+      showTitle: '@?',
+      hideTitle: '@?'
+    };
+  }
 
-    // scope values
-    this.scope = {};
+  link($scope: IShowAreaScope) {
+    $scope.isHide = true;
+    $scope.toggleVisibility = () => {
+      $scope.isHide = !$scope.isHide;
+    };
+
+    const showTitle = $scope.showTitle ? $scope.showTitle : 'Show';
+    const hideTitle = $scope.hideTitle ? $scope.hideTitle : 'Cancel';
+    $scope.getButtonTitle = () => {
+      return $scope.isHide ? showTitle : hideTitle;
+    }
   }
 }

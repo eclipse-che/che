@@ -1,12 +1,10 @@
 <div layout="column" class="config-import">
-  <div class="saving-message">
-    <span ng-if="workspaceDevfileEditorController.isSaving">Saving workspace devfile...</span>
-  </div>
   <div class="config-editor">
     <che-editor editor-content="workspaceDevfileEditorController.devfileYaml"
                 editor-state="editorState"
                 on-content-change="workspaceDevfileEditorController.onChange()"
                 editor-mode="text/x-yaml"
+                editor-read-only="!!workspaceDevfileEditorController.editorReadOnly"
                 required>
       <div ng-message="required">Devfile is required.</div>
     </che-editor>
@@ -17,7 +15,8 @@
           ng-repeat="errorMessage in workspaceDevfileEditorController.devfileValidationMessages">
         {{errorMessage}}
       </div>
-    </div>   
+    </div>
   </div>
+  <a ng-href="{{workspaceDevfileEditorController.devfileDocsUrl}}" target="_blank">Docs: Devfile Structure</a>
 </div>
 

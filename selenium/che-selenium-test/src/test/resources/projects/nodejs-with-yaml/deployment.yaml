@@ -87,8 +87,6 @@ spec:
             - name: CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL
               value: >-
                 http://che-${NAMESPACE}.172.0.0.1.nip.io/agent-binaries/linux_amd64/bootstrapper/bootstrapper
-            - name: CHE_INFRA_KUBERNETES_MACHINE__START__TIMEOUT__MIN
-              value: '5'
             - name: CHE_INFRA_KUBERNETES_OAUTH__TOKEN
             - name: CHE_INFRA_KUBERNETES_USERNAME
             - name: CHE_INFRA_KUBERNETES_PASSWORD
