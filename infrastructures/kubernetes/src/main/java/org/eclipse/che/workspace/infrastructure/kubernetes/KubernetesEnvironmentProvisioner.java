@@ -21,7 +21,7 @@ import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitUserProfileProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
@@ -31,6 +31,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityCon
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSshKeysProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
@@ -73,8 +74,9 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final ServiceAccountProvisioner serviceAccountProvisioner;
     private final CertificateProvisioner certificateProvisioner;
     private final VcsSshKeysProvisioner vcsSshKeysProvisioner;
-    private final GitUserProfileProvisioner gitUserProfileProvisioner;
+    private final GitConfigProvisioner gitConfigProvisioner;
     private final PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer;
+    private final VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
 
     @Inject
     public KubernetesEnvironmentProvisionerImpl(
@@ -94,8 +96,9 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         ServiceAccountProvisioner serviceAccountProvisioner,
         CertificateProvisioner certificateProvisioner,
         VcsSshKeysProvisioner vcsSshKeysProvisioner,
-        GitUserProfileProvisioner gitUserProfileProvisioner,
-        PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer) {
+        GitConfigProvisioner gitConfigProvisioner,
+        PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer,
+        VcsSslCertificateProvisioner vcsSslCertificateProvisioner) {
       this.pvcEnabled = pvcEnabled;
       this.volumesStrategy = volumesStrategy;
       this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -112,7 +115,8 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.serviceAccountProvisioner = serviceAccountProvisioner;
       this.certificateProvisioner = certificateProvisioner;
       this.vcsSshKeysProvisioner = vcsSshKeysProvisioner;
-      this.gitUserProfileProvisioner = gitUserProfileProvisioner;
+      this.vcsSslCertificateProvisioner = vcsSslCertificateProvisioner;
+      this.gitConfigProvisioner = gitConfigProvisioner;
       this.previewUrlExposer = previewUrlExposer;
     }
 
@@ -152,7 +156,8 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       serviceAccountProvisioner.provision(k8sEnv, identity);
       certificateProvisioner.provision(k8sEnv, identity);
       vcsSshKeysProvisioner.provision(k8sEnv, identity);
-      gitUserProfileProvisioner.provision(k8sEnv, identity);
+      vcsSslCertificateProvisioner.provision(k8sEnv, identity);
+      gitConfigProvisioner.provision(k8sEnv, identity);
       LOG.debug("Provisioning Kubernetes environment done for workspace '{}'", workspaceId);
     }
   }
