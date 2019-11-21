@@ -61,7 +61,7 @@ public class DeployBrokerTest {
 
   private static final String PLUGIN_BROKER_POD_NAME = "pluginBrokerPodName";
   private static final RuntimeIdentity RUNTIME_ID =
-      new RuntimeIdentityImpl("workspaceId", "env", "userId");
+      new RuntimeIdentityImpl("workspaceId", "env", "userId", "infraNamespace");
   @Mock private BrokerPhase nextBrokerPhase;
 
   @Mock private KubernetesNamespace k8sNamespace;
