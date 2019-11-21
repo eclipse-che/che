@@ -139,7 +139,8 @@ public class WorkspacePermissionsFilterTest {
             .post(SECURE_PATH + "/workspace?namespace=userok");
 
     assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).create(any(WorkspaceConfigDto.class), any(), any(), eq("userok"));
+    verify(workspaceService)
+        .create(any(WorkspaceConfigDto.class), any(), any(), any(), eq("userok"));
     verify(permissionsFilter).checkAccountPermissions("userok", AccountOperation.CREATE_WORKSPACE);
     verifyZeroInteractions(subject);
   }
@@ -158,7 +159,8 @@ public class WorkspacePermissionsFilterTest {
             .post(SECURE_PATH + "/workspace/devfile?namespace=userok");
 
     assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).create(any(DevfileDto.class), any(), any(), eq("userok"), any());
+    verify(workspaceService)
+        .create(any(DevfileDto.class), any(), any(), any(), eq("userok"), any());
     verify(permissionsFilter).checkAccountPermissions("userok", AccountOperation.CREATE_WORKSPACE);
     verifyZeroInteractions(subject);
   }
