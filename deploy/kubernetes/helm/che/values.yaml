@@ -52,6 +52,8 @@ global:
 
   gitHubClientID: ""
   gitHubClientSecret: ""
+  # Possible values: common, per-workspace, unique
+  cheWorkspacesPVCStrategy: "common"
   pvcClaim: "1Gi"
   cheWorkspacesNamespace: "<username>-che"
   # Service account name that will be mounted to workspaces pods
