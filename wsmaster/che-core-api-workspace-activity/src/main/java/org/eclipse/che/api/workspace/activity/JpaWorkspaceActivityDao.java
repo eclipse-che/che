@@ -20,12 +20,13 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.core.db.jpa.DuplicateKeyException;
+import org.eclipse.che.core.db.jpa.IntegrityConstraintViolationException;
 
 /**
  * JPA workspaces expiration times storage.
@@ -72,17 +73,21 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   }
 
   @Override
-  @Transactional(rollbackOn = ServerException.class)
   public void removeActivity(String workspaceId) throws ServerException {
     try {
-      EntityManager em = managerProvider.get();
-      WorkspaceActivity activity = em.find(WorkspaceActivity.class, workspaceId);
-      if (activity != null) {
-        em.remove(activity);
-        em.flush();
-      }
+      doRemove(workspaceId);
     } catch (RuntimeException x) {
-      throw new ServerException(x.getLocalizedMessage(), x);
+      throw new ServerException(x.getMessage(), x);
+    }
+  }
+
+  @Transactional
+  void doRemove(String workspaceId) {
+    EntityManager em = managerProvider.get();
+    WorkspaceActivity activity = em.find(WorkspaceActivity.class, workspaceId);
+    if (activity != null) {
+      em.remove(activity);
+      em.flush();
     }
   }
 
@@ -173,7 +178,7 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
 
       return new Page<>(data, skipCount, maxItems, count);
     } catch (RuntimeException e) {
-      throw new ServerException(e.getLocalizedMessage(), e);
+      throw new ServerException(e.getMessage(), e);
     }
   }
 
@@ -190,7 +195,7 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
           .setParameter("time", timestamp)
           .getSingleResult();
     } catch (RuntimeException e) {
-      throw new ServerException(e.getLocalizedMessage(), e);
+      throw new ServerException(e.getMessage(), e);
     }
   }
 
@@ -222,62 +227,89 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
 
       return new Page<>(page, skipCount, maxItems, total);
     } catch (RuntimeException e) {
-      throw new ServerException(e.getLocalizedMessage(), e);
+      throw new ServerException(e.getMessage(), e);
     }
   }
 
   @Override
-  @Transactional(rollbackOn = {ConflictException.class, ServerException.class})
   public void createActivity(WorkspaceActivity activity) throws ConflictException, ServerException {
     try {
-      EntityManager em = managerProvider.get();
-      em.persist(activity);
-      em.flush();
-    } catch (EntityExistsException e) {
+      doCreate(activity);
+    } catch (IntegrityConstraintViolationException e) {
+      throw new ServerException(
+          String.format(
+              "Can not create activity record since the specified workspace with "
+                  + "id '%s' does not exist.",
+              activity.getWorkspaceId()),
+          e);
+    } catch (DuplicateKeyException e) {
       throw new ConflictException(
           "Activity record for workspace ID " + activity.getWorkspaceId() + " already exists.", e);
     } catch (RuntimeException e) {
-      throw new ServerException(e.getLocalizedMessage(), e);
+      throw new ServerException(e.getMessage(), e);
     }
   }
 
-  @Transactional(rollbackOn = ServerException.class)
-  protected void doUpdate(String workspaceId, Consumer<WorkspaceActivity> updater)
-      throws ServerException {
-    doUpdate(false, workspaceId, updater);
+  @Transactional
+  void doCreate(WorkspaceActivity activity) {
+    EntityManager em = managerProvider.get();
+    em.persist(activity);
+    em.flush();
   }
 
-  @Transactional(rollbackOn = ServerException.class)
-  protected void doUpdateOptionally(String workspaceId, Consumer<WorkspaceActivity> updater)
-      throws ServerException {
-    doUpdate(true, workspaceId, updater);
-  }
-
-  private void doUpdate(boolean optional, String workspaceId, Consumer<WorkspaceActivity> updater)
+  private void doUpdate(String workspaceId, Consumer<WorkspaceActivity> updater)
       throws ServerException {
     try {
-      EntityManager em = managerProvider.get();
-      WorkspaceActivity activity = em.find(WorkspaceActivity.class, workspaceId);
-      if (activity == null) {
-        if (optional) {
-          return;
-        }
-        activity = new WorkspaceActivity();
-        activity.setWorkspaceId(workspaceId);
-
-        updater.accept(activity);
-
-        em.persist(activity);
-      } else {
-        updater.accept(activity);
-
-        em.merge(activity);
-      }
-
-      em.flush();
+      doUpdate(false, workspaceId, updater);
+    } catch (IntegrityConstraintViolationException e) {
+      throw new ServerException(
+          String.format(
+              "Can not create activity record since the specified workspace with "
+                  + "id '%s' does not exist.",
+              workspaceId),
+          e);
     } catch (RuntimeException x) {
-      throw new ServerException(x.getLocalizedMessage(), x);
+      throw new ServerException(x.getMessage(), x);
     }
+  }
+
+  private void doUpdateOptionally(String workspaceId, Consumer<WorkspaceActivity> updater)
+      throws ServerException {
+    try {
+      doUpdate(true, workspaceId, updater);
+    } catch (IntegrityConstraintViolationException e) {
+      throw new ServerException(
+          String.format(
+              "Can not create activity record since the specified workspace with "
+                  + "id '%s' does not exist.",
+              workspaceId),
+          e);
+    } catch (RuntimeException x) {
+      throw new ServerException(x.getMessage(), x);
+    }
+  }
+
+  @Transactional
+  void doUpdate(boolean optional, String workspaceId, Consumer<WorkspaceActivity> updater) {
+    EntityManager em = managerProvider.get();
+    WorkspaceActivity activity = em.find(WorkspaceActivity.class, workspaceId);
+    if (activity == null) {
+      if (optional) {
+        return;
+      }
+      activity = new WorkspaceActivity();
+      activity.setWorkspaceId(workspaceId);
+
+      updater.accept(activity);
+
+      em.persist(activity);
+    } else {
+      updater.accept(activity);
+
+      em.merge(activity);
+    }
+
+    em.flush();
   }
 
   private static String firstUpperCase(String str) {

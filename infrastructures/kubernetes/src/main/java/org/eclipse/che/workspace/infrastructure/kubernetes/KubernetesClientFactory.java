@@ -30,6 +30,7 @@ import okhttp3.Authenticator;
 import okhttp3.ConnectionPool;
 import okhttp3.Credentials;
 import okhttp3.Dispatcher;
+import okhttp3.EventListener;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -61,7 +62,8 @@ public class KubernetesClientFactory {
           int maxConcurrentRequestsPerHost,
       @Named("che.infra.kubernetes.client.http.connection_pool.max_idle") int maxIdleConnections,
       @Named("che.infra.kubernetes.client.http.connection_pool.keep_alive_min")
-          int connectionPoolKeepAlive) {
+          int connectionPoolKeepAlive,
+      EventListener eventListener) {
     this.defaultConfig = buildDefaultConfig(masterUrl, doTrustCerts);
     OkHttpClient temporary = HttpClientUtils.createHttpClient(defaultConfig);
     OkHttpClient.Builder builder = temporary.newBuilder();
@@ -69,7 +71,7 @@ public class KubernetesClientFactory {
     builder.connectionPool(
         new ConnectionPool(maxIdleConnections, connectionPoolKeepAlive, TimeUnit.MINUTES));
     oldPool.evictAll();
-    this.httpClient = builder.build();
+    this.httpClient = builder.eventListener(eventListener).build();
     httpClient.dispatcher().setMaxRequests(maxConcurrentRequests);
     httpClient.dispatcher().setMaxRequestsPerHost(maxConcurrentRequestsPerHost);
   }

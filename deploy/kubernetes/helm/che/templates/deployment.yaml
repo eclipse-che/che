@@ -72,6 +72,25 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+
+
+        # If git-self-signed-cert is used then configure Che Server with certificate content
+        # to propagate it to the specified location and provide particular configuration for Git service
+        {{- if .Values.global.useGitSelfSignedCerts }}
+        - name: CHE_GIT_SELF__SIGNED__CERT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Values.global.cheGitSelfSignedCertConfigMapName }}
+              key: ca.crt
+              optional: false
+        - name: CHE_GIT_SELF__SIGNED__CERT__HOST
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Values.global.cheGitSelfSignedCertConfigMapName }}
+              key: githost
+              optional: false
+        {{- end }}
+
         {{- if .Values.global.tls.enabled }}
 
         # If self-signed-cert is used then configure Che Server with certificate content

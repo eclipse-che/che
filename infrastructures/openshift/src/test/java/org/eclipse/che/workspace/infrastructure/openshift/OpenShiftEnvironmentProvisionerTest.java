@@ -17,13 +17,14 @@ import static org.mockito.Mockito.inOrder;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitUserProfileProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSshKeysProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
@@ -63,8 +64,9 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private ServiceAccountProvisioner serviceAccountProvisioner;
   @Mock private CertificateProvisioner certificateProvisioner;
   @Mock private VcsSshKeysProvisioner vcsSshKeysProvisioner;
-  @Mock private GitUserProfileProvisioner gitUserProfileProvisioner;
+  @Mock private GitConfigProvisioner gitConfigProvisioner;
   @Mock private OpenShiftPreviewUrlExposer previewUrlEndpointsProvisioner;
+  @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
 
   private OpenShiftEnvironmentProvisioner osInfraProvisioner;
 
@@ -89,8 +91,9 @@ public class OpenShiftEnvironmentProvisionerTest {
             serviceAccountProvisioner,
             certificateProvisioner,
             vcsSshKeysProvisioner,
-            gitUserProfileProvisioner,
-            previewUrlEndpointsProvisioner);
+            gitConfigProvisioner,
+            previewUrlEndpointsProvisioner,
+            vcsSslCertificateProvisioner);
     provisionOrder =
         inOrder(
             logsVolumeMachineProvisioner,
@@ -107,7 +110,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             serviceAccountProvisioner,
             certificateProvisioner,
             vcsSshKeysProvisioner,
-            gitUserProfileProvisioner,
+            vcsSslCertificateProvisioner,
+            gitConfigProvisioner,
             previewUrlEndpointsProvisioner);
   }
 
@@ -131,7 +135,8 @@ public class OpenShiftEnvironmentProvisionerTest {
     provisionOrder.verify(serviceAccountProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(certificateProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(vcsSshKeysProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(gitUserProfileProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(vcsSslCertificateProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(gitConfigProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }
