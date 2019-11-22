@@ -835,7 +835,9 @@ public class WorkspaceService extends Service {
   private static Map<String, String> parseAttrs(List<String> attributes)
       throws BadRequestException, ForbiddenException {
     if (attributes == null) {
-      return emptyMap();
+      // we need to make room for the potential infrastructure namespace that can be put into
+      // this map by the callers...
+      return Maps.newHashMapWithExpectedSize(1);
     }
     final Map<String, String> res = Maps.newHashMapWithExpectedSize(attributes.size());
     for (String attribute : attributes) {
