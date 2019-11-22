@@ -32,7 +32,7 @@
     port_range="3"
     namespace="${KUBERNETES_NAMESPACE:che}"
     labels="${KUBERNETES_LABELS:app=che,component=che}"
-    useNotReadyAddresses="false"
+    useNotReadyAddresses="${KUBERNETES_USE_NOT_READY_ADDRESSES:false}"
   />
 
   <MERGE3 min_interval="10000"
