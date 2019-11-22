@@ -111,8 +111,8 @@ public abstract class RuntimeInfrastructure {
    * infrastructure namespace info(legacy workspaces).
    *
    * @param resolutionCtx the runtime holder specifying which user and workspace runtime targets.
-   * @throws InfrastructureException when there is no configured default namespace
-   * @throws InfrastructureException on any other error
+   * @throws InfrastructureException when there is no configured default namespace or on any other
+   *     error
    */
   public abstract String evaluateInfraNamespace(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException;

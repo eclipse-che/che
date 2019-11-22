@@ -347,12 +347,7 @@ public class KubernetesNamespaceFactory {
     return doCreateNamespaceAccess(workspaceId, namespaceName);
   }
 
-  /**
-   * Gets a namespace the workspace is deployed to.
-   *
-   * @param workspace the workspace
-   * @return the namespace
-   */
+  /** Gets a namespace the workspace is deployed to. */
   public KubernetesNamespace get(Workspace workspace) throws InfrastructureException {
     return doCreateNamespaceAccess(workspace.getId(), getNamespaceName(workspace));
   }
