@@ -32,10 +32,11 @@ import javax.inject.Singleton;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ZipUtils;
 
+/** The class that allow getting different diagnostic information from the current JVM. */
 @Singleton
 public class JvmManager {
 
-  public static final DateFormat MILLIS_FORMAT = new SimpleDateFormat("mm:ss:SSS");
+  private static final DateFormat MILLIS_FORMAT = new SimpleDateFormat("mm:ss:SSS");
   private final ThreadMXBean threadMxBean;
   private final HotSpotDiagnosticMXBean hotSpotMxBean;
 
@@ -44,8 +45,11 @@ public class JvmManager {
     hotSpotMxBean = ManagementFactory.getPlatformMXBean(HotSpotDiagnosticMXBean.class);
   }
 
+  /**
+   * Write thread dump that contains stack traces of existed threads, plus it contains some other
+   * diagnostic information about threads such as: daemon, priority, etc.
+   */
   public void writeThreadDump(OutputStream outputStream) throws IOException {
-    OutputStreamWriter writer = new OutputStreamWriter(outputStream);
     ThreadInfo[] threadInfos =
         threadMxBean.getThreadInfo(threadMxBean.getAllThreadIds(), Integer.MAX_VALUE);
     Map<Long, ThreadInfo> threadInfoMap = new HashMap<>();
@@ -53,7 +57,7 @@ public class JvmManager {
       threadInfoMap.put(threadInfo.getThreadId(), threadInfo);
     }
 
-    try {
+    try (OutputStreamWriter writer = new OutputStreamWriter(outputStream)) {
       Map<Thread, StackTraceElement[]> stacks = Thread.getAllStackTraces();
 
       writer.write(String.format("Dump of %d threads at %Tc\n", stacks.size(), new Date()));
@@ -121,11 +125,10 @@ public class JvmManager {
         }
       }
       writer.write("------------------------------------------------------");
-    } finally {
-      writer.close();
     }
   }
 
+  /** Create a file with a zipped hprof heap dump. */
   public File createZippedHeapDump() throws IOException {
     File tmpFolder = Files.createTempDir();
     File heapFile = new File(tmpFolder, "heapdump.hprof");
