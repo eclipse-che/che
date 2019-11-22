@@ -44,9 +44,7 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/**
- * Tests {@link SystemServicePermissionsFilter}.
- */
+/** Tests {@link SystemServicePermissionsFilter}. */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class JvmServicePermissionsFilterTest {
 
