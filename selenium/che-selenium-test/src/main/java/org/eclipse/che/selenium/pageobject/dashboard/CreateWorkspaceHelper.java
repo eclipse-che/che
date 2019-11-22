@@ -20,6 +20,7 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 
 /**
@@ -36,6 +37,7 @@ public class CreateWorkspaceHelper {
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
+  @Inject private WorkspaceDetails workspaceDetails;
 
   public TestWorkspace createWorkspaceFromDevfileWithProject(
       Devfile devfile, String workspaceName, String projectName) {
@@ -70,6 +72,8 @@ public class CreateWorkspaceHelper {
 
     projectSourcePage.clickOnAddProjectButton();
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
+
+    workspaceDetails.waitToolbarTitleName(workspaceName);
 
     return testWorkspaceProvider.getWorkspace(workspaceName, defaultTestUser);
   }

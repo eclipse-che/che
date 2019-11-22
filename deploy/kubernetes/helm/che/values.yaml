@@ -50,8 +50,17 @@ global:
     useSelfSignedCerts: false
     selfSignedCertSecretName: self-signed-cert
 
+
+  ## If using git self-signed certificate is enabled
+  ## then certificate from `cheGitSelfSignedCertConfigMapName` will be propagated to Che components'
+  ## and provide particular configuration for Git
+  useGitSelfSignedCerts: false
+  cheGitSelfSignedCertConfigMapName: che-git-self-signed-cert
+
   gitHubClientID: ""
   gitHubClientSecret: ""
+  # Possible values: common, per-workspace, unique
+  cheWorkspacesPVCStrategy: "common"
   pvcClaim: "1Gi"
   cheWorkspacesNamespace: "<username>-che"
   # Service account name that will be mounted to workspaces pods

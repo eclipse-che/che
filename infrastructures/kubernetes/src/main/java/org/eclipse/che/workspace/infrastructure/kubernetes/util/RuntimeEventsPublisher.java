@@ -94,6 +94,14 @@ public class RuntimeEventsPublisher {
             .withTime(time));
   }
 
+  public void sendRuntimeLogEvent(String text, String time, RuntimeIdentity runtimeId) {
+    eventService.publish(
+        DtoFactory.newDto(RuntimeLogEvent.class)
+            .withRuntimeId(DtoConverter.asDto(runtimeId))
+            .withText(text)
+            .withTime(time));
+  }
+
   public void sendAbnormalStoppedEvent(RuntimeIdentity runtimeId, String reason) {
     eventService.publish(new RuntimeAbnormalStoppedEvent(runtimeId, reason));
   }

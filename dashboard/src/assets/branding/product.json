@@ -20,10 +20,10 @@
   },
   "docs" : {
     "devfile" : "/docs/che-7/using-developer-environments-workspaces.html#making-a-workspace-portable-using-a-devfile_using-developer-environments-workspaces",
-    "workspace" : "/docs/what-are-workspaces.html",
+    "workspace" : "/docs/che-7/workspaces-overview/",
     "factory" : "/docs/factories-getting-started.html",
     "organization": "/docs/organizations.html",
     "converting": "/docs/che-7/converting-a-che-6-workspace-to-a-che-7-devfile/",
-    "general": "/docs"
+    "general": "/docs/che-7"
   }
 }

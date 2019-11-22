@@ -21,7 +21,7 @@ import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitUserProfileProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
@@ -29,6 +29,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettin
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSshKeysProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
@@ -69,8 +70,9 @@ public class OpenShiftEnvironmentProvisioner
   private final ServiceAccountProvisioner serviceAccountProvisioner;
   private final CertificateProvisioner certificateProvisioner;
   private final VcsSshKeysProvisioner vcsSshKeysProvisioner;
-  private final GitUserProfileProvisioner gitUserProfileProvisioner;
+  private final GitConfigProvisioner gitConfigProvisioner;
   private final PreviewUrlExposer<OpenShiftEnvironment> previewUrlExposer;
+  private final VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
@@ -89,8 +91,9 @@ public class OpenShiftEnvironmentProvisioner
       ServiceAccountProvisioner serviceAccountProvisioner,
       CertificateProvisioner certificateProvisioner,
       VcsSshKeysProvisioner vcsSshKeysProvisioner,
-      GitUserProfileProvisioner gitUserProfileProvisioner,
-      OpenShiftPreviewUrlExposer previewUrlEndpointsProvisioner) {
+      GitConfigProvisioner gitConfigProvisioner,
+      OpenShiftPreviewUrlExposer previewUrlEndpointsProvisioner,
+      VcsSslCertificateProvisioner vcsSslCertificateProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -106,8 +109,9 @@ public class OpenShiftEnvironmentProvisioner
     this.serviceAccountProvisioner = serviceAccountProvisioner;
     this.certificateProvisioner = certificateProvisioner;
     this.vcsSshKeysProvisioner = vcsSshKeysProvisioner;
-    this.gitUserProfileProvisioner = gitUserProfileProvisioner;
+    this.gitConfigProvisioner = gitConfigProvisioner;
     this.previewUrlExposer = previewUrlEndpointsProvisioner;
+    this.vcsSslCertificateProvisioner = vcsSslCertificateProvisioner;
   }
 
   @Override
@@ -143,7 +147,8 @@ public class OpenShiftEnvironmentProvisioner
     serviceAccountProvisioner.provision(osEnv, identity);
     certificateProvisioner.provision(osEnv, identity);
     vcsSshKeysProvisioner.provision(osEnv, identity);
-    gitUserProfileProvisioner.provision(osEnv, identity);
+    vcsSslCertificateProvisioner.provision(osEnv, identity);
+    gitConfigProvisioner.provision(osEnv, identity);
     LOG.debug(
         "Provisioning OpenShift environment done for workspace '{}'", identity.getWorkspaceId());
   }
