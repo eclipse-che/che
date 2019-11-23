@@ -17,7 +17,6 @@ import static java.util.Arrays.asList;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -32,7 +31,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.system.server.SystemService;
+import org.eclipse.che.api.system.server.JvmService;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.multiuser.api.permission.server.SystemDomain;
@@ -45,30 +44,27 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/**
- * Tests {@link SystemServicePermissionsFilter}.
- *
- * @author Yevhenii Voevodin
- */
+/** Tests {@link SystemServicePermissionsFilter}. */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
-public class SystemServicePermissionsFilterTest {
+public class JvmServicePermissionsFilterTest {
 
-  private static final Set<String> TEST_HANDLED_METHODS = new HashSet<>(asList("stop", "getState"));
+  private static final Set<String> TEST_HANDLED_METHODS =
+      new HashSet<>(asList("heapDump", "threadDump"));
 
   @SuppressWarnings("unused")
-  private static final SystemServicePermissionsFilter serviceFilter =
-      new SystemServicePermissionsFilter();
+  private static final JvmServicePermissionsFilter serviceFilter =
+      new JvmServicePermissionsFilter();
 
   @SuppressWarnings("unused")
   private static final EnvironmentFilter envFilter = new EnvironmentFilter();
 
   @Mock private static Subject subject;
 
-  @Mock private SystemService systemService;
+  @Mock private JvmService jvmService;
 
   @Test
   public void allPublicMethodsAreFiltered() {
-    Set<String> existingMethods = getDeclaredPublicMethods(SystemService.class);
+    Set<String> existingMethods = getDeclaredPublicMethods(JvmService.class);
 
     if (!existingMethods.equals(TEST_HANDLED_METHODS)) {
       Set<String> existingMinusExpected = Sets.difference(existingMethods, TEST_HANDLED_METHODS);
@@ -83,59 +79,61 @@ public class SystemServicePermissionsFilterTest {
   }
 
   @Test
-  public void allowsStopForUserWithManageSystemPermission() throws Exception {
+  public void allowsGenerateThreadDumpWithManageSystemPermission() throws Exception {
     permitSubject(SystemDomain.MANAGE_SYSTEM_ACTION);
 
     given()
         .auth()
         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
         .when()
-        .post(SECURE_PATH + "/system/stop")
+        .get(SECURE_PATH + "/jvm/dump/thread")
         .then()
         .statusCode(204);
 
-    verify(systemService).stop(anyBoolean());
+    verify(jvmService).threadDump();
   }
 
   @Test
-  public void rejectsStopForUserWithoutManageSystemPermission() throws Exception {
+  public void rejectsGenerateThreadDumpWithoutManageSystemPermission() throws Exception {
     permitSubject("nothing");
 
     given()
         .auth()
         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
         .when()
-        .post(SECURE_PATH + "/system/stop")
+        .get(SECURE_PATH + "/jvm/dump/thread")
         .then()
         .statusCode(403);
 
-    verify(systemService, never()).stop(anyBoolean());
+    verify(jvmService, never()).threadDump();
   }
 
   @Test
-  public void allowsGetStateForUserWithManageSystemPermission() throws Exception {
+  public void allowsGenerateHeapDumpWithManageSystemPermission() throws Exception {
     permitSubject(SystemDomain.MANAGE_SYSTEM_ACTION);
 
     given()
         .auth()
         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
         .when()
-        .get(SECURE_PATH + "/system/state");
+        .get(SECURE_PATH + "/jvm/dump/heap");
 
-    verify(systemService).getState();
+    verify(jvmService).heapDump();
   }
 
   @Test
-  public void shouldNotRejectsGetStateForUserWithoutManageSystemPermission() throws Exception {
+  public void rejectsGenerateHeapDumpWithoutManageSystemPermission() throws Exception {
     permitSubject("nothing");
 
     given()
         .auth()
         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
         .when()
-        .get(SECURE_PATH + "/system/state");
+        .get(SECURE_PATH + "/jvm/dump/heap")
+        .then()
+        .statusCode(403);
 
-    verify(systemService).getState();
+    verify(jvmService, never()).heapDump();
   }
 
   private static void permitSubject(String... allowedActions) throws ForbiddenException {
@@ -153,7 +151,7 @@ public class SystemServicePermissionsFilterTest {
 
   private static Set<String> getDeclaredPublicMethods(Class<?> c) {
     return Arrays.stream(c.getDeclaredMethods())
-        .filter(method -> Modifier.isPublic(method.getModifiers()))
+        .filter(m -> Modifier.isPublic(m.getModifiers()))
         .map(Method::getName)
         .collect(Collectors.toSet());
   }
