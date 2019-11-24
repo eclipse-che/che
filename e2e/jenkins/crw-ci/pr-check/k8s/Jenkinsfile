@@ -213,8 +213,6 @@ pipeline {
                        -d "grant_type=password" \\
                        -d "client_id=che-public" | jq -r .access_token)
 
-                    wget $testWorkspaceDevfileUrl -O ${WORKSPACE}/test-workspace-devfile.yaml
-
                     ${WORKSPACE}/chectl workspace:start --devfile=$DEVFILE_PATH --access-token "\$USER_ACCESS_TOKEN"
                 """
             }
