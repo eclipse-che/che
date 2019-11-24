@@ -14,6 +14,7 @@ pipeline {
         PATH = "/tmp:/qa/tools/opt/apache-maven-3.5.4/bin:$PATH"
         JENKINS_BUILD = "true"
 
+        DEVFILE_PATH = "${WORKSPACE}/e2e/files/happy-path/happy-path-workspace.yaml"
         SUCCESS_THRESHOLD = 5
 
         LOGS_AND_CONFIGS="${WORKSPACE}/logs-and-configs"
@@ -36,17 +37,9 @@ pipeline {
                 defaultValue: "test-happy-path",
                 description: 'TypeScript E2E test to run')
         
-        string(name: 'testWorkspaceDevfileUrl',
-                defaultValue: "https://raw.githubusercontent.com/eclipse/che/${ghprbSourceBranch}/e2e/files/happy-path/happy-path-workspace.yaml",
-                description: 'URL of devfile of test workspace')
-
-        string(name: 'cheCustomResourceUrl',
-                defaultValue: "http://raw.githubusercontent.com/eclipse/che-operator/${ghprbSourceBranch}/deploy/crds/org_v1_che_cr.yaml",
-                description: 'URL of Che custom resource yaml')
-
-        text(name: 'customResource',
-              description: 'Custom resource yaml content'
-        )
+        booleanParam(name: 'createTestWorkspace',
+                defaultValue: true,
+                description: 'Should create test workspace')
     }
 
     stages {
@@ -205,7 +198,7 @@ pipeline {
 
         stage("Create test workspace") {
             when {
-                expression { return params.testWorkspaceDevfileUrl != null && params.testWorkspaceDevfileUrl != "" }
+                expression { params.createTestWorkspace }
             }
 
             steps {
@@ -222,7 +215,7 @@ pipeline {
 
                     wget $testWorkspaceDevfileUrl -O ${WORKSPACE}/test-workspace-devfile.yaml
 
-                    ${WORKSPACE}/chectl workspace:start --devfile=${WORKSPACE}/test-workspace-devfile.yaml --access-token "\$USER_ACCESS_TOKEN"
+                    ${WORKSPACE}/chectl workspace:start --devfile=$DEVFILE_PATH --access-token "\$USER_ACCESS_TOKEN"
                 """
             }
         }
