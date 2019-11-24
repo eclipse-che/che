@@ -37,9 +37,9 @@ pipeline {
                 defaultValue: "test-happy-path",
                 description: 'TypeScript E2E test to run')
         
-        booleanParam(name: 'createTestWorkspace',
-                defaultValue: true,
-                description: 'Should create test workspace')
+        string(name: 'testWorkspaceDevfileUrl',
+                defaultValue: "https://raw.githubusercontent.com/eclipse/che/${ghprbSourceBranch}/e2e/files/happy-path/happy-path-workspace.yaml",
+                description: 'URL of devfile of test workspace')
     }
 
     stages {
@@ -198,11 +198,13 @@ pipeline {
 
         stage("Create test workspace") {
             when {
-                expression { params.createTestWorkspace }
+                expression { return testWorkspaceDevfileUrl != null && testWorkspaceDevfileUrl != "" }
             }
 
             steps {
                 sh """
+                    wget $testWorkspaceDevfileUrl -O ${WORKSPACE}/test-workspace-devfile.yaml
+
                     KEYCLOAK_URL=\$(kubectl get ingress/keycloak -n che -o jsonpath='{.spec.rules[0].host}')
                     KEYCLOAK_BASE_URL="http://\${KEYCLOAK_URL}/auth"
 
@@ -213,7 +215,9 @@ pipeline {
                        -d "grant_type=password" \\
                        -d "client_id=che-public" | jq -r .access_token)
 
-                    ${WORKSPACE}/chectl workspace:start --devfile=$DEVFILE_PATH --access-token "\$USER_ACCESS_TOKEN"
+                    ${WORKSPACE}/chectl workspace:start \\
+                       --devfile=${WORKSPACE}/test-workspace-devfile.yaml \\
+                       --access-token "\$USER_ACCESS_TOKEN"
                 """
             }
         }
@@ -268,7 +272,7 @@ pipeline {
                 mkdir -p $LOGS_AND_CONFIGS/che-config
 
                 cp ${WORKSPACE}/org_v1_che_cr.yaml $LOGS_AND_CONFIGS/che-config || true
-                cp ${WORKSPACE}/test-workspace-devfile.yaml $LOGS_AND_CONFIGS/che-config || true
+                cp ${WORKSPACE}/test-workspace-devfile.yaml $LOGS_AND_CONFIGS || true
 
                 kubectl get checluster --namespace=che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml || true
                 kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
@@ -293,7 +297,8 @@ pipeline {
                 docker image ls > $LOGS_AND_CONFIGS/docker/images.txt || true
                 docker ps -a > $LOGS_AND_CONFIGS/docker/containers.txt || true
 
-                env
+                env > $LOGS_AND_CONFIGS/env.output.txt || true
+                ${WORKSPACE}/chectl --help > $LOGS_AND_CONFIGS/chectl.version.txt || true
             """
 
             archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**, logs-and-configs/**"
