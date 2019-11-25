@@ -14,7 +14,6 @@ pipeline {
         PATH = "/tmp:/qa/tools/opt/apache-maven-3.5.4/bin:$PATH"
         JENKINS_BUILD = "true"
 
-        DEVFILE_PATH = "${WORKSPACE}/e2e/files/happy-path/happy-path-workspace.yaml"
         SUCCESS_THRESHOLD = 5
 
         LOGS_AND_CONFIGS="${WORKSPACE}/logs-and-configs"
