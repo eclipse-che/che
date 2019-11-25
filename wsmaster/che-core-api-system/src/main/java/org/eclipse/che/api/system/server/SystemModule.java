@@ -20,6 +20,8 @@ public class SystemModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(org.eclipse.che.api.system.server.SystemService.class);
+    bind(org.eclipse.che.api.system.server.JvmService.class);
+    bind(org.eclipse.che.api.system.server.JvmManager.class).asEagerSingleton();
     bind(org.eclipse.che.api.system.server.SystemEventsWebsocketBroadcaster.class)
         .asEagerSingleton();
     Multibinder.newSetBinder(binder(), ServiceTermination.class);

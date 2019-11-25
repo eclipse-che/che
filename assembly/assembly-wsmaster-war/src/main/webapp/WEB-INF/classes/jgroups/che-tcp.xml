@@ -31,7 +31,8 @@
   <org.jgroups.protocols.kubernetes.KUBE_PING
     port_range="3"
     namespace="${KUBERNETES_NAMESPACE:che}"
-    labels="${KUBERNETES_LABEL:app=che,component=che}"
+    labels="${KUBERNETES_LABELS:app=che,component=che}"
+    useNotReadyAddresses="${KUBERNETES_USE_NOT_READY_ADDRESSES:false}"
   />
 
   <MERGE3 min_interval="10000"
