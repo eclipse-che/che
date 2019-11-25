@@ -71,21 +71,8 @@ export class PluginRegistry {
     return 'Che Editor';
   }
 
-  private getRegistryAuthorization(): string {
-    // TODO add an ability to configure registry as secure
-    return `Basic ${btoa('Che plugin')}`;
-  }
-
   fetchPlugins(location: string): ng.IPromise<Array<IPlugin>> {
-    const promise = this.$http({
-      'method': 'GET',
-      'url': `${location}/plugins/`,
-      'headers': {
-        'Authorization': this.getRegistryAuthorization()
-      }
-    });
-
-    return promise.then((result: ng.IHttpResponse<IPlugin[]>) => {
+    return this.$http({'method': 'GET', 'url': location + '/plugins/'}).then((result: ng.IHttpResponse<IPlugin[]>) => {
       this.plugins.set(location, result.data);
       return this.$q.when(result.data);
     }, (error: any) => {

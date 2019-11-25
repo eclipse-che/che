@@ -15,6 +15,8 @@ import {HttpInterceptorBase} from './interceptor-base';
 
 const GITHUB_API = 'api.github.com';
 
+const AUTHORIZATION = 'Authorization';
+
 /**
  * @author Oleksii Kurinnyi
  */
@@ -49,11 +51,15 @@ export class KeycloakTokenInterceptor extends HttpInterceptorBase {
       return config;
     }
 
-    if (config.headers.Authorization) {
+    const headers = config.headers;
+    if (headers && Object.keys(headers).indexOf(AUTHORIZATION) != -1) {
+      if (headers[AUTHORIZATION] === undefined) {
+        delete headers[AUTHORIZATION];
+      }
       return config;
     }
 
-    
+
     if (this.keycloak && this.keycloak.token) {
       let deferred = this.$q.defer();
       this.keycloak.updateToken(5).success(() => {
