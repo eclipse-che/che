@@ -59,12 +59,16 @@ export class PluginRegistry {
 
   private plugins = new Map<string, Array<IPlugin>>();
 
+  private headers: { [name: string]: string; };
+
   /**
    * Default constructor that is using resource
    */
   constructor($http: ng.IHttpService, $q: ng.IQService) {
     this.$http = $http;
     this.$q = $q;
+
+    this.headers = { 'Authorization': undefined };
   }
 
   static get EDITOR_TYPE(): string {
@@ -72,7 +76,13 @@ export class PluginRegistry {
   }
 
   fetchPlugins(location: string): ng.IPromise<Array<IPlugin>> {
-    return this.$http({'method': 'GET', 'url': location + '/plugins/'}).then((result: ng.IHttpResponse<IPlugin[]>) => {
+    const promise = this.$http({
+      'method': 'GET',
+      'url': `${location}/plugins/`,
+      'headers': this.headers
+    });
+
+    return promise.then((result: ng.IHttpResponse<IPlugin[]>) => {
       this.plugins.set(location, result.data);
       return this.$q.when(result.data);
     }, (error: any) => {
