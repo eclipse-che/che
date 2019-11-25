@@ -14,8 +14,7 @@ package org.eclipse.che.api.workspace.server.spi;
 import java.util.Objects;
 
 /**
- * Infrastructure may be configured to use namespace value that should be evaluated. This objects
- * holds everything that might be needed for such evaluation.
+ * Holds information needed for resolving placeholders in the namespace name.
  *
  * @author Lukas Krejci
  * @author Sergii Leshchenko

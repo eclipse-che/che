@@ -119,7 +119,7 @@ public class KubernetesNamespaceFactoryTest {
   @Test(
       expectedExceptions = ValidationException.class,
       expectedExceptionsMessageRegExp =
-          "User defined namespaces are not allowed. You're able to specify only admin configured which is 'defaultNs'")
+          "User defined namespaces are not allowed. Only the default namespace 'defaultNs' is available.")
   public void
       shouldThrowExceptionIfNonDefaultNamespaceIsSpecifiedAndUserDefinedAreNotAllowedOnCheckingIfNamespaceIsAllowed()
           throws Exception {

@@ -26,7 +26,7 @@ public interface RuntimeIdentity {
 
   /**
    * The workspace environment name that was used to start runtime. May be null if workspace does
-   * not contain stored environment configuration (it may me generated on fly).
+   * not contain stored environment configuration (it may be generated on fly).
    */
   @Nullable
   String getEnvName();

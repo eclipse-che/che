@@ -146,9 +146,9 @@ public class KubernetesNamespaceFactory {
         evalPlaceholders(defaultNamespaceName, EnvironmentContext.getCurrent().getSubject(), null);
     if (!namespaceName.equals(defaultNamespace)) {
       throw new ValidationException(
-          "User defined namespaces are not allowed. You're able to specify only admin configured which is '"
-              + defaultNamespaceName
-              + '\'');
+          format(
+              "User defined namespaces are not allowed. Only the default namespace '%s' is available.",
+              defaultNamespaceName));
     }
   }
 
