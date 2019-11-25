@@ -58,25 +58,42 @@ export class DevfileRegistry {
     this.jwtproxyMemoryLimitNumber = this.getMemoryLimit(DEFAULT_JWTPROXY_MEMORY_LIMIT);
   }
 
+  private getRegistryAuthorization(): string {
+    // TODO add an ability to configure registry as secure
+    return `Basic ${btoa('Che devfile')}`;
+  }
+
   fetchDevfiles(location: string): ng.IPromise<Array<IDevfileMetaData>> {
-    let promise = this.$http({ 'method': 'GET', 'url': location + '/devfiles/index.json' });
-    return promise.then((result: any) => {
-      return result.data.map((devfileMetaData: IDevfileMetaData) => {
+    let promise = this.$http({
+      'method': 'GET',
+      'url': `${location}/devfiles/index.json`,
+      'headers': {
+        'Authorization': this.getRegistryAuthorization()
+      }
+    });
+
+    return promise.then(result =>
+      result.data.map((devfileMetaData: IDevfileMetaData) => {
         let globalMemoryLimitNumber = this.getMemoryLimit(devfileMetaData.globalMemoryLimit);
         // TODO remove this after fixing https://github.com/eclipse/che/issues/11424
         if (this.isKeycloackPresent) {
           globalMemoryLimitNumber += this.jwtproxyMemoryLimitNumber;
         }
-        devfileMetaData.globalMemoryLimit = this.$filter<IChangeMemoryUnit>('changeMemoryUnit')(globalMemoryLimitNumber, ['B','GB']);
+        devfileMetaData.globalMemoryLimit = this.$filter<IChangeMemoryUnit>('changeMemoryUnit')(globalMemoryLimitNumber, ['B', 'GB']);
         return devfileMetaData;
-      });
-    });
+      }));
   }
 
   fetchDevfile(location: string, link: string): ng.IPromise<che.IWorkspaceDevfile> {
-    let promise = this.$http({ 'method': 'GET', 'url': location + link });
+    let promise = this.$http({
+      'method': 'GET',
+      'url': `${location}${link}`,
+      'headers': {
+        'Authorization': this.getRegistryAuthorization()
+      }
+    });
     return promise.then((result: any) => {
-      let devfile = this.devfileYamlToJson(result.data)
+      let devfile = this.devfileYamlToJson(result.data);
       this.devfilesMap.set(location + link, devfile);
       return devfile;
     });
