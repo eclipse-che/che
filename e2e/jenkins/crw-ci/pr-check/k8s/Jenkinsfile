@@ -163,10 +163,15 @@ pipeline {
                     --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml
                 """
 
+                script {
+                    cheHost = sh(
+                            script: "kubectl get ingress che -n=che -o=jsonpath={'.spec.rules[0].host'}",
+                            returnStdout: true
+                    ).trim()
+                }
+
                 echo "Wait che-server to be available"
                 sh """
-                     CHE_URL=\$(kubectl get ingress che -n=che -o=jsonpath={'.spec.rules[0].host'})
-                     
                      COUNTER=0;
                      SUCCESS_RATE_COUNTER=0;
                      while true; do
@@ -178,7 +183,7 @@ pipeline {
                       ((COUNTER+=1))
                       
                       
-                      STATUS_CODE=\$(curl -sL -w "%{http_code}" -I \${CHE_URL} -o /dev/null; true) || true
+                      STATUS_CODE=\$(curl -sL -w "%{http_code}" -I ${cheHost} -o /dev/null; true) || true
                       
                       echo "Try \${COUNTER}. Status code: \${STATUS_CODE}"
                       if [ "\$STATUS_CODE" == "200" ]; then 
@@ -226,8 +231,7 @@ pipeline {
                 sh """
                      docker pull eclipse/che-e2e:nightly
                      
-                     CHE_HOST=\$(kubectl get ingress che -n=che -o=jsonpath={'.spec.rules[0].host'})
-                     CHE_URL=http://\${CHE_HOST}
+                     CHE_URL=http://${cheHost}
                      docker run --shm-size=256m --net=host --ipc=host \\
                        -e TS_SELENIUM_HEADLESS='true' \\
                        -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \\
