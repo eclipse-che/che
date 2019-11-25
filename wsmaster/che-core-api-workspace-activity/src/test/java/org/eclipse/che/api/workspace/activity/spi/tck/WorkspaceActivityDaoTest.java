@@ -15,6 +15,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -27,7 +28,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivity;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
@@ -73,7 +76,6 @@ public class WorkspaceActivityDaoTest {
 
   @BeforeMethod
   private void setUp() throws TckRepositoryException {
-
     for (int i = 0; i < COUNT; i++) {
       accounts[i] = new AccountImpl("accountId" + i, "accountName" + i, "test");
       // 2 workspaces share 1 namespace
@@ -124,16 +126,26 @@ public class WorkspaceActivityDaoTest {
 
   @Test(dependsOnMethods = "shouldFindExpirationsByTimestamp")
   public void shouldUpdateExpirations() throws Exception {
-
     List<String> expected =
         asList(
             activities[0].getWorkspaceId(),
             activities[2].getWorkspaceId(),
             activities[1].getWorkspaceId());
+
     workspaceActivityDao.setExpirationTime(activities[2].getWorkspaceId(), 1_750_000);
 
     List<String> found = workspaceActivityDao.findExpired(2_500_000);
     assertEquals(found, expected);
+  }
+
+  @Test(
+      expectedExceptions = ServerException.class,
+      expectedExceptionsMessageRegExp =
+          "Can not create activity record since the specified workspace with id 'non-existing' does not exist.",
+      dependsOnMethods = "shouldFindExpirationsByTimestamp")
+  public void shouldThrowServerExceptionOnUpdateExpirationsWhenSuchWorkspaceDoesNotExist()
+      throws Exception {
+    workspaceActivityDao.setExpirationTime("non-existing", 1_750_000);
   }
 
   @Test(dependsOnMethods = {"shouldFindExpirationsByTimestamp", "shouldRemoveExpirationsByWsId"})
@@ -147,6 +159,35 @@ public class WorkspaceActivityDaoTest {
 
     List<String> found = workspaceActivityDao.findExpired(1_500_000);
     assertEquals(found, expected);
+  }
+
+  @Test(
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp = "Activity record for workspace ID ws0 already exists.")
+  public void shouldThrowServerExceptionWhenSuchWorkspaceActivityAlreadyExist() throws Exception {
+    workspaceActivityDao.createActivity(activities[0]);
+  }
+
+  @Test(
+      expectedExceptions = ServerException.class,
+      expectedExceptionsMessageRegExp =
+          "Can not create activity record since the specified "
+              + "workspace with id 'non-existing' does not exist.")
+  public void shouldThrowServerExceptionWhenWorkspaceDoesNotExist() throws Exception {
+    activities[0].setWorkspaceId("non-existing");
+
+    workspaceActivityDao.createActivity(activities[0]);
+  }
+
+  @Test(
+      expectedExceptions = ServerException.class,
+      expectedExceptionsMessageRegExp =
+          "Can not create activity record since the specified "
+              + "workspace with id 'non-existing' does not exist.",
+      dependsOnMethods = "shouldFindExpirationsByTimestamp")
+  public void shouldThrowServerExceptionOnStatusChangeTimeWhenSuchWorkspaceDoesNotExist()
+      throws Exception {
+    workspaceActivityDao.setStatusChangeTime("non-existing", STOPPED, 1_750_000);
   }
 
   @Test

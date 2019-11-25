@@ -95,22 +95,7 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
         workspaceActivities
             .values()
             .stream()
-            .filter(a -> a.getStatus() == status)
-            .filter(
-                a -> {
-                  switch (status) {
-                    case STOPPED:
-                      return isGreater(a.getLastStopped(), timestamp);
-                    case STOPPING:
-                      return isGreater(a.getLastStopped(), timestamp);
-                    case RUNNING:
-                      return isGreater(a.getLastStopped(), timestamp);
-                    case STARTING:
-                      return isGreater(a.getLastStopped(), timestamp);
-                    default:
-                      return false;
-                  }
-                })
+            .filter(a -> a.getStatus() == status && isGreater(a.getLastStopped(), timestamp))
             .map(WorkspaceActivity::getWorkspaceId)
             .collect(toList());
 

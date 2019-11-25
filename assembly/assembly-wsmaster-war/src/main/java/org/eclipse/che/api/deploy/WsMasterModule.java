@@ -341,6 +341,7 @@ public class WsMasterModule extends AbstractModule {
 
     // Permission filters
     bind(org.eclipse.che.multiuser.permission.system.SystemServicePermissionsFilter.class);
+    bind(org.eclipse.che.multiuser.permission.system.JvmServicePermissionsFilter.class);
     bind(
         org.eclipse.che.multiuser.permission.system.SystemEventsSubscriptionPermissionsCheck.class);
 
