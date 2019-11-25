@@ -14,6 +14,8 @@ pipeline {
         PATH = "/tmp:/qa/tools/opt/apache-maven-3.5.4/bin:$PATH"
         JENKINS_BUILD = "true"
 
+        DEVFILE_PATH = "${WORKSPACE}/test-workspace-devfile.yaml"
+
         SUCCESS_THRESHOLD = 5
 
         LOGS_AND_CONFIGS="${WORKSPACE}/logs-and-configs"
@@ -37,8 +39,12 @@ pipeline {
                 description: 'TypeScript E2E test to run')
         
         string(name: 'testWorkspaceDevfileUrl',
-                defaultValue: "https://raw.githubusercontent.com/eclipse/che/${ghprbSourceBranch}/e2e/files/happy-path/happy-path-workspace.yaml",
+                defaultValue: "",
                 description: 'URL of devfile of test workspace')
+
+        booleanParam(name: 'createTestWorkspace',
+                defaultValue: true,
+                description: 'Should create test workspace')
     }
 
     stages {
@@ -91,7 +97,7 @@ pipeline {
 
                 stage("Build Che including upstream projects") {
                     when {
-                        expression { params.buildChe }
+                        expression { buildChe }
                     }
 
                     steps {
@@ -124,7 +130,7 @@ pipeline {
 
         stage("Build and push che-server image") {
             when {
-                expression { params.buildChe }
+                expression { buildChe }
             }
 
             steps {
@@ -202,27 +208,34 @@ pipeline {
 
         stage("Create test workspace") {
             when {
-                expression { return testWorkspaceDevfileUrl != null && testWorkspaceDevfileUrl != "" }
+                expression { createTestWorkspace }
             }
 
             steps {
-                sh """
-                    wget $testWorkspaceDevfileUrl -O ${WORKSPACE}/test-workspace-devfile.yaml
+                script {
+                    if (testWorkspaceDevfileUrl != null && testWorkspaceDevfileUrl != "") {
+                        sh "wget $testWorkspaceDevfileUrl -O $DEVFILE_PATH"
 
-                    KEYCLOAK_URL=\$(kubectl get ingress/keycloak -n che -o jsonpath='{.spec.rules[0].host}')
-                    KEYCLOAK_BASE_URL="http://\${KEYCLOAK_URL}/auth"
+                    } else {
+                        sh "cp ${WORKSPACE}/e2e/files/happy-path/happy-path-workspace.yaml $DEVFILE_PATH"
+                    }
 
-                    USER_ACCESS_TOKEN=\$(curl -X POST \$KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token \\
-                       -H "Content-Type: application/x-www-form-urlencoded" \\
-                       -d "username=admin" \\
-                       -d "password=admin" \\
-                       -d "grant_type=password" \\
-                       -d "client_id=che-public" | jq -r .access_token)
-
-                    ${WORKSPACE}/chectl workspace:start \\
-                       --devfile=${WORKSPACE}/test-workspace-devfile.yaml \\
-                       --access-token "\$USER_ACCESS_TOKEN"
-                """
+                    sh """   
+                        KEYCLOAK_URL=\$(kubectl get ingress/keycloak -n che -o jsonpath='{.spec.rules[0].host}')
+                        KEYCLOAK_BASE_URL="http://\${KEYCLOAK_URL}/auth"
+    
+                        USER_ACCESS_TOKEN=\$(curl -X POST \$KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token \\
+                           -H "Content-Type: application/x-www-form-urlencoded" \\
+                           -d "username=admin" \\
+                           -d "password=admin" \\
+                           -d "grant_type=password" \\
+                           -d "client_id=che-public" | jq -r .access_token)
+    
+                        ${WORKSPACE}/chectl workspace:start \\
+                           --devfile=${DEVFILE_PATH} \\
+                           --access-token "\$USER_ACCESS_TOKEN"
+                    """
+                }
             }
         }
 
@@ -233,6 +246,7 @@ pipeline {
                      
                      CHE_URL=http://${cheHost}
                      docker run --shm-size=256m --net=host --ipc=host \\
+                       -p 5920:5920 \\
                        -e TS_SELENIUM_HEADLESS='true' \\
                        -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \\
                        -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \\
@@ -268,14 +282,14 @@ pipeline {
         }
 
         cleanup {
-            sh """                      
+            sh """                   
                 mkdir -p $LOGS_AND_CONFIGS/kubectl
                 kubectl --namespace=che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
 
                 mkdir -p $LOGS_AND_CONFIGS/che-config
 
                 cp ${WORKSPACE}/org_v1_che_cr.yaml $LOGS_AND_CONFIGS/che-config || true
-                cp ${WORKSPACE}/test-workspace-devfile.yaml $LOGS_AND_CONFIGS || true
+                cp ${DEVFILE_PATH} $LOGS_AND_CONFIGS || true
 
                 kubectl get checluster --namespace=che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml || true
                 kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
