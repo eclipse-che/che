@@ -46,6 +46,8 @@ export class DevfileRegistry {
 
   private jwtproxyMemoryLimitNumber: number;
 
+  private headers: { [name: string]: string; };
+
   /**
    * Default constructor that is using resource
    */
@@ -56,10 +58,17 @@ export class DevfileRegistry {
     this.devfilesMap = new Map<string, che.IWorkspaceDevfile>();
     this.isKeycloackPresent = cheKeycloak.isPresent();
     this.jwtproxyMemoryLimitNumber = this.getMemoryLimit(DEFAULT_JWTPROXY_MEMORY_LIMIT);
+
+    this.headers = { 'Authorization': undefined };
   }
 
   fetchDevfiles(location: string): ng.IPromise<Array<IDevfileMetaData>> {
-    let promise = this.$http({ 'method': 'GET', 'url': location + '/devfiles/index.json' });
+    let promise = this.$http({
+      'method': 'GET',
+      'url': `${location}/devfiles/index.json`,
+      'headers': this.headers
+    });
+
     return promise.then((result: any) => {
       return result.data.map((devfileMetaData: IDevfileMetaData) => {
         let globalMemoryLimitNumber = this.getMemoryLimit(devfileMetaData.globalMemoryLimit);
@@ -74,9 +83,13 @@ export class DevfileRegistry {
   }
 
   fetchDevfile(location: string, link: string): ng.IPromise<che.IWorkspaceDevfile> {
-    let promise = this.$http({ 'method': 'GET', 'url': location + link });
+    let promise = this.$http({
+      'method': 'GET',
+      'url': `${location}${link}`,
+      'headers': this.headers
+    });
     return promise.then((result: any) => {
-      let devfile = this.devfileYamlToJson(result.data)
+      let devfile = this.devfileYamlToJson(result.data);
       this.devfilesMap.set(location + link, devfile);
       return devfile;
     });

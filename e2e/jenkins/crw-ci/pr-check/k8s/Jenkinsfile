@@ -1,11 +1,11 @@
 #!groovy
 
 pipeline {
-    agent { label 'codenvy-slave9' }
+    agent { label "minikube-rhel7-24gb" }
 
     options {
         timestamps()
-        timeout(time: 15, unit: 'MINUTES')
+        timeout(time: 60, unit: 'MINUTES')
         buildDiscarder(logRotator(artifactDaysToKeepStr: '',
                 artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '100'))
     }
@@ -14,225 +14,311 @@ pipeline {
         PATH = "/tmp:/qa/tools/opt/apache-maven-3.5.4/bin:$PATH"
         JENKINS_BUILD = "true"
 
-        DEVFILE_URL = "${WORKSPACE}/e2e/files/happy-path/happy-path-workspace.yaml"
-        SUCCESS_THRESHOLD = 5
+        DEVFILE_PATH = "${WORKSPACE}/test-workspace-devfile.yaml"
 
-        CHE_IMAGE_REPO = "maxura/che-server"
-        CHE_IMAGE_TAG = "${ghprbPullId}"
+        SUCCESS_THRESHOLD = 5
 
         LOGS_AND_CONFIGS="${WORKSPACE}/logs-and-configs"
     }
 
-    stages {
-        stage("Cleanup") {
-            steps {
-                script() {
-                    sh "/usr/local/bin/minikube delete || true"
-                }
-            }
-        }
+    parameters {
+        string(name: 'cheImageRepo',
+                defaultValue: "maxura/che-server",
+                description: 'Repo of Che server image')
 
+        string(name: 'cheImageTag',
+                defaultValue: "$ghprbPullId",
+                description: 'Tag of Che server image')
+
+        booleanParam(name: 'buildChe',
+                defaultValue: true,
+                description: 'Should build Che server')
+
+        string(name: 'e2eTestToRun',
+                defaultValue: "test-happy-path",
+                description: 'TypeScript E2E test to run')
+        
+        string(name: 'testWorkspaceDevfileUrl',
+                defaultValue: "",
+                description: 'URL of devfile of test workspace')
+
+        booleanParam(name: 'createTestWorkspace',
+                defaultValue: true,
+                description: 'Should create test workspace')
+    }
+
+    stages {
         stage("Prepare to start Che on K8S") {
             failFast true
 
             parallel {
                 stage("Download chectl") {
                     steps {
-                        script {
-                            // TO-DO use option "--install-path" https://github.com/eclipse/che/pull/14182
-                            sh """
-                               curl -sL  https://www.eclipse.org/che/chectl/ > install_chectl.sh
-                               chmod +x install_chectl.sh
-                               sudo PATH=$PATH ./install_chectl.sh --channel=next
-                               sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
-                               sudo chmod +x ${WORKSPACE}/chectl
-                            """
-                        }
+                        // TO-DO use option "--install-path" https://github.com/eclipse/che/pull/14182
+                        sh """
+                           curl -sL https://www.eclipse.org/che/chectl/ > install_chectl.sh
+                           chmod +x install_chectl.sh
+                           sudo PATH=$PATH ./install_chectl.sh --channel=next
+                           sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
+                           sudo chmod +x ${WORKSPACE}/chectl
+                        """
                     }
                 }
 
                 stage("Start Kubernetes") {
                     steps {
-                        script {
-                            sh """
-                              /usr/local/bin/minikube start \\
-                                --vm-driver=none \\
-                                --cpus 4 \\
-                                --memory 12288 \\
-                                --logtostderr
-                            
-                              sudo chmod g+r -R /home/codenvy/.minikube
-                              sudo chmod g+r -R /home/codenvy/.kube
-                              sudo chmod g+r /var/lib/kubeadm.yaml
-                            """
-                        }
-                    }
-                }
-
-                stage("Build Che") {
-                    steps {
-                        script {
-                            sh "mvn clean install -f ${WORKSPACE}/pom.xml -T 4 -U -DskipTests -Dskip-enforce -Dskip-validate-sources"
-                        }
-                    }
-                }
-            }
-        }
-
-        stage("Push Che artifacts to docker.io") {
-            steps {
-                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
-                    script {
+                        echo "Workaround k8s error https://github.com/eclipse/che/issues/14902"
                         sh """
-                          ${WORKSPACE}/dockerfiles/che/build.sh --organization:maxura --tag:${CHE_IMAGE_TAG} --dockerfile:Dockerfile
-                          docker tag ${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG} docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
-                          docker login -u maxura -p ${maxura_docker_password}
-                          docker push docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
+                            cat /etc/sysctl.conf
+                            echo "net.bridge.bridge-nf-call-iptables = 1" | sudo tee -a /etc/sysctl.conf
+                            sudo sysctl -p
+                        """
+
+                        sh """
+                            # https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md
+                            export MINIKUBE_WANTUPDATENOTIFICATION=false
+                            export MINIKUBE_WANTREPORTERRORPROMPT=false
+                            export MINIKUBE_HOME=\$HOME
+                            export CHANGE_MINIKUBE_NONE_USER=true
+                            export KUBECONFIG=\$HOME/.kube/config
+                            export DOCKER_CONFIG=\$HOME/.docker
+
+                            mkdir -p \$HOME/.kube \$HOME/.minikube
+                            touch \$KUBECONFIG
+
+                            sudo -E /usr/local/bin/minikube start \\
+                            --vm-driver=none \\
+                            --cpus 4 \\
+                            --memory 13000 \\
+                            --logtostderr
                         """
                     }
                 }
+
+                stage("Build Che including upstream projects") {
+                    when {
+                        expression { buildChe }
+                    }
+
+                    steps {
+                        echo "Build branch ${ghprbSourceBranch} of upstream projects"
+                        sh """
+                            project_list=(
+                                eclipse/che-parent
+                                eclipse/che-docs
+                            )
+                            
+                            for project in \${project_list[@]};
+                            do
+                                result=\$(git ls-remote --heads https://github.com/\${project}.git ${ghprbSourceBranch})
+                                if [[ \$result == *"refs"* ]]; then
+                                    echo "[PRE-BUILD CHECK] found upstream project: \${project} with same branch name: ${ghprbSourceBranch}"
+                                    git clone -b ${ghprbSourceBranch} https://github.com/\${project} \${project}
+                                    mvn clean install -f ${WORKSPACE}/\${project}/pom.xml -DskipTests
+                                else
+                                    echo "[PRE-BUILD CHECK] skip build upstream project: \$project, unable to find branch: ${ghprbSourceBranch}."
+                                fi
+                            done
+                        """
+
+                        echo "Build Che"
+                        sh "mvn clean install -f ${WORKSPACE}/pom.xml -T 4 -U -DskipTests -Dskip-enforce -Dskip-validate-sources"
+                    }
+                }
             }
         }
 
-        stage("Start Single Che") {
-            steps {
-                script {
-                    sh """
-                      ${WORKSPACE}/chectl server:start \\
-                        --k8spodreadytimeout=180000 \\
-                        -t=${WORKSPACE}/deploy/ \\
-                        --listr-renderer=verbose \\
-                        --platform=minikube \\
-                        --cheimage=${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
-                    """
+        stage("Build and push che-server image") {
+            when {
+                expression { buildChe }
+            }
 
-                    // wait che-server to be available
+            steps {
+                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
                     sh """
-                         CHE_URL=\$(kubectl get ingress che-ingress -n=che -o=jsonpath={'.spec.rules[0].host'})
-                         
-                         COUNTER=0;
-                         SUCCESS_RATE_COUNTER=0;
-                         while true; do
-                          if [ \$COUNTER -gt 180 ]; then
-                          echo "Unable to get stable route. Exiting"
-                            exit 1
-                          fi
-                          
-                          ((COUNTER+=1))
-                          
-                          
-                          STATUS_CODE=\$(curl -sL -w "%{http_code}" -I \${CHE_URL} -o /dev/null; true) || true
-                          
-                          echo "Try \${COUNTER}. Status code: \${STATUS_CODE}"
-                          if [ "\$STATUS_CODE" == "200" ]; then 
-                            ((SUCCESS_RATE_COUNTER+=1))
-                          fi
-                          sleep 1;
-                        
-                          if [ \$SUCCESS_RATE_COUNTER == \$SUCCESS_THRESHOLD ]; then 
-                            echo "Route is stable enough. Continuing running tests"
-                            break
-                          fi
-                         done
+                        ${WORKSPACE}/dockerfiles/che/build.sh --dockerfile:Dockerfile
+                        docker tag eclipse/che-server:nightly docker.io/${cheImageRepo}:${cheImageTag}
+                        docker login -u maxura -p ${maxura_docker_password}
+                        docker push docker.io/${cheImageRepo}:${cheImageTag}
                     """
                 }
+            }
+        }
+
+        stage("Start Che") {
+            steps {
+                echo "Download and patch Che custom-resource.yaml"
+                sh """
+                    wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml
+                    
+                    sed -i "s|cheImage: ''|cheImage: '${cheImageRepo}'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                    sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${cheImageTag}'|" ${WORKSPACE}/org_v1_che_cr.yaml
+
+                    sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" ${WORKSPACE}/org_v1_che_cr.yaml
+
+                    sed -i "s|ingressDomain: '192.168.99.101.nip.io'|ingressDomain: '\$(minikube ip).nip.io'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                """
+
+                echo "Install Che"
+                sh """
+                    ${WORKSPACE}/chectl server:start \\
+                    --k8spodreadytimeout=180000 \\
+                    --installer=operator \\
+                    --listr-renderer=verbose \\
+                    --platform=minikube \\
+                    --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml
+                """
+
+                script {
+                    cheHost = sh(
+                            script: "kubectl get ingress che -n=che -o=jsonpath={'.spec.rules[0].host'}",
+                            returnStdout: true
+                    ).trim()
+                }
+
+                echo "Wait che-server to be available"
+                sh """
+                     COUNTER=0;
+                     SUCCESS_RATE_COUNTER=0;
+                     while true; do
+                      if [ \$COUNTER -gt 180 ]; then
+                      echo "Unable to get stable route. Exiting"
+                        exit 1
+                      fi
+                      
+                      ((COUNTER+=1))
+                      
+                      
+                      STATUS_CODE=\$(curl -sL -w "%{http_code}" -I ${cheHost} -o /dev/null; true) || true
+                      
+                      echo "Try \${COUNTER}. Status code: \${STATUS_CODE}"
+                      if [ "\$STATUS_CODE" == "200" ]; then 
+                        ((SUCCESS_RATE_COUNTER+=1))
+                      fi
+                      sleep 1;
+                    
+                      if [ \$SUCCESS_RATE_COUNTER == \$SUCCESS_THRESHOLD ]; then 
+                        echo "Route is stable enough. Continuing running tests"
+                        break
+                      fi
+                     done
+                """
             }
         }
 
         stage("Create test workspace") {
+            when {
+                expression { createTestWorkspace }
+            }
+
             steps {
                 script {
-                    sh "${WORKSPACE}/chectl workspace:start --devfile=$DEVFILE_URL"
+                    if (testWorkspaceDevfileUrl != null && testWorkspaceDevfileUrl != "") {
+                        sh "wget $testWorkspaceDevfileUrl -O $DEVFILE_PATH"
+
+                    } else {
+                        sh "cp ${WORKSPACE}/e2e/files/happy-path/happy-path-workspace.yaml $DEVFILE_PATH"
+                    }
+
+                    sh """   
+                        KEYCLOAK_URL=\$(kubectl get ingress/keycloak -n che -o jsonpath='{.spec.rules[0].host}')
+                        KEYCLOAK_BASE_URL="http://\${KEYCLOAK_URL}/auth"
+    
+                        USER_ACCESS_TOKEN=\$(curl -X POST \$KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token \\
+                           -H "Content-Type: application/x-www-form-urlencoded" \\
+                           -d "username=admin" \\
+                           -d "password=admin" \\
+                           -d "grant_type=password" \\
+                           -d "client_id=che-public" | jq -r .access_token)
+    
+                        ${WORKSPACE}/chectl workspace:start \\
+                           --devfile=${DEVFILE_PATH} \\
+                           --access-token "\$USER_ACCESS_TOKEN"
+                    """
                 }
             }
         }
 
         stage("Run E2E Happy path tests") {
             steps {
-                script {
-                    sh """
-                         docker pull eclipse/che-e2e:nightly
-                         
-                         CHE_HOST=\$(kubectl get ingress che-ingress -n=che -o=jsonpath={'.spec.rules[0].host'})
-                         CHE_URL=http://\${CHE_HOST}
-                         docker run --shm-size=256m --net=host --ipc=host \\
-                           -e TS_SELENIUM_HEADLESS='true' \\
-                           -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \\
-                           -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \\
-                           -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \\
-                           -e TS_SELENIUM_BASE_URL=\${CHE_URL} \\
-                           -e TS_SELENIUM_LOG_LEVEL='DEBUG' \\
-                           -v ${WORKSPACE}/e2e:/tmp/e2e:Z \\
-                           eclipse/che-e2e:nightly
-                    """
-                }
+                sh """
+                     docker pull eclipse/che-e2e:nightly
+                     
+                     CHE_URL=http://${cheHost}
+                     docker run --shm-size=256m --net=host --ipc=host \\
+                       -p 5920:5920 \\
+                       -e TS_SELENIUM_HEADLESS='true' \\
+                       -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \\
+                       -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \\
+                       -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \\
+                       -e TS_SELENIUM_BASE_URL=\${CHE_URL} \\
+                       -e TS_SELENIUM_LOG_LEVEL='DEBUG' \\
+                       -e TS_SELENIUM_MULTIUSER="true" \\
+                       -e TS_SELENIUM_USERNAME="admin" \\
+                       -e TS_SELENIUM_PASSWORD="admin" \\
+                       -e TEST_SUITE="${e2eTestToRun}" \\
+                       -v ${WORKSPACE}/e2e:/tmp/e2e:Z \\
+                       eclipse/che-e2e:nightly
+                """
             }
         }
     }
 
     post {
         failure {
-            script {
-                echo "Create screencast from $WORKSPACE/e2e/report/executionScreencast files."
-                sh """
-                    command -v ffmpeg >/dev/null 2>&1 && if ls $WORKSPACE/e2e/report/executionScreencast/*.png 1> /dev/null 2>&1; then
-                      cd $WORKSPACE/e2e/report/executionScreencast
+            echo "Create screencast from $WORKSPACE/e2e/report/executionScreencast files."
+            sh """
+                command -v ffmpeg >/dev/null 2>&1 && if ls $WORKSPACE/e2e/report/executionScreencast/*.png 1> /dev/null 2>&1; then
+                  cd $WORKSPACE/e2e/report/executionScreencast
 
-                      # remove first screenshot which has lower resolution 800x600 and breaks screencast video
-                      sudo rm -f 00100001* || true
-                      
-                      sudo ffmpeg -framerate 1 -pattern_type glob -i '*.png' -c:v libx264 -r 30 -pix_fmt yuv420p $WORKSPACE/e2e/report/screencast.mp4
-                      cd $WORKSPACE/e2e/report/
-                      sudo rm -rf $WORKSPACE/e2e/report/executionScreencast
-                    fi
-                """
-            }
+                  # remove first screenshot which has lower resolution 800x600 and breaks screencast video
+                  sudo rm -f 00100001* || true
+                  
+                  sudo ffmpeg -framerate 1 -pattern_type glob -i '*.png' -c:v libx264 -r 30 -pix_fmt yuv420p $WORKSPACE/e2e/report/screencast.mp4
+                  cd $WORKSPACE/e2e/report/
+                  sudo rm -rf $WORKSPACE/e2e/report/executionScreencast
+                fi
+            """
         }
 
         cleanup {
-            script {
-                sh """                      
-                      mkdir -p $LOGS_AND_CONFIGS/kubectl
-                      kubectl --namespace=che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
+            sh """                   
+                mkdir -p $LOGS_AND_CONFIGS/kubectl
+                kubectl --namespace=che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
 
-                      mkdir -p $LOGS_AND_CONFIGS/che-config
-                      kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
-                      kubectl get ingresses --namespace=che > $LOGS_AND_CONFIGS/che-config/ingresses.txt || true
-                      kubectl get all -n che -o yaml > $LOGS_AND_CONFIGS/che-config/all.yaml || true
+                mkdir -p $LOGS_AND_CONFIGS/che-config
 
-                      mkdir -p $LOGS_AND_CONFIGS/che-logs
-                      kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep che- | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/che-server.log || true
-                      kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep devfile-registry- | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/devfile-registry.log || true
-                      kubectl logs --namespace=che \$(kubectl get pods --namespace=che | grep plugin-registry- | awk {'print \$1'})>$LOGS_AND_CONFIGS/che-logs/plugin-registry.log || true
-                        
-                      mkdir -p $LOGS_AND_CONFIGS/workspace-logs
-                      export WS_POD=\$(kubectl get pod --namespace=che | grep  workspace | awk '{print \$1}')
-                      for c in \$(kubectl get pod --namespace=che \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do kubectl logs \$(kubectl get pod --namespace=che | grep  workspace | awk '{print \$1}') "\${c}" -n che > $LOGS_AND_CONFIGS/workspace-logs/"\${c}"-container.log || true; done
-                      kubectl describe pod --namespace=che \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
-                """
+                cp ${WORKSPACE}/org_v1_che_cr.yaml $LOGS_AND_CONFIGS/che-config || true
+                cp ${DEVFILE_PATH} $LOGS_AND_CONFIGS || true
 
-                sh """
-                      /usr/local/bin/minikube stop || true
-                    
-                      sudo umount \$(mount | grep "kubelet" | awk '{if(NR>0) print \$3}') || true
-                      sudo rm -rf `sudo find /tmp -name 'hostpath-provisioner' 2>/dev/null` || true
-                    
-                      docker volume rm \$(docker volume ls -q -f dangling=true) || true
-                      
-                      docker rm -f \$(sudo docker ps --all | awk 'NR>0 {print \$1;}') || true
-                      
-                      if [[ \$(docker images | grep '${CHE_IMAGE_REPO}') != "" ]]; then
-                        docker rmi -f \$(docker images | grep '${CHE_IMAGE_REPO}') || true
-                      fi
-                """
+                kubectl get checluster --namespace=che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml || true
+                kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
+                kubectl get ingresses --namespace=che > $LOGS_AND_CONFIGS/che-config/ingresses.txt || true
+                kubectl get pods --namespace=che >$LOGS_AND_CONFIGS/che-config/pods.txt || true
+                kubectl get all -n che -o yaml > $LOGS_AND_CONFIGS/che-config/all.yaml || true
 
-                archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**, logs-and-configs/**"
+                mkdir -p $LOGS_AND_CONFIGS/che-logs
+                export PODS=\$(kubectl get pod --namespace=che | awk 'NR>1 {print \$1}')
+                for pod in \$PODS ; do \
+                    kubectl logs --namespace=che "\${pod}" -n che > $LOGS_AND_CONFIGS/che-logs/"\${pod}".pod.log || true; \
+                done
 
-                sh "sudo rm -rf ${WORKSPACE}/e2e"
-                sh "sudo rm -rf ${WORKSPACE}/logs-and-configs"
-            }
+                mkdir -p $LOGS_AND_CONFIGS/workspace-logs
+                export WS_POD=\$(kubectl get pod --namespace=che | grep ".workspace-" | awk '{print \$1}')
+                for c in \$(kubectl get pod --namespace=che \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do \\
+                    kubectl logs \$(kubectl get pod --namespace=che | grep ".workspace-" | awk '{print \$1}') "\${c}" -n che > $LOGS_AND_CONFIGS/workspace-logs/"\${c}".container.log || true; \\
+                done
+                kubectl describe pod --namespace=che \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
 
-            cleanWs notFailBuild: true, disableDeferredWipeout: true, deleteDirs: true
+                mkdir -p $LOGS_AND_CONFIGS/docker
+                docker image ls > $LOGS_AND_CONFIGS/docker/images.txt || true
+                docker ps -a > $LOGS_AND_CONFIGS/docker/containers.txt || true
+
+                env > $LOGS_AND_CONFIGS/env.output.txt || true
+                ${WORKSPACE}/chectl --help > $LOGS_AND_CONFIGS/chectl.version.txt || true
+            """
+
+            archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**, logs-and-configs/**"
         }
 
     }

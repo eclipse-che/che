@@ -55,6 +55,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.EnvVars;
 
 /**
  * Applies changes on workspace config according to the specified kubernetes/openshift component.
@@ -71,11 +72,13 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   private final Set<String> kubernetesBasedComponentTypes;
   private final String defaultPVCAccessMode;
   private final String pvcStorageClassName;
+  private final EnvVars envVars;
 
   @Inject
   public KubernetesComponentToWorkspaceApplier(
       KubernetesRecipeParser objectsParser,
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
+      EnvVars envVars,
       @Named("che.workspace.projects.storage") String projectFolderPath,
       @Named("che.workspace.projects.storage.default.size") String defaultProjectPVCSize,
       @Named("che.infra.kubernetes.pvc.access_mode") String defaultPVCAccessMode,
@@ -84,6 +87,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     this(
         objectsParser,
         k8sEnvProvisioner,
+        envVars,
         KubernetesEnvironment.TYPE,
         projectFolderPath,
         defaultProjectPVCSize,
@@ -95,6 +99,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   protected KubernetesComponentToWorkspaceApplier(
       KubernetesRecipeParser objectsParser,
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
+      EnvVars envVars,
       String environmentType,
       String projectFolderPath,
       String defaultProjectPVCSize,
@@ -109,6 +114,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     this.defaultPVCAccessMode = defaultPVCAccessMode;
     this.pvcStorageClassName = pvcStorageClassName;
     this.kubernetesBasedComponentTypes = kubernetesBasedComponentTypes;
+    this.envVars = envVars;
   }
 
   /**
@@ -150,6 +156,10 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
 
     if (Boolean.TRUE.equals(k8sComponent.getMountSources())) {
       applyProjectsVolumes(podsData, componentObjects);
+    }
+
+    if (!k8sComponent.getEnv().isEmpty()) {
+      podsData.forEach(p -> envVars.apply(p, k8sComponent.getEnv()));
     }
 
     applyEntrypoints(k8sComponent.getEntrypoints(), componentObjects);

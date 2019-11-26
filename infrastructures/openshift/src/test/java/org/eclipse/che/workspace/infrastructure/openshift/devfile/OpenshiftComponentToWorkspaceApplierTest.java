@@ -25,6 +25,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentToWorkspaceApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.EnvVars;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -42,6 +43,7 @@ public class OpenshiftComponentToWorkspaceApplierTest {
   private KubernetesComponentToWorkspaceApplier applier;
   @Mock private KubernetesEnvironmentProvisioner k8sEnvProvisioner;
   @Mock private KubernetesRecipeParser k8sRecipeParser;
+  @Mock private EnvVars envVars;
 
   @BeforeMethod
   public void setUp() {
@@ -51,6 +53,7 @@ public class OpenshiftComponentToWorkspaceApplierTest {
         new OpenshiftComponentToWorkspaceApplier(
             k8sRecipeParser,
             k8sEnvProvisioner,
+            envVars,
             "/projects",
             "1Gi",
             "ReadWriteOnce",
