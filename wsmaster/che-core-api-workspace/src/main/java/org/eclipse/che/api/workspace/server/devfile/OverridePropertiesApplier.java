@@ -26,6 +26,19 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 
+/**
+ * Applies override properties to provided devfile {@link JsonNode}. The following set of rules will
+ * be used during object modification:
+ *
+ * <ul>
+ *   <li>Only allowed top-level fields can be altered: apiVersion, metadata, project.
+ *   <li>The absent segment will be created as an object and next segment will be added as an field
+ *       of it
+ *   <li>The property identifier cannot ends with an array type reference
+ *   <li>The property identifier for object in an array should contain valid object name, error will
+ *       be thrown otherwise.
+ * </ul>
+ */
 public class OverridePropertiesApplier {
 
   private final List<String> allowedFirstSegments = asList("apiVersion", "metadata", "projects");
