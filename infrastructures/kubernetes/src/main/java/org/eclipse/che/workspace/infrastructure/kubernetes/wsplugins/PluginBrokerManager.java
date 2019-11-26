@@ -107,7 +107,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
     KubernetesNamespace kubernetesNamespace = factory.getOrCreate(identity);
     BrokersResult brokersResult = new BrokersResult();
 
-    E brokerEnvironment = brokerEnvironmentFactory.create(pluginFQNs, identity);
+    E brokerEnvironment = brokerEnvironmentFactory.createForMetadataBroker(pluginFQNs, identity);
     if (isEphemeral) {
       EphemeralWorkspaceUtility.makeEphemeral(brokerEnvironment.getAttributes());
     }

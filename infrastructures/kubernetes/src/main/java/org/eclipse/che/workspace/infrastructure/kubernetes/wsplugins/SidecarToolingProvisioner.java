@@ -41,18 +41,18 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
   private static final Logger LOG = LoggerFactory.getLogger(SidecarToolingProvisioner.class);
 
   private final Map<String, ChePluginsApplier> workspaceNextAppliers;
-  private final KubernetesBrokerInitContainerApplier<E> brokerApplier;
+  private final KubernetesArtifactsBrokerApplier<E> artifactsBrokerApplier;
   private final PluginFQNParser pluginFQNParser;
   private final PluginBrokerManager<E> pluginBrokerManager;
 
   @Inject
   public SidecarToolingProvisioner(
       Map<String, ChePluginsApplier> workspaceNextAppliers,
-      KubernetesBrokerInitContainerApplier<E> brokerApplier,
+      KubernetesArtifactsBrokerApplier<E> artifactsBrokerApplier,
       PluginFQNParser pluginFQNParser,
       PluginBrokerManager<E> pluginBrokerManager) {
     this.workspaceNextAppliers = ImmutableMap.copyOf(workspaceNextAppliers);
-    this.brokerApplier = brokerApplier;
+    this.artifactsBrokerApplier = artifactsBrokerApplier;
     this.pluginFQNParser = pluginFQNParser;
     this.pluginBrokerManager = pluginBrokerManager;
   }
@@ -80,9 +80,7 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
         pluginBrokerManager.getTooling(identity, startSynchronizer, pluginFQNs, isEphemeral);
 
     pluginsApplier.apply(identity, environment, chePlugins);
-    if (isEphemeral) {
-      brokerApplier.apply(environment, identity, pluginFQNs);
-    }
+    artifactsBrokerApplier.apply(environment, identity, pluginFQNs);
     LOG.debug("Finished sidecar tooling provisioning workspace '{}'", identity.getWorkspaceId());
   }
 }
