@@ -13,17 +13,26 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.util;
 
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.EnvVars.extractReferencedVariables;
 import static org.testng.Assert.assertEquals;
 
+import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.EnvVarSource;
+import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class EnvVarsTest {
+
+  private EnvVars envVars = new EnvVars();
 
   @Test(dataProvider = "detectReferencesTestValues")
   public void shouldDetectReferences(String value, Set<EnvVar> expected, String caseName) {
@@ -67,7 +76,119 @@ public class EnvVarsTest {
     assertEquals(refs, new HashSet<>(Arrays.asList("b", "c")));
   }
 
+  @Test
+  public void shouldProvisionEnvIfContainersDoeNotHaveEnvAtAll() throws Exception {
+    // given
+    PodData pod =
+        new PodData(
+            new PodBuilder()
+                .withNewMetadata()
+                .withName("pod")
+                .endMetadata()
+                .withNewSpec()
+                .withInitContainers(new ContainerBuilder().withName("initContainer").build())
+                .withContainers(new ContainerBuilder().withName("container").build())
+                .endSpec()
+                .build());
+
+    // when
+    envVars.apply(pod, singletonList(new EnvImpl("TEST_ENV", "anyValue")));
+
+    // then
+    List<EnvVar> initCEnv = pod.getSpec().getInitContainers().get(0).getEnv();
+    assertEquals(initCEnv.size(), 1);
+    assertEquals(initCEnv.get(0), new EnvVar("TEST_ENV", "anyValue", null));
+
+    List<EnvVar> containerEnv = pod.getSpec().getContainers().get(0).getEnv();
+    assertEquals(containerEnv.size(), 1);
+    assertEquals(containerEnv.get(0), new EnvVar("TEST_ENV", "anyValue", null));
+  }
+
+  @Test
+  public void shouldOverrideEnvOnApplyingEnvVarIfContainersAlreadyHaveSomeEnvVars()
+      throws Exception {
+    // given
+    EnvVar existingInitCEnvVar = new EnvVar("TEST_ENV", "value", null);
+    EnvVar existingCEnvVar = new EnvVar("TEST_ENV", null, new EnvVarSource());
+    PodData pod =
+        new PodData(
+            new PodBuilder()
+                .withNewMetadata()
+                .withName("pod")
+                .endMetadata()
+                .withNewSpec()
+                .withInitContainers(
+                    new ContainerBuilder()
+                        .withName("initContainer")
+                        .withEnv(copy(existingInitCEnvVar))
+                        .build())
+                .withContainers(
+                    new ContainerBuilder()
+                        .withName("container")
+                        .withEnv(copy(existingCEnvVar))
+                        .build())
+                .endSpec()
+                .build());
+
+    // when
+    envVars.apply(pod, singletonList(new EnvImpl("TEST_ENV", "anyValue")));
+
+    // then
+    List<EnvVar> initCEnv = pod.getSpec().getInitContainers().get(0).getEnv();
+    assertEquals(initCEnv.size(), 1);
+    assertEquals(initCEnv.get(0), new EnvVar("TEST_ENV", "anyValue", null));
+
+    List<EnvVar> containerEnv = pod.getSpec().getContainers().get(0).getEnv();
+    assertEquals(containerEnv.size(), 1);
+    assertEquals(containerEnv.get(0), new EnvVar("TEST_ENV", "anyValue", null));
+  }
+
+  @Test
+  public void shouldProvisionEnvIntoK8SListIfContainerAlreadyHasSomeEnvVars() throws Exception {
+
+    // given
+    EnvVar existingInitCEnvVar = new EnvVar("ENV", "value", null);
+    EnvVar existingCEnvVar = new EnvVar("ENV", null, new EnvVarSource());
+    PodData pod =
+        new PodData(
+            new PodBuilder()
+                .withNewMetadata()
+                .withName("pod")
+                .endMetadata()
+                .withNewSpec()
+                .withInitContainers(
+                    new ContainerBuilder()
+                        .withName("initContainer")
+                        .withEnv(copy(existingInitCEnvVar))
+                        .build())
+                .withContainers(
+                    new ContainerBuilder()
+                        .withName("container")
+                        .withEnv(copy(existingCEnvVar))
+                        .build())
+                .endSpec()
+                .build());
+
+    // when
+    envVars.apply(pod, singletonList(new EnvImpl("TEST_ENV", "anyValue")));
+
+    // then
+    List<EnvVar> initCEnv = pod.getSpec().getInitContainers().get(0).getEnv();
+    assertEquals(initCEnv.size(), 2);
+    assertEquals(initCEnv.get(0), existingInitCEnvVar);
+    assertEquals(initCEnv.get(1), new EnvVar("TEST_ENV", "anyValue", null));
+
+    List<EnvVar> containerEnv = pod.getSpec().getContainers().get(0).getEnv();
+    assertEquals(containerEnv.size(), 2);
+    assertEquals(containerEnv.get(0), existingCEnvVar);
+    assertEquals(containerEnv.get(1), new EnvVar("TEST_ENV", "anyValue", null));
+  }
+
   private static EnvVar var(String name, String value) {
     return new EnvVar(name, value, null);
+  }
+
+  private EnvVar copy(EnvVar envVar) {
+    return new EnvVar(envVar.getName(), envVar.getValue(), envVar.getValueFrom());
   }
 }
