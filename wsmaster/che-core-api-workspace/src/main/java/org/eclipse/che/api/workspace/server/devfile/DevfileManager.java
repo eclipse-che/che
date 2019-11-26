@@ -21,19 +21,13 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_C
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
@@ -56,6 +50,7 @@ public class DevfileManager {
   private ObjectMapper jsonMapper;
   private final DevfileSchemaValidator schemaValidator;
   private final DevfileIntegrityValidator integrityValidator;
+  private final OverridePropertiesApplier overridePropertiesApplier;
 
   @Inject
   public DevfileManager(
@@ -77,6 +72,7 @@ public class DevfileManager {
     this.integrityValidator = integrityValidator;
     this.yamlMapper = yamlMapper;
     this.jsonMapper = jsonMapper;
+    this.overridePropertiesApplier = new OverridePropertiesApplier();
   }
 
   /**
@@ -96,12 +92,11 @@ public class DevfileManager {
    * Creates {@link DevfileImpl} from given devfile content in YAML and provides possibility to
    * override its values using key-value map, where key is an json-pointer-like string and value is
    * desired property value. NOTE: unlike json pointers, objects in arrays should be pointed by
-   * their name (or alias for components), not by index. Examples:
+   * their names, not by index. Examples:
    *
    * <ul>
    *   <li>metadata.generateName : python-dev-
    *   <li>projects.foo.source.type : git // foo is an project name
-   *   <li>components.mysql.memoryLimit : 500Mi // mysql in an component alias
    * </ul>
    *
    * Performs schema and integrity validation of input data.
@@ -134,12 +129,11 @@ public class DevfileManager {
    * Creates {@link DevfileImpl} from given devfile content in JSON and provides possibility to
    * override its values using key-value map, where key is an json-pointer-like string and value is
    * desired property value. NOTE: unlike json pointers, objects in arrays should be pointed by
-   * their name (or alias for components), not by index. Examples:
+   * their names, not by index. Examples:
    *
    * <ul>
    *   <li>metadata.generateName : python-dev-
    *   <li>projects.foo.source.type : git // foo is an project name
-   *   <li>components.mysql.memoryLimit : 500Mi // mysql in an component alias
    * </ul>
    *
    * Performs schema and integrity validation of input data.
@@ -192,7 +186,7 @@ public class DevfileManager {
     DevfileImpl devfile;
     try {
       JsonNode parsed = mapper.readTree(content);
-      parsed = applyPropertiesOverride(parsed, overrideProperties);
+      parsed = overridePropertiesApplier.applyPropertiesOverride(parsed, overrideProperties);
       schemaValidator.validate(parsed);
       devfile = mapper.treeToValue(parsed, DevfileImpl.class);
     } catch (JsonProcessingException e) {
@@ -202,68 +196,5 @@ public class DevfileManager {
     }
     integrityValidator.validateDevfile(devfile);
     return devfile;
-  }
-
-  private JsonNode applyPropertiesOverride(
-      JsonNode devfileNode, Map<String, String> overrideProperties) throws DevfileFormatException {
-    for (Map.Entry<String, String> entry : overrideProperties.entrySet()) {
-      // prepare stuff
-      String[] pathSegments = entry.getKey().split("\\.");
-      if (pathSegments.length < 1) {
-        continue;
-      }
-      String lastSegment = pathSegments[pathSegments.length - 1];
-      JsonNode currentNode = devfileNode;
-      // iterate until we reach last but one path segment,
-      // because it's impossible to change value of the current Json node,
-      // so to set value to Json node, you should be 1 level up and do put(key, value).
-      Iterator<String> pathSegmentsIterator = Stream.of(pathSegments).iterator();
-      do {
-        String currentSegment = pathSegmentsIterator.next();
-        JsonNode nextNode = currentNode.path(currentSegment);
-        if (nextNode.isMissingNode() && pathSegmentsIterator.hasNext()) {
-          // no such intermediate node, let's create it as a empty object
-          currentNode = ((ObjectNode) currentNode).putObject(currentSegment);
-          continue;
-        } else if (nextNode.isArray()) {
-          // ok we have reference to array, so need to make sure that we have next path segment
-          // ant then try to retrieve it from array
-          if (!pathSegmentsIterator.hasNext()) {
-            throw new DevfileFormatException(
-                format(
-                    "Override property reference '%s' points to an array type object. Please add an item qualifier by name or alias.",
-                    entry.getKey()));
-          }
-          // retrieve object by name from array
-          String arrayObjectName = pathSegmentsIterator.next();
-          Optional<JsonNode> namedNode =
-              findNodeByNameOrAlias((ArrayNode) nextNode, arrayObjectName);
-          currentNode =
-              namedNode.orElseThrow(
-                  () ->
-                      new DevfileFormatException(
-                          format(
-                              "Object with name '%s' not found in array of %s.",
-                              arrayObjectName, currentSegment)));
-          continue;
-        } else {
-          if (pathSegmentsIterator.hasNext()) {
-            // do not set last segment as current node, we need to be 1 level up
-            currentNode = nextNode;
-          }
-        }
-      } while (pathSegmentsIterator.hasNext());
-      // end of path segments reached, now we can set value
-      ((ObjectNode) currentNode).put(lastSegment, entry.getValue());
-    }
-    return devfileNode;
-  }
-
-  private Optional<JsonNode> findNodeByNameOrAlias(ArrayNode parentNode, String name) {
-    return StreamSupport.stream(parentNode.spliterator(), false)
-        .filter(
-            node ->
-                node.path("name").asText().equals(name) || node.path("alias").asText().equals(name))
-        .findFirst();
   }
 }
