@@ -452,7 +452,7 @@ public class FactoryService extends Service {
           return factoryParametersResolver;
         }
       }
-      return defaultFactoryResolver;
+      return defaultFactoryResolver.accept(parameters) ? defaultFactoryResolver : null;
     }
   }
 
