@@ -108,7 +108,7 @@ public class OverridePropertiesApplier {
             () ->
                 new DevfileFormatException(
                     format(
-                        "Object with name '%s' not found in array of %s.",
+                        "Cannot apply override: object with name '%s' not found in array of %s.",
                         searchName, parentNodeName)));
   }
 }

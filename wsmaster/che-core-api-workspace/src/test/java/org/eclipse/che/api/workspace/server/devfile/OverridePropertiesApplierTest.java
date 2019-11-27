@@ -83,7 +83,8 @@ public class OverridePropertiesApplierTest {
 
   @Test(
       expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp = "Object with name 'test3' not found in array of projects.")
+      expectedExceptionsMessageRegExp =
+          "Cannot apply override: object with name 'test3' not found in array of projects.")
   public void shouldThrowExceptionIfOverrideArrayObjectNotFoundByName() throws Exception {
     String json =
         "{"
