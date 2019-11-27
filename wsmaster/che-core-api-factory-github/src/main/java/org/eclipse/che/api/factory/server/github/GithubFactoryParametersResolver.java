@@ -57,7 +57,6 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
     super(urlFactoryBuilder, urlFetcher);
     this.githubUrlParser = githubUrlParser;
     this.githubSourceStorageBuilder = githubSourceStorageBuilder;
-    this.urlFactoryBuilder = urlFactoryBuilder;
     this.projectConfigDtoMerger = projectConfigDtoMerger;
   }
 
