@@ -38,7 +38,7 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
 
   private static final String OVERRIDE_PREFIX = "override.";
 
-  protected URLFactoryBuilder urlFactoryBuilder;
+  protected final  URLFactoryBuilder urlFactoryBuilder;
   protected final URLFetcher urlFetcher;
 
   @Inject

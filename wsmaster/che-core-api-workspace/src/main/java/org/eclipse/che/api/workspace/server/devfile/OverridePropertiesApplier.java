@@ -32,8 +32,8 @@ import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatExcep
  *
  * <ul>
  *   <li>Only allowed top-level fields can be altered: apiVersion, metadata, project.
- *   <li>The absent segment will be created as an object and next segment will be added as an field
- *       of it
+ *   <li>The absent segment will be created as an empty object and next segment will be added as a
+ *       field of it
  *   <li>The property identifier cannot ends with an array type reference
  *   <li>The property identifier for object in an array should contain valid object name, error will
  *       be thrown otherwise.

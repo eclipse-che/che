@@ -115,7 +115,10 @@ public class DefaultFactoryParameterResolverTest {
     verify(urlFactoryBuilder)
         .createFactoryFromDevfile(
             any(RemoteFactoryUrl.class), any(URLFileContentProvider.class), captor.capture());
-    assertEquals(2, captor.getValue().size());
-    assertFalse(captor.getValue().keySet().contains("ignored.non-override.property"));
+    Map<String, String> filteredOverrides = captor.getValue();
+    assertEquals(2, filteredOverrides.size());
+    assertEquals("bar", filteredOverrides.get("param.foo"));
+    assertEquals("foo", filteredOverrides.get("param.bar"));
+    assertFalse(filteredOverrides.keySet().contains("ignored.non-override.property"));
   }
 }
