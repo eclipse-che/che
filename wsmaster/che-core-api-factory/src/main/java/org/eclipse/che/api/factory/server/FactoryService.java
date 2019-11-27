@@ -338,13 +338,12 @@ public class FactoryService extends Service {
     requiredNotNull(parameters, "Factory build parameters");
 
     // search matching resolver and create factory from matching resolver
-    FactoryDto resolvedFactory =
-        factoryParametersResolverHolder
-            .getFactoryParametersResolver(parameters)
-            .createFactory(parameters);
-    if (resolvedFactory == null) {
+    FactoryParametersResolver resolver =
+        factoryParametersResolverHolder.getFactoryParametersResolver(parameters);
+    if (resolver == null) {
       throw new BadRequestException(FACTORY_NOT_RESOLVABLE);
     }
+    FactoryDto resolvedFactory = resolver.createFactory(parameters);
     if (validate) {
       acceptValidator.validateOnAccept(resolvedFactory);
     }
@@ -438,20 +437,19 @@ public class FactoryService extends Service {
     @Inject private DefaultFactoryParameterResolver defaultFactoryResolver;
 
     /**
-     * Provides a suitable resolver for the given parameters
+     * Provides a suitable resolver for the given parameters or {@code null} if none is found
+     * (generally means that provided parameters set is invalid)
      *
      * @return suitable service-specific resolver or default one
      */
     public FactoryParametersResolver getFactoryParametersResolver(Map<String, String> parameters) {
-      if (specificFactoryParametersResolvers == null) {
-        return defaultFactoryResolver;
-      }
-      for (FactoryParametersResolver factoryParametersResolver :
-          specificFactoryParametersResolvers) {
-        if (factoryParametersResolver.accept(parameters)) {
-          return factoryParametersResolver;
+      if (specificFactoryParametersResolvers != null)
+        for (FactoryParametersResolver factoryParametersResolver :
+            specificFactoryParametersResolvers) {
+          if (factoryParametersResolver.accept(parameters)) {
+            return factoryParametersResolver;
+          }
         }
-      }
       return defaultFactoryResolver.accept(parameters) ? defaultFactoryResolver : null;
     }
   }
