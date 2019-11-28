@@ -340,10 +340,10 @@ public class FactoryService extends Service {
     // search matching resolver and create factory from matching resolver
     FactoryParametersResolver resolver =
         factoryParametersResolverHolder.getFactoryParametersResolver(parameters);
-    if (resolver == null) {
+    FactoryDto resolvedFactory = resolver.createFactory(parameters);
+    if (resolvedFactory == null) {
       throw new BadRequestException(FACTORY_NOT_RESOLVABLE);
     }
-    FactoryDto resolvedFactory = resolver.createFactory(parameters);
     if (validate) {
       acceptValidator.validateOnAccept(resolvedFactory);
     }
@@ -442,15 +442,21 @@ public class FactoryService extends Service {
      *
      * @return suitable service-specific resolver or default one
      */
-    public FactoryParametersResolver getFactoryParametersResolver(Map<String, String> parameters) {
-      if (specificFactoryParametersResolvers != null)
+    public FactoryParametersResolver getFactoryParametersResolver(Map<String, String> parameters)
+        throws BadRequestException {
+      if (specificFactoryParametersResolvers != null) {
         for (FactoryParametersResolver factoryParametersResolver :
             specificFactoryParametersResolvers) {
           if (factoryParametersResolver.accept(parameters)) {
             return factoryParametersResolver;
           }
         }
-      return defaultFactoryResolver.accept(parameters) ? defaultFactoryResolver : null;
+      }
+      if (defaultFactoryResolver.accept(parameters)) {
+        return defaultFactoryResolver;
+      } else {
+        throw new BadRequestException(FACTORY_NOT_RESOLVABLE);
+      }
     }
   }
 
