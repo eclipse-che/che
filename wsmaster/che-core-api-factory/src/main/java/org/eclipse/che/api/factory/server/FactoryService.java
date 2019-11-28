@@ -438,8 +438,8 @@ public class FactoryService extends Service {
     @Inject private DefaultFactoryParameterResolver defaultFactoryResolver;
 
     /**
-     * Provides a suitable resolver for the given parameters or {@code null} if none is found
-     * (generally means that provided parameters set is invalid)
+     * Provides a suitable resolver for the given parameters. If there is no at least one resolver
+     * able to process parameters,then {@link BadRequestException} will be thrown
      *
      * @return suitable service-specific resolver or default one
      */
