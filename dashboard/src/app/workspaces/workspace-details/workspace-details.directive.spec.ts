@@ -419,7 +419,6 @@ describe(`WorkspaceDetailsController >`, () => {
 
               getSaveButton().click();
               $scope.$digest();
-              $timeout.flush();
             });
 
             it('should not prevent to leave page', () => {
@@ -488,7 +487,6 @@ describe(`WorkspaceDetailsController >`, () => {
               newWorkspace = angular.copy((controller as any).workspaceDetails);
               getSaveButton().click();
               $scope.$digest();
-              $timeout.flush();
             });
 
             it('should not prevent to leave page', () => {
@@ -600,7 +598,6 @@ describe(`WorkspaceDetailsController >`, () => {
 
               getSaveButton().click();
               $scope.$digest();
-              $timeout.flush();
             });
 
             it('should not prevent to leave page', () => {
@@ -668,7 +665,6 @@ describe(`WorkspaceDetailsController >`, () => {
 
               getSaveButton().click();
               $scope.$digest();
-              $timeout.flush();
             });
 
             it('should not prevent to leave page', () => {

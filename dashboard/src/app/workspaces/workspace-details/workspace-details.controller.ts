@@ -137,8 +137,12 @@ export class WorkspaceDetailsController {
 
       this.initialWorkspaceDetails = angular.copy(newWorkspaceDetails);
       if (this.workspaceDetailsService.isWorkspaceModified(this.workspaceId)) {
+        const newName = this.workspaceDataManager.getName(newWorkspaceDetails);
+        if (this.workspaceName !== newName) {
+          this.$location.path(`workspace/${this.workspaceDetails.namespace}/${newName}`);
+          return;
+        }
         this.workspaceDetails = angular.copy(newWorkspaceDetails);
-        this.workspaceName = this.workspaceDataManager.getName(this.workspaceDetails);
       }
       this.checkEditMode();
       this.updateDeprecatedInfo();
