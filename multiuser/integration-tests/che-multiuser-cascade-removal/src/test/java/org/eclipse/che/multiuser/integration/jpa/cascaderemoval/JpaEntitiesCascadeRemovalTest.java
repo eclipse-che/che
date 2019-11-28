@@ -70,6 +70,7 @@ import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService;
 import org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache;
+import org.eclipse.che.api.workspace.server.WorkspaceAttributeValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceLockService;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
@@ -224,6 +225,8 @@ public class JpaEntitiesCascadeRemovalTest {
 
                 bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
                 bind(RemoveFreeResourcesLimitSubscriber.class).asEagerSingleton();
+                // initialize empty binder
+                Multibinder.newSetBinder(binder(), WorkspaceAttributeValidator.class);
                 bind(WorkspaceManager.class);
                 bind(WorkspaceLockService.class).to(DefaultWorkspaceLockService.class);
                 bind(WorkspaceStatusCache.class).to(DefaultWorkspaceStatusCache.class);

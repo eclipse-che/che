@@ -99,7 +99,7 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
     }
     final String workspaceId = workspace.getId();
     factory
-        .create(workspaceId)
+        .get(workspace)
         .persistentVolumeClaims()
         .delete(ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, workspaceId));
   }

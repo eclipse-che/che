@@ -75,7 +75,7 @@ public class EnvVarsConverterTest {
     environment.setMachines(
         Collections.singletonMap(Names.machineName(podMeta, testContainer), machine));
 
-    identity = new RuntimeIdentityImpl("wsId", "blah", "bleh");
+    identity = new RuntimeIdentityImpl("wsId", "blah", "bleh", "infraNamespace");
   }
 
   @Test

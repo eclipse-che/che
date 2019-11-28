@@ -23,7 +23,6 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -40,7 +39,6 @@ public class WorkspacePVCCleanerTest {
 
   @Mock private WorkspaceVolumesStrategy pvcStrategy;
   private EventService eventService;
-  @Mock private KubernetesNamespaceFactory namespaceFactory;
   @Mock private Workspace workspace;
   @Mock WorkspaceRemovedEvent event;
 
@@ -48,8 +46,7 @@ public class WorkspacePVCCleanerTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(namespaceFactory.isManagingNamespace(any())).thenReturn(false);
-    workspacePVCCleaner = new WorkspacePVCCleaner(true, namespaceFactory, pvcStrategy);
+    workspacePVCCleaner = new WorkspacePVCCleaner(true, pvcStrategy);
     when(workspace.getId()).thenReturn("123");
     when(event.getWorkspace()).thenReturn(workspace);
 
@@ -58,7 +55,7 @@ public class WorkspacePVCCleanerTest {
 
   @Test
   public void testDoNotSubscribesCleanerWhenPVCDisabled() throws Exception {
-    workspacePVCCleaner = spy(new WorkspacePVCCleaner(false, namespaceFactory, pvcStrategy));
+    workspacePVCCleaner = spy(new WorkspacePVCCleaner(false, pvcStrategy));
 
     workspacePVCCleaner.subscribe(eventService);
 
@@ -73,25 +70,12 @@ public class WorkspacePVCCleanerTest {
   }
 
   @Test
-  public void testInvokeCleanupWhenWorkspaceRemovedEventPublishedAndNamespaceIsNotManaged()
-      throws Exception {
+  public void testInvokeCleanupWhenWorkspaceRemovedEventPublished() throws Exception {
     workspacePVCCleaner.subscribe(eventService);
 
     eventService.publish(event);
 
     verify(pvcStrategy).cleanup(workspace);
-  }
-
-  @Test
-  public void testNotInvokeCleanupWhenWorkspaceRemovedEventPublishedAndNamespaceIsManaged()
-      throws Exception {
-    when(namespaceFactory.isManagingNamespace(any())).thenReturn(true);
-
-    workspacePVCCleaner.subscribe(eventService);
-
-    eventService.publish(event);
-
-    verify(pvcStrategy, never()).cleanup(workspace);
   }
 
   @Test

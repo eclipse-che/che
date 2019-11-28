@@ -201,7 +201,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       LOG.debug("Provisioning of workspace '{}' completed.", workspaceId);
 
       volumesStrategy.prepare(
-          context.getEnvironment(), workspaceId, startSynchronizer.getStartTimeoutMillis());
+          context.getEnvironment(),
+          context.getIdentity(),
+          startSynchronizer.getStartTimeoutMillis());
 
       startSynchronizer.checkFailure();
 
@@ -731,7 +733,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     if (!runtimeStates.putIfAbsent(
         new KubernetesRuntimeState(
             getContext().getIdentity(),
-            namespace.getName(),
             WorkspaceStatus.STARTING,
             getContext().getEnvironment().getCommands()))) {
       throw new StateException("Runtime is already started");

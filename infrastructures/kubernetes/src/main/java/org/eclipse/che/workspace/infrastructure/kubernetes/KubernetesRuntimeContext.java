@@ -73,7 +73,7 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
 
     if (!runtimeStateOpt.isPresent()) {
       // there is no cached runtime, create a new one
-      return runtimeFactory.create(this, namespaceFactory.create(workspaceId));
+      return runtimeFactory.create(this, namespaceFactory.getOrCreate(getIdentity()));
     }
 
     // there is cached runtime, restore cached one
@@ -86,7 +86,7 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
         runtimeId.getOwnerId());
     KubernetesInternalRuntime runtime =
         runtimeFactory.create(
-            this, namespaceFactory.create(workspaceId, runtimeState.getNamespace()));
+            this, namespaceFactory.access(workspaceId, runtimeState.getNamespace()));
 
     runtime.scheduleRuntimeStateChecks();
 

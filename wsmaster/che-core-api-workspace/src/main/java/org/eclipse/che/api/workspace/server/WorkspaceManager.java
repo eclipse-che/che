@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.server;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
@@ -24,6 +25,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_GENERATE_NAME_CHARS_APPEND;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 
 import com.google.inject.Inject;
 import java.util.Collections;
@@ -50,6 +52,8 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
@@ -303,16 +307,19 @@ public class WorkspaceManager {
     if (update.getConfig() != null) {
       validator.validateConfig(update.getConfig());
     }
-    validator.validateAttributes(update.getAttributes());
-
     WorkspaceImpl workspace = workspaceDao.get(id);
+
+    validator.validateUpdateAttributes(workspace.getAttributes(), update.getAttributes());
+
     if (workspace.getConfig() != null) {
       workspace.setConfig(new WorkspaceConfigImpl(update.getConfig()));
     }
     if (workspace.getDevfile() != null) {
       workspace.setDevfile(new DevfileImpl(update.getDevfile()));
     }
+
     workspace.setAttributes(update.getAttributes());
+
     workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
     workspace.setTemporary(update.isTemporary());
 
@@ -436,6 +443,21 @@ public class WorkspaceManager {
       throw new ConflictException(e.getMessage(), e);
     }
 
+    // handle the situation where a workspace created by a previous Che version doesn't have a
+    // namespace stored for it. We use the legacy-aware method to figure out the namespace to
+    // correctly capture the workspaces which have PVCs already in a namespace defined by the legacy
+    // configuration variable.
+    if (isNullOrEmpty(
+        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE))) {
+      try {
+        String namespace =
+            runtimes.evalLegacyInfrastructureNamespace(buildResolutionContext(workspace));
+        workspace.getAttributes().put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
+      } catch (InfrastructureException e) {
+        throw new ServerException(e);
+      }
+    }
+
     workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
     workspaceDao.update(workspace);
 
@@ -451,6 +473,12 @@ public class WorkspaceManager {
               }
               return null;
             });
+  }
+
+  private NamespaceResolutionContext buildResolutionContext(WorkspaceImpl workspace) {
+    Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
+    return new NamespaceResolutionContext(
+        workspace.getId(), currentSubject.getUserId(), currentSubject.getUserName());
   }
 
   /** Returns first non-null argument or null if both are null. */
@@ -499,7 +527,7 @@ public class WorkspaceManager {
   private void handleStartupError(String workspaceId, Throwable t) {
     try {
       // we need to reload the workspace because the runtimes might have updated it
-      Workspace workspace = getWorkspace(workspaceId);
+      WorkspaceImpl workspace = getWorkspace(workspaceId);
       workspace
           .getAttributes()
           .put(
@@ -507,8 +535,8 @@ public class WorkspaceManager {
               t instanceof RuntimeException ? t.getCause().getMessage() : t.getMessage());
       workspace.getAttributes().put(STOPPED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
       workspace.getAttributes().put(STOPPED_ABNORMALLY_ATTRIBUTE_NAME, Boolean.toString(true));
-      updateWorkspace(workspace.getId(), workspace);
-    } catch (NotFoundException | ServerException | ValidationException | ConflictException e) {
+      workspaceDao.update(workspace);
+    } catch (NotFoundException | ServerException | ConflictException e) {
       LOG.warn(
           String.format(
               "Cannot set error status of the workspace %s. Error is: %s",
@@ -519,14 +547,14 @@ public class WorkspaceManager {
   private void handleStartupSuccess(String workspaceId) {
     try {
       // we need to reload the workspace because the runtimes might have updated it
-      Workspace workspace = getWorkspace(workspaceId);
+      WorkspaceImpl workspace = getWorkspace(workspaceId);
 
       workspace.getAttributes().remove(STOPPED_ATTRIBUTE_NAME);
       workspace.getAttributes().remove(STOPPED_ABNORMALLY_ATTRIBUTE_NAME);
       workspace.getAttributes().remove(ERROR_MESSAGE_ATTRIBUTE_NAME);
 
-      updateWorkspace(workspace.getId(), workspace);
-    } catch (NotFoundException | ServerException | ValidationException | ConflictException e) {
+      workspaceDao.update(workspace);
+    } catch (NotFoundException | ServerException | ConflictException e) {
       LOG.warn(
           String.format(
               "Cannot clear error status status of the workspace %s. Error is: %s",
@@ -564,6 +592,16 @@ public class WorkspaceManager {
             .setStatus(STOPPED)
             .build();
     workspace.getAttributes().put(CREATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
+
+    if (isNullOrEmpty(
+        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE))) {
+      try {
+        String namespace = runtimes.evalInfrastructureNamespace(buildResolutionContext(workspace));
+        workspace.getAttributes().put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
+      } catch (InfrastructureException e) {
+        throw new ServerException(e);
+      }
+    }
 
     workspaceDao.create(workspace);
     LOG.info(

@@ -55,7 +55,8 @@ public class BrokerStatusListenerTest {
   public void shouldDoNothingIfEventWithForeignWorkspaceIdIsReceived() {
     // given
     BrokerEvent event =
-        new BrokerEvent().withRuntimeId(new RuntimeIdentityImpl("foreignWorkspace", null, null));
+        new BrokerEvent()
+            .withRuntimeId(new RuntimeIdentityImpl("foreignWorkspace", null, null, null));
 
     // when
     brokerStatusListener.onEvent(event);
@@ -81,7 +82,7 @@ public class BrokerStatusListenerTest {
     // given
     BrokerEvent event =
         new BrokerEvent()
-            .withRuntimeId(new RuntimeIdentityImpl(WORKSPACE_ID, null, null))
+            .withRuntimeId(new RuntimeIdentityImpl(WORKSPACE_ID, null, null, null))
             .withStatus(BrokerStatus.DONE)
             .withTooling(emptyList());
 
@@ -99,7 +100,7 @@ public class BrokerStatusListenerTest {
     doThrow(new ValidationException("test")).when(validator).validatePluginNames(anyList());
     BrokerEvent event =
         new BrokerEvent()
-            .withRuntimeId(new RuntimeIdentityImpl(WORKSPACE_ID, null, null))
+            .withRuntimeId(new RuntimeIdentityImpl(WORKSPACE_ID, null, null, null))
             .withStatus(BrokerStatus.DONE)
             .withTooling(emptyList());
 
@@ -116,7 +117,7 @@ public class BrokerStatusListenerTest {
     doThrow(new ValidationException("test")).when(validator).validatePluginNames(anyList());
     BrokerEvent event =
         new BrokerEvent()
-            .withRuntimeId(new RuntimeIdentityImpl(WORKSPACE_ID, null, null))
+            .withRuntimeId(new RuntimeIdentityImpl(WORKSPACE_ID, null, null, null))
             .withStatus(BrokerStatus.DONE)
             .withTooling(emptyList());
 
@@ -132,7 +133,7 @@ public class BrokerStatusListenerTest {
     // given
     BrokerEvent event =
         new BrokerEvent()
-            .withRuntimeId(new RuntimeIdentityImpl(WORKSPACE_ID, null, null))
+            .withRuntimeId(new RuntimeIdentityImpl(WORKSPACE_ID, null, null, null))
             .withStatus(BrokerStatus.DONE)
             .withTooling(null);
 
@@ -148,7 +149,7 @@ public class BrokerStatusListenerTest {
     // given
     BrokerEvent event =
         new BrokerEvent()
-            .withRuntimeId(new RuntimeIdentityImpl(WORKSPACE_ID, null, null))
+            .withRuntimeId(new RuntimeIdentityImpl(WORKSPACE_ID, null, null, null))
             .withStatus(BrokerStatus.FAILED)
             .withError("error");
 

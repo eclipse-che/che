@@ -110,6 +110,8 @@ objects:
             value: "${CHE_INFRA_KUBERNETES_MASTER__URL}"
           - name: CHE_INFRA_OPENSHIFT_PROJECT
             value: "${CHE_INFRA_OPENSHIFT_PROJECT}"
+          - name: CHE_INFRA_KUBERNETES_NAMESPACE_DEFAULT
+            value: "${CHE_INFRA_KUBERNETES_NAMESPACE_DEFAULT}"
           - name: CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME
             value: "${CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME}"
           - name: CHE_INFRA_KUBERNETES_PVC_STRATEGY
@@ -278,6 +280,10 @@ parameters:
   description: HTTPS support in Che
   value: 'false'
 - name: CHE_INFRA_OPENSHIFT_PROJECT
+  displayName: LEGACY OpenShift namespace to create workspace objects
+  description: LEGACY Che server namespace by default. When empty, each workspace gets own namespace. In this case a privileged sa or credentials/token need to be used.
+  value: '${NAMESPACE}'
+- name: CHE_INFRA_KUBERNETES_NAMESPACE_DEFAULT
   displayName: OpenShift namespace to create workspace objects
   description: Che server namespace by default. When empty, each workspace gets own namespace. In this case a privileged sa or credentials/token need to be used.
   value: '${NAMESPACE}'

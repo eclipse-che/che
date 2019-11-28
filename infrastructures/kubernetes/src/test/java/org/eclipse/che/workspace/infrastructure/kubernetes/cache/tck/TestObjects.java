@@ -53,8 +53,8 @@ public class TestObjects {
 
   public static KubernetesRuntimeState createRuntimeState(WorkspaceImpl workspace) {
     return new KubernetesRuntimeState(
-        new RuntimeIdentityImpl(workspace.getId(), "defEnv", workspace.getAccount().getId()),
-        generate("namespace", 5),
+        new RuntimeIdentityImpl(
+            workspace.getId(), "defEnv", workspace.getAccount().getId(), generate("namespace", 5)),
         WorkspaceStatus.RUNNING,
         Arrays.asList(createCommand(), createCommand()));
   }
