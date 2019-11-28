@@ -119,7 +119,7 @@ export class NewWorkspace {
 
         await this.driverHelper.waitVisibility(By.css(NewWorkspace.NAME_FIELD_CSS), timeout);
         await this.driverHelper.waitVisibility(By.css(NewWorkspace.TITLE_CSS), timeout);
-        await this.waitLoaderAbsence(timeout);
+        await this.driverHelper.waitVisibility(By.css(NewWorkspace.PROJECT_SOURCE_FORM_CSS), timeout);
     }
 
     async waitLoaderAbsence(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
