@@ -25,17 +25,6 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 public interface WorkspaceActivityDao {
 
   /**
-   * Sets workspace expiration time. Any running workspace must prolongate expiration time
-   * periodically, otherwise it will be stopped by passing that time.
-   *
-   * @param expiration expiration object to store
-   * @throws ServerException when operation failed
-   * @deprecated use {@link #setExpirationTime(String, long)} instead
-   */
-  @Deprecated
-  void setExpiration(WorkspaceExpiration expiration) throws ServerException;
-
-  /**
    * Sets workspace expiration time. Any running workspace must prolong expiration time
    * periodically, otherwise it will be stopped by passing that time.
    *

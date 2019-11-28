@@ -33,11 +33,6 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
   private final Map<String, WorkspaceActivity> workspaceActivities = new ConcurrentHashMap<>();
 
   @Override
-  public void setExpiration(WorkspaceExpiration expiration) {
-    setExpirationTime(expiration.getWorkspaceId(), expiration.getExpiration());
-  }
-
-  @Override
   public void setExpirationTime(String workspaceId, long expirationTime) {
     findActivity(workspaceId).setExpiration(expirationTime);
   }

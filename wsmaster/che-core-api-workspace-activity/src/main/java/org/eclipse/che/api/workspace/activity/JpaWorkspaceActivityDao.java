@@ -39,11 +39,6 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   @Inject private Provider<EntityManager> managerProvider;
 
   @Override
-  public void setExpiration(WorkspaceExpiration expiration) throws ServerException {
-    setExpirationTime(expiration.getWorkspaceId(), expiration.getExpiration());
-  }
-
-  @Override
   public void setExpirationTime(String workspaceId, long expirationTime) throws ServerException {
     requireNonNull(workspaceId, "Required non-null workspace id");
     doUpdate(workspaceId, a -> a.setExpiration(expirationTime));
