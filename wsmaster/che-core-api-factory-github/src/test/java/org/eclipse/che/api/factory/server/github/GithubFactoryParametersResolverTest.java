@@ -28,7 +28,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import java.util.HashMap;
+import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.Optional;
 import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
@@ -120,11 +120,10 @@ public class GithubFactoryParametersResolverTest {
         .thenReturn(Optional.empty());
     when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any(), anyMap()))
         .thenReturn(Optional.empty());
-    Map<String, String> params = new HashMap<>();
-    params.put(URL_PARAMETER_NAME, githubUrl);
-
+    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, githubUrl);
+    // when
     FactoryDto factory = githubFactoryParametersResolver.createFactory(params);
-
+    // then
     verify(urlFactoryBuilder).buildDefaultDevfile(eq("che"));
     assertEquals(factory, computedFactory);
   }
@@ -139,11 +138,10 @@ public class GithubFactoryParametersResolverTest {
     when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any(), anyMap()))
         .thenReturn(Optional.of(computedFactory));
 
-    Map<String, String> params = new HashMap<>();
-    params.put(URL_PARAMETER_NAME, githubUrl);
-
+    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, githubUrl);
+    // when
     FactoryDto factory = githubFactoryParametersResolver.createFactory(params);
-
+    // then
     assertNotNull(factory.getDevfile());
     assertNull(factory.getWorkspace());
 
@@ -168,11 +166,10 @@ public class GithubFactoryParametersResolverTest {
     when(urlFactoryBuilder.createFactoryFromJson(any(RemoteFactoryUrl.class)))
         .thenReturn(Optional.of(computedFactory));
 
-    Map<String, String> params = new HashMap<>();
-    params.put(URL_PARAMETER_NAME, githubUrl);
-
+    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, githubUrl);
+    // when
     githubFactoryParametersResolver.createFactory(params);
-
+    // then
     // check we called the builder with the following factory json file
     verify(urlFactoryBuilder).createFactoryFromJson(factoryUrlArgumentCaptor.capture());
     verify(urlFactoryBuilder, never()).buildDefaultDevfile(eq("che"));
