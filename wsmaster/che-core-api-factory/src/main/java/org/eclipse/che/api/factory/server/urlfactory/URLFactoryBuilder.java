@@ -32,6 +32,7 @@ import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.devfile.exception.OverrideParameterException;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
@@ -127,7 +128,7 @@ public class URLFactoryBuilder {
               .withDevfile(DtoConverter.asDto(devfile))
               .withSource(remoteFactoryUrl.getDevfileFilename());
       return Optional.of(factoryDto);
-    } catch (DevfileException e) {
+    } catch (DevfileException | OverrideParameterException e) {
       throw new BadRequestException(
           "Error occurred during creation a workspace from devfile located at `"
               + remoteFactoryUrl.devfileFileLocation()

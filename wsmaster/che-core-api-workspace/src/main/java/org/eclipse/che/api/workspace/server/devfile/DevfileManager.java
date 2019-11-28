@@ -32,6 +32,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
+import org.eclipse.che.api.workspace.server.devfile.exception.OverrideParameterException;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
@@ -85,7 +86,12 @@ public class DevfileManager {
    * @throws DevfileFormatException when any yaml parsing error occurs
    */
   public DevfileImpl parseYaml(String devfileContent) throws DevfileFormatException {
-    return parse(devfileContent, yamlMapper, emptyMap());
+    try {
+      return parse(devfileContent, yamlMapper, emptyMap());
+    } catch (OverrideParameterException e) {
+      // should never happen as we send empty overrides map
+      throw new RuntimeException(e.getMessage());
+    }
   }
 
   /**
@@ -106,9 +112,10 @@ public class DevfileManager {
    * @return Devfile object created from the source content
    * @throws DevfileFormatException when any of schema or integrity validations fail
    * @throws DevfileFormatException when any yaml parsing error occurs
+   * @throws OverrideParameterException when override properties is incorrect
    */
   public DevfileImpl parseYaml(String devfileContent, Map<String, String> overrideProperties)
-      throws DevfileFormatException {
+      throws DevfileFormatException, OverrideParameterException {
     return parse(devfileContent, yamlMapper, overrideProperties);
   }
 
@@ -122,7 +129,12 @@ public class DevfileManager {
    * @throws DevfileFormatException when any yaml parsing error occurs
    */
   public DevfileImpl parseJson(String devfileContent) throws DevfileFormatException {
-    return parse(devfileContent, jsonMapper, emptyMap());
+    try {
+      return parse(devfileContent, jsonMapper, emptyMap());
+    } catch (OverrideParameterException e) {
+      // should never happen as we send empty overrides map
+      throw new RuntimeException(e.getMessage());
+    }
   }
 
   /**
@@ -143,9 +155,10 @@ public class DevfileManager {
    * @return Devfile object created from the source content
    * @throws DevfileFormatException when any of schema or integrity validations fail
    * @throws DevfileFormatException when any yaml parsing error occurs
+   * @throws OverrideParameterException when override properties is incorrect
    */
   public DevfileImpl parseJson(String devfileContent, Map<String, String> overrideProperties)
-      throws DevfileFormatException {
+      throws DevfileFormatException, OverrideParameterException {
     return parse(devfileContent, jsonMapper, overrideProperties);
   }
 
@@ -182,7 +195,7 @@ public class DevfileManager {
 
   private DevfileImpl parse(
       String content, ObjectMapper mapper, Map<String, String> overrideProperties)
-      throws DevfileFormatException {
+      throws DevfileFormatException, OverrideParameterException {
     DevfileImpl devfile;
     try {
       JsonNode parsed = mapper.readTree(content);

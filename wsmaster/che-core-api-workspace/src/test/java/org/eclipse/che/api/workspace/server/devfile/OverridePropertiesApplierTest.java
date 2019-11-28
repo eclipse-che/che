@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
+import org.eclipse.che.api.workspace.server.devfile.exception.OverrideParameterException;
 import org.testng.annotations.Test;
 
 public class OverridePropertiesApplierTest {
@@ -82,7 +82,7 @@ public class OverridePropertiesApplierTest {
   }
 
   @Test(
-      expectedExceptions = DevfileFormatException.class,
+      expectedExceptions = OverrideParameterException.class,
       expectedExceptionsMessageRegExp =
           "Cannot apply override: object with name 'test3' not found in array of projects.")
   public void shouldThrowExceptionIfOverrideArrayObjectNotFoundByName() throws Exception {
@@ -107,7 +107,7 @@ public class OverridePropertiesApplierTest {
   }
 
   @Test(
-      expectedExceptions = DevfileFormatException.class,
+      expectedExceptions = OverrideParameterException.class,
       expectedExceptionsMessageRegExp =
           "Override property reference 'projects' points to an array type object. Please add an item qualifier by name.")
   public void shouldThrowExceptionIfOverrideReferenceEndsWithArray() throws Exception {
@@ -132,7 +132,7 @@ public class OverridePropertiesApplierTest {
   }
 
   @Test(
-      expectedExceptions = DevfileFormatException.class,
+      expectedExceptions = OverrideParameterException.class,
       expectedExceptionsMessageRegExp =
           "Override property reference 'projects' points to an array type object. Please add an item qualifier by name.")
   public void shouldThrowExceptionIfOverrideReferenceIsJustWithArray() throws Exception {
@@ -153,7 +153,7 @@ public class OverridePropertiesApplierTest {
   }
 
   @Test(
-      expectedExceptions = DevfileFormatException.class,
+      expectedExceptions = OverrideParameterException.class,
       expectedExceptionsMessageRegExp =
           "Override path 'commands.run.foo.bar' starts with an unsupported field pointer. Supported fields are \\{\"apiVersion\",\"metadata\",\"projects\"\\}.")
   public void shouldThrowExceptionIfOverrideReferenceUsesUnsupportedField() throws Exception {

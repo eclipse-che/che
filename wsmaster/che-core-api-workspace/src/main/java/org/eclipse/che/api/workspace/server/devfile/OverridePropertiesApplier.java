@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
+import org.eclipse.che.api.workspace.server.devfile.exception.OverrideParameterException;
 
 /**
  * Applies override properties to provided devfile {@link JsonNode}. The following set of rules will
@@ -44,7 +44,8 @@ public class OverridePropertiesApplier {
   private final List<String> allowedFirstSegments = asList("apiVersion", "metadata", "projects");
 
   public JsonNode applyPropertiesOverride(
-      JsonNode devfileNode, Map<String, String> overrideProperties) throws DevfileFormatException {
+      JsonNode devfileNode, Map<String, String> overrideProperties)
+      throws OverrideParameterException {
     for (Map.Entry<String, String> entry : overrideProperties.entrySet()) {
       String[] pathSegments = entry.getKey().split("\\.");
       if (pathSegments.length < 1) {
@@ -63,9 +64,9 @@ public class OverridePropertiesApplier {
           continue;
         } else if (nextNode.isArray()) {
           // ok we have reference to array, so need to make sure that we have next path segment
-          // ant then try to retrieve it from array
+          // and then try to retrieve it from array
           if (!pathSegmentsIterator.hasNext()) {
-            throw new DevfileFormatException(
+            throw new OverrideParameterException(
                 format(
                     "Override property reference '%s' points to an array type object. Please add an item qualifier by name.",
                     entry.getKey()));
@@ -89,9 +90,9 @@ public class OverridePropertiesApplier {
     return devfileNode;
   }
 
-  private void validateFirstSegment(String[] pathSegments) throws DevfileFormatException {
+  private void validateFirstSegment(String[] pathSegments) throws OverrideParameterException {
     if (!allowedFirstSegments.contains(pathSegments[0])) {
-      throw new DevfileFormatException(
+      throw new OverrideParameterException(
           format(
               "Override path '%s' starts with an unsupported field pointer. Supported fields are %s.",
               join(".", pathSegments),
@@ -100,13 +101,13 @@ public class OverridePropertiesApplier {
   }
 
   private JsonNode findNodeByName(ArrayNode parentNode, String searchName, String parentNodeName)
-      throws DevfileFormatException {
+      throws OverrideParameterException {
     return StreamSupport.stream(parentNode.spliterator(), false)
         .filter(node -> node.path("name").asText().equals(searchName))
         .findFirst()
         .orElseThrow(
             () ->
-                new DevfileFormatException(
+                new OverrideParameterException(
                     format(
                         "Cannot apply override: object with name '%s' not found in array of %s.",
                         searchName, parentNodeName)));
