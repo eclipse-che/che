@@ -47,6 +47,7 @@ export class NavbarRecentWorkspacesController {
   recentWorkspaces: Array<che.IWorkspace>;
   workspaceUpdated: Map<string, number>;
   veryRecentWorkspaceId: string;
+  workspaceNameById: Map<string, string> = new Map();
   ideSvc: IdeSvc;
   $scope: ng.IScope;
   $log: ng.ILogService;
@@ -179,6 +180,8 @@ export class NavbarRecentWorkspacesController {
    * Update recent workspaces
    */
   updateRecentWorkspaces(): void {
+    this.workspaceNameById.clear();
+
     if (!this.workspaces || this.workspaces.length === 0) {
       this.recentWorkspaces = [];
       return;
@@ -221,6 +224,10 @@ export class NavbarRecentWorkspacesController {
       }
     }
     this.recentWorkspaces = recentWorkspaces.slice(0, MAX_RECENT_WORKSPACES_ITEMS);
+
+    recentWorkspaces.forEach((workspace: che.IWorkspace) =>
+      this.workspaceNameById.set(workspace.id, this.cheWorkspace.getWorkspaceDataManager().getName(workspace))
+    );
   }
 
   /**
@@ -247,8 +254,7 @@ export class NavbarRecentWorkspacesController {
    * @returns {String}
    */
   getWorkspaceName(workspaceId: string): string {
-    let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
-    return workspace ? this.cheWorkspace.getWorkspaceDataManager().getName(workspace) : 'unknown';
+    return this.workspaceNameById.get(workspaceId) || 'unknown';
   }
 
   /**
@@ -384,7 +390,7 @@ export class NavbarRecentWorkspacesController {
    * Returns `true` if workspace configuration has unsaved changes.
    * @param id a workspace ID
    */
-  checkUnsavedChanges(id: string): ng.IPromise<any> | any {
+  checkUnsavedChanges(id: string): boolean {
     return this.workspaceDetailsService.isWorkspaceConfigSaved(id) === false;
   }
 
