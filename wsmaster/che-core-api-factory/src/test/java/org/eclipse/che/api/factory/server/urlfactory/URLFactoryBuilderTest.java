@@ -35,6 +35,7 @@ import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.devfile.exception.OverrideParameterException;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -170,7 +171,8 @@ public class URLFactoryBuilderTest {
 
   @Test(dataProvider = "devfiles")
   public void checkThatDtoHasCorrectNames(DevfileImpl devfile, String expectedGenerateName)
-      throws BadRequestException, ServerException, DevfileException, IOException {
+      throws BadRequestException, ServerException, DevfileException, IOException,
+          OverrideParameterException {
     DefaultFactoryUrl defaultFactoryUrl = mock(DefaultFactoryUrl.class);
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
     when(defaultFactoryUrl.devfileFileLocation()).thenReturn("anything");
