@@ -118,7 +118,6 @@ public class OpenShiftEnvironmentProvisioner
   @Traced
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     LOG.debug(

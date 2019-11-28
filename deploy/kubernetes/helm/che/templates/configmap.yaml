@@ -50,6 +50,9 @@ data:
 {{- if and .Values.global.multiuser .Values.customOidcUsernameClaim }}
   CHE_KEYCLOAK_USERNAME__CLAIM: {{ .Values.customOidcUsernameClaim }}
 {{- end }}
+  # This is only kept for the upgrade purposes where we need to make sure we don't loose this piece of old configuration
+  # so that we can find the data of old workspaces
+  CHE_INFRA_KUBERNETES_NAMESPACE: {{ .Values.global.cheWorkspacesNamespace | quote}}
   CHE_INFRA_KUBERNETES_NAMESPACE_DEFAULT: {{ .Values.global.cheWorkspacesNamespace | quote}}
   CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME: {{ .Values.global.cheWorkspaceServiceAccount }}
   CHE_INFRA_KUBERNETES_TRUST__CERTS: "false"

@@ -22,12 +22,14 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.NoEnvironmentFactory.NoEnvInternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
 /** @author Sergii Leshchenko */
 @Singleton
@@ -37,13 +39,15 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
 
   private final KubernetesRuntimeContextFactory runtimeContextFactory;
   private final KubernetesRuntimeStateCache runtimeStatusesCache;
+  private final KubernetesNamespaceFactory namespaceFactory;
 
   @Inject
   public KubernetesInfrastructure(
       EventService eventService,
       KubernetesRuntimeContextFactory runtimeContextFactory,
       Set<InternalEnvironmentProvisioner> internalEnvProvisioners,
-      KubernetesRuntimeStateCache runtimeStatusesCache) {
+      KubernetesRuntimeStateCache runtimeStatusesCache,
+      KubernetesNamespaceFactory namespaceFactory) {
     super(
         NAME,
         ImmutableSet.of(KubernetesEnvironment.TYPE, Constants.NO_ENVIRONMENT_RECIPE_TYPE),
@@ -51,11 +55,24 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
         internalEnvProvisioners);
     this.runtimeContextFactory = runtimeContextFactory;
     this.runtimeStatusesCache = runtimeStatusesCache;
+    this.namespaceFactory = namespaceFactory;
   }
 
   @Override
   public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
     return runtimeStatusesCache.getIdentities();
+  }
+
+  @Override
+  public String evaluateInfraNamespace(NamespaceResolutionContext resolutionCtx)
+      throws InfrastructureException {
+    return namespaceFactory.evaluateNamespaceName(resolutionCtx);
+  }
+
+  @Override
+  public String evaluateLegacyInfraNamespace(NamespaceResolutionContext resolutionContext)
+      throws InfrastructureException {
+    return namespaceFactory.evaluateLegacyNamespaceName(resolutionContext);
   }
 
   @Override

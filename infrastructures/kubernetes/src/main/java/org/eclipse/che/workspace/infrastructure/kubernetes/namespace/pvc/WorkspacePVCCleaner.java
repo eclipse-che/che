@@ -18,7 +18,6 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,15 +37,12 @@ public class WorkspacePVCCleaner {
 
   private final boolean pvcEnabled;
   private final WorkspaceVolumesStrategy strategy;
-  private final KubernetesNamespaceFactory namespaceFactory;
 
   @Inject
   public WorkspacePVCCleaner(
       @Named("che.infra.kubernetes.pvc.enabled") boolean pvcEnabled,
-      KubernetesNamespaceFactory namespaceFactory,
       WorkspaceVolumesStrategy pvcStrategy) {
     this.pvcEnabled = pvcEnabled;
-    this.namespaceFactory = namespaceFactory;
     this.strategy = pvcStrategy;
   }
 
@@ -57,13 +53,6 @@ public class WorkspacePVCCleaner {
           event -> {
             final Workspace workspace = event.getWorkspace();
             try {
-              if (namespaceFactory.isManagingNamespace(workspace.getId())) {
-                // the namespaces of managed workspaces are deleted, so no need to do the cleanup
-                LOG.debug(
-                    "Not cleaning up the PVCs of workspace %s, because its namespace is"
-                        + " going to be deleted.");
-                return;
-              }
               strategy.cleanup(workspace);
             } catch (InfrastructureException ex) {
               LOG.error(

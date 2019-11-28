@@ -48,7 +48,8 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class InconsistentRuntimesDetectorTest {
 
-  private RuntimeIdentity runtimeId = new RuntimeIdentityImpl("workspace1", "envName", "owner1");
+  private RuntimeIdentity runtimeId =
+      new RuntimeIdentityImpl("workspace1", "envName", "owner1", "infraNamespace");
 
   @Mock private RuntimeEventsPublisher eventPublisher;
   @Mock private WorkspaceRuntimes workspaceRuntimes;

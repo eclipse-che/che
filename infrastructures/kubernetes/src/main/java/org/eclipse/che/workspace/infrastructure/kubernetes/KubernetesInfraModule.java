@@ -29,6 +29,7 @@ import com.google.inject.multibindings.Multibinder;
 import java.util.Map;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.workspace.server.NoEnvironmentFactory;
+import org.eclipse.che.api.workspace.server.WorkspaceAttributeValidator;
 import org.eclipse.che.api.workspace.server.devfile.DevfileBindings;
 import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator.NoopComponentIntegrityValidator;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -80,6 +81,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.Brok
 public class KubernetesInfraModule extends AbstractModule {
   @Override
   protected void configure() {
+    Multibinder.newSetBinder(binder(), WorkspaceAttributeValidator.class)
+        .addBinding()
+        .to(K8sInfraNamespaceWsAttributeValidator.class);
+
     bind(KubernetesNamespaceService.class);
 
     MapBinder<String, InternalEnvironmentFactory> factories =

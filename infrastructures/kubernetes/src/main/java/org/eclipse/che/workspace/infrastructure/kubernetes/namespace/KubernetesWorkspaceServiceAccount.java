@@ -60,6 +60,9 @@ public class KubernetesWorkspaceServiceAccount {
    * Make sure that workspace service account exists and has `view` and `exec` role bindings, as
    * well as create workspace-view and exec roles in namespace scope
    *
+   * <p>Do NOT make any changes to the service account if it already exists in the namespace to
+   * preserve its configuration done by someone else.
+   *
    * @throws InfrastructureException when any exception occurred
    */
   void prepare() throws InfrastructureException {
@@ -68,6 +71,8 @@ public class KubernetesWorkspaceServiceAccount {
     if (k8sClient.serviceAccounts().inNamespace(namespace).withName(serviceAccountName).get()
         == null) {
       createWorkspaceServiceAccount(k8sClient);
+    } else {
+      return;
     }
 
     String execRoleName = "exec";
