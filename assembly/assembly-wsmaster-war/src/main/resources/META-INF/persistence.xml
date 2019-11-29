@@ -72,7 +72,6 @@
         <class>org.eclipse.che.multiuser.organization.spi.impl.MemberImpl</class>
         <class>org.eclipse.che.multiuser.organization.spi.impl.OrganizationDistributedResourcesImpl</class>
 
-        <class>org.eclipse.che.api.workspace.activity.WorkspaceExpiration</class>
         <class>org.eclipse.che.api.workspace.activity.WorkspaceActivity</class>
         <class>org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyImpl</class>
         <class>org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyPairImpl</class>

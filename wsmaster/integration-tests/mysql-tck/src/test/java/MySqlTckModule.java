@@ -39,7 +39,6 @@ import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.activity.JpaWorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivity;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
-import org.eclipse.che.api.workspace.activity.WorkspaceExpiration;
 import org.eclipse.che.api.workspace.server.devfile.SerializableConverter;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
@@ -196,9 +195,6 @@ public class MySqlTckModule extends TckModule {
     bind(WorkspaceDao.class).to(JpaWorkspaceDao.class);
     bind(WorkspaceActivityDao.class).to(JpaWorkspaceActivityDao.class);
     bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new WorkspaceRepository());
-
-    bind(new TypeLiteral<TckRepository<WorkspaceExpiration>>() {})
-        .toInstance(new JpaTckRepository<>(WorkspaceExpiration.class));
 
     // sign keys
     bind(SignatureKeyDao.class).to(JpaSignatureKeyDao.class);
