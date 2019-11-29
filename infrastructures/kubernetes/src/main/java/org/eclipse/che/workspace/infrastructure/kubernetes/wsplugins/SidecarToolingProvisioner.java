@@ -59,14 +59,15 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
 
   @Traced
   @Beta
-  public void provision(RuntimeIdentity id, StartSynchronizer startSynchronizer, E environment)
+  public void provision(
+      RuntimeIdentity identity, StartSynchronizer startSynchronizer, E environment)
       throws InfrastructureException {
 
     Collection<PluginFQN> pluginFQNs = pluginFQNParser.parsePlugins(environment.getAttributes());
     if (pluginFQNs.isEmpty()) {
       return;
     }
-    LOG.debug("Started sidecar tooling provisioning workspace '{}'", id.getWorkspaceId());
+    LOG.debug("Started sidecar tooling provisioning workspace '{}'", identity.getWorkspaceId());
     String recipeType = environment.getType();
     ChePluginsApplier pluginsApplier = workspaceNextAppliers.get(recipeType);
     if (pluginsApplier == null) {
@@ -76,12 +77,12 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
 
     boolean isEphemeral = EphemeralWorkspaceUtility.isEphemeral(environment.getAttributes());
     List<ChePlugin> chePlugins =
-        pluginBrokerManager.getTooling(id, startSynchronizer, pluginFQNs, isEphemeral);
+        pluginBrokerManager.getTooling(identity, startSynchronizer, pluginFQNs, isEphemeral);
 
-    pluginsApplier.apply(id, environment, chePlugins);
+    pluginsApplier.apply(identity, environment, chePlugins);
     if (isEphemeral) {
-      brokerApplier.apply(environment, id, pluginFQNs);
+      brokerApplier.apply(environment, identity, pluginFQNs);
     }
-    LOG.debug("Finished sidecar tooling provisioning workspace '{}'", id.getWorkspaceId());
+    LOG.debug("Finished sidecar tooling provisioning workspace '{}'", identity.getWorkspaceId());
   }
 }

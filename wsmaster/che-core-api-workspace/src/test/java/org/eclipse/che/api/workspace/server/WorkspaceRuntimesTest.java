@@ -20,6 +20,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRI
 import static org.eclipse.che.api.workspace.shared.Constants.NO_ENVIRONMENT_RECIPE_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -74,18 +76,22 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
+import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -103,6 +109,7 @@ public class WorkspaceRuntimesTest {
   @Mock private DBInitializer dbInitializer;
 
   @Mock private WorkspaceSharedPool sharedPool;
+  @Mock private ExecutorService executorService;
 
   @Mock private ProbeScheduler probeScheduler;
 
@@ -134,6 +141,13 @@ public class WorkspaceRuntimesTest {
             statuses,
             lockService,
             devfileConverter);
+
+    lenient().when(sharedPool.getExecutor()).thenReturn(executorService);
+  }
+
+  @AfterMethod
+  public void tearDown() {
+    EnvironmentContext.reset();
   }
 
   @Test(
@@ -149,6 +163,37 @@ public class WorkspaceRuntimesTest {
     config.getEnvironments().put("default", new EnvironmentImpl());
 
     runtimes.validate(workspace, "non-existing");
+  }
+
+  @Test(
+      expectedExceptions = ServerException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace does not have infrastructure namespace specified. "
+              + "Please set value of 'infrastructureNamespace' workspace attribute.")
+  public void shouldThrowExceptionIfWorkspaceDoesNotHaveInfraNamespaceSpecifiedOnStartAsync()
+      throws Exception {
+    WorkspaceImpl workspace =
+        WorkspaceImpl.builder().setId("workspace123").setDevfile(new DevfileImpl()).build();
+
+    runtimes.startAsync(workspace, "env", emptyMap());
+  }
+
+  @Test
+  public void shouldUseInfraNamespaceAttributeOnStartAsync() throws Exception {
+    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("username", "user123", null, false));
+    WorkspaceImpl workspace = mockWorkspaceWithDevfile("workspace123", "env");
+    workspace.getAttributes().put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "infraNamespace");
+    RuntimeContext context =
+        mockContext(new RuntimeIdentityImpl("workspace123", "env", "user123", "infraNamespace"));
+    doReturn(context.getEnvironment()).when(testEnvFactory).create(any());
+
+    runtimes.startAsync(workspace, null, emptyMap());
+
+    ArgumentCaptor<RuntimeIdentity> runtimeIdCaptor =
+        ArgumentCaptor.forClass(RuntimeIdentity.class);
+    verify(infrastructure).prepare(runtimeIdCaptor.capture(), any());
+    RuntimeIdentity runtimeId = runtimeIdCaptor.getValue();
+    assertEquals(runtimeId.getInfrastructureNamespace(), "infraNamespace");
   }
 
   @Test
@@ -201,7 +246,8 @@ public class WorkspaceRuntimesTest {
 
   @Test
   public void runtimeIsRecoveredForWorkspaceWithConfig() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", "my-env", "myId", "infraNamespace");
     mockWorkspaceWithConfig(identity);
     RuntimeContext context = mockContext(identity);
     when(context.getRuntime())
@@ -221,7 +267,8 @@ public class WorkspaceRuntimesTest {
 
   @Test
   public void runtimeIsRecoveredForWorkspaceWithDevfile() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "default", "myId");
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", "default", "myId", "infraNamespace");
 
     WorkspaceImpl workspaceMock = mockWorkspaceWithDevfile(identity);
     RuntimeContext context = mockContext(identity);
@@ -247,7 +294,8 @@ public class WorkspaceRuntimesTest {
       expectedExceptionsMessageRegExp =
           "Workspace configuration is missing for the runtime 'workspace123:my-env'. Runtime won't be recovered")
   public void runtimeIsNotRecoveredIfNoWorkspaceFound() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", "my-env", "myId", "infraNamespace");
     when(workspaceDao.get(identity.getWorkspaceId())).thenThrow(new NotFoundException("no!"));
 
     // try recover
@@ -261,7 +309,8 @@ public class WorkspaceRuntimesTest {
       expectedExceptionsMessageRegExp =
           "Environment configuration is missing for the runtime 'workspace123:my-env'. Runtime won't be recovered")
   public void runtimeIsNotRecoveredIfNoEnvironmentFound() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", "my-env", "myId", "infraNamespace");
     WorkspaceImpl workspace = mockWorkspaceWithConfig(identity);
     when(workspace.getConfig().getEnvironments()).thenReturn(emptyMap());
 
@@ -276,7 +325,8 @@ public class WorkspaceRuntimesTest {
       expectedExceptionsMessageRegExp =
           "Couldn't recover runtime 'workspace123:my-env'. Error: oops!")
   public void runtimeIsNotRecoveredIfInfraPreparationFailed() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", "my-env", "myId", "infraNamespace");
 
     mockWorkspaceWithConfig(identity);
     InternalEnvironment internalEnvironment = mock(InternalEnvironment.class);
@@ -294,9 +344,12 @@ public class WorkspaceRuntimesTest {
   @Test
   public void runtimeRecoveryContinuesThroughException() throws Exception {
     // Given
-    RuntimeIdentityImpl identity1 = new RuntimeIdentityImpl("workspace1", "env1", "owner1");
-    RuntimeIdentityImpl identity2 = new RuntimeIdentityImpl("workspace2", "env2", "owner2");
-    RuntimeIdentityImpl identity3 = new RuntimeIdentityImpl("workspace3", "env3", "owner3");
+    RuntimeIdentityImpl identity1 =
+        new RuntimeIdentityImpl("workspace1", "env1", "owner1", "infraNamespace");
+    RuntimeIdentityImpl identity2 =
+        new RuntimeIdentityImpl("workspace2", "env2", "owner2", "infraNamespace");
+    RuntimeIdentityImpl identity3 =
+        new RuntimeIdentityImpl("workspace3", "env3", "owner3", "infraNamespace");
     Set<RuntimeIdentity> identities =
         ImmutableSet.<RuntimeIdentity>builder()
             .add(identity1)
@@ -352,9 +405,12 @@ public class WorkspaceRuntimesTest {
   @Test
   public void runtimeRecoveryContinuesThroughRuntimeException() throws Exception {
     // Given
-    RuntimeIdentityImpl identity1 = new RuntimeIdentityImpl("workspace1", "env1", "owner1");
-    RuntimeIdentityImpl identity2 = new RuntimeIdentityImpl("workspace2", "env2", "owner2");
-    RuntimeIdentityImpl identity3 = new RuntimeIdentityImpl("workspace3", "env3", "owner3");
+    RuntimeIdentityImpl identity1 =
+        new RuntimeIdentityImpl("workspace1", "env1", "owner1", "infraNamespace");
+    RuntimeIdentityImpl identity2 =
+        new RuntimeIdentityImpl("workspace2", "env2", "owner2", "infraNamespace");
+    RuntimeIdentityImpl identity3 =
+        new RuntimeIdentityImpl("workspace3", "env3", "owner3", "infraNamespace");
     Set<RuntimeIdentity> identities =
         ImmutableSet.<RuntimeIdentity>builder()
             .add(identity1)
@@ -495,7 +551,7 @@ public class WorkspaceRuntimesTest {
     ImmutableMap<String, Machine> machines =
         ImmutableMap.of("machine", new MachineImpl(emptyMap(), emptyMap(), MachineStatus.STARTING));
 
-    RuntimeIdentity identity = new RuntimeIdentityImpl("ws123", "my-env", "myId");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("ws123", "my-env", "myId", "infraNamespace");
     RuntimeContext context = mockContext(identity);
     doReturn(context).when(infrastructure).prepare(eq(identity), any());
 
@@ -528,7 +584,8 @@ public class WorkspaceRuntimesTest {
   @Test
   public void shouldRecoverRuntimeWhenThereIsNotCachedOneDuringInjecting() throws Exception {
     // given
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", "my-env", "myId", "infraNamespace");
     mockWorkspaceWithConfig(identity);
 
     when(statuses.get("workspace123")).thenReturn(WorkspaceStatus.STARTING);
@@ -567,7 +624,8 @@ public class WorkspaceRuntimesTest {
   @Test
   public void shouldNotInjectRuntimeIfExceptionOccurredOnRuntimeFetching() throws Exception {
     // given
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", "my-env", "myId", "infraNamespace");
     mockWorkspaceWithConfig(identity);
 
     when(statuses.get("workspace123")).thenReturn(WorkspaceStatus.STARTING);
@@ -682,6 +740,7 @@ public class WorkspaceRuntimesTest {
     lenient().doReturn(context).when(infrastructure).prepare(eq(identity), eq(internalEnvironment));
     lenient().when(context.getInfrastructure()).thenReturn(infrastructure);
     lenient().when(context.getIdentity()).thenReturn(identity);
+    lenient().when(context.getRuntime()).thenReturn(new TestInternalRuntime(context));
     lenient().when(context.getEnvironment()).thenReturn(internalEnvironment);
 
     List<Warning> warnings = new ArrayList<>();
@@ -695,7 +754,7 @@ public class WorkspaceRuntimesTest {
       throws NotFoundException, ServerException {
     WorkspaceConfigImpl config = mock(WorkspaceConfigImpl.class);
     EnvironmentImpl environment = mockEnvironment();
-    when(config.getEnvironments()).thenReturn(ImmutableMap.of(identity.getEnvName(), environment));
+    doReturn(ImmutableMap.of(identity.getEnvName(), environment)).when(config).getEnvironments();
 
     WorkspaceImpl workspace = mock(WorkspaceImpl.class);
     when(workspace.getConfig()).thenReturn(config);
@@ -728,6 +787,28 @@ public class WorkspaceRuntimesTest {
     return workspace;
   }
 
+  private WorkspaceImpl mockWorkspaceWithDevfile(String workspaceId, String envName)
+      throws NotFoundException, ServerException {
+    DevfileImpl devfile = mock(DevfileImpl.class);
+
+    WorkspaceImpl workspace = mock(WorkspaceImpl.class);
+    lenient().when(workspace.getDevfile()).thenReturn(devfile);
+    lenient().when(workspace.getId()).thenReturn(workspaceId);
+    lenient().when(workspace.getAttributes()).thenReturn(new HashMap<>());
+
+    lenient().when(workspaceDao.get(workspaceId)).thenReturn(workspace);
+
+    WorkspaceConfigImpl convertedConfig = mock(WorkspaceConfigImpl.class);
+    when(convertedConfig.getDefaultEnv()).thenReturn(envName);
+    EnvironmentImpl environment = mockEnvironment();
+    lenient()
+        .when(convertedConfig.getEnvironments())
+        .thenReturn(ImmutableMap.of(envName, environment));
+    lenient().when(devfileConverter.convert(devfile)).thenReturn(convertedConfig);
+
+    return workspace;
+  }
+
   private EnvironmentImpl mockEnvironment() {
     EnvironmentImpl environment = mock(EnvironmentImpl.class);
     when(environment.getRecipe())
@@ -752,6 +833,17 @@ public class WorkspaceRuntimesTest {
 
     public TestInfrastructure(String... types) {
       super("test", asList(types), null, emptySet());
+    }
+
+    @Override
+    public String evaluateInfraNamespace(NamespaceResolutionContext ctx) {
+      return "defaultNamespace";
+    }
+
+    @Override
+    public String evaluateLegacyInfraNamespace(NamespaceResolutionContext resolutionContext)
+        throws InfrastructureException {
+      return "defaultLegacyNamespace";
     }
 
     @Override

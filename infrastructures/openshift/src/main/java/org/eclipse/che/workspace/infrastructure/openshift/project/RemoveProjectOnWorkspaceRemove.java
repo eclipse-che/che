@@ -44,15 +44,12 @@ public class RemoveProjectOnWorkspaceRemove implements EventSubscriber<Workspace
 
   @Override
   public void onEvent(WorkspaceRemovedEvent event) {
-    String workspaceId = event.getWorkspace().getId();
     try {
-      if (projectFactory.isManagingNamespace(workspaceId)) {
-        projectFactory.delete(workspaceId);
-      }
+      projectFactory.deleteIfManaged(event.getWorkspace());
     } catch (InfrastructureException e) {
       LOG.warn(
           "Fail to remove OpenShift project for workspace with id {}. Cause: {}",
-          workspaceId,
+          event.getWorkspace().getId(),
           e.getMessage());
     }
   }

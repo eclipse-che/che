@@ -16,12 +16,15 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
 
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -30,9 +33,11 @@ import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.api.model.DoneableProjectRequest;
 import io.fabric8.openshift.api.model.Project;
+import io.fabric8.openshift.api.model.ProjectBuilder;
 import io.fabric8.openshift.api.model.ProjectRequestFluent.MetadataNested;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.ProjectRequestOperation;
+import java.util.Map;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
@@ -103,12 +108,16 @@ public class OpenShiftProjectTest {
   @Test
   public void testOpenShiftProjectPreparingWhenProjectExists() throws Exception {
     // given
+    MetadataNested projectMeta = prepareProjectRequest();
+
     prepareProject(PROJECT_NAME);
-    OpenShiftProject openShiftProject =
-        new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
 
     // when
-    openShiftProject.prepare();
+    project.prepare(false, true);
+
+    // then
+    verify(projectMeta, never()).withName(PROJECT_NAME);
   }
 
   @Test
@@ -118,14 +127,71 @@ public class OpenShiftProjectTest {
 
     Resource resource = prepareProjectResource(PROJECT_NAME);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
-    OpenShiftProject openShiftProject =
-        new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
 
     // when
-    openShiftProject.prepare();
+    openShiftProject.prepare(false, true);
 
     // then
     verify(projectMetadata).withName(PROJECT_NAME);
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void throwsExceptionIfNamespaceDoesntExistAndNotAllowedToCreateIt() throws Exception {
+    // given
+    Resource resource = prepareProjectResource(PROJECT_NAME);
+    doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
+    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+
+    // when
+    project.prepare(false, false);
+
+    // then
+    // exception is thrown
+  }
+
+  @Test
+  public void testMarksNamespaceManaged() throws Exception {
+    // given
+    MetadataNested projectMeta = prepareProjectRequest();
+
+    Project projectResource = prepareProject(PROJECT_NAME);
+    ObjectMeta metadata = mock(ObjectMeta.class);
+    @SuppressWarnings("unchecked")
+    Map<String, String> labels = mock(Map.class);
+    when(projectResource.getMetadata()).thenReturn(metadata);
+    when(metadata.getLabels()).thenReturn(labels);
+
+    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+
+    // when
+    project.prepare(true, false);
+
+    // then
+    verify(projectMeta, never()).withName(PROJECT_NAME);
+    verify(labels).put("che-managed", "true");
+  }
+
+  @Test
+  public void testDoesntMarkNamespaceManaged() throws Exception {
+    // given
+    MetadataNested projectMeta = prepareProjectRequest();
+
+    Project projectResource = prepareProject(PROJECT_NAME);
+    ObjectMeta metadata = mock(ObjectMeta.class);
+    @SuppressWarnings("unchecked")
+    Map<String, String> labels = mock(Map.class);
+    when(projectResource.getMetadata()).thenReturn(metadata);
+    when(metadata.getLabels()).thenReturn(labels);
+
+    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+
+    // when
+    project.prepare(false, false);
+
+    // then
+    verify(projectMeta, never()).withName(PROJECT_NAME);
+    verify(labels, never()).put(anyString(), anyString());
   }
 
   @Test
@@ -162,27 +228,46 @@ public class OpenShiftProjectTest {
   }
 
   @Test
-  public void testDeletesExistingProject() throws Exception {
+  public void testDeletesExistingManagedProject() throws Exception {
     // given
     OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
-    Resource resource = prepareProjectResource(PROJECT_NAME);
+    Resource resource = prepareManagedProjectResource(PROJECT_NAME);
 
     // when
-    project.delete();
+    project.deleteIfManaged();
 
     // then
     verify(resource).delete();
   }
 
   @Test
-  public void testDoesntFailIfDeletedProjectDoesntExist() throws Exception {
+  public void testDoesntDeleteExistingNonManagedNamespace() throws Exception {
     // given
     OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
     Resource resource = prepareProjectResource(PROJECT_NAME);
+
+    // when
+    try {
+      project.deleteIfManaged();
+      fail("Deleting a non-managed project shouldn't have succeeded.");
+    } catch (InfrastructureException e) {
+      // good
+    }
+
+    // then
+    verify(resource, never()).delete();
+  }
+
+  @Test
+  public void testDoesntFailIfDeletedProjectDoesntExist() throws Exception {
+    // given
+    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    Resource resource = prepareManagedProjectResource(PROJECT_NAME);
+    when(resource.get()).thenThrow(new KubernetesClientException("err", 404, null));
     when(resource.delete()).thenThrow(new KubernetesClientException("err", 404, null));
 
     // when
-    project.delete();
+    project.deleteIfManaged();
 
     // then
     verify(resource).delete();
@@ -193,11 +278,11 @@ public class OpenShiftProjectTest {
   public void testDoesntFailIfDeletedProjectIsBeingDeleted() throws Exception {
     // given
     OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
-    Resource resource = prepareProjectResource(PROJECT_NAME);
+    Resource resource = prepareManagedProjectResource(PROJECT_NAME);
     when(resource.delete()).thenThrow(new KubernetesClientException("err", 409, null));
 
     // when
-    project.delete();
+    project.deleteIfManaged();
 
     // then
     verify(resource).delete();
@@ -223,13 +308,39 @@ public class OpenShiftProjectTest {
     NonNamespaceOperation projectOperation = mock(NonNamespaceOperation.class);
     doReturn(projectResource).when(projectOperation).withName(projectName);
     doReturn(projectOperation).when(openShiftClient).projects();
+
+    when(projectResource.get())
+        .thenReturn(
+            new ProjectBuilder().withNewMetadata().withName(projectName).endMetadata().build());
+
     openShiftClient.projects().withName(projectName).get();
     return projectResource;
   }
 
-  private void prepareProject(String projectName) {
+  private Resource prepareManagedProjectResource(String projectName) {
+    Resource projectResource = mock(Resource.class);
+
+    NonNamespaceOperation projectOperation = mock(NonNamespaceOperation.class);
+    doReturn(projectResource).when(projectOperation).withName(projectName);
+    doReturn(projectOperation).when(openShiftClient).projects();
+
+    when(projectResource.get())
+        .thenReturn(
+            new ProjectBuilder()
+                .withNewMetadata()
+                .withName(projectName)
+                .addToLabels("che-managed", "true")
+                .endMetadata()
+                .build());
+
+    openShiftClient.projects().withName(projectName).get();
+    return projectResource;
+  }
+
+  private Project prepareProject(String projectName) {
     Project project = mock(Project.class);
     Resource projectResource = prepareProjectResource(projectName);
     doReturn(project).when(projectResource).get();
+    return project;
   }
 }

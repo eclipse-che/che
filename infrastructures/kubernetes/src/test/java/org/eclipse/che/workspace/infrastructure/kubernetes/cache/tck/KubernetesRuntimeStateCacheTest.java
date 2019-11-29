@@ -118,7 +118,7 @@ public class KubernetesRuntimeStateCacheTest {
     // when
     List<? extends Command> commands =
         runtimesStatesCache.getCommands(
-            new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1"));
+            new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1", "infraNamespace"));
 
     // then
     assertTrue(commands.isEmpty());
@@ -151,7 +151,8 @@ public class KubernetesRuntimeStateCacheTest {
 
     // when
     runtimesStatesCache.updateCommands(
-        new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1"), singletonList(newCommand));
+        new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1", "infraNamespace"),
+        singletonList(newCommand));
   }
 
   @Test
@@ -197,7 +198,8 @@ public class KubernetesRuntimeStateCacheTest {
       throws Exception {
     // when
     Optional<WorkspaceStatus> statusOpt =
-        runtimesStatesCache.getStatus(new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1"));
+        runtimesStatesCache.getStatus(
+            new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1", "infraNamespace"));
 
     // then
     assertFalse(statusOpt.isPresent());
@@ -269,7 +271,8 @@ public class KubernetesRuntimeStateCacheTest {
       throws Exception {
     // when
     runtimesStatesCache.updateStatus(
-        new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1"), WorkspaceStatus.STOPPED);
+        new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1", "infraNamespace"),
+        WorkspaceStatus.STOPPED);
   }
 
   @Test(
@@ -280,7 +283,7 @@ public class KubernetesRuntimeStateCacheTest {
       throws Exception {
     // when
     runtimesStatesCache.updateStatus(
-        new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1"),
+        new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1", "infraNamespace"),
         s -> s.equals(WorkspaceStatus.STOPPING),
         WorkspaceStatus.STOPPED);
   }

@@ -124,7 +124,6 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
         throws InfrastructureException {
       final String workspaceId = identity.getWorkspaceId();
-
       TracingTags.WORKSPACE_ID.set(workspaceId);
 
       LOG.debug("Start provisioning Kubernetes environment for workspace '{}'", workspaceId);

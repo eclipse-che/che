@@ -37,6 +37,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -68,6 +69,7 @@ import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule;
 import org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService;
 import org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache;
+import org.eclipse.che.api.workspace.server.WorkspaceAttributeValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
@@ -244,6 +246,8 @@ public class CascadeRemovalTest {
                 install(new WorkspaceActivityModule());
                 install(new JpaKubernetesRuntimeCacheModule());
                 bind(ExecutorServiceWrapper.class).to(NoopExecutorServiceWrapper.class);
+                // initialize empty binder
+                Multibinder.newSetBinder(binder(), WorkspaceAttributeValidator.class);
                 bind(WorkspaceManager.class);
 
                 RuntimeInfrastructure infra = mock(RuntimeInfrastructure.class);

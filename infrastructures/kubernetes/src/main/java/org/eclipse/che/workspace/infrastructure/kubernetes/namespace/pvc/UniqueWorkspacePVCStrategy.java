@@ -112,7 +112,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
         new HashMap<>(k8sEnv.getPersistentVolumeClaims());
 
     k8sEnv.getPersistentVolumeClaims().clear();
-    fillInExistingPVCs(k8sEnv, workspaceId);
+    fillInExistingPVCs(k8sEnv, identity);
 
     pvcProvisioner.provision(k8sEnv, userDefinedPVCs);
 
@@ -127,8 +127,10 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
 
   @Traced
   @Override
-  public void prepare(KubernetesEnvironment k8sEnv, String workspaceId, long timeoutMillis)
+  public void prepare(KubernetesEnvironment k8sEnv, RuntimeIdentity identity, long timeoutMillis)
       throws InfrastructureException {
+    String workspaceId = identity.getWorkspaceId();
+
     TracingTags.WORKSPACE_ID.set(workspaceId);
 
     if (EphemeralWorkspaceUtility.isEphemeral(k8sEnv.getAttributes())) {
@@ -141,7 +143,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
     }
 
     final KubernetesPersistentVolumeClaims k8sClaims =
-        factory.create(workspaceId).persistentVolumeClaims();
+        factory.getOrCreate(identity).persistentVolumeClaims();
     LOG.debug("Creating PVCs for workspace '{}'", workspaceId);
     k8sClaims.createIfNotExist(k8sEnv.getPersistentVolumeClaims().values());
 
@@ -159,20 +161,19 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
     if (EphemeralWorkspaceUtility.isEphemeral(workspace)) {
       return;
     }
-    String workspaceId = workspace.getId();
     factory
-        .create(workspaceId)
+        .get(workspace)
         .persistentVolumeClaims()
-        .delete(ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, workspaceId));
+        .delete(ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, workspace.getId()));
   }
 
-  private void fillInExistingPVCs(KubernetesEnvironment k8sEnv, String workspaceId)
+  private void fillInExistingPVCs(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     Map<String, PersistentVolumeClaim> existingPVCs =
         factory
-            .create(workspaceId)
+            .getOrCreate(identity)
             .persistentVolumeClaims()
-            .getByLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
+            .getByLabel(CHE_WORKSPACE_ID_LABEL, identity.getWorkspaceId())
             .stream()
             .collect(toMap(pvc -> pvc.getMetadata().getName(), Function.identity()));
 

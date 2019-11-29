@@ -66,7 +66,7 @@ public class PVCProvisionerTest {
   private static final String PVC_STORAGE_CLASS_NAME = "default";
 
   private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1", "infraNamespace");
 
   private KubernetesEnvironment k8sEnv;
 

@@ -45,9 +45,7 @@ public class RemoveNamespaceOnWorkspaceRemove implements EventSubscriber<Workspa
   public void onEvent(WorkspaceRemovedEvent event) {
     String workspaceId = event.getWorkspace().getId();
     try {
-      if (namespaceFactory.isManagingNamespace(workspaceId)) {
-        namespaceFactory.delete(workspaceId);
-      }
+      namespaceFactory.deleteIfManaged(event.getWorkspace());
     } catch (InfrastructureException e) {
       LOG.warn(
           "Fail to remove Kubernetes namespace for workspace with id {}. Cause: {}",

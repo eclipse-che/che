@@ -48,7 +48,8 @@ public class EphemeralWorkspaceUtility {
   }
 
   /**
-   * Change workspace attributes such that future calls to {@link isEphemeral} will return true.
+   * Change workspace attributes such that future calls to {@link #isEphemeral(Map)} will return
+   * true.
    *
    * @param workspaceAttributes workspace config or devfile attributes to which ephemeral mode
    *     configuration should be provisioned

@@ -54,9 +54,8 @@ public class PodTerminationGracePeriodProvisioner implements ConfigurationProvis
   }
 
   /**
-   * @param pod
-   * @return true if 'terminationGracePeriodSeconds' have been explicitly set in Kubernetes /
-   *     OpenShift recipe, false otherwise
+   * Returns true if 'terminationGracePeriodSeconds' have been explicitly set in Kubernetes /
+   * OpenShift recipe, false otherwise
    */
   private boolean isTerminationGracePeriodSet(final PodSpec podSpec) {
     return podSpec.getTerminationGracePeriodSeconds() != null;

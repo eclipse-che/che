@@ -59,6 +59,7 @@ import org.testng.annotations.Test;
 public class PVCSubPathHelperTest {
 
   private static final String WORKSPACE_ID = "workspace132";
+  private static final String NAMESPACE = "namespace";
   private static final String PVC_NAME = "che-workspace-claim";
   private static final String jobMemoryLimit = "250Mi";
   private static final String jobImage = "centos:centos7";
@@ -85,7 +86,7 @@ public class PVCSubPathHelperTest {
             k8sNamespaceFactory,
             securityContextProvisioner,
             new NoopExecutorServiceWrapper());
-    lenient().when(k8sNamespaceFactory.create(anyString())).thenReturn(k8sNamespace);
+    lenient().when(k8sNamespaceFactory.access(WORKSPACE_ID, NAMESPACE)).thenReturn(k8sNamespace);
     lenient().when(k8sNamespace.deployments()).thenReturn(osDeployments);
     lenient().when(pod.getStatus()).thenReturn(podStatus);
     lenient().when(osDeployments.deploy(nullable(Pod.class))).thenReturn(pod);
@@ -110,7 +111,7 @@ public class PVCSubPathHelperTest {
   public void testSuccessfullyCreatesWorkspaceDirs() throws Exception {
     when(podStatus.getPhase()).thenReturn(POD_PHASE_SUCCEEDED);
 
-    pvcSubPathHelper.createDirs(WORKSPACE_ID, PVC_NAME, WORKSPACE_ID + PROJECTS_PATH);
+    pvcSubPathHelper.createDirs(WORKSPACE_ID, NAMESPACE, PVC_NAME, WORKSPACE_ID + PROJECTS_PATH);
 
     verify(osDeployments).create(podCaptor.capture());
     final List<String> actual = podCaptor.getValue().getSpec().getContainers().get(0).getCommand();
@@ -130,7 +131,7 @@ public class PVCSubPathHelperTest {
   public void testSetMemoryLimitAndRequest() throws Exception {
     when(podStatus.getPhase()).thenReturn(POD_PHASE_SUCCEEDED);
 
-    pvcSubPathHelper.createDirs(WORKSPACE_ID, PVC_NAME, WORKSPACE_ID + PROJECTS_PATH);
+    pvcSubPathHelper.createDirs(WORKSPACE_ID, NAMESPACE, PVC_NAME, WORKSPACE_ID + PROJECTS_PATH);
 
     verify(osDeployments).create(podCaptor.capture());
     ResourceRequirements actual =
@@ -152,7 +153,7 @@ public class PVCSubPathHelperTest {
     when(podStatus.getPhase()).thenReturn(POD_PHASE_FAILED);
 
     pvcSubPathHelper.execute(
-        WORKSPACE_ID, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
+        WORKSPACE_ID, NAMESPACE, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
 
     verify(osDeployments).create(any());
     verify(osDeployments).wait(anyString(), anyInt(), any());
@@ -163,14 +164,15 @@ public class PVCSubPathHelperTest {
 
   @Test
   public void testLogErrorWhenKubernetesProjectCreationFailed() throws Exception {
-    when(k8sNamespaceFactory.create(WORKSPACE_ID))
+    when(osDeployments.create(any()))
         .thenThrow(new InfrastructureException("Kubernetes namespace creation failed"));
 
     pvcSubPathHelper.execute(
-        WORKSPACE_ID, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
+        WORKSPACE_ID, NAMESPACE, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
 
-    verify(k8sNamespaceFactory).create(WORKSPACE_ID);
-    verify(k8sNamespace, never()).deployments();
+    verify(k8sNamespaceFactory).access(WORKSPACE_ID, NAMESPACE);
+    verify(osDeployments).create(any());
+    verify(osDeployments, never()).wait(anyString(), anyInt(), any());
   }
 
   @Test
@@ -179,9 +181,9 @@ public class PVCSubPathHelperTest {
         .thenThrow(new InfrastructureException("Kubernetes pod creation failed"));
 
     pvcSubPathHelper.execute(
-        WORKSPACE_ID, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
+        WORKSPACE_ID, NAMESPACE, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
 
-    verify(k8sNamespaceFactory).create(WORKSPACE_ID);
+    verify(k8sNamespaceFactory).access(WORKSPACE_ID, NAMESPACE);
     verify(k8sNamespace).deployments();
     verify(osDeployments).create(any());
     verify(osDeployments, never()).wait(anyString(), anyInt(), any());
@@ -193,7 +195,7 @@ public class PVCSubPathHelperTest {
     doThrow(InfrastructureException.class).when(osDeployments).delete(anyString());
 
     pvcSubPathHelper.execute(
-        WORKSPACE_ID, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
+        WORKSPACE_ID, NAMESPACE, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
 
     verify(osDeployments).create(any());
     verify(osDeployments).wait(anyString(), anyInt(), any());

@@ -65,6 +65,7 @@ import org.testng.annotations.Test;
 public class CommonPVCStrategyTest {
 
   private static final String WORKSPACE_ID = "workspace123";
+  private static final String NAMESPACE = "infraNamespace";
   private static final String PVC_NAME = "che-claim";
 
   private static final String PVC_QUANTITY = "10Gi";
@@ -74,7 +75,7 @@ public class CommonPVCStrategyTest {
   private static final String[] WORKSPACE_SUBPATHS = {"/projects", "/logs"};
 
   private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1", NAMESPACE);
 
   private KubernetesEnvironment k8sEnv;
 
@@ -114,13 +115,13 @@ public class CommonPVCStrategyTest {
 
     provisionOrder = inOrder(volumeConverter, subpathPrefixes, podsVolumes);
 
-    lenient().doNothing().when(pvcSubPathHelper).execute(any(), any(), any());
+    lenient().doNothing().when(pvcSubPathHelper).execute(any(), any(), any(), any());
     lenient()
         .doReturn(CompletableFuture.completedFuture(null))
         .when(pvcSubPathHelper)
-        .removeDirsAsync(anyString(), any(String.class));
+        .removeDirsAsync(anyString(), anyString(), any(String.class));
 
-    lenient().when(factory.create(WORKSPACE_ID)).thenReturn(k8sNamespace);
+    lenient().when(factory.getOrCreate(IDENTITY)).thenReturn(k8sNamespace);
     lenient().when(k8sNamespace.persistentVolumeClaims()).thenReturn(pvcs);
 
     lenient().when(subpathPrefixes.getWorkspaceSubPath(WORKSPACE_ID)).thenReturn(WORKSPACE_ID);
@@ -194,14 +195,16 @@ public class CommonPVCStrategyTest {
     pvc.getAdditionalProperties()
         .put(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID), WORKSPACE_SUBPATHS);
     k8sEnv.getPersistentVolumeClaims().put(PVC_NAME, pvc);
-    doNothing().when(pvcSubPathHelper).createDirs(WORKSPACE_ID, PVC_NAME, WORKSPACE_SUBPATHS);
+    doNothing()
+        .when(pvcSubPathHelper)
+        .createDirs(WORKSPACE_ID, NAMESPACE, PVC_NAME, WORKSPACE_SUBPATHS);
 
-    commonPVCStrategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    commonPVCStrategy.prepare(k8sEnv, IDENTITY, 100);
 
     verify(pvcs).get();
     verify(pvcs).create(pvc);
     verify(pvcs).waitBound(PVC_NAME, 100);
-    verify(pvcSubPathHelper).createDirs(WORKSPACE_ID, PVC_NAME, WORKSPACE_SUBPATHS);
+    verify(pvcSubPathHelper).createDirs(WORKSPACE_ID, NAMESPACE, PVC_NAME, WORKSPACE_SUBPATHS);
   }
 
   @Test
@@ -224,14 +227,16 @@ public class CommonPVCStrategyTest {
     pvc.getAdditionalProperties()
         .put(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID), WORKSPACE_SUBPATHS);
     k8sEnv.getPersistentVolumeClaims().put(PVC_NAME, pvc);
-    doNothing().when(pvcSubPathHelper).createDirs(WORKSPACE_ID, PVC_NAME, WORKSPACE_SUBPATHS);
+    doNothing()
+        .when(pvcSubPathHelper)
+        .createDirs(WORKSPACE_ID, NAMESPACE, PVC_NAME, WORKSPACE_SUBPATHS);
 
-    commonPVCStrategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    commonPVCStrategy.prepare(k8sEnv, IDENTITY, 100);
 
     verify(pvcs).get();
     verify(pvcs).create(pvc);
     verify(pvcs, never()).waitBound(anyString(), anyLong());
-    verify(pvcSubPathHelper).createDirs(WORKSPACE_ID, PVC_NAME, WORKSPACE_SUBPATHS);
+    verify(pvcSubPathHelper).createDirs(WORKSPACE_ID, NAMESPACE, PVC_NAME, WORKSPACE_SUBPATHS);
   }
 
   @Test(
@@ -244,7 +249,7 @@ public class CommonPVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().put("pvc1", pvc1);
     k8sEnv.getPersistentVolumeClaims().put("pvc2", pvc2);
 
-    commonPVCStrategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    commonPVCStrategy.prepare(k8sEnv, IDENTITY, 100);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -252,7 +257,7 @@ public class CommonPVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().put(PVC_NAME, mock(PersistentVolumeClaim.class));
     doThrow(InfrastructureException.class).when(pvcs).get();
 
-    commonPVCStrategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    commonPVCStrategy.prepare(k8sEnv, IDENTITY, 100);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -262,7 +267,7 @@ public class CommonPVCStrategyTest {
     when(pvcs.get()).thenReturn(emptyList());
     doThrow(InfrastructureException.class).when(pvcs).create(any());
 
-    commonPVCStrategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    commonPVCStrategy.prepare(k8sEnv, IDENTITY, 100);
   }
 
   @Test
@@ -282,7 +287,7 @@ public class CommonPVCStrategyTest {
     commonPVCStrategy.cleanup(workspace);
 
     // then
-    verify(pvcSubPathHelper).removeDirsAsync(WORKSPACE_ID, PVC_NAME, WORKSPACE_ID);
+    verify(pvcSubPathHelper).removeDirsAsync(WORKSPACE_ID, null, PVC_NAME, WORKSPACE_ID);
   }
 
   @Test
@@ -304,7 +309,7 @@ public class CommonPVCStrategyTest {
     commonPVCStrategy.cleanup(workspace);
 
     // then
-    verify(pvcSubPathHelper).removeDirsAsync(WORKSPACE_ID, PVC_NAME, WORKSPACE_ID);
+    verify(pvcSubPathHelper).removeDirsAsync(WORKSPACE_ID, null, PVC_NAME, WORKSPACE_ID);
   }
 
   @Test
@@ -325,7 +330,7 @@ public class CommonPVCStrategyTest {
     commonPVCStrategy.cleanup(workspace);
 
     // then
-    verify(pvcSubPathHelper, never()).removeDirsAsync(WORKSPACE_ID, WORKSPACE_ID);
+    verify(pvcSubPathHelper, never()).removeDirsAsync(WORKSPACE_ID, null, WORKSPACE_ID);
   }
 
   private static PersistentVolumeClaim newPVC(String name) {

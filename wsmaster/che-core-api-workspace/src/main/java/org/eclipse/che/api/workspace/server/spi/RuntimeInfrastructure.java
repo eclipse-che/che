@@ -90,31 +90,58 @@ public abstract class RuntimeInfrastructure {
    * </ul>
    * </pre>
    *
-   * @param id the RuntimeIdentity
+   * @param identity the runtime identity
    * @param environment incoming internal environment
    * @return new RuntimeContext object
    * @throws ValidationException if incoming environment is not valid
    * @throws InfrastructureException if any other error occurred
    */
-  public RuntimeContext prepare(RuntimeIdentity id, InternalEnvironment environment)
+  public RuntimeContext prepare(RuntimeIdentity identity, InternalEnvironment environment)
       throws ValidationException, InfrastructureException {
     for (InternalEnvironmentProvisioner provisioner : internalEnvironmentProvisioners) {
-      provisioner.provision(id, environment);
+      provisioner.provision(identity, environment);
     }
-    return internalPrepare(id, environment);
+    return internalPrepare(identity, environment);
   }
+
+  /**
+   * Returns the namespace a workspace should be deployed into when user do not specify it.
+   *
+   * <p>May be used for evaluating a default namespace or for workspaces that does not have stored
+   * infrastructure namespace info(legacy workspaces).
+   *
+   * @param resolutionCtx the runtime holder specifying which user and workspace runtime targets.
+   * @throws InfrastructureException when there is no configured default namespace or on any other
+   *     error
+   */
+  public abstract String evaluateInfraNamespace(NamespaceResolutionContext resolutionCtx)
+      throws InfrastructureException;
+
+  /**
+   * Returns the namespace a workspace should be deployed into when using the legacy (pre 7.5.0)
+   * logic. This is required to handle a case where we're starting a workspace created using an old
+   * version of the Che server that didn't store the infrastructure namespace in the workspace
+   * attributes.
+   *
+   * @param resolutionContext the runtime holder specifying which user and workspace runtime
+   *     targets.
+   * @throws InfrastructureException when there is no configured default namespace or any other
+   *     error
+   */
+  public abstract String evaluateLegacyInfraNamespace(NamespaceResolutionContext resolutionContext)
+      throws InfrastructureException;
 
   /**
    * An Infrastructure implementation should be able to prepare RuntimeContext. This method is not
    * supposed to be called by clients of class {@link RuntimeInfrastructure}.
    *
-   * @param id the RuntimeIdentity
+   * @param identity the runtime identity
    * @param environment incoming internal environment
    * @return new RuntimeContext object
    * @throws ValidationException if incoming environment is not valid
    * @throws InfrastructureException if any other error occurred
    */
   protected abstract RuntimeContext internalPrepare(
-      RuntimeIdentity id, InternalEnvironment environment)
+      RuntimeIdentity identity, InternalEnvironment environment)
       throws ValidationException, InfrastructureException;
 }

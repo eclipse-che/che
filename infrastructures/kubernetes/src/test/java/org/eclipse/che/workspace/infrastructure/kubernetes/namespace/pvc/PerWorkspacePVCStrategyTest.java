@@ -15,6 +15,7 @@ import static java.lang.String.format;
 import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.SUBPATHS_PROPERTY_FMT;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -31,6 +32,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -50,11 +53,15 @@ import org.testng.annotations.Test;
 public class PerWorkspacePVCStrategyTest {
 
   private static final String WORKSPACE_ID = "workspace123";
+  private static final String INFRA_NAMESPACE = "infraNamespace";
   private static final String PVC_NAME_PREFIX = "che-claim";
 
   private static final String PVC_QUANTITY = "10Gi";
   private static final String PVC_ACCESS_MODE = "RWO";
   private static final String PVC_STORAGE_CLASS_NAME = "special";
+
+  private static final RuntimeIdentity IDENTITY =
+      new RuntimeIdentityImpl(WORKSPACE_ID, "userid", null, INFRA_NAMESPACE);
 
   @Mock private PVCSubPathHelper pvcSubPathHelper;
   @Mock private KubernetesNamespaceFactory factory;
@@ -85,7 +92,8 @@ public class PerWorkspacePVCStrategyTest {
             podsVolumes,
             subpathPrefixes);
 
-    lenient().when(factory.create(WORKSPACE_ID)).thenReturn(k8sNamespace);
+    lenient().when(factory.getOrCreate(IDENTITY)).thenReturn(k8sNamespace);
+    lenient().when(factory.get(any(Workspace.class))).thenReturn(k8sNamespace);
     lenient().when(k8sNamespace.persistentVolumeClaims()).thenReturn(pvcs);
   }
 
@@ -102,13 +110,14 @@ public class PerWorkspacePVCStrategyTest {
     pvc.getAdditionalProperties().put(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID), subPaths);
 
     // when
-    strategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    strategy.prepare(k8sEnv, IDENTITY, 100);
 
     // then
     verify(pvcs).get();
     verify(pvcs).create(pvc);
     verify(pvcs).waitBound(perWorkspacePVCName, 100);
-    verify(pvcSubPathHelper).createDirs(WORKSPACE_ID, perWorkspacePVCName, subPaths);
+    verify(pvcSubPathHelper)
+        .createDirs(WORKSPACE_ID, INFRA_NAMESPACE, perWorkspacePVCName, subPaths);
   }
 
   @Test
@@ -138,13 +147,14 @@ public class PerWorkspacePVCStrategyTest {
     pvc.getAdditionalProperties().put(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID), subPaths);
 
     // when
-    strategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    strategy.prepare(k8sEnv, IDENTITY, 100);
 
     // then
     verify(pvcs).get();
     verify(pvcs).create(pvc);
     verify(pvcs, never()).waitBound(anyString(), anyLong());
-    verify(pvcSubPathHelper).createDirs(WORKSPACE_ID, perWorkspacePVCName, subPaths);
+    verify(pvcSubPathHelper)
+        .createDirs(WORKSPACE_ID, INFRA_NAMESPACE, perWorkspacePVCName, subPaths);
   }
 
   @Test

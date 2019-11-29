@@ -170,7 +170,7 @@ public class KubernetesInternalRuntimeTest {
   private static final String M2_NAME = WORKSPACE_POD_NAME + '/' + CONTAINER_NAME_2;
 
   private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1", "infraNamespace");
 
   @Mock private EventService eventService;
   @Mock private StartSynchronizerFactory startSynchronizerFactory;
@@ -745,10 +745,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(),
-            "test",
-            WorkspaceStatus.STARTING,
-            emptyList()));
+            internalRuntime.getContext().getIdentity(), WorkspaceStatus.STARTING, emptyList()));
 
     // when
     internalRuntime.markStarting();
@@ -759,10 +756,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(),
-            "test",
-            WorkspaceStatus.STARTING,
-            emptyList()));
+            internalRuntime.getContext().getIdentity(), WorkspaceStatus.STARTING, emptyList()));
 
     // when
     internalRuntime.markRunning();
@@ -776,10 +770,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(),
-            "test",
-            WorkspaceStatus.RUNNING,
-            emptyList()));
+            internalRuntime.getContext().getIdentity(), WorkspaceStatus.RUNNING, emptyList()));
 
     // when
     internalRuntime.markStopping();
@@ -797,7 +788,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(), "test", status, emptyList()));
+            internalRuntime.getContext().getIdentity(), status, emptyList()));
 
     // when
     internalRuntime.markStopping();
@@ -813,10 +804,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(),
-            "test",
-            WorkspaceStatus.STOPPING,
-            emptyList()));
+            internalRuntime.getContext().getIdentity(), WorkspaceStatus.STOPPING, emptyList()));
 
     // when
     internalRuntime.markStopped();
@@ -830,10 +818,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(),
-            "test",
-            WorkspaceStatus.RUNNING,
-            emptyList()));
+            internalRuntime.getContext().getIdentity(), WorkspaceStatus.RUNNING, emptyList()));
 
     // when
     internalRuntime.scheduleServersCheckers();
@@ -847,10 +832,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(),
-            "test",
-            WorkspaceStatus.STARTING,
-            emptyList()));
+            internalRuntime.getContext().getIdentity(), WorkspaceStatus.STARTING, emptyList()));
 
     // when
     internalRuntime.scheduleServersCheckers();
@@ -865,7 +847,7 @@ public class KubernetesInternalRuntimeTest {
     // given
     runtimeStatesCache.putIfAbsent(
         new KubernetesRuntimeState(
-            internalRuntime.getContext().getIdentity(), "test", status, emptyList()));
+            internalRuntime.getContext().getIdentity(), status, emptyList()));
 
     // when
     internalRuntime.scheduleServersCheckers();
