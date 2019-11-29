@@ -20,60 +20,53 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
-import org.eclipse.che.commons.json.JsonHelper;
-import org.eclipse.che.commons.json.JsonParseException;
-import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.commons.subject.SubjectImpl;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
-import org.testng.reporters.Files;
 
 @Listeners(MockitoTestNGListener.class)
 public class DevfileManagerTest {
 
-  private static final Subject TEST_SUBJECT = new SubjectImpl("name", "id", "token", false);
   private static final String DEVFILE_YAML_CONTENT = "devfile yaml stub";
 
   @Mock private DevfileSchemaValidator schemaValidator;
   @Mock private DevfileIntegrityValidator integrityValidator;
-  @Mock private ObjectMapper objectMapper;
+  @Mock private ObjectMapper jsonMapper;
+  @Mock private ObjectMapper yamlMapper;
   @Mock private FileContentProvider contentProvider;
 
   @Mock private JsonNode devfileJsonNode;
   private DevfileImpl devfile;
 
-  @InjectMocks private DevfileManager devfileManager;
+  private DevfileManager devfileManager;
 
   @BeforeMethod
   public void setUp() throws Exception {
     devfile = new DevfileImpl();
+    devfileManager =
+        new DevfileManager(schemaValidator, integrityValidator, yamlMapper, jsonMapper);
 
-    lenient().when(schemaValidator.validateYaml(any())).thenReturn(devfileJsonNode);
-    lenient().when(objectMapper.treeToValue(any(), eq(DevfileImpl.class))).thenReturn(devfile);
+    lenient().when(jsonMapper.treeToValue(any(), eq(DevfileImpl.class))).thenReturn(devfile);
+    lenient().when(yamlMapper.treeToValue(any(), eq(DevfileImpl.class))).thenReturn(devfile);
+    lenient().when(yamlMapper.readTree(anyString())).thenReturn(devfileJsonNode);
   }
 
   @Test
@@ -83,8 +76,8 @@ public class DevfileManagerTest {
 
     // then
     assertEquals(parsed, devfile);
-    verify(schemaValidator).validateYaml(DEVFILE_YAML_CONTENT);
-    verify(objectMapper).treeToValue(devfileJsonNode, DevfileImpl.class);
+    verify(yamlMapper).treeToValue(devfileJsonNode, DevfileImpl.class);
+    verify(schemaValidator).validate(eq(devfileJsonNode));
     verify(integrityValidator).validateDevfile(devfile);
   }
 
@@ -124,7 +117,7 @@ public class DevfileManagerTest {
 
     // then
     verify(contentProvider).fetchContent(eq("myfile.yaml"));
-    assertEquals(referenceContent, devfile.getComponents().get(0).getReferenceContent());
+    assertEquals(devfile.getComponents().get(0).getReferenceContent(), referenceContent);
   }
 
   @Test(
@@ -151,7 +144,7 @@ public class DevfileManagerTest {
       expectedExceptionsMessageRegExp = "non valid")
   public void shouldThrowExceptionWhenExceptionOccurredDuringSchemaValidation() throws Exception {
     // given
-    doThrow(new DevfileFormatException("non valid")).when(schemaValidator).validateYaml(any());
+    doThrow(new DevfileFormatException("non valid")).when(schemaValidator).validate(any());
 
     // when
     devfileManager.parseYaml(DEVFILE_YAML_CONTENT);
@@ -164,25 +157,9 @@ public class DevfileManagerTest {
     // given
     JsonProcessingException jsonException = mock(JsonProcessingException.class);
     when(jsonException.getMessage()).thenReturn("non valid");
-    doThrow(jsonException).when(objectMapper).treeToValue(any(), any());
+    doThrow(jsonException).when(jsonMapper).treeToValue(any(), any());
 
     // when
-    devfileManager.parseYaml(DEVFILE_YAML_CONTENT);
-  }
-
-  private WorkspaceImpl createWorkspace(WorkspaceStatus status)
-      throws IOException, JsonParseException {
-    return WorkspaceImpl.builder()
-        .generateId()
-        .setConfig(createConfig())
-        .setAccount(new AccountImpl("anyId", TEST_SUBJECT.getUserName(), "test"))
-        .setStatus(status)
-        .build();
-  }
-
-  private WorkspaceConfigImpl createConfig() throws IOException, JsonParseException {
-    String jsonContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_config.json"));
-    return JsonHelper.fromJson(jsonContent, WorkspaceConfigImpl.class, null);
+    devfileManager.parseJson(DEVFILE_YAML_CONTENT);
   }
 }

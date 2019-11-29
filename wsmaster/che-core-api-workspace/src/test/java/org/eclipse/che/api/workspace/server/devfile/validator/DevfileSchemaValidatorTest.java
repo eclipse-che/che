@@ -15,6 +15,8 @@ import static java.lang.String.format;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
 import org.eclipse.che.api.workspace.server.devfile.Constants;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
@@ -27,16 +29,18 @@ import org.testng.reporters.Files;
 public class DevfileSchemaValidatorTest {
 
   private DevfileSchemaValidator schemaValidator;
+  private ObjectMapper yamlMapper;
 
   @BeforeClass
   public void setUp() {
+    yamlMapper = new ObjectMapper(new YAMLFactory());
     schemaValidator = new DevfileSchemaValidator(new DevfileSchemaProvider());
   }
 
   @Test(dataProvider = "validDevfiles")
   public void shouldNotThrowExceptionOnValidationOfValidDevfile(String resourceFilePath)
       throws Exception {
-    schemaValidator.validateYaml(getResource(resourceFilePath));
+    schemaValidator.validate(yamlMapper.readTree(getResource(resourceFilePath)));
   }
 
   @DataProvider
@@ -80,7 +84,7 @@ public class DevfileSchemaValidatorTest {
   public void shouldThrowExceptionOnValidationOfNonValidDevfile(
       String resourceFilePath, String expectedMessage) throws Exception {
     try {
-      schemaValidator.validateYaml(getResource(resourceFilePath));
+      schemaValidator.validate(yamlMapper.readTree(getResource(resourceFilePath)));
     } catch (DevfileFormatException e) {
       assertEquals(
           e.getMessage(),
@@ -96,7 +100,7 @@ public class DevfileSchemaValidatorTest {
     try {
       String devfile =
           "---\n" + "apiVersion: 111.111\n" + "metadata:\n" + "  name: test-invalid-apiversion\n";
-      schemaValidator.validateYaml(devfile);
+      schemaValidator.validate(yamlMapper.readTree(devfile));
     } catch (DevfileFormatException e) {
       assertEquals(
           e.getMessage(),

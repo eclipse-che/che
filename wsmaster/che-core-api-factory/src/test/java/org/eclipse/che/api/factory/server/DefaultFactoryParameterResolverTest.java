@@ -16,20 +16,27 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMP
 import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMPONENT_TYPE;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.testng.Assert.assertFalse;
+import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
+import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator;
 import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator.NoopComponentIntegrityValidator;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
@@ -84,5 +91,34 @@ public class DefaultFactoryParameterResolverTest {
 
     // then
     verify(urlFetcher).fetch(eq("scheme:/localfile"));
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void shouldFilterAndProvideOverrideParameters() throws Exception {
+    URLFactoryBuilder urlFactoryBuilder = mock(URLFactoryBuilder.class);
+    URLFetcher urlFetcher = mock(URLFetcher.class);
+
+    DefaultFactoryParameterResolver res =
+        new DefaultFactoryParameterResolver(urlFactoryBuilder, urlFetcher);
+
+    Map<String, String> factoryParameters = new HashMap<>();
+    factoryParameters.put(URL_PARAMETER_NAME, "scheme:/myloc/devfile");
+    factoryParameters.put("override.param.foo", "bar");
+    factoryParameters.put("override.param.bar", "foo");
+    factoryParameters.put("ignored.non-override.property", "baz");
+
+    ArgumentCaptor<Map<String, String>> captor = ArgumentCaptor.forClass(Map.class);
+    // when
+    res.createFactory(factoryParameters);
+
+    verify(urlFactoryBuilder)
+        .createFactoryFromDevfile(
+            any(RemoteFactoryUrl.class), any(URLFileContentProvider.class), captor.capture());
+    Map<String, String> filteredOverrides = captor.getValue();
+    assertEquals(2, filteredOverrides.size());
+    assertEquals("bar", filteredOverrides.get("param.foo"));
+    assertEquals("foo", filteredOverrides.get("param.bar"));
+    assertFalse(filteredOverrides.keySet().contains("ignored.non-override.property"));
   }
 }

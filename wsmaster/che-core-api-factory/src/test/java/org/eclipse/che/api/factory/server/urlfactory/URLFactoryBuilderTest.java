@@ -18,6 +18,7 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,7 @@ import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.devfile.exception.OverrideParameterException;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -126,7 +128,7 @@ public class URLFactoryBuilderTest {
     workspaceConfigImpl.setDefaultEnv("name");
 
     when(urlFetcher.fetchSafely(anyString())).thenReturn("random_content");
-    when(devfileManager.parseYaml(anyString())).thenReturn(devfile);
+    when(devfileManager.parseYaml(anyString(), anyMap())).thenReturn(devfile);
 
     FactoryDto factory =
         urlFactoryBuilder
@@ -134,7 +136,8 @@ public class URLFactoryBuilderTest {
                 new DefaultFactoryUrl()
                     .withDevfileFileLocation(myLocation)
                     .withDevfileFilename("devfile.yml"),
-                s -> myLocation + ".list")
+                s -> myLocation + ".list",
+                emptyMap())
             .get();
 
     assertEquals(factory.getSource(), "devfile.yml");
@@ -168,14 +171,17 @@ public class URLFactoryBuilderTest {
 
   @Test(dataProvider = "devfiles")
   public void checkThatDtoHasCorrectNames(DevfileImpl devfile, String expectedGenerateName)
-      throws BadRequestException, ServerException, DevfileException, IOException {
+      throws BadRequestException, ServerException, DevfileException, IOException,
+          OverrideParameterException {
     DefaultFactoryUrl defaultFactoryUrl = mock(DefaultFactoryUrl.class);
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
     when(defaultFactoryUrl.devfileFileLocation()).thenReturn("anything");
-    when(devfileManager.parseYaml(anyString())).thenReturn(devfile);
+    when(devfileManager.parseYaml(anyString(), anyMap())).thenReturn(devfile);
     when(urlFetcher.fetchSafely(anyString())).thenReturn("anything");
     FactoryDto factory =
-        urlFactoryBuilder.createFactoryFromDevfile(defaultFactoryUrl, fileContentProvider).get();
+        urlFactoryBuilder
+            .createFactoryFromDevfile(defaultFactoryUrl, fileContentProvider, emptyMap())
+            .get();
 
     assertNull(factory.getDevfile().getMetadata().getName());
     assertEquals(factory.getDevfile().getMetadata().getGenerateName(), expectedGenerateName);

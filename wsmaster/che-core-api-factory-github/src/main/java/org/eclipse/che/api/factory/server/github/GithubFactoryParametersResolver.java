@@ -22,7 +22,7 @@ import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.factory.server.FactoryParametersResolver;
+import org.eclipse.che.api.factory.server.DefaultFactoryParameterResolver;
 import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
@@ -36,18 +36,13 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
  * @author Florent Benoit
  */
 @Singleton
-public class GithubFactoryParametersResolver implements FactoryParametersResolver {
+public class GithubFactoryParametersResolver extends DefaultFactoryParameterResolver {
 
   /** Parser which will allow to check validity of URLs and create objects. */
   private GithubURLParser githubUrlParser;
 
-  private final URLFetcher urlFetcher;
-
   /** Builder allowing to build objects from github URL. */
   private GithubSourceStorageBuilder githubSourceStorageBuilder;
-
-  /** Builds factory by fetching json/devfile content from given URL */
-  private URLFactoryBuilder urlFactoryBuilder;
 
   /** ProjectDtoMerger */
   @Inject private ProjectConfigDtoMerger projectConfigDtoMerger;
@@ -59,10 +54,9 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
       GithubSourceStorageBuilder githubSourceStorageBuilder,
       URLFactoryBuilder urlFactoryBuilder,
       ProjectConfigDtoMerger projectConfigDtoMerger) {
+    super(urlFactoryBuilder, urlFetcher);
     this.githubUrlParser = githubUrlParser;
-    this.urlFetcher = urlFetcher;
     this.githubSourceStorageBuilder = githubSourceStorageBuilder;
-    this.urlFactoryBuilder = urlFactoryBuilder;
     this.projectConfigDtoMerger = projectConfigDtoMerger;
   }
 
@@ -97,7 +91,9 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
     FactoryDto factory =
         urlFactoryBuilder
             .createFactoryFromDevfile(
-                githubUrl, fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)))
+                githubUrl,
+                fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)),
+                extractOverrideParams(factoryParameters))
             .orElseGet(
                 () ->
                     urlFactoryBuilder

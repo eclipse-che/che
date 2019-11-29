@@ -17,6 +17,7 @@ import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -27,6 +28,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.Optional;
 import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
@@ -70,7 +72,7 @@ public class GithubFactoryParametersResolverTest {
   /**
    * Capturing the location parameter when calling {@link
    * URLFactoryBuilder#createFactoryFromJson(RemoteFactoryUrl)} or {@link
-   * URLFactoryBuilder#createFactoryFromDevfile(RemoteFactoryUrl, FileContentProvider)}
+   * URLFactoryBuilder#createFactoryFromDevfile(RemoteFactoryUrl, FileContentProvider, Map)}
    */
   @Captor private ArgumentCaptor<RemoteFactoryUrl> factoryUrlArgumentCaptor;
 
@@ -116,12 +118,12 @@ public class GithubFactoryParametersResolverTest {
 
     when(urlFactoryBuilder.createFactoryFromJson(any(RemoteFactoryUrl.class)))
         .thenReturn(Optional.empty());
-    when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any()))
+    when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any(), anyMap()))
         .thenReturn(Optional.empty());
-
-    FactoryDto factory =
-        githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
-
+    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, githubUrl);
+    // when
+    FactoryDto factory = githubFactoryParametersResolver.createFactory(params);
+    // then
     verify(urlFactoryBuilder).buildDefaultDevfile(eq("che"));
     assertEquals(factory, computedFactory);
   }
@@ -133,17 +135,19 @@ public class GithubFactoryParametersResolverTest {
 
     FactoryDto computedFactory = generateDevfileFactory();
 
-    when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any()))
+    when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any(), anyMap()))
         .thenReturn(Optional.of(computedFactory));
 
-    FactoryDto factory =
-        githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
-
+    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, githubUrl);
+    // when
+    FactoryDto factory = githubFactoryParametersResolver.createFactory(params);
+    // then
     assertNotNull(factory.getDevfile());
     assertNull(factory.getWorkspace());
 
     // check we called the builder with the following devfile file
-    verify(urlFactoryBuilder).createFactoryFromDevfile(factoryUrlArgumentCaptor.capture(), any());
+    verify(urlFactoryBuilder)
+        .createFactoryFromDevfile(factoryUrlArgumentCaptor.capture(), any(), anyMap());
     verify(urlFactoryBuilder, never()).buildDefaultDevfile(eq("che"));
     assertEquals(
         factoryUrlArgumentCaptor.getValue().devfileFileLocation(),
@@ -162,8 +166,10 @@ public class GithubFactoryParametersResolverTest {
     when(urlFactoryBuilder.createFactoryFromJson(any(RemoteFactoryUrl.class)))
         .thenReturn(Optional.of(computedFactory));
 
-    githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
-
+    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, githubUrl);
+    // when
+    githubFactoryParametersResolver.createFactory(params);
+    // then
     // check we called the builder with the following factory json file
     verify(urlFactoryBuilder).createFactoryFromJson(factoryUrlArgumentCaptor.capture());
     verify(urlFactoryBuilder, never()).buildDefaultDevfile(eq("che"));

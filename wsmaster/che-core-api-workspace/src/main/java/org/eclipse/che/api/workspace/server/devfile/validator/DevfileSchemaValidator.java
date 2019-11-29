@@ -16,7 +16,6 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.SUPPORTED_V
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -38,14 +37,12 @@ import org.leadpony.justify.api.ProblemHandler;
 public class DevfileSchemaValidator {
 
   private final JsonValidationService service = JsonValidationService.newInstance();
-  private ObjectMapper yamlMapper;
   private ObjectMapper jsonMapper;
   private Map<String, JsonSchema> schemasByVersion;
   private ErrorMessageComposer errorMessageComposer;
 
   @Inject
   public DevfileSchemaValidator(DevfileSchemaProvider schemaProvider) {
-    this.yamlMapper = new ObjectMapper(new YAMLFactory());
     this.jsonMapper = new ObjectMapper();
     this.errorMessageComposer = new ErrorMessageComposer();
     try {
@@ -58,26 +55,7 @@ public class DevfileSchemaValidator {
     }
   }
 
-  public JsonNode validateYaml(String yamlContent) throws DevfileFormatException {
-    return validate(yamlContent, yamlMapper);
-  }
-
-  public JsonNode validateJson(String jsonContent) throws DevfileFormatException {
-    return validate(jsonContent, jsonMapper);
-  }
-
-  private JsonNode validate(String content, ObjectMapper mapper) throws DevfileFormatException {
-    JsonNode contentNode;
-    try {
-      contentNode = mapper.readTree(content);
-      validate(contentNode);
-      return contentNode;
-    } catch (IOException e) {
-      throw new DevfileFormatException("Unable to validate Devfile. Error: " + e.getMessage());
-    }
-  }
-
-  private void validate(JsonNode contentNode) throws DevfileFormatException {
+  public void validate(JsonNode contentNode) throws DevfileFormatException {
     try {
       List<Problem> validationErrors = new ArrayList<>();
       ProblemHandler handler = ProblemHandler.collectingTo(validationErrors);

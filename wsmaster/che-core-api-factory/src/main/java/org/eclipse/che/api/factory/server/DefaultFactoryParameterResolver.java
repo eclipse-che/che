@@ -11,10 +11,12 @@
  */
 package org.eclipse.che.api.factory.server;
 
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
@@ -28,13 +30,16 @@ import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
 
 /**
  * Default {@link FactoryParametersResolver} implementation. Tries to resolve factory based on
- * provided parameters. Presumes url parameters as direct URL to a devfile content.
+ * provided parameters. Presumes url parameter as direct URL to a devfile content. Extracts and
+ * applies devfile values override parameters.
  */
 @Singleton
 public class DefaultFactoryParameterResolver implements FactoryParametersResolver {
 
-  private URLFactoryBuilder urlFactoryBuilder;
-  private final URLFetcher urlFetcher;
+  private static final String OVERRIDE_PREFIX = "override.";
+
+  protected final URLFactoryBuilder urlFactoryBuilder;
+  protected final URLFetcher urlFetcher;
 
   @Inject
   public DefaultFactoryParameterResolver(
@@ -66,7 +71,22 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
             new DefaultFactoryUrl()
                 .withDevfileFileLocation(devfileLocation)
                 .withDevfileFilename(null),
-            new URLFileContentProvider(URI.create(devfileLocation), urlFetcher))
+            new URLFileContentProvider(URI.create(devfileLocation), urlFetcher),
+            extractOverrideParams(factoryParameters))
         .orElse(null);
+  }
+
+  /**
+   * Finds and returns devfile override parameters in general factory parameters map.
+   *
+   * @param factoryParameters map containing factory data parameters provided through URL
+   * @return filtered devfile values override map
+   */
+  protected Map<String, String> extractOverrideParams(Map<String, String> factoryParameters) {
+    return factoryParameters
+        .entrySet()
+        .stream()
+        .filter(e -> e.getKey().startsWith(OVERRIDE_PREFIX))
+        .collect(toMap(e -> e.getKey().substring(OVERRIDE_PREFIX.length()), Entry::getValue));
   }
 }
