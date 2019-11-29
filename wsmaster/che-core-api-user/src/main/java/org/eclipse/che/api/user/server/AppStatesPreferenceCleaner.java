@@ -83,9 +83,10 @@ public class AppStatesPreferenceCleaner implements EventSubscriber<WorkspaceRemo
     } catch (NotFoundException | ServerException e) {
       Workspace workspace = workspaceRemovedEvent.getWorkspace();
       LOG.error(
-          "Unable to clean up preferences for owner of the workspace {} with namespace {}",
+          "Unable to clean up preferences for owner of the workspace {} with namespace {} because of '{}'",
           workspace.getId(),
-          workspace.getNamespace());
+          workspace.getNamespace(),
+          e.getMessage());
     }
   }
 }
