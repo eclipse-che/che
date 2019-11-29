@@ -12,6 +12,7 @@
 package org.eclipse.che.api.core.rest;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import javax.inject.Inject;
@@ -47,8 +48,14 @@ public class ApiInfoProvider implements Provider<ApiInfo> {
 
   private ApiInfo readApiInfo(String buildInfo) {
     try {
-      try (InputStream manifestInputStream =
-          ApiInfoProvider.class.getResourceAsStream("/META-INF/MANIFEST.MF")) {
+      // calculate path to MANIFEST.MF in the jar with ApiInfo.class
+      Class clazz = ApiInfo.class;
+      String classPath = clazz.getResource(clazz.getSimpleName() + ".class").toString();
+
+      String manifestPath =
+          classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
+
+      try (InputStream manifestInputStream = new URL(manifestPath).openStream()) {
 
         final Manifest manifest = new Manifest(manifestInputStream);
         final Attributes mainAttributes = manifest.getMainAttributes();
