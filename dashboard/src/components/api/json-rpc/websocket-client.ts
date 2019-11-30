@@ -126,7 +126,11 @@ export class WebsocketClient implements ICommunicationClient {
    * @param data to be sent
    */
   send(data: any): void {
-    this.websocketStream.send(data);
+    if (this.websocketStream) {
+      this.websocketStream.send(data);
+    } else {
+      console.log('Failed to send data. WebSocket stream isn\'t open.');
+    }
   }
 
   /**
