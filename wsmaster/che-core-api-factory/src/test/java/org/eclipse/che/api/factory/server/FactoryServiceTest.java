@@ -95,8 +95,8 @@ import org.everrest.assured.EverrestJetty;
 import org.everrest.core.Filter;
 import org.everrest.core.GenericContainerRequest;
 import org.everrest.core.RequestFilter;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -129,7 +129,9 @@ public class FactoryServiceTest {
   @Mock private UserManager userManager;
   @Mock private FactoryEditValidator editValidator;
   @Mock private WorkspaceManager workspaceManager;
-  @Mock private FactoryParametersResolverHolder factoryParametersResolverHolder;
+  @Mock private DefaultFactoryParameterResolver defaultFactoryParameterResolver;
+
+  @InjectMocks private FactoryParametersResolverHolder factoryParametersResolverHolder;
 
   private FactoryBuilder factoryBuilderSpy;
 
@@ -522,9 +524,22 @@ public class FactoryServiceTest {
 
   @Test
   public void checkValidateResolver() throws Exception {
-    final FactoryParametersResolver dummyResolver = Mockito.mock(FactoryParametersResolver.class);
-    when(factoryParametersResolverHolder.getFactoryParametersResolver(anyMap()))
-        .thenReturn(dummyResolver);
+    final FactoryParametersResolverHolder dummyHolder = spy(factoryParametersResolverHolder);
+    doReturn(defaultFactoryParameterResolver)
+        .when(dummyHolder)
+        .getFactoryParametersResolver(anyMap());
+    // service instance with dummy holder
+    service =
+        new FactoryService(
+            factoryManager,
+            userManager,
+            preferenceManager,
+            createValidator,
+            acceptValidator,
+            editValidator,
+            factoryBuilderSpy,
+            workspaceManager,
+            dummyHolder);
 
     // invalid factory
     final String invalidFactoryMessage = "invalid factory";
@@ -537,7 +552,7 @@ public class FactoryServiceTest {
         newDto(FactoryDto.class).withV(CURRENT_VERSION).withName("matchingResolverFactory");
 
     // accept resolver
-    when(dummyResolver.createFactory(anyMap())).thenReturn(expectFactory);
+    when(defaultFactoryParameterResolver.createFactory(anyMap())).thenReturn(expectFactory);
 
     // when
     final Map<String, String> map = new HashMap<>();
@@ -549,16 +564,34 @@ public class FactoryServiceTest {
             .queryParam(VALIDATE_QUERY_PARAMETER, valueOf(true))
             .post(SERVICE_PATH + "/resolver");
 
-    // then check we have a not found
+    // then check we have a bad request
     assertEquals(response.getStatusCode(), BAD_REQUEST.getStatusCode());
     assertTrue(response.getBody().asString().contains(invalidFactoryMessage));
 
     // check we call resolvers
-    factoryParametersResolverHolder.getFactoryParametersResolver(anyMap());
-    verify(dummyResolver).createFactory(anyMap());
+    dummyHolder.getFactoryParametersResolver(anyMap());
+    verify(defaultFactoryParameterResolver).createFactory(anyMap());
 
     // check we call validator
     verify(acceptValidator).validateOnAccept(any());
+  }
+
+  @Test
+  public void shouldThrowBadRequestWhenNoURLParameterGiven() throws Exception {
+    // when
+    final Map<String, String> map = new HashMap<>();
+    final Response response =
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .body(map)
+            .queryParam(VALIDATE_QUERY_PARAMETER, valueOf(true))
+            .post(SERVICE_PATH + "/resolver");
+
+    assertEquals(response.getStatusCode(), 400);
+    assertEquals(
+        DTO.createDtoFromJson(response.getBody().asString(), ServiceError.class).getMessage(),
+        "Cannot build factory with any of the provided parameters. Please check parameters correctness, and resend query.");
   }
 
   private FactoryImpl createFactory() {

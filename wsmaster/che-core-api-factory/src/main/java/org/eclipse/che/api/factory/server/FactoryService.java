@@ -438,21 +438,26 @@ public class FactoryService extends Service {
     @Inject private DefaultFactoryParameterResolver defaultFactoryResolver;
 
     /**
-     * Provides a suitable resolver for the given parameters
+     * Provides a suitable resolver for the given parameters. If there is no at least one resolver
+     * able to process parameters,then {@link BadRequestException} will be thrown
      *
      * @return suitable service-specific resolver or default one
      */
-    public FactoryParametersResolver getFactoryParametersResolver(Map<String, String> parameters) {
-      if (specificFactoryParametersResolvers == null) {
-        return defaultFactoryResolver;
-      }
-      for (FactoryParametersResolver factoryParametersResolver :
-          specificFactoryParametersResolvers) {
-        if (factoryParametersResolver.accept(parameters)) {
-          return factoryParametersResolver;
+    public FactoryParametersResolver getFactoryParametersResolver(Map<String, String> parameters)
+        throws BadRequestException {
+      if (specificFactoryParametersResolvers != null) {
+        for (FactoryParametersResolver factoryParametersResolver :
+            specificFactoryParametersResolvers) {
+          if (factoryParametersResolver.accept(parameters)) {
+            return factoryParametersResolver;
+          }
         }
       }
-      return defaultFactoryResolver;
+      if (defaultFactoryResolver.accept(parameters)) {
+        return defaultFactoryResolver;
+      } else {
+        throw new BadRequestException(FACTORY_NOT_RESOLVABLE);
+      }
     }
   }
 
