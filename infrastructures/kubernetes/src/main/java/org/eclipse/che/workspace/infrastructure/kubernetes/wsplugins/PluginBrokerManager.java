@@ -97,28 +97,28 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   @Beta
   @Traced
   public List<ChePlugin> getTooling(
-      RuntimeIdentity runtimeID,
+      RuntimeIdentity identity,
       StartSynchronizer startSynchronizer,
       Collection<PluginFQN> pluginFQNs,
       boolean isEphemeral)
       throws InfrastructureException {
 
-    String workspaceId = runtimeID.getWorkspaceId();
-    KubernetesNamespace kubernetesNamespace = factory.create(workspaceId);
+    String workspaceId = identity.getWorkspaceId();
+    KubernetesNamespace kubernetesNamespace = factory.getOrCreate(identity);
     BrokersResult brokersResult = new BrokersResult();
 
-    E brokerEnvironment = brokerEnvironmentFactory.create(pluginFQNs, runtimeID);
+    E brokerEnvironment = brokerEnvironmentFactory.create(pluginFQNs, identity);
     if (isEphemeral) {
       EphemeralWorkspaceUtility.makeEphemeral(brokerEnvironment.getAttributes());
     }
-    environmentProvisioner.provision(brokerEnvironment, runtimeID);
+    environmentProvisioner.provision(brokerEnvironment, identity);
 
     ListenBrokerEvents listenBrokerEvents = getListenEventPhase(workspaceId, brokersResult);
     PrepareStorage prepareStorage =
-        getPrepareStoragePhase(workspaceId, startSynchronizer, brokerEnvironment);
+        getPrepareStoragePhase(identity, startSynchronizer, brokerEnvironment);
     WaitBrokerResult waitBrokerResult = getWaitBrokerPhase(workspaceId, brokersResult);
     DeployBroker deployBroker =
-        getDeployBrokerPhase(runtimeID, kubernetesNamespace, brokerEnvironment, brokersResult);
+        getDeployBrokerPhase(identity, kubernetesNamespace, brokerEnvironment, brokersResult);
     LOG.debug("Entering plugin brokers deployment chain workspace '{}'", workspaceId);
     listenBrokerEvents.then(prepareStorage).then(deployBroker).then(waitBrokerResult);
     return listenBrokerEvents.execute();
@@ -129,11 +129,11 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   }
 
   private PrepareStorage getPrepareStoragePhase(
-      String workspaceId,
+      RuntimeIdentity identity,
       StartSynchronizer startSynchronizer,
       KubernetesEnvironment brokerEnvironment) {
     return new PrepareStorage(
-        workspaceId, brokerEnvironment, volumesStrategy, startSynchronizer, tracer);
+        identity, brokerEnvironment, volumesStrategy, startSynchronizer, tracer);
   }
 
   private DeployBroker getDeployBrokerPhase(

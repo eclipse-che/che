@@ -22,6 +22,7 @@ import static org.eclipse.che.api.workspace.server.WorkspaceKeyValidator.validat
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
@@ -160,6 +161,14 @@ public class WorkspaceService extends Service {
           @QueryParam("attribute")
           List<String> attrsList,
       @ApiParam(
+              value =
+                  "The target infrastructure namespace (Kubernetes namespace or OpenShift"
+                      + " project) where the workspace should be deployed to when started. This"
+                      + " parameter is optional. The workspace creation will fail if the Che server"
+                      + " is configured to not allow deploying into that infrastructure namespace.")
+          @QueryParam("infrastructure-namespace")
+          String infrastructureNamespace,
+      @ApiParam(
               "If true then the workspace will be immediately "
                   + "started after it is successfully created")
           @QueryParam("start-after-create")
@@ -175,7 +184,9 @@ public class WorkspaceService extends Service {
     if (namespace == null) {
       namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
     }
-
+    if (!isNullOrEmpty(infrastructureNamespace)) {
+      attributes.put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, infrastructureNamespace);
+    }
     WorkspaceImpl workspace;
     try {
       workspace = workspaceManager.createWorkspace(config, namespace, attributes);
@@ -221,12 +232,20 @@ public class WorkspaceService extends Service {
           @QueryParam("attribute")
           List<String> attrsList,
       @ApiParam(
+              value =
+                  "The target infrastructure namespace (Kubernetes namespace or OpenShift"
+                      + " project) where the workspace should be deployed to when started. This"
+                      + " parameter is optional. The workspace creation will fail if the Che server"
+                      + " is configured to not allow deploying into that infrastructure namespace.")
+          @QueryParam("infrastructure-namespace")
+          String infrastructureNamespace,
+      @ApiParam(
               "If true then the workspace will be immediately "
                   + "started after it is successfully created")
           @QueryParam("start-after-create")
           @DefaultValue("false")
           Boolean startAfterCreate,
-      @ApiParam("Namespace where workspace should be created") @QueryParam("namespace")
+      @ApiParam("Che namespace where workspace should be created") @QueryParam("namespace")
           String namespace,
       @HeaderParam(CONTENT_TYPE) MediaType contentType)
       throws ConflictException, BadRequestException, ForbiddenException, NotFoundException,
@@ -235,6 +254,9 @@ public class WorkspaceService extends Service {
     final Map<String, String> attributes = parseAttrs(attrsList);
     if (namespace == null) {
       namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
+    }
+    if (!isNullOrEmpty(infrastructureNamespace)) {
+      attributes.put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, infrastructureNamespace);
     }
     WorkspaceImpl workspace;
     try {
@@ -813,7 +835,9 @@ public class WorkspaceService extends Service {
   private static Map<String, String> parseAttrs(List<String> attributes)
       throws BadRequestException, ForbiddenException {
     if (attributes == null) {
-      return emptyMap();
+      // we need to make room for the potential infrastructure namespace that can be put into
+      // this map by the callers...
+      return Maps.newHashMapWithExpectedSize(1);
     }
     final Map<String, String> res = Maps.newHashMapWithExpectedSize(attributes.size());
     for (String attribute : attributes) {

@@ -27,6 +27,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_GENERATE_NAME_CHARS_APPEND;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -34,6 +35,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -89,6 +91,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
@@ -167,7 +170,8 @@ public class WorkspaceManagerTest {
   public void createsWorkspace() throws Exception {
     final WorkspaceConfig cfg = createConfig();
 
-    final WorkspaceImpl workspace = workspaceManager.createWorkspace(cfg, NAMESPACE_1, null);
+    final WorkspaceImpl workspace =
+        workspaceManager.createWorkspace(cfg, NAMESPACE_1, ImmutableMap.of("attr", "value"));
 
     assertNotNull(workspace);
     assertFalse(isNullOrEmpty(workspace.getId()));
@@ -177,6 +181,7 @@ public class WorkspaceManagerTest {
     assertEquals(workspace.getStatus(), STOPPED);
     assertNotNull(workspace.getAttributes().get(CREATED_ATTRIBUTE_NAME));
     verify(workspaceDao).create(workspace);
+    verify(validator).validateAttributes(ImmutableMap.of("attr", "value"));
   }
 
   @Test
@@ -202,6 +207,41 @@ public class WorkspaceManagerTest {
     assertEquals(
         workspace.getDevfile().getName().length(),
         testDevfileGenerateName.length() + WORKSPACE_GENERATE_NAME_CHARS_APPEND);
+  }
+
+  @Test
+  public void evaluatesInfraNamespaceIfMissingOnWorkspaceCreation() throws Exception {
+    when(runtimes.evalInfrastructureNamespace(any())).thenReturn("evaluated");
+
+    final WorkspaceConfig cfg = createConfig();
+
+    final WorkspaceImpl workspace = workspaceManager.createWorkspace(cfg, NAMESPACE_1, null);
+
+    assertNotNull(workspace);
+    assertNotNull(
+        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE), "evaluated");
+    verify(workspaceDao).create(workspace);
+    verify(runtimes)
+        .evalInfrastructureNamespace(
+            new NamespaceResolutionContext(workspace.getId(), USER_ID, NAMESPACE_1));
+  }
+
+  @Test
+  public void propagatesInfraNamespaceFromAttributesOnWorkspaceCreation() throws Exception {
+    final WorkspaceConfig cfg = createConfig();
+
+    final WorkspaceImpl workspace =
+        workspaceManager.createWorkspace(
+            cfg,
+            NAMESPACE_1,
+            ImmutableMap.of(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "user-defined"));
+
+    assertNotNull(workspace);
+    assertNotNull(
+        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE),
+        "user-defined");
+    verify(workspaceDao).create(workspace);
+    verify(runtimes, never()).evalInfrastructureNamespace(any());
   }
 
   @Test
@@ -401,6 +441,7 @@ public class WorkspaceManagerTest {
   @Test
   public void updatesWorkspace() throws Exception {
     final WorkspaceImpl workspace = new WorkspaceImpl(createAndMockWorkspace());
+    Map<String, String> oldAttributes = new HashMap<>(workspace.getAttributes());
     workspace.setTemporary(true);
     workspace.getAttributes().put("new attribute", "attribute");
     when(workspaceDao.update(any())).thenAnswer(inv -> inv.getArguments()[0]);
@@ -408,6 +449,7 @@ public class WorkspaceManagerTest {
     workspaceManager.updateWorkspace(workspace.getId(), workspace);
 
     verify(workspaceDao).update(workspace);
+    verify(validator).validateUpdateAttributes(oldAttributes, workspace.getAttributes());
   }
 
   @Test
@@ -523,6 +565,81 @@ public class WorkspaceManagerTest {
     workspaceManager.startWorkspace(workspace.getId(), null, emptyMap());
 
     verify(runtimes).startAsync(eq(workspace), eq(null), anyMap());
+  }
+
+  @Test
+  public void evaluatesLegacyInfraNamespaceIfMissingOnWorkspaceStart() throws Exception {
+    DevfileImpl devfile = mock(DevfileImpl.class);
+    WorkspaceImpl workspace = createAndMockWorkspace(devfile, NAMESPACE_1, new HashMap<>());
+    when(runtimes.evalLegacyInfrastructureNamespace(any())).thenReturn("evaluatedLegacy");
+
+    EnvironmentImpl environment = new EnvironmentImpl(null, emptyMap());
+    Command command = new CommandImpl("cmd", "echo hello", "custom");
+    WorkspaceConfig convertedConfig =
+        new WorkspaceConfigImpl(
+            "any",
+            "",
+            "default",
+            singletonList(command),
+            emptyList(),
+            ImmutableMap.of("default", environment),
+            ImmutableMap.of("attr", "value"));
+    when(devfileConverter.convert(any())).thenReturn(convertedConfig);
+
+    mockAnyWorkspaceStart();
+
+    workspaceManager.startWorkspace(workspace.getId(), null, emptyMap());
+
+    verify(runtimes).startAsync(eq(workspace), eq(null), anyMap());
+    verify(workspaceDao, times(2)).update(workspaceCaptor.capture());
+    assertEquals(
+        workspaceCaptor
+            .getAllValues()
+            .get(0)
+            .getAttributes()
+            .get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE),
+        "evaluatedLegacy");
+    verify(runtimes)
+        .evalLegacyInfrastructureNamespace(
+            new NamespaceResolutionContext(workspace.getId(), USER_ID, NAMESPACE_1));
+  }
+
+  @Test
+  public void doNotEvaluateInfraNamespaceIfItIsSpecifiedOnWorkspaceStart() throws Exception {
+    DevfileImpl devfile = mock(DevfileImpl.class);
+    WorkspaceImpl workspace =
+        createAndMockWorkspace(
+            devfile,
+            NAMESPACE_1,
+            ImmutableMap.of(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "user-defined"));
+
+    EnvironmentImpl environment = new EnvironmentImpl(null, emptyMap());
+    Command command = new CommandImpl("cmd", "echo hello", "custom");
+    WorkspaceConfig convertedConfig =
+        new WorkspaceConfigImpl(
+            "any",
+            "",
+            "default",
+            singletonList(command),
+            emptyList(),
+            ImmutableMap.of("default", environment),
+            ImmutableMap.of("attr", "value"));
+    when(devfileConverter.convert(any())).thenReturn(convertedConfig);
+
+    mockAnyWorkspaceStart();
+
+    workspaceManager.startWorkspace(workspace.getId(), null, emptyMap());
+
+    verify(runtimes).startAsync(eq(workspace), eq(null), anyMap());
+    verify(workspaceDao, times(2)).update(workspaceCaptor.capture());
+    assertEquals(
+        workspaceCaptor
+            .getAllValues()
+            .get(0)
+            .getAttributes()
+            .get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE),
+        "user-defined");
+    verify(runtimes, never()).evalLegacyInfrastructureNamespace(any());
   }
 
   @Test
@@ -687,11 +804,17 @@ public class WorkspaceManagerTest {
   }
 
   private WorkspaceImpl createAndMockWorkspace(Devfile devfile, String namespace) throws Exception {
+    return createAndMockWorkspace(devfile, namespace, emptyMap());
+  }
+
+  private WorkspaceImpl createAndMockWorkspace(
+      Devfile devfile, String namespace, Map<String, String> attributes) throws Exception {
     WorkspaceImpl workspace =
         WorkspaceImpl.builder()
             .setDevfile(devfile)
             .generateId()
             .setAccount(new AccountImpl("id", namespace, "type"))
+            .setAttributes(attributes)
             .setStatus(STOPPED)
             .build();
     lenient().when(workspaceDao.get(workspace.getId())).thenReturn(workspace);

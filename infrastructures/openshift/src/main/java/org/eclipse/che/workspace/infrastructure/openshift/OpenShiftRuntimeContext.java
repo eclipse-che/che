@@ -66,7 +66,7 @@ public class OpenShiftRuntimeContext extends KubernetesRuntimeContext<OpenShiftE
 
     if (!runtimeStateOpt.isPresent()) {
       // there is no cached runtime, create a new one
-      return runtimeFactory.create(this, projectFactory.create(workspaceId));
+      return runtimeFactory.create(this, projectFactory.getOrCreate(getIdentity()));
     }
 
     // there is cached runtime, restore cached one
@@ -79,7 +79,7 @@ public class OpenShiftRuntimeContext extends KubernetesRuntimeContext<OpenShiftE
         runtimeId.getOwnerId());
     OpenShiftInternalRuntime runtime =
         runtimeFactory.create(
-            this, projectFactory.create(workspaceId, runtimeState.getNamespace()));
+            this, projectFactory.access(workspaceId, runtimeState.getNamespace()));
 
     runtime.scheduleRuntimeStateChecks();
 

@@ -64,10 +64,11 @@ import org.testng.annotations.Test;
 public class UniqueWorkspacePVCStrategyTest {
 
   private static final String WORKSPACE_ID = "workspace123";
+  private static final String NAMESPACE = "infraNamespace";
   private static final String PVC_NAME_PREFIX = "che-claim";
 
   private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1", NAMESPACE);
 
   private KubernetesEnvironment k8sEnv;
 
@@ -94,7 +95,8 @@ public class UniqueWorkspacePVCStrategyTest {
 
     provisionOrder = inOrder(pvcProvisioner, subpathPrefixes, podsVolumes);
 
-    when(factory.create(WORKSPACE_ID)).thenReturn(k8sNamespace);
+    lenient().when(factory.getOrCreate(eq(IDENTITY))).thenReturn(k8sNamespace);
+    lenient().when(factory.get(any(Workspace.class))).thenReturn(k8sNamespace);
     when(k8sNamespace.persistentVolumeClaims()).thenReturn(pvcs);
   }
 
@@ -150,7 +152,7 @@ public class UniqueWorkspacePVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().putAll(singletonMap(uniqueName, pvc));
     doReturn(pvc).when(pvcs).create(any());
 
-    strategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    strategy.prepare(k8sEnv, IDENTITY, 100);
 
     verify(pvcs).createIfNotExist(any());
     verify(pvcs).waitBound(uniqueName, 100);
@@ -172,7 +174,7 @@ public class UniqueWorkspacePVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().putAll(singletonMap(uniqueName, pvc));
     doReturn(pvc).when(pvcs).create(any());
 
-    strategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    strategy.prepare(k8sEnv, IDENTITY, 100);
 
     verify(pvcs).createIfNotExist(any());
     verify(pvcs, never()).waitBound(anyString(), anyLong());
@@ -186,7 +188,7 @@ public class UniqueWorkspacePVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().put(PVC_NAME_PREFIX, pvc);
     doThrow(InfrastructureException.class).when(pvcs).createIfNotExist(any());
 
-    strategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    strategy.prepare(k8sEnv, IDENTITY, 100);
   }
 
   @Test

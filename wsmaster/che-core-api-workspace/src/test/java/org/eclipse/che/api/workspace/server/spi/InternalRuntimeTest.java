@@ -626,7 +626,9 @@ public class InternalRuntimeTest {
         throws ValidationException, InfrastructureException {
       super(
           new TestRuntimeContext(
-              new InternalEnvironment() {}, new RuntimeIdentityImpl("ws", "env", "id"), null),
+              new InternalEnvironment() {},
+              new RuntimeIdentityImpl("ws", "env", "id", "infraNamespace"),
+              null),
           urlRewriter,
           running ? WorkspaceStatus.RUNNING : null);
     }

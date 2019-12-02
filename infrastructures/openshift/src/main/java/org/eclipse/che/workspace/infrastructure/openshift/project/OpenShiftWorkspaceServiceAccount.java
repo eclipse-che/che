@@ -61,6 +61,9 @@ class OpenShiftWorkspaceServiceAccount {
    * Make sure that workspace service account exists and has `view` and `exec` role bindings, as
    * well as create workspace-view and exec roles in namespace scope
    *
+   * <p>Do NOT make any changes to the service account if it already exists in the namespace to
+   * preserve its configuration done by someone else.
+   *
    * @throws InfrastructureException when any exception occurred
    */
   void prepare() throws InfrastructureException {
@@ -69,6 +72,8 @@ class OpenShiftWorkspaceServiceAccount {
     if (osClient.serviceAccounts().inNamespace(projectName).withName(serviceAccountName).get()
         == null) {
       createWorkspaceServiceAccount(osClient);
+    } else {
+      return;
     }
 
     String execRoleName = "exec";

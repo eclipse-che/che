@@ -20,15 +20,18 @@ public final class RuntimeIdentityImpl implements RuntimeIdentity {
   private final String workspaceId;
   private final String envName;
   private final String ownerId;
+  private final String infrastructureNamespace;
 
   public RuntimeIdentityImpl(RuntimeIdentity id) {
-    this(id.getWorkspaceId(), id.getEnvName(), id.getOwnerId());
+    this(id.getWorkspaceId(), id.getEnvName(), id.getOwnerId(), id.getInfrastructureNamespace());
   }
 
-  public RuntimeIdentityImpl(String workspaceId, String envName, String ownerId) {
+  public RuntimeIdentityImpl(
+      String workspaceId, String envName, String ownerId, String infrastructureNamespace) {
     this.workspaceId = workspaceId;
     this.envName = envName;
     this.ownerId = ownerId;
+    this.infrastructureNamespace = infrastructureNamespace;
   }
 
   @Override
@@ -47,17 +50,25 @@ public final class RuntimeIdentityImpl implements RuntimeIdentity {
   }
 
   @Override
+  public String getInfrastructureNamespace() {
+    return infrastructureNamespace;
+  }
+
+  @Override
   public int hashCode() {
-    return Objects.hash(workspaceId, envName, ownerId);
+    return Objects.hash(workspaceId, envName, ownerId, infrastructureNamespace);
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof RuntimeIdentityImpl)) return false;
+    if (!(obj instanceof RuntimeIdentityImpl)) {
+      return false;
+    }
     RuntimeIdentityImpl other = (RuntimeIdentityImpl) obj;
     return workspaceId.equals(other.workspaceId)
         && Objects.equals(envName, other.envName)
-        && Objects.equals(ownerId, other.ownerId);
+        && Objects.equals(ownerId, other.ownerId)
+        && Objects.equals(infrastructureNamespace, other.infrastructureNamespace);
   }
 
   @Override
@@ -71,6 +82,9 @@ public final class RuntimeIdentityImpl implements RuntimeIdentity {
         + '\''
         + ", ownerId='"
         + ownerId
+        + '\''
+        + ", infrastructureNamespace='"
+        + infrastructureNamespace
         + '\''
         + '}';
   }

@@ -43,7 +43,7 @@ import org.testng.annotations.Test;
 public class EnvVarEnvironmentProvisionerTest {
 
   private static final RuntimeIdentity RUNTIME_IDENTITY =
-      new RuntimeIdentityImpl("testWsId", "testEnv", "testOwnerId");
+      new RuntimeIdentityImpl("testWsId", "testEnv", "testOwnerId", "infraNamespace");
 
   @Mock private EnvVarProvider provider1;
   @Mock private EnvVarProvider provider2;

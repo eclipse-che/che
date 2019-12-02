@@ -12,11 +12,14 @@
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
 import static java.lang.String.format;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.isLabeled;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.openshift.api.model.DoneableProjectRequest;
 import io.fabric8.openshift.api.model.Project;
+import io.fabric8.openshift.api.model.ProjectRequestFluent;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -25,6 +28,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesC
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
@@ -77,22 +81,43 @@ public class OpenShiftProject extends KubernetesNamespace {
   }
 
   /**
-   * Prepare project for using.
+   * Prepare a project for using.
    *
    * <p>Preparing includes creating if needed and waiting for default service account.
    *
-   * @throws InfrastructureException if any exception occurs during namespace preparing
+   * @param markManaged mark the project as managed by Che. Also applies for already existing
+   *     projects.
+   * @param canCreate defines what to do when the project is not found. The project is created when
+   *     {@code true}, otherwise an exception is thrown.
+   * @throws InfrastructureException if any exception occurs during project preparation or if the
+   *     project doesn't exist and {@code canCreate} is {@code false}.
    */
-  void prepare() throws InfrastructureException {
+  void prepare(boolean markManaged, boolean canCreate) throws InfrastructureException {
     String workspaceId = getWorkspaceId();
     String projectName = getName();
 
     KubernetesClient kubeClient = clientFactory.create(workspaceId);
     OpenShiftClient osClient = clientFactory.createOC(workspaceId);
 
-    if (get(projectName, osClient) == null) {
-      create(projectName, osClient);
+    Project project = get(projectName, osClient);
+
+    if (project == null) {
+      if (!canCreate) {
+        throw new InfrastructureException(
+            format(
+                "Creating the namespace '%s' is not allowed, yet" + " it was not found.",
+                projectName));
+      }
+
+      create(projectName, osClient, markManaged);
       waitDefaultServiceAccount(projectName, kubeClient);
+      return;
+    }
+
+    if (markManaged && !isLabeled(project, MANAGED_NAMESPACE_LABEL, "true")) {
+      // provision managed label is marking is requested but label is missing
+      KubernetesObjectUtil.putLabel(project, MANAGED_NAMESPACE_LABEL, "true");
+      update(project, osClient);
     }
   }
 
@@ -102,11 +127,23 @@ public class OpenShiftProject extends KubernetesNamespace {
    *
    * @throws InfrastructureException if any unexpected exception occurs during project deletion
    */
-  void delete() throws InfrastructureException {
+  void deleteIfManaged() throws InfrastructureException {
     String workspaceId = getWorkspaceId();
     String projectName = getName();
 
     OpenShiftClient osClient = clientFactory.createOC(workspaceId);
+
+    if (!isManagedInternal(osClient)) {
+      throw new InfrastructureException(
+          format(
+              "Can't delete project '%s' that contains"
+                  + " runtime of workspace '%s' because it doesn't have the '"
+                  + MANAGED_NAMESPACE_LABEL
+                  + "' label equal to 'true'.",
+              projectName,
+              workspaceId));
+    }
+
     delete(projectName, osClient);
   }
 
@@ -125,20 +162,35 @@ public class OpenShiftProject extends KubernetesNamespace {
         configMaps()::delete);
   }
 
-  private void create(String projectName, OpenShiftClient osClient) throws InfrastructureException {
+  private void create(String projectName, OpenShiftClient osClient, boolean markManaged)
+      throws InfrastructureException {
     try {
-      osClient
-          .projectrequests()
-          .createNew()
-          .withNewMetadata()
-          .withName(projectName)
-          .endMetadata()
-          .done();
+      ProjectRequestFluent.MetadataNested<DoneableProjectRequest> metadata =
+          osClient.projectrequests().createNew().withNewMetadata().withName(projectName);
+
+      if (markManaged) {
+        metadata.addToLabels(MANAGED_NAMESPACE_LABEL, "true");
+      }
+
+      metadata.endMetadata().done();
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {
         LOG.error(
             "Unable to create new OpenShift project due to lack of permissions."
                 + "HINT: When using workspace project name placeholders, os-oauth or service account with more lenient permissions (cluster-admin) must be used.");
+      }
+      throw new KubernetesInfrastructureException(e);
+    }
+  }
+
+  private void update(Project project, OpenShiftClient client) throws InfrastructureException {
+    try {
+      client.projects().createOrReplace(project);
+    } catch (KubernetesClientException e) {
+      if (e.getCode() == 403) {
+        LOG.error(
+            "Unable to update new Kubernetes project due to lack of permissions."
+                + "When using workspace namespace placeholders, service account with lenient permissions (cluster-admin) must be used.");
       }
       throw new KubernetesInfrastructureException(e);
     }
@@ -171,6 +223,29 @@ public class OpenShiftProject extends KubernetesNamespace {
       } else {
         throw new KubernetesInfrastructureException(e);
       }
+    }
+  }
+
+  private boolean isManagedInternal(OpenShiftClient client) throws InfrastructureException {
+    try {
+      Project namespace = client.projects().withName(getName()).get();
+      return namespace.getMetadata().getLabels() != null
+          && "true".equals(namespace.getMetadata().getLabels().get(MANAGED_NAMESPACE_LABEL));
+    } catch (KubernetesClientException e) {
+      if (e.getCode() == 403) {
+        throw new InfrastructureException(
+            format(
+                "Could not access the project %s when trying to determine if it is managed "
+                    + "for workspace %s",
+                getName(), getWorkspaceId()),
+            e);
+      } else if (e.getCode() == 404) {
+        // we don't want to block whatever work the caller is doing on the namespace. The caller
+        // will fail anyway if the project doesn't exist.
+        return true;
+      }
+
+      throw new KubernetesInfrastructureException(e);
     }
   }
 }

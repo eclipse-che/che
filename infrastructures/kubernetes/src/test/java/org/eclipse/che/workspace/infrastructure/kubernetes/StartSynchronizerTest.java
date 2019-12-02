@@ -49,7 +49,7 @@ public class StartSynchronizerTest {
 
   @BeforeMethod
   public void setUp() {
-    runtimeId = new RuntimeIdentityImpl("workspace123", "envName", "ownerId");
+    runtimeId = new RuntimeIdentityImpl("workspace123", "envName", "ownerId", "infraNamespace");
     startSynchronizer = new StartSynchronizer(eventService, 5, runtimeId);
   }
 

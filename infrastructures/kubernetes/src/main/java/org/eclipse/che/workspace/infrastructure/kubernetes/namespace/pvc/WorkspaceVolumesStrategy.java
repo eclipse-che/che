@@ -40,11 +40,12 @@ public interface WorkspaceVolumesStrategy extends ConfigurationProvisioner {
    * Note that this step, depending on the strategy, may take some time.
    *
    * @param k8sEnv Kubernetes environment that changes as a result of preparation
-   * @param workspaceId the workspace identifier for which volumes will be prepared
+   * @param identity the target into which the workspace is being provisioned and where the volumes
+   *     will be prepared.
    * @param timeoutMillis timeout in milliseconds
    * @throws InfrastructureException when any error while preparation occurs
    */
-  void prepare(KubernetesEnvironment k8sEnv, String workspaceId, long timeoutMillis)
+  void prepare(KubernetesEnvironment k8sEnv, RuntimeIdentity identity, long timeoutMillis)
       throws InfrastructureException;
 
   /**

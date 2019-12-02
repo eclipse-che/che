@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.server;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.emptyList;
@@ -25,6 +26,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_RUNTIMES_ID_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOP_REASON;
@@ -71,6 +73,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
+import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
@@ -268,6 +271,21 @@ public class WorkspaceRuntimes {
   }
 
   /**
+   * Evaluates infrastructure namespace.
+   *
+   * @param resolutionCtx context that holds info needed for namespace resolution
+   * @throws InfrastructureException when any exception occurs during namespace resolution
+   */
+  public String evalInfrastructureNamespace(NamespaceResolutionContext resolutionCtx)
+      throws InfrastructureException {
+    return infrastructure.evaluateInfraNamespace(resolutionCtx);
+  }
+
+  public String evalLegacyInfrastructureNamespace(NamespaceResolutionContext resolutionContext)
+      throws InfrastructureException {
+    return infrastructure.evaluateLegacyInfraNamespace(resolutionContext);
+  }
+  /**
    * Injects runtime information such as status and {@link
    * org.eclipse.che.api.core.model.workspace.Runtime} into the workspace object, if the workspace
    * doesn't have runtime sets the status to {@link WorkspaceStatus#STOPPED}.
@@ -408,8 +426,24 @@ public class WorkspaceRuntimes {
       envName = config.getDefaultEnv();
     }
 
-    final String ownerId = EnvironmentContext.getCurrent().getSubject().getUserId();
-    final RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, ownerId);
+    String infraNamespace =
+        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
+
+    if (isNullOrEmpty(infraNamespace)) {
+      throw new ServerException(
+          String.format(
+              "Workspace does not have infrastructure namespace "
+                  + "specified. Please set value of '%s' workspace attribute.",
+              WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE));
+    }
+
+    final RuntimeIdentity runtimeId =
+        new RuntimeIdentityImpl(
+            workspaceId,
+            envName,
+            EnvironmentContext.getCurrent().getSubject().getUserId(),
+            infraNamespace);
+
     try {
       InternalEnvironment internalEnv =
           createInternalEnvironment(
@@ -669,6 +703,7 @@ public class WorkspaceRuntimes {
       InternalEnvironment internalEnv =
           createInternalEnvironment(
               environment, workspaceConfig.getAttributes(), workspaceConfig.getCommands());
+
       runtime = infra.prepare(identity, internalEnv).getRuntime();
       WorkspaceStatus runtimeStatus = runtime.getStatus();
       try (Unlocker ignored = lockService.writeLock(workspace.getId())) {
