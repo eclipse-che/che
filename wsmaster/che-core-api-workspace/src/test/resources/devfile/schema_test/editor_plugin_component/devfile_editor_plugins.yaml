@@ -22,11 +22,17 @@ projects:
 components:
   - type: cheEditor
     id: eclipse/chetheia/0.0.3
+    env:
+      - name: ENV_VAR
+        value: value
   - alias: mvn-stack
     type: chePlugin
     id: eclipse/chemaven-jdk8/1.0.0
   - type: chePlugin
     id: eclipse/chetheia-jdtls/0.0.3
+    env:
+      - name: ENV_VAR
+        value: value
 commands:
   - name: build
     actions:
