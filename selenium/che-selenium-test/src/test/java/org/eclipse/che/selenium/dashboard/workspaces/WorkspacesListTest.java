@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.dashboard.workspaces;
 
 import static java.util.Arrays.asList;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
@@ -43,6 +44,7 @@ import org.testng.annotations.Test;
  * @author Sergey Skorik
  * @author Ihor Okhrimenko
  */
+@Test(groups = {FLAKY})
 public class WorkspacesListTest {
   private static final String EXPECTED_JAVA_PROJECT_NAME = "console-java-simple";
   private static final String NEWEST_CREATED_WORKSPACE_NAME = "just-created-workspace";

@@ -29,6 +29,8 @@
           <class name="org.eclipse.che.selenium.dashboard.CreateWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.workspaces.NewWorkspacePageTest"/>
           <class name="org.eclipse.che.selenium.dashboard.organization.UserEmptyOrganizationTest"/>
+          <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolderTest"/>
+          <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithSpecificBranchTest"/>
           <class name="org.eclipse.che.selenium.theia.TheiaBuildPluginTest"/>
           <class name="org.eclipse.che.selenium.swagger.SwaggerTest"/>
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterRefreshTest"/>
