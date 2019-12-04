@@ -121,6 +121,8 @@ public final class Constants {
    */
   public static final String SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE = "sidecar.%s.memory_limit";
 
+  public static final String SIDECAR_ENV_VARIABLES_ATTR_TEMPLATE = "sidecar.%s.environment_variables";
+
   /**
    * Describes workspace runtimes which perform start/stop of this workspace. Should be set/read
    * from {@link Workspace#getAttributes}
