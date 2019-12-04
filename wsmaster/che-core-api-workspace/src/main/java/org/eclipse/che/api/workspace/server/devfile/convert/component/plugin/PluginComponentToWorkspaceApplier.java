@@ -14,15 +14,19 @@ package org.eclipse.che.api.workspace.server.devfile.convert.component.plugin;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_ENV_VARIABLES_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 
+import java.util.List;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
+import org.eclipse.che.api.core.model.workspace.devfile.Env;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentToWorkspaceApplier;
@@ -126,6 +130,15 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
                           fqn.getId())
                       + "="
                       + pluginComponent.getAlias()));
+    }
+
+    final List<? extends Env> env = pluginComponent.getEnv();
+    if (!env.isEmpty()) {
+      workspaceConfig.getAttributes()
+          .put(format(SIDECAR_ENV_VARIABLES_ATTR_TEMPLATE, fqn.getPublisherAndName()),
+              String.join(",", env.stream().map(
+                  (java.util.function.Function<Env, String>) e -> e.getName() + "=" + e.getValue())
+                  .collect(toList())));
     }
   }
 

@@ -20,6 +20,7 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_ENV_VARIABLES_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 
 import io.fabric8.kubernetes.api.model.Container;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
@@ -79,12 +81,24 @@ public class MachineResolver {
         new InternalMachineConfig(
             null,
             toServers(containerEndpoints),
-            null,
+            toEnvVariables(wsAttributes),
             toMachineAttributes(pluginId, wsAttributes),
             toWorkspaceVolumes(cheContainer));
 
     normalizeMemory(container, machineConfig);
     return machineConfig;
+  }
+
+  private Map<String,String> toEnvVariables(Map<String,String> wsAttributes) {
+    String envVars = wsAttributes
+        .get(format(SIDECAR_ENV_VARIABLES_ATTR_TEMPLATE, pluginPublisherAndName));
+    if (isNullOrEmpty(envVars)) {
+      return null;
+    }
+    return Stream.of(envVars.split(","))
+        // only splitting by 1'st '=' since env value may also contain it
+        .map(value -> value.split("=", 2))
+        .collect(toMap(arr -> arr[0], arr -> arr[1]));
   }
 
   private Map<String, String> toMachineAttributes(
