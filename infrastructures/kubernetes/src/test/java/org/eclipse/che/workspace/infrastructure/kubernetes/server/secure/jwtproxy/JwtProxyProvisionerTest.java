@@ -129,8 +129,7 @@ public class JwtProxyProvisionerTest {
     port.setTargetPort(new IntOrString(4401));
 
     // when
-    jwtProxyProvisioner.expose(
-        k8sEnv, "terminal", port, "TCP", ImmutableMap.of("server", secureServer));
+    jwtProxyProvisioner.expose(k8sEnv, "terminal", port, "TCP", "server", secureServer);
 
     // then
     InternalMachineConfig jwtProxyMachine =
@@ -179,12 +178,7 @@ public class JwtProxyProvisionerTest {
     port.setTargetPort(new IntOrString(4401));
 
     // when
-    jwtProxyProvisioner.expose(
-        k8sEnv,
-        "terminal",
-        port,
-        "TCP",
-        ImmutableMap.of("server1", server1, "server2", server2, "server3", server3));
+    jwtProxyProvisioner.expose(k8sEnv, "terminal", port, "TCP", "server1", server1);
   }
 
   @Test
@@ -220,8 +214,7 @@ public class JwtProxyProvisionerTest {
     port.setTargetPort(new IntOrString(4401));
 
     // when
-    jwtProxyProvisioner.expose(
-        k8sEnv, "terminal", port, "TCP", ImmutableMap.of("server1", server1, "server2", server2));
+    jwtProxyProvisioner.expose(k8sEnv, "terminal", port, "TCP", "server1", server1);
 
     // then
     verify(configBuilder).addVerifierProxy(any(), any(), any(), eq(true), any(), any());
@@ -250,8 +243,7 @@ public class JwtProxyProvisionerTest {
     port.setTargetPort(new IntOrString(4401));
 
     // when
-    jwtProxyProvisioner.expose(
-        k8sEnv, "terminal", port, "TCP", ImmutableMap.of("server1", server1));
+    jwtProxyProvisioner.expose(k8sEnv, "terminal", port, "TCP", "server1", server1);
 
     // then
     verify(configBuilder).addVerifierProxy(any(), any(), any(), eq(false), any(), any());

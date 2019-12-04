@@ -15,7 +15,6 @@ import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServiceExposureStrategyProvider.STRATEGY_PROPERTY;
 
 import com.google.common.base.Strings;
-import io.fabric8.kubernetes.api.model.ServicePort;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.inject.ConfigurationException;
@@ -65,12 +64,12 @@ public class MultiHostExternalServiceExposureStrategy implements ExternalService
   }
 
   @Override
-  public String getExternalHost(String serviceName, ServicePort servicePort) {
-    return serviceName + "-" + servicePort.getName() + "." + domain;
+  public String getExternalHost(String serviceName, String serverName) {
+    return serviceName + "-" + serverName + "." + domain;
   }
 
   @Override
-  public String getExternalPath(String serviceName, ServicePort servicePort) {
+  public String getExternalPath(String serviceName, String serverName) {
     return "/";
   }
 }

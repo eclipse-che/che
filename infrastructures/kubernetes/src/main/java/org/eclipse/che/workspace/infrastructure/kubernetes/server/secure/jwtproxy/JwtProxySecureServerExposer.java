@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.Map;
@@ -68,11 +69,26 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
       ServicePort servicePort,
       Map<String, ServerConfig> secureServers)
       throws InfrastructureException {
-    ServicePort exposedServicePort =
-        proxyProvisioner.expose(
-            k8sEnv, serviceName, servicePort, servicePort.getProtocol(), secureServers);
 
-    exposer.expose(
-        k8sEnv, machineName, proxyProvisioner.getServiceName(), exposedServicePort, secureServers);
+    for (Map.Entry<String, ServerConfig> e : secureServers.entrySet()) {
+      String serverName = e.getKey();
+      ServerConfig serverConfig = e.getValue();
+
+      ServicePort exposedServicePort =
+          proxyProvisioner.expose(
+              k8sEnv,
+              serviceName,
+              servicePort,
+              servicePort.getProtocol(),
+              serverName,
+              serverConfig);
+
+      exposer.expose(
+          k8sEnv,
+          machineName,
+          proxyProvisioner.getServiceName(),
+          exposedServicePort,
+          ImmutableMap.of(serverName, serverConfig));
+    }
   }
 }

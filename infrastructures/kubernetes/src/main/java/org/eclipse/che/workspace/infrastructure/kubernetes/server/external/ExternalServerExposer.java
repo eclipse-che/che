@@ -11,9 +11,12 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -60,41 +63,58 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
       String serviceName,
       ServicePort servicePort,
       Map<String, ServerConfig> externalServers) {
-    Ingress ingress = generateIngress(machineName, serviceName, servicePort, externalServers);
-    k8sEnv.getIngresses().put(ingress.getMetadata().getName(), ingress);
+    List<Ingress> ingresses =
+        generateIngresses(machineName, serviceName, servicePort, externalServers);
+    for (Ingress ingress : ingresses) {
+      k8sEnv.getIngresses().put(ingress.getMetadata().getName(), ingress);
+    }
   }
 
-  private Ingress generateIngress(
+  private List<Ingress> generateIngresses(
       String machineName,
       String serviceName,
       ServicePort servicePort,
       Map<String, ServerConfig> ingressesServers) {
 
-    ExternalServerIngressBuilder ingressBuilder = new ExternalServerIngressBuilder();
-    String host = strategy.getExternalHost(serviceName, servicePort);
-    if (host != null) {
-      ingressBuilder = ingressBuilder.withHost(host);
-    }
+    return ingressesServers
+        .entrySet()
+        .stream()
+        .map(
+            e -> {
+              String serverName = makeValidDnsName(e.getKey());
+              ServerConfig serverConfig = e.getValue();
 
-    return ingressBuilder
-        .withPath(
-            String.format(
-                pathTransformFmt,
-                ensureEndsWithSlash(strategy.getExternalPath(serviceName, servicePort))))
-        .withName(getIngressName(serviceName, servicePort))
-        .withMachineName(machineName)
-        .withServiceName(serviceName)
-        .withAnnotations(ingressAnnotations)
-        .withServicePort(servicePort.getName())
-        .withServers(ingressesServers)
-        .build();
+              ExternalServerIngressBuilder ingressBuilder = new ExternalServerIngressBuilder();
+              String host = strategy.getExternalHost(serviceName, serverName);
+              if (host != null) {
+                ingressBuilder = ingressBuilder.withHost(host);
+              }
+
+              return ingressBuilder
+                  .withPath(
+                      String.format(
+                          pathTransformFmt,
+                          ensureEndsWithSlash(strategy.getExternalPath(serviceName, serverName))))
+                  .withName(getIngressName(serviceName, serverName))
+                  .withMachineName(machineName)
+                  .withServiceName(serviceName)
+                  .withAnnotations(ingressAnnotations)
+                  .withServicePort(servicePort.getName())
+                  .withServers(ImmutableMap.of(serverName, serverConfig))
+                  .build();
+            })
+        .collect(Collectors.toList());
   }
 
   private static String ensureEndsWithSlash(String path) {
     return path.endsWith("/") ? path : path + '/';
   }
 
-  private static String getIngressName(String serviceName, ServicePort servicePort) {
-    return serviceName + "-" + servicePort.getName();
+  private static String getIngressName(String serviceName, String serverName) {
+    return serviceName + "-" + serverName;
+  }
+
+  protected static String makeValidDnsName(String name) {
+    return name.replaceAll("/", "-");
   }
 }
