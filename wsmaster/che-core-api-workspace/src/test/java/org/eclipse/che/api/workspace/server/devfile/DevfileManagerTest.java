@@ -122,6 +122,22 @@ public class DevfileManagerTest {
 
   @Test(
       expectedExceptions = DevfileException.class,
+      expectedExceptionsMessageRegExp = "Unable to parse Devfile - provided source is empty")
+  public void shouldThrowDevfileExceptionWhenEmptyObjectProvided() throws Exception {
+    // when
+    devfileManager.parseJson("{}");
+  }
+
+  @Test(
+      expectedExceptions = DevfileException.class,
+      expectedExceptionsMessageRegExp = "Unable to parse Devfile - provided source is empty")
+  public void shouldThrowDevfileExceptionWhenEmptySourceProvided() throws Exception {
+    // when
+    devfileManager.parseJson("");
+  }
+
+  @Test(
+      expectedExceptions = DevfileException.class,
       expectedExceptionsMessageRegExp = "Unable to resolve reference of component: test")
   public void shouldThrowDevfileExceptionWhenReferenceIsNotResolvable() throws Exception {
 
@@ -157,6 +173,7 @@ public class DevfileManagerTest {
     // given
     JsonProcessingException jsonException = mock(JsonProcessingException.class);
     when(jsonException.getMessage()).thenReturn("non valid");
+    when(jsonMapper.readTree(anyString())).thenReturn(devfileJsonNode);
     doThrow(jsonException).when(jsonMapper).treeToValue(any(), any());
 
     // when

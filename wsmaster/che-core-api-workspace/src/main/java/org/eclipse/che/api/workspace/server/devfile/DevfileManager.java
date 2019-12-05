@@ -199,6 +199,9 @@ public class DevfileManager {
     DevfileImpl devfile;
     try {
       JsonNode parsed = mapper.readTree(content);
+      if (parsed == null) {
+        throw new DevfileFormatException("Unable to parse Devfile - provided source is empty");
+      }
       parsed = overridePropertiesApplier.applyPropertiesOverride(parsed, overrideProperties);
       schemaValidator.validate(parsed);
       devfile = mapper.treeToValue(parsed, DevfileImpl.class);
