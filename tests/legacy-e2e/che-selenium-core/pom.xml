@@ -16,7 +16,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>che-selenium-parent</artifactId>
-        <groupId>org.eclipse.che.tests.legacy-e2e</groupId>
+        <groupId>org.eclipse.che.selenium</groupId>
         <version>7.6.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-selenium-core</artifactId>

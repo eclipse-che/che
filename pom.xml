@@ -683,12 +683,12 @@
                 <version>${che.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.tests.legacy-e2e</groupId>
+                <groupId>org.eclipse.che.selenium</groupId>
                 <artifactId>che-selenium-core</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.tests.legacy-e2e</groupId>
+                <groupId>org.eclipse.che.selenium</groupId>
                 <artifactId>che-selenium-test</artifactId>
                 <version>${che.version}</version>
             </dependency>
