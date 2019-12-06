@@ -313,7 +313,7 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeGroupIds>org.eclipse.che.tests.legacy-e2e</includeGroupIds>
+                            <includeGroupIds>org.eclipse.che.selenium</includeGroupIds>
                             <includeArtifactIds>che-selenium-core</includeArtifactIds>
                             <outputDirectory>${project.build.directory}/bin</outputDirectory>
                             <includes>webdriver.sh</includes>
