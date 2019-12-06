@@ -80,7 +80,7 @@ public class WorkspaceEntityProvider
     try {
       JsonNode wsNode = mapper.readTree(entityStream);
       JsonNode devfileNode = wsNode.path("devfile");
-      if (!devfileNode.isNull()) {
+      if (!devfileNode.isNull() && !devfileNode.isMissingNode()) {
         devfileManager.parseJson(devfileNode.toString());
       }
       return DtoFactory.getInstance().createDtoFromJson(wsNode.toString(), WorkspaceDto.class);
