@@ -262,7 +262,7 @@
                                 </property>
                                 <property>
                                     <name>listener</name>
-                                    <value>org.eclipse.che.tests.legacy-e2e.core.CheSeleniumTestHandler</value>
+                                    <value>org.eclipse.che.selenium.core.CheSeleniumTestHandler</value>
                                 </property>
                             </properties>
                             <systemProperties>
