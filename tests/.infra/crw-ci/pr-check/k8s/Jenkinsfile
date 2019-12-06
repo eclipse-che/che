@@ -97,10 +97,13 @@ pipeline {
 
                 stage("Build Che including upstream projects") {
                     when {
-                        expression { buildChe }
+                        expression { return params.buildChe == true || params.buildChe == 'true' }
                     }
 
                     steps {
+                        echo "buildChe = $params.buildChe"
+                        echo "createTestWorkspace = $params.createTestWorkspace"
+
                         echo "Build branch ${ghprbSourceBranch} of upstream projects"
                         sh """
                             project_list=(
@@ -130,7 +133,7 @@ pipeline {
 
         stage("Build and push che-server image") {
             when {
-                expression { buildChe }
+                expression { return params.buildChe == true || params.buildChe == 'true' }
             }
 
             steps {
@@ -208,7 +211,7 @@ pipeline {
 
         stage("Create test workspace") {
             when {
-                expression { createTestWorkspace }
+                expression { return params.createTestWorkspace == true || params.createTestWorkspace == 'true' }
             }
 
             steps {
