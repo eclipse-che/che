@@ -15,6 +15,7 @@ pipeline {
         JENKINS_BUILD = "true"
 
         DEVFILE_PATH = "${WORKSPACE}/test-workspace-devfile.yaml"
+        CUSTOM_RESOURCE_FILE_PATH = "${WORKSPACE}/custom-resource.yaml"
 
         SUCCESS_THRESHOLD = 5
 
@@ -27,7 +28,7 @@ pipeline {
                 description: 'Repo of Che server image')
 
         string(name: 'cheImageTag',
-                defaultValue: "$ghprbPullId",
+                defaultValue: "",
                 description: 'Tag of Che server image')
 
         booleanParam(name: 'buildChe',
@@ -42,12 +43,37 @@ pipeline {
                 defaultValue: "",
                 description: 'URL of devfile of test workspace')
 
+        text(name: 'customResourceFileContent',
+                defaultValue: "",
+                description: 'Content of custom-resource.yaml')
+
         booleanParam(name: 'createTestWorkspace',
                 defaultValue: true,
                 description: 'Should create test workspace')
     }
 
     stages {
+        stage("Setup environment") {
+            steps {
+                script {
+                    if (cheImageTag == null || cheImageTag == '') {
+                        cheImageTag = ghprbPullId
+                    }
+
+                    if (customResourceFileContent == null || customResourceFileContent == '') {
+                        sh """
+                            wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
+                            -O $CUSTOM_RESOURCE_FILE_PATH
+                        """
+
+                    } else {
+                        def file = new File(CUSTOM_RESOURCE_FILE_PATH)
+                        file.write(customResourceFileContent)
+                    }
+                }
+            }
+        }
+
         stage("Prepare to start Che on K8S") {
             failFast true
 
@@ -97,7 +123,7 @@ pipeline {
 
                 stage("Build Che including upstream projects") {
                     when {
-                        expression { return params.buildChe == true || params.buildChe == 'true' }
+                        expression { params.buildChe }
                     }
 
                     steps {
@@ -133,7 +159,7 @@ pipeline {
 
         stage("Build and push che-server image") {
             when {
-                expression { return params.buildChe == true || params.buildChe == 'true' }
+                expression { params.buildChe }
             }
 
             steps {
@@ -150,16 +176,14 @@ pipeline {
 
         stage("Start Che") {
             steps {
-                echo "Download and patch Che custom-resource.yaml"
+                echo "Patch Che custom-resource.yaml"
                 sh """
-                    wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml
-                    
-                    sed -i "s|cheImage: ''|cheImage: '${cheImageRepo}'|" ${WORKSPACE}/org_v1_che_cr.yaml
-                    sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${cheImageTag}'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                    sed -i "s|cheImage: ''|cheImage: '${cheImageRepo}'|" $CUSTOM_RESOURCE_FILE_PATH
+                    sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${cheImageTag}'|" $CUSTOM_RESOURCE_FILE_PATH
 
-                    sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" ${WORKSPACE}/org_v1_che_cr.yaml
+                    sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" $CUSTOM_RESOURCE_FILE_PATH
 
-                    sed -i "s|ingressDomain: '192.168.99.101.nip.io'|ingressDomain: '\$(minikube ip).nip.io'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                    sed -i "s|ingressDomain: '192.168.99.101.nip.io'|ingressDomain: '\$(minikube ip).nip.io'|" $CUSTOM_RESOURCE_FILE_PATH
                 """
 
                 echo "Install Che"
@@ -169,7 +193,7 @@ pipeline {
                     --installer=operator \\
                     --listr-renderer=verbose \\
                     --platform=minikube \\
-                    --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml
+                    --che-operator-cr-yaml=$CUSTOM_RESOURCE_FILE_PATH
                 """
 
                 script {
@@ -211,7 +235,7 @@ pipeline {
 
         stage("Create test workspace") {
             when {
-                expression { return params.createTestWorkspace == true || params.createTestWorkspace == 'true' }
+                expression { params.createTestWorkspace }
             }
 
             steps {
@@ -269,7 +293,7 @@ pipeline {
 
     post {
         failure {
-            echo "Create screencast from $WORKSPACE/e2e/report/executionScreencast files."
+            echo "Create screencast from $WORKSPACE/tests/e2e/report/executionScreencast files."
             sh """
                 command -v ffmpeg >/dev/null 2>&1 && if ls $WORKSPACE/tests/e2e/report/executionScreencast/*.png 1> /dev/null 2>&1; then
                   cd $WORKSPACE/tests/e2e/report/executionScreencast
@@ -293,6 +317,7 @@ pipeline {
 
                 cp ${WORKSPACE}/org_v1_che_cr.yaml $LOGS_AND_CONFIGS/che-config || true
                 cp ${DEVFILE_PATH} $LOGS_AND_CONFIGS || true
+                cp ${CUSTOM_RESOURCE_FILE_PATH} $LOGS_AND_CONFIGS || true
 
                 kubectl get checluster --namespace=che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml || true
                 kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true

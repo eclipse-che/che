@@ -66,37 +66,59 @@ pipeline {
             }
         }
 
-    stage('Run Happy path tests against Eclipse Che release candidate') {
-        steps {
-            build job: 'Multiuser-Che-PR-check-E2E-Happy-path-tests-against-k8s',
-                    parameters: [
-                            string(name: 'cheImageRepo',
-                                    value: 'eclipse/che-server'),
+        stage('Patch custom-resource.yaml') {
+            steps {
+                script {
+                    customResourceFile = "${WORKSPACE}/custom-resource.yaml"
 
-                            string(name: 'cheImageTag',
-                                    value: 'rc'),
+                    sh """
+                        wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
+                          -O $customResourceFile
+                    """
 
-                            booleanParam(name: 'buildChe',
-                                    value: false),
+                    String customResourceFileContent = new File(customResourceFile).getText('UTF-8')
+                    customResourceFileContent = customResourceFileContent.replace("eclipse/che-keycloak:nightly", "eclipse/che-keycloak:rc")
+                    customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-devfile-registry:nightly", "quay.io/eclipse/che-devfile-registry:$RELEASE_VERSION")
+                    customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-plugin-registry:nightly", "quay.io/eclipse/che-plugin-registry:$RELEASE_VERSION")
+                }
+            }
+        }
 
-                            string(name: 'ghprbAuthorRepoGitUrl',
-                                    value: 'https://github.com/eclipse/che.git'),
+        stage('Run Happy path tests against Eclipse Che release candidate') {
+            steps {
+                build job: 'Multiuser-Che-PR-check-E2E-Happy-path-tests-against-k8s',
+                        parameters: [
+                                string(name: 'cheImageRepo',
+                                        value: 'eclipse/che-server'),
 
-                            string(name: 'ghprbSourceBranch',
-                                    value: "$RELEASE_BRANCH"),
+                                string(name: 'cheImageTag',
+                                        value: 'rc'),
 
-                            string(name: 'ghprbPullId',
-                                    value: ''),
+                                booleanParam(name: 'buildChe',
+                                        value: false),
 
-                            string(name: 'e2eTestToRun',
-                                    value: 'test-happy-path'),
+                                string(name: 'ghprbAuthorRepoGitUrl',
+                                        value: 'https://github.com/eclipse/che.git'),
 
-                            string(name: 'testWorkspaceDevfileUrl',
-                                    value: "https://raw.githubusercontent.com/chepullreq4/pr-check-files/master/che/$RELEASE_VERSION/happy-path-workspace.yaml"),
+                                string(name: 'ghprbSourceBranch',
+                                        value: "$RELEASE_BRANCH"),
 
-                            booleanParam(name: 'createTestWorkspace',
-                                    value: true)
-                    ]            }
-    }
+                                string(name: 'ghprbPullId',
+                                        value: ''),
+
+                                string(name: 'e2eTestToRun',
+                                        value: 'test-happy-path'),
+
+                                string(name: 'testWorkspaceDevfileUrl',
+                                        value: "https://raw.githubusercontent.com/chepullreq4/pr-check-files/master/che/$RELEASE_VERSION/happy-path-workspace.yaml"),
+
+                                text(name: 'customResourceFileContent',
+                                        value: customResourceFileContent),
+
+                                booleanParam(name: 'createTestWorkspace',
+                                        value: true)
+                        ]
+            }
+        }
     }
 }
