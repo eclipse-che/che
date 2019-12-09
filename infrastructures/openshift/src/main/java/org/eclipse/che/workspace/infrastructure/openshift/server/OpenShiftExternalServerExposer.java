@@ -19,8 +19,8 @@ import io.fabric8.openshift.api.model.Route;
 import java.util.Collections;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
-import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
@@ -105,7 +105,12 @@ public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenSh
     for (Map.Entry<String, ServerConfig> e : externalServers.entrySet()) {
       Route route =
           new RouteBuilder()
-              .withName(Names.generateName("route"))
+              .withName(
+                  NameGenerator.generate("route", 3)
+                      + "-"
+                      + makeValidDnsName(machineName)
+                      + "-"
+                      + makeValidDnsName(e.getKey()))
               .withMachineName(machineName)
               .withTargetPort(servicePort.getName())
               .withServer(makeValidDnsName(e.getKey()), e.getValue())
@@ -165,7 +170,7 @@ public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenSh
           .endMetadata()
           .withNewSpec()
           .withNewTo()
-          .withName(serviceName + "-" + serverName)
+          .withName(serviceName)
           .endTo()
           .withNewPort()
           .withTargetPort(targetPort)
