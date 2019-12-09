@@ -10,7 +10,7 @@
 base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
-E2E_DIR="${base_dir}/../../e2e"
+E2E_DIR="${base_dir}/../../tests/e2e"
 LOCAL_E2E_DIR="${base_dir}/e2e"
 
 if [ -d $LOCAL_E2E_DIR ]; then

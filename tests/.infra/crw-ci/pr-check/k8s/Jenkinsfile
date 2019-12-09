@@ -217,7 +217,7 @@ pipeline {
                         sh "wget $testWorkspaceDevfileUrl -O $DEVFILE_PATH"
 
                     } else {
-                        sh "cp ${WORKSPACE}/e2e/files/happy-path/happy-path-workspace.yaml $DEVFILE_PATH"
+                        sh "cp ${WORKSPACE}/tests/e2e/files/happy-path/happy-path-workspace.yaml $DEVFILE_PATH"
                     }
 
                     sh """   
@@ -257,7 +257,7 @@ pipeline {
                        -e TS_SELENIUM_USERNAME="admin" \\
                        -e TS_SELENIUM_PASSWORD="admin" \\
                        -e TEST_SUITE="${e2eTestToRun}" \\
-                       -v ${WORKSPACE}/e2e:/tmp/e2e:Z \\
+                       -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
                        eclipse/che-e2e:nightly
                 """
             }
