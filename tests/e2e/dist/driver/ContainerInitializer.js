@@ -67,7 +67,7 @@ function getContainer() {
     e2eContainer.bind(inversify_types_1.CLASSES.RightToolbar).to(RightToolbar_1.RightToolbar).inSingletonScope();
     e2eContainer.bind(inversify_types_1.CLASSES.Terminal).to(Terminal_1.Terminal).inSingletonScope();
     e2eContainer.bind(inversify_types_1.CLASSES.DebugView).to(DebugView_1.DebugView).inSingletonScope();
-    e2eContainer.bind(inversify_types_1.CLASSES.WarningDialog).to(DialogWindow_1.DialogWindow).inSingletonScope();
+    e2eContainer.bind(inversify_types_1.CLASSES.DialogWindow).to(DialogWindow_1.DialogWindow).inSingletonScope();
     e2eContainer.bind(inversify_types_1.CLASSES.ScreenCatcher).to(ScreenCatcher_1.ScreenCatcher).inSingletonScope();
     e2eContainer.bind(inversify_types_1.CLASSES.OcpLoginPage).to(OcpLoginPage_1.OcpLoginPage).inSingletonScope();
     e2eContainer.bind(inversify_types_1.CLASSES.OcpWebConsolePage).to(OcpWebConsolePage_1.OcpWebConsolePage).inSingletonScope();

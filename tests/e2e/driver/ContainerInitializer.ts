@@ -72,7 +72,7 @@ export function getContainer(): Container {
     e2eContainer.bind<RightToolbar>(CLASSES.RightToolbar).to(RightToolbar).inSingletonScope();
     e2eContainer.bind<Terminal>(CLASSES.Terminal).to(Terminal).inSingletonScope();
     e2eContainer.bind<DebugView>(CLASSES.DebugView).to(DebugView).inSingletonScope();
-    e2eContainer.bind<DialogWindow>(CLASSES.WarningDialog).to(DialogWindow).inSingletonScope();
+    e2eContainer.bind<DialogWindow>(CLASSES.DialogWindow).to(DialogWindow).inSingletonScope();
     e2eContainer.bind<ScreenCatcher>(CLASSES.ScreenCatcher).to(ScreenCatcher).inSingletonScope();
     e2eContainer.bind<OcpLoginPage>(CLASSES.OcpLoginPage).to(OcpLoginPage).inSingletonScope();
     e2eContainer.bind<OcpWebConsolePage>(CLASSES.OcpWebConsolePage).to(OcpWebConsolePage).inSingletonScope();
