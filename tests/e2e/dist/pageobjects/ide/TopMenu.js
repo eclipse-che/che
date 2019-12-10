@@ -29,6 +29,7 @@ const TestConstants_1 = require("../../TestConstants");
 const selenium_webdriver_1 = require("selenium-webdriver");
 const Ide_1 = require("./Ide");
 const Logger_1 = require("../../utils/Logger");
+const QuickOpenContainer_1 = require("./QuickOpenContainer");
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
  *
@@ -39,9 +40,10 @@ const Logger_1 = require("../../utils/Logger");
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 let TopMenu = TopMenu_1 = class TopMenu {
-    constructor(driverHelper, ide) {
+    constructor(driverHelper, ide, quickOpenContainer) {
         this.driverHelper = driverHelper;
         this.ide = ide;
+        this.quickOpenContainer = quickOpenContainer;
     }
     waitTopMenu(timeout = TestConstants_1.TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -74,6 +76,23 @@ let TopMenu = TopMenu_1 = class TopMenu {
             yield this.driverHelper.waitAndClick(submenuItemLocator, timeout);
         });
     }
+    runTask(task) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.selectOption('Terminal', 'Run Task...');
+            try {
+                yield this.quickOpenContainer.waitContainer();
+            }
+            catch (err) {
+                if (err instanceof selenium_webdriver_1.error.TimeoutError) {
+                    console.log(`After clicking to the "Terminal" -> "Run Task ..." the "Quick Open Container" has not been displayed, one more try`);
+                    yield this.selectOption('Terminal', 'Run Task...');
+                    yield this.quickOpenContainer.waitContainer();
+                }
+            }
+            yield this.quickOpenContainer.clickOnContainerItem(task);
+            yield this.quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
+        });
+    }
     getTopMenuButtonLocator(buttonText) {
         return selenium_webdriver_1.By.xpath(`//div[@id='theia:menubar']//div[@class='p-MenuBar-itemLabel' and text()='${buttonText}']`);
     }
@@ -86,8 +105,10 @@ TopMenu = TopMenu_1 = __decorate([
     inversify_1.injectable(),
     __param(0, inversify_1.inject(inversify_types_1.CLASSES.DriverHelper)),
     __param(1, inversify_1.inject(inversify_types_1.CLASSES.Ide)),
+    __param(2, inversify_1.inject(inversify_types_1.CLASSES.QuickOpenContainer)),
     __metadata("design:paramtypes", [DriverHelper_1.DriverHelper,
-        Ide_1.Ide])
+        Ide_1.Ide,
+        QuickOpenContainer_1.QuickOpenContainer])
 ], TopMenu);
 exports.TopMenu = TopMenu;
 //# sourceMappingURL=TopMenu.js.map

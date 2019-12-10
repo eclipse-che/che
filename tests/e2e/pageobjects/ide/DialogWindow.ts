@@ -13,7 +13,6 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TestConstants } from '../../TestConstants';
-import { Test } from 'mocha';
 
 @injectable()
 export class DialogWindow {

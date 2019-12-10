@@ -137,7 +137,7 @@ suite('Language server validation', () => __awaiter(this, void 0, void 0, functi
 }));
 suite('Validation of workspace build and run', () => __awaiter(this, void 0, void 0, function* () {
     test('Build application', () => __awaiter(this, void 0, void 0, function* () {
-        yield runTask('build-file-output');
+        yield topMenu.runTask('build-file-output');
         // workaround for issue: https://github.com/eclipse/che/issues/14771
         // await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'build-output.txt');
         yield projectTree.expandPathAndOpenFile(projectName, 'result-build-output.txt', 220000);
@@ -145,7 +145,7 @@ suite('Validation of workspace build and run', () => __awaiter(this, void 0, voi
         // await editor.followAndWaitForText('build-output.txt', '[INFO] BUILD SUCCESS', 300000, 10000);
     }));
     test('Run application', () => __awaiter(this, void 0, void 0, function* () {
-        yield runTask('run');
+        yield topMenu.runTask('run');
         yield ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
         yield ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
     }));
@@ -174,7 +174,7 @@ suite('Display source code changes in the running application', () => __awaiter(
         yield editor.performKeyCombination(changedJavaFileName, selenium_webdriver_1.Key.chord(selenium_webdriver_1.Key.CONTROL, 's'));
     }));
     test('Build application with changes', () => __awaiter(this, void 0, void 0, function* () {
-        yield runTask('build');
+        yield topMenu.runTask('build');
         yield projectTree.collapseProjectTree(projectName + '/src', 'main');
         yield projectTree.expandPathAndOpenFile(projectName, 'result-build.txt', 300000);
         yield editor.waitText('result-build.txt', '[INFO] BUILD SUCCESS');
@@ -186,7 +186,7 @@ suite('Display source code changes in the running application', () => __awaiter(
         await editor.followAndWaitForText('build.txt', '[INFO] BUILD SUCCESS', 300000, 5000);*/
     }));
     test('Run application with changes', () => __awaiter(this, void 0, void 0, function* () {
-        yield runTask('run-with-changes');
+        yield topMenu.runTask('run-with-changes');
         yield ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
         yield ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
     }));
@@ -210,7 +210,7 @@ suite('Validation of debug functionality', () => __awaiter(this, void 0, void 0,
         yield editor.activateBreakpoint(javaFileName, 32);
     }));
     test('Launch debug', () => __awaiter(this, void 0, void 0, function* () {
-        yield runTask('run-debug');
+        yield topMenu.runTask('run-debug');
         yield ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 180000);
         yield ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 180000);
     }));
@@ -263,23 +263,6 @@ function checkErrorMessageInApplicationController() {
         }
         yield driverHelper.getDriver().switchTo().defaultContent();
         yield ide.waitAndSwitchToIdeFrame();
-    });
-}
-function runTask(task) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield topMenu.selectOption('Terminal', 'Run Task...');
-        try {
-            yield quickOpenContainer.waitContainer();
-        }
-        catch (err) {
-            if (err instanceof selenium_webdriver_1.error.TimeoutError) {
-                console.log(`After clicking to the "Terminal" -> "Run Task ..." the "Quick Open Container" has not been displayed, one more try`);
-                yield topMenu.selectOption('Terminal', 'Run Task...');
-                yield quickOpenContainer.waitContainer();
-            }
-        }
-        yield quickOpenContainer.clickOnContainerItem(task);
-        yield quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
     });
 }
 function checkCodeNavigationWithContextMenu() {
