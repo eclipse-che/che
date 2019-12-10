@@ -8,6 +8,8 @@ pipeline {
         VSCODE_YAML_META_YAML_DIR_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/redhat/vscode-yaml/'
         JAVA8_META_YAML_DIR_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/redhat/java8/'
         DEVFILE_URL="${WORKSPACE}/happy-path-workspace.yaml"
+
+        String customResourceFileContent = ""
     }
 
     parameters {
@@ -76,48 +78,54 @@ pipeline {
                           -O $customResourceFilePath
                     """
 
-                    String customResourceFileContent = readFile customResourceFilePath
+                    customResourceFileContent = readFile customResourceFilePath
                     customResourceFileContent = customResourceFileContent.replace("eclipse/che-keycloak:nightly", "eclipse/che-keycloak:rc")
                     customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-devfile-registry:nightly", "quay.io/eclipse/che-devfile-registry:$RELEASE_VERSION")
                     customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-plugin-registry:nightly", "quay.io/eclipse/che-plugin-registry:$RELEASE_VERSION")
+
+                    echo "$customResourceFileContent"
                 }
             }
         }
 
         stage('Run Happy path tests against Eclipse Che release candidate') {
             steps {
-                build job: 'basic-MultiUser-Che-check-E2E-Happy-path-tests-against-k8s',
-                        parameters: [
-                                string(name: 'cheImageRepo',
-                                        value: 'eclipse/che-server'),
+                script {
+                    echo "$customResourceFileContent"
 
-                                string(name: 'cheImageTag',
-                                        value: 'rc'),
+                    build job: 'basic-MultiUser-Che-check-E2E-Happy-path-tests-against-k8s',
+                            parameters: [
+                                    string(name: 'cheImageRepo',
+                                            value: 'eclipse/che-server'),
 
-                                booleanParam(name: 'buildChe',
-                                        value: false),
+                                    string(name: 'cheImageTag',
+                                            value: 'rc'),
 
-                                string(name: 'ghprbAuthorRepoGitUrl',
-                                        value: 'https://github.com/eclipse/che.git'),
+                                    booleanParam(name: 'buildChe',
+                                            value: false),
 
-                                string(name: 'ghprbSourceBranch',
-                                        value: "$RELEASE_BRANCH"),
+                                    string(name: 'ghprbAuthorRepoGitUrl',
+                                            value: 'https://github.com/eclipse/che.git'),
 
-                                string(name: 'ghprbPullId',
-                                        value: ''),
+                                    string(name: 'ghprbSourceBranch',
+                                            value: "$RELEASE_BRANCH"),
 
-                                string(name: 'e2eTestToRun',
-                                        value: 'test-happy-path'),
+                                    string(name: 'ghprbPullId',
+                                            value: ''),
 
-                                string(name: 'testWorkspaceDevfileUrl',
-                                        value: "https://raw.githubusercontent.com/chepullreq4/pr-check-files/master/che/$RELEASE_VERSION/happy-path-workspace.yaml"),
+                                    string(name: 'e2eTestToRun',
+                                            value: 'test-happy-path'),
 
-                                text(name: 'customResourceFileContent',
-                                        value: customResourceFileContent),
+                                    string(name: 'testWorkspaceDevfileUrl',
+                                            value: "https://raw.githubusercontent.com/chepullreq4/pr-check-files/master/che/$RELEASE_VERSION/happy-path-workspace.yaml"),
 
-                                booleanParam(name: 'createTestWorkspace',
-                                        value: true)
-                        ]
+                                    text(name: 'customResourceFileContent',
+                                            value: "$customResourceFileContent"),
+
+                                    booleanParam(name: 'createTestWorkspace',
+                                            value: true)
+                            ]
+                }
             }
         }
     }

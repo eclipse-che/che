@@ -67,8 +67,7 @@ pipeline {
                         """
 
                     } else {
-                        def file = new File(CUSTOM_RESOURCE_FILE_PATH)
-                        file.write(customResourceFileContent)
+                        writeFile file: CUSTOM_RESOURCE_FILE_PATH, text: customResourceFileContent
                     }
                 }
             }
