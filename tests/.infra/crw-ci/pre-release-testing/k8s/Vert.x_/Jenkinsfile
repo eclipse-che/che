@@ -1,0 +1,79 @@
+pipeline {
+    agent { label 'rhel7-8gb' }
+
+    environment {
+        YQ_TOOL_URL = 'https://github.com/mikefarah/yq/releases/download/2.4.0/yq_linux_amd64'
+
+        CHE_THEIA_META_YAML_URL = 'https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/eclipse/che-theia/next/meta.yaml'
+        VSCODE_YAML_META_YAML_DIR_URL = 'https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/redhat/vscode-yaml/'
+        JAVA8_META_YAML_DIR_URL = 'https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/redhat/java8/'
+        DEVFILE_URL = "${WORKSPACE}/happy-path-workspace.yaml"
+    }
+
+    parameters {
+        string(name: 'RELEASE_BRANCH',
+                defaultValue: "7.5.x",
+                description: 'Branch with pre-release version to take E2E Happy path test.')
+    }
+
+    stage('Patch custom-resource.yaml') {
+        steps {
+            script {
+                String customResourceFilePath = "${WORKSPACE}/custom-resource.yaml"
+
+                sh """
+                        wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
+                          -O $customResourceFilePath
+                    """
+
+                customResourceFileContent = readFile customResourceFilePath
+                customResourceFileContent = customResourceFileContent.replace("eclipse/che-keycloak:nightly", "eclipse/che-keycloak:rc")
+                customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-devfile-registry:nightly", "quay.io/eclipse/che-devfile-registry:$RELEASE_VERSION")
+                customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-plugin-registry:nightly", "quay.io/eclipse/che-plugin-registry:$RELEASE_VERSION")
+
+                echo "$customResourceFileContent"
+            }
+        }
+    }
+
+    stage('Run Vert.x tests against Eclipse Che release candidate') {
+        steps {
+            script {
+                echo "$customResourceFileContent"
+
+                build job: 'basic-MultiUser-Che-check-E2E-Happy-path-tests-against-k8s',
+                        parameters: [
+                                string(name: 'cheImageRepo',
+                                        value: 'eclipse/che-server'),
+
+                                string(name: 'cheImageTag',
+                                        value: 'rc'),
+
+                                booleanParam(name: 'buildChe',
+                                        value: false),
+
+                                string(name: 'ghprbAuthorRepoGitUrl',
+                                        value: 'https://github.com/eclipse/che.git'),
+
+                                string(name: 'ghprbSourceBranch',
+                                        value: "$RELEASE_BRANCH"),
+
+                                string(name: 'ghprbPullId',
+                                        value: ''),
+
+                                string(name: 'e2eTestToRun',
+                                        value: 'test-java-vertx'),
+
+                                string(name: 'testWorkspaceDevfileUrl',
+                                        value: ""),
+
+                                text(name: 'customResourceFileContent',
+                                        value: "$customResourceFileContent"),
+
+                                booleanParam(name: 'createTestWorkspace',
+                                        value: false)
+                        ]
+            }
+        }
+    }
+}

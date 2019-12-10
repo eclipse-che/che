@@ -1,23 +1,8 @@
 pipeline {
     agent { label 'rhel7-8gb' }
 
-    environment {
-        YQ_TOOL_URL='https://github.com/mikefarah/yq/releases/download/2.4.0/yq_linux_amd64'
-
-        CHE_THEIA_META_YAML_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/eclipse/che-theia/next/meta.yaml'
-        VSCODE_YAML_META_YAML_DIR_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/redhat/vscode-yaml/'
-        JAVA8_META_YAML_DIR_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/redhat/java8/'
-        DEVFILE_URL="${WORKSPACE}/happy-path-workspace.yaml"
-    }
-
-    parameters {
-        string(name: 'RELEASE_BRANCH',
-                defaultValue: "7.5.x",
-                description: 'Branch with pre-release version to take E2E Happy path test.')
-    }
-
     stages {
-        stage('Run Vert.x tests against Eclipse Che release candidate') {
+        stage('Run Happy path tests against nightly build') {
             steps {
                 build job: 'basic-MultiUser-Che-check-E2E-Happy-path-tests-against-k8s',
                         parameters: [
@@ -25,7 +10,7 @@ pipeline {
                                         value: 'eclipse/che-server'),
 
                                 string(name: 'cheImageTag',
-                                        value: 'rc'),
+                                        value: 'nightly'),
 
                                 booleanParam(name: 'buildChe',
                                         value: false),
@@ -34,19 +19,22 @@ pipeline {
                                         value: 'https://github.com/eclipse/che.git'),
 
                                 string(name: 'ghprbSourceBranch',
-                                        value: "$RELEASE_BRANCH"),
+                                        value: 'che-15397'),
 
                                 string(name: 'ghprbPullId',
                                         value: ''),
 
                                 string(name: 'e2eTestToRun',
-                                        value: 'test-java-vertx'),
+                                        value: 'test-happy-path'),
 
                                 string(name: 'testWorkspaceDevfileUrl',
+                                        value: 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml'),
+
+                                text(name: 'customResourceFileContent',
                                         value: ''),
 
                                 booleanParam(name: 'createTestWorkspace',
-                                        value: false)
+                                        value: true)
                         ]            }
         }
     }
