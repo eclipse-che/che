@@ -82,8 +82,6 @@ pipeline {
                     customResourceFileContent = customResourceFileContent.replace("eclipse/che-keycloak:nightly", "eclipse/che-keycloak:rc")
                     customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-devfile-registry:nightly", "quay.io/eclipse/che-devfile-registry:$RELEASE_VERSION")
                     customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-plugin-registry:nightly", "quay.io/eclipse/che-plugin-registry:$RELEASE_VERSION")
-
-                    echo "$customResourceFileContent"
                 }
             }
         }
