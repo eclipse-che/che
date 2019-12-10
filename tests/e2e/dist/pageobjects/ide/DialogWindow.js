@@ -76,10 +76,14 @@ let DialogWindow = DialogWindow_1 = class DialogWindow {
             yield this.clickToButton('Open Link');
         });
     }
-    waitDialog(timeout = TestConstants_1.TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    waitDialog(timeout = TestConstants_1.TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT, dialogTest = '') {
         return __awaiter(this, void 0, void 0, function* () {
             Logger_1.Logger.debug('WarningDialog.waitDialog');
-            yield this.driverHelper.waitVisibility(selenium_webdriver_1.By.xpath(DialogWindow_1.DIALOG_BODY_XPATH_LOCATOR), timeout);
+            // if dialog text is provided uses xpath with this text
+            // if not uses window body xpath
+            const dialogWithTextXpathLocator = `${DialogWindow_1.DIALOG_BODY_XPATH_LOCATOR}//span[contains(text(), '${dialogTest}')]`;
+            const dialogXpathLocator = (dialogTest ? dialogWithTextXpathLocator : DialogWindow_1.DIALOG_BODY_XPATH_LOCATOR);
+            yield this.driverHelper.waitVisibility(selenium_webdriver_1.By.xpath(dialogXpathLocator), timeout);
         });
     }
     waitDialogAndOpenLink(timeout = TestConstants_1.TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
