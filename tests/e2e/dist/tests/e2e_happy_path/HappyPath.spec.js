@@ -34,7 +34,6 @@ const driverHelper = inversify_config_1.e2eContainer.get(inversify_types_1.CLASS
 const ide = inversify_config_1.e2eContainer.get(inversify_types_1.CLASSES.Ide);
 const projectTree = inversify_config_1.e2eContainer.get(inversify_types_1.CLASSES.ProjectTree);
 const topMenu = inversify_config_1.e2eContainer.get(inversify_types_1.CLASSES.TopMenu);
-const quickOpenContainer = inversify_config_1.e2eContainer.get(inversify_types_1.CLASSES.QuickOpenContainer);
 const editor = inversify_config_1.e2eContainer.get(inversify_types_1.CLASSES.Editor);
 const contextMenu = inversify_config_1.e2eContainer.get(inversify_types_1.CLASSES.ContextMenu);
 const previewWidget = inversify_config_1.e2eContainer.get(inversify_types_1.CLASSES.PreviewWidget);

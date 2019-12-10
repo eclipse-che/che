@@ -50,10 +50,10 @@ let Editor = Editor_1 = class Editor {
             yield this.driverHelper.waitVisibility(selenium_webdriver_1.By.css(Editor_1.SUGGESTION_WIDGET_BODY_CSS), timeout);
         });
     }
-    waitSuggestionContainerClosed() {
+    waitSuggestionContainerClosed(timeout = TestConstants_1.TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         return __awaiter(this, void 0, void 0, function* () {
             Logger_1.Logger.debug('Editor.waitSuggestionContainerClosed');
-            yield this.driverHelper.waitDisappearanceWithTimeout(selenium_webdriver_1.By.css(Editor_1.SUGGESTION_WIDGET_BODY_CSS));
+            yield this.driverHelper.waitDisappearanceWithTimeout(selenium_webdriver_1.By.css(Editor_1.SUGGESTION_WIDGET_BODY_CSS), timeout);
         });
     }
     waitSuggestion(editorTabTitle, suggestionText, timeout = TestConstants_1.TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -69,9 +69,39 @@ let Editor = Editor_1 = class Editor {
                     if (!(err instanceof selenium_webdriver_1.error.TimeoutError)) {
                         throw err;
                     }
-                    yield this.pressEscapeButton(editorTabTitle);
-                    yield this.waitSuggestionContainerClosed();
+                    yield this.closeSuggestionContainer(editorTabTitle, timeout);
                     yield this.pressControlSpaceCombination(editorTabTitle);
+                }
+            }), timeout);
+        });
+    }
+    closeSuggestionContainer(editorTabTitle, timeout = TestConstants_1.TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        return __awaiter(this, void 0, void 0, function* () {
+            Logger_1.Logger.debug(`Editor.closeSuggestionContainer tabTitle: "${editorTabTitle}"`);
+            yield this.driverHelper.getDriver().wait(() => __awaiter(this, void 0, void 0, function* () {
+                // if container already closed stop the method execution
+                try {
+                    // for avoiding problem when the inner timeout
+                    // bigger than timeout of the method
+                    const suggestionContainerTimeout = timeout / 2;
+                    yield this.waitSuggestionContainer(suggestionContainerTimeout);
+                }
+                catch (err) {
+                    if (err instanceof selenium_webdriver_1.error.TimeoutError) {
+                        return true;
+                    }
+                    throw err;
+                }
+                // try to close container
+                try {
+                    yield this.pressEscapeButton(editorTabTitle);
+                    yield this.waitSuggestionContainerClosed(2000);
+                    return true;
+                }
+                catch (err) {
+                    if (!(err instanceof selenium_webdriver_1.error.TimeoutError)) {
+                        throw err;
+                    }
                 }
             }), timeout);
         });
@@ -89,8 +119,7 @@ let Editor = Editor_1 = class Editor {
                     if (!(err instanceof selenium_webdriver_1.error.TimeoutError)) {
                         throw err;
                     }
-                    yield this.pressEscapeButton(editorTabTitle);
-                    yield this.waitSuggestionContainerClosed();
+                    yield this.closeSuggestionContainer(editorTabTitle, timeout);
                     yield this.pressControlSpaceCombination(editorTabTitle);
                 }
             }), timeout);
