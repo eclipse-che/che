@@ -11,10 +11,10 @@
  */
 package org.eclipse.che.api.workspace.server.devfile.convert.component;
 
-import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 
 /**
  * Applies changes on workspace config according to the specified component. Different
@@ -37,6 +37,8 @@ public interface ComponentToWorkspaceApplier {
    * @throws DevfileException if any exception occurs during content retrieving
    */
   void apply(
-      WorkspaceConfigImpl workspaceConfig, Component component, FileContentProvider contentProvider)
+      WorkspaceConfigImpl workspaceConfig,
+      ComponentImpl component,
+      FileContentProvider contentProvider)
       throws DevfileException;
 }

@@ -114,16 +114,6 @@ public final class Constants {
   public static final String WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE = "plugins";
 
   /**
-   * Template for workspace attribute key that sets sidecar limit in a plugin. %s should be replaced
-   * with pluginPublisher/pluginName. When plugin provides several sidecars this property sets the
-   * same limit for each sidecar, so is not that useful in such a case. Value format see {@link
-   * KubernetesSize}
-   */
-  public static final String SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE = "sidecar.%s.memory_limit";
-
-  public static final String SIDECAR_ENV_VARIABLES_ATTR_TEMPLATE = "sidecar.%s.environment_variables";
-
-  /**
    * Describes workspace runtimes which perform start/stop of this workspace. Should be set/read
    * from {@link Workspace#getAttributes}
    */

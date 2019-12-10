@@ -549,7 +549,7 @@ public class WorkspaceManagerTest {
 
     EnvironmentImpl environment = new EnvironmentImpl(null, emptyMap());
     Command command = new CommandImpl("cmd", "echo hello", "custom");
-    WorkspaceConfig convertedConfig =
+    WorkspaceConfigImpl convertedConfig =
         new WorkspaceConfigImpl(
             "any",
             "",
@@ -575,7 +575,7 @@ public class WorkspaceManagerTest {
 
     EnvironmentImpl environment = new EnvironmentImpl(null, emptyMap());
     Command command = new CommandImpl("cmd", "echo hello", "custom");
-    WorkspaceConfig convertedConfig =
+    WorkspaceConfigImpl convertedConfig =
         new WorkspaceConfigImpl(
             "any",
             "",
@@ -615,7 +615,7 @@ public class WorkspaceManagerTest {
 
     EnvironmentImpl environment = new EnvironmentImpl(null, emptyMap());
     Command command = new CommandImpl("cmd", "echo hello", "custom");
-    WorkspaceConfig convertedConfig =
+    WorkspaceConfigImpl convertedConfig =
         new WorkspaceConfigImpl(
             "any",
             "",

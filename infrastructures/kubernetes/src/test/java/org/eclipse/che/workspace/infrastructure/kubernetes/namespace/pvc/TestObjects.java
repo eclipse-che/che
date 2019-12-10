@@ -127,8 +127,7 @@ public class TestObjects {
     }
 
     public InternalMachineConfig build() {
-      return new InternalMachineConfig(
-          new ArrayList<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), volumes);
+      return new InternalMachineConfig(new HashMap<>(), new HashMap<>(), new HashMap<>(), volumes);
     }
   }
 }

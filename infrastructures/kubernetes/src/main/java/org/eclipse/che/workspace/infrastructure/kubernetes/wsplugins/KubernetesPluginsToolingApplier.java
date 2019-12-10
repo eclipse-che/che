@@ -32,13 +32,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
@@ -122,10 +125,33 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         chePluginsVolumeApplier.applyVolumes(pod, k8sInitContainer, container.getVolumes(), k8sEnv);
       }
 
+      Map<String, ComponentImpl> devfilePlugins =
+          k8sEnv
+              .getDevfile()
+              .getComponents()
+              .stream()
+              .filter(c -> c.getType().equals("cheEditor") || c.getType().equals("chePlugin"))
+              .collect(Collectors.toMap(ComponentImpl::getId, Function.identity()));
+      if (!devfilePlugins.containsKey(chePlugin.getId())) {
+        throw new InfrastructureException(
+            String.format(
+                "The downloaded plugin '%s' configuration does not have the "
+                    + "corresponding component in devfile. Devfile contains the following cheEditor/chePlugins: %s",
+                chePlugin.getId(), devfilePlugins.keySet()));
+      }
+      ComponentImpl pluginRelatedComponent = devfilePlugins.get(chePlugin.getId());
+
       Collection<CommandImpl> pluginRelatedCommands = commandsResolver.resolve(chePlugin);
 
       for (CheContainer container : chePlugin.getContainers()) {
-        addSidecar(pod, container, chePlugin, k8sEnv, pluginRelatedCommands, runtimeIdentity);
+        addSidecar(
+            pod,
+            container,
+            chePlugin,
+            k8sEnv,
+            pluginRelatedCommands,
+            pluginRelatedComponent,
+            runtimeIdentity);
       }
     }
 
@@ -202,6 +228,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       ChePlugin chePlugin,
       KubernetesEnvironment k8sEnv,
       Collection<CommandImpl> sidecarRelatedCommands,
+      Component pluginRelatedComponent,
       RuntimeIdentity runtimeIdentity)
       throws InfrastructureException {
 
@@ -222,11 +249,8 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .setContainer(k8sContainer)
             .setContainerEndpoints(containerEndpoints)
             .setDefaultSidecarMemorySizeAttribute(defaultSidecarMemoryLimitBytes)
-            .setAttributes(k8sEnv.getAttributes())
             .setProjectsRootPathEnvVar(projectsRootEnvVariableProvider.get(runtimeIdentity))
-            .setPluginPublisher(chePlugin.getPublisher())
-            .setPluginName(chePlugin.getName())
-            .setPluginId(chePlugin.getId())
+            .setComponent(pluginRelatedComponent)
             .build();
 
     InternalMachineConfig machineConfig = machineResolver.resolve();

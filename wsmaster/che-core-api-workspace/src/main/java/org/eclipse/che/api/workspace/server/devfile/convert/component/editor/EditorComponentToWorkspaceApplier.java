@@ -14,24 +14,18 @@ package org.eclipse.che.api.workspace.server.devfile.convert.component.editor;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_TYPE;
-import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_ENV_VARIABLES_ATTR_TEMPLATE;
-import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 
-import java.util.List;
 import javax.inject.Inject;
-import org.eclipse.che.api.core.model.workspace.devfile.Component;
-import org.eclipse.che.api.core.model.workspace.devfile.Env;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 
 /**
@@ -61,7 +55,7 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
   @Override
   public void apply(
       WorkspaceConfigImpl workspaceConfig,
-      Component editorComponent,
+      ComponentImpl editorComponent,
       FileContentProvider contentProvider)
       throws DevfileException {
     checkArgument(workspaceConfig != null, "Workspace config must not be null");
@@ -73,20 +67,8 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     final String editorComponentAlias = editorComponent.getAlias();
     final String editorId = editorComponent.getId();
     final String registryUrl = editorComponent.getRegistryUrl();
-    final String memoryLimit = editorComponent.getMemoryLimit();
-    final List<? extends Env> env = editorComponent.getEnv();
 
     final ExtendedPluginFQN fqn = componentFQNParser.evaluateFQN(editorComponent, contentProvider);
-    if (editorComponentAlias != null) {
-      workspaceConfig
-          .getAttributes()
-          .put(
-              EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE,
-              componentFQNParser.getCompositeId(
-                      fqn.getRegistry() != null ? fqn.getRegistry().toString() : null, fqn.getId())
-                  + "="
-                  + editorComponentAlias);
-    }
 
     if (!isNullOrEmpty(fqn.getReference())) {
       workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, fqn.getReference());
@@ -97,11 +79,7 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
               WORKSPACE_TOOLING_EDITOR_ATTRIBUTE,
               componentFQNParser.getCompositeId(registryUrl, editorId));
     }
-    if (memoryLimit != null) {
-      workspaceConfig
-          .getAttributes()
-          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, fqn.getPublisherAndName()), memoryLimit);
-    }
+
     workspaceConfig
         .getCommands()
         .stream()
@@ -112,13 +90,8 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
                         c.getAttributes().get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE)))
         .forEach(c -> c.getAttributes().put(PLUGIN_ATTRIBUTE, fqn.getId()));
 
-    if (!env.isEmpty()) {
-      workspaceConfig.getAttributes()
-          .put(format(SIDECAR_ENV_VARIABLES_ATTR_TEMPLATE, fqn.getPublisherAndName()),
-              String.join(",", env.stream().map(
-                  (java.util.function.Function<Env, String>) e -> e.getName() + "=" + e.getValue())
-                  .collect(toList())));
-    }
+    // make sure id is set to be able to match component with plugin broker result
+    // when referenceContent is used
+    editorComponent.setId(fqn.getId());
   }
-
 }

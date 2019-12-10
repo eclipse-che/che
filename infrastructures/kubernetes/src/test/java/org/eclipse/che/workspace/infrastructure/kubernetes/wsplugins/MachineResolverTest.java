@@ -12,23 +12,20 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import static com.google.common.collect.ImmutableMap.of;
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 import io.fabric8.kubernetes.api.model.Container;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
@@ -57,41 +54,25 @@ public class MachineResolverTest {
   private static final String PROJECTS_MOUNT_PATH = "/wherever/i/may/roam";
 
   private List<ChePluginEndpoint> endpoints;
-  private Map<String, String> wsAttributes;
   private CheContainer cheContainer;
   private Container container;
   private MachineResolver resolver;
+  private ComponentImpl component;
 
   @BeforeMethod
   public void setUp() {
     endpoints = new ArrayList<>();
     cheContainer = new CheContainer();
     container = new Container();
-    wsAttributes = new HashMap<>();
+    component = new ComponentImpl("chePlugin", PLUGIN_ID);
     resolver =
         new MachineResolver(
-            PLUGIN_PUBLISHER,
-            PLUGIN_NAME,
-            PLUGIN_ID,
             new Pair<>(PROJECTS_ENV_VAR, PROJECTS_MOUNT_PATH),
             container,
             cheContainer,
             DEFAULT_MEM_LIMIT,
             endpoints,
-            wsAttributes);
-  }
-
-  @Test
-  public void shouldSetComponentAliasAttributeInMachineConfig() throws InfrastructureException {
-    String componentAlias = "mycomponent";
-    wsAttributes.put(
-        PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE,
-        "another/foo/plugin=fooplugin," + PLUGIN_ID + "=" + componentAlias);
-    wsAttributes.put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, "some/theia/editor=myeditor");
-
-    InternalMachineConfig machineConfig = resolver.resolve();
-    assertEquals(
-        machineConfig.getAttributes().get(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE), componentAlias);
+            component);
   }
 
   @Test(dataProvider = "serverProvider")
@@ -151,10 +132,8 @@ public class MachineResolverTest {
 
   @Test(dataProvider = "memoryAttributeProvider")
   public void shouldSetMemoryLimitOfASidecarIfCorrespondingWSConfigAttributeIsSet(
-      String attributeValue, String expectedMemLimit) throws InfrastructureException {
-    wsAttributes.put(
-        format(Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, PLUGIN_PUBLISHER_NAME),
-        attributeValue);
+      String memoryLimit, String expectedMemLimit) throws InfrastructureException {
+    component.setMemoryLimit(memoryLimit);
 
     InternalMachineConfig machineConfig = resolver.resolve();
 
@@ -175,16 +154,26 @@ public class MachineResolverTest {
   @Test
   public void shouldOverrideMemoryLimitOfASidecarIfCorrespondingWSConfigAttributeIsSet()
       throws InfrastructureException {
-    String attributeValue = "300Mi";
-    String expectedMemLimit = toBytesString(attributeValue);
+    String memoryLimit = "300Mi";
+    String expectedMemLimit = toBytesString(memoryLimit);
     Containers.addRamLimit(container, 123456789);
-    wsAttributes.put(
-        format(Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, PLUGIN_PUBLISHER_NAME),
-        attributeValue);
+    component.setMemoryLimit(memoryLimit);
 
     InternalMachineConfig machineConfig = resolver.resolve();
 
     assertEquals(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), expectedMemLimit);
+  }
+
+  @Test
+  public void
+      shouldProvisionEnvironmentVarsIntoMachineConfigOfASidecarIfTheyAreSetInTheCorrespondingComponent()
+          throws InfrastructureException {
+    component.getEnv().add(new EnvImpl("test", "value"));
+
+    InternalMachineConfig machineConfig = resolver.resolve();
+
+    assertEquals(machineConfig.getEnv().size(), 1);
+    assertEquals(machineConfig.getEnv().get("test"), "value");
   }
 
   @Test

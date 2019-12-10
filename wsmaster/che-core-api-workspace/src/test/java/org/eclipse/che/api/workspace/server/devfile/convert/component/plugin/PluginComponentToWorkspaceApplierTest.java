@@ -11,12 +11,9 @@
  */
 package org.eclipse.che.api.workspace.server.devfile.convert.component.plugin;
 
-import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMPONENT_TYPE;
-import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -80,16 +77,6 @@ public class PluginComponentToWorkspaceApplierTest {
     assertTrue(workspaceTooling.matches("(.+/.+/.+),(.+/.+/.+)"));
     assertTrue(workspaceTooling.contains(superPluginId));
     assertTrue(workspaceTooling.contains("publisher1/custom-plugin/v1"));
-    String toolingAliases =
-        workspaceConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
-    assertTrue(toolingAliases.matches("(.+/.+/.+=.+),(.+/.+/.+=.+)"));
-    assertTrue(toolingAliases.contains(superPluginId + "=super-plugin"));
-    assertTrue(toolingAliases.contains("publisher1/custom-plugin/v1=custom"));
-    assertEquals(
-        workspaceConfig
-            .getAttributes()
-            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-plugin")),
-        "1234M");
   }
 
   @Test
@@ -124,16 +111,6 @@ public class PluginComponentToWorkspaceApplierTest {
     assertTrue(workspaceTooling.matches("(.+/.+/.+),(.+/.+/.+)"));
     assertTrue(workspaceTooling.contains(superPluginId));
     assertTrue(workspaceTooling.contains(registryUrl + "#" + "publisher1/custom-plugin/v1"));
-    String toolingAliases =
-        workspaceConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
-    assertTrue(toolingAliases.matches("(.+/.+/.+=.+),(.+/.+/.+=.+)"));
-    assertTrue(toolingAliases.contains(superPluginId + "=super-plugin"));
-    assertTrue(toolingAliases.contains("publisher1/custom-plugin/v1=custom"));
-    assertEquals(
-        workspaceConfig
-            .getAttributes()
-            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-plugin")),
-        "1234M");
   }
 
   @Test
@@ -174,11 +151,7 @@ public class PluginComponentToWorkspaceApplierTest {
     assertTrue(workspaceTooling.matches("(.+/.+/.+),(https://.+/.+/.+)"));
     assertTrue(workspaceTooling.contains(superPluginId));
     assertTrue(workspaceTooling.contains(reference));
-    assertEquals(
-        workspaceConfig
-            .getAttributes()
-            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-plugin")),
-        "1234M");
+    assertEquals(customPluginComponent.getId(), "eclipse/super-plugin/0.0.1");
   }
 
   @Test

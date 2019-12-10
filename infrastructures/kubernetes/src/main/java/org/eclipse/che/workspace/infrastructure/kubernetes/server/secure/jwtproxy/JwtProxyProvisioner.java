@@ -272,7 +272,7 @@ public class JwtProxyProvisioner {
   }
 
   private InternalMachineConfig createJwtProxyMachine() {
-    return new InternalMachineConfig(null, emptyMap(), emptyMap(), attributes, null);
+    return new InternalMachineConfig(emptyMap(), emptyMap(), attributes, null);
   }
 
   private Pod createJwtProxyPod() {

@@ -96,7 +96,6 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
         machines.put(
             machineEntry.getKey(),
             new InternalMachineConfig(
-                installers,
                 normalizeServers(machineConfig.getServers()),
                 machineConfig.getEnv(),
                 machineConfig.getAttributes(),
