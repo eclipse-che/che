@@ -25,7 +25,7 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'e45af3e6-8061-4d02-b187-b1c3bb133d3a', variable: 'GITHUB_TOKEN')]) {
                     sh """
-                      wget https://raw.githubusercontent.com/eclipse/che/$RELEASE_BRANCH/e2e/files/happy-path/happy-path-workspace.yaml --no-check-certificate -O $DEVFILE_URL
+                      wget https://raw.githubusercontent.com/eclipse/che/$RELEASE_BRANCH/tests/e2e/files/happy-path/happy-path-workspace.yaml --no-check-certificate -O $DEVFILE_URL
                     
                       PR_CHECK_FILES_DIR=${WORKSPACE}/pr-check-files/che/$RELEASE_VERSION
                       PR_CHECK_FILES_GITHUB_URL="https://raw.githubusercontent.com/chepullreq4/pr-check-files/master/che/$RELEASE_VERSION"
@@ -48,7 +48,7 @@ pipeline {
                       wget \$JAVA8_META_YAML_URL -O \$PR_CHECK_FILES_DIR/java8_meta.yaml
                       ./yq_linux_amd64 w -i \$PR_CHECK_FILES_DIR/java8_meta.yaml spec.containers[0].image eclipse/che-remote-plugin-runner-java8:$RELEASE_VERSION
     
-                      # patch che/e2e/files/happy-path/happy-path-workspace.yaml
+                      # patch che/tests/e2e/files/happy-path/happy-path-workspace.yaml
                       sed -i "s|id: eclipse/che-theia/next|alias: che-theia\\n    reference: \$PR_CHECK_FILES_GITHUB_URL/che_theia_meta.yaml|" $DEVFILE_URL
                     
                       sed -i "s|id: redhat/java/latest|alias: java8\\n    reference: \$PR_CHECK_FILES_GITHUB_URL/java8_meta.yaml|" $DEVFILE_URL
