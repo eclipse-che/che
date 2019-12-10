@@ -69,14 +69,14 @@ pipeline {
         stage('Patch custom-resource.yaml') {
             steps {
                 script {
-                    customResourceFile = "${WORKSPACE}/custom-resource.yaml"
+                    String customResourceFilePath = "${WORKSPACE}/custom-resource.yaml"
 
                     sh """
                         wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
-                          -O $customResourceFile
+                          -O $customResourceFilePath
                     """
 
-                    String customResourceFileContent = new File(customResourceFile).getText('UTF-8')
+                    String customResourceFileContent = new File(customResourceFilePath).getText('UTF-8')
                     customResourceFileContent = customResourceFileContent.replace("eclipse/che-keycloak:nightly", "eclipse/che-keycloak:rc")
                     customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-devfile-registry:nightly", "quay.io/eclipse/che-devfile-registry:$RELEASE_VERSION")
                     customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-plugin-registry:nightly", "quay.io/eclipse/che-plugin-registry:$RELEASE_VERSION")
@@ -86,7 +86,7 @@ pipeline {
 
         stage('Run Happy path tests against Eclipse Che release candidate') {
             steps {
-                build job: 'Multiuser-Che-PR-check-E2E-Happy-path-tests-against-k8s',
+                build job: 'basic-MultiUser-Che-check-E2E-Happy-path-tests-against-k8s',
                         parameters: [
                                 string(name: 'cheImageRepo',
                                         value: 'eclipse/che-server'),
