@@ -69,10 +69,10 @@ export class DialogWindow {
         await this.driverHelper.waitVisibility(By.xpath(dialogXpathLocator), timeout);
     }
 
-    async waitDialogAndOpenLink(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitDialogAndOpenLink(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT, dialogText: string = '') {
         Logger.debug('WarningDialog.waitDialogAndOpenLink');
 
-        await this.waitDialog(timeout);
+        await this.waitDialog(timeout, dialogText);
         await this.clickToOpenLinkButton();
         await this.waitDialogDissappearance();
     }

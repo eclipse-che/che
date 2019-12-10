@@ -86,10 +86,10 @@ let DialogWindow = DialogWindow_1 = class DialogWindow {
             yield this.driverHelper.waitVisibility(selenium_webdriver_1.By.xpath(dialogXpathLocator), timeout);
         });
     }
-    waitDialogAndOpenLink(timeout = TestConstants_1.TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    waitDialogAndOpenLink(timeout = TestConstants_1.TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT, dialogText = '') {
         return __awaiter(this, void 0, void 0, function* () {
             Logger_1.Logger.debug('WarningDialog.waitDialogAndOpenLink');
-            yield this.waitDialog(timeout);
+            yield this.waitDialog(timeout, dialogText);
             yield this.clickToOpenLinkButton();
             yield this.waitDialogDissappearance();
         });
