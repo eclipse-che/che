@@ -21,7 +21,7 @@
     </parent>
     <artifactId>che-selenium-test</artifactId>
     <packaging>jar</packaging>
-    <name>Che Selenium :: Test</name>
+    <name>Che Legacy E2E :: Test</name>
     <properties>
         <docker.showLogs>true</docker.showLogs>
         <runSuite>${project.build.testOutputDirectory}/suites/CheSuite.xml</runSuite>

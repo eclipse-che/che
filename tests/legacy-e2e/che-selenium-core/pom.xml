@@ -21,7 +21,7 @@
     </parent>
     <artifactId>che-selenium-core</artifactId>
     <packaging>jar</packaging>
-    <name>Che Selenium :: Core</name>
+    <name>Che Legacy E2E :: Core</name>
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>

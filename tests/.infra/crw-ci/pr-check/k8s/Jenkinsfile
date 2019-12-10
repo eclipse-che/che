@@ -217,7 +217,7 @@ pipeline {
                         sh "wget $testWorkspaceDevfileUrl -O $DEVFILE_PATH"
 
                     } else {
-                        sh "cp ${WORKSPACE}/e2e/files/happy-path/happy-path-workspace.yaml $DEVFILE_PATH"
+                        sh "cp ${WORKSPACE}/tests/e2e/files/happy-path/happy-path-workspace.yaml $DEVFILE_PATH"
                     }
 
                     sh """   
@@ -257,7 +257,7 @@ pipeline {
                        -e TS_SELENIUM_USERNAME="admin" \\
                        -e TS_SELENIUM_PASSWORD="admin" \\
                        -e TEST_SUITE="${e2eTestToRun}" \\
-                       -v ${WORKSPACE}/e2e:/tmp/e2e:Z \\
+                       -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
                        eclipse/che-e2e:nightly
                 """
             }
@@ -268,15 +268,15 @@ pipeline {
         failure {
             echo "Create screencast from $WORKSPACE/e2e/report/executionScreencast files."
             sh """
-                command -v ffmpeg >/dev/null 2>&1 && if ls $WORKSPACE/e2e/report/executionScreencast/*.png 1> /dev/null 2>&1; then
-                  cd $WORKSPACE/e2e/report/executionScreencast
+                command -v ffmpeg >/dev/null 2>&1 && if ls $WORKSPACE/tests/e2e/report/executionScreencast/*.png 1> /dev/null 2>&1; then
+                  cd $WORKSPACE/tests/e2e/report/executionScreencast
 
                   # remove first screenshot which has lower resolution 800x600 and breaks screencast video
                   sudo rm -f 00100001* || true
                   
-                  sudo ffmpeg -framerate 1 -pattern_type glob -i '*.png' -c:v libx264 -r 30 -pix_fmt yuv420p $WORKSPACE/e2e/report/screencast.mp4
-                  cd $WORKSPACE/e2e/report/
-                  sudo rm -rf $WORKSPACE/e2e/report/executionScreencast
+                  sudo ffmpeg -framerate 1 -pattern_type glob -i '*.png' -c:v libx264 -r 30 -pix_fmt yuv420p $WORKSPACE/tests/e2e/report/screencast.mp4
+                  cd $WORKSPACE/tests/e2e/report/
+                  sudo rm -rf $WORKSPACE/tests/e2e/report/executionScreencast
                 fi
             """
         }
@@ -318,7 +318,7 @@ pipeline {
                 ${WORKSPACE}/chectl --help > $LOGS_AND_CONFIGS/chectl.version.txt || true
             """
 
-            archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**, logs-and-configs/**"
+            archiveArtifacts allowEmptyArchive: true, artifacts: "tests/e2e/report/**, logs-and-configs/**"
         }
 
     }
