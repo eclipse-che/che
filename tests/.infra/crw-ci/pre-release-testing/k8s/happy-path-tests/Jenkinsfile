@@ -94,37 +94,37 @@ pipeline {
                     echo "$customResourceFileContent"
 
                     build job: 'basic-MultiUser-Che-check-E2E-Happy-path-tests-against-k8s',
-                            parameters: [
-                                    string(name: 'cheImageRepo',
-                                            value: 'eclipse/che-server'),
+                        parameters: [
+                            string(name: 'cheImageRepo',
+                                value: 'eclipse/che-server'),
 
-                                    string(name: 'cheImageTag',
-                                            value: 'rc'),
+                            string(name: 'cheImageTag',
+                                value: 'rc'),
 
-                                    booleanParam(name: 'buildChe',
-                                            value: false),
+                            booleanParam(name: 'buildChe',
+                                value: false),
 
-                                    string(name: 'ghprbAuthorRepoGitUrl',
-                                            value: 'https://github.com/eclipse/che.git'),
+                            string(name: 'ghprbAuthorRepoGitUrl',
+                                value: 'https://github.com/eclipse/che.git'),
 
-                                    string(name: 'ghprbSourceBranch',
-                                            value: "$RELEASE_BRANCH"),
+                            string(name: 'ghprbSourceBranch',
+                                value: "$RELEASE_BRANCH"),
 
-                                    string(name: 'ghprbPullId',
-                                            value: ''),
+                            string(name: 'ghprbPullId',
+                                value: ''),
 
-                                    string(name: 'e2eTestToRun',
-                                            value: 'test-happy-path'),
+                            string(name: 'e2eTestToRun',
+                                value: 'test-happy-path'),
 
-                                    string(name: 'testWorkspaceDevfileUrl',
-                                            value: "https://raw.githubusercontent.com/chepullreq4/pr-check-files/master/che/$RELEASE_VERSION/happy-path-workspace.yaml"),
+                            string(name: 'testWorkspaceDevfileUrl',
+                                value: "https://raw.githubusercontent.com/chepullreq4/pr-check-files/master/che/$RELEASE_VERSION/happy-path-workspace.yaml"),
 
-                                    text(name: 'customResourceFileContent',
-                                            value: "$customResourceFileContent"),
+                            text(name: 'customResourceFileContent',
+                                value: "$customResourceFileContent"),
 
-                                    booleanParam(name: 'createTestWorkspace',
-                                            value: true)
-                            ]
+                            booleanParam(name: 'createTestWorkspace',
+                                value: true)
+                        ]
                 }
             }
         }
