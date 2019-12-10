@@ -24,7 +24,7 @@ import { Logger } from '../../utils/Logger';
 export class NewWorkspace {
     private static readonly CHE_7_STACK_CSS: string = 'div[data-stack-id=\'che7-preview\']';
     private static readonly SELECTED_CHE_7_STACK_CSS: string = '.stack-selector-item-selected[data-stack-id=\'che7-preview\']';
-    private static readonly CREATE_AND_OPEN_BUTTON_XPATH: string = '(//che-button-save-flat[@che-button-title=\'Create & Open\']/button)[1]';
+    private static readonly CREATE_AND_OPEN_BUTTON_XPATH: string = '(//che-button-save-flat[@che-button-title=\'Create & Open\'][@aria-disabled=\'false\']/button)[1]';
     private static readonly CREATE_AND_EDIT_BUTTON_CSS: string = '#dropdown-toggle button[name=\'dropdown-toggle\']';
     private static readonly ADD_OR_IMPORT_PROJECT_BUTTON_CSS: string = '.add-import-project-toggle-button';
     private static readonly ADD_BUTTON_CSS: string = 'button[aria-disabled=\'false\'][name=\'addButton\']';

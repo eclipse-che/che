@@ -232,7 +232,7 @@ let NewWorkspace = NewWorkspace_1 = class NewWorkspace {
 };
 NewWorkspace.CHE_7_STACK_CSS = 'div[data-stack-id=\'che7-preview\']';
 NewWorkspace.SELECTED_CHE_7_STACK_CSS = '.stack-selector-item-selected[data-stack-id=\'che7-preview\']';
-NewWorkspace.CREATE_AND_OPEN_BUTTON_XPATH = '(//che-button-save-flat[@che-button-title=\'Create & Open\']/button)[1]';
+NewWorkspace.CREATE_AND_OPEN_BUTTON_XPATH = '(//che-button-save-flat[@che-button-title=\'Create & Open\'][@aria-disabled=\'false\']/button)[1]';
 NewWorkspace.CREATE_AND_EDIT_BUTTON_CSS = '#dropdown-toggle button[name=\'dropdown-toggle\']';
 NewWorkspace.ADD_OR_IMPORT_PROJECT_BUTTON_CSS = '.add-import-project-toggle-button';
 NewWorkspace.ADD_BUTTON_CSS = 'button[aria-disabled=\'false\'][name=\'addButton\']';
