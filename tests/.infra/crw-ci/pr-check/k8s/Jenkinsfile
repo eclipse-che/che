@@ -27,7 +27,7 @@ pipeline {
                 description: 'Repo of Che server image')
 
         string(name: 'cheImageTag',
-                defaultValue: "$ghprbPullId",
+                defaultValue: "",
                 description: 'Tag of Che server image')
 
         booleanParam(name: 'buildChe',
@@ -48,6 +48,16 @@ pipeline {
     }
 
     stages {
+        stage("Setup environment") {
+            steps {
+                script {
+                    if (cheImageTag == null || cheImageTag == '') {
+                        cheImageTag = ghprbPullId
+                    }
+                }
+            }
+        }
+
         stage("Prepare to start Che on K8S") {
             failFast true
 
