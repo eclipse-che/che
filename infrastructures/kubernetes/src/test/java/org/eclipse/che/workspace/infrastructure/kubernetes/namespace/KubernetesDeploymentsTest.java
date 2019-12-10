@@ -30,6 +30,8 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
+import io.fabric8.kubernetes.api.model.ContainerStateBuilder;
+import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.DoneableEvent;
 import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.Event;
@@ -236,10 +238,10 @@ public class KubernetesDeploymentsTest {
   }
 
   @Test
-  public void shouldCompleteFutureForWaitingPidIfStatusIsRunning() {
+  public void shouldCompleteFutureForWaitingPodIfStatusIsRunning() {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_RUNNING);
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
+    CompletableFuture<?> future = kubernetesDeployments.waitRunningAsync(POD_NAME);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -248,6 +250,34 @@ public class KubernetesDeploymentsTest {
 
     // then
     assertTrue(future.isDone());
+  }
+
+  @Test
+  public void
+      shouldCompleteExceptionallyFutureForWaitingPodIfStatusIsRunningButSomeContainersAreTerminated() {
+    // given
+    ContainerStatus containerStatus = mock(ContainerStatus.class);
+    when(containerStatus.getName()).thenReturn("FailingContainer");
+    when(containerStatus.getState())
+        .thenReturn(
+            new ContainerStateBuilder()
+                .withNewTerminated()
+                .withReason("Completed")
+                .endTerminated()
+                .build());
+
+    when(status.getPhase()).thenReturn(POD_STATUS_PHASE_RUNNING);
+    when(status.getContainerStatuses()).thenReturn(singletonList(containerStatus));
+    CompletableFuture<?> future = kubernetesDeployments.waitRunningAsync(POD_NAME);
+
+    // when
+    verify(podResource).watch(watcherCaptor.capture());
+    Watcher<Pod> watcher = watcherCaptor.getValue();
+    watcher.eventReceived(Watcher.Action.MODIFIED, pod);
+
+    // then
+    assertTrue(future.isDone());
+    assertTrue(future.isCompletedExceptionally());
   }
 
   @Test
