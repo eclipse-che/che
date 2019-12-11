@@ -22,13 +22,13 @@ export class DialogWindow {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async dialogDisplayes(): Promise<boolean> {
-        Logger.debug('WarningDialog.dialogDisplayes');
+        Logger.debug('DialogWindow.dialogDisplayes');
 
         return await this.driverHelper.isVisible(By.xpath(DialogWindow.DIALOG_BODY_XPATH_LOCATOR));
     }
 
     async waitAndCloseIfAppear() {
-        Logger.debug('WarningDialog.waitAndCloseIfAppear');
+        Logger.debug('DialogWindow.waitAndCloseIfAppear');
 
         const dialogDisplayes: boolean = await this.driverHelper.waitVisibilityBoolean(By.xpath(DialogWindow.DIALOG_BODY_XPATH_LOCATOR));
 
@@ -40,26 +40,26 @@ export class DialogWindow {
     }
 
     async clickToButton(buttonText: string) {
-        Logger.debug('WarningDialog.clickToButton');
+        Logger.debug('DialogWindow.clickToButton');
 
         const buttonLocator: By = By.xpath(`${DialogWindow.DIALOG_BODY_XPATH_LOCATOR}//button[text()='${buttonText}']`);
         await this.driverHelper.waitAndClick(buttonLocator);
     }
 
     async closeDialog() {
-        Logger.debug('WarningDialog.closeDialog');
+        Logger.debug('DialogWindow.closeDialog');
 
         await this.clickToButton('close');
     }
 
     async clickToOpenLinkButton() {
-        Logger.debug('WarningDialog.clickToOpenLinkButton');
+        Logger.debug('DialogWindow.clickToOpenLinkButton');
 
         await this.clickToButton('Open Link');
     }
 
     async waitDialog(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT, dialogTest: string = '') {
-        Logger.debug('WarningDialog.waitDialog');
+        Logger.debug('DialogWindow.waitDialog');
 
         // if dialog text is provided uses xpath with this text
         // if not uses window body xpath
@@ -70,7 +70,7 @@ export class DialogWindow {
     }
 
     async waitDialogAndOpenLink(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT, dialogText: string = '') {
-        Logger.debug('WarningDialog.waitDialogAndOpenLink');
+        Logger.debug('DialogWindow.waitDialogAndOpenLink');
 
         await this.waitDialog(timeout, dialogText);
         await this.clickToOpenLinkButton();
@@ -78,7 +78,7 @@ export class DialogWindow {
     }
 
     async waitDialogDissappearance() {
-        Logger.debug('WarningDialog.waitDialogDissappearance');
+        Logger.debug('DialogWindow.waitDialogDissappearance');
 
         await this.driverHelper.waitDisappearanceWithTimeout(By.xpath(DialogWindow.CLOSE_BUTTON_XPATH_LOCATOR));
     }
