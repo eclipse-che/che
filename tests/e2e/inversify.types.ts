@@ -33,7 +33,7 @@ const CLASSES = {
     RightToolbar: 'RightToolbar',
     Terminal: 'Terminal',
     DebugView: 'DebugView',
-    WarningDialog: 'WarningDialog',
+    DialogWindow: 'DialogWindow',
     ScreenCatcher: 'ScreenCatcher',
     OcpLoginPage: 'OcpLoginPage',
     OcpWebConsolePage: 'OcpWebConsolePage',

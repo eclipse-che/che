@@ -2,9 +2,10 @@ import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../TestConstants';
-import { By } from 'selenium-webdriver';
+import { By, error } from 'selenium-webdriver';
 import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
+import { QuickOpenContainer } from './QuickOpenContainer';
 
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
@@ -21,7 +22,8 @@ export class TopMenu {
     private static readonly TOP_MENU_BUTTONS: string[] = ['File', 'Edit', 'Selection', 'View', 'Go', 'Debug', 'Terminal', 'Help'];
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.Ide) private readonly ide: Ide) { }
+        @inject(CLASSES.Ide) private readonly ide: Ide,
+        @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer) { }
 
     public async waitTopMenu(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('TopMenu.waitTopMenu');
@@ -53,6 +55,23 @@ export class TopMenu {
 
         const submenuItemLocator: By = this.getSubmenuItemLocator(itemText);
         await this.driverHelper.waitAndClick(submenuItemLocator, timeout);
+    }
+
+    public async runTask(task: string) {
+        await this.selectOption('Terminal', 'Run Task...');
+        try {
+            await this.quickOpenContainer.waitContainer();
+        } catch (err) {
+            if (err instanceof error.TimeoutError) {
+                console.log(`After clicking to the "Terminal" -> "Run Task ..." the "Quick Open Container" has not been displayed, one more try`);
+
+                await this.selectOption('Terminal', 'Run Task...');
+                await this.quickOpenContainer.waitContainer();
+            }
+        }
+
+        await this.quickOpenContainer.clickOnContainerItem(task);
+        await this.quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
     }
 
     private getTopMenuButtonLocator(buttonText: string): By {

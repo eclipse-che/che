@@ -14,14 +14,13 @@ import { TYPES, CLASSES } from '../../inversify.types';
 import { Ide, RightToolbarButton } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
-import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { PreviewWidget } from '../../pageobjects/ide/PreviewWidget';
 import { TestConstants } from '../../TestConstants';
 import { RightToolbar } from '../../pageobjects/ide/RightToolbar';
 import { By, Key, error } from 'selenium-webdriver';
 import { DebugView } from '../../pageobjects/ide/DebugView';
-import { WarningDialog } from '../../pageobjects/ide/WarningDialog';
+import { DialogWindow } from '../../pageobjects/ide/DialogWindow';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import * as fs from 'fs';
@@ -31,14 +30,13 @@ const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
-const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const contextMenu: ContextMenu = e2eContainer.get(CLASSES.ContextMenu);
 const previewWidget: PreviewWidget = e2eContainer.get(CLASSES.PreviewWidget);
 const rightToolbar: RightToolbar = e2eContainer.get(CLASSES.RightToolbar);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
-const warningDialog: WarningDialog = e2eContainer.get(CLASSES.WarningDialog);
+const warningDialog: DialogWindow = e2eContainer.get(CLASSES.DialogWindow);
 const projectName: string = 'petclinic';
 const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
 const workspaceName: string = TestConstants.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME;
@@ -148,7 +146,7 @@ suite('Language server validation', async () => {
 
 suite('Validation of workspace build and run', async () => {
     test('Build application', async () => {
-        await runTask('build-file-output');
+        await topMenu.runTask('build-file-output');
 
         // workaround for issue: https://github.com/eclipse/che/issues/14771
 
@@ -159,7 +157,7 @@ suite('Validation of workspace build and run', async () => {
     });
 
     test('Run application', async () => {
-        await runTask('run');
+        await topMenu.runTask('run');
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
     });
@@ -195,7 +193,7 @@ suite('Display source code changes in the running application', async () => {
     });
 
     test('Build application with changes', async () => {
-        await runTask('build');
+        await topMenu.runTask('build');
         await projectTree.collapseProjectTree(projectName + '/src', 'main');
         await projectTree.expandPathAndOpenFile(projectName, 'result-build.txt', 300000);
         await editor.waitText('result-build.txt', '[INFO] BUILD SUCCESS');
@@ -212,7 +210,7 @@ suite('Display source code changes in the running application', async () => {
     });
 
     test('Run application with changes', async () => {
-        await runTask('run-with-changes');
+        await topMenu.runTask('run-with-changes');
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
     });
@@ -241,7 +239,7 @@ suite('Validation of debug functionality', async () => {
     });
 
     test('Launch debug', async () => {
-        await runTask('run-debug');
+        await topMenu.runTask('run-debug');
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 180000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 180000);
     });
@@ -301,23 +299,6 @@ async function checkErrorMessageInApplicationController() {
 
     await driverHelper.getDriver().switchTo().defaultContent();
     await ide.waitAndSwitchToIdeFrame();
-}
-
-async function runTask(task: string) {
-    await topMenu.selectOption('Terminal', 'Run Task...');
-    try {
-        await quickOpenContainer.waitContainer();
-    } catch (err) {
-        if (err instanceof error.TimeoutError) {
-            console.log(`After clicking to the "Terminal" -> "Run Task ..." the "Quick Open Container" has not been displayed, one more try`);
-
-            await topMenu.selectOption('Terminal', 'Run Task...');
-            await quickOpenContainer.waitContainer();
-        }
-    }
-
-    await quickOpenContainer.clickOnContainerItem(task);
-    await quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
 }
 
 async function checkCodeNavigationWithContextMenu() {

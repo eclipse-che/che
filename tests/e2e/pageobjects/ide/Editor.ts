@@ -34,10 +34,10 @@ export class Editor {
         await this.driverHelper.waitVisibility(By.css(Editor.SUGGESTION_WIDGET_BODY_CSS), timeout);
     }
 
-    public async waitSuggestionContainerClosed() {
+    public async waitSuggestionContainerClosed(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('Editor.waitSuggestionContainerClosed');
 
-        await this.driverHelper.waitDisappearanceWithTimeout(By.css(Editor.SUGGESTION_WIDGET_BODY_CSS));
+        await this.driverHelper.waitDisappearanceWithTimeout(By.css(Editor.SUGGESTION_WIDGET_BODY_CSS), timeout);
     }
 
     public async waitSuggestion(editorTabTitle: string,
@@ -57,10 +57,42 @@ export class Editor {
                     throw err;
                 }
 
-                await this.pressEscapeButton(editorTabTitle);
-                await this.waitSuggestionContainerClosed();
+                await this.closeSuggestionContainer(editorTabTitle, timeout);
                 await this.pressControlSpaceCombination(editorTabTitle);
             }
+        }, timeout);
+    }
+
+    public async closeSuggestionContainer(editorTabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Editor.closeSuggestionContainer tabTitle: "${editorTabTitle}"`);
+
+        await this.driverHelper.getDriver().wait(async () => {
+            // if container already closed stop the method execution
+            try {
+                // for avoiding problem when the inner timeout
+                // bigger than timeout of the method
+                const suggestionContainerTimeout: number = timeout / 2;
+
+                await this.waitSuggestionContainer(suggestionContainerTimeout);
+            } catch (err) {
+                if (err instanceof error.TimeoutError) {
+                    return true;
+                }
+
+                throw err;
+            }
+
+            // try to close container
+            try {
+                await this.pressEscapeButton(editorTabTitle);
+                await this.waitSuggestionContainerClosed(2000);
+                return true;
+            } catch (err) {
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err;
+                }
+            }
+
         }, timeout);
     }
 
@@ -81,8 +113,7 @@ export class Editor {
                     throw err;
                 }
 
-                await this.pressEscapeButton(editorTabTitle);
-                await this.waitSuggestionContainerClosed();
+                await this.closeSuggestionContainer(editorTabTitle, timeout);
                 await this.pressControlSpaceCombination(editorTabTitle);
             }
         }, timeout);
