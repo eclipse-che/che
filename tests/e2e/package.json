@@ -8,6 +8,7 @@
     "test-docker": "npm run cleanup-docker && docker run -it --shm-size=2g -p 5920:5920 --name selenium-e2e -e TS_SELENIUM_BASE_URL=$TS_SELENIUM_BASE_URL eclipse/che-e2e:nightly",
     "test-docker-mount-e2e": "npm run cleanup-docker && docker run -it --shm-size=2g -p 5920:5920 --name selenium-e2e -e TS_SELENIUM_BASE_URL=$TS_SELENIUM_BASE_URL -v $(pwd):/tmp/e2e:Z eclipse/che-e2e:nightly",
     "test": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha.opts",
+    "load-test": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-load.opts",
     "test-happy-path": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-happy-path.opts",
     "test-operatorhub-installation": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-che-operatorhub.opts",
     "test-wkspc-creation-and-ls": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-wkspc-creation-and-ls.opts",
