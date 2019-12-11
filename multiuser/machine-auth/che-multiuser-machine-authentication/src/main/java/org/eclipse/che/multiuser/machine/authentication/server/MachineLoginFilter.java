@@ -31,11 +31,11 @@ import javax.servlet.ServletResponse;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;
-import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
 import org.eclipse.che.multiuser.api.authentication.commons.filter.MultiUserEnvironmentInitializationFilter;
+import org.eclipse.che.multiuser.api.authentication.commons.token.RequestTokenExtractor;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 
 /**
