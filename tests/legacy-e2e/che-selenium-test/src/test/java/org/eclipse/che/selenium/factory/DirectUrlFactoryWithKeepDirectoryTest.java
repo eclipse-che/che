@@ -14,7 +14,6 @@ package org.eclipse.che.selenium.factory;
 import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.nio.file.Path;
@@ -88,14 +87,7 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
     theiaProjectTree.expandItem(repositoryName);
     theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
 
-    Assert.assertTrue(theiaProjectTree.isItemVisible(repositoryName + "/my-lib/pom.xml"));
-
-    try {
-      Assert.assertFalse(theiaProjectTree.isItemVisible(repositoryName + "/my-webapp"));
-    } catch (AssertionError ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/12311");
-    }
+    Assert.assertFalse(theiaProjectTree.isItemVisible(repositoryName + "/my-webapp"));
   }
 
   private String getWorkspaceName() {
