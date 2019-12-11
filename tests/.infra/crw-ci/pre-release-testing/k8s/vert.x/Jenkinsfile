@@ -22,8 +22,8 @@ pipeline {
                         String customResourceFilePath = "${WORKSPACE}/custom-resource.yaml"
 
                         sh """
-                                wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
-                                -O $customResourceFilePath
+                            wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
+                            -O $customResourceFilePath
                         """
 
                         customResourceFileContent = readFile customResourceFilePath
@@ -49,9 +49,6 @@ pipeline {
 
                                         booleanParam(name: 'buildChe',
                                                 value: false),
-
-                                        string(name: 'ghprbAuthorRepoGitUrl',
-                                                value: 'https://github.com/eclipse/che.git'),
 
                                         string(name: 'ghprbSourceBranch',
                                                 value: "$RELEASE_BRANCH"),

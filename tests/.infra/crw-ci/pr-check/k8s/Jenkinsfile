@@ -51,9 +51,6 @@ pipeline {
                 defaultValue: true,
                 description: 'Should create test workspace')
 
-        string(name: 'ghprbAuthorRepoGitUrl',
-                defaultValue: 'https://github.com/eclipse/che.git')
-
         string(name: 'ghprbSourceBranch',
                 defaultValue: "master")
     }

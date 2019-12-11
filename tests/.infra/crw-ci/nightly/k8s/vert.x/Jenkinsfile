@@ -15,9 +15,6 @@ pipeline {
                                 booleanParam(name: 'buildChe',
                                         value: false),
 
-                                string(name: 'ghprbAuthorRepoGitUrl',
-                                        value: 'https://github.com/eclipse/che.git'),
-
                                 string(name: 'ghprbSourceBranch',
                                         value: 'che-15397'),
 
