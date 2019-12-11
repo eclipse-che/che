@@ -19,7 +19,9 @@ pipeline {
 
         SUCCESS_THRESHOLD = 5
 
-        LOGS_AND_CONFIGS="${WORKSPACE}/logs-and-configs"
+        LOGS_AND_CONFIGS ="${WORKSPACE}/logs-and-configs"
+
+        mutableCheImageTag = ""
     }
 
     parameters {
@@ -60,7 +62,9 @@ pipeline {
             steps {
                 script {
                     if (cheImageTag == null || cheImageTag == '') {
-                        cheImageTag = ghprbPullId
+                        mutableCheImageTag = ghprbPullId
+                    } else {
+                        mutableCheImageTag = cheImageTag
                     }
 
                     if (customResourceFileContent == null || customResourceFileContent == '') {
@@ -168,9 +172,9 @@ pipeline {
                 withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
                     sh """
                         ${WORKSPACE}/dockerfiles/che/build.sh --dockerfile:Dockerfile
-                        docker tag eclipse/che-server:nightly docker.io/${cheImageRepo}:${cheImageTag}
+                        docker tag eclipse/che-server:nightly docker.io/${cheImageRepo}:${mutableCheImageTag}
                         docker login -u maxura -p ${maxura_docker_password}
-                        docker push docker.io/${cheImageRepo}:${cheImageTag}
+                        docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
                     """
                 }
             }
@@ -181,7 +185,7 @@ pipeline {
                 echo "Patch Che custom-resource.yaml"
                 sh """
                     sed -i "s|cheImage: ''|cheImage: '${cheImageRepo}'|" $CUSTOM_RESOURCE_FILE_PATH
-                    sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${cheImageTag}'|" $CUSTOM_RESOURCE_FILE_PATH
+                    sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${mutableCheImageTag}'|" $CUSTOM_RESOURCE_FILE_PATH
 
                     sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" $CUSTOM_RESOURCE_FILE_PATH
 
