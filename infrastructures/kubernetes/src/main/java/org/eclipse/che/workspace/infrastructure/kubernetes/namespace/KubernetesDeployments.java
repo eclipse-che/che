@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_DEPLOYMENT_NAME_LABEL;
@@ -197,17 +198,17 @@ public class KubernetesDeployments {
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new InfrastructureException(
-          String.format(
+          format(
               "Interrupted while waiting for Pod creation. -id: %s -message: %s",
               deploymentName, e.getMessage()));
     } catch (ExecutionException e) {
       throw new InfrastructureException(
-          String.format(
+          format(
               "Error occured while waiting for Pod creation. -id: %s -message: %s",
               deploymentName, e.getCause().getMessage()));
     } catch (TimeoutException e) {
       throw new InfrastructureException(
-          String.format(
+          format(
               "Pod creation timeout exceeded. -id: %s -message: %s",
               deploymentName, e.getMessage()));
     } finally {
@@ -403,7 +404,9 @@ public class KubernetesDeployments {
         if (terminated != null) {
           terminatedContainers.put(
               cs.getName(),
-              "reason = " + terminated.getReason() + ", message = " + terminated.getMessage());
+              format(
+                  "reason = '%s', exit code = %d, message = '%s'",
+                  terminated.getReason(), terminated.getExitCode(), terminated.getMessage()));
         }
       }
 
@@ -833,7 +836,7 @@ public class KubernetesDeployments {
               .withName(deploymentName);
       if (deploymentResource.get() == null) {
         throw new InfrastructureException(
-            String.format("No deployment foud to delete for name %s", deploymentName));
+            format("No deployment foud to delete for name %s", deploymentName));
       }
 
       final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
@@ -881,8 +884,7 @@ public class KubernetesDeployments {
       PodResource<Pod, DoneablePod> podResource =
           clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName);
       if (podResource.get() == null) {
-        throw new InfrastructureException(
-            String.format("No pod found to delete for name %s", podName));
+        throw new InfrastructureException(format("No pod found to delete for name %s", podName));
       }
 
       final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
@@ -953,8 +955,7 @@ public class KubernetesDeployments {
     if (pods.isEmpty()) {
       return Optional.empty();
     } else if (pods.size() > 1) {
-      throw new InfrastructureException(
-          String.format("Found multiple pods in Deployment '%s'", name));
+      throw new InfrastructureException(format("Found multiple pods in Deployment '%s'", name));
     }
 
     return Optional.of(pods.get(0));
@@ -975,7 +976,7 @@ public class KubernetesDeployments {
     if (pod.isPresent()) {
       return pod.get().getMetadata().getName();
     } else {
-      throw new InfrastructureException(String.format("Failed to find pod with name %s", name));
+      throw new InfrastructureException(format("Failed to find pod with name %s", name));
     }
   }
 
