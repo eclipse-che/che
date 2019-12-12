@@ -16,10 +16,7 @@ import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
@@ -28,18 +25,17 @@ import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 @Test(groups = {GITHUB, OPENSHIFT})
-public class DirectUrlFactoryWithKeepDirectoryTest {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(DirectUrlFactoryWithKeepDirectoryTest.class);
+public class CreateFactoryFromDevfileUrl {
+  private static final Logger LOG = LoggerFactory.getLogger(CreateFactoryFromDevfileUrl.class);
+  private final String YAML_URL =
+      "https://raw.githubusercontent.com/eclipse/che-devfile-registry/master/devfiles/java-maven/devfile.yaml";
 
   @Inject private TestFactoryInitializer testFactoryInitializer;
-  @Inject private TestGitHubRepository testRepo;
   @Inject private TheiaIde theiaIde;
   @Inject private TheiaProjectTree theiaProjectTree;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
@@ -50,12 +46,7 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    // preconditions - add the project to the test repository
-    Path entryPath = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
-    testRepo.addContent(entryPath);
-    String repositoryUrl = testRepo.getHtmlUrl();
-
-    testFactoryWithKeepDir = testFactoryInitializer.fromUrl(repositoryUrl + "/tree/master/my-lib");
+    testFactoryWithKeepDir = testFactoryInitializer.fromUrl(YAML_URL);
   }
 
   @AfterClass
@@ -69,7 +60,7 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
 
   @Test
   public void factoryWithDirectUrlWithKeepDirectory() {
-    String repositoryName = testRepo.getName();
+    String repositoryName = "console-java-simple";
     testFactoryWithKeepDir.authenticateAndOpen();
 
     theiaIde.switchToIdeFrame();
@@ -85,9 +76,7 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
 
     theiaProjectTree.waitItem(repositoryName);
     theiaProjectTree.expandItem(repositoryName);
-    theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
-
-    Assert.assertFalse(theiaProjectTree.isItemVisible(repositoryName + "/my-webapp"));
+    theiaProjectTree.waitItem(repositoryName + "/pom.xml");
   }
 
   private String getWorkspaceName() {
