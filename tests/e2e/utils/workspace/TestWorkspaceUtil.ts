@@ -13,7 +13,6 @@ import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import 'reflect-metadata';
-import * as rm from 'typed-rest-client/RestClient';
 import { WorkspaceStatus } from './WorkspaceStatus';
 import { ITestWorkspaceUtil } from './ITestWorkspaceUtil';
 import axios from 'axios';
@@ -30,8 +29,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
     workspaceApiUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/api/workspace`;
 
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        private readonly rest: rm.RestClient = new rm.RestClient('rest-samples')) {
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) {
 
     }
 
@@ -42,14 +40,14 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         let workspaceStatus: string = '';
 
         for (let i = 0; i < attempts; i++) {
-            const response: rm.IRestResponse<any> = await this.processRequest(RequestType.GET, workspaceStatusApiUrl);
+            const response = await this.processRequest(RequestType.GET, workspaceStatusApiUrl);
 
-            if (response.statusCode !== 200) {
+            if (response.status !== 200) {
                 await this.driverHelper.wait(polling);
                 continue;
             }
 
-            workspaceStatus = await response.result.status;
+            workspaceStatus = await response.data.status;
 
             if (workspaceStatus === expectedWorkspaceStatus) {
                 return;
@@ -67,14 +65,14 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         const polling: number = TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_POLLING;
 
         for (let i = 0; i < attempts; i++) {
-            const response: rm.IRestResponse<any> = await this.processRequest(RequestType.GET, workspaceStatusApiUrl);
+            const response = await this.processRequest(RequestType.GET, workspaceStatusApiUrl);
 
-            if (response.statusCode !== 200) {
+            if (response.status !== 200) {
                 await this.driverHelper.wait(polling);
                 continue;
             }
 
-            const machines: string = JSON.stringify(response.result.runtime.machines);
+            const machines: string = JSON.stringify(response.data.runtime.machines);
             const isPluginPresent: boolean = machines.search(pluginName) > 0;
 
             if (isPluginPresent) {
@@ -90,13 +88,13 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     public async getListOfWorkspaceId() {
-        const getAllWorkspacesResponse: rm.IRestResponse<any> = await this.processRequest(RequestType.GET, this.workspaceApiUrl);
+        const getAllWorkspacesResponse = await this.processRequest(RequestType.GET, this.workspaceApiUrl);
 
         interface IMyObj {
             id: string;
             status: string;
         }
-        let stringified = JSON.stringify(getAllWorkspacesResponse.result);
+        let stringified = JSON.stringify(getAllWorkspacesResponse.data);
         let arrayOfWorkspaces = <IMyObj[]>JSON.parse(stringified);
         let wsList: Array<string> = [];
         for (let entry of arrayOfWorkspaces) {
@@ -107,13 +105,13 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
     public async getIdOfRunningWorkspaces(): Promise<Array<string>> {
         try {
-            const getAllWorkspacesResponse: rm.IRestResponse<any> = await this.processRequest(RequestType.GET, this.workspaceApiUrl);
+            const getAllWorkspacesResponse = await this.processRequest(RequestType.GET, this.workspaceApiUrl);
 
             interface IMyObj {
                 id: string;
                 status: string;
             }
-            let stringified = JSON.stringify(getAllWorkspacesResponse.result);
+            let stringified = JSON.stringify(getAllWorkspacesResponse.data);
             let arrayOfWorkspaces = <IMyObj[]>JSON.parse(stringified);
             let idOfRunningWorkspace: Array<string> = new Array();
 
@@ -128,7 +126,10 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
             console.log(`Getting id of running workspaces failed. URL used: ${this.workspaceApiUrl}`);
             throw err;
         }
+    }
 
+    getIdOfRunningWorkspace(namespace: string): Promise<string> {
+        throw new Error('Method not implemented.');
     }
 
     public async removeWorkspaceById(id: string) {
@@ -139,9 +140,9 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
         for (let i = 0; i < attempts; i++) {
 
-            const getInfoResponse: rm.IRestResponse<any> = await this.processRequest(RequestType.GET, workspaceIdUrl);
+            const getInfoResponse = await this.processRequest(RequestType.GET, workspaceIdUrl);
 
-            if (getInfoResponse.result.status === 'STOPPED') {
+            if (getInfoResponse.data.status === 'STOPPED') {
                 stopped = true;
                 break;
             }
@@ -150,11 +151,11 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
         if (stopped) {
             try {
-                const deleteWorkspaceResponse: rm.IRestResponse<any> = await this.processRequest(RequestType.DELETE, workspaceIdUrl);
+                const deleteWorkspaceResponse = await this.processRequest(RequestType.DELETE, workspaceIdUrl);
 
                 // response code 204: "No Content" expected
-                if (deleteWorkspaceResponse.statusCode !== 204) {
-                    throw new Error(`Can not remove workspace. Code: ${deleteWorkspaceResponse.statusCode} Result: ${deleteWorkspaceResponse.result}`);
+                if (deleteWorkspaceResponse.status !== 204) {
+                    throw new Error(`Can not remove workspace. Code: ${deleteWorkspaceResponse.status} Data: ${deleteWorkspaceResponse.data}`);
                 }
             } catch (err) {
                 console.log(`Removing of workspace failed.`);
@@ -202,11 +203,11 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     public async stopWorkspaceById(id: string) {
         const stopWorkspaceApiUrl: string = `${this.workspaceApiUrl}/${id}/runtime`;
         try {
-            const stopWorkspaceResponse: rm.IRestResponse<any> = await this.processRequest(RequestType.DELETE, stopWorkspaceApiUrl);
+            const stopWorkspaceResponse = await this.processRequest(RequestType.DELETE, stopWorkspaceApiUrl);
 
             // response code 204: "No Content" expected
-            if (stopWorkspaceResponse.statusCode !== 204) {
-                throw new Error(`Can not stop workspace. Code: ${stopWorkspaceResponse.statusCode} Result: ${stopWorkspaceResponse.result}`);
+            if (stopWorkspaceResponse.status !== 204) {
+                throw new Error(`Can not stop workspace. Code: ${stopWorkspaceResponse.status} Data: ${stopWorkspaceResponse.data}`);
             }
         } catch (err) {
             console.log(`Stopping workspace failed. URL used: ${stopWorkspaceApiUrl}`);
@@ -238,34 +239,23 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     async processRequest(reqType: RequestType, url: string) {
-        let response: rm.IRestResponse<any>;
+        let response;
+        // maybe this check can be moved somewhere else at the begining so it will be executed just once
         if (TestConstants.TS_SELENIUM_MULTIUSER === true) {
-            switch (reqType) {
-                case RequestType.GET: {
-                    response = await this.rest.get(url, { additionalHeaders: { 'Authorization': 'Bearer ' + await this.getCheBearerToken() } });
-                    break;
-                }
-                case RequestType.DELETE: {
-                    response = await this.rest.del(url, { additionalHeaders: { 'Authorization': 'Bearer ' + await this.getCheBearerToken() } });
-                    break;
-                }
-                default: {
-                    throw new Error('Unknown RequestType: ' + reqType);
-                }
+            let authorization = 'Authorization';
+            axios.defaults.headers.common[authorization] = 'Bearer ' + await this.getCheBearerToken();
+        }
+        switch (reqType) {
+            case RequestType.GET: {
+                response = await axios.get(url);
+                break;
             }
-        } else {
-            switch (reqType) {
-                case RequestType.GET: {
-                    response = await this.rest.get(url);
-                    break;
-                }
-                case RequestType.DELETE: {
-                    response = await this.rest.del(url);
-                    break;
-                }
-                default: {
-                    throw new Error('Unknown RequestType: ' + reqType);
-                }
+            case RequestType.DELETE: {
+                response = await axios.delete(url);
+                break;
+            }
+            default: {
+                throw new Error('Unknown RequestType: ' + reqType);
             }
         }
         return response;
