@@ -43,8 +43,6 @@ describe('CheEditor >', () => {
    */
   let $httpBackend: ng.IHttpBackendService;
 
-  const requiredErrorMessage = 'A reference is required.';
-
   /**
    *  setup module
    */
@@ -92,8 +90,7 @@ describe('CheEditor >', () => {
                    editor-state="model.editorState"
                    validator="model.isRecipeValidFn()"
                    on-content-change="model.onChangeFn()"
-                   editor-mode="model.editorMode"
-                   required><div ng-message="required">${requiredErrorMessage}</div></che-editor>`
+                   editor-mode="model.editorMode"></che-editor>`
     ))($scope);
     $scope.$digest();
     controller = compiledDirective.controller('cheEditor');
@@ -159,22 +156,6 @@ describe('CheEditor >', () => {
         const errorMessagesElement = compiledDirective.find('.validator-checks');
         expect(errorMessagesElement.html()).toContain(errorMessage);
       });
-
-      it(`should show transclude error message if editor is required`, () => {
-        const newValue = '';
-        expect($scope.model.editorScript).not.toEqual(newValue);
-        expect($scope.model.editorState.isValid).toEqual(true);
-
-        controller.setEditorValue(newValue);
-        $scope.$digest();
-        $timeout.flush();
-
-        expect($scope.model.editorScript).toEqual(newValue);
-        expect($scope.model.editorState.isValid).toEqual(true);
-        const errorMessagesElement = compiledDirective.find('.custom-checks');
-        expect(errorMessagesElement.html()).toContain(requiredErrorMessage);
-      });
-
     });
 
   });
