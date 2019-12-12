@@ -240,7 +240,7 @@ export const TestConstants = {
     TS_SELENIUM_LOG_LEVEL: process.env.TS_SELENIUM_LOG_LEVEL || 'INFO',
 
     /**
-     * Running test suite
+     * Running test suite - possible variants can be found in package.json scripts part.
      */
-    TEST_SUITE: process.env.TEST_SUITE || ''
+    TEST_SUITE: process.env.TEST_SUITE || 'test-happy-path'
 };

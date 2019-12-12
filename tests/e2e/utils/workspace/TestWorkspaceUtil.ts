@@ -18,6 +18,7 @@ import { WorkspaceStatus } from './WorkspaceStatus';
 import { ITestWorkspaceUtil } from './ITestWorkspaceUtil';
 import axios from 'axios';
 import querystring from 'querystring';
+import { error } from 'selenium-webdriver';
 enum RequestType {
     GET,
     POST,
@@ -38,7 +39,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         const workspaceStatusApiUrl: string = `${this.workspaceApiUrl}/${namespace}:${workspaceName}`;
         const attempts: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_POLLING;
-        var workspaceStatus: string = '';
+        let workspaceStatus: string = '';
 
         for (let i = 0; i < attempts; i++) {
             const response: rm.IRestResponse<any> = await this.processRequest(RequestType.GET, workspaceStatusApiUrl);
@@ -57,7 +58,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
             await this.driverHelper.wait(polling);
         }
 
-        throw new Error(`Exceeded the maximum number of checking attempts, workspace status is: '${workspaceStatus}' different to '${expectedWorkspaceStatus}'`);
+        throw new error.TimeoutError(`Exceeded the maximum number of checking attempts, workspace status is: '${workspaceStatus}' different to '${expectedWorkspaceStatus}'`);
     }
 
     public async waitPluginAdding(namespace: string, workspaceName: string, pluginName: string) {
@@ -81,7 +82,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
             }
 
             if (i === attempts - 1) {
-                throw new Error(`Exceeded maximum tries attempts, the '${pluginName}' plugin is not present in the workspace runtime.`);
+                throw new error.TimeoutError(`Exceeded maximum tries attempts, the '${pluginName}' plugin is not present in the workspace runtime.`);
             }
 
             await this.driverHelper.wait(polling);
@@ -237,7 +238,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     async processRequest(reqType: RequestType, url: string) {
-        var response: rm.IRestResponse<any>;
+        let response: rm.IRestResponse<any>;
         if (TestConstants.TS_SELENIUM_MULTIUSER === true) {
             switch (reqType) {
                 case RequestType.GET: {

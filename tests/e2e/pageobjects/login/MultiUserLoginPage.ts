@@ -29,5 +29,5 @@ export class MultiUserLoginPage implements ICheLoginPage {
         await this.cheLogin.inputPaswordEclipseCheLoginPage(TestConstants.TS_SELENIUM_PASSWORD);
         await this.cheLogin.clickEclipseCheLoginButton();
     }
-    
+
 }
