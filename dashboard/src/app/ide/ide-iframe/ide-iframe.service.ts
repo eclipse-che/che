@@ -98,7 +98,7 @@ class IdeIFrameSvc {
         return;
       }
 
-      if (msg.startsWith('update-token')) {
+      if (msg.startsWith('update-token:')) {
         this.updateToken(msg);
         return;
       }
