@@ -15,6 +15,16 @@ export const TestConstants = {
     TS_SELENIUM_BASE_URL: process.env.TS_SELENIUM_BASE_URL || 'http://sample-url',
 
     /**
+     * Base URl of web console OpenShift which uses to test OperatorHub.
+     */
+    TS_SELENIUM_WEB_CONSOLE_OCP_URL: process.env.TS_SELENIUM_WEB_CONSOLE_OCP_URL || 'https://console-openshift-console.apps.',
+
+    /**
+     * Base URL of OperatorHub main page on the web console OpenShift
+     */
+    TS_SELENIUM_OPERATORHUB_PAGE_URL: process.env.TS_SELENIUM_OPERATORHUB_PAGE_URL || '/operatorhub/all-namespaces',
+
+    /**
      * Run browser in "Headless" (hiden) mode, "false" by default.
      */
     TS_SELENIUM_HEADLESS: process.env.TS_SELENIUM_HEADLESS === 'true',
@@ -102,22 +112,27 @@ export const TestConstants = {
     /**
      * Name of namespace created on OCP for installation CHE by using OperatorHub UI.
      */
-    TS_SELENIUM_INSTALL_PROJECT_NAME: process.env.TS_SELENIUM_INSTALL_PROJECT_NAME || 'test-che-operator',
+    TS_SELENIUM_INSTALL_PROJECT_NAME: process.env.TS_SELENIUM_INSTALL_PROJECT_NAME || '',
 
     /**
-     * OpenShift OAuth field line in 'Create Che Cluster' yaml.
+     * Update Channel name on 'Create Operator Subscription' page on OCP, "nightly" or "stable".
      */
-    TS_SELENIUM_OPENSHIFT_OAUTH_FIELD_LINE: process.env.TS_SELENIUM_OPENSHIFT_OAUTH_FIELD_LINE || '21',
+    TS_OCP_OPERATOR_UPDATE_CHANNEL: process.env.TS_OCP_OPERATOR_UPDATE_CHANNEL || 'nightly',
 
     /**
-     * Value of OpenShift OAuth field in the 'Create Che Cluster' yaml using OperatorHub
+     * Value of TLS Support property in the 'Create Che Cluster' yaml using OperatorHub.
      */
-    TS_SELENIUM_VALUE_OPENSHIFT_OAUTH: process.env.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH || 'false',
+    TS_SELENIUM_VALUE_TLS_SUPPORT: process.env.TS_SELENIUM_VALUE_TLS_SUPPORT || 'false',
 
     /**
-     * Catalog Source name on Subscription Overview.
+     * Value of Self Sign Cert property in the 'Create Che Cluster' yaml using OperatorHub.
      */
-    TS_SELENIUM_CATALOG_SOURCE_NAME: process.env.TS_SELENIUM_CATALOG_SOURCE_NAME || 'installed-custom',
+    TS_SELENIUM_VALUE_SELF_SIGN_CERT: process.env.TS_SELENIUM_VALUE_SELF_SIGN_CERT || 'false',
+
+    /**
+     * Value of OpenShift oAuth property in the 'Create Che Cluster' yaml using OperatorHub.
+     */
+    TS_SELENIUM_VALUE_OPENSHIFT_OAUTH: process.env.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH || 'true',
 
     /**
      * Prefix URL on deployed application by installation using OperatorHub.
@@ -135,9 +150,54 @@ export const TestConstants = {
     TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || '',
 
     /**
-     * Username used to log in OCP.
+     * Log into OCP if configured an HTPasswd identity provider, "false" by default.
      */
-    TS_SELENIUM_OCP_USERNAME: process.env.TS_SELENIUM_OCP_USERNAME || 'kubeadmin',
+    TS_OCP_LOGIN_PAGE_HTPASW: process.env.TS_OCP_LOGIN_PAGE_HTPASW === 'true',
+
+    /**
+     * Log into CHE in MultiUser mode, "false" by default.
+     */
+    TS_SELENIUM_MULTIUSER: process.env.TS_SELENIUM_MULTIUSER === 'true',
+
+    /**
+     * Log into CHE by using regular user OCP, "false" by default.
+     */
+    TS_SELENIUM_LOGIN_CHE_OCP_USER: process.env.TS_SELENIUM_LOGIN_CHE_OCP_USER === 'true',
+
+    /**
+     * Temp admin username used to log in OCP.
+     */
+    TS_SELENIUM_OCP_TEMP_ADMIN_USERNAME: process.env.TS_SELENIUM_OCP_TEMP_ADMIN_USERNAME || 'kubeadmin',
+
+    /**
+     * Temp admin password used to log in OCP.
+     */
+    TS_SELENIUM_OCP_TEMP_ADMIN_PASSWORD: process.env.TS_SELENIUM_OCP_TEMP_ADMIN_PASSWORD || '',
+
+    /**
+     * Regular username used to login in OCP.
+     */
+    TS_SELENIUM_OCP_USERNAME: process.env.TS_SELENIUM_OCP_USERNAME || '',
+
+    /**
+     * Password regular user used to login in OCP.
+     */
+    TS_SELENIUM_OCP_PASSWORD: process.env.TS_SELENIUM_OCP_PASSWORD || '',
+
+    /**
+     * Email of regular user OpenShift to login CHE.
+     */
+    TS_SELENIUM_EMAIL_USER: process.env.TS_SELENIUM_EMAIL_USER || 'test@test.com',
+
+    /**
+     * First name of regular user OpenShift to login CHE.
+     */
+    TS_SELENIUM_FIRST_NAME: process.env.TS_SELENIUM_FIRST_NAME || 'qa',
+
+    /**
+     * Last name of regular user Openshift to login CHE.
+     */
+    TS_SELENIUM_LAST_NAME: process.env.TS_SELENIUM_LAST_NAME || 'test',
 
     /**
      * Delay between screenshots catching in the milliseconds for the execution screencast.
@@ -158,26 +218,6 @@ export const TestConstants = {
      * Delete screencast after execution if all tests passed, "true" by default.
      */
     DELETE_SCREENCAST_IF_TEST_PASS: process.env.DELETE_SCREENCAST_IF_TEST_PASS !== 'false',
-
-    /**
-     * Password used to log in OCP.
-     */
-    TS_SELENIUM_OCP_PASSWORD: process.env.TS_SELENIUM_OCP_PASSWORD || '',
-
-    /**
-     * Log into CHE in MultiUser mode, "false" by default.
-     */
-    TS_SELENIUM_MULTIUSER: process.env.TS_SELENIUM_MULTIUSER === 'true',
-
-    /**
-     * Log into OCP if configured an HTPasswd identity provider, "false" by default.
-     */
-    TS_OCP_LOGIN_PAGE_HTPASW: process.env.TS_OCP_LOGIN_PAGE_HTPASW === 'true',
-
-    /**
-     * Update Channel name on 'Create Operator Subscription' page on OCP, "nightly" or "stable".
-     */
-    TS_OCP_OPERATOR_UPDATE_CHANNEL: process.env.TS_OCP_OPERATOR_UPDATE_CHANNEL || 'nightly',
 
     /**
      * Remote driver URL.
