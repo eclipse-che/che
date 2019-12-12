@@ -59,6 +59,18 @@ export class CheKeycloak {
     return defer.promise;
   }
 
+  updateToken(validityTime: number): ng.IPromise<boolean> {
+    const deferred = this.$q.defer<boolean>();
+
+    this.keycloak.updateToken(validityTime).success((refreshed: boolean) => {
+      deferred.resolve(refreshed);
+    }).error((error: any) => {
+      deferred.reject(error);
+    });
+
+    return deferred.promise;
+  }
+
   isPresent(): boolean {
     return this.keycloak !== null;
   }
