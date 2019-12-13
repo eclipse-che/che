@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_DEPLOYMENT_NAME_LABEL;
@@ -22,6 +23,8 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.Kube
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.setSelector;
 
 import com.google.common.base.Strings;
+import io.fabric8.kubernetes.api.model.ContainerStateTerminated;
+import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -29,6 +32,7 @@ import io.fabric8.kubernetes.api.model.ObjectReference;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
@@ -46,6 +50,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -193,17 +198,17 @@ public class KubernetesDeployments {
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new InfrastructureException(
-          String.format(
+          format(
               "Interrupted while waiting for Pod creation. -id: %s -message: %s",
               deploymentName, e.getMessage()));
     } catch (ExecutionException e) {
       throw new InfrastructureException(
-          String.format(
+          format(
               "Error occured while waiting for Pod creation. -id: %s -message: %s",
               deploymentName, e.getCause().getMessage()));
     } catch (TimeoutException e) {
       throw new InfrastructureException(
-          String.format(
+          format(
               "Pod creation timeout exceeded. -id: %s -message: %s",
               deploymentName, e.getMessage()));
     } finally {
@@ -388,19 +393,48 @@ public class KubernetesDeployments {
   }
 
   private void handleStartingPodStatus(CompletableFuture<Void> podRunningFuture, Pod pod) {
-    if (POD_STATUS_PHASE_RUNNING.equals(pod.getStatus().getPhase())) {
-      podRunningFuture.complete(null);
+    PodStatus status = pod.getStatus();
+    String podPhase = status.getPhase();
+    if (POD_STATUS_PHASE_RUNNING.equals(podPhase)) {
+      // check that all the containers are ready...
+      Map<String, String> terminatedContainers = new HashMap<>();
+
+      for (ContainerStatus cs : status.getContainerStatuses()) {
+        ContainerStateTerminated terminated = cs.getState().getTerminated();
+        if (terminated != null) {
+          terminatedContainers.put(
+              cs.getName(),
+              format(
+                  "reason = '%s', exit code = %d, message = '%s'",
+                  terminated.getReason(), terminated.getExitCode(), terminated.getMessage()));
+        }
+      }
+
+      if (terminatedContainers.isEmpty()) {
+        podRunningFuture.complete(null);
+      } else {
+        String errorMessage =
+            "The following containers have terminated:\n"
+                + terminatedContainers
+                    .entrySet()
+                    .stream()
+                    .map(e -> e.getKey() + ": " + e.getValue())
+                    .collect(Collectors.joining("" + "\n"));
+
+        podRunningFuture.completeExceptionally(new InfrastructureException(errorMessage));
+      }
+
       return;
     }
 
-    if (POD_STATUS_PHASE_SUCCEEDED.equals(pod.getStatus().getPhase())) {
+    if (POD_STATUS_PHASE_SUCCEEDED.equals(podPhase)) {
       podRunningFuture.completeExceptionally(
           new InfrastructureException(
               "Pod container has been terminated. Container must be configured to use a non-terminating command."));
       return;
     }
 
-    if (POD_STATUS_PHASE_FAILED.equals(pod.getStatus().getPhase())) {
+    if (POD_STATUS_PHASE_FAILED.equals(podPhase)) {
       String exceptionMessage = "Pod '" + pod.getMetadata().getName() + "' failed to start.";
       String reason = pod.getStatus().getReason();
       if (Strings.isNullOrEmpty(reason)) {
@@ -802,7 +836,7 @@ public class KubernetesDeployments {
               .withName(deploymentName);
       if (deploymentResource.get() == null) {
         throw new InfrastructureException(
-            String.format("No deployment foud to delete for name %s", deploymentName));
+            format("No deployment foud to delete for name %s", deploymentName));
       }
 
       final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
@@ -850,8 +884,7 @@ public class KubernetesDeployments {
       PodResource<Pod, DoneablePod> podResource =
           clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName);
       if (podResource.get() == null) {
-        throw new InfrastructureException(
-            String.format("No pod found to delete for name %s", podName));
+        throw new InfrastructureException(format("No pod found to delete for name %s", podName));
       }
 
       final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
@@ -922,8 +955,7 @@ public class KubernetesDeployments {
     if (pods.isEmpty()) {
       return Optional.empty();
     } else if (pods.size() > 1) {
-      throw new InfrastructureException(
-          String.format("Found multiple pods in Deployment '%s'", name));
+      throw new InfrastructureException(format("Found multiple pods in Deployment '%s'", name));
     }
 
     return Optional.of(pods.get(0));
@@ -944,7 +976,7 @@ public class KubernetesDeployments {
     if (pod.isPresent()) {
       return pod.get().getMetadata().getName();
     } else {
-      throw new InfrastructureException(String.format("Failed to find pod with name %s", name));
+      throw new InfrastructureException(format("Failed to find pod with name %s", name));
     }
   }
 
