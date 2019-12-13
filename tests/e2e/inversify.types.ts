@@ -39,7 +39,8 @@ const CLASSES = {
     OcpWebConsolePage: 'OcpWebConsolePage',
     OpenWorkspaceWidget: 'OpenWorkspaceWidget',
     ContextMenu: 'ContextMenu',
-    CheLoginPage: 'CheLoginPage'
+    CheLoginPage: 'CheLoginPage',
+    TestWorkspaceUtil: 'TestWorkspaceUtil'
 };
 
 export { TYPES, CLASSES };

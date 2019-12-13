@@ -11,9 +11,11 @@
 import { WorkspaceStatus } from './WorkspaceStatus';
 
 export interface ITestWorkspaceUtil {
+    cleanUpAllWorkspaces() : void;
     waitWorkspaceStatus(namespace: string, workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus) : void;
     waitPluginAdding(namespace: string, workspaceName: string, pluginId: string) : void;
     removeWorkspaceById(id: string) : void;
     stopWorkspaceById(id: string) : void;
     getIdOfRunningWorkspace(namespace: string): Promise<string>;
+    getIdOfRunningWorkspaces(): Promise<Array<string>>;
 }
