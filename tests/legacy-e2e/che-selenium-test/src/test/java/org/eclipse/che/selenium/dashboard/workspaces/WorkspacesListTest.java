@@ -13,8 +13,10 @@ package org.eclipse.che.selenium.dashboard.workspaces;
 
 import static java.util.Arrays.asList;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_ADD_PROJECT_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_CONFIGURE_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -44,7 +46,7 @@ import org.testng.annotations.Test;
  * @author Sergey Skorik
  * @author Ihor Okhrimenko
  */
-@Test(groups = {FLAKY})
+@Test
 public class WorkspacesListTest {
   private static final String EXPECTED_JAVA_PROJECT_NAME = "console-java-simple";
   private static final String NEWEST_CREATED_WORKSPACE_NAME = "just-created-workspace";
@@ -224,31 +226,25 @@ public class WorkspacesListTest {
 
     // check "Add project" button
     workspaces.waitPageLoading();
-
-    workspaces.moveCursorToWorkspaceRamSection(WORKSPACE_NAME2);
-    workspaces.clickOnWorkspaceAddProjectButton(WORKSPACE_NAME2);
-
+    workspaces.clickOnWorkspaceActionsButton(WORKSPACE_NAME2, WORKSPACE_ITEM_ADD_PROJECT_BUTTON);
     workspaceProjects.waitProjectIsPresent(EXPECTED_JAVA_PROJECT_NAME);
 
     seleniumWebDriver.navigate().back();
 
     // check "Workspace configuration" button
     workspaces.waitPageLoading();
-
-    workspaces.moveCursorToWorkspaceRamSection(WORKSPACE_NAME2);
-    workspaces.clickOnWorkspaceConfigureButton(WORKSPACE_NAME2);
+    workspaces.clickOnWorkspaceActionsButton(WORKSPACE_NAME2, WORKSPACE_ITEM_CONFIGURE_BUTTON);
     workspaceConfig.waitConfigForm();
 
     seleniumWebDriver.navigate().back();
 
     // check stop/start button
     workspaces.waitPageLoading();
-
-    workspaces.moveCursorToWorkspaceRamSection(WORKSPACE_NAME2);
-    workspaces.clickOnWorkspaceStopStartButton(WORKSPACE_NAME2);
+    workspaces.clickOnWorkspaceActionsButton(
+        WORKSPACE_NAME2, WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON);
     workspaces.waitWorkspaceStatus(WORKSPACE_NAME2, Status.RUNNING);
-
-    workspaces.clickOnWorkspaceStopStartButton(WORKSPACE_NAME2);
+    workspaces.clickOnWorkspaceActionsButton(
+        WORKSPACE_NAME2, WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON);
     workspaces.waitWorkspaceStatus(WORKSPACE_NAME2, Status.STOPPED);
 
     // check adding the workspace to list

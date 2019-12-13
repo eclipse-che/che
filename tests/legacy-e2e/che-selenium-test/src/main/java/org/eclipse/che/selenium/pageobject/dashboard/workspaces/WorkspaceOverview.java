@@ -229,6 +229,10 @@ public class WorkspaceOverview {
     return errorMessages.getText().equals(message);
   }
 
+  public void waitWorkspaceNameErrorMessageNotVisible() {
+    seleniumWebDriverHelper.waitInvisibility(errorMessages);
+  }
+
   public void checkOnWorkspaceNameErrorAbsence() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(invisibilityOfElementLocated(By.xpath("//che-error-messages/div")));

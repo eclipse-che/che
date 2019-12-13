@@ -16,11 +16,11 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -32,12 +32,12 @@ import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceShare;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.openqa.selenium.WebDriverException;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S, TestGroup.FLAKY})
+@Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S})
 public class ShareWorkspaceOwnerTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
@@ -58,6 +58,7 @@ public class ShareWorkspaceOwnerTest {
   @Inject private Workspaces workspaces;
   @Inject private TestUser testUser;
   @Inject private WorkspaceShare workspaceShare;
+  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -75,16 +76,16 @@ public class ShareWorkspaceOwnerTest {
     navigationBar.waitNavigationBar();
 
     dashboard.selectWorkspacesItemOnDashboard();
-
-    try {
-      workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
-    } catch (WebDriverException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/8594");
-    }
+    workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
 
     workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
     workspaceDetails.selectTabInWorkspaceMenu(SHARE);
+  }
+
+  @AfterClass
+  public void tearDown() throws Exception {
+    workspaceServiceClient.delete(WORKSPACE_NAME, adminTestUser.getName());
+    org.delete();
   }
 
   @Test
@@ -137,6 +138,7 @@ public class ShareWorkspaceOwnerTest {
     assertEquals(workspaceShare.getMemberPermissions(memberName), MEMBER_PERMISSIONS);
 
     // check the 'No members in team' dialog
+    workspaceShare.waitNoMembersDialogClosed();
     workspaceShare.clickOnAddDeveloperButton();
     workspaceShare.waitNoMembersDialog();
     workspaceDetails.clickOnCloseButtonInDialogWindow();
