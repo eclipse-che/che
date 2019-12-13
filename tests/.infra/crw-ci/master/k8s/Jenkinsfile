@@ -1,12 +1,21 @@
 pipeline {
     agent { label 'rhel7-8gb' }
 
+    options {
+        timestamps()
+        timeout(time: 2, unit: 'HOURS')
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '',
+                artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '30'))
+    }
+
+    triggers { cron("@hourly") }
+
     stages {
         stage("Run E2E tests against master branch") {
             parallel {
                 stage('Run Happy path tests') {
                     steps {
-                        build job: 'basic-MultiUser-Che-check-E2E-Happy-path-tests-against-k8s',
+                        build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                 parameters: [
                                         string(name: 'cheImageRepo',
                                                 value: 'maxura/che-server'),
@@ -40,7 +49,7 @@ pipeline {
 
                 stage('Run Vert.x tests') {
                     steps {
-                        build job: 'basic-MultiUser-Che-check-E2E-Happy-path-tests-against-k8s',
+                        build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                 parameters: [
                                         string(name: 'cheImageRepo',
                                                 value: 'maxura/che-server'),
