@@ -23,14 +23,13 @@ import { Terminal } from '../../pageobjects/ide/Terminal';
 import 'reflect-metadata';
 import { error, Key } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { ContextMenu } from '../../pageobjects/ide/ContextMenu';
 
 const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
 const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
-const sampleName: string = 'java-web-vertx';
-const fileFolderPath: string = `${sampleName}/src/main/java/io/vertx/examples/spring`;
-const tabTitle: string = 'SpringExampleRunner.java';
-const codeNavigationClassName: string = 'ApplicationContext.class';
+const sampleName: string = 'vertx-http-example';
+const fileFolderPath: string = `${sampleName}/src/main/java/io/openshift/example`;
+const tabTitle: string = 'HttpApplication.java';
+const codeNavigationClassName: string = 'RouterImpl.class';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
@@ -42,7 +41,6 @@ const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
-const contextMenu: ContextMenu = e2eContainer.get(CLASSES.ContextMenu);
 
 suite('Java Vert.x test', async () => {
     suite('Login and wait dashboard', async () => {
@@ -95,36 +93,29 @@ suite('Java Vert.x test', async () => {
             await editor.clickOnTab(tabTitle);
             await editor.waitEditorAvailable(tabTitle);
             await editor.waitTabFocused(tabTitle);
-            await editor.moveCursorToLineAndChar(tabTitle, 19, 11);
+            await editor.moveCursorToLineAndChar(tabTitle, 19, 31);
             await editor.pressControlSpaceCombination(tabTitle);
-            await editor.waitSuggestionWithScrolling(tabTitle, 'cancelTimer(long arg0) : boolean');
+            await editor.waitSuggestionWithScrolling(tabTitle, 'router(Vertx vertx) : Router');
         });
 
         test('Error highlighting', async () => {
-            await editor.type(tabTitle, 'error', 21);
+            await editor.type(tabTitle, 'error', 20);
             await editor.waitErrorInLine(21);
             await editor.performKeyCombination(tabTitle, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
             await editor.waitErrorInLineDisappearance(21);
         });
 
         test('Autocomplete', async () => {
-            await editor.moveCursorToLineAndChar(tabTitle, 18, 15);
+            await editor.moveCursorToLineAndChar(tabTitle, 19, 7);
             await editor.pressControlSpaceCombination(tabTitle);
             await editor.waitSuggestionContainer();
-            await editor.waitSuggestionWithScrolling(tabTitle, 'Vertx - io.vertx.core');
+            await editor.waitSuggestionWithScrolling(tabTitle, 'Router - io.vertx.ext.web');
         });
 
         test('Codenavigation', async () => {
-            await editor.moveCursorToLineAndChar(tabTitle, 17, 15);
-            try {
-                await editor.performKeyCombination(tabTitle, Key.chord(Key.CONTROL, Key.F12));
-                await editor.waitEditorAvailable(codeNavigationClassName);
-            } catch (err) {
-                // workaround for issue: https://github.com/eclipse/che/issues/14520
-                if (err instanceof error.TimeoutError) {
-                    checkCodeNavigationWithContextMenu();
-                }
-            }
+            await editor.moveCursorToLineAndChar(tabTitle, 19, 7);
+            await editor.performKeyCombination(tabTitle, Key.chord(Key.CONTROL, Key.F12));
+            await editor.waitEditorAvailable(codeNavigationClassName);
         });
 
     });
@@ -134,7 +125,7 @@ suite('Java Vert.x test', async () => {
             let taskName: string = 'maven build';
             await runTask(taskName);
             await quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
-            await ide.waitNotification('Task ' + taskName + ' has exited with code 0.', 60000);
+            await ide.waitNotification('has exited with code 0.', 60000);
         });
 
         test('Close the terminal tasks', async () => {
@@ -167,12 +158,6 @@ suite('Java Vert.x test', async () => {
         }
 
         await quickOpenContainer.clickOnContainerItem(task);
-    }
-
-    async function checkCodeNavigationWithContextMenu() {
-        await contextMenu.invokeContextMenuOnActiveElementWithKeys();
-        await contextMenu.waitContextMenuAndClickOnItem('Go to Definition');
-        console.log('Known isuue https://github.com/eclipse/che/issues/14520.');
     }
 
 });
