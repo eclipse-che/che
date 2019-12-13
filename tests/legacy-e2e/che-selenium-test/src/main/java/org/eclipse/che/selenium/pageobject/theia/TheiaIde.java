@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEME
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_CLOSE_BUTTON;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_MESSAGE_CONTAINS_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_MESSAGE_EQUALS_TO_XPATH_TEMPLATE;
@@ -249,6 +250,6 @@ public class TheiaIde {
   }
 
   public String getBranchName() {
-    return seleniumWebDriverHelper.waitVisibilityAndGetText(branchName);
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(branchName, WIDGET_TIMEOUT_SEC);
   }
 }
