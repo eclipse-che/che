@@ -2,20 +2,20 @@ pipeline {
     agent { label 'rhel7-8gb' }
 
     stages {
-        stage("Run E2E tests") {
+        stage("Run E2E tests against master branch") {
             parallel {
-                stage('Run Happy path tests against nightly build') {
+                stage('Run Happy path tests') {
                     steps {
                         build job: 'basic-MultiUser-Che-check-E2E-Happy-path-tests-against-k8s',
                                 parameters: [
                                         string(name: 'cheImageRepo',
-                                                value: 'eclipse/che-server'),
+                                                value: 'maxura/che-server'),
 
                                         string(name: 'cheImageTag',
-                                                value: 'nightly'),
+                                                value: 'master'),
 
                                         booleanParam(name: 'buildChe',
-                                                value: false),
+                                                value: true),
 
                                         string(name: 'ghprbSourceBranch',
                                                 value: 'che-15397'),
@@ -38,18 +38,18 @@ pipeline {
                     }
                 }
 
-                stage('Run Vert.x tests against nightly build') {
+                stage('Run Vert.x tests') {
                     steps {
                         build job: 'basic-MultiUser-Che-check-E2E-Happy-path-tests-against-k8s',
                                 parameters: [
                                         string(name: 'cheImageRepo',
-                                                value: 'eclipse/che-server'),
+                                                value: 'maxura/che-server'),
 
                                         string(name: 'cheImageTag',
-                                                value: 'nightly'),
+                                                value: 'master'),
 
                                         booleanParam(name: 'buildChe',
-                                                value: false),
+                                                value: true),
 
                                         string(name: 'ghprbSourceBranch',
                                                 value: 'che-15397'),
