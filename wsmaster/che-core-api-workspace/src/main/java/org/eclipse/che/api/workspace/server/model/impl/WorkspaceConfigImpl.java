@@ -32,10 +32,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -87,6 +90,10 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
   @Column(name = "attributes")
   private Map<String, String> attributes;
 
+  // we do not store converted workspace configs,
+  // so it's not needed to store devfile from which this workspace config is generated
+  @Transient private DevfileImpl devfile;
+
   public WorkspaceConfigImpl() {}
 
   public WorkspaceConfigImpl(
@@ -97,6 +104,18 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
       List<? extends ProjectConfig> projects,
       Map<String, ? extends Environment> environments,
       Map<String, String> attributes) {
+    this(name, description, defaultEnv, commands, projects, environments, attributes, null);
+  }
+
+  public WorkspaceConfigImpl(
+      String name,
+      String description,
+      String defaultEnv,
+      List<? extends Command> commands,
+      List<? extends ProjectConfig> projects,
+      Map<String, ? extends Environment> environments,
+      Map<String, String> attributes,
+      Devfile devfile) {
     this.name = name;
     this.defaultEnv = defaultEnv;
     this.description = description;
@@ -116,6 +135,9 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     if (attributes != null) {
       this.attributes = new HashMap<>(attributes);
     }
+    if (devfile != null) {
+      this.devfile = new DevfileImpl(devfile);
+    }
   }
 
   public WorkspaceConfigImpl(WorkspaceConfig workspaceConfig) {
@@ -126,7 +148,8 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
         workspaceConfig.getCommands(),
         workspaceConfig.getProjects(),
         workspaceConfig.getEnvironments(),
-        workspaceConfig.getAttributes());
+        workspaceConfig.getAttributes(),
+        workspaceConfig.getDevfile());
   }
 
   @Override
@@ -205,6 +228,17 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     this.attributes = attributes;
   }
 
+  public WorkspaceConfigImpl setDevfile(DevfileImpl devfile) {
+    this.devfile = devfile;
+    return this;
+  }
+
+  @Nullable
+  @Override
+  public DevfileImpl getDevfile() {
+    return devfile;
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {
@@ -218,6 +252,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
         && Objects.equals(name, that.name)
         && Objects.equals(description, that.description)
         && Objects.equals(defaultEnv, that.defaultEnv)
+        && Objects.equals(devfile, that.devfile)
         && getCommands().equals(that.getCommands())
         && getProjects().equals(that.getProjects())
         && getEnvironments().equals(that.getEnvironments())
@@ -231,6 +266,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     hash = 31 * hash + Objects.hashCode(name);
     hash = 31 * hash + Objects.hashCode(description);
     hash = 31 * hash + Objects.hashCode(defaultEnv);
+    hash = 31 * hash + Objects.hashCode(devfile);
     hash = 31 * hash + getCommands().hashCode();
     hash = 31 * hash + getProjects().hashCode();
     hash = 31 * hash + getEnvironments().hashCode();
@@ -260,6 +296,8 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
         + environments
         + ", attributes="
         + attributes
+        + ", devfile="
+        + devfile
         + '}';
   }
 
