@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.AUXILIARY;
-import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
@@ -26,8 +25,10 @@ import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
@@ -39,7 +40,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {GITHUB, OPENSHIFT, FLAKY})
+@Test(groups = {GITHUB, OPENSHIFT})
 public class DirectUrlFactoryWithSpecificBranchTest {
   private static final Logger LOG =
       LoggerFactory.getLogger(DirectUrlFactoryWithSpecificBranchTest.class);
@@ -56,6 +57,8 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   @Inject private TheiaProjectTree theiaProjectTree;
   @Inject private TheiaTerminal theiaTerminal;
   @Inject private TheiaProposalForm theiaProposalForm;
+  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private DefaultTestUser defaultTestUser;
 
   private TestFactory testFactoryWithSpecificBranch;
 
@@ -76,7 +79,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   @AfterClass
   public void deleteTestBranch() throws Exception {
     try {
-      testFactoryWithSpecificBranch.delete();
+      workspaceServiceClient.delete(getWorkspaceName(), defaultTestUser.getName());
     } catch (Exception e) {
       LOG.warn("It was impossible to remove factory.", e);
     }
@@ -85,7 +88,6 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   @Test
   public void factoryWithDirectUrlWithSpecificBranch() {
     String repositoryName = testAuxiliaryRepo.getName();
-    final String wsTheiaIdeTerminalTitle = "theia-ide terminal 0";
     List<String> expectedItemsAfterCloning =
         Arrays.asList("my-lib", "my-webapp", "my-lib/src", "pom.xml");
 
@@ -94,17 +96,21 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     theiaIde.switchToIdeFrame();
     theiaIde.waitTheiaIde();
     theiaIde.waitLoaderInvisibility();
-    theiaIde.waitNotificationDisappearance(
-        "Che Workspace: Finished cloning projects.", UPDATING_PROJECT_TIMEOUT_SEC);
+    theiaIde.waitTheiaIdeTopPanel();
+    theiaIde.waitAllNotificationsClosed();
 
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitItem(repositoryName);
+    theiaIde.waitNotificationDisappearance(
+        "Che Workspace: Finished importing projects.", UPDATING_PROJECT_TIMEOUT_SEC);
     theiaIde.waitAllNotificationsClosed();
+
     theiaProjectTree.expandItem(repositoryName);
     theiaProjectTree.waitItem(repositoryName + "/pom.xml");
     theiaProjectTree.expandItem(repositoryName + "/my-lib");
     theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
+
     expectedItemsAfterCloning.forEach(
         name -> {
           try {
@@ -117,5 +123,11 @@ public class DirectUrlFactoryWithSpecificBranchTest {
 
     // check specific branch
     assertEquals(theiaIde.getBranchName(), SECOND_BRANCH_NAME);
+  }
+
+  private String getWorkspaceName() {
+    String workspaceUrl = seleniumWebDriver.getCurrentUrl();
+
+    return workspaceUrl.substring(workspaceUrl.lastIndexOf('/') + 1);
   }
 }

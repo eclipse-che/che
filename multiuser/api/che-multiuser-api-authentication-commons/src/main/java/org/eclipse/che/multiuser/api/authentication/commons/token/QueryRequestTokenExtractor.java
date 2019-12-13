@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.commons.auth.token;
+package org.eclipse.che.multiuser.api.authentication.commons.token;
 
 import javax.servlet.http.HttpServletRequest;
 

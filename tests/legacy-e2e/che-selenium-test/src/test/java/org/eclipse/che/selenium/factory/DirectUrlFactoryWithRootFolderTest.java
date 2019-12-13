@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.factory;
 
-import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
@@ -21,9 +20,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.slf4j.Logger;
@@ -33,7 +35,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-@Test(groups = {GITHUB, OPENSHIFT, FLAKY})
+@Test(groups = {GITHUB, OPENSHIFT})
 public class DirectUrlFactoryWithRootFolderTest {
   private static final Logger LOG =
       LoggerFactory.getLogger(DirectUrlFactoryWithRootFolderTest.class);
@@ -42,6 +44,9 @@ public class DirectUrlFactoryWithRootFolderTest {
   @Inject private TestGitHubRepository testRepo;
   @Inject private TheiaIde theiaIde;
   @Inject private TheiaProjectTree theiaProjectTree;
+  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private DefaultTestUser defaultTestUser;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   private TestFactory testFactoryWithRootFolder;
 
@@ -58,7 +63,7 @@ public class DirectUrlFactoryWithRootFolderTest {
   @AfterClass
   public void tearDown() throws Exception {
     try {
-      testFactoryWithRootFolder.delete();
+      workspaceServiceClient.delete(getWorkspaceName(), defaultTestUser.getName());
     } catch (Exception e) {
       LOG.warn("It was impossible to remove factory.", e);
     }
@@ -91,12 +96,14 @@ public class DirectUrlFactoryWithRootFolderTest {
     theiaIde.switchToIdeFrame();
     theiaIde.waitTheiaIde();
     theiaIde.waitLoaderInvisibility();
-    theiaIde.waitNotificationDisappearance(
-        "Che Workspace: Finished cloning projects.", UPDATING_PROJECT_TIMEOUT_SEC);
+    theiaIde.waitTheiaIdeTopPanel();
+    theiaIde.waitAllNotificationsClosed();
 
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitItem(repositoryName);
+    theiaIde.waitNotificationDisappearance(
+        "Che Workspace: Finished importing projects.", UPDATING_PROJECT_TIMEOUT_SEC);
     theiaIde.waitAllNotificationsClosed();
     theiaProjectTree.expandItem(repositoryName);
 
@@ -104,5 +111,11 @@ public class DirectUrlFactoryWithRootFolderTest {
         name -> {
           theiaProjectTree.waitItem(repositoryName + "/" + name);
         });
+  }
+
+  private String getWorkspaceName() {
+    String workspaceUrl = seleniumWebDriver.getCurrentUrl();
+
+    return workspaceUrl.substring(workspaceUrl.lastIndexOf('/') + 1);
   }
 }

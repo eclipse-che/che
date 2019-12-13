@@ -33,12 +33,13 @@ const CLASSES = {
     RightToolbar: 'RightToolbar',
     Terminal: 'Terminal',
     DebugView: 'DebugView',
-    WarningDialog: 'WarningDialog',
+    DialogWindow: 'DialogWindow',
     ScreenCatcher: 'ScreenCatcher',
     OcpLoginPage: 'OcpLoginPage',
     OcpWebConsolePage: 'OcpWebConsolePage',
     OpenWorkspaceWidget: 'OpenWorkspaceWidget',
-    ContextMenu: 'ContextMenu'
+    ContextMenu: 'ContextMenu',
+    CheLoginPage: 'CheLoginPage'
 };
 
 export { TYPES, CLASSES };

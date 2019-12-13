@@ -11,12 +11,9 @@
  */
 package org.eclipse.che.api.workspace.server.devfile.convert.component.editor;
 
-import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_TYPE;
-import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -66,14 +63,6 @@ public class EditorComponentToWorkspaceApplierTest {
 
     // then
     assertEquals(workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE), editorId);
-    assertEquals(
-        workspaceConfig.getAttributes().get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE),
-        editorId + "=" + editorComponent.getAlias());
-    assertEquals(
-        workspaceConfig
-            .getAttributes()
-            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-editor")),
-        "12345M");
   }
 
   @Test
@@ -98,18 +87,6 @@ public class EditorComponentToWorkspaceApplierTest {
     assertEquals(
         workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE),
         registryUrl + "#" + editorId);
-    assertEquals(
-        workspaceConfig.getAttributes().get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE),
-        registryUrl.substring(0, registryUrl.length() - 1)
-            + "#"
-            + editorId
-            + "="
-            + editorComponent.getAlias());
-    assertEquals(
-        workspaceConfig
-            .getAttributes()
-            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-editor")),
-        "12345M");
   }
 
   @Test
@@ -137,14 +114,7 @@ public class EditorComponentToWorkspaceApplierTest {
     // then
     assertEquals(
         workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE), reference);
-    assertEquals(
-        workspaceConfig.getAttributes().get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE),
-        "eclipse/super-editor/0.0.1" + "=" + editorComponent.getAlias());
-    assertEquals(
-        workspaceConfig
-            .getAttributes()
-            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-editor")),
-        "12345M");
+    assertEquals(editorComponent.getId(), "eclipse/super-editor/0.0.1");
   }
 
   @Test

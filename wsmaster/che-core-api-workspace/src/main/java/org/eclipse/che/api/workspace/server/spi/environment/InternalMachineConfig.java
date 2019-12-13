@@ -11,13 +11,10 @@
  */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
-import org.eclipse.che.api.installer.shared.model.Installer;
 
 /**
  * Machine Config to use inside infrastructure.
@@ -32,7 +29,6 @@ import org.eclipse.che.api.installer.shared.model.Installer;
  * @author gazarenkov
  */
 public class InternalMachineConfig {
-  private final List<Installer> installers;
   private final Map<String, ServerConfig> servers;
   private final Map<String, String> env;
   private final Map<String, String> attributes;
@@ -40,14 +36,12 @@ public class InternalMachineConfig {
 
   public InternalMachineConfig() {
     this.servers = new HashMap<>();
-    this.installers = new ArrayList<>();
     this.env = new HashMap<>();
     this.attributes = new HashMap<>();
     this.volumes = new HashMap<>();
   }
 
   public InternalMachineConfig(
-      List<Installer> installers,
       Map<String, ? extends ServerConfig> servers,
       Map<String, String> env,
       Map<String, String> attributes,
@@ -65,11 +59,6 @@ public class InternalMachineConfig {
     if (volumes != null) {
       this.volumes.putAll(volumes);
     }
-  }
-
-  /** Returns modifiable ordered list of installers configs of the machine. */
-  public List<Installer> getInstallers() {
-    return installers;
   }
 
   /** Returns modifiable map of servers configured in the machine. */

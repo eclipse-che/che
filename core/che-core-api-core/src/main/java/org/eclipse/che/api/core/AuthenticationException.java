@@ -9,9 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.commons.auth;
-
-import org.eclipse.che.api.core.ApiException;
+package org.eclipse.che.api.core;
 
 @SuppressWarnings("serial")
 public class AuthenticationException extends ApiException {

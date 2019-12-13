@@ -51,6 +51,7 @@ import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentT
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
@@ -134,7 +135,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   @Override
   public void apply(
       WorkspaceConfigImpl workspaceConfig,
-      Component k8sComponent,
+      ComponentImpl k8sComponent,
       FileContentProvider contentProvider)
       throws DevfileException {
     checkArgument(workspaceConfig != null, "Workspace config must not be null");
