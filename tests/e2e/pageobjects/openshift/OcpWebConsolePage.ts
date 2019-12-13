@@ -141,13 +141,15 @@ export class OcpWebConsolePage {
     async waitCreateCheClusterYaml() {
         Logger.debug('OcpWebConsolePage.waitCreateCheClusterYaml');
 
-        const headerTextCheClusterLocator: By = By.xpath('//h1[text()=\'Create Che Cluster\']');
+        const headerTextCheClusterLocator: By = By.xpath('//h1[contains(text(), \'Cluster\')]');
         const createCheClusterYamlLocator: By = By.css('div[class=yaml-editor]');
         await this.driverHelper.waitVisibility(headerTextCheClusterLocator);
         await this.driverHelper.waitVisibility(createCheClusterYamlLocator);
     }
 
     async openEditorReplaceWidget() {
+        Logger.debug('OcpWebConsolePage.openEditorReplaceWidget');
+
         await this.driverHelper.getAction().sendKeys(Key.chord(Key.CONTROL, 'h')).perform();
     }
 
@@ -170,7 +172,7 @@ export class OcpWebConsolePage {
     async waitResourcesCheClusterTitle() {
         Logger.debug('OcpWebConsolePage.waitResourcesCheClusterTitle');
 
-        const resourcesCheClusterTitleLocator: By = By.xpath('//*[text()=\'Che Clusters\']');
+        const resourcesCheClusterTitleLocator: By = By.xpath('//*[contains(text(), \'Clusters\')]');
         await this.driverHelper.waitVisibility(resourcesCheClusterTitleLocator);
     }
 
