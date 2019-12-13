@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -299,8 +298,6 @@ public class Workspaces {
     // to avoid clicking on the tooltip
     moveCursorToWorkspaceRamSection(workspaceName);
     waitWorkspaceActionTooltipDisappearance();
-
-    WaitUtils.sleepQuietly(4);
 
     seleniumWebDriverHelper.waitAndClick(By.xpath(buttonXpath));
 
