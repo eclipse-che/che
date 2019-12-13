@@ -9,10 +9,9 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { ICheLoginPage } from './ICheLoginPage';
+import { CheLoginPage } from '../openshift/CheLoginPage';
 import { injectable, inject } from 'inversify';
-import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
-import { By } from 'selenium-webdriver';
 import { TestConstants } from '../../TestConstants';
 import { Logger } from '../../utils/Logger';
 
@@ -20,39 +19,15 @@ import { Logger } from '../../utils/Logger';
 export class MultiUserLoginPage implements ICheLoginPage {
 
     constructor(
-        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+        @inject (CLASSES.CheLoginPage) private readonly cheLogin: CheLoginPage) {}
 
     async login() {
         Logger.debug('MultiUserLoginPage.login');
 
-        await this.waitEclipseCheLoginFormPage();
-        await this.inputUserNameEclipseCheLoginPage(TestConstants.TS_SELENIUM_USERNAME);
-        await this.inputPaswordEclipseCheLoginPage(TestConstants.TS_SELENIUM_PASSWORD);
-        await this.clickEclipseCheLoginButton();
-    }
-
-    async waitEclipseCheLoginFormPage() {
-        Logger.debug('MultiUserLoginPage.waitEclipseCheLoginFormPage');
-
-        await this.driverHelper.waitVisibility(By.id('kc-form-login'));
-    }
-
-    async inputUserNameEclipseCheLoginPage(userName: string) {
-        Logger.debug(`MultiUserLoginPage.inputUserNameEclipseCheLoginPage username: "${userName}"`);
-
-        await this.driverHelper.enterValue(By.id('username'), userName);
-    }
-
-    async inputPaswordEclipseCheLoginPage(passw: string) {
-        Logger.debug(`MultiUserLoginPage.inputPaswordEclipseCheLoginPage password: "${passw}"`);
-
-        await this.driverHelper.enterValue(By.id('password'), passw);
-    }
-
-    async clickEclipseCheLoginButton() {
-        Logger.debug('MultiUserLoginPage.clickEclipseCheLoginButton');
-
-        await this.driverHelper.waitAndClick(By.id('kc-login'));
+        await this.cheLogin.waitEclipseCheLoginFormPage();
+        await this.cheLogin.inputUserNameEclipseCheLoginPage(TestConstants.TS_SELENIUM_USERNAME);
+        await this.cheLogin.inputPaswordEclipseCheLoginPage(TestConstants.TS_SELENIUM_PASSWORD);
+        await this.cheLogin.clickEclipseCheLoginButton();
     }
 
 }
