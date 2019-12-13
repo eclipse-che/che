@@ -271,6 +271,7 @@
                   "type": {},
                   "alias": {},
                   "id": {},
+                  "env": {},
                   "reference": {},
                   "registryUrl": {},
                   "memoryLimit": {}
@@ -293,6 +294,7 @@
                   "type": {},
                   "alias": {},
                   "id": {},
+                  "env": {},
                   "memoryLimit": {},
                   "reference": {},
                   "registryUrl": {},
@@ -344,7 +346,7 @@
                   "type": {},
                   "alias": {},
                   "mountSources": {},
-                  "env":  {},
+                  "env": {},
                   "reference": {
                     "description": "Describes absolute or devfile-relative location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type components",
                     "type": "string",
@@ -431,7 +433,7 @@
                   "type": {},
                   "alias": {},
                   "mountSources": {},
-                  "env":  {},
+                  "env": {},
                   "image": {
                     "type": "string",
                     "description": "Specifies the docker image that should be used for component",

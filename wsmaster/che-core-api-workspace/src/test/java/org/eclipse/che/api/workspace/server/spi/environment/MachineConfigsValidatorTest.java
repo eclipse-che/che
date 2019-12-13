@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
@@ -212,7 +211,6 @@ public class MachineConfigsValidatorTest {
   private static InternalMachineConfig machineMock() {
     InternalMachineConfig machineConfig = mock(InternalMachineConfig.class);
     when(machineConfig.getServers()).thenReturn(emptyMap());
-    when(machineConfig.getInstallers()).thenReturn(emptyList());
     return machineConfig;
   }
 

@@ -500,7 +500,7 @@ public class ComponentImpl implements Component {
         + "id='"
         + componentId
         + '\''
-        + "alias='"
+        + ", alias='"
         + alias
         + '\''
         + ", type='"

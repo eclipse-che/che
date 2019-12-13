@@ -55,7 +55,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
@@ -69,7 +68,9 @@ import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
@@ -216,8 +217,7 @@ public class WorkspaceRuntimes {
    */
   public void validate(WorkspaceImpl workspace, @Nullable String envName)
       throws ValidationException, NotFoundException, ServerException {
-    WorkspaceConfig config = workspace.getConfig();
-
+    WorkspaceConfigImpl config = workspace.getConfig();
     if (workspace.getDevfile() != null) {
       config = devfileConverter.convert(workspace.getDevfile());
     }
@@ -264,7 +264,7 @@ public class WorkspaceRuntimes {
 
     // try to create internal environment to check if the specified environment is valid
     try {
-      createInternalEnvironment(environment, emptyMap(), emptyList());
+      createInternalEnvironment(environment, emptyMap(), emptyList(), config.getDevfile());
     } catch (InfrastructureException e) {
       throw new ServerException(e.getMessage(), e);
     }
@@ -417,7 +417,7 @@ public class WorkspaceRuntimes {
               workspace.getName()));
     }
 
-    WorkspaceConfig config = workspace.getConfig();
+    WorkspaceConfigImpl config = workspace.getConfig();
     if (config == null) {
       config = devfileConverter.convert(workspace.getDevfile());
     }
@@ -447,7 +447,10 @@ public class WorkspaceRuntimes {
     try {
       InternalEnvironment internalEnv =
           createInternalEnvironment(
-              config.getEnvironments().get(envName), config.getAttributes(), config.getCommands());
+              config.getEnvironments().get(envName),
+              config.getAttributes(),
+              config.getCommands(),
+              config.getDevfile());
 
       RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);
       InternalRuntime runtime = runtimeContext.getRuntime();
@@ -672,7 +675,7 @@ public class WorkspaceRuntimes {
                   + "no more workspaces are allowed to start",
               identity.getWorkspaceId()));
     }
-    Workspace workspace;
+    WorkspaceImpl workspace;
     try {
       workspace = workspaceDao.get(identity.getWorkspaceId());
     } catch (NotFoundException x) {
@@ -683,7 +686,7 @@ public class WorkspaceRuntimes {
     }
 
     Environment environment = null;
-    WorkspaceConfig workspaceConfig = workspace.getConfig();
+    WorkspaceConfigImpl workspaceConfig = workspace.getConfig();
     if (workspaceConfig == null) {
       workspaceConfig = devfileConverter.convert(workspace.getDevfile());
     }
@@ -702,7 +705,10 @@ public class WorkspaceRuntimes {
     try {
       InternalEnvironment internalEnv =
           createInternalEnvironment(
-              environment, workspaceConfig.getAttributes(), workspaceConfig.getCommands());
+              environment,
+              workspaceConfig.getAttributes(),
+              workspaceConfig.getCommands(),
+              workspaceConfig.getDevfile());
 
       runtime = infra.prepare(identity, internalEnv).getRuntime();
       WorkspaceStatus runtimeStatus = runtime.getStatus();
@@ -727,7 +733,8 @@ public class WorkspaceRuntimes {
   InternalEnvironment createInternalEnvironment(
       @Nullable Environment environment,
       Map<String, String> workspaceConfigAttributes,
-      List<? extends Command> commands)
+      List<? extends Command> commands,
+      DevfileImpl devfile)
       throws InfrastructureException, ValidationException, NotFoundException {
     String recipeType;
     if (environment == null) {
@@ -743,6 +750,7 @@ public class WorkspaceRuntimes {
     InternalEnvironment internalEnvironment = factory.create(environment);
     internalEnvironment.setAttributes(new HashMap<>(workspaceConfigAttributes));
     internalEnvironment.setCommands(commands.stream().map(CommandImpl::new).collect(toList()));
+    internalEnvironment.setDevfile(devfile);
 
     return internalEnvironment;
   }

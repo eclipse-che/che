@@ -23,6 +23,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -44,6 +45,7 @@ public abstract class InternalEnvironment {
   private final List<Warning> warnings;
   private Map<String, String> attributes;
   private List<CommandImpl> commands;
+  private DevfileImpl devfile;
 
   protected InternalEnvironment() {
     this.warnings = new CopyOnWriteArrayList<>();
@@ -67,6 +69,7 @@ public abstract class InternalEnvironment {
     this.warnings = new CopyOnWriteArrayList<>(internalEnvironment.getWarnings());
     this.attributes = internalEnvironment.getAttributes();
     this.commands = internalEnvironment.getCommands();
+    this.devfile = internalEnvironment.getDevfile();
   }
 
   /**
@@ -179,5 +182,14 @@ public abstract class InternalEnvironment {
       this.commands = commands.stream().map(CommandImpl::new).collect(Collectors.toList());
     }
     return this;
+  }
+
+  /** Return the devfile that was used for the environment constructing. */
+  public DevfileImpl getDevfile() {
+    return devfile;
+  }
+
+  public void setDevfile(DevfileImpl devfile) {
+    this.devfile = devfile;
   }
 }

@@ -61,6 +61,8 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
@@ -72,6 +74,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Command;
 import org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -112,6 +115,7 @@ public class KubernetesPluginsToolingApplierTest {
   @BeforeMethod
   public void setUp() {
     internalEnvironment = spy(KubernetesEnvironment.builder().build());
+    internalEnvironment.setDevfile(new DevfileImpl());
     applier =
         new KubernetesPluginsToolingApplier(
             TEST_IMAGE_POLICY,
@@ -164,6 +168,31 @@ public class KubernetesPluginsToolingApplierTest {
     validateContainerNameName(envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "container");
   }
 
+  @Test(
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "The downloaded plugin 'publisher/id/version' configuration does "
+              + "not have the corresponding component in devfile. Devfile contains the following "
+              + "cheEditor/chePlugins: \\[publisher/editor/1, publisher/plugin/1\\]")
+  public void shouldThrowExceptionWhenDownloadedPluginIsNotMatchedWitComponent() throws Exception {
+    // given
+    ChePlugin chePlugin = createChePlugin("publisher/id/version");
+
+    internalEnvironment.getDevfile().getComponents().clear();
+    internalEnvironment
+        .getDevfile()
+        .getComponents()
+        .add(new ComponentImpl("cheEditor", "publisher/editor/1"));
+    internalEnvironment
+        .getDevfile()
+        .getComponents()
+        .add(new ComponentImpl("chePlugin", "publisher/plugin/1"));
+    internalEnvironment.getDevfile().getComponents().add(new ComponentImpl("k8s", null));
+
+    // when
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
+  }
+
   @Test
   public void shouldResolveMachineNameForCommandsInEnvironment() throws Exception {
     // given
@@ -192,7 +221,7 @@ public class KubernetesPluginsToolingApplierTest {
   public void shouldFillInWarningIfChePluginDoesNotHaveAnyContainersButThereAreRelatedCommands()
       throws Exception {
     // given
-    ChePlugin chePlugin = createChePlugin("custom-name");
+    ChePlugin chePlugin = createChePlugin("somePublisher/custom-name/0.0.3");
     String pluginRef = chePlugin.getId();
 
     CommandImpl pluginCommand = new CommandImpl("test-command", "echo Hello World!", "custom");
@@ -274,7 +303,7 @@ public class KubernetesPluginsToolingApplierTest {
     // given
     internalEnvironment.getMachines().clear();
 
-    ChePlugin chePlugin = createChePlugin("plugin1", createContainer("container1"));
+    ChePlugin chePlugin = createChePlugin("publisher/plugin1/0.2.1", createContainer("container1"));
 
     // when
     applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
@@ -421,6 +450,7 @@ public class KubernetesPluginsToolingApplierTest {
   @Test
   public void createsPodAndAddToolingIfNoPodIsPresent() throws Exception {
     internalEnvironment = spy(KubernetesEnvironment.builder().build());
+    internalEnvironment.setDevfile(new DevfileImpl());
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     machines.put(USER_MACHINE_NAME, userMachineConfig);
     internalEnvironment.getMachines().putAll(machines);
@@ -814,18 +844,19 @@ public class KubernetesPluginsToolingApplierTest {
   }
 
   private ChePlugin createChePlugin(CheContainer... containers) {
-    return createChePlugin("some-name", containers);
+    return createChePlugin("publisher/" + NameGenerator.generate("name", 3) + "/0.0.1", containers);
   }
 
-  private ChePlugin createChePlugin(String name, CheContainer... containers) {
-    String version = "0.0.3";
-    String publisher = "somePublisher";
+  private ChePlugin createChePlugin(String id, CheContainer... containers) {
+    String[] splittedId = id.split("/");
     ChePlugin plugin = new ChePlugin();
-    plugin.setName(name);
-    plugin.setPublisher(publisher);
-    plugin.setId(publisher + "/" + name + "/" + version);
-    plugin.setVersion(version);
+    plugin.setPublisher(splittedId[0]);
+    plugin.setName(splittedId[1]);
+    plugin.setVersion(splittedId[2]);
+    plugin.setId(id);
     plugin.setContainers(Arrays.asList(containers));
+
+    internalEnvironment.getDevfile().getComponents().add(new ComponentImpl("chePlugin", id));
     return plugin;
   }
 

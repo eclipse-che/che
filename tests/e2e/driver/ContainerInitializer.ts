@@ -41,6 +41,8 @@ import { OcpLoginByTempAdmin } from '../pageobjects/login/OcpLoginByTempAdmin';
 import { OpenWorkspaceWidget } from '../pageobjects/ide/OpenWorkspaceWidget';
 import { ContextMenu } from '../pageobjects/ide/ContextMenu';
 import { ITestWorkspaceUtil } from '..';
+import { CheLoginPage } from '../pageobjects/openshift/CheLoginPage';
+import { RegularUserOcpCheLoginPage } from '../pageobjects/login/RegularUserOcpCheLoginPage';
 
 export function getContainer(): Container {
     const e2eContainer = new Container();
@@ -50,7 +52,11 @@ export function getContainer(): Container {
     e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpLoginByTempAdmin).inSingletonScope();
 
     if (TestConstants.TS_SELENIUM_MULTIUSER) {
-        e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(MultiUserLoginPage).inSingletonScope();
+        if (TestConstants.TS_SELENIUM_LOGIN_CHE_OCP_USER) {
+            e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage).inSingletonScope();
+        } else {
+            e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(MultiUserLoginPage).inSingletonScope();
+        }
     } else {
         e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(SingleUserLoginPage).inSingletonScope();
     }
@@ -77,5 +83,6 @@ export function getContainer(): Container {
     e2eContainer.bind<OcpLoginPage>(CLASSES.OcpLoginPage).to(OcpLoginPage).inSingletonScope();
     e2eContainer.bind<OcpWebConsolePage>(CLASSES.OcpWebConsolePage).to(OcpWebConsolePage).inSingletonScope();
     e2eContainer.bind<OpenWorkspaceWidget>(CLASSES.OpenWorkspaceWidget).to(OpenWorkspaceWidget).inSingletonScope();
+    e2eContainer.bind<CheLoginPage>(CLASSES.CheLoginPage).to(CheLoginPage).inSingletonScope();
     return e2eContainer;
 }
