@@ -34,7 +34,7 @@ pipeline {
                                                 value: true),
 
                                         string(name: 'ghprbSourceBranch',
-                                                value: 'che-15397'),
+                                                value: 'master'),
 
                                         string(name: 'ghprbPullId',
                                                 value: ''),
@@ -68,7 +68,7 @@ pipeline {
                                                 value: true),
 
                                         string(name: 'ghprbSourceBranch',
-                                                value: 'che-15397'),
+                                                value: 'master'),
 
                                         string(name: 'ghprbPullId',
                                                 value: ''),
