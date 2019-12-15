@@ -10,6 +10,12 @@ pipeline {
 
     triggers { cron("@midnight") }
 
+    parameters {
+        string(name: 'emails',
+                defaultValue: 'dnochevn@redhat.com',
+                description: 'Comma-separated list of emails to send results')
+    }
+
     stages {
         stage("Run E2E tests") {
             parallel {
@@ -79,6 +85,18 @@ pipeline {
                                                 value: false)
                                 ]
                     }
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            script {
+                if (emails != "") {
+                    mail to: emails,
+                        subject: "Jenkins Job $currentBuild.fullDisplayName has failed.",
+                        body: "Build $currentBuild.absoluteUrl has failed."
                 }
             }
         }
