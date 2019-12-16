@@ -49,12 +49,11 @@ install_deps(){
 
 build_and_deploy_artifacts() {
     set -x
-    scl enable rh-maven33 'mvn clean install -DskipTests -T 1C -Dskip-validate-sources -Dfindbugs.skip=true'
-    #scl enable rh-maven33 'mvn -T 4 clean install -U -Pintegration'
+    scl enable rh-maven33 'mvn clean install -U -Pintegration'
     if [ $? -eq 0 ]; then
         echo 'Build Success!'
         echo 'Going to deploy artifacts'
-    #    scl enable rh-maven33 "mvn -T 4 clean deploy -Dmaven.test.skip=true -DcreateChecksum=true  -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE"
+        scl enable rh-maven33 "mvn -T 4 clean deploy -Dmaven.test.skip=true -DcreateChecksum=true  -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE"
     else
         echo 'Build Failed!'
         exit 1
