@@ -7,15 +7,9 @@ projects:
       type: git
       location: 'https://github.com/eclipse/che.git'
 components:
-  - alias: theia-editor
-    type: cheEditor
-    id: eclipse/che-theia/next
   - alias: typescript-plugin
     type: chePlugin
     id: che-incubator/typescript/1.30.2
-  - alias: exec-plugin
-    type: chePlugin
-    id: eclipse/che-machine-exec-plugin/0.0.1
   - alias: dash-dev
     type: dockerimage
     image: 'eclipse/che-dashboard-dev:nightly'
