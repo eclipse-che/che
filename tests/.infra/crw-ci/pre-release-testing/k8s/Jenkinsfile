@@ -1,0 +1,174 @@
+pipeline {
+    agent { label 'rhel7-8gb' }
+
+    options {
+        timestamps()
+        timeout(time: 2, unit: 'HOURS')
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '',
+                artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '30'))
+    }
+
+    environment {
+        YQ_TOOL_URL='https://github.com/mikefarah/yq/releases/download/2.4.0/yq_linux_amd64'
+
+        CHE_THEIA_META_YAML_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/eclipse/che-theia/next/meta.yaml'
+        VSCODE_YAML_META_YAML_DIR_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/redhat/vscode-yaml/'
+        JAVA8_META_YAML_DIR_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/redhat/java8/'
+        DEVFILE_URL="${WORKSPACE}/happy-path-workspace.yaml"
+
+        String customResourceFileContent = ""
+    }
+
+    parameters {
+        string(name: 'RELEASE_BRANCH',
+                defaultValue: "7.5.x",
+                description: 'Branch with pre-release version to take E2E Happy path test.')
+
+        string(name: 'RELEASE_VERSION',
+                defaultValue: "7.5.0",
+                description: 'Version of Che-theia')
+    }
+
+    stages {
+        stage('Prepare Happy path devfile') {
+            steps {
+                withCredentials([string(credentialsId: 'e45af3e6-8061-4d02-b187-b1c3bb133d3a', variable: 'GITHUB_TOKEN')]) {
+                    sh """
+                      wget https://raw.githubusercontent.com/eclipse/che/$RELEASE_BRANCH/tests/e2e/files/happy-path/happy-path-workspace.yaml --no-check-certificate -O $DEVFILE_URL
+                    
+                      PR_CHECK_FILES_DIR=${WORKSPACE}/pr-check-files/che/$RELEASE_VERSION
+                      PR_CHECK_FILES_GITHUB_URL="https://raw.githubusercontent.com/chepullreq4/pr-check-files/master/che/$RELEASE_VERSION"
+                    
+                      git clone https://chepullreq4:${GITHUB_TOKEN}@github.com/chepullreq4/pr-check-files.git
+                      mkdir -p \$PR_CHECK_FILES_DIR
+                    
+                      wget $YQ_TOOL_URL
+                      sudo chmod +x yq_linux_amd64
+                    
+                      wget $CHE_THEIA_META_YAML_URL -O \$PR_CHECK_FILES_DIR/che_theia_meta.yaml
+                      ./yq_linux_amd64 w -i \$PR_CHECK_FILES_DIR/che_theia_meta.yaml spec.containers[0].image eclipse/che-theia:$RELEASE_VERSION
+                      ./yq_linux_amd64 w -i \$PR_CHECK_FILES_DIR/che_theia_meta.yaml spec.initContainers[0].image eclipse/che-theia-endpoint-runtime-binary:$RELEASE_VERSION
+                    
+                      VSCODE_YAML_META_YAML_URL="$VSCODE_YAML_META_YAML_DIR_URL/\$(curl $VSCODE_YAML_META_YAML_DIR_URL/latest.txt)/meta.yaml"
+                      wget \$VSCODE_YAML_META_YAML_URL -O \$PR_CHECK_FILES_DIR/vscode_yaml_meta.yaml
+                      ./yq_linux_amd64 w -i \$PR_CHECK_FILES_DIR/vscode_yaml_meta.yaml spec.containers[0].image eclipse/che-remote-plugin-node:$RELEASE_VERSION
+                    
+                      JAVA8_META_YAML_URL="$JAVA8_META_YAML_DIR_URL/\$(curl $JAVA8_META_YAML_DIR_URL/latest.txt)/meta.yaml"
+                      wget \$JAVA8_META_YAML_URL -O \$PR_CHECK_FILES_DIR/java8_meta.yaml
+                      ./yq_linux_amd64 w -i \$PR_CHECK_FILES_DIR/java8_meta.yaml spec.containers[0].image eclipse/che-remote-plugin-runner-java8:$RELEASE_VERSION
+    
+                      # patch che/tests/e2e/files/happy-path/happy-path-workspace.yaml
+                      sed -i "s|id: eclipse/che-theia/next|alias: che-theia\\n    reference: \$PR_CHECK_FILES_GITHUB_URL/che_theia_meta.yaml|" $DEVFILE_URL
+                    
+                      sed -i "s|id: redhat/java/latest|alias: java8\\n    reference: \$PR_CHECK_FILES_GITHUB_URL/java8_meta.yaml|" $DEVFILE_URL
+                      sed -i "s|id: redhat/vscode-yaml/latest|alias: vscode_yaml\\n    reference: \$PR_CHECK_FILES_GITHUB_URL/vscode_yaml_meta.yaml|" $DEVFILE_URL
+                    
+                      cat $DEVFILE_URL
+                    
+                      cp $DEVFILE_URL \${PR_CHECK_FILES_DIR}
+                      cd \${PR_CHECK_FILES_DIR}
+                      git add -A
+                      git diff-index --quiet HEAD || git commit -m "Che $RELEASE_VERSION files for pre-release testing on Jenkins $JOB_URL"
+                      git push
+                    """
+                }
+            }
+        }
+
+        stage('Patch custom-resource.yaml') {
+            steps {
+                script {
+                    String customResourceFilePath = "${WORKSPACE}/custom-resource.yaml"
+
+                    sh """
+                        wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
+                          -O $customResourceFilePath
+                    """
+
+                    customResourceFileContent = readFile customResourceFilePath
+                    customResourceFileContent = customResourceFileContent.replace("eclipse/che-keycloak:nightly", "eclipse/che-keycloak:rc")
+                    customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-devfile-registry:nightly", "quay.io/eclipse/che-devfile-registry:$RELEASE_VERSION")
+                    customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-plugin-registry:nightly", "quay.io/eclipse/che-plugin-registry:$RELEASE_VERSION")
+                }
+            }
+        }
+
+        stage("Run E2E tests") {
+            parallel {
+                stage('Run Happy path tests against Eclipse Che release candidate') {
+                    steps {
+                        script {
+                            echo "$customResourceFileContent"
+
+                            build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
+                                    parameters: [
+                                            string(name: 'cheImageRepo',
+                                                    value: 'eclipse/che-server'),
+
+                                            string(name: 'cheImageTag',
+                                                    value: 'rc'),
+
+                                            booleanParam(name: 'buildChe',
+                                                    value: false),
+
+                                            string(name: 'ghprbSourceBranch',
+                                                    value: "$RELEASE_BRANCH"),
+
+                                            string(name: 'ghprbPullId',
+                                                    value: ''),
+
+                                            string(name: 'e2eTestToRun',
+                                                    value: 'test-happy-path'),
+
+                                            string(name: 'testWorkspaceDevfileUrl',
+                                                    value: "https://raw.githubusercontent.com/chepullreq4/pr-check-files/master/che/$RELEASE_VERSION/happy-path-workspace.yaml"),
+
+                                            text(name: 'customResourceFileContent',
+                                                    value: "$customResourceFileContent"),
+
+                                            booleanParam(name: 'createTestWorkspace',
+                                                    value: true)
+                                    ]
+                        }
+                    }
+                }
+
+                stage('Run Vert.x tests against Eclipse Che release candidate') {
+                    steps {
+                        script {
+                            build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
+                                    parameters: [
+                                            string(name: 'cheImageRepo',
+                                                    value: 'eclipse/che-server'),
+
+                                            string(name: 'cheImageTag',
+                                                    value: 'rc'),
+
+                                            booleanParam(name: 'buildChe',
+                                                    value: false),
+
+                                            string(name: 'ghprbSourceBranch',
+                                                    value: "$RELEASE_BRANCH"),
+
+                                            string(name: 'ghprbPullId',
+                                                    value: ''),
+
+                                            string(name: 'e2eTestToRun',
+                                                    value: 'test-java-vertx'),
+
+                                            string(name: 'testWorkspaceDevfileUrl',
+                                                    value: ""),
+
+                                            text(name: 'customResourceFileContent',
+                                                    value: "$customResourceFileContent"),
+
+                                            booleanParam(name: 'createTestWorkspace',
+                                                    value: false)
+                                    ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
