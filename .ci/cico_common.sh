@@ -53,7 +53,7 @@ build_and_deploy_artifacts() {
     if [ $? -eq 0 ]; then
         echo 'Build Success!'
         echo 'Going to deploy artifacts'
-        scl enable rh-maven33 "mvn -T 4 clean deploy -Dmaven.test.skip=true -DcreateChecksum=true  -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE"
+        scl enable rh-maven33 "mvn clean deploy -DcreateChecksum=true  -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE"
     else
         echo 'Build Failed!'
         exit 1
