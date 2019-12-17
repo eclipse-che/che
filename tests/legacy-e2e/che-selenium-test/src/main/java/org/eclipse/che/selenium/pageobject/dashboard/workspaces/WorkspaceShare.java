@@ -126,4 +126,9 @@ public class WorkspaceShare {
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(Locators.NO_MEMBERS_IN_ORGANIZATION_DIALOG_XPATH));
   }
+
+  public void waitNoMembersDialogClosed() {
+    seleniumWebDriverHelper.waitInvisibility(
+        By.xpath("//div[@class='md-dialog-container ng-scope']"));
+  }
 }
