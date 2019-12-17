@@ -170,7 +170,12 @@ export const TestConstants = {
     TS_SELENIUM_OCP_TEMP_ADMIN_USERNAME: process.env.TS_SELENIUM_OCP_TEMP_ADMIN_USERNAME || 'kubeadmin',
 
     /**
-     * Temp admin password used to log in OCP.
+     * Path to folder with load tests execution report.
+     */
+    TS_SELENIUM_LOAD_TEST_REPORT_FOLDER: process.env.TS_SELENIUM_LOAD_TEST_REPORT_FOLDER || './load-test-folder',
+
+    /**
+     * Enable or disable storing of execution screencast, "true" by default.
      */
     TS_SELENIUM_OCP_TEMP_ADMIN_PASSWORD: process.env.TS_SELENIUM_OCP_TEMP_ADMIN_PASSWORD || '',
 
@@ -232,5 +237,10 @@ export const TestConstants = {
     /**
      * Log level settings, possible variants: 'INFO' (by default), 'DEBUG', 'TRACE'.
      */
-    TS_SELENIUM_LOG_LEVEL: process.env.TS_SELENIUM_LOG_LEVEL || 'INFO'
+    TS_SELENIUM_LOG_LEVEL: process.env.TS_SELENIUM_LOG_LEVEL || 'INFO',
+
+    /**
+     * Running test suite - possible variants can be found in package.json scripts part.
+     */
+    TEST_SUITE: process.env.TEST_SUITE || 'test-happy-path'
 };

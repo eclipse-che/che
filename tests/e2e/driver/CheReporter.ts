@@ -83,6 +83,19 @@ class CheReporter extends mocha.reporters.Spec {
       }
     });
 
+    runner.on('pass', async (test: mocha.Test) => {
+      if (TestConstants.TEST_SUITE === 'load-test') {
+        const loadTestReportFolder: string = TestConstants.TS_SELENIUM_LOAD_TEST_REPORT_FOLDER;
+        const loadTestFilePath: string = loadTestReportFolder + '/load-test-results.txt';
+        const report = test.title + ': ' + test.duration + '\r';
+        if (!fs.existsSync(loadTestReportFolder)) {
+            fs.mkdirSync(loadTestReportFolder);
+          }
+          fs.appendFileSync(loadTestFilePath, report);
+        }
+      });
+
+
     runner.on('end', async function (test: mocha.Test) {
       // ensure that fired events done
       await driver.get().sleep(5000);
@@ -150,11 +163,9 @@ class CheReporter extends mocha.reporters.Spec {
       // stop and remove running workspace
       if (TestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
         console.log('Property DELETE_WORKSPACE_ON_FAILED_TEST se to true - trying to stop and delete running workspace.');
-        let namespace = TestConstants.TS_SELENIUM_USERNAME;
-        let workspaceId = await testWorkspaceUtil.getIdOfRunningWorkspace(namespace);
-        testWorkspaceUtil.stopWorkspaceById(workspaceId);
-        testWorkspaceUtil.removeWorkspaceById(workspaceId);
+        testWorkspaceUtil.cleanUpAllWorkspaces();
       }
+
     });
   }
 }

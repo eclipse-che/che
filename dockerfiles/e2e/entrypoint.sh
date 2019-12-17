@@ -61,4 +61,29 @@ fi
 
 
 # Launch tests
-npm run $TEST_SUITE
+if [ $TEST_SUITE == "load-test" ]; then
+  timestamp=$(date +%s)
+  user_folder="$TS_SELENIUM_USERNAME-$timestamp"
+  export TS_SELENIUM_REPORT_FOLDER="./$user_folder/report"
+  export TS_SELENIUM_LOAD_TEST_REPORT_FOLDER="./$user_folder/load-test-folder"
+  CONSOLE_LOGS="./$user_folder/console-log.txt"
+  mkdir $user_folder
+  touch $CONSOLE_LOGS
+
+  npm run $TEST_SUITE 2>&1 | tee $CONSOLE_LOGS
+
+  echo "Tarring files and sending them via FTP..."
+  tar -cf $user_folder.tar ./$user_folder
+
+  ftp -n load-tests-ftp-service << End_script 
+  user user pass1234
+  binary
+  put $user_folder.tar
+  quit
+End_script
+  
+  echo "Files sent to load-tests-ftp-service."
+else
+  echo "Running TEST_SUITE: $TEST_SUITE with user: $TS_SELENIUM_USERNAME"
+  npm run $TEST_SUITE
+fi
