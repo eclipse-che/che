@@ -304,6 +304,7 @@ export class Editor {
         for (let i = 1; i < char; i++) {
             await this.performKeyCombination(editorTabTitle, Key.ARROW_RIGHT);
         }
+        Logger.debug(`At the end of moveCursorToLineAndChar ---------`);
     }
 
     async performKeyCombination(editorTabTitle: string, text: string) {
@@ -373,46 +374,44 @@ export class Editor {
     async activateBreakpoint(tabTitle: string, lineNumber: number) {
         Logger.debug(`Editor.activateBreakpoint title: "${tabTitle}" line: "${lineNumber}"`);
 
-        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
-        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
-
-        for (let i = 0; i < attempts; i++) {
-            try {
-                await this.selectTab(tabTitle);
-                await this.moveCursorToLineAndChar(tabTitle, lineNumber, 1);
-                await this.performKeyCombination(tabTitle, Key.F9);
-                await this.waitBreakpoint(tabTitle, lineNumber);
-                return;
-            } catch (err) {
-                if (i === attempts - 1) {
-                    throw new error.TimeoutError(`Exceeded maximum breakpoint activation attempts`);
-                }
-
-                // ignore errors and wait
-                await this.driverHelper.wait(polling);
-            }
+        try {
+            await this.selectTab(tabTitle);
+            await this.moveCursorToLineAndChar(tabTitle, lineNumber, 1);
+            Logger.debug(`Add debug by Key.F9 ------`);
+            await this.performKeyCombination(tabTitle, Key.F9);
+            // hardcoded wait to be sure breakpoit is here
+            await this.driverHelper.wait(2000);
+            await this.waitBreakpoint(tabTitle, lineNumber);
+            return;
+        } catch (err) {
+            throw new error.TimeoutError(`Breakpoint was not found.`);
         }
     }
 
 
     async getLineYCoordinates(lineNumber: number): Promise<number> {
         Logger.debug(`Editor.getLineYCoordinates line: "${lineNumber}"`);
-
-        const lineNumberLocator: By = By.xpath(`//div[contains(@class, 'line-numbers') and text()='${lineNumber}']` +
+        try {
+            const lineNumberLocator: By = By.xpath(`//div[contains(@class, 'line-numbers') and text()='${lineNumber}']` +
+                `//parent::div[contains(@style, 'position')]`);
+            Logger.debug(`Trying to get element style by xpath: //div[contains(@class, 'line-numbers') and text()='${lineNumber}']` +
             `//parent::div[contains(@style, 'position')]`);
+            let elementStyleValue: string = await this.driverHelper.waitAndGetElementAttribute(lineNumberLocator, 'style');
 
-        let elementStyleValue: string = await this.driverHelper.waitAndGetElementAttribute(lineNumberLocator, 'style');
+            elementStyleValue = elementStyleValue.replace('position: absolute; top: ', '');
+            elementStyleValue = elementStyleValue.replace('px; width: 100%; height: 19px;', '');
+            const lineYCoordinate: number = Number.parseInt(elementStyleValue, 10);
 
-        elementStyleValue = elementStyleValue.replace('position: absolute; top: ', '');
-        elementStyleValue = elementStyleValue.replace('px; width: 100%; height: 19px;', '');
+            if (Number.isNaN(lineYCoordinate)) {
+                Logger.debug(`Number.isNan(lineYCoordinate) returns true!`);
+                throw new error.UnsupportedOperationError(`Failed to parse the ${elementStyleValue} row to number format`);
+            }
 
-        const lineYCoordinate: number = Number.parseInt(elementStyleValue, 10);
-
-        if (Number.isNaN(lineYCoordinate)) {
-            throw new error.UnsupportedOperationError(`Failed to parse the ${elementStyleValue} row to number format`);
+            return lineYCoordinate;
+        } catch (err) {
+            Logger.debug('Can not obtain line coordinates!');
+            throw err;
         }
-
-        return lineYCoordinate;
     }
 
     async clickOnLineAndChar(line: number, char: number) {
@@ -481,11 +480,14 @@ export class Editor {
     }
 
     private async getDebugBreakpointLocator(tabTitle: string, lineNumber: number): Promise<By> {
+        Logger.debug(`Editor.getDebugBreakpointLocator`);
         const lineYPixelCoordinates: number = await this.getLineYCoordinates(lineNumber);
-
-        return By.xpath(`//div[contains(@id, '${tabTitle}')]//div[@class='margin']` +
-            `//div[contains(@style, '${lineYPixelCoordinates}px')]` +
-            '//div[contains(@class, \'theia-debug-breakpoint\')]');
+        Logger.debug('Searching for element: ');
+        var path = `//div[contains(@id, '${tabTitle}')]//div[@class='margin']` +
+        `//div[contains(@style, '${lineYPixelCoordinates}px')]` +
+        '//div[contains(@class, \'theia-debug-breakpoint\')]';
+        Logger.debug(path);
+        return By.xpath(path);
     }
 
     private async getDebugBreakpointHintLocator(tabTitle: string, lineNumber: number): Promise<By> {
