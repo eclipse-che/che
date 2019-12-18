@@ -12,11 +12,9 @@
 'use strict';
 
 import { ICommunicationClient, CommunicationClientEvent } from './json-rpc-client';
-import * as ReconnectingWebsocket from 'reconnecting-websocket';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 
 // tslint:disable:no-any
-
-const RWS = require('reconnecting-websocket');
 
 /**
  * The implementation for JSON RPC protocol communication through websocket.
@@ -24,25 +22,25 @@ const RWS = require('reconnecting-websocket');
  * @author Ann Shumilova
  */
 export class WebsocketClient implements ICommunicationClient {
-    private websocketStream: ReconnectingWebsocket;
+    private websocketStream: ReconnectingWebSocket;
     private handlers: { [event: string]: Function[] } = {};
 
     /**
      * Performs connection to the pointed entrypoint.
      *
-     * @param entrypoint the entrypoint to connect to
+     * @param entrypointProvider the entrypoint to connect to
      */
-    connect(entrypoint: (() => string)): Promise<void> {
+    connect(entrypointProvider: (() => Promise<string>)): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.websocketStream = new RWS(entrypoint, [], {
-                connectionTimeout: 10000
+            this.websocketStream = new ReconnectingWebSocket(entrypointProvider, [], {
+                connectionTimeout: 60000
             });
             this.websocketStream.addEventListener('open', (event: Event) => {
                 const eventType: CommunicationClientEvent = 'open';
                 this.callHandlers(eventType, event);
                 resolve();
             });
-            this.websocketStream.addEventListener('error', (event: Event) => {
+            this.websocketStream.addEventListener('error', (event: ErrorEvent) => {
                 const eventType: CommunicationClientEvent = 'error';
                 this.callHandlers(eventType, event);
                 reject();
@@ -52,7 +50,7 @@ export class WebsocketClient implements ICommunicationClient {
                 const eventType: CommunicationClientEvent = 'message';
                 this.callHandlers(eventType, data);
             });
-            this.websocketStream.addEventListener('close', (event: Event) => {
+            this.websocketStream.addEventListener('close', (event: CloseEvent) => {
                 const eventType: CommunicationClientEvent = 'close';
                 this.callHandlers(eventType, event);
             });

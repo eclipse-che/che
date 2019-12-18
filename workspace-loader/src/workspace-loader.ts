@@ -322,8 +322,17 @@ export class WorkspaceLoader {
         });
     }
 
-    getAuthenticationToken(): string {
-        return this.keycloak && this.keycloak.token ? '?token=' + this.keycloak.token : '';
+    async getAuthenticationToken(): Promise<string> {
+        if (!this.keycloak) {
+            return Promise.resolve('');
+        }
+        return new Promise(resolve => {
+            this.keycloak.updateToken(5).success(() => {
+                resolve('?token=' + this.keycloak.token);
+            }).error(() => {
+                resolve('');
+            });
+        });
     }
 
 }
