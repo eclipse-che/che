@@ -39,4 +39,11 @@ export class ProjectItemCtrl {
 
   $onInit(): void { }
 
+  get workspaceName(): string {
+    if (!this.workspace) {
+      return '';
+    }
+    return this.cheWorkspace.getWorkspaceDataManager().getName(this.workspace);
+  }
+
 }
