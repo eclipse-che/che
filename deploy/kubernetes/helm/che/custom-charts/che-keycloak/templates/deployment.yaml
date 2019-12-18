@@ -30,7 +30,7 @@ spec:
     spec:
       initContainers:
       - name: wait-for-postgres
-        image: eclipse/che-endpoint-watcher:nightly
+        image: eclipse/che-endpoint-watcher:7.6.0
         env:
           - name: POD_NAMESPACE
             valueFrom:
