@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import io.fabric8.kubernetes.api.model.Container;
 import java.util.List;
-import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.commons.lang.Pair;
@@ -25,35 +25,25 @@ public class MachineResolverBuilder {
   private CheContainer cheContainer;
   private String defaultSidecarMemorySizeAttribute;
   private List<ChePluginEndpoint> containerEndpoints;
-  private Map<String, String> wsAttributes;
   private Pair<String, String> projectsRootPathEnvVar;
-  private String pluginPublisher;
-  private String pluginName;
-  private String pluginId;
+  private Component component;
 
   public MachineResolver build() {
     if (container == null
         || cheContainer == null
         || defaultSidecarMemorySizeAttribute == null
-        || wsAttributes == null
         || containerEndpoints == null
-        || projectsRootPathEnvVar == null
-        || pluginPublisher == null
-        || pluginName == null
-        || pluginId == null) {
+        || projectsRootPathEnvVar == null) {
       throw new IllegalStateException();
     }
 
     return new MachineResolver(
-        pluginPublisher,
-        pluginName,
-        pluginId,
         projectsRootPathEnvVar,
         container,
         cheContainer,
         defaultSidecarMemorySizeAttribute,
         containerEndpoints,
-        wsAttributes);
+        component);
   }
 
   public MachineResolverBuilder setContainer(Container container) {
@@ -77,29 +67,14 @@ public class MachineResolverBuilder {
     return this;
   }
 
-  public MachineResolverBuilder setAttributes(Map<String, String> wsConfigAttributes) {
-    this.wsAttributes = wsConfigAttributes;
-    return this;
-  }
-
   public MachineResolverBuilder setProjectsRootPathEnvVar(
       Pair<String, String> projectsRootPathEnvVar) {
     this.projectsRootPathEnvVar = projectsRootPathEnvVar;
     return this;
   }
 
-  public MachineResolverBuilder setPluginPublisher(String pluginPublisher) {
-    this.pluginPublisher = pluginPublisher;
-    return this;
-  }
-
-  public MachineResolverBuilder setPluginName(String pluginName) {
-    this.pluginName = pluginName;
-    return this;
-  }
-
-  public MachineResolverBuilder setPluginId(String pluginId) {
-    this.pluginId = pluginId;
+  public MachineResolverBuilder setComponent(Component component) {
+    this.component = component;
     return this;
   }
 }

@@ -42,6 +42,7 @@ import {CheInvite} from './che-invite.factory';
 import {NpmRegistry} from './npm-registry.factory';
 import {PluginRegistry} from './plugin-registry.factory';
 import {DevfileRegistry} from './devfile-registry.factory';
+import { CheDevfile } from './che-devfile.factory';
 
 export class ApiConfig {
 
@@ -77,5 +78,6 @@ export class ApiConfig {
     register.factory('npmRegistry', NpmRegistry);
     register.factory('pluginRegistry', PluginRegistry);
     register.factory('devfileRegistry', DevfileRegistry);
+    register.factory('cheDevfile', CheDevfile);
   }
 }

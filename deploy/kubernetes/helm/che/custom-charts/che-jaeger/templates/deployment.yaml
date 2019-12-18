@@ -16,6 +16,9 @@ metadata:
       jaeger-infra: jaeger-deployment
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: jaeger
   strategy:
     type: RollingUpdate
     rollingUpdate:

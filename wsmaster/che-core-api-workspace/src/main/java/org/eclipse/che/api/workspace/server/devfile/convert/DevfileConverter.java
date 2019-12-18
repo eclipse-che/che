@@ -20,9 +20,7 @@ import com.google.common.base.Strings;
 import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.devfile.Command;
-import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.workspace.server.devfile.DevfileRecipeFormatException;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
@@ -34,6 +32,7 @@ import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatExcep
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 
@@ -65,7 +64,17 @@ public class DevfileConverter {
     this.urlFileContentProvider = new URLFileContentProvider(null, urlFetcher);
   }
 
-  public WorkspaceConfig convert(Devfile devfile) throws ServerException {
+  /**
+   * Converts given {@link Devfile} into {@link WorkspaceConfigImpl workspace config}.
+   *
+   * <p>Note: some default components may be provisioned into devfile. The final devfile is
+   * accessible via {@link WorkspaceConfigImpl#getDevfile()}.
+   *
+   * @param devfile initial devfile
+   * @return constructed workspace config
+   * @throws ServerException when general devfile error occurs
+   */
+  public WorkspaceConfigImpl convert(Devfile devfile) throws ServerException {
     try {
       return devFileToWorkspaceConfig(
           new DevfileImpl(devfile), FileContentProvider.cached(urlFileContentProvider));
@@ -112,7 +121,7 @@ public class DevfileConverter {
 
     // note that component applier modifies commands in workspace config
     // so, commands should be already converted
-    for (Component component : devfile.getComponents()) {
+    for (ComponentImpl component : devfile.getComponents()) {
       ComponentToWorkspaceApplier applier = componentTypeToApplier.get(component.getType());
       if (applier == null) {
         throw new DevfileException(
@@ -129,6 +138,8 @@ public class DevfileConverter {
     }
 
     config.getAttributes().putAll(devfile.getAttributes());
+
+    config.setDevfile(devfile);
 
     return config;
   }

@@ -72,11 +72,11 @@ export class CheJsonRpcApiClient {
     /**
      * Connects to the pointed entrypoint
      *
-     * @param entrypoint entrypoint to connect to
+     * @param entrypointProvider entrypoint to connect to
      * @returns {Promise<void>} promise
      */
-    connect(entrypoint: () => string): Promise<void> {
-        return this.client.connect(entrypoint);
+    connect(entrypointProvider: () => Promise<string>): Promise<void> {
+        return this.client.connect(entrypointProvider);
     }
 
     /**

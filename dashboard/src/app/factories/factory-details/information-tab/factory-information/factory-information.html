@@ -170,10 +170,10 @@
     <div class="factory-configuration-panel">
       <md-content layout="column" layout-fill>
         <div class="json-editor" ng-if="factoryInformationController.factoryContent !== null">
-          <textarea ui-codemirror="factoryInformationController.editorOptions"
+          <div ui-monaco="factoryInformationController.editorOptions"
                     ng-model="factoryInformationController.factoryContent"
                     aria-label="Factory configuration editor"
-                    ng-change="factoryInformationController.factoryEditorOnChange()"></textarea>
+                    ng-change="factoryInformationController.factoryEditorOnChange()"></div>
         </div>
       </md-content>
       <div layout="row" flex>

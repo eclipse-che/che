@@ -127,6 +127,10 @@ declare namespace che {
       deleteTeamInvitation(teamId: string, email: string);
     }
 
+    export interface ICheDevfile {
+      fetchDevfileSchema(): ng.IPromise<any>;
+    }
+
   }
 
   export namespace resource {
@@ -480,9 +484,11 @@ declare namespace che {
 
   export interface IEditorOptions {
     mode: string;
-    lineNumbers: boolean;
-    lineWrapping: boolean;
+    lineNumbers: string;
+    wordWrap: string;
     matchBrackets: boolean;
+    lineDecorationsWidth: number;
+    lineNumbersMinChars: number;
   }
 
   export interface IValidation {

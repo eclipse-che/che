@@ -40,22 +40,6 @@ public class Constants {
   /** Action type that should be used for commands execution. */
   public static final String EXEC_ACTION_TYPE = "exec";
 
-  /**
-   * Workspace config attribute which contains comma-separated list of mappings of chePlugin
-   * component id to its name.
-   *
-   * <p>Example value:
-   *
-   * <pre>
-   * eclipse/maven-jdk8/1.0.0=mvn-stack,eclipse/theia-jdtls/0.0.3=jdt.ls
-   * </pre>
-   */
-  public static final String PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE =
-      "pluginComponentsAliases";
-
-  /** Workspace config attribute which contains cheEditor component name. */
-  public static final String EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE = "editorComponentAlias";
-
   /** Workspace command attributes that indicates with which component it is associated. */
   public static final String COMPONENT_ALIAS_COMMAND_ATTRIBUTE = "componentAlias";
 

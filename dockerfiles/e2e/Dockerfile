@@ -5,10 +5,14 @@ ENV DISPLAY=':20'
 USER root
 
 RUN apt-get update && apt-get install && \
+    apt-get install -y ftp && \
     apt-get install -y nodejs && \
     apt-get install -y npm && \
     npm install -g typescript && \
     apt-get install x11vnc -y
+
+RUN mkdir /tmp/e2e && \
+    chmod -R 777 /tmp/e2e
 
 COPY e2e/package.json e2e/package-lock.json /tmp/e2e/
 

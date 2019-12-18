@@ -13,6 +13,7 @@
 
 import { CheWorkspace, WorkspaceStatus } from '../../../components/api/workspace/che-workspace.factory';
 import IdeSvc from '../ide.service';
+import { CheKeycloak } from '../../../components/api/che-keycloak.factory';
 
 /*global $:false */
 
@@ -29,28 +30,41 @@ interface IIdeIFrameRootScope extends ng.IRootScopeService {
  */
 class IdeIFrameSvc {
 
-  static $inject = ['$window', '$location', '$rootScope', '$mdSidenav', 'cheWorkspace', 'ideSvc'];
+  static $inject = [
+    '$window',
+    '$location',
+    '$rootScope',
+    '$mdSidenav',
+    'cheWorkspace',
+    'ideSvc',
+    'cheKeycloak'
+  ];
 
   private $location: ng.ILocationService;
   private $rootScope: IIdeIFrameRootScope;
   private $mdSidenav: ng.material.ISidenavService;
   private cheWorkspace: CheWorkspace;
   private ideSvc: IdeSvc;
+  private cheKeycloak: CheKeycloak;
 
   /**
    * Default constructor that is using resource
    */
-  constructor($window: ng.IWindowService,
-              $location: ng.ILocationService,
-              $rootScope: IIdeIFrameRootScope,
-              $mdSidenav: ng.material.ISidenavService,
-              cheWorkspace: CheWorkspace,
-              ideSvc: IdeSvc) {
+  constructor(
+    $window: ng.IWindowService,
+    $location: ng.ILocationService,
+    $rootScope: IIdeIFrameRootScope,
+    $mdSidenav: ng.material.ISidenavService,
+    cheWorkspace: CheWorkspace,
+    ideSvc: IdeSvc,
+    cheKeycloak: CheKeycloak
+  ) {
     this.$location = $location;
     this.$rootScope = $rootScope;
     this.$mdSidenav = $mdSidenav;
     this.cheWorkspace = cheWorkspace;
     this.ideSvc = ideSvc;
+    this.cheKeycloak = cheKeycloak;
 
     $window.addEventListener('message', (event: any) => {
       if (!event || typeof event.data !== "string") {
@@ -63,17 +77,17 @@ class IdeIFrameSvc {
         this.showIDE();
         return;
       }
-      
+
       if ('show-workspaces' === msg) {
         this.showWorkspaces();
         return;
       }
-      
+
       if ('show-navbar' === msg) {
         this.showNavBar();
         return;
       }
-      
+
       if ('hide-navbar' === msg) {
         this.hideNavBar();
         return;
@@ -81,6 +95,11 @@ class IdeIFrameSvc {
 
       if (msg.startsWith('restart-workspace:')) {
         this.restartWorkspace(msg);
+        return;
+      }
+
+      if (msg.startsWith('update-token:')) {
+        this.updateToken(msg);
         return;
       }
 
@@ -116,10 +135,10 @@ class IdeIFrameSvc {
 
   /**
    * Restarts the workspace
-   * 
+   *
    * @param message message from Editor in format
    *                restart-workspace:${workspaceId}:${token}
-   *                Where 
+   *                Where
    *                  'restart-workspace' - action name
    *                  ${workspaceId} - workpsace ID
    *                  ${token} - Che machine token to validate
@@ -149,9 +168,22 @@ class IdeIFrameSvc {
   }
 
   /**
-  * Returns true if the user is waiting for IDE.
-  * @returns {boolean}
-  */
+   * Refreshes keycloak token if it is expiring in less than `validityTime` seconds.
+   */
+  private updateToken(msg: string): void {
+    const [actionName, validityTimeStr] = msg.split(':');
+
+    const validityTimeMs = parseInt(validityTimeStr, 10);
+    const validityTimeSec = Number.isNaN(validityTimeMs) ? 5 : Math.ceil(validityTimeMs / 1000);
+    this.cheKeycloak.updateToken(validityTimeSec).catch(() => {
+      console.warn('Cannot refresh keycloak token');
+    });
+  }
+
+  /**
+   * Returns true if the user is waiting for IDE.
+   * @returns {boolean}
+   */
   private isWaitingIDE(): boolean {
     return /\/ide\//.test(this.$location.path());
   }

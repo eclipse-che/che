@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.workspace.server.devfile.Constants;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
@@ -51,6 +50,7 @@ import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
@@ -103,7 +103,7 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
   @Override
   public void apply(
       WorkspaceConfigImpl workspaceConfig,
-      Component dockerimageComponent,
+      ComponentImpl dockerimageComponent,
       FileContentProvider contentProvider)
       throws DevfileException {
     checkArgument(workspaceConfig != null, "Workspace config must not be null");

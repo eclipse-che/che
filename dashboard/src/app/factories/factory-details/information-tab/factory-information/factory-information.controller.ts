@@ -89,7 +89,7 @@ export class FactoryInformationController {
       onLoad: ((instance: any) => {
         editorLoadedDefer.resolve(instance);
         if (instance) {
-          instance.on('blur', () => {
+          instance.onDidBlurEditorWidget(() => {
             this.showUpdateIfNecessaryDialog();
           });
         }
@@ -134,7 +134,7 @@ export class FactoryInformationController {
       if (!this.factoryContent) {
         this.editorLoadedPromise.then((instance: any) => {
           this.$timeout(() => {
-            instance.refresh();
+            instance.render(true);
           }, 500);
         });
       }

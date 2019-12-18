@@ -22,7 +22,7 @@
     </parent>
     <artifactId>che-assembly-parent</artifactId>
     <packaging>pom</packaging>
-    <name>Che IDE :: Parent</name>
+    <name>Che Assembly :: Parent</name>
     <modules>
         <module>assembly-swagger-war</module>
         <module>assembly-wsmaster-war</module>

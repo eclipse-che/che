@@ -16,6 +16,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -64,4 +65,7 @@ public interface WorkspaceConfig {
    * values.
    */
   Map<String, String> getAttributes();
+
+  /** Returns devfile that was to generating workspace config, null otherwise. */
+  Devfile getDevfile();
 }

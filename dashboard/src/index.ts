@@ -12,7 +12,11 @@
 export interface ICheWindow extends Window {
   $: Function;
   jQuery: Function;
-  CodeMirror: Function;
+  Monaco: any;
+  yamlLanguageServer: any;
+  monacoConversion: any;
+  MonacoEnvironment: any;
+  url: any;
   jsyaml: Object;
   jsonlint?: Object;
 }
@@ -24,23 +28,16 @@ const $ = require('jquery');
 windowObject.$ = $;
 windowObject.jQuery = $;
 windowObject.jsyaml = require('js-yaml');
-windowObject.CodeMirror = require('codemirror');
 if (windowObject.jsonlint === undefined) {
   windowObject.jsonlint = require('jsonlint');
 }
-/* tslint:enable */
+windowObject.monacoConversion = require('monaco-languageclient/lib/monaco-converter');
+windowObject.url = require('url');
+windowObject.Monaco = require('monaco-editor-core/esm/vs/editor/editor.main');
 
-import 'codemirror/mode/javascript/javascript';
-import 'codemirror/mode/yaml/yaml';
-import 'codemirror/mode/dockerfile/dockerfile';
-import 'codemirror/addon/lint/lint';
-import 'codemirror/addon/lint/json-lint';
-import 'codemirror/addon/edit/matchbrackets';
-import 'codemirror/addon/edit/closebrackets';
-import 'codemirror/addon/fold/foldcode';
-import 'codemirror/addon/fold/foldgutter';
-import 'codemirror/addon/fold/brace-fold';
-import 'codemirror/addon/selection/active-line';
+/* tslint:enable */
+import './monaco-env-setup';
+import './monaco-languages-setup';
 import 'angular';
 import 'angular-animate';
 import 'angular-cookies';
@@ -63,3 +60,4 @@ import '../node_modules/angular-websocket/dist/angular-websocket.min.js';
 
 // include UD app
 import './app/index.module';
+

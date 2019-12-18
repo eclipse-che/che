@@ -87,6 +87,8 @@ global:
 che:
   workspace: {}
 #    devfileRegistryUrl: "https://che-devfile-registry.openshift.io/"
+#    pluginBroker:
+#      waitTimeoutMin: "3"
 #    pluginRegistryUrl: "https://che-plugin-registry.openshift.io/v3"
 
 cheDevfileRegistry:
