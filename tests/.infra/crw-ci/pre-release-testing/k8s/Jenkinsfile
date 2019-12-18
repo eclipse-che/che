@@ -46,23 +46,12 @@ pipeline {
                       sudo chmod +x yq_linux_amd64
                     
                       wget $CHE_THEIA_META_YAML_URL -O \$PR_CHECK_FILES_DIR/che_theia_meta.yaml
-                      ./yq_linux_amd64 w -i \$PR_CHECK_FILES_DIR/che_theia_meta.yaml spec.containers[0].image eclipse/che-theia:$RELEASE_VERSION
-                      ./yq_linux_amd64 w -i \$PR_CHECK_FILES_DIR/che_theia_meta.yaml spec.initContainers[0].image eclipse/che-theia-endpoint-runtime-binary:$RELEASE_VERSION
+                      ./yq_linux_amd64 w -i \$PR_CHECK_FILES_DIR/che_theia_meta.yaml spec.containers[0].image quay.io/eclipse/che-theia:$RELEASE_VERSION
+                      ./yq_linux_amd64 w -i \$PR_CHECK_FILES_DIR/che_theia_meta.yaml spec.initContainers[0].image quay.io/eclipse/che-theia-endpoint-runtime-binary:$RELEASE_VERSION
                     
-                      VSCODE_YAML_META_YAML_URL="$VSCODE_YAML_META_YAML_DIR_URL/\$(curl $VSCODE_YAML_META_YAML_DIR_URL/latest.txt)/meta.yaml"
-                      wget \$VSCODE_YAML_META_YAML_URL -O \$PR_CHECK_FILES_DIR/vscode_yaml_meta.yaml
-                      ./yq_linux_amd64 w -i \$PR_CHECK_FILES_DIR/vscode_yaml_meta.yaml spec.containers[0].image eclipse/che-remote-plugin-node:$RELEASE_VERSION
-                    
-                      JAVA8_META_YAML_URL="$JAVA8_META_YAML_DIR_URL/\$(curl $JAVA8_META_YAML_DIR_URL/latest.txt)/meta.yaml"
-                      wget \$JAVA8_META_YAML_URL -O \$PR_CHECK_FILES_DIR/java8_meta.yaml
-                      ./yq_linux_amd64 w -i \$PR_CHECK_FILES_DIR/java8_meta.yaml spec.containers[0].image eclipse/che-remote-plugin-runner-java8:$RELEASE_VERSION
-    
                       # patch che/tests/e2e/files/happy-path/happy-path-workspace.yaml
                       sed -i "s|id: eclipse/che-theia/next|alias: che-theia\\n    reference: \$PR_CHECK_FILES_GITHUB_URL/che_theia_meta.yaml|" $DEVFILE_URL
-                    
-                      sed -i "s|id: redhat/java/latest|alias: java8\\n    reference: \$PR_CHECK_FILES_GITHUB_URL/java8_meta.yaml|" $DEVFILE_URL
-                      sed -i "s|id: redhat/vscode-yaml/latest|alias: vscode_yaml\\n    reference: \$PR_CHECK_FILES_GITHUB_URL/vscode_yaml_meta.yaml|" $DEVFILE_URL
-                    
+                  
                       cat $DEVFILE_URL
                     
                       cp $DEVFILE_URL \${PR_CHECK_FILES_DIR}
