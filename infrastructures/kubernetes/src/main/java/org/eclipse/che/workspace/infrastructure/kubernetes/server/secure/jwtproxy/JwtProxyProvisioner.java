@@ -153,8 +153,7 @@ public class JwtProxyProvisioner {
    * @param backendServiceName service name that will be exposed
    * @param backendServicePort service port that will be exposed
    * @param protocol protocol that will be used for exposed port
-   * @param serverName the name of the exposed secure server
-   * @param secureServer secure server to expose
+   * @param secureServers secure servers to expose
    * @return JWTProxy service port that expose the specified one
    * @throws InfrastructureException if any exception occurs during port exposing
    */
@@ -163,24 +162,33 @@ public class JwtProxyProvisioner {
       String backendServiceName,
       ServicePort backendServicePort,
       String protocol,
-      String serverName,
-      ServerConfig secureServer)
+      Map<String, ServerConfig> secureServers)
       throws InfrastructureException {
-    Preconditions.checkArgument(secureServer != null, "Secure server is missing");
+    Preconditions.checkArgument(
+        secureServers != null && !secureServers.isEmpty(), "Secure servers are missing");
     ensureJwtProxyInjected(k8sEnv);
 
     Set<String> excludes = new HashSet<>();
+    Boolean cookiesAuthEnabled = null;
+    for (ServerConfig config : secureServers.values()) {
+      // accumulate unsecured paths
+      if (config.getAttributes().containsKey(UNSECURED_PATHS_ATTRIBUTE)) {
+        Collections.addAll(
+            excludes, config.getAttributes().get(UNSECURED_PATHS_ATTRIBUTE).split(","));
+      }
 
-    // accumulate unsecured paths
-    if (secureServer.getAttributes().containsKey(UNSECURED_PATHS_ATTRIBUTE)) {
-      Collections.addAll(
-          excludes, secureServer.getAttributes().get(UNSECURED_PATHS_ATTRIBUTE).split(","));
+      // calculate `cookiesAuthEnabled` attributes
+      Boolean serverCookiesAuthEnabled =
+          parseBoolean(config.getAttributes().get(SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE));
+      if (cookiesAuthEnabled == null) {
+        cookiesAuthEnabled = serverCookiesAuthEnabled;
+      } else {
+        if (!cookiesAuthEnabled.equals(serverCookiesAuthEnabled)) {
+          throw new InfrastructureException(
+              "Secure servers which expose the same port should have the same `cookiesAuthEnabled` value.");
+        }
+      }
     }
-
-    // calculate `cookiesAuthEnabled` attributes
-    Boolean cookiesAuthEnabled =
-        parseBoolean(
-            secureServer.getAttributes().get(SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE));
 
     int listenPort = availablePort++;
 
@@ -200,7 +208,7 @@ public class JwtProxyProvisioner {
         excludes,
         cookiesAuthEnabled,
         cookiePathStrategy.get(serviceName, exposedPort),
-        externalServiceExposureStrategy.getExternalPath(serviceName, serverName));
+        externalServiceExposureStrategy.getExternalPath(serviceName, exposedPort.getName()));
     k8sEnv
         .getConfigMaps()
         .get(getConfigMapName())

@@ -17,10 +17,11 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Route;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
@@ -102,21 +103,34 @@ public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenSh
       ServicePort servicePort,
       Map<String, ServerConfig> externalServers) {
 
+    Map<String, ServerConfig> nonUniqueServers = new HashMap<>();
+
     for (Map.Entry<String, ServerConfig> e : externalServers.entrySet()) {
-      Route route =
+      if (e.getValue().isUnique()) {
+        Route route =
+            new RouteBuilder()
+                .withName(Names.generateName("route"))
+                .withMachineName(machineName)
+                .withTargetPort(servicePort.getName())
+                .withServer(makeValidDnsName(e.getKey()), e.getValue())
+                .withTo(serviceName)
+                .build();
+        openShiftEnvironment.getRoutes().put(route.getMetadata().getName(), route);
+      } else {
+        nonUniqueServers.put(makeValidDnsName(e.getKey()), e.getValue());
+      }
+    }
+
+    if (!nonUniqueServers.isEmpty()) {
+      Route commonRoute =
           new RouteBuilder()
-              .withName(
-                  NameGenerator.generate("route", 3)
-                      + "-"
-                      + makeValidDnsName(machineName)
-                      + "-"
-                      + makeValidDnsName(e.getKey()))
+              .withName(Names.generateName("route"))
               .withMachineName(machineName)
               .withTargetPort(servicePort.getName())
-              .withServer(makeValidDnsName(e.getKey()), e.getValue())
+              .withServers(nonUniqueServers)
               .withTo(serviceName)
               .build();
-      openShiftEnvironment.getRoutes().put(route.getMetadata().getName(), route);
+      openShiftEnvironment.getRoutes().put(commonRoute.getMetadata().getName(), commonRoute);
     }
   }
 
@@ -125,8 +139,7 @@ public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenSh
     private String name;
     private String serviceName;
     private IntOrString targetPort;
-    private String serverName;
-    private ServerConfig serverConfig;
+    private Map<String, ServerConfig> servers;
     private String machineName;
 
     private RouteBuilder withName(String name) {
@@ -145,8 +158,16 @@ public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenSh
     }
 
     private RouteBuilder withServer(String serverName, ServerConfig serverConfig) {
-      this.serverName = serverName;
-      this.serverConfig = serverConfig;
+      return withServers(ImmutableMap.of(serverName, serverConfig));
+    }
+
+    private RouteBuilder withServers(Map<String, ServerConfig> servers) {
+      if (this.servers == null) {
+        this.servers = new HashMap<>();
+      }
+
+      this.servers.putAll(servers);
+
       return this;
     }
 
@@ -163,10 +184,7 @@ public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenSh
           .withNewMetadata()
           .withName(name.replace("/", "-"))
           .withAnnotations(
-              Annotations.newSerializer()
-                  .servers(ImmutableMap.of(serverName, serverConfig))
-                  .machineName(machineName)
-                  .annotations())
+              Annotations.newSerializer().servers(servers).machineName(machineName).annotations())
           .endMetadata()
           .withNewSpec()
           .withNewTo()

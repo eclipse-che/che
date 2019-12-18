@@ -16,6 +16,7 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_UNIQUE_PART_SIZE;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
@@ -78,7 +80,10 @@ public class PreviewUrlExposer<T extends KubernetesEnvironment> {
               null,
               foundService.get().getMetadata().getName(),
               servicePort,
-              Collections.emptyMap());
+              ImmutableMap.of(
+                  command.getName(),
+                  new ServerConfigImpl(
+                      servicePort.getName(), "http", "/", Collections.emptyMap())));
         }
       } else {
         portsToProvision.add(createServicePort(port));
@@ -86,16 +91,20 @@ public class PreviewUrlExposer<T extends KubernetesEnvironment> {
     }
 
     if (!portsToProvision.isEmpty()) {
+      String serverName = generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + "-previewUrl";
       Service service =
-          new ServerServiceBuilder()
-              .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + "-previewUrl")
-              .withPorts(portsToProvision)
-              .build();
-      env.getServices().put(service.getMetadata().getName(), service);
+          new ServerServiceBuilder().withName(serverName).withPorts(portsToProvision).build();
+      env.getServices().put(serverName, service);
       portsToProvision.forEach(
           port ->
               externalServerExposer.expose(
-                  env, null, service.getMetadata().getName(), port, Collections.emptyMap()));
+                  env,
+                  null,
+                  service.getMetadata().getName(),
+                  port,
+                  ImmutableMap.of(
+                      serverName,
+                      new ServerConfigImpl(port.getName(), "http", "/", Collections.emptyMap()))));
     }
   }
 

@@ -14,8 +14,11 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -76,34 +79,71 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
       ServicePort servicePort,
       Map<String, ServerConfig> ingressesServers) {
 
-    return ingressesServers
-        .entrySet()
-        .stream()
-        .map(
-            e -> {
-              String serverName = makeValidDnsName(e.getKey());
-              ServerConfig serverConfig = e.getValue();
+    // all the unique servers need their separate ingresses. all the other servers can get lumped
+    // under a common ingress corresponding to the server and port.
+    Map<String, ServerConfig> nonUniqueServers = new HashMap<>();
 
-              ExternalServerIngressBuilder ingressBuilder = new ExternalServerIngressBuilder();
-              String host = strategy.getExternalHost(serviceName, serverName);
-              if (host != null) {
-                ingressBuilder = ingressBuilder.withHost(host);
-              }
+    // let's go through the servers. Build the unique ingresses straight away and collect the
+    // servers to be put behind the common ingress.
+    List<Ingress> ingresses =
+        ingressesServers
+            .entrySet()
+            .stream()
+            .map(
+                e -> {
+                  ServerConfig serverConfig = e.getValue();
 
-              return ingressBuilder
-                  .withPath(
-                      String.format(
-                          pathTransformFmt,
-                          ensureEndsWithSlash(strategy.getExternalPath(serviceName, serverName))))
-                  .withName(getIngressName(serviceName, serverName))
-                  .withMachineName(machineName)
-                  .withServiceName(serviceName)
-                  .withAnnotations(ingressAnnotations)
-                  .withServicePort(servicePort.getName())
-                  .withServers(ImmutableMap.of(serverName, serverConfig))
-                  .build();
-            })
-        .collect(Collectors.toList());
+                  if (!serverConfig.isUnique()) {
+                    nonUniqueServers.put(e.getKey(), serverConfig);
+                    return null;
+                  } else {
+                    return generateIngress(
+                        machineName,
+                        serviceName,
+                        e.getKey(),
+                        servicePort,
+                        ImmutableMap.of(e.getKey(), serverConfig));
+                  }
+                })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toCollection(ArrayList::new));
+
+    // now generate the common ingress unconditionally, even if there are no servers
+    if (!nonUniqueServers.isEmpty()) {
+      ingresses.add(
+          generateIngress(
+              machineName, serviceName, servicePort.getName(), servicePort, nonUniqueServers));
+    }
+
+    return ingresses;
+  }
+
+  private Ingress generateIngress(
+      String machineName,
+      String serviceName,
+      String serverId,
+      ServicePort servicePort,
+      Map<String, ServerConfig> servers) {
+
+    String serverName = makeValidDnsName(serverId);
+    ExternalServerIngressBuilder ingressBuilder = new ExternalServerIngressBuilder();
+    String host = strategy.getExternalHost(serviceName, serverName);
+    if (host != null) {
+      ingressBuilder = ingressBuilder.withHost(host);
+    }
+
+    return ingressBuilder
+        .withPath(
+            String.format(
+                pathTransformFmt,
+                ensureEndsWithSlash(strategy.getExternalPath(serviceName, serverName))))
+        .withName(getIngressName(serviceName, serverName))
+        .withMachineName(machineName)
+        .withServiceName(serviceName)
+        .withAnnotations(ingressAnnotations)
+        .withServicePort(servicePort.getName())
+        .withServers(servers)
+        .build();
   }
 
   private static String ensureEndsWithSlash(String path) {

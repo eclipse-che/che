@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
@@ -32,6 +33,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -39,6 +41,9 @@ import org.testng.annotations.Test;
 public class DefaultHostExternalServiceExposureStrategyTest {
 
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
+  private static final Map<String, String> UNIQUE_SERVER_ATTRIBUTES =
+      ImmutableMap.of("key", "value", ServerConfig.UNIQUE_SERVER_ATTRIBUTE, "true");
+
   private static final String MACHINE_NAME = "pod/main";
   private static final String SERVICE_NAME = SERVER_PREFIX + "12345678" + "-" + MACHINE_NAME;
 
@@ -93,7 +98,7 @@ public class DefaultHostExternalServiceExposureStrategyTest {
   }
 
   @Test
-  public void shouldCreateIngressForServerWhenTwoServersHasTheSamePort() {
+  public void shouldCreateSingleIngressForTwoNonUniqueServersWithTheSamePort() {
     // given
     ServerConfigImpl httpServerConfig =
         new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
@@ -132,6 +137,46 @@ public class DefaultHostExternalServiceExposureStrategyTest {
         new ServerConfigImpl(wsServerConfig).withAttributes(ATTRIBUTES_MAP));
   }
 
+  @Test
+  public void shouldCreateIngressPerUniqueServerWithTheSamePort() {
+    // given
+    ServerConfigImpl httpServerConfig =
+        new ServerConfigImpl("8080/tcp", "http", "/api", UNIQUE_SERVER_ATTRIBUTES);
+    ServerConfigImpl wsServerConfig =
+        new ServerConfigImpl("8080/tcp", "ws", "/connect", UNIQUE_SERVER_ATTRIBUTES);
+    ServicePort servicePort =
+        new ServicePortBuilder()
+            .withName("server-8080")
+            .withPort(8080)
+            .withProtocol("TCP")
+            .withTargetPort(new IntOrString(8080))
+            .build();
+
+    Map<String, ServerConfig> serversToExpose =
+        ImmutableMap.of(
+            "http-server", httpServerConfig,
+            "ws-server", wsServerConfig);
+
+    // when
+    externalServerExposer.expose(
+        kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, servicePort, serversToExpose);
+
+    // then
+    assertEquals(kubernetesEnvironment.getIngresses().size(), 2);
+    assertThatExternalServerIsExposed(
+        MACHINE_NAME,
+        SERVICE_NAME,
+        "http-server",
+        servicePort,
+        new ServerConfigImpl(httpServerConfig).withAttributes(UNIQUE_SERVER_ATTRIBUTES));
+    assertThatExternalServerIsExposed(
+        MACHINE_NAME,
+        SERVICE_NAME,
+        "ws-server",
+        servicePort,
+        new ServerConfigImpl(wsServerConfig).withAttributes(UNIQUE_SERVER_ATTRIBUTES));
+  }
+
   @SuppressWarnings("SameParameterValue")
   private void assertThatExternalServerIsExposed(
       String machineName,
@@ -141,18 +186,32 @@ public class DefaultHostExternalServiceExposureStrategyTest {
       ServerConfigImpl expected) {
 
     // ensure that required ingress is created
-    Ingress ingress = kubernetesEnvironment.getIngresses().values().iterator().next();
-    IngressRule ingressRule = ingress.getSpec().getRules().get(0);
-    IngressBackend backend = ingressRule.getHttp().getPaths().get(0).getBackend();
-    assertEquals(backend.getServiceName(), serviceName);
-    assertEquals(backend.getServicePort().getStrVal(), servicePort.getName());
+    for (Ingress ingress : kubernetesEnvironment.getIngresses().values()) {
+      IngressRule ingressRule = ingress.getSpec().getRules().get(0);
+      IngressBackend backend = ingressRule.getHttp().getPaths().get(0).getBackend();
+      if (serviceName.equals(backend.getServiceName())) {
+        assertEquals(backend.getServicePort().getStrVal(), servicePort.getName());
 
-    Annotations.Deserializer ingressAnnotations =
-        Annotations.newDeserializer(ingress.getMetadata().getAnnotations());
-    Map<String, ServerConfigImpl> servers = ingressAnnotations.servers();
-    ServerConfig serverConfig = servers.get(serverNameRegex);
-    assertEquals(serverConfig, expected);
+        Annotations.Deserializer ingressAnnotations =
+            Annotations.newDeserializer(ingress.getMetadata().getAnnotations());
+        Map<String, ServerConfigImpl> servers = ingressAnnotations.servers();
+        ServerConfig serverConfig = servers.get(serverNameRegex);
 
-    assertEquals(ingressAnnotations.machineName(), machineName);
+        if (serverConfig == null) {
+          // ok, this ingress is not for this particular server
+          continue;
+        }
+
+        assertEquals(serverConfig, expected);
+
+        assertEquals(ingressAnnotations.machineName(), machineName);
+        return;
+      }
+    }
+
+    Assert.fail(
+        format(
+            "Could not find an ingress for machine '%s' and service '%s'",
+            machineName, serviceName));
   }
 }

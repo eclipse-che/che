@@ -40,6 +40,8 @@ import org.testng.annotations.Test;
 public class MultiHostExternalServiceExposureStrategyTest {
 
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
+  private static final Map<String, String> UNIQUE_SERVER_ATTRIBUTES =
+      ImmutableMap.of("key", "value", ServerConfig.UNIQUE_SERVER_ATTRIBUTE, "true");
   private static final String MACHINE_NAME = "pod/main";
   private static final String SERVICE_NAME = SERVER_PREFIX + "12345678" + "-" + MACHINE_NAME;
   private static final String DOMAIN = "che.com";
@@ -145,6 +147,50 @@ public class MultiHostExternalServiceExposureStrategyTest {
         new ServerConfigImpl(wsServerConfig).withAttributes(ATTRIBUTES_MAP));
   }
 
+  @Test
+  public void shouldCreateIngressPerUniqueServerWithTheSamePort() {
+    // given
+    ServerConfigImpl httpServerConfig =
+        new ServerConfigImpl("8080/tcp", "http", "/api", UNIQUE_SERVER_ATTRIBUTES);
+    ServerConfigImpl wsServerConfig =
+        new ServerConfigImpl("8080/tcp", "ws", "/connect", UNIQUE_SERVER_ATTRIBUTES);
+    ServicePort servicePort =
+        new ServicePortBuilder()
+            .withName("server-8080")
+            .withPort(8080)
+            .withProtocol("TCP")
+            .withTargetPort(new IntOrString(8080))
+            .build();
+
+    Map<String, ServerConfig> serversToExpose =
+        ImmutableMap.of(
+            "http-server", httpServerConfig,
+            "ws-server", wsServerConfig);
+
+    // when
+    externalServerExposer.expose(
+        kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, servicePort, serversToExpose);
+
+    // then
+    assertEquals(kubernetesEnvironment.getIngresses().size(), 2);
+    assertThatExternalServerIsExposed(
+        MACHINE_NAME,
+        SERVICE_NAME,
+        "http-server",
+        "tcp",
+        8080,
+        servicePort,
+        new ServerConfigImpl(httpServerConfig).withAttributes(UNIQUE_SERVER_ATTRIBUTES));
+    assertThatExternalServerIsExposed(
+        MACHINE_NAME,
+        SERVICE_NAME,
+        "ws-server",
+        "tcp",
+        8080,
+        servicePort,
+        new ServerConfigImpl(wsServerConfig).withAttributes(UNIQUE_SERVER_ATTRIBUTES));
+  }
+
   private void assertThatExternalServerIsExposed(
       String machineName,
       String serviceName,
@@ -155,9 +201,11 @@ public class MultiHostExternalServiceExposureStrategyTest {
       ServerConfigImpl expected) {
 
     // ensure that required ingress is created
-    Ingress ingress = kubernetesEnvironment.getIngresses().get(serviceName + "-server-" + port);
+    String ingressName =
+        serviceName + "-" + (expected.isUnique() ? serverNameRegex : servicePort.getName());
+    Ingress ingress = kubernetesEnvironment.getIngresses().get(ingressName);
     IngressRule ingressRule = ingress.getSpec().getRules().get(0);
-    assertEquals(ingressRule.getHost(), serviceName + "-" + servicePort.getName() + "." + DOMAIN);
+    assertEquals(ingressRule.getHost(), ingressName + "." + DOMAIN);
     assertEquals(ingressRule.getHttp().getPaths().get(0).getPath(), "/");
     IngressBackend backend = ingressRule.getHttp().getPaths().get(0).getBackend();
     assertEquals(backend.getServiceName(), serviceName);

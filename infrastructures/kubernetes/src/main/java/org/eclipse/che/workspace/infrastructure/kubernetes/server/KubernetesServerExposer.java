@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 
 import static java.lang.Integer.parseInt;
 import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.INTERNAL_SERVER_ATTRIBUTE;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 
@@ -143,13 +142,13 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
 
     servers.forEach(
         (key, value) -> {
-          if ("true".equals(value.getAttributes().get(INTERNAL_SERVER_ATTRIBUTE))) {
+          if (value.isInternal()) {
             // Server is internal. It doesn't make sense to make an it secure since
             // it is available only within workspace servers
             internalServers.put(key, value);
           } else {
             // Server is external. Check if it should be secure or not
-            if ("true".equals(value.getAttributes().get(ServerConfig.SECURE_SERVER_ATTRIBUTE))) {
+            if (value.isSecure()) {
               secureServers.put(key, value);
             } else {
               externalServers.put(key, value);
