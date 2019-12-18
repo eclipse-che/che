@@ -336,9 +336,9 @@ class Loader {
 
         await new KeycloakLoader().loadKeycloakSettings();
         const workspace = await loader.asyncGetWorkspace(workspaceId);
-        await loader.asyncCheckServiceLink(workspace, redirectUrl);
+        const server = await loader.asyncCheckServiceLink(workspace, redirectUrl);
         const token = await loader.asyncGetWsToken(workspace);
-        await loader.asyncAuthenticate(redirectUrl, token);
+        await loader.asyncAuthenticate(server.url, token);
 
         window.location.replace(redirectUrl);
     } catch (errorMessage) {
