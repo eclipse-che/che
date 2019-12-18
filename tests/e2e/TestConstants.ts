@@ -30,6 +30,11 @@ export const TestConstants = {
     TS_SELENIUM_HEADLESS: process.env.TS_SELENIUM_HEADLESS === 'true',
 
     /**
+     * Disable W3C protocol, "false" by default.
+     */
+    TS_SELENIUM_W3C_CHROME_OPTION: process.env.TS_SELENIUM_W3C_CHROME_OPTION === 'true',
+
+    /**
      * Browser width resolution, "1920" by default.
      */
     TS_SELENIUM_RESOLUTION_WIDTH: Number(process.env.TS_SELENIUM_RESOLUTION_WIDTH) || 1920,
@@ -158,11 +163,6 @@ export const TestConstants = {
      * Log into CHE in MultiUser mode, "false" by default.
      */
     TS_SELENIUM_MULTIUSER: process.env.TS_SELENIUM_MULTIUSER === 'true',
-
-    /**
-     * Log into CHE by using regular user OCP, "false" by default.
-     */
-    TS_SELENIUM_LOGIN_CHE_OCP_USER: process.env.TS_SELENIUM_LOGIN_CHE_OCP_USER === 'true',
 
     /**
      * Temp admin username used to log in OCP.
