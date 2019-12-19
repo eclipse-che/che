@@ -3,6 +3,7 @@ export { inversifyConfig };
 export * from './inversify.types';
 export * from './TestConstants';
 
+export * from './driver/ChromeDriver';
 export * from './driver/IDriver';
 export * from './driver/ContainerInitializer';
 export * from './utils/Logger';
