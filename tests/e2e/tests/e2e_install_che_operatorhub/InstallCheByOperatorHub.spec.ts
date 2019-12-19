@@ -38,7 +38,7 @@ suite('E2E', async () => {
     suite('Subscribe Operator to defined namespace', async () => {
         test('Go to the OperatorHub main page', async () => {
             await ocpWebConsole.waitNavpanelOpenShift();
-            await ocpWebConsole.openOperatorHubMainPageByUrl(TestConstants.TS_SELENIUM_OPERATORHUB_PAGE_URL);
+            await ocpWebConsole.openOperatorHubMainPageByUrl(TestConstants.TS_SELENIUM_WEB_CONSOLE_OCP_URL + '/operatorhub/all-namespaces');
             await ocpWebConsole.waitOperatorHubMainPage();
         });
 

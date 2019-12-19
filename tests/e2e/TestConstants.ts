@@ -20,19 +20,14 @@ export const TestConstants = {
     TS_SELENIUM_WEB_CONSOLE_OCP_URL: process.env.TS_SELENIUM_WEB_CONSOLE_OCP_URL || 'https://console-openshift-console.apps.',
 
     /**
-     * Base URL of OperatorHub main page on the web console OpenShift
-     */
-    TS_SELENIUM_OPERATORHUB_PAGE_URL: process.env.TS_SELENIUM_OPERATORHUB_PAGE_URL || '/operatorhub/all-namespaces',
-
-    /**
      * Run browser in "Headless" (hiden) mode, "false" by default.
      */
     TS_SELENIUM_HEADLESS: process.env.TS_SELENIUM_HEADLESS === 'true',
 
     /**
-     * Disable W3C protocol, "false" by default.
+     * Run browser with an enabled or disabled W3C protocol (on Chrome  76 and upper, it is enabled by default), "true" by default.
      */
-    TS_SELENIUM_W3C_CHROME_OPTION: process.env.TS_SELENIUM_W3C_CHROME_OPTION === 'true',
+    TS_SELENIUM_W3C_CHROME_OPTION: process.env.TS_SELENIUM_W3C_CHROME_OPTION !== 'false',
 
     /**
      * Browser width resolution, "1920" by default.
