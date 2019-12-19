@@ -232,11 +232,12 @@ class Loader {
     }
 
     /**
-     * Returns `true` if any machine in workspace contains a server which matches with `redirectUrl`
+     * Finds and returns appropriate server which user request belongs to, or throw error
+     * if none is found.
      * @param {*} workspace a workspace
      * @param {string} redirectUrl a redirect URL
      */
-    asyncCheckServiceLink(workspace, redirectUrl) {
+    asyncGetMatchedServer(workspace, redirectUrl) {
         return new Promise((resolve, reject) => {
             if (!workspace.runtime) {
                 reject(new Error("Can't check service link: Workspace isn't RUNNING at the moment."));
@@ -274,6 +275,7 @@ class Loader {
     }
 
     /**
+     * Calls auth endpoint in order to accept authentication cookie.
      * @param {string} redirectUrl a redirect URL
      * @param {string} token
      */
@@ -336,9 +338,9 @@ class Loader {
 
         await new KeycloakLoader().loadKeycloakSettings();
         const workspace = await loader.asyncGetWorkspace(workspaceId);
-        await loader.asyncCheckServiceLink(workspace, redirectUrl);
+        const server = await loader.asyncGetMatchedServer(workspace, redirectUrl);
         const token = await loader.asyncGetWsToken(workspace);
-        await loader.asyncAuthenticate(redirectUrl, token);
+        await loader.asyncAuthenticate(server.url, token);
 
         window.location.replace(redirectUrl);
     } catch (errorMessage) {

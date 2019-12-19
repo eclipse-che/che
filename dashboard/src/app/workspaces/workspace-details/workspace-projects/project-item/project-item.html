@@ -30,7 +30,7 @@
          layout-align-xs="start start"
          class="che-list-item-details">
       <div flex-gt-xs="30"
-           aria-label="project-item" 
+           aria-label="project-item"
            class="che-list-item-name">
         <span class="che-xs-header noselect" hide-gt-xs>Name</span>
         <span class="che-hover project-item-name">{{projectItemCtrl.project.name}}</span>
@@ -47,7 +47,7 @@
           <a ng-if="projectItemCtrl.hasAction"
              uib-tooltip="Open in IDE"
              tooltip-append-to-body="true"
-             ng-href="#/ide/{{projectItemCtrl.workspace.namespace}}/{{projectItemCtrl.workspace.config.name}}">
+             ng-href="#/ide/{{projectItemCtrl.workspace.namespace}}/{{projectItemCtrl.workspaceName}}">
             <span class="fa fa-chevron-circle-right"></span>
           </a>
         </span>
