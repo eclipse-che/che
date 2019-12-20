@@ -13,13 +13,15 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TestConstants } from '../../TestConstants';
+import { Ide } from './Ide';
 
 @injectable()
 export class DialogWindow {
     private static readonly DIALOG_BODY_XPATH_LOCATOR: string = '//div[@id=\'theia-dialog-shell\']//div[@class=\'dialogBlock\']';
     private static readonly CLOSE_BUTTON_XPATH_LOCATOR: string = `${DialogWindow.DIALOG_BODY_XPATH_LOCATOR}//button[text()='close']`;
 
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.Ide) private readonly ide: Ide) { }
 
     async dialogDisplayes(): Promise<boolean> {
         Logger.debug('DialogWindow.dialogDisplayes');
@@ -73,6 +75,7 @@ export class DialogWindow {
         Logger.debug('DialogWindow.waitDialogAndOpenLink');
 
         await this.waitDialog(timeout, dialogText);
+        await this.ide.waitApllicationIsReady(await this.getApplicationUrlFromDialog(dialogText));
         await this.clickToOpenLinkButton();
         await this.waitDialogDissappearance();
     }
@@ -81,6 +84,19 @@ export class DialogWindow {
         Logger.debug('DialogWindow.waitDialogDissappearance');
 
         await this.driverHelper.waitDisappearanceWithTimeout(By.xpath(DialogWindow.CLOSE_BUTTON_XPATH_LOCATOR));
+    }
+
+    async getApplicationUrlFromDialog(dialogWindowText: string) {
+        const notificationTextLocator: By = By.xpath(`${DialogWindow.DIALOG_BODY_XPATH_LOCATOR}//span[contains(text(), '${dialogWindowText}')]`);
+
+        let dialogWindow = await this.driverHelper.waitAndGetText(notificationTextLocator);
+        let regexp: RegExp = new RegExp('^.*(https?://.*)$');
+
+        if (!regexp.test(dialogWindow)) {
+            throw new Error('Cannot obtaine url from notification message');
+        }
+
+        return dialogWindow.split(regexp)[1];
     }
 
 }
