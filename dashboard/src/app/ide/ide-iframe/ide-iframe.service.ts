@@ -180,11 +180,13 @@ class IdeIFrameSvc {
   private updateToken(msg: string): void {
     const [actionName, validityTimeStr] = msg.split(':');
 
-    const validityTimeMs = parseInt(validityTimeStr, 10);
-    const validityTimeSec = Number.isNaN(validityTimeMs) ? 5 : Math.ceil(validityTimeMs / 1000);
-    this.cheKeycloak.updateToken(validityTimeSec).catch(() => {
-      console.warn('Cannot refresh keycloak token');
-    });
+    if (this.cheKeycloak.isPresent()) {
+      const validityTimeMs = parseInt(validityTimeStr, 10);
+      const validityTimeSec = Number.isNaN(validityTimeMs) ? 5 : Math.ceil(validityTimeMs / 1000);
+      this.cheKeycloak.updateToken(validityTimeSec).catch(() => {
+        console.warn('Cannot refresh keycloak token');
+      });
+    }
   }
 
   /**
