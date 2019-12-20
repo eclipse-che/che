@@ -40,8 +40,6 @@ import {EditServerDialogController} from './environments/list-servers/edit-serve
 import {ListCommandsController} from './list-commands/list-commands.controller';
 import {ListCommands} from './list-commands/list-commands.directive';
 import {EditCommandDialogController} from './list-commands/edit-command-dialog/edit-command-dialog.controller';
-import {ListAgentsController} from './environments/list-agents/list-agents.controller';
-import {ListAgents} from './environments/list-agents/list-agents.directive';
 import {WorkspaceMachinesController} from './workspace-machines/workspace-machines.controller';
 import {WorkspaceMachines} from './workspace-machines/workspace-machines.directive';
 import {WorkspaceMachineItem} from './workspace-machines/machine-item/workspace-machine-item.directive';
@@ -114,8 +112,6 @@ export class WorkspaceDetailsConfig {
     register.controller('ListCommandsController', ListCommandsController);
     register.directive('listCommands', ListCommands);
     register.controller('EditCommandDialogController', EditCommandDialogController);
-    register.controller('ListAgentsController', ListAgentsController);
-    register.directive('listAgents', ListAgents);
     register.controller('WorkspaceMachinesController', WorkspaceMachinesController);
     register.directive('workspaceMachines', WorkspaceMachines);
     register.directive('workspaceMachineItem', WorkspaceMachineItem);
