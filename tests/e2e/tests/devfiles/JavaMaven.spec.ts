@@ -7,32 +7,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { NameGenerator } from '../../utils/NameGenerator';
-import { TestConstants } from '../../TestConstants';
-import { e2eContainer } from '../../inversify.config';
-import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
-import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
-import { NewWorkspace } from '../../pageobjects/dashboard/NewWorkspace';
-import { CLASSES, TYPES } from '../../inversify.types';
-import { Ide } from '../../pageobjects/ide/Ide';
-import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
-import { Editor } from '../../pageobjects/ide/Editor';
-import { TopMenu } from '../../pageobjects/ide/TopMenu';
-import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
-import { Terminal } from '../../pageobjects/ide/Terminal';
 import 'reflect-metadata';
 import { error, Key } from 'selenium-webdriver';
-import { DriverHelper } from '../../utils/DriverHelper';
+import { Container } from 'inversify';
+import { NameGenerator, TestConstants, inversifyConfig, CLASSES, Dashboard, NewWorkspace, Ide, ProjectTree, TopMenu, Editor, QuickOpenContainer, Terminal } from '../..';
 
 const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
 const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
-const sampleName: string = 'vertx-http-example';
-const fileFolderPath: string = `${sampleName}/src/main/java/io/openshift/example`;
-const tabTitle: string = 'HttpApplication.java';
-const codeNavigationClassName: string = 'RouterImpl.class';
+const sampleName: string = 'console-java-simple';
+const fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
+const tabTitle: string = 'HelloWorld.java';
+const codeNavigationClassName: string = 'String.class';
 
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
+const e2eContainer: Container = inversifyConfig.e2eContainer;
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const newWorkspace: NewWorkspace = e2eContainer.get(CLASSES.NewWorkspace);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -42,22 +29,16 @@ const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 
-suite('Java Vert.x test', async () => {
-    suite('Login and wait dashboard', async () => {
-        test('Login', async () => {
-            await driverHelper.navigateToUrl(TestConstants.TS_SELENIUM_BASE_URL);
-            await loginPage.login();
-        });
-    });
-
-    suite('Create Java Vert.x workspace ' + workspaceName, async () => {
-        test('Open \'New Workspace\' page', async () => {
+suite('Java Maven test', async () => {
+    suite('Create and run workspace ' + workspaceName, async () => {
+        test(`Open 'New Workspace' page`, async () => {
             await newWorkspace.openPageByUI();
         });
 
         test('Create and open workspace', async () => {
-            await newWorkspace.createAndOpenWorkspace(workspaceName, 'Java Vert.x');
+            await newWorkspace.createAndOpenWorkspace(workspaceName, 'Java Maven');
         });
+
     });
 
     suite('Work with IDE', async () => {
@@ -72,7 +53,31 @@ suite('Java Vert.x test', async () => {
         test('Wait project imported', async () => {
             await projectTree.waitProjectImported(sampleName, 'src');
         });
+    });
 
+    suite('Validation of workspace build and run', async () => {
+        test('Build application', async () => {
+            let taskName: string = 'maven build';
+            await runTask(taskName);
+            await quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
+            await ide.waitNotification('has exited with code 0.', 120000);
+       });
+
+        test('Close the terminal tasks', async () => {
+            await terminal.closeTerminalTab('maven build');
+        });
+
+        test('Run application', async () => {
+            let taskName: string = 'maven build and run';
+            await runTask(taskName);
+            await quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
+
+            await ide.waitNotification('has exited with code 0.', 120000);
+        });
+
+        test('Close the terminal tasks', async () => {
+            await terminal.closeTerminalTab('maven build and run');
+        });
     });
 
     suite('Language server validation', async () => {
@@ -82,7 +87,7 @@ suite('Java Vert.x test', async () => {
         });
 
         test('Java LS initialization', async () => {
-            await ide.checkLsInitializationStart('Starting Java Language Server');
+            await ide.waitStatusBarContains('Starting Java Language Server', 20000);
             await ide.waitStatusBarTextAbsence('Starting Java Language Server', 1800000);
             await ide.waitStatusBarTextAbsence('Building workspace', 360000);
         });
@@ -93,44 +98,31 @@ suite('Java Vert.x test', async () => {
             await editor.clickOnTab(tabTitle);
             await editor.waitEditorAvailable(tabTitle);
             await editor.waitTabFocused(tabTitle);
-            await editor.moveCursorToLineAndChar(tabTitle, 19, 31);
+            await editor.moveCursorToLineAndChar(tabTitle, 10, 20);
             await editor.pressControlSpaceCombination(tabTitle);
-            await editor.waitSuggestionWithScrolling(tabTitle, 'router(Vertx vertx) : Router');
+            await editor.waitSuggestion(tabTitle, 'append(char c) : PrintStream');
         });
 
         test('Error highlighting', async () => {
-            await editor.type(tabTitle, 'error', 20);
-            await editor.waitErrorInLine(21);
+            await editor.type(tabTitle, 'error', 11);
+            await editor.waitErrorInLine(11);
             await editor.performKeyCombination(tabTitle, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
-            await editor.waitErrorInLineDisappearance(21);
+            await editor.waitErrorInLineDisappearance(7);
         });
 
         test('Autocomplete', async () => {
-            await editor.moveCursorToLineAndChar(tabTitle, 19, 7);
+            await editor.moveCursorToLineAndChar(tabTitle, 10, 11);
             await editor.pressControlSpaceCombination(tabTitle);
             await editor.waitSuggestionContainer();
-            await editor.waitSuggestionWithScrolling(tabTitle, 'Router - io.vertx.ext.web');
+            await editor.waitSuggestion(tabTitle, 'System - java.lang');
         });
 
         test('Codenavigation', async () => {
-            await editor.moveCursorToLineAndChar(tabTitle, 19, 7);
+            await editor.moveCursorToLineAndChar(tabTitle, 9, 10);
             await editor.performKeyCombination(tabTitle, Key.chord(Key.CONTROL, Key.F12));
             await editor.waitEditorAvailable(codeNavigationClassName);
         });
 
-    });
-
-    suite('Validation of project build', async () => {
-        test('Build application', async () => {
-            let taskName: string = 'maven build';
-            await runTask(taskName);
-            await quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
-            await ide.waitNotification('has exited with code 0.', 60000);
-        });
-
-        test('Close the terminal tasks', async () => {
-            await terminal.closeTerminalTab('maven build');
-        });
     });
 
     suite('Stop and remove workspace', async () => {
@@ -159,5 +151,4 @@ suite('Java Vert.x test', async () => {
 
         await quickOpenContainer.clickOnContainerItem(task);
     }
-
 });
