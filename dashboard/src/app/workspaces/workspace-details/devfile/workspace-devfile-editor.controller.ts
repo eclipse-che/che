@@ -46,7 +46,10 @@ export class WorkspaceDevfileEditorController {
     mode: string,
     onLoad: Function
   };
-  private validationErrors: string[] = [];
+  private editorState: che.IValidation = {
+    isValid: true,
+    errors: []
+  };
   private devfileYaml: string;
   private saveTimeoutPromise: ng.IPromise<any>;
   private cheAPI: CheAPI;
@@ -79,10 +82,40 @@ export class WorkspaceDevfileEditorController {
       }
 
       if (angular.equals(devfile, this.workspaceDevfile) === false) {
+        Object.keys(devfile).forEach((key: string) => {
+          if (!this.workspaceDevfile[key]) {
+            delete devfile[key];
+          }
+        });
         angular.extend(devfile, this.workspaceDevfile);
         this.devfileYaml = jsyaml.safeDump(devfile);
       }
     }, true);
+  }
+
+  /**
+   * Returns the workspace devfile validation.
+   * @returns {che.IValidation}
+   */
+  workspaceDevfileValidation(): che.IValidation {
+    const validation = {
+      isValid: true,
+      errors: []
+    };
+
+    try {
+      jsyaml.safeLoad(this.devfileYaml);
+    } catch (e) {
+      if (e && e.name === 'YAMLException') {
+        validation.errors = [e.message];
+      } else {
+        validation.errors = ['Devfile is invalid.'];
+      }
+      validation.isValid = false;
+      this.$log.error(e);
+    }
+
+    return validation;
   }
 
   $onInit(): void {
@@ -117,12 +150,18 @@ export class WorkspaceDevfileEditorController {
     }
 
     this.saveTimeoutPromise = this.$timeout(() => {
-      if (this.validationErrors.length !== 0) {
+      if (!this.editorState.isValid) {
         return;
       }
 
-      angular.extend(this.workspaceDevfile, jsyaml.safeLoad(this.devfileYaml));
-      this.workspaceDevfileOnChange({devfile: this.workspaceDevfile});
+      const devfile =  jsyaml.safeLoad(this.devfileYaml);
+      Object.keys(this.workspaceDevfile).forEach((key: string) => {
+        if (!devfile[key]) {
+          delete this.workspaceDevfile[key];
+        }
+      });
+      angular.extend(this.workspaceDevfile, devfile);
+      this.workspaceDevfileOnChange({devfile});
     }, 500);
   }
 
