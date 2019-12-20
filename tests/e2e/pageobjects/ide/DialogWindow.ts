@@ -87,8 +87,7 @@ export class DialogWindow {
     }
 
     async getApplicationUrlFromDialog(dialogWindowText: string) {
-        const dialogBodyXpathLocator: string = '//div[@id=\'theia-dialog-shell\']//div[@class=\'dialogBlock\']';
-        const notificationTextLocator: By = By.xpath(`${dialogBodyXpathLocator}//span[contains(text(), '${dialogWindowText}')]`);
+        const notificationTextLocator: By = By.xpath(`${DialogWindow.DIALOG_BODY_XPATH_LOCATOR}//span[contains(text(), '${dialogWindowText}')]`);
 
         let dialogWindow = await this.driverHelper.waitAndGetText(notificationTextLocator);
         let regexp: RegExp = new RegExp('^.*(https?://.*)$');
