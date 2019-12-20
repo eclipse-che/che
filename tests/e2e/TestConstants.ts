@@ -130,9 +130,10 @@ export const TestConstants = {
     TS_SELENIUM_VALUE_SELF_SIGN_CERT: process.env.TS_SELENIUM_VALUE_SELF_SIGN_CERT || 'false',
 
     /**
-     * Value of OpenShift oAuth property in the 'Create Che Cluster' yaml using OperatorHub.
+     * Value of OpenShift oAuth property determines how to login in installed application,
+     * if 'false' as an user of application, if 'true' as a regular user of OCP.
      */
-    TS_SELENIUM_VALUE_OPENSHIFT_OAUTH: process.env.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH || 'true',
+    TS_SELENIUM_VALUE_OPENSHIFT_OAUTH: process.env.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH || 'false',
 
     /**
      * Prefix URL on deployed application by installation using OperatorHub.
