@@ -52,8 +52,6 @@ import {WorkspaceDetailsOverview} from './workspace-overview/workspace-details-o
 import {EnvVariablesController} from './workspace-machine-env-variables/env-variables.controller';
 import {EnvVariables} from './workspace-machine-env-variables/env-variables.directive';
 import {EditEnvVariableDialogController} from './workspace-machine-env-variables/edit-variable-dialog/edit-variable-dialog.controller';
-import {MachineSelectorController} from './machine-selector/machine-selector.controller';
-import {MachineSelector} from './machine-selector/machine-selector.directive';
 import {MachineServersController} from './workspace-machine-servers/machine-servers.controller';
 import {MachineServers} from './workspace-machine-servers/machine-servers.directive';
 import {EditMachineServerDialogController} from './workspace-machine-servers/edit-machine-server-dialog/edit-server-dialog.controller';
@@ -131,8 +129,6 @@ export class WorkspaceDetailsConfig {
     register.controller('MachineVolumesController', MachineVolumesController);
     register.directive('cheMachineVolumes', MachineVolumes);
     register.controller('EditMachineVolumeDialogController', EditMachineVolumeDialogController);
-    register.controller('MachineSelectorController', MachineSelectorController);
-    register.directive('cheMachineSelector', MachineSelector);
     register.controller('MachineServersController', MachineServersController);
     register.directive('cheMachineServers', MachineServers);
     register.controller('EditMachineServerDialogController', EditMachineServerDialogController);
