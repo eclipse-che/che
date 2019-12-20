@@ -24,8 +24,6 @@ import {ExportWorkspaceController} from './export-workspace/export-workspace.con
 import {ExportWorkspace} from './export-workspace/export-workspace.directive';
 import {WorkspaceDevfileEditorController} from './devfile/workspace-devfile-editor.controller';
 import {WorkspaceDevfileEditor} from './devfile/workspace-devfile-editor.directive';
-import {WorkspaceEnvironmentsController} from './environments/environments.controller';
-import {WorkspaceEnvironments} from './environments/environments.directive';
 import {ListCommandsController} from './list-commands/list-commands.controller';
 import {ListCommands} from './list-commands/list-commands.directive';
 import {EditCommandDialogController} from './list-commands/edit-command-dialog/edit-command-dialog.controller';
@@ -85,8 +83,6 @@ export class WorkspaceDetailsConfig {
     register.directive('exportWorkspace', ExportWorkspace);
     register.controller('WorkspaceDevfileEditorController', WorkspaceDevfileEditorController);
     register.directive('workspaceDevfileEditor', WorkspaceDevfileEditor);
-    register.controller('WorkspaceEnvironmentsController', WorkspaceEnvironmentsController);
-    register.directive('workspaceEnvironments', WorkspaceEnvironments);
     register.controller('ListCommandsController', ListCommandsController);
     register.directive('listCommands', ListCommands);
     register.controller('EditCommandDialogController', EditCommandDialogController);
