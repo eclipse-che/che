@@ -123,28 +123,6 @@
       </md-tab-body>
     </md-tab>
 
-    <!-- Config tab -->
-    <md-tab ng-if="workspaceDetailsController.workspaceDetails.config"
-      md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Config); isConfigActive = true"
-      md-on-deselect="isConfigActive = false">
-      <md-tab-label>
-        <i ng-show="workspaceDetailsController.checkFormsNotValid(workspaceDetailsController.tab.Config)"
-           class="error-state fa fa-exclamation-circle" aria-hidden="true"></i>
-        <span class="che-tab-label-title">Config</span>
-      </md-tab-label>
-      <md-tab-body>
-        <che-label-container che-label-name="Workspace">
-          <ng-form name="workspaceConfigForm">
-            <che-workspace-config-import
-              ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Config, workspaceConfigForm)"
-              is-active="isConfigActive"
-              workspace-config="workspaceDetailsController.workspaceDetails.config"
-              workspace-config-on-change="workspaceDetailsController.updateWorkspaceConfigImport(config)"></che-workspace-config-import>
-          </ng-form>
-        </che-label-container>
-      </md-tab-body>
-    </md-tab>
-
     <!-- SSH Tab -->
     <md-tab ng-if="workspaceDetailsController.workspaceDetails.config"
       md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.SSH);">

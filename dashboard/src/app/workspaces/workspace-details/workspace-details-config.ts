@@ -22,8 +22,6 @@ import {WorkspaceDetailsService} from './workspace-details.service';
 import {ExportWorkspaceDialogController} from './export-workspace/dialog/export-workspace-dialog.controller';
 import {ExportWorkspaceController} from './export-workspace/export-workspace.controller';
 import {ExportWorkspace} from './export-workspace/export-workspace.directive';
-import {WorkspaceConfigImportController} from './config-import/workspace-config-import.controller';
-import {WorkspaceConfigImport} from './config-import/workspace-config-import.directive';
 import {WorkspaceDevfileEditorController} from './devfile/workspace-devfile-editor.controller';
 import {WorkspaceDevfileEditor} from './devfile/workspace-devfile-editor.directive';
 import {WorkspaceEnvironmentsController} from './environments/environments.controller';
@@ -100,8 +98,6 @@ export class WorkspaceDetailsConfig {
     register.controller('ExportWorkspaceDialogController', ExportWorkspaceDialogController);
     register.controller('ExportWorkspaceController', ExportWorkspaceController);
     register.directive('exportWorkspace', ExportWorkspace);
-    register.controller('WorkspaceConfigImportController', WorkspaceConfigImportController);
-    register.directive('cheWorkspaceConfigImport', WorkspaceConfigImport);
     register.controller('WorkspaceDevfileEditorController', WorkspaceDevfileEditorController);
     register.directive('workspaceDevfileEditor', WorkspaceDevfileEditor);
     register.controller('WorkspaceEnvironmentsController', WorkspaceEnvironmentsController);
