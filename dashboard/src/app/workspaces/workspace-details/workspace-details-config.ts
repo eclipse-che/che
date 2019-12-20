@@ -26,11 +26,6 @@ import {WorkspaceDevfileEditorController} from './devfile/workspace-devfile-edit
 import {WorkspaceDevfileEditor} from './devfile/workspace-devfile-editor.directive';
 import {WorkspaceEnvironmentsController} from './environments/environments.controller';
 import {WorkspaceEnvironments} from './environments/environments.directive';
-import {WorkspaceMachineConfigController} from './environments/machine-config/machine-config.controller';
-import {WorkspaceMachineConfig} from './environments/machine-config/machine-config.directive';
-import {EditMachineNameDialogController} from './environments/machine-config/edit-machine-name-dialog/edit-machine-name-dialog.controller';
-import {DeleteDevMachineDialogController} from './environments/machine-config/delete-dev-machine-dialog/delete-dev-machine-dialog.controller';
-import {DevMachineLabel} from './environments/machine-config/dev-machine-label/dev-machine-label.directive';
 import {ListCommandsController} from './list-commands/list-commands.controller';
 import {ListCommands} from './list-commands/list-commands.directive';
 import {EditCommandDialogController} from './list-commands/edit-command-dialog/edit-command-dialog.controller';
@@ -92,11 +87,6 @@ export class WorkspaceDetailsConfig {
     register.directive('workspaceDevfileEditor', WorkspaceDevfileEditor);
     register.controller('WorkspaceEnvironmentsController', WorkspaceEnvironmentsController);
     register.directive('workspaceEnvironments', WorkspaceEnvironments);
-    register.controller('WorkspaceMachineConfigController', WorkspaceMachineConfigController);
-    register.directive('workspaceMachineConfig', WorkspaceMachineConfig);
-    register.controller('EditMachineNameDialogController', EditMachineNameDialogController);
-    register.controller('DeleteDevMachineDialogController', DeleteDevMachineDialogController);
-    register.directive('devMachineLabel', DevMachineLabel);
     register.controller('ListCommandsController', ListCommandsController);
     register.directive('listCommands', ListCommands);
     register.controller('EditCommandDialogController', EditCommandDialogController);
