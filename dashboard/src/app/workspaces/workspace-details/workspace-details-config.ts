@@ -31,9 +31,6 @@ import {WorkspaceMachineConfig} from './environments/machine-config/machine-conf
 import {EditMachineNameDialogController} from './environments/machine-config/edit-machine-name-dialog/edit-machine-name-dialog.controller';
 import {DeleteDevMachineDialogController} from './environments/machine-config/delete-dev-machine-dialog/delete-dev-machine-dialog.controller';
 import {DevMachineLabel} from './environments/machine-config/dev-machine-label/dev-machine-label.directive';
-import {ListServersController} from './environments/list-servers/list-servers.controller';
-import {ListServers} from './environments/list-servers/list-servers.directive';
-import {EditServerDialogController} from './environments/list-servers/edit-server-dialog/edit-server-dialog.controller';
 import {ListCommandsController} from './list-commands/list-commands.controller';
 import {ListCommands} from './list-commands/list-commands.directive';
 import {EditCommandDialogController} from './list-commands/edit-command-dialog/edit-command-dialog.controller';
@@ -100,9 +97,6 @@ export class WorkspaceDetailsConfig {
     register.controller('EditMachineNameDialogController', EditMachineNameDialogController);
     register.controller('DeleteDevMachineDialogController', DeleteDevMachineDialogController);
     register.directive('devMachineLabel', DevMachineLabel);
-    register.controller('ListServersController', ListServersController);
-    register.directive('listServers', ListServers);
-    register.controller('EditServerDialogController', EditServerDialogController);
     register.controller('ListCommandsController', ListCommandsController);
     register.directive('listCommands', ListCommands);
     register.controller('EditCommandDialogController', EditCommandDialogController);
