@@ -31,9 +31,6 @@ import {EditMachineDialogController} from './workspace-machines/edit-machine-dia
 import {CheWorkspaceStatusButton} from './status-button/workspace-status-button.directive';
 import {WorkspaceDetailsOverviewController} from './workspace-overview/workspace-details-overview.controller';
 import {WorkspaceDetailsOverview} from './workspace-overview/workspace-details-overview.directive';
-import {EnvVariablesController} from './workspace-machine-env-variables/env-variables.controller';
-import {EnvVariables} from './workspace-machine-env-variables/env-variables.directive';
-import {EditEnvVariableDialogController} from './workspace-machine-env-variables/edit-variable-dialog/edit-variable-dialog.controller';
 import {MachineServersController} from './workspace-machine-servers/machine-servers.controller';
 import {MachineServers} from './workspace-machine-servers/machine-servers.directive';
 import {EditMachineServerDialogController} from './workspace-machine-servers/edit-machine-server-dialog/edit-server-dialog.controller';
@@ -87,9 +84,6 @@ export class WorkspaceDetailsConfig {
     register.directive('workspaceStatusButton', CheWorkspaceStatusButton);
     register.controller('WorkspaceDetailsOverviewController', WorkspaceDetailsOverviewController);
     register.directive('workspaceDetailsOverview', WorkspaceDetailsOverview);
-    register.controller('EnvVariablesController', EnvVariablesController);
-    register.directive('cheEnvVariables', EnvVariables);
-    register.controller('EditEnvVariableDialogController', EditEnvVariableDialogController);
     register.controller('MachineVolumesController', MachineVolumesController);
     register.directive('cheMachineVolumes', MachineVolumes);
     register.controller('EditMachineVolumeDialogController', EditMachineVolumeDialogController);
