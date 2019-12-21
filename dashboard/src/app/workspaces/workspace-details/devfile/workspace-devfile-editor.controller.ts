@@ -109,7 +109,7 @@ export class WorkspaceDevfileEditorController {
       if (e && e.name === 'YAMLException') {
         validation.errors = [e.message];
       } else {
-        validation.errors = ['Devfile is invalid.'];
+        validation.errors = ['Unable to parse YAML.'];
       }
       validation.isValid = false;
       this.$log.error(e);
