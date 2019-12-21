@@ -24,9 +24,6 @@ import {ExportWorkspaceController} from './export-workspace/export-workspace.con
 import {ExportWorkspace} from './export-workspace/export-workspace.directive';
 import {WorkspaceDevfileEditorController} from './devfile/workspace-devfile-editor.controller';
 import {WorkspaceDevfileEditor} from './devfile/workspace-devfile-editor.directive';
-import {ListCommandsController} from './list-commands/list-commands.controller';
-import {ListCommands} from './list-commands/list-commands.directive';
-import {EditCommandDialogController} from './list-commands/edit-command-dialog/edit-command-dialog.controller';
 import {WorkspaceMachinesController} from './workspace-machines/workspace-machines.controller';
 import {WorkspaceMachines} from './workspace-machines/workspace-machines.directive';
 import {WorkspaceMachineItem} from './workspace-machines/machine-item/workspace-machine-item.directive';
@@ -83,9 +80,6 @@ export class WorkspaceDetailsConfig {
     register.directive('exportWorkspace', ExportWorkspace);
     register.controller('WorkspaceDevfileEditorController', WorkspaceDevfileEditorController);
     register.directive('workspaceDevfileEditor', WorkspaceDevfileEditor);
-    register.controller('ListCommandsController', ListCommandsController);
-    register.directive('listCommands', ListCommands);
-    register.controller('EditCommandDialogController', EditCommandDialogController);
     register.controller('WorkspaceMachinesController', WorkspaceMachinesController);
     register.directive('workspaceMachines', WorkspaceMachines);
     register.directive('workspaceMachineItem', WorkspaceMachineItem);
