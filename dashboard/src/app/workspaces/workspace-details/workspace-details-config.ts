@@ -37,10 +37,6 @@ import {CheRecipeService} from './che-recipe.service';
 import {CheProjectItem} from './workspace-projects/project-item/project-item.directive';
 import {ProjectItemCtrl} from './workspace-projects/project-item/project-item.controller';
 import {NoGithubOauthDialogController} from '../create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-github-project/oauth-dialog/no-github-oauth-dialog.controller';
-import {EditMachineVolumeDialogController} from './workspace-machine-volumes/edit-volume-dialog/edit-volume-dialog.controller';
-import {MachineVolumes} from './workspace-machine-volumes/machine-volumes.directive';
-import {MachineVolumesController} from './workspace-machine-volumes/machine-volumes.controller';
-
 
 /**
  * @ngdoc controller
@@ -81,9 +77,6 @@ export class WorkspaceDetailsConfig {
     register.directive('workspaceStatusButton', CheWorkspaceStatusButton);
     register.controller('WorkspaceDetailsOverviewController', WorkspaceDetailsOverviewController);
     register.directive('workspaceDetailsOverview', WorkspaceDetailsOverview);
-    register.controller('MachineVolumesController', MachineVolumesController);
-    register.directive('cheMachineVolumes', MachineVolumes);
-    register.controller('EditMachineVolumeDialogController', EditMachineVolumeDialogController);
 
     // config routes
     register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
