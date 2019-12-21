@@ -31,9 +31,6 @@ import {EditMachineDialogController} from './workspace-machines/edit-machine-dia
 import {CheWorkspaceStatusButton} from './status-button/workspace-status-button.directive';
 import {WorkspaceDetailsOverviewController} from './workspace-overview/workspace-details-overview.controller';
 import {WorkspaceDetailsOverview} from './workspace-overview/workspace-details-overview.directive';
-import {MachineServersController} from './workspace-machine-servers/machine-servers.controller';
-import {MachineServers} from './workspace-machine-servers/machine-servers.directive';
-import {EditMachineServerDialogController} from './workspace-machine-servers/edit-machine-server-dialog/edit-server-dialog.controller';
 import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
 import {WorkspaceConfigService} from '../workspace-config.service';
 import {CheRecipeService} from './che-recipe.service';
@@ -87,9 +84,6 @@ export class WorkspaceDetailsConfig {
     register.controller('MachineVolumesController', MachineVolumesController);
     register.directive('cheMachineVolumes', MachineVolumes);
     register.controller('EditMachineVolumeDialogController', EditMachineVolumeDialogController);
-    register.controller('MachineServersController', MachineServersController);
-    register.directive('cheMachineServers', MachineServers);
-    register.controller('EditMachineServerDialogController', EditMachineServerDialogController);
 
     // config routes
     register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
