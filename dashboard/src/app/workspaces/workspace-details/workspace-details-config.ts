@@ -24,10 +24,6 @@ import {ExportWorkspaceController} from './export-workspace/export-workspace.con
 import {ExportWorkspace} from './export-workspace/export-workspace.directive';
 import {WorkspaceDevfileEditorController} from './devfile/workspace-devfile-editor.controller';
 import {WorkspaceDevfileEditor} from './devfile/workspace-devfile-editor.directive';
-import {WorkspaceMachinesController} from './workspace-machines/workspace-machines.controller';
-import {WorkspaceMachines} from './workspace-machines/workspace-machines.directive';
-import {WorkspaceMachineItem} from './workspace-machines/machine-item/workspace-machine-item.directive';
-import {EditMachineDialogController} from './workspace-machines/edit-machine-dialog/edit-machine-dialog.controller';
 import {CheWorkspaceStatusButton} from './status-button/workspace-status-button.directive';
 import {WorkspaceDetailsOverviewController} from './workspace-overview/workspace-details-overview.controller';
 import {WorkspaceDetailsOverview} from './workspace-overview/workspace-details-overview.directive';
@@ -70,10 +66,6 @@ export class WorkspaceDetailsConfig {
     register.directive('exportWorkspace', ExportWorkspace);
     register.controller('WorkspaceDevfileEditorController', WorkspaceDevfileEditorController);
     register.directive('workspaceDevfileEditor', WorkspaceDevfileEditor);
-    register.controller('WorkspaceMachinesController', WorkspaceMachinesController);
-    register.directive('workspaceMachines', WorkspaceMachines);
-    register.directive('workspaceMachineItem', WorkspaceMachineItem);
-    register.controller('EditMachineDialogController', EditMachineDialogController);
     register.directive('workspaceStatusButton', CheWorkspaceStatusButton);
     register.controller('WorkspaceDetailsOverviewController', WorkspaceDetailsOverviewController);
     register.directive('workspaceDetailsOverview', WorkspaceDetailsOverview);

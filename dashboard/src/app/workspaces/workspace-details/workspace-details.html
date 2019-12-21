@@ -60,18 +60,6 @@
       </md-tab-body>
     </md-tab>
 
-    <!-- Machines tab -->
-    <md-tab ng-if="workspaceDetailsController.workspaceDetails.config"
-      md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Containers);">
-      <md-tab-label>
-        <span class="che-tab-label-title">Containers</span>
-      </md-tab-label>
-      <md-tab-body>
-        <workspace-machines workspace-details="workspaceDetailsController.workspaceDetails"
-                            on-change="workspaceDetailsController.checkEditMode()"></workspace-machines>
-      </md-tab-body>
-    </md-tab>
-
     <!-- SSH Tab -->
     <md-tab ng-if="workspaceDetailsController.workspaceDetails.config"
       md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.SSH);">
