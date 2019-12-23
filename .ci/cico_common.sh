@@ -218,7 +218,7 @@ publishImagesOnQuayLatest() {
     set -e
     set -o pipefail
 
-    TAG = $1
+    TAG=$1
     git checkout ${TAG}
     REGISTRY="quay.io"
     ORGANIZATION="eclipse"
