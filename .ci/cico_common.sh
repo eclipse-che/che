@@ -93,7 +93,7 @@ build_and_deploy_artifacts() {
 gitHttps2ssh(){
     #git remote set-url origin git@github.com:$(git remote get-url origin | sed 's/https:\/\/github.com\///' | sed 's/git@github.com://')
     #git version 1.8.3 not support get-url sub-command so hardcode url
-    git remote set-url origin git@github.com:eclipse/che-parent
+    git remote set-url origin git@github.com:eclipse/che
 }
 
 
