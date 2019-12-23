@@ -113,7 +113,14 @@ releaseProject() {
     echo ">>>>>>>>>> $tag"
     setReleaseVersionInMavenProject $tag
     git commit -asm "Release version ${tag}"
-    build_and_deploy_artifacts
+    scl enable rh-maven33 'mvn clean install -U -DskipTests=true -Dskip-validate-sources'
+    if [ $? -eq 0 ]; then
+        echo 'Build Success!'
+        echo 'Going to deploy artifacts'
+        scl enable rh-maven33 "mvn clean deploy -DcreateChecksum=true -DskipTests=true -Dskip-validate-sources -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE"
+    else
+        die_with 'Build Failed!'
+    fi
     git tag "${tag}" || die_with "Failed to create tag ${tag}! Release has been deployed, however"
     git push --tags ||  die_with "Failed to push tags. Please do this manually"
     publishImagesOnQuayLatest
