@@ -124,20 +124,6 @@ suite('E2E', async () => {
             await ocpWebConsole.logoutFromWebConsole();
             await ocpWebConsole.waitDisappearanceNavpanelOpenShift();
         });
-
-        test('Go to the insatalled application URL', async () => {
-            await ocpLoginPage.openLoginPageOpenShift(TestConstants.TS_SELENIUM_BASE_URL);
-        });
-    });
-
-    suite('Log into installed application', async () => {
-        test('Login to application', async () => {
-            cheLogin.login();
-        });
-
-        test('Wait application dashboard', async () => {
-            await dashboard.waitPage();
-        });
     });
 
 });
