@@ -172,7 +172,7 @@ parameters:
   value: 'nightly'
 - name: IMAGE_KEYCLOAK
   displayName: Keycloak Image
-  description: Keycloak Image. Defaults to docker.io/quay.io/eclipse/che-keycloak
+  description: Keycloak Image. Defaults to quay.io/eclipse/che-keycloak
   value: 'quay.io/eclipse/che-keycloak'
 - name: CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD
   displayName: Require admin password update
