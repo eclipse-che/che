@@ -106,6 +106,7 @@ setup_gitconfig() {
 
 releaseProject() {
     set -x
+    gitHttps2ssh
     git checkout -f release
     curVer=$(getCurrentVersion)
     echo ">>>>>>>> $curVer"
@@ -117,13 +118,13 @@ releaseProject() {
     if [ $? -eq 0 ]; then
         echo 'Build Success!'
         echo 'Going to deploy artifacts'
-        scl enable rh-maven33 "mvn clean deploy -DcreateChecksum=true -DskipTests=true -Dskip-validate-sources -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE"
+       # scl enable rh-maven33 "mvn clean deploy -DcreateChecksum=true -DskipTests=true -Dskip-validate-sources -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE"
     else
         die_with 'Build Failed!'
     fi
-    git tag "${tag}" || die_with "Failed to create tag ${tag}! Release has been deployed, however"
-    git push --tags ||  die_with "Failed to push tags. Please do this manually"
-    publishImagesOnQuayLatest
+   # git tag "${tag}" || die_with "Failed to create tag ${tag}! Release has been deployed, however"
+   # git push --tags ||  die_with "Failed to push tags. Please do this manually"
+    publishImagesOnQuayLatest ${tag}
     exit 0
 }
 
@@ -299,5 +300,4 @@ publishImagesOnQuayLatest() {
            exit 1
          fi
      done
-
 }
