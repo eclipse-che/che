@@ -37,7 +37,8 @@ if [ "${CHE_SELF__SIGNED__CERT}" != "" ]; then
     echo "${CHE_SELF__SIGNED__CERT}" > /scripts/openshift.cer
     keytool -importcert -alias HOSTDOMAIN -keystore /scripts/openshift.jks -file /scripts/openshift.cer -storepass openshift -noprompt
     keytool -importkeystore -srckeystore $JAVA_HOME/jre/lib/security/cacerts -destkeystore /scripts/openshift.jks -srcstorepass changeit -deststorepass openshift
-    /opt/jboss/keycloak/bin/jboss-cli.sh --file=/scripts/cli/add_openshift_certificate.cli && rm -rf /opt/jboss/keycloak/standalone/configuration/standalone_xml_history
+    /opt/jboss/keycloak/bin/jboss-cli.sh --file=/scripts/cli/add_openshift_certificate.cli && rm -f /opt/jboss/keycloak/standalone/configuration/standalone_xml_history
+    /opt/jboss/keycloak/bin/jboss-cli.sh --file=/scripts/cli/add_openshift_certificate-ha.cli
 fi
 
 # POSTGRES_PORT is assigned by Kubernetes controller
