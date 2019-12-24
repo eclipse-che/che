@@ -45,23 +45,16 @@ load_mvn_settings_gpg_key() {
     set +x
     mkdir $HOME/.m2
     #prepare settings.xml for maven and sonatype (central maven repository)
-    echo $CHE_MAVEN_SETTINGS | base64 -d > $HOME/.m2/settings.xml
+    echo ${CHE_MAVEN_SETTINGS} | base64 -d > $HOME/.m2/settings.xml
     #load GPG key for sign artifacts
-    echo $CHE_OSS_SONATYPE_GPG_KEY | base64 -d > $HOME/.m2/gpg.key
+    echo ${CHE_OSS_SONATYPE_GPG_KEY} | base64 -d > $HOME/.m2/gpg.key
     #load SSH key for release process
     echo ${#CHE_OSS_SONATYPE_GPG_KEY}
-    echo $CHE_GITHUB_SSH_KEY | base64 -d > $HOME/.ssh/id_rsa
+    echo ${CHE_GITHUB_SSH_KEY} | base64 -d > $HOME/.ssh/id_rsa
     chmod 0400 $HOME/.ssh/id_rsa
     ssh-keyscan github.com >> ~/.ssh/known_hosts
     set -x
     gpg --import $HOME/.m2/gpg.key
-}
-
-setup_gitconfig() {
-  set +x
-  git config --global github.user che-bot
-  git config --global github.token $CHE_BOT_GITHUB_TOKEN
-
 }
 
 install_deps(){
@@ -80,7 +73,7 @@ install_deps(){
 build_and_deploy_artifacts() {
     set -x
     scl enable rh-maven33 'mvn clean install -U -Pintegration'
-    if [ $? -eq 0 ]; then
+    if [[ $? -eq 0 ]]; then
         echo 'Build Success!'
         echo 'Going to deploy artifacts'
         scl enable rh-maven33 "mvn clean deploy -DcreateChecksum=true  -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE"
@@ -104,7 +97,6 @@ setup_gitconfig() {
 
 
 publishImagesOnQuayLatest() {
-
     echo "Going to build and push docker images"
     set -e
     set -o pipefail
@@ -113,11 +105,8 @@ publishImagesOnQuayLatest() {
     git checkout ${TAG}
     REGISTRY="quay.io"
     ORGANIZATION="eclipse"
-    # For pushing to quay.io 'eclipse' organization we need to use different credentials
-    QUAY_USERNAME=${QUAY_ECLIPSE_CHE_USERNAME}
-    QUAY_PASSWORD=${QUAY_ECLIPSE_CHE_PASSWORD}
-    if [ -n "${QUAY_USERNAME}" ] && [ -n "${QUAY_PASSWORD}" ]; then
-        docker login -u "${QUAY_USERNAME}" -p "${QUAY_PASSWORD}" "${REGISTRY}"
+    if [[ -n "${QUAY_USERNAME_CHE_USERNAME}" ]] && [[ -n "${QUAY_PASSWORD_CHE_PASSWORD}" ]]; then
+        docker login -u "${QUAY_USERNAME_CHE_USERNAME}" -p "${QUAY_ECLIPSE_CHE_PASSWORD}" "${REGISTRY}"
     else
       echo "Could not login, missing credentials for pushing to the '${ORGANIZATION}' organization"
       return
@@ -153,20 +142,20 @@ publishImagesOnQuayLatest() {
     # BUILD IMAGES
     for image_dir in ${DOCKER_FILES_LOCATIONS[@]}
      do
-         bash $(pwd)/$image_dir/build.sh --tag:${TAG}
-         if [ $image_dir == "dockerfiles/che" ]; then
+         bash $(pwd)/${image_dir}/build.sh --tag:${TAG}
+         if [[ ${image_dir} == "dockerfiles/che" ]]; then
            #CENTOS SINGLE USER
            BUILD_ASSEMBLY_DIR=$(echo assembly/assembly-main/target/eclipse-che-*/eclipse-che-*/)
-           LOCAL_ASSEMBLY_DIR="$image_dir/eclipse-che"
-           if [ -d "${LOCAL_ASSEMBLY_DIR}" ]; then
+           LOCAL_ASSEMBLY_DIR="${image_dir}/eclipse-che"
+           if [[ -d "${LOCAL_ASSEMBLY_DIR}" ]]; then
                rm -r "${LOCAL_ASSEMBLY_DIR}"
            fi
            cp -r "${BUILD_ASSEMBLY_DIR}" "${LOCAL_ASSEMBLY_DIR}"
-           docker build -t ${ORGANIZATION}/che-server:${TAG}-centos -f $(pwd)/$image_dir/Dockerfile.centos $(pwd)/$image_dir/
+           docker build -t ${ORGANIZATION}/che-server:${TAG}-centos -f $(pwd)/${image_dir}/Dockerfile.centos $(pwd)/${image_dir}/
          fi
-         if [ $? -ne 0 ]; then
+         if [[ $? -ne 0 ]]; then
            echo "ERROR:"
-           echo "build of '$image_dir' image is failed!"
+           echo "build of '${image_dir}' image is failed!"
            exit 1
          fi
      done
@@ -176,22 +165,22 @@ publishImagesOnQuayLatest() {
      do
          docker tag "${image}:${TAG}" "${REGISTRY}/${image}:${TAG}"
          echo y | docker push "${REGISTRY}/${image}:${TAG}"
-         if [ $2 == "pushLatest" ]; then
+         if [[ $2 == "pushLatest" ]]; then
             docker tag "${image}:${TAG}" "${REGISTRY}/${image}:latest"
             echo y | docker push "${REGISTRY}/${image}:latest"
          fi
 
-         if [ $image == "${ORGANIZATION}/che-server" ]; then
+         if [[ ${image} == "${ORGANIZATION}/che-server" ]]; then
            docker tag "${image}:${TAG}" "${REGISTRY}/${image}:${TAG}-centos"
            echo y | docker push "${REGISTRY}/${ORGANIZATION}/che-server:${TAG}-centos"
-           if [ $2 == "pushLatest" ]; then
+           if [[ $2 == "pushLatest" ]]; then
                docker tag "${image}:${TAG}" "${REGISTRY}/${image}:latest-centos"
                echo y | docker push "${REGISTRY}/${ORGANIZATION}/che-server:latest-centos"
            fi
          fi
-         if [ $? -ne 0 ]; then
+         if [[ $? -ne 0 ]]; then
            echo "ERROR:"
-           echo "docker push of '$image' image is failed!"
+           echo "docker push of '${image}' image is failed!"
            exit 1
          fi
      done
@@ -202,13 +191,12 @@ releaseProject() {
     gitHttps2ssh
     git checkout -f release
     curVer=$(getCurrentVersion)
-    echo ">>>>>>>> $curVer"
-    tag=$(getReleaseVersion $curVer)
-    echo ">>>>>>>>>> $tag"
-    setReleaseVersionInMavenProject $tag
+    tag=$(getReleaseVersion ${curVer})
+    echo "Release version ${tag}"
+    setReleaseVersionInMavenProject ${tag}
     git commit -asm "Release version ${tag}"
     scl enable rh-maven33 'mvn clean install -U -DskipTests=true -Dskip-validate-sources'
-    if [ $? -eq 0 ]; then
+    if [[ $? -eq 0 ]]; then
         echo 'Build Success!'
         echo 'Going to deploy artifacts'
         scl enable rh-maven33 "mvn clean deploy -DcreateChecksum=true -DskipTests=true -Dskip-validate-sources -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE"
