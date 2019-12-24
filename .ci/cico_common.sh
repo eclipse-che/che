@@ -263,7 +263,7 @@ publishImagesOnQuayLatest() {
     # BUILD IMAGES
     for image_dir in ${DOCKER_FILES_LOCATIONS[@]}
      do
-         bash $(pwd)/$image_dir/build.sh
+         bash $(pwd)/$image_dir/build.sh --tag:${TAG}
          if [ $image_dir == "dockerfiles/che" ]; then
            #CENTOS SINGLE USER
            BUILD_ASSEMBLY_DIR=$(echo assembly/assembly-main/target/eclipse-che-*/eclipse-che-*/)
