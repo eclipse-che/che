@@ -11,7 +11,6 @@
  */
 'use strict';
 
-import {CheWorkspaceAgent, IWorkspaceAgentData} from '../che-workspace-agent';
 import {CheJsonRpcMasterApi} from '../json-rpc/che-json-rpc-master-api';
 import {CheJsonRpcApi} from '../json-rpc/che-json-rpc-api.factory';
 import {IObservableCallbackFn, Observable} from '../../utils/observable';
@@ -67,7 +66,6 @@ export class CheWorkspace {
   private workspaceStatuses: Array<string>;
   private workspaces: Array<che.IWorkspace>;
   private subscribedWorkspacesIds: Array<string>;
-  private workspaceAgents: Map<string, CheWorkspaceAgent>;
   private workspacesByNamespace: Map<string, Array<che.IWorkspace>>;
   private workspacesById: Map<string, che.IWorkspace>;
   private remoteWorkspaceAPI: ICHELicenseResource<any>;
@@ -122,9 +120,6 @@ export class CheWorkspace {
 
     // per namespace
     this.workspacesByNamespace = new Map();
-
-    // workspace agents per workspace id:
-    this.workspaceAgents = new Map();
 
     // listeners if workspaces are changed/updated
     this.listeners = [];
@@ -194,56 +189,6 @@ export class CheWorkspace {
       return;
     }
     observable.unsubscribe(action);
-  }
-
-  /**
-   * Gets workspace agent
-   * @param workspaceId {string}
-   * @returns {CheWorkspaceAgent}
-   */
-  getWorkspaceAgent(workspaceId: string): CheWorkspaceAgent {
-    if (this.workspaceAgents.has(workspaceId)) {
-      return this.workspaceAgents.get(workspaceId);
-    }
-    const runtimeConfig = this.getWorkspaceById(workspaceId).runtime;
-    if (runtimeConfig) {
-      const machineToken = runtimeConfig.machineToken;
-      const machines = runtimeConfig.machines;
-      let wsAgentLink: any;
-      let wsAgentWebocketLink: any;
-      Object.keys(machines).forEach((key: string) => {
-        const machine = machines[key];
-        if (machine.servers[WS_AGENT_HTTP_LINK]) {
-          wsAgentLink = machine.servers[WS_AGENT_HTTP_LINK];
-        }
-        if (machine.servers[WS_AGENT_WS_LINK]) {
-          wsAgentWebocketLink = machine.servers[WS_AGENT_WS_LINK];
-        }
-      });
-
-      if (!wsAgentLink) {
-        return null;
-      }
-
-      const workspaceAgentData: IWorkspaceAgentData = {
-        path: wsAgentLink.url,
-        websocket: wsAgentWebocketLink.url,
-        clientId: this.cheJsonRpcMasterApi.getClientId(),
-        machineToken: machineToken
-      };
-      const wsagent: CheWorkspaceAgent = new CheWorkspaceAgent(this.$resource, this.$q, this.$websocket, workspaceAgentData);
-      this.workspaceAgents.set(workspaceId, wsagent);
-      return wsagent;
-    }
-    return null;
-  }
-
-  /**
-   * Gets all workspace agents of this remote
-   * @returns {Map<string, CheWorkspaceAgent>}
-   */
-  getWorkspaceAgents(): Map<string, CheWorkspaceAgent> {
-    return this.workspaceAgents;
   }
 
   /**

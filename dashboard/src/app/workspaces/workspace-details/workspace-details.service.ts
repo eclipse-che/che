@@ -401,12 +401,6 @@ export class WorkspaceDetailsService {
       hasProjectsToDelete = projectNamesToDelete.length > 0;
 
     return this.cheWorkspace.updateWorkspace(workspace.id, workspace)
-      .then(() => {
-        if (!hasProjectsToDelete) {
-          return this.$q.when();
-        }
-        return this.workspaceDetailsProjectsService.deleteSelectedProjects(workspace.id, projectNamesToDelete);
-      })
       .catch((error: any) => {
         this.$log.error(error);
         return this.$q.reject(error);

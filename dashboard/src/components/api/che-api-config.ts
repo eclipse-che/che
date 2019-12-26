@@ -24,7 +24,6 @@ import {CheHttpBackendFactory} from './test/che-http-backend.factory';
 import {CheAPIBuilder} from './builder/che-api-builder.factory';
 import {CheRemote} from './remote/che-remote.factory';
 import {CheOAuthProvider} from './che-o-auth-provider.factory';
-import {CheAgent} from './che-agent.factory';
 import {CheSsh} from './che-ssh.factory';
 import {CheNamespaceRegistry} from './namespace/che-namespace-registry.factory';
 import {CheUser} from './che-user.factory';
@@ -58,7 +57,6 @@ export class ApiConfig {
     register.factory('cheAPI', CheAPI);
     register.factory('cheRemote', CheRemote);
     register.factory('cheOAuthProvider', CheOAuthProvider);
-    register.factory('cheAgent', CheAgent);
     register.factory('cheSsh', CheSsh);
     register.factory('cheNamespaceRegistry', CheNamespaceRegistry);
     register.factory('cheUser', CheUser);
