@@ -105,8 +105,8 @@ publishImagesOnQuayLatest() {
     git checkout ${TAG}
     REGISTRY="quay.io"
     ORGANIZATION="eclipse"
-    if [[ -n "${QUAY_USERNAME_CHE_USERNAME}" ]] && [[ -n "${QUAY_PASSWORD_CHE_PASSWORD}" ]]; then
-        docker login -u "${QUAY_USERNAME_CHE_USERNAME}" -p "${QUAY_ECLIPSE_CHE_PASSWORD}" "${REGISTRY}"
+    if [[ -n "${QUAY_ECLIPSE_CHE_USERNAME}" ]] && [[ -n "${QUAY_ECLIPSE_CHE_PASSWORD}" ]]; then
+        docker login -u "${QUAY_ECLIPSE_CHE_USERNAME}" -p "${QUAY_ECLIPSE_CHE_PASSWORD}" "${REGISTRY}"
     else
       echo "Could not login, missing credentials for pushing to the '${ORGANIZATION}' organization"
       return
