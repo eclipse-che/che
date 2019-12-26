@@ -32,7 +32,7 @@
             <che-steps-container class="load-factory-working-log"
                                  che-all-steps="loadFactoryController.getLoadingSteps()"
                                  che-current-step="loadFactoryController.getCurrentProgressStep()">
-                                 <che-description ng-show="loadFactoryController.factory && !loadFactoryController.isSupportedVersion()===true" class="load-factory-warning-info">
+                                 <che-description ng-show="loadFactoryController.factory===true && loadFactoryController.isSupported()===false" class="load-factory-warning-info">
                                     This factory is using old workspace definition format which is not compatible anymore.
                                     Please follow the <a ng-href="{{branding.docs.workspace}}" target="_blank">documentation</a> to update the definition of the workspace and benefits from the latest capabilities.
                                  </che-description>
@@ -51,7 +51,7 @@
                    layout="column" layout-align="start end">
                 <div layout="row" layout-align="center stretch">
                     <che-button-primary che-button-title="Continue the process manually"
-                                        ng-hide="loadFactoryController.isSupportedVersion()"
+                                        ng-hide="loadFactoryController.isSupported()"
                                         ng-click="loadFactoryController.redirectToCreateWorkspace()"></che-button-primary>
                    <che-button-danger che-button-title="{{loadFactoryController.isResourceProblem() ? 'Stop running workspaces' :  'Retry'}}"
                                       ng-click="loadFactoryController.resetLoadFactoryInProgress()"

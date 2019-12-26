@@ -12,13 +12,10 @@
 'use strict';
 
 import {CheWorkspaceAgent, IWorkspaceAgentData} from '../che-workspace-agent';
-import {CheEnvironmentRegistry} from '../environment/che-environment-registry.factory';
 import {CheJsonRpcMasterApi} from '../json-rpc/che-json-rpc-master-api';
 import {CheJsonRpcApi} from '../json-rpc/che-json-rpc-api.factory';
 import {IObservableCallbackFn, Observable} from '../../utils/observable';
 import {CheBranding} from '../../branding/che-branding.factory';
-import {CheEnvironmentManager} from '../environment/che-environment-manager.factory';
-import {CheRecipeTypes} from '../recipe/che-recipe-types';
 import {CheNotification} from '../../notification/che-notification.factory';
 import {WorkspaceDataManager} from './workspace-data-manager';
 
@@ -58,7 +55,7 @@ export enum WorkspaceStatus {
  */
 export class CheWorkspace {
 
-  static $inject = ['$resource', '$http', '$q', 'cheJsonRpcApi', 'cheNotification', '$websocket', '$location', 'proxySettings', 'userDashboardConfig', 'lodash', 'cheEnvironmentRegistry', 'cheBranding', 'keycloakAuth', 'cheEnvironmentManager'];
+  static $inject = ['$resource', '$http', '$q', 'cheJsonRpcApi', 'cheNotification', '$websocket', '$location', 'proxySettings', 'userDashboardConfig', 'lodash', 'cheBranding'];
 
   private $resource: ng.resource.IResourceService;
   private $http: ng.IHttpService;
@@ -105,10 +102,8 @@ export class CheWorkspace {
               proxySettings: string,
               userDashboardConfig: any,
               lodash: any,
-              cheEnvironmentRegistry: CheEnvironmentRegistry,
-              cheBranding: CheBranding,
-              keycloakAuth: any,
-              cheEnvironmentManager: CheEnvironmentManager) {
+              cheBranding: CheBranding
+  ) {
     this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
     // keep resource
     this.$q = $q;
@@ -158,8 +153,6 @@ export class CheWorkspace {
       }
     );
 
-    let recipeTypes: Array<string> = CheRecipeTypes.getValues();
-
     const CONTEXT_FETCHER_ID = 'websocketContextFetcher';
     const callback = () => {
       this.jsonRpcApiLocation = this.formJsonRpcApiLocation($location, proxySettings, userDashboardConfig.developmentMode) + cheBranding.getWebsocketContext();
@@ -167,16 +160,6 @@ export class CheWorkspace {
       cheBranding.unregisterCallback(CONTEXT_FETCHER_ID);
     };
     cheBranding.registerCallback(CONTEXT_FETCHER_ID, callback.bind(this));
-
-    this.fetchWorkspaceSettings().finally(() => {
-      // update recipe types
-      recipeTypes = lodash.uniq(recipeTypes.concat(this.getSupportedRecipeTypes()));
-      recipeTypes.forEach((recipeType: string) => {
-        // add environment managers
-        const environmentManager = cheEnvironmentManager.create(recipeType);
-        cheEnvironmentRegistry.addEnvironmentManager(recipeType, environmentManager);
-      });
-    });
 
     this.checkWorkspaceLoader(userDashboardConfig.developmentMode, proxySettings);
   }
@@ -455,85 +438,6 @@ export class CheWorkspace {
     return this.remoteWorkspaceAPI.deleteProject({workspaceId: workspaceId, path: path}).$promise;
   }
 
-  /**
-   * Prepares workspace config using the data in provided one,
-   * workspace name, machine source, RAM.
-   *
-   * @param config {any} provided base workspace config
-   * @param workspaceName {string} workspace name
-   * @param source {any} machine source
-   * @param ram {number} workspace's RAM
-   * @returns {any} prepared workspace config
-   */
-  formWorkspaceConfig(config: any, workspaceName: string, source: any, ram: number): any {
-    config = config || {};
-    config.name = workspaceName;
-    config.projects = [];
-    config.defaultEnv = config.defaultEnv || workspaceName;
-    config.description = null;
-    ram = ram || 2 * Math.pow(1024, 3);
-
-    // check environments were provided in config:
-    config.environments = (config.environments && Object.keys(config.environments).length > 0) ? config.environments : {};
-
-    let defaultEnvironment = config.environments[config.defaultEnv];
-
-    // check default environment is provided and add if there is no:
-    if (!defaultEnvironment) {
-      defaultEnvironment = {
-        'recipe': null,
-        'machines': {
-          'dev-machine': {
-            'attributes': {'memoryLimitBytes': ram}
-          }
-        }
-      };
-
-      config.environments[config.defaultEnv] = defaultEnvironment;
-    }
-
-    if (source && source.type && source.type === 'environment') {
-      let contentType = source.format === 'dockerfile' ? 'text/x-dockerfile' : 'application/x-yaml';
-      defaultEnvironment.recipe = {
-        'type': source.format,
-        'contentType': contentType
-      };
-
-      defaultEnvironment.recipe.content = source.content || null;
-      defaultEnvironment.recipe.location = source.location || null;
-    }
-
-    if (defaultEnvironment.recipe && defaultEnvironment.recipe.type === 'compose') {
-      return config;
-    }
-
-    let devMachine = this.lodash.find(defaultEnvironment.machines, (machine: any) => {
-      return machine.installers.indexOf('org.eclipse.che.ws-agent') >= 0;
-    });
-
-    // check dev machine is provided and add if there is no:
-    if (!devMachine) {
-      devMachine = {
-        'name': 'ws-machine',
-        'attributes': {'memoryLimitBytes': ram},
-        'type': 'docker'
-      };
-      defaultEnvironment.machines[devMachine.name] = devMachine;
-    } else {
-      if (devMachine.attributes) {
-        if (!devMachine.attributes.memoryLimitBytes) {
-          devMachine.attributes.memoryLimitBytes = ram;
-        }
-      } else {
-        devMachine.attributes = {'memoryLimitBytes': ram};
-      }
-    }
-    if (source) {
-      devMachine.source = source;
-    }
-
-    return config;
-  }
 
   createWorkspace(namespace: string, workspaceName: string, source: any, ram: number, attributes: any): ng.IPromise<any> {
     let data = this.formWorkspaceConfig({}, workspaceName, source, ram);
@@ -793,20 +697,6 @@ export class CheWorkspace {
       return this.$q.reject(error);
     });
   }
-
-  /**
-   * Returns list of supported recipe types.
-   *
-   * @returns {string[]}
-   */
-  getSupportedRecipeTypes(): string[] {
-    if (!this.workspaceSettings || !this.workspaceSettings.supportedRecipeTypes) {
-      return [];
-    }
-
-    return this.workspaceSettings.supportedRecipeTypes.split(',');
-  }
-
   /**
    * Returns the system settings for workspaces.
    *

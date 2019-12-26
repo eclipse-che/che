@@ -134,11 +134,11 @@ export class LoadFactoryService {
    * @param factory {che.IFactory}
    * @returns {boolean}
    */
-  isSupportedVersion(factory: che.IFactory): boolean {
+  isSupported(factory: che.IFactory): boolean {
     if (!factory) {
       return false;
     }
-    return this.workspacesService.isSupportedVersion({ 
+    return this.workspacesService.isSupported({
       config: factory.workspace,
       devfile: factory.devfile
     });

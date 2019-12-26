@@ -11,7 +11,6 @@
  */
 'use strict';
 import {CheFactory} from '../../../../components/api/che-factory.factory';
-import {CheEnvironmentRegistry} from '../../../../components/api/environment/che-environment-registry.factory';
 import {LoadFactoryService} from '../../../factories/load-factory/load-factory.service';
 
 /**
@@ -20,11 +19,10 @@ import {LoadFactoryService} from '../../../factories/load-factory/load-factory.s
  */
 export class FactoryItemController {
 
-  static $inject = ['$location', 'cheFactory', 'cheEnvironmentRegistry', 'lodash', 'loadFactoryService'];
+  static $inject = ['$location', 'cheFactory', 'lodash', 'loadFactoryService'];
 
   private $location: ng.ILocationService;
   private cheFactory: CheFactory;
-  private cheEnvironmentRegistry: CheEnvironmentRegistry;
   private lodash: any;
   private factory: che.IFactory;
   private loadFactoryService: LoadFactoryService;
@@ -34,12 +32,10 @@ export class FactoryItemController {
    */
   constructor($location: ng.ILocationService,
               cheFactory: CheFactory,
-              cheEnvironmentRegistry: CheEnvironmentRegistry,
               lodash: any,
               loadFactoryService: LoadFactoryService) {
     this.$location = $location;
     this.cheFactory = cheFactory;
-    this.cheEnvironmentRegistry = cheEnvironmentRegistry;
     this.lodash = lodash;
     this.loadFactoryService =  loadFactoryService;
   }
@@ -50,8 +46,8 @@ export class FactoryItemController {
    * Returns `true` if supported version of factory workspace.
    * @returns {boolean}
    */
-  isSupportedVersion(): boolean {
-    return this.loadFactoryService.isSupportedVersion(this.factory);
+  isSupported(): boolean {
+    return this.loadFactoryService.isSupported(this.factory);
   }
 
   /**
@@ -76,26 +72,8 @@ export class FactoryItemController {
    * @returns {string} display value of memory limit
    */
   getMemoryLimit(): string {
-    if (!this.factory.workspace || !this.factory.workspace.defaultEnv) {
-      return '-';
-    }
-
-    let defaultEnvName = this.factory.workspace.defaultEnv;
-    let environment = this.factory.workspace.environments[defaultEnvName];
-
-    let recipeType = environment.recipe.type;
-    let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
-    let machines = environmentManager.getMachines(environment);
-
-    let limits = this.lodash.pluck(machines, 'attributes.memoryLimitBytes');
-    let total = 0;
-    limits.forEach((limit: number) => {
-      if (limit) {
-        total += limit / (1024 * 1024);
-      }
-    });
-
-    return (total > 0) ? total + ' MB' : '-';
+    return '-';
   }
+
 }
 

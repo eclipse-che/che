@@ -108,8 +108,6 @@ describe(`WorkspaceDetailsController >`, () => {
       })
       .service('workspacesService', function() {
         this.isSupported = () => { return true; };
-        this.isSupportedVersion = () => { return true; };
-        this.isSupportedRecipeType = () => { return true; };
       })
       .service('$route', function() {
         this.current = {
@@ -687,11 +685,6 @@ describe(`WorkspaceDetailsController >`, () => {
           compileDirective();
 
           (controller as any).workspacesService.isSupported = jasmine.createSpy('workspaceDetailsController.isSupported')
-            .and
-            .callFake(() => {
-              return false;
-            });
-          (controller as any).workspacesService.isSupportedRecipeType = jasmine.createSpy('workspaceDetailsController.isSupportedRecipeType')
             .and
             .callFake(() => {
               return false;

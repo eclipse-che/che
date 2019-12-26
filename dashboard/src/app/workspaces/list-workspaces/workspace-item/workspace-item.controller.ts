@@ -38,7 +38,6 @@ export class WorkspaceItemCtrl {
   workspaceName: string;
   workspaceSupportIssues: any;
 
-  private supportedRecipeTypeIssue: any;
   private supportedVersionTypeIssue: any;
   private timeoutPromise: ng.IPromise<any>;
 
@@ -59,8 +58,6 @@ export class WorkspaceItemCtrl {
     this.workspacesService = workspacesService;
     this.$timeout = $timeout;
     this.$document = $document;
-
-    this.supportedRecipeTypeIssue = $sce.trustAsHtml('Current infrastructure doesn\'t support this workspace recipe type.');
 
     this.supportedVersionTypeIssue = $sce.trustAsHtml(`This workspace is using old definition format which is not compatible anymore.
           Please follow the <a href="${cheBranding.getDocs().converting}" target="_blank">documentation</a>
@@ -98,13 +95,7 @@ export class WorkspaceItemCtrl {
    * @returns {boolean}
    */
   get isSupported(): boolean {
-    if (!this.workspacesService.isSupportedRecipeType(this.workspace)) {
-      if (this.workspaceSupportIssues !== this.supportedRecipeTypeIssue) {
-        this.workspaceSupportIssues = this.supportedRecipeTypeIssue;
-      }
-
-      return false;
-    } else if (!this.workspacesService.isSupportedVersion(this.workspace)) {
+    if (!this.workspacesService.isSupported(this.workspace)) {
       if (this.workspaceSupportIssues !== this.supportedVersionTypeIssue) {
         this.workspaceSupportIssues = this.supportedVersionTypeIssue;
       }
@@ -125,31 +116,8 @@ export class WorkspaceItemCtrl {
     this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspaceName).search({tab: tab ? tab : 'Overview'});
   }
 
-  getDefaultEnvironment(workspace: che.IWorkspace): che.IWorkspaceEnvironment {
-    let environments = workspace.config.environments;
-    let envName = workspace.config.defaultEnv;
-    let defaultEnvironment = environments[envName];
-    return defaultEnvironment;
-  }
-
   getMemoryLimit(workspace: che.IWorkspace): string {
-    if (!workspace.config && workspace.devfile) {
       return '-';
-    }
-
-    let environment = this.getDefaultEnvironment(workspace);
-    if (environment) {
-      let limits = this.lodash.pluck(environment.machines, 'attributes.memoryLimitBytes');
-      let total = 0;
-      limits.forEach((limit: number) => {
-        if (limit) {
-          total += limit / (1024 * 1024);
-        }
-      });
-      return (total > 0) ? Math.round(total) + ' MB' : '-';
-    }
-
-    return '-';
   }
 
   setTemporaryFocus(elementId?: string): void {

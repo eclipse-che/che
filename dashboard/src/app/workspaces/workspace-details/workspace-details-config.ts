@@ -29,7 +29,6 @@ import {WorkspaceDetailsOverviewController} from './workspace-overview/workspace
 import {WorkspaceDetailsOverview} from './workspace-overview/workspace-details-overview.directive';
 import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
 import {WorkspaceConfigService} from '../workspace-config.service';
-import {CheRecipeService} from './che-recipe.service';
 import {CheProjectItem} from './workspace-projects/project-item/project-item.directive';
 import {ProjectItemCtrl} from './workspace-projects/project-item/project-item.controller';
 import {NoGithubOauthDialogController} from '../create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-github-project/oauth-dialog/no-github-oauth-dialog.controller';
@@ -52,7 +51,6 @@ export class WorkspaceDetailsConfig {
     register.directive('workspaceDetailsProjects', WorkspaceDetailsProjects);
     register.service('workspaceDetailsProjectsService', WorkspaceDetailsProjectsService);
 
-    register.service('cheRecipeService', CheRecipeService);
     register.service('workspaceDetailsService', WorkspaceDetailsService);
 
     register.directive('cheProjectItem', CheProjectItem);

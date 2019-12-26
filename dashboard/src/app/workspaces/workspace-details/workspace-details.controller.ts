@@ -69,7 +69,6 @@ export class WorkspaceDetailsController {
   private workspaceName: string = '';
   private newName: string = '';
   private initialWorkspaceDetails: che.IWorkspace = {};
-  private workspaceImportedRecipe: che.IRecipe;
   private forms: Map<string, ng.IFormController> = new Map();
   private tab: { [key: string]: string } = {};
   private errorMessage: string = '';
@@ -223,14 +222,6 @@ export class WorkspaceDetailsController {
     return this.workspacesService.isSupported(this.workspaceDetails);
   }
 
-  get isSupportedVersion(): boolean {
-    return this.workspacesService.isSupportedVersion(this.workspaceDetails);
-  }
-
-  get isSupportedRecipeType(): boolean {
-    return this.workspacesService.isSupportedRecipeType(this.workspaceDetails);
-  }
-
   /**
    * Update tabs.
    */
@@ -332,11 +323,7 @@ export class WorkspaceDetailsController {
    * @returns {string}
    */
   getOverlayMessage(): string {
-    if (!this.isSupportedRecipeType) {
-      return `Current infrastructure doesn't support this workspace recipe type.`;
-    }
-
-    if (!this.isSupportedVersion) {
+    if (!this.isSupported) {
       return `This workspace is using old definition format which is not compatible anymore.`;
     }
 
@@ -592,7 +579,7 @@ export class WorkspaceDetailsController {
   get warningMessage(): any {
     let message = '';
 
-    if (!this.isSupportedVersion) {
+    if (!this.isSupported) {
       message += `This workspace is using old definition format which is not compatible anymore.
       Please follow the <a href="${this.cheBranding.getDocs().converting}" target="_blank">documentation</a>
       to update the definition of the workspace and benefits from the latest capabilities.`;
@@ -606,7 +593,7 @@ export class WorkspaceDetailsController {
   }
 
   get hasWarningMessage(): boolean {
-    return !this.isSupportedVersion || this.hasSelectedDeprecatedEditor || this.hasSelectedDeprecatedPlugins;
+    return !this.isSupported || this.hasSelectedDeprecatedEditor || this.hasSelectedDeprecatedPlugins;
   }
 
   private updateDeprecatedInfo() {
