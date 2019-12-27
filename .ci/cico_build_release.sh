@@ -17,5 +17,7 @@
 load_jenkins_vars
 load_mvn_settings_gpg_key
 install_deps
+setup_gitconfig
 releaseProject
+
 
