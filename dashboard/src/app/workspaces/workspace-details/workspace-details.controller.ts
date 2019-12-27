@@ -181,14 +181,14 @@ export class WorkspaceDetailsController {
       },
       applyButton: {
         action: () => {
-          this.applyConfigChanges();
+          this.applyChanges();
         },
         disabled: true,
         title: 'Apply'
       },
       saveButton: {
         action: () => {
-          this.saveConfigChanges();
+          this.saveChanges();
         },
         title: 'Save',
         disabled: true
@@ -418,13 +418,13 @@ export class WorkspaceDetailsController {
   /**
    * Applies workspace config changes and restarts the workspace.
    */
-  applyConfigChanges(): void {
+  applyChanges(): void {
     this.editOverlayConfig.disabled = true;
 
     this.loading = true;
     this.$scope.$broadcast('edit-workspace-details', { status: 'saving' });
 
-    this.workspaceDetailsService.applyConfigChanges(this.workspaceDetails)
+    this.workspaceDetailsService.applyChanges(this.workspaceDetails)
       .then(() => {
         this.workspaceDetailsService.removeModified(this.workspaceId);
         this.cheNotification.showInfo('Workspace updated.');
@@ -450,7 +450,7 @@ export class WorkspaceDetailsController {
    * Updates workspace with new config.
    *
    */
-  saveConfigChanges(): void {
+  saveChanges(): void {
     const notifyRestart = this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.STARTING]
       || this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.RUNNING];
 
@@ -459,7 +459,7 @@ export class WorkspaceDetailsController {
     this.loading = true;
     this.$scope.$broadcast('edit-workspace-details', { status: 'saving' });
 
-    this.workspaceDetailsService.saveConfigChanges(this.workspaceDetails)
+    this.workspaceDetailsService.saveChanges(this.workspaceDetails)
       .then(() => {
         this.workspaceDetailsService.setModified(this.workspaceId, { isSaved: true });
 

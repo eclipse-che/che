@@ -238,7 +238,7 @@ export class ListOrganizationWorkspacesController {
 
         // delete stopped workspace
         let promise = stoppedStatusPromise.then(() => {
-          return this.cheWorkspace.deleteWorkspaceConfig(workspaceId);
+          return this.cheWorkspace.deleteWorkspace(workspaceId);
         }).catch((error: any) => {
           isError = true;
         });

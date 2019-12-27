@@ -425,10 +425,10 @@ export class CheWorkspace {
 
   /**
    * Starts a temporary workspace by specifying configuration
-   * @param workspaceConfig {che.IWorkspaceConfig}
+   * @param workspaceConfig {che.IWorkspaceDevfile}
    * @returns {ng.IPromise<any>} promise
    */
-  startTemporaryWorkspace(workspaceConfig: che.IWorkspaceConfig): ng.IPromise<any> {
+  startTemporaryWorkspace(workspaceConfig: che.IWorkspaceDevfile): ng.IPromise<any> {
     return this.remoteWorkspaceAPI.startTemporaryWorkspace({}, workspaceConfig).$promise;
   }
 
