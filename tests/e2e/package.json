@@ -13,6 +13,7 @@
     "test-operatorhub-installation": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-che-operatorhub.opts",
     "test-wkspc-creation-and-ls": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-wkspc-creation-and-ls.opts",
     "test-java-vertx": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-java-vertx.opts",
+    "test-all-devfiles": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-all-devfiles.opts",
     "lint": "tslint --fix -p .",
     "tsc": "tsc -p ."
   },

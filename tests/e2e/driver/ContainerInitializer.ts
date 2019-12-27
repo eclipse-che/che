@@ -52,7 +52,7 @@ export function getContainer(): Container {
     e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpLoginByTempAdmin).inSingletonScope();
 
     if (TestConstants.TS_SELENIUM_MULTIUSER) {
-        if (TestConstants.TS_SELENIUM_LOGIN_CHE_OCP_USER) {
+        if (JSON.parse(TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH)) {
             e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage).inSingletonScope();
         } else {
             e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(MultiUserLoginPage).inSingletonScope();

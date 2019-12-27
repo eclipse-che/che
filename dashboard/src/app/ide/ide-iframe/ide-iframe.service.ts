@@ -31,6 +31,7 @@ interface IIdeIFrameRootScope extends ng.IRootScopeService {
 class IdeIFrameSvc {
 
   static $inject = [
+    '$q',
     '$window',
     '$location',
     '$rootScope',
@@ -40,6 +41,7 @@ class IdeIFrameSvc {
     'cheKeycloak'
   ];
 
+  private $q: ng.IQService;
   private $location: ng.ILocationService;
   private $rootScope: IIdeIFrameRootScope;
   private $mdSidenav: ng.material.ISidenavService;
@@ -51,6 +53,7 @@ class IdeIFrameSvc {
    * Default constructor that is using resource
    */
   constructor(
+    $q: ng.IQService,
     $window: ng.IWindowService,
     $location: ng.ILocationService,
     $rootScope: IIdeIFrameRootScope,
@@ -59,6 +62,7 @@ class IdeIFrameSvc {
     ideSvc: IdeSvc,
     cheKeycloak: CheKeycloak
   ) {
+    this.$q = $q;
     this.$location = $location;
     this.$rootScope = $rootScope;
     this.$mdSidenav = $mdSidenav;
@@ -140,30 +144,33 @@ class IdeIFrameSvc {
    *                restart-workspace:${workspaceId}:${token}
    *                Where
    *                  'restart-workspace' - action name
-   *                  ${workspaceId} - workpsace ID
+   *                  ${workspaceId} - workspace ID
    *                  ${token} - Che machine token to validate
    */
   private restartWorkspace(message: string): void {
-    // cut action name
-    message = message.substring(message.indexOf(':') + 1);
+    const [actionName, workspaceId, token] = message.split(':');
 
-    // get workpsace ID
-    const workspaceId = message.substring(0, message.indexOf(':'));
+    // validate machine token if it's necessary
+    const machineTokenValidationDefer = this.$q.defer<void>();
+    if (this.cheKeycloak.isPresent()) {
+      this.cheWorkspace.validateMachineToken(workspaceId, token).then(() => {
+        machineTokenValidationDefer.resolve();
+      }, () => {
+        machineTokenValidationDefer.reject('Machine token is not valid.');
+      });
+    } else {
+      machineTokenValidationDefer.resolve();
+    }
 
-    // get Che machine token
-    const token = message.substring(message.indexOf(':') + 1);
-
-    this.cheWorkspace.validateMachineToken(workspaceId, token).then(() => {
-
+    // restart the workspace
+    machineTokenValidationDefer.promise.then(() => {
       this.cheWorkspace.fetchStatusChange(workspaceId, WorkspaceStatus[WorkspaceStatus.STOPPING]).then(() => {
         this.ideSvc.reloadIdeFrame();
       });
 
-      this.cheWorkspace.stopWorkspace(workspaceId).catch((error) => {
-        console.error('Unable to stop workspace. ', error);
-      });
-    }).catch(() => {
-      console.error('Unable to stop workspace: token is not valid.');
+      return this.cheWorkspace.stopWorkspace(workspaceId);
+    }).catch((err: any) => {
+      console.error('Unable to stop workspace:', err);
     });
   }
 
@@ -173,11 +180,13 @@ class IdeIFrameSvc {
   private updateToken(msg: string): void {
     const [actionName, validityTimeStr] = msg.split(':');
 
-    const validityTimeMs = parseInt(validityTimeStr, 10);
-    const validityTimeSec = Number.isNaN(validityTimeMs) ? 5 : Math.ceil(validityTimeMs / 1000);
-    this.cheKeycloak.updateToken(validityTimeSec).catch(() => {
-      console.warn('Cannot refresh keycloak token');
-    });
+    if (this.cheKeycloak.isPresent()) {
+      const validityTimeMs = parseInt(validityTimeStr, 10);
+      const validityTimeSec = Number.isNaN(validityTimeMs) ? 5 : Math.ceil(validityTimeMs / 1000);
+      this.cheKeycloak.updateToken(validityTimeSec).catch(() => {
+        console.warn('Cannot refresh keycloak token');
+      });
+    }
   }
 
   /**

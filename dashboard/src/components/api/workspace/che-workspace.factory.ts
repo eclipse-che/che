@@ -409,14 +409,14 @@ export class CheWorkspace {
 
   /**
    * Validates machine token for the workspace
-   * 
+   *
    * @param workspaceId workspace ID
    * @param token Che machine token
    */
-  validateMachineToken(workspaceId: string, token: string): ng.IPromise<any> {
-    const defer = this.$q.defer();
+  validateMachineToken(workspaceId: string, token: string): ng.IPromise<void> {
+    const defer = this.$q.defer<void>();
 
-    const promise: ng.IHttpPromise<any> = this.$http.get(`/api/workspace/${workspaceId}`, {
+    const promise: ng.IHttpPromise<che.IWorkspace> = this.$http.get(`/api/workspace/${workspaceId}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
