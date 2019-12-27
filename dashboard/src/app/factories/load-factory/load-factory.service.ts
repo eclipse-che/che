@@ -139,7 +139,6 @@ export class LoadFactoryService {
       return false;
     }
     return this.workspacesService.isSupported({
-      config: factory.workspace,
       devfile: factory.devfile
     });
   }

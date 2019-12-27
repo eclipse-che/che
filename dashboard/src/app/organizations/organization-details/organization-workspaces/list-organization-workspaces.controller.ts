@@ -317,24 +317,7 @@ export class ListOrganizationWorkspacesController {
    * @returns {string}
    */
   getMemoryLimit(workspace: che.IWorkspace): string {
-    if (!workspace.config && workspace.devfile) {
-      return '-';
-    }
-
-    const environment = workspace.config.environments[workspace.config.defaultEnv];
-    if (!environment) {
-      return '-';
-    }
-
-    let limits = this.lodash.pluck(environment.machines, 'attributes.memoryLimitBytes');
-    let total = 0;
-    limits.forEach((limit: number) => {
-      if (limit) {
-        total += limit / (1024 * 1024);
-      }
-    });
-
-    return (total > 0) ? Math.round(total) + ' MB' : '-';
+    return '-';
   }
 
   /**

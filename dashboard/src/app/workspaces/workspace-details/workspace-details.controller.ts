@@ -128,9 +128,7 @@ export class WorkspaceDetailsController {
     this.workspaceId = initData.workspaceDetails.id;
 
     const action = (newWorkspaceDetails: che.IWorkspace) => {
-      if (this.initialWorkspaceDetails.config && angular.equals(newWorkspaceDetails.config, this.initialWorkspaceDetails.config)) {
-        return;
-      } else if (this.initialWorkspaceDetails.devfile && angular.equals(newWorkspaceDetails.devfile, this.initialWorkspaceDetails.devfile)) {
+      if (this.initialWorkspaceDetails.devfile && angular.equals(newWorkspaceDetails.devfile, this.initialWorkspaceDetails.devfile)) {
         return;
       }
 
@@ -151,7 +149,7 @@ export class WorkspaceDetailsController {
     this.initialWorkspaceDetails = angular.copy(initData.workspaceDetails);
     this.workspaceDetails = angular.copy(initData.workspaceDetails);
     this.updateDeprecatedInfo();
-    this.TAB = this.workspaceDetails.config ? ['Overview', 'Projects', 'Containers', 'Servers', 'Env_Variables', 'Volumes', 'Config', 'SSH', 'Plugins', 'Editors'] : ['Overview', 'Projects', 'Plugins', 'Editors', 'Devfile'];
+    this.TAB = ['Overview', 'Projects', 'Plugins', 'Editors', 'Devfile'];
     this.updateTabs();
 
     this.updateSelectedTab(this.$location.search().tab);
@@ -392,13 +390,7 @@ export class WorkspaceDetailsController {
   }
 
   onWorkspaceChanged(): void {
-    let isModified: boolean;
-    let needRestart: boolean;
-    if (this.initialWorkspaceDetails.config) {
-      ({ isModified, needRestart } = this.isModifiedConfig());
-    } else {
-      ({ isModified, needRestart } = this.isModifiedDevfile());
-    }
+    let { isModified, needRestart } = this.isModifiedDevfile();
 
     if (this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.STARTING]
       || this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.RUNNING]) {
@@ -535,23 +527,6 @@ export class WorkspaceDetailsController {
   checkFormsNotValid(tabIndex: string): boolean {
     const form = this.forms.get(tabIndex);
     return form && form.$invalid;
-  }
-
-  private isModifiedConfig(): { isModified: boolean, needRestart: boolean } {
-    const isEqual = angular.equals(this.initialWorkspaceDetails.config, this.workspaceDetails.config);
-    if (isEqual) {
-      return {
-        isModified: false,
-        needRestart: false
-      };
-    }
-
-    const tmpConfig = angular.extend({}, this.initialWorkspaceDetails.config, { name: this.workspaceDetails.config.name });
-    const needRestart = false === angular.equals(tmpConfig, this.workspaceDetails.config);
-    return {
-      isModified: true,
-      needRestart
-    };
   }
 
   private isModifiedDevfile(): { isModified: boolean, needRestart: boolean } {

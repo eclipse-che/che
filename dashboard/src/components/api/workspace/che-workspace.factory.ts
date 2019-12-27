@@ -22,8 +22,6 @@ const WS_AGENT_HTTP_LINK: string = 'wsagent/http';
 const WS_AGENT_WS_LINK: string = 'wsagent/ws';
 
 interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
-  create: any;
-  createWithNamespace: any;
   createDevfile: any;
   createDevfileWithNamespace: any;
   deleteWorkspace: any;
@@ -34,7 +32,6 @@ interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   startWorkspace: any;
   startWorkspaceWithNoEnvironment: any;
   startTemporaryWorkspace: any;
-  addCommand: any;
   getSettings: () => ng.resource.IResource<che.IWorkspaceSettings>;
 }
 
@@ -131,8 +128,6 @@ export class CheWorkspace {
     // remote call
     this.remoteWorkspaceAPI = <ICHELicenseResource<any>>this.$resource('/api/workspace', {}, {
         // having 2 methods for creation to ensure namespace parameter won't be send at all if value is null or undefined
-        create: {method: 'POST', url: '/api/workspace'},
-        createWithNamespace: {method: 'POST', url: '/api/workspace?namespace=:namespace'},
         createDevfile: {method: 'POST', url: '/api/workspace/devfile'},
         createDevfileWithNamespace: {method: 'POST', url: '/api/workspace/devfile?namespace=:namespace'},
         deleteWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId'},
@@ -143,7 +138,6 @@ export class CheWorkspace {
         startWorkspace: {method: 'POST', url: '/api/workspace/:workspaceId/runtime?environment=:envName'},
         startWorkspaceWithNoEnvironment: {method: 'POST', url: '/api/workspace/:workspaceId/runtime'},
         startTemporaryWorkspace: {method: 'POST', url: '/api/workspace/runtime?temporary=true'},
-        addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'},
         getSettings: {method: 'GET', url: '/api/workspace/settings'}
       }
     );
@@ -383,32 +377,7 @@ export class CheWorkspace {
     return this.remoteWorkspaceAPI.deleteProject({workspaceId: workspaceId, path: path}).$promise;
   }
 
-
-  createWorkspace(namespace: string, workspaceName: string, source: any, ram: number, attributes: any): ng.IPromise<any> {
-    let data = this.formWorkspaceConfig({}, workspaceName, source, ram);
-    let attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item: any) => {
-      return item[0] + ':' + item[1];
-    });
-    let promise = namespace ? this.remoteWorkspaceAPI.createWithNamespace({
-      namespace: namespace,
-      attribute: attrs
-    }, data).$promise :
-      this.remoteWorkspaceAPI.create({attribute: attrs}, data).$promise;
-    return promise;
-  }
-
-  createWorkspaceFromConfig(namespace: string, workspaceConfig: che.IWorkspaceConfig, attributes: any): ng.IPromise<any> {
-    let attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item: any) => {
-      return item[0] + ':' + item[1];
-    });
-    return namespace ? this.remoteWorkspaceAPI.createWithNamespace({
-      namespace: namespace,
-      attribute: attrs
-    }, workspaceConfig).$promise :
-      this.remoteWorkspaceAPI.create({attribute: attrs}, workspaceConfig).$promise;
-  }
-
-  createWorkspaceFromDevfile(namespace: string, devfile: che.IWorkspaceDevfile, attributes: any): ng.IPromise<any> {
+  createWorkspaceFromDevfile(namespace: string, devfile: che.IWorkspaceDevfile, attributes: any): ng.IPromise<che.IWorkspace> {
     let attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item: any) => {
       return item[0] + ':' + item[1];
     });
@@ -417,16 +386,6 @@ export class CheWorkspace {
       attribute: attrs
     }, devfile).$promise :
       this.remoteWorkspaceAPI.createDevfile({attribute: attrs}, devfile).$promise;
-  }
-
-  /**
-   * Add a command into the workspace
-   * @param workspaceId {string} the id of the workspace on which we want to add the command
-   * @param command {any} the command object that contains attribute like name, type, etc.
-   * @returns {ng.IPromise<any>}
-   */
-  addCommand(workspaceId: string, command: any): ng.IPromise<any> {
-    return this.remoteWorkspaceAPI.addCommand({workspaceId: workspaceId}, command).$promise;
   }
 
   /**
@@ -458,7 +417,7 @@ export class CheWorkspace {
    */
   notifyIfEphemeral(workspaceId: string): void {
     let workspace = this.workspacesById.get(workspaceId);
-    let isEphemeral = workspace && workspace.config && workspace.config.attributes && workspace.config.attributes.persistVolumes ? !JSON.parse(workspace.config.attributes.persistVolumes) : false;
+    let isEphemeral = workspace && workspace.devfile && workspace.devfile.attributes && workspace.devfile.attributes.persistVolumes ? !JSON.parse(workspace.devfile.attributes.persistVolumes) : false;
     if (isEphemeral) {
       this.cheNotification.showWarning('Your are starting an ephemeral workspace. All changes to the source code will be lost when the workspace is stopped unless they are pushed to a source code repository.');
     }
@@ -519,7 +478,7 @@ export class CheWorkspace {
    * @param workspaceId {string} the workspace ID
    * @returns {ng.IPromise<any>}
    */
-  deleteWorkspaceConfig(workspaceId: string): ng.IPromise<any> {
+  deleteWorkspace(workspaceId: string): ng.IPromise<any> {
     let defer = this.$q.defer();
     let promise = this.remoteWorkspaceAPI.deleteWorkspace({workspaceId: workspaceId}).$promise;
     promise.then(() => {
@@ -541,21 +500,16 @@ export class CheWorkspace {
   getWorkspaceProjects(): che.IWorkspaceProjects {
     let workspaceProjects: che.IWorkspaceProjects = {};
     this.workspacesById.forEach((workspace: che.IWorkspace) => {
-      let projects = workspace.config.projects;
+      const projects = this.workspaceDataManager.getProjects(workspace);
       projects.forEach((project: che.IProject) => {
         project.workspaceId = workspace.id;
-        project.workspaceName = workspace.config.name;
+        project.workspaceName = this.workspaceDataManager.getName(workspace);
       });
 
       workspaceProjects[workspace.id] = projects;
     });
 
     return workspaceProjects;
-  }
-
-  getAllProjects(): Array<che.IProject> {
-    let projects = this.lodash.pluck(this.workspaces, 'config.projects');
-    return [].concat.apply([], projects);
   }
 
   /**

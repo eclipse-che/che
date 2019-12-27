@@ -13,7 +13,7 @@
 import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
 import {CheBranding} from '../../../../components/branding/che-branding.factory';
 import {WorkspacesService} from '../../workspaces.service';
-
+import { WorkspaceDataManager } from '../../../../components/api/workspace/workspace-data-manager';
 
 const BLUR_TIMEOUT = 5000;
 
@@ -25,15 +25,25 @@ const BLUR_TIMEOUT = 5000;
  */
 export class WorkspaceItemCtrl {
 
-  static $inject = ['$location', 'lodash', 'cheWorkspace', 'workspacesService', '$timeout', '$document', 'cheBranding', '$sce'];
+  static $inject = [
+    '$document',
+    '$location',
+    '$sce',
+    '$timeout',
+    'cheBranding',
+    'cheWorkspace',
+    'lodash',
+    'workspacesService',
+  ];
 
-  $location: ng.ILocationService;
-  lodash: any;
-  cheWorkspace: CheWorkspace;
-  workspacesService: WorkspacesService;
   $document: ng.IDocumentService;
+  $location: ng.ILocationService;
   $timeout: ng.ITimeoutService;
+  cheWorkspace: CheWorkspace;
+  lodash: any;
+  workspacesService: WorkspacesService;
 
+  workspaceDataManager: WorkspaceDataManager;
   workspace: che.IWorkspace;
   workspaceName: string;
   workspaceSupportIssues: any;
@@ -44,20 +54,24 @@ export class WorkspaceItemCtrl {
   /**
    * Default constructor that is using resource
    */
-  constructor($location: ng.ILocationService,
-              lodash: any,
-              cheWorkspace: CheWorkspace,
-              workspacesService: WorkspacesService,
-              $timeout: ng.ITimeoutService,
-              $document: ng.IDocumentService,
-              cheBranding: CheBranding,
-              $sce: ng.ISCEService) {
-    this.$location = $location;
-    this.lodash = lodash;
-    this.cheWorkspace = cheWorkspace;
-    this.workspacesService = workspacesService;
-    this.$timeout = $timeout;
+  constructor(
+    $document: ng.IDocumentService,
+    $location: ng.ILocationService,
+    $sce: ng.ISCEService,
+    $timeout: ng.ITimeoutService,
+    cheBranding: CheBranding,
+    cheWorkspace: CheWorkspace,
+    lodash: any,
+    workspacesService: WorkspacesService,
+  ) {
     this.$document = $document;
+    this.$location = $location;
+    this.$timeout = $timeout;
+    this.cheWorkspace = cheWorkspace;
+    this.lodash = lodash;
+    this.workspacesService = workspacesService;
+
+    this.workspaceDataManager = new WorkspaceDataManager();
 
     this.supportedVersionTypeIssue = $sce.trustAsHtml(`This workspace is using old definition format which is not compatible anymore.
           Please follow the <a href="${cheBranding.getDocs().converting}" target="_blank">documentation</a>
@@ -83,10 +97,7 @@ export class WorkspaceItemCtrl {
    * @returns {Array<che.IProject>}
    */
   get projects(): Array<che.IProject> {
-    if (this.workspace.devfile) {
-      return this.workspace.devfile.projects || [];
-    }
-    return this.workspace.config.projects || [];
+    return this.workspaceDataManager.getProjects(this.workspace);
   }
 
   /**
