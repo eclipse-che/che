@@ -51,7 +51,6 @@ suite('E2E', async () => {
             await ocpWebConsole.selectDefinedNamespaceOnSubscriptionPage();
             await ocpWebConsole.clickOnSubscribeButtonOnSubscriptionPage();
         });
-
     });
 
     suite('Wait the operator is represented by CSV', async () => {
@@ -64,6 +63,10 @@ suite('E2E', async () => {
             await ocpWebConsole.waitInstalledOperatorLogoName();
         });
     });
+
+    if (TestConstants.TS_SELENIUM_UPDATE_INSTALLED_APPLICATION) {
+        return;
+    }
 
     suite('Create new Che cluster', async () => {
         test('Click on the logo-name Che operator', async () => {
