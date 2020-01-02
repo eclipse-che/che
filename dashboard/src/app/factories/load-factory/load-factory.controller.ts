@@ -339,7 +339,7 @@ export class LoadFactoryController {
   createWorkspace(): any {
     const defer = this.$q.defer();
     if (!this.factory.devfile) {
-      defer.reject(new Error('No devfile in factory.'));
+      defer.reject({ data: {message: 'No devfile in factory.' }});
     } else {
       const devfile = this.factory.devfile;
       // set devfile attributes
