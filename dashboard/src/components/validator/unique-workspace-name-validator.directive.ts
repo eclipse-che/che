@@ -11,6 +11,7 @@
  */
 'use strict';
 import {CheAPI} from '../api/che-api.factory';
+import {WorkspaceDataManager} from '../api/workspace/workspace-data-manager';
 
 interface IUniqueWorkspaceNameValidatorAttributes extends ng.IAttributes {
   uniqueWorkspaceName: string;
@@ -30,12 +31,15 @@ export class UniqueWorkspaceNameValidator implements ng.IDirective {
   cheAPI: CheAPI;
   $q: ng.IQService;
 
+  workspaceDataManager: WorkspaceDataManager;
+
   /**
    * Default constructor that is using resource
    */
   constructor (cheAPI: CheAPI, $q: ng.IQService) {
     this.cheAPI = cheAPI;
     this.$q = $q;
+    this.workspaceDataManager = new WorkspaceDataManager();
   }
 
   /**
@@ -62,10 +66,10 @@ export class UniqueWorkspaceNameValidator implements ng.IDirective {
         if (workspaces.length) {
 
           for (let i = 0; i < workspaces.length; i++) {
-            if (workspaces[i].config.name === currentWorkspaceName) {
+            if (this.workspaceDataManager.getName(workspaces[i]) === currentWorkspaceName) {
               continue;
             }
-            if (workspaces[i].config.name === modelValue) {
+            if (this.workspaceDataManager.getName(workspaces[i]) === modelValue) {
               deferred.reject(false);
             }
           }
