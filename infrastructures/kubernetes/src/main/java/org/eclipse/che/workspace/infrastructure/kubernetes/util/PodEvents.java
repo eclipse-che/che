@@ -12,7 +12,6 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.util;
 
 import com.google.common.base.Strings;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,7 +23,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEv
  * @author Ilya Buziuk
  */
 public final class PodEvents {
-  private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+  private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssX";
 
   private PodEvents() {}
 
@@ -35,11 +34,11 @@ public final class PodEvents {
     if (Strings.isNullOrEmpty(timestamp)) {
       throw new IllegalArgumentException("Pod event timestamp can not be blank");
     }
-    return dateFormat.parse(timestamp);
+    return new SimpleDateFormat(DATE_FORMAT).parse(timestamp);
   }
 
   /** Converts the {@link Date} to {@link PodEvent} timestamp format e.g. '2018-05-15T16:17:54Z' */
   public static String convertDateToEventTimestamp(Date date) {
-    return dateFormat.format(date);
+    return new SimpleDateFormat(DATE_FORMAT).format(date);
   }
 }
