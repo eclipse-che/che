@@ -155,32 +155,4 @@ export class WorkspaceDetailsProjectsService {
     this.projectNamesToDelete = [];
   }
 
-  /**
-   * Deletes projects by names.
-   *
-   * @param {string} workspaceId workspace ID
-   * @param {string[]} projectNames list of names of projects to delete
-   * @return {angular.IPromise<any>}
-   */
-  deleteSelectedProjects(workspaceId: string, projectNames: string[]): ng.IPromise<any> {
-    const deleteProjectPromises = [];
-
-    const workspaceAgent = this.cheWorkspace.getWorkspaceAgent(workspaceId);
-
-    if (!workspaceAgent) {
-      return this.$q.all(deleteProjectPromises);
-    }
-    const projectService = workspaceAgent.getProject();
-
-    projectNames.forEach((projectName: string) => {
-      const promise = projectService.remove(projectName);
-      deleteProjectPromises.push(promise);
-    });
-
-    return this.$q.all(deleteProjectPromises).catch((error: any) => {
-      this.$log.error(error);
-      return this.$q.reject(error);
-    });
-  }
-
 }

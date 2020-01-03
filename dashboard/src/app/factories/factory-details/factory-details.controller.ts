@@ -52,8 +52,8 @@ export class FactoryDetailsController {
    * Returns `true` if supported version of factory workspace.
    * @returns {boolean}
    */
-  isSupportedVersion(): boolean {
-    return this.loadFactoryService.isSupportedVersion(this.factory);
+  isSupported(): boolean {
+    return this.loadFactoryService.isSupported(this.factory);
   }
 
   /**

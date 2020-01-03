@@ -47,9 +47,6 @@ export class CheHttpBackend {
   private permissionsMap: Map<string, Array<che.IPermissions>>;
   private resourcesMap: Map<string, Map<string, any>>;
 
-  private installersMap: Map<string, che.IAgent> = new Map();
-  private installersList: Array<che.IAgent> = [];
-
   private plugins: Array<IPlugin>;
   private pluginRegistryUrl: string;
 
@@ -690,28 +687,6 @@ export class CheHttpBackend {
     } else {
       organizationResourcesMap.set(scope, [resource]);
     }
-  }
-
-  /**
-   * Setup backend for installers.
-   */
-  installersBackendSetup(): void {
-    for (const [installerId, installer] of this.installersMap) {
-      this.$httpBackend.when('GET', `/api/installer/${installerId}`).respond(installer);
-    }
-    this.$httpBackend.when('GET', '/api/installer').respond(this.installersList);
-  }
-
-  /**
-   * Add installers.
-   * @param {che.IAgent} installer an installer to add
-   */
-  addInstaller(installer: che.IAgent): void {
-    const latest = this.installersMap.get(installer.id);
-    if (!latest || installer.version > latest.version) {
-      this.installersMap.set(installer.id, installer);
-    }
-    this.installersList.push(installer);
   }
 
 }

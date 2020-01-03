@@ -83,7 +83,8 @@ export class Ide {
     async waitNotificationAndOpenLink(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Ide.waitNotificationAndOpenLink "${notificationText}"`);
 
-        await this.waitApllicationIsReady(await this.getApplicationUrlFromNotification(notificationText));
+        await this.waitNotification(notificationText, timeout);
+        await this.waitApllicationIsReady(await this.getApplicationUrlFromNotification(notificationText), timeout);
         await this.waitNotificationAndClickOnButton(notificationText, 'Open Link', timeout);
     }
 
