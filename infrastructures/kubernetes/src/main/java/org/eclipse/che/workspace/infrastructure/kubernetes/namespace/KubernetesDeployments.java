@@ -532,9 +532,9 @@ public class KubernetesDeployments {
                   }
                 } catch (ParseException e) {
                   LOG.error(
-                      String.format(
-                          "Failed to parse last timestamp of the event. Cause: %s. Event: %s",
-                          e.getMessage(), podEvent),
+                      "Failed to parse last timestamp of the event. Cause: {}. Event: {}",
+                      e.getMessage(),
+                      podEvent,
                       e);
                 }
               }
