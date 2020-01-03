@@ -122,7 +122,7 @@ export const TestConstants = {
     /**
      * Updating installed application to major version using OperatorHub, "false" by default.
      */
-    TS_SELENIUM_UPDATE_INSTALLED_APPLICATION: process.env.TS_SELENIUM_UPDATE_INSTALLED_APPLICATION === 'true',
+    TS_SELENIUM_UPDATE_CHE_BY_OPERATOR_HUB: process.env.TS_SELENIUM_UPDATE_CHE_BY_OPERATOR_HUB === 'true',
 
     /**
      * Value of TLS Support property in the 'Create Che Cluster' yaml using OperatorHub.

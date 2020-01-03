@@ -64,7 +64,7 @@ suite('E2E', async () => {
         });
     });
 
-    if (TestConstants.TS_SELENIUM_UPDATE_INSTALLED_APPLICATION) {
+    if (TestConstants.TS_SELENIUM_UPDATE_CHE_BY_OPERATOR_HUB) {
         return;
     }
 
