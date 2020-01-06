@@ -59,6 +59,10 @@ function installGit(){
   yum install --assumeyes -d1 git
 }
 
+function installWget() {
+  yum install wget
+}
+
 function installDependencies() {
   installEpelRelease
   installYQ
@@ -66,6 +70,7 @@ function installDependencies() {
   installJQ
   installOC
   installGit  
+  installWget
   # Getting dependencies ready
   yum install --assumeyes -d1 \
               patch \
