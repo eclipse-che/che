@@ -17,9 +17,6 @@ export BASEDIR=$(pwd)
 
 source tests/.infra/centos-ci/functional_tests_utils.sh
 
-echo "Checking credentials:"
-checkAllCreds
-
 echo "Installing dependencies:"
 start=$(date +%s)
 installDependencies
