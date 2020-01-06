@@ -530,11 +530,12 @@ public class KubernetesDeployments {
                   if (happenedAfterWatcherInitialization(podEvent)) {
                     containerEventsHandlers.forEach(h -> h.handle(podEvent));
                   }
-                } catch (ParseException | IllegalArgumentException e) {
+                } catch (ParseException e) {
                   LOG.error(
                       "Failed to parse last timestamp of the event. Cause: {}. Event: {}",
                       e.getMessage(),
-                      podEvent);
+                      podEvent,
+                      e);
                 }
               }
             }
