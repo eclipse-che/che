@@ -370,7 +370,7 @@ export class NavbarRecentWorkspacesController {
 
     this.updateRecentWorkspace(workspaceId);
 
-    this.cheWorkspace.startWorkspace(workspace.id, workspace.config ? workspace.config.defaultEnv : null).catch((error: any) => {
+    this.cheWorkspace.startWorkspace(workspace.id).catch((error: any) => {
       this.$log.error(error);
       this.cheNotification.showError('Run workspace error.', error);
     });

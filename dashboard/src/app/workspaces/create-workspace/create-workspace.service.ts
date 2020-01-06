@@ -152,23 +152,12 @@ export class CreateWorkspaceSvc {
 
   createWorkspaceFromDevfile(sourceDevfile: che.IWorkspaceDevfile, attributes: any, skipProjectTemplates?: boolean): ng.IPromise<che.IWorkspace> {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
-          projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
-
-    let projects = [];
-    let noProjectsFromDevfile = true;
-    projectTemplates.forEach((template: che.IProjectTemplate) => {
-      sourceDevfile.projects.forEach((project) => {
-        if (project.name === template.name) {
-          noProjectsFromDevfile = false;
-        }
-      });
-
-      projects.push(template);
-    });
+          noProjectsFromDevfile = !sourceDevfile.projects || !sourceDevfile.projects.length,
+          projectsTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
     return this.checkEditingProgress().then(() => {
       if (!skipProjectTemplates) {
-        sourceDevfile.projects = projects;
+        sourceDevfile.projects = projectsTemplates;
         // If no projects defined in devfile were added - remove the commands from devfile as well:
         if (noProjectsFromDevfile) {
           sourceDevfile.commands = [];

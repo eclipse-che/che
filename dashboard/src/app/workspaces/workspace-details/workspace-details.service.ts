@@ -330,7 +330,7 @@ export class WorkspaceDetailsService {
    * @param {che.IWorkspace} workspace
    * @returns {ng.IPromise<any>}
    */
-  applyConfigChanges(workspace: che.IWorkspace): ng.IPromise<any> {
+  applyChanges(workspace: che.IWorkspace): ng.IPromise<any> {
     return this.$q.when()
       .then(() => {
         if (this.getWorkspaceStatus(workspace.id) !== WorkspaceStatus[WorkspaceStatus.STOPPED]) {
@@ -339,11 +339,10 @@ export class WorkspaceDetailsService {
         return this.cheWorkspace.fetchStatusChange(workspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
       })
       .then(() => {
-        return this.saveConfigChanges(workspace);
+        return this.saveChanges(workspace);
       })
       .then(() => {
-        const envName = workspace.config ? workspace.config.defaultEnv : undefined;
-        this.cheWorkspace.startWorkspace(workspace.id, envName);
+        this.cheWorkspace.startWorkspace(workspace.id);
         return this.cheWorkspace.fetchStatusChange(workspace.id, WorkspaceStatus[WorkspaceStatus.RUNNING]);
       })
       .catch((error: any) => {
@@ -394,19 +393,13 @@ export class WorkspaceDetailsService {
    * @param {che.IWorkspace} workspace new workspace details
    * @return {angular.IPromise<any>}
    */
-  saveConfigChanges(workspace: che.IWorkspace): ng.IPromise<any> {
+  saveChanges(workspace: che.IWorkspace): ng.IPromise<any> {
     delete workspace.links;
 
     const projectNamesToDelete = this.workspaceDetailsProjectsService.getProjectNamesToDelete(),
       hasProjectsToDelete = projectNamesToDelete.length > 0;
 
     return this.cheWorkspace.updateWorkspace(workspace.id, workspace)
-      .then(() => {
-        if (!hasProjectsToDelete) {
-          return this.$q.when();
-        }
-        return this.workspaceDetailsProjectsService.deleteSelectedProjects(workspace.id, projectNamesToDelete);
-      })
       .catch((error: any) => {
         this.$log.error(error);
         return this.$q.reject(error);

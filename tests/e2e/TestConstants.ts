@@ -20,14 +20,14 @@ export const TestConstants = {
     TS_SELENIUM_WEB_CONSOLE_OCP_URL: process.env.TS_SELENIUM_WEB_CONSOLE_OCP_URL || 'https://console-openshift-console.apps.',
 
     /**
-     * Base URL of OperatorHub main page on the web console OpenShift
-     */
-    TS_SELENIUM_OPERATORHUB_PAGE_URL: process.env.TS_SELENIUM_OPERATORHUB_PAGE_URL || '/operatorhub/all-namespaces',
-
-    /**
      * Run browser in "Headless" (hiden) mode, "false" by default.
      */
     TS_SELENIUM_HEADLESS: process.env.TS_SELENIUM_HEADLESS === 'true',
+
+    /**
+     * Run browser with an enabled or disabled W3C protocol (on Chrome  76 and upper, it is enabled by default), "true" by default.
+     */
+    TS_SELENIUM_W3C_CHROME_OPTION: process.env.TS_SELENIUM_W3C_CHROME_OPTION !== 'false',
 
     /**
      * Browser width resolution, "1920" by default.
@@ -130,9 +130,10 @@ export const TestConstants = {
     TS_SELENIUM_VALUE_SELF_SIGN_CERT: process.env.TS_SELENIUM_VALUE_SELF_SIGN_CERT || 'false',
 
     /**
-     * Value of OpenShift oAuth property in the 'Create Che Cluster' yaml using OperatorHub.
+     * Value of OpenShift oAuth property determines how to login in installed application,
+     * if 'false' as an user of application, if 'true' as a regular user of OCP.
      */
-    TS_SELENIUM_VALUE_OPENSHIFT_OAUTH: process.env.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH || 'true',
+    TS_SELENIUM_VALUE_OPENSHIFT_OAUTH: process.env.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH || 'false',
 
     /**
      * Prefix URL on deployed application by installation using OperatorHub.
@@ -158,11 +159,6 @@ export const TestConstants = {
      * Log into CHE in MultiUser mode, "false" by default.
      */
     TS_SELENIUM_MULTIUSER: process.env.TS_SELENIUM_MULTIUSER === 'true',
-
-    /**
-     * Log into CHE by using regular user OCP, "false" by default.
-     */
-    TS_SELENIUM_LOGIN_CHE_OCP_USER: process.env.TS_SELENIUM_LOGIN_CHE_OCP_USER === 'true',
 
     /**
      * Temp admin username used to log in OCP.

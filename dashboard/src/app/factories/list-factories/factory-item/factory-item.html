@@ -43,12 +43,12 @@
       </div>
       <div flex-gt-xs="15">
         <span class="che-xs-header noselect" name="open-factory" hide-gt-xs>Actions</span>
-        <span class="che-list-actions" ng-if="factoryItemController.isSupportedVersion() === true">
+        <span class="che-list-actions" ng-if="factoryItemController.isSupported() === true">
           <a uib-tooltip="Open in IDE" ng-href="#/load-factory/{{factoryItemController.factory.id}}">
             <span class="fa fa-chevron-circle-right factory-action"></span>
           </a>
         </span>
-        <div class="che-list-item-secondary workspace-item-not-supported" ng-if="factoryItemController.isSupportedVersion() === false">
+        <div class="che-list-item-secondary workspace-item-not-supported" ng-if="factoryItemController.isSupported() === false">
           <div>
            <span>Not compatible</span>
             <span class="che-list-actions">
