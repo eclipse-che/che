@@ -13,6 +13,7 @@
 import {CheAPI} from '../../../../components/api/che-api.factory';
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
 import {WorkspacesService} from '../../../workspaces/workspaces.service';
+import {WorkspaceDataManager} from '../../../../components/api/workspace/workspace-data-manager';
 
 /**
  * Controller for creating factory from a workspace.
@@ -21,11 +22,20 @@ import {WorkspacesService} from '../../../workspaces/workspaces.service';
  */
 export class FactoryFromWorkspaceCtrl {
 
-  static $inject = ['$filter', 'cheAPI', 'cheNotification', 'workspacesService'];
+  static $inject = [
+    '$filter',
+    'cheAPI',
+    'cheNotification',
+    'workspacesService',
+  ];
 
   private $filter: ng.IFilterService;
   private cheAPI: CheAPI;
   private cheNotification: CheNotification;
+  private workspacesService: WorkspacesService;
+
+  private workspaceDataManager: WorkspaceDataManager;
+
   private workspaces: Array<che.IWorkspace>;
   private workspacesById: Map<string, che.IWorkspace>;
   private filtersWorkspaceSelected: any;
@@ -33,16 +43,22 @@ export class FactoryFromWorkspaceCtrl {
   private isLoading: boolean;
   private isImporting: boolean;
   private factoryContent: any;
-  private workspacesService: WorkspacesService;
 
   /**
    * Default constructor that is using resource injection
    */
-  constructor($filter: ng.IFilterService, cheAPI: CheAPI, cheNotification: CheNotification, workspacesService: WorkspacesService) {
+  constructor(
+    $filter: ng.IFilterService,
+    cheAPI: CheAPI,
+    cheNotification: CheNotification,
+    workspacesService: WorkspacesService,
+  ) {
     this.$filter = $filter;
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
     this.workspacesService = workspacesService;
+
+    this.workspaceDataManager = new WorkspaceDataManager();
 
     this.filtersWorkspaceSelected = {};
 
@@ -121,9 +137,9 @@ export class FactoryFromWorkspaceCtrl {
    */
   getWorkspaceName(workspaceId: string): string {
     let workspace = this.workspacesById.get(workspaceId);
-    if (workspace && workspace.config.name) {
-      return workspace.config.name;
+    if (!workspace) {
+      return '';
     }
-    return '';
+    return this.workspaceDataManager.getName(workspace) || '';
   }
 }

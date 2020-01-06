@@ -12,6 +12,7 @@
 'use strict';
 import {CheNotification} from '../../../../../components/notification/che-notification.factory';
 import {CheRemote} from '../../../../../components/api/remote/che-remote.factory';
+import { WorkspaceDataManager } from '../../../../../components/api/workspace/workspace-data-manager';
 
 /**
  * @ngdoc controller
@@ -21,16 +22,28 @@ import {CheRemote} from '../../../../../components/api/remote/che-remote.factory
  */
 export class ExportWorkspaceDialogController {
 
-  static $inject = ['$q', '$filter', 'lodash', 'cheRemote', 'cheNotification', '$mdDialog', '$log', '$window', '$scope'];
+  static $inject = [
+    '$filter',
+    '$log',
+    '$mdDialog',
+    '$q',
+    '$scope',
+    '$window',
+    'cheNotification',
+    'cheRemote',
+    'lodash',
+  ];
 
-  private $q: ng.IQService;
   private $filter: ng.IFilterService;
-  private cheNotification: CheNotification;
   private $log: ng.ILogService;
   private $mdDialog: ng.material.IDialogService;
-  private cheRemote: CheRemote;
+  private $q: ng.IQService;
   private $window: ng.IWindowService;
+  private cheNotification: CheNotification;
+  private cheRemote: CheRemote;
   private lodash: any;
+
+  private workspaceDataManager: WorkspaceDataManager;
 
   private editorOptions: any;
   private destination: string;
@@ -47,23 +60,27 @@ export class ExportWorkspaceDialogController {
   /**
    * Default constructor that is using resource
    */
-  constructor($q: ng.IQService,
-              $filter: ng.IFilterService,
-              lodash: any,
-              cheRemote: CheRemote,
-              cheNotification: CheNotification,
-              $mdDialog: ng.material.IDialogService,
-              $log: ng.ILogService,
-              $window: ng.IWindowService,
-              $scope: ng.IScope) {
-    this.$q = $q;
+  constructor(
+    $filter: ng.IFilterService,
+    $log: ng.ILogService,
+    $mdDialog: ng.material.IDialogService,
+    $q: ng.IQService,
+    $scope: ng.IScope,
+    $window: ng.IWindowService,
+    cheNotification: CheNotification,
+    cheRemote: CheRemote,
+    lodash: any,
+  ) {
     this.$filter = $filter;
-    this.lodash = lodash;
-    this.cheRemote = cheRemote;
-    this.cheNotification = cheNotification;
-    this.$mdDialog = $mdDialog;
     this.$log = $log;
+    this.$mdDialog = $mdDialog;
+    this.$q = $q;
     this.$window = $window;
+    this.cheNotification = cheNotification;
+    this.cheRemote = cheRemote;
+    this.lodash = lodash;
+
+    this.workspaceDataManager = new WorkspaceDataManager();
 
     this.editorOptions = {
       wordWrap : 'on',
@@ -176,8 +193,8 @@ export class ExportWorkspaceDialogController {
    * @param remoteWorkspace the remote exported workspace
    */
   finishWorkspaceExporting(remoteWorkspace: che.IWorkspace) {
-    this.exportInCloudSteps += 'Export of workspace ' + remoteWorkspace.config.name + 'finished <br>';
-    this.cheNotification.showInfo('Successfully exported the workspace to ' + remoteWorkspace.config.name + ' on ' + this.privateCloudUrl);
+    this.exportInCloudSteps += 'Export of workspace ' + this.workspaceDataManager.getName(remoteWorkspace) + 'finished <br>';
+    this.cheNotification.showInfo('Successfully exported the workspace to ' + this.workspaceDataManager.getName(remoteWorkspace) + ' on ' + this.privateCloudUrl);
     this.hide();
   }
 

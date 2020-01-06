@@ -48,25 +48,18 @@ describe(`WorkspaceDetailsController >`, () => {
     return {
       'namespace': 'che',
       'status': 'RUNNING',
-      'config': {
-        'attributes': {},
-        'environments': {
-          'default': {
-            'recipe': {'type': 'dockerimage', 'content': 'eclipse/ubuntu_jdk8'},
-            'machines': {
-              'dev-machine': {
-                'env': {},
-                'volumes': {},
-                'servers': {
-                  'tomcat8-debug': {'protocol': 'http', 'port': '8000'},
-                  'codeserver': {'protocol': 'http', 'port': '9876'},
-                  'tomcat8': {'protocol': 'http', 'port': '8080'}
-                },
-                'attributes': {'memoryLimitBytes': '2147483648'}
-              }
-            }
+      'devfile': {
+        'metadata': {
+          'name': 'wksp-tkbi'
+        },
+        'projects': [
+          {
+            'name': 'project-1', 'source': { 'location': 'https://example.com/project-1.git', 'type': 'git', 'branch': 'master' }
           }
-        }, 'projects': [], 'commands': [], 'defaultEnv': 'default', 'name': 'wksp-98cs'
+        ],
+        'components': [],
+        'apiVersion': '1.0.0',
+        'commands': []
       },
       'temporary': false,
       'links': {
@@ -102,14 +95,12 @@ describe(`WorkspaceDetailsController >`, () => {
       .service('initData', function() {
         return {
           namespaceId: workspace.namespace,
-          workspaceName: workspace.config.name,
+          workspaceName: workspace.devfile.metadata.name,
           workspaceDetails: workspace
         };
       })
       .service('workspacesService', function() {
         this.isSupported = () => { return true; };
-        this.isSupportedVersion = () => { return true; };
-        this.isSupportedRecipeType = () => { return true; };
       })
       .service('$route', function() {
         this.current = {
@@ -368,7 +359,7 @@ describe(`WorkspaceDetailsController >`, () => {
           beforeEach(() => {
             compileDirective();
 
-            (controller as any).workspaceDetails.config.name = 'wksp-new-name';
+            (controller as any).workspaceDetails.devfile.metadata.name = 'wksp-new-name';
             controller.checkEditMode();
             $scope.$digest();
             $timeout.flush();
@@ -438,7 +429,9 @@ describe(`WorkspaceDetailsController >`, () => {
           beforeEach(() => {
             compileDirective();
 
-            (controller as any).workspaceDetails.config.defaultEnv = 'new-env';
+            ((controller as any).workspaceDetails as che.IWorkspace).devfile.projects.push({
+              'name': 'project-2', 'source': { 'location': 'https://example.com/project-2.git', 'type': 'git', 'branch': 'master' }
+            });
             controller.checkEditMode();
             $scope.$digest();
             $timeout.flush();
@@ -542,7 +535,7 @@ describe(`WorkspaceDetailsController >`, () => {
           compileDirective();
 
           controller.stopWorkspace();
-          (controller as any).workspaceDetails.config.name = 'wksp-new-name';
+          (controller as any).workspaceDetails.devfile.metadata.name = 'wksp-new-name';
         });
 
         describe(`and restart is not necessary >`, () => {
@@ -691,13 +684,8 @@ describe(`WorkspaceDetailsController >`, () => {
             .callFake(() => {
               return false;
             });
-          (controller as any).workspacesService.isSupportedRecipeType = jasmine.createSpy('workspaceDetailsController.isSupportedRecipeType')
-            .and
-            .callFake(() => {
-              return false;
-            });
 
-          (controller as any).workspaceDetails.config.name = 'wksp-new-name';
+          ((controller as any).workspaceDetails as che.IWorkspace).devfile.metadata.name = 'wksp-new-name';
           controller.checkEditMode();
           $scope.$digest();
           $timeout.flush();

@@ -69,7 +69,6 @@ export class WorkspaceDetailsController {
   private workspaceName: string = '';
   private newName: string = '';
   private initialWorkspaceDetails: che.IWorkspace = {};
-  private workspaceImportedRecipe: che.IRecipe;
   private forms: Map<string, ng.IFormController> = new Map();
   private tab: { [key: string]: string } = {};
   private errorMessage: string = '';
@@ -129,9 +128,7 @@ export class WorkspaceDetailsController {
     this.workspaceId = initData.workspaceDetails.id;
 
     const action = (newWorkspaceDetails: che.IWorkspace) => {
-      if (this.initialWorkspaceDetails.config && angular.equals(newWorkspaceDetails.config, this.initialWorkspaceDetails.config)) {
-        return;
-      } else if (this.initialWorkspaceDetails.devfile && angular.equals(newWorkspaceDetails.devfile, this.initialWorkspaceDetails.devfile)) {
+      if (this.initialWorkspaceDetails.devfile && angular.equals(newWorkspaceDetails.devfile, this.initialWorkspaceDetails.devfile)) {
         return;
       }
 
@@ -152,7 +149,7 @@ export class WorkspaceDetailsController {
     this.initialWorkspaceDetails = angular.copy(initData.workspaceDetails);
     this.workspaceDetails = angular.copy(initData.workspaceDetails);
     this.updateDeprecatedInfo();
-    this.TAB = this.workspaceDetails.config ? ['Overview', 'Projects', 'Containers', 'Servers', 'Env_Variables', 'Volumes', 'Config', 'SSH', 'Plugins', 'Editors'] : ['Overview', 'Projects', 'Plugins', 'Editors', 'Devfile'];
+    this.TAB = ['Overview', 'Projects', 'Plugins', 'Editors', 'Devfile'];
     this.updateTabs();
 
     this.updateSelectedTab(this.$location.search().tab);
@@ -184,14 +181,14 @@ export class WorkspaceDetailsController {
       },
       applyButton: {
         action: () => {
-          this.applyConfigChanges();
+          this.applyChanges();
         },
         disabled: true,
         title: 'Apply'
       },
       saveButton: {
         action: () => {
-          this.saveConfigChanges();
+          this.saveChanges();
         },
         title: 'Save',
         disabled: true
@@ -221,14 +218,6 @@ export class WorkspaceDetailsController {
    */
   get isSupported(): boolean {
     return this.workspacesService.isSupported(this.workspaceDetails);
-  }
-
-  get isSupportedVersion(): boolean {
-    return this.workspacesService.isSupportedVersion(this.workspaceDetails);
-  }
-
-  get isSupportedRecipeType(): boolean {
-    return this.workspacesService.isSupportedRecipeType(this.workspaceDetails);
   }
 
   /**
@@ -332,11 +321,7 @@ export class WorkspaceDetailsController {
    * @returns {string}
    */
   getOverlayMessage(): string {
-    if (!this.isSupportedRecipeType) {
-      return `Current infrastructure doesn't support this workspace recipe type.`;
-    }
-
-    if (!this.isSupportedVersion) {
+    if (!this.isSupported) {
       return `This workspace is using old definition format which is not compatible anymore.`;
     }
 
@@ -405,13 +390,7 @@ export class WorkspaceDetailsController {
   }
 
   onWorkspaceChanged(): void {
-    let isModified: boolean;
-    let needRestart: boolean;
-    if (this.initialWorkspaceDetails.config) {
-      ({ isModified, needRestart } = this.isModifiedConfig());
-    } else {
-      ({ isModified, needRestart } = this.isModifiedDevfile());
-    }
+    let { isModified, needRestart } = this.isModifiedDevfile();
 
     if (this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.STARTING]
       || this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.RUNNING]) {
@@ -439,13 +418,13 @@ export class WorkspaceDetailsController {
   /**
    * Applies workspace config changes and restarts the workspace.
    */
-  applyConfigChanges(): void {
+  applyChanges(): void {
     this.editOverlayConfig.disabled = true;
 
     this.loading = true;
     this.$scope.$broadcast('edit-workspace-details', { status: 'saving' });
 
-    this.workspaceDetailsService.applyConfigChanges(this.workspaceDetails)
+    this.workspaceDetailsService.applyChanges(this.workspaceDetails)
       .then(() => {
         this.workspaceDetailsService.removeModified(this.workspaceId);
         this.cheNotification.showInfo('Workspace updated.');
@@ -471,7 +450,7 @@ export class WorkspaceDetailsController {
    * Updates workspace with new config.
    *
    */
-  saveConfigChanges(): void {
+  saveChanges(): void {
     const notifyRestart = this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.STARTING]
       || this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.RUNNING];
 
@@ -480,7 +459,7 @@ export class WorkspaceDetailsController {
     this.loading = true;
     this.$scope.$broadcast('edit-workspace-details', { status: 'saving' });
 
-    this.workspaceDetailsService.saveConfigChanges(this.workspaceDetails)
+    this.workspaceDetailsService.saveChanges(this.workspaceDetails)
       .then(() => {
         this.workspaceDetailsService.setModified(this.workspaceId, { isSaved: true });
 
@@ -550,23 +529,6 @@ export class WorkspaceDetailsController {
     return form && form.$invalid;
   }
 
-  private isModifiedConfig(): { isModified: boolean, needRestart: boolean } {
-    const isEqual = angular.equals(this.initialWorkspaceDetails.config, this.workspaceDetails.config);
-    if (isEqual) {
-      return {
-        isModified: false,
-        needRestart: false
-      };
-    }
-
-    const tmpConfig = angular.extend({}, this.initialWorkspaceDetails.config, { name: this.workspaceDetails.config.name });
-    const needRestart = false === angular.equals(tmpConfig, this.workspaceDetails.config);
-    return {
-      isModified: true,
-      needRestart
-    };
-  }
-
   private isModifiedDevfile(): { isModified: boolean, needRestart: boolean } {
     const isEqual = angular.equals(this.initialWorkspaceDetails.devfile, this.workspaceDetails.devfile);
     if (isEqual) {
@@ -592,7 +554,7 @@ export class WorkspaceDetailsController {
   get warningMessage(): any {
     let message = '';
 
-    if (!this.isSupportedVersion) {
+    if (!this.isSupported) {
       message += `This workspace is using old definition format which is not compatible anymore.
       Please follow the <a href="${this.cheBranding.getDocs().converting}" target="_blank">documentation</a>
       to update the definition of the workspace and benefits from the latest capabilities.`;
@@ -606,7 +568,7 @@ export class WorkspaceDetailsController {
   }
 
   get hasWarningMessage(): boolean {
-    return !this.isSupportedVersion || this.hasSelectedDeprecatedEditor || this.hasSelectedDeprecatedPlugins;
+    return !this.isSupported || this.hasSelectedDeprecatedEditor || this.hasSelectedDeprecatedPlugins;
   }
 
   private updateDeprecatedInfo() {

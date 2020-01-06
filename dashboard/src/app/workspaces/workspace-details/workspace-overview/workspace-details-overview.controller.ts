@@ -276,7 +276,7 @@ export class WorkspaceDetailsOverviewController {
         this.cheWorkspace.stopWorkspace(this.workspaceDetails.id);
       }
       this.cheWorkspace.fetchStatusChange(this.workspaceDetails.id, STOPPED).then(() => {
-        this.cheWorkspace.deleteWorkspaceConfig(this.workspaceDetails.id).then(() => {
+        this.cheWorkspace.deleteWorkspace(this.workspaceDetails.id).then(() => {
           this.$location.path('/workspaces').search({});
         }, (error: any) => {
           this.cheNotification.showError('Delete workspace failed.', error);

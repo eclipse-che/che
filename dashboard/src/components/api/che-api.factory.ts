@@ -18,7 +18,6 @@ import {CheFactoryTemplate} from './che-factory-template.factory';
 import {ChePreferences} from './che-preferences.factory';
 import {CheService} from './che-service.factory';
 import {CheOAuthProvider} from './che-o-auth-provider.factory';
-import {CheAgent} from './che-agent.factory';
 import {CheUser} from './che-user.factory';
 import { CheDevfile } from './che-devfile.factory';
 
@@ -31,7 +30,7 @@ import { CheDevfile } from './che-devfile.factory';
 export class CheAPI {
 
   static $inject = ['cheWorkspace', 'cheFactory', 'cheFactoryTemplate',
-               'cheProfile', 'chePreferences', 'cheService', 'cheOAuthProvider', 'cheAgent',
+               'cheProfile', 'chePreferences', 'cheService', 'cheOAuthProvider',
             'cheSsh', 'cheUser', 'chePermissions', 'cheOrganization', 'cheDevfile'];
 
   private cheWorkspace: CheWorkspace;
@@ -41,7 +40,6 @@ export class CheAPI {
   private cheFactoryTemplate: CheFactoryTemplate;
   private cheService: CheService;
   private cheOAuthProvider: CheOAuthProvider;
-  private cheAgent: CheAgent;
   private cheSsh: CheSsh;
   private cheUser: CheUser;
   private chePermissions: che.api.IChePermissions;
@@ -52,7 +50,7 @@ export class CheAPI {
    * Default constructor that is using resource
    */
   constructor(cheWorkspace: CheWorkspace, cheFactory: CheFactory, cheFactoryTemplate: CheFactoryTemplate,
-              cheProfile: CheProfile, chePreferences: ChePreferences, cheService: CheService, cheOAuthProvider: CheOAuthProvider, cheAgent: CheAgent,
+              cheProfile: CheProfile, chePreferences: ChePreferences, cheService: CheService, cheOAuthProvider: CheOAuthProvider,
               cheSsh: CheSsh, cheUser: CheUser, chePermissions: che.api.IChePermissions, cheOrganization: che.api.ICheOrganization,
               cheDevfile: CheDevfile) {
     this.cheWorkspace = cheWorkspace;
@@ -62,7 +60,6 @@ export class CheAPI {
     this.chePreferences = chePreferences;
     this.cheService = cheService;
     this.cheOAuthProvider = cheOAuthProvider;
-    this.cheAgent = cheAgent;
     this.cheSsh = cheSsh;
     this.cheUser = cheUser;
     this.chePermissions = chePermissions;
@@ -108,14 +105,6 @@ export class CheAPI {
    */
   getService(): CheService {
     return this.cheService;
-  }
-
-  /**
-   * The Che Agent API
-   * @returns {CheAgent}
-   */
-  getAgent(): CheAgent {
-    return this.cheAgent;
   }
 
   /**

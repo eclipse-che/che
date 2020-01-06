@@ -69,11 +69,11 @@ export class CheFactoryBuilder {
 
   /**
    * Sets the workspace of the factory
-   * @param {che.IWorkspaceConfig} workspace
+   * @param {che.IWorkspaceDevfile} devfile
    * @returns {CheFactoryBuilder}
    */
-  withWorkspace(workspace: che.IWorkspaceConfig): CheFactoryBuilder {
-    this.factory.workspace = workspace;
+  withDevfile(devfile: che.IWorkspaceDevfile): CheFactoryBuilder {
+    this.factory.devfile = devfile;
     return this;
   }
 
@@ -93,13 +93,13 @@ export class CheFactoryBuilder {
       },
       type: 'custom'
     };
-    if (!this.factory.workspace) {
-      this.factory.workspace = {} as che.IWorkspaceConfig;
+    if (!this.factory.devfile) {
+      this.factory.devfile = {} as che.IWorkspaceDevfile;
     }
-    if (!this.factory.workspace.commands) {
-      this.factory.workspace.commands = [];
+    if (!this.factory.devfile.commands) {
+      this.factory.devfile.commands = [];
     }
-    this.factory.workspace.commands.push(command);
+    this.factory.devfile.commands.push(command);
     return this;
   }
 

@@ -15,7 +15,6 @@ import {GitUrlValidator} from './git-url-validator.directive';
 import {UniqueProjectNameValidator} from './unique-project-name-validator.directive';
 import {UniqueWorkspaceNameValidator} from './unique-workspace-name-validator.directive';
 import {CustomValidator} from './custom-validator.directive';
-import {CityNameValidator} from './city-name-validator.directive';
 import {CustomAsyncValidator} from './custom-async-validator.directive';
 import {UniqueTeamNameValidator} from './unique-team-name-validator.directive';
 import {UniqueFactoryNameValidator} from './unique-factory-name-validator.directive';
@@ -25,7 +24,6 @@ export class ValidatorConfig {
   constructor(register: che.IRegisterService) {
 
     register.directive('gitUrl', GitUrlValidator);
-    register.directive('cityNameValidator', CityNameValidator);
     register.directive('uniqueProjectName', UniqueProjectNameValidator);
     register.directive('uniqueWorkspaceName', UniqueWorkspaceNameValidator);
     register.directive('customValidator', CustomValidator);
