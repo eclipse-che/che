@@ -60,7 +60,7 @@ function installGit(){
 }
 
 function installWget() {
-  yum install wget
+  yum -y install  wget
 }
 
 function installDependencies() {
