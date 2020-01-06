@@ -10,7 +10,6 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import IWorkspaceEnvironment = che.IWorkspaceEnvironment;
 
 /**
  * This class is providing a builder for Workspace
@@ -61,16 +60,6 @@ export class CheWorkspaceBuilder {
 
   withStatus(status: string): CheWorkspaceBuilder {
     this.workspace.status = status;
-    return this;
-  }
-
-  withDefaultEnvironment(defaultEnv: string): CheWorkspaceBuilder {
-    this.workspace.config.defaultEnv = defaultEnv;
-    return this;
-  }
-
-  withEnvironments(environments: {[envName: string]: IWorkspaceEnvironment}): CheWorkspaceBuilder {
-    this.workspace.config.environments = environments;
     return this;
   }
 

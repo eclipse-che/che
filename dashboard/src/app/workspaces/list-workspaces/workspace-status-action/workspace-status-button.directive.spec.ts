@@ -70,21 +70,9 @@ describe('WorkspaceStatus >', () => {
   });
 
   function getCompiledElement(status: WorkspaceStatus): ng.IAugmentedJQuery {
-    const defaultEnvironment = 'default';
-    const environments = {
-      [defaultEnvironment]: {
-        'machines': {
-          'dev-machine': {
-          }
-        },
-        'recipe': {
-          'type': 'compose',
-          'content': 'services:\n dev-machine:\n image: eclipse/ubuntu_jdk8\n',
-          'contentType': 'application/x-yaml'
-        }
-      }
-    };
-    const workspace = apiBuilder.getWorkspaceBuilder().withId($rootScope.model.workspaceId).withEnvironments(<any>environments).withDefaultEnvironment('default').withStatus(WorkspaceStatus[status]).build();
+    const workspace = apiBuilder.getWorkspaceBuilder()
+      .withId($rootScope.model.workspaceId)
+      .withStatus(WorkspaceStatus[status]).build();
     // add workspaces on Http backend
     cheBackend.addWorkspaces([workspace]);
     // setup backend
@@ -123,7 +111,7 @@ describe('WorkspaceStatus >', () => {
       $timeout.flush();
 
       // expecting POSTs
-      httpBackend.expectPOST('/api/workspace/' + $rootScope.model.workspaceId + '/runtime?environment=default').respond(200, {});
+      httpBackend.expectPOST('/api/workspace/' + $rootScope.model.workspaceId + '/runtime').respond(200, {});
 
       jqElement.find('.workspace-status').click();
 
