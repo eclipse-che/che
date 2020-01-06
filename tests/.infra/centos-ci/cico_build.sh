@@ -15,7 +15,7 @@ export BASEDIR=$(pwd)
 
 
 
-source .ci/functional_tests_utils.sh
+source tests/.infra/centos-ci/functional_tests_utils.sh
 
 echo "Checking credentials:"
 checkAllCreds
