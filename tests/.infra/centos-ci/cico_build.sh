@@ -46,7 +46,7 @@ oc login -u system:admin
 oc adm policy add-cluster-role-to-user cluster-admin developer
 oc login -u developer -p pass
 
-cd deploy/openshift && ocp.sh --run-ocp --deploy-che --multiuser
+cd deploy/openshift && ./ocp.sh --run-ocp --deploy-che --multiuser
 
 #bash <(curl -sL  https://www.eclipse.org/che/chectl/) --channel=next
 
