@@ -29,7 +29,7 @@ docker run --shm-size=256m -e TS_SELENIUM_BASE_URL=$URL eclipse/che-e2e:nightly
 If you want to gather screenshots of fallen tests, you have to mount a volume to the docker file. Create a folder, when you want to have the screenshots saved. Then run a command:
 
 ```
-docker run --shm-size=256m -v /full/path/to/your/folder:/root/e2e/report:Z -e TS_SELENIUM_BASE_URL=$URL eclipse/che-e2e:nightly
+docker run --shm-size=256m -v /full/path/to/your/folder:/tmp/e2e/report:Z -e TS_SELENIUM_BASE_URL=$URL eclipse/che-e2e:nightly
 ```
 
 Happy Path test suite will be run by default when executing a docker run command. If you want to run another test suite, you can specify that via variable ` TEST_SUITE `. Available tests are e.g. ` test-happy-path `, ` test-operatorhub-installation ` and ` test-wkspc-creation-and-ls `.
