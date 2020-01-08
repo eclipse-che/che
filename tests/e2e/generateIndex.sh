@@ -2,7 +2,9 @@
 
 echo "Generating index.ts file..."
 echo "import * as inversifyConfig from './inversify.config';
-export { inversifyConfig };
+import * as commonTestMethods from './tests/CommonTestMethods';
+import * as commonLSTests from './tests/CommonLSTests';
+export { inversifyConfig, commonTestMethods, commonLSTests };
 export * from './inversify.types';
 export * from './TestConstants';
 " > index.ts

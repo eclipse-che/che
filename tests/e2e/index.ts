@@ -1,9 +1,10 @@
 import * as inversifyConfig from './inversify.config';
-export { inversifyConfig };
+import * as commonTestMethods from './tests/CommonTestMethods';
+import * as commonLSTests from './tests/CommonLSTests';
+export { inversifyConfig, commonTestMethods, commonLSTests };
 export * from './inversify.types';
 export * from './TestConstants';
 
-export * from './driver/ChromeDriver';
 export * from './driver/IDriver';
 export * from './driver/ContainerInitializer';
 export * from './utils/ScreenCatcher';
@@ -38,5 +39,6 @@ export * from './pageobjects/ide/DebugView';
 export * from './pageobjects/ide/ContextMenu';
 export * from './pageobjects/ide/QuickOpenContainer';
 export * from './pageobjects/openshift/OcpWebConsolePage';
+export * from './pageobjects/openshift/CheLoginPage';
 export * from './pageobjects/openshift/OcpLoginPage';
 export * from './pageobjects/openshift/CheLoginPage';
