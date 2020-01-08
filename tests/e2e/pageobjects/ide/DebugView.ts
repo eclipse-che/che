@@ -10,7 +10,7 @@
 import { inject, injectable } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { By, Key } from 'selenium-webdriver';
+import { By, Key, WebElement } from 'selenium-webdriver';
 import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
 
@@ -29,7 +29,7 @@ export class DebugView {
     async clickOnDebugConfigurationItem(itemText: string) {
         Logger.debug(`DebugView.clickOnDebugConfigurationItem "${itemText}"`);
 
-        const configurationItemLocator: By = By.xpath(`//select[@class='debug-configuration']//option[text()=\'${itemText}\']`);
+        const configurationItemLocator: By = By.xpath(`//select[contains(@class,'debug-configuration')]//option[text()=\'${itemText}\']`);
 
         await this.driverHelper.waitAndClick(configurationItemLocator);
         await this.ide.performKeyCombination(Key.ESCAPE);
@@ -41,6 +41,16 @@ export class DebugView {
         const runDebugButtonLocator: By = By.xpath('//span[@title=\'Start Debugging\']');
 
         await this.driverHelper.waitAndClick(runDebugButtonLocator);
+
+        await this.driverHelper.getDriver().wait(async () => {
+            Logger.debug(`Waiting for debugger to connect (threads to appear in "Threads" view)`);
+            const threadElements: WebElement[] = await this.driverHelper.getDriver().findElements(By.xpath(`//div[contains(@class, 'theia-debug-thread')]`));
+            if (threadElements.length < 2) {
+                return false;
+            } else {
+                return true;
+            }
+        });
     }
 
 }

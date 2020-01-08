@@ -45,6 +45,7 @@ const pathToJavaFolder: string = `${projectName}/src/main/java/org/springframewo
 const pathToChangedJavaFileFolder: string = `${projectName}/src/main/java/org/springframework/samples/petclinic/system`;
 const classPathFilename: string = '.classpath';
 const javaFileName: string = 'PetClinicApplication.java';
+const weclomeControllerJavaFileName: string = 'WelcomeController.java';
 const changedJavaFileName: string = 'CrashController.java';
 const textForErrorMessageChange: string = 'HHHHHHHHHHHHH';
 const codeNavigationClassName: string = 'SpringApplication.class';
@@ -56,6 +57,7 @@ const SpringAppLocators = {
     springTitleLocator: By.xpath('//div[@class=\'container-fluid\']//h2[text()=\'Welcome\']'),
     springMenuButtonLocator: By.css('button[data-target=\'#main-navbar\']'),
     springErrorButtonLocator: By.xpath('//div[@id=\'main-navbar\']//span[text()=\'Error\']'),
+    springHomeButtonLocator: By.className('navbar-brand'),
     springErrorMessageLocator: By.xpath('//p[text()=\'Expected: controller used to ' +
         `showcase what happens when an exception is thrown${textForErrorMessageChange}\']`)
 };
@@ -234,8 +236,8 @@ suite('Display source code changes in the running application', async () => {
 
 suite('Validation of debug functionality', async () => {
     test('Open file and activate breakpoint', async () => {
-        await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
-        await editor.activateBreakpoint(javaFileName, 32);
+        await projectTree.expandPathAndOpenFile(pathToJavaFolder + '/system', weclomeControllerJavaFileName);
+        await editor.activateBreakpoint(weclomeControllerJavaFileName, 27);
     });
 
     test('Launch debug', async () => {
@@ -245,37 +247,26 @@ suite('Validation of debug functionality', async () => {
     });
 
     test('Check content of the launched application', async () => {
-        await checkErrorMessageInApplicationController();
+        await previewWidget.waitAndSwitchToWidgetFrame();
+        await previewWidget.waitAndClick(SpringAppLocators.springHomeButtonLocator);
+        await driverHelper.getDriver().switchTo().defaultContent();
+        await ide.waitAndSwitchToIdeFrame();
     });
 
-    test('Open debug configuration file', async () => {
-        await isureClickOnDebugMenu();
-        await editor.waitEditorAvailable('launch.json');
-        await editor.selectTab('launch.json');
-    });
-
-    test('Add debug configuration options', async () => {
-        await editor.moveCursorToLineAndChar('launch.json', 11, 7);
-        await editor.performKeyCombination('launch.json', Key.chord(Key.CONTROL, Key.SPACE));
-        await editor.clickOnSuggestion('Java: Launch Program in Current File');
-        await editor.waitTabWithUnsavedStatus('launch.json');
-        await editor.waitText('launch.json', '\"name\": \"Debug (Launch) - Current File\"');
-        await editor.waitTabWithSavedStatus('launch.json');
-    });
 
     test('Run debug and check application stop in the breakpoint', async () => {
-        await editor.selectTab(javaFileName);
+        await editor.selectTab(weclomeControllerJavaFileName);
         await topMenu.selectOption('View', 'Debug');
         await ide.waitRightToolbarButton(RightToolbarButton.Debug);
         await debugView.clickOnDebugConfigurationDropDown();
-        await debugView.clickOnDebugConfigurationItem('Debug (Launch) - Current File');
+        await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote');
         await debugView.clickOnRunDebugButton();
         await previewWidget.refreshPage();
         try {
-            await editor.waitStoppedDebugBreakpoint(javaFileName, 32);
+            await editor.waitStoppedDebugBreakpoint(weclomeControllerJavaFileName, 27);
         } catch (err) {
             await previewWidget.refreshPage();
-            await editor.waitStoppedDebugBreakpoint(javaFileName, 32);
+            await editor.waitStoppedDebugBreakpoint(weclomeControllerJavaFileName, 27);
         }
     });
 });
@@ -305,14 +296,6 @@ async function checkCodeNavigationWithContextMenu() {
     await contextMenu.invokeContextMenuOnActiveElementWithKeys();
     await contextMenu.waitContextMenuAndClickOnItem('Go to Definition');
     console.log('Known isuue https://github.com/eclipse/che/issues/14520.');
-}
-
-// sometimes under high loading the first click can be failed
-async function isureClickOnDebugMenu() {
-    try { await topMenu.selectOption('Debug', 'Open Configurations'); } catch (e) {
-        console.log(`After clicking to the Debug top menu the menu has been not opened, try to click again...`);
-        await topMenu.selectOption('Debug', 'Open Configurations');
-    }
 }
 
 async function checkJavaPathCompletion() {
