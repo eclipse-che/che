@@ -102,7 +102,9 @@ publishImagesOnQuay() {
     set -o pipefail
 
     TAG=$1
-    git checkout ${TAG}
+    if [[ ${TAG} == "nightly" ]]; then #if given tag 'nightly' means that don't need to checkout and going to build master
+        git checkout ${TAG}
+    fi
     REGISTRY="quay.io"
     ORGANIZATION="eclipse"
     if [[ -n "${QUAY_ECLIPSE_CHE_USERNAME}" ]] && [[ -n "${QUAY_ECLIPSE_CHE_PASSWORD}" ]]; then
