@@ -9,8 +9,8 @@
  **********************************************************************/
 import * as mocha from 'mocha';
 import { IDriver } from './IDriver';
-import { e2eContainer } from '../inversify.config';
-import { TYPES, CLASSES } from '../inversify.types';
+import { inversifyConfig } from '..';
+import { TYPES, CLASSES } from '..';
 import * as fs from 'fs';
 import * as rm from 'rimraf';
 import { TestConstants } from '../TestConstants';
@@ -19,6 +19,7 @@ import { DriverHelper } from '../utils/DriverHelper';
 import { ScreenCatcher } from '../utils/ScreenCatcher';
 import { ITestWorkspaceUtil } from '../utils/workspace/ITestWorkspaceUtil';
 
+const e2eContainer = inversifyConfig.e2eContainer;
 const driver: IDriver = e2eContainer.get(TYPES.Driver);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
