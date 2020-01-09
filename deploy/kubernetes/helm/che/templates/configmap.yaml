@@ -117,7 +117,7 @@ data:
 {{- if .Values.global.cheWorkspaceClusterRole }}
   CHE_INFRA_KUBERNETES_CLUSTER__ROLE__NAME: {{ .Values.global.cheWorkspaceClusterRole }}
 {{- end }}
-  CHE_CORS_ENABLED: "true"
+  CHE_CORS_ENABLED: "false"
   CHE_CORS_ALLOW__CREDENTIALS: "false"
   CHE_CORS_ALLOWED__ORIGINS: "*"
   CHE_WSAGENT_CORS_ENABLED: "true"
