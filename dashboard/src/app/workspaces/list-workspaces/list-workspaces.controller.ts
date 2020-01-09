@@ -28,7 +28,7 @@ export class ListWorkspacesCtrl {
   static $inject = ['$log', '$mdDialog', '$q', 'lodash', 'cheAPI', 'cheNotification', 'cheBranding', 'cheWorkspace', 'cheNamespaceRegistry',
    'confirmDialogService', '$scope', 'cheListHelperFactory'];
 
-   $q: ng.IQService;
+  $q: ng.IQService;
   $log: ng.ILogService;
   lodash: any;
   $mdDialog: ng.material.IDialogService;
@@ -39,7 +39,6 @@ export class ListWorkspacesCtrl {
 
   state: string;
   isInfoLoading: boolean;
-  workspaceFilter: any;
   userWorkspaces: che.IWorkspace[];
   workspaceCreationLink: string;
 
@@ -84,7 +83,6 @@ export class ListWorkspacesCtrl {
     this.state = 'loading';
     this.isInfoLoading = true;
     this.isExactMatch = false;
-    this.workspaceFilter = {config: {name: ''}};
     this.namespaceFilter = {namespace: ''};
 
     // map of all workspaces with additional info by id:
@@ -100,8 +98,7 @@ export class ListWorkspacesCtrl {
 
     // callback when search value is changed
     this.onSearchChanged = (str: string) => {
-      this.workspaceFilter.config.name = str;
-      this.cheListHelper.applyFilter('name', this.workspaceFilter);
+      this.cheListHelper.applyFilter('$', str ? str : {});
     };
 
     // callback when namespace is changed

@@ -25,6 +25,7 @@ import {NavbarConfig} from './navbar/navbar-config';
 import {ProxySettingsConfig} from './proxy/proxy-settings.constant';
 import {WorkspacesConfig} from './workspaces/workspaces-config';
 import {StacksConfig} from './stacks/stacks-config';
+import {GetStartedConfig} from './get-started/get-started-config';
 import {DemoComponentsController} from './demo-components/demo-components.controller';
 import {CheBranding} from '../components/branding/che-branding.factory';
 import {ChePreferences} from '../components/api/che-preferences.factory';
@@ -152,14 +153,14 @@ angular.element(document).ready(() => {
     // load Keycloak
     return keycloakLoad(keycloakSettings).then(() => {
       // init Keycloak
-      var theUseNonce: boolean;
+      let theUseNonce: boolean;
       if (typeof keycloakSettings['che.keycloak.use_nonce'] === 'string') {
         theUseNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() === 'true';
       }
-      var initOptions = {
+      let initOptions = {
         useNonce: theUseNonce,
         redirectUrl: keycloakSettings['che.keycloak.redirect_url.dashboard']
-      }
+      };
       return keycloakInit(keycloakAuth.config, initOptions);
     }).then((keycloak: any) => {
       keycloakAuth.isPresent = true;
@@ -492,6 +493,7 @@ new NavbarConfig(instanceRegister);
 new WorkspacesConfig(instanceRegister);
 new DashboardConfig(instanceRegister);
 new StacksConfig(instanceRegister);
+new GetStartedConfig(instanceRegister);
 new FactoryConfig(instanceRegister);
 new OrganizationsConfig(instanceRegister);
 new TeamsConfig(instanceRegister);

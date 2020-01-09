@@ -306,27 +306,26 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
     <md-tab label="List"
             md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.List)">
       <div layout="column">
-        <che-html-source>
-
-          <che-list style="margin: 10px; width: 200px">
+        <textarea demo-source-render>
+          <che-list style="margin: 10px; width: 200px; float: left;">
             <che-list-item ng-repeat="document in demoComponentsController.listItemsDocs">
-              <div layout="row" flex="100" style="height: 24px; margin: 5px">
+              <div layout="row" flex="100" style="height: 35px; margin: 5px">
                 <che-list-item-checked flex="20" che-icon="md-font fa fa-file-text-o"
                                        style="font-size: 20px"></che-list-item-checked>
-                <div flex="80" style="height: 20px">{{document}}</div>
+                <div flex="80" style="height: 40px">{{document}}</div>
               </div>
             </che-list-item>
           </che-list>
 
-          <che-list style="margin: 10px; width: 200px">
+          <che-list style="margin: 10px; width: 200px; float: right;">
             <che-list-item ng-repeat="task in demoComponentsController.listItemsTasks">
-              <div layout="row" flex="100" style="height: 24px; margin: 5px">
+              <div layout="row" flex="100" style="height: 35px; margin: 5px">
                 <div flex="70">{{task.name}}</div>
                 <che-list-item-checked flex="30" ng-model="task.done"></che-list-item-checked>
               </div>
             </che-list-item>
           </che-list>
-        </che-html-source>
+          </textarea>
       </div>
     </md-tab>
 

@@ -99,9 +99,7 @@ export class DemoComponentsController {
         orderNumber: 1
       }]
     };
-  }
 
-  $onInit(): void {
     const tab = this.$location.search().tab;
     if (Tab[tab]) {
       this.selectedIndex = parseInt(Tab[tab], 10);
@@ -199,14 +197,14 @@ export class DemoComponentsController {
       {text: 'Starting workspace runtime', inProgressText: 'Retrieving the stack\'s image and launching it', logs: '', hasError: false},
       {text: 'Starting workspace agent', inProgressText: 'Agents provide RESTful services like intellisense and SSH', logs: '', hasError: false},
       {text: 'Open IDE', inProgressText: '', logs: '', hasError: false}
-    ]
+    ];
     this.loader.getLoadingSteps = () => allSteps;
     let currentProgressStep = 0;
     this.loader.getCurrentProgressStep = () => currentProgressStep;
     this.loader.nextStep = () => {
       currentProgressStep++;
       currentProgressStep = currentProgressStep % (allSteps.length);
-    }
+    };
     this.loader.pause = () => {
       this.loader.paused = !this.loader.paused;
     };
