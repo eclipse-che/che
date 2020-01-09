@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.devfile;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Constants {
@@ -25,7 +25,7 @@ public class Constants {
   public static final String CURRENT_API_VERSION = "1.0.0";
 
   public static final List<String> SUPPORTED_VERSIONS =
-      Arrays.asList(CURRENT_API_VERSION, "1.0.1-beta");
+      Collections.singletonList(CURRENT_API_VERSION);
 
   public static final String EDITOR_COMPONENT_TYPE = "cheEditor";
 
