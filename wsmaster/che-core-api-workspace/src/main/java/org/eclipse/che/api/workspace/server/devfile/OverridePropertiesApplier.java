@@ -92,7 +92,10 @@ public class OverridePropertiesApplier {
   }
 
   private String[] parseSegments(String key) {
-    return key.split("\\.", key.startsWith("attributes.") ? 2 : 0);
+    return key.startsWith("attributes.")
+        // for attributes we treat anything as a attribute name so just need only 2 parts
+        ? key.split("\\.", 2)
+        : key.split("\\.");
   }
 
   private void validateFirstSegment(String[] pathSegments) throws OverrideParameterException {
