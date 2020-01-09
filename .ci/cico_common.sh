@@ -96,7 +96,7 @@ setup_gitconfig() {
 
 
 
-publishImagesOnQuayLatest() {
+publishImagesOnQuay() {
     echo "Going to build and push docker images"
     set -e
     set -o pipefail
@@ -205,5 +205,5 @@ releaseProject() {
     fi
     git tag "${tag}" || die_with "Failed to create tag ${tag}! Release has been deployed, however"
     git push --tags ||  die_with "Failed to push tags. Please do this manually"
-    publishImagesOnQuayLatest ${tag} "pushLatest"
+    publishImagesOnQuay ${tag} "pushLatest"
 }
