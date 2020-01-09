@@ -22,7 +22,8 @@ maven-eclipse.xml
 *.iws
 .idea/
 
-.vscode/
+.vscode/*
+!.vscode/launch.json
 
 # Compiled source #
 ###################
