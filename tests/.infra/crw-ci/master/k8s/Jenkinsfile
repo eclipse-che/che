@@ -79,6 +79,9 @@ pipeline {
                                         string(name: 'testWorkspaceDevfileUrl',
                                                 value: ''),
 
+                                        string(name: 'e2eTestParameters',
+                                                value: '-e "TS_SELENIUM_LOAD_PAGE_TIMEOUT=180000""')
+
                                         text(name: 'customResourceFileContent',
                                                 value: ''),
 
