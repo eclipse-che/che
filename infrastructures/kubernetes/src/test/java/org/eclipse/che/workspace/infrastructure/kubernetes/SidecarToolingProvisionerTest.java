@@ -28,7 +28,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesBrokerInitContainerApplier;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesArtifactsBrokerApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.mockito.Mock;
@@ -49,7 +49,7 @@ public class SidecarToolingProvisionerTest {
   private static final String PLUGIN_FQN_ID = "TestPluginId";
 
   @Mock private StartSynchronizer startSynchronizer;
-  @Mock private KubernetesBrokerInitContainerApplier<KubernetesEnvironment> brokerApplier;
+  @Mock private KubernetesArtifactsBrokerApplier<KubernetesEnvironment> artifactsBrokerApplier;
   @Mock private PluginFQNParser pluginFQNParser;
   @Mock private PluginBrokerManager<KubernetesEnvironment> brokerManager;
   @Mock private KubernetesEnvironment nonEphemeralEnvironment;
@@ -86,22 +86,22 @@ public class SidecarToolingProvisionerTest {
 
     provisioner =
         new SidecarToolingProvisioner<>(
-            workspaceNextAppliers, brokerApplier, pluginFQNParser, brokerManager);
+            workspaceNextAppliers, artifactsBrokerApplier, pluginFQNParser, brokerManager);
   }
 
   @Test
-  public void shouldNotAddInitContainerWhenWorkspaceIsNotEphemeral() throws Exception {
+  public void shouldIncludexArtifactsBrokerWhenWorkspaceIsNotEphemeral() throws Exception {
     provisioner.provision(runtimeId, startSynchronizer, nonEphemeralEnvironment);
 
     verify(chePluginsApplier, times(1)).apply(any(), any(), any());
-    verify(brokerApplier, times(0)).apply(any(), any(), any());
+    verify(artifactsBrokerApplier, times(1)).apply(any(), any(), any());
   }
 
   @Test
-  public void shouldIncludeInitContainerWhenWorkspaceIsEphemeral() throws Exception {
+  public void shouldIncludeArtifactsBrokerWhenWorkspaceIsEphemeral() throws Exception {
     provisioner.provision(runtimeId, startSynchronizer, ephemeralEnvironment);
 
     verify(chePluginsApplier, times(1)).apply(any(), any(), any());
-    verify(brokerApplier, times(1)).apply(any(), any(), any());
+    verify(artifactsBrokerApplier, times(1)).apply(any(), any(), any());
   }
 }

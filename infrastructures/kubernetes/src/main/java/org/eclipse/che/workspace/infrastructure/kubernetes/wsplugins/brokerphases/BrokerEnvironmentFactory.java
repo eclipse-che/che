@@ -27,11 +27,10 @@ import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
-import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -77,8 +76,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   private final String brokerPullPolicy;
   private final AgentAuthEnableEnvVarProvider authEnableEnvVarProvider;
   private final MachineTokenEnvVarProvider machineTokenEnvVarProvider;
-  private final String unifiedBrokerImage;
-  private final String initBrokerImage;
+  private final String artifactsBrokerImage;
+  private final String metadataBrokerImage;
   private final String pluginRegistryUrl;
   private final CertificateProvisioner certProvisioner;
 
@@ -87,81 +86,82 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       String brokerPullPolicy,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
       MachineTokenEnvVarProvider machineTokenEnvVarProvider,
-      String unifiedBrokerImage,
-      String initBrokerImage,
+      String artifactsBrokerImage,
+      String metadataBrokerImage,
       String pluginRegistryUrl,
       CertificateProvisioner certProvisioner) {
     this.cheWebsocketEndpoint = cheWebsocketEndpoint;
     this.brokerPullPolicy = brokerPullPolicy;
     this.authEnableEnvVarProvider = authEnableEnvVarProvider;
     this.machineTokenEnvVarProvider = machineTokenEnvVarProvider;
-    this.unifiedBrokerImage = unifiedBrokerImage;
-    this.initBrokerImage = initBrokerImage;
+    this.artifactsBrokerImage = artifactsBrokerImage;
+    this.metadataBrokerImage = metadataBrokerImage;
     this.pluginRegistryUrl = pluginRegistryUrl;
     this.certProvisioner = certProvisioner;
   }
 
   /**
-   * Creates {@link KubernetesEnvironment} with everything needed to deploy Plugin broker.
+   * Creates {@link KubernetesEnvironment} with everything needed to deploy metadata plugin broker.
    *
    * @param pluginFQNs fully qualified names of plugins that needs to be resolved by the broker
    * @param runtimeID ID of the runtime the broker would be started
    * @return kubernetes environment (or its extension) with the Plugin broker objects
    */
-  public E create(Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID)
+  public E createForMetadataBroker(Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID)
+      throws InfrastructureException {
+    BrokersConfigs brokersConfigs = getBrokersConfigs(pluginFQNs, runtimeID, metadataBrokerImage);
+    return doCreate(brokersConfigs);
+  }
+
+  /**
+   * Creates {@link KubernetesEnvironment} with everything needed to deploy artifacts plugin broker.
+   *
+   * @param pluginFQNs fully qualified names of plugins that needs to be resolved by the broker
+   * @param runtimeID ID of the runtime the broker would be started
+   * @return kubernetes environment (or its extension) with the Plugin broker objects
+   */
+  public E createForArtifactsBroker(Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID)
+      throws InfrastructureException {
+    BrokersConfigs brokersConfigs = getBrokersConfigs(pluginFQNs, runtimeID, artifactsBrokerImage);
+    brokersConfigs
+        .machines
+        .values()
+        .forEach(
+            m -> m.getVolumes().put(PLUGINS_VOLUME_NAME, new VolumeImpl().withPath("/plugins")));
+    return doCreate(brokersConfigs);
+  }
+
+  private BrokersConfigs getBrokersConfigs(
+      Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID, String brokerImage)
       throws InfrastructureException {
 
-    BrokersConfigs brokersConfigs = new BrokersConfigs();
-    Pod pod = brokersConfigs.pod = newPod();
-    brokersConfigs.configMaps = new HashMap<>();
-    brokersConfigs.machines = new HashMap<>();
+    String configMapName = generateUniqueName(CONFIG_MAP_NAME_SUFFIX);
+    String configMapVolume = generateUniqueName(BROKER_VOLUME);
+    ConfigMap configMap = newConfigMap(configMapName, pluginFQNs);
 
-    PodSpec spec = pod.getSpec();
+    Pod pod = newPod();
     List<EnvVar> envVars =
         Stream.of(
                 authEnableEnvVarProvider.get(runtimeID), machineTokenEnvVarProvider.get(runtimeID))
             .map(this::asEnvVar)
             .collect(Collectors.toList());
+    Container container = newContainer(runtimeID, envVars, brokerImage, configMapVolume);
+    pod.getSpec().getContainers().add(container);
+    pod.getSpec().getVolumes().add(newConfigMapVolume(configMapName, configMapVolume));
 
-    BrokerConfig brokerConfig =
-        createBrokerConfig(runtimeID, pluginFQNs, envVars, unifiedBrokerImage, pod);
-    brokersConfigs.machines.put(brokerConfig.machineName, brokerConfig.machineConfig);
-    brokersConfigs.configMaps.put(brokerConfig.configMapName, brokerConfig.configMap);
-    spec.getContainers().add(brokerConfig.container);
-    spec.getVolumes()
-        .add(
-            new VolumeBuilder()
-                .withName(brokerConfig.configMapVolume)
-                .withNewConfigMap()
-                .withName(brokerConfig.configMapName)
-                .endConfigMap()
-                .build());
+    InternalMachineConfig machineConfig = new InternalMachineConfig();
+    String machineName = Names.machineName(pod.getMetadata(), container);
 
-    // Add init broker that cleans up /plugins
-    BrokerConfig initBrokerConfig =
-        createBrokerConfig(runtimeID, null, envVars, initBrokerImage, pod);
-    pod.getSpec().getInitContainers().add(initBrokerConfig.container);
-    brokersConfigs.machines.put(initBrokerConfig.machineName, initBrokerConfig.machineConfig);
+    BrokersConfigs configs = new BrokersConfigs();
+    configs.configMaps = singletonMap(configMapName, configMap);
+    configs.machines = singletonMap(machineName, machineConfig);
+    configs.pods = singletonMap(pod.getMetadata().getName(), pod);
 
-    return doCreate(brokersConfigs);
+    return configs;
   }
 
   /** Needed to implement this component in both - Kubernetes and Openshift infrastructures. */
-  protected abstract E doCreate(BrokersConfigs brokersConfigs);
-
-  private String generateUniqueName(String suffix) {
-    return NameGenerator.generate(suffix, 6);
-  }
-
-  /**
-   * Generate a container name from an image reference. Since full image references can be over 63
-   * characters, we need to strip registry and organization from the image reference to limit name
-   * length.
-   */
-  @VisibleForTesting
-  protected String generateContainerNameFromImageRef(String image) {
-    return image.toLowerCase().replaceAll("[^/]*/", "").replaceAll("[^\\d\\w-]", "-");
-  }
+  protected abstract E doCreate(BrokersConfigs brokerConfigs);
 
   private Container newContainer(
       RuntimeIdentity runtimeId,
@@ -223,51 +223,36 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     }
   }
 
+  private Volume newConfigMapVolume(String configMapName, String configMapVolume) {
+    return new VolumeBuilder()
+        .withName(configMapVolume)
+        .withNewConfigMap()
+        .withName(configMapName)
+        .endConfigMap()
+        .build();
+  }
+
   private EnvVar asEnvVar(Pair<String, String> envVar) {
     return new EnvVarBuilder().withName(envVar.first).withValue(envVar.second).build();
   }
 
-  private BrokerConfig createBrokerConfig(
-      RuntimeIdentity runtimeId,
-      @Nullable Collection<PluginFQN> pluginFQNs,
-      List<EnvVar> envVars,
-      String image,
-      Pod pod)
-      throws InternalInfrastructureException {
-
-    BrokerConfig brokerConfig = new BrokerConfig();
-    String configMapVolume = null;
-    if (pluginFQNs != null) {
-      brokerConfig.configMapName = generateUniqueName(CONFIG_MAP_NAME_SUFFIX);
-      brokerConfig.configMapVolume = generateUniqueName(BROKER_VOLUME);
-      brokerConfig.configMap = newConfigMap(brokerConfig.configMapName, pluginFQNs);
-      configMapVolume = brokerConfig.configMapVolume;
-    }
-    brokerConfig.container = newContainer(runtimeId, envVars, image, configMapVolume);
-    brokerConfig.machineName = Names.machineName(pod.getMetadata(), brokerConfig.container);
-    brokerConfig.machineConfig = new InternalMachineConfig();
-    brokerConfig
-        .machineConfig
-        .getVolumes()
-        .put(PLUGINS_VOLUME_NAME, new VolumeImpl().withPath("/plugins"));
-
-    return brokerConfig;
+  private String generateUniqueName(String suffix) {
+    return NameGenerator.generate(suffix, 6);
   }
 
-  private static class BrokerConfig {
-
-    String configMapName;
-    ConfigMap configMap;
-    Container container;
-    String machineName;
-    InternalMachineConfig machineConfig;
-    String configMapVolume;
+  /**
+   * Generate a container name from an image reference. Since full image references can be over 63
+   * characters, we need to strip registry and organization from the image reference to limit name
+   * length.
+   */
+  @VisibleForTesting
+  protected String generateContainerNameFromImageRef(String image) {
+    return image.toLowerCase().replaceAll("[^/]*/", "").replaceAll("[^\\d\\w-]", "-");
   }
 
   public static class BrokersConfigs {
-
     public Map<String, InternalMachineConfig> machines;
     public Map<String, ConfigMap> configMaps;
-    public Pod pod;
+    public Map<String, Pod> pods;
   }
 }
