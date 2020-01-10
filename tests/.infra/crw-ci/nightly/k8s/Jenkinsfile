@@ -53,7 +53,7 @@ pipeline {
                     }
                 }
 
-                stage('Run Vert.x tests against nightly build') {
+                stage('Run devfile tests against nightly build') {
                     steps {
                         build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                 parameters: [
@@ -73,7 +73,7 @@ pipeline {
                                                 value: ''),
 
                                         string(name: 'e2eTestToRun',
-                                                value: 'test-java-vertx'),
+                                                value: 'test-all-devfiles'),
 
                                         string(name: 'testWorkspaceDevfileUrl',
                                                 value: ''),

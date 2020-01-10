@@ -127,6 +127,10 @@ declare namespace che {
       deleteTeamInvitation(teamId: string, email: string);
     }
 
+    export interface ICheDevfile {
+      fetchDevfileSchema(): ng.IPromise<any>;
+    }
+
   }
 
   export namespace resource {
@@ -161,16 +165,6 @@ declare namespace che {
       TEAM_MEMBER: any;
       TEAM_ADMIN: any;
       getValues(): any[];
-    }
-
-    export interface ICheRecipeTypes {
-      DOCKERFILE: string;
-      DOCKERIMAGE: string;
-      COMPOSE: string;
-      KUBERNETES: string;
-      OPENSHIFT: string;
-      NOENVIRONMENT: string;
-      getValues(): Array<string>;
     }
 
     export interface ICheMachineSourceTypes {
@@ -324,7 +318,7 @@ declare namespace che {
     name?: string;
     defaultEnv?: string;
     environments: {
-      [envName: string]: IWorkspaceEnvironment
+      [envName: string]: any;
     };
     projects?: Array <any>;
     commands?: Array <any>;
@@ -346,48 +340,6 @@ declare namespace che {
     metadata: {
       name: string
     }
-  }
-
-  export interface IWorkspaceEnvironment {
-    machines: {
-      [machineName: string]: IEnvironmentMachine
-    };
-    recipe: IRecipe;
-  }
-
-  export interface IRecipe {
-    id?: string;
-    content?: string;
-    location?: string;
-    contentType?: string;
-    type: string;
-  }
-
-  export interface IEnvironmentMachine {
-    installers?: string[];
-    attributes?: {
-      memoryLimitBytes?: string|number;
-      source?: string;
-      [attrName: string]: string|number;
-    };
-    servers?: {
-      [serverRef: string]: IEnvironmentMachineServer
-    };
-    volumes?: {
-      [volumeRef: string]: IEnvironmentMachineVolume
-    };
-    env?: {[envName: string]: string};
-  }
-
-  export interface IEnvironmentMachineServer {
-    port: string|number;
-    protocol: string;
-    path?: string;
-    properties?: any;
-  }
-
-  export interface IEnvironmentMachineVolume {
-    path: string;
   }
 
   export interface IWorkspaceRuntime {
@@ -418,17 +370,6 @@ declare namespace che {
     ref: string;
     protocol: string;
     path: string;
-  }
-
-  export interface IAgent {
-    id: string;
-    name: string;
-    version: string;
-    description: string;
-    properties: any;
-    script: string;
-    servers: { [serverName: string]: IEnvironmentMachineServer };
-    dependencies: string[];
   }
 
   export interface IProjectSource {
@@ -480,9 +421,11 @@ declare namespace che {
 
   export interface IEditorOptions {
     mode: string;
-    lineNumbers: boolean;
-    lineWrapping: boolean;
+    lineNumbers: string;
+    wordWrap: string;
     matchBrackets: boolean;
+    lineDecorationsWidth: number;
+    lineNumbersMinChars: number;
   }
 
   export interface IValidation {

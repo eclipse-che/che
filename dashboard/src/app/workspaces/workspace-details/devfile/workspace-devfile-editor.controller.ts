@@ -10,7 +10,10 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+
 import {CheBranding} from '../../../../components/branding/che-branding.factory';
+import { CheAPI } from '../../../../components/api/che-api.factory';
+
 /**
  * @ngdoc controller
  * @name workspaces.devfile-editor.controller:WorkspaceDevfileEditorController
@@ -23,7 +26,8 @@ export class WorkspaceDevfileEditorController {
     '$log',
     '$scope',
     '$timeout',
-    'cheBranding'
+    'cheBranding',
+    'cheAPI'
   ];
   private $log: ng.ILogService;
   private $scope: ng.IScope;
@@ -35,25 +39,31 @@ export class WorkspaceDevfileEditorController {
   private workspaceDevfileOnChange: Function;
   private devfileDocsUrl: string;
 
-  private validationErrors: string[] = [];
+  private editorOptions: {
+    wordWrap: string,
+    lineNumbers: string,
+    matchBrackets: boolean,
+    mode: string,
+    onLoad: Function
+  };
+  private editorState: che.IValidation = {
+    isValid: true,
+    errors: []
+  };
   private devfileYaml: string;
   private saveTimeoutPromise: ng.IPromise<any>;
+  private cheAPI: CheAPI;
 
 
   /**
    * Default constructor that is using resource
    */
-  constructor(
-    $log: ng.ILogService,
-    $scope: ng.IScope,
-    $timeout: ng.ITimeoutService,
-    cheBranding: CheBranding
-  ) {
+  constructor($log: ng.ILogService, $scope: ng.IScope, $timeout: ng.ITimeoutService, cheBranding: CheBranding, cheAPI: CheAPI) {
     this.$log = $log;
     this.$scope = $scope;
     this.$timeout = $timeout;
     this.cheBranding = cheBranding;
-    this.devfileYaml = jsyaml.dump(this.workspaceDevfile);
+    this.cheAPI = cheAPI;
 
     this.$scope.$on('edit-workspace-details', (event: ng.IAngularEvent, attrs: { status: string }) => {
       if (attrs.status === 'cancelled') {
@@ -72,33 +82,59 @@ export class WorkspaceDevfileEditorController {
       }
 
       if (angular.equals(devfile, this.workspaceDevfile) === false) {
+        Object.keys(devfile).forEach((key: string) => {
+          if (!this.workspaceDevfile[key]) {
+            delete devfile[key];
+          }
+        });
         angular.extend(devfile, this.workspaceDevfile);
         this.devfileYaml = jsyaml.safeDump(devfile);
-        this.validate();
       }
     }, true);
+  }
+
+  /**
+   * Returns the workspace devfile validation.
+   * @returns {che.IValidation}
+   */
+  workspaceDevfileValidation(): che.IValidation {
+    const validation = {
+      isValid: true,
+      errors: []
+    };
+
+    try {
+      jsyaml.safeLoad(this.devfileYaml);
+    } catch (e) {
+      if (e && e.name === 'YAMLException') {
+        validation.errors = [e.message];
+      } else {
+        validation.errors = ['Unable to parse YAML.'];
+      }
+      validation.isValid = false;
+      this.$log.error(e);
+    }
+
+    return validation;
   }
 
   $onInit(): void {
     this.devfileYaml = jsyaml.safeDump(this.workspaceDevfile);
     this.devfileDocsUrl = this.cheBranding.getDocs().devfile;
-  }
-
-  validate() {
-    this.validationErrors = [];
-
-    let devfile: che.IWorkspaceDevfile;
-    try {
-      devfile = jsyaml.safeLoad(this.devfileYaml);
-    } catch (e) {
-      if (e.name === 'YAMLException') {
-        this.validationErrors = [e.message];
-      }
-      if (this.validationErrors.length === 0) {
-        this.validationErrors = ['Devfile is invalid.'];
-      }
-      this.$log.error(e);
-    }
+    const yamlService = (window as any).yamlService;
+    this.cheAPI.getDevfile().fetchDevfileSchema().then(jsonSchema => {
+      const schemas = [{
+        uri: 'inmemory:yaml',
+        fileMatch: ['*'],
+        schema: jsonSchema
+      }];
+      yamlService.configure({
+        validate: true,
+        schemas,
+        hover: true,
+        completion: true,
+      });
+    });
   }
 
   /**
@@ -114,14 +150,19 @@ export class WorkspaceDevfileEditorController {
     }
 
     this.saveTimeoutPromise = this.$timeout(() => {
-      this.validate();
-      if (this.validationErrors.length !== 0) {
+      if (!this.editorState.isValid) {
         return;
       }
 
-      angular.extend(this.workspaceDevfile, jsyaml.safeLoad(this.devfileYaml));
-      this.workspaceDevfileOnChange({devfile: this.workspaceDevfile});
-    }, 200);
+      const devfile =  jsyaml.safeLoad(this.devfileYaml);
+      Object.keys(this.workspaceDevfile).forEach((key: string) => {
+        if (!devfile[key]) {
+          delete this.workspaceDevfile[key];
+        }
+      });
+      angular.extend(this.workspaceDevfile, devfile);
+      this.workspaceDevfileOnChange({devfile});
+    }, 500);
   }
 
 }

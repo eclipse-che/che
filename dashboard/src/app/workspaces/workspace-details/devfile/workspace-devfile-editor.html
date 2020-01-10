@@ -5,17 +5,11 @@
                 on-content-change="workspaceDevfileEditorController.onChange()"
                 editor-mode="text/x-yaml"
                 editor-read-only="!!workspaceDevfileEditorController.editorReadOnly"
+                validator="workspaceDevfileEditorController.workspaceDevfileValidation()"
+                editor-state="workspaceDevfileEditorController.editorState"
                 required>
       <div ng-message="required">Devfile is required.</div>
     </che-editor>
-  </div>
-  <div layout="column">
-    <div ng-if="workspaceDevfileEditorController.devfileValidationMessages.length>0">
-      <div class="error-message"
-          ng-repeat="errorMessage in workspaceDevfileEditorController.devfileValidationMessages">
-        {{errorMessage}}
-      </div>
-    </div>
   </div>
   <a ng-href="{{workspaceDevfileEditorController.devfileDocsUrl}}" target="_blank">Docs: Devfile Structure</a>
 </div>

@@ -24,7 +24,7 @@ import {CheMultiTransclude} from './multi-transclude/che-multi-transclude.direct
 import {CheMultiTranscludePart} from './multi-transclude/che-multi-transclude-part.directive';
 import {ImgSrc} from './img-src/img-src.directive';
 import {CheClipTheMiddle} from './clip-the-middle/che-clip-the-middle.directive';
-import {UiCodemirror} from './codemirror/codemirror.directive';
+import {UiMonaco} from './monaco/monaco.directive';
 
 export class AttributeConfig {
 
@@ -53,7 +53,7 @@ export class AttributeConfig {
     register.directive('imgSrc', ImgSrc);
 
     register.directive('cheClipTheMiddle', CheClipTheMiddle);
-    // ui codemirror
-    register.directive('uiCodemirror', UiCodemirror);
+    // ui monaco
+    register.directive('uiMonaco', UiMonaco);
   }
 }
