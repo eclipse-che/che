@@ -374,11 +374,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-commons-tomcat</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-json</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -405,6 +400,11 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-schedule</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-commons-tomcat</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
