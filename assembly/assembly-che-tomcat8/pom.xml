@@ -22,6 +22,12 @@
     <artifactId>assembly-che-tomcat8</artifactId>
     <packaging>jar</packaging>
     <name>Che IDE :: Assemblies Che Tomcat8</name>
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-tomcat</artifactId>
+        </dependency>
+    </dependencies>
     <build>
         <finalName>assembly-che-tomcat8</finalName>
         <plugins>

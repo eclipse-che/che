@@ -12,8 +12,9 @@
       Red Hat, Inc. - initial API and implementation
 
 -->
-<assembly xmlns="https://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="https://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.0.0 https://maven.apache.org/xsd/assembly-2.0.0.xsd">
+<assembly xmlns="https://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.0.0"
+          xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="https://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.0.0 https://maven.apache.org/xsd/assembly-2.0.0.xsd">
     <id>tomcat-zip</id>
 
     <formats>
@@ -35,6 +36,7 @@
                 <exclude>**/bin/*.tar.gz</exclude>
                 <exclude>**/conf/tomcat-users.xml</exclude>
                 <exclude>**/conf/server.xml</exclude>
+                <exclude>**/conf/context.xml</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -45,8 +47,6 @@
             </includes>
             <fileMode>755</fileMode>
         </fileSet>
-
-
         <fileSet>
             <directory>${project.basedir}/src/assembly</directory>
             <outputDirectory></outputDirectory>
@@ -76,4 +76,14 @@
             </includes>
         </fileSet>
     </fileSets>
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>org.eclipse.che.core:che-core-commons-tomcat</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
 </assembly>
