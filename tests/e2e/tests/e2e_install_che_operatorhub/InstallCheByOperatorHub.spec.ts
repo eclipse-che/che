@@ -9,19 +9,15 @@
  **********************************************************************/
 
 import { e2eContainer } from '../../inversify.config';
-import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { IOcpLoginPage } from '../../pageobjects/login/IOcpLoginPage';
 import { CLASSES, TYPES } from '../../inversify.types';
-import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { OcpLoginPage } from '../../pageobjects/openshift/OcpLoginPage';
 import { OcpWebConsolePage } from '../../pageobjects/openshift/OcpWebConsolePage';
 import { TestConstants } from '../../TestConstants';
 
-const cheLogin: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
 const ocpLogin: IOcpLoginPage = e2eContainer.get<IOcpLoginPage>(TYPES.OcpLogin);
 const ocpLoginPage: OcpLoginPage = e2eContainer.get(CLASSES.OcpLoginPage);
 const ocpWebConsole: OcpWebConsolePage = e2eContainer.get(CLASSES.OcpWebConsolePage);
-const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 
 suite('E2E', async () => {
 
@@ -123,20 +119,6 @@ suite('E2E', async () => {
         test('Logout from temp admin user', async () => {
             await ocpWebConsole.logoutFromWebConsole();
             await ocpWebConsole.waitDisappearanceNavpanelOpenShift();
-        });
-
-        test('Go to the insatalled application URL', async () => {
-            await ocpLoginPage.openLoginPageOpenShift(TestConstants.TS_SELENIUM_BASE_URL);
-        });
-    });
-
-    suite('Log into installed application', async () => {
-        test('Login to application', async () => {
-            cheLogin.login();
-        });
-
-        test('Wait application dashboard', async () => {
-            await dashboard.waitPage();
         });
     });
 

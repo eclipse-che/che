@@ -115,7 +115,7 @@ suite('Language server validation', async () => {
     });
 
     test('Suggestion', async () => {
-        await editor.moveCursorToLineAndChar(javaFileName, 32, 27);
+        await editor.moveCursorToLineAndChar(javaFileName, 32, 21);
         await editor.pressControlSpaceCombination(javaFileName);
         await editor.waitSuggestionWithScrolling(javaFileName, 'run(Class<?> primarySource, String... args) : ConfigurableApplicationContext', 120000);
     });
@@ -187,7 +187,7 @@ suite('Display source code changes in the running application', async () => {
         await editor.clickOnTab(changedJavaFileName);
         await editor.waitTabFocused(changedJavaFileName);
 
-        await editor.moveCursorToLineAndChar(changedJavaFileName, 34, 55);
+        await editor.moveCursorToLineAndChar(changedJavaFileName, 34, 89);
         await editor.performKeyCombination(changedJavaFileName, textForErrorMessageChange);
         await editor.performKeyCombination(changedJavaFileName, Key.chord(Key.CONTROL, 's'));
     });

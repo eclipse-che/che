@@ -42,25 +42,25 @@ export class Editor {
 
     public async waitSuggestion(editorTabTitle: string,
         suggestionText: string,
-        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
+        lineNumber?: number,
+        charNumber?: number) {
 
-        Logger.debug(`Editor.waitSuggestion tabTitle: "${editorTabTitle}" suggestion: "${suggestionText}"`);
+        const charInLineNumber: number = (charNumber ? charNumber : 1);
 
-        const suggestionLocator: By = this.getSuggestionLineXpathLocator(suggestionText);
+        // if line defined the method sets cursor to line and char
+        // before invoking suggestion container and repeat this
+        // cycle if suggestion didn't display
+        if (lineNumber) {
+            await this.waitSuggestionWithResettingCursor(editorTabTitle, suggestionText, timeout, lineNumber, charInLineNumber);
+            return;
+        }
 
-        await this.driverHelper.getDriver().wait(async () => {
-            try {
-                await this.driverHelper.waitVisibility(suggestionLocator, 5000);
-                return true;
-            } catch (err) {
-                if (!(err instanceof error.TimeoutError)) {
-                    throw err;
-                }
+        // if line not defined the method just invoke suggestion container
+        // without setting cursor to line and char and repeat this
+        // cycle if suggestion didn't display
+        await this.waitSuggestionWithoutResettingCursor(editorTabTitle, suggestionText, timeout);
 
-                await this.closeSuggestionContainer(editorTabTitle, timeout);
-                await this.pressControlSpaceCombination(editorTabTitle);
-            }
-        }, timeout);
     }
 
     public async closeSuggestionContainer(editorTabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -526,5 +526,61 @@ export class Editor {
         const lineYCoordinates: number = await this.getLineYCoordinates(lineNumber);
 
         return By.xpath(`//div[contains(@style, 'top:${lineYCoordinates}px')]//div[contains(@class, 'squiggly-error')]`);
+    }
+
+    private async waitSuggestionWithResettingCursor(editorTabTitle: string,
+        suggestionText: string,
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
+        lineNumber: number,
+        charNumber: number) {
+
+        const suggestionLocator: By = this.getSuggestionLineXpathLocator(suggestionText);
+
+        const methodLogText: string = `Editor.waitSuggestion tabTitle: "${editorTabTitle}" ` +
+            `suggestion: "${suggestionText}" ` +
+            `line: "${lineNumber}" ` +
+            `char: "${charNumber}"`;
+
+        Logger.debug(methodLogText);
+
+        await this.driverHelper.getDriver().wait(async () => {
+            await this.selectTab(editorTabTitle);
+            await this.moveCursorToLineAndChar(editorTabTitle, lineNumber, charNumber);
+            await this.pressControlSpaceCombination(editorTabTitle);
+
+            try {
+                await this.driverHelper.waitVisibility(suggestionLocator, 5000);
+                await this.closeSuggestionContainer(editorTabTitle);
+                return true;
+            } catch (err) {
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err;
+                }
+            }
+        }, timeout);
+    }
+
+    private async waitSuggestionWithoutResettingCursor(editorTabTitle: string,
+        suggestionText: string,
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+
+        Logger.debug(`Editor.waitSuggestion tabTitle: "${editorTabTitle}" suggestion: "${suggestionText}"`);
+
+        const suggestionLocator: By = this.getSuggestionLineXpathLocator(suggestionText);
+
+        await this.driverHelper.getDriver().wait(async () => {
+            try {
+                await this.driverHelper.waitVisibility(suggestionLocator, 5000);
+                await this.closeSuggestionContainer(editorTabTitle);
+                return true;
+            } catch (err) {
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err;
+                }
+
+                await this.closeSuggestionContainer(editorTabTitle, timeout);
+                await this.pressControlSpaceCombination(editorTabTitle);
+            }
+        }, timeout);
     }
 }

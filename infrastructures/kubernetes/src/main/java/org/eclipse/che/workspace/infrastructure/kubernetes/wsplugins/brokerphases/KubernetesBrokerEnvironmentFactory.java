@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases;
 
-import static java.util.Collections.singletonMap;
-
 import com.google.common.annotations.Beta;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -21,6 +19,7 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVar
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory.BrokersConfigs;
 
 /**
  * Extends {@link BrokerEnvironmentFactory} to be used in the kubernetes infrastructure.
@@ -39,8 +38,8 @@ public class KubernetesBrokerEnvironmentFactory
       @Named("che.workspace.plugin_broker.pull_policy") String brokerPullPolicy,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
       MachineTokenEnvVarProvider machineTokenEnvVarProvider,
-      @Named("che.workspace.plugin_broker.init.image") String initBrokerImage,
-      @Named("che.workspace.plugin_broker.unified.image") String unifiedBrokerImage,
+      @Named("che.workspace.plugin_broker.artifacts.image") String artifactsBrokerImage,
+      @Named("che.workspace.plugin_broker.metadata.image") String metadataBrokerImage,
       @Nullable @Named("che.workspace.plugin_registry_url") String pluginRegistryUrl,
       CertificateProvisioner certProvisioner) {
     super(
@@ -48,8 +47,8 @@ public class KubernetesBrokerEnvironmentFactory
         brokerPullPolicy,
         authEnableEnvVarProvider,
         machineTokenEnvVarProvider,
-        unifiedBrokerImage,
-        initBrokerImage,
+        artifactsBrokerImage,
+        metadataBrokerImage,
         pluginRegistryUrl,
         certProvisioner);
   }
@@ -59,7 +58,7 @@ public class KubernetesBrokerEnvironmentFactory
     return KubernetesEnvironment.builder()
         .setConfigMaps(brokersConfigs.configMaps)
         .setMachines(brokersConfigs.machines)
-        .setPods(singletonMap(brokersConfigs.pod.getMetadata().getName(), brokersConfigs.pod))
+        .setPods(brokersConfigs.pods)
         .build();
   }
 }

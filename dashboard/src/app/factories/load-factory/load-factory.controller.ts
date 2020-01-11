@@ -17,6 +17,7 @@ import {CheNotification} from '../../../components/notification/che-notification
 import {RouteHistory} from '../../../components/routing/route-history.service';
 import {CheJsonRpcApi} from '../../../components/api/json-rpc/che-json-rpc-api.factory';
 import {CheJsonRpcMasterApi} from '../../../components/api/json-rpc/che-json-rpc-master-api';
+import {WorkspaceDataManager} from '../../../components/api/workspace/workspace-data-manager';
 
 const STARTING = WorkspaceStatus[WorkspaceStatus.STARTING];
 const RUNNING = WorkspaceStatus[WorkspaceStatus.RUNNING];
@@ -29,20 +30,36 @@ const WS_AGENT_STEP: number = 4;
  */
 export class LoadFactoryController {
 
-  static $inject = ['cheAPI', 'cheWorkspace','cheJsonRpcApi', '$route', '$timeout', '$mdDialog', 'loadFactoryService', 'lodash', 'cheNotification', '$location', 'routeHistory', '$window', 'loadFactoryService'];
+  static $inject = [
+    '$location',
+    '$mdDialog',
+    '$q',
+    '$route',
+    '$timeout',
+    '$window',
+    'cheAPI',
+    'cheJsonRpcApi',
+    'cheNotification',
+    'cheWorkspace',
+    'loadFactoryService',
+    'lodash',
+    'routeHistory',
+  ];
 
-  private cheAPI: CheAPI;
-  private cheWorkspace: CheWorkspace;
-  private $timeout: ng.ITimeoutService;
+  private $location: ng.ILocationService;
   private $mdDialog: ng.material.IDialogService;
+  private $q: ng.IQService;
+  private $timeout: ng.ITimeoutService;
+  private $window: ng.IWindowService;
+  private cheAPI: CheAPI;
+  private cheNotification: CheNotification;
+  private cheWorkspace: CheWorkspace;
   private loadFactoryService: LoadFactoryService;
   private lodash: any;
-  private cheNotification: CheNotification;
-  private $location: ng.ILocationService;
   private routeHistory: RouteHistory;
-  private $window: ng.IWindowService;
   private routeParams: any;
 
+  private workspaceDataManager: WorkspaceDataManager;
   private workspaces: Array<che.IWorkspace>;
   private workspace: che.IWorkspace;
   private projectsToImport: number;
@@ -53,28 +70,34 @@ export class LoadFactoryController {
   /**
    * Default constructor that is using resource
    */
-  constructor(cheAPI: CheAPI,
-              cheWorkspace: CheWorkspace,
-              cheJsonRpcApi: CheJsonRpcApi,
-              $route: ng.route.IRouteService,
-              $timeout: ng.ITimeoutService,
-              $mdDialog: ng.material.IDialogService,
-              loadFactoryService: LoadFactoryService,
-              lodash: any,
-              cheNotification: CheNotification,
-              $location: ng.ILocationService,
-              routeHistory: RouteHistory,
-              $window: ng.IWindowService) {
-    this.cheAPI = cheAPI;
-    this.cheWorkspace = cheWorkspace;
-    this.$timeout = $timeout;
+  constructor(
+    $location: ng.ILocationService,
+    $mdDialog: ng.material.IDialogService,
+    $q: ng.IQService,
+    $route: ng.route.IRouteService,
+    $timeout: ng.ITimeoutService,
+    $window: ng.IWindowService,
+    cheAPI: CheAPI,
+    cheJsonRpcApi: CheJsonRpcApi,
+    cheNotification: CheNotification,
+    cheWorkspace: CheWorkspace,
+    loadFactoryService: LoadFactoryService,
+    lodash: any,
+    routeHistory: RouteHistory,
+  ) {
+    this.$location = $location;
     this.$mdDialog = $mdDialog;
+    this.$q = $q;
+    this.$timeout = $timeout;
+    this.$window = $window;
+    this.cheAPI = cheAPI;
+    this.cheNotification = cheNotification;
+    this.cheWorkspace = cheWorkspace;
     this.loadFactoryService = loadFactoryService;
     this.lodash = lodash;
-    this.cheNotification = cheNotification;
-    this.$location = $location;
     this.routeHistory = routeHistory;
-    this.$window = $window;
+
+    this.workspaceDataManager = new WorkspaceDataManager();
 
     this.workspaces = [];
     this.workspace = {} as che.IWorkspace;
@@ -133,7 +156,7 @@ export class LoadFactoryController {
         }
 
         // check factory contains compatible workspace config:
-        if (!(Boolean(this.factory.workspace) !== Boolean(this.factory.devfile)) || !this.isSupportedVersion()) {
+        if (!(Boolean(this.factory.workspace) !== Boolean(this.factory.devfile)) || !this.isSupported()) {
           this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
           this.getLoadingSteps()[this.getCurrentProgressStep()].logs = 'Factory has no compatible workspace config or devfile.';
         } else {
@@ -280,7 +303,7 @@ export class LoadFactoryController {
       case 'peraccount' :
         // TODO when account is ready
         workspace = this.lodash.find(this.workspaces, (w: che.IWorkspace) => {
-          return this.factory.workspace.name === w.config.name;
+          return this.factory.workspace.name === this.workspaceDataManager.getName(w);
         });
         break;
       case 'perclick' :
@@ -314,16 +337,11 @@ export class LoadFactoryController {
    * Create workspace from factory config.
    */
   createWorkspace(): any {
-    let creationPromise: ng.IPromise<any>;
-    if (this.factory.workspace) {
-      let config = this.factory.workspace;
-      // set factory attribute:
-      let attrs = {factoryId: this.factory.id};
-      config.name = this.getWorkspaceName(config.name);
-
-      creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, config, attrs);
-    } else if (this.factory.devfile) {
-      let devfile = this.factory.devfile;
+    const defer = this.$q.defer();
+    if (!this.factory.devfile) {
+      defer.reject({ data: {message: 'No devfile in factory.' }});
+    } else {
+      const devfile = this.factory.devfile;
       // set devfile attributes
       let url = '';
       let params = '';
@@ -336,40 +354,16 @@ export class LoadFactoryController {
       }
 
       const attrs = {factoryurl: `${url}${params}`};
-      creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromDevfile(null, devfile, attrs);
+      this.cheAPI.getWorkspace().createWorkspaceFromDevfile(null, devfile, attrs)
+        .then((workspace: che.IWorkspace) => defer.resolve(workspace));
     }
-    creationPromise.then((data: any) => {
+    defer.promise.then((workspace: che.IWorkspace) => {
       this.$timeout(() => {
-        this.startWorkspace(data);
+        this.startWorkspace(workspace);
       }, 1000);
     }, (error: any) => {
       this.handleError(error);
     });
-  }
-
-  /**
-   * Get workspace name by detecting the existing names
-   * and generate new name if necessary.
-   *
-   * @param name workspace name
-   * @returns {string} generated name
-   */
-  getWorkspaceName(name: string): string {
-    if (this.workspaces.length === 0) {
-      return name;
-    }
-    let existingNames = this.lodash.pluck(this.workspaces, 'config.name');
-
-    if (existingNames.indexOf(name) < 0) {
-      return name;
-    }
-
-    let generatedName = name;
-    let counter = 1;
-    while (existingNames.indexOf(generatedName) >= 0) {
-      generatedName = name + '_' + counter++;
-    }
-    return generatedName;
   }
 
   /**
@@ -381,13 +375,8 @@ export class LoadFactoryController {
     this.workspace = workspace;
 
     if (workspace.status === RUNNING) {
-      if(workspace.config && workspace.config.projects) {
-        this.loadFactoryService.setCurrentProgressStep(4);
-        this.importProjects();
-      } else {
-        this.finish();
-      }
-        return;
+      this.finish();
+      return;
     }
 
     this.subscribeOnEvents(workspace);
@@ -531,108 +520,6 @@ export class LoadFactoryController {
   }
 
   /**
-   * Performs importing projects.
-   */
-  importProjects(): void {
-    let promise = this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspace.id);
-    promise.then(() => {
-      let projects = this.cheAPI.getWorkspace().getWorkspacesById().get(this.workspace.id).config.projects;
-      this.detectProjectsToImport(projects);
-    }, (error: any) => {
-      if (error.status !== 304) {
-        let projects = this.cheAPI.getWorkspace().getWorkspacesById().get(this.workspace.id).config.projects;
-        this.detectProjectsToImport(projects);
-      } else {
-        this.handleError(error);
-      }
-    });
-  }
-
-  /**
-   * Detects the projects to be imported.
-   *
-   * @param projects projects list
-   */
-  detectProjectsToImport(projects: Array<che.IProject>): void {
-    this.projectsToImport = 0;
-
-    projects.forEach((project: che.IProjectTemplate) => {
-      if (!this.isProjectOnFileSystem(project)) {
-        this.projectsToImport++;
-        this.importProject(this.workspace.id, project);
-      }
-    });
-
-    if (this.projectsToImport === 0) {
-      this.finish();
-    }
-  }
-
-  /**
-   * Project is on file system if there is no errors except code=9.
-   */
-  isProjectOnFileSystem(project: che.IProjectTemplate): boolean {
-    let problems = project.problems;
-    if (!problems || problems.length === 0) {
-      return true;
-    }
-
-    for (let i = 0; i < problems.length; i++) {
-      if (problems[i].code === 10) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Performs project import to pointed workspace.
-   *
-   * @param workspaceId workspace id, where project should be imported to
-   * @param project project to be imported
-   */
-  importProject(workspaceId: string, project: che.IProject): void {
-    var promise;
-    let wsAgentApi = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getWsAgentApi();
-
-    let projectImportHandler = (message: any) => {
-      this.getLoadingSteps()[this.getCurrentProgressStep()].logs = message.line;
-    };
-    wsAgentApi.subscribeProjectImport(project.name, projectImportHandler);
-
-    let projectService = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProject();
-    promise = projectService.importProject(project.name, project.source);
-
-    // needs to update configuration of the project
-    let updatePromise = promise.then(() => {
-      projectService.updateProject(project.name, project);
-    }, (error: any) => {
-      this.handleError(error);
-    });
-
-    updatePromise.then(() => {
-      this.projectsToImport--;
-      if (this.projectsToImport === 0) {
-        this.finish();
-      }
-      wsAgentApi.unSubscribeProjectImport(project.name, projectImportHandler);
-    }, (error: any) => {
-      wsAgentApi.unSubscribeProjectImport(project.name, projectImportHandler);
-      this.handleError(error);
-
-      // need to show the error
-      this.$mdDialog.show(
-        this.$mdDialog.alert()
-          .title('Error while importing project')
-          .textContent(error.statusText + ': ' + error.data.message)
-          .ariaLabel('Import project')
-          .ok('OK')
-      );
-    });
-  }
-
-  /**
    * Performs operations at the end of accepting factory.
    */
   finish(): void {
@@ -670,7 +557,7 @@ export class LoadFactoryController {
    * @returns {string}
    */
   getWorkspace(): string {
-    return this.workspace.config.name;
+    return this.workspaceDataManager.getName(this.workspace);
   }
 
   /**
@@ -748,8 +635,8 @@ export class LoadFactoryController {
    * Returns `true` if supported version of factory workspace.
    * @returns {boolean}
    */
-  isSupportedVersion(): boolean {
-    return this.loadFactoryService.isSupportedVersion(this.factory);
+  isSupported(): boolean {
+    return this.loadFactoryService.isSupported(this.factory);
   }
 
   /**

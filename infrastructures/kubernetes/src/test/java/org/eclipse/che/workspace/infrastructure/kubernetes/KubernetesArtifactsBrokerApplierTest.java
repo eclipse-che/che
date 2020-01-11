@@ -39,7 +39,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesBrokerInitContainerApplier;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesArtifactsBrokerApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -48,12 +48,12 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link KubernetesBrokerInitContainerApplier}.
+ * Tests {@link KubernetesArtifactsBrokerApplier}.
  *
  * @author Angel Misevski
  */
 @Listeners(MockitoTestNGListener.class)
-public class KubernetesBrokerInitContainerApplierTest {
+public class KubernetesArtifactsBrokerApplierTest {
 
   private static final String WORKSPACE_POD_NAME = "workspacePod";
   private static final String WORKSPACE_MACHINE_NAME = "workspaceMachine";
@@ -85,7 +85,7 @@ public class KubernetesBrokerInitContainerApplierTest {
   private KubernetesEnvironment workspaceEnvironment;
   private Pod workspacePod;
 
-  private KubernetesBrokerInitContainerApplier<KubernetesEnvironment> applier;
+  private KubernetesArtifactsBrokerApplier<KubernetesEnvironment> applier;
 
   @BeforeMethod
   public void setUp() throws Exception {
@@ -121,9 +121,11 @@ public class KubernetesBrokerInitContainerApplierTest {
             .setConfigMaps(ImmutableMap.of(BROKER_CONFIGMAP_NAME, brokerConfigMap))
             .setMachines(ImmutableMap.of(BROKER_MACHINE_NAME, brokerMachine))
             .build();
-    doReturn(brokerEnvironment).when(brokerEnvironmentFactory).create(any(), any());
+    doReturn(brokerEnvironment)
+        .when(brokerEnvironmentFactory)
+        .createForArtifactsBroker(any(), any());
 
-    applier = new KubernetesBrokerInitContainerApplier<>(brokerEnvironmentFactory);
+    applier = new KubernetesArtifactsBrokerApplier<>(brokerEnvironmentFactory);
   }
 
   @Test
