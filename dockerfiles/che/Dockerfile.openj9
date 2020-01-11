@@ -9,10 +9,10 @@
 #   Florent Benoit - Initial Implementation
 #
 # To build it, run in the repository root:
-#  `docker build -t eclipse/che-server:openj9 -f Dockerfile.openj9 .`
+#  `docker build -t quay.io/eclipse/che-server:openj9 -f Dockerfile.openj9 .`
 #
 # To run it:
-#  docker run -e IMAGE_CHE=eclipse/che-server:openj9 \
+#  docker run -e IMAGE_CHE=quay.io/eclipse/che-server:openj9 \
 #             -it \
 #             --rm \
 #             -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/data:/data \
