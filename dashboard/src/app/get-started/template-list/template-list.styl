@@ -5,25 +5,27 @@
   md-toolbar
     height: 110px;
 
+  div.che-toolbar-header div:last-child
+    bottom initial
+
   div.che-toolbar-title
     display inline-block
     font-weight bold
     text-align left
     margin-left 10px
 
-  .custom-template
-    display block
-    margin-bottom 10px
+  .layout-align-start-center
+    .custom-template
+      float left
+      margin-right 20px
 
-    .che-button
-      margin 0
-      font-size 14px !important
-      font-weight bold !important
-      padding 0 20px !important
-      height 38px !important
-
-  che-button-dropdown
-    float right
+      .che-button
+        margin 0
+        font-size 14px !important
+        font-weight bold !important
+        padding 0 20px !important
+        height 40px !important
+        line-height 40px !important
 
 md-content.getting-started
   background-color $very-light-grey-background-color

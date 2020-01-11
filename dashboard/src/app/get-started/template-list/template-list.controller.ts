@@ -45,6 +45,7 @@ export class TemplateListController {
   };
 
   private isLoading: boolean;
+  private isCreating: boolean;
   private devfileRegistryUrl: string;
   private selectedDevfile: IDevfileMetaData | undefined;
 
@@ -75,18 +76,20 @@ export class TemplateListController {
         title: 'Create & Open',
         type: 'button',
         action: () => {
+          this.isCreating = true;
           this.createWorkspace().then((workspace: che.IWorkspace) => {
             this.createWorkspaceSvc.redirectToIDE(workspace);
-          });
+          }).catch(() => this.isCreating = false);
         }
       },
       otherActions: [{
         title: 'Create & Proceed Editing',
         type: 'button',
         action: () => {
+          this.isCreating = true;
           this.createWorkspace().then((workspace: che.IWorkspace) => {
             this.createWorkspaceSvc.redirectToDetails(workspace);
-          });
+          }).catch(() => this.isCreating = false);
         },
         orderNumber: 1
       }]
@@ -151,6 +154,6 @@ export class TemplateListController {
   }
 
   isCreateButtonDisabled(): boolean {
-    return !this.selectedDevfile || !this.selectedDevfile.links || !this.selectedDevfile.links.self;
+    return this.isCreating || !this.selectedDevfile || !this.selectedDevfile.links || !this.selectedDevfile.links.self;
   }
 }
