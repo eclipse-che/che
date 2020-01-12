@@ -8,7 +8,7 @@ projects:
       location: 'https://github.com/eclipse/che.git'
 components:
   - type: dockerimage
-    image: 'eclipse/che-dev:nightly'
+    image: 'quay.io/eclipse/che-dev:nightly'
     alias: che-server-dev
     mountSources: true
     memoryLimit: 5Gi
@@ -16,7 +16,7 @@ components:
       - name: maven
         containerPath: /home/user/.m2
   - type: dockerimage
-    image: 'eclipse/che-server:nightly'
+    image: 'quay.io/eclipse/che-server:nightly'
     alias: che-server-runtime
     mountSources: true
     memoryLimit: 1Gi

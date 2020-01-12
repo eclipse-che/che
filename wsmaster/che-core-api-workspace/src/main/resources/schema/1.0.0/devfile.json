@@ -358,7 +358,7 @@
                     "description": "Inlined content of a file specified in field 'reference'",
                     "type": "string",
                     "examples": [
-                      "{\"kind\":\"List\",\"items\":[{\"apiVersion\":\"v1\",\"kind\":\"Pod\",\"metadata\":{\"name\":\"ws\"},\"spec\":{\"containers\":[{\"image\":\"eclipse/che-dev:nightly\"}]}}]}"
+                      "{\"kind\":\"List\",\"items\":[{\"apiVersion\":\"v1\",\"kind\":\"Pod\",\"metadata\":{\"name\":\"ws\"},\"spec\":{\"containers\":[{\"image\":\"quay.io/eclipse/che-dev:nightly\"}]}}]}"
                     ]
                   },
                   "selector": {
