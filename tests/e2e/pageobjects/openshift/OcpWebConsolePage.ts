@@ -74,7 +74,7 @@ export class OcpWebConsolePage {
         Logger.debug('OcpWebConsolePage.selectUpdateChannelOnSubscriptionPage');
 
         const updateChannelOperatorLocator: By = By.css(`input[value=${TestConstants.TS_OCP_OPERATOR_UPDATE_CHANNEL}]`);
-        await this.driverHelper.waitAndClick(updateChannelOperatorLocator);
+        await this.driverHelper.waitAndClick(updateChannelOperatorLocator, TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async clickOnDropdownNamespaceListOnSubscriptionPage() {
