@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
 
 import io.fabric8.kubernetes.api.model.DoneableNamespace;
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
@@ -304,12 +303,7 @@ public class KubernetesNamespaceTest {
     Resource resource = prepareNamespaceResource(NAMESPACE);
 
     // when
-    try {
-      namespace.deleteIfManaged();
-      fail("Deleting a non-managed namespace shouldn't have succeeded.");
-    } catch (InfrastructureException e) {
-      // good
-    }
+    namespace.deleteIfManaged();
 
     // then
     verify(resource, never()).delete();
