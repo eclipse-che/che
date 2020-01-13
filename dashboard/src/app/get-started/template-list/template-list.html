@@ -14,7 +14,7 @@
 <che-toolbar che-title="Getting Started with Eclipse Che"
              class="getting-started-toolbar">
   <che-button-primary-flat che-button-title="Create a Custom Workspace" class="custom-template md-raised"
-                           href="#/create-workspace?tab=IMPORT_DEVFILE"></che-button-primary-flat>
+                           href="#/create-workspace"></che-button-primary-flat>
   <che-button-dropdown button-disabled="templateListController.isCreateButtonDisabled()"
                        main-action-config="templateListController.createButtonConfig.mainAction"
                        other-actions-config="templateListController.createButtonConfig.otherActions"
@@ -25,7 +25,7 @@
                       md-mode="indeterminate"></md-progress-linear>
   <div ng-hide="templateListController.isLoading" class="getting-started-list">
     <!-- Template header -->
-    <div flex="100" layout="row" layout-align="start end" class="template-header">
+    <div flex="100" layout="row" layout-align="start center" class="template-header">
       <div flex>
         <div class="header-title">Select a Template</div>
         <div class="header-description">Use a sample template to create your first workspace.</div>
@@ -43,7 +43,7 @@
           </div>
         </div>
       </div>
-      <div flex="5" layout-align="end end" class="template-info">
+      <div flex="5" layout-align="end center" class="template-info">
         {{templateListController.filteredDevfiles.length}}&nbsp;items
       </div>
     </div>
