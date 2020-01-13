@@ -1,0 +1,8 @@
+<div class="kubernetes-namespace">
+  <div ng-if="ctrl.namespaces.length === 1">
+    <che-input-box che-name="kubernetes-namespace" aria-label="Kubernetes Namespace" che-place-holder="Kubernetes Namespace" ng-model="ctrl.selectedName" che-readonly="true"></che-input-box>
+  </div>
+  <div ng-if="ctrl.namespaces.length > 1" layout="row" layout-align="start center">
+    <che-filter-selector che-values="ctrl.namespaces" ng-model="ctrl.selectedName" che-width="200px" che-on-change="ctrl.onChangeNamespace(value)"></che-filter-selector>
+  </div>
+</div>
