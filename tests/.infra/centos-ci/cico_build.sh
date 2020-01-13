@@ -39,7 +39,7 @@ eval "$(./env-toolkit load -f jenkins-env.json -r \
         ^ghprb \
         ^RH_CHE)"
 
-source .ci/functional_tests_utils.sh
+source ./functional_tests_utils.sh
 
 echo "Checking credentials:"
 checkAllCreds
