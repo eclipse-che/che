@@ -86,21 +86,12 @@ function installDependencies() {
 
 function checkAllCreds() {
   CREDS_NOT_SET="false"
-
-  if [[ -z "${QUAY_USERNAME}" || -z "${QUAY_PASSWORD}" ]]; then
-    echo "Docker registry credentials not set"
-    CREDS_NOT_SET="true"
-  fi
   
-  if [[ -z "${RH_CHE_AUTOMATION_DEV_CLUSTER_SA_TOKEN}" ]]; then
-    echo "RDU2C credentials not set"
-    CREDS_NOT_SET="true"
-  fi
+    echo ${#QUAY_ECLIPSE_CHE_USERNAME}
+    echo ${#QUAY_ECLIPSE_CHE_PASSWORD}
 
-  if [[ -z "${RH_CHE_AUTOMATION_CHE_PREVIEW_EMAIL}" ]] ||
-     [[ -z "${RH_CHE_AUTOMATION_CHE_PREVIEW_USERNAME}" ]] ||
-     [[ -z "${RH_CHE_AUTOMATION_CHE_PREVIEW_PASSWORD}" ]]; then
-    echo "Prod-preview credentials not set."
+  if [[ -z "${QUAY_ECLIPSE_CHE_USERNAME}" || -z "${QUAY_ECLIPSE_CHE_PASSWORD}" ]]; then
+    echo "Docker registry credentials not set"
     CREDS_NOT_SET="true"
   fi
   

@@ -25,19 +25,20 @@ function archiveArtifacts1(){
 set -e
 
 echo "****** Starting RH-Che PR check $(date) ******"
+
 total_start_time=$(date +%s)
 export PR_CHECK_BUILD="true"
 export BASEDIR=$(pwd)
 export DEV_CLUSTER_URL=https://devtools-dev.ext.devshift.net:8443/
 
-eval "$(./env-toolkit load -f jenkins-env.json -r \
-        ^DEVSHIFT_TAG_LEN$ \
-        ^QUAY_ \
-        ^KEYCLOAK \
-        ^BUILD_NUMBER$ \
-        ^JOB_NAME$ \
-        ^ghprb \
-        ^RH_CHE)"
+ eval "$(./env-toolkit load -f jenkins-env.json \
+                              CHE_BOT_GITHUB_TOKEN \
+                              CHE_MAVEN_SETTINGS \
+                              CHE_GITHUB_SSH_KEY \
+                              CHE_OSS_SONATYPE_GPG_KEY \
+                              CHE_OSS_SONATYPE_PASSPHRASE \
+                              QUAY_ECLIPSE_CHE_USERNAME \
+                              QUAY_ECLIPSE_CHE_PASSWORD)"
 
 source tests/.infra/centos-ci/functional_tests_utils.sh
 
