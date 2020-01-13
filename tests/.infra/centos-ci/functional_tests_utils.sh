@@ -31,9 +31,9 @@ function installEpelRelease() {
 }
 
 function installYQ() {
-  installEpelRelease	  installEpelRelease
-  yum install --assumeyes -d1 python-pip	  yum install --assumeyes -d1 python3-pip
-  pip install yq	  pip3 install --upgrade setuptools
+  installEpelRelease
+  yum install --assumeyes -d1 python3-pip
+  pip3 install --upgrade setuptools
   pip3 install yq
 }
 
