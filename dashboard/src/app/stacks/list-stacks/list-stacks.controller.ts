@@ -25,7 +25,13 @@ const DEFAULT_COLUMN = 'displayName';
  */
 export class ListStacksController {
 
-  static $inject = ['$scope', '$location', 'cheWorkspace', 'devfileRegistry', 'cheListHelperFactory', '$log', 'cheNotification'];
+  static $inject = ['$scope',
+    '$location',
+    'cheWorkspace',
+    'devfileRegistry',
+    'cheListHelperFactory',
+    '$log',
+    'cheNotification'];
 
   private $location: ng.ILocationService;
   private devfileRegistry: DevfileRegistry;
@@ -100,7 +106,7 @@ export class ListStacksController {
 
   updateFilters(): void {
     this.cheListHelper.clearFilters();
-    const filter: {[searchBy: string]: string} =  {};
+    const filter: { [searchBy: string]: string } = {};
     if (this.searchStr) {
       filter[this.searchBy] = this.searchStr;
     }

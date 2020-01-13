@@ -17,7 +17,7 @@ import {
   ICheButtonDropdownMainAction,
   ICheButtonDropdownOtherAction
 } from '../../../components/widget/button-dropdown/che-button-dropdown.directive';
-import {CheNotification} from "../../../components/notification/che-notification.factory";
+import {CheNotification} from '../../../components/notification/che-notification.factory';
 
 
 /**
@@ -28,7 +28,14 @@ import {CheNotification} from "../../../components/notification/che-notification
  */
 export class TemplateListController {
 
-  static $inject = ['$q', 'cheWorkspace', 'devfileRegistry', 'createWorkspaceSvc', '$filter', '$log', 'cheNotification'];
+  static $inject = [
+    '$q',
+    'cheWorkspace',
+    'devfileRegistry',
+    'createWorkspaceSvc',
+    '$filter',
+    '$log',
+    'cheNotification'];
 
   private $q: ng.IQService;
   private $log: ng.ILogService;
@@ -112,10 +119,6 @@ export class TemplateListController {
     });
   }
 
-  /**
-   * Creates workspace.
-   * @returns {ng.IPromise<che.IWorkspace>}
-   */
   private createWorkspace(): ng.IPromise<che.IWorkspace> {
     if (!this.selectedDevfile || !this.selectedDevfile.links || !this.selectedDevfile.links.self) {
       return this.$q.reject({data: {message: 'There is no selected Template.'}});

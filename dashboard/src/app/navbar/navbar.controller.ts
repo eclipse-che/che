@@ -28,9 +28,17 @@ export const MENU_ITEM = {
 
 export class CheNavBarController {
 
-  static $inject = ['$mdSidenav', '$scope', '$location', '$route', 'cheAPI', '$window', 'chePermissions', 'cheKeycloak', 'cheService'];
+  static $inject = ['$mdSidenav',
+    '$scope',
+    '$location',
+    '$route',
+    'cheAPI',
+    '$window',
+    'chePermissions',
+    'cheKeycloak',
+    'cheService'];
 
-  menuItemUrl =  MENU_ITEM;
+  menuItemUrl = MENU_ITEM;
 
   accountItems = [
     {
@@ -107,9 +115,13 @@ export class CheNavBarController {
         if (this.chePermissions.getSystemPermissions()) {
           this.updateData();
         } else {
-          this.chePermissions.fetchSystemPermissions().finally(() => {
+          this.chePermissions.fetchSystemPermissions()
+            .catch(() => {
+              // fetch unhandled rejection
+            })
+            .finally(() => {
               this.updateData();
-          });
+            });
         }
       }
     });
@@ -134,9 +146,13 @@ export class CheNavBarController {
     organization.fetchOrganizations().then(() => {
       this.organizations = organization.getOrganizations();
       const user = this.cheAPI.getUser().getUser();
-      organization.fetchOrganizationByName(user.name).finally(() => {
+      organization.fetchOrganizationByName(user.name)
+        .catch(() => {
+          // fetch unhandled rejection
+        })
+        .finally(() => {
           this.hasPersonalAccount = angular.isDefined(organization.getOrganizationByName(user.name));
-      });
+        });
     });
   }
 
