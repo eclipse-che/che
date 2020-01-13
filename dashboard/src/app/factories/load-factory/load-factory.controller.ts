@@ -354,7 +354,7 @@ export class LoadFactoryController {
       }
 
       const attrs = {factoryurl: `${url}${params}`};
-      this.cheAPI.getWorkspace().createWorkspaceFromDevfile(null, devfile, attrs)
+      this.cheAPI.getWorkspace().createWorkspaceFromDevfile(undefined, undefined, devfile, attrs)
         .then((workspace: che.IWorkspace) => defer.resolve(workspace));
     }
     defer.promise.then((workspace: che.IWorkspace) => {
