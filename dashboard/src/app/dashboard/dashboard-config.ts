@@ -15,7 +15,7 @@ import {DashboardLastWorkspacesController} from './last-workspaces/last-workspac
 import {DashboardLastWorkspaces} from './last-workspaces/last-workspaces.directive';
 import {DashboardPanel} from './dashboard-panel/dashboard-panel.directive';
 import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
-import  {MENU_ITEM}  from '../navbar/navbar.controller';
+import {MENU_ITEM} from '../navbar/navbar.controller';
 
 export class DashboardConfig {
 
@@ -44,7 +44,7 @@ export class DashboardConfig {
                 defer.resolve();
               }
             });
-            return  defer.promise;
+            return defer.promise;
           }]
         }
       });

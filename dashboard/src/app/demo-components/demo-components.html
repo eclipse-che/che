@@ -325,7 +325,7 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
               </div>
             </che-list-item>
           </che-list>
-          </textarea>
+        </textarea>
       </div>
     </md-tab>
 
@@ -439,31 +439,38 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
             <input id="message-content" type="text" ng-model="demoComponentsController.overlayConfig.message.content">
             <br/>
             <label for="message-visible">Visible</label>
-            <input id="message-visible" type="checkbox" ng-model="demoComponentsController.overlayConfig.message.visible">
+            <input id="message-visible" type="checkbox"
+                   ng-model="demoComponentsController.overlayConfig.message.visible">
           </fieldset>
           <fieldset>
             <legend>SAVE button</legend>
             <label for="save-button-title">Title</label>
-            <input id="save-button-title" type="text" ng-model="demoComponentsController.overlayConfig.saveButton.title">
+            <input id="save-button-title" type="text"
+                   ng-model="demoComponentsController.overlayConfig.saveButton.title">
             <br/>
             <label for="save-button-disabled">Disabled</label>
-            <input id="save-button-disabled" type="checkbox" ng-model="demoComponentsController.overlayConfig.saveButton.disabled">
+            <input id="save-button-disabled" type="checkbox"
+                   ng-model="demoComponentsController.overlayConfig.saveButton.disabled">
           </fieldset>
           <fieldset>
             <legend>APPLY button</legend>
             <label for="apply-button-title">Title</label>
-            <input id="apply-button-title" type="text" ng-model="demoComponentsController.overlayConfig.applyButton.title">
+            <input id="apply-button-title" type="text"
+                   ng-model="demoComponentsController.overlayConfig.applyButton.title">
             <br/>
             <label for="apply-button-disabled">Disabled</label>
-            <input id="apply-button-disabled" type="checkbox" ng-model="demoComponentsController.overlayConfig.applyButton.disabled">
+            <input id="apply-button-disabled" type="checkbox"
+                   ng-model="demoComponentsController.overlayConfig.applyButton.disabled">
           </fieldset>
           <fieldset>
             <legend>CANCEL button</legend>
             <label for="cancel-button-title">Title</label>
-            <input id="cancel-button-title" type="text" ng-model="demoComponentsController.overlayConfig.cancelButton.title">
+            <input id="cancel-button-title" type="text"
+                   ng-model="demoComponentsController.overlayConfig.cancelButton.title">
             <br/>
             <label for="cancel-button-disabled">Disabled</label>
-            <input id="cancel-button-disabled" type="checkbox" ng-model="demoComponentsController.overlayConfig.cancelButton.disabled">
+            <input id="cancel-button-disabled" type="checkbox"
+                   ng-model="demoComponentsController.overlayConfig.cancelButton.disabled">
           </fieldset>
         </form>
       </div>
@@ -484,14 +491,16 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
       </div>
       <div>
         <label for="loader-pause">Pause</label><input id="loader-pause" type="checkbox"
-          ng-click="demoComponentsController.loader.pause()" value="{{demoComponentsController.loader.paused}}">
+                                                      ng-click="demoComponentsController.loader.pause()"
+                                                      value="{{demoComponentsController.loader.paused}}">
       </div>
 
       <md-content flex>
         <div class="{{demoComponentsController.loader.paused ? 'animation-pause' : ''}}">
           <che-loader-crane che-all-steps="demoComponentsController.loader.getLoadingSteps()"
-            che-exclude-steps="[demoComponentsController.loader.getLoadingSteps().length-1]"
-            che-step="{{demoComponentsController.loader.getCurrentProgressStep()}}" che-switch-on-iteration="true">
+                            che-exclude-steps="[demoComponentsController.loader.getLoadingSteps().length-1]"
+                            che-step="{{demoComponentsController.loader.getCurrentProgressStep()}}"
+                            che-switch-on-iteration="true">
           </che-loader-crane>
         </div>
       </md-content>
