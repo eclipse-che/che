@@ -18,7 +18,7 @@ import org.eclipse.che.commons.lang.Pair;
 
 /**
  * CHE_API endpoint var provided. For all currently supported infrastructures, it reuses {@link
- * CheApiInternalEnvVarProvider} to provide the value.
+ * CheApiExternalEnvVarProvider} to provide the value.
  *
  * @deprecated this class shall soon be removed, as this variable is provided only for backward
  *     compatibility
@@ -31,11 +31,11 @@ public class CheApiEnvVarProvider implements EnvVarProvider {
   /** Che API url */
   public static final String CHE_API_VARIABLE = "CHE_API";
 
-  private final CheApiInternalEnvVarProvider cheApiInternalEnvVarProvider;
+  private final CheApiExternalEnvVarProvider cheApiExternalEnvVarProvider;
 
   @Inject
-  public CheApiEnvVarProvider(CheApiInternalEnvVarProvider cheApiInternalEnvVarProvider) {
-    this.cheApiInternalEnvVarProvider = cheApiInternalEnvVarProvider;
+  public CheApiEnvVarProvider(CheApiExternalEnvVarProvider cheApiExternalEnvVarProvider) {
+    this.cheApiExternalEnvVarProvider = cheApiExternalEnvVarProvider;
   }
 
   /**
@@ -45,6 +45,6 @@ public class CheApiEnvVarProvider implements EnvVarProvider {
    */
   @Override
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) throws InfrastructureException {
-    return Pair.of(CHE_API_VARIABLE, cheApiInternalEnvVarProvider.get(runtimeIdentity).second);
+    return Pair.of(CHE_API_VARIABLE, cheApiExternalEnvVarProvider.get(runtimeIdentity).second);
   }
 }
