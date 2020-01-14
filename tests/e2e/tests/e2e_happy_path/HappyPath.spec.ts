@@ -261,6 +261,7 @@ suite('Validation of debug functionality', async () => {
         await debugView.clickOnDebugConfigurationDropDown();
         await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote');
         await debugView.clickOnRunDebugButton();
+        await debugView.waitForDebuggerToConnect();
         await previewWidget.refreshPage();
         try {
             await editor.waitStoppedDebugBreakpoint(weclomeControllerJavaFileName, 27);
