@@ -14,22 +14,31 @@ import {CheAPI} from '../../components/api/che-api.factory';
 import {CheKeycloak} from '../../components/api/che-keycloak.factory';
 import {CheService} from '../../components/api/che-service.factory';
 
+export const MENU_ITEM = {
+  dashboard: '#/',
+  getStarted: '#/getstarted',
+  workspaces: '#/workspaces',
+  stacks: '#/stacks',
+  factories: '#/factories',
+  administration: '#/administration',
+  usermanagement: '#/admin/usermanagement',
+  organizations: '#/organizations',
+  account: '#/account'
+};
+
 export class CheNavBarController {
 
-  static $inject = ['$mdSidenav', '$scope', '$location', '$route', 'cheAPI', '$window', 'chePermissions', 'cheKeycloak', 'cheService'];
+  static $inject = ['$mdSidenav',
+    '$scope',
+    '$location',
+    '$route',
+    'cheAPI',
+    '$window',
+    'chePermissions',
+    'cheKeycloak',
+    'cheService'];
 
-  menuItemUrl = {
-    dashboard: '#/',
-    workspaces: '#/workspaces',
-    administration: '#/administration',
-    // subsections
-    plugins: '#/admin/plugins',
-    factories: '#/factories',
-    account: '#/account',
-    stacks: '#/stacks',
-    organizations: '#/organizations',
-    usermanagement: '#/admin/usermanagement'
-  };
+  menuItemUrl = MENU_ITEM;
 
   accountItems = [
     {
@@ -87,9 +96,7 @@ export class CheNavBarController {
 
   $onInit(): void {
     this.isKeycloackPresent = this.cheKeycloak.isPresent();
-
     this.profile = this.cheAPI.getProfile().getProfile();
-
     this.userServices = this.chePermissions.getUserServices();
 
     // highlight navbar menu item
@@ -104,14 +111,13 @@ export class CheNavBarController {
     this.isPermissionServiceAvailable = false;
     this.resolvePermissionServiceAvailability().then((isAvailable: boolean) => {
       this.isPermissionServiceAvailable = isAvailable;
-
       if (isAvailable) {
         if (this.chePermissions.getSystemPermissions()) {
           this.updateData();
         } else {
           this.chePermissions.fetchSystemPermissions()
-            .catch((error: any) => {
-              // noop
+            .catch(() => {
+              // fetch unhandled rejection
             })
             .finally(() => {
               this.updateData();
@@ -141,17 +147,13 @@ export class CheNavBarController {
       this.organizations = organization.getOrganizations();
       const user = this.cheAPI.getUser().getUser();
       organization.fetchOrganizationByName(user.name)
-        .catch((error: any) => {
-          // noop
+        .catch(() => {
+          // fetch unhandled rejection
         })
         .finally(() => {
           this.hasPersonalAccount = angular.isDefined(organization.getOrganizationByName(user.name));
         });
     });
-  }
-
-  reload(): void {
-    this.$route.reload();
   }
 
   /**
@@ -167,7 +169,6 @@ export class CheNavBarController {
 
   /**
    * Returns number of workspaces.
-   *
    * @return {number}
    */
   getWorkspacesNumber(): number {
@@ -176,7 +177,6 @@ export class CheNavBarController {
 
   /**
    * Returns number of factories.
-   *
    * @return {number}
    */
   getFactoriesNumber(): number {
@@ -185,7 +185,6 @@ export class CheNavBarController {
 
   /**
    * Returns number of all organizations.
-   *
    * @return {number}
    */
   getOrganizationsNumber(): number {
@@ -198,7 +197,6 @@ export class CheNavBarController {
 
   /**
    * Returns number of root organizations.
-   *
    * @return {number}
    */
   getRootOrganizationsNumber(): number {
@@ -212,22 +210,17 @@ export class CheNavBarController {
     return rootOrganizations.length;
   }
 
-  openLinkInNewTab(url: string): void {
-    this.$window.open(url, '_blank');
-  }
-
   /**
    * Opens user profile in new browser page.
    */
-  gotoProfile(): void {
+  private gotoProfile(): void {
     this.$location.path('/account');
   }
 
   /**
    * Logout.
    */
-  logout(): void {
+  private logout(): void {
     this.cheKeycloak.logout();
   }
-
 }
