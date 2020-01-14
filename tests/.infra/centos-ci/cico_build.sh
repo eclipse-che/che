@@ -6,6 +6,7 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 function archiveArtifacts1(){
+  ls -la
   set +e
   JOB_NAME=che-nightly
   echo "Archiving artifacts from ${DATE} for ${JOB_NAME}/${BUILD_NUMBER}"
