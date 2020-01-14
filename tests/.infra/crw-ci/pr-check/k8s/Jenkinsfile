@@ -278,9 +278,8 @@ pipeline {
                      docker pull eclipse/che-e2e:nightly
                      
                      CHE_URL=http://${cheHost}
-                     docker run --shm-size=256m --net=host --ipc=host \\
+                     docker run --shm-size=1g --net=host --ipc=host \\
                        -p 5920:5920 \\
-                       -e TS_SELENIUM_HEADLESS='true' \\
                        -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \\
                        -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \\
                        -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \\
@@ -291,7 +290,7 @@ pipeline {
                        -e TS_SELENIUM_PASSWORD="admin" \\
                        -e TEST_SUITE="${e2eTestToRun}" \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
-                       eclipse/che-e2e:nightly
+                       quay.io/eclipse/che-e2e:nightly
                 """
             }
         }

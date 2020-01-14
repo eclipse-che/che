@@ -260,11 +260,11 @@ export class Ide {
         await this.driverHelper.waitVisibility(selectedRightToolbarButtonLocator, timeout);
     }
 
-    async getApplicationUrlFromNotification(notificationText: string) {
+    async getApplicationUrlFromNotification(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Ide.getApplicationUrlFromNotification ${notificationText}`);
 
         const notificationTextLocator: By = By.xpath(`//div[@class='theia-notification-message']/span[contains(.,'${notificationText}')]`);
-        let notification = await this.driverHelper.waitAndGetText(notificationTextLocator);
+        let notification = await this.driverHelper.waitAndGetText(notificationTextLocator, timeout);
         let regexp: RegExp = new RegExp('^.*(https?://.*)$');
 
         if (!regexp.test(notification)) {
