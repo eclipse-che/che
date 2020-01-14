@@ -19,7 +19,7 @@ function archiveArtifacts1(){
 }
 
 set -e
-
+: '
 echo "****** Starting RH-Che PR check $(date) ******"
 
 total_start_time=$(date +%s)
@@ -169,6 +169,7 @@ docker run --shm-size=256m --network host -v $REPORT_FOLDER:/tmp/e2e/report:Z -e
 set -e
 
 ### Archive artifacts
+: '
 archiveArtifacts1
 
 
