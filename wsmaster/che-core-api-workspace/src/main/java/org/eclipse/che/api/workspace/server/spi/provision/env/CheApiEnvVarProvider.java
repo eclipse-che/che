@@ -20,12 +20,9 @@ import org.eclipse.che.commons.lang.Pair;
  * CHE_API endpoint var provided. For all currently supported infrastructures, it reuses {@link
  * CheApiExternalEnvVarProvider} to provide the value.
  *
- * @deprecated this class shall soon be removed, as this variable is provided only for backward
- *     compatibility
  * @author Sergii Leshchenko
  * @author Mykhailo Kuznietsov
  */
-@Deprecated
 public class CheApiEnvVarProvider implements EnvVarProvider {
 
   /** Che API url */
