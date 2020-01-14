@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.WorkspaceAttributeValidator;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
 /**
@@ -76,7 +77,14 @@ public class K8sInfraNamespaceWsAttributeValidator implements WorkspaceAttribute
                 + "')");
       }
 
-      namespaceFactoryProvider.get().checkIfNamespaceIsAllowed(namespace);
+      // the current user is going to be anonymous only during internal scheduled jobs. In those
+      // circumstances, we don't actually need to check the namespace validity, because those
+      // workflows are defined by our code and are therefore "safe". User-initiated workspace
+      // creation or update is never going to succeed using an anonymous user anyway, so again,
+      // skipping this check for anonymous user is safe.
+      if (!EnvironmentContext.getCurrent().getSubject().isAnonymous()) {
+        namespaceFactoryProvider.get().checkIfNamespaceIsAllowed(namespace);
+      }
     }
   }
 

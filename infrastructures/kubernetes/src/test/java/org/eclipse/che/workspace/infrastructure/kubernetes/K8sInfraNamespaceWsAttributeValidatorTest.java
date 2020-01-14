@@ -14,13 +14,20 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
 import javax.inject.Provider;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -46,6 +53,7 @@ public class K8sInfraNamespaceWsAttributeValidatorTest {
   @BeforeMethod
   public void setUp() {
     lenient().when(namespaceFactoryProvider.get()).thenReturn(namespaceFactory);
+    EnvironmentContext.setCurrent(new EnvironmentContext());
   }
 
   @Test(
@@ -82,6 +90,7 @@ public class K8sInfraNamespaceWsAttributeValidatorTest {
         .when(namespaceFactory)
         .checkIfNamespaceIsAllowed(anyString());
 
+    setNonAnonymousUserInContext();
     validator.validate(ImmutableMap.of(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "any"));
   }
 
@@ -112,8 +121,33 @@ public class K8sInfraNamespaceWsAttributeValidatorTest {
         emptyMap());
   }
 
+  @Test
+  public void shouldNotCheckIfNamespaceIsAllowedWhenUsingAnonymousUser()
+      throws ValidationException {
+    validator.validate(ImmutableMap.of(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "ns"));
+    verify(namespaceFactory, never()).checkIfNamespaceIsAllowed(anyString());
+  }
+
+  @Test
+  public void shouldCheckIfNamespaceIsAllowedWhenUsingNonAnonymousUser()
+      throws ValidationException {
+    setNonAnonymousUserInContext();
+    validator.validate(ImmutableMap.of(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "ns"));
+    verify(namespaceFactory).checkIfNamespaceIsAllowed(eq("ns"));
+  }
+
   @DataProvider
   public Object[][] invalidNamespaces() {
     return new String[][] {{"name!space"}, {"name@space"}, {"-namespace"}, {"namespace-"}};
+  }
+
+  private void setNonAnonymousUserInContext() {
+    Subject subj = mock(Subject.class);
+    when(subj.isAnonymous()).thenReturn(false);
+
+    EnvironmentContext ctx = new EnvironmentContext();
+    ctx.setSubject(subj);
+
+    EnvironmentContext.setCurrent(ctx);
   }
 }
