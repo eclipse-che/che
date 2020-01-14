@@ -6,7 +6,8 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 function archiveArtifacts1(){
- find / -name artifacts.key 2>&1 | grep -v "Permission denied"
+  echo "FIND artifacts: "
+  find / -name artifacts.key 2>&1 | grep -v "Permission denied"
   set +e
   JOB_NAME=che-nightly
   echo "Archiving artifacts from ${DATE} for ${JOB_NAME}/${BUILD_NUMBER}"
