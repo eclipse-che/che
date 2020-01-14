@@ -24,19 +24,27 @@ export class PreviewWidget {
         @inject(CLASSES.Ide) private readonly ide: Ide) { }
 
     async waitUrl(expectedUrl: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`PreviewWidget.waitUrl ${expectedUrl}`);
+
         await this.driverHelper.waitAttributeValue(PreviewWidget.WIDGET_URL_LOCATOR, 'value', expectedUrl, timeout);
     }
 
     async typeUrl(url: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`PreviewWidget.typeUrl ${url}`);
+
         await this.driverHelper.enterValue(PreviewWidget.WIDGET_URL_LOCATOR, url, timeout);
     }
 
     async typeAndApplyUrl(url: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`PreviewWidget.typeAndApplyUrl ${url}`);
+
         await this.typeUrl(url, timeout);
         await this.refreshPage();
     }
 
     async waitApplicationOpened(expectedUrl: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`PreviewWidget.waitApplicationOpened ${expectedUrl}`);
+
         await this.driverHelper.getDriver().wait(async () => {
             try {
                 await this.waitUrl(expectedUrl, timeout / 5);
