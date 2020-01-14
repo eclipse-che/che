@@ -6,8 +6,7 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 function archiveArtifacts1(){
- cd /payload && ls
-  ls -la
+ cd /home/devtools/workspace/devtools-che-che-nightly-test-master/ && ls -la
   set +e
   JOB_NAME=che-nightly
   echo "Archiving artifacts from ${DATE} for ${JOB_NAME}/${BUILD_NUMBER}"
