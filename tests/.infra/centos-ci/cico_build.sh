@@ -6,7 +6,7 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 function archiveArtifacts1(){
-  pwd
+ cd /payload && ls
   ls -la
   set +e
   JOB_NAME=che-nightly
