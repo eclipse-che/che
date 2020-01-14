@@ -147,6 +147,8 @@ suite('Language server validation', async () => {
 });
 
 suite('Validation of workspace build and run', async () => {
+    let applicationUrl: string = '';
+
     test('Build application', async () => {
         await topMenu.runTask('build-file-output');
 
@@ -161,10 +163,12 @@ suite('Validation of workspace build and run', async () => {
     test('Run application', async () => {
         await topMenu.runTask('run');
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
+        applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 120000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
     });
 
     test('Check the running application', async () => {
+        await previewWidget.waitApplicationOpened(applicationUrl, 60000);
         await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60000, 10000);
     });
 
@@ -183,6 +187,8 @@ suite('Validation of workspace build and run', async () => {
 });
 
 suite('Display source code changes in the running application', async () => {
+    let applicationUrl: string = '';
+
     test('Change source code', async () => {
         await projectTree.expandPathAndOpenFile(pathToChangedJavaFileFolder, changedJavaFileName);
         await editor.waitEditorAvailable(changedJavaFileName);
@@ -214,10 +220,12 @@ suite('Display source code changes in the running application', async () => {
     test('Run application with changes', async () => {
         await topMenu.runTask('run-with-changes');
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
+        applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 120000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
     });
 
     test('Check changes are displayed', async () => {
+        await previewWidget.waitApplicationOpened(applicationUrl, 60000);
         await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60000, 10000);
         await checkErrorMessageInApplicationController();
     });
@@ -235,6 +243,8 @@ suite('Display source code changes in the running application', async () => {
 });
 
 suite('Validation of debug functionality', async () => {
+    let applicationUrl: string = '';
+
     test('Open file and activate breakpoint', async () => {
         await projectTree.expandPathAndOpenFile(pathToJavaFolder + '/system', weclomeControllerJavaFileName);
         await editor.activateBreakpoint(weclomeControllerJavaFileName, 27);
@@ -243,10 +253,12 @@ suite('Validation of debug functionality', async () => {
     test('Launch debug', async () => {
         await topMenu.runTask('run-debug');
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 180000);
+        applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 180000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 180000);
     });
 
     test('Check content of the launched application', async () => {
+        await previewWidget.waitApplicationOpened(applicationUrl, 60000);
         await previewWidget.waitAndSwitchToWidgetFrame();
         await previewWidget.waitAndClick(SpringAppLocators.springHomeButtonLocator);
         await driverHelper.getDriver().switchTo().defaultContent();
