@@ -7,7 +7,7 @@
 
 function archiveArtifacts1(){
   echo "FIND artifacts: "
-  find / -name artifacts.key 2>&1 | grep -v "Permission denied"
+  find / -name artifacts.key
   set +e
   JOB_NAME=che-nightly
   echo "Archiving artifacts from ${DATE} for ${JOB_NAME}/${BUILD_NUMBER}"
