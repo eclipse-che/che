@@ -66,6 +66,9 @@ public class ComponentFQNParser {
   public String getPluginPublisherAndName(String pluginId) throws DevfileException {
     try {
       ExtendedPluginFQN meta = fqnParser.parsePluginFQN(pluginId);
+      if (!isNullOrEmpty(meta.getReference())) {
+        return meta.getReference();
+      }
       return meta.getPublisherAndName();
     } catch (InfrastructureException e) {
       throw new DevfileException(e.getMessage(), e);
