@@ -12,7 +12,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
-import { By, WebElement, error } from 'selenium-webdriver';
+import { By, error } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 
 export enum RightToolbarButton {
@@ -218,32 +218,41 @@ export class Ide {
         await this.waitStatusBarContains(expectedTextInStatusBar, 20000);
     }
 
-    async closeAllNotifications() {
-        const notificationLocator: By = By.css('.theia-Notification');
+    async closeAllNotifications(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Ide.closeAllNotifications`);
 
-        Logger.debug('Ide.closeAllNotifications');
+        await this.waitAndOpenNotificationCenter(timeout);
+        await this.waitAndPressNotificationsCenterCloseAllButton(timeout);
+        await this.waitNotificationsCenterClosed(timeout);
+        await this.waitNotificationsDismissed(timeout);
+    }
 
-        if (! await this.driverHelper.isVisible(notificationLocator)) {
-            return;
-        }
+    async waitAndOpenNotificationCenter(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const statusBarNotificationsLocator: By = By.xpath(`//div[@id="theia-statusBar"]/div[@class="area right"]//div[contains(@title, 'Notification')]`);
+        Logger.debug(`Ide.waitAndOpenNotificationCenter`);
 
-        const notifications: WebElement[] = await this.driverHelper.waitAllPresence(notificationLocator);
-        const notificationsCapacity: number = notifications.length;
+        await this.driverHelper.waitAndClick(statusBarNotificationsLocator, timeout);
+    }
 
-        for (let i = 1; i <= notificationsCapacity; i++) {
-            const notificationLocator: By = By.xpath('//div[@class=\'theia-Notification\']//button[text()=\'Close\']');
+    async waitAndPressNotificationsCenterCloseAllButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const notificationCenterActionCloseAllButtonLocator: By = By.xpath(`//div[contains(@class, 'theia-notifications-container theia-notification-center open')]//ul[@class="theia-notification-actions"]/li[@class="clear-all"]`);
+        Logger.debug(`Ide.waitAndPressNotificationsCenterCloseAllButton`);
 
-            try {
-                await this.driverHelper.waitAndClick(notificationLocator);
-            } catch (err) {
-                if (err instanceof error.TimeoutError) {
-                    console.log(`The '${notificationLocator}' element is not visible and can't be clicked`);
-                    continue;
-                }
+        await this.driverHelper.waitAndClick(notificationCenterActionCloseAllButtonLocator, timeout);
+    }
 
-                throw err;
-            }
-        }
+    async waitNotificationsCenterClosed(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const notificationCenterClosedLocator: By = By.xpath(`//div[contains(@class, 'theia-notifications-container theia-notification-center closed')]`);
+        Logger.debug(`Ide.waitNotificationsCenterClosed`);
+
+        await this.driverHelper.waitPresence(notificationCenterClosedLocator, timeout);
+    }
+
+    async waitNotificationsDismissed(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const notificationCenterContainerNotificationsLocator: By = By.xpath(`//div[contains(@class, 'theia-notifications-container theia-notification-center')]//div[@class='theia-notification-list']//*`);
+        Logger.debug(`Ide.waitNotificationsDismissed`);
+
+        await this.driverHelper.waitDisappearance(notificationCenterContainerNotificationsLocator, timeout);
     }
 
     async performKeyCombination(keyCombination: string) {
