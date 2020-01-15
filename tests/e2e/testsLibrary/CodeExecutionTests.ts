@@ -17,7 +17,7 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const dialogWindow: DialogWindow = e2eContainer.get(CLASSES.DialogWindow);
 
 export function runTask(taskName: string, timeout: number) {
-    test( `Run command '${taskName}'`, async () => {
+    test(`Run command '${taskName}'`, async () => {
         await topMenu.runTask(taskName);
         await ide.waitNotification('has exited with code 0.', timeout);
     });
