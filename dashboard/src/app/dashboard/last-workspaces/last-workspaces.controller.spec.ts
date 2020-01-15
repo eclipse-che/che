@@ -9,9 +9,9 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-import { DashboardLastWorkspacesController } from "./last-workspaces.controller";
-import { CheWorkspace } from "../../../components/api/workspace/che-workspace.factory";
-import { CheNotification } from "../../../components/notification/che-notification.factory";
+import {DashboardLastWorkspacesController} from './last-workspaces.controller';
+import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
+import {CheNotification} from '../../../components/notification/che-notification.factory';
 
 declare const expect: (param: any) => {
   toHaveBeenCalledTimes: any;

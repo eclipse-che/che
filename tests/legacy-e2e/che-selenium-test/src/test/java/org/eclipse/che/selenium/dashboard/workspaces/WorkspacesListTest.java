@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.dashboard.workspaces;
 
 import static java.util.Arrays.asList;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_ADD_PROJECT_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_CONFIGURE_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON;
@@ -177,7 +176,7 @@ public class WorkspacesListTest {
     workspaces.waitDeleteWorkspaceBtnDisappearance();
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkSearchField() throws Exception {
     int nameLength = WORKSPACE_NAME.length();
     int existingWorkspacesCount = testWorkspaceServiceClient.getWorkspacesCount();

@@ -9,8 +9,8 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-import { IAugmentedJQuery, ITemplateCacheService, ICompileService, IRootScopeService, ICompileProvider } from "angular";
-import { CheHttpBackend } from "../../../components/api/test/che-http-backend";
+import {IAugmentedJQuery, ITemplateCacheService, ICompileService, IRootScopeService, ICompileProvider} from 'angular';
+import {CheHttpBackend} from '../../../components/api/test/che-http-backend';
 
 /**
  * @author Lucia Jelinkova
@@ -22,11 +22,11 @@ describe(`Last workspaces directive >`, () => {
   let directiveElement: IAugmentedJQuery;
 
   beforeAll(() => {
-    // this call replaces the inner directive <che-workspace-item> with mocked value. 
-    // the reason is that we want to test only <dashboard-last-workspaces> itself and not 
-    // underlying directives. Those should be tested separately. 
+    // this call replaces the inner directive <che-workspace-item> with mocked value.
+    // the reason is that we want to test only <dashboard-last-workspaces> itself and not
+    // underlying directives. Those should be tested separately.
     // NOTE: it is possible that if another test mocks the same directive, it will fail. In that
-    // case the whole call needs to be extracted and executed before all .spec files. 
+    // case the whole call needs to be extracted and executed before all .spec files.
     angular.module('userDashboard').config(function ($compileProvider: ICompileProvider) {
       $compileProvider.directive('cheWorkspaceItem', function () {
         var def = {
@@ -124,8 +124,10 @@ describe(`Last workspaces directive >`, () => {
   }
 
   function moreWorkspacesDirectiveTest(workspacesCount: number, workspacesDisplayedCount: number = workspacesCount) {
-    $scope.dashboardLastWorkspacesController.workspaces = 
-      Array.from(new Array(workspacesCount)).map((x, i) => {return {} });
+    $scope.dashboardLastWorkspacesController.workspaces =
+      Array.from(new Array(workspacesCount)).map((x, i) => {
+        return {}
+      });
     $scope.$digest();
 
     let emptyLabel = directiveElement.find('.last-workspaces-empty-label');

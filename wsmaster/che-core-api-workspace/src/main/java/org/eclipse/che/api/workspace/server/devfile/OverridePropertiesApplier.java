@@ -31,7 +31,7 @@ import org.eclipse.che.api.workspace.server.devfile.exception.OverrideParameterE
  * be used during object modification:
  *
  * <ul>
- *   <li>Only allowed top-level fields can be altered: apiVersion, metadata, project.
+ *   <li>Only allowed top-level fields can be altered: apiVersion, metadata, project, attributes.
  *   <li>The absent segment will be created as an empty object and next segment will be added as a
  *       field of it
  *   <li>The property identifier cannot ends with an array type reference
@@ -41,13 +41,14 @@ import org.eclipse.che.api.workspace.server.devfile.exception.OverrideParameterE
  */
 public class OverridePropertiesApplier {
 
-  private final List<String> allowedFirstSegments = asList("apiVersion", "metadata", "projects");
+  private final List<String> allowedFirstSegments =
+      asList("apiVersion", "metadata", "projects", "attributes");
 
   public JsonNode applyPropertiesOverride(
       JsonNode devfileNode, Map<String, String> overrideProperties)
       throws OverrideParameterException {
     for (Map.Entry<String, String> entry : overrideProperties.entrySet()) {
-      String[] pathSegments = entry.getKey().split("\\.");
+      String[] pathSegments = parseSegments(entry.getKey());
       if (pathSegments.length < 1) {
         continue;
       }
@@ -88,6 +89,13 @@ public class OverridePropertiesApplier {
       ((ObjectNode) currentNode).put(lastSegment, entry.getValue());
     }
     return devfileNode;
+  }
+
+  private String[] parseSegments(String key) {
+    return key.startsWith("attributes.")
+        // for attributes we treat the rest as a attribute name so just need only 2 parts
+        ? key.split("\\.", 2)
+        : key.split("\\.");
   }
 
   private void validateFirstSegment(String[] pathSegments) throws OverrideParameterException {

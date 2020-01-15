@@ -29,7 +29,7 @@ export class ProjectTree {
     async clickCollapseAllButton() {
         Logger.debug('ProjectTree.clickCollapseAllButton');
 
-        const collapseAllButtonLocator: By = By.css('div.theia-sidepanel-toolbar div.collapse-all');
+        const collapseAllButtonLocator: By = By.css('div.theia-sidepanel-toolbar div.theia-collapse-all-icon');
         await this.driverHelper.waitAndClick(collapseAllButtonLocator);
     }
 
