@@ -199,5 +199,5 @@ subjects:
 EOF
 ```
 
-Also `CHE_API_INTERNAL`, `CHE_API_EXTERNAL` and `CHE_API` should be set in runner container and point to new Che server API.
+Also `CHE_API_INTERNAL` and `CHE_API` should be set in runner container and point to new Che server API.
 If one uses provided devfile, they are already set to: `http://che-dev:8080/api`, which should be changed in case of https protocol.
