@@ -60,7 +60,6 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.LegacyEnvVarProvid
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MavenOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.ProjectsRootEnvVariableProvider;
-import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentJavaOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceIdEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNameEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNamespaceNameEnvVarProvider;
@@ -174,10 +173,6 @@ public class WsMasterModule extends AbstractModule {
     legacyEnvVarProviderMultibinders.addBinding().to(MavenOptsEnvVariableProvider.class);
 
     legacyEnvVarProviderMultibinders.addBinding().to(AgentAuthEnableEnvVarProvider.class);
-    legacyEnvVarProviderMultibinders
-        .addBinding()
-        .to(WorkspaceAgentJavaOptsEnvVariableProvider.class);
-
     bind(org.eclipse.che.api.workspace.server.event.WorkspaceJsonRpcMessenger.class)
         .asEagerSingleton();
     bind(org.eclipse.che.everrest.EverrestDownloadFileResponseFilter.class);

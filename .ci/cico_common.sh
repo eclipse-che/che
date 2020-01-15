@@ -96,13 +96,15 @@ setup_gitconfig() {
 
 
 
-publishImagesOnQuayLatest() {
+publishImagesOnQuay() {
     echo "Going to build and push docker images"
     set -e
     set -o pipefail
 
     TAG=$1
-    git checkout ${TAG}
+    if [[ ${TAG} != "nightly" ]]; then #if given tag 'nightly' means that don't need to checkout and going to build master
+        git checkout ${TAG}
+    fi
     REGISTRY="quay.io"
     ORGANIZATION="eclipse"
     if [[ -n "${QUAY_ECLIPSE_CHE_USERNAME}" ]] && [[ -n "${QUAY_ECLIPSE_CHE_PASSWORD}" ]]; then
@@ -199,11 +201,11 @@ releaseProject() {
     if [[ $? -eq 0 ]]; then
         echo 'Build Success!'
         echo 'Going to deploy artifacts'
-        scl enable rh-maven33 "mvn clean deploy -DcreateChecksum=true -DskipTests=true -Dskip-validate-sources -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE"
+        scl enable rh-maven33 "mvn clean deploy -Pcodenvy-release -DcreateChecksum=true -DskipTests=true -Dskip-validate-sources -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE -Darchetype.test.skip=true -Dversion.animal-sniffer.enforcer-rule=1.16"
     else
         die_with 'Build Failed!'
     fi
     git tag "${tag}" || die_with "Failed to create tag ${tag}! Release has been deployed, however"
     git push --tags ||  die_with "Failed to push tags. Please do this manually"
-    publishImagesOnQuayLatest ${tag} "pushLatest"
+    publishImagesOnQuay ${tag} "pushLatest"
 }

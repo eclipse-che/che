@@ -112,8 +112,8 @@ parameters:
   value: nightly
 - name: IMAGE_POSTGRES
   displayName: Postgres DB Image
-  description: Postgres DB Image. Defaults to docker.io/eclipse/che-postgres
-  value: docker.io/eclipse/che-postgres
+  description: Postgres DB Image. Defaults to quay.io/eclipse/che-postgres
+  value: quay.io/eclipse/che-postgres
 - name: POSTGRESQL_LOG_DEBUG
   displayName: Postgres DB debug
   description: Enable Postgres DB debug log mode

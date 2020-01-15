@@ -12,7 +12,7 @@ components:
     id: che-incubator/typescript/1.30.2
   - alias: dash-dev
     type: dockerimage
-    image: 'eclipse/che-dashboard-dev:nightly'
+    image: 'quay.io/eclipse/che-dashboard-dev:nightly'
     endpoints:
       - name: dashboard-dev-server
         port: 3000

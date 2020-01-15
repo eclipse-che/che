@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases;
 
-import static java.util.Collections.singletonMap;
-
 import com.google.common.annotations.Beta;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -41,8 +39,8 @@ public class OpenshiftBrokerEnvironmentFactory
       @Named("che.workspace.plugin_broker.pull_policy") String brokerPullPolicy,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
       MachineTokenEnvVarProvider machineTokenEnvVarProvider,
-      @Named("che.workspace.plugin_broker.init.image") String initBrokerImage,
-      @Named("che.workspace.plugin_broker.unified.image") String unifiedBrokerImage,
+      @Named("che.workspace.plugin_broker.artifacts.image") String artifactsBrokerImage,
+      @Named("che.workspace.plugin_broker.metadata.image") String metadataBrokerImage,
       @Nullable @Named("che.workspace.plugin_registry_url") String pluginRegistryUrl,
       CertificateProvisioner certProvisioner) {
     super(
@@ -50,8 +48,8 @@ public class OpenshiftBrokerEnvironmentFactory
         brokerPullPolicy,
         authEnableEnvVarProvider,
         machineTokenEnvVarProvider,
-        unifiedBrokerImage,
-        initBrokerImage,
+        artifactsBrokerImage,
+        metadataBrokerImage,
         pluginRegistryUrl,
         certProvisioner);
   }
@@ -61,7 +59,7 @@ public class OpenshiftBrokerEnvironmentFactory
     return OpenShiftEnvironment.builder()
         .setConfigMaps(brokersConfigs.configMaps)
         .setMachines(brokersConfigs.machines)
-        .setPods(singletonMap(brokersConfigs.pod.getMetadata().getName(), brokersConfigs.pod))
+        .setPods(brokersConfigs.pods)
         .build();
   }
 }
