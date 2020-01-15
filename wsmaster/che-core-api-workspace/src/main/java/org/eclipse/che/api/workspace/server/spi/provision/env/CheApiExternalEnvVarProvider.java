@@ -15,7 +15,12 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.Pair;
 
-/** @author Mykhailo Kuznietsov */
+/**
+ * @deprecated this class shall soon be removed, as this variable is provided only for backward
+ *     compatibility. Use `CHE_API` instead of `CHE_API_EXTERNAL`.
+ * @author Mykhailo Kuznietsov
+ */
+@Deprecated
 public interface CheApiExternalEnvVarProvider extends EnvVarProvider {
 
   /** Env variable for machine that contains url of Che API */
