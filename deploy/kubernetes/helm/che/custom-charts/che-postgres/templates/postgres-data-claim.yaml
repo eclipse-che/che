@@ -16,7 +16,7 @@ metadata:
   name: postgres-data
 spec:
   {{- if .Values.global.chePostgresPVCStorageClassName }}
-    storageClassName: {{ .Values.global.chePostgresPVCStorageClassName }}
+  storageClassName: {{ .Values.global.chePostgresPVCStorageClassName }}
   {{- end }}
   accessModes:
   - ReadWriteOnce
