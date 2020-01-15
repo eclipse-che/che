@@ -1,10 +1,23 @@
 .workspace-overview-tab-content
   margin-top 30px
-  .che-label-container:not(:first-child)
+  .che-label-container
     padding 10px 0
-  .che-label-container:first-child
-    height 55px
-    padding 0
+
+    &.workspace-name-input-container,
+    &.infrastructure-namespace-input-container
+      height 56px
+
+    &.workspace-name-input-container .che-input-box
+      margin-top -1px
+
+    &.infrastructure-namespace-input-container
+
+      .che-input
+        margin-top 3px
+
+        .che-input-desktop-value-column
+          flex auto
+
   div.che-label-container
     border-bottom none
 

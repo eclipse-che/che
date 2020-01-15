@@ -15,6 +15,7 @@ import {CheNotification} from '../../../../components/notification/che-notificat
 import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
 import {NamespaceSelectorSvc} from '../../create-workspace/ready-to-go-stacks/namespace-selector/namespace-selector.service';
 import {WorkspaceDetailsService} from '../workspace-details.service';
+import { CheKubernetesNamespace } from '../../../../components/api/che-kubernetes-namespace.factory';
 
 const STARTING = WorkspaceStatus[WorkspaceStatus.STARTING];
 const RUNNING = WorkspaceStatus[WorkspaceStatus.RUNNING];
@@ -28,22 +29,41 @@ const STOPPED = WorkspaceStatus[WorkspaceStatus.STOPPED];
  */
 export class WorkspaceDetailsOverviewController {
 
-  static $inject = ['$scope', '$q', '$route', '$timeout', '$location', 'cheWorkspace', 'cheNotification', 'confirmDialogService', 'namespaceSelectorSvc', 'workspaceDetailsService'];
+  static $inject = [
+    '$location',
+    '$q',
+    '$route',
+    '$scope',
+    '$timeout',
+    'cheKubernetesNamespace',
+    'cheNotification',
+    'cheWorkspace',
+    'confirmDialogService',
+    'namespaceSelectorSvc',
+    'workspaceDetailsService',
+  ];
 
   onChange: Function;
 
-  private $scope: ng.IScope;
+  /**
+   * Displaying name of infrastructure namespace.
+   */
+  infrastructureNamespace: string;
+
+  private $location: ng.ILocationService;
   private $q: ng.IQService;
   private $route: ng.route.IRouteService;
-  private $location: ng.ILocationService;
+  private $scope: ng.IScope;
   private $timeout: ng.ITimeoutService;
-  private cheWorkspace: CheWorkspace;
+  private cheKubernetesNamespace: CheKubernetesNamespace;
   private cheNotification: CheNotification;
+  private cheWorkspace: CheWorkspace;
   private confirmDialogService: ConfirmDialogService;
-  private overviewForm: ng.IFormController;
-  private workspaceDetails: che.IWorkspace;
   private namespaceSelectorSvc: NamespaceSelectorSvc;
   private workspaceDetailsService: WorkspaceDetailsService;
+
+  private workspaceDetails: che.IWorkspace;
+  private overviewForm: ng.IFormController;
   private namespaceId: string;
   private workspaceName: string;
   private name: string;
@@ -57,16 +77,27 @@ export class WorkspaceDetailsOverviewController {
   /**
    * Default constructor that is using resource
    */
-  constructor($scope: ng.IScope, $q: ng.IQService, $route: ng.route.IRouteService, $timeout: ng.ITimeoutService, $location: ng.ILocationService,
-              cheWorkspace: CheWorkspace, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService,
-              namespaceSelectorSvc: NamespaceSelectorSvc, workspaceDetailsService: WorkspaceDetailsService) {
-    this.$scope = $scope;
+  constructor(
+    $location: ng.ILocationService,
+    $q: ng.IQService,
+    $route: ng.route.IRouteService,
+    $scope: ng.IScope,
+    $timeout: ng.ITimeoutService,
+    cheKubernetesNamespace: CheKubernetesNamespace,
+    cheNotification: CheNotification,
+    cheWorkspace: CheWorkspace,
+    confirmDialogService: ConfirmDialogService,
+    namespaceSelectorSvc: NamespaceSelectorSvc,
+    workspaceDetailsService: WorkspaceDetailsService,
+  ) {
+    this.$location = $location;
     this.$q = $q;
     this.$route = $route;
+    this.$scope = $scope;
     this.$timeout = $timeout;
-    this.$location = $location;
-    this.cheWorkspace = cheWorkspace;
+    this.cheKubernetesNamespace = cheKubernetesNamespace;
     this.cheNotification = cheNotification;
+    this.cheWorkspace = cheWorkspace;
     this.confirmDialogService = confirmDialogService;
     this.namespaceSelectorSvc = namespaceSelectorSvc;
     this.workspaceDetailsService = workspaceDetailsService;
@@ -98,6 +129,8 @@ export class WorkspaceDetailsOverviewController {
     this.name = this.cheWorkspace.getWorkspaceDataManager().getName(this.workspaceDetails);
     this.isEphemeralMode = this.attributes && this.attributes.persistVolumes ? !JSON.parse(this.attributes.persistVolumes) : false;
     this.attributesCopy = angular.copy(this.cheWorkspace.getWorkspaceDataManager().getAttributes(this.workspaceDetails));
+
+    this.updateInfrastructureNamespace();
   }
 
   /**
@@ -382,4 +415,16 @@ export class WorkspaceDetailsOverviewController {
   getNamespaceCaption(): string {
     return this.namespaceSelectorSvc.getNamespaceCaption();
   }
+
+  private updateInfrastructureNamespace() {
+    const namespaceId = this.workspaceDetails.attributes.infrastructureNamespace;
+    this.infrastructureNamespace = namespaceId;
+    return this.cheKubernetesNamespace.fetchKubernetesNamespace().then(namespaces => {
+      const currentNamespace = namespaces.find(namespace => namespace.name === namespaceId);
+      if (currentNamespace) {
+        this.infrastructureNamespace = currentNamespace.attributes.displayName || currentNamespace.name;
+      }
+    });
+  }
+
 }
