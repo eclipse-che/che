@@ -108,7 +108,12 @@ export class TemplateListController {
   private init(): void {
     this.isLoading = true;
     this.devfileRegistry.fetchDevfiles(this.devfileRegistryUrl).then((devfiles: Array<IDevfileMetaData>) => {
-      this.devfiles = devfiles;
+      this.devfiles = devfiles.map(devfile => {
+        if (!devfile.icon.startsWith('http')) {
+          devfile.icon = this.devfileRegistryUrl + devfile.icon;
+        }
+        return devfile;
+      });
       this.applyFilter();
     }, (error: any) => {
       const message = 'Failed to load devfiles meta list.';
