@@ -75,8 +75,9 @@ export class DialogWindow {
         Logger.debug('DialogWindow.waitDialogAndOpenLink');
 
         await this.waitDialog(timeout, dialogText);
-        await this.ide.waitApllicationIsReady(await this.getApplicationUrlFromDialog(dialogText), timeout);
+        const applicationUrlFromDialog: string = await this.getApplicationUrlFromDialog(dialogText);
         await this.clickToOpenLinkButton();
+        await this.ide.waitApllicationIsReady(applicationUrlFromDialog, timeout);
         await this.waitDialogDissappearance();
     }
 

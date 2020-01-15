@@ -20,6 +20,7 @@ import { Logger } from './Logger';
 @injectable()
 export class DriverHelper {
     private readonly driver: ThenableWebDriver;
+    private readonly BY_XPATH_LOCATOR_START_INDEX: number = 10;
 
     constructor(@inject(TYPES.Driver) driver: IDriver) {
         this.driver = driver.get();
@@ -519,6 +520,32 @@ export class DriverHelper {
         }
 
         throw new error.TimeoutError(`Exceeded maximum mouse move attempts, for the '${elementLocator}' element`);
+    }
+
+    public async hasChildren(elementLocator: By): Promise<boolean> {
+        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        Logger.trace(`DriverHelper.hasChildren ${elementLocator}`);
+
+        for (let i = 0; i < attempts; i++) {
+            try {
+                const childrenLocatorString: string = elementLocator.toString().substr(this.BY_XPATH_LOCATOR_START_INDEX, elementLocator.toString().length - this.BY_XPATH_LOCATOR_START_INDEX - 1) + `//*`;
+                const childrenLocator: By = By.xpath(childrenLocatorString);
+                const children: Array<WebElement> = await this.driver.findElements(childrenLocator);
+                Logger.trace(`DriverHelper.hasChildren child elements locator '${childrenLocator}', child elements:${children.length}`);
+                if (children.length > 0) { return true; }
+                return false;
+            } catch (err) {
+                if (err instanceof error.StaleElementReferenceError) {
+                    await this.wait(polling);
+                    continue;
+                }
+
+                throw err;
+            }
+        }
+
+        throw new error.TimeoutError(`Exceeded maximum attempts to get children for '${elementLocator}'.`);
     }
 
     getDriver(): ThenableWebDriver {
