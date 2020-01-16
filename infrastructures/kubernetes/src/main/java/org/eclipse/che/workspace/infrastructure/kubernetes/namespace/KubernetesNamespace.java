@@ -150,7 +150,7 @@ public class KubernetesNamespace {
     KubernetesClient client = clientFactory.create(workspaceId);
 
     if (!isNamespaceManaged(client)) {
-      LOG.debug(
+      LOG.info(
           "Namespace {} for workspace {} is not marked as managed. Ignoring the delete request.",
           name,
           workspaceId);
