@@ -107,6 +107,7 @@ public class WorkspaceService extends Service {
   private final String apiEndpoint;
   private final boolean cheWorkspaceAutoStart;
   private final FileContentProvider devfileContentProvider;
+  private final boolean defaultPersistVolumes;
 
   @Inject
   public WorkspaceService(
@@ -117,6 +118,7 @@ public class WorkspaceService extends Service {
       WorkspaceLinksGenerator linksGenerator,
       @Named(CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY) @Nullable String pluginRegistryUrl,
       @Named(CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY) @Nullable String devfileRegistryUrl,
+      @Named("che.infra.kubernetes.pvc.enabled") boolean defaultPersistVolumes,
       URLFetcher urlFetcher) {
     this.apiEndpoint = apiEndpoint;
     this.cheWorkspaceAutoStart = cheWorkspaceAutoStart;
@@ -126,6 +128,7 @@ public class WorkspaceService extends Service {
     this.pluginRegistryUrl = pluginRegistryUrl;
     this.devfileRegistryUrl = devfileRegistryUrl;
     this.devfileContentProvider = new URLFileContentProvider(null, urlFetcher);
+    this.defaultPersistVolumes = defaultPersistVolumes;
   }
 
   @POST
@@ -828,6 +831,8 @@ public class WorkspaceService extends Service {
     if (devfileRegistryUrl != null) {
       settings.put("cheWorkspaceDevfileRegistryUrl", devfileRegistryUrl);
     }
+
+    settings.put("cheWorkspacesDefaultPersistVolumes", Boolean.toString(defaultPersistVolumes));
 
     return settings.build();
   }

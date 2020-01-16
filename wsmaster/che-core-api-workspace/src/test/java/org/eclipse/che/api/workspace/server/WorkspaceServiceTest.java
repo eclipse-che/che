@@ -123,6 +123,8 @@ public class WorkspaceServiceTest {
   private static final String CHE_WORKSPACE_PLUGIN_REGISTRY_ULR = "http://localhost:9898/plugins/";
   private static final String CHE_WORKSPACE_DEVFILE_REGISTRY_ULR =
       "http://localhost:9898/devfiles/";
+  private static final boolean CHE_WORKSPACES_DEFAULT_PERSIST_VOLUMES = false;
+
   private static final Account TEST_ACCOUNT = new AccountImpl("anyId", NAMESPACE, "test");
 
   @SuppressWarnings("unused")
@@ -149,6 +151,7 @@ public class WorkspaceServiceTest {
             linksGenerator,
             CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
             CHE_WORKSPACE_DEVFILE_REGISTRY_ULR,
+            CHE_WORKSPACES_DEFAULT_PERSIST_VOLUMES,
             urlFetcher);
   }
 
@@ -1327,7 +1330,9 @@ public class WorkspaceServiceTest {
             "cheWorkspacePluginRegistryUrl",
             CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
             "cheWorkspaceDevfileRegistryUrl",
-            CHE_WORKSPACE_DEVFILE_REGISTRY_ULR));
+            CHE_WORKSPACE_DEVFILE_REGISTRY_ULR,
+            "cheWorkspacesDefaultPersistVolumes",
+            Boolean.toString(CHE_WORKSPACES_DEFAULT_PERSIST_VOLUMES)));
   }
 
   private static String unwrapError(Response response) {
