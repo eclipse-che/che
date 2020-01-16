@@ -7,7 +7,7 @@
 
 function archiveArtifacts1(){
   set +e
-  JOB_NAME=che-nightly
+  JOB_NAME=che-nightly 
   echo "Archiving artifacts from ${DATE} for ${JOB_NAME}/${BUILD_NUMBER}"
   ls -la ./artifacts.key
   chmod 600 ./artifacts.key
