@@ -144,7 +144,7 @@ public class KubernetesNamespace {
    * to delete a namespace that is already being deleted. If the namespace is not marked as managed,
    * it is silently not deleted.
    *
-   * @throws InfrastructureException f any unexpected exception occurs during namespace deletion
+   * @throws InfrastructureException if any unexpected exception occurs during namespace deletion
    */
   void deleteIfManaged() throws InfrastructureException {
     KubernetesClient client = clientFactory.create(workspaceId);
