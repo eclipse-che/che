@@ -9,32 +9,41 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { NameGenerator} from '../..';
-import * as commonTestMethods from '../CommonTestMethods';
-import * as commonLSTests from '../CommonLSTests';
+import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
+import * as LSTests from '../../testsLibrary/LSTests';
+import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
+import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 
 const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
 const sampleName: string = 'console-java-simple';
 const fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
 const tabTitle: string = 'HelloWorld.java';
 const codeNavigationClassName: string = 'String.class';
+const stack : string = 'Java Maven';
+const taskName: string = 'maven build';
 
 suite('Java Maven test', async () => {
-    commonTestMethods.createAndOpenWorkspace(workspaceName, 'Java Maven');
-    commonTestMethods.waitIdeAndProjectImported(workspaceName, sampleName, 'src');
+    suite (`Create ${stack} workspace ${workspaceName}`, async () => {
+        workspaceHandling.createAndOpenWorkspace(workspaceName, stack);
+        projectAndFileTests.waitWorkspaceReadiness(workspaceName, sampleName, 'src');
+    });
 
     suite('Validation of workspace build and run', async () => {
-        commonTestMethods.runTaskAndCloseTerminal('maven build', 120000);
-        commonTestMethods.runTaskAndCloseTerminal('maven build and run', 120000);
+        codeExecutionTests.runTask(taskName, 120000);
+        codeExecutionTests.closeTerminal(taskName);
     });
 
     suite('Language server validation', async () => {
-        commonTestMethods.openFileInAssociatedWorkspace(fileFolderPath, tabTitle);
-
-        commonLSTests.waitLSInitialization('Starting Java Language Server', 1800000, 360000);
-        commonLSTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
-        commonLSTests.errorHighlighting(tabTitle, 'error', 11);
-        commonLSTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');
-        commonLSTests.codeNavigation(tabTitle, 9, 10, codeNavigationClassName);
+        projectAndFileTests.openFile(fileFolderPath, tabTitle);
+        LSTests.waitLSInitialization('Starting Java Language Server', 1800000, 360000);
+        LSTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
+        LSTests.errorHighlighting(tabTitle, 'error', 11);
+        LSTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');
+        LSTests.codeNavigation(tabTitle, 9, 10, codeNavigationClassName);
     });
-    commonTestMethods.stopAndRemoveWorkspace(workspaceName);
+
+    suite ('Stop and remove workspace', async() => {
+        workspaceHandling.stopWorkspace(workspaceName);
+        workspaceHandling.removeWorkspace(workspaceName);
+    });
 });

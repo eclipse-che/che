@@ -9,8 +9,10 @@
  **********************************************************************/
 import { NameGenerator } from '../../utils/NameGenerator';
 import 'reflect-metadata';
-import * as commonTestMethods from '../CommonTestMethods';
-import * as commonLSTests from '../CommonLSTests';
+import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
+import * as commonLSTests from '../../testsLibrary/LSTests';
+import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
+import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 
 const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
 const sampleName: string = 'vertx-http-example';
@@ -19,14 +21,17 @@ const tabTitle: string = 'HttpApplication.java';
 const codeNavigationClassName: string = 'RouterImpl.class';
 const buildTaskName: string = 'maven build';
 const LSstarting: string = 'Starting Java Language Server';
+const stack: string = 'Java Vert.x';
 
 suite('Java Vert.x test', async () => {
 
-    commonTestMethods.createAndOpenWorkspace(workspaceName, 'Java Vert.x');
-    commonTestMethods.waitIdeAndProjectImported(workspaceName, sampleName, 'src');
+    suite (`Create ${stack} workspace ${workspaceName}`, async () => {
+        workspaceHandling.createAndOpenWorkspace(workspaceName, stack);
+        projectAndFileTests.waitWorkspaceReadiness(workspaceName, sampleName, 'src');
+    });
 
     suite('Language server validation', async () => {
-        commonTestMethods.openFileInAssociatedWorkspace(fileFolderPath, tabTitle);
+        projectAndFileTests.openFile(fileFolderPath, tabTitle);
         commonLSTests.waitLSInitialization(LSstarting, 1800000, 360000);
         commonLSTests.suggestionInvoking(tabTitle, 19, 31, 'router(Vertx vertx) : Router');
         commonLSTests.errorHighlighting(tabTitle, 'error', 20);
@@ -35,9 +40,13 @@ suite('Java Vert.x test', async () => {
     });
 
     suite('Validation of project build', async () => {
-        commonTestMethods.runTaskAndCloseTerminal(buildTaskName, 120000);
+        codeExecutionTests.runTask(buildTaskName, 120000);
+        codeExecutionTests.closeTerminal(buildTaskName);
     });
 
-    commonTestMethods.stopAndRemoveWorkspace(workspaceName);
+    suite ('Stopping and deleting the workspace', async () => {
+        workspaceHandling.stopWorkspace(workspaceName);
+        workspaceHandling.removeWorkspace(workspaceName);
+    });
 
 });

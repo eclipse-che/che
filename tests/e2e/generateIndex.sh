@@ -5,11 +5,9 @@ echo "import * as inversifyConfig from './inversify.config';
 export { inversifyConfig };
 export * from './inversify.types';
 export * from './TestConstants';
-export * from './tests/CommonTestMethods';
-export * from './tests/CommonLSTests';
 " > index.ts
 
-listOfDirs="driver utils pageobjects"
+listOfDirs="driver utils pageobjects testsLibrary"
 listOfExcludes="./driver/CheReporter.ts"
 for dir in $listOfDirs
 do

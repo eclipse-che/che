@@ -19,7 +19,9 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
     test('Error highlighting', async () => {
         await editor.type(openedTab, textToWrite, line);
         await editor.waitErrorInLine(line);
-        await editor.performKeyCombination(openedTab, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
+        for (let i = 0; i < textToWrite.length; i++) {
+            await editor.performKeyCombination(openedTab, Key.BACK_SPACE);
+        }
         await editor.waitErrorInLineDisappearance(line);
     });
  }
