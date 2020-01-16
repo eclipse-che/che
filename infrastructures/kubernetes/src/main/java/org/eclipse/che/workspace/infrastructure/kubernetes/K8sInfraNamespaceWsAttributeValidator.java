@@ -21,7 +21,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.WorkspaceAttributeValidator;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
 /**
@@ -77,14 +76,7 @@ public class K8sInfraNamespaceWsAttributeValidator implements WorkspaceAttribute
                 + "')");
       }
 
-      // the current user is going to be anonymous only during internal scheduled jobs. In those
-      // circumstances, we don't actually need to check the namespace validity, because those
-      // workflows are defined by our code and are therefore "safe". User-initiated workspace
-      // creation or update is never going to succeed using an anonymous user anyway, so again,
-      // skipping this check for anonymous user is safe.
-      if (!EnvironmentContext.getCurrent().getSubject().isAnonymous()) {
-        namespaceFactoryProvider.get().checkIfNamespaceIsAllowed(namespace);
-      }
+      namespaceFactoryProvider.get().checkIfNamespaceIsAllowed(namespace);
     }
   }
 
@@ -115,6 +107,17 @@ public class K8sInfraNamespaceWsAttributeValidator implements WorkspaceAttribute
               "The namespace information must not be updated or "
                   + "deleted. You must provide \"%s\" attribute with \"%s\" as a value",
               WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, existingNamespace));
+    }
+
+    if (isNullOrEmpty(existingNamespace)) {
+      // this would mean that the user made an update to the workspace without it having the
+      // namespace attribute stored. This is very, very unlikely, because the setting of attributes
+      // happens during the creation process. But let's just cover this case anyway, just to be
+      // sure.
+      validate(update);
+
+      // everything is fine. We allow to change infra namespace in such case.
+      return;
     }
 
     if (!updateNamespace.equals(existingNamespace)) {
