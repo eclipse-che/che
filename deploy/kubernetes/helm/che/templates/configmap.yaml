@@ -59,6 +59,7 @@ data:
   CHE_INFRA_KUBERNETES_PVC_STRATEGY: "{{ .Values.global.cheWorkspacesPVCStrategy }}"
   CHE_INFRA_KUBERNETES_PVC_QUANTITY: {{ .Values.global.pvcClaim }}
   CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS: "true"
+  CHE_INFRA_KUBERNETES_PVC_STORAGE__CLASS__NAME: "{{ .Values.global.cheWorkspacePVCStorageClassName }}"
   CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_RUN__AS__USER: "{{ .Values.global.securityContext.runAsUser }}"
   CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_FS__GROUP: "{{ .Values.global.securityContext.fsGroup }}"
   CHE_LOCAL_CONF_DIR: /etc/conf

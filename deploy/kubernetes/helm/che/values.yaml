@@ -62,6 +62,8 @@ global:
   # Possible values: common, per-workspace, unique
   cheWorkspacesPVCStrategy: "common"
   pvcClaim: "1Gi"
+  # Defines the storage class of Persistent Volume Claim(s) for the workspaces.
+  cheWorkspacePVCStorageClassName: ""
   cheWorkspacesNamespace: "<username>-che"
   # Service account name that will be mounted to workspaces pods
   # Note that:
@@ -81,6 +83,8 @@ global:
     runAsUser: 1724
     fsGroup: 1724
   postgresDebugLogs: false
+  # Defines the storage class of Persistent Volume Claim for Postgres database.
+  chePostgresPVCStorageClassName: ""
   cheDevfileRegistryUrlFormat: "devfile-registry-%s.%s"
   chePluginRegistryUrlFormat: "plugin-registry-%s.%s"
 
