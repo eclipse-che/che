@@ -13,11 +13,16 @@
 
 #include commont scripts 
 . ../../../../.ci/cico_common.sh
+. ./cico_tests_common.sh
 
 
 load_jenkins_vars
 
 install_deps
+
+installJQ
+
+installOC
 
 function archiveArtifacts1(){
   set +e
