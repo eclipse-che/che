@@ -10,7 +10,7 @@
 import 'reflect-metadata';
 import { NameGenerator} from '../..';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as commonLSTests from '../../testsLibrary/LSTests';
+import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 
@@ -35,11 +35,11 @@ suite('Java Maven test', async () => {
 
     suite('Language server validation', async () => {
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
-        commonLSTests.waitLSInitialization('Starting Java Language Server', 1800000, 360000);
-        commonLSTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
-        commonLSTests.errorHighlighting(tabTitle, 'error', 11);
-        commonLSTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');
-        commonLSTests.codeNavigation(tabTitle, 9, 10, codeNavigationClassName);
+        commonLsTests.waitLSInitialization('Starting Java Language Server', 1800000, 360000);
+        commonLsTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
+        commonLsTests.errorHighlighting(tabTitle, 'error', 11);
+        commonLsTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');
+        commonLsTests.codeNavigation(tabTitle, 9, 10, codeNavigationClassName);
     });
 
     suite ('Stop and remove workspace', async() => {

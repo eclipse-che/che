@@ -15,7 +15,7 @@ const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const newWorkspace: NewWorkspace = e2eContainer.get(CLASSES.NewWorkspace);
 
 export function createAndOpenWorkspace(workspaceName : string, stack: string) {
-    test('Open \'New Workspace\' page', async () => {
+    test(`Open 'New Workspace' page`, async () => {
         await newWorkspace.openPageByUI();
         await newWorkspace.createAndOpenWorkspace(workspaceName, stack);
     });

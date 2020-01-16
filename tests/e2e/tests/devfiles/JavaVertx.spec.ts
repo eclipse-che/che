@@ -10,7 +10,7 @@
 import { NameGenerator } from '../../utils/NameGenerator';
 import 'reflect-metadata';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as commonLSTests from '../../testsLibrary/LSTests';
+import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 
@@ -32,11 +32,11 @@ suite('Java Vert.x test', async () => {
 
     suite('Language server validation', async () => {
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
-        commonLSTests.waitLSInitialization(LSstarting, 1800000, 360000);
-        commonLSTests.suggestionInvoking(tabTitle, 19, 31, 'router(Vertx vertx) : Router');
-        commonLSTests.errorHighlighting(tabTitle, 'error', 20);
-        commonLSTests.autocomplete(tabTitle, 19, 7, 'Router - io.vertx.ext.web');
-        commonLSTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName);
+        commonLsTests.waitLSInitialization(LSstarting, 1800000, 360000);
+        commonLsTests.suggestionInvoking(tabTitle, 19, 31, 'router(Vertx vertx) : Router');
+        commonLsTests.errorHighlighting(tabTitle, 'error', 20);
+        commonLsTests.autocomplete(tabTitle, 19, 7, 'Router - io.vertx.ext.web');
+        commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName);
     });
 
     suite('Validation of project build', async () => {
