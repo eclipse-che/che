@@ -15,6 +15,9 @@ metadata:
     io.kompose.service: postgres-data
   name: postgres-data
 spec:
+  {{- if .Values.global.chePostgresPVCStorageClassName }}
+  storageClassName: {{ .Values.global.chePostgresPVCStorageClassName }}
+  {{- end }}
   accessModes:
   - ReadWriteOnce
   resources:

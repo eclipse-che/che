@@ -42,7 +42,7 @@ commands:
     actions:
       - type: exec
         component: maven-container
-        command: mvn clean package >> build.txt && tail -n 40 /projects/petclinic/build.txt | grep 'BUILD SUCCESS' > /projects/petclinic/result-build.txt
+        command: mvn clean package | tee build.txt && tail -n 40 /projects/petclinic/build.txt | grep 'BUILD SUCCESS' > /projects/petclinic/result-build.txt
         workdir: /projects/petclinic
   - name: build-file-output
     actions:
@@ -65,5 +65,20 @@ commands:
     actions:
       - type: exec
         component: maven-container
-        command: java -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044 spring-petclinic-2.2.0.BUILD-SNAPSHOT.jar --spring.profiles.active=mysql
+        command: java -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 spring-petclinic-2.2.0.BUILD-SNAPSHOT.jar --spring.profiles.active=mysql
         workdir: /projects/petclinic/target
+  - name: Debug remote java application
+    actions:
+      - type: vscode-launch
+        referenceContent: |
+          {
+          "version": "0.2.0",
+          "configurations": [
+            {
+              "type": "java",
+              "name": "Debug (Attach) - Remote",
+              "request": "attach",
+              "hostName": "localhost",
+              "port": 5005
+            }]
+          }
