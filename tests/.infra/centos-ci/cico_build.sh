@@ -42,10 +42,12 @@ echo "Checking credentials:"
 checkAllCreds
 
 echo "Installing dependencies:"
+
 start=$(date +%s)
 installDependencies
 stop=$(date +%s)
 instal_dep_duration=$(($stop - $start))
+
 installOC
 echo "Installing all dependencies lasted $instal_dep_duration seconds."
 
