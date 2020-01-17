@@ -7,11 +7,11 @@ export * from './inversify.types';
 export * from './TestConstants';
 " > index.ts
 
-listOfDirs="driver utils pageobjects"
+listOfDirs="driver utils pageobjects testsLibrary"
 listOfExcludes="./driver/CheReporter.ts"
 for dir in $listOfDirs
 do
-  files=$(find ./$dir -type f)
+  files=$(find ./$dir -type f | sort)
   for file in $files
   do  
     case $file in *ts)
