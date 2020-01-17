@@ -36,6 +36,9 @@ public interface WorkspaceAttributeValidator {
   /**
    * Validates if the specified workspace attributes can be updated with new values.
    *
+   * <p>Note that this method must not allow updates that would not validate using the {@link
+   * #validate(Map)} method.
+   *
    * <p>This check includes:
    *
    * <ul>

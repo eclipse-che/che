@@ -109,6 +109,17 @@ public class K8sInfraNamespaceWsAttributeValidator implements WorkspaceAttribute
               WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, existingNamespace));
     }
 
+    if (isNullOrEmpty(existingNamespace)) {
+      // this would mean that the user made an update to the workspace without it having the
+      // namespace attribute stored. This is very, very unlikely, because the setting of attributes
+      // happens during the creation process. But let's just cover this case anyway, just to be
+      // sure.
+      validate(update);
+
+      // everything is fine. We allow to change infra namespace in such case.
+      return;
+    }
+
     if (!updateNamespace.equals(existingNamespace)) {
       throw new ValidationException(
           format(

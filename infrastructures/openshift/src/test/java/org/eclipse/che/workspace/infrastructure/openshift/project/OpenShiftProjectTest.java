@@ -21,7 +21,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
 
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -247,12 +246,7 @@ public class OpenShiftProjectTest {
     Resource resource = prepareProjectResource(PROJECT_NAME);
 
     // when
-    try {
-      project.deleteIfManaged();
-      fail("Deleting a non-managed project shouldn't have succeeded.");
-    } catch (InfrastructureException e) {
-      // good
-    }
+    project.deleteIfManaged();
 
     // then
     verify(resource, never()).delete();

@@ -123,8 +123,7 @@ public class WorkspaceValidator {
   }
 
   /**
-   * Checks whether workspace attributes are valid on updating. The attribute is valid if it's key
-   * is not null & not empty & is not prefixed with 'codenvy'.
+   * Checks whether workspace attributes are valid on updating.
    *
    * @param existing actual attributes
    * @param update new attributes that are going to be stored instead of existing
@@ -132,8 +131,6 @@ public class WorkspaceValidator {
    */
   public void validateUpdateAttributes(Map<String, String> existing, Map<String, String> update)
       throws ValidationException {
-    validateAttributes(update);
-
     for (WorkspaceAttributeValidator attributeValidator : attributeValidators) {
       attributeValidator.validateUpdate(existing, update);
     }
