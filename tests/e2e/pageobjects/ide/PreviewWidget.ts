@@ -17,8 +17,7 @@ import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class PreviewWidget {
-    private static readonly WIDGET_TOOLBAR_XPATH: string = '//*[@id=\'theia-right-side-panel\']//div[@class=\'theia-mini-browser-toolbar\']';
-    private static readonly WIDGET_URL_LOCATOR: By = By.xpath(`${PreviewWidget.WIDGET_TOOLBAR_XPATH}//input[@class='theia-input']`);
+    private static readonly WIDGET_URL_LOCATOR: By = By.css('div.theia-mini-browser input');
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Ide) private readonly ide: Ide) { }

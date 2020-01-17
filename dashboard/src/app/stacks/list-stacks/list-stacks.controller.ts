@@ -83,7 +83,12 @@ export class ListStacksController {
   loadDevfiles(): void {
     this.isLoading = true;
     this.devfileRegistry.fetchDevfiles(this.devfileRegistryUrl).then((data: Array<IDevfileMetaData>) => {
-      this.cheListHelper.setList(data, 'displayName');
+      this.cheListHelper.setList(data.map(devfileMetaData => {
+        if (!devfileMetaData.icon.startsWith('http')) {
+          devfileMetaData.icon = this.devfileRegistryUrl + devfileMetaData.icon;
+        }
+        return devfileMetaData;
+      }), 'displayName');
     }, (error: any) => {
       const message = 'Failed to load devfiles meta list.';
       this.cheNotification.showError(message);
