@@ -28,3 +28,5 @@
 * `git push -f`
 ##### 6. Close/release repository on Nexus 
  https://oss.sonatype.org/#stagingRepositories
+
+ > **Note:** For bugfix release procedure will be similar except creating new branch on first step and update version in master branch. 
