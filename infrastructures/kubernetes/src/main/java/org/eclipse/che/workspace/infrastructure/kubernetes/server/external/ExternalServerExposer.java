@@ -102,14 +102,14 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
             serverId = servicePort.getName();
           }
 
-          exposeServers(k8sEnv, machineName, serviceName, serverId, servicePort, servers);
+          exposeAsSingle(k8sEnv, machineName, serviceName, serverId, servicePort, servers);
         });
   }
 
   /** Exposes the given set of servers using a single ingress/route. */
-  protected void exposeServers(
+  public void exposeAsSingle(
       T k8sEnv,
-      String machineName,
+      @Nullable String machineName,
       String serviceName,
       String serverId,
       ServicePort servicePort,
