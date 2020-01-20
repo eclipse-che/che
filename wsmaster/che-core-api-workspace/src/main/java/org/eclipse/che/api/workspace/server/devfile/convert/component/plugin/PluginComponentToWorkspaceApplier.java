@@ -19,6 +19,8 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_A
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import javax.inject.Inject;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
@@ -71,6 +73,13 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
 
     final String pluginId = pluginComponent.getId();
     final String registryUrl = pluginComponent.getRegistryUrl();
+
+    try {
+      URL tryUrl = new URL(pluginComponent.getId());
+      pluginComponent.setReference(pluginComponent.getId());
+    } catch (MalformedURLException e) {
+      // If we can't parse the ID as a URL it must not be a reference type plugin
+    }
 
     final ExtendedPluginFQN fqn = componentFQNParser.evaluateFQN(pluginComponent, contentProvider);
     if (!isNullOrEmpty(fqn.getReference())) {
