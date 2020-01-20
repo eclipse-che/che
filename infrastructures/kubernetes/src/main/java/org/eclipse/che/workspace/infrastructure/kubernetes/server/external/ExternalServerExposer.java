@@ -14,12 +14,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.function.BiConsumer;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -50,6 +47,36 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
   }
 
   /**
+   * A helper method to split the servers to unique sets that should be exposed together.
+   *
+   * <p>The consumer is responsible for doing the actual exposure and is supplied 2 pieces of data.
+   * The first is the server ID, which is non-null for any unique server from the input set and null
+   * for any compound set of servers that should be exposed together. The caller is responsible for
+   * figuring out an appropriate ID in such case.
+   *
+   * @param allServers all unique and non-unique servers mixed together
+   * @param consumer the consumer responsible for handling the split sets of servers
+   */
+  public static void onEachExposableServerSet(
+      Map<String, ServerConfig> allServers,
+      BiConsumer<String, Map<String, ServerConfig>> consumer) {
+    Map<String, ServerConfig> nonUniqueServers = new HashMap<>();
+
+    for (Map.Entry<String, ServerConfig> e : allServers.entrySet()) {
+      String serverId = makeValidDnsName(e.getKey());
+      if (e.getValue().isUnique()) {
+        consumer.accept(serverId, ImmutableMap.of(serverId, e.getValue()));
+      } else {
+        nonUniqueServers.put(serverId, e.getValue());
+      }
+    }
+
+    if (!nonUniqueServers.isEmpty()) {
+      consumer.accept(null, nonUniqueServers);
+    }
+  }
+
+  /**
    * Exposes service ports on given service externally (outside kubernetes cluster). Each exposed
    * service port is associated with a specific Server configuration. Server configuration should be
    * encoded in the exposing object's annotations, to be used by {@link KubernetesServerResolver}.
@@ -66,56 +93,32 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
       String serviceName,
       ServicePort servicePort,
       Map<String, ServerConfig> externalServers) {
-    List<Ingress> ingresses =
-        generateIngresses(machineName, serviceName, servicePort, externalServers);
-    for (Ingress ingress : ingresses) {
-      k8sEnv.getIngresses().put(ingress.getMetadata().getName(), ingress);
-    }
+
+    onEachExposableServerSet(
+        externalServers,
+        (serverId, servers) -> {
+          if (serverId == null) {
+            // this is the ID for non-unique servers
+            serverId = servicePort.getName();
+          }
+
+          exposeServers(k8sEnv, machineName, serviceName, serverId, servicePort, servers);
+        });
   }
 
-  private List<Ingress> generateIngresses(
+  /** Exposes the given set of servers using a single ingress/route. */
+  protected void exposeServers(
+      T k8sEnv,
       String machineName,
       String serviceName,
+      String serverId,
       ServicePort servicePort,
-      Map<String, ServerConfig> ingressesServers) {
+      Map<String, ServerConfig> externalServers) {
 
-    // all the unique servers need their separate ingresses. all the other servers can get lumped
-    // under a common ingress corresponding to the server and port.
-    Map<String, ServerConfig> nonUniqueServers = new HashMap<>();
+    Ingress ingress =
+        generateIngress(machineName, serviceName, serverId, servicePort, externalServers);
 
-    // let's go through the servers. Build the unique ingresses straight away and collect the
-    // servers to be put behind the common ingress.
-    List<Ingress> ingresses =
-        ingressesServers
-            .entrySet()
-            .stream()
-            .map(
-                e -> {
-                  ServerConfig serverConfig = e.getValue();
-
-                  if (!serverConfig.isUnique()) {
-                    nonUniqueServers.put(e.getKey(), serverConfig);
-                    return null;
-                  } else {
-                    return generateIngress(
-                        machineName,
-                        serviceName,
-                        e.getKey(),
-                        servicePort,
-                        ImmutableMap.of(e.getKey(), serverConfig));
-                  }
-                })
-            .filter(Objects::nonNull)
-            .collect(Collectors.toCollection(ArrayList::new));
-
-    // now generate the common ingress unconditionally, even if there are no servers
-    if (!nonUniqueServers.isEmpty()) {
-      ingresses.add(
-          generateIngress(
-              machineName, serviceName, servicePort.getName(), servicePort, nonUniqueServers));
-    }
-
-    return ingresses;
+    k8sEnv.getIngresses().put(ingress.getMetadata().getName(), ingress);
   }
 
   private Ingress generateIngress(

@@ -12,11 +12,10 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.ServicePort;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -71,41 +70,33 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
       Map<String, ServerConfig> secureServers)
       throws InfrastructureException {
 
-    Map<String, ServerConfig> nonUniqueServers = new HashMap<>();
+    AtomicReference<InfrastructureException> exceptionHolder = new AtomicReference<>();
 
-    for (Map.Entry<String, ServerConfig> e : secureServers.entrySet()) {
-      String serverName = e.getKey();
-      ServerConfig serverConfig = e.getValue();
+    ExternalServerExposer.onEachExposableServerSet(
+        secureServers,
+        (serverId, servers) -> {
+          if (exceptionHolder.get() != null) {
+            return;
+          }
 
-      if (serverConfig.isUnique()) {
-        Map<String, ServerConfig> serverMapping = ImmutableMap.of(serverName, serverConfig);
+          try {
+            ServicePort exposedServicePort =
+                proxyProvisioner.expose(
+                    k8sEnv, serviceName, servicePort, servicePort.getProtocol(), servers);
 
-        ServicePort exposedServicePort =
-            proxyProvisioner.expose(
-                k8sEnv, serviceName, servicePort, servicePort.getProtocol(), serverMapping);
+            exposer.expose(
+                k8sEnv,
+                machineName,
+                proxyProvisioner.getServiceName(),
+                exposedServicePort,
+                servers);
+          } catch (InfrastructureException e) {
+            exceptionHolder.set(e);
+          }
+        });
 
-        exposer.expose(
-            k8sEnv,
-            machineName,
-            proxyProvisioner.getServiceName(),
-            exposedServicePort,
-            serverMapping);
-      } else {
-        nonUniqueServers.put(serverName, serverConfig);
-      }
-    }
-
-    if (!nonUniqueServers.isEmpty()) {
-      ServicePort exposedServicePort =
-          proxyProvisioner.expose(
-              k8sEnv, serviceName, servicePort, servicePort.getProtocol(), nonUniqueServers);
-
-      exposer.expose(
-          k8sEnv,
-          machineName,
-          proxyProvisioner.getServiceName(),
-          exposedServicePort,
-          nonUniqueServers);
+    if (exceptionHolder.get() != null) {
+      throw exceptionHolder.get();
     }
   }
 }

@@ -96,42 +96,22 @@ public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenSh
   }
 
   @Override
-  public void expose(
-      OpenShiftEnvironment openShiftEnvironment,
+  protected void exposeServers(
+      OpenShiftEnvironment env,
       String machineName,
       String serviceName,
+      String serverId,
       ServicePort servicePort,
       Map<String, ServerConfig> externalServers) {
-
-    Map<String, ServerConfig> nonUniqueServers = new HashMap<>();
-
-    for (Map.Entry<String, ServerConfig> e : externalServers.entrySet()) {
-      if (e.getValue().isUnique()) {
-        Route route =
-            new RouteBuilder()
-                .withName(Names.generateName("route"))
-                .withMachineName(machineName)
-                .withTargetPort(servicePort.getName())
-                .withServer(makeValidDnsName(e.getKey()), e.getValue())
-                .withTo(serviceName)
-                .build();
-        openShiftEnvironment.getRoutes().put(route.getMetadata().getName(), route);
-      } else {
-        nonUniqueServers.put(makeValidDnsName(e.getKey()), e.getValue());
-      }
-    }
-
-    if (!nonUniqueServers.isEmpty()) {
-      Route commonRoute =
-          new RouteBuilder()
-              .withName(Names.generateName("route"))
-              .withMachineName(machineName)
-              .withTargetPort(servicePort.getName())
-              .withServers(nonUniqueServers)
-              .withTo(serviceName)
-              .build();
-      openShiftEnvironment.getRoutes().put(commonRoute.getMetadata().getName(), commonRoute);
-    }
+    Route commonRoute =
+        new RouteBuilder()
+            .withName(Names.generateName("route"))
+            .withMachineName(machineName)
+            .withTargetPort(servicePort.getName())
+            .withServers(externalServers)
+            .withTo(serviceName)
+            .build();
+    env.getRoutes().put(commonRoute.getMetadata().getName(), commonRoute);
   }
 
   private static class RouteBuilder {
