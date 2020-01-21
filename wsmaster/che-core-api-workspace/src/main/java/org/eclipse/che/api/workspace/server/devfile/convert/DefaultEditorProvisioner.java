@@ -19,7 +19,6 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMP
 import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
@@ -68,7 +67,7 @@ public class DefaultEditorProvisioner {
    * Provision default editor if there is no editor. Also provisions default plugins for default
    * editor regardless whether it is provisioned or set by user.
    *
-   * @param devfile         devfile where editor and plugins should be provisioned
+   * @param devfile devfile where editor and plugins should be provisioned
    * @param contentProvider content provider for plugin references retrieval
    */
   public void apply(DevfileImpl devfile, FileContentProvider contentProvider)
