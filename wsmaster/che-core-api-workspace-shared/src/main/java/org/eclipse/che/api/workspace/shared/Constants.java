@@ -42,7 +42,7 @@ public final class Constants {
    * configure the values for their workspaces via Devfile attribute.
    */
   public static final String CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY =
-      "che.workspace.persist_volumes";
+      "che.workspace.persist_volumes.default";
 
   /**
    * The settings parameter that exposes value of {@link #CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY} to
