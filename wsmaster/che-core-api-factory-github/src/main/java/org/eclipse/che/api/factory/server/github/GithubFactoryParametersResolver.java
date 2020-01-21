@@ -134,7 +134,9 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
       // update existing project with same repository, set current branch if needed
       projects.forEach(
           project -> {
-            if (project.getSource().getLocation().equals(githubUrl.repositoryLocation() + ".git")) {
+            final String location = project.getSource().getLocation();
+            if (location.equals(githubUrl.repositoryLocation())
+                || location.equals(githubUrl.repositoryLocation() + ".git")) {
               project.getSource().setBranch(githubUrl.getBranch());
             }
           });

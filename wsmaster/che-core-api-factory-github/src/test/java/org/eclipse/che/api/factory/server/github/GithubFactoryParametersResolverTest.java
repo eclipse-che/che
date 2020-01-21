@@ -129,7 +129,7 @@ public class GithubFactoryParametersResolverTest {
     verify(urlFactoryBuilder).buildDefaultDevfile(eq("che"));
     assertEquals(factory, computedFactory);
     SourceDto source = factory.getDevfile().getProjects().get(0).getSource();
-    assertEquals(source.getLocation(), githubUrl);
+    assertEquals(source.getLocation(), githubUrl + ".git");
     assertEquals(source.getBranch(), "master");
   }
 
@@ -164,7 +164,7 @@ public class GithubFactoryParametersResolverTest {
   @Test
   public void shouldSetDefaultProjectIntoDevfileIfNotSpecified() throws Exception {
 
-    String githubUrl = "https://github.com/eclipse/che";
+    String githubUrl = "https://github.com/eclipse/che/tree/foobar";
 
     FactoryDto computedFactory = generateDevfileFactory();
 
@@ -177,8 +177,8 @@ public class GithubFactoryParametersResolverTest {
     // then
     assertNotNull(factory.getDevfile());
     SourceDto source = factory.getDevfile().getProjects().get(0).getSource();
-    assertEquals(source.getLocation(), githubUrl);
-    assertEquals(source.getBranch(), "master");
+    assertEquals(source.getLocation(), "https://github.com/eclipse/che.git");
+    assertEquals(source.getBranch(), "foobar");
   }
 
   @Test
