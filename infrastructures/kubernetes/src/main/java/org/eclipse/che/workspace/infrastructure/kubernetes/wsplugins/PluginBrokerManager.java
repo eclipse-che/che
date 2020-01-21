@@ -28,7 +28,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceAdapter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
@@ -62,6 +62,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   private final KubernetesEnvironmentProvisioner<E> environmentProvisioner;
   private final UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
   private final RuntimeEventsPublisher runtimeEventsPublisher;
+  private final EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
   private final Tracer tracer;
 
   @Inject
@@ -75,6 +76,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
       UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory,
       @Named("che.workspace.plugin_broker.wait_timeout_min") int pluginBrokerWaitingTimeout,
       RuntimeEventsPublisher runtimeEventsPublisher,
+      EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter,
       Tracer tracer) {
     this.factory = factory;
     this.eventService = eventService;
@@ -85,6 +87,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
     this.pluginBrokerWaitingTimeout = pluginBrokerWaitingTimeout;
     this.unrecoverablePodEventListenerFactory = unrecoverablePodEventListenerFactory;
     this.runtimeEventsPublisher = runtimeEventsPublisher;
+    this.ephemeralWorkspaceAdapter = ephemeralWorkspaceAdapter;
     this.tracer = tracer;
   }
 
@@ -109,7 +112,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
 
     E brokerEnvironment = brokerEnvironmentFactory.createForMetadataBroker(pluginFQNs, identity);
     if (isEphemeral) {
-      EphemeralWorkspaceUtility.makeEphemeral(brokerEnvironment.getAttributes());
+      ephemeralWorkspaceAdapter.makeEphemeral(brokerEnvironment.getAttributes());
     }
     environmentProvisioner.provision(brokerEnvironment, identity);
 

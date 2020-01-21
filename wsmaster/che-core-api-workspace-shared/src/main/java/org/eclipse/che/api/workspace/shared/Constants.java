@@ -37,6 +37,20 @@ public final class Constants {
 
   public static final String CHE_WORKSPACE_AUTO_START = "che.workspace.auto_start";
 
+  /**
+   * The configuration property that defined default value for persist volumes. Users are able to
+   * configure the values for their workspaces via Devfile attribute.
+   */
+  public static final String CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY =
+      "che.workspace.persist_volumes";
+
+  /**
+   * The settings parameter that exposes value of {@link #CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY} to
+   * be consumed by clients.
+   */
+  public static final String CHE_WORKSPACE_PERSIST_VOLUMES_SETTING =
+      "cheWorkspacesDefaultPersistVolumes";
+
   /** Property name for Che plugin registry url. */
   public static final String CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY =
       "che.workspace.plugin_registry_url";

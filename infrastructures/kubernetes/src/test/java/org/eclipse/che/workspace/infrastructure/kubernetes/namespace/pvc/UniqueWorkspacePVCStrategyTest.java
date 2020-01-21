@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -192,8 +191,7 @@ public class UniqueWorkspacePVCStrategyTest {
   }
 
   @Test
-  public void shouldDeletePVCsIfThereIsNoPersistAttributeInWorkspaceConfigWhenCleanupCalled()
-      throws Exception {
+  public void shouldDeletePVCsIfWorkspaceIsNotEphemeralWhenCleanupCalled() throws Exception {
     // given
     Workspace workspace = mock(Workspace.class);
     lenient().when(workspace.getId()).thenReturn(WORKSPACE_ID);
@@ -201,40 +199,18 @@ public class UniqueWorkspacePVCStrategyTest {
     WorkspaceConfig workspaceConfig = mock(WorkspaceConfig.class);
     lenient().when(workspace.getConfig()).thenReturn(workspaceConfig);
 
-    Map<String, String> workspaceConfigAttributes = new HashMap<>();
-    lenient().when(workspaceConfig.getAttributes()).thenReturn(workspaceConfigAttributes);
-
-    // when
-    strategy.cleanup(workspace);
-
-    // then
-    verify(pvcs).delete(ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, WORKSPACE_ID));
-  }
-
-  @Test
-  public void shouldDeletePVCsIfPersistAttributeIsSetToTrueInWorkspaceConfigWhenCleanupCalled()
-      throws Exception {
-    // given
-    Workspace workspace = mock(Workspace.class);
-    lenient().when(workspace.getId()).thenReturn(WORKSPACE_ID);
-
-    WorkspaceConfig workspaceConfig = mock(WorkspaceConfig.class);
-    lenient().when(workspace.getConfig()).thenReturn(workspaceConfig);
-
-    Map<String, String> workspaceConfigAttributes = new HashMap<>();
-    lenient().when(workspaceConfig.getAttributes()).thenReturn(workspaceConfigAttributes);
-    workspaceConfigAttributes.put(PERSIST_VOLUMES_ATTRIBUTE, "true");
+    when(ephemeralWorkspaceAdapter.isEphemeral(any(Workspace.class))).thenReturn(false);
 
     // when
     strategy.cleanup(workspace);
 
     // then
     verify(pvcs).delete(any());
+    verify(ephemeralWorkspaceAdapter).isEphemeral(workspace);
   }
 
   @Test
-  public void shouldDoNothingIfPersistAttributeIsSetToFalseInWorkspaceConfigWhenCleanupCalled()
-      throws Exception {
+  public void shouldDoNothingIfWorkspaceIsEphemeralWhenCleanupCalled() throws Exception {
     // given
     Workspace workspace = mock(Workspace.class);
     lenient().when(workspace.getId()).thenReturn(WORKSPACE_ID);
@@ -242,15 +218,14 @@ public class UniqueWorkspacePVCStrategyTest {
     WorkspaceConfig workspaceConfig = mock(WorkspaceConfig.class);
     lenient().when(workspace.getConfig()).thenReturn(workspaceConfig);
 
-    Map<String, String> workspaceConfigAttributes = new HashMap<>();
-    lenient().when(workspaceConfig.getAttributes()).thenReturn(workspaceConfigAttributes);
-    workspaceConfigAttributes.put(PERSIST_VOLUMES_ATTRIBUTE, "false");
+    when(ephemeralWorkspaceAdapter.isEphemeral(any(Workspace.class))).thenReturn(true);
 
     // when
     strategy.cleanup(workspace);
 
     // then
     verify(pvcs, never()).delete(any());
+    verify(ephemeralWorkspaceAdapter).isEphemeral(workspace);
   }
 
   static PersistentVolumeClaim newPVC(String name) {

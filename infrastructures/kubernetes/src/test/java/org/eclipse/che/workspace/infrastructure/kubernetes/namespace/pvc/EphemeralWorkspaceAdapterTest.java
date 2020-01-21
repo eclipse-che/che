@@ -70,7 +70,8 @@ public class EphemeralWorkspaceAdapterTest {
 
   @BeforeMethod
   public void setup() throws Exception {
-    ephemeralWorkspaceAdapter = new EphemeralWorkspaceAdapter(pvcProvisioner, subPathPrefixes);
+    ephemeralWorkspaceAdapter =
+        new EphemeralWorkspaceAdapter(pvcProvisioner, subPathPrefixes, true);
 
     // ephemeral workspace configuration
     lenient().when(ephemeralWorkspace.getId()).thenReturn(EPHEMERAL_WORKSPACE_ID);
@@ -93,8 +94,20 @@ public class EphemeralWorkspaceAdapterTest {
 
   @Test
   public void testIsEphemeralWorkspace() throws Exception {
-    assertTrue(EphemeralWorkspaceUtility.isEphemeral(ephemeralWorkspace));
-    assertFalse(EphemeralWorkspaceUtility.isEphemeral(nonEphemeralWorkspace));
+    ephemeralWorkspaceAdapter =
+        new EphemeralWorkspaceAdapter(pvcProvisioner, subPathPrefixes, true);
+
+    // a little tricky part since attribute indicates whether volumes are persisted while
+    // method indicates whether workspace is ephemeral
+    assertFalse(
+        ephemeralWorkspaceAdapter.isEphemeral(ImmutableMap.of(PERSIST_VOLUMES_ATTRIBUTE, "true")));
+    assertTrue(
+        ephemeralWorkspaceAdapter.isEphemeral(ImmutableMap.of(PERSIST_VOLUMES_ATTRIBUTE, "false")));
+    // any string value except true is propagated as false
+    assertTrue(
+        ephemeralWorkspaceAdapter.isEphemeral(ImmutableMap.of(PERSIST_VOLUMES_ATTRIBUTE, "any")));
+
+    assertFalse(ephemeralWorkspaceAdapter.isEphemeral(Collections.emptyMap()));
   }
 
   @Test

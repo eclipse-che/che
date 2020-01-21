@@ -27,7 +27,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceAdapter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesArtifactsBrokerApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
@@ -56,6 +56,7 @@ public class SidecarToolingProvisionerTest {
   @Mock private KubernetesEnvironment ephemeralEnvironment;
   @Mock private RuntimeIdentity runtimeId;
   @Mock private ChePluginsApplier chePluginsApplier;
+  @Mock private EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
 
   private static Map<String, String> environmentAttributesBase =
       ImmutableMap.of(
@@ -71,7 +72,6 @@ public class SidecarToolingProvisionerTest {
     Map<String, ChePluginsApplier> workspaceNextAppliers =
         ImmutableMap.of(RECIPE_TYPE, chePluginsApplier);
     Map<String, String> ephemeralEnvironmentAttributes = new HashMap<>(environmentAttributesBase);
-    EphemeralWorkspaceUtility.makeEphemeral(ephemeralEnvironmentAttributes);
     Map<String, String> nonEphemeralEnvironmentAttributes =
         new HashMap<>(environmentAttributesBase);
 
@@ -86,7 +86,11 @@ public class SidecarToolingProvisionerTest {
 
     provisioner =
         new SidecarToolingProvisioner<>(
-            workspaceNextAppliers, artifactsBrokerApplier, pluginFQNParser, brokerManager);
+            workspaceNextAppliers,
+            artifactsBrokerApplier,
+            pluginFQNParser,
+            brokerManager,
+            ephemeralWorkspaceAdapter);
   }
 
   @Test

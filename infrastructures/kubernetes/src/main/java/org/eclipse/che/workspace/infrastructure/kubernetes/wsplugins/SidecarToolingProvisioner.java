@@ -26,7 +26,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,17 +44,20 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
   private final KubernetesArtifactsBrokerApplier<E> artifactsBrokerApplier;
   private final PluginFQNParser pluginFQNParser;
   private final PluginBrokerManager<E> pluginBrokerManager;
+  private final EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
 
   @Inject
   public SidecarToolingProvisioner(
       Map<String, ChePluginsApplier> workspaceNextAppliers,
       KubernetesArtifactsBrokerApplier<E> artifactsBrokerApplier,
       PluginFQNParser pluginFQNParser,
-      PluginBrokerManager<E> pluginBrokerManager) {
+      PluginBrokerManager<E> pluginBrokerManager,
+      EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter) {
     this.workspaceNextAppliers = ImmutableMap.copyOf(workspaceNextAppliers);
     this.artifactsBrokerApplier = artifactsBrokerApplier;
     this.pluginFQNParser = pluginFQNParser;
     this.pluginBrokerManager = pluginBrokerManager;
+    this.ephemeralWorkspaceAdapter = ephemeralWorkspaceAdapter;
   }
 
   @Traced
@@ -75,7 +78,7 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
           "Sidecar tooling configuration is not supported with environment type " + recipeType);
     }
 
-    boolean isEphemeral = EphemeralWorkspaceUtility.isEphemeral(environment.getAttributes());
+    boolean isEphemeral = ephemeralWorkspaceAdapter.isEphemeral(environment.getAttributes());
     List<ChePlugin> chePlugins =
         pluginBrokerManager.getTooling(identity, startSynchronizer, pluginFQNs, isEphemeral);
 

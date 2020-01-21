@@ -47,6 +47,7 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
   private final String pvcAccessMode;
   private final String pvcQuantity;
   private final String pvcStorageClassName;
+  private final EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
 
   @Inject
   public PerWorkspacePVCStrategy(
@@ -80,6 +81,7 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
     this.pvcAccessMode = pvcAccessMode;
     this.pvcQuantity = pvcQuantity;
     this.pvcStorageClassName = pvcStorageClassName;
+    this.ephemeralWorkspaceAdapter = ephemeralWorkspaceAdapter;
   }
 
   @Override
@@ -94,7 +96,7 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
 
   @Override
   public void cleanup(Workspace workspace) throws InfrastructureException {
-    if (EphemeralWorkspaceUtility.isEphemeral(workspace)) {
+    if (ephemeralWorkspaceAdapter.isEphemeral(workspace)) {
       return;
     }
     final String workspaceId = workspace.getId();

@@ -101,7 +101,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     final String workspaceId = identity.getWorkspaceId();
-    if (EphemeralWorkspaceUtility.isEphemeral(k8sEnv.getAttributes())) {
+    if (ephemeralWorkspaceAdapter.isEphemeral(k8sEnv.getAttributes())) {
       ephemeralWorkspaceAdapter.provision(k8sEnv, identity);
       return;
     }
@@ -133,7 +133,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
 
     TracingTags.WORKSPACE_ID.set(workspaceId);
 
-    if (EphemeralWorkspaceUtility.isEphemeral(k8sEnv.getAttributes())) {
+    if (ephemeralWorkspaceAdapter.isEphemeral(k8sEnv.getAttributes())) {
       return;
     }
 
@@ -158,7 +158,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
 
   @Override
   public void cleanup(Workspace workspace) throws InfrastructureException {
-    if (EphemeralWorkspaceUtility.isEphemeral(workspace)) {
+    if (ephemeralWorkspaceAdapter.isEphemeral(workspace)) {
       return;
     }
     factory
