@@ -16,12 +16,10 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMP
 import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_FREE_DEVFILE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMPONENT_TYPE;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Named;
+
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
@@ -61,7 +59,7 @@ public class DefaultEditorProvisioner {
             : componentFQNParser.getPluginPublisherAndName(this.defaultEditorRef);
     Map<String, String> map = new HashMap<>();
     for (String defaultPluginsRef : defaultPluginsRefs) {
-      map.put(defaultPluginsRef, defaultPluginsRef);
+      map.put(componentFQNParser.getPluginPublisherAndName(defaultPluginsRef), defaultPluginsRef);
     }
     this.defaultPluginsToRefs = map;
   }
@@ -70,7 +68,7 @@ public class DefaultEditorProvisioner {
    * Provision default editor if there is no editor. Also provisions default plugins for default
    * editor regardless whether it is provisioned or set by user.
    *
-   * @param devfile devfile where editor and plugins should be provisioned
+   * @param devfile         devfile where editor and plugins should be provisioned
    * @param contentProvider content provider for plugin references retrieval
    */
   public void apply(DevfileImpl devfile, FileContentProvider contentProvider)
@@ -117,17 +115,27 @@ public class DefaultEditorProvisioner {
 
     for (String pluginRef : missingPluginsIdToRef.values()) {
       ExtendedPluginFQN fqn;
+      ComponentImpl component;
       try {
-        fqn = pluginFQNParser.evaluateFqn(pluginRef, contentProvider);
+        fqn = pluginFQNParser.parsePluginFQN(pluginRef);
       } catch (InfrastructureException e) {
         throw new DevfileException(e.getMessage(), e);
       }
-      ComponentImpl component = new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginRef);
-      if (!isNullOrEmpty(fqn.getId())) {
-        component.setId(fqn.getId());
-      }
-      if (!isNullOrEmpty(fqn.getReference())) {
-        component.setReference(fqn.getReference());
+      if (isNullOrEmpty(fqn.getReference())) {
+        component = new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginRef);
+      } else {
+        try {
+          fqn = pluginFQNParser.evaluateFqn(pluginRef, contentProvider);
+          component = new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginRef);
+        } catch (InfrastructureException e) {
+          throw new DevfileException(e.getMessage(), e);
+        }
+        if (!isNullOrEmpty(fqn.getId())) {
+          component.setId(fqn.getId());
+        }
+        if (!isNullOrEmpty(fqn.getReference())) {
+          component.setReference(fqn.getReference());
+        }
       }
       components.add(component);
     }
