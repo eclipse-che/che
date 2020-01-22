@@ -171,8 +171,8 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
                     sh """
-                        ${WORKSPACE}/dockerfiles/che/build.sh --dockerfile:Dockerfile
-                        docker tag eclipse/che-server:nightly docker.io/${cheImageRepo}:${mutableCheImageTag}
+                        ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
+                        docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
                         docker login -u maxura -p ${maxura_docker_password}
                         docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
                     """
