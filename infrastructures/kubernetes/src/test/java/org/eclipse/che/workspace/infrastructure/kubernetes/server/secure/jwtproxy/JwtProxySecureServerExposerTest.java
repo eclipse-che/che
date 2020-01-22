@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -84,9 +85,10 @@ public class JwtProxySecureServerExposerTest {
     verify(jwtProxyProvisioner)
         .expose(eq(k8sEnv), eq(MACHINE_SERVICE_NAME), eq(machineServicePort), eq("TCP"), any());
     verify(externalServerExposer)
-        .expose(
+        .exposeAsSingle(
             eq(k8sEnv),
             eq(MACHINE_NAME),
+            isNull(),
             eq(JWT_PROXY_SERVICE_NAME),
             eq(jwtProxyServicePort),
             eq(servers));
