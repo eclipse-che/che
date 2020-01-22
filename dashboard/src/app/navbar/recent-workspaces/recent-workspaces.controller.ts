@@ -110,11 +110,9 @@ export class NavbarRecentWorkspacesController {
   $onInit(): void {
     this.workspaceCreationLink = this.cheBranding.getWorkspace().creationLink;
 
-    // get workspaces
-    this.workspaces = this.cheWorkspace.getWorkspaces();
-
-    // fetch workspaces when initializing
-    this.cheWorkspace.fetchWorkspaces();
+    this.cheWorkspace.fetchWorkspaces().then(() => {
+      this.workspaces = this.cheWorkspace.getWorkspaces();
+    });
 
     this.updateRecentWorkspaces();
     this.fetchWorkspaceSettings();

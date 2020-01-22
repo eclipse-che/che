@@ -92,9 +92,6 @@ describe('CheWorkspace', () => {
         expect(factory.getWorkspaces().length).toEqual(0);
         expect(listener.getWorkspaces().length).toEqual(0);
 
-        // expecting a GET
-        httpBackend.expectGET('/api/workspace');
-
         // providing request
         // add workspaces on Http backend
         cheBackend.addWorkspaces([workspace1, tmpWorkspace2]);
