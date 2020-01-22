@@ -47,6 +47,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -106,6 +107,10 @@ import org.slf4j.LoggerFactory;
 public class WorkspaceRuntimes {
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceRuntimes.class);
+
+  // 1-63 chars, a-z, 0-9, hyphen, no hyphen at the start or end
+  private static final Pattern DNS_NAME_PATTERN =
+      Pattern.compile("[a-z0-9][a-z0-9-]{0,61}[a-z0-9]?");
 
   private ConcurrentMap<String, InternalRuntime<?>> runtimes;
   private final WorkspaceStatusCache statuses;
@@ -181,6 +186,10 @@ public class WorkspaceRuntimes {
           notSupportedByInfra);
     }
     workspaceRuntimesId = NameGenerator.generate("runtimes", 16);
+  }
+
+  public static boolean isNamespaceNameValid(String name) {
+    return DNS_NAME_PATTERN.matcher(name).matches();
   }
 
   @PostConstruct

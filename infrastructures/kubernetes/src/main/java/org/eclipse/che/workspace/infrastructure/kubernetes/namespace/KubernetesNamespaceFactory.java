@@ -39,6 +39,7 @@ import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -364,7 +365,41 @@ public class KubernetesNamespaceFactory {
               EnvironmentContext.getCurrent().getSubject().getUserId(),
               EnvironmentContext.getCurrent().getSubject().getUserName());
       namespace = evaluateLegacyNamespaceName(resolutionCtx);
+
+      LOG.warn("Workspace '{}' doesn't have an explicit namespace assigned."
+          + " The legacy namespace resolution resolved it to '{}'.", workspace.getId(), namespace);
     }
+
+    if (!WorkspaceRuntimes.isNamespaceNameValid(namespace)) {
+      // At a certain unfortunate past version of Che, we stored invalid namespace names.
+      // At this point in time, we're trying to work with an existing workspace that never could
+      // started OR has been running since before that unfortunate version. In both cases, going
+      // back to the default namespace name is the most safe bet we can make.
+
+      // but of course, our attempt will be futile if we're running in a context that doesn't know
+      // the current user.
+      Subject subj = EnvironmentContext.getCurrent().getSubject();
+      if (!subj.isAnonymous()) {
+        NamespaceResolutionContext resolutionCtx =
+            new NamespaceResolutionContext(workspace.getId(), subj.getUserId(), subj.getUserName());
+
+        String defaultNamespace = evaluateNamespaceName(resolutionCtx);
+
+        LOG.warn("The namespace '{}' of the workspace '{}' is not valid. Trying to recover"
+            + " from this situation using a default namespace which resolved to '{}'.", namespace,
+            workspace.getId(), defaultNamespace);
+
+        namespace = defaultNamespace;
+      } else {
+        // log a warning including a stacktrace to be able to figure out from where we got here...
+        LOG.warn("The namespace '{}' of the workspace '{}' is not valid but we currently don't have"
+            + " an active user to try an recover from this situation.", namespace,
+            workspace.getId(), new Exception());
+      }
+
+      //ok, we tried to recover the namespace but nothing helped.
+    }
+
     return namespace;
   }
 
@@ -372,7 +407,7 @@ public class KubernetesNamespaceFactory {
       throws InfrastructureException {
     String namespace = resolveLegacyNamespaceName(resolutionCtx);
 
-    if (!checkNamespaceExists(namespace)) {
+    if (!WorkspaceRuntimes.isNamespaceNameValid(namespace) || !checkNamespaceExists(namespace)) {
       namespace = evaluateNamespaceName(resolutionCtx);
     }
 
@@ -470,4 +505,5 @@ public class KubernetesNamespaceFactory {
   protected String getClusterRoleName() {
     return clusterRoleName;
   }
+
 }

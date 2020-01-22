@@ -447,12 +447,26 @@ public class WorkspaceManager {
     // namespace stored for it. We use the legacy-aware method to figure out the namespace to
     // correctly capture the workspaces which have PVCs already in a namespace defined by the legacy
     // configuration variable.
-    if (isNullOrEmpty(
-        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE))) {
+    String targetNamespace =
+        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
+    if (isNullOrEmpty(targetNamespace)) {
       try {
-        String namespace =
+        targetNamespace =
             runtimes.evalLegacyInfrastructureNamespace(buildResolutionContext(workspace));
-        workspace.getAttributes().put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
+        workspace
+            .getAttributes()
+            .put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, targetNamespace);
+      } catch (InfrastructureException e) {
+        throw new ServerException(e);
+      }
+    }
+
+    if (!WorkspaceRuntimes.isNamespaceNameValid(targetNamespace)) {
+      try {
+        targetNamespace = runtimes.evalInfrastructureNamespace(buildResolutionContext(workspace));
+        workspace
+            .getAttributes()
+            .put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, targetNamespace);
       } catch (InfrastructureException e) {
         throw new ServerException(e);
       }

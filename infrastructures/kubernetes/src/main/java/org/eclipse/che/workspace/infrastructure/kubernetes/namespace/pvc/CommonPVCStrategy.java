@@ -234,7 +234,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     PersistentVolumeClaim pvc = createCommonPVC(workspaceId);
     pvcSubPathHelper.removeDirsAsync(
         workspaceId,
-        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE),
+        factory.get(workspace).getName(),
         pvc.getMetadata().getName(),
         subpathPrefixes.getWorkspaceSubPath(workspaceId));
   }
