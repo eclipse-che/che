@@ -47,7 +47,17 @@ export enum WorkspaceStatus {
  */
 export class CheWorkspace {
 
-  static $inject = ['$resource', '$http', '$q', 'cheJsonRpcApi', 'cheNotification', '$websocket', '$location', 'proxySettings', 'userDashboardConfig', 'lodash', 'cheBranding'];
+  static $inject = ['$resource',
+    '$http',
+    '$q',
+    'cheJsonRpcApi',
+    'cheNotification',
+    '$websocket',
+    '$location',
+    'proxySettings',
+    'userDashboardConfig',
+    'lodash',
+    'cheBranding'];
 
   private $resource: ng.resource.IResourceService;
   private $http: ng.IHttpService;
@@ -95,8 +105,6 @@ export class CheWorkspace {
               lodash: any,
               cheBranding: CheBranding
   ) {
-    this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
-    // keep resource
     this.$q = $q;
     this.$resource = $resource;
     this.$http = $http;
@@ -122,7 +130,7 @@ export class CheWorkspace {
     this.statusDefers = {};
 
     // remote call
-    this.remoteWorkspaceAPI = <ICHELicenseResource<any>>this.$resource('/api/workspace?maxItems=:maxItems', {}, {
+    this.remoteWorkspaceAPI = <ICHELicenseResource<any>>this.$resource('/api/workspace', {}, {
         createDevfile: {method: 'POST', url: '/api/workspace/devfile'},
         deleteWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId'},
         updateWorkspace: {method: 'PUT', url: '/api/workspace/:workspaceId'},
@@ -167,7 +175,6 @@ export class CheWorkspace {
 
   /**
    * Unregister on workspace change callback.
-   *
    * @param {string} workspaceId
    * @param {IObservableCallbackFn<che.IWorkspace>} action the callback
    */
@@ -212,11 +219,10 @@ export class CheWorkspace {
 
   /**
    * Fetches workspaces by provided namespace.
-   *
    * @param namespace namespace
    */
   fetchWorkspacesByNamespace(namespace: string): ng.IPromise<void> {
-    let promise = this.$http.get('/api/workspace/namespace/' + namespace);
+    let promise = this.$http.get(`/api/workspace/namespace/${namespace}?maxItems=256`);
     let resultPromise = promise.then((response: ng.IHttpResponse<che.IWorkspace[]>) => {
       const workspaces = this.getWorkspacesByNamespace(namespace);
 
@@ -450,17 +456,12 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>}
    */
   updateWorkspace(workspaceId: string, data: che.IWorkspace): ng.IPromise<any> {
-    let defer = this.$q.defer();
-    let promise = this.remoteWorkspaceAPI.updateWorkspace({workspaceId: workspaceId}, data).$promise;
-    promise.then((data: che.IWorkspace) => {
-      this.updateWorkspacesList(data);
-      this.startUpdateWorkspaceStatus(data.id);
-      defer.resolve(data);
-    }, (error: any) => {
-      defer.reject(error);
-    });
+    const promise = this.remoteWorkspaceAPI.updateWorkspace({workspaceId: workspaceId}, data).$promise;
 
-    return defer.promise;
+    return promise.then((data: che.IWorkspace) => {
+      this.updateWorkspacesList(data);
+      return this.$q.resolve(data);
+    });
   }
 
   /**
@@ -550,9 +551,9 @@ export class CheWorkspace {
     if (this.subscribedWorkspacesIds.indexOf(workspaceId) < 0) {
       this.subscribedWorkspacesIds.push(workspaceId);
       this.cheJsonRpcMasterApi.subscribeWorkspaceStatus(workspaceId, (message: any) => {
-        let status = message.error ? 'ERROR' : message.status;
+        const status = message.error ? 'ERROR' : message.status;
 
-        if (this.workspaceStatuses.indexOf(status) >= 0) {
+        if (WorkspaceStatus[status]) {
           this.getWorkspaceById(workspaceId).status = status;
         }
 
