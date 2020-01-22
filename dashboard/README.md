@@ -235,7 +235,7 @@ Mocks are also provided for the Che API, allowing to emulate a real backend for 
 
 The `configuration.menu.disabled` field in [product.json](/src/assets/branding/product.json) allows users to list there menu entries they want to hide in left navigation bar. Along with that corresponding routes also will be disabled.
 
-For example:
+Available values are `'administration'`, `'factories'`,  `'getstarted'`, `'organizations'`, `'stacks'`.
 
 ```json
 // product.json

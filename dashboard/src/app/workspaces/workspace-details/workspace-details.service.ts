@@ -19,7 +19,6 @@ import {CheService} from '../../../components/api/che-service.factory';
 import {PluginRegistry} from '../../../components/api/plugin-registry.factory';
 import {WorkspaceDataManager} from '../../../components/api/workspace/workspace-data-manager';
 import { ConfirmDialogService } from '../../../components/service/confirm-dialog/confirm-dialog.service';
-import { CheDashboardConfigurationService } from '../../../components/branding/che-dashboard-configuration.service';
 
 interface IPage {
   title: string;
@@ -85,15 +84,14 @@ export class WorkspaceDetailsService {
   static $inject = [
     '$log',
     '$q',
-    'cheDashboardConfigurationService',
-    'cheNotification',
-    'chePermissions',
-    'cheService',
     'cheWorkspace',
-    'confirmDialogService',
+    'cheNotification',
     'ideSvc',
-    'pluginRegistry',
     'workspaceDetailsProjectsService',
+    'cheService',
+    'chePermissions',
+    'confirmDialogService',
+    'pluginRegistry'
   ];
 
   /**
@@ -151,7 +149,6 @@ export class WorkspaceDetailsService {
    * Workspace data manager.
    */
   private workspaceDataManager: WorkspaceDataManager;
-  private cheDashboardConfigurationService: CheDashboardConfigurationService;
 
   /**
    * Default constructor that is using resource
@@ -159,15 +156,14 @@ export class WorkspaceDetailsService {
   constructor (
     $log: ng.ILogService,
     $q: ng.IQService,
-    cheDashboardConfigurationService: CheDashboardConfigurationService,
-    cheNotification: CheNotification,
-    chePermissions: che.api.IChePermissions,
-    cheService: CheService,
     cheWorkspace: CheWorkspace,
-    confirmDialogService: ConfirmDialogService,
+    cheNotification: CheNotification,
     ideSvc: IdeSvc,
-    pluginRegistry: PluginRegistry,
     workspaceDetailsProjectsService: WorkspaceDetailsProjectsService,
+    cheService: CheService,
+    chePermissions: che.api.IChePermissions,
+    confirmDialogService: ConfirmDialogService,
+    pluginRegistry: PluginRegistry
   ) {
     this.$log = $log;
     this.$q = $q;
@@ -177,7 +173,6 @@ export class WorkspaceDetailsService {
     this.pluginRegistry = pluginRegistry;
     this.workspaceDetailsProjectsService = workspaceDetailsProjectsService;
     this.confirmDialogService = confirmDialogService;
-    this.cheDashboardConfigurationService = cheDashboardConfigurationService;
 
     this.observable =  new Observable<any>();
 
@@ -186,9 +181,7 @@ export class WorkspaceDetailsService {
     this.observable = new Observable();
 
     cheService.fetchServices().finally(() => {
-      const organizationsAllowed = cheDashboardConfigurationService.allowedMenuItem('organizations');
-      const permissionServiceAvailable = cheService.isServiceAvailable(chePermissions.getPermissionsServicePath());
-      if (organizationsAllowed && permissionServiceAvailable) {
+      if (cheService.isServiceAvailable(chePermissions.getPermissionsServicePath())) {
         this.addPage('Share', '<share-workspace></share-workspace>', 'icon-ic_folder_shared_24px');
       }
     });
