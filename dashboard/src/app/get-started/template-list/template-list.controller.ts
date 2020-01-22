@@ -132,7 +132,7 @@ export class TemplateListController {
     return this.devfileRegistry.fetchDevfile(this.devfileRegistryUrl, selfLink).then(() => {
       const devfile = this.devfileRegistry.getDevfile(this.devfileRegistryUrl, selfLink);
       const attributes = {stackName: this.selectedDevfile.displayName};
-      return this.createWorkspaceSvc.createWorkspaceFromDevfile(devfile, attributes, true);
+      return this.createWorkspaceSvc.createWorkspaceFromDevfile(undefined, devfile, attributes, true);
     });
   }
 

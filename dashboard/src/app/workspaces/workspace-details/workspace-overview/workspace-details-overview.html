@@ -1,7 +1,7 @@
 <md-progress-linear ng-show="workspaceDetailsOverviewController.isLoading" md-mode="indeterminate"></md-progress-linear>
 <div class="workspace-overview-tab-content" ng-hide="workspaceDetailsOverviewController.isLoading">
   <!-- Name -->
-  <che-label-container che-label-name="Workspace name">
+  <che-label-container che-label-name="Workspace name" class="workspace-name-input-container">
     <che-input-box
       che-form="workspaceDetailsOverviewController.overviewForm"
       che-name="name"
@@ -27,6 +27,17 @@
   <che-label-container ng-repeat="section in workspaceDetailsOverviewController.getSections()"
                        che-label-name="{{section.title}}" che-label-description="{{section.description}}">
     <div che-compile="section.content"></div>
+  </che-label-container>
+  <!-- Infrastructure Namespace -->
+  <che-label-container class="infrastructure-namespace-input-container"
+    che-label-name="Kubernetes Namespace"
+    ng-if="workspaceDetailsOverviewController.infrastructureNamespace">
+    <che-input
+      che-name="kubernetes-namespace"
+      che-place-holder="Kubernetes Namespace"
+      aria-label="Kubernetes Namespace"
+      che-readonly="true"
+      ng-model="workspaceDetailsOverviewController.infrastructureNamespace"></che-input>
   </che-label-container>
   <!-- Namespace -->
   <che-label-container che-label-name="{{workspaceDetailsOverviewController.getNamespaceCaption()}}"

@@ -131,6 +131,13 @@ declare namespace che {
       fetchDevfileSchema(): ng.IPromise<any>;
     }
 
+    export interface ICheKubernetesNamespace {
+      fetchKubernetesNamespace(): ng.IPromise<IKubernetesNamespace[]>;
+      isPlaceholder(namespace: che.IKubernetesNamespace): boolean;
+      containsPlaceholder(): boolean;
+      getHintDescription(): string;
+    }
+
   }
 
   export namespace resource {
@@ -311,6 +318,7 @@ declare namespace che {
     factoryId?: string;
     factoryurl?: string;
     errorMessage?: string;
+    infrastructureNamespace: string;
     [propName: string]: string | number;
   }
 
@@ -338,7 +346,8 @@ declare namespace che {
     commands?: Array <any>;
     attributes?: che.IWorkspaceConfigAttributes;
     metadata: {
-      name: string
+      name?: string;
+      generateName?: string;
     }
   }
 
@@ -545,4 +554,14 @@ declare namespace che {
     name?: string;
     isPending?: boolean;
   }
+
+  export interface IKubernetesNamespace {
+    name: string;
+    attributes: {
+      default?: boolean;
+      displayName?: string;
+      phase: string;
+    };
+  }
+
 }

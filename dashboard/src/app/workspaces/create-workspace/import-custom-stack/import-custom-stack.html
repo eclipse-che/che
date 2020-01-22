@@ -6,18 +6,25 @@
       selected-source="importStackController.selectedSource"
       on-change="importStackController.onSourceChange(source)"></devfile-source-selector>
   </che-label-container>
+
+  <!-- Kubernetes namespace selector -->
+  <che-label-container che-label-name="Kubernetes Namespace" che-label-description="{{importStackController.infrastructureNamespaceHint}}">
+    <kubernetes-namespace-selector on-change="importStackController.onInfrastructureNamespaceChange(namespaceId)"></kubernetes-namespace-selector>
+  </che-label-container>
+
   <!-- Import stack  -->
   <che-label-container che-label-name="{{importStackController.selectedSource}}">
     <!-- URL -->
     <devfile-by-url ng-if="importStackController.isUrlSelected() === true"
                     workspace-devfile-location="importStackController.devfileLocation"
-                    workspace-devfile-on-change="importStackController.updateDevfile(devfile, attributes)"></devfile-by-url>
+                    workspace-devfile-on-change="importStackController.updateDevfileFromRemote(devfile, attributes)"></devfile-by-url>
     <!-- YAML -->
     <workspace-devfile-editor ng-if="importStackController.isYamlSelected() === true"
                               is-active="true"
-                              workspace-devfile="importStackController.devfile"
-                              workspace-devfile-on-change="importStackController.updateDevfile(devfile)"></workspace-devfile-editor>
+                              workspace-devfile="importStackController.devfileYaml"
+                              workspace-devfile-on-change="importStackController.updateDevfileFromYaml(devfile)"></workspace-devfile-editor>
   </che-label-container>
+
   <!-- Create Workspace Button -->
   <che-label-container>
     <ng-transclude></ng-transclude>

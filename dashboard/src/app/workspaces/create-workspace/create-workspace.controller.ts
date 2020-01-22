@@ -12,6 +12,7 @@
 'use strict';
 
 import { CreateWorkspaceSvc } from './create-workspace.service';
+import { DevfileChangeEventData } from './devfile-change-event-data';
 import {
   ICheButtonDropdownMainAction,
   ICheButtonDropdownOtherAction
@@ -24,14 +25,6 @@ enum TABS {
   READY_TO_GO,
   IMPORT_DEVFILE
 }
-
-/**
- *
- */
-type DevfileChangeEventData = {
-  devfile: che.IWorkspaceDevfile,
-  attrs?: { [key: string]: string }
-};
 
 /**
  * This class is handling the controller for workspace creation.
@@ -192,10 +185,9 @@ export class CreateWorkspaceController {
    * Creates workspace.
    */
   createWorkspace(): ng.IPromise<che.IWorkspace> {
-    const { devfile, attrs } = this.devfiles.get(this.selectedTab);
-    return this.createWorkspaceSvc.createWorkspaceFromDevfile(devfile, attrs, this.selectedTab === TABS.IMPORT_DEVFILE);
+    const { devfile, attrs, infrastructureNamespaceId } = this.devfiles.get(this.selectedTab);
+    return this.createWorkspaceSvc.createWorkspaceFromDevfile(infrastructureNamespaceId, devfile, attrs, this.selectedTab === TABS.IMPORT_DEVFILE);
   }
-
 
   /**
    * Creates a workspace and redirects to the IDE.
@@ -206,8 +198,8 @@ export class CreateWorkspaceController {
     });
   }
 
-  onDevfileChange(tab: number, devfile: che.IWorkspaceDevfile, attrs: { [key: string]: string }): void {
-    this.devfiles.set(tab, { devfile, attrs });
+  onDevfileChange(tab: number, eventData: DevfileChangeEventData): void {
+    this.devfiles.set(tab, eventData);
   }
 
 }
