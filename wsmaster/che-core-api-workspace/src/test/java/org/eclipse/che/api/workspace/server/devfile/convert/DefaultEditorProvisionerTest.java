@@ -381,6 +381,41 @@ public class DefaultEditorProvisionerTest {
     assertNull(defaultPlugin.getAlias());
   }
 
+  @Test
+  public void shouldResolveDefaultReferencePlugins() throws Exception {
+    // given
+    String referencePluginRef = "https://remotepluginregistry.com/plugins/abc/meta.yaml";
+    provisioner =
+        new DefaultEditorProvisioner(
+            EDITOR_REF,
+            new String[] {EDITOR_PUBLISHER + "/" + "my-plugin/v2.0", referencePluginRef},
+            fqnParser,
+            pluginFQNParser);
+    String meta =
+        "apiVersion: v2\n"
+            + "publisher: "
+            + EDITOR_PUBLISHER
+            + "\n"
+            + "name: "
+            + COMMAND_PLUGIN_NAME
+            + "\n"
+            + "version: v1.0.0"
+            + "\n"
+            + "type: Che Plugin";
+    DevfileImpl devfile = new DevfileImpl();
+    when(fileContentProvider.fetchContent(anyString())).thenReturn(meta);
+    ComponentImpl myPlugin = new ComponentImpl(PLUGIN_COMPONENT_TYPE, COMMAND_PLUGIN_REF);
+    myPlugin.setReference(referencePluginRef);
+    myPlugin.setId(COMMAND_PLUGIN_REF);
+    // when
+    provisioner.apply(devfile, fileContentProvider);
+
+    // then
+    List<ComponentImpl> components = devfile.getComponents();
+    assertEquals(components.size(), 3);
+    assertTrue(components.contains(myPlugin));
+  }
+
   private ComponentImpl findById(List<ComponentImpl> components, String id) {
     return components
         .stream()

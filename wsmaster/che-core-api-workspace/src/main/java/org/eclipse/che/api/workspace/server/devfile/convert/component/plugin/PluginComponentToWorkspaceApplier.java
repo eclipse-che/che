@@ -72,13 +72,6 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     final String pluginId = pluginComponent.getId();
     final String registryUrl = pluginComponent.getRegistryUrl();
 
-    //    try {
-    //      URL tryUrl = new URL(pluginComponent.getId());
-    //      pluginComponent.setReference(pluginComponent.getId());
-    //    } catch (MalformedURLException e) {
-    //      // If we can't parse the ID as a URL it must not be a reference type plugin
-    //    }
-
     final ExtendedPluginFQN fqn = componentFQNParser.evaluateFQN(pluginComponent, contentProvider);
     if (!isNullOrEmpty(fqn.getReference())) {
       workspaceConfig
