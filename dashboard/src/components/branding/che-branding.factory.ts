@@ -28,23 +28,36 @@ interface IBranding {
     configName?: string;
     name?: string;
   };
-  docs?: {
-    devfile?: string;
-    workspace?: string;
-    factory?: string;
-    organization?: string;
-    general?: string;
-    converting?: string;
+  docs?: IBrandingDocs;
+  workspace?: IBrandingWorkspace;
+  footer?: IBrandingFooter;
+  configuration?: IBrandingConfiguration;
+}
+
+interface IBrandingDocs {
+  devfile?: string;
+  workspace?: string;
+  factory?: string;
+  organization?: string;
+  general?: string;
+  converting?: string;
+}
+interface IBrandingWorkspace {
+  priorityStacks?: Array<string>;
+  defaultStack?: string;
+  creationLink?: string;
+}
+interface IBrandingFooter {
+  content?: string;
+  links?: Array<{ title: string, location: string }>;
+  email?: { title: string, address: string, subject: string };
+}
+interface IBrandingConfiguration {
+  menu: {
+    disabled: che.ConfigurableMenuItem[];
   };
-  workspace?: {
-    priorityStacks?: Array<string>;
-    defaultStack?: string;
-    creationLink?: string;
-  };
-  footer?: {
-    content?: string;
-    links?: Array<{title: string, location: string}>;
-    email?: {title: string, address: string, subject: string};
+  misc: {
+    idePrefetch?: string[];
   };
 }
 
@@ -76,26 +89,46 @@ const DEFAULT_WEBSOCKET_CONTEXT = '/api/websocket';
  */
 export class CheBranding {
 
-  static $inject = ['$http', '$rootScope', 'cheService'];
+  static $inject = [
+    '$http',
+    '$q',
+    '$rootScope',
+    'cheService'
+  ];
 
-  private $rootScope: che.IRootScopeService;
   private $http: ng.IHttpService;
+  private $q: ng.IQService;
+  private $rootScope: che.IRootScopeService;
   private cheService: CheService;
+
   private branding: IBranding;
   private callbacks: Map<string, Function> = new Map();
+  private _readyDeferred: ng.IDeferred<void>;
 
   /**
    * Default constructor that is using resource
    */
-  constructor($http: ng.IHttpService, $rootScope: che.IRootScopeService, cheService: CheService) {
+  constructor(
+    $http: ng.IHttpService,
+    $q: ng.IQService,
+    $rootScope: che.IRootScopeService,
+    cheService: CheService
+  ) {
     this.$http = $http;
+    this.$q = $q;
     this.$rootScope = $rootScope;
     this.cheService = cheService;
+
     this.branding = {};
+    this._readyDeferred = this.$q.defer();
 
     this.initialize();
     this.updateData();
     this.updateVersion();
+  }
+
+  get ready(): ng.IPromise<void> {
+    return this._readyDeferred.promise;
   }
 
   initialize(): void {
@@ -114,7 +147,8 @@ export class CheBranding {
       oauthDocs: this.getOauthDocs(),
       cli: this.getCLI(),
       docs: this.getDocs(),
-      workspace: this.getWorkspace()
+      workspace: this.getWorkspace(),
+      configuration: this.getConfiguration(),
     };
   }
 
@@ -140,6 +174,7 @@ export class CheBranding {
           callback(this.$rootScope.branding);
         }
       });
+      this._readyDeferred.resolve();
     });
   }
 
@@ -256,10 +291,8 @@ export class CheBranding {
 
   /**
    * Returns footer additional elements (email button, content, button links).
-   *
-   * @returns {any} additional elements (email button, content, button links).
    */
-  getFooter():  {content?: string; links?: Array<{title: string, location: string}>; email: {title: string, address: string, subject: string}} {
+  getFooter(): IBrandingFooter {
     return {
       content: this.branding.footer && this.branding.footer.content ? this.branding.footer.content : '',
       links: this.branding.footer && this.branding.footer.links ? this.branding.footer.links : [],
@@ -269,7 +302,6 @@ export class CheBranding {
 
   /**
    * Returns object with configName and name.
-   * @returns {{configName: string, name: string}}
    */
   getCLI(): { configName: string; name: string } {
     return {
@@ -280,9 +312,8 @@ export class CheBranding {
 
   /**
    * Returns object with docs URLs.
-   * @returns {{devfile: string, workspace: string, factory: string, organization: string, general: string, converting: string}}
    */
-  getDocs(): { devfile: string; workspace: string; factory: string; organization: string; general: string, converting: string} {
+  getDocs(): IBrandingDocs {
     return {
       devfile: this.branding.docs && this.branding.docs.devfile ? this.branding.docs.devfile : DEFAULT_DOCS_DEVFILE,
       workspace: this.branding.docs && this.branding.docs.workspace ? this.branding.docs.workspace : DEFAULT_DOCS_WORKSPACE,
@@ -295,13 +326,35 @@ export class CheBranding {
 
   /**
    * Returns object with workspace dedicated data.
-   * @returns {{stack: string, workspace: string}}
    */
-  getWorkspace(): { priorityStacks: Array<string>; defaultStack: string, creationLink: string} {
+  getWorkspace(): IBrandingWorkspace {
     return {
       priorityStacks: this.branding.workspace && this.branding.workspace.priorityStacks ? this.branding.workspace.priorityStacks : DEFAULT_WORKSPACE_PRIORITY_STACKS,
       defaultStack: this.branding.workspace && this.branding.workspace.defaultStack ? this.branding.workspace.defaultStack : DEFAULT_WORKSPACE_DEFAULT_STACK,
       creationLink: this.branding.workspace && this.branding.workspace.creationLink ? this.branding.workspace.creationLink : DEFAULT_WORKSPACE_CREATION_LINK
     };
   }
+
+  /**
+   * Returns object with UD configuration options.
+   */
+  getConfiguration(): IBrandingConfiguration {
+    return {
+      menu: {
+        disabled:
+          this.branding.configuration &&
+          this.branding.configuration.menu && this.branding.configuration.menu.disabled
+            ? this.branding.configuration.menu.disabled
+            : []
+      },
+      misc: {
+        idePrefetch:
+          this.branding.configuration &&
+          this.branding.configuration.misc && this.branding.configuration.misc.idePrefetch
+            ? this.branding.configuration.misc.idePrefetch
+            : []
+      }
+    };
+  }
+
 }
