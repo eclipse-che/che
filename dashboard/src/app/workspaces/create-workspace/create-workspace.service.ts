@@ -150,7 +150,7 @@ export class CreateWorkspaceSvc {
     return defer.promise;
   }
 
-  createWorkspaceFromDevfile(sourceDevfile: che.IWorkspaceDevfile, attributes: any, skipProjectTemplates?: boolean): ng.IPromise<che.IWorkspace> {
+  createWorkspaceFromDevfile(infrastructureNamespaceId: string, sourceDevfile: che.IWorkspaceDevfile, attributes: any, skipProjectTemplates: boolean): ng.IPromise<che.IWorkspace> {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
           noProjectsFromDevfile = !sourceDevfile.projects || !sourceDevfile.projects.length,
           projectsTemplates = this.projectSourceSelectorService.getProjectTemplates();
@@ -158,12 +158,12 @@ export class CreateWorkspaceSvc {
     return this.checkEditingProgress().then(() => {
       if (!skipProjectTemplates) {
         sourceDevfile.projects = projectsTemplates;
-        // If no projects defined in devfile were added - remove the commands from devfile as well:
+        // if no projects defined in devfile were added - remove the commands from devfile as well:
         if (noProjectsFromDevfile) {
           sourceDevfile.commands = [];
         }
       }
-      return this.cheWorkspace.createWorkspaceFromDevfile(namespaceId, sourceDevfile, attributes).then((workspace: che.IWorkspace) => {
+      return this.cheWorkspace.createWorkspaceFromDevfile(namespaceId, infrastructureNamespaceId, sourceDevfile, attributes).then((workspace: che.IWorkspace) => {
         return this.cheWorkspace.fetchWorkspaces().then(() => this.cheWorkspace.getWorkspaceById(workspace.id));
       })
       .then((workspace: che.IWorkspace) => {

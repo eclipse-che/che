@@ -19,6 +19,7 @@
 export class CheFilterSelectorController {
 
   private valueModel: string;
+  private values: string[];
   private width: string;
   private onChange: Function;
 

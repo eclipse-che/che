@@ -23,7 +23,6 @@ const WS_AGENT_WS_LINK: string = 'wsagent/ws';
 
 interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   createDevfile: any;
-  createDevfileWithNamespace: any;
   deleteWorkspace: any;
   updateWorkspace: any;
   addProject: any;
@@ -127,9 +126,7 @@ export class CheWorkspace {
 
     // remote call
     this.remoteWorkspaceAPI = <ICHELicenseResource<any>>this.$resource('/api/workspace', {}, {
-        // having 2 methods for creation to ensure namespace parameter won't be send at all if value is null or undefined
         createDevfile: {method: 'POST', url: '/api/workspace/devfile'},
-        createDevfileWithNamespace: {method: 'POST', url: '/api/workspace/devfile?namespace=:namespace'},
         deleteWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId'},
         updateWorkspace: {method: 'PUT', url: '/api/workspace/:workspaceId'},
         addProject: {method: 'POST', url: '/api/workspace/:workspaceId/project'},
@@ -377,15 +374,15 @@ export class CheWorkspace {
     return this.remoteWorkspaceAPI.deleteProject({workspaceId: workspaceId, path: path}).$promise;
   }
 
-  createWorkspaceFromDevfile(namespace: string, devfile: che.IWorkspaceDevfile, attributes: any): ng.IPromise<che.IWorkspace> {
+  createWorkspaceFromDevfile(cheNamespaceId: string, infrastructureNamespaceId: string, devfile: che.IWorkspaceDevfile, attributes: any): ng.IPromise<che.IWorkspace> {
     let attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item: any) => {
       return item[0] + ':' + item[1];
     });
-    return namespace ? this.remoteWorkspaceAPI.createDevfileWithNamespace({
-      namespace: namespace,
-      attribute: attrs
-    }, devfile).$promise :
-      this.remoteWorkspaceAPI.createDevfile({attribute: attrs}, devfile).$promise;
+    return this.remoteWorkspaceAPI.createDevfile({
+      attribute: attrs,
+      namespace: cheNamespaceId,
+      'infrastructure-namespace': infrastructureNamespaceId,
+    }, devfile).$promise;
   }
 
   /**

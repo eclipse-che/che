@@ -28,11 +28,16 @@
   </ng-form>
 </che-label-container>
 
-<!-- Namespace selector -->
+<!-- Kubernetes namespace selector -->
+<che-label-container che-label-name="Kubernetes Namespace" che-label-description="{{readyToGoStacksController.infrastructureNamespaceHint}}">
+  <kubernetes-namespace-selector on-change="readyToGoStacksController.onInfrastructureNamespaceChanged(namespaceId)"></kubernetes-namespace-selector>
+</che-label-container>
+
+<!-- Che namespace selector -->
 <che-label-container che-label-name="{{ readyToGoStacksController.getNamespaceCaption() }}"
   ng-if="readyToGoStacksController.getNamespaces().length > 0 || readyToGoStacksController.getNamespaceEmptyMessage()">
   <namespace-selector
-  on-namespace-change="readyToGoStacksController.onNamespaceChanged(namespaceId)">
+  on-namespace-change="readyToGoStacksController.onCheNamespaceChanged(namespaceId)">
   </namespace-selector>
 </che-label-container>
 
