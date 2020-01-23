@@ -71,6 +71,9 @@ export class CheNavBarController {
   private isPermissionServiceAvailable: boolean;
   private isKeycloackPresent: boolean;
 
+  private workspacesNumber: number;
+  private pageFactories: Array<che.IFactory>;
+
   /**
    * Default constructor
    */
@@ -92,6 +95,15 @@ export class CheNavBarController {
     this.chePermissions = chePermissions;
     this.cheKeycloak = cheKeycloak;
     this.cheService = cheService;
+
+    const handler = (workspaces: Array<che.IWorkspace>) => {
+      this.workspacesNumber = workspaces.length;
+    };
+    this.cheAPI.getWorkspace().addListener('onChangeWorkspaces', handler);
+
+    $scope.$on('$destroy', () => {
+      this.cheAPI.getWorkspace().removeListener('onChangeWorkspaces', handler);
+    });
   }
 
   $onInit(): void {
@@ -105,8 +117,13 @@ export class CheNavBarController {
       this.$scope.$broadcast('navbar-selected:set', path);
     });
 
-    this.cheAPI.getWorkspace().fetchWorkspaces();
-    this.cheAPI.getFactory().fetchFactories();
+    this.cheAPI.getWorkspace().fetchWorkspaces().then((workspaces: Array<che.IWorkspace>) => {
+      this.workspacesNumber = workspaces.length;
+    });
+
+    this.cheAPI.getFactory().fetchFactories().then(() => {
+      this.pageFactories = this.cheAPI.getFactory().getPageFactories();
+    });
 
     this.isPermissionServiceAvailable = false;
     this.resolvePermissionServiceAvailability().then((isAvailable: boolean) => {
@@ -168,19 +185,11 @@ export class CheNavBarController {
   }
 
   /**
-   * Returns number of workspaces.
-   * @return {number}
-   */
-  getWorkspacesNumber(): number {
-    return this.cheAPI.getWorkspace().getWorkspaces().length;
-  }
-
-  /**
    * Returns number of factories.
    * @return {number}
    */
   getFactoriesNumber(): number {
-    return this.cheAPI.getFactory().getPageFactories().length;
+    return this.pageFactories.length;
   }
 
   /**

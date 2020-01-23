@@ -18,9 +18,6 @@ import {CheBranding} from '../../branding/che-branding.factory';
 import {CheNotification} from '../../notification/che-notification.factory';
 import {WorkspaceDataManager} from './workspace-data-manager';
 
-const WS_AGENT_HTTP_LINK: string = 'wsagent/http';
-const WS_AGENT_WS_LINK: string = 'wsagent/ws';
-
 interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   createDevfile: any;
   deleteWorkspace: any;
@@ -43,14 +40,29 @@ export enum WorkspaceStatus {
   ERROR
 }
 
+type workspacesEvent = 'onChangeWorkspaces' | 'onDeleteWorkspace';
+
+const MAX_ITEMS = 256;
+
 /**
  * This class is handling the workspace retrieval
  * It sets to the array workspaces the current workspaces which are not temporary
  * @author Florent Benoit
+ * @author Oleksii Orel
  */
 export class CheWorkspace {
 
-  static $inject = ['$resource', '$http', '$q', 'cheJsonRpcApi', 'cheNotification', '$websocket', '$location', 'proxySettings', 'userDashboardConfig', 'lodash', 'cheBranding'];
+  static $inject = ['$resource',
+    '$http',
+    '$q',
+    'cheJsonRpcApi',
+    'cheNotification',
+    '$websocket',
+    '$location',
+    'proxySettings',
+    'userDashboardConfig',
+    'lodash',
+    'cheBranding'];
 
   private $resource: ng.resource.IResourceService;
   private $http: ng.IHttpService;
@@ -58,9 +70,8 @@ export class CheWorkspace {
   private $websocket: any;
   private cheNotification: CheNotification;
   private cheJsonRpcMasterApi: CheJsonRpcMasterApi;
-  private listeners: Array<any>;
-  private workspaceStatuses: Array<string>;
-  private workspaces: Array<che.IWorkspace>;
+  private handlers: { [paramName: string]: Array<any> };
+  private workspaceIds: Array<string>;
   private subscribedWorkspacesIds: Array<string>;
   private workspacesByNamespace: Map<string, Array<che.IWorkspace>>;
   private workspacesById: Map<string, che.IWorkspace>;
@@ -98,8 +109,6 @@ export class CheWorkspace {
               lodash: any,
               cheBranding: CheBranding
   ) {
-    this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
-    // keep resource
     this.$q = $q;
     this.$resource = $resource;
     this.$http = $http;
@@ -109,7 +118,7 @@ export class CheWorkspace {
     this.workspaceDataManager = new WorkspaceDataManager();
 
     // current list of workspaces
-    this.workspaces = [];
+    this.workspaceIds = [];
 
     // per Id
     this.workspacesById = new Map();
@@ -118,7 +127,7 @@ export class CheWorkspace {
     this.workspacesByNamespace = new Map();
 
     // listeners if workspaces are changed/updated
-    this.listeners = [];
+    this.handlers = {};
 
     // list of subscribed to websocket workspace Ids
     this.subscribedWorkspacesIds = [];
@@ -152,7 +161,6 @@ export class CheWorkspace {
 
   /**
    * Add callback to the list of on workspace change subscribers.
-   *
    * @param {string} workspaceId
    * @param {IObservableCallbackFn<che.IWorkspace>} action the callback
    */
@@ -170,7 +178,6 @@ export class CheWorkspace {
 
   /**
    * Unregister on workspace change callback.
-   *
    * @param {string} workspaceId
    * @param {IObservableCallbackFn<che.IWorkspace>} action the callback
    */
@@ -183,20 +190,39 @@ export class CheWorkspace {
   }
 
   /**
-   * Add a listener that need to have the onChangeWorkspaces(workspaces: Array) method
-   * @param listener {Function} a changing listener
+   * Adds a listener on an event.
+   * @param {workspacesEvent} event
+   * @param {Function} handler
    */
-  addListener(listener: Function): void {
-    this.listeners.push(listener);
+  addListener(event: workspacesEvent, handler: Function): void {
+    if (!this.handlers[event]) {
+      this.handlers[event] = [];
+    }
+    this.handlers[event].push(handler);
   }
 
+  /**
+   * Removes a listener.
+   * @param {workspacesEvent} event
+   * @param {Function} handler
+   */
+  removeListener(event: workspacesEvent, handler: Function): void {
+    if (!this.handlers[event] || !handler) {
+      return;
+    }
+    const index = this.handlers[event].indexOf(handler);
+    if (index === -1) {
+      return;
+    }
+    this.handlers[event].splice(index, 1);
+  }
 
   /**
    * Gets the workspaces of this remote
    * @returns {Array}
    */
   getWorkspaces(): Array<che.IWorkspace> {
-    return this.workspaces;
+    return this.workspaceIds.map(id => this.workspacesById.get(id));
   }
 
   /**
@@ -208,18 +234,17 @@ export class CheWorkspace {
   }
 
   getWorkspaceByName(namespace: string, name: string): che.IWorkspace {
-    return this.lodash.find(this.workspaces, (workspace: che.IWorkspace) => {
+    return this.lodash.find(this.getWorkspaces(), (workspace: che.IWorkspace) => {
       return workspace.namespace === namespace && this.workspaceDataManager.getName(workspace) === name;
     });
   }
 
   /**
    * Fetches workspaces by provided namespace.
-   *
    * @param namespace namespace
    */
   fetchWorkspacesByNamespace(namespace: string): ng.IPromise<void> {
-    let promise = this.$http.get('/api/workspace/namespace/' + namespace);
+    let promise = this.$http.get(`/api/workspace/namespace/${namespace}?maxItems=${MAX_ITEMS}`);
     let resultPromise = promise.then((response: ng.IHttpResponse<che.IWorkspace[]>) => {
       const workspaces = this.getWorkspacesByNamespace(namespace);
 
@@ -258,39 +283,34 @@ export class CheWorkspace {
   /**
    * Ask for loading the workspaces in asynchronous way
    * If there are no changes, it's not updated
-   * @returns {ng.IPromise<Array<che.IWorkspace>>}
    */
   fetchWorkspaces(): ng.IPromise<Array<che.IWorkspace>> {
-    let promise = this.remoteWorkspaceAPI.query().$promise;
-    let updatedPromise = promise.then((data: Array<che.IWorkspace>) => {
-      this.workspaces.length = 0;
-      this.workspacesById.clear();
-      // add workspace if not temporary
-      data.forEach((workspace: che.IWorkspace) => {
+    let promise = this.remoteWorkspaceAPI.query({'maxItems': 256}).$promise;
+
+    promise.then((workspaces: Array<che.IWorkspace>) => {
+      this.workspaceIds.length = 0;
+      workspaces.forEach((workspace: che.IWorkspace) => {
+        if (!workspace.temporary) {
+          this.workspaceIds.push(workspace.id);
+        }
         this.updateWorkspacesList(workspace);
       });
-      return this.workspaces;
+
+      const onChangeHandlers = this.handlers['onChangeWorkspaces'];
+      if (onChangeHandlers) {
+        onChangeHandlers.forEach(handler => {
+          handler(this.getWorkspaces());
+        });
+      }
+      return this.$q.resolve(this.getWorkspaces());
     }, (error: any) => {
       if (error && error.status === 304) {
-        return this.workspaces;
+        return this.$q.resolve(this.getWorkspaces());
       }
       return this.$q.reject(error);
     });
 
-    let callbackPromises = updatedPromise.then((data: Array<che.IWorkspace>) => {
-      let promises = [];
-      promises.push(updatedPromise);
-
-      this.listeners.forEach((listener: any) => {
-        let promise = listener.onChangeWorkspaces(data);
-        promises.push(promise);
-      });
-      return this.$q.all(promises).then(() => data);
-    }, (error: any) => {
-      return this.$q.reject(error);
-    });
-
-    return callbackPromises;
+    return promise;
   }
 
   /**
@@ -454,20 +474,20 @@ export class CheWorkspace {
    * Performs workspace config update by the given workspaceId and new data.
    * @param workspaceId {string} the workspace ID
    * @param data {che.IWorkspace} the new workspace details
-   * @returns {ng.IPromise<any>}
    */
-  updateWorkspace(workspaceId: string, data: che.IWorkspace): ng.IPromise<any> {
-    let defer = this.$q.defer();
-    let promise = this.remoteWorkspaceAPI.updateWorkspace({workspaceId: workspaceId}, data).$promise;
-    promise.then((data: che.IWorkspace) => {
-      this.updateWorkspacesList(data);
-      this.startUpdateWorkspaceStatus(data.id);
-      defer.resolve(data);
-    }, (error: any) => {
-      defer.reject(error);
-    });
+  updateWorkspace(workspaceId: string, data: che.IWorkspace): ng.IPromise<che.IWorkspace> {
+    const promise = this.remoteWorkspaceAPI.updateWorkspace({workspaceId: workspaceId}, data).$promise;
 
-    return defer.promise;
+    return promise.then(data => {
+      this.updateWorkspacesList(data);
+      const onChangeHandlers = this.handlers['onChangeWorkspaces'];
+      if (onChangeHandlers) {
+        onChangeHandlers.forEach(handler => {
+          handler(this.getWorkspaces());
+        });
+      }
+      return this.$q.resolve(data);
+    });
   }
 
   /**
@@ -479,9 +499,12 @@ export class CheWorkspace {
     let defer = this.$q.defer();
     let promise = this.remoteWorkspaceAPI.deleteWorkspace({workspaceId: workspaceId}).$promise;
     promise.then(() => {
-      this.listeners.forEach((listener: any) => {
-        listener.onDeleteWorkspace(workspaceId);
-      });
+      const onDeleteHandlers = this.handlers['onDeleteWorkspace'];
+      if (onDeleteHandlers) {
+        onDeleteHandlers.forEach(handler => {
+          handler(workspaceId);
+        });
+      }
       defer.resolve();
     }, (error: any) => {
       defer.reject(error);
@@ -557,9 +580,9 @@ export class CheWorkspace {
     if (this.subscribedWorkspacesIds.indexOf(workspaceId) < 0) {
       this.subscribedWorkspacesIds.push(workspaceId);
       this.cheJsonRpcMasterApi.subscribeWorkspaceStatus(workspaceId, (message: any) => {
-        let status = message.error ? 'ERROR' : message.status;
+        const status = message.error ? 'ERROR' : message.status;
 
-        if (this.workspaceStatuses.indexOf(status) >= 0) {
+        if (WorkspaceStatus[status]) {
           this.getWorkspaceById(workspaceId).status = status;
         }
 
@@ -615,26 +638,14 @@ export class CheWorkspace {
       this.workspacesById.set(workspace.id, workspace);
       return;
     }
-
     const workspaceDetails = this.getWorkspaceById(workspace.id);
-
-    if (!workspaceDetails) {
-      this.workspacesById.set(workspace.id, workspace);
+    if (workspaceDetails && this.isWorkspaceRunning(workspaceDetails) && !workspace.runtime) {
+      workspace.runtime = workspaceDetails.runtime;
     }
-    if (workspaceDetails && WorkspaceStatus[workspaceDetails.status] === WorkspaceStatus.RUNNING && workspaceDetails.runtime && !workspace.runtime) {
-      workspace.runtime = angular.copy(workspaceDetails.runtime);
-    }
-    this.lodash.remove(this.workspaces, (_workspace: che.IWorkspace) => {
-      return _workspace.id === workspace.id;
-    });
-    this.workspaces.push(workspace);
+    this.workspacesById.set(workspace.id, workspace);
     // publish change
     if (this.observables.has(workspace.id)) {
       this.observables.get(workspace.id).publish(workspace);
-    }
-    if (!angular.equals(workspaceDetails, workspace)) {
-      this.fetchWorkspaceDetails(workspace.id);
-      return;
     }
 
     this.startUpdateWorkspaceStatus(workspace.id);
@@ -647,6 +658,10 @@ export class CheWorkspace {
         });
       }
     });
+  }
+
+  private isWorkspaceRunning(workspace: che.IWorkspace): boolean {
+    return workspace && WorkspaceStatus[workspace.status] === WorkspaceStatus.RUNNING;
   }
 
   private formJsonRpcApiLocation($location: ng.ILocationService, proxySettings: string, devmode: boolean): string {

@@ -128,7 +128,7 @@ export class CheHttpBackend {
       this.$httpBackend.when('DELETE', '/api/workspace/' + key).respond(200);
     }
 
-    this.$httpBackend.when('GET', '/api/workspace').respond(workspaceReturn);
+    this.$httpBackend.when('GET', /\/api\/workspace(\?.*$)?/).respond(workspaceReturn);
 
     this.$httpBackend.when('GET', '/api/stack?maxItems=50').respond(this.stacks);
 
