@@ -86,7 +86,7 @@ describe('CheWorkspace', () => {
 
         // add the listener
         let listener = new Listener();
-        factory.addListener(listener);
+        factory.addListener('onChangeWorkspaces', listener.onChangeWorkspaces);
 
         // no workspaces now on factory or on listener
         expect(factory.getWorkspaces().length).toEqual(0);

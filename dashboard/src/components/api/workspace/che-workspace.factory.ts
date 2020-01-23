@@ -40,10 +40,15 @@ export enum WorkspaceStatus {
   ERROR
 }
 
+type workspacesEvent = 'onChangeWorkspaces' | 'onDeleteWorkspace';
+
+const MAX_ITEMS = 256;
+
 /**
  * This class is handling the workspace retrieval
  * It sets to the array workspaces the current workspaces which are not temporary
  * @author Florent Benoit
+ * @author Oleksii Orel
  */
 export class CheWorkspace {
 
@@ -65,8 +70,7 @@ export class CheWorkspace {
   private $websocket: any;
   private cheNotification: CheNotification;
   private cheJsonRpcMasterApi: CheJsonRpcMasterApi;
-  private listeners: Array<any>;
-  private workspaceStatuses: Array<string>;
+  private handlers: { [paramName: string]: Array<any> };
   private workspaceIds: Array<string>;
   private subscribedWorkspacesIds: Array<string>;
   private workspacesByNamespace: Map<string, Array<che.IWorkspace>>;
@@ -123,7 +127,7 @@ export class CheWorkspace {
     this.workspacesByNamespace = new Map();
 
     // listeners if workspaces are changed/updated
-    this.listeners = [];
+    this.handlers = {};
 
     // list of subscribed to websocket workspace Ids
     this.subscribedWorkspacesIds = [];
@@ -157,7 +161,6 @@ export class CheWorkspace {
 
   /**
    * Add callback to the list of on workspace change subscribers.
-   *
    * @param {string} workspaceId
    * @param {IObservableCallbackFn<che.IWorkspace>} action the callback
    */
@@ -187,13 +190,32 @@ export class CheWorkspace {
   }
 
   /**
-   * Add a listener that need to have the onChangeWorkspaces(workspaces: Array) method
-   * @param listener {Function} a changing listener
+   * Adds a listener on an event.
+   * @param {workspacesEvent} event
+   * @param {Function} handler
    */
-  addListener(listener: Function): void {
-    this.listeners.push(listener);
+  addListener(event: workspacesEvent, handler: Function): void {
+    if (!this.handlers[event]) {
+      this.handlers[event] = [];
+    }
+    this.handlers[event].push(handler);
   }
 
+  /**
+   * Removes a listener.
+   * @param {workspacesEvent} event
+   * @param {Function} handler
+   */
+  removeListener(event: workspacesEvent, handler: Function): void {
+    if (!this.handlers[event] || !handler) {
+      return;
+    }
+    const index = this.handlers[event].indexOf(handler);
+    if (index === -1) {
+      return;
+    }
+    this.handlers[event].splice(index, 1);
+  }
 
   /**
    * Gets the workspaces of this remote
@@ -222,7 +244,7 @@ export class CheWorkspace {
    * @param namespace namespace
    */
   fetchWorkspacesByNamespace(namespace: string): ng.IPromise<void> {
-    let promise = this.$http.get(`/api/workspace/namespace/${namespace}?maxItems=256`);
+    let promise = this.$http.get(`/api/workspace/namespace/${namespace}?maxItems=${MAX_ITEMS}`);
     let resultPromise = promise.then((response: ng.IHttpResponse<che.IWorkspace[]>) => {
       const workspaces = this.getWorkspacesByNamespace(namespace);
 
@@ -261,35 +283,34 @@ export class CheWorkspace {
   /**
    * Ask for loading the workspaces in asynchronous way
    * If there are no changes, it's not updated
-   * @returns {ng.IPromise<void>}
    */
   fetchWorkspaces(): ng.IPromise<Array<che.IWorkspace>> {
-    let fetchPromise = this.remoteWorkspaceAPI.query({'maxItems': 256}).$promise.then((workspaces: Array<che.IWorkspace>) => {
+    let promise = this.remoteWorkspaceAPI.query({'maxItems': 256}).$promise;
+
+    promise.then((workspaces: Array<che.IWorkspace>) => {
       this.workspaceIds.length = 0;
       workspaces.forEach((workspace: che.IWorkspace) => {
-        if (workspace && !workspace.temporary) {
+        if (!workspace.temporary) {
           this.workspaceIds.push(workspace.id);
-          if(!this.workspacesById.has(workspace.id)) {
-            this.workspacesById.set(workspace.id, workspace);
-          }
-          this.startUpdateWorkspaceStatus(workspace.id);
         }
-        return this.$q.resolve();
+        this.updateWorkspacesList(workspace);
       });
+
+      const onChangeHandlers = this.handlers['onChangeWorkspaces'];
+      if (onChangeHandlers) {
+        onChangeHandlers.forEach(handler => {
+          handler(this.getWorkspaces());
+        });
+      }
+      return this.$q.resolve(this.getWorkspaces());
     }, (error: any) => {
       if (error && error.status === 304) {
-        return this.$q.resolve();
+        return this.$q.resolve(this.getWorkspaces());
       }
       return this.$q.reject(error);
     });
-    const promises = [fetchPromise];
 
-    return fetchPromise.then(() => {
-      this.listeners.forEach((listener: any) => {
-        promises.push(listener.onChangeWorkspaces(this.getWorkspaces()));
-      });
-      return this.$q.all(promises).then(() => this.getWorkspaces());
-    });
+    return promise;
   }
 
   /**
@@ -453,13 +474,18 @@ export class CheWorkspace {
    * Performs workspace config update by the given workspaceId and new data.
    * @param workspaceId {string} the workspace ID
    * @param data {che.IWorkspace} the new workspace details
-   * @returns {ng.IPromise<any>}
    */
-  updateWorkspace(workspaceId: string, data: che.IWorkspace): ng.IPromise<any> {
+  updateWorkspace(workspaceId: string, data: che.IWorkspace): ng.IPromise<che.IWorkspace> {
     const promise = this.remoteWorkspaceAPI.updateWorkspace({workspaceId: workspaceId}, data).$promise;
 
-    return promise.then((data: che.IWorkspace) => {
+    return promise.then(data => {
       this.updateWorkspacesList(data);
+      const onChangeHandlers = this.handlers['onChangeWorkspaces'];
+      if (onChangeHandlers) {
+        onChangeHandlers.forEach(handler => {
+          handler(this.getWorkspaces());
+        });
+      }
       return this.$q.resolve(data);
     });
   }
@@ -473,9 +499,12 @@ export class CheWorkspace {
     let defer = this.$q.defer();
     let promise = this.remoteWorkspaceAPI.deleteWorkspace({workspaceId: workspaceId}).$promise;
     promise.then(() => {
-      this.listeners.forEach((listener: any) => {
-        listener.onDeleteWorkspace(workspaceId);
-      });
+      const onDeleteHandlers = this.handlers['onDeleteWorkspace'];
+      if (onDeleteHandlers) {
+        onDeleteHandlers.forEach(handler => {
+          handler(workspaceId);
+        });
+      }
       defer.resolve();
     }, (error: any) => {
       defer.reject(error);
@@ -609,22 +638,14 @@ export class CheWorkspace {
       this.workspacesById.set(workspace.id, workspace);
       return;
     }
-
     const workspaceDetails = this.getWorkspaceById(workspace.id);
-
-    if (!workspaceDetails) {
-      this.workspacesById.set(workspace.id, workspace);
+    if (workspaceDetails && this.isWorkspaceRunning(workspaceDetails) && !workspace.runtime) {
+      workspace.runtime = workspaceDetails.runtime;
     }
-    if (!workspace.runtime && workspaceDetails.runtime && this.isWorkspaceRunning(workspaceDetails)) {
-      workspace.runtime = angular.copy(workspaceDetails.runtime);
-    }
+    this.workspacesById.set(workspace.id, workspace);
     // publish change
     if (this.observables.has(workspace.id)) {
       this.observables.get(workspace.id).publish(workspace);
-    }
-    if (!angular.equals(workspaceDetails, workspace)) {
-      this.fetchWorkspaceDetails(workspace.id);
-      return;
     }
 
     this.startUpdateWorkspaceStatus(workspace.id);

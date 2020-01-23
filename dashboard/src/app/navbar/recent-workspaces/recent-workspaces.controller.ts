@@ -92,6 +92,15 @@ export class NavbarRecentWorkspacesController {
     this.dropdownItems = {};
     this.dropdownItemTempl = [];
 
+    const handler = (workspaces: Array<che.IWorkspace>) => {
+      this.workspaces = workspaces;
+      this.updateRecentWorkspaces();
+    };
+    this.cheWorkspace.addListener('onChangeWorkspaces', handler);
+    $scope.$on('$destroy', () => {
+      this.cheWorkspace.removeListener('onChangeWorkspaces', handler);
+    });
+
     let cleanup = $rootScope.$on('recent-workspace:set', (event: ng.IAngularEvent, workspaceId: string) => {
       this.veryRecentWorkspaceId = workspaceId;
       this.updateRecentWorkspaces();
@@ -99,12 +108,6 @@ export class NavbarRecentWorkspacesController {
     $rootScope.$on('$destroy', () => {
       cleanup();
     });
-
-    $scope.$watch(() => {
-      return this.workspaces;
-    }, () => {
-      this.updateRecentWorkspaces();
-    }, true);
   }
 
   $onInit(): void {
