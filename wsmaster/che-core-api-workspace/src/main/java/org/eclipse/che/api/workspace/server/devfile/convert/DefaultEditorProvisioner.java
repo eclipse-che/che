@@ -116,6 +116,7 @@ public class DefaultEditorProvisioner {
     Map<String, String> missingPluginsIdToRef = new HashMap<>(defaultPluginsToRefs);
     removeAlreadyAddedPlugins(components, contentProvider, missingPluginsIdToRef);
     addMissingPlugins(components, contentProvider, missingPluginsIdToRef);
+
   }
 
   /**
@@ -145,7 +146,7 @@ public class DefaultEditorProvisioner {
    * plugin ref. If the plugin does not have a reference, it is added to the component list, and its
    * plugin ID will be used to resolve it. If it has a reference, the Plugin is evaluated, so that
    * its meta.yaml can be retrieved. From the meta.yaml, the new Component's ID and reference are
-   * properly set, and the Component is added to the list.kk
+   * properly set, and the Component is added to the list.
    *
    * @param components - The list of Devfile components
    * @param contentProvider - The content provider to retrieve YAML
