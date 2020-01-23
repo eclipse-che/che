@@ -464,6 +464,15 @@ public class WorkspaceManager {
     if (!WorkspaceRuntimes.isNamespaceNameValid(targetNamespace)) {
       try {
         targetNamespace = runtimes.evalInfrastructureNamespace(buildResolutionContext(workspace));
+
+        if (targetNamespace == null || !WorkspaceRuntimes.isNamespaceNameValid(targetNamespace)) {
+          throw new ServerException(
+              format(
+                  "The workspace would be started in a namespace/project"
+                      + " '%s', which is not a valid namespace/project name.",
+                  targetNamespace));
+        }
+
         workspace
             .getAttributes()
             .put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, targetNamespace);
@@ -607,14 +616,25 @@ public class WorkspaceManager {
             .build();
     workspace.getAttributes().put(CREATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
 
-    if (isNullOrEmpty(
-        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE))) {
+    String targetNamespace =
+        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
+    if (isNullOrEmpty(targetNamespace)) {
       try {
-        String namespace = runtimes.evalInfrastructureNamespace(buildResolutionContext(workspace));
-        workspace.getAttributes().put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
+        targetNamespace = runtimes.evalInfrastructureNamespace(buildResolutionContext(workspace));
+        workspace
+            .getAttributes()
+            .put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, targetNamespace);
       } catch (InfrastructureException e) {
         throw new ServerException(e);
       }
+    }
+
+    if (targetNamespace == null || !WorkspaceRuntimes.isNamespaceNameValid(targetNamespace)) {
+      throw new ServerException(
+          format(
+              "The workspace would be started in a namespace/project"
+                  + " '%s', which is not a valid namespace/project name.",
+              targetNamespace));
     }
 
     workspaceDao.create(workspace);

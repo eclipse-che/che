@@ -91,6 +91,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
@@ -171,6 +172,8 @@ public class WorkspaceManagerTest {
   public void createsWorkspace() throws Exception {
     final WorkspaceConfig cfg = createConfig();
 
+    when(runtimes.evalInfrastructureNamespace(any())).thenReturn("ns");
+
     final WorkspaceImpl workspace =
         workspaceManager.createWorkspace(cfg, NAMESPACE_1, ImmutableMap.of("attr", "value"));
 
@@ -181,27 +184,32 @@ public class WorkspaceManagerTest {
     assertFalse(workspace.isTemporary());
     assertEquals(workspace.getStatus(), STOPPED);
     assertNotNull(workspace.getAttributes().get(CREATED_ATTRIBUTE_NAME));
+    assertEquals("ns", workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE));
     verify(workspaceDao).create(workspace);
     verify(validator).validateAttributes(ImmutableMap.of("attr", "value"));
   }
 
   @Test
   public void createsWorkspaceFromDevfile()
-      throws ValidationException, ConflictException, NotFoundException, ServerException {
+      throws ValidationException, ConflictException, NotFoundException, ServerException,
+          InfrastructureException {
     final DevfileImpl devfile = new DevfileImpl();
     devfile.setApiVersion(CURRENT_API_VERSION);
     devfile.setName("ws");
+    when(runtimes.evalInfrastructureNamespace(any())).thenReturn("ns");
     Workspace workspace = workspaceManager.createWorkspace(devfile, NAMESPACE_1, null, null);
     assertEquals(workspace.getDevfile(), devfile);
   }
 
   @Test
   public void createsWorkspaceFromDevfileWithGenerateName()
-      throws ValidationException, ConflictException, NotFoundException, ServerException {
+      throws ValidationException, ConflictException, NotFoundException, ServerException,
+          InfrastructureException {
     final String testDevfileGenerateName = "ws-";
     final DevfileImpl devfile = new DevfileImpl();
     devfile.setApiVersion(CURRENT_API_VERSION);
     devfile.getMetadata().setGenerateName(testDevfileGenerateName);
+    when(runtimes.evalInfrastructureNamespace(any())).thenReturn("ns");
     Workspace workspace = workspaceManager.createWorkspace(devfile, NAMESPACE_1, null, null);
 
     assertTrue(workspace.getDevfile().getName().startsWith(testDevfileGenerateName));
@@ -247,12 +255,14 @@ public class WorkspaceManagerTest {
 
   @Test
   public void nameIsUsedWhenNameAndGenerateNameSet()
-      throws ValidationException, ConflictException, NotFoundException, ServerException {
+      throws ValidationException, ConflictException, NotFoundException, ServerException,
+          InfrastructureException {
     final String devfileName = "workspacename";
     final DevfileImpl devfile = new DevfileImpl();
     devfile.setApiVersion(CURRENT_API_VERSION);
     devfile.getMetadata().setName(devfileName);
     devfile.getMetadata().setGenerateName("this_will_not_be_set_as_a_name");
+    when(runtimes.evalInfrastructureNamespace(any())).thenReturn("ns");
     Workspace workspace = workspaceManager.createWorkspace(devfile, NAMESPACE_1, null, null);
 
     assertEquals(workspace.getDevfile().getName(), devfileName);

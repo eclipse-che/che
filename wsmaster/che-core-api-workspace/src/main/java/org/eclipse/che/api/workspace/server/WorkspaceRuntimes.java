@@ -110,7 +110,7 @@ public class WorkspaceRuntimes {
 
   // 1-63 chars, a-z, 0-9, hyphen, no hyphen at the start or end
   private static final Pattern DNS_NAME_PATTERN =
-      Pattern.compile("[a-z0-9][a-z0-9-]{0,61}[a-z0-9]?");
+      Pattern.compile("[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?");
 
   private ConcurrentMap<String, InternalRuntime<?>> runtimes;
   private final WorkspaceStatusCache statuses;
