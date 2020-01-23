@@ -366,8 +366,11 @@ public class KubernetesNamespaceFactory {
               EnvironmentContext.getCurrent().getSubject().getUserName());
       namespace = evaluateLegacyNamespaceName(resolutionCtx);
 
-      LOG.warn("Workspace '{}' doesn't have an explicit namespace assigned."
-          + " The legacy namespace resolution resolved it to '{}'.", workspace.getId(), namespace);
+      LOG.warn(
+          "Workspace '{}' doesn't have an explicit namespace assigned."
+              + " The legacy namespace resolution resolved it to '{}'.",
+          workspace.getId(),
+          namespace);
     }
 
     if (!WorkspaceRuntimes.isNamespaceNameValid(namespace)) {
@@ -385,19 +388,25 @@ public class KubernetesNamespaceFactory {
 
         String defaultNamespace = evaluateNamespaceName(resolutionCtx);
 
-        LOG.warn("The namespace '{}' of the workspace '{}' is not valid. Trying to recover"
-            + " from this situation using a default namespace which resolved to '{}'.", namespace,
-            workspace.getId(), defaultNamespace);
+        LOG.warn(
+            "The namespace '{}' of the workspace '{}' is not valid. Trying to recover"
+                + " from this situation using a default namespace which resolved to '{}'.",
+            namespace,
+            workspace.getId(),
+            defaultNamespace);
 
         namespace = defaultNamespace;
       } else {
         // log a warning including a stacktrace to be able to figure out from where we got here...
-        LOG.warn("The namespace '{}' of the workspace '{}' is not valid but we currently don't have"
-            + " an active user to try an recover from this situation.", namespace,
-            workspace.getId(), new Exception());
+        LOG.warn(
+            "The namespace '{}' of the workspace '{}' is not valid but we currently don't have"
+                + " an active user to try an recover from this situation.",
+            namespace,
+            workspace.getId(),
+            new Exception());
       }
 
-      //ok, we tried to recover the namespace but nothing helped.
+      // ok, we tried to recover the namespace but nothing helped.
     }
 
     return namespace;
@@ -505,5 +514,4 @@ public class KubernetesNamespaceFactory {
   protected String getClusterRoleName() {
     return clusterRoleName;
   }
-
 }
