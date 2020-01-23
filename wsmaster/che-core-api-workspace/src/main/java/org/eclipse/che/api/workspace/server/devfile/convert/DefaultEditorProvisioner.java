@@ -116,7 +116,6 @@ public class DefaultEditorProvisioner {
     Map<String, String> missingPluginsIdToRef = new HashMap<>(defaultPluginsToRefs);
     removeAlreadyAddedPlugins(components, contentProvider, missingPluginsIdToRef);
     addMissingPlugins(components, contentProvider, missingPluginsIdToRef);
-
   }
 
   /**
