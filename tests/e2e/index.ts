@@ -4,7 +4,6 @@ export * from './inversify.types';
 export * from './TestConstants';
 
 export * from './driver/ChromeDriver';
-export * from './driver/ContainerInitializer';
 export * from './driver/IDriver';
 export * from './utils/DriverHelper';
 export * from './utils/Logger';
