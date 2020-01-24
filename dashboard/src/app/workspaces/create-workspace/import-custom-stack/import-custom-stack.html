@@ -7,6 +7,14 @@
       on-change="importStackController.onSourceChange(source)"></devfile-source-selector>
   </che-label-container>
 
+  <!-- Ephemeral mode -->
+  <che-label-container che-label-name="Temporary Storage" che-label-description="Temporary Storage allows for faster I/O. It may have limited storage for certain configurations and is not persistent." class="ephemeral-mode-toggle">
+      <md-switch ng-model="importStackController.ephemeralMode"
+        ng-change="importStackController.onEphemeralModeChange()"
+        aria-label="Enables Temporary Storage.">
+      </md-switch>
+  </che-label-container>
+
   <!-- Kubernetes namespace selector -->
   <che-label-container che-label-name="Kubernetes Namespace" che-label-description="{{importStackController.infrastructureNamespaceHint}}">
     <kubernetes-namespace-selector on-change="importStackController.onInfrastructureNamespaceChange(namespaceId)"></kubernetes-namespace-selector>
