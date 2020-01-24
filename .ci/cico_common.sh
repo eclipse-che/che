@@ -153,7 +153,7 @@ publishImagesOnQuay() {
                rm -r "${LOCAL_ASSEMBLY_DIR}"
            fi
            cp -r "${BUILD_ASSEMBLY_DIR}" "${LOCAL_ASSEMBLY_DIR}"
-           docker build -t ${ORGANIZATION}/che-server:${TAG}-centos -f $(pwd)/${image_dir}/Dockerfile.centos $(pwd)/${image_dir}/
+           docker build -t ${REGISTRY}/${ORGANIZATION}/che-server:${TAG}-centos -f $(pwd)/${image_dir}/Dockerfile.centos $(pwd)/${image_dir}/
          fi
          if [[ $? -ne 0 ]]; then
            echo "ERROR:"
@@ -165,7 +165,6 @@ publishImagesOnQuay() {
     #PUSH IMAGES
     for image in ${IMAGES_LIST[@]}
      do
-         docker tag "${image}:${TAG}" "${REGISTRY}/${image}:${TAG}"
          echo y | docker push "${REGISTRY}/${image}:${TAG}"
          if [[ $2 == "pushLatest" ]]; then
             docker tag "${image}:${TAG}" "${REGISTRY}/${image}:latest"
@@ -173,10 +172,10 @@ publishImagesOnQuay() {
          fi
 
          if [[ ${image} == "${ORGANIZATION}/che-server" ]]; then
-           docker tag "${image}:${TAG}" "${REGISTRY}/${image}:${TAG}-centos"
+           docker tag "${REGISTRY}/${image}:${TAG}" "${REGISTRY}/${image}:${TAG}-centos"
            echo y | docker push "${REGISTRY}/${ORGANIZATION}/che-server:${TAG}-centos"
            if [[ $2 == "pushLatest" ]]; then
-               docker tag "${image}:${TAG}" "${REGISTRY}/${image}:latest-centos"
+               docker tag "${REGISTRY}/${image}:${TAG}" "${REGISTRY}/${image}:latest-centos"
                echo y | docker push "${REGISTRY}/${ORGANIZATION}/che-server:latest-centos"
            fi
          fi
