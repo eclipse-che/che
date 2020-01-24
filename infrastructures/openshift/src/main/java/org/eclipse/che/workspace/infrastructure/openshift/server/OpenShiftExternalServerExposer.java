@@ -96,7 +96,7 @@ public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenSh
   }
 
   @Override
-  public void exposeAsSingle(
+  public void expose(
       OpenShiftEnvironment env,
       String machineName,
       String serviceName,

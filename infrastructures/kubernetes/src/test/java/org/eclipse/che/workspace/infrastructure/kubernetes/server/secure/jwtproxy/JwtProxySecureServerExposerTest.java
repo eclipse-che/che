@@ -79,13 +79,13 @@ public class JwtProxySecureServerExposerTest {
 
     // when
     secureServerExposer.expose(
-        k8sEnv, MACHINE_NAME, MACHINE_SERVICE_NAME, machineServicePort, servers);
+        k8sEnv, MACHINE_NAME, MACHINE_SERVICE_NAME, null, machineServicePort, servers);
 
     // then
     verify(jwtProxyProvisioner)
         .expose(eq(k8sEnv), eq(MACHINE_SERVICE_NAME), eq(machineServicePort), eq("TCP"), any());
     verify(externalServerExposer)
-        .exposeAsSingle(
+        .expose(
             eq(k8sEnv),
             eq(MACHINE_NAME),
             isNull(),

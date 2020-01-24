@@ -74,7 +74,7 @@ public class PreviewUrlExposer<T extends KubernetesEnvironment> {
                                   "Port '%d' in service '%s' not found. This is not expected, please report a bug!",
                                   port, foundService.get().getMetadata().getName())));
           String serviceName = foundService.get().getMetadata().getName();
-          externalServerExposer.exposeAsSingle(
+          externalServerExposer.expose(
               env, null, serviceName, serviceName, servicePort, Collections.emptyMap());
         }
       } else {
@@ -89,7 +89,7 @@ public class PreviewUrlExposer<T extends KubernetesEnvironment> {
       env.getServices().put(serverName, service);
       portsToProvision.forEach(
           port ->
-              externalServerExposer.exposeAsSingle(
+              externalServerExposer.expose(
                   env,
                   null,
                   service.getMetadata().getName(),

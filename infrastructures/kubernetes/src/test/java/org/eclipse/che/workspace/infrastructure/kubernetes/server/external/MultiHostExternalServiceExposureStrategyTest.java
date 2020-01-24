@@ -88,7 +88,7 @@ public class MultiHostExternalServiceExposureStrategyTest {
 
     // when
     externalServerExposer.expose(
-        kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, servicePort, serversToExpose);
+        kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, null, servicePort, serversToExpose);
 
     // then
     assertThatExternalServerIsExposed(
@@ -99,96 +99,6 @@ public class MultiHostExternalServiceExposureStrategyTest {
         8080,
         servicePort,
         new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP));
-  }
-
-  @Test
-  public void shouldCreateIngressForServerWhenTwoServersHasTheSamePort() {
-    // given
-    ServerConfigImpl httpServerConfig =
-        new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
-    ServerConfigImpl wsServerConfig =
-        new ServerConfigImpl("8080/tcp", "ws", "/connect", ATTRIBUTES_MAP);
-    IntOrString targetPort = new IntOrString(8080);
-
-    ServicePort servicePort =
-        new ServicePortBuilder()
-            .withName("server-8080")
-            .withPort(8080)
-            .withProtocol("TCP")
-            .withTargetPort(targetPort)
-            .build();
-
-    Map<String, ServerConfig> serversToExpose =
-        ImmutableMap.of(
-            "http-server", httpServerConfig,
-            "ws-server", wsServerConfig);
-
-    // when
-    externalServerExposer.expose(
-        kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, servicePort, serversToExpose);
-
-    // then
-    assertEquals(kubernetesEnvironment.getIngresses().size(), 1);
-    assertThatExternalServerIsExposed(
-        MACHINE_NAME,
-        SERVICE_NAME,
-        "http-server",
-        "tcp",
-        8080,
-        servicePort,
-        new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP));
-    assertThatExternalServerIsExposed(
-        MACHINE_NAME,
-        SERVICE_NAME,
-        "ws-server",
-        "tcp",
-        8080,
-        servicePort,
-        new ServerConfigImpl(wsServerConfig).withAttributes(ATTRIBUTES_MAP));
-  }
-
-  @Test
-  public void shouldCreateIngressPerUniqueServerWithTheSamePort() {
-    // given
-    ServerConfigImpl httpServerConfig =
-        new ServerConfigImpl("8080/tcp", "http", "/api", UNIQUE_SERVER_ATTRIBUTES);
-    ServerConfigImpl wsServerConfig =
-        new ServerConfigImpl("8080/tcp", "ws", "/connect", UNIQUE_SERVER_ATTRIBUTES);
-    ServicePort servicePort =
-        new ServicePortBuilder()
-            .withName("server-8080")
-            .withPort(8080)
-            .withProtocol("TCP")
-            .withTargetPort(new IntOrString(8080))
-            .build();
-
-    Map<String, ServerConfig> serversToExpose =
-        ImmutableMap.of(
-            "http-server", httpServerConfig,
-            "ws-server", wsServerConfig);
-
-    // when
-    externalServerExposer.expose(
-        kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, servicePort, serversToExpose);
-
-    // then
-    assertEquals(kubernetesEnvironment.getIngresses().size(), 2);
-    assertThatExternalServerIsExposed(
-        MACHINE_NAME,
-        SERVICE_NAME,
-        "http-server",
-        "tcp",
-        8080,
-        servicePort,
-        new ServerConfigImpl(httpServerConfig).withAttributes(UNIQUE_SERVER_ATTRIBUTES));
-    assertThatExternalServerIsExposed(
-        MACHINE_NAME,
-        SERVICE_NAME,
-        "ws-server",
-        "tcp",
-        8080,
-        servicePort,
-        new ServerConfigImpl(wsServerConfig).withAttributes(UNIQUE_SERVER_ATTRIBUTES));
   }
 
   private void assertThatExternalServerIsExposed(

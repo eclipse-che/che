@@ -15,7 +15,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -66,38 +65,21 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
       T k8sEnv,
       String machineName,
       String serviceName,
+      String serverId,
       ServicePort servicePort,
       Map<String, ServerConfig> secureServers)
       throws InfrastructureException {
 
-    AtomicReference<InfrastructureException> exceptionHolder = new AtomicReference<>();
+    ServicePort exposedServicePort =
+        proxyProvisioner.expose(
+            k8sEnv, serviceName, servicePort, servicePort.getProtocol(), secureServers);
 
-    ExternalServerExposer.onEachExposableServerSet(
-        secureServers,
-        (serverId, servers) -> {
-          if (exceptionHolder.get() != null) {
-            return;
-          }
-
-          try {
-            ServicePort exposedServicePort =
-                proxyProvisioner.expose(
-                    k8sEnv, serviceName, servicePort, servicePort.getProtocol(), servers);
-
-            exposer.exposeAsSingle(
-                k8sEnv,
-                machineName,
-                serverId,
-                proxyProvisioner.getServiceName(),
-                exposedServicePort,
-                servers);
-          } catch (InfrastructureException e) {
-            exceptionHolder.set(e);
-          }
-        });
-
-    if (exceptionHolder.get() != null) {
-      throw exceptionHolder.get();
-    }
+    exposer.expose(
+        k8sEnv,
+        machineName,
+        serverId,
+        proxyProvisioner.getServiceName(),
+        exposedServicePort,
+        secureServers);
   }
 }

@@ -11,17 +11,15 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
-import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 
 public class ExternalServerExposer<T extends KubernetesEnvironment> {
@@ -47,73 +45,30 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
   }
 
   /**
-   * A helper method to split the servers to unique sets that should be exposed together.
-   *
-   * <p>The consumer is responsible for doing the actual exposure and is supplied 2 pieces of data.
-   * The first is the server ID, which is non-null for any unique server from the input set and null
-   * for any compound set of servers that should be exposed together. The caller is responsible for
-   * figuring out an appropriate ID in such case.
-   *
-   * @param allServers all unique and non-unique servers mixed together
-   * @param consumer the consumer responsible for handling the split sets of servers
-   */
-  public static void onEachExposableServerSet(
-      Map<String, ServerConfig> allServers,
-      BiConsumer<String, Map<String, ServerConfig>> consumer) {
-    Map<String, ServerConfig> nonUniqueServers = new HashMap<>();
-
-    for (Map.Entry<String, ServerConfig> e : allServers.entrySet()) {
-      String serverId = makeValidDnsName(e.getKey());
-      if (e.getValue().isUnique()) {
-        consumer.accept(serverId, ImmutableMap.of(serverId, e.getValue()));
-      } else {
-        nonUniqueServers.put(serverId, e.getValue());
-      }
-    }
-
-    if (!nonUniqueServers.isEmpty()) {
-      consumer.accept(null, nonUniqueServers);
-    }
-  }
-
-  /**
-   * Exposes service ports on given service externally (outside kubernetes cluster). Each exposed
+   * Exposes service port on given service externally (outside kubernetes cluster). The exposed
    * service port is associated with a specific Server configuration. Server configuration should be
    * encoded in the exposing object's annotations, to be used by {@link KubernetesServerResolver}.
    *
    * @param k8sEnv Kubernetes environment
    * @param machineName machine containing servers
    * @param serviceName service associated with machine, mapping all machine server ports
+   * @param serverId non-null for a unique server, null for a compound set of servers that should be
+   *     exposed together.
    * @param servicePort specific service port to be exposed externally
    * @param externalServers server configs of servers to be exposed externally
    */
   public void expose(
-      T k8sEnv,
-      String machineName,
-      String serviceName,
-      ServicePort servicePort,
-      Map<String, ServerConfig> externalServers) {
-
-    onEachExposableServerSet(
-        externalServers,
-        (serverId, servers) -> {
-          if (serverId == null) {
-            // this is the ID for non-unique servers
-            serverId = servicePort.getName();
-          }
-
-          exposeAsSingle(k8sEnv, machineName, serviceName, serverId, servicePort, servers);
-        });
-  }
-
-  /** Exposes the given set of servers using a single ingress/route. */
-  public void exposeAsSingle(
       T k8sEnv,
       @Nullable String machineName,
       String serviceName,
       String serverId,
       ServicePort servicePort,
       Map<String, ServerConfig> externalServers) {
+
+    if (serverId == null) {
+      // this is the ID for non-unique servers
+      serverId = servicePort.getName();
+    }
 
     Ingress ingress =
         generateIngress(machineName, serviceName, serverId, servicePort, externalServers);
@@ -128,7 +83,7 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
       ServicePort servicePort,
       Map<String, ServerConfig> servers) {
 
-    String serverName = makeValidDnsName(serverId);
+    String serverName = KubernetesServerExposer.makeServerNameValidForDns(serverId);
     ExternalServerIngressBuilder ingressBuilder = new ExternalServerIngressBuilder();
     String host = strategy.getExternalHost(serviceName, serverName);
     if (host != null) {
@@ -155,9 +110,5 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
 
   private static String getIngressName(String serviceName, String serverName) {
     return serviceName + "-" + serverName;
-  }
-
-  protected static String makeValidDnsName(String name) {
-    return name.replaceAll("/", "-");
   }
 }
