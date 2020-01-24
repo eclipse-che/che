@@ -162,7 +162,7 @@ public class DefaultEditorProvisioner {
       ComponentImpl component;
       try {
         ExtendedPluginFQN fqn = pluginFQNParser.parsePluginFQN(pluginRef);
-        if (isNullOrEmpty(fqn.getReference())) {
+        if (!isNullOrEmpty(fqn.getId())) {
           component = new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginRef);
         } else {
           component = createReferencePluginComponent(pluginRef, contentProvider);
@@ -186,7 +186,8 @@ public class DefaultEditorProvisioner {
   private ComponentImpl createReferencePluginComponent(
       String pluginRef, FileContentProvider contentProvider) throws InfrastructureException {
     ExtendedPluginFQN fqn = pluginFQNParser.evaluateFqn(pluginRef, contentProvider);
-    ComponentImpl component = new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginRef);
+    ComponentImpl component = new ComponentImpl();
+    component.setType(PLUGIN_COMPONENT_TYPE);
     if (!isNullOrEmpty(fqn.getId())) {
       component.setId(fqn.getId());
     }
