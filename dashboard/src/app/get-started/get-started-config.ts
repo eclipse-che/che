@@ -13,9 +13,10 @@
 
 import {TemplateListController} from './template-list/template-list.controller';
 import {Template} from './template/template.directive';
+import { CheDashboardConfigurationService } from '../../components/branding/che-dashboard-configuration.service';
+import { GetStartedConfigService } from './get-started-config.service';
 
 /**
- * @ngdoc controller
  * @name getStarted:GetStartedConfig
  * @description This class is used for configuring all get started devfiles.
  * @author Oleksii Orel
@@ -27,13 +28,20 @@ export class GetStartedConfig {
 
     register.controller('TemplateListController', TemplateListController);
 
+    register.service('getStartedConfigService', GetStartedConfigService);
+
     // config routes
     register.app.config(['$routeProvider', ($routeProvider: any) => {
       $routeProvider.accessWhen('/getstarted', {
         title: 'Get Started',
         templateUrl: 'app/get-started/template-list/template-list.html',
         controller: 'TemplateListController',
-        controllerAs: 'templateListController'
+        controllerAs: 'templateListController',
+        resolve: {
+          initData: ['getStartedConfigService', (svc: GetStartedConfigService) => {
+            return svc.allowGetStartedRoutes();
+          }]
+        }
       });
     }]);
   }

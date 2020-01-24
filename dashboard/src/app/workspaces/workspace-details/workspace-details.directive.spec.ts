@@ -235,9 +235,16 @@ describe(`WorkspaceDetailsController >`, () => {
         return {
           getDocs: () => {
             const converting = 'converting-a-che-6-workspace-to-a-che-7-devfile';
-            return {converting};
+            return { converting };
+          },
+          getConfiguration: () => {
+            return {
+              menu: {
+                disabled: []
+              }
+            };
           }
-        }
+        };
       })
       // terminal directives which prevent to execute an original ones
       .directive('mdTab', function () {
