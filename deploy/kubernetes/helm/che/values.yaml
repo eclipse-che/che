@@ -89,6 +89,9 @@ global:
   chePluginRegistryUrlFormat: "plugin-registry-%s.%s"
 
 che:
+  properties:
+    che:
+      foo_bar_baz: 3
   workspace: {}
 #    devfileRegistryUrl: "https://che-devfile-registry.openshift.io/"
 #    pluginBroker:
