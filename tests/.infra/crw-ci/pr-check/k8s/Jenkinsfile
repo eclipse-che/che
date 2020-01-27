@@ -86,44 +86,52 @@ pipeline {
             parallel {
                 stage("Download chectl") {
                     steps {
-                        // TO-DO use option "--install-path" https://github.com/eclipse/che/pull/14182
-                        sh """
-                           curl -sL https://www.eclipse.org/che/chectl/ > install_chectl.sh
-                           chmod +x install_chectl.sh
-                           sudo PATH=$PATH ./install_chectl.sh --channel=next
-                           sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
-                           sudo chmod +x ${WORKSPACE}/chectl
-                        """
+                        script {
+                            retry(2) {
+                                // TO-DO use option "--install-path" https://github.com/eclipse/che/pull/14182
+                                sh """
+                                curl -sL https://www.eclipse.org/che/chectl/ > install_chectl.sh
+                                chmod +x install_chectl.sh
+                                sudo PATH=$PATH ./install_chectl.sh --channel=next
+                                sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
+                                sudo chmod +x ${WORKSPACE}/chectl
+                                """
+                            }
+                        }
                     }
                 }
 
                 stage("Start Kubernetes") {
                     steps {
-                        echo "Workaround k8s error https://github.com/eclipse/che/issues/14902"
-                        sh """
-                            cat /etc/sysctl.conf
-                            echo "net.bridge.bridge-nf-call-iptables = 1" | sudo tee -a /etc/sysctl.conf
-                            sudo sysctl -p
-                        """
+                        script {
+                            retry(2) {
+                                echo "Workaround k8s error https://github.com/eclipse/che/issues/14902"
+                                sh """
+                                    cat /etc/sysctl.conf
+                                    echo "net.bridge.bridge-nf-call-iptables = 1" | sudo tee -a /etc/sysctl.conf
+                                    sudo sysctl -p
+                                """
 
-                        sh """
-                            # https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md
-                            export MINIKUBE_WANTUPDATENOTIFICATION=false
-                            export MINIKUBE_WANTREPORTERRORPROMPT=false
-                            export MINIKUBE_HOME=\$HOME
-                            export CHANGE_MINIKUBE_NONE_USER=true
-                            export KUBECONFIG=\$HOME/.kube/config
-                            export DOCKER_CONFIG=\$HOME/.docker
+                                sh """
+                                    # https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md
+                                    export MINIKUBE_WANTUPDATENOTIFICATION=false
+                                    export MINIKUBE_WANTREPORTERRORPROMPT=false
+                                    export MINIKUBE_HOME=\$HOME
+                                    export CHANGE_MINIKUBE_NONE_USER=true
+                                    export KUBECONFIG=\$HOME/.kube/config
+                                    export DOCKER_CONFIG=\$HOME/.docker
 
-                            mkdir -p \$HOME/.kube \$HOME/.minikube
-                            touch \$KUBECONFIG
+                                    mkdir -p \$HOME/.kube \$HOME/.minikube
+                                    touch \$KUBECONFIG
 
-                            sudo -E /usr/local/bin/minikube start \\
-                            --vm-driver=none \\
-                            --cpus 4 \\
-                            --memory 13000 \\
-                            --logtostderr
-                        """
+                                    sudo -E /usr/local/bin/minikube start \\
+                                    --vm-driver=none \\
+                                    --cpus 4 \\
+                                    --memory 13000 \\
+                                    --logtostderr
+                                """
+                            }
+                        }
                     }
                 }
 
@@ -158,6 +166,19 @@ pipeline {
 
                         echo "Build Che"
                         sh "mvn clean install -f ${WORKSPACE}/pom.xml -T 4 -U -DskipTests -Dskip-enforce -Dskip-validate-sources"
+                    }
+                }
+
+                stage("Pull test images") {
+                    steps {
+                        script {
+                            retry(2) {
+                                sh """
+                                    docker pull quay.io/eclipse/che-e2e:nightly
+                                    docker pull quay.io/eclipse/happy-path:nightly
+                                """
+                            }
+                        }
                     }
                 }
             }
@@ -274,9 +295,7 @@ pipeline {
 
         stage("Run E2E Happy path tests") {
             steps {
-                sh """
-                     docker pull eclipse/che-e2e:nightly
-                     
+                sh """                     
                      CHE_URL=http://${cheHost}
                      docker run --shm-size=1g --net=host --ipc=host \\
                        -p 5920:5920 \\
