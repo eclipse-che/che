@@ -77,7 +77,7 @@ export class CheNavBarController {
   private isKeycloackPresent: boolean;
 
   private workspacesNumber: number;
-  private pageFactories: Array<che.IFactory>;
+  private pageFactories: Array<che.IFactory> = [];
 
   /**
    * Default constructor
