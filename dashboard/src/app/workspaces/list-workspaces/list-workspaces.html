@@ -16,9 +16,11 @@
   A workspace is where your projects live and run. Create workspaces from stacks that define projects, runtimes, and commands.
 </che-description>
 <md-content md-scroll-y flex layout="column" md-theme="maincontent-theme">
-  <div class="progress-line"><md-progress-linear md-mode="indeterminate"
-                      ng-show="listWorkspacesCtrl.isInfoLoading || listWorkspacesCtrl.isRequestPending"></md-progress-linear>
-  <md-content flex class="workspace-list-content" ng-hide="listWorkspacesCtrl.isInfoLoading"><div>
+  <div class="progress-line">
+    <md-progress-linear md-mode="indeterminate"
+                        ng-show="listWorkspacesCtrl.isInfoLoading"></md-progress-linear>
+  </div>
+  <md-content flex class="workspace-list-content" ng-hide="listWorkspacesCtrl.isInfoLoading">
     <che-list-header che-input-placeholder="Search"
                      che-on-search-change="listWorkspacesCtrl.onSearchChanged(str)"
                      che-hide-search="listWorkspacesCtrl.userWorkspaces.length === 0"
@@ -64,15 +66,14 @@
         </div>
       </div>
     </che-list-header>
-    <che-list ng-show="listWorkspacesCtrl.cheListHelper.visibleItemsNumber > 0">
+    <che-list>
       <che-workspace-item
-              ng-repeat="workspace in listWorkspacesCtrl.cheListHelper.getVisibleItems() | orderBy:[listWorkspacesCtrl.workspaceOrderBy, 'devfile.metadata.name']"
-              ng-model="listWorkspacesCtrl.cheListHelper.itemsSelectionStatus[workspace.id]"
-              is-request-pending="listWorkspacesCtrl.isRequestPending"
-              che-selectable="true"
-              che-display-labels="false"
-              che-on-checkbox-click="listWorkspacesCtrl.cheListHelper.updateBulkSelectionStatus()"
-              che-workspace-item="workspace"></che-workspace-item>
+        ng-repeat="workspace in listWorkspacesCtrl.cheListHelper.getVisibleItems() | orderBy:[listWorkspacesCtrl.workspaceOrderBy, 'devfile.metadata.name']"
+        ng-model="listWorkspacesCtrl.cheListHelper.itemsSelectionStatus[workspace.id]"
+        che-selectable="true"
+        che-display-labels="false"
+        che-on-checkbox-click="listWorkspacesCtrl.cheListHelper.updateBulkSelectionStatus()"
+        che-workspace-item="workspace"></che-workspace-item>
     </che-list>
     <div class="che-list-empty">
         <span ng-show="listWorkspacesCtrl.userWorkspaces.length > 0 && listWorkspacesCtrl.cheListHelper.visibleItemsNumber === 0">

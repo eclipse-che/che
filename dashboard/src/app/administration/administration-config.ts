@@ -11,11 +11,10 @@
  */
 'use strict';
 
-
 import {DockerRegistryList} from './docker-registry/docker-registry-list/docker-registry-list.directive';
 import {DockerRegistryListController} from './docker-registry/docker-registry-list/docker-registry-list.controller';
 import {EditRegistryController} from './docker-registry/docker-registry-list/edit-registry/edit-registry.controller';
-
+import { AdministrationConfigService } from './administration-config.service';
 
 export class AdministrationConfig {
 
@@ -25,11 +24,20 @@ export class AdministrationConfig {
 
     register.controller('EditRegistryController', EditRegistryController);
 
+    register.service('administrationConfigService', AdministrationConfigService);
+
     // config routes
     register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/administration', {
         title: 'Administration',
-        templateUrl: 'app/administration/administration.html'
+        templateUrl: 'app/administration/administration.html',
+        resolve: {
+          init: [
+            'administrationConfigService',
+            (svc: AdministrationConfigService) => {
+              return svc.allowAdministrationRoutes();
+            }]
+        }
       });
     }]);
 

@@ -84,7 +84,6 @@ describe('OrganizationsConfig >', () => {
       spyOn(callbacks, 'testReject');
 
       $location.path('/admin/create-organization');
-      $rootScope.$digest();
 
       const service = $injector.invoke(resolveBlock);
 
@@ -92,6 +91,7 @@ describe('OrganizationsConfig >', () => {
         .then(callbacks.testResolve)
         .catch(callbacks.testReject);
 
+      $rootScope.$digest();
       $httpBackend.flush();
 
       expect(callbacks.testResolve).toHaveBeenCalledWith({
@@ -137,7 +137,6 @@ describe('OrganizationsConfig >', () => {
       spyOn(callbacks, 'testReject');
 
       $location.path(`/admin/create-organization/${parentOrg.qualifiedName}`);
-      $rootScope.$digest();
 
       const service = $injector.invoke(resolveBlock);
 
@@ -145,6 +144,7 @@ describe('OrganizationsConfig >', () => {
         .then(callbacks.testResolve)
         .catch(callbacks.testReject);
 
+      $rootScope.$digest();
       $httpBackend.flush();
 
       expect(callbacks.testResolve).toHaveBeenCalled();
@@ -169,7 +169,6 @@ describe('OrganizationsConfig >', () => {
       spyOn(callbacks, 'testReject');
 
       $location.path(`/admin/create-organization/${parentOrg.qualifiedName}`);
-      $rootScope.$digest();
 
       // make response for organizations list fail
       $httpBackend.expect('GET', /\/api\/organization(\?.*$)?/).respond(500, [], {message: 'response failed'});
@@ -180,6 +179,7 @@ describe('OrganizationsConfig >', () => {
         .then(callbacks.testResolve)
         .catch(callbacks.testReject);
 
+      $rootScope.$digest();
       $httpBackend.flush();
 
       expect(callbacks.testResolve).toHaveBeenCalledWith({
@@ -253,7 +253,6 @@ describe('OrganizationsConfig >', () => {
       spyOn(callbacks, 'testReject');
 
       $location.path(`/organization/${parentOrg.qualifiedName}`);
-      $rootScope.$digest();
 
       const service = $injector.invoke(resolveBlock);
 
@@ -261,6 +260,7 @@ describe('OrganizationsConfig >', () => {
         .then(callbacks.testResolve)
         .catch(callbacks.testReject);
 
+      $rootScope.$digest();
       $httpBackend.flush();
 
       expect(callbacks.testResolve).toHaveBeenCalled();
@@ -288,7 +288,6 @@ describe('OrganizationsConfig >', () => {
       spyOn(callbacks, 'testReject');
 
       $location.path(`/organization/${parentOrg.qualifiedName}`);
-      $rootScope.$digest();
 
       // make response for organizations list fail
       $httpBackend.expect('GET', /\/api\/organization(\?.*$)?/).respond(500, [], {message: 'response failed'});
@@ -299,6 +298,7 @@ describe('OrganizationsConfig >', () => {
         .then(callbacks.testResolve)
         .catch(callbacks.testReject);
 
+      $rootScope.$digest();
       $httpBackend.flush();
 
       expect(callbacks.testResolve).toHaveBeenCalled();
@@ -345,7 +345,6 @@ describe('OrganizationsConfig >', () => {
       spyOn(callbacks, 'testReject');
 
       $location.path(`/organization/${subOrg.qualifiedName}`);
-      $rootScope.$digest();
 
       const service = $injector.invoke(resolveBlock);
 
@@ -353,6 +352,7 @@ describe('OrganizationsConfig >', () => {
         .then(callbacks.testResolve)
         .catch(callbacks.testReject);
 
+      $rootScope.$digest();
       $httpBackend.flush();
 
       expect(callbacks.testResolve).toHaveBeenCalled();
@@ -380,7 +380,6 @@ describe('OrganizationsConfig >', () => {
       spyOn(callbacks, 'testReject');
 
       $location.path(`/organization/${subOrg.qualifiedName}`);
-      $rootScope.$digest();
 
       // make response for organizations list fail
       $httpBackend.expect('GET', /\/api\/organization(\?.*$)?/).respond(500, [], {message: 'response failed'});
@@ -391,6 +390,7 @@ describe('OrganizationsConfig >', () => {
         .then(callbacks.testResolve)
         .catch(callbacks.testReject);
 
+      $rootScope.$digest();
       $httpBackend.flush();
 
       expect(callbacks.testResolve).toHaveBeenCalled();

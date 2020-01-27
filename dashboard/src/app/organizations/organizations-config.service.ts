@@ -11,9 +11,20 @@
  */
 'use strict';
 
+import { CheDashboardConfigurationService } from '../../components/branding/che-dashboard-configuration.service';
+
 export class OrganizationsConfigService {
 
-  static $inject = ['$log', '$q', '$route', 'cheOrganization', 'chePermissions', 'cheResourcesDistribution', 'cheUser'];
+  static $inject = [
+    '$log',
+    '$q',
+    '$route',
+    'cheDashboardConfigurationService',
+    'cheOrganization',
+    'chePermissions',
+    'cheResourcesDistribution',
+    'cheUser'
+  ];
 
   /**
    * Log service.
@@ -43,19 +54,28 @@ export class OrganizationsConfigService {
    * User profile API interaction.
    */
   private cheUser: any;
-
-  /** Default constructor that is using resource injection
+  /**
+   * Dashboard configuration service.
    */
-  constructor($log: ng.ILogService,
-              $q: ng.IQService,
-              $route: ng.route.IRouteService,
-              cheOrganization: che.api.ICheOrganization,
-              chePermissions: che.api.IChePermissions,
-              cheResourcesDistribution: che.api.ICheResourcesDistribution,
-              cheUser: any) {
+  private cheDashboardConfigurationService: CheDashboardConfigurationService;
+
+  /**
+   * Default constructor that is using resource injection
+   */
+  constructor(
+    $log: ng.ILogService,
+    $q: ng.IQService,
+    $route: ng.route.IRouteService,
+    cheDashboardConfigurationService: CheDashboardConfigurationService,
+    cheOrganization: che.api.ICheOrganization,
+    chePermissions: che.api.IChePermissions,
+    cheResourcesDistribution: che.api.ICheResourcesDistribution,
+    cheUser: any
+  ) {
     this.$log = $log;
     this.$q = $q;
     this.$route = $route;
+    this.cheDashboardConfigurationService = cheDashboardConfigurationService;
     this.cheOrganization = cheOrganization;
     this.chePermissions = chePermissions;
     this.cheResourcesDistribution = cheResourcesDistribution;
@@ -229,6 +249,10 @@ export class OrganizationsConfigService {
     }
 
     return this.$q.all(userPromises);
+  }
+
+  allowOrganizationsRoutes(): ng.IPromise<void> {
+    return this.cheDashboardConfigurationService.allowRoutes('organizations');
   }
 
   /**

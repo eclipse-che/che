@@ -29,7 +29,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -79,12 +78,6 @@ public class RecreateUpdateStrategyTest {
     theiaIde.waitAllNotificationsClosed();
 
     cheTestSystemClient.stop();
-
-    // open the Dashboard and make sure that workspace is not available after suspending system
-    dashboard.open();
-    dashboard.waitDashboardToolbarTitle();
-    dashboard.selectWorkspacesItemOnDashboard();
-    Assert.assertFalse(dashboard.isWorkspacePresentedInRecentList(WORKSPACE_NAME));
 
     // performs rollout
     hotUpdateUtil.executeMasterPodUpdateCommand();

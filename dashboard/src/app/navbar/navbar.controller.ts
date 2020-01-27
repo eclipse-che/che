@@ -13,30 +13,36 @@
 import {CheAPI} from '../../components/api/che-api.factory';
 import {CheKeycloak} from '../../components/api/che-keycloak.factory';
 import {CheService} from '../../components/api/che-service.factory';
+import { CheDashboardConfigurationService } from '../../components/branding/che-dashboard-configuration.service';
 
-export const MENU_ITEM = {
-  dashboard: '#/',
-  getStarted: '#/getstarted',
-  workspaces: '#/workspaces',
-  stacks: '#/stacks',
-  factories: '#/factories',
+type ConfigurableMenu = { [key in che.ConfigurableMenuItem ]: string };
+
+const CONFIGURABLE_MENU: ConfigurableMenu = {
   administration: '#/administration',
-  usermanagement: '#/admin/usermanagement',
+  factories: '#/factories',
+  getstarted: '#/getstarted',
   organizations: '#/organizations',
-  account: '#/account'
+  stacks: '#/stacks',
 };
+
+export const MENU_ITEM = angular.extend({
+  account: '#/account',
+  dashboard: '#/',
+  usermanagement: '#/admin/usermanagement',
+  workspaces: '#/workspaces',
+}, CONFIGURABLE_MENU);
 
 export class CheNavBarController {
 
-  static $inject = ['$mdSidenav',
-    '$scope',
+  static $inject = [
     '$location',
-    '$route',
+    '$scope',
     'cheAPI',
-    '$window',
-    'chePermissions',
+    'cheDashboardConfigurationService',
     'cheKeycloak',
-    'cheService'];
+    'chePermissions',
+    'cheService',
+  ];
 
   menuItemUrl = MENU_ITEM;
 
@@ -55,43 +61,52 @@ export class CheNavBarController {
     }
   ];
 
-  private $mdSidenav: ng.material.ISidenavService;
-  private $scope: ng.IScope;
-  private $window: ng.IWindowService;
   private $location: ng.ILocationService;
-  private $route: ng.route.IRouteService;
+  private $scope: ng.IScope;
   private cheAPI: CheAPI;
-  private profile: che.IProfile;
+  private cheDashboardConfigurationService: CheDashboardConfigurationService;
+  private cheKeycloak: CheKeycloak;
   private chePermissions: che.api.IChePermissions;
+  private cheService: CheService;
+
+  private profile: che.IProfile;
   private userServices: che.IUserServices;
   private hasPersonalAccount: boolean;
   private organizations: Array<che.IOrganization>;
-  private cheKeycloak: CheKeycloak;
-  private cheService: CheService;
   private isPermissionServiceAvailable: boolean;
   private isKeycloackPresent: boolean;
+
+  private workspacesNumber: number;
+  private pageFactories: Array<che.IFactory>;
 
   /**
    * Default constructor
    */
-  constructor($mdSidenav: ng.material.ISidenavService,
-              $scope: ng.IScope,
-              $location: ng.ILocationService,
-              $route: ng.route.IRouteService,
-              cheAPI: CheAPI,
-              $window: ng.IWindowService,
-              chePermissions: che.api.IChePermissions,
-              cheKeycloak: CheKeycloak,
-              cheService: CheService) {
-    this.$mdSidenav = $mdSidenav;
-    this.$scope = $scope;
+  constructor(
+    $location: ng.ILocationService,
+    $scope: ng.IScope,
+    cheAPI: CheAPI,
+    cheDashboardConfigurationService: CheDashboardConfigurationService,
+    cheKeycloak: CheKeycloak,
+    chePermissions: che.api.IChePermissions,
+    cheService: CheService,
+  ) {
     this.$location = $location;
-    this.$route = $route;
+    this.$scope = $scope;
     this.cheAPI = cheAPI;
-    this.$window = $window;
-    this.chePermissions = chePermissions;
+    this.cheDashboardConfigurationService = cheDashboardConfigurationService;
     this.cheKeycloak = cheKeycloak;
+    this.chePermissions = chePermissions;
     this.cheService = cheService;
+
+    const handler = (workspaces: Array<che.IWorkspace>) => {
+      this.workspacesNumber = workspaces.length;
+    };
+    this.cheAPI.getWorkspace().addListener('onChangeWorkspaces', handler);
+
+    $scope.$on('$destroy', () => {
+      this.cheAPI.getWorkspace().removeListener('onChangeWorkspaces', handler);
+    });
   }
 
   $onInit(): void {
@@ -105,8 +120,13 @@ export class CheNavBarController {
       this.$scope.$broadcast('navbar-selected:set', path);
     });
 
-    this.cheAPI.getWorkspace().fetchWorkspaces();
-    this.cheAPI.getFactory().fetchFactories();
+    this.cheAPI.getWorkspace().fetchWorkspaces().then((workspaces: Array<che.IWorkspace>) => {
+      this.workspacesNumber = workspaces.length;
+    });
+
+    this.cheAPI.getFactory().fetchFactories().then(() => {
+      this.pageFactories = this.cheAPI.getFactory().getPageFactories();
+    });
 
     this.isPermissionServiceAvailable = false;
     this.resolvePermissionServiceAvailability().then((isAvailable: boolean) => {
@@ -168,19 +188,11 @@ export class CheNavBarController {
   }
 
   /**
-   * Returns number of workspaces.
-   * @return {number}
-   */
-  getWorkspacesNumber(): number {
-    return this.cheAPI.getWorkspace().getWorkspaces().length;
-  }
-
-  /**
    * Returns number of factories.
    * @return {number}
    */
   getFactoriesNumber(): number {
-    return this.cheAPI.getFactory().getPageFactories().length;
+    return this.pageFactories.length;
   }
 
   /**
@@ -210,6 +222,10 @@ export class CheNavBarController {
     return rootOrganizations.length;
   }
 
+  showMenuItem(menuItem: che.ConfigurableMenuItem | string): boolean {
+    return this.cheDashboardConfigurationService.allowedMenuItem(menuItem);
+  }
+
   /**
    * Opens user profile in new browser page.
    */
@@ -223,4 +239,5 @@ export class CheNavBarController {
   private logout(): void {
     this.cheKeycloak.logout();
   }
+
 }
