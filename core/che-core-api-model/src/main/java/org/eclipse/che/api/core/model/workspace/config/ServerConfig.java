@@ -11,6 +11,11 @@
  */
 package org.eclipse.che.api.core.model.workspace.config;
 
+import static java.lang.String.join;
+import static java.util.Collections.emptyList;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -52,6 +57,12 @@ public interface ServerConfig {
   String SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE = "cookiesAuthEnabled";
 
   /**
+   * {@link ServerConfig} and {@link Server} attribute name which sets the server as unique, meaning
+   * that, if exposed, it has its own endpoint even if it shares the same port with other servers.
+   */
+  String UNIQUE_SERVER_ATTRIBUTE = "unique";
+
+  /**
    * Port used by server.
    *
    * <p>It may contain protocol(tcp or udp) after '/' symbol. If protocol is missing tcp will be
@@ -87,4 +98,140 @@ public interface ServerConfig {
 
   /** Attributes of the server */
   Map<String, String> getAttributes();
+
+  /**
+   * Determines whether the attributes configure the server to be internal.
+   *
+   * @param attributes the attributes with additional server configuration
+   * @see #INTERNAL_SERVER_ATTRIBUTE
+   */
+  static boolean isInternal(Map<String, String> attributes) {
+    return AttributesEvaluator.booleanAttr(attributes, INTERNAL_SERVER_ATTRIBUTE, false);
+  }
+
+  /**
+   * Sets the "internal" flag in the provided attributes to the provided value.
+   *
+   * @param attributes the attributes with the additional server configuration
+   */
+  static void setInternal(Map<String, String> attributes, boolean value) {
+    attributes.put(INTERNAL_SERVER_ATTRIBUTE, Boolean.toString(value));
+  }
+
+  /**
+   * Determines whether the attributes configure the server to be secure.
+   *
+   * @param attributes the attributes with additional server configuration
+   * @see #SECURE_SERVER_ATTRIBUTE
+   */
+  static boolean isSecure(Map<String, String> attributes) {
+    return AttributesEvaluator.booleanAttr(attributes, SECURE_SERVER_ATTRIBUTE, false);
+  }
+
+  /**
+   * Sets the "secure" flag in the provided attributes to the provided value.
+   *
+   * @param attributes the attributes with the additional server configuration
+   */
+  static void setSecure(Map<String, String> attributes, boolean value) {
+    attributes.put(SECURE_SERVER_ATTRIBUTE, Boolean.toString(value));
+  }
+
+  /**
+   * Determines whether the attributes configure the server to be unique.
+   *
+   * @param attributes the attributes with additional server configuration
+   * @see #UNIQUE_SERVER_ATTRIBUTE
+   */
+  static boolean isUnique(Map<String, String> attributes) {
+    return AttributesEvaluator.booleanAttr(attributes, UNIQUE_SERVER_ATTRIBUTE, false);
+  }
+
+  /**
+   * Sets the "unique" flag in the provided attributes to the provided value.
+   *
+   * @param attributes the attributes with the additional server configuration
+   */
+  static void setUnique(Map<String, String> attributes, boolean value) {
+    attributes.put(UNIQUE_SERVER_ATTRIBUTE, Boolean.toString(value));
+  }
+
+  /**
+   * Determines whether the attributes configure the server to be authenticated using JWT cookies.
+   *
+   * @param attributes the attributes with additional server configuration
+   * @see #SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE
+   */
+  static boolean isCookiesAuthEnabled(Map<String, String> attributes) {
+    return AttributesEvaluator.booleanAttr(
+        attributes, SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE, false);
+  }
+
+  /**
+   * Sets the "cookiesAuthEnabled" flag in the provided attributes to the provided value.
+   *
+   * @param attributes the attributes with the additional server configuration
+   */
+  static void setCookiesAuthEnabled(Map<String, String> attributes, boolean value) {
+    attributes.put(SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE, Boolean.toString(value));
+  }
+
+  /**
+   * Finds the unsecured paths configuration in the provided attributes.s
+   *
+   * @param attributes the attributes with additional server configuration
+   * @see #UNSECURED_PATHS_ATTRIBUTE
+   */
+  static List<String> getUnsecuredPaths(Map<String, String> attributes) {
+    if (attributes == null) {
+      return emptyList();
+    }
+
+    String paths = attributes.get(UNSECURED_PATHS_ATTRIBUTE);
+    if (paths == null) {
+      return emptyList();
+    }
+
+    return Arrays.asList(paths.split("\\s*,\\s*"));
+  }
+
+  static void setUnsecuredPaths(Map<String, String> attributes, List<String> value) {
+    attributes.put(UNSECURED_PATHS_ATTRIBUTE, join(",", value));
+  }
+
+  default boolean isInternal() {
+    return isInternal(getAttributes());
+  }
+
+  default boolean isSecure() {
+    return isSecure(getAttributes());
+  }
+
+  default boolean isUnique() {
+    return isUnique(getAttributes());
+  }
+
+  default boolean isCookiesAuthEnabled() {
+    return isCookiesAuthEnabled(getAttributes());
+  }
+
+  default List<String> getUnsecuredPaths() {
+    return getUnsecuredPaths(getAttributes());
+  }
+}
+
+// helper class for the default methods in the above interface
+class AttributesEvaluator {
+  static boolean booleanAttr(Map<String, String> attrs, String name, boolean defaultValue) {
+    if (attrs == null) {
+      return defaultValue;
+    }
+
+    String attr = attrs.get(name);
+    if (attr == null) {
+      return defaultValue;
+    }
+
+    return Boolean.parseBoolean(attr);
+  }
 }

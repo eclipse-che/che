@@ -978,8 +978,7 @@ public class WorkspaceService extends Service {
           .getServers()
           .forEach(
               (name, server) -> {
-                if (!"true"
-                    .equals(server.getAttributes().get(ServerConfig.INTERNAL_SERVER_ATTRIBUTE))) {
+                if (!ServerConfig.isInternal(server.getAttributes())) {
                   filteredServers.put(name, server);
                 }
               });

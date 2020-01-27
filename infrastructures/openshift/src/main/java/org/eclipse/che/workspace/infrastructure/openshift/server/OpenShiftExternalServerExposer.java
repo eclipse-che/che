@@ -11,11 +11,13 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.server;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Route;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
@@ -95,12 +97,13 @@ public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenSh
 
   @Override
   public void expose(
-      OpenShiftEnvironment openShiftEnvironment,
+      OpenShiftEnvironment env,
       String machineName,
       String serviceName,
+      String serverId,
       ServicePort servicePort,
       Map<String, ServerConfig> externalServers) {
-    Route route =
+    Route commonRoute =
         new RouteBuilder()
             .withName(Names.generateName("route"))
             .withMachineName(machineName)
@@ -108,7 +111,7 @@ public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenSh
             .withServers(externalServers)
             .withTo(serviceName)
             .build();
-    openShiftEnvironment.getRoutes().put(route.getMetadata().getName(), route);
+    env.getRoutes().put(commonRoute.getMetadata().getName(), commonRoute);
   }
 
   private static class RouteBuilder {
@@ -116,7 +119,7 @@ public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenSh
     private String name;
     private String serviceName;
     private IntOrString targetPort;
-    private Map<String, ? extends ServerConfig> serversConfigs;
+    private Map<String, ServerConfig> servers;
     private String machineName;
 
     private RouteBuilder withName(String name) {
@@ -134,8 +137,17 @@ public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenSh
       return this;
     }
 
-    private RouteBuilder withServers(Map<String, ? extends ServerConfig> serversConfigs) {
-      this.serversConfigs = serversConfigs;
+    private RouteBuilder withServer(String serverName, ServerConfig serverConfig) {
+      return withServers(ImmutableMap.of(serverName, serverConfig));
+    }
+
+    private RouteBuilder withServers(Map<String, ServerConfig> servers) {
+      if (this.servers == null) {
+        this.servers = new HashMap<>();
+      }
+
+      this.servers.putAll(servers);
+
       return this;
     }
 
@@ -152,10 +164,7 @@ public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenSh
           .withNewMetadata()
           .withName(name.replace("/", "-"))
           .withAnnotations(
-              Annotations.newSerializer()
-                  .servers(serversConfigs)
-                  .machineName(machineName)
-                  .annotations())
+              Annotations.newSerializer().servers(servers).machineName(machineName).annotations())
           .endMetadata()
           .withNewSpec()
           .withNewTo()
