@@ -12,12 +12,12 @@
 package org.eclipse.che.selenium.dashboard.organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -34,8 +34,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 // Known permanent failure https://github.com/eclipse/che/issues/15822
-@Test(groups = {UNDER_REPAIR})
-// @Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S})
+@Test(groups = {TestGroup.UNDER_REPAIR, TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S})
 public class AddWorkspaceToOrganizationTest {
 
   private static final String WORKSPACE_FOR_ADMIN_1 = generate("workspace", 4);
