@@ -285,9 +285,9 @@ export class CheWorkspace {
    * If there are no changes, it's not updated
    */
   fetchWorkspaces(): ng.IPromise<Array<che.IWorkspace>> {
-    let promise = this.remoteWorkspaceAPI.query({'maxItems': 256}).$promise;
+    const promise = this.remoteWorkspaceAPI.query({'maxItems': 256}).$promise;
 
-    promise.then((workspaces: Array<che.IWorkspace>) => {
+    return promise.then((workspaces: Array<che.IWorkspace>) => {
       this.workspaceIds.length = 0;
       workspaces.forEach((workspace: che.IWorkspace) => {
         if (!workspace.temporary) {
@@ -310,7 +310,6 @@ export class CheWorkspace {
       return this.$q.reject(error);
     });
 
-    return promise;
   }
 
   /**
