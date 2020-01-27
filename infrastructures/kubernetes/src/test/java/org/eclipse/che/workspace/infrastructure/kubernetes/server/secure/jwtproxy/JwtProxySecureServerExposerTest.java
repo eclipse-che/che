@@ -88,8 +88,8 @@ public class JwtProxySecureServerExposerTest {
         .expose(
             eq(k8sEnv),
             eq(MACHINE_NAME),
-            isNull(),
             eq(JWT_PROXY_SERVICE_NAME),
+            isNull(),
             eq(jwtProxyServicePort),
             eq(servers));
   }
