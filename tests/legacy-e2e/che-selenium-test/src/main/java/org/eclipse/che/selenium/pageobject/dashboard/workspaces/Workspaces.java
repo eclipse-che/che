@@ -85,7 +85,7 @@ public class Workspaces {
     String WORKSPACE_ITEM_ACTIONS =
         "//div[@id='ws-name-%s']//*[@name='workspace-stop-start-button']/div";
     String WORKSPACE_ITEM_CONFIGURE_BUTTON =
-        "//div[@id='ws-name-%s']//a[@name='configure-workspace-button']";
+        "//div[@id='ws-name-%s']//span[@name='configure-workspace-button']";
     String WORKSPACE_ITEM_ADD_PROJECT_BUTTON =
         "//div[@id='ws-name-%s']//span[@name='add-project-button']";
     String WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON =
