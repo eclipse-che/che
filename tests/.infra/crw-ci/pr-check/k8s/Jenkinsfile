@@ -160,6 +160,15 @@ pipeline {
                         sh "mvn clean install -f ${WORKSPACE}/pom.xml -T 4 -U -DskipTests -Dskip-enforce -Dskip-validate-sources"
                     }
                 }
+
+                stage("Pull test images") {
+                    steps {
+                        sh """
+                            docker pull quay.io/eclipse/che-e2e:nightly
+                            docker pull quay.io/eclipse/happy-path:nightly
+                        """
+                    }
+                }
             }
         }
 
@@ -274,9 +283,7 @@ pipeline {
 
         stage("Run E2E Happy path tests") {
             steps {
-                sh """
-                     docker pull eclipse/che-e2e:nightly
-                     
+                sh """                     
                      CHE_URL=http://${cheHost}
                      docker run --shm-size=1g --net=host --ipc=host \\
                        -p 5920:5920 \\
