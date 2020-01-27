@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.regex.Pattern;
 import org.eclipse.che.api.core.ValidationException;
 
@@ -50,7 +51,8 @@ public final class NamespaceNameValidator {
     return validateInternal(name).isOk();
   }
 
-  private static ValidationResult validateInternal(String namespaceName) {
+  @VisibleForTesting
+  static ValidationResult validateInternal(String namespaceName) {
     if (isNullOrEmpty(namespaceName)) {
       return ValidationResult.NULL_OR_EMPTY;
     }
@@ -66,13 +68,13 @@ public final class NamespaceNameValidator {
     return ValidationResult.OK;
   }
 
-  private enum ValidationResult {
+  enum ValidationResult {
     OK,
     NULL_OR_EMPTY,
     TOO_LONG,
     INVALID;
 
-    public boolean isOk() {
+    boolean isOk() {
       return this == OK;
     }
 
