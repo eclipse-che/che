@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.multiuser.api.authentication.commons.filter;
 
-import static java.lang.String.format;
 import static org.eclipse.che.multiuser.api.authentication.commons.Constants.CHE_SUBJECT_ATTRIBUTE;
 
 import java.io.IOException;
@@ -126,9 +125,9 @@ public abstract class MultiUserEnvironmentInitializationFilter implements Filter
       session.setAttribute(CHE_SUBJECT_ATTRIBUTE, sessionSubject);
     } else if (!sessionSubject.getUserId().equals(userId)) {
       LOG.debug(
-          format(
-              "Invalidating session with mismatched user IDs: old was %s, new is %s.",
-              sessionSubject.getUserId(), userId));
+          "Invalidating session with mismatched user IDs: old was '{}', new is '{}'.",
+          sessionSubject.getUserId(),
+          userId);
       session.invalidate();
       HttpSession new_session = httpRequest.getSession(true);
       sessionSubject = extractSubject(token);
