@@ -43,7 +43,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S})
+// Known permanent failure https://github.com/eclipse/che/issues/15822
+@Test(groups = {TestGroup.UNDER_REPAIR, TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S})
 public class ShareWorkspaceMemberTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);

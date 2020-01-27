@@ -76,7 +76,6 @@ export class TemplateListController {
     this.cheNotification = cheNotification;
     this.devfileRegistry = devfileRegistry;
     this.createWorkspaceSvc = createWorkspaceSvc;
-    this.devfileRegistryUrl = cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
 
     this.createButtonConfig = {
       mainAction: {
@@ -102,10 +101,20 @@ export class TemplateListController {
       }]
     };
 
-    this.init();
+    cheWorkspace.fetchWorkspaceSettings().then(() => {
+      const workspaceSettings = cheWorkspace.getWorkspaceSettings();
+      this.devfileRegistryUrl = workspaceSettings && workspaceSettings.cheWorkspaceDevfileRegistryUrl;
+      this.init();
+    });
   }
 
   private init(): void {
+    if (!this.devfileRegistryUrl) {
+      const message = 'Failed to load the devfile registry URL.';
+      this.cheNotification.showError(message);
+      this.$log.error(message);
+      return;
+    }
     this.isLoading = true;
     this.devfileRegistry.fetchDevfiles(this.devfileRegistryUrl).then((devfiles: Array<IDevfileMetaData>) => {
       this.devfiles = devfiles.map(devfile => {

@@ -50,7 +50,12 @@ export class DevfileSelectorController {
   loadDevfiles(): void {
     let location = this.cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
     this.devfileRegistry.fetchDevfiles(location).then((data: Array<IDevfileMetaData>) => {
-      this.devfiles = data;
+      this.devfiles = data.map(devfile => {
+        if (!devfile.icon.startsWith('http')) {
+          devfile.icon = location + devfile.icon;
+        }
+        return devfile;
+      });
 
       if (this.devfiles && this.devfiles.length > 0) {
         this.devfileOnClick(this.devfiles[0]);

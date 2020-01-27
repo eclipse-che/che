@@ -38,7 +38,7 @@ export class DashboardConfig {
             const defer = $q.defer();
             cheWorkspace.fetchWorkspaces().then(() => {
               if (cheWorkspace.getWorkspaces().length === 0) {
-                $window.open(MENU_ITEM.getStarted, '_self');
+                $window.open(MENU_ITEM.getstarted, '_self');
                 defer.reject();
               } else {
                 defer.resolve();

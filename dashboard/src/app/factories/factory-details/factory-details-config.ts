@@ -13,7 +13,7 @@
 
 import {FactoryDetailsController} from '../factory-details/factory-details.controller';
 import {InformationTabConfig} from './information-tab/information-tab-config';
-
+import { FactoryConfigService } from '../factory-config.service';
 
 export class FactoryDetailsConfig {
 
@@ -26,7 +26,12 @@ export class FactoryDetailsConfig {
         title: 'Factory',
         templateUrl: 'app/factories/factory-details/factory-details.html',
         controller: 'FactoryDetailsController',
-        controllerAs: 'factoryDetailsController'
+        controllerAs: 'factoryDetailsController',
+        resolve: {
+          initData: ['factoryConfigService', (svc: FactoryConfigService) => {
+            return svc.allowFactoriesRoutes();
+          }]
+        }
       };
 
       $routeProvider.accessWhen('/factory/:id', locationProvider)

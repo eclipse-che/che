@@ -11,7 +11,6 @@
  */
 'use strict';
 
-
 import {FactoryDetailsConfig} from './factory-details/factory-details-config';
 import {CreateFactoryConfig} from './create-factory/create-factory-config';
 import {LastFactoriesConfig} from './last-factories/last-factories-config';
@@ -20,6 +19,7 @@ import {FactoryItemController} from './list-factories/factory-item/factory-item.
 import {CheFactoryItem} from './list-factories/factory-item/factory-item.directive';
 import {LoadFactoryController} from './load-factory/load-factory.controller';
 import {LoadFactoryService} from './load-factory/load-factory.service';
+import { FactoryConfigService } from './factory-config.service';
 
 export class FactoryConfig {
 
@@ -32,27 +32,44 @@ export class FactoryConfig {
     register.controller('LoadFactoryController', LoadFactoryController);
     register.service('loadFactoryService', LoadFactoryService);
 
+    register.service('factoryConfigService', FactoryConfigService);
+
     // config routes
     register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
-      $routeProvider.accessWhen('/factories', {
-        title: 'Factories',
-        templateUrl: 'app/factories/list-factories/list-factories.html',
-        controller: 'ListFactoriesController',
-        controllerAs: 'listFactoriesCtrl'
-      })
+      $routeProvider
+        .accessWhen('/factories', {
+          title: 'Factories',
+          templateUrl: 'app/factories/list-factories/list-factories.html',
+          controller: 'ListFactoriesController',
+          controllerAs: 'listFactoriesCtrl',
+          resolve: {
+            initData: ['factoryConfigService', (svc: FactoryConfigService) => {
+              return svc.allowFactoriesRoutes();
+            }]
+          }
+        })
         .accessWhen('/load-factory', {
           title: 'Load Factory',
           templateUrl: 'app/factories/load-factory/load-factory.html',
           controller: 'LoadFactoryController',
-          controllerAs: 'loadFactoryController'
+          controllerAs: 'loadFactoryController',
+          resolve: {
+            initData: ['factoryConfigService', (svc: FactoryConfigService) => {
+              return svc.allowFactoriesRoutes();
+            }]
+          }
         })
-      .accessWhen('/load-factory/:id', {
-        title: 'Load Factory',
-        templateUrl: 'app/factories/load-factory/load-factory.html',
-        controller: 'LoadFactoryController',
-        controllerAs: 'loadFactoryController'
-      });
-
+        .accessWhen('/load-factory/:id', {
+          title: 'Load Factory',
+          templateUrl: 'app/factories/load-factory/load-factory.html',
+          controller: 'LoadFactoryController',
+          controllerAs: 'loadFactoryController',
+          resolve: {
+            initData: ['factoryConfigService', (svc: FactoryConfigService) => {
+              return svc.allowFactoriesRoutes();
+            }]
+          }
+        });
     }]);
 
     // config files
@@ -63,4 +80,3 @@ export class FactoryConfig {
     /* tslint:enable */
   }
 }
-
