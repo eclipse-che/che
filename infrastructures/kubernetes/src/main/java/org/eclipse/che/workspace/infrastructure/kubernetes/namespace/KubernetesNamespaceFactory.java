@@ -39,7 +39,6 @@ import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.user.server.UserManager;
-import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -373,7 +372,7 @@ public class KubernetesNamespaceFactory {
           namespace);
     }
 
-    if (!WorkspaceRuntimes.isNamespaceNameValid(namespace)) {
+    if (!NamespaceNameValidator.isValid(namespace)) {
       // At a certain unfortunate past version of Che, we stored invalid namespace names.
       // At this point in time, we're trying to work with an existing workspace that never could
       // started OR has been running since before that unfortunate version. In both cases, going
@@ -416,7 +415,7 @@ public class KubernetesNamespaceFactory {
       throws InfrastructureException {
     String namespace = resolveLegacyNamespaceName(resolutionCtx);
 
-    if (!WorkspaceRuntimes.isNamespaceNameValid(namespace) || !checkNamespaceExists(namespace)) {
+    if (!NamespaceNameValidator.isValid(namespace) || !checkNamespaceExists(namespace)) {
       namespace = evaluateNamespaceName(resolutionCtx);
     }
 

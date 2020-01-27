@@ -847,6 +847,11 @@ public class WorkspaceRuntimesTest {
     }
 
     @Override
+    public boolean isNamespaceValid(String namespaceName) {
+      return true;
+    }
+
+    @Override
     public RuntimeContext internalPrepare(RuntimeIdentity id, InternalEnvironment environment) {
       throw new UnsupportedOperationException();
     }

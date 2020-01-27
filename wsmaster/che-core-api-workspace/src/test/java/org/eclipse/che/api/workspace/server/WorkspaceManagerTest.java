@@ -166,6 +166,8 @@ public class WorkspaceManagerTest {
             return new SubjectImpl(NAMESPACE_1, USER_ID, "token", false);
           }
         });
+
+    when(runtimes.isInfrastructureNamespaceValid(any())).thenReturn(true);
   }
 
   @Test
@@ -642,6 +644,7 @@ public class WorkspaceManagerTest {
             ImmutableMap.of("default", environment),
             ImmutableMap.of("attr", "value"));
     when(devfileConverter.convert(any())).thenReturn(convertedConfig);
+    when(runtimes.isInfrastructureNamespaceValid(eq("-invalid-dns-name"))).thenReturn(false);
 
     mockAnyWorkspaceStart();
 

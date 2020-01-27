@@ -461,11 +461,11 @@ public class WorkspaceManager {
       }
     }
 
-    if (!WorkspaceRuntimes.isNamespaceNameValid(targetNamespace)) {
+    if (!runtimes.isInfrastructureNamespaceValid(targetNamespace)) {
       try {
         targetNamespace = runtimes.evalInfrastructureNamespace(buildResolutionContext(workspace));
 
-        if (targetNamespace == null || !WorkspaceRuntimes.isNamespaceNameValid(targetNamespace)) {
+        if (targetNamespace == null || !runtimes.isInfrastructureNamespaceValid(targetNamespace)) {
           throw new ServerException(
               format(
                   "The workspace would be started in a namespace/project"
@@ -629,7 +629,7 @@ public class WorkspaceManager {
       }
     }
 
-    if (targetNamespace == null || !WorkspaceRuntimes.isNamespaceNameValid(targetNamespace)) {
+    if (targetNamespace == null || !runtimes.isInfrastructureNamespaceValid(targetNamespace)) {
       throw new ServerException(
           format(
               "The workspace would be started in a namespace/project"
