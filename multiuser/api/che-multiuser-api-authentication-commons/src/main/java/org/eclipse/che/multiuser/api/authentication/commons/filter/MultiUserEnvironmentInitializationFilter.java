@@ -115,7 +115,15 @@ public abstract class MultiUserEnvironmentInitializationFilter implements Filter
     HttpSession session = httpRequest.getSession(true);
     // retrieve and check / create new subject
     sessionSubject = (Subject) session.getAttribute(CHE_SUBJECT_ATTRIBUTE);
-    if (sessionSubject == null || !sessionSubject.getToken().equals(token)) {
+    if (sessionSubject == null) {
+      sessionSubject = extractSubject(token);
+      session.setAttribute(CHE_SUBJECT_ATTRIBUTE, sessionSubject);
+    } else if (!sessionSubject.getUserId().equals(userId)) {
+      session.invalidate();
+      HttpSession new_session = httpRequest.getSession(true);
+      sessionSubject = extractSubject(token);
+      new_session.setAttribute(CHE_SUBJECT_ATTRIBUTE, sessionSubject);
+    } else if (!sessionSubject.getToken().equals(token)) {
       sessionSubject = extractSubject(token);
       session.setAttribute(CHE_SUBJECT_ATTRIBUTE, sessionSubject);
     }
