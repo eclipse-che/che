@@ -109,32 +109,36 @@ public class DefaultEditorProvisioner {
    *
    * @param components The set of components currently present in the Devfile
    * @param contentProvider content provider for plugin references retrieval
-   * @throws DevfileException
+   * @throws DevfileException - A DevfileException containing any caught InfrastructureException
    */
   private void provisionDefaultPlugins(
       List<ComponentImpl> components, FileContentProvider contentProvider) throws DevfileException {
     Map<String, String> missingPluginsIdToRef = new HashMap<>(defaultPluginsToRefs);
     removeAlreadyAddedPlugins(components, contentProvider, missingPluginsIdToRef);
-    addMissingPlugins(components, contentProvider, missingPluginsIdToRef);
+    try {
+      addMissingPlugins(components, contentProvider, missingPluginsIdToRef);
+    } catch (InfrastructureException e) {
+      throw new DevfileException(e.getMessage(), e);
+    }
   }
 
   /**
    * Checks if any of the Devfile's components are also in the list of missing default plugins, and
    * removes them.
    *
-   * @param components - The list of Devfile components
+   * @param devfileComponents - The list of Devfile components
    * @param contentProvider - The content provider to retrieve YAML
    * @param missingPluginsIdToRef - The list of default plugins that are not currently in the list
    *     of Devfile components
    */
   private void removeAlreadyAddedPlugins(
-      List<ComponentImpl> components,
+      List<ComponentImpl> devfileComponents,
       FileContentProvider contentProvider,
       Map<String, String> missingPluginsIdToRef)
       throws DevfileException {
-    for (ComponentImpl t : components) {
-      if (PLUGIN_COMPONENT_TYPE.equals(t.getType())) {
-        String pluginPublisherAndName = getPluginPublisherAndName(t, contentProvider);
+    for (ComponentImpl component : devfileComponents) {
+      if (PLUGIN_COMPONENT_TYPE.equals(component.getType())) {
+        String pluginPublisherAndName = getPluginPublisherAndName(component, contentProvider);
         missingPluginsIdToRef.remove(pluginPublisherAndName);
       }
     }
@@ -147,30 +151,26 @@ public class DefaultEditorProvisioner {
    * its meta.yaml can be retrieved. From the meta.yaml, the new Component's ID and reference are
    * properly set, and the Component is added to the list.
    *
-   * @param components - The list of Devfile components
+   * @param devfileComponents - The list of Devfile components
    * @param contentProvider - The content provider to retrieve YAML
    * @param missingPluginsIdToRef - The list of default plugins that are not currently in the list
    *     of devfile components
-   * @throws DevfileException
+   * @throws InfrastructureException if the parser is unable to evaluate the FQN of the plugin.
    */
   private void addMissingPlugins(
-      List<ComponentImpl> components,
+      List<ComponentImpl> devfileComponents,
       FileContentProvider contentProvider,
       Map<String, String> missingPluginsIdToRef)
-      throws DevfileException {
+      throws InfrastructureException {
     for (String pluginRef : missingPluginsIdToRef.values()) {
       ComponentImpl component;
-      try {
-        ExtendedPluginFQN fqn = pluginFQNParser.parsePluginFQN(pluginRef);
-        if (!isNullOrEmpty(fqn.getId())) {
-          component = new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginRef);
-        } else {
-          component = createReferencePluginComponent(pluginRef, contentProvider);
-        }
-        components.add(component);
-      } catch (InfrastructureException e) {
-        throw new DevfileException(e.getMessage(), e);
+      ExtendedPluginFQN fqn = pluginFQNParser.parsePluginFQN(pluginRef);
+      if (!isNullOrEmpty(fqn.getId())) {
+        component = new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginRef);
+      } else {
+        component = createReferencePluginComponent(pluginRef, contentProvider);
       }
+      devfileComponents.add(component);
     }
   }
 
@@ -178,10 +178,11 @@ public class DefaultEditorProvisioner {
    * Evaluates a plugin FQN by retrieving it's meta.yaml, and sets it's name and reference to the
    * appropriate values.
    *
-   * @param pluginRef - The plugin ref string
+   * @param pluginRef - The formatted plugin reference (e.g.
+   *     eclipse/che-machine-exec-plugin/nightly)
    * @param contentProvider - The content provider used to read YAML data
    * @return - A {@link ComponentImpl} with it's ID and reference URL set.
-   * @throws InfrastructureException
+   * @throws InfrastructureException when the parser cannot evalute the plugin's FQN.
    */
   private ComponentImpl createReferencePluginComponent(
       String pluginRef, FileContentProvider contentProvider) throws InfrastructureException {
