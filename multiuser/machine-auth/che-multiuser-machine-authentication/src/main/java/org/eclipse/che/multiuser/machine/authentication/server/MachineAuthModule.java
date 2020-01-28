@@ -82,6 +82,9 @@ public class MachineAuthModule extends AbstractModule {
     machineAuthenticatedResources
         .addBinding()
         .toInstance(new MachineAuthenticatedResource("/activity", "active"));
+    machineAuthenticatedResources
+        .addBinding()
+        .toInstance(new MachineAuthenticatedResource("oauth", "token"));
 
     machineAuthenticatedResources
         .addBinding()
