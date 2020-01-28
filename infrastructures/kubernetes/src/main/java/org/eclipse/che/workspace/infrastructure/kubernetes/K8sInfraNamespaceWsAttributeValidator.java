@@ -16,12 +16,12 @@ import static java.lang.String.format;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 
 import java.util.Map;
-import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.WorkspaceAttributeValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator;
 
 /**
  * Validates the values of {@link
@@ -31,10 +31,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
  * @author Sergii Leshchenko
  */
 public class K8sInfraNamespaceWsAttributeValidator implements WorkspaceAttributeValidator {
-
-  private final int METADATA_NAME_MAX_LENGTH = 63;
-  private final String METADATA_NAME_REGEX = "[a-z0-9]([-a-z0-9]*[a-z0-9])?";
-  private final Pattern METADATA_NAME_PATTERN = Pattern.compile(METADATA_NAME_REGEX);
 
   private final Provider<KubernetesNamespaceFactory> namespaceFactoryProvider;
 
@@ -57,25 +53,7 @@ public class K8sInfraNamespaceWsAttributeValidator implements WorkspaceAttribute
   public void validate(Map<String, String> attributes) throws ValidationException {
     String namespace = attributes.get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
     if (!isNullOrEmpty(namespace)) {
-      if (namespace.length() > METADATA_NAME_MAX_LENGTH) {
-        throw new ValidationException(
-            "The specified namespace "
-                + namespace
-                + " is invalid: must be no more than 63 characters");
-      }
-
-      if (!METADATA_NAME_PATTERN.matcher(namespace).matches()) {
-        throw new ValidationException(
-            "The specified namespace "
-                + namespace
-                + " is invalid: a DNS-1123 label must consist of lower case alphanumeric"
-                + " characters or '-', and must start and end with an"
-                + " alphanumeric character (e.g. 'my-name', or '123-abc', regex used for"
-                + " validation is '"
-                + METADATA_NAME_REGEX
-                + "')");
-      }
-
+      NamespaceNameValidator.validate(namespace);
       namespaceFactoryProvider.get().checkIfNamespaceIsAllowed(namespace);
     }
   }
