@@ -11,7 +11,7 @@ RELEASE-TEMPLATE-BEGIN
 | Owner | Process | Script | Artifact(s) |
 | --- | --- | --- | --- |
 | <ul><li>[ ] @azatsarynnyy</li></ul>| [che-theia](https://github.com/eclipse/che-theia/blob/master/RELEASE.md) | [***MANUAL***](https://github.com/eclipse/che-theia/blob/master/RELEASE.md) | `quay.io/eclipse/che-theia` |
-| <ul><li>[ ] @nickboldt</li></ul>| [che-machine-exec](https://github.com/eclipse/che-machine-exec/blob/master/RELEASE.md) | [RELEASE.sh](https://github.com/eclipse/che-machine-exec/blob/master/RELEASE.sh) | `quay.io/eclipse/che-machine-exec` | 
+| <ul><li>[ ] @nickboldt</li></ul>| [che-machine-exec](https://github.com/eclipse/che-machine-exec/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-machine-exec/blob/master/make-release.sh) | `quay.io/eclipse/che-machine-exec` | 
 | <ul><li>[ ] @ibuziuk / @nickboldt</li></ul>| che-plugin-registry | ***MANUAL*** | `quay.io/eclipse/che-plugin-registry` | 
 | | | | <ul><li>[ ] Copy nightly/next versions of che-theia & machine-exec as `$VERSION` to master and `$BRANCH` branches</li></ul>| 
 | <ul><li>[ ] @nickboldt</li></ul>| [che-devfile-registry](https://github.com/eclipse/che-devfile-registry/blob/master/RELEASE.md) | [RELEASE.sh](https://github.com/eclipse/che-devfile-registry/blob/master/RELEASE.sh) | `quay.io/eclipse/che-devfile-registry` | 
