@@ -68,6 +68,7 @@ public final class NamespaceNameValidator {
     return ValidationResult.OK;
   }
 
+  @VisibleForTesting
   enum ValidationResult {
     OK,
     NULL_OR_EMPTY,

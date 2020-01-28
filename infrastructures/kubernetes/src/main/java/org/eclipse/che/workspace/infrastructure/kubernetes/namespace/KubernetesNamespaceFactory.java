@@ -399,10 +399,12 @@ public class KubernetesNamespaceFactory {
         // log a warning including a stacktrace to be able to figure out from where we got here...
         LOG.warn(
             "The namespace '{}' of the workspace '{}' is not valid but we currently don't have"
-                + " an active user to try an recover from this situation.",
+                + " an active user to try an recover from this situation. We're letting the parent"
+                + " workflow continue, but it may fail at some later point in time because of"
+                + " the incorrect namespace name in use.",
             namespace,
             workspace.getId(),
-            new Exception());
+            new Throwable());
       }
 
       // ok, we tried to recover the namespace but nothing helped.
