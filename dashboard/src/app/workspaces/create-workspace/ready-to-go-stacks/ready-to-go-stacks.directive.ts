@@ -11,8 +11,13 @@
  */
 'use strict';
 
+import { DevfileChangeEventData } from '../devfile-change-event-data';
+
 export interface IReadyToGoStacksScopeBindings {
-  onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs?: { [key: string]: any} }) => void;
+  onChange: IReadyToGoStacksScopeOnChange;
+}
+export interface IReadyToGoStacksScopeOnChange {
+  (eventData: DevfileChangeEventData): void;
 }
 
 export class ReadyToGoStacks implements ng.IDirective {

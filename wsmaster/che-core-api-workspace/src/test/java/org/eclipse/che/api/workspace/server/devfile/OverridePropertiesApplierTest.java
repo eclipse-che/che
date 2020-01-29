@@ -55,6 +55,48 @@ public class OverridePropertiesApplierTest {
   }
 
   @Test
+  public void shouldCreateUnExistingAttributesInDevfile() throws Exception {
+    String json = "{" + "\"apiVersion\": \"1.0.0\"" + "}";
+    Map<String, String> overrides = new HashMap<>();
+    overrides.put("attributes.persistVolumes", "true");
+    // when
+    JsonNode result = applier.applyPropertiesOverride(jsonMapper.readTree(json), overrides);
+    assertEquals(result.get("attributes").get("persistVolumes").textValue(), "true");
+  }
+
+  @Test
+  public void shouldUpdateExistingAttributesInDevfile() throws Exception {
+    String json =
+        "{"
+            + "\"apiVersion\": \"1.0.0\","
+            + "\"attributes\": {"
+            + "    \"persistVolumes\": \"false\""
+            + "  }"
+            + "}";
+    Map<String, String> overrides = new HashMap<>();
+    overrides.put("attributes.persistVolumes", "true");
+    // when
+    JsonNode result = applier.applyPropertiesOverride(jsonMapper.readTree(json), overrides);
+    assertEquals(result.get("attributes").get("persistVolumes").textValue(), "true");
+  }
+
+  @Test
+  public void shouldUpdateExistingAttributesWithDotsInDevfile() throws Exception {
+    String json =
+        "{"
+            + "\"apiVersion\": \"1.0.0\","
+            + "\"attributes\": {"
+            + "    \"che.persistVolumes\": \"false\""
+            + "  }"
+            + "}";
+    Map<String, String> overrides = new HashMap<>();
+    overrides.put("attributes.che.persistVolumes", "true");
+    // when
+    JsonNode result = applier.applyPropertiesOverride(jsonMapper.readTree(json), overrides);
+    assertEquals(result.get("attributes").get("che.persistVolumes").textValue(), "true");
+  }
+
+  @Test
   public void shouldRewriteValueInProjectsArrayElementByName() throws Exception {
     String json =
         "{"
@@ -155,7 +197,7 @@ public class OverridePropertiesApplierTest {
   @Test(
       expectedExceptions = OverrideParameterException.class,
       expectedExceptionsMessageRegExp =
-          "Override path 'commands.run.foo.bar' starts with an unsupported field pointer. Supported fields are \\{\"apiVersion\",\"metadata\",\"projects\"\\}.")
+          "Override path 'commands.run.foo.bar' starts with an unsupported field pointer. Supported fields are \\{\"apiVersion\",\"metadata\",\"projects\"\\,\"attributes\"\\}.")
   public void shouldThrowExceptionIfOverrideReferenceUsesUnsupportedField() throws Exception {
     String json =
         "{"

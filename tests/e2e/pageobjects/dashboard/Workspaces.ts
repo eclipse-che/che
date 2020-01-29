@@ -69,7 +69,7 @@ export class Workspaces {
     async clickWorkspaceListItem(workspaceName: string, timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
         Logger.debug(`Workspaces.clickWorkspaceListItem "${workspaceName}"`);
 
-        var namespace: string = TestConstants.TS_SELENIUM_USERNAME;
+        let namespace: string = TestConstants.TS_SELENIUM_USERNAME;
         const workspaceListItemLocator: By = By.css(`div[id='ws-full-name-${namespace}/${workspaceName}']`);
 
         await this.driverHelper.waitAndClick(workspaceListItemLocator, timeout);
@@ -86,7 +86,7 @@ export class Workspaces {
     async waitWorkspaceListItemAbcence(workspaceName: string, timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceListItemAbcence "${workspaceName}"`);
 
-        var namespace: string = TestConstants.TS_SELENIUM_USERNAME;
+        let namespace: string = TestConstants.TS_SELENIUM_USERNAME;
         const workspaceListItemLocator: By = By.css(`div[id='ws-full-name-${namespace}/${workspaceName}']`);
 
         await this.driverHelper.waitDisappearance(workspaceListItemLocator, timeout);

@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.commons.tracing;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
+
 import com.google.common.annotations.Beta;
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
@@ -73,7 +75,7 @@ public final class TracingTags {
   /** Set error status and associated tags on a span, given a throwable */
   public static void setErrorStatus(Span span, Throwable e) {
     TracingTags.ERROR.set(span, true);
-    TracingTags.ERROR_REASON.set(span, e.getMessage());
+    TracingTags.ERROR_REASON.set(span, firstNonNull(e.getMessage(), "Unknown reason"));
     TracingTags.SAMPLING_PRIORITY.set(span, 1);
   }
 

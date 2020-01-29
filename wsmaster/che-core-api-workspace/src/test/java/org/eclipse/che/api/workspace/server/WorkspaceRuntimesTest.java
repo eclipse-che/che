@@ -216,7 +216,7 @@ public class WorkspaceRuntimesTest {
     when(noEnvFactory.create(eq(null))).thenReturn(expectedEnvironment);
 
     InternalEnvironment actualEnvironment =
-        runtimes.createInternalEnvironment(null, emptyMap(), emptyList());
+        runtimes.createInternalEnvironment(null, emptyMap(), emptyList(), null);
 
     assertEquals(actualEnvironment, expectedEnvironment);
   }
@@ -229,7 +229,7 @@ public class WorkspaceRuntimesTest {
       throws Exception {
     EnvironmentImpl environment = new EnvironmentImpl();
     environment.setRecipe(new RecipeImpl("not-supported-type", "", "", null));
-    runtimes.createInternalEnvironment(environment, emptyMap(), emptyList());
+    runtimes.createInternalEnvironment(environment, emptyMap(), emptyList(), null);
   }
 
   @Test(
@@ -241,7 +241,7 @@ public class WorkspaceRuntimesTest {
   public void
       internalEnvironmentShouldThrowExceptionWhenNoEnvironmentFactoryFoundForNoEnvironmentWorkspaceCase()
           throws Exception {
-    runtimes.createInternalEnvironment(null, emptyMap(), emptyList());
+    runtimes.createInternalEnvironment(null, emptyMap(), emptyList(), null);
   }
 
   @Test
@@ -844,6 +844,11 @@ public class WorkspaceRuntimesTest {
     public String evaluateLegacyInfraNamespace(NamespaceResolutionContext resolutionContext)
         throws InfrastructureException {
       return "defaultLegacyNamespace";
+    }
+
+    @Override
+    public boolean isNamespaceValid(String namespaceName) {
+      return true;
     }
 
     @Override

@@ -27,14 +27,17 @@ div.workspace-details-warning-info
   background-color $warning-color
 
 .workspace-details-content
+  & > md-tabs
+    height 100%
+
   md-tab-content
     padding 0
 
   .config-import .config-editor
     margin-top 10px
 
-    .CodeMirror
-      height: 500px
+    .monaco-editor
+      height: 500px !important
 
   .workspace-details-tab-content
 

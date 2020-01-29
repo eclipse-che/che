@@ -11,17 +11,19 @@
  */
 'use strict';
 
+import { CheAPI } from '../../api/che-api.factory';
+
 interface IEditor {
-  refresh: Function;
-  on(name: string, listener: (...args: any[]) => any);
-  getDoc(): any;
+  render: Function;
+  onDidBlurEditorWidget: Function;
+  getModel(): any;
   getCursor(): ICursorPos;
   setCursor(cursorPos: ICursorPos): void;
 }
 
 interface ICursorPos {
   line: number;
-  ch: number;
+  column: number;
 }
 
 interface IEditorState {
@@ -48,10 +50,11 @@ export class CheEditorController {
   private editorOptions: {
     mode?: string;
     readOnly?: boolean;
-    lineWrapping?: boolean;
-    lineNumbers?: boolean;
+    wordWrap?: string;
+    lineNumbers?: string;
     onLoad: Function;
   };
+
   /**
    * Editor form controller.
    */
@@ -79,7 +82,7 @@ export class CheEditorController {
   /**
    * Cursor position.
    */
-  private cursorPos: ICursorPos = { line: 0, ch: 0 };
+  private cursorPos: ICursorPos = { line: 0, column: 0 };
 
   /**
    * Default constructor that is using resource injection
@@ -93,48 +96,16 @@ export class CheEditorController {
     this.editorOptions = {
       mode: angular.isString(this.editorMode) ? this.editorMode : 'application/json',
       readOnly: this.editorReadOnly ? this.editorReadOnly : false,
-      lineWrapping: true,
-      lineNumbers: true,
+      lineNumbers: 'on',
+      wordWrap: 'on',
       onLoad: (editor: IEditor) => {
-        this.$timeout(() => {
-          //to avoid Ctrl+Z clear the content
-          editor.getDoc().clearHistory();
-          editor.refresh();
-        }, 1000);
-        const doc = editor.getDoc();
+        const doc = editor.getModel();
         this.setEditorValue = (content: string) => {
           doc.setValue(content);
         };
-        editor.on('change', () => {
-          const { line, ch } = editor.getCursor();
-          if (line === 0 && ch === 0) {
-            editor.setCursor(this.cursorPos);
-          } else {
-            this.cursorPos.ch = ch;
-            this.cursorPos.line = line;
-          }
+        doc.onDidChangeContent(() => {
           this.$timeout(() => {
             this.editorState.errors.length = 0;
-            let editorErrors: Array<{ id: string; message: string }> = doc.getAllMarks().filter((mark: any) => {
-              return mark.className && mark.className.includes('error');
-            }).map((mark: any) => {
-              const annotation = '__annotation';
-              let message: string;
-              if (mark[annotation]) {
-                message = mark[annotation].message.split('\n').map((part: string) => {
-                  return !part.includes('-^') ? part : '... -';
-                }).join(' ');
-              } else {
-                message = 'Parse error';
-              }
-              return { id: mark.id, message: message };
-            });
-            editorErrors.forEach((editorError: { id: string; message: string }) => {
-              if (!editorError || !editorError.message) {
-                return;
-              }
-              this.editorState.errors.push(editorError.message);
-            });
             if (angular.isFunction(this.validator)) {
               try {
                 const customValidatorState: IEditorState = this.validator();
@@ -155,8 +126,65 @@ export class CheEditorController {
             this.editorForm.$setValidity('custom-validator', this.editorState.isValid, null);
           }, 500);
         });
+        this.YAMLValidation();
       }
     };
+  }
+
+  YAMLValidation() {
+    require('regenerator-runtime');
+    const MODEL_URI = 'inmemory://model.yaml';
+    const MONACO_URI = monaco.Uri.parse(MODEL_URI);
+
+    const p2m = new (window as any).monacoConversion.ProtocolToMonacoConverter();
+
+    function createDocument(model) {
+      return (window as any).yamlLanguageServer.TextDocument.create(
+        MODEL_URI,
+        model.getModeId(),
+        model.getVersionId(),
+        model.getValue()
+      );
+    }
+
+    const yamlService = (window as any).yamlService;
+    const pendingValidationRequests = new Map();
+
+    const getModel = () => monaco.editor.getModels()[0];
+
+    const cleanPendingValidation = (document) => {
+      const request = pendingValidationRequests.get(document.uri);
+      if (request !== undefined) {
+        clearTimeout(request);
+        pendingValidationRequests.delete(document.uri);
+      }
+    };
+
+    const cleanDiagnostics = () =>
+      monaco.editor.setModelMarkers(monaco.editor.getModel(MONACO_URI), 'default', []);
+
+    const doValidate = (document) => {
+      if (document.getText().length === 0) {
+        cleanDiagnostics();
+        return;
+      }
+      yamlService.doValidation(document, false).then((diagnostics) => {
+        const markers = p2m.asDiagnostics(diagnostics);
+        monaco.editor.setModelMarkers(getModel(), 'default', markers);
+      });
+    };
+
+    getModel().onDidChangeContent(() => {
+      const document = createDocument(getModel());
+      cleanPendingValidation(document);
+      pendingValidationRequests.set(
+        document.uri,
+        setTimeout(() => {
+          pendingValidationRequests.delete(document.uri);
+          doValidate(document);
+        })
+      );
+    });
   }
 
   /**

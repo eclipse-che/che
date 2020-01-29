@@ -8,18 +8,12 @@ projects:
       location: 'https://github.com/eclipse/che.git'
       sparseCheckoutDir: /workspace-loader/
 components:
-  - alias: theia-editor
-    type: cheEditor
-    id: eclipse/che-theia/next
-  - alias: exec-plugin
-    type: chePlugin
-    id: eclipse/che-machine-exec-plugin/0.0.1
   - alias: typescript-plugin
     type: chePlugin
     id: che-incubator/typescript/1.30.2
   - alias: ws-loader-dev
     type: dockerimage
-    image: 'eclipse/che-dashboard-dev:nightly'
+    image: 'quay.io/eclipse/che-dashboard-dev:nightly'
     endpoints:
       - name: dev-server
         port: 3000

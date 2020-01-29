@@ -18,9 +18,9 @@ import {CheFactoryTemplate} from './che-factory-template.factory';
 import {ChePreferences} from './che-preferences.factory';
 import {CheService} from './che-service.factory';
 import {CheOAuthProvider} from './che-o-auth-provider.factory';
-import {CheAgent} from './che-agent.factory';
 import {CheUser} from './che-user.factory';
-
+import {CheDevfile} from './che-devfile.factory';
+import {CheKubernetesNamespace} from './che-kubernetes-namespace.factory';
 
 /**
  * This class is providing the entry point for accessing to Che API
@@ -29,41 +29,67 @@ import {CheUser} from './che-user.factory';
  */
 export class CheAPI {
 
-  static $inject = ['cheWorkspace', 'cheFactory', 'cheFactoryTemplate',
-               'cheProfile', 'chePreferences', 'cheService', 'cheOAuthProvider', 'cheAgent',
-            'cheSsh', 'cheUser', 'chePermissions', 'cheOrganization'];
+  static $inject = [
+    'cheDevfile',
+    'cheFactory',
+    'cheFactoryTemplate',
+    'cheKubernetesNamespace',
+    'cheOAuthProvider',
+    'cheOrganization',
+    'chePermissions',
+    'chePreferences',
+    'cheProfile',
+    'cheService',
+    'cheSsh',
+    'cheUser',
+    'cheWorkspace',
+  ];
 
-  private cheWorkspace: CheWorkspace;
-  private cheProfile: CheProfile;
-  private chePreferences: ChePreferences;
+  private cheDevfile: CheDevfile;
   private cheFactory: CheFactory;
   private cheFactoryTemplate: CheFactoryTemplate;
-  private cheService: CheService;
+  private cheKubernetesNamespace: che.api.ICheKubernetesNamespace;
   private cheOAuthProvider: CheOAuthProvider;
-  private cheAgent: CheAgent;
+  private cheOrganization: che.api.ICheOrganization;
+  private chePermissions: che.api.IChePermissions;
+  private chePreferences: ChePreferences;
+  private cheProfile: CheProfile;
+  private cheService: CheService;
   private cheSsh: CheSsh;
   private cheUser: CheUser;
-  private chePermissions: che.api.IChePermissions;
-  private cheOrganization: che.api.ICheOrganization;
+  private cheWorkspace: CheWorkspace;
 
   /**
    * Default constructor that is using resource
    */
-  constructor(cheWorkspace: CheWorkspace, cheFactory: CheFactory, cheFactoryTemplate: CheFactoryTemplate,
-              cheProfile: CheProfile, chePreferences: ChePreferences, cheService: CheService, cheOAuthProvider: CheOAuthProvider, cheAgent: CheAgent,
-              cheSsh: CheSsh, cheUser: CheUser, chePermissions: che.api.IChePermissions, cheOrganization: che.api.ICheOrganization) {
-    this.cheWorkspace = cheWorkspace;
-    this.cheProfile = cheProfile;
+  constructor(
+    cheDevfile: CheDevfile,
+    cheFactory: CheFactory,
+    cheFactoryTemplate: CheFactoryTemplate,
+    cheKubernetesNamespace: CheKubernetesNamespace,
+    cheOAuthProvider: CheOAuthProvider,
+    cheOrganization: che.api.ICheOrganization,
+    chePermissions: che.api.IChePermissions,
+    chePreferences: ChePreferences,
+    cheProfile: CheProfile,
+    cheService: CheService,
+    cheSsh: CheSsh,
+    cheUser: CheUser,
+    cheWorkspace: CheWorkspace,
+  ) {
+    this.cheDevfile = cheDevfile;
     this.cheFactory = cheFactory;
     this.cheFactoryTemplate = cheFactoryTemplate;
-    this.chePreferences = chePreferences;
-    this.cheService = cheService;
+    this.cheKubernetesNamespace = cheKubernetesNamespace;
     this.cheOAuthProvider = cheOAuthProvider;
-    this.cheAgent = cheAgent;
+    this.cheOrganization = cheOrganization;
+    this.chePermissions = chePermissions;
+    this.chePreferences = chePreferences;
+    this.cheProfile = cheProfile;
+    this.cheService = cheService;
     this.cheSsh = cheSsh;
     this.cheUser = cheUser;
-    this.chePermissions = chePermissions;
-    this.cheOrganization = cheOrganization;
+    this.cheWorkspace = cheWorkspace;
   }
 
   /**
@@ -104,14 +130,6 @@ export class CheAPI {
    */
   getService(): CheService {
     return this.cheService;
-  }
-
-  /**
-   * The Che Agent API
-   * @returns {CheAgent}
-   */
-  getAgent(): CheAgent {
-    return this.cheAgent;
   }
 
   /**
@@ -161,5 +179,20 @@ export class CheAPI {
    */
   getOrganization(): che.api.ICheOrganization {
     return this.cheOrganization;
+  }
+
+  /**
+   * The Che Devfile API
+   * @returns {che.api.ICheDevfile}
+   */
+  getDevfile(): che.api.ICheDevfile {
+    return this.cheDevfile;
+  }
+
+  /**
+   * The Che Kubernetes Namespace API
+   */
+  getKubernetesNamespace(): che.api.ICheKubernetesNamespace {
+    return this.cheKubernetesNamespace;
   }
 }

@@ -17,12 +17,12 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>7.6.0-SNAPSHOT</version>
+        <version>7.8.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-assembly-parent</artifactId>
     <packaging>pom</packaging>
-    <name>Che IDE :: Parent</name>
+    <name>Che Assembly :: Parent</name>
     <modules>
         <module>assembly-swagger-war</module>
         <module>assembly-wsmaster-war</module>

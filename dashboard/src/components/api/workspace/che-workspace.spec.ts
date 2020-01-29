@@ -86,14 +86,11 @@ describe('CheWorkspace', () => {
 
         // add the listener
         let listener = new Listener();
-        factory.addListener(listener);
+        factory.addListener('onChangeWorkspaces', listener.onChangeWorkspaces);
 
         // no workspaces now on factory or on listener
         expect(factory.getWorkspaces().length).toEqual(0);
         expect(listener.getWorkspaces().length).toEqual(0);
-
-        // expecting a GET
-        httpBackend.expectGET('/api/workspace');
 
         // providing request
         // add workspaces on Http backend

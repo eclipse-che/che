@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    group: load-tests
+  name: REPLACE_NAME
+spec:
+  completions: REPLACE_COMPLETITIONS
+  backoffLimit: 1
+  template:
+    metadata:
+      name: load-tests-template
+      labels:
+        group: load-tests
+    spec:
+      containers:
+      - env:                                 
+        - name: TS_SELENIUM_BASE_URL
+          value: REPLACE_URL
+        - name: TS_SELENIUM_USERNAME
+          value: REPLACE_USERNAME
+        - name: TS_SELENIUM_PASSWORD
+          value: REPLACE_PASSWORD
+        - name: TEST_SUITE
+          value: load-test
+        - name: TIMESTAMP
+          value: REPLACE_TIMESTAMP
+        - name: TS_SELENIUM_MULTIUSER
+          value: "true"
+        - name: TS_SELENIUM_LOAD_PAGE_TIMEOUT
+          value: "600000"
+        - name: TS_SELENIUM_START_WORKSPACE_TIMEOUT
+          value: "600000"
+        - name: TS_SELENIUM_DEFAULT_TIMEOUT
+          value: "600000"
+        - name: TESTED_ENVIRONMENT
+          value: 'CRW'
+        image: REPLACE_IMAGE 
+        imagePullPolicy: Always
+        name: load-testing-container
+        resources:
+          requests:
+            memory: "200Mi"
+            cpu: "250m"
+          limits:
+            memory: "750Mi"
+            cpu: "450m"
+      restartPolicy: Never    

@@ -54,10 +54,7 @@ gulp.task('styles', function () {
 
   var css = gulp.src([
     path.join(conf.paths.modules, '/font-awesome/css/font-awesome.css'),
-    path.join(conf.paths.modules, '/angular-material/**/*.css'),
-    path.join(conf.paths.modules, '/codemirror/lib/codemirror.css'),
-    path.join(conf.paths.modules, '/codemirror/addon/lint/lint.css'),
-    path.join(conf.paths.modules, '/codemirror/addon/fold/foldgutter.css')
+    path.join(conf.paths.modules, '/angular-material/**/*.css')
   ])
     .pipe(concat('css-files.css'));
 

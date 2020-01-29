@@ -37,6 +37,23 @@ public final class Constants {
 
   public static final String CHE_WORKSPACE_AUTO_START = "che.workspace.auto_start";
 
+  /**
+   * The configuration property that defines a default value for persist volumes that clients like
+   * Dashboard should propose for users during workspace creation.
+   *
+   * <p>Possible values: true or false
+   *
+   * <ul>
+   *   <li>In case of true - PersistentVolumeClaims are used by declared volumes by user and
+   *       plugins. `true` value is supposed not to be set explicitly in Devfile attributes since
+   *       it's default fixed behaviour.
+   *   <li>In case of false - emptyDir is used instead of PVCs. Note that data will be lost after
+   *       workspace restart.
+   * </ul>
+   */
+  public static final String CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY =
+      "che.workspace.persist_volumes.default";
+
   /** Property name for Che plugin registry url. */
   public static final String CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY =
       "che.workspace.plugin_registry_url";
@@ -112,14 +129,6 @@ public final class Constants {
    * <p>Example of the attribute value: 'eclipse/plugin1/0.0.1, redhat/plugin2/1.0.0'
    */
   public static final String WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE = "plugins";
-
-  /**
-   * Template for workspace attribute key that sets sidecar limit in a plugin. %s should be replaced
-   * with pluginPublisher/pluginName. When plugin provides several sidecars this property sets the
-   * same limit for each sidecar, so is not that useful in such a case. Value format see {@link
-   * KubernetesSize}
-   */
-  public static final String SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE = "sidecar.%s.memory_limit";
 
   /**
    * Describes workspace runtimes which perform start/stop of this workspace. Should be set/read

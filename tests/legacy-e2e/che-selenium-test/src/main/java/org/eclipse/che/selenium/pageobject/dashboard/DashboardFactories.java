@@ -105,7 +105,7 @@ public class DashboardFactories {
     String BULK_CHECKBOX = "//md-checkbox[@aria-label='Factory list']";
     String DELETE_FACTORY_BTN_ID = "delete-item-button";
     String DELETE_DIALOG_BUTTON_ID = "ok-dialog-button";
-    String SEARCH_FACTORY_FIELD = "//input[@ng-placeholder='Search']";
+    String SEARCH_FACTORY_FIELD = "//input[placeholder='Search']";
   }
 
   private interface AddActionWindow {

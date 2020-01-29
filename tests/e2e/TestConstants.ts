@@ -15,9 +15,19 @@ export const TestConstants = {
     TS_SELENIUM_BASE_URL: process.env.TS_SELENIUM_BASE_URL || 'http://sample-url',
 
     /**
+     * Base URl of web console OpenShift which uses to test OperatorHub.
+     */
+    TS_SELENIUM_WEB_CONSOLE_OCP_URL: process.env.TS_SELENIUM_WEB_CONSOLE_OCP_URL || 'https://console-openshift-console.apps.',
+
+    /**
      * Run browser in "Headless" (hiden) mode, "false" by default.
      */
     TS_SELENIUM_HEADLESS: process.env.TS_SELENIUM_HEADLESS === 'true',
+
+    /**
+     * Run browser with an enabled or disabled W3C protocol (on Chrome  76 and upper, it is enabled by default), "true" by default.
+     */
+    TS_SELENIUM_W3C_CHROME_OPTION: process.env.TS_SELENIUM_W3C_CHROME_OPTION !== 'false',
 
     /**
      * Browser width resolution, "1920" by default.
@@ -37,7 +47,7 @@ export const TestConstants = {
     /**
      * Timeout in milliseconds waiting for workspace start, "240 000" by default.
      */
-    TS_SELENIUM_START_WORKSPACE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 240000,
+    TS_SELENIUM_START_WORKSPACE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 360000,
 
     /**
      * Timeout in milliseconds waiting for page load, "120 000" by default.
@@ -102,22 +112,28 @@ export const TestConstants = {
     /**
      * Name of namespace created on OCP for installation CHE by using OperatorHub UI.
      */
-    TS_SELENIUM_INSTALL_PROJECT_NAME: process.env.TS_SELENIUM_INSTALL_PROJECT_NAME || 'test-che-operator',
+    TS_SELENIUM_INSTALL_PROJECT_NAME: process.env.TS_SELENIUM_INSTALL_PROJECT_NAME || '',
 
     /**
-     * OpenShift OAuth field line in 'Create Che Cluster' yaml.
+     * Update Channel name on 'Create Operator Subscription' page on OCP, "nightly" or "stable".
      */
-    TS_SELENIUM_OPENSHIFT_OAUTH_FIELD_LINE: process.env.TS_SELENIUM_OPENSHIFT_OAUTH_FIELD_LINE || '21',
+    TS_OCP_OPERATOR_UPDATE_CHANNEL: process.env.TS_OCP_OPERATOR_UPDATE_CHANNEL || 'nightly',
 
     /**
-     * Value of OpenShift OAuth field in the 'Create Che Cluster' yaml using OperatorHub
+     * Value of TLS Support property in the 'Create Che Cluster' yaml using OperatorHub.
+     */
+    TS_SELENIUM_VALUE_TLS_SUPPORT: process.env.TS_SELENIUM_VALUE_TLS_SUPPORT || 'false',
+
+    /**
+     * Value of Self Sign Cert property in the 'Create Che Cluster' yaml using OperatorHub.
+     */
+    TS_SELENIUM_VALUE_SELF_SIGN_CERT: process.env.TS_SELENIUM_VALUE_SELF_SIGN_CERT || 'false',
+
+    /**
+     * Value of OpenShift oAuth property determines how to login in installed application,
+     * if 'false' as an user of application, if 'true' as a regular user of OCP.
      */
     TS_SELENIUM_VALUE_OPENSHIFT_OAUTH: process.env.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH || 'false',
-
-    /**
-     * Catalog Source name on Subscription Overview.
-     */
-    TS_SELENIUM_CATALOG_SOURCE_NAME: process.env.TS_SELENIUM_CATALOG_SOURCE_NAME || 'installed-custom',
 
     /**
      * Prefix URL on deployed application by installation using OperatorHub.
@@ -135,9 +151,54 @@ export const TestConstants = {
     TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || '',
 
     /**
-     * Username used to log in OCP.
+     * Log into OCP if configured an HTPasswd identity provider, "false" by default.
      */
-    TS_SELENIUM_OCP_USERNAME: process.env.TS_SELENIUM_OCP_USERNAME || 'kubeadmin',
+    TS_OCP_LOGIN_PAGE_HTPASW: process.env.TS_OCP_LOGIN_PAGE_HTPASW === 'true',
+
+    /**
+     * Log into CHE in MultiUser mode, "false" by default.
+     */
+    TS_SELENIUM_MULTIUSER: process.env.TS_SELENIUM_MULTIUSER === 'true',
+
+    /**
+     * Temp admin username used to log in OCP.
+     */
+    TS_SELENIUM_OCP_TEMP_ADMIN_USERNAME: process.env.TS_SELENIUM_OCP_TEMP_ADMIN_USERNAME || 'kubeadmin',
+
+    /**
+     * Path to folder with load tests execution report.
+     */
+    TS_SELENIUM_LOAD_TEST_REPORT_FOLDER: process.env.TS_SELENIUM_LOAD_TEST_REPORT_FOLDER || './load-test-folder',
+
+    /**
+     * Enable or disable storing of execution screencast, "true" by default.
+     */
+    TS_SELENIUM_OCP_TEMP_ADMIN_PASSWORD: process.env.TS_SELENIUM_OCP_TEMP_ADMIN_PASSWORD || '',
+
+    /**
+     * Regular username used to login in OCP.
+     */
+    TS_SELENIUM_OCP_USERNAME: process.env.TS_SELENIUM_OCP_USERNAME || '',
+
+    /**
+     * Password regular user used to login in OCP.
+     */
+    TS_SELENIUM_OCP_PASSWORD: process.env.TS_SELENIUM_OCP_PASSWORD || '',
+
+    /**
+     * Email of regular user OpenShift to login CHE.
+     */
+    TS_SELENIUM_EMAIL_USER: process.env.TS_SELENIUM_EMAIL_USER || 'test@test.com',
+
+    /**
+     * First name of regular user OpenShift to login CHE.
+     */
+    TS_SELENIUM_FIRST_NAME: process.env.TS_SELENIUM_FIRST_NAME || 'qa',
+
+    /**
+     * Last name of regular user Openshift to login CHE.
+     */
+    TS_SELENIUM_LAST_NAME: process.env.TS_SELENIUM_LAST_NAME || 'test',
 
     /**
      * Delay between screenshots catching in the milliseconds for the execution screencast.
@@ -160,26 +221,6 @@ export const TestConstants = {
     DELETE_SCREENCAST_IF_TEST_PASS: process.env.DELETE_SCREENCAST_IF_TEST_PASS !== 'false',
 
     /**
-     * Password used to log in OCP.
-     */
-    TS_SELENIUM_OCP_PASSWORD: process.env.TS_SELENIUM_OCP_PASSWORD || '',
-
-    /**
-     * Log into CHE in MultiUser mode, "false" by default.
-     */
-    TS_SELENIUM_MULTIUSER: process.env.TS_SELENIUM_MULTIUSER === 'true',
-
-    /**
-     * Log into OCP if configured an HTPasswd identity provider, "false" by default.
-     */
-    TS_OCP_LOGIN_PAGE_HTPASW: process.env.TS_OCP_LOGIN_PAGE_HTPASW === 'true',
-
-    /**
-     * Update Channel name on 'Create Operator Subscription' page on OCP, "nightly" or "stable".
-     */
-    TS_OCP_OPERATOR_UPDATE_CHANNEL: process.env.TS_OCP_OPERATOR_UPDATE_CHANNEL || 'nightly',
-
-    /**
      * Remote driver URL.
      */
     TS_SELENIUM_REMOTE_DRIVER_URL: process.env.TS_SELENIUM_REMOTE_DRIVER_URL || '',
@@ -192,5 +233,10 @@ export const TestConstants = {
     /**
      * Log level settings, possible variants: 'INFO' (by default), 'DEBUG', 'TRACE'.
      */
-    TS_SELENIUM_LOG_LEVEL: process.env.TS_SELENIUM_LOG_LEVEL || 'INFO'
+    TS_SELENIUM_LOG_LEVEL: process.env.TS_SELENIUM_LOG_LEVEL || 'INFO',
+
+    /**
+     * Running test suite - possible variants can be found in package.json scripts part.
+     */
+    TEST_SUITE: process.env.TEST_SUITE || 'test-happy-path'
 };

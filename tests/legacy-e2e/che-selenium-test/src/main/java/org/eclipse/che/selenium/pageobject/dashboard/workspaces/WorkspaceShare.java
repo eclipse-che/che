@@ -36,7 +36,7 @@ public class WorkspaceShare {
   private interface Locators {
     String ADD_DEVELOPER_BUTTON_XPATH = "//che-button-primary[@che-button-title='Add Developer']";
     String BULK_SELECTION_ID = "share-workspace-bulk-selection";
-    String FILTER_MEMBERS_BY_NAME_FIELD_XPATH = "//input[@ng-placeholder='Search']";
+    String FILTER_MEMBERS_BY_NAME_FIELD_XPATH = "//share-workspace//input[@placeholder='Search']";
     String MEMBER_ITEM_XPATH_PATTERN = "//div[@id='member-email-%s']";
     String MEMBER_NAME_XPATH = MEMBER_ITEM_XPATH_PATTERN + "//span[@data-user-email]";
     String MEMBER_CHECKBOX_XPATH = MEMBER_ITEM_XPATH_PATTERN + "//md-checkbox";
@@ -125,5 +125,10 @@ public class WorkspaceShare {
   public void closeNoMembersDialog() {
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(Locators.NO_MEMBERS_IN_ORGANIZATION_DIALOG_XPATH));
+  }
+
+  public void waitNoMembersDialogClosed() {
+    seleniumWebDriverHelper.waitInvisibility(
+        By.xpath("//div[@class='md-dialog-container ng-scope']"));
   }
 }

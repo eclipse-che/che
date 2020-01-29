@@ -14,14 +14,13 @@ import { TYPES, CLASSES } from '../../inversify.types';
 import { Ide, RightToolbarButton } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
-import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { PreviewWidget } from '../../pageobjects/ide/PreviewWidget';
 import { TestConstants } from '../../TestConstants';
 import { RightToolbar } from '../../pageobjects/ide/RightToolbar';
 import { By, Key, error } from 'selenium-webdriver';
 import { DebugView } from '../../pageobjects/ide/DebugView';
-import { WarningDialog } from '../../pageobjects/ide/WarningDialog';
+import { DialogWindow } from '../../pageobjects/ide/DialogWindow';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import * as fs from 'fs';
@@ -31,14 +30,13 @@ const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
-const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const contextMenu: ContextMenu = e2eContainer.get(CLASSES.ContextMenu);
 const previewWidget: PreviewWidget = e2eContainer.get(CLASSES.PreviewWidget);
 const rightToolbar: RightToolbar = e2eContainer.get(CLASSES.RightToolbar);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
-const warningDialog: WarningDialog = e2eContainer.get(CLASSES.WarningDialog);
+const warningDialog: DialogWindow = e2eContainer.get(CLASSES.DialogWindow);
 const projectName: string = 'petclinic';
 const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
 const workspaceName: string = TestConstants.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME;
@@ -47,6 +45,7 @@ const pathToJavaFolder: string = `${projectName}/src/main/java/org/springframewo
 const pathToChangedJavaFileFolder: string = `${projectName}/src/main/java/org/springframework/samples/petclinic/system`;
 const classPathFilename: string = '.classpath';
 const javaFileName: string = 'PetClinicApplication.java';
+const weclomeControllerJavaFileName: string = 'WelcomeController.java';
 const changedJavaFileName: string = 'CrashController.java';
 const textForErrorMessageChange: string = 'HHHHHHHHHHHHH';
 const codeNavigationClassName: string = 'SpringApplication.class';
@@ -58,6 +57,7 @@ const SpringAppLocators = {
     springTitleLocator: By.xpath('//div[@class=\'container-fluid\']//h2[text()=\'Welcome\']'),
     springMenuButtonLocator: By.css('button[data-target=\'#main-navbar\']'),
     springErrorButtonLocator: By.xpath('//div[@id=\'main-navbar\']//span[text()=\'Error\']'),
+    springHomeButtonLocator: By.className('navbar-brand'),
     springErrorMessageLocator: By.xpath('//p[text()=\'Expected: controller used to ' +
         `showcase what happens when an exception is thrown${textForErrorMessageChange}\']`)
 };
@@ -117,7 +117,7 @@ suite('Language server validation', async () => {
     });
 
     test('Suggestion', async () => {
-        await editor.moveCursorToLineAndChar(javaFileName, 32, 27);
+        await editor.moveCursorToLineAndChar(javaFileName, 32, 21);
         await editor.pressControlSpaceCombination(javaFileName);
         await editor.waitSuggestionWithScrolling(javaFileName, 'run(Class<?> primarySource, String... args) : ConfigurableApplicationContext', 120000);
     });
@@ -147,8 +147,10 @@ suite('Language server validation', async () => {
 });
 
 suite('Validation of workspace build and run', async () => {
+    let applicationUrl: string = '';
+
     test('Build application', async () => {
-        await runTask('build-file-output');
+        await topMenu.runTask('build-file-output');
 
         // workaround for issue: https://github.com/eclipse/che/issues/14771
 
@@ -159,12 +161,14 @@ suite('Validation of workspace build and run', async () => {
     });
 
     test('Run application', async () => {
-        await runTask('run');
+        await topMenu.runTask('run');
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
+        applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 120000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
     });
 
     test('Check the running application', async () => {
+        await previewWidget.waitApplicationOpened(applicationUrl, 60000);
         await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60000, 10000);
     });
 
@@ -183,19 +187,21 @@ suite('Validation of workspace build and run', async () => {
 });
 
 suite('Display source code changes in the running application', async () => {
+    let applicationUrl: string = '';
+
     test('Change source code', async () => {
         await projectTree.expandPathAndOpenFile(pathToChangedJavaFileFolder, changedJavaFileName);
         await editor.waitEditorAvailable(changedJavaFileName);
         await editor.clickOnTab(changedJavaFileName);
         await editor.waitTabFocused(changedJavaFileName);
 
-        await editor.moveCursorToLineAndChar(changedJavaFileName, 34, 55);
+        await editor.moveCursorToLineAndChar(changedJavaFileName, 34, 89);
         await editor.performKeyCombination(changedJavaFileName, textForErrorMessageChange);
         await editor.performKeyCombination(changedJavaFileName, Key.chord(Key.CONTROL, 's'));
     });
 
     test('Build application with changes', async () => {
-        await runTask('build');
+        await topMenu.runTask('build');
         await projectTree.collapseProjectTree(projectName + '/src', 'main');
         await projectTree.expandPathAndOpenFile(projectName, 'result-build.txt', 300000);
         await editor.waitText('result-build.txt', '[INFO] BUILD SUCCESS');
@@ -212,12 +218,14 @@ suite('Display source code changes in the running application', async () => {
     });
 
     test('Run application with changes', async () => {
-        await runTask('run-with-changes');
+        await topMenu.runTask('run-with-changes');
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
+        applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 120000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
     });
 
     test('Check changes are displayed', async () => {
+        await previewWidget.waitApplicationOpened(applicationUrl, 60000);
         await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60000, 10000);
         await checkErrorMessageInApplicationController();
     });
@@ -235,49 +243,43 @@ suite('Display source code changes in the running application', async () => {
 });
 
 suite('Validation of debug functionality', async () => {
+    let applicationUrl: string = '';
+
     test('Open file and activate breakpoint', async () => {
-        await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
-        await editor.activateBreakpoint(javaFileName, 32);
+        await projectTree.expandPathAndOpenFile(pathToJavaFolder + '/system', weclomeControllerJavaFileName);
+        await editor.activateBreakpoint(weclomeControllerJavaFileName, 27);
     });
 
     test('Launch debug', async () => {
-        await runTask('run-debug');
+        await topMenu.runTask('run-debug');
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 180000);
+        applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 180000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 180000);
     });
 
     test('Check content of the launched application', async () => {
-        await checkErrorMessageInApplicationController();
+        await previewWidget.waitApplicationOpened(applicationUrl, 60000);
+        await previewWidget.waitAndSwitchToWidgetFrame();
+        await previewWidget.waitAndClick(SpringAppLocators.springHomeButtonLocator);
+        await driverHelper.getDriver().switchTo().defaultContent();
+        await ide.waitAndSwitchToIdeFrame();
     });
 
-    test('Open debug configuration file', async () => {
-        await isureClickOnDebugMenu();
-        await editor.waitEditorAvailable('launch.json');
-        await editor.selectTab('launch.json');
-    });
-
-    test('Add debug configuration options', async () => {
-        await editor.moveCursorToLineAndChar('launch.json', 11, 7);
-        await editor.performKeyCombination('launch.json', Key.chord(Key.CONTROL, Key.SPACE));
-        await editor.clickOnSuggestion('Java: Launch Program in Current File');
-        await editor.waitTabWithUnsavedStatus('launch.json');
-        await editor.waitText('launch.json', '\"name\": \"Debug (Launch) - Current File\"');
-        await editor.waitTabWithSavedStatus('launch.json');
-    });
 
     test('Run debug and check application stop in the breakpoint', async () => {
-        await editor.selectTab(javaFileName);
+        await editor.selectTab(weclomeControllerJavaFileName);
         await topMenu.selectOption('View', 'Debug');
         await ide.waitRightToolbarButton(RightToolbarButton.Debug);
         await debugView.clickOnDebugConfigurationDropDown();
-        await debugView.clickOnDebugConfigurationItem('Debug (Launch) - Current File');
+        await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote');
         await debugView.clickOnRunDebugButton();
+        await debugView.waitForDebuggerToConnect();
         await previewWidget.refreshPage();
         try {
-            await editor.waitStoppedDebugBreakpoint(javaFileName, 32);
+            await editor.waitStoppedDebugBreakpoint(weclomeControllerJavaFileName, 27);
         } catch (err) {
             await previewWidget.refreshPage();
-            await editor.waitStoppedDebugBreakpoint(javaFileName, 32);
+            await editor.waitStoppedDebugBreakpoint(weclomeControllerJavaFileName, 27);
         }
     });
 });
@@ -303,35 +305,10 @@ async function checkErrorMessageInApplicationController() {
     await ide.waitAndSwitchToIdeFrame();
 }
 
-async function runTask(task: string) {
-    await topMenu.selectOption('Terminal', 'Run Task...');
-    try {
-        await quickOpenContainer.waitContainer();
-    } catch (err) {
-        if (err instanceof error.TimeoutError) {
-            console.log(`After clicking to the "Terminal" -> "Run Task ..." the "Quick Open Container" has not been displayed, one more try`);
-
-            await topMenu.selectOption('Terminal', 'Run Task...');
-            await quickOpenContainer.waitContainer();
-        }
-    }
-
-    await quickOpenContainer.clickOnContainerItem(task);
-    await quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
-}
-
 async function checkCodeNavigationWithContextMenu() {
     await contextMenu.invokeContextMenuOnActiveElementWithKeys();
     await contextMenu.waitContextMenuAndClickOnItem('Go to Definition');
     console.log('Known isuue https://github.com/eclipse/che/issues/14520.');
-}
-
-// sometimes under high loading the first click can be failed
-async function isureClickOnDebugMenu() {
-    try { await topMenu.selectOption('Debug', 'Open Configurations'); } catch (e) {
-        console.log(`After clicking to the Debug top menu the menu has been not opened, try to click again...`);
-        await topMenu.selectOption('Debug', 'Open Configurations');
-    }
 }
 
 async function checkJavaPathCompletion() {

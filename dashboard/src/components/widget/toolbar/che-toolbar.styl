@@ -14,7 +14,7 @@ $toolbar-height = 60px
 .che-toolbar a:hover span
   text-decoration none
 
-.che-toolbar a,
+.che-toolbar *:not(.custom-template) > a,
 .che-toolbar md-icon,
 .che-toolbar .che-toolbar-subheader,
 .che-toolbar .che-toolbar-title-label
@@ -76,7 +76,7 @@ $toolbar-height = 60px
 .che-toolbar-control-button md-icon
   vertical-align inherit
 
-.che-toolbar .che-button.md-button
+.che-toolbar *:not(.custom-template) > .che-button.md-button
   color $white-color !important
   font-size 13px !important
   font-weight bold !important

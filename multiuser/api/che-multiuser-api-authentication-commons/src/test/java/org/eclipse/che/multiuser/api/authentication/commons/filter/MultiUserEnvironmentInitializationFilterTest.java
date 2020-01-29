@@ -29,11 +29,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
+import org.eclipse.che.multiuser.api.authentication.commons.token.RequestTokenExtractor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -102,6 +102,19 @@ public class MultiUserEnvironmentInitializationFilterTest {
 
   @Test
   public void shouldReCreateSubjectIfTokensDidNotMatch() throws Exception {
+    Subject otherSubject =
+        new SubjectImpl(subject.getUserId(), subject.getUserName(), "token111", false);
+    when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn(token);
+    when(sessionStore.getSession(eq(userId), any())).thenReturn(session);
+    when(session.getAttribute(eq(CHE_SUBJECT_ATTRIBUTE))).thenReturn(otherSubject);
+    // when
+    filter.doFilter(request, response, chain);
+    // then
+    verify(filter).extractSubject(eq(token));
+  }
+
+  @Test
+  public void shouldInvalidateSessionIfUserChanged() throws Exception {
     Subject otherSubject = new SubjectImpl("another_user", "user987", "token111", false);
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn(token);
     when(sessionStore.getSession(eq(userId), any())).thenReturn(session);
@@ -109,6 +122,7 @@ public class MultiUserEnvironmentInitializationFilterTest {
     // when
     filter.doFilter(request, response, chain);
     // then
+    verify(session).invalidate();
     verify(filter).extractSubject(eq(token));
   }
 

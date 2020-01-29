@@ -12,7 +12,7 @@ import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
-import { By, Key, error, ActionSequence, Button } from 'selenium-webdriver';
+import { By, Key, error, ActionSequence, Button, WebElement } from 'selenium-webdriver';
 import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
 
@@ -20,7 +20,6 @@ import { Logger } from '../../utils/Logger';
 @injectable()
 export class Editor {
     private static readonly SUGGESTION_WIDGET_BODY_CSS: string = 'div.visible[widgetId=\'editor.widget.suggestWidget\']';
-
     private static readonly ADDITIONAL_SHIFTING_TO_Y: number = 19;
     private static readonly ADDITIONAL_SHIFTING_TO_X: number = 1;
 
@@ -34,33 +33,65 @@ export class Editor {
         await this.driverHelper.waitVisibility(By.css(Editor.SUGGESTION_WIDGET_BODY_CSS), timeout);
     }
 
-    public async waitSuggestionContainerClosed() {
+    public async waitSuggestionContainerClosed(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('Editor.waitSuggestionContainerClosed');
 
-        await this.driverHelper.waitDisappearanceWithTimeout(By.css(Editor.SUGGESTION_WIDGET_BODY_CSS));
+        await this.driverHelper.waitDisappearanceWithTimeout(By.css(Editor.SUGGESTION_WIDGET_BODY_CSS), timeout);
     }
 
     public async waitSuggestion(editorTabTitle: string,
         suggestionText: string,
-        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
+        lineNumber?: number,
+        charNumber?: number) {
 
-        Logger.debug(`Editor.waitSuggestion tabTitle: "${editorTabTitle}" suggestion: "${suggestionText}"`);
+        const charInLineNumber: number = (charNumber ? charNumber : 1);
 
-        const suggestionLocator: By = this.getSuggestionLineXpathLocator(suggestionText);
+        // if line defined the method sets cursor to line and char
+        // before invoking suggestion container and repeat this
+        // cycle if suggestion didn't display
+        if (lineNumber) {
+            await this.waitSuggestionWithResettingCursor(editorTabTitle, suggestionText, timeout, lineNumber, charInLineNumber);
+            return;
+        }
+
+        // if line not defined the method just invoke suggestion container
+        // without setting cursor to line and char and repeat this
+        // cycle if suggestion didn't display
+        await this.waitSuggestionWithoutResettingCursor(editorTabTitle, suggestionText, timeout);
+
+    }
+
+    public async closeSuggestionContainer(editorTabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Editor.closeSuggestionContainer tabTitle: "${editorTabTitle}"`);
 
         await this.driverHelper.getDriver().wait(async () => {
+            // if container already closed stop the method execution
             try {
-                await this.driverHelper.waitVisibility(suggestionLocator, 5000);
+                // for avoiding problem when the inner timeout
+                // bigger than timeout of the method
+                const suggestionContainerTimeout: number = timeout / 2;
+
+                await this.waitSuggestionContainer(suggestionContainerTimeout);
+            } catch (err) {
+                if (err instanceof error.TimeoutError) {
+                    return true;
+                }
+
+                throw err;
+            }
+
+            // try to close container
+            try {
+                await this.pressEscapeButton(editorTabTitle);
+                await this.waitSuggestionContainerClosed(2000);
                 return true;
             } catch (err) {
                 if (!(err instanceof error.TimeoutError)) {
                     throw err;
                 }
-
-                await this.pressEscapeButton(editorTabTitle);
-                await this.waitSuggestionContainerClosed();
-                await this.pressControlSpaceCombination(editorTabTitle);
             }
+
         }, timeout);
     }
 
@@ -81,8 +112,7 @@ export class Editor {
                     throw err;
                 }
 
-                await this.pressEscapeButton(editorTabTitle);
-                await this.waitSuggestionContainerClosed();
+                await this.closeSuggestionContainer(editorTabTitle, timeout);
                 await this.pressControlSpaceCombination(editorTabTitle);
             }
         }, timeout);
@@ -307,36 +337,18 @@ export class Editor {
     async waitStoppedDebugBreakpoint(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.waitStoppedDebugBreakpoint title: "${tabTitle}" line: "${lineNumber}"`);
 
-        const stoppedDebugBreakpointLocator: By = By.xpath(await this.getStoppedDebugBreakpointXpathLocator(tabTitle, lineNumber));
-        await this.driverHelper.waitVisibility(stoppedDebugBreakpointLocator, timeout);
+        await this.driverHelper.waitUntilTrue(() => this.isBreakpointPresent(lineNumber, true), timeout);
     }
 
     async waitBreakpoint(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.waitBreakpoint title: "${tabTitle}" line: "${lineNumber}"`);
 
-        const debugBreakpointLocator: By = await this.getDebugBreakpointLocator(tabTitle, lineNumber);
-        await this.driverHelper.waitVisibility(debugBreakpointLocator, timeout);
+        await this.driverHelper.waitUntilTrue(() => this.isBreakpointPresent(lineNumber), timeout);
     }
 
     async waitBreakpointAbsence(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.waitBreakpointAbsence title: "${tabTitle}" line: "${lineNumber}"`);
-
-        const debugBreakpointLocator: By = await this.getDebugBreakpointLocator(tabTitle, lineNumber);
-        await this.driverHelper.waitDisappearanceWithTimeout(debugBreakpointLocator, timeout);
-    }
-
-    async waitBreakpointHint(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug(`Editor.waitBreakpointHint title: "${tabTitle}" line: "${lineNumber}"`);
-
-        const debugBreakpointHintLocator: By = await this.getDebugBreakpointHintLocator(tabTitle, lineNumber);
-        await this.driverHelper.waitVisibility(debugBreakpointHintLocator, timeout);
-    }
-
-    async waitBreakpointHintDisappearance(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug(`Editor.waitBreakpointHintDisappearance title: "${tabTitle}" line: "${lineNumber}"`);
-
-        const debugBreakpointHintLocator: By = await this.getDebugBreakpointHintLocator(tabTitle, lineNumber);
-        await this.driverHelper.waitDisappearanceWithTimeout(debugBreakpointHintLocator, timeout);
+        await this.driverHelper.waitUntilTrue(() => !this.isBreakpointPresent(lineNumber), timeout);
     }
 
     async activateBreakpoint(tabTitle: string, lineNumber: number) {
@@ -358,6 +370,7 @@ export class Editor {
                 }
 
                 // ignore errors and wait
+                Logger.debug(`Editor.activateBreakpoint - Error: ${err}`);
                 await this.driverHelper.wait(polling);
             }
         }
@@ -369,7 +382,6 @@ export class Editor {
 
         const lineNumberLocator: By = By.xpath(`//div[contains(@class, 'line-numbers') and text()='${lineNumber}']` +
             `//parent::div[contains(@style, 'position')]`);
-
         let elementStyleValue: string = await this.driverHelper.waitAndGetElementAttribute(lineNumberLocator, 'style');
 
         elementStyleValue = elementStyleValue.replace('position: absolute; top: ', '');
@@ -440,31 +452,6 @@ export class Editor {
         return By.xpath(`//div[text()='${tabTitle}']/parent::li[contains(@class, 'theia-mod-dirty')]`);
     }
 
-    private async getStoppedDebugBreakpointXpathLocator(tabTitle: string, lineNumber: number): Promise<string> {
-        const lineYPixelCoordinates: number = await this.getLineYCoordinates(lineNumber);
-        const stoppedDebugBreakpointXpathLocator: string = `//div[contains(@id, '${tabTitle}')]//div[@class='margin']` +
-            `//div[contains(@style, '${lineYPixelCoordinates}px')]` +
-            '//div[contains(@class, \'theia-debug-top-stack-frame\')]';
-
-        return stoppedDebugBreakpointXpathLocator;
-    }
-
-    private async getDebugBreakpointLocator(tabTitle: string, lineNumber: number): Promise<By> {
-        const lineYPixelCoordinates: number = await this.getLineYCoordinates(lineNumber);
-
-        return By.xpath(`//div[contains(@id, '${tabTitle}')]//div[@class='margin']` +
-            `//div[contains(@style, '${lineYPixelCoordinates}px')]` +
-            '//div[contains(@class, \'theia-debug-breakpoint\')]');
-    }
-
-    private async getDebugBreakpointHintLocator(tabTitle: string, lineNumber: number): Promise<By> {
-        const lineYPixelCoordinates: number = await this.getLineYCoordinates(lineNumber);
-
-        return By.xpath(`//div[contains(@id, '${tabTitle}')]//div[@class='margin']` +
-            `//div[contains(@style, '${lineYPixelCoordinates}px')]` +
-            '//div[contains(@class, \'theia-debug-breakpoint-hint\')]');
-    }
-
     private getEditorBodyLocator(editorTabTitle: string): By {
         const editorXpathLocator: string = `//div[@id='theia-main-content-panel']//div[contains(@class, 'monaco-editor')` +
             ` and contains(@data-uri, '${editorTabTitle}')]//*[contains(@class, 'lines-content')]`;
@@ -495,5 +482,98 @@ export class Editor {
         const lineYCoordinates: number = await this.getLineYCoordinates(lineNumber);
 
         return By.xpath(`//div[contains(@style, 'top:${lineYCoordinates}px')]//div[contains(@class, 'squiggly-error')]`);
+    }
+
+    private async waitSuggestionWithResettingCursor(editorTabTitle: string,
+        suggestionText: string,
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
+        lineNumber: number,
+        charNumber: number) {
+
+        const suggestionLocator: By = this.getSuggestionLineXpathLocator(suggestionText);
+
+        const methodLogText: string = `Editor.waitSuggestion tabTitle: "${editorTabTitle}" ` +
+            `suggestion: "${suggestionText}" ` +
+            `line: "${lineNumber}" ` +
+            `char: "${charNumber}"`;
+
+        Logger.debug(methodLogText);
+
+        await this.driverHelper.getDriver().wait(async () => {
+            await this.selectTab(editorTabTitle);
+            await this.moveCursorToLineAndChar(editorTabTitle, lineNumber, charNumber);
+            await this.pressControlSpaceCombination(editorTabTitle);
+
+            try {
+                await this.driverHelper.waitVisibility(suggestionLocator, 5000);
+                await this.closeSuggestionContainer(editorTabTitle);
+                return true;
+            } catch (err) {
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err;
+                }
+            }
+        }, timeout);
+    }
+
+    private async waitSuggestionWithoutResettingCursor(editorTabTitle: string,
+        suggestionText: string,
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+
+        Logger.debug(`Editor.waitSuggestion tabTitle: "${editorTabTitle}" suggestion: "${suggestionText}"`);
+
+        const suggestionLocator: By = this.getSuggestionLineXpathLocator(suggestionText);
+
+        await this.driverHelper.getDriver().wait(async () => {
+            try {
+                await this.driverHelper.waitVisibility(suggestionLocator, 5000);
+                await this.closeSuggestionContainer(editorTabTitle);
+                return true;
+            } catch (err) {
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err;
+                }
+
+                await this.closeSuggestionContainer(editorTabTitle, timeout);
+                await this.pressControlSpaceCombination(editorTabTitle);
+            }
+        }, timeout);
+    }
+
+    /**
+     * Checks for breakpoint presence in currently opened editor on given line.
+     *
+     * @param lineNumber Line number to check the breakpoint presence on.
+     * @param triggered Whether this breakpoint is triggered or not. Default false.
+     */
+
+    private async isBreakpointPresent(lineNumber: number, triggered: boolean = false): Promise<boolean> {
+
+        // get current editor element
+        const currentEditorLocator: By = By.xpath(`//div[contains(@id, 'code-editor-opener') and not(contains(@class, 'p-mod-hidden'))]`);
+        const currentEditor: WebElement = await this.driverHelper.waitVisibility(currentEditorLocator);
+
+        // get line number element
+        const lineNumberLocator: By = By.xpath(`.//div[contains(@class, 'line-numbers') and text()='${lineNumber}']` +
+            `//parent::div[contains(@style, 'position')]`);
+        const lineElement: WebElement = await currentEditor.findElement(lineNumberLocator);
+
+        // get breakpoint locator
+        let breakpointLocator: By;
+        if (triggered) {
+            breakpointLocator = By.xpath(`.//div[contains(@class, 'theia-debug-breakpoint') and contains(@class, 'theia-debug-top-stack-frame')]`);
+        } else {
+            breakpointLocator = By.xpath(`.//div[contains(@class, 'theia-debug-breakpoint')]`);
+        }
+
+        // look for breakpoint
+        const elements: WebElement[] = await lineElement.findElements(breakpointLocator);
+        if (elements.length < 1) {
+            Logger.debug('Editor.isBreakpointPresent - Breakpoint is NOT present.');
+            return false;
+        } else {
+            Logger.debug('Editor.isBreakpointPresent - Breakpoint is present.');
+            return true;
+        }
     }
 }

@@ -72,7 +72,7 @@ public class Workspaces {
     String DELETE_WORKSPACE_BTN = "delete-item-button";
     String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button[text()='Delete']";
     String BULK_CHECKBOX = "//md-checkbox[@aria-label='Workspace list']";
-    String SEARCH_WORKSPACE_FIELD = "//input[@ng-placeholder='Search']";
+    String SEARCH_WORKSPACE_FIELD = "//input[@placeholder='Search']";
     String NO_WORKSPACE_FOUND = "//span[text()='No workspaces found.']";
     String WORKSPACE_ITEM_NAME = "//div[@class='workspace-name-clip' and contains(@id, '/%s')]";
     String WORKSPACE_ITEM_XPATH = "//div[@id='ws-name-%s']";
@@ -85,11 +85,11 @@ public class Workspaces {
     String WORKSPACE_ITEM_ACTIONS =
         "//div[@id='ws-name-%s']//*[@name='workspace-stop-start-button']/div";
     String WORKSPACE_ITEM_CONFIGURE_BUTTON =
-        "//div[@id='ws-name-%s']//a[@name='configure-workspace-button']";
+        "//div[@id='ws-name-%s']//span[@name='configure-workspace-button']";
     String WORKSPACE_ITEM_ADD_PROJECT_BUTTON =
         "//div[@id='ws-name-%s']//span[@name='add-project-button']";
     String WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON =
-        "//div[@id='ws-name-%s']//*[@name='workspace-stop-start-button']/div";
+        "//div[@id='ws-name-%s']//*[@name='workspace-stop-start-button']";
     String WORKSPACE_LIST_HEADER = "//md-item[@class='noselect']//span";
     String WORKSPACE_LIST_ITEM =
         "(//div[@class='workspace-name-clip']/parent::div/parent::div/parent::div)[%s]";
@@ -265,33 +265,19 @@ public class Workspaces {
         .getText();
   }
 
-  public void clickOnWorkspaceActionsButton(String workspaceName) {
-    redrawUiElementsTimeout
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format(Locators.WORKSPACE_ITEM_ACTIONS, workspaceName))))
-        .click();
-  }
+  public void clickOnWorkspaceActionsButton(String workspaceName, String actionButton) {
+    moveCursorToWorkspaceRamSection(workspaceName);
+    waitWorkspaceActionTooltipDisappearance();
 
-  public void clickOnWorkspaceConfigureButton(String workspaceName) {
-    redrawUiElementsTimeout
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format(Locators.WORKSPACE_ITEM_CONFIGURE_BUTTON, workspaceName))))
-        .click();
+    seleniumWebDriverHelper.moveCursorTo(By.xpath(format(actionButton, workspaceName)));
+    seleniumWebDriverHelper.isVisible(
+        By.xpath("//che-workspace-status//div[@uib-tooltip-popup and @is-open='isOpen']"));
+    seleniumWebDriverHelper.waitAndClick((By.xpath(format(actionButton, workspaceName))));
   }
 
   public void clickOnWorkspaceListItem(String userName, String workspaceName) {
     String itemId = String.format("ws-full-name-%s/%s", userName, workspaceName);
     seleniumWebDriverHelper.waitAndClick(By.id(itemId));
-  }
-
-  public void clickOnWorkspaceAddProjectButton(String workspaceName) {
-    redrawUiElementsTimeout
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format(Locators.WORKSPACE_ITEM_ADD_PROJECT_BUTTON, workspaceName))))
-        .click();
   }
 
   public void clickOnRamButton() {

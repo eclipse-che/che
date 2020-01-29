@@ -10,10 +10,10 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
+import {CheWorkspace, WorkspaceStatus} from '../../../../components/api/workspace/che-workspace.factory';
 import {CheBranding} from '../../../../components/branding/che-branding.factory';
 import {WorkspacesService} from '../../workspaces.service';
-
+import {WorkspaceDataManager} from '../../../../components/api/workspace/workspace-data-manager';
 
 const BLUR_TIMEOUT = 5000;
 
@@ -25,42 +25,57 @@ const BLUR_TIMEOUT = 5000;
  */
 export class WorkspaceItemCtrl {
 
-  static $inject = ['$location', 'lodash', 'cheWorkspace', 'workspacesService', '$timeout', '$document', 'cheBranding', '$sce'];
+  static $inject = [
+    '$document',
+    '$location',
+    '$sce',
+    '$timeout',
+    'cheBranding',
+    'cheWorkspace',
+    'lodash',
+    'workspacesService',
+    '$filter'
+  ];
 
-  $location: ng.ILocationService;
-  lodash: any;
-  cheWorkspace: CheWorkspace;
-  workspacesService: WorkspacesService;
   $document: ng.IDocumentService;
+  $location: ng.ILocationService;
   $timeout: ng.ITimeoutService;
+  cheWorkspace: CheWorkspace;
+  lodash: any;
+  workspacesService: WorkspacesService;
 
+  workspaceDataManager: WorkspaceDataManager;
   workspace: che.IWorkspace;
   workspaceName: string;
   workspaceSupportIssues: any;
+  $filter: ng.IFilterService;
 
-  private supportedRecipeTypeIssue: any;
   private supportedVersionTypeIssue: any;
   private timeoutPromise: ng.IPromise<any>;
 
   /**
    * Default constructor that is using resource
    */
-  constructor($location: ng.ILocationService,
-              lodash: any,
-              cheWorkspace: CheWorkspace,
-              workspacesService: WorkspacesService,
-              $timeout: ng.ITimeoutService,
-              $document: ng.IDocumentService,
-              cheBranding: CheBranding,
-              $sce: ng.ISCEService) {
-    this.$location = $location;
-    this.lodash = lodash;
-    this.cheWorkspace = cheWorkspace;
-    this.workspacesService = workspacesService;
-    this.$timeout = $timeout;
+  constructor(
+    $document: ng.IDocumentService,
+    $location: ng.ILocationService,
+    $sce: ng.ISCEService,
+    $timeout: ng.ITimeoutService,
+    cheBranding: CheBranding,
+    cheWorkspace: CheWorkspace,
+    lodash: any,
+    workspacesService: WorkspacesService,
+    $filter: ng.IFilterService,
+  ) {
     this.$document = $document;
+    this.$location = $location;
+    this.$timeout = $timeout;
+    this.cheWorkspace = cheWorkspace;
+    this.lodash = lodash;
+    this.workspacesService = workspacesService;
+    this.$filter = $filter;
 
-    this.supportedRecipeTypeIssue = $sce.trustAsHtml('Current infrastructure doesn\'t support this workspace recipe type.');
+    this.workspaceDataManager = new WorkspaceDataManager();
 
     this.supportedVersionTypeIssue = $sce.trustAsHtml(`This workspace is using old definition format which is not compatible anymore.
           Please follow the <a href="${cheBranding.getDocs().converting}" target="_blank">documentation</a>
@@ -86,10 +101,7 @@ export class WorkspaceItemCtrl {
    * @returns {Array<che.IProject>}
    */
   get projects(): Array<che.IProject> {
-    if (this.workspace.devfile) {
-      return this.workspace.devfile.projects || [];
-    }
-    return this.workspace.config.projects || [];
+    return this.workspaceDataManager.getProjects(this.workspace);
   }
 
   /**
@@ -98,13 +110,7 @@ export class WorkspaceItemCtrl {
    * @returns {boolean}
    */
   get isSupported(): boolean {
-    if (!this.workspacesService.isSupportedRecipeType(this.workspace)) {
-      if (this.workspaceSupportIssues !== this.supportedRecipeTypeIssue) {
-        this.workspaceSupportIssues = this.supportedRecipeTypeIssue;
-      }
-
-      return false;
-    } else if (!this.workspacesService.isSupportedVersion(this.workspace)) {
+    if (!this.workspacesService.isSupported(this.workspace)) {
       if (this.workspaceSupportIssues !== this.supportedVersionTypeIssue) {
         this.workspaceSupportIssues = this.supportedVersionTypeIssue;
       }
@@ -121,34 +127,11 @@ export class WorkspaceItemCtrl {
    * Redirects to workspace details.
    * @param tab {string}
    */
-  redirectToWorkspaceDetails(tab?: string): void {
-    this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspaceName).search({tab: tab ? tab : 'Overview'});
+  redirectToWorkspaceDetails(tab: string = 'Overview'): void {
+    this.$location.path(`/workspace/${this.workspace.namespace}/${this.workspaceName}`).search({tab});
   }
 
-  getDefaultEnvironment(workspace: che.IWorkspace): che.IWorkspaceEnvironment {
-    let environments = workspace.config.environments;
-    let envName = workspace.config.defaultEnv;
-    let defaultEnvironment = environments[envName];
-    return defaultEnvironment;
-  }
-
-  getMemoryLimit(workspace: che.IWorkspace): string {
-    if (!workspace.config && workspace.devfile) {
-      return '-';
-    }
-
-    let environment = this.getDefaultEnvironment(workspace);
-    if (environment) {
-      let limits = this.lodash.pluck(environment.machines, 'attributes.memoryLimitBytes');
-      let total = 0;
-      limits.forEach((limit: number) => {
-        if (limit) {
-          total += limit / (1024 * 1024);
-        }
-      });
-      return (total > 0) ? Math.round(total) + ' MB' : '-';
-    }
-
+  getMemoryLimit(): string {
     return '-';
   }
 
@@ -172,12 +155,28 @@ export class WorkspaceItemCtrl {
     }
   }
 
+  get workspaceTooltip(): string {
+    const isWorkspaceRunning = WorkspaceStatus.RUNNING === WorkspaceStatus[this.getWorkspaceStatus()];
+    const attributes = this.workspace.attributes;
+    const time = parseInt('' + (attributes.updated ? attributes.updated : attributes.created), 10);
+    const amTimeAgo: (time: number) => string = this.$filter('amTimeAgo');
+    return isWorkspaceRunning ? 'Running' : 'Last modified: ' + amTimeAgo(time);
+  }
+
   /**
    * Returns current status of workspace
-   * @returns {String}
    */
   getWorkspaceStatus(): string {
-    let workspace = this.cheWorkspace.getWorkspaceById(this.workspace.id);
-    return workspace ? workspace.status : 'unknown';
+    const workspace = this.cheWorkspace.getWorkspaceById(this.workspace.id);
+    if (!workspace || !workspace.status) {
+      return 'unknown';
+    }
+
+    return workspace.status;
+  }
+
+  isCheckboxEnable(): boolean {
+    const status =  WorkspaceStatus[this.getWorkspaceStatus()];
+    return status === WorkspaceStatus.RUNNING || status === WorkspaceStatus.STOPPED;
   }
 }

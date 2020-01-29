@@ -65,14 +65,21 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
       T k8sEnv,
       String machineName,
       String serviceName,
+      String serverId,
       ServicePort servicePort,
       Map<String, ServerConfig> secureServers)
       throws InfrastructureException {
+
     ServicePort exposedServicePort =
         proxyProvisioner.expose(
             k8sEnv, serviceName, servicePort, servicePort.getProtocol(), secureServers);
 
     exposer.expose(
-        k8sEnv, machineName, proxyProvisioner.getServiceName(), exposedServicePort, secureServers);
+        k8sEnv,
+        machineName,
+        proxyProvisioner.getServiceName(),
+        serverId,
+        exposedServicePort,
+        secureServers);
   }
 }

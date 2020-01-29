@@ -378,7 +378,7 @@ public class KubernetesNamespaceFactoryTest {
 
     WorkspaceImpl workspace =
         new WorkspaceImplBuilder().setId("workspace123").setAttributes(emptyMap()).build();
-    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("JonDoe", "123", null, false));
+    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("jondoe", "123", null, false));
     String namespace = namespaceFactory.getNamespaceName(workspace);
 
     assertEquals(namespace, "che-123");
@@ -391,7 +391,7 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>--",
+            "blabol-<userid>-<username>-<userid>-<username>",
             "",
             "",
             "che-<userid>",
@@ -401,11 +401,11 @@ public class KubernetesNamespaceFactoryTest {
 
     WorkspaceImpl workspace = new WorkspaceImplBuilder().build();
 
-    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("JonDoe", "123", null, false));
+    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("jondoe", "123", null, false));
 
     String namespace = namespaceFactory.getNamespaceName(workspace);
 
-    assertEquals(namespace, "blabol-123-JonDoe-123-JonDoe--");
+    assertEquals(namespace, "blabol-123-jondoe-123-jondoe");
   }
 
   @Test
@@ -414,7 +414,7 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>--",
+            "blabol-<userid>-<username>-<userid>-<username>",
             "",
             "",
             "che-<userid>",
@@ -439,7 +439,7 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>--",
+            "blabol-<userid>-<username>-<userid>-<username>",
             "",
             "",
             "che-<userid>",

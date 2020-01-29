@@ -278,7 +278,7 @@ public class ProjectSourcePage {
   }
 
   public void waitGithubProjectList() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(Locators.GITHUB_PROJECTS_LIST)))
         .isDisplayed();
   }

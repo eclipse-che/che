@@ -9,8 +9,8 @@
  **********************************************************************/
 import * as mocha from 'mocha';
 import { IDriver } from './IDriver';
-import { e2eContainer } from '../inversify.config';
-import { TYPES, CLASSES } from '../inversify.types';
+import { inversifyConfig } from '..';
+import { TYPES, CLASSES } from '..';
 import * as fs from 'fs';
 import * as rm from 'rimraf';
 import { TestConstants } from '../TestConstants';
@@ -19,6 +19,7 @@ import { DriverHelper } from '../utils/DriverHelper';
 import { ScreenCatcher } from '../utils/ScreenCatcher';
 import { ITestWorkspaceUtil } from '../utils/workspace/ITestWorkspaceUtil';
 
+const e2eContainer = inversifyConfig.e2eContainer;
 const driver: IDriver = e2eContainer.get(TYPES.Driver);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
@@ -82,6 +83,19 @@ class CheReporter extends mocha.reporters.Spec {
         await driverHelper.wait(TestConstants.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS);
       }
     });
+
+    runner.on('pass', async (test: mocha.Test) => {
+      if (TestConstants.TEST_SUITE === 'load-test') {
+        const loadTestReportFolder: string = TestConstants.TS_SELENIUM_LOAD_TEST_REPORT_FOLDER;
+        const loadTestFilePath: string = loadTestReportFolder + '/load-test-results.txt';
+        const report = test.title + ': ' + test.duration + '\r';
+        if (!fs.existsSync(loadTestReportFolder)) {
+            fs.mkdirSync(loadTestReportFolder);
+          }
+          fs.appendFileSync(loadTestFilePath, report);
+        }
+      });
+
 
     runner.on('end', async function (test: mocha.Test) {
       // ensure that fired events done
@@ -150,11 +164,9 @@ class CheReporter extends mocha.reporters.Spec {
       // stop and remove running workspace
       if (TestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
         console.log('Property DELETE_WORKSPACE_ON_FAILED_TEST se to true - trying to stop and delete running workspace.');
-        let namespace = TestConstants.TS_SELENIUM_USERNAME;
-        let workspaceId = await testWorkspaceUtil.getIdOfRunningWorkspace(namespace);
-        testWorkspaceUtil.stopWorkspaceById(workspaceId);
-        testWorkspaceUtil.removeWorkspaceById(workspaceId);
+        testWorkspaceUtil.cleanUpAllWorkspaces();
       }
+
     });
   }
 }

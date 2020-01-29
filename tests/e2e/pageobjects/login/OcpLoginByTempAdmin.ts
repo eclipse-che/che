@@ -26,11 +26,13 @@ export class OcpLoginByTempAdmin implements IOcpLoginPage {
 
         if (TestConstants.TS_OCP_LOGIN_PAGE_HTPASW) {
             await this.ocpLogin.clickOnLoginWitnKubeAdmin();
+            await this.ocpLogin.waitOpenShiftLoginPage();
         }
 
-        await this.ocpLogin.enterUserNameOpenShift(TestConstants.TS_SELENIUM_OCP_USERNAME);
-        await this.ocpLogin.enterPasswordOpenShift(TestConstants.TS_SELENIUM_OCP_PASSWORD);
+        await this.ocpLogin.enterUserNameOpenShift(TestConstants.TS_SELENIUM_OCP_TEMP_ADMIN_USERNAME);
+        await this.ocpLogin.enterPasswordOpenShift(TestConstants.TS_SELENIUM_OCP_TEMP_ADMIN_PASSWORD);
         await this.ocpLogin.clickOnLoginButton();
-        await this.ocpLogin.waitDisappearanceLoginPageOpenShift();
+        await this.ocpLogin.waitDisappearanceOpenShiftLoginPage();
     }
+
 }

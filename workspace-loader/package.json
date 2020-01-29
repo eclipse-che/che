@@ -34,9 +34,9 @@
     "webpack-merge": "^4.1.1"
   },
   "dependencies": {
-    "@eclipse-che/api": "latest",    
+    "@eclipse-che/api": "latest",
     "lodash": "4.17.15",
-    "reconnecting-websocket": "3.2.2"
+    "reconnecting-websocket": "4.2.0"
   },
   "jest": {
     "moduleFileExtensions": [

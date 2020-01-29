@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.dashboard.organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.OVERVIEW;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.SHARE;
@@ -42,7 +43,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S})
+// Known permanent failure https://github.com/eclipse/che/issues/15822
+@Test(groups = {TestGroup.UNDER_REPAIR, TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S})
 public class ShareWorkspaceMemberTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
@@ -171,11 +173,14 @@ public class ShareWorkspaceMemberTest {
     theiaIde.waitTheiaIde();
     theiaIde.waitLoaderInvisibility();
     theiaIde.waitTheiaIdeTopPanel();
+    theiaIde.waitAllNotificationsClosed();
 
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
-    theiaIde.waitAllNotificationsClosed();
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
+    theiaIde.waitNotificationDisappearance(
+        "Che Workspace: Finished importing projects.", UPDATING_PROJECT_TIMEOUT_SEC);
+    theiaIde.waitAllNotificationsClosed();
     theiaProjectTree.expandItem(CONSOLE_JAVA_SIMPLE);
     theiaProjectTree.openItem(CONSOLE_JAVA_SIMPLE + "/README.md");
     theiaEditor.waitEditorTab("README.md");

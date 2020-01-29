@@ -47,9 +47,17 @@ export class ChromeDriver implements IDriver {
     }
 
     private getDriverBuilder(options: Options): Builder {
+        const disableW3copts = { 'goog:chromeOptions' : { 'w3c' : false }};
         let builder: Builder = new Builder()
             .forBrowser('chrome')
             .setChromeOptions(options);
+
+        // if 'false' w3c protocl is disabled
+        if (! TestConstants.TS_SELENIUM_W3C_CHROME_OPTION) {
+            builder.withCapabilities(disableW3copts)
+            .forBrowser('chrome')
+            .setChromeOptions(options);
+        }
 
         // if 'true' run with remote driver
         if (TestConstants.TS_SELENIUM_REMOTE_DRIVER_URL) {

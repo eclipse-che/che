@@ -40,9 +40,9 @@ export interface ICommunicationClient {
     /**
      * Performs connections.
      *
-     * @param entrypoint
+     * @param entrypointProvider
      */
-    connect(entrypoint: () => string): Promise<void>;
+    connect(entrypointProvider: () => Promise<string>): Promise<void>;
     /**
      * Close the connection.
      * @param {number} code close code

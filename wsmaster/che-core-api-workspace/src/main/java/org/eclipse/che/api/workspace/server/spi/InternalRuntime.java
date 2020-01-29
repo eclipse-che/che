@@ -12,7 +12,6 @@
 package org.eclipse.che.api.workspace.server.spi;
 
 import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.INTERNAL_SERVER_ATTRIBUTE;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +19,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
@@ -219,7 +219,7 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
     for (Map.Entry<String, ? extends Server> entry : incoming.entrySet()) {
       String name = entry.getKey();
       Server incomingServer = entry.getValue();
-      if (Boolean.parseBoolean(incomingServer.getAttributes().get(INTERNAL_SERVER_ATTRIBUTE))) {
+      if (ServerConfig.isInternal(incomingServer.getAttributes())) {
         outgoing.put(name, incomingServer);
       } else {
         try {

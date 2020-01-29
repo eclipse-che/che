@@ -13,7 +13,7 @@
 
 import { che } from '@eclipse-che/api';
 import { CheJsonRpcApiClient } from './che-json-rpc-api-service';
-import { ICommunicationClient, CODE_REQUEST_TIMEOUT, CommunicationClientEvent } from './json-rpc-client';
+import { ICommunicationClient, CommunicationClientEvent } from './json-rpc-client';
 import { WorkspaceLoader } from '../workspace-loader';
 
 export enum MasterChannels {
@@ -33,16 +33,12 @@ export class CheJsonRpcMasterApi {
     private cheJsonRpcApi: CheJsonRpcApiClient;
     private clientId: string;
 
-    private checkingInterval: number | undefined;
-    private checkingDelay = 10000;
-    private fetchingClientIdTimeout = 5000;
-
-    constructor(private readonly client: ICommunicationClient,
+    constructor(
+        private readonly client: ICommunicationClient,
         private readonly entryPoint: string,
-        private readonly loader: WorkspaceLoader) {
+        private readonly loader: WorkspaceLoader
+    ) {
         this.cheJsonRpcApi = new CheJsonRpcApiClient(client);
-
-        client.addListener('open', () => this.onConnectionOpen());
     }
 
     addListener(eventType: CommunicationClientEvent, handler: Function): void {
@@ -53,53 +49,14 @@ export class CheJsonRpcMasterApi {
         this.client.removeListener(eventType, handler);
     }
 
-    onConnectionOpen(): void {
-        if (this.checkingInterval) {
-            clearInterval(this.checkingInterval);
-            this.checkingInterval = undefined;
-        }
-
-        this.checkingInterval = window.setInterval(() => {
-            let isAlive = false;
-            const fetchClientPromise = new Promise(resolve => {
-                this.fetchClientId().then(() => {
-                    isAlive = true;
-                    resolve(isAlive);
-                }, () => {
-                    isAlive = false;
-                    resolve(isAlive);
-                });
-            });
-
-            // this is timeout of fetchClientId request
-            const fetchClientTimeoutPromise = new Promise(resolve => {
-                setTimeout(() => {
-                    resolve(isAlive);
-                }, this.fetchingClientIdTimeout);
-            });
-
-            Promise.race([fetchClientPromise, fetchClientTimeoutPromise]).then((_isAlive: boolean) => {
-                if (_isAlive) {
-                    return;
-                }
-
-                window.clearInterval(this.checkingInterval);
-                this.checkingInterval = undefined;
-
-                this.client.disconnect(CODE_REQUEST_TIMEOUT);
-            });
-
-        }, this.checkingDelay);
-    }
-
     /**
      * Opens connection to pointed entryPoint.
      *
      * @returns {Promise<void>}
      */
     async connect(): Promise<void> {
-        const entryPointFunction = () => {
-            const entryPoint = this.entryPoint + this.loader.getAuthenticationToken();
+        const entryPointProvider = async () => {
+            const entryPoint = this.entryPoint + (await this.loader.getAuthenticationToken());
             if (this.clientId) {
                 let clientId = `clientId=${this.clientId}`;
                 // in case of re-connection
@@ -115,7 +72,7 @@ export class CheJsonRpcMasterApi {
             return entryPoint;
         };
 
-        await this.cheJsonRpcApi.connect(entryPointFunction);
+        await this.cheJsonRpcApi.connect(entryPointProvider);
         return await this.fetchClientId();
     }
 

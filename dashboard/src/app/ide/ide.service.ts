@@ -69,6 +69,15 @@ class IdeSvc {
 
     this.lastWorkspace = null;
     this.openedWorkspace = null;
+
+    this.$rootScope.$watch(
+      () => (this.$rootScope as any).showIDE,
+      () => {
+        if ((this.$rootScope as any).showIDE === false) {
+          this.closeIde();
+        }
+      }
+    );
   }
 
   displayIDE(): void {
@@ -214,6 +223,15 @@ class IdeSvc {
   updateRecentWorkspace(workspaceId: string): void {
     this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
   }
+
+  closeIde(): void {
+    // remove IDE iframe
+    const iframe = angular.element('#ide-application-iframe');
+    if (iframe) {
+      iframe.remove();
+    }
+  }
+
 }
 
 export default IdeSvc;

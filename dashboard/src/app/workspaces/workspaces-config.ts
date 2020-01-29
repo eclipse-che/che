@@ -15,7 +15,6 @@ import {ListWorkspacesCtrl} from './list-workspaces/list-workspaces.controller';
 import {CheWorkspaceItem} from './list-workspaces/workspace-item/workspace-item.directive';
 import {CheWorkspaceStatus} from './list-workspaces/workspace-status-action/workspace-status.directive';
 import {WorkspaceStatusController} from './list-workspaces/workspace-status-action/workspace-status.controller';
-import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive';
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
 import {WorkspaceEditModeOverlay} from './workspace-edit-mode/workspace-edit-mode-overlay.directive';
 import {WorkspaceEditModeToolbarButton} from './workspace-edit-mode/workspace-edit-mode-toolbar-button.directive';
@@ -79,6 +78,8 @@ import {DevfileByUrl} from './create-workspace/import-custom-stack/devfile-by-ur
 import {DevfileByUrlController} from './create-workspace/import-custom-stack/devfile-by-url/devfile-by-url.controller';
 import {ImportStackController} from './create-workspace/import-custom-stack/import-custom-stack.controller';
 import {ImportStack} from './create-workspace/import-custom-stack/import-custom-stack.directive';
+import {KubernetesNamespaceSelectorController} from './create-workspace/kubernetes-namespace-selector/kubernetes-namespace-selector.controller';
+import {KubernetesNamespaceSelectorDirective} from './create-workspace/kubernetes-namespace-selector/kubernetes-namespace-selector.directive';
 
 /**
  * @ngdoc controller
@@ -99,7 +100,6 @@ export class WorkspacesConfig {
     register.controller('ListWorkspacesCtrl', ListWorkspacesCtrl);
     register.directive('cheWorkspaceItem', CheWorkspaceItem);
     register.controller('WorkspaceItemCtrl', WorkspaceItemCtrl);
-    register.directive('usageChart', UsageChart);
     register.directive('cheWorkspaceStatus', CheWorkspaceStatus);
     register.controller('WorkspaceStatusController', WorkspaceStatusController);
     register.directive('workspaceEditModeOverlay', WorkspaceEditModeOverlay);
@@ -161,6 +161,8 @@ export class WorkspacesConfig {
     register.controller('DevfileByUrlController', DevfileByUrlController);
     register.controller('ImportStackController', ImportStackController);
     register.directive('importStack', ImportStack);
+    register.controller('KubernetesNamespaceSelectorController', KubernetesNamespaceSelectorController);
+    register.directive('kubernetesNamespaceSelector', KubernetesNamespaceSelectorDirective);
 
     // config routes
     register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {

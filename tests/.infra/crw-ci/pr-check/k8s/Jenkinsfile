@@ -5,7 +5,7 @@ pipeline {
 
     options {
         timestamps()
-        timeout(time: 60, unit: 'MINUTES')
+        timeout(time: 1, unit: 'HOURS')
         buildDiscarder(logRotator(artifactDaysToKeepStr: '',
                 artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '100'))
     }
@@ -15,10 +15,13 @@ pipeline {
         JENKINS_BUILD = "true"
 
         DEVFILE_PATH = "${WORKSPACE}/test-workspace-devfile.yaml"
+        CUSTOM_RESOURCE_FILE_PATH = "${WORKSPACE}/custom-resource.yaml"
 
         SUCCESS_THRESHOLD = 5
 
-        LOGS_AND_CONFIGS="${WORKSPACE}/logs-and-configs"
+        LOGS_AND_CONFIGS ="${WORKSPACE}/logs-and-configs"
+
+        mutableCheImageTag = ""
     }
 
     parameters {
@@ -27,7 +30,7 @@ pipeline {
                 description: 'Repo of Che server image')
 
         string(name: 'cheImageTag',
-                defaultValue: "$ghprbPullId",
+                defaultValue: "",
                 description: 'Tag of Che server image')
 
         booleanParam(name: 'buildChe',
@@ -42,65 +45,105 @@ pipeline {
                 defaultValue: "",
                 description: 'URL of devfile of test workspace')
 
+        text(name: 'customResourceFileContent',
+                defaultValue: "",
+                description: 'Content of custom-resource.yaml')
+
         booleanParam(name: 'createTestWorkspace',
                 defaultValue: true,
                 description: 'Should create test workspace')
+
+        string(name: 'ghprbSourceBranch',
+                defaultValue: "master")
     }
 
     stages {
+        stage("Setup environment") {
+            steps {
+                script {
+                    if (cheImageTag == null || cheImageTag == '') {
+                        mutableCheImageTag = ghprbPullId
+                    } else {
+                        mutableCheImageTag = cheImageTag
+                    }
+
+                    if (customResourceFileContent == null || customResourceFileContent == '') {
+                        sh """
+                            wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
+                            -O $CUSTOM_RESOURCE_FILE_PATH
+                        """
+
+                    } else {
+                        writeFile file: CUSTOM_RESOURCE_FILE_PATH, text: customResourceFileContent
+                    }
+                }
+            }
+        }
+
         stage("Prepare to start Che on K8S") {
             failFast true
 
             parallel {
                 stage("Download chectl") {
                     steps {
-                        // TO-DO use option "--install-path" https://github.com/eclipse/che/pull/14182
-                        sh """
-                           curl -sL https://www.eclipse.org/che/chectl/ > install_chectl.sh
-                           chmod +x install_chectl.sh
-                           sudo PATH=$PATH ./install_chectl.sh --channel=next
-                           sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
-                           sudo chmod +x ${WORKSPACE}/chectl
-                        """
+                        script {
+                            retry(2) {
+                                // TO-DO use option "--install-path" https://github.com/eclipse/che/pull/14182
+                                sh """
+                                curl -sL https://www.eclipse.org/che/chectl/ > install_chectl.sh
+                                chmod +x install_chectl.sh
+                                sudo PATH=$PATH ./install_chectl.sh --channel=next
+                                sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
+                                sudo chmod +x ${WORKSPACE}/chectl
+                                """
+                            }
+                        }
                     }
                 }
 
                 stage("Start Kubernetes") {
                     steps {
-                        echo "Workaround k8s error https://github.com/eclipse/che/issues/14902"
-                        sh """
-                            cat /etc/sysctl.conf
-                            echo "net.bridge.bridge-nf-call-iptables = 1" | sudo tee -a /etc/sysctl.conf
-                            sudo sysctl -p
-                        """
+                        script {
+                            retry(2) {
+                                echo "Workaround k8s error https://github.com/eclipse/che/issues/14902"
+                                sh """
+                                    cat /etc/sysctl.conf
+                                    echo "net.bridge.bridge-nf-call-iptables = 1" | sudo tee -a /etc/sysctl.conf
+                                    sudo sysctl -p
+                                """
 
-                        sh """
-                            # https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md
-                            export MINIKUBE_WANTUPDATENOTIFICATION=false
-                            export MINIKUBE_WANTREPORTERRORPROMPT=false
-                            export MINIKUBE_HOME=\$HOME
-                            export CHANGE_MINIKUBE_NONE_USER=true
-                            export KUBECONFIG=\$HOME/.kube/config
-                            export DOCKER_CONFIG=\$HOME/.docker
+                                sh """
+                                    # https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md
+                                    export MINIKUBE_WANTUPDATENOTIFICATION=false
+                                    export MINIKUBE_WANTREPORTERRORPROMPT=false
+                                    export MINIKUBE_HOME=\$HOME
+                                    export CHANGE_MINIKUBE_NONE_USER=true
+                                    export KUBECONFIG=\$HOME/.kube/config
+                                    export DOCKER_CONFIG=\$HOME/.docker
 
-                            mkdir -p \$HOME/.kube \$HOME/.minikube
-                            touch \$KUBECONFIG
+                                    mkdir -p \$HOME/.kube \$HOME/.minikube
+                                    touch \$KUBECONFIG
 
-                            sudo -E /usr/local/bin/minikube start \\
-                            --vm-driver=none \\
-                            --cpus 4 \\
-                            --memory 13000 \\
-                            --logtostderr
-                        """
+                                    sudo -E /usr/local/bin/minikube start \\
+                                    --vm-driver=none \\
+                                    --cpus 4 \\
+                                    --memory 13000 \\
+                                    --logtostderr
+                                """
+                            }
+                        }
                     }
                 }
 
                 stage("Build Che including upstream projects") {
                     when {
-                        expression { buildChe }
+                        expression { return buildChe.toString() == 'true' }
                     }
 
                     steps {
+                        echo "buildChe = $params.buildChe"
+                        echo "createTestWorkspace = $params.createTestWorkspace"
+
                         echo "Build branch ${ghprbSourceBranch} of upstream projects"
                         sh """
                             project_list=(
@@ -125,21 +168,34 @@ pipeline {
                         sh "mvn clean install -f ${WORKSPACE}/pom.xml -T 4 -U -DskipTests -Dskip-enforce -Dskip-validate-sources"
                     }
                 }
+
+                stage("Pull test images") {
+                    steps {
+                        script {
+                            retry(2) {
+                                sh """
+                                    docker pull quay.io/eclipse/che-e2e:nightly
+                                    docker pull quay.io/eclipse/happy-path:nightly
+                                """
+                            }
+                        }
+                    }
+                }
             }
         }
 
         stage("Build and push che-server image") {
             when {
-                expression { buildChe }
+                expression { return buildChe.toString() == 'true' }
             }
 
             steps {
                 withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
                     sh """
-                        ${WORKSPACE}/dockerfiles/che/build.sh --dockerfile:Dockerfile
-                        docker tag eclipse/che-server:nightly docker.io/${cheImageRepo}:${cheImageTag}
+                        ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
+                        docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
                         docker login -u maxura -p ${maxura_docker_password}
-                        docker push docker.io/${cheImageRepo}:${cheImageTag}
+                        docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
                     """
                 }
             }
@@ -147,16 +203,14 @@ pipeline {
 
         stage("Start Che") {
             steps {
-                echo "Download and patch Che custom-resource.yaml"
+                echo "Patch Che custom-resource.yaml"
                 sh """
-                    wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml
-                    
-                    sed -i "s|cheImage: ''|cheImage: '${cheImageRepo}'|" ${WORKSPACE}/org_v1_che_cr.yaml
-                    sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${cheImageTag}'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                    sed -i "s|cheImage: ''|cheImage: '${cheImageRepo}'|" $CUSTOM_RESOURCE_FILE_PATH
+                    sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${mutableCheImageTag}'|" $CUSTOM_RESOURCE_FILE_PATH
 
-                    sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" ${WORKSPACE}/org_v1_che_cr.yaml
+                    sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" $CUSTOM_RESOURCE_FILE_PATH
 
-                    sed -i "s|ingressDomain: '192.168.99.101.nip.io'|ingressDomain: '\$(minikube ip).nip.io'|" ${WORKSPACE}/org_v1_che_cr.yaml
+                    sed -i "s|ingressDomain: '192.168.99.101.nip.io'|ingressDomain: '\$(minikube ip).nip.io'|" $CUSTOM_RESOURCE_FILE_PATH
                 """
 
                 echo "Install Che"
@@ -166,7 +220,7 @@ pipeline {
                     --installer=operator \\
                     --listr-renderer=verbose \\
                     --platform=minikube \\
-                    --che-operator-cr-yaml=${WORKSPACE}/org_v1_che_cr.yaml
+                    --che-operator-cr-yaml=$CUSTOM_RESOURCE_FILE_PATH
                 """
 
                 script {
@@ -208,7 +262,7 @@ pipeline {
 
         stage("Create test workspace") {
             when {
-                expression { createTestWorkspace }
+                expression { return createTestWorkspace.toString() == 'true' }
             }
 
             steps {
@@ -241,13 +295,10 @@ pipeline {
 
         stage("Run E2E Happy path tests") {
             steps {
-                sh """
-                     docker pull eclipse/che-e2e:nightly
-                     
+                sh """                     
                      CHE_URL=http://${cheHost}
-                     docker run --shm-size=256m --net=host --ipc=host \\
+                     docker run --shm-size=1g --net=host --ipc=host \\
                        -p 5920:5920 \\
-                       -e TS_SELENIUM_HEADLESS='true' \\
                        -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \\
                        -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \\
                        -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \\
@@ -258,7 +309,7 @@ pipeline {
                        -e TS_SELENIUM_PASSWORD="admin" \\
                        -e TEST_SUITE="${e2eTestToRun}" \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
-                       eclipse/che-e2e:nightly
+                       quay.io/eclipse/che-e2e:nightly
                 """
             }
         }
@@ -266,7 +317,7 @@ pipeline {
 
     post {
         failure {
-            echo "Create screencast from $WORKSPACE/e2e/report/executionScreencast files."
+            echo "Create screencast from $WORKSPACE/tests/e2e/report/executionScreencast files."
             sh """
                 command -v ffmpeg >/dev/null 2>&1 && if ls $WORKSPACE/tests/e2e/report/executionScreencast/*.png 1> /dev/null 2>&1; then
                   cd $WORKSPACE/tests/e2e/report/executionScreencast
@@ -290,6 +341,7 @@ pipeline {
 
                 cp ${WORKSPACE}/org_v1_che_cr.yaml $LOGS_AND_CONFIGS/che-config || true
                 cp ${DEVFILE_PATH} $LOGS_AND_CONFIGS || true
+                cp ${CUSTOM_RESOURCE_FILE_PATH} $LOGS_AND_CONFIGS || true
 
                 kubectl get checluster --namespace=che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml || true
                 kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
