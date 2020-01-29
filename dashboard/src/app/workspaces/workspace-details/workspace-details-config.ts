@@ -87,9 +87,9 @@ export class WorkspaceDetailsConfig {
                 }
                 return workspace.devfile.metadata.name;
               };
-              return cheWorkspace.fetchWorkspacesByNamespace(namespace).then(() => {
-                const workspaceDetails = cheWorkspace.getWorkspacesByNamespace(namespace).find( workspace => getName(workspace) === workspaceName);
-                return {namespaceId: namespace, workspaceName: workspaceName, workspaceDetails: workspaceDetails};
+              return cheWorkspace.fetchWorkspaceDetails(`${namespace}/${workspaceName}`).then(() => {
+                const workspaceDetails = cheWorkspace.getWorkspaceByName(namespace, workspaceName);
+                return { namespaceId: namespace, workspaceName: workspaceName, workspaceDetails: workspaceDetails };
               });
             }]
           }
