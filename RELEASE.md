@@ -15,9 +15,9 @@ RELEASE-TEMPLATE-BEGIN
 | <ul><li>[ ] @ibuziuk / @nickboldt</li></ul>| che-plugin-registry | ***MANUAL*** | `quay.io/eclipse/che-plugin-registry` | 
 | | | | <ul><li>[ ] Copy nightly/next versions of che-theia & machine-exec as `$VERSION` to master and `$BRANCH` branches</li></ul>| 
 | <ul><li>[ ] @nickboldt</li></ul>| [che-devfile-registry](https://github.com/eclipse/che-devfile-registry/blob/master/RELEASE.md) | [RELEASE.sh](https://github.com/eclipse/che-devfile-registry/blob/master/RELEASE.sh) | `quay.io/eclipse/che-devfile-registry` | 
-| <ul><li>[ ] @vparfonov / @mkuznets</li></ul>| [che-parent](https://github.com/eclipse/che/blob/master/RELEASE.md) | [***MANUAL***](https://github.com/eclipse/che/blob/master/RELEASE.md) | 
-| <ul><li>[ ] @vparfonov / @mkuznets</li></ul>| [che-docs](https://github.com/eclipse/che/blob/master/RELEASE.md) | [***MANUAL***](https://github.com/eclipse/che/blob/master/RELEASE.md) | 
-| <ul><li>[ ] @vparfonov / @mkuznets</li></ul>| [che](https://github.com/eclipse/che/blob/master/RELEASE.md) | [***MANUAL***](https://github.com/eclipse/che/blob/master/RELEASE.md) | 
+| <ul><li>[ ] @vparfonov / @mkuznyetsov</li></ul>| [che-parent](https://github.com/eclipse/che/blob/master/RELEASE.md) | [***MANUAL***](https://github.com/eclipse/che/blob/master/RELEASE.md) | 
+| <ul><li>[ ] @vparfonov / @mkuznyetsov</li></ul>| [che-docs](https://github.com/eclipse/che/blob/master/RELEASE.md) | [***MANUAL***](https://github.com/eclipse/che/blob/master/RELEASE.md) | 
+| <ul><li>[ ] @vparfonov / @mkuznyetsov</li></ul>| [che](https://github.com/eclipse/che/blob/master/RELEASE.md) | [***MANUAL***](https://github.com/eclipse/che/blob/master/RELEASE.md) | 
 | <ul><li>[ ] @davidfestal</li></ul>| [che-operator](https://github.com/eclipse/che-operator/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-operator/blob/master/make-release.sh) | `quay.io/eclipse/che-operator` | 
 | | | | Community operator PRs: <ul><li>[ ] Kubernetes</li><li>[ ] OpenShift</li></ul>| 
 | <ul><li>[ ] @tolusha</li></ul>| [chectl](https://github.com/che-incubator/chectl/blob/master/RELEASE.md) | [make-release.sh](https://github.com/che-incubator/chectl/blob/master/make-release.sh) |
