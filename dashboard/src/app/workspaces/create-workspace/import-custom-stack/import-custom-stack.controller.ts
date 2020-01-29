@@ -16,6 +16,7 @@ import {CreateWorkspaceSvc} from '../create-workspace.service';
 import {RandomSvc} from '../../../../components/utils/random.service';
 import {NamespaceSelectorSvc} from '../ready-to-go-stacks/namespace-selector/namespace-selector.service';
 import { CheKubernetesNamespace } from '../../../../components/api/che-kubernetes-namespace.factory';
+import { CheWorkspace } from '../../../../components/api/workspace/che-workspace.factory';
 
 /**
  * This class is handling the controller for stack importing directive.
@@ -26,6 +27,7 @@ export class ImportStackController implements IImportStackScopeBindings {
 
   static $inject = [
     'cheKubernetesNamespace',
+    'cheWorkspace',
     'createWorkspaceSvc',
     'namespaceSelectorSvc',
     'randomSvc'
@@ -35,10 +37,16 @@ export class ImportStackController implements IImportStackScopeBindings {
 
   infrastructureNamespaceHint: string;
 
+  ephemeralMode: boolean;
+
   /**
    * Kubernetes Namespace API interaction.
    */
   private cheKubernetesNamespace: CheKubernetesNamespace;
+  /**
+   * Workspace API interaction.
+   */
+  private cheWorkspace: CheWorkspace;
   /**
    * Namespace selector service.
    */
@@ -81,18 +89,23 @@ export class ImportStackController implements IImportStackScopeBindings {
    */
   constructor(
     cheKubernetesNamespace: CheKubernetesNamespace,
+    cheWorkspace: CheWorkspace,
     createWorkspaceSvc: CreateWorkspaceSvc,
     namespaceSelectorSvc: NamespaceSelectorSvc,
     randomSvc: RandomSvc
   ) {
     this.cheKubernetesNamespace = cheKubernetesNamespace;
+    this.cheWorkspace = cheWorkspace;
     this.createWorkspaceSvc = createWorkspaceSvc;
     this.namespaceSelectorSvc = namespaceSelectorSvc;
     this.randomSvc = randomSvc;
   }
 
   $onInit(): void {
-    this.cheKubernetesNamespace.fetchKubernetesNamespace().then(() => this.updateInfrastructureNamespaceHint());
+    this.cheKubernetesNamespace.fetchKubernetesNamespace().then(() => this.setInfrastructureNamespaceHint());
+    this.cheWorkspace.fetchWorkspaceSettings().then((settings: che.IWorkspaceSettings) => {
+      this.ephemeralMode = settings['che.workspace.persist_volumes.default'] === 'false';
+    });
   }
 
   updateDevfileFromRemote(devfile: che.IWorkspaceDevfile, attrs: { factoryurl?: string } | undefined): void {
@@ -106,6 +119,7 @@ export class ImportStackController implements IImportStackScopeBindings {
     this.devfileYaml = devfile;
     this.devfile = devfile;
     this.attrs = undefined;
+    this.ephemeralMode = this.devfile && this.devfile.attributes && this.devfile.attributes.persistVolumes === 'false' ? true : false;
     this.propagateChanges();
   }
 
@@ -128,7 +142,31 @@ export class ImportStackController implements IImportStackScopeBindings {
     this.propagateChanges();
   }
 
+  onEphemeralModeChange(): void {
+    this.propagateChanges();
+  }
+
+  private updatePersistVolumeAttribute(): void {
+    if (!this.devfile) {
+      return;
+    }
+    if (this.ephemeralMode) {
+      if (!this.devfile.attributes) {
+        this.devfile.attributes = {};
+      }
+      this.devfile.attributes.persistVolumes = 'false';
+    } else {
+      if (this.devfile.attributes) {
+        delete this.devfile.attributes.persistVolumes;
+      }
+      if (this.devfile.attributes && Object.keys(this.devfile.attributes).length === 0) {
+        delete this.devfile.attributes;
+      }
+    }
+  }
+
   private propagateChanges(): void {
+    this.updatePersistVolumeAttribute();
     const opts = {
       devfile: this.devfile,
       attrs: this.attrs,
@@ -156,7 +194,7 @@ export class ImportStackController implements IImportStackScopeBindings {
     }
   }
 
-  private updateInfrastructureNamespaceHint(): void {
+  private setInfrastructureNamespaceHint(): void {
     this.infrastructureNamespaceHint = this.cheKubernetesNamespace.getHintDescription();
   }
 

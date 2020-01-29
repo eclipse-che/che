@@ -600,10 +600,8 @@ export class CheWorkspace {
 
   /**
    * Fetches the system settings for workspaces.
-   *
-   * @returns {IPromise<any>}
    */
-  fetchWorkspaceSettings(): ng.IPromise<any> {
+  fetchWorkspaceSettings(): ng.IPromise<che.IWorkspaceSettings> {
     const promise = this.remoteWorkspaceAPI.getSettings().$promise;
     return promise.then((settings: che.IWorkspaceSettings) => {
       this.workspaceSettings = settings;
