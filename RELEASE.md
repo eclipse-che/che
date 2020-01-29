@@ -4,23 +4,38 @@
 
 Use this template, eg., for VERSION = 7.8.0 and BRANCH = 7.8.x:
 
-<!-- 
+<!--
 RELEASE-TEMPLATE-BEGIN
 
+### List of pending issues / PRs
+
+- [ ] *(add blockers here)*
+
 ### Release status
-| Owner | Process | Script | Artifact(s) |
-| --- | --- | --- | --- |
-| <ul><li>[ ] @azatsarynnyy</li></ul>| [che-theia](https://github.com/eclipse/che-theia/blob/master/RELEASE.md) | [***MANUAL***](https://github.com/eclipse/che-theia/blob/master/RELEASE.md) | `quay.io/eclipse/che-theia` |
-| <ul><li>[ ] @nickboldt</li></ul>| [che-machine-exec](https://github.com/eclipse/che-machine-exec/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-machine-exec/blob/master/make-release.sh) | `quay.io/eclipse/che-machine-exec` | 
-| <ul><li>[ ] @ibuziuk / @nickboldt</li></ul>| che-plugin-registry | ***MANUAL*** | `quay.io/eclipse/che-plugin-registry` | 
-| | | | <ul><li>[ ] Copy nightly/next versions of che-theia & machine-exec as `$VERSION` to master and `$BRANCH` branches</li></ul>| 
-| <ul><li>[ ] @nickboldt</li></ul>| [che-devfile-registry](https://github.com/eclipse/che-devfile-registry/blob/master/RELEASE.md) | [RELEASE.sh](https://github.com/eclipse/che-devfile-registry/blob/master/RELEASE.sh) | `quay.io/eclipse/che-devfile-registry` | 
-| <ul><li>[ ] @vparfonov / @mkuznyetsov</li></ul>| [che-parent](https://github.com/eclipse/che/blob/master/RELEASE.md) | [***MANUAL***](https://github.com/eclipse/che/blob/master/RELEASE.md) | 
-| <ul><li>[ ] @vparfonov / @mkuznyetsov</li></ul>| [che-docs](https://github.com/eclipse/che/blob/master/RELEASE.md) | [***MANUAL***](https://github.com/eclipse/che/blob/master/RELEASE.md) | 
-| <ul><li>[ ] @vparfonov / @mkuznyetsov</li></ul>| [che](https://github.com/eclipse/che/blob/master/RELEASE.md) | [***MANUAL***](https://github.com/eclipse/che/blob/master/RELEASE.md) | 
-| <ul><li>[ ] @davidfestal</li></ul>| [che-operator](https://github.com/eclipse/che-operator/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-operator/blob/master/make-release.sh) | `quay.io/eclipse/che-operator` | 
-| | | | Community operator PRs: <ul><li>[ ] Kubernetes</li><li>[ ] OpenShift</li></ul>| 
-| <ul><li>[ ] @tolusha</li></ul>| [chectl](https://github.com/che-incubator/chectl/blob/master/RELEASE.md) | [make-release.sh](https://github.com/che-incubator/chectl/blob/master/make-release.sh) |
+
+- [ ] che-theia
+- [ ] che-machine-exec
+- [ ] che-plugin-registry
+- [ ] che-devfile-registry
+- [ ] che-parent
+- [ ] che-docs
+- [ ] che
+- [ ] che-operator
+  - [ ] Kubernetes community operator PR
+  - [ ] OpenShift community operator PR
+- [ ] chectl
+
+| Owner | Process | Script | CI | Artifact(s) |
+| --- | --- | --- | --- | --- |
+| @azatsarynnyy| [che-theia](https://github.com/eclipse/che-theia/blob/master/RELEASE.md) | [***MANUAL***](https://github.com/eclipse/che-theia/blob/master/RELEASE.md) | [centos](https://ci.centos.org/job/devtools-che-theia-che-release/) | [`quay.io/eclipse/che-theia`](https://quay.io/eclipse/che-theia) |
+| @nickboldt| [che-machine-exec](https://github.com/eclipse/che-machine-exec/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-machine-exec/blob/master/make-release.sh) | [centos](https://ci.centos.org/job/devtools-che-machine-exec-release/) | [`quay.io/eclipse/che-machine-exec`](https://quay.io/eclipse/che-machine-exec)| 
+| @nickboldt| [che-devfile-registry](https://github.com/eclipse/che-devfile-registry/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-devfile-registry/blob/master/make-release.sh) | [centos](https://ci.centos.org/job/devtools-che-devfile-registry-release/) | [`quay.io/eclipse/che-devfile-registry`](https://quay.io/eclipse/che-devfile-registry)| 
+| @nickboldt| [che-plugin-registry](https://github.com/eclipse/che-plugin-registry/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-plugin-registry/blob/master/make-release.sh) | [centos](https://ci.centos.org/job/devtools-che-plugin-registry-release/) | [`quay.io/eclipse/che-plugin-registry`](https://quay.io/eclipse/che-plugin-registry)| 
+| @vparfonov / @mkuznyetsov| [che-parent](https://github.com/eclipse/che/blob/master/RELEASE.md) | [***MANUAL***](https://github.com/eclipse/che/blob/master/RELEASE.md) | [centos](https://ci.centos.org/job/devtools-che-parent-che-release/) | [che-parent](https://search.maven.org/search?q=a:che-parent), [che.depmgt](https://search.maven.org/artifact/org.eclipse.che.depmgt/maven-depmgt-pom) |
+| @vparfonov / @mkuznyetsov| [che-docs](https://github.com/eclipse/che/blob/master/RELEASE.md) | [***MANUAL***](https://github.com/eclipse/che/blob/master/RELEASE.md) | [centos](https://ci.centos.org/job/devtools-che-docs-che-release/) | [che-docs](https://search.maven.org/search?q=a:che-docs)
+| @vparfonov / @mkuznyetsov| [che](https://github.com/eclipse/che/blob/master/RELEASE.md) | [***MANUAL***](https://github.com/eclipse/che/blob/master/RELEASE.md) | [centos](https://ci.centos.org/job/devtools-che-che-release/) | [che.core](https://search.maven.org/search?q=che.core) |
+| @davidfestal| [che-operator](https://github.com/eclipse/che-operator/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-operator/blob/master/make-release.sh) | ? | [`quay.io/eclipse/che-operator`](https://quay.io/eclipse/che-operator)| 
+| @tolusha| [chectl](https://github.com/che-incubator/chectl/blob/master/RELEASE.md) | [make-release.sh](https://github.com/che-incubator/chectl/blob/master/make-release.sh) | [travis](https://travis-ci.org/che-incubator/chectl) | [chectl releases](https://github.com/che-incubator/chectl/releases)
 
 RELEASE-TEMPLATE-END
 -->
