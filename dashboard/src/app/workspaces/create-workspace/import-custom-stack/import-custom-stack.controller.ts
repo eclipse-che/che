@@ -143,6 +143,10 @@ export class ImportStackController implements IImportStackScopeBindings {
   }
 
   onEphemeralModeChange(): void {
+    this.propagateChanges();
+  }
+
+  private updatePersistVolumeAttribute(): void {
     if (!this.devfile) {
       return;
     }
@@ -159,10 +163,10 @@ export class ImportStackController implements IImportStackScopeBindings {
         delete this.devfile.attributes;
       }
     }
-    this.propagateChanges();
   }
 
   private propagateChanges(): void {
+    this.updatePersistVolumeAttribute();
     const opts = {
       devfile: this.devfile,
       attrs: this.attrs,
