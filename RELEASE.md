@@ -1,5 +1,6 @@
 # Eclipse Che release process
 
+
 ##### 1. Create branch for release preparation and next bugfixes:
 * `git branch {branchname} #e.g 7.7.x`
 * `git push --set-upstream origin {branchname}`
