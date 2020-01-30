@@ -8,12 +8,10 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import { NameGenerator } from '../../utils/NameGenerator';
-import { error } from 'selenium-webdriver';
 import 'reflect-metadata';
 import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as workspaceHandler from '../../testsLibrary/WorksapceHandlingTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
-import { Logger } from '../../utils/Logger';
 
 const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
 const workspaceStack: string = 'Python Django';
@@ -24,6 +22,7 @@ const taskInstallDependencies: string = 'install dependencies';
 const taskMigrate: string = 'migrate';
 const taskRunServer: string = 'run server';
 const taskExpectedDialogText: string = 'A process is now listening on port 7000';
+const taskCustomUrlSubpath: string = '/api/';
 
 suite(`${workspaceStack} test`, async () => {
 
@@ -43,16 +42,7 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite('Run django server', async () => {
-        //todo: fix try catch block. exception is not being caught for some reason
-        try {
-            codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskRunServer, taskExpectedDialogText, 30_000);
-        } catch (err) {
-            Logger.debug(`Caught an exception while trying to run the Django example application server.`);
-            if (err instanceof error.TimeoutError) {
-                console.log(`        ⚠️ Python Django failed to load deployed example application server.`);
-                console.log(`        ⚠️ This issue is being reported here: `);
-            } else { throw err; }
-        }
+        codeExecutionHelper.runTaskWithDialogShellDjangoWorkaround(taskRunServer, taskExpectedDialogText, taskCustomUrlSubpath, 30_000);
     });
 
     suite('Stop and remove workspace', async() => {
