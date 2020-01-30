@@ -40,7 +40,9 @@ const CLASSES = {
     OpenWorkspaceWidget: 'OpenWorkspaceWidget',
     ContextMenu: 'ContextMenu',
     CheLoginPage: 'CheLoginPage',
-    TestWorkspaceUtil: 'TestWorkspaceUtil'
+    TestWorkspaceUtil: 'TestWorkspaceUtil',
+    RequestType: 'RequestType',
+    RequestHandler: 'RequestHandler',
 };
 
 export { TYPES, CLASSES };
