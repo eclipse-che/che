@@ -35,6 +35,7 @@ import {CheUIElementsInjectorService} from '../components/service/injector/che-u
 import {OrganizationsConfig} from './organizations/organizations-config';
 import {TeamsConfig} from './teams/teams-config';
 import {ProfileConfig} from './profile/profile-config';
+import {ResourceFetcherService} from '../components/service/resource-fetcher/resource-fetcher.service';
 
 // init module
 const initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'ngResource', 'ngRoute',
@@ -257,16 +258,27 @@ initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) 
 /**
  * Setup route redirect module
  */
-initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$timeout', '$mdSidenav', 'routeHistory', 'cheUIElementsInjectorService', 'workspaceDetailsService',
+initModule.run([
+  '$location',
+  '$mdSidenav',
+  '$rootScope',
+  '$routeParams',
+  '$timeout',
+  'cheUIElementsInjectorService',
+  'resourceFetcherService',
+  'routeHistory',
+  'routingRedirect',
+  'workspaceDetailsService',
   (
-    $rootScope: che.IRootScopeService,
     $location: ng.ILocationService,
-    $routeParams: ng.route.IRouteParamsService,
-    routingRedirect: RoutingRedirect,
-    $timeout: ng.ITimeoutService,
     $mdSidenav: ng.material.ISidenavService,
+    $rootScope: che.IRootScopeService,
+    $routeParams: ng.route.IRouteParamsService,
+    $timeout: ng.ITimeoutService,
+    cheUIElementsInjectorService: CheUIElementsInjectorService,
+    resourceFetcherService: ResourceFetcherService,
     routeHistory: RouteHistory,
-    cheUIElementsInjectorService: CheUIElementsInjectorService
+    routingRedirect: RoutingRedirect,
   ) => {
 
     $rootScope.hideLoader = false;
@@ -276,6 +288,7 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
 
     // here only to create instances of these components
     /* tslint:disable */
+    resourceFetcherService;
     routeHistory;
     /* tslint:enable */
 
