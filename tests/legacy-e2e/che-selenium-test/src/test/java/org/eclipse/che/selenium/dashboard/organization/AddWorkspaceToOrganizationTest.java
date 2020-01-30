@@ -158,6 +158,7 @@ public class AddWorkspaceToOrganizationTest {
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitOrganizationInList(organizationName);
     organizationListPage.clickOnOrganization(organizationName);
+    dashboard.waitNotificationIsClosed();
     organizationPage.clickOnWorkspacesTab();
     organizationPage.clickOnAddWorkspaceBtn();
 

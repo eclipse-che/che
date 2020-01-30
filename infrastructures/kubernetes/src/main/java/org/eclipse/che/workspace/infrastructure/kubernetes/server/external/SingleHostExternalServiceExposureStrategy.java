@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
-import io.fabric8.kubernetes.api.model.ServicePort;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -53,12 +52,12 @@ public class SingleHostExternalServiceExposureStrategy implements ExternalServic
   }
 
   @Override
-  public String getExternalHost(String serviceName, ServicePort servicePort) {
+  public String getExternalHost(String serviceName, String serverName) {
     return cheHost;
   }
 
   @Override
-  public String getExternalPath(String serviceName, ServicePort servicePort) {
-    return "/" + serviceName + "/" + servicePort.getName();
+  public String getExternalPath(String serviceName, String serverName) {
+    return "/" + serviceName + "/" + serverName;
   }
 }

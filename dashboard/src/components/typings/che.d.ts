@@ -15,6 +15,8 @@ declare module 'che' {
 
 declare namespace che {
 
+  export type ConfigurableMenuItem = 'administration' | 'factories' | 'getstarted' | 'organizations' | 'stacks';
+
   export interface IRootScopeService extends ng.IRootScopeService {
     hideLoader: boolean;
     showIDE: boolean;
@@ -129,6 +131,13 @@ declare namespace che {
 
     export interface ICheDevfile {
       fetchDevfileSchema(): ng.IPromise<any>;
+    }
+
+    export interface ICheKubernetesNamespace {
+      fetchKubernetesNamespace(): ng.IPromise<IKubernetesNamespace[]>;
+      isPlaceholder(namespace: che.IKubernetesNamespace): boolean;
+      containsPlaceholder(): boolean;
+      getHintDescription(): string;
     }
 
   }
@@ -297,10 +306,10 @@ declare namespace che {
   }
 
   export interface IWorkspaceSettings {
-    supportedRecipeTypes: string;
-    cheWorkspacePluginRegistryUrl: string;
     cheWorkspaceDevfileRegistryUrl?: string;
-    [propName: string]: string | boolean;
+    cheWorkspacePluginRegistryUrl: string;
+    'che.workspace.persist_volumes.default': 'false' | 'true';
+    supportedRecipeTypes: string;
   }
 
   export interface IWorkspaceAttributes {
@@ -311,6 +320,7 @@ declare namespace che {
     factoryId?: string;
     factoryurl?: string;
     errorMessage?: string;
+    infrastructureNamespace: string;
     [propName: string]: string | number;
   }
 
@@ -326,7 +336,7 @@ declare namespace che {
   }
 
   export interface IWorkspaceConfigAttributes {
-    persistVolumes?: string;
+    persistVolumes?: 'false'; // explicitly indicates turning the ephemeral mode on
     editor?: string;
     plugins?: string;
   }
@@ -338,7 +348,8 @@ declare namespace che {
     commands?: Array <any>;
     attributes?: che.IWorkspaceConfigAttributes;
     metadata: {
-      name: string
+      name?: string;
+      generateName?: string;
     }
   }
 
@@ -545,4 +556,14 @@ declare namespace che {
     name?: string;
     isPending?: boolean;
   }
+
+  export interface IKubernetesNamespace {
+    name: string;
+    attributes: {
+      default?: boolean;
+      displayName?: string;
+      phase: string;
+    };
+  }
+
 }

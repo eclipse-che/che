@@ -28,22 +28,20 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory;
 
 /**
- * Given a {@link InternalEnvironment} representing a workspace, adds the plugin broker as an init
- * container to the workspace Pod. This is necessary if the workspace is created using emptyDir
- * volumes (to allow the broker to add files to the workspace pod's volumes).
+ * Given a {@link InternalEnvironment} representing a workspace, adds the artifacts plugin broker as
+ * an init container to the workspace Pod in order to ensure that any extensions are downloaded.
  *
  * <p>This API is in <b>Beta</b> and is subject to changes or removal.
  *
  * @author Angel Misevski
  */
 @Beta
-public class KubernetesBrokerInitContainerApplier<E extends KubernetesEnvironment> {
+public class KubernetesArtifactsBrokerApplier<E extends KubernetesEnvironment> {
 
   private final BrokerEnvironmentFactory<E> brokerEnvironmentFactory;
 
   @Inject
-  public KubernetesBrokerInitContainerApplier(
-      BrokerEnvironmentFactory<E> brokerEnvironmentFactory) {
+  public KubernetesArtifactsBrokerApplier(BrokerEnvironmentFactory<E> brokerEnvironmentFactory) {
     this.brokerEnvironmentFactory = brokerEnvironmentFactory;
   }
 
@@ -55,7 +53,7 @@ public class KubernetesBrokerInitContainerApplier<E extends KubernetesEnvironmen
       E workspaceEnvironment, RuntimeIdentity runtimeID, Collection<PluginFQN> pluginFQNs)
       throws InfrastructureException {
 
-    E brokerEnvironment = brokerEnvironmentFactory.create(pluginFQNs, runtimeID);
+    E brokerEnvironment = brokerEnvironmentFactory.createForArtifactsBroker(pluginFQNs, runtimeID);
 
     Map<String, PodData> workspacePods = workspaceEnvironment.getPodsData();
     if (workspacePods.size() != 1) {

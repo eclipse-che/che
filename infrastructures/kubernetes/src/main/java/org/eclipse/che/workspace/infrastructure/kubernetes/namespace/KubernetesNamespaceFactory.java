@@ -364,7 +364,52 @@ public class KubernetesNamespaceFactory {
               EnvironmentContext.getCurrent().getSubject().getUserId(),
               EnvironmentContext.getCurrent().getSubject().getUserName());
       namespace = evaluateLegacyNamespaceName(resolutionCtx);
+
+      LOG.warn(
+          "Workspace '{}' doesn't have an explicit namespace assigned."
+              + " The legacy namespace resolution resolved it to '{}'.",
+          workspace.getId(),
+          namespace);
     }
+
+    if (!NamespaceNameValidator.isValid(namespace)) {
+      // At a certain unfortunate past version of Che, we stored invalid namespace names.
+      // At this point in time, we're trying to work with an existing workspace that never could
+      // started OR has been running since before that unfortunate version. In both cases, going
+      // back to the default namespace name is the most safe bet we can make.
+
+      // but of course, our attempt will be futile if we're running in a context that doesn't know
+      // the current user.
+      Subject subj = EnvironmentContext.getCurrent().getSubject();
+      if (!subj.isAnonymous()) {
+        NamespaceResolutionContext resolutionCtx =
+            new NamespaceResolutionContext(workspace.getId(), subj.getUserId(), subj.getUserName());
+
+        String defaultNamespace = evaluateNamespaceName(resolutionCtx);
+
+        LOG.warn(
+            "The namespace '{}' of the workspace '{}' is not valid. Trying to recover"
+                + " from this situation using a default namespace which resolved to '{}'.",
+            namespace,
+            workspace.getId(),
+            defaultNamespace);
+
+        namespace = defaultNamespace;
+      } else {
+        // log a warning including a stacktrace to be able to figure out from where we got here...
+        LOG.warn(
+            "The namespace '{}' of the workspace '{}' is not valid but we currently don't have"
+                + " an active user to try an recover from this situation. We're letting the parent"
+                + " workflow continue, but it may fail at some later point in time because of"
+                + " the incorrect namespace name in use.",
+            namespace,
+            workspace.getId(),
+            new Throwable());
+      }
+
+      // ok, we tried to recover the namespace but nothing helped.
+    }
+
     return namespace;
   }
 
@@ -372,7 +417,7 @@ public class KubernetesNamespaceFactory {
       throws InfrastructureException {
     String namespace = resolveLegacyNamespaceName(resolutionCtx);
 
-    if (!checkNamespaceExists(namespace)) {
+    if (!NamespaceNameValidator.isValid(namespace) || !checkNamespaceExists(namespace)) {
       namespace = evaluateNamespaceName(resolutionCtx);
     }
 

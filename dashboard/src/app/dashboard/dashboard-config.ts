@@ -15,6 +15,7 @@ import {DashboardLastWorkspacesController} from './last-workspaces/last-workspac
 import {DashboardLastWorkspaces} from './last-workspaces/last-workspaces.directive';
 import {DashboardPanel} from './dashboard-panel/dashboard-panel.directive';
 import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
+import {MENU_ITEM} from '../navbar/navbar.controller';
 
 export class DashboardConfig {
 
@@ -33,15 +34,13 @@ export class DashboardConfig {
         title: 'Dashboard',
         templateUrl: 'app/dashboard/dashboard.html',
         resolve: {
-          check: ['$q', '$location', 'cheWorkspace', ($q: ng.IQService, $location: ng.ILocationService, cheWorkspace: CheWorkspace) => {
-            cheWorkspace.fetchWorkspaces().then(() => {
+          check: ['$q', '$window', 'cheWorkspace', ($q: ng.IQService, $window: ng.IWindowService, cheWorkspace: CheWorkspace) => {
+            return cheWorkspace.fetchWorkspaces().then(() => {
               if (cheWorkspace.getWorkspaces().length === 0) {
-                $location.path('/create-workspace');
+                return $q.reject();
               }
-            }, (error: any) => {
-              if (error.status === 304 && cheWorkspace.getWorkspaces().length === 0) {
-                $location.path('/create-workspace');
-              }
+            }).catch(() => {
+                $window.open(MENU_ITEM.getstarted, '_self');
             });
           }]
         }

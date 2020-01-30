@@ -10,11 +10,13 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {IImportStackScopeBindings} from './import-custom-stack.directive';
+import { IImportStackScopeBindings, IImportStackScopeOnChange } from './import-custom-stack.directive';
 import {YAML, URL} from './devfile-source-selector/devfile-source-selector.directive';
 import {CreateWorkspaceSvc} from '../create-workspace.service';
 import {RandomSvc} from '../../../../components/utils/random.service';
 import {NamespaceSelectorSvc} from '../ready-to-go-stacks/namespace-selector/namespace-selector.service';
+import { CheKubernetesNamespace } from '../../../../components/api/che-kubernetes-namespace.factory';
+import { CheWorkspace } from '../../../../components/api/workspace/che-workspace.factory';
 
 /**
  * This class is handling the controller for stack importing directive.
@@ -23,10 +25,28 @@ import {NamespaceSelectorSvc} from '../ready-to-go-stacks/namespace-selector/nam
  */
 export class ImportStackController implements IImportStackScopeBindings {
 
-  static $inject = ['namespaceSelectorSvc', 'createWorkspaceSvc', 'randomSvc'];
+  static $inject = [
+    'cheKubernetesNamespace',
+    'cheWorkspace',
+    'createWorkspaceSvc',
+    'namespaceSelectorSvc',
+    'randomSvc'
+  ];
 
-  onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs?: { [key: string]: any } }) => void;
+  onChange: IImportStackScopeOnChange;
 
+  infrastructureNamespaceHint: string;
+
+  ephemeralMode: boolean;
+
+  /**
+   * Kubernetes Namespace API interaction.
+   */
+  private cheKubernetesNamespace: CheKubernetesNamespace;
+  /**
+   * Workspace API interaction.
+   */
+  private cheWorkspace: CheWorkspace;
   /**
    * Namespace selector service.
    */
@@ -44,58 +64,67 @@ export class ImportStackController implements IImportStackScopeBindings {
    */
   private selectedSource: string;
   /**
-   * The imported devfile location(URL).
+   * The imported devfile location(URL) to show preview.
    */
   private devfileLocation: string;
   /**
-   * The imported devfile(YAML).
+   * The imported YAML content to show in editor.
+   */
+  private devfileYaml: che.IWorkspaceDevfile;
+  /**
+   * The devfile to create the workspace.
    */
   private devfile: che.IWorkspaceDevfile;
+  /**
+   * The selected infrastructure namespace ID.
+   */
+  private infrastructureNamespaceId: string;
+  /**
+   * Additional workspace attributes.
+   */
+  private attrs: {[key: string]: any};
 
   /**
    * Default constructor that is using resource injection
    */
-  constructor(namespaceSelectorSvc: NamespaceSelectorSvc, createWorkspaceSvc: CreateWorkspaceSvc, randomSvc: RandomSvc) {
-    this.namespaceSelectorSvc = namespaceSelectorSvc;
+  constructor(
+    cheKubernetesNamespace: CheKubernetesNamespace,
+    cheWorkspace: CheWorkspace,
+    createWorkspaceSvc: CreateWorkspaceSvc,
+    namespaceSelectorSvc: NamespaceSelectorSvc,
+    randomSvc: RandomSvc
+  ) {
+    this.cheKubernetesNamespace = cheKubernetesNamespace;
+    this.cheWorkspace = cheWorkspace;
     this.createWorkspaceSvc = createWorkspaceSvc;
+    this.namespaceSelectorSvc = namespaceSelectorSvc;
     this.randomSvc = randomSvc;
   }
 
   $onInit(): void {
+    this.cheKubernetesNamespace.fetchKubernetesNamespace().then(() => this.setInfrastructureNamespaceHint());
+    this.cheWorkspace.fetchWorkspaceSettings().then((settings: che.IWorkspaceSettings) => {
+      this.ephemeralMode = settings['che.workspace.persist_volumes.default'] === 'false';
+    });
   }
 
-  private initializeMinDevfile() {
-    this.devfile = {
-      apiVersion: '1.0.0',
-      components: [],
-      projects: [],
-      metadata: {
-        name: 'wksp-custom'
-      }
-    };
-
-    if (this.devfile) {
-      const prefix = `${this.devfile.metadata.name}-`;
-      const namespaceId = this.namespaceSelectorSvc.getNamespaceId();
-      this.createWorkspaceSvc.buildListOfUsedNames(namespaceId).then((list: string[]) => {
-        this.devfile.metadata.name = this.randomSvc.getRandString({prefix, list});
-      });
-    }
+  updateDevfileFromRemote(devfile: che.IWorkspaceDevfile, attrs: { factoryurl?: string } | undefined): void {
+    this.devfileLocation = attrs.factoryurl;
+    this.devfile = devfile;
+    this.attrs = attrs;
+    this.propagateChanges();
   }
 
-  updateDevfile(devfile: che.IWorkspaceDevfile, attrs: { factoryurl?: string } = {}): void {
-    if (this.isYamlSelected()) {
-      this.devfile = devfile;
-    } else if (attrs.factoryurl) {
-      this.devfileLocation = attrs.factoryurl;
-    }
-    if (angular.isFunction(this.onChange)) {
-      this.onChange({devfile, attrs});
-    }
+  updateDevfileFromYaml(devfile: che.IWorkspaceDevfile): void {
+    this.devfileYaml = devfile;
+    this.devfile = devfile;
+    this.attrs = undefined;
+    this.ephemeralMode = this.devfile && this.devfile.attributes && this.devfile.attributes.persistVolumes === 'false' ? true : false;
+    this.propagateChanges();
   }
 
   onSourceChange(source: string): void {
-    if (source === YAML && !this.devfile) {
+    if (source === YAML && !this.devfileYaml) {
       this.initializeMinDevfile();
     }
   }
@@ -107,4 +136,66 @@ export class ImportStackController implements IImportStackScopeBindings {
   isYamlSelected(): boolean {
     return this.selectedSource === YAML;
   }
+
+  onInfrastructureNamespaceChange(namespaceId: string): void {
+    this.infrastructureNamespaceId = namespaceId;
+    this.propagateChanges();
+  }
+
+  onEphemeralModeChange(): void {
+    this.propagateChanges();
+  }
+
+  private updatePersistVolumeAttribute(): void {
+    if (!this.devfile) {
+      return;
+    }
+    if (this.ephemeralMode) {
+      if (!this.devfile.attributes) {
+        this.devfile.attributes = {};
+      }
+      this.devfile.attributes.persistVolumes = 'false';
+    } else {
+      if (this.devfile.attributes) {
+        delete this.devfile.attributes.persistVolumes;
+      }
+      if (this.devfile.attributes && Object.keys(this.devfile.attributes).length === 0) {
+        delete this.devfile.attributes;
+      }
+    }
+  }
+
+  private propagateChanges(): void {
+    this.updatePersistVolumeAttribute();
+    const opts = {
+      devfile: this.devfile,
+      attrs: this.attrs,
+      infrastructureNamespaceId: this.infrastructureNamespaceId
+    };
+    this.onChange(opts);
+  }
+
+  private initializeMinDevfile() {
+    this.devfileYaml = {
+      apiVersion: '1.0.0',
+      components: [],
+      projects: [],
+      metadata: {
+        name: 'wksp-custom'
+      }
+    };
+
+    if (this.devfileYaml) {
+      const prefix = `${this.devfileYaml.metadata.name}-`;
+      const namespaceId = this.namespaceSelectorSvc.getNamespaceId();
+      this.createWorkspaceSvc.buildListOfUsedNames(namespaceId).then((list: string[]) => {
+        this.devfileYaml.metadata.name = this.randomSvc.getRandString({prefix, list});
+      });
+    }
+  }
+
+  private setInfrastructureNamespaceHint(): void {
+    this.infrastructureNamespaceHint = this.cheKubernetesNamespace.getHintDescription();
+  }
+
 }

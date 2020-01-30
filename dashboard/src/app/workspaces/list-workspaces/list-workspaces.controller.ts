@@ -28,7 +28,7 @@ export class ListWorkspacesCtrl {
   static $inject = ['$log', '$mdDialog', '$q', 'lodash', 'cheAPI', 'cheNotification', 'cheBranding', 'cheWorkspace', 'cheNamespaceRegistry',
    'confirmDialogService', '$scope', 'cheListHelperFactory'];
 
-   $q: ng.IQService;
+  $q: ng.IQService;
   $log: ng.ILogService;
   lodash: any;
   $mdDialog: ng.material.IDialogService;
@@ -39,7 +39,6 @@ export class ListWorkspacesCtrl {
 
   state: string;
   isInfoLoading: boolean;
-  workspaceFilter: any;
   userWorkspaces: che.IWorkspace[];
   workspaceCreationLink: string;
 
@@ -84,7 +83,6 @@ export class ListWorkspacesCtrl {
     this.state = 'loading';
     this.isInfoLoading = true;
     this.isExactMatch = false;
-    this.workspaceFilter = {config: {name: ''}};
     this.namespaceFilter = {namespace: ''};
 
     // map of all workspaces with additional info by id:
@@ -92,7 +90,7 @@ export class ListWorkspacesCtrl {
     // map of workspaces' used resources (consumed GBH):
     this.workspaceUsedResources = new Map();
 
-    this.getUserWorkspaces();
+    this.fetchUserWorkspaces();
 
     this.cheNamespaceRegistry.fetchNamespaces().then(() => {
       this.namespaceLabels = this.getNamespaceLabelsList();
@@ -100,8 +98,7 @@ export class ListWorkspacesCtrl {
 
     // callback when search value is changed
     this.onSearchChanged = (str: string) => {
-      this.workspaceFilter.config.name = str;
-      this.cheListHelper.applyFilter('name', this.workspaceFilter);
+      this.cheListHelper.applyFilter('$', str ? str : {});
     };
 
     // callback when namespace is changed
@@ -126,69 +123,26 @@ export class ListWorkspacesCtrl {
   }
 
   /**
-   * Fetch current user's workspaces (where he is a member):
+   * Fetch current user's workspaces.
    */
-  getUserWorkspaces(): void {
-    // fetch workspaces when initializing
+  fetchUserWorkspaces(): void {
     const promise = this.cheAPI.getWorkspace().fetchWorkspaces();
 
     promise.then(() => {
-      return this.updateSharedWorkspaces();
+      this.userWorkspaces = this.cheAPI.getWorkspace().getWorkspaces();
+      return this.$q.resolve();
     }, (error: any) => {
       if (error && error.status === 304) {
-        // ok
-        return this.updateSharedWorkspaces();
+        this.userWorkspaces = this.cheAPI.getWorkspace().getWorkspaces();
+        return this.$q.resolve();
       }
       this.state = 'error';
-      this.isInfoLoading = false;
       return this.$q.reject(error);
     }).then(() => {
       this.cheListHelper.setList(this.userWorkspaces, 'id');
-    });
-  }
-
-  /**
-   * Update the info of all user workspaces:
-   *
-   * @return {IPromise<any>}
-   */
-  updateSharedWorkspaces(): ng.IPromise<any> {
-    this.userWorkspaces = [];
-    let workspaces = this.cheAPI.getWorkspace().getWorkspaces();
-    if (workspaces.length === 0) {
+    }).finally(()=> {
       this.isInfoLoading = false;
-    }
-    const promises: Array<ng.IPromise<any>> = [];
-    workspaces.forEach((workspace: che.IWorkspace) => {
-      // first check the list of already received workspace info:
-      if (!this.workspacesById.get(workspace.id)) {
-        const promise = this.cheWorkspace.fetchWorkspaceDetails(workspace.id)
-          .catch((error: any) => {
-            if (error && error.status === 304) {
-              return this.$q.when();
-            }
-            let message = error.data && error.data.message ? ' Reason: ' + error.data.message : '';
-            let workspaceName = this.cheWorkspace.getWorkspaceDataManager().getName(workspace);
-            this.cheNotification.showError('Failed to retrieve workspace ' + workspaceName + ' data.' + message) ;
-            return this.$q.reject(error);
-          })
-          .then(() => {
-            let userWorkspace = this.cheAPI.getWorkspace().getWorkspaceById(workspace.id);
-            this.getWorkspaceInfo(userWorkspace);
-            this.userWorkspaces.push(userWorkspace);
-            return this.$q.when();
-          });
-        promises.push(promise);
-      } else {
-        let userWorkspace = this.workspacesById.get(workspace.id);
-        this.userWorkspaces.push(userWorkspace);
-        this.isInfoLoading = false;
-      }
     });
-
-    this.state = 'loaded';
-
-    return this.$q.all(promises);
   }
 
   /**
@@ -203,38 +157,12 @@ export class ListWorkspacesCtrl {
   }
 
   /**
-   * Gets all necessary workspace info to be displayed.
-   *
-   * @param {che.IWorkspace} workspace
-   */
-  getWorkspaceInfo(workspace: che.IWorkspace): void {
-    let promises = [];
-    this.workspacesById.set(workspace.id, workspace);
-
-    workspace.isLocked = false;
-    workspace.usedResources = this.workspaceUsedResources.get(workspace.id);
-
-    // no access to runner resources if workspace is locked:
-    if (!workspace.isLocked) {
-      let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
-      promises.push(promiseWorkspace);
-    }
-
-    this.$q.all(promises).finally(() => {
-      this.isInfoLoading = false;
-    });
-  }
-
-  /**
    * Delete all selected workspaces
    */
   deleteSelectedWorkspaces(): void {
-    const selectedWorkspaces = this.cheListHelper.getSelectedItems(),
-          selectedWorkspacesIds = selectedWorkspaces.map((workspace: che.IWorkspace) => {
-      return workspace.id;
-    });
+    const selectedWorkspaces = this.cheListHelper.getSelectedItems();
 
-    let queueLength = selectedWorkspacesIds.length;
+    let queueLength = selectedWorkspaces.length;
     if (!queueLength) {
       this.cheNotification.showError('No such workspace.');
       return;
@@ -247,26 +175,22 @@ export class ListWorkspacesCtrl {
       let deleteWorkspacePromises = [];
       let workspaceName;
 
-      selectedWorkspacesIds.forEach((workspaceId: string) => {
-        this.cheListHelper.itemsSelectionStatus[workspaceId] = false;
+      selectedWorkspaces.forEach((workspace: che.IWorkspace) => {
+        this.cheListHelper.itemsSelectionStatus[workspace.id] = false;
 
-        let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
-        if (!workspace) {
-          return;
-        }
         workspaceName = this.cheWorkspace.getWorkspaceDataManager().getName(workspace);
-        let stoppedStatusPromise = this.cheWorkspace.fetchStatusChange(workspaceId, 'STOPPED');
+        let stoppedStatusPromise = this.cheWorkspace.fetchStatusChange(workspace.id, 'STOPPED');
 
         // stop workspace if it's status is RUNNING
         if (workspace.status === 'RUNNING') {
-          this.cheWorkspace.stopWorkspace(workspaceId);
+          this.cheWorkspace.stopWorkspace(workspace.id);
         }
 
         // delete stopped workspace
         let promise = stoppedStatusPromise.then(() => {
-          return this.cheWorkspace.deleteWorkspace(workspaceId);
+          return this.cheWorkspace.deleteWorkspace(workspace.id);
         }).then(() => {
-            this.workspacesById.delete(workspaceId);
+            this.workspacesById.delete(workspace.id);
             queueLength--;
           },
           (error: any) => {
@@ -277,7 +201,7 @@ export class ListWorkspacesCtrl {
       });
 
       this.$q.all(deleteWorkspacePromises).finally(() => {
-        this.getUserWorkspaces();
+        this.fetchUserWorkspaces();
 
         if (isError) {
           this.cheNotification.showError('Delete failed.');

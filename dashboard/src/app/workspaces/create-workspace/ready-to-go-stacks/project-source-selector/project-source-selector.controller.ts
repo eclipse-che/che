@@ -69,7 +69,7 @@ export class ProjectSourceSelectorController implements IProjectSourceSelectorSc
    * <code>true</code> if content has to be scrolled to bottom.
    * @type {boolean}
    */
-  private scrollToBottom: boolean = true;
+  private scrollToBottom: boolean = false;
 
   /**
    * Default constructor that is using resource injection

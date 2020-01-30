@@ -30,6 +30,7 @@ import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator;
 
 /** @author Sergii Leshchenko */
 @Singleton
@@ -73,6 +74,11 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
   public String evaluateLegacyInfraNamespace(NamespaceResolutionContext resolutionContext)
       throws InfrastructureException {
     return namespaceFactory.evaluateLegacyNamespaceName(resolutionContext);
+  }
+
+  @Override
+  public boolean isNamespaceValid(String name) {
+    return NamespaceNameValidator.isValid(name);
   }
 
   @Override

@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
-import io.fabric8.kubernetes.api.model.ServicePort;
-
 /**
  * Provides a path-based strategy for exposing service ports outside the cluster using Ingress
  * Ingresses will be created without an explicit host (defaulting to *).
@@ -45,12 +43,12 @@ public class DefaultHostExternalServiceExposureStrategy implements ExternalServi
   public static final String DEFAULT_HOST_STRATEGY = "default-host";
 
   @Override
-  public String getExternalHost(String serviceName, ServicePort servicePort) {
+  public String getExternalHost(String serviceName, String serverName) {
     return null;
   }
 
   @Override
-  public String getExternalPath(String serviceName, ServicePort servicePort) {
-    return "/" + serviceName + "/" + servicePort.getName();
+  public String getExternalPath(String serviceName, String serverName) {
+    return "/" + serviceName + "/" + serverName;
   }
 }

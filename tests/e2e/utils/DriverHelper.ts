@@ -94,13 +94,16 @@ export class DriverHelper {
         Logger.trace(`DriverHelper.waitVisibility ${elementLocator}`);
 
         for (let i = 0; i < attempts; i++) {
+            Logger.trace('DriverHelper.waitVisibility - Waiting until element is located');
             const webElement: WebElement = await this.driver.wait(until.elementLocated(elementLocator), timeout);
-
+            Logger.trace('DriverHelper.waitVisibility - Element was located. Waitng for visibility now.');
             try {
                 const visibleWebElement = await this.driver.wait(until.elementIsVisible(webElement), timeout);
+                Logger.trace('DriverHelper.waitVisibility - Element is located and is visible.');
                 return visibleWebElement;
             } catch (err) {
                 if (err instanceof error.StaleElementReferenceError) {
+                    Logger.debug(`DriverHelper.waitVisibility - Stale element error - ${err}`);
                     await this.wait(polling);
                     continue;
                 }
@@ -216,11 +219,13 @@ export class DriverHelper {
                 return;
             } catch (err) {
                 if (err instanceof error.StaleElementReferenceError) {
+                    Logger.debug(`DriverHelper.waitAndClik - ${elementLocator} - StaleElementReferenceError - ${err}`);
                     await this.wait(polling);
                     continue;
                 }
 
                 if (err instanceof error.WebDriverError) {
+                    Logger.debug(`DriverHelper.waitAndClik - ${elementLocator} - WebDriverError - ${err}`);
                     await this.wait(polling);
                     continue;
                 }
@@ -456,7 +461,7 @@ export class DriverHelper {
     public async waitUntilTrue(callback: any, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.trace('DriverHelper.waitUntilTrue');
 
-        await this.driver.wait(callback(), timeout);
+        await this.driver.wait(callback, timeout);
     }
 
     public async reloadPage() {

@@ -39,6 +39,8 @@ import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -126,6 +128,9 @@ public class GithubFactoryParametersResolverTest {
     // then
     verify(urlFactoryBuilder).buildDefaultDevfile(eq("che"));
     assertEquals(factory, computedFactory);
+    SourceDto source = factory.getDevfile().getProjects().get(0).getSource();
+    assertEquals(source.getLocation(), githubUrl + ".git");
+    assertEquals(source.getBranch(), "master");
   }
 
   @Test
@@ -154,6 +159,52 @@ public class GithubFactoryParametersResolverTest {
         "https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml");
 
     assertEquals(factoryUrlArgumentCaptor.getValue().getDevfileFilename(), "devfile.yaml");
+  }
+
+  @Test
+  public void shouldSetDefaultProjectIntoDevfileIfNotSpecified() throws Exception {
+
+    String githubUrl = "https://github.com/eclipse/che/tree/foobar";
+
+    FactoryDto computedFactory = generateDevfileFactory();
+
+    when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any(), anyMap()))
+        .thenReturn(Optional.of(computedFactory));
+
+    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, githubUrl);
+    // when
+    FactoryDto factory = githubFactoryParametersResolver.createFactory(params);
+    // then
+    assertNotNull(factory.getDevfile());
+    SourceDto source = factory.getDevfile().getProjects().get(0).getSource();
+    assertEquals(source.getLocation(), "https://github.com/eclipse/che.git");
+    assertEquals(source.getBranch(), "foobar");
+  }
+
+  @Test
+  public void shouldSetBranchIntoDevfileIfNotMatchesCurrent() throws Exception {
+
+    String githubUrl = "https://github.com/eclipse/che/tree/foobranch";
+
+    FactoryDto computedFactory = generateDevfileFactory();
+    computedFactory
+        .getDevfile()
+        .getProjects()
+        .add(
+            newDto(ProjectDto.class)
+                .withSource(
+                    newDto(SourceDto.class).withLocation("https://github.com/eclipse/che.git")));
+
+    when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any(), anyMap()))
+        .thenReturn(Optional.of(computedFactory));
+
+    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, githubUrl);
+    // when
+    FactoryDto factory = githubFactoryParametersResolver.createFactory(params);
+    // then
+    assertNotNull(factory.getDevfile());
+    SourceDto source = factory.getDevfile().getProjects().get(0).getSource();
+    assertEquals(source.getBranch(), "foobranch");
   }
 
   @Test

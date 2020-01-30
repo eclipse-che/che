@@ -28,6 +28,8 @@ import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentF
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 
 /**
@@ -41,15 +43,18 @@ public class DefaultEditorProvisioner {
   private final String defaultEditor;
   private final Map<String, String> defaultPluginsToRefs;
   private final ComponentFQNParser componentFQNParser;
+  private final PluginFQNParser pluginFQNParser;
 
   @Inject
   public DefaultEditorProvisioner(
       @Named("che.workspace.devfile.default_editor") String defaultEditorRef,
       @Named("che.workspace.devfile.default_editor.plugins") String[] defaultPluginsRefs,
-      ComponentFQNParser componentFQNParser)
+      ComponentFQNParser componentFQNParser,
+      PluginFQNParser pluginFQNParser)
       throws DevfileException {
     this.defaultEditorRef = isNullOrEmpty(defaultEditorRef) ? null : defaultEditorRef;
     this.componentFQNParser = componentFQNParser;
+    this.pluginFQNParser = pluginFQNParser;
     this.defaultEditor =
         this.defaultEditorRef == null
             ? null
@@ -99,20 +104,98 @@ public class DefaultEditorProvisioner {
     }
   }
 
+  /**
+   * Provision the default editor plugins and add them to the the Devfile's component list
+   *
+   * @param components The set of components currently present in the Devfile
+   * @param contentProvider content provider for plugin references retrieval
+   * @throws DevfileException - A DevfileException containing any caught InfrastructureException
+   */
   private void provisionDefaultPlugins(
       List<ComponentImpl> components, FileContentProvider contentProvider) throws DevfileException {
     Map<String, String> missingPluginsIdToRef = new HashMap<>(defaultPluginsToRefs);
+    removeAlreadyAddedPlugins(components, contentProvider, missingPluginsIdToRef);
+    try {
+      addMissingPlugins(components, contentProvider, missingPluginsIdToRef);
+    } catch (InfrastructureException e) {
+      throw new DevfileException(e.getMessage(), e);
+    }
+  }
 
-    for (ComponentImpl t : components) {
-      if (PLUGIN_COMPONENT_TYPE.equals(t.getType())) {
-        String pluginPublisherAndName = getPluginPublisherAndName(t, contentProvider);
+  /**
+   * Checks if any of the Devfile's components are also in the list of missing default plugins, and
+   * removes them.
+   *
+   * @param devfileComponents - The list of Devfile components
+   * @param contentProvider - The content provider to retrieve YAML
+   * @param missingPluginsIdToRef - The list of default plugins that are not currently in the list
+   *     of Devfile components
+   */
+  private void removeAlreadyAddedPlugins(
+      List<ComponentImpl> devfileComponents,
+      FileContentProvider contentProvider,
+      Map<String, String> missingPluginsIdToRef)
+      throws DevfileException {
+    for (ComponentImpl component : devfileComponents) {
+      if (PLUGIN_COMPONENT_TYPE.equals(component.getType())) {
+        String pluginPublisherAndName = getPluginPublisherAndName(component, contentProvider);
         missingPluginsIdToRef.remove(pluginPublisherAndName);
       }
     }
+  }
 
-    missingPluginsIdToRef
-        .values()
-        .forEach(pluginRef -> components.add(new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginRef)));
+  /**
+   * Tries to add default plugins to the Devfile components. Each plugin is initially parsed by
+   * plugin ref. If the plugin does not have a reference, it is added to the component list, and its
+   * plugin ID will be used to resolve it. If it has a reference, the Plugin is evaluated, so that
+   * its meta.yaml can be retrieved. From the meta.yaml, the new Component's ID and reference are
+   * properly set, and the Component is added to the list.
+   *
+   * @param devfileComponents - The list of Devfile components
+   * @param contentProvider - The content provider to retrieve YAML
+   * @param missingPluginsIdToRef - The list of default plugins that are not currently in the list
+   *     of devfile components
+   * @throws InfrastructureException if the parser is unable to evaluate the FQN of the plugin.
+   */
+  private void addMissingPlugins(
+      List<ComponentImpl> devfileComponents,
+      FileContentProvider contentProvider,
+      Map<String, String> missingPluginsIdToRef)
+      throws InfrastructureException {
+    for (String pluginRef : missingPluginsIdToRef.values()) {
+      ComponentImpl component;
+      ExtendedPluginFQN fqn = pluginFQNParser.parsePluginFQN(pluginRef);
+      if (!isNullOrEmpty(fqn.getId())) {
+        component = new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginRef);
+      } else {
+        component = createReferencePluginComponent(pluginRef, contentProvider);
+      }
+      devfileComponents.add(component);
+    }
+  }
+
+  /**
+   * Evaluates a plugin FQN by retrieving it's meta.yaml, and sets it's name and reference to the
+   * appropriate values.
+   *
+   * @param pluginRef - The formatted plugin reference (e.g.
+   *     eclipse/che-machine-exec-plugin/nightly)
+   * @param contentProvider - The content provider used to read YAML data
+   * @return - A {@link ComponentImpl} with it's ID and reference URL set.
+   * @throws InfrastructureException when the parser cannot evalute the plugin's FQN.
+   */
+  private ComponentImpl createReferencePluginComponent(
+      String pluginRef, FileContentProvider contentProvider) throws InfrastructureException {
+    ExtendedPluginFQN fqn = pluginFQNParser.evaluateFqn(pluginRef, contentProvider);
+    ComponentImpl component = new ComponentImpl();
+    component.setType(PLUGIN_COMPONENT_TYPE);
+    if (!isNullOrEmpty(fqn.getId())) {
+      component.setId(fqn.getId());
+    }
+    if (!isNullOrEmpty(fqn.getReference())) {
+      component.setReference(fqn.getReference());
+    }
+    return component;
   }
 
   private String getPluginPublisherAndName(Component component, FileContentProvider contentProvider)

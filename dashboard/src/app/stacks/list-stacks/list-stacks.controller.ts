@@ -12,6 +12,7 @@
 'use strict';
 import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
 import {DevfileRegistry, IDevfileMetaData} from '../../../components/api/devfile-registry.factory';
+import {CheNotification} from '../../../components/notification/che-notification.factory';
 
 const DEFAULT_COLUMN = 'displayName';
 
@@ -24,32 +25,42 @@ const DEFAULT_COLUMN = 'displayName';
  */
 export class ListStacksController {
 
-  static $inject = ['$scope', 'cheWorkspace', '$location', 'devfileRegistry', 'cheListHelperFactory'];
+  static $inject = ['$scope',
+    '$location',
+    'cheWorkspace',
+    'devfileRegistry',
+    'cheListHelperFactory',
+    '$log',
+    'cheNotification'];
 
   private $location: ng.ILocationService;
-
-  private cheWorkspace: CheWorkspace;
   private devfileRegistry: DevfileRegistry;
   private cheListHelper: che.widget.ICheListHelper;
+  private $log: ng.ILogService;
+  private cheNotification: CheNotification;
 
   private orderBy: string;
   private searchBy: string;
   private searchStr: string;
-  private pluginRegistryUrl: string;
-
+  private devfileRegistryUrl: string;
   private isLoading: boolean;
 
   /**
    * Default constructor that is using resource
    */
   constructor($scope: ng.IScope,
-               cheWorkspace: CheWorkspace,
-               $location: ng.ILocationService,
-               devfileRegistry: DevfileRegistry,
-               cheListHelperFactory: che.widget.ICheListHelperFactory) {
+              $location: ng.ILocationService,
+              cheWorkspace: CheWorkspace,
+              devfileRegistry: DevfileRegistry,
+              cheListHelperFactory: che.widget.ICheListHelperFactory,
+              $log: ng.ILogService,
+              cheNotification: CheNotification) {
     this.$location = $location;
-    this.cheWorkspace = cheWorkspace;
     this.devfileRegistry = devfileRegistry;
+    this.$log = $log;
+    this.cheNotification = cheNotification;
+
+    this.devfileRegistryUrl = cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
 
     const helperId = 'devfiles-meta-list';
     this.cheListHelper = cheListHelperFactory.getHelper(helperId);
@@ -58,9 +69,8 @@ export class ListStacksController {
     });
 
     this.orderBy = DEFAULT_COLUMN;
-
-    // TODO remove this after cheListHelper improvement
-    this.searchBy = 'tmpFilterColumn';
+    //
+    this.searchBy = '$';
 
     this.loadDevfiles();
   }
@@ -72,18 +82,17 @@ export class ListStacksController {
 
   loadDevfiles(): void {
     this.isLoading = true;
-    this.pluginRegistryUrl = this.cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
-    this.devfileRegistry.fetchDevfiles(this.pluginRegistryUrl).then((data: Array<IDevfileMetaData>) => {
-      const devfileMetaDatas = data.map((devfileMetaData: IDevfileMetaData) => {
-
-        // TODO remove this after cheListHelper improvement
-        devfileMetaData[this.searchBy]= `${devfileMetaData.displayName} ${devfileMetaData.description} ${devfileMetaData.globalMemoryLimit}`;
-
+    this.devfileRegistry.fetchDevfiles(this.devfileRegistryUrl).then((data: Array<IDevfileMetaData>) => {
+      this.cheListHelper.setList(data.map(devfileMetaData => {
+        if (!devfileMetaData.icon.startsWith('http')) {
+          devfileMetaData.icon = this.devfileRegistryUrl + devfileMetaData.icon;
+        }
         return devfileMetaData;
-      });
-      this.cheListHelper.setList(devfileMetaDatas, DEFAULT_COLUMN);
+      }), 'displayName');
     }, (error: any) => {
-      console.log('Failed to load devfiles meta list', error);
+      const message = 'Failed to load devfiles meta list.';
+      this.cheNotification.showError(message);
+      this.$log.error(message, error);
     }).finally(() => {
       this.isLoading = false;
     });
@@ -102,7 +111,7 @@ export class ListStacksController {
 
   updateFilters(): void {
     this.cheListHelper.clearFilters();
-    const filter: {[searchBy: string]: string} =  {};
+    const filter: { [searchBy: string]: string } = {};
     if (this.searchStr) {
       filter[this.searchBy] = this.searchStr;
     }

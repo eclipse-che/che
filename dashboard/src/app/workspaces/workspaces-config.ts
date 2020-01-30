@@ -78,6 +78,8 @@ import {DevfileByUrl} from './create-workspace/import-custom-stack/devfile-by-ur
 import {DevfileByUrlController} from './create-workspace/import-custom-stack/devfile-by-url/devfile-by-url.controller';
 import {ImportStackController} from './create-workspace/import-custom-stack/import-custom-stack.controller';
 import {ImportStack} from './create-workspace/import-custom-stack/import-custom-stack.directive';
+import {KubernetesNamespaceSelectorController} from './create-workspace/kubernetes-namespace-selector/kubernetes-namespace-selector.controller';
+import {KubernetesNamespaceSelectorDirective} from './create-workspace/kubernetes-namespace-selector/kubernetes-namespace-selector.directive';
 
 /**
  * @ngdoc controller
@@ -159,6 +161,8 @@ export class WorkspacesConfig {
     register.controller('DevfileByUrlController', DevfileByUrlController);
     register.controller('ImportStackController', ImportStackController);
     register.directive('importStack', ImportStack);
+    register.controller('KubernetesNamespaceSelectorController', KubernetesNamespaceSelectorController);
+    register.directive('kubernetesNamespaceSelector', KubernetesNamespaceSelectorDirective);
 
     // config routes
     register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {

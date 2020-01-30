@@ -168,8 +168,6 @@ public class JwtProxyProvisioner {
         secureServers != null && !secureServers.isEmpty(), "Secure servers are missing");
     ensureJwtProxyInjected(k8sEnv);
 
-    int listenPort = availablePort++;
-
     Set<String> excludes = new HashSet<>();
     Boolean cookiesAuthEnabled = null;
     for (ServerConfig config : secureServers.values()) {
@@ -192,6 +190,8 @@ public class JwtProxyProvisioner {
       }
     }
 
+    int listenPort = availablePort++;
+
     ServicePort exposedPort =
         new ServicePortBuilder()
             .withName("server-" + listenPort)
@@ -208,7 +208,7 @@ public class JwtProxyProvisioner {
         excludes,
         cookiesAuthEnabled,
         cookiePathStrategy.get(serviceName, exposedPort),
-        externalServiceExposureStrategy.getExternalPath(serviceName, exposedPort));
+        externalServiceExposureStrategy.getExternalPath(serviceName, exposedPort.getName()));
     k8sEnv
         .getConfigMaps()
         .get(getConfigMapName())

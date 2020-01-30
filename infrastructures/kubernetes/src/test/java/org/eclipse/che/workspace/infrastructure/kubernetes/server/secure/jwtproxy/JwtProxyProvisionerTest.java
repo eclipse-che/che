@@ -158,7 +158,7 @@ public class JwtProxyProvisionerTest {
       expectedExceptionsMessageRegExp =
           "Secure servers which expose the same port should have "
               + "the same `cookiesAuthEnabled` value\\.")
-  public void shouldThrowAnExceptionIsServersHaveDifferentValueForCookiesAuthEnabled()
+  public void shouldThrowAnExceptionIfServersHaveDifferentValueForCookiesAuthEnabled()
       throws Exception {
     // given
     ServerConfigImpl server1 =
@@ -221,7 +221,7 @@ public class JwtProxyProvisionerTest {
 
     // when
     jwtProxyProvisioner.expose(
-        k8sEnv, "terminal", port, "TCP", ImmutableMap.of("server1", server1, "server2", server2));
+        k8sEnv, "terminal", port, "TCP", ImmutableMap.of("server1", server1));
 
     // then
     verify(configBuilder).addVerifierProxy(any(), any(), any(), eq(true), any(), any());

@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
@@ -24,19 +23,19 @@ import static org.testng.Assert.assertTrue;
 import com.google.common.collect.ImmutableList;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory.BrokersConfigs;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -50,12 +49,12 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class BrokerEnvironmentFactoryTest {
 
-  private static final String INIT_IMAGE = "init:image";
-  private static final String UNIFIED_BROKER_IMAGE = "unified:image";
+  private static final String ARTIFACTS_BROKER_IMAGE = "artifacts:image";
+  private static final String METADATA_BROKER_IMAGE = "metadata:image";
   private static final String DEFAULT_REGISTRY = "default.registry";
   private static final String IMAGE_PULL_POLICY = "Never";
   private static final String PUSH_ENDPOINT = "http://localhost:8080";
-
+  private static final String PLUGINS_VOLUME_NAME = "plugins";
   @Mock private CertificateProvisioner certProvisioner;
   @Mock private AgentAuthEnableEnvVarProvider authEnableEnvVarProvider;
   @Mock private MachineTokenEnvVarProvider machineTokenEnvVarProvider;
@@ -72,8 +71,8 @@ public class BrokerEnvironmentFactoryTest {
                 IMAGE_PULL_POLICY,
                 authEnableEnvVarProvider,
                 machineTokenEnvVarProvider,
-                UNIFIED_BROKER_IMAGE,
-                INIT_IMAGE,
+                ARTIFACTS_BROKER_IMAGE,
+                METADATA_BROKER_IMAGE,
                 DEFAULT_REGISTRY,
                 certProvisioner) {
               @Override
@@ -93,46 +92,7 @@ public class BrokerEnvironmentFactoryTest {
   }
 
   @Test
-  public void testInitBrokerContainer() throws Exception {
-    // given
-    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id"));
-    ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
-
-    // when
-    factory.create(pluginFQNs, runtimeId);
-
-    // then
-    verify(factory).doCreate(captor.capture());
-    BrokersConfigs brokersConfigs = captor.getValue();
-    List<Container> initContainers = brokersConfigs.pod.getSpec().getInitContainers();
-    assertEquals(initContainers.size(), 1);
-    Container initContainer = initContainers.get(0);
-    assertEquals(initContainer.getName(), "init-image");
-    assertEquals(initContainer.getImage(), INIT_IMAGE);
-    assertEquals(initContainer.getImagePullPolicy(), IMAGE_PULL_POLICY);
-    assertEquals(
-        initContainer.getEnv(),
-        asList(new EnvVar("test1", "value1", null), new EnvVar("test2", "value2", null)));
-    assertEquals(
-        initContainer.getArgs().toArray(),
-        new String[] {
-          "-push-endpoint",
-          PUSH_ENDPOINT,
-          "-runtime-id",
-          String.format(
-              "%s:%s:%s",
-              runtimeId.getWorkspaceId(), runtimeId.getEnvName(), runtimeId.getOwnerId()),
-          "-cacert",
-          "",
-          "--registry-address",
-          DEFAULT_REGISTRY
-        });
-    assertEquals(Containers.getRamLimit(initContainer), 262144000);
-    assertEquals(Containers.getRamLimit(initContainer), 262144000);
-  }
-
-  @Test
-  public void testSelfSignedCertificate() throws Exception {
+  public void testMetadataBrokerSelfSignedCertificate() throws Exception {
     when(certProvisioner.isConfigured()).thenReturn(true);
     when(certProvisioner.getCertPath()).thenReturn("/tmp/che/cacert");
     // given
@@ -140,17 +100,23 @@ public class BrokerEnvironmentFactoryTest {
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
-    factory.create(pluginFQNs, runtimeId);
+    factory.createForMetadataBroker(pluginFQNs, runtimeId);
 
     // then
     verify(factory).doCreate(captor.capture());
     BrokersConfigs brokersConfigs = captor.getValue();
 
-    List<Container> initContainers = brokersConfigs.pod.getSpec().getInitContainers();
-    assertEquals(initContainers.size(), 1);
-    Container initContainer = initContainers.get(0);
+    List<Container> containers =
+        brokersConfigs
+            .pods
+            .values()
+            .stream()
+            .flatMap(p -> p.getSpec().getContainers().stream())
+            .collect(Collectors.toList());
+    assertEquals(containers.size(), 1);
+    Container container = containers.get(0);
     assertEquals(
-        initContainer.getArgs().toArray(),
+        container.getArgs().toArray(),
         new String[] {
           "-push-endpoint",
           PUSH_ENDPOINT,
@@ -162,9 +128,32 @@ public class BrokerEnvironmentFactoryTest {
           "/tmp/che/cacert",
           "--registry-address",
           DEFAULT_REGISTRY,
+          "-metas",
+          "/broker-config/config.json",
         });
+  }
 
-    List<Container> containers = brokersConfigs.pod.getSpec().getContainers();
+  public void testArtifactsBrokerSelfSignedCertificate() throws Exception {
+    when(certProvisioner.isConfigured()).thenReturn(true);
+    when(certProvisioner.getCertPath()).thenReturn("/tmp/che/cacert");
+    // given
+    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id"));
+    ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
+
+    // when
+    factory.createForArtifactsBroker(pluginFQNs, runtimeId);
+
+    // then
+    verify(factory).doCreate(captor.capture());
+    BrokersConfigs brokersConfigs = captor.getValue();
+
+    List<Container> containers =
+        brokersConfigs
+            .pods
+            .values()
+            .stream()
+            .flatMap(p -> p.getSpec().getContainers().stream())
+            .collect(Collectors.toList());
     assertEquals(containers.size(), 1);
     Container container = containers.get(0);
     assertEquals(
@@ -186,30 +175,45 @@ public class BrokerEnvironmentFactoryTest {
   }
 
   @Test
-  public void shouldNameContainersAfterPluginBrokerImage() throws Exception {
+  public void shouldNameContainersAfterMetadataPluginBrokerImage() throws Exception {
     // given
     Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id"));
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
-    factory.create(pluginFQNs, runtimeId);
+    factory.createForMetadataBroker(pluginFQNs, runtimeId);
 
     // then
     verify(factory).doCreate(captor.capture());
     BrokersConfigs brokersConfigs = captor.getValue();
-    PodSpec brokerPodSpec = brokersConfigs.pod.getSpec();
-
-    List<Container> initContainers = brokerPodSpec.getInitContainers();
-    assertEquals(initContainers.size(), 1);
-    assertEquals(initContainers.get(0).getName(), "init-image");
+    PodSpec brokerPodSpec = brokersConfigs.pods.values().iterator().next().getSpec();
 
     List<Container> containers = brokerPodSpec.getContainers();
     assertEquals(containers.size(), 1);
-    assertEquals(containers.get(0).getName(), "unified-image");
+    assertEquals(containers.get(0).getName(), "metadata-image");
   }
 
   @Test
-  public void shouldCreateConfigMapWithPluginFQNs() throws Exception {
+  public void shouldNameContainersAfterArtifactsPluginBrokerImage() throws Exception {
+    // given
+    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id"));
+    ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
+
+    // when
+    factory.createForArtifactsBroker(pluginFQNs, runtimeId);
+
+    // then
+    verify(factory).doCreate(captor.capture());
+    BrokersConfigs brokersConfigs = captor.getValue();
+    PodSpec brokerPodSpec = brokersConfigs.pods.values().iterator().next().getSpec();
+
+    List<Container> containers = brokerPodSpec.getContainers();
+    assertEquals(containers.size(), 1);
+    assertEquals(containers.get(0).getName(), "artifacts-image");
+  }
+
+  @Test
+  public void shouldCreateConfigMapWithPluginFQNsWithMetadataBroker() throws Exception {
     // given
     Collection<PluginFQN> pluginFQNs =
         ImmutableList.of(
@@ -218,7 +222,7 @@ public class BrokerEnvironmentFactoryTest {
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
-    factory.create(pluginFQNs, runtimeId);
+    factory.createForMetadataBroker(pluginFQNs, runtimeId);
 
     // then
     verify(factory).doCreate(captor.capture());
@@ -238,6 +242,71 @@ public class BrokerEnvironmentFactoryTest {
           String.format(
               "Missing field from serialized config: expected '%s' in '%s'", expect, config));
     }
+  }
+
+  @Test
+  public void shouldCreateConfigMapWithPluginFQNsWithArtifactsBroker() throws Exception {
+    // given
+    Collection<PluginFQN> pluginFQNs =
+        ImmutableList.of(
+            new PluginFQN(null, "testPublisher/testPlugin1/testver1"),
+            new PluginFQN(new URI("testregistry"), "testPublisher/testPlugin2/testver2"));
+    ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
+
+    // when
+    factory.createForArtifactsBroker(pluginFQNs, runtimeId);
+
+    // then
+    verify(factory).doCreate(captor.capture());
+    BrokersConfigs brokersConfigs = captor.getValue();
+    ConfigMap brokerConfigMap = brokersConfigs.configMaps.values().iterator().next();
+    String config = brokerConfigMap.getData().get(BrokerEnvironmentFactory.CONFIG_FILE);
+
+    assertFalse(config.contains("\"registry\":null"), "Should not serialize null registry");
+    List<String> expected =
+        ImmutableList.of(
+            "\"id\":\"testPublisher/testPlugin1/testver1\"",
+            "\"registry\":\"testregistry\"",
+            "\"id\":\"testPublisher/testPlugin2/testver2\"");
+    for (String expect : expected) {
+      assertTrue(
+          config.contains(expect),
+          String.format(
+              "Missing field from serialized config: expected '%s' in '%s'", expect, config));
+    }
+  }
+
+  @Test
+  public void shouldIncludePluginsVolumeInArtifactsBroker() throws Exception {
+    // given
+    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id"));
+    ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
+
+    // when
+    factory.createForArtifactsBroker(pluginFQNs, runtimeId);
+
+    // then
+    verify(factory).doCreate(captor.capture());
+    BrokersConfigs brokersConfigs = captor.getValue();
+    InternalMachineConfig machine = brokersConfigs.machines.values().iterator().next();
+    assertTrue(machine.getVolumes().containsKey(PLUGINS_VOLUME_NAME));
+    assertEquals(machine.getVolumes().get(PLUGINS_VOLUME_NAME).getPath(), "/plugins");
+  }
+
+  @Test
+  public void shouldNotIncludePluginsVolumeInMetadataBroker() throws Exception {
+    // given
+    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id"));
+    ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
+
+    // when
+    factory.createForMetadataBroker(pluginFQNs, runtimeId);
+
+    // then
+    verify(factory).doCreate(captor.capture());
+    BrokersConfigs brokersConfigs = captor.getValue();
+    InternalMachineConfig machine = brokersConfigs.machines.values().iterator().next();
+    assertFalse(machine.getVolumes().containsKey(PLUGINS_VOLUME_NAME));
   }
 
   @Test(dataProvider = "imageRefs")
