@@ -48,8 +48,8 @@ RELEASE-TEMPLATE-END
   * `git push`
 ##### 4. Start pre-release testing.
 ##### 5. If pre-release test passed need to merge branch to the `release` branch and push changes, release process will start by webhook:
-* Set released parent version: `mvn versions:update-parent  versions:commit -DallowSnapshots=true -DparentVersion={next_version}`
-* Update dependencies: `sed -i -e "s#{version_old}#{next_version}#" pom.xml`
+* Set released parent version
+* Update dependencies in pom.xml 
 * `git checkout release`
 * `git merge -X theirs {branchname}`
 * `git push -f`
