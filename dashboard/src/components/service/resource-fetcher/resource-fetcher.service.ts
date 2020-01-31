@@ -58,6 +58,9 @@ export class ResourceFetcherService {
    * Prefetch Che specific resources.
    */
   private prefetchCheCDNResources(url: string): void {
+    if (!url) {
+      return;
+    }
     type resourceEntry = {
       chunk: string;
       cdn: string;
@@ -83,6 +86,9 @@ export class ResourceFetcherService {
    * Prefetch other resources
    */
   private prefetchResources(resources: string[]): void {
+    if (!resources || resources.length === 0) {
+      return;
+    }
     resources.forEach(resource => {
       this.appendLink(resource);
     });
