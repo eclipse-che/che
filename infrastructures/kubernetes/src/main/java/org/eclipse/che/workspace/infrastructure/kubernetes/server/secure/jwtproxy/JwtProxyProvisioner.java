@@ -93,7 +93,7 @@ public class JwtProxyProvisioner {
   static final String JWT_PROXY_CONFIG_FILE = "config.yaml";
   static final String JWT_PROXY_MACHINE_NAME = "che-jwtproxy";
 
-  static final String JWT_PROXY_CONFIG_FOLDER = "/config";
+  static final String JWT_PROXY_CONFIG_FOLDER = "/che-jwtproxy-config";
   static final String JWT_PROXY_PUBLIC_KEY_FILE = "mykey.pub";
 
   public static final String JWT_PROXY_POD_NAME = JWT_PROXY_MACHINE_NAME;
@@ -159,6 +159,7 @@ public class JwtProxyProvisioner {
    */
   public ServicePort expose(
       KubernetesEnvironment k8sEnv,
+      String machineName,
       String backendServiceName,
       ServicePort backendServicePort,
       String protocol,
@@ -166,7 +167,7 @@ public class JwtProxyProvisioner {
       throws InfrastructureException {
     Preconditions.checkArgument(
         secureServers != null && !secureServers.isEmpty(), "Secure servers are missing");
-    ensureJwtProxyInjected(k8sEnv);
+    ensureJwtProxyInjected(k8sEnv, machineName);
 
     Set<String> excludes = new HashSet<>();
     Boolean cookiesAuthEnabled = null;
@@ -226,13 +227,15 @@ public class JwtProxyProvisioner {
   /** Returns config map name that will be mounted into JWTProxy Pod. */
   @VisibleForTesting
   String getConfigMapName() {
-    return "jwtproxy-config-" + identity.getWorkspaceId();
+    return "jwtproxy-config";
   }
 
-  private void ensureJwtProxyInjected(KubernetesEnvironment k8sEnv) throws InfrastructureException {
+  private void ensureJwtProxyInjected(KubernetesEnvironment k8sEnv, String machineName)
+      throws InfrastructureException {
     if (!k8sEnv.getMachines().containsKey(JWT_PROXY_MACHINE_NAME)) {
       k8sEnv.getMachines().put(JWT_PROXY_MACHINE_NAME, createJwtProxyMachine());
-      k8sEnv.addPod(createJwtProxyPod());
+      Pod jwtProxyPod = createJwtProxyPod();
+      k8sEnv.addInjectablePod(machineName, jwtProxyPod);
 
       KeyPair keyPair;
       try {
@@ -276,25 +279,30 @@ public class JwtProxyProvisioner {
   }
 
   private Pod createJwtProxyPod() {
+    String containerName = Names.generateName("verifier");
     return new PodBuilder()
         .withNewMetadata()
         .withName(JWT_PROXY_POD_NAME)
-        .withAnnotations(Names.createMachineNameAnnotations("verifier", JWT_PROXY_MACHINE_NAME))
+        .withAnnotations(Names.createMachineNameAnnotations(containerName, JWT_PROXY_MACHINE_NAME))
         .endMetadata()
         .withNewSpec()
         .withContainers(
             new ContainerBuilder()
                 .withImagePullPolicy("Always")
-                .withName("verifier")
+                .withName(containerName)
                 .withImage(jwtProxyImage)
                 .withVolumeMounts(
                     new VolumeMount(
-                        JWT_PROXY_CONFIG_FOLDER + "/", null, "jwtproxy-config-volume", false, null))
+                        JWT_PROXY_CONFIG_FOLDER + "/",
+                        null,
+                        "che-jwtproxy-config-volume",
+                        false,
+                        null))
                 .withArgs("-config", JWT_PROXY_CONFIG_FOLDER + "/" + JWT_PROXY_CONFIG_FILE)
                 .build())
         .withVolumes(
             new VolumeBuilder()
-                .withName("jwtproxy-config-volume")
+                .withName("che-jwtproxy-config-volume")
                 .withNewConfigMap()
                 .withName(getConfigMapName())
                 .endConfigMap()

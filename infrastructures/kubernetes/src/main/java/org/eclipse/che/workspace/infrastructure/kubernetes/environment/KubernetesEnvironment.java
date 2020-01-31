@@ -57,6 +57,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
   private final Map<String, PersistentVolumeClaim> persistentVolumeClaims;
   private final Map<String, Secret> secrets;
   private final Map<String, ConfigMap> configMaps;
+  private final Map<String, Pod> injectablePods;
 
   /** Returns builder for creating environment from blank {@link KubernetesEnvironment}. */
   public static Builder builder() {
@@ -104,6 +105,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
     this.secrets = secrets;
     this.configMaps = configMaps;
     this.podData = new HashMap<>();
+    this.injectablePods = new HashMap<>();
     pods.forEach((name, pod) -> podData.put(name, new PodData(pod)));
     deployments.forEach((name, deployment) -> podData.put(name, new PodData(deployment)));
   }
@@ -129,6 +131,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
     this.secrets = secrets;
     this.configMaps = configMaps;
     this.podData = new HashMap<>();
+    this.injectablePods = new HashMap<>();
     pods.forEach((name, pod) -> podData.put(name, new PodData(pod)));
     deployments.forEach((name, deployment) -> podData.put(name, new PodData(deployment)));
   }
@@ -185,6 +188,26 @@ public class KubernetesEnvironment extends InternalEnvironment {
     String podName = pod.getMetadata().getName();
     pods.put(podName, pod);
     podData.put(podName, new PodData(pod.getSpec(), pod.getMetadata()));
+  }
+
+  /**
+   * Get the pods that are meant to be injected into other deployments, like JWT proxy. The keys are
+   * machine names of machines that require the pods to be injected into their deployments.
+   */
+  public Map<String, Pod> getInjectablePodsCopy() {
+    return ImmutableMap.copyOf(injectablePods);
+  }
+
+  /**
+   * An injectable pod is a pod that is intended to be merged into all deployments that require it.
+   * This is established by tracking the names of the machines that require this additional pod.
+   *
+   * @param requiringMachine the name of the machine that has been determined to require this
+   *     additional pod
+   * @param pod the pod to merge into the deployment containing the machine
+   */
+  public void addInjectablePod(String requiringMachine, Pod pod) {
+    this.injectablePods.put(requiringMachine, pod);
   }
 
   /** Returns services that should be created when environment starts. */
