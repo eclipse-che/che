@@ -235,7 +235,7 @@ Mocks are also provided for the Che API, allowing to emulate a real backend for 
 
 Configurations for User Dashboard could be applied in [product.json](/src/assets/branding/product.json) in `"configuration"` section.
 
-Adding the `"configuration.menu.disabled"` field allows users to list there menu entries they want to hide in left navigation bar. Along with that corresponding routes also will be disabled.
+Adding the `"configuration.menu.disabled"` field allows Che Admins to list menu entries they want to hide in the left navigation bar, along with the corresponding routes which will be disabled.
 
 Available values are `"administration"`, `"factories"`,  `"getstarted"`, `"organizations"`, `"stacks"`.
 
