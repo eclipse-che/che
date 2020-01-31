@@ -843,10 +843,13 @@ public class WorkspaceRuntimes {
     public void run() {
       long startTime = System.currentTimeMillis();
       LOG.info("Recovering of runtimes is started.");
-
       for (RuntimeIdentity identity : identities) {
         try {
-          recoverOne(infrastructure, identity);
+          // Recover runtime in multi-thread friendly manner
+          // 1. acquire write lock
+          // 2. check if runtime already restored by other thread.
+          // 3. If needed restore runtime.
+          getInternalRuntime(identity.getWorkspaceId());
         } catch (Exception e) {
           LOG.error(
               "An error occurred while attempting to recover runtime '{}' using infrastructure '{}'. Reason: '{}'",
