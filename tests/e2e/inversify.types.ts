@@ -41,7 +41,10 @@ const CLASSES = {
     ContextMenu: 'ContextMenu',
     CheLoginPage: 'CheLoginPage',
     TestWorkspaceUtil: 'TestWorkspaceUtil',
-    NotificationCenter: 'NotificationCenter'
+    NotificationCenter: 'NotificationCenter',
+    RequestType: 'RequestType',
+    RequestHandler: 'RequestHandler',
+    PreferencesHandler: 'PreferencesHandler'
 };
 
 export { TYPES, CLASSES };
