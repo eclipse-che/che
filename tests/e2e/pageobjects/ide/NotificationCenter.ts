@@ -52,7 +52,7 @@ export class NotificationCenter {
     }
 
     async waitClosing(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug(`NotificationCenter.close`);
+        Logger.debug(`NotificationCenter.waitClosing`);
 
         const notificationCenterClosedLocator: By = By.css('.theia-notification-center.closed');
 
