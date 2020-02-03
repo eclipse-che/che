@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.workspaces;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 
 import com.google.inject.Inject;
@@ -36,7 +35,7 @@ import org.testng.annotations.Test;
  * @author Aleksandr Shmaraev TODO turn on the test after
  *     https://github.com/eclipse/che/issues/15317 resolved
  */
-@Test(groups = UNDER_REPAIR)
+@Test
 public class ProjectStateAfterRenameWorkspaceTest {
   private static final String WORKSPACE_NAME =
       generate(ProjectStateAfterRenameWorkspaceTest.class.getSimpleName(), 5);
