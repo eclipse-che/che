@@ -41,6 +41,7 @@ interface IBrandingDocs {
   organization?: string;
   general?: string;
   converting?: string;
+  faq?: string;
 }
 interface IBrandingWorkspace {
   priorityStacks?: Array<string>;
@@ -324,7 +325,8 @@ export class CheBranding {
       factory: this.branding.docs && this.branding.docs.factory ? this.branding.docs.factory : DEFAULT_DOCS_FACTORY,
       organization: this.branding.docs && this.branding.docs.organization ? this.branding.docs.organization : DEFAULT_DOCS_ORGANIZATION,
       general: this.branding.docs && this.branding.docs.general ? this.branding.docs.general : DEFAULT_DOCS_GENERAL,
-      converting: this.branding.docs && this.branding.docs.converting ? this.branding.docs.converting : DEFAULT_DOCS_CONVERTING
+      converting: this.branding.docs && this.branding.docs.converting ? this.branding.docs.converting : DEFAULT_DOCS_CONVERTING,
+      faq: this.branding.docs && this.branding.docs.faq ? this.branding.docs.faq : undefined
     };
   }
 
