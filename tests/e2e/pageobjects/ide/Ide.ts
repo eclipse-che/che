@@ -253,7 +253,7 @@ export class Ide {
         Logger.debug(`Ide.closeAllNotifications`);
 
         await this.notificationCenter.open(timeout);
-        await this.notificationCenter.clearAll(timeout);
+        await this.notificationCenter.closeAll(timeout);
     }
 
     async waitApllicationIsReady(url: string,

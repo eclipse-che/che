@@ -67,8 +67,8 @@ export class NotificationCenter {
         await this.driverHelper.waitDisappearance(notificationLocator, timeout);
     }
 
-    async clearAll(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug('NotificationCenter.clearAll');
+    async closeAll(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('NotificationCenter.closeAll');
 
         await this.clickCloseAllNotificationsButton(timeout);
         await this.waitClearNotificationsList(timeout);
