@@ -70,17 +70,28 @@ install_deps(){
     service docker start
 }
 
-build_and_deploy_artifacts() {
+mvn_build() {
     set -x
     scl enable rh-maven33 'mvn clean install -U -Pintegration'
     if [[ $? -eq 0 ]]; then
         echo 'Build Success!'
-        echo 'Going to deploy artifacts'
-        scl enable rh-maven33 "mvn clean deploy -DcreateChecksum=true  -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE"
     else
         die_with  'Build Failed!'
     fi
 }
+
+mvn_deploy() {
+    set -x
+    echo 'Going to deploy artifacts'
+    scl enable rh-maven33 "mvn clean deploy -DcreateChecksum=true  -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE"
+    if [[ $? -eq 0 ]]; then
+        echo 'Deploy Success!'
+    else
+        die_with  'Deploy Failed!'
+    fi
+}
+
+
 
 gitHttps2ssh(){
     #git remote set-url origin git@github.com:$(git remote get-url origin | sed 's/https:\/\/github.com\///' | sed 's/git@github.com://')
@@ -94,57 +105,45 @@ setup_gitconfig() {
   git config --global user.email vparfono@redhat.com
 }
 
+ # KEEP RIGHT ORDER!!!
+DOCKER_FILES_LOCATIONS=(
+    dockerfiles/endpoint-watcher
+    dockerfiles/keycloak
+    dockerfiles/postgres
+    dockerfiles/dev
+    dockerfiles/che
+    dockerfiles/dashboard-dev
+    dockerfiles/e2e
+)
 
+IMAGES_LIST=(
+    quay.io/eclipse/che-endpoint-watcher
+    quay.io/eclipse/che-keycloak
+    quay.io/eclipse/che-postgres
+    quay.io/eclipse/che-dev
+    quay.io/eclipse/che-server
+    quay.io/eclipse/che-dashboard-dev
+    quay.io/eclipse/che-e2e
+)
 
-publishImagesOnQuay() {
-    echo "Going to build and push docker images"
+REGISTRY="quay.io"
+ORGANIZATION="eclipse"
+
+buildImages() {
+    echo "Going to build docker images"
     set -e
     set -o pipefail
-
     TAG=$1
-    if [[ ${TAG} != "nightly" ]]; then #if given tag 'nightly' means that don't need to checkout and going to build master
-        git checkout ${TAG}
-    fi
-    REGISTRY="quay.io"
-    ORGANIZATION="eclipse"
-    if [[ -n "${QUAY_ECLIPSE_CHE_USERNAME}" ]] && [[ -n "${QUAY_ECLIPSE_CHE_PASSWORD}" ]]; then
-        docker login -u "${QUAY_ECLIPSE_CHE_USERNAME}" -p "${QUAY_ECLIPSE_CHE_PASSWORD}" "${REGISTRY}"
-    else
-      echo "Could not login, missing credentials for pushing to the '${ORGANIZATION}' organization"
-      return
-    fi
-
+  
     # stop / rm all containers
     if [[ $(docker ps -aq) != "" ]];then
         docker rm -f $(docker ps -aq)
     fi
 
-    # KEEP RIGHT ORDER!!!
-    DOCKER_FILES_LOCATIONS=(
-        dockerfiles/endpoint-watcher
-        dockerfiles/keycloak
-        dockerfiles/postgres
-        dockerfiles/dev
-        dockerfiles/che
-        dockerfiles/dashboard-dev
-        dockerfiles/e2e
-    )
-
-    IMAGES_LIST=(
-        eclipse/che-endpoint-watcher
-        eclipse/che-keycloak
-        eclipse/che-postgres
-        eclipse/che-dev
-        eclipse/che-server
-        eclipse/che-dashboard-dev
-        eclipse/che-e2e
-    )
-
-
     # BUILD IMAGES
     for image_dir in ${DOCKER_FILES_LOCATIONS[@]}
      do
-         bash $(pwd)/${image_dir}/build.sh --tag:${TAG}
+         bash $(pwd)/${image_dir}/build.sh --tag:${TAG} 
          if [[ ${image_dir} == "dockerfiles/che" ]]; then
            #CENTOS SINGLE USER
            BUILD_ASSEMBLY_DIR=$(echo assembly/assembly-main/target/eclipse-che-*/eclipse-che-*/)
@@ -161,31 +160,45 @@ publishImagesOnQuay() {
            exit 1
          fi
      done
+}
 
-    #PUSH IMAGES
+tagImages() {
     for image in ${IMAGES_LIST[@]}
      do
-         echo y | docker push "${REGISTRY}/${image}:${TAG}"
-         if [[ $2 == "pushLatest" ]]; then
-            docker tag "${image}:${TAG}" "${REGISTRY}/${image}:latest"
-            echo y | docker push "${REGISTRY}/${image}:latest"
-         fi
-
+         echo y | docker tag "${REGISTRY}/${image}:$1"
          if [[ ${image} == "${ORGANIZATION}/che-server" ]]; then
-           docker tag "${REGISTRY}/${image}:${TAG}" "${REGISTRY}/${image}:${TAG}-centos"
-           echo y | docker push "${REGISTRY}/${ORGANIZATION}/che-server:${TAG}-centos"
-           if [[ $2 == "pushLatest" ]]; then
-               docker tag "${REGISTRY}/${image}:${TAG}" "${REGISTRY}/${image}:latest-centos"
-               echo y | docker push "${REGISTRY}/${ORGANIZATION}/che-server:latest-centos"
-           fi
+           docker tag "${REGISTRY}/${image}:$1" "${REGISTRY}/${image}:$1-centos"
          fi
          if [[ $? -ne 0 ]]; then
-           echo "ERROR:"
-           echo "docker push of '${image}' image is failed!"
-           exit 1
+           die_with  "docker push of '${image}' image is failed!"
          fi
      done
 }
+
+pushImagesOnQuay() {
+    #PUSH IMAGES
+      if [[ -n "${QUAY_ECLIPSE_CHE_USERNAME}" ]] && [[ -n "${QUAY_ECLIPSE_CHE_PASSWORD}" ]]; then
+        docker login -u "${QUAY_ECLIPSE_CHE_USERNAME}" -p "${QUAY_ECLIPSE_CHE_PASSWORD}" "${REGISTRY}"
+    else
+        echo "Could not login, missing credentials for pushing to the '${ORGANIZATION}' organization"
+         return
+    fi
+    for image in ${IMAGES_LIST[@]}
+     do
+         echo y | docker push "${image}:$1"
+         if [[ $2 == "pushLatest" ]]; then
+            echo y | docker push "${REGISTRY}/${image}:latest"
+         fi
+
+         if [[ ${image} == "${REGISTRY}/${ORGANIZATION}/che-server" ]]; then
+           echo y | docker push "${REGISTRY}/${ORGANIZATION}/che-server:$1-centos"
+         fi
+         if [[ $? -ne 0 ]]; then
+           die_with  "docker push of '${image}' image is failed!"
+         fi
+     done
+}
+
 
 releaseProject() {
     set -x
@@ -206,5 +219,9 @@ releaseProject() {
     fi
     git tag "${tag}" || die_with "Failed to create tag ${tag}! Release has been deployed, however"
     git push --tags ||  die_with "Failed to push tags. Please do this manually"
-    publishImagesOnQuay ${tag} "pushLatest"
+    git checkout ${tag}
+    buildImages  ${tag}
+    pushImagesOnQuay ${tag}
+    tagImages "latest"
+    pushImagesOnQuay "latest"
 }
