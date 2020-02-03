@@ -1,6 +1,6 @@
 {{- define "properties" -}}
   {{- range $key, $value := . -}}
-    {{- $key | upper | replace "_" "__" | nindent 2 -}}
+    {{- $key | upper | replace "_" "__" | replace "." "_" | nindent 2 -}}
     {{- template "travarsalProperty" . }}
   {{- end -}}
 {{- end -}}
