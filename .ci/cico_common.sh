@@ -127,7 +127,7 @@ IMAGES_LIST=(
 )
 
 REGISTRY="quay.io"
-ORGANIZATION="vparfono"
+ORGANIZATION="eclipse"
 
 buildImages() {
     echo "Going to build docker images"
