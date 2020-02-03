@@ -35,6 +35,10 @@ export class CheDashboardConfigurationService {
     this.cheBranding = cheBranding;
   }
 
+  get ready(): ng.IPromise<void> {
+    return this.cheBranding.ready;
+  }
+
   allowedMenuItem(menuItem: che.ConfigurableMenuItem | string): boolean {
     const disabledItems = this.cheBranding.getConfiguration().menu.disabled;
     return (disabledItems as string[]).indexOf(menuItem) === -1;
@@ -46,6 +50,11 @@ export class CheDashboardConfigurationService {
         return this.$q.reject();
       }
     });
+  }
+
+  enabledFeature(feature: che.TogglableFeature): boolean {
+    const disabledFeatures = this.cheBranding.getConfiguration().features.disabled;
+    return disabledFeatures.indexOf(feature) === -1;
   }
 
 }

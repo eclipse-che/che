@@ -60,6 +60,9 @@ interface IBrandingConfiguration {
     cheCDN: string;
     resources: string[];
   };
+  features: {
+    disabled: che.TogglableFeature[];
+  };
 }
 
 const ASSET_PREFIX = 'assets/branding/';
@@ -344,8 +347,16 @@ export class CheBranding {
       menu: {
         disabled:
           this.branding.configuration &&
-          this.branding.configuration.menu && this.branding.configuration.menu.disabled
+            this.branding.configuration.menu && this.branding.configuration.menu.disabled
             ? this.branding.configuration.menu.disabled
+            : []
+      },
+      features: {
+        disabled:
+          this.branding.configuration &&
+            this.branding.configuration.features &&
+            this.branding.configuration.features.disabled
+            ? this.branding.configuration.features.disabled
             : []
       },
       prefetch: {

@@ -18,6 +18,7 @@ import { IReadyToGoStacksScopeBindings, IReadyToGoStacksScopeOnChange } from './
 import { ProjectSourceSelectorService } from './project-source-selector/project-source-selector.service';
 import { CheKubernetesNamespace } from '../../../../components/api/che-kubernetes-namespace.factory';
 import { CheWorkspace } from '../../../../components/api/workspace/che-workspace.factory';
+import { CheDashboardConfigurationService } from '../../../../components/branding/che-dashboard-configuration.service';
 
 /**
  * This class is handling the controller for predefined stacks.
@@ -27,12 +28,13 @@ import { CheWorkspace } from '../../../../components/api/workspace/che-workspace
 export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings {
 
   static $inject = [
+    'cheDashboardConfigurationService',
     'cheKubernetesNamespace',
     'cheWorkspace',
     'createWorkspaceSvc',
     'namespaceSelectorSvc',
     'projectSourceSelectorService',
-    'randomSvc'
+    'randomSvc',
   ];
 
   /**
@@ -53,10 +55,12 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
   WORKSPACE_NAME_FORM = 'workspaceName';
   infrastructureNamespaceHint: string = '';
   ephemeralMode: boolean;
+  enabledKubernetesNamespaceSelector: boolean = false;
 
   /**
    * Injected dependencies.
    */
+  private cheDashboardConfigurationService: CheDashboardConfigurationService;
   private cheKubernetesNamespace: CheKubernetesNamespace;
   private cheWorkspace: CheWorkspace;
   private createWorkspaceSvc: CreateWorkspaceSvc;
@@ -101,13 +105,15 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
    * Default constructor that is using resource injection
    */
   constructor(
+    cheDashboardConfigurationService: CheDashboardConfigurationService,
     cheKubernetesNamespace: CheKubernetesNamespace,
     cheWorkspace: CheWorkspace,
     createWorkspaceSvc: CreateWorkspaceSvc,
     namespaceSelectorSvc: NamespaceSelectorSvc,
     projectSourceSelectorService: ProjectSourceSelectorService,
-    randomSvc: RandomSvc
+    randomSvc: RandomSvc,
   ) {
+    this.cheDashboardConfigurationService = cheDashboardConfigurationService;
     this.cheKubernetesNamespace = cheKubernetesNamespace;
     this.cheWorkspace = cheWorkspace;
     this.createWorkspaceSvc = createWorkspaceSvc;
@@ -130,6 +136,9 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
     this.cheKubernetesNamespace.fetchKubernetesNamespace().then(() => this.setInfrastructureNamespaceHint());
     this.cheWorkspace.fetchWorkspaceSettings().then((settings: che.IWorkspaceSettings) => {
       this.ephemeralMode = settings['che.workspace.persist_volumes.default'] === 'false';
+    });
+    this.cheDashboardConfigurationService.ready.then(() => {
+      this.enabledKubernetesNamespaceSelector = this.cheDashboardConfigurationService.enabledFeature('kubernetesNamespaceSelector');
     });
   }
 

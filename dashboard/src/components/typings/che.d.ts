@@ -16,6 +16,7 @@ declare module 'che' {
 declare namespace che {
 
   export type ConfigurableMenuItem = 'administration' | 'factories' | 'getstarted' | 'organizations' | 'stacks';
+  export type TogglableFeature = 'workspaceSharing' | 'kubernetesNamespaceSelector';
 
   export interface IRootScopeService extends ng.IRootScopeService {
     hideLoader: boolean;
