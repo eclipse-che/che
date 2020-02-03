@@ -62,7 +62,7 @@ export class NotificationCenter {
     async waitClearNotificationsList(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`NotificationCenter.waitClearNotificationsList`);
 
-        const notificationLocator: By = By.xpath('.theia-notification-center .theia-notification-list > *');
+        const notificationLocator: By = By.css('.theia-notification-center .theia-notification-list > *');
 
         await this.driverHelper.waitDisappearance(notificationLocator, timeout);
     }
