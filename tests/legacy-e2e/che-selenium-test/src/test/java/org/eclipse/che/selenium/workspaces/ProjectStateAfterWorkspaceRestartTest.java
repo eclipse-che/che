@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.workspaces;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.testng.Assert.fail;
 
@@ -34,7 +35,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 10.03.16 * */
-@Test
+@Test(groups = {UNDER_REPAIR})
 public class ProjectStateAfterWorkspaceRestartTest {
 
   private static final String WORKSPACE_NAME =
