@@ -847,7 +847,7 @@ public class WorkspaceRuntimes {
         try {
           // Recover runtime in multi-thread friendly manner
           // 1. acquire write lock
-          // 2. check if runtime already restored by other thread.
+          // 2. check if runtime already restored by other threads.
           // 3. If needed restore runtime.
           getInternalRuntime(identity.getWorkspaceId());
         } catch (Exception e) {
