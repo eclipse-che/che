@@ -855,7 +855,8 @@ public class WorkspaceRuntimes {
               "An error occurred while attempting to recover runtime '{}' using infrastructure '{}'. Reason: '{}'",
               identity.getWorkspaceId(),
               infrastructure.getName(),
-              e.getMessage());
+              e.getMessage(),
+              e);
         }
       }
 
