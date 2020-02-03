@@ -285,6 +285,16 @@ public class WorkspaceRuntimes {
       throws InfrastructureException {
     return infrastructure.evaluateLegacyInfraNamespace(resolutionContext);
   }
+
+  /**
+   * This method just passes on the question down to the underlying infrastructure.
+   *
+   * @see RuntimeInfrastructure#isNamespaceValid(String)
+   */
+  public boolean isInfrastructureNamespaceValid(String namespaceName) {
+    return infrastructure.isNamespaceValid(namespaceName);
+  }
+
   /**
    * Injects runtime information such as status and {@link
    * org.eclipse.che.api.core.model.workspace.Runtime} into the workspace object, if the workspace

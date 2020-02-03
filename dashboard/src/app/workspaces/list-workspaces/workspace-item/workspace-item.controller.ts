@@ -10,10 +10,10 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
+import {CheWorkspace, WorkspaceStatus} from '../../../../components/api/workspace/che-workspace.factory';
 import {CheBranding} from '../../../../components/branding/che-branding.factory';
 import {WorkspacesService} from '../../workspaces.service';
-import { WorkspaceDataManager } from '../../../../components/api/workspace/workspace-data-manager';
+import {WorkspaceDataManager} from '../../../../components/api/workspace/workspace-data-manager';
 
 const BLUR_TIMEOUT = 5000;
 
@@ -34,6 +34,7 @@ export class WorkspaceItemCtrl {
     'cheWorkspace',
     'lodash',
     'workspacesService',
+    '$filter'
   ];
 
   $document: ng.IDocumentService;
@@ -47,6 +48,7 @@ export class WorkspaceItemCtrl {
   workspace: che.IWorkspace;
   workspaceName: string;
   workspaceSupportIssues: any;
+  $filter: ng.IFilterService;
 
   private supportedVersionTypeIssue: any;
   private timeoutPromise: ng.IPromise<any>;
@@ -63,6 +65,7 @@ export class WorkspaceItemCtrl {
     cheWorkspace: CheWorkspace,
     lodash: any,
     workspacesService: WorkspacesService,
+    $filter: ng.IFilterService,
   ) {
     this.$document = $document;
     this.$location = $location;
@@ -70,6 +73,7 @@ export class WorkspaceItemCtrl {
     this.cheWorkspace = cheWorkspace;
     this.lodash = lodash;
     this.workspacesService = workspacesService;
+    this.$filter = $filter;
 
     this.workspaceDataManager = new WorkspaceDataManager();
 
@@ -123,12 +127,12 @@ export class WorkspaceItemCtrl {
    * Redirects to workspace details.
    * @param tab {string}
    */
-  redirectToWorkspaceDetails(tab?: string): void {
-    this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspaceName).search({tab: tab ? tab : 'Overview'});
+  redirectToWorkspaceDetails(tab: string = 'Overview'): void {
+    this.$location.path(`/workspace/${this.workspace.namespace}/${this.workspaceName}`).search({tab});
   }
 
-  getMemoryLimit(workspace: che.IWorkspace): string {
-      return '-';
+  getMemoryLimit(): string {
+    return '-';
   }
 
   setTemporaryFocus(elementId?: string): void {
@@ -151,12 +155,28 @@ export class WorkspaceItemCtrl {
     }
   }
 
+  get workspaceTooltip(): string {
+    const isWorkspaceRunning = WorkspaceStatus.RUNNING === WorkspaceStatus[this.getWorkspaceStatus()];
+    const attributes = this.workspace.attributes;
+    const time = parseInt('' + (attributes.updated ? attributes.updated : attributes.created), 10);
+    const amTimeAgo: (time: number) => string = this.$filter('amTimeAgo');
+    return isWorkspaceRunning ? 'Running' : 'Last modified: ' + amTimeAgo(time);
+  }
+
   /**
    * Returns current status of workspace
-   * @returns {String}
    */
   getWorkspaceStatus(): string {
-    let workspace = this.cheWorkspace.getWorkspaceById(this.workspace.id);
-    return workspace ? workspace.status : 'unknown';
+    const workspace = this.cheWorkspace.getWorkspaceById(this.workspace.id);
+    if (!workspace || !workspace.status) {
+      return 'unknown';
+    }
+
+    return workspace.status;
+  }
+
+  isCheckboxEnable(): boolean {
+    const status =  WorkspaceStatus[this.getWorkspaceStatus()];
+    return status === WorkspaceStatus.RUNNING || status === WorkspaceStatus.STOPPED;
   }
 }

@@ -67,7 +67,7 @@ describe(`WorkspaceDetailsController >`, () => {
         'ide': 'http://localhost:8080/che/wksp-98cs'
       },
       'id': 'workspacezbkov1e8qcm00dli',
-      'attributes': {'created': 1516282666658, 'stackId': 'blank-default'}
+      'attributes': {'created': 1516282666658, 'stackId': 'blank-default', 'infrastructureNamespace': 'che'}
     };
   }
 
@@ -235,9 +235,21 @@ describe(`WorkspaceDetailsController >`, () => {
         return {
           getDocs: () => {
             const converting = 'converting-a-che-6-workspace-to-a-che-7-devfile';
-            return {converting};
+            return { converting };
+          },
+          registerCallback: (callbackId: string, callback: Function): void => {
+            callback();
+          },
+          unregisterCallback: (callbackId: string): void => {},
+          getConfiguration: () => {
+            return {
+              menu: {
+                disabled: []
+              },
+              prefetch: {}
+            };
           }
-        }
+        };
       })
       // terminal directives which prevent to execute an original ones
       .directive('mdTab', function () {

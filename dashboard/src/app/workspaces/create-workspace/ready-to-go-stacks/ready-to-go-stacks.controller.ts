@@ -14,8 +14,10 @@
 import { CreateWorkspaceSvc } from '../create-workspace.service';
 import { NamespaceSelectorSvc } from './namespace-selector/namespace-selector.service';
 import { RandomSvc } from '../../../../components/utils/random.service';
-import { IReadyToGoStacksScopeBindings } from './ready-to-go-stacks.directive';
+import { IReadyToGoStacksScopeBindings, IReadyToGoStacksScopeOnChange } from './ready-to-go-stacks.directive';
 import { ProjectSourceSelectorService } from './project-source-selector/project-source-selector.service';
+import { CheKubernetesNamespace } from '../../../../components/api/che-kubernetes-namespace.factory';
+import { CheWorkspace } from '../../../../components/api/workspace/che-workspace.factory';
 
 /**
  * This class is handling the controller for predefined stacks.
@@ -25,7 +27,8 @@ import { ProjectSourceSelectorService } from './project-source-selector/project-
 export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings {
 
   static $inject = [
-    '$timeout',
+    'cheKubernetesNamespace',
+    'cheWorkspace',
     'createWorkspaceSvc',
     'namespaceSelectorSvc',
     'projectSourceSelectorService',
@@ -35,7 +38,7 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
   /**
    * Directive scope bindings.
    */
-  onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs: { [key: string]: any } }) => void;
+  onChange: IReadyToGoStacksScopeOnChange;
   /**
    * The selected devfile.
    */
@@ -48,20 +51,35 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
    * Form name
    */
   WORKSPACE_NAME_FORM = 'workspaceName';
+  infrastructureNamespaceHint: string = '';
+  ephemeralMode: boolean;
 
   /**
    * Injected dependencies.
    */
-  private $timeout: ng.ITimeoutService;
+  private cheKubernetesNamespace: CheKubernetesNamespace;
+  private cheWorkspace: CheWorkspace;
   private createWorkspaceSvc: CreateWorkspaceSvc;
   private namespaceSelectorSvc: NamespaceSelectorSvc;
   private projectSourceSelectorService: ProjectSourceSelectorService;
   private randomSvc: RandomSvc;
 
   /**
-   * The selected namespace ID.
+   * The workspace devfile.
    */
-  private namespaceId: string;
+  private devfile: che.IWorkspaceDevfile;
+  /**
+   * The workspace attributes.
+   */
+  private attrs: { [key: string]: any } = {};
+  /**
+   * The selected Che namespace ID.
+   */
+  private cheNamespaceId: string;
+  /**
+   * The selected Kubernetes namespace ID.
+   */
+  private infrastructureNamespaceId: string;
   /**
    * The map of forms.
    */
@@ -83,13 +101,15 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
    * Default constructor that is using resource injection
    */
   constructor(
-    $timeout: ng.ITimeoutService,
+    cheKubernetesNamespace: CheKubernetesNamespace,
+    cheWorkspace: CheWorkspace,
     createWorkspaceSvc: CreateWorkspaceSvc,
     namespaceSelectorSvc: NamespaceSelectorSvc,
     projectSourceSelectorService: ProjectSourceSelectorService,
     randomSvc: RandomSvc
   ) {
-    this.$timeout = $timeout;
+    this.cheKubernetesNamespace = cheKubernetesNamespace;
+    this.cheWorkspace = cheWorkspace;
     this.createWorkspaceSvc = createWorkspaceSvc;
     this.namespaceSelectorSvc = namespaceSelectorSvc;
     this.projectSourceSelectorService = projectSourceSelectorService;
@@ -100,12 +120,16 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
   }
 
   $onInit(): void {
-    this.namespaceId = this.namespaceSelectorSvc.getNamespaceId();
-    this.createWorkspaceSvc.buildListOfUsedNames(this.namespaceId).then((namesList: string[]) => {
+    this.cheNamespaceId = this.namespaceSelectorSvc.getNamespaceId();
+    this.createWorkspaceSvc.buildListOfUsedNames(this.cheNamespaceId).then((namesList: string[]) => {
       this.usedNamesList = namesList;
       this.workspaceName = this.randomSvc.getRandString({ prefix: 'wksp-', list: this.usedNamesList });
       this.providedWorkspaceName = this.workspaceName;
       this.reValidateName();
+    });
+    this.cheKubernetesNamespace.fetchKubernetesNamespace().then(() => this.setInfrastructureNamespaceHint());
+    this.cheWorkspace.fetchWorkspaceSettings().then((settings: che.IWorkspaceSettings) => {
+      this.ephemeralMode = settings['che.workspace.persist_volumes.default'] === 'false';
     });
   }
 
@@ -121,7 +145,7 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
 
   onDevfileNameChange(newName: string): void {
     this.providedWorkspaceName = newName;
-    this.onDevfileChange();
+    this.propagateChanges();
   }
 
   /**
@@ -142,7 +166,6 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
     return this.namespaceSelectorSvc.getNamespaceEmptyMessage();
   }
 
-
   /**
    * Returns list of namespaces.
    */
@@ -162,60 +185,39 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
    */
   onDevfileSelected(devfile: che.IWorkspaceDevfile): void {
     this.selectedDevfile = devfile;
-    this.onDevfileChange();
+    this.propagateChanges();
   }
 
   /**
    * Callback which is called when a project template is added, updated or removed.
    */
   onProjectSelectorChange(): void {
-    this.onDevfileChange();
-  }
-
-  onDevfileChange(): void {
-    const devfile = angular.copy(this.selectedDevfile);
-
-    this.updateDevfileProjects(devfile);
-    devfile.metadata.name = this.providedWorkspaceName;
-
-    this.onChange({
-      devfile: devfile,
-      attrs: { stackName: this.stackName }
-    });
+    this.propagateChanges();
   }
 
   /**
-   * Populates a devfile with chosen projects
+   * Callback which is called when Che namespace is selected.
    */
-  updateDevfileProjects(devfile: che.IWorkspaceDevfile): che.IWorkspaceDevfile {
-    // projects to add to current devfile
-    const projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
-
-    devfile.projects = projectTemplates;
-
-    // check if some of added projects are defined in initial devfile
-    const projectDefinedInDevfile = projectTemplates.some((template: che.IProjectTemplate) =>
-      devfile.projects.some((devfileProject: any) => devfileProject.name === template.name)
-    );
-
-    // if no projects defined in devfile were added - remove the commands from devfile as well:
-    if (projectDefinedInDevfile === false) {
-      devfile.commands = [];
-    }
-
-    return devfile;
-  }
-
-  /**
-   * Callback which is called when namespace is selected.
-   */
-  onNamespaceChanged(namespaceId: string) {
-    this.namespaceId = namespaceId;
+  onCheNamespaceChanged(namespaceId: string) {
+    this.cheNamespaceId = namespaceId;
 
     this.createWorkspaceSvc.buildListOfUsedNames(namespaceId).then((namesList: string[]) => {
       this.usedNamesList = namesList;
       this.reValidateName();
     });
+  }
+
+  onInfrastructureNamespaceChanged(namespaceId: string): void {
+    this.infrastructureNamespaceId = namespaceId;
+    this.propagateChanges();
+  }
+
+  onEphemeralModeChange(): void {
+    this.propagateChanges();
+  }
+
+  private setInfrastructureNamespaceHint(): void {
+    this.infrastructureNamespaceHint = this.cheKubernetesNamespace.getHintDescription();
   }
 
   /**
@@ -233,6 +235,74 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
       if (model) {
         model.$validate();
       }
+    });
+  }
+
+  private updateDevfile(): void {
+    this.devfile = angular.copy(this.selectedDevfile);
+    this.updateDevfileProjects();
+    this.updateDevfileMetadataName();
+    this.updatePersistVolumesAttribute();
+  }
+
+  private updatePersistVolumesAttribute(): void {
+    if (!this.devfile) {
+      return;
+    }
+    if (this.ephemeralMode) {
+      if (!this.devfile.attributes) {
+        this.devfile.attributes = {};
+      }
+      this.devfile.attributes.persistVolumes = 'false';
+    } else {
+      if (this.devfile.attributes) {
+        delete this.devfile.attributes.persistVolumes;
+      }
+      if (this.devfile.attributes && Object.keys(this.devfile.attributes).length === 0) {
+        delete this.devfile.attributes;
+      }
+    }
+  }
+
+  private updateDevfileMetadataName(): void {
+    if (!this.devfile) {
+      return;
+    }
+    this.devfile.metadata.name = this.providedWorkspaceName;
+  }
+
+  /**
+   * Populates a devfile with chosen projects
+   */
+  private updateDevfileProjects() {
+    if (!this.devfile) {
+      return;
+    }
+
+    // projects to add to current devfile
+    const projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
+
+    this.devfile.projects = projectTemplates;
+
+    // check if some of added projects are defined in initial devfile
+    const projectDefinedInDevfile = projectTemplates.some((template: che.IProjectTemplate) =>
+      this.devfile.projects.some((devfileProject: any) => devfileProject.name === template.name)
+    );
+
+    // if no projects defined in devfile were added - remove the commands from devfile as well:
+    if (projectDefinedInDevfile === false) {
+      this.devfile.commands = [];
+    }
+  }
+
+  private propagateChanges(): void {
+    this.updateDevfile();
+    this.onChange({
+      devfile: this.devfile,
+      attrs: {
+        stackName: this.stackName,
+      },
+      infrastructureNamespaceId: this.infrastructureNamespaceId,
     });
   }
 

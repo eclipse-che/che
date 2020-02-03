@@ -11,8 +11,13 @@
  */
 'use strict';
 
+import { DevfileChangeEventData } from '../devfile-change-event-data';
+
 export interface IImportStackScopeBindings {
-  onChange: (eventData: { devfile: che.IWorkspaceDevfile, attrs?: { [key: string]: any } }) => void;
+  onChange: IImportStackScopeOnChange;
+}
+export interface IImportStackScopeOnChange {
+  (eventData: DevfileChangeEventData): void;
 }
 
 /**

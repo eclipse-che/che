@@ -10,15 +10,53 @@
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { By } from 'selenium-webdriver';
+import { By, error } from 'selenium-webdriver';
 import { TestConstants } from '../../TestConstants';
 import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class PreviewWidget {
+    private static readonly WIDGET_URL_LOCATOR: By = By.css('div.theia-mini-browser input');
+
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Ide) private readonly ide: Ide) { }
+
+    async waitUrl(expectedUrl: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`PreviewWidget.waitUrl ${expectedUrl}`);
+
+        await this.driverHelper.waitAttributeValue(PreviewWidget.WIDGET_URL_LOCATOR, 'value', expectedUrl, timeout);
+    }
+
+    async typeUrl(url: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`PreviewWidget.typeUrl ${url}`);
+
+        await this.driverHelper.enterValue(PreviewWidget.WIDGET_URL_LOCATOR, url, timeout);
+    }
+
+    async typeAndApplyUrl(url: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`PreviewWidget.typeAndApplyUrl ${url}`);
+
+        await this.typeUrl(url, timeout);
+        await this.refreshPage();
+    }
+
+    async waitApplicationOpened(expectedUrl: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`PreviewWidget.waitApplicationOpened ${expectedUrl}`);
+
+        await this.driverHelper.getDriver().wait(async () => {
+            try {
+                await this.waitUrl(expectedUrl, timeout / 5);
+                return true;
+            } catch (err) {
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err;
+                }
+
+                await this.typeAndApplyUrl(expectedUrl, timeout);
+            }
+        }, timeout);
+    }
 
     async waitAndSwitchToWidgetFrame() {
         Logger.debug('PreviewWidget.waitAndSwitchToWidgetFrame');

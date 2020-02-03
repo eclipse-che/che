@@ -28,6 +28,8 @@ import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
 import org.eclipse.che.multiuser.api.authentication.commons.SubjectHttpRequestWrapper;
 import org.eclipse.che.multiuser.api.authentication.commons.token.RequestTokenExtractor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Performs basic environment initialization actions as follows:
@@ -43,6 +45,9 @@ import org.eclipse.che.multiuser.api.authentication.commons.token.RequestTokenEx
  * @author Max Shaposhnyk (mshaposh@redhat.com)
  */
 public abstract class MultiUserEnvironmentInitializationFilter implements Filter {
+
+  private static final Logger LOG =
+      LoggerFactory.getLogger(MultiUserEnvironmentInitializationFilter.class);
 
   private final SessionStore sessionStore;
   private final RequestTokenExtractor tokenExtractor;
@@ -115,7 +120,19 @@ public abstract class MultiUserEnvironmentInitializationFilter implements Filter
     HttpSession session = httpRequest.getSession(true);
     // retrieve and check / create new subject
     sessionSubject = (Subject) session.getAttribute(CHE_SUBJECT_ATTRIBUTE);
-    if (sessionSubject == null || !sessionSubject.getToken().equals(token)) {
+    if (sessionSubject == null) {
+      sessionSubject = extractSubject(token);
+      session.setAttribute(CHE_SUBJECT_ATTRIBUTE, sessionSubject);
+    } else if (!sessionSubject.getUserId().equals(userId)) {
+      LOG.debug(
+          "Invalidating session with mismatched user IDs: old was '{}', new is '{}'.",
+          sessionSubject.getUserId(),
+          userId);
+      session.invalidate();
+      HttpSession new_session = httpRequest.getSession(true);
+      sessionSubject = extractSubject(token);
+      new_session.setAttribute(CHE_SUBJECT_ATTRIBUTE, sessionSubject);
+    } else if (!sessionSubject.getToken().equals(token)) {
       sessionSubject = extractSubject(token);
       session.setAttribute(CHE_SUBJECT_ATTRIBUTE, sessionSubject);
     }

@@ -12,9 +12,9 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,23 +73,23 @@ public class JwtProxySecureServerExposerTest {
     ServicePort jwtProxyServicePort = new ServicePort();
     doReturn(jwtProxyServicePort)
         .when(jwtProxyProvisioner)
-        .expose(any(), anyString(), any(), anyString(), anyMap());
+        .expose(any(), anyString(), any(), anyString(), any());
 
     when(jwtProxyProvisioner.getServiceName()).thenReturn(JWT_PROXY_SERVICE_NAME);
 
     // when
     secureServerExposer.expose(
-        k8sEnv, MACHINE_NAME, MACHINE_SERVICE_NAME, machineServicePort, servers);
+        k8sEnv, MACHINE_NAME, MACHINE_SERVICE_NAME, null, machineServicePort, servers);
 
     // then
     verify(jwtProxyProvisioner)
-        .expose(
-            eq(k8sEnv), eq(MACHINE_SERVICE_NAME), eq(machineServicePort), eq("TCP"), eq(servers));
+        .expose(eq(k8sEnv), eq(MACHINE_SERVICE_NAME), eq(machineServicePort), eq("TCP"), any());
     verify(externalServerExposer)
         .expose(
             eq(k8sEnv),
             eq(MACHINE_NAME),
             eq(JWT_PROXY_SERVICE_NAME),
+            isNull(),
             eq(jwtProxyServicePort),
             eq(servers));
   }

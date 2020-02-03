@@ -15,6 +15,7 @@ import {ListStacksController} from './list-stacks/list-stacks.controller';
 import {StackController, IStackInitData} from './stack-details/stack.controller';
 import {DevfileRegistry, IDevfileMetaData} from '../../components/api/devfile-registry.factory';
 import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
+import { StacksConfigService } from './stacks-config.service';
 
 /**
  * @ngdoc controller
@@ -28,13 +29,20 @@ export class StacksConfig {
     register.controller('ListStacksController', ListStacksController);
     register.controller('StackController', StackController);
 
+    register.service('stacksConfigService', StacksConfigService);
+
     // config routes
-    register.app.config(['$routeProvider', ($routeProvider: any) => {
+    register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/stacks', {
         title: 'Stacks',
         templateUrl: 'app/stacks/list-stacks/list-stacks.html',
         controller: 'ListStacksController',
-        controllerAs: 'listStacksController'
+        controllerAs: 'listStacksController',
+        resolve: {
+          initData: ['stacksConfigService', (svc: StacksConfigService) => {
+            return svc.allowStacksRoutes();
+          }]
+        }
       })
         .accessWhen('/stack/:stackId*', {
           title: (params: any) => {
@@ -44,19 +52,21 @@ export class StacksConfig {
           controller: 'StackController',
           controllerAs: 'stackController',
           resolve: {
-            initData: ['$q', '$route', 'cheWorkspace', 'devfileRegistry', ($q: ng.IQService, $route: ng.route.IRouteService, cheWorkspace: CheWorkspace,  devfileRegistry: DevfileRegistry) => {
-              const {stackId} = $route.current.params;
-              const selfLink = devfileRegistry.devfileIdToSelfLink(stackId);
-              const location = cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
-
-              return devfileRegistry.fetchDevfiles(location).then((devfileMetaDatas: Array<IDevfileMetaData>) => {
+            initData: ['$q', '$route', 'cheWorkspace', 'devfileRegistry', 'stacksConfigService', ($q: ng.IQService, $route: ng.route.IRouteService, cheWorkspace: CheWorkspace, devfileRegistry: DevfileRegistry, stacksConfigService: StacksConfigService) => {
+              return stacksConfigService.allowStacksRoutes().then(() => {
+                const location = cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
+                return devfileRegistry.fetchDevfiles(location);
+              }).then((devfileMetaDatas: Array<IDevfileMetaData>) => {
+                const location = cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
+                const { stackId } = $route.current.params;
+                const selfLink = devfileRegistry.devfileIdToSelfLink(stackId);
                 const devfileMetaData = devfileMetaDatas.find((devfileMetaData: IDevfileMetaData) => devfileMetaData.links.self === selfLink);
                 if (!devfileMetaData) {
                   return $q.reject();
                 }
                 return devfileRegistry.fetchDevfile(location, selfLink).then(() => {
                   const devfileContent = devfileRegistry.getDevfile(location, selfLink);
-                  return <IStackInitData>{devfileMetaData, devfileContent};
+                  return <IStackInitData>{ devfileMetaData, devfileContent };
                 });
               });
             }]

@@ -25,7 +25,7 @@ export class RandomSvc {
    * @param {string[]} list the list of strings to check the uniqueness of new one.
    * @return {string}
    */
-  getRandString({prefix, list}: {prefix?: string, list?: string[]}) {
+  getRandString({prefix, list}: {prefix?: string, list?: string[]}): string {
     let str: string,
         limit = 100;
 

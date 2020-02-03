@@ -72,7 +72,7 @@ public class Workspaces {
     String DELETE_WORKSPACE_BTN = "delete-item-button";
     String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button[text()='Delete']";
     String BULK_CHECKBOX = "//md-checkbox[@aria-label='Workspace list']";
-    String SEARCH_WORKSPACE_FIELD = "//input[@ng-placeholder='Search']";
+    String SEARCH_WORKSPACE_FIELD = "//input[@placeholder='Search']";
     String NO_WORKSPACE_FOUND = "//span[text()='No workspaces found.']";
     String WORKSPACE_ITEM_NAME = "//div[@class='workspace-name-clip' and contains(@id, '/%s')]";
     String WORKSPACE_ITEM_XPATH = "//div[@id='ws-name-%s']";
@@ -85,7 +85,7 @@ public class Workspaces {
     String WORKSPACE_ITEM_ACTIONS =
         "//div[@id='ws-name-%s']//*[@name='workspace-stop-start-button']/div";
     String WORKSPACE_ITEM_CONFIGURE_BUTTON =
-        "//div[@id='ws-name-%s']//a[@name='configure-workspace-button']";
+        "//div[@id='ws-name-%s']//span[@name='configure-workspace-button']";
     String WORKSPACE_ITEM_ADD_PROJECT_BUTTON =
         "//div[@id='ws-name-%s']//span[@name='add-project-button']";
     String WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON =

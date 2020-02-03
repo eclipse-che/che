@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
-import io.fabric8.kubernetes.api.model.ServicePort;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -22,8 +21,8 @@ public interface ExternalServiceExposureStrategy {
 
   /** Returns a host that should be used to expose the service */
   @Nullable
-  String getExternalHost(String serviceName, ServicePort servicePort);
+  String getExternalHost(String serviceName, String serverName);
 
   /** Returns the path on which the service should be exposed */
-  String getExternalPath(String serviceName, ServicePort servicePort);
+  String getExternalPath(String serviceName, String serverName);
 }

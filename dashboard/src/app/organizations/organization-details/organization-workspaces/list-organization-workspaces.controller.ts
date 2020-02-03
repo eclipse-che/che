@@ -193,8 +193,6 @@ export class ListOrganizationWorkspacesController {
 
   /**
    * Filter workspaces by namespace.
-   *
-   * @returns {Array<che.IWorkspace>}
    */
   filterWorkspacesByNamespace(): Array<che.IWorkspace> {
     return this.lodash.filter(this.cheWorkspace.getWorkspaces(), (workspace: che.IWorkspace) => {

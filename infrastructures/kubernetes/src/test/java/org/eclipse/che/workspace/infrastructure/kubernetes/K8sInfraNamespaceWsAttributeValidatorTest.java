@@ -13,9 +13,13 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import com.google.common.collect.ImmutableMap;
@@ -110,6 +114,24 @@ public class K8sInfraNamespaceWsAttributeValidatorTest {
     validator.validateUpdate(
         ImmutableMap.of(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "che-workspaces"),
         emptyMap());
+  }
+
+  @Test
+  public void shouldValidateFullyIfExistingIsEmpty() throws ValidationException {
+    validator.validateUpdate(
+        emptyMap(),
+        ImmutableMap.of(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "che-workspaces"));
+
+    verify(namespaceFactory).checkIfNamespaceIsAllowed(eq("che-workspaces"));
+  }
+
+  @Test
+  public void shouldNotValidateFullyIfExistingIsNotEmpty() throws ValidationException {
+    validator.validateUpdate(
+        ImmutableMap.of(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "che-workspaces"),
+        ImmutableMap.of(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "che-workspaces"));
+
+    verify(namespaceFactory, never()).checkIfNamespaceIsAllowed(any());
   }
 
   @DataProvider

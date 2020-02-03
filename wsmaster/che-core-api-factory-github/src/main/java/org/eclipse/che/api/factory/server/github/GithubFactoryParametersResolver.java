@@ -16,6 +16,7 @@ import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -115,8 +116,13 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
                 .withPath("/".concat(githubUrl.getRepository()));
           });
     } else if (factory.getDevfile() == null) {
-      // initialize default devfile and github project
+      // initialize default devfile
       factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(githubUrl.getRepository()));
+    }
+
+    List<ProjectDto> projects = factory.getDevfile().getProjects();
+    // if no projects set, set the default one from GitHub url
+    if (projects.isEmpty()) {
       factory
           .getDevfile()
           .setProjects(
@@ -124,6 +130,16 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
                   newDto(ProjectDto.class)
                       .withSource(githubSourceStorageBuilder.buildDevfileSource(githubUrl))
                       .withName(githubUrl.getRepository())));
+    } else {
+      // update existing project with same repository, set current branch if needed
+      projects.forEach(
+          project -> {
+            final String location = project.getSource().getLocation();
+            if (location.equals(githubUrl.repositoryLocation())
+                || location.equals(githubUrl.repositoryLocation() + ".git")) {
+              project.getSource().setBranch(githubUrl.getBranch());
+            }
+          });
     }
     return factory;
   }

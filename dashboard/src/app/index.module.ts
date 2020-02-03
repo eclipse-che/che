@@ -25,6 +25,7 @@ import {NavbarConfig} from './navbar/navbar-config';
 import {ProxySettingsConfig} from './proxy/proxy-settings.constant';
 import {WorkspacesConfig} from './workspaces/workspaces-config';
 import {StacksConfig} from './stacks/stacks-config';
+import {GetStartedConfig} from './get-started/get-started-config';
 import {DemoComponentsController} from './demo-components/demo-components.controller';
 import {CheBranding} from '../components/branding/che-branding.factory';
 import {ChePreferences} from '../components/api/che-preferences.factory';
@@ -34,6 +35,7 @@ import {CheUIElementsInjectorService} from '../components/service/injector/che-u
 import {OrganizationsConfig} from './organizations/organizations-config';
 import {TeamsConfig} from './teams/teams-config';
 import {ProfileConfig} from './profile/profile-config';
+import {ResourceFetcherService} from '../components/service/resource-fetcher/resource-fetcher.service';
 
 // init module
 const initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'ngResource', 'ngRoute',
@@ -152,14 +154,14 @@ angular.element(document).ready(() => {
     // load Keycloak
     return keycloakLoad(keycloakSettings).then(() => {
       // init Keycloak
-      var theUseNonce: boolean;
+      let theUseNonce: boolean;
       if (typeof keycloakSettings['che.keycloak.use_nonce'] === 'string') {
         theUseNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() === 'true';
       }
-      var initOptions = {
+      let initOptions = {
         useNonce: theUseNonce,
         redirectUrl: keycloakSettings['che.keycloak.redirect_url.dashboard']
-      }
+      };
       return keycloakInit(keycloakAuth.config, initOptions);
     }).then((keycloak: any) => {
       keycloakAuth.isPresent = true;
@@ -256,16 +258,27 @@ initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) 
 /**
  * Setup route redirect module
  */
-initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$timeout', '$mdSidenav', 'routeHistory', 'cheUIElementsInjectorService', 'workspaceDetailsService',
+initModule.run([
+  '$location',
+  '$mdSidenav',
+  '$rootScope',
+  '$routeParams',
+  '$timeout',
+  'cheUIElementsInjectorService',
+  'resourceFetcherService',
+  'routeHistory',
+  'routingRedirect',
+  'workspaceDetailsService',
   (
-    $rootScope: che.IRootScopeService,
     $location: ng.ILocationService,
-    $routeParams: ng.route.IRouteParamsService,
-    routingRedirect: RoutingRedirect,
-    $timeout: ng.ITimeoutService,
     $mdSidenav: ng.material.ISidenavService,
+    $rootScope: che.IRootScopeService,
+    $routeParams: ng.route.IRouteParamsService,
+    $timeout: ng.ITimeoutService,
+    cheUIElementsInjectorService: CheUIElementsInjectorService,
+    resourceFetcherService: ResourceFetcherService,
     routeHistory: RouteHistory,
-    cheUIElementsInjectorService: CheUIElementsInjectorService
+    routingRedirect: RoutingRedirect,
   ) => {
 
     $rootScope.hideLoader = false;
@@ -275,6 +288,7 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
 
     // here only to create instances of these components
     /* tslint:disable */
+    resourceFetcherService;
     routeHistory;
     /* tslint:enable */
 
@@ -492,6 +506,7 @@ new NavbarConfig(instanceRegister);
 new WorkspacesConfig(instanceRegister);
 new DashboardConfig(instanceRegister);
 new StacksConfig(instanceRegister);
+new GetStartedConfig(instanceRegister);
 new FactoryConfig(instanceRegister);
 new OrganizationsConfig(instanceRegister);
 new TeamsConfig(instanceRegister);

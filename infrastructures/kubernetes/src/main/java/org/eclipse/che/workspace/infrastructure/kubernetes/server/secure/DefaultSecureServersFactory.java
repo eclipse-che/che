@@ -46,9 +46,10 @@ public class DefaultSecureServersFactory<T extends KubernetesEnvironment>
         T k8sEnv,
         String machineName,
         String serviceName,
+        String serverId,
         ServicePort servicePort,
         Map<String, ServerConfig> secureServers) {
-      exposer.expose(k8sEnv, machineName, serviceName, servicePort, secureServers);
+      exposer.expose(k8sEnv, machineName, serviceName, serverId, servicePort, secureServers);
     }
   }
 }

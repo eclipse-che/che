@@ -28,7 +28,6 @@ import {CheWorkspaceStatusButton} from './status-button/workspace-status-button.
 import {WorkspaceDetailsOverviewController} from './workspace-overview/workspace-details-overview.controller';
 import {WorkspaceDetailsOverview} from './workspace-overview/workspace-details-overview.directive';
 import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
-import {WorkspaceConfigService} from '../workspace-config.service';
 import {CheProjectItem} from './workspace-projects/project-item/project-item.directive';
 import {ProjectItemCtrl} from './workspace-projects/project-item/project-item.controller';
 import {NoGithubOauthDialogController} from '../create-workspace/ready-to-go-stacks/project-source-selector/add-import-project/import-github-project/oauth-dialog/no-github-oauth-dialog.controller';
@@ -80,11 +79,17 @@ export class WorkspaceDetailsConfig {
           controller: 'WorkspaceDetailsController',
           controllerAs: 'workspaceDetailsController',
           resolve: {
-            initData: ['$q', '$route', 'cheWorkspace', 'workspaceConfigService', ($q: ng.IQService, $route: ng.route.IRouteService, cheWorkspace: CheWorkspace, workspaceConfigService: WorkspaceConfigService) => {
-              return workspaceConfigService.resolveWorkspaceRoute().then(() => {
-                const {namespace, workspaceName} = $route.current.params;
+            initData: ['$q', '$route', 'cheWorkspace', ($q: ng.IQService, $route: ng.route.IRouteService, cheWorkspace: CheWorkspace) => {
+              const {namespace, workspaceName} = $route.current.params;
+              const getName = (workspace: che.IWorkspace) => {
+                if (workspace.config) {
+                  return workspace.config.name;
+                }
+                return workspace.devfile.metadata.name;
+              };
+              return cheWorkspace.fetchWorkspaceDetails(`${namespace}/${workspaceName}`).then(() => {
                 const workspaceDetails = cheWorkspace.getWorkspaceByName(namespace, workspaceName);
-                return {namespaceId: namespace, workspaceName: workspaceName, workspaceDetails: workspaceDetails};
+                return { namespaceId: namespace, workspaceName: workspaceName, workspaceDetails: workspaceDetails };
               });
             }]
           }
