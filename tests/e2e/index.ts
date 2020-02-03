@@ -23,6 +23,7 @@ export * from './pageobjects/ide/DialogWindow';
 export * from './pageobjects/ide/Editor';
 export * from './pageobjects/ide/GitHubPlugin';
 export * from './pageobjects/ide/Ide';
+export * from './pageobjects/ide/NotificationCenter';
 export * from './pageobjects/ide/OpenWorkspaceWidget';
 export * from './pageobjects/ide/PreviewWidget';
 export * from './pageobjects/ide/ProjectTree';
