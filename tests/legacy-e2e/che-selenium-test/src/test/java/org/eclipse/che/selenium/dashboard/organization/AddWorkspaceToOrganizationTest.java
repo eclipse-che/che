@@ -33,8 +33,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-// Known permanent failure https://github.com/eclipse/che/issues/15822
-@Test(groups = {TestGroup.UNDER_REPAIR, TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S})
+@Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S})
 public class AddWorkspaceToOrganizationTest {
 
   private static final String WORKSPACE_FOR_ADMIN_1 = generate("workspace", 4);

@@ -56,8 +56,9 @@ interface IBrandingConfiguration {
   menu: {
     disabled: che.ConfigurableMenuItem[];
   };
-  misc: {
-    idePrefetch?: string[];
+  prefetch: {
+    cheCDN: string;
+    resources: string[];
   };
 }
 
@@ -347,11 +348,17 @@ export class CheBranding {
             ? this.branding.configuration.menu.disabled
             : []
       },
-      misc: {
-        idePrefetch:
+      prefetch: {
+        cheCDN: this.branding.configuration &&
+          this.branding.configuration.prefetch &&
+          this.branding.configuration.prefetch.cheCDN
+          ? this.branding.configuration.prefetch.cheCDN
+          : undefined,
+        resources:
           this.branding.configuration &&
-          this.branding.configuration.misc && this.branding.configuration.misc.idePrefetch
-            ? this.branding.configuration.misc.idePrefetch
+            this.branding.configuration.prefetch &&
+            this.branding.configuration.prefetch.resources
+            ? this.branding.configuration.prefetch.resources
             : []
       }
     };

@@ -327,12 +327,15 @@ export class WorkspaceDetailsOverviewController {
       this.attributes.persistVolumes = 'false';
     } else {
       if (!this.attributesCopy) {
-        this.attributes = null;
+        this.attributes = undefined;
       } else {
-        if (this.attributesCopy.persistVolumes) {
-          this.attributes.persistVolumes = 'true';
+        if ((this.attributesCopy.persistVolumes as string) === 'true') {
+          (this.attributes.persistVolumes as string) = 'true';
         } else {
           delete this.attributes.persistVolumes;
+          if (Object.keys(this.attributes).length === 0) {
+            this.attributes = undefined;
+          }
         }
       }
     }

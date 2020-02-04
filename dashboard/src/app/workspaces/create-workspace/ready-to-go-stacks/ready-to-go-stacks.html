@@ -28,6 +28,14 @@
   </ng-form>
 </che-label-container>
 
+<!-- Ephemeral mode -->
+<che-label-container che-label-name="Temporary Storage" che-label-description="Temporary Storage allows for faster I/O. It may have limited storage for certain configurations and is not persistent." class="ephemeral-mode-toggle">
+    <md-switch ng-model="readyToGoStacksController.ephemeralMode"
+      ng-change="readyToGoStacksController.onEphemeralModeChange()"
+      aria-label="Enables Temporary Storage.">
+    </md-switch>
+</che-label-container>
+
 <!-- Kubernetes namespace selector -->
 <che-label-container che-label-name="Kubernetes Namespace" che-label-description="{{readyToGoStacksController.infrastructureNamespaceHint}}">
   <kubernetes-namespace-selector on-change="readyToGoStacksController.onInfrastructureNamespaceChanged(namespaceId)"></kubernetes-namespace-selector>

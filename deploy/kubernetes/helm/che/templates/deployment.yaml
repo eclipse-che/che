@@ -125,6 +125,7 @@ spec:
         imagePullPolicy: {{ .Values.cheImagePullPolicy }}
         securityContext:
           runAsUser: {{ .Values.global.securityContext.runAsUser }}
+{{- if not .Values.che.disableProbes }}
         livenessProbe:
           httpGet:
             path: /api/system/state
@@ -132,6 +133,14 @@ spec:
             scheme: HTTP
           initialDelaySeconds: 120
           timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/system/state
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 15
+          timeoutSeconds: 60
+{{- end }}
         name: che
         ports:
         - containerPort: 8080
@@ -142,13 +151,6 @@ spec:
           name: jgroups-ping
         - containerPort: 8087
           name: http-metrics
-        readinessProbe:
-          httpGet:
-            path: /api/system/state
-            port: 8080
-            scheme: HTTP
-          initialDelaySeconds: 15
-          timeoutSeconds: 60
         resources:
           limits:
             memory: 600Mi

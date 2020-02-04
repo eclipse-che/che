@@ -8,12 +8,13 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { CLASSES, Terminal, TopMenu, Ide } from '..';
+import { CLASSES, Terminal, TopMenu, Ide, DialogWindow } from '..';
 import { e2eContainer } from '../inversify.config';
 
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
+const dialogWindow: DialogWindow = e2eContainer.get(CLASSES.DialogWindow);
 
 export function runTask(taskName: string, timeout: number) {
     test( `Run command '${taskName}'`, async () => {
@@ -22,8 +23,25 @@ export function runTask(taskName: string, timeout: number) {
     });
 }
 
+export function runTaskWithDialogShellAndOpenLink(taskName: string, expectedDialogText: string, timeout: number) {
+    test(`Run command '${taskName}' expecting dialog shell`, async () => {
+        await topMenu.runTask(taskName);
+        await dialogWindow.waitDialogAndOpenLink(timeout, expectedDialogText);
+    });
+}
+
+export function runTaskWithDialogShellAndClose(taskName: string, expectedDialogText: string, timeout: number) {
+    test(`Run command '${taskName}' expecting dialog shell`, async () => {
+        await topMenu.runTask(taskName);
+        await dialogWindow.waitDialog(timeout, expectedDialogText);
+        await dialogWindow.closeDialog();
+        await dialogWindow.waitDialogDissappearance();
+    });
+}
+
 export function closeTerminal(taskName: string) {
     test('Close the terminal tasks', async () => {
+        await ide.closeAllNotifications();
         await terminal.closeTerminalTab(taskName);
     });
 }
