@@ -6,4 +6,4 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 set -e
-./multiuser-all-test.sh
+tests/.infra/centos-ci/multiuser-all-test.sh 
