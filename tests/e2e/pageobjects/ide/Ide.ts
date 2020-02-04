@@ -14,6 +14,7 @@ import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { By, error } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
+import { NotificationCenter } from './NotificationCenter';
 
 export enum RightToolbarButton {
     Explorer = 'Explorer',
@@ -33,7 +34,9 @@ export class Ide {
     private static readonly IDE_IFRAME_CSS: string = 'iframe#ide-application-iframe';
 
     constructor(
-        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.NotificationCenter) private readonly notificationCenter: NotificationCenter
+    ) { }
 
     async waitAndSwitchToIdeFrame(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         Logger.debug('Ide.waitAndSwitchToIdeFrame');
@@ -218,43 +221,6 @@ export class Ide {
         await this.waitStatusBarContains(expectedTextInStatusBar, 20000);
     }
 
-    async closeAllNotifications(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug(`Ide.closeAllNotifications`);
-
-        await this.waitAndOpenNotificationCenter(timeout);
-        await this.waitAndPressNotificationsCenterCloseAllButton(timeout);
-        await this.waitNotificationsCenterClosed(timeout);
-        await this.waitNotificationsDismissed(timeout);
-    }
-
-    async waitAndOpenNotificationCenter(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const statusBarNotificationsLocator: By = By.xpath(`//div[@id="theia-statusBar"]/div[@class="area right"]//div[contains(@title, 'Notification')]`);
-        Logger.debug(`Ide.waitAndOpenNotificationCenter`);
-
-        await this.driverHelper.waitAndClick(statusBarNotificationsLocator, timeout);
-    }
-
-    async waitAndPressNotificationsCenterCloseAllButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const notificationCenterActionCloseAllButtonLocator: By = By.xpath(`//div[contains(@class, 'theia-notifications-container theia-notification-center open')]//ul[@class="theia-notification-actions"]/li[@class="clear-all"]`);
-        Logger.debug(`Ide.waitAndPressNotificationsCenterCloseAllButton`);
-
-        await this.driverHelper.waitAndClick(notificationCenterActionCloseAllButtonLocator, timeout);
-    }
-
-    async waitNotificationsCenterClosed(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const notificationCenterClosedLocator: By = By.xpath(`//div[contains(@class, 'theia-notifications-container theia-notification-center closed')]`);
-        Logger.debug(`Ide.waitNotificationsCenterClosed`);
-
-        await this.driverHelper.waitPresence(notificationCenterClosedLocator, timeout);
-    }
-
-    async waitNotificationsDismissed(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const notificationCenterContainerNotificationsLocator: By = By.xpath(`//div[contains(@class, 'theia-notifications-container theia-notification-center')]//div[@class='theia-notification-list']//*`);
-        Logger.debug(`Ide.waitNotificationsDismissed`);
-
-        await this.driverHelper.waitDisappearance(notificationCenterContainerNotificationsLocator, timeout);
-    }
-
     async performKeyCombination(keyCombination: string) {
         Logger.debug(`Ide.performKeyCombination "${keyCombination}"`);
 
@@ -281,6 +247,13 @@ export class Ide {
         }
 
         return notification.split(regexp)[1];
+    }
+
+    async closeAllNotifications(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Ide.closeAllNotifications`);
+
+        await this.notificationCenter.open(timeout);
+        await this.notificationCenter.closeAll(timeout);
     }
 
     async waitApllicationIsReady(url: string,
