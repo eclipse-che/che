@@ -1,3 +1,4 @@
+
 #!/usr/bin/env bash
 
 # Copyright (c) 2020 Red Hat, Inc.
