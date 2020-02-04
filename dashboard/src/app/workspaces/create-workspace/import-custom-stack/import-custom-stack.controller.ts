@@ -18,6 +18,7 @@ import {NamespaceSelectorSvc} from '../ready-to-go-stacks/namespace-selector/nam
 import { CheKubernetesNamespace } from '../../../../components/api/che-kubernetes-namespace.factory';
 import { CheWorkspace } from '../../../../components/api/workspace/che-workspace.factory';
 import { CheDashboardConfigurationService } from '../../../../components/branding/che-dashboard-configuration.service';
+import { TogglableFeature } from '../../../../components/branding/che-branding.factory';
 
 /**
  * This class is handling the controller for stack importing directive.
@@ -114,7 +115,7 @@ export class ImportStackController implements IImportStackScopeBindings {
       this.ephemeralMode = settings['che.workspace.persist_volumes.default'] === 'false';
     });
     this.cheDashboardConfigurationService.ready.then(() => {
-      this.enabledKubernetesNamespaceSelector = this.cheDashboardConfigurationService.enabledFeature('kubernetesNamespaceSelector');
+      this.enabledKubernetesNamespaceSelector = this.cheDashboardConfigurationService.enabledFeature(TogglableFeature.KUBERNETES_NAMESPACE_SELECTOR);
     });
   }
 

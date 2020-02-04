@@ -62,8 +62,13 @@ interface IBrandingConfiguration {
     resources: string[];
   };
   features: {
-    disabled: che.TogglableFeature[];
+    disabled: TogglableFeature[];
   };
+}
+
+export enum TogglableFeature {
+  WORKSPACE_SHARING = 'workspaceSharing',
+  KUBERNETES_NAMESPACE_SELECTOR = 'kubernetesNamespaceSelector',
 }
 
 const ASSET_PREFIX = 'assets/branding/';

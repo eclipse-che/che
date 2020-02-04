@@ -20,6 +20,7 @@ import {PluginRegistry} from '../../../components/api/plugin-registry.factory';
 import {WorkspaceDataManager} from '../../../components/api/workspace/workspace-data-manager';
 import { ConfirmDialogService } from '../../../components/service/confirm-dialog/confirm-dialog.service';
 import { CheDashboardConfigurationService } from '../../../components/branding/che-dashboard-configuration.service';
+import { TogglableFeature } from '../../../components/branding/che-branding.factory';
 
 interface IPage {
   title: string;
@@ -189,7 +190,7 @@ export class WorkspaceDetailsService {
     this.observable = new Observable();
 
     cheService.fetchServices().finally(() => {
-      const sharingEnabled = this.cheDashboardConfigurationService.enabledFeature('workspaceSharing');
+      const sharingEnabled = this.cheDashboardConfigurationService.enabledFeature(TogglableFeature.WORKSPACE_SHARING);
       const permissionServiceAvailable = cheService.isServiceAvailable(chePermissions.getPermissionsServicePath());
       if (sharingEnabled && permissionServiceAvailable) {
         this.addPage('Share', '<share-workspace></share-workspace>', 'icon-ic_folder_shared_24px');

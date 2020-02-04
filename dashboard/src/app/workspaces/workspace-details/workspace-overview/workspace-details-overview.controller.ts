@@ -17,6 +17,7 @@ import {NamespaceSelectorSvc} from '../../create-workspace/ready-to-go-stacks/na
 import {WorkspaceDetailsService} from '../workspace-details.service';
 import { CheKubernetesNamespace } from '../../../../components/api/che-kubernetes-namespace.factory';
 import { CheDashboardConfigurationService } from '../../../../components/branding/che-dashboard-configuration.service';
+import { TogglableFeature } from '../../../../components/branding/che-branding.factory';
 
 const STARTING = WorkspaceStatus[WorkspaceStatus.STARTING];
 const RUNNING = WorkspaceStatus[WorkspaceStatus.RUNNING];
@@ -128,7 +129,7 @@ export class WorkspaceDetailsOverviewController {
     });
 
     this.cheDashboardConfigurationService.ready.then(() => {
-      this.enabledKubernetesNamespaceSelector = this.cheDashboardConfigurationService.enabledFeature('kubernetesNamespaceSelector');
+      this.enabledKubernetesNamespaceSelector = this.cheDashboardConfigurationService.enabledFeature(TogglableFeature.KUBERNETES_NAMESPACE_SELECTOR);
     });
 
     this.init();

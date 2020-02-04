@@ -11,7 +11,7 @@
  */
 'use strict';
 
-import { CheBranding } from './che-branding.factory';
+import { CheBranding, TogglableFeature } from './che-branding.factory';
 
 export type FooterLink = {
   title: string;
@@ -57,7 +57,7 @@ export class CheDashboardConfigurationService {
     });
   }
 
-  enabledFeature(feature: che.TogglableFeature): boolean {
+  enabledFeature(feature: TogglableFeature): boolean {
     const disabledFeatures = this.cheBranding.getConfiguration().features.disabled;
     return disabledFeatures.indexOf(feature) === -1;
   }
