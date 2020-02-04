@@ -382,7 +382,7 @@ function saveSeleniumTestResult() {
   cp -r /root/payload/tests/legacy-e2e/che-selenium-test/target/site report
 }
 
-function createIndentityProvider() {
+function createGithubIndentityProvider() {
   CHE_MULTI_USER_GITHUB_CLIENTID_OCP=04cbc0f8172109d5e2e5
   CHE_MULTI_USER_GITHUB_SECRET_OCP=a0a9b8602bb0916d8b4a62e71b7ed92036563b7a
   CHE_OPENSHIFT_PROJECT=eclipse-che
