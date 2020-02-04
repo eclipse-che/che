@@ -844,19 +844,23 @@ public class WorkspaceRuntimes {
       long startTime = System.currentTimeMillis();
       LOG.info("Recovering of runtimes is started.");
       for (RuntimeIdentity identity : identities) {
-        try {
-          // Recover runtime in multi-thread friendly manner
-          // 1. acquire write lock
-          // 2. check if runtime already restored by other threads.
-          // 3. If needed restore runtime.
-          getInternalRuntime(identity.getWorkspaceId());
-        } catch (Exception e) {
-          LOG.error(
-              "An error occurred while attempting to recover runtime '{}' using infrastructure '{}'. Reason: '{}'",
-              identity.getWorkspaceId(),
-              infrastructure.getName(),
-              e.getMessage(),
-              e);
+        try (Unlocker ignored = lockService.writeLock(identity.getWorkspaceId())) {
+          try {
+            InternalRuntime<?> runtime = runtimes.get(identity.getWorkspaceId());
+            if (runtime == null) {
+              LOG.info("Recovering runtime {}", identity.getWorkspaceId());
+              recoverOne(infrastructure, identity);
+            } else {
+              LOG.info("Runtime {} already restored. Skipping it.", identity.getWorkspaceId());
+            }
+          } catch (Exception e) {
+            LOG.error(
+                "An error occurred while attempting to recover runtime '{}' using infrastructure '{}'. Reason: '{}'",
+                identity.getWorkspaceId(),
+                infrastructure.getName(),
+                e.getMessage(),
+                e);
+          }
         }
       }
 
