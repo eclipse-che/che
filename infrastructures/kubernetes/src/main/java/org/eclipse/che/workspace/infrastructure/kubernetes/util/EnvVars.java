@@ -35,8 +35,8 @@ public class EnvVars {
    * <p>If a container does not have the corresponding env - it will be provisioned, if it has - the
    * value will be overridden.
    *
-   * @param podData pod to apply env
-   * @param env env var to apply
+   * @param podData pod to supply env vars
+   * @param env env vars to apply
    */
   public void apply(PodData podData, List<? extends Env> env) {
     Stream.concat(
@@ -45,7 +45,16 @@ public class EnvVars {
         .forEach(c -> apply(c, env));
   }
 
-  private void apply(Container container, List<? extends Env> toApply) {
+  /**
+   * Applies the specified env vars list to the specified containers.
+   *
+   * <p>If a container does not have the corresponding env - it will be provisioned, if it has - the
+   * value will be overridden.
+   *
+   * @param container pod to supply env vars
+   * @param toApply env vars to apply
+   */
+  public void apply(Container container, List<? extends Env> toApply) {
     List<EnvVar> targetEnv = container.getEnv();
     if (targetEnv == null) {
       targetEnv = new ArrayList<>();
