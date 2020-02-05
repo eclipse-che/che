@@ -5,13 +5,16 @@ export * from './TestConstants';
 
 export * from './driver/ChromeDriver';
 export * from './driver/IDriver';
+export * from './utils/AbstractRequestHandler';
 export * from './utils/DriverHelper';
+export * from './utils/IRequestHandler';
 export * from './utils/Logger';
+export * from './utils/MultiUserRequestHandler';
 export * from './utils/NameGenerator';
 export * from './utils/PreferencesHandler';
-export * from './utils/RequestHandler';
 export * from './utils/RequestType';
 export * from './utils/ScreenCatcher';
+export * from './utils/SingleUserRequestHandler';
 export * from './utils/workspace/ITestWorkspaceUtil';
 export * from './utils/workspace/TestWorkspaceUtil';
 export * from './utils/workspace/WorkspaceStatus';

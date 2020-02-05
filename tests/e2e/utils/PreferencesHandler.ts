@@ -1,15 +1,15 @@
 
 import { injectable, inject } from 'inversify';
 import { Logger } from './Logger';
-import { CLASSES } from '../inversify.types';
-import { RequestHandler } from './RequestHandler';
+import { TYPES } from '../inversify.types';
+import { IRequestHandler } from './IRequestHandler';
 import { TestConstants } from '../TestConstants';
 import { RequestType } from './RequestType';
 
 @injectable()
 export class PreferencesHandler {
 
-    constructor(@inject(CLASSES.RequestHandler) private readonly requestHandler: RequestHandler) {
+    constructor(@inject(TYPES.RequestHandler) private readonly requestHandler: IRequestHandler) {
     }
 
     public async setTerminalType(type: string) {

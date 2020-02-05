@@ -45,8 +45,10 @@ import { OcpWebConsolePage } from './pageobjects/openshift/OcpWebConsolePage';
 import { OpenWorkspaceWidget } from './pageobjects/ide/OpenWorkspaceWidget';
 import { CheLoginPage } from './pageobjects/openshift/CheLoginPage';
 import { NotificationCenter } from './pageobjects/ide/NotificationCenter';
-import { RequestHandler } from './utils/RequestHandler';
 import { PreferencesHandler } from './utils/PreferencesHandler';
+import { IRequestHandler } from './utils/IRequestHandler';
+import { MultiUserRequestHandler } from './utils/MultiUserRequestHandler';
+import { SingleUserRequestHandler } from './utils/SingleUserRequestHandler';
 
 
 const e2eContainer: Container = new Container();
@@ -57,6 +59,7 @@ e2eContainer.bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil)
 e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpLoginByTempAdmin).inSingletonScope();
 
 if (TestConstants.TS_SELENIUM_MULTIUSER) {
+    e2eContainer.bind<IRequestHandler>(TYPES.RequestHandler).to(MultiUserRequestHandler).inSingletonScope();
     if (JSON.parse(TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH)) {
         e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage).inSingletonScope();
     } else {
@@ -64,6 +67,7 @@ if (TestConstants.TS_SELENIUM_MULTIUSER) {
     }
 } else {
     e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(SingleUserLoginPage).inSingletonScope();
+    e2eContainer.bind<IRequestHandler>(TYPES.RequestHandler).to(SingleUserRequestHandler).inSingletonScope();
 }
 
 e2eContainer.bind<ContextMenu>(CLASSES.ContextMenu).to(ContextMenu).inSingletonScope();
@@ -90,7 +94,6 @@ e2eContainer.bind<OcpWebConsolePage>(CLASSES.OcpWebConsolePage).to(OcpWebConsole
 e2eContainer.bind<OpenWorkspaceWidget>(CLASSES.OpenWorkspaceWidget).to(OpenWorkspaceWidget).inSingletonScope();
 e2eContainer.bind<CheLoginPage>(CLASSES.CheLoginPage).to(CheLoginPage).inSingletonScope();
 e2eContainer.bind<NotificationCenter>(CLASSES.NotificationCenter).to(NotificationCenter).inSingletonScope();
-e2eContainer.bind<RequestHandler>(CLASSES.RequestHandler).to(RequestHandler).inSingletonScope();
 e2eContainer.bind<PreferencesHandler>(CLASSES.PreferencesHandler).to(PreferencesHandler).inSingletonScope();
 
 

@@ -13,7 +13,8 @@ const TYPES = {
     Driver: Symbol.for('Driver'),
     CheLogin: Symbol.for('CheLogin'),
     OcpLogin: Symbol.for('OcpLogin'),
-    WorkspaceUtil: Symbol.for('WorkspaceUtil')
+    WorkspaceUtil: Symbol.for('WorkspaceUtil'),
+    RequestHandler: Symbol.for('RequestHandler')
 };
 
 const CLASSES = {
@@ -43,7 +44,6 @@ const CLASSES = {
     TestWorkspaceUtil: 'TestWorkspaceUtil',
     NotificationCenter: 'NotificationCenter',
     RequestType: 'RequestType',
-    RequestHandler: 'RequestHandler',
     PreferencesHandler: 'PreferencesHandler'
 };
 
