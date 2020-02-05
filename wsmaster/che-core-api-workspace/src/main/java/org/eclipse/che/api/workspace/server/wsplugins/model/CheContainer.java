@@ -34,6 +34,15 @@ public class CheContainer {
   @JsonProperty("memoryLimit")
   private String memoryLimit = null;
 
+  @JsonProperty("memoryRequest")
+  private String memoryRequest = null;
+
+  @JsonProperty("CPULimit")
+  private String cpuLimit = null;
+
+  @JsonProperty("CPURequest")
+  private String cpuRequest = null;
+
   @JsonProperty("mountSources")
   private boolean mountSources = false;
 
@@ -148,6 +157,48 @@ public class CheContainer {
   public void setMemoryLimit(String memoryLimit) {
     this.memoryLimit = memoryLimit;
   }
+
+
+  public CheContainer memoryRequest(String memoryRequest) {
+    this.memoryRequest = memoryRequest;
+    return this;
+  }
+
+  public String getMemoryRequest() {
+    return memoryRequest;
+  }
+
+  public void setMemoryRequest(String memoryRequest) {
+    this.memoryRequest = memoryRequest;
+  }
+
+  public CheContainer cpuLimit(String cpuLimit) {
+    this.cpuLimit = cpuLimit;
+    return this;
+  }
+
+  public String getCpuLimit() {
+    return cpuLimit;
+  }
+
+  public void setCpuLimit(String cpuLimit) {
+    this.cpuLimit = cpuLimit;
+  }
+
+
+  public CheContainer cpuRequest(String cpuRequest) {
+    this.cpuRequest = cpuRequest;
+    return this;
+  }
+
+  public String getCpuRequest() {
+    return cpuRequest;
+  }
+
+  public void setCpuRequest(String cpuRequest) {
+    this.cpuRequest = cpuRequest;
+  }
+
 
   public CheContainer mountSources(boolean mountSources) {
     this.mountSources = mountSources;

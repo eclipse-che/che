@@ -71,7 +71,10 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
   private static final String CHE_WORKSPACE_POD = "che-workspace-pod";
 
   private final String defaultSidecarMemoryLimitBytes;
+  private final String defaultSidecarMemoryRequestBytes;
   private final String sidecarImagePullPolicy;
+  private final String defaultSidecarCpuLimitCores;
+  private final String defaultSidecarCpuRequestCores;
   private final boolean isAuthEnabled;
   private final ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider;
   private final ChePluginsVolumeApplier chePluginsVolumeApplier;
@@ -80,10 +83,16 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
   public KubernetesPluginsToolingApplier(
       @Named("che.workspace.sidecar.image_pull_policy") String sidecarImagePullPolicy,
       @Named("che.workspace.sidecar.default_memory_limit_mb") long defaultSidecarMemoryLimitMB,
+      @Named("che.workspace.sidecar.default_memory_request_mb") long defaultSidecarMemoryRequestMB,
+      @Named("che.workspace.sidecar.default_cpu_limit_cores") String defaultSidecarCpuLimitCores,
+      @Named("che.workspace.sidecar.default_cpu_request_cores") String defaultSidecarCpuRequestCores,
       @Named("che.agents.auth_enabled") boolean isAuthEnabled,
       ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider,
       ChePluginsVolumeApplier chePluginsVolumeApplier) {
     this.defaultSidecarMemoryLimitBytes = String.valueOf(defaultSidecarMemoryLimitMB * 1024 * 1024);
+    this.defaultSidecarMemoryRequestBytes = String.valueOf(defaultSidecarMemoryRequestMB * 1024 * 1024);
+    this.defaultSidecarCpuLimitCores = defaultSidecarCpuLimitCores;
+    this.defaultSidecarCpuRequestCores = defaultSidecarCpuRequestCores;
     this.isAuthEnabled = isAuthEnabled;
     this.sidecarImagePullPolicy =
         validImagePullPolicies.contains(sidecarImagePullPolicy) ? sidecarImagePullPolicy : null;
@@ -248,7 +257,10 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .setCheContainer(container)
             .setContainer(k8sContainer)
             .setContainerEndpoints(containerEndpoints)
-            .setDefaultSidecarMemorySizeAttribute(defaultSidecarMemoryLimitBytes)
+            .setDefaultSidecarMemoryLimitAttribute(defaultSidecarMemoryLimitBytes)
+            .setDefaultSidecarMemoryRequestAttribute(defaultSidecarMemoryRequestBytes)
+            .setDefaultSidecarCpuLimitAttribute(defaultSidecarCpuLimitCores)
+            .setDefaultSidecarCpuRequestAttribute(defaultSidecarCpuRequestCores)
             .setProjectsRootPathEnvVar(projectsRootEnvVariableProvider.get(runtimeIdentity))
             .setComponent(pluginRelatedComponent)
             .build();

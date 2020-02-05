@@ -71,6 +71,7 @@ public class MachineResolverTest {
             container,
             cheContainer,
             DEFAULT_MEM_LIMIT,
+            defaultSidecarMemoryRequestBytes, defaultSidecarCpuLimit, defaultSidecarCpuRequest,
             endpoints,
             component);
   }
