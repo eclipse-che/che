@@ -8,6 +8,8 @@
 set -e
 set +x
 
+echo "DO NOT MERGE. I'm just testing PR check mechanism."
+
 source tests/.infra/centos-ci/functional_tests_utils.sh
 
 eval "$(./env-toolkit load -f jenkins-env.json -r ^ghprbPullId)"
