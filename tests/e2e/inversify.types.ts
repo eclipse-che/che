@@ -14,7 +14,7 @@ const TYPES = {
     CheLogin: Symbol.for('CheLogin'),
     OcpLogin: Symbol.for('OcpLogin'),
     WorkspaceUtil: Symbol.for('WorkspaceUtil'),
-    RequestHandler: Symbol.for('RequestHandler')
+    HeaderHandler: Symbol.for('HeaderHandler')
 };
 
 const CLASSES = {
@@ -43,8 +43,9 @@ const CLASSES = {
     CheLoginPage: 'CheLoginPage',
     TestWorkspaceUtil: 'TestWorkspaceUtil',
     NotificationCenter: 'NotificationCenter',
-    RequestType: 'RequestType',
-    PreferencesHandler: 'PreferencesHandler'
+    PreferencesHandler: 'PreferencesHandler',
+    CheApiRequestHandler: 'CheApiRequestHandler',
+    TokenHandler: 'TokenHandler'
 };
 
 export { TYPES, CLASSES };

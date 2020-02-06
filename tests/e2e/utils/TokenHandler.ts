@@ -1,18 +1,19 @@
-import { TestConstants } from '..';
+/*********************************************************************
+ * Copyright (c) 2019 Red Hat, Inc.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ **********************************************************************/
 import axios from 'axios';
 import querystring from 'querystring';
 import { injectable } from 'inversify';
-import { IRequestHandler } from './IRequestHandler';
-import { AbstractRequestHandler } from './AbstractRequestHandler';
+import { TestConstants } from '../TestConstants';
 
 @injectable()
-export class MultiUserRequestHandler extends AbstractRequestHandler implements IRequestHandler {
-
-    async setHeaders() {
-        let authorization = 'Authorization';
-        axios.defaults.headers.common[authorization] = 'Bearer ' + await this.getCheBearerToken();
-    }
-
+export class TokenHandler {
     async getCheBearerToken(): Promise<string> {
         let params = {};
 
@@ -36,3 +37,5 @@ export class MultiUserRequestHandler extends AbstractRequestHandler implements I
 
     }
 }
+
+

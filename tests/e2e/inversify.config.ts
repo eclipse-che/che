@@ -46,9 +46,11 @@ import { OpenWorkspaceWidget } from './pageobjects/ide/OpenWorkspaceWidget';
 import { CheLoginPage } from './pageobjects/openshift/CheLoginPage';
 import { NotificationCenter } from './pageobjects/ide/NotificationCenter';
 import { PreferencesHandler } from './utils/PreferencesHandler';
-import { IRequestHandler } from './utils/IRequestHandler';
-import { MultiUserRequestHandler } from './utils/MultiUserRequestHandler';
-import { SingleUserRequestHandler } from './utils/SingleUserRequestHandler';
+import { CheApiRequestHandler } from './utils/requestHandlers/CheApiRequestHandler';
+import { IHeaderHandler } from './utils/requestHandlers/IHeaderHandler';
+import { MultiUserHeaderHandler } from './utils/requestHandlers/MultiUserHeaderHandler';
+import { SingleUserHeaderHandler } from './utils/requestHandlers/SingleUserHeaderHandler';
+import { TokenHandler } from './utils/TokenHandler';
 
 
 const e2eContainer: Container = new Container();
@@ -59,7 +61,7 @@ e2eContainer.bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil)
 e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpLoginByTempAdmin).inSingletonScope();
 
 if (TestConstants.TS_SELENIUM_MULTIUSER) {
-    e2eContainer.bind<IRequestHandler>(TYPES.RequestHandler).to(MultiUserRequestHandler).inSingletonScope();
+    e2eContainer.bind<IHeaderHandler>(TYPES.HeaderHandler).to(MultiUserHeaderHandler).inSingletonScope();
     if (JSON.parse(TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH)) {
         e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage).inSingletonScope();
     } else {
@@ -67,7 +69,7 @@ if (TestConstants.TS_SELENIUM_MULTIUSER) {
     }
 } else {
     e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(SingleUserLoginPage).inSingletonScope();
-    e2eContainer.bind<IRequestHandler>(TYPES.RequestHandler).to(SingleUserRequestHandler).inSingletonScope();
+    e2eContainer.bind<IHeaderHandler>(TYPES.HeaderHandler).to(SingleUserHeaderHandler).inSingletonScope();
 }
 
 e2eContainer.bind<ContextMenu>(CLASSES.ContextMenu).to(ContextMenu).inSingletonScope();
@@ -95,6 +97,7 @@ e2eContainer.bind<OpenWorkspaceWidget>(CLASSES.OpenWorkspaceWidget).to(OpenWorks
 e2eContainer.bind<CheLoginPage>(CLASSES.CheLoginPage).to(CheLoginPage).inSingletonScope();
 e2eContainer.bind<NotificationCenter>(CLASSES.NotificationCenter).to(NotificationCenter).inSingletonScope();
 e2eContainer.bind<PreferencesHandler>(CLASSES.PreferencesHandler).to(PreferencesHandler).inSingletonScope();
-
+e2eContainer.bind<CheApiRequestHandler>(CLASSES.CheApiRequestHandler).to(CheApiRequestHandler).inSingletonScope();
+e2eContainer.bind<TokenHandler>(CLASSES.TokenHandler).to(TokenHandler).inSingletonScope();
 
 export { e2eContainer };

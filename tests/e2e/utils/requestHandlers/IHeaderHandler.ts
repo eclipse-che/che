@@ -8,10 +8,10 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { RequestType } from './RequestType';
-import { AxiosResponse } from 'axios';
+import { AxiosRequestConfig } from 'axios';
 
-export interface IRequestHandler {
-    processRequest(reqType: RequestType, url: string, data?: string) : Promise<AxiosResponse>;
-    setHeaders(): void;
+export interface IHeaderHandler {
+    getHeaders() : Promise<AxiosRequestConfig> ;
 }
+
+
