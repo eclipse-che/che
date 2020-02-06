@@ -130,6 +130,35 @@ pipeline {
                                     --memory 13000 \\
                                     --logtostderr
                                 """
+
+                                echo("Patch minikube to prevent an error https://github.com/eclipse/che/issues/15944")
+                                sh """
+                                    kubectl delete pod storage-provisioner -n kube-system                                    
+                                    echo "apiVersion: v1
+kind: Pod
+metadata:
+  name: storage-provisioner
+  namespace: kube-system
+  labels:
+    integration-test: storage-provisioner
+    addonmanager.kubernetes.io/mode: Reconcile
+spec:
+  serviceAccountName: storage-provisioner
+  hostNetwork: true
+  containers:
+  - name: storage-provisioner
+    image: docker pull gcr.io/k8s-minikube/storage-provisioner:v1.8.0
+    command: ["/storage-provisioner"]
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - mountPath: /tmp
+      name: tmp
+  volumes:
+  - name: tmp
+    hostPath:
+      path: /tmp
+      type: Directory" | kubectl apply -f -
+                                """
                             }
                         }
                     }
