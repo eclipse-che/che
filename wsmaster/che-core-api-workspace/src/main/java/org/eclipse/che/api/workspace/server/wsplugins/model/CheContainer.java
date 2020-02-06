@@ -158,7 +158,6 @@ public class CheContainer {
     this.memoryLimit = memoryLimit;
   }
 
-
   public CheContainer memoryRequest(String memoryRequest) {
     this.memoryRequest = memoryRequest;
     return this;
@@ -185,7 +184,6 @@ public class CheContainer {
     this.cpuLimit = cpuLimit;
   }
 
-
   public CheContainer cpuRequest(String cpuRequest) {
     this.cpuRequest = cpuRequest;
     return this;
@@ -198,7 +196,6 @@ public class CheContainer {
   public void setCpuRequest(String cpuRequest) {
     this.cpuRequest = cpuRequest;
   }
-
 
   public CheContainer mountSources(boolean mountSources) {
     this.mountSources = mountSources;

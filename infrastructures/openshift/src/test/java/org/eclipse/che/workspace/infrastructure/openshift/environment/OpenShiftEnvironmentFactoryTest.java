@@ -57,7 +57,7 @@ import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
-import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
+import org.eclipse.che.api.workspace.server.spi.environment.ResourceLimitAttributesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
@@ -87,7 +87,7 @@ public class OpenShiftEnvironmentFactoryTest {
   @Mock private InternalRecipe internalRecipe;
   @Mock private InternalMachineConfig machineConfig1;
   @Mock private InternalMachineConfig machineConfig2;
-  @Mock private MemoryAttributeProvisioner memoryProvisioner;
+  @Mock private ResourceLimitAttributesProvisioner memoryProvisioner;
   @Mock private KubernetesRecipeParser k8sRecipeParser;
   @Mock private PodMerger podMerger;
 

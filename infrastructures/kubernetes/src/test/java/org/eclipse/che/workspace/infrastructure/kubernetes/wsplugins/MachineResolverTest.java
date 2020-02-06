@@ -46,6 +46,9 @@ import org.testng.annotations.Test;
 public class MachineResolverTest {
 
   private static final String DEFAULT_MEM_LIMIT = "100001";
+  private static final String DEFAULT_MEM_REQUEST = "5001";
+  private static final String DEFAULT_CPU_LIMIT = "2";
+  private static final String DEFAULT_CPU_REQUEST = "1";
   private static final String PLUGIN_NAME = "testplugin";
   private static final String PLUGIN_PUBLISHER = "testpublisher";
   private static final String PLUGIN_PUBLISHER_NAME = PLUGIN_PUBLISHER + "/" + PLUGIN_NAME;
@@ -71,7 +74,9 @@ public class MachineResolverTest {
             container,
             cheContainer,
             DEFAULT_MEM_LIMIT,
-            defaultSidecarMemoryRequestBytes, defaultSidecarCpuLimit, defaultSidecarCpuRequest,
+            DEFAULT_MEM_REQUEST,
+            DEFAULT_CPU_LIMIT,
+            DEFAULT_CPU_REQUEST,
             endpoints,
             component);
   }

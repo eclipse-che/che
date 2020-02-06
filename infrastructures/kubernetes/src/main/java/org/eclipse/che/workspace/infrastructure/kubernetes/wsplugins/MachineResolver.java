@@ -14,8 +14,11 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CPU_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CPU_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 
 import io.fabric8.kubernetes.api.model.Container;
@@ -112,45 +115,44 @@ public class MachineResolver {
 
     long ramRequest = Containers.getRamRequest(container);
     if (ramRequest == 0) {
-      machineConfig.getAttributes().put(MEMORY_LIMIT_ATTRIBUTE, defaultSidecarMemoryRequestBytes);
+      machineConfig.getAttributes().put(MEMORY_REQUEST_ATTRIBUTE, defaultSidecarMemoryRequestBytes);
     }
-//    String overriddenSidecarMemRequest = component.getRamRequest();
-//    if (!isNullOrEmpty(overriddenSidecarMemRequest)) {
-//      machineConfig
-//          .getAttributes()
-//          .put(
-//              MEMORY_REQUEST_ATTRIBUTE,
-//              Long.toString(KubernetesSize.toBytes(overriddenSidecarMemRequest)));
-//    }
+    //    String overriddenSidecarMemRequest = component.getRamRequest();
+    //    if (!isNullOrEmpty(overriddenSidecarMemRequest)) {
+    //      machineConfig
+    //          .getAttributes()
+    //          .put(
+    //              MEMORY_REQUEST_ATTRIBUTE,
+    //              Long.toString(KubernetesSize.toBytes(overriddenSidecarMemRequest)));
+    //    }
   }
-
 
   private void normalizeCpu(Container container, InternalMachineConfig machineConfig) {
     float cpuLimit = Containers.getCpuLimit(container);
     if (cpuLimit == 0) {
-      machineConfig.getAttributes().put(MEMORY_LIMIT_ATTRIBUTE, defaultSidecarCpuLimitCores);
+      machineConfig.getAttributes().put(CPU_LIMIT_ATTRIBUTE, defaultSidecarCpuLimitCores);
     }
-//    String overriddenSidecarCpuLimit = component.getCpuLimit();
-//    if (!isNullOrEmpty(overriddenSidecarCpuLimit)) {
-//      machineConfig
-//          .getAttributes()
-//          .put(
-//              CPU_LIMIT_ATTRIBUTE,
-//              Long.toString(KubernetesSize.toCores(overriddenSidecarCpuLimit)));
-//    }
+    //    String overriddenSidecarCpuLimit = component.getCpuLimit();
+    //    if (!isNullOrEmpty(overriddenSidecarCpuLimit)) {
+    //      machineConfig
+    //          .getAttributes()
+    //          .put(
+    //              CPU_LIMIT_ATTRIBUTE,
+    //              Long.toString(KubernetesSize.toCores(overriddenSidecarCpuLimit)));
+    //    }
 
     float cpuRequest = Containers.getCpuRequest(container);
     if (cpuRequest == 0) {
-      machineConfig.getAttributes().put(MEMORY_LIMIT_ATTRIBUTE, defaultSidecarCpuRequestCores);
+      machineConfig.getAttributes().put(CPU_REQUEST_ATTRIBUTE, defaultSidecarCpuRequestCores);
     }
-//    String overriddenSidecarCpuRequest = component.getCpuRequest();
-//    if (!isNullOrEmpty(overriddenSidecarCpuRequest)) {
-//      machineConfig
-//          .getAttributes()
-//          .put(
-//              CPU_REQUEST_ATTRIBUTE,
-//              Long.toString(KubernetesSize.toCores(overriddenSidecarCpuRequest)));
-//    }
+    //    String overriddenSidecarCpuRequest = component.getCpuRequest();
+    //    if (!isNullOrEmpty(overriddenSidecarCpuRequest)) {
+    //      machineConfig
+    //          .getAttributes()
+    //          .put(
+    //              CPU_REQUEST_ATTRIBUTE,
+    //              Long.toString(KubernetesSize.toCores(overriddenSidecarCpuRequest)));
+    //    }
   }
 
   private Map<String, ? extends org.eclipse.che.api.core.model.workspace.config.Volume>

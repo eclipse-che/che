@@ -55,6 +55,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
 
 /**
  * Applies Che plugins tooling configuration to a kubernetes internal runtime object.
@@ -85,14 +86,18 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       @Named("che.workspace.sidecar.default_memory_limit_mb") long defaultSidecarMemoryLimitMB,
       @Named("che.workspace.sidecar.default_memory_request_mb") long defaultSidecarMemoryRequestMB,
       @Named("che.workspace.sidecar.default_cpu_limit_cores") String defaultSidecarCpuLimitCores,
-      @Named("che.workspace.sidecar.default_cpu_request_cores") String defaultSidecarCpuRequestCores,
+      @Named("che.workspace.sidecar.default_cpu_request_cores")
+          String defaultSidecarCpuRequestCores,
       @Named("che.agents.auth_enabled") boolean isAuthEnabled,
       ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider,
       ChePluginsVolumeApplier chePluginsVolumeApplier) {
     this.defaultSidecarMemoryLimitBytes = String.valueOf(defaultSidecarMemoryLimitMB * 1024 * 1024);
-    this.defaultSidecarMemoryRequestBytes = String.valueOf(defaultSidecarMemoryRequestMB * 1024 * 1024);
-    this.defaultSidecarCpuLimitCores = defaultSidecarCpuLimitCores;
-    this.defaultSidecarCpuRequestCores = defaultSidecarCpuRequestCores;
+    this.defaultSidecarMemoryRequestBytes =
+        String.valueOf(defaultSidecarMemoryRequestMB * 1024 * 1024);
+    this.defaultSidecarCpuLimitCores =
+        Float.toString(KubernetesSize.toCores(defaultSidecarCpuLimitCores));
+    this.defaultSidecarCpuRequestCores =
+        Float.toString(KubernetesSize.toCores(defaultSidecarCpuRequestCores));
     this.isAuthEnabled = isAuthEnabled;
     this.sidecarImagePullPolicy =
         validImagePullPolicies.contains(sidecarImagePullPolicy) ? sidecarImagePullPolicy : null;

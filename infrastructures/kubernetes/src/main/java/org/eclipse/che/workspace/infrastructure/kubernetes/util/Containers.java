@@ -145,7 +145,7 @@ public class Containers {
       resourceBuilder = new ResourceRequirementsBuilder();
     }
     container.setResources(
-        resourceBuilder.addToLimits("memory", new Quantity(Float.toString(cpuLimit))).build());
+        resourceBuilder.addToLimits("cpu", new Quantity(Float.toString(cpuLimit))).build());
   }
 
   /**
@@ -162,7 +162,6 @@ public class Containers {
     container.setResources(
         resourceBuilder.addToLimits("cpu", new Quantity(limitInK8sNotion)).build());
   }
-
 
   /**
    * Returns the CPU request in bytes, if it is present in given container otherwise 0 will be
@@ -209,6 +208,4 @@ public class Containers {
     container.setResources(
         resourceBuilder.addToRequests("cpu", new Quantity(limitInK8sNotion)).build());
   }
-
-
 }

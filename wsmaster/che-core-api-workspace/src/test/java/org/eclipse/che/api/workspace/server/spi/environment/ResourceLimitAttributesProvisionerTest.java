@@ -24,52 +24,50 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/** Tests {@link MemoryAttributeProvisioner} */
+/** Tests {@link ResourceLimitAttributesProvisioner} */
 @Listeners(MockitoTestNGListener.class)
-public class MemoryAttributeProvisionerTest {
-
-  private MemoryAttributeProvisioner memoryAttributeProvisioner;
+public class ResourceLimitAttributesProvisionerTest {
 
   @Test
   public void testSetsRamDefaultAttributesWhenTheyAreMissingInConfigAndNotPassedInRecipe() {
     long defaultMemoryLimit = 2048L;
     long defaultMemoryRequest = 1024L;
-    InternalMachineConfig machineConfig =
-        getInternalMachineConfig(defaultMemoryLimit, defaultMemoryRequest, new HashMap<>());
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
 
-    memoryAttributeProvisioner.provision(machineConfig, 0L, 0L);
+    ResourceLimitAttributesProvisioner.provisionMemory(
+        machineConfig, 0L, 0L, defaultMemoryLimit, defaultMemoryRequest);
     long memLimit = Long.parseLong(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE));
     long memRequest = Long.parseLong(machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE));
 
-    assertEquals(memLimit, defaultMemoryLimit * 1024 * 1024);
-    assertEquals(memRequest, defaultMemoryRequest * 1024 * 1024);
+    assertEquals(memLimit, defaultMemoryLimit);
+    assertEquals(memRequest, defaultMemoryRequest);
   }
 
   @Test
   public void testRamDefaultMemoryRequestIsIgnoredIfGreaterThanDefaultRamLimit() {
     long defaultMemoryLimit = 1024L;
     long defaultMemoryRequest = 2048L;
-    InternalMachineConfig machineConfig =
-        getInternalMachineConfig(defaultMemoryLimit, defaultMemoryRequest, new HashMap<>());
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
 
-    memoryAttributeProvisioner.provision(machineConfig, 0L, 0L);
+    ResourceLimitAttributesProvisioner.provisionMemory(
+        machineConfig, 0L, 0L, defaultMemoryLimit, defaultMemoryRequest);
     long memLimit = Long.parseLong(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE));
     long memRequest = Long.parseLong(machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE));
 
-    assertEquals(memLimit, defaultMemoryLimit * 1024 * 1024);
-    assertEquals(memRequest, defaultMemoryLimit * 1024 * 1024);
+    assertEquals(memLimit, defaultMemoryLimit);
+    assertEquals(memRequest, defaultMemoryLimit);
   }
 
   @Test
   public void testRamAttributesAreTakenFromRecipeWhenNotPresentInConfig() {
     long defaultMemoryLimit = 1024L;
     long defaultMemoryRequest = 2048L;
-    InternalMachineConfig machineConfig =
-        getInternalMachineConfig(defaultMemoryLimit, defaultMemoryRequest, new HashMap<>());
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
 
     long recipeLimit = 4096L;
     long recipeRequest = 2048L;
-    memoryAttributeProvisioner.provision(machineConfig, recipeLimit, recipeRequest);
+    ResourceLimitAttributesProvisioner.provisionMemory(
+        machineConfig, recipeLimit, recipeRequest, defaultMemoryLimit, defaultMemoryRequest);
 
     assertEquals(
         machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), String.valueOf(recipeLimit));
@@ -82,13 +80,13 @@ public class MemoryAttributeProvisionerTest {
       testWhenRamAttributesTakenFromRecipeAreInconsistentAndNotPresentInConfigRequestIsIgnored() {
     long defaultMemoryLimit = 1024L;
     long defaultMemoryRequest = 2048L;
-    InternalMachineConfig machineConfig =
-        getInternalMachineConfig(defaultMemoryLimit, defaultMemoryRequest, new HashMap<>());
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
 
     // inconsistent attributes mean request > limit
     long recipeLimit = 2048L;
     long recipeRequest = 4096L;
-    memoryAttributeProvisioner.provision(machineConfig, recipeLimit, recipeRequest);
+    ResourceLimitAttributesProvisioner.provisionMemory(
+        machineConfig, recipeLimit, recipeRequest, defaultMemoryLimit, defaultMemoryRequest);
 
     assertEquals(
         machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), String.valueOf(recipeLimit));
@@ -101,14 +99,13 @@ public class MemoryAttributeProvisionerTest {
     long defaultMemoryLimit = 1024L;
     long defaultMemoryRequest = 2048L;
     InternalMachineConfig machineConfig =
-        getInternalMachineConfig(
-            defaultMemoryLimit,
-            defaultMemoryRequest,
+        mockInternalMachineConfig(
             ImmutableMap.of(MEMORY_LIMIT_ATTRIBUTE, "1526", MEMORY_REQUEST_ATTRIBUTE, "512"));
 
     long recipeLimit = 4096L;
     long recipeRequest = 2048L;
-    memoryAttributeProvisioner.provision(machineConfig, recipeLimit, recipeRequest);
+    ResourceLimitAttributesProvisioner.provisionMemory(
+        machineConfig, recipeLimit, recipeRequest, defaultMemoryLimit, defaultMemoryRequest);
 
     assertEquals(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), String.valueOf(1526L));
     assertEquals(machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE), String.valueOf(512L));
@@ -120,12 +117,12 @@ public class MemoryAttributeProvisionerTest {
     long defaultMemoryRequest = 2048L;
     Map<String, String> attributes = new HashMap<>();
     attributes.put(MEMORY_REQUEST_ATTRIBUTE, "512");
-    InternalMachineConfig machineConfig =
-        getInternalMachineConfig(defaultMemoryLimit, defaultMemoryRequest, attributes);
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(attributes);
 
     long recipeLimit = 4096L;
     long recipeRequest = 2048L;
-    memoryAttributeProvisioner.provision(machineConfig, recipeLimit, recipeRequest);
+    ResourceLimitAttributesProvisioner.provisionMemory(
+        machineConfig, recipeLimit, recipeRequest, defaultMemoryLimit, defaultMemoryRequest);
 
     assertEquals(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), String.valueOf(512L));
     assertEquals(machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE), String.valueOf(512L));
@@ -137,12 +134,12 @@ public class MemoryAttributeProvisionerTest {
     long defaultMemoryRequest = 2048L;
     Map<String, String> attributes = new HashMap<>();
     attributes.put(MEMORY_LIMIT_ATTRIBUTE, "1526");
-    InternalMachineConfig machineConfig =
-        getInternalMachineConfig(defaultMemoryLimit, defaultMemoryRequest, attributes);
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(attributes);
 
     long recipeLimit = 4096L;
     long recipeRequest = 2048L;
-    memoryAttributeProvisioner.provision(machineConfig, recipeLimit, recipeRequest);
+    ResourceLimitAttributesProvisioner.provisionMemory(
+        machineConfig, recipeLimit, recipeRequest, defaultMemoryLimit, defaultMemoryRequest);
 
     assertEquals(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), String.valueOf(1526L));
     assertEquals(
@@ -153,11 +150,11 @@ public class MemoryAttributeProvisionerTest {
   public void testWhenRamAttributesAreNotPresentInMachineConfigAndOnlyRequestIsProvidedInRecipe() {
     long defaultMemoryLimit = 1024L;
     long defaultMemoryRequest = 2048L;
-    InternalMachineConfig machineConfig =
-        getInternalMachineConfig(defaultMemoryLimit, defaultMemoryRequest, new HashMap<>());
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
 
     long recipeRequest = 1526L;
-    memoryAttributeProvisioner.provision(machineConfig, null, recipeRequest);
+    ResourceLimitAttributesProvisioner.provisionMemory(
+        machineConfig, 0, recipeRequest, defaultMemoryLimit, defaultMemoryRequest);
 
     assertEquals(
         machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), String.valueOf(recipeRequest));
@@ -169,11 +166,11 @@ public class MemoryAttributeProvisionerTest {
   public void testWhenRamAttributesAreNotPresentInMachineConfigAndOnlyLimitIsProvidedInRecipe() {
     long defaultMemoryLimit = 1024L;
     long defaultMemoryRequest = 2048L;
-    InternalMachineConfig machineConfig =
-        getInternalMachineConfig(defaultMemoryLimit, defaultMemoryRequest, new HashMap<>());
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
 
     long recipeLimit = 1526L;
-    memoryAttributeProvisioner.provision(machineConfig, recipeLimit, null);
+    ResourceLimitAttributesProvisioner.provisionMemory(
+        machineConfig, recipeLimit, 0, defaultMemoryLimit, defaultMemoryRequest);
 
     assertEquals(
         machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), String.valueOf(recipeLimit));
@@ -181,16 +178,11 @@ public class MemoryAttributeProvisionerTest {
         machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE), String.valueOf(recipeLimit));
   }
 
-  private InternalMachineConfig getInternalMachineConfig(
-      long defaultMemoryLimit, long defaultMemoryRequest, Map<String, String> attributes) {
-    memoryAttributeProvisioner =
-        new MemoryAttributeProvisioner(defaultMemoryLimit, defaultMemoryRequest);
-    return mockInternalMachineConfig(attributes);
-  }
-
   private static InternalMachineConfig mockInternalMachineConfig(Map<String, String> attributes) {
     final InternalMachineConfig machineConfigMock = mock(InternalMachineConfig.class);
     when(machineConfigMock.getAttributes()).thenReturn(attributes);
     return machineConfigMock;
   }
+
+  // TODO: CPU tests
 }

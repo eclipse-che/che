@@ -15,9 +15,7 @@ import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.PodMerger.DEPLOYMENT_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.setSelector;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -27,7 +25,6 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,14 +39,12 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentF
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
-import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
+import org.eclipse.che.api.workspace.server.spi.environment.ResourceLimitAttributesProvisioner;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.PodMerger;
-import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 
 /**
  * Parses {@link InternalEnvironment} into {@link OpenShiftEnvironment}.
@@ -60,7 +55,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
 
   private final OpenShiftEnvironmentValidator envValidator;
   private final KubernetesRecipeParser k8sObjectsParser;
-  private final MemoryAttributeProvisioner memoryProvisioner;
+  private final ResourceLimitAttributesProvisioner resourceLimitAttributesProvisioner;
   private final PodMerger podMerger;
 
   @Inject
@@ -69,12 +64,12 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       MachineConfigsValidator machinesValidator,
       OpenShiftEnvironmentValidator envValidator,
       KubernetesRecipeParser k8sObjectsParser,
-      MemoryAttributeProvisioner memoryProvisioner,
+      ResourceLimitAttributesProvisioner resourceLimitAttributesProvisioner,
       PodMerger podMerger) {
     super(recipeRetriever, machinesValidator);
     this.envValidator = envValidator;
     this.k8sObjectsParser = k8sObjectsParser;
-    this.memoryProvisioner = memoryProvisioner;
+    this.resourceLimitAttributesProvisioner = resourceLimitAttributesProvisioner;
     this.podMerger = podMerger;
   }
 
@@ -146,7 +141,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
             .setRoutes(routes)
             .build();
 
-    addRamAttributes(osEnv.getMachines(), osEnv.getPodsData().values());
+    //addRamAttributes(osEnv.getMachines(), osEnv.getPodsData().values());
 
     envValidator.validate(osEnv);
 
@@ -213,21 +208,21 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
     }
   }
 
-  @VisibleForTesting
-  void addRamAttributes(Map<String, InternalMachineConfig> machines, Collection<PodData> pods) {
-    for (PodData pod : pods) {
-      for (Container container : pod.getSpec().getContainers()) {
-        final String machineName = Names.machineName(pod, container);
-        InternalMachineConfig machineConfig;
-        if ((machineConfig = machines.get(machineName)) == null) {
-          machineConfig = new InternalMachineConfig();
-          machines.put(machineName, machineConfig);
-        }
-        memoryProvisioner.provision(
-            machineConfig, Containers.getRamLimit(container), Containers.getRamRequest(container));
-      }
-    }
-  }
+//  @VisibleForTesting
+//  void addRamAttributes(Map<String, InternalMachineConfig> machines, Collection<PodData> pods) {
+//    for (PodData pod : pods) {
+//      for (Container container : pod.getSpec().getContainers()) {
+//        final String machineName = Names.machineName(pod, container);
+//        InternalMachineConfig machineConfig;
+//        if ((machineConfig = machines.get(machineName)) == null) {
+//          machineConfig = new InternalMachineConfig();
+//          machines.put(machineName, machineConfig);
+//        }
+//        resourceLimitAttributesProvisioner.provision(
+//            machineConfig, Containers.getRamLimit(container), Containers.getRamRequest(container));
+//      }
+//    }
+//  }
 
   private void checkNotNull(Object object, String errorMessage) throws ValidationException {
     if (object == null) {

@@ -103,6 +103,7 @@ public class K8sContainerResolverTest {
   public void shouldProvisionSidecarMemoryLimitAndRequest(
       String sidecarMemLimit, ResourceRequirements resources) throws Exception {
     cheContainer.setMemoryLimit(sidecarMemLimit);
+    cheContainer.setMemoryRequest(sidecarMemLimit);
 
     Container container = resolver.resolve();
 
