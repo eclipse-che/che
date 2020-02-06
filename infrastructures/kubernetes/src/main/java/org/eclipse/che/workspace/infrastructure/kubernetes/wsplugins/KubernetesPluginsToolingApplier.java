@@ -55,6 +55,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.EnvVars;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
 
 /**
@@ -79,6 +80,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
   private final boolean isAuthEnabled;
   private final ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider;
   private final ChePluginsVolumeApplier chePluginsVolumeApplier;
+  private final EnvVars envVars;
 
   @Inject
   public KubernetesPluginsToolingApplier(
@@ -90,7 +92,8 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
           String defaultSidecarCpuRequestCores,
       @Named("che.agents.auth_enabled") boolean isAuthEnabled,
       ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider,
-      ChePluginsVolumeApplier chePluginsVolumeApplier) {
+      ChePluginsVolumeApplier chePluginsVolumeApplier,
+      EnvVars envVars) {
     this.defaultSidecarMemoryLimitBytes = String.valueOf(defaultSidecarMemoryLimitMB * 1024 * 1024);
     this.defaultSidecarMemoryRequestBytes =
         String.valueOf(defaultSidecarMemoryRequestMB * 1024 * 1024);
@@ -103,6 +106,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         validImagePullPolicies.contains(sidecarImagePullPolicy) ? sidecarImagePullPolicy : null;
     this.projectsRootEnvVariableProvider = projectsRootEnvVariableProvider;
     this.chePluginsVolumeApplier = chePluginsVolumeApplier;
+    this.envVars = envVars;
   }
 
   @Override
@@ -133,12 +137,6 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
     CommandsResolver commandsResolver = new CommandsResolver(k8sEnv);
     for (ChePlugin chePlugin : chePlugins) {
-      for (CheContainer container : chePlugin.getInitContainers()) {
-        Container k8sInitContainer = toK8sContainer(container);
-        pod.getSpec().getInitContainers().add(k8sInitContainer);
-        chePluginsVolumeApplier.applyVolumes(pod, k8sInitContainer, container.getVolumes(), k8sEnv);
-      }
-
       Map<String, ComponentImpl> devfilePlugins =
           k8sEnv
               .getDevfile()
@@ -154,6 +152,13 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
                 chePlugin.getId(), devfilePlugins.keySet()));
       }
       ComponentImpl pluginRelatedComponent = devfilePlugins.get(chePlugin.getId());
+
+      for (CheContainer container : chePlugin.getInitContainers()) {
+        Container k8sInitContainer = toK8sContainer(container);
+        envVars.apply(k8sInitContainer, pluginRelatedComponent.getEnv());
+        chePluginsVolumeApplier.applyVolumes(pod, k8sInitContainer, container.getVolumes(), k8sEnv);
+        pod.getSpec().getInitContainers().add(k8sInitContainer);
+      }
 
       Collection<CommandImpl> pluginRelatedCommands = commandsResolver.resolve(chePlugin);
 
@@ -251,6 +256,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     List<ChePluginEndpoint> containerEndpoints = k8sContainerResolver.getEndpoints();
 
     Container k8sContainer = k8sContainerResolver.resolve();
+    envVars.apply(k8sContainer, pluginRelatedComponent.getEnv());
     chePluginsVolumeApplier.applyVolumes(pod, k8sContainer, container.getVolumes(), k8sEnv);
 
     String machineName = k8sContainer.getName();
