@@ -129,12 +129,36 @@ pipeline {
                                     --cpus 4 \\
                                     --memory 13000 \\
                                     --logtostderr
-                                """
+   
+                                    echo "Patch minikube to prevent an error https://github.com/eclipse/che/issues/15944"
+                                    sudo -E /usr/local/bin/minikube addons disable storage-provisioner                                    
+                                    echo "
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: storage-provisioner
+  namespace: kube-system
+  labels:
+    addonmanager.kubernetes.io/mode: Reconcile
 
-                                echo("Patch minikube to prevent an error https://github.com/eclipse/che/issues/15944")
-                                sh """
-                                    kubectl delete pod storage-provisioner -n kube-system                                    
-                                    echo "apiVersion: v1
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: storage-provisioner
+  labels:
+    addonmanager.kubernetes.io/mode: EnsureExists
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:persistent-volume-provisioner
+subjects:
+  - kind: ServiceAccount
+    name: storage-provisioner
+    namespace: kube-system
+---
+apiVersion: v1
 kind: Pod
 metadata:
   name: storage-provisioner
