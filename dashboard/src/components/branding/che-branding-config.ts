@@ -11,14 +11,11 @@
  */
 'use strict';
 
-import {CheBranding} from './che-branding.factory';
 import { CheDashboardConfigurationService } from './che-dashboard-configuration.service';
 
 export class CheBrandingConfig {
 
   constructor(register: che.IRegisterService) {
-    // register this factory
-    register.factory('cheBranding', CheBranding);
     register.service('cheDashboardConfigurationService', CheDashboardConfigurationService);
 
   }

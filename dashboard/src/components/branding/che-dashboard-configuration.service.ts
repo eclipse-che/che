@@ -11,7 +11,8 @@
  */
 'use strict';
 
-import { CheBranding, TogglableFeature } from './che-branding.factory';
+import { TogglableFeature } from './branding.constant';
+import { CheBranding } from './che-branding';
 
 export type FooterLink = {
   title: string;
@@ -41,7 +42,7 @@ export class CheDashboardConfigurationService {
   }
 
   get ready(): ng.IPromise<void> {
-    return this.cheBranding.ready;
+    return this.$q.resolve();
   }
 
   allowedMenuItem(menuItem: che.ConfigurableMenuItem | string): boolean {
@@ -50,11 +51,14 @@ export class CheDashboardConfigurationService {
   }
 
   allowRoutes(menuItem: che.ConfigurableMenuItem): ng.IPromise<void> {
-    return this.cheBranding.ready.then(() => {
-      if (this.allowedMenuItem(menuItem) === false) {
-        return this.$q.reject();
+    const defer = this.$q.defer<void>();
+      if (this.allowedMenuItem(menuItem)) {
+        defer.resolve();
+      } else {
+        defer.reject();
       }
-    });
+
+    return defer.promise;
   }
 
   enabledFeature(feature: TogglableFeature): boolean {

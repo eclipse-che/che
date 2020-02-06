@@ -18,7 +18,7 @@ import {NamespaceSelectorSvc} from '../ready-to-go-stacks/namespace-selector/nam
 import { CheKubernetesNamespace } from '../../../../components/api/che-kubernetes-namespace.factory';
 import { CheWorkspace } from '../../../../components/api/workspace/che-workspace.factory';
 import { CheDashboardConfigurationService } from '../../../../components/branding/che-dashboard-configuration.service';
-import { TogglableFeature } from '../../../../components/branding/che-branding.factory';
+import { TogglableFeature } from '../../../../components/branding/branding.constant';
 
 /**
  * This class is handling the controller for stack importing directive.
