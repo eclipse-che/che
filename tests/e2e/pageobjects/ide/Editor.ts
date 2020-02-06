@@ -558,13 +558,7 @@ export class Editor {
         const breakpointLocator: string = (triggered ? triggeredBreakpointXpathLocator : regularBreakpointXpathLocator);
         const breakpointLineNumberXpathLocator = linesBarXpathLocator + breakpointLocator + lineNumberRelativeXpathLocator;
 
-        if (await this.driverHelper.isVisible(By.xpath(breakpointLineNumberXpathLocator))) {
-            Logger.trace('Editor.isBreakpointPresent - Breakpoint is present.');
-            return true;
-        }
-
-        Logger.trace('Editor.isBreakpointPresent - Breakpoint is NOT present.');
-        return false;
+        return await this.driverHelper.isVisible(By.xpath(breakpointLineNumberXpathLocator));
     }
 
 }
