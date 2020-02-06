@@ -227,6 +227,15 @@ function installAndStartMinishift() {
   chmod +x ./minishift
   mv ./minishift /usr/local/bin/minishift
 
+  #Setup GitHub token for minishift
+  if [ -z "$CHE_BOT_GITHUB_TOKEN" ]
+  then
+    echo "\$CHE_BOT_GITHUB_TOKEN is empty. Minishift start might fail with GitGub API rate limit reached."
+  else
+    echo "\$CHE_BOT_GITHUB_TOKEN is set, using it for Minishift."
+    export MINISHIFT_GITHUB_API_TOKEN=$CHE_BOT_GITHUB_TOKEN
+  fi
+
   minishift version
   minishift config set memory 14GB
   minishift config set cpus 4
