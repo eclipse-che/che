@@ -232,8 +232,16 @@ function installAndStartMinishift() {
   then
     echo "\$CHE_BOT_GITHUB_TOKEN is empty. Minishift start might fail with GitGub API rate limit reached."
   else
-    echo "\$CHE_BOT_GITHUB_TOKEN is set, using it for Minishift."
-    export MINISHIFT_GITHUB_API_TOKEN=$CHE_BOT_GITHUB_TOKEN
+    echo "\$CHE_BOT_GITHUB_TOKEN is set, checking limits."
+    GITHUB_RATE_REMAINING=$(curl -slL "https://api.github.com/rate_limit?access_token=$CHE_BOT_GITHUB_TOKEN" | jq .rate.remaining)
+    if [ "$GITHUB_RATE_REMAINING" -gt 1000 ]
+    then
+      echo "Github rate greater than 1000. Using che-bot token for minishift startup."
+      export MINISHIFT_GITHUB_API_TOKEN=$CHE_BOT_GITHUB_TOKEN
+    else
+      echo "Github rate is lower than 1000. *Not* using che-bot for minishift startup."
+      echo "If minishift startup fails, please try again later."
+    fi
   fi
 
   minishift version
