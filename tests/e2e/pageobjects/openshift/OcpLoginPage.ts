@@ -41,11 +41,25 @@ export class OcpLoginPage {
         await this.driverHelper.waitAndClick(loginWithKubeAdminLocator);
     }
 
+    async isIdentityProviderLinkVisible(): Promise<boolean> {
+        Logger.debug('OcpLoginPage.isIdentityProviderLinkVisible');
+
+        const loginWithHtpaswdLocator: By = By.css('a[title=\'Log in with htpasswd\']');
+        return await this.driverHelper.isVisible(loginWithHtpaswdLocator);
+    }
+
     async clickOnLoginWitnHtpasswd() {
         Logger.debug('OcpLoginPage.clickOnLoginWitnHtpasswd');
 
         const loginWithHtpaswdLocator: By = By.css('a[title=\'Log in with htpasswd\']');
         await this.driverHelper.waitAndClick(loginWithHtpaswdLocator);
+    }
+
+    async isAuthorizeOpenShiftIdentityProviderPageVisible(): Promise<boolean> {
+        Logger.debug('OcpLoginPage.isAuthorizeOpenShiftIdentityProviderPageVisible');
+
+        const authorizeOpenshiftIdentityProviderPageLocator: By = By.xpath('//h1[text()=\'Authorize Access\']');
+        return await this.driverHelper.isVisible(authorizeOpenshiftIdentityProviderPageLocator);
     }
 
     async waitAuthorizeOpenShiftIdentityProviderPage() {
