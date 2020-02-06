@@ -21,6 +21,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.NO_ENVIRONMENT_RECI
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -36,16 +37,20 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
@@ -84,12 +89,12 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -113,7 +118,7 @@ public class WorkspaceRuntimesTest {
 
   @Mock private ProbeScheduler probeScheduler;
 
-  @Mock private WorkspaceLockService lockService;
+  private WorkspaceLockService lockService = new DefaultWorkspaceLockService();
 
   @Mock private WorkspaceStatusCache statuses;
 
@@ -400,6 +405,61 @@ public class WorkspaceRuntimesTest {
     runtimes.injectRuntime(workspace3);
     assertNotNull(workspace3.getRuntime());
     assertEquals(workspace3.getStatus(), WorkspaceStatus.STARTING);
+  }
+
+  @Test
+  public void shouldRecoverEachRuntimeOnlyOnce() throws Exception {
+    // Given
+    Set<RuntimeIdentity> identities = generateRuntimeIdentitySet(200);
+    doReturn(identities).when(infrastructure).getIdentities();
+    for (RuntimeIdentity identity : identities) {
+      mockWorkspaceWithDevfile(identity);
+      RuntimeContext context = mockContext(identity);
+      when(context.getRuntime())
+          .thenReturn(new TestInternalRuntime(context, emptyMap(), WorkspaceStatus.STARTING));
+      doReturn(context).when(infrastructure).prepare(eq(identity), any());
+    }
+    when(statuses.get(anyString())).thenReturn(WorkspaceStatus.STARTING);
+    InternalEnvironment internalEnvironment = mock(InternalEnvironment.class);
+    doReturn(internalEnvironment).when(testEnvFactory).create(any(Environment.class));
+
+    CountDownLatch finishLatch = new CountDownLatch(1);
+    WorkspaceRuntimes runtimesSpy = spy(runtimes);
+
+    // When
+    WorkspaceRuntimes.RecoverRuntimesTask recoverRuntimesTask =
+        runtimesSpy.new RecoverRuntimesTask(identities);
+    new Thread(
+            () -> {
+              recoverRuntimesTask.run();
+              finishLatch.countDown();
+            })
+        .start();
+
+    // simulate all WorkspaceManager methods that uses WorkspaceManager.normalizeState
+    new Thread(
+            () -> {
+              List<RuntimeIdentity> runtimeIdentities = new ArrayList<>(identities);
+              Collections.shuffle(runtimeIdentities);
+              for (RuntimeIdentity runtimeIdentity : runtimeIdentities) {
+                if (finishLatch.getCount() > 0) {
+                  try {
+                    runtimesSpy.injectRuntime(
+                        WorkspaceImpl.builder().setId(runtimeIdentity.getWorkspaceId()).build());
+                  } catch (ServerException e) {
+                    fail(e.getMessage());
+                  }
+                } else {
+                  break;
+                }
+              }
+            })
+        .start();
+
+    finishLatch.await();
+    // Then
+    verify(runtimesSpy, Mockito.times(identities.size()))
+        .recoverOne(any(RuntimeInfrastructure.class), any(RuntimeIdentity.class));
   }
 
   @Test
@@ -732,6 +792,22 @@ public class WorkspaceRuntimesTest {
     assertTrue(running.containsAll(asList("ws2", "ws3", "ws4")));
   }
 
+  private RuntimeIdentityImpl newRandomRuntimeIdentity() {
+    return new RuntimeIdentityImpl(
+        generate("workspace", 6),
+        generate("env", 6),
+        generate("owner", 6),
+        generate("infraNamespace", 6));
+  }
+
+  private Set<RuntimeIdentity> generateRuntimeIdentitySet(int size) {
+    Set<RuntimeIdentity> result = new HashSet<>();
+    for (int i = 0; i < size; i++) {
+      result.add(newRandomRuntimeIdentity());
+    }
+    return result;
+  }
+
   private RuntimeContext mockContext(RuntimeIdentity identity)
       throws ValidationException, InfrastructureException {
     RuntimeContext context = mock(RuntimeContext.class);
@@ -912,7 +988,7 @@ public class WorkspaceRuntimesTest {
   }
 
   private static CommandImpl createCommand() {
-    return new CommandImpl(NameGenerator.generate("command-", 5), "echo Hello", "custom");
+    return new CommandImpl(generate("command-", 5), "echo Hello", "custom");
   }
 
   private static WarningImpl createWarning() {

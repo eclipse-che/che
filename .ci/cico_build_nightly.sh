@@ -17,5 +17,8 @@
 load_jenkins_vars
 load_mvn_settings_gpg_key
 install_deps
-build_and_deploy_artifacts
-publishImagesOnQuay "nightly"
+mvn_build
+mvn_deploy
+buildImages "nightly"
+pushImagesOnQuay "nightly"
+

@@ -15,7 +15,7 @@ import {CheConfirmDialogController} from './confirm-dialog/che-confirm-dialog.co
 import {ConfirmDialogService} from './confirm-dialog/confirm-dialog.service';
 import {CheUIElementsInjectorService} from './injector/che-ui-elements-injector.service';
 import {ResourcesService} from './resources-service/resources-service';
-
+import { ResourceFetcherService } from './resource-fetcher/resource-fetcher.service';
 
 export class ServiceConfig {
 
@@ -25,5 +25,6 @@ export class ServiceConfig {
 
     register.service('cheUIElementsInjectorService', CheUIElementsInjectorService);
     register.service('resourcesService', ResourcesService);
+    register.service('resourceFetcherService', ResourceFetcherService)
   }
 }

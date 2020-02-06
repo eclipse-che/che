@@ -54,6 +54,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFacto
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -93,6 +94,11 @@ public class KubernetesNamespaceFactoryTest {
     lenient()
         .when(userManager.getById(USER_ID))
         .thenReturn(new UserImpl(USER_ID, "test@mail.com", USER_NAME));
+  }
+
+  @AfterMethod
+  public void tearDown() {
+    EnvironmentContext.reset();
   }
 
   @Test
