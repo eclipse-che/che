@@ -28,6 +28,7 @@ deployCheIntoCluster --chenamespace=eclipse-che --che-operator-cr-yaml=/tmp/cust
 createTestUserAndObtainUserToken
 installDockerCompose
 seleniumTestsSetup
+createIndentityProvider
 bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh --threads=3 --host=${CHE_ROUTE} --port=80 --multiuser
 saveSeleniumTestResult
 getOpenshiftLogs
