@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CPU_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CPU_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.mockito.Mockito.mock;
@@ -178,11 +180,158 @@ public class ResourceLimitAttributesProvisionerTest {
         machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE), String.valueOf(recipeLimit));
   }
 
+  @Test
+  public void testSetsCPUDefaultAttributesWhenTheyAreMissingInConfigAndNotPassedInRecipe() {
+    float defaultCPULimit = 0.500f;
+    float defaultCPURequest = 0.200f;
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
+
+    ResourceLimitAttributesProvisioner.provisionCPU(
+        machineConfig, 0, 0, defaultCPULimit, defaultCPURequest);
+    float cpuLimit = Float.parseFloat(machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE));
+    float cpuRequest = Float.parseFloat(machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE));
+
+    assertEquals(cpuLimit, defaultCPULimit);
+    assertEquals(cpuRequest, defaultCPURequest);
+  }
+
+  @Test
+  public void testRamDefaultCPURequestIsIgnoredIfGreaterThanDefaultCPULimit() {
+    float defaultCPULimit = 0.2f;
+    float defaultCPURequest = 0.5f;
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
+
+    ResourceLimitAttributesProvisioner.provisionCPU(
+        machineConfig, 0L, 0L, defaultCPULimit, defaultCPURequest);
+    float memLimit = Float.parseFloat(machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE));
+    float memRequest = Float.parseFloat(machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE));
+
+    assertEquals(memLimit, defaultCPULimit);
+    assertEquals(memRequest, defaultCPULimit);
+  }
+
+  @Test
+  public void testCPUAttributesAreTakenFromRecipeWhenNotPresentInConfig() {
+    float defaultCPULimit = 1.0f;
+    float defaultCPURequest = 0.2f;
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
+
+    float recipeLimit = 4f;
+    float recipeRequest = 2f;
+    ResourceLimitAttributesProvisioner.provisionCPU(
+        machineConfig, recipeLimit, recipeRequest, defaultCPULimit, defaultCPURequest);
+
+    assertEquals(
+        machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), String.valueOf(recipeLimit));
+    assertEquals(
+        machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE), String.valueOf(recipeRequest));
+  }
+
+  @Test
+  public void
+      testWhenCPUAttributesTakenFromRecipeAreInconsistentAndNotPresentInConfigRequestIsIgnored() {
+    float defaultCPULimit = 0.2f;
+    float defaultCPURequest = 0.5f;
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
+
+    // inconsistent attributes mean request > limit
+    float recipeLimit = 0.3f;
+    float recipeRequest = 0.6f;
+    ResourceLimitAttributesProvisioner.provisionCPU(
+        machineConfig, recipeLimit, recipeRequest, defaultCPULimit, defaultCPURequest);
+
+    assertEquals(
+        machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), String.valueOf(recipeLimit));
+    assertEquals(
+        machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE), String.valueOf(recipeLimit));
+  }
+
+  @Test
+  public void testWhenCPUAttributesArePresentInMachineConfigValuesInRecipeAreIgnored() {
+    float defaultCPULimit = 0.2f;
+    float defaultCPURequest = 0.5f;
+    InternalMachineConfig machineConfig =
+        mockInternalMachineConfig(
+            ImmutableMap.of(CPU_LIMIT_ATTRIBUTE, "0.512", CPU_REQUEST_ATTRIBUTE, "0.152"));
+
+    float recipeLimit = 0.3f;
+    float recipeRequest = 0.6f;
+    ResourceLimitAttributesProvisioner.provisionCPU(
+        machineConfig, recipeLimit, recipeRequest, defaultCPULimit, defaultCPURequest);
+
+    assertEquals(machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), String.valueOf(0.512f));
+    assertEquals(machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE), String.valueOf(0.152f));
+  }
+
+  @Test
+  public void testWhenCPURequestAttributeIsPresentInMachineConfigValuesInRecipeAreIgnored() {
+    float defaultCPULimit = 0.2f;
+    float defaultCPURequest = 0.5f;
+    Map<String, String> attributes = new HashMap<>();
+    attributes.put(CPU_REQUEST_ATTRIBUTE, "0.512");
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(attributes);
+
+    float recipeLimit = 0.3f;
+    float recipeRequest = 0.6f;
+    ResourceLimitAttributesProvisioner.provisionCPU(
+        machineConfig, recipeLimit, recipeRequest, defaultCPULimit, defaultCPURequest);
+
+    assertEquals(machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), String.valueOf(0.512f));
+    assertEquals(machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE), String.valueOf(0.512f));
+  }
+
+  @Test
+  public void testWhenCPULimitAttributeIsPresentInMachineConfigValuesInRecipeAreIgnored() {
+    float defaultCPULimit = 0.2f;
+    float defaultCPURequest = 0.5f;
+    Map<String, String> attributes = new HashMap<>();
+    attributes.put(CPU_LIMIT_ATTRIBUTE, "0.152");
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(attributes);
+
+    float recipeLimit = 0.3f;
+    float recipeRequest = 0.6f;
+    ResourceLimitAttributesProvisioner.provisionCPU(
+        machineConfig, recipeLimit, recipeRequest, defaultCPULimit, defaultCPURequest);
+
+    assertEquals(machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), String.valueOf(0.152f));
+    assertEquals(machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE), String.valueOf(0.152f));
+  }
+
+  @Test
+  public void testWhenCPUAttributesAreNotPresentInMachineConfigAndOnlyRequestIsProvidedInRecipe() {
+    float defaultCPULimit = 0.2f;
+    float defaultCPURequest = 0.5f;
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
+
+    float recipeRequest = 0.1526f;
+    ResourceLimitAttributesProvisioner.provisionCPU(
+        machineConfig, 0, recipeRequest, defaultCPULimit, defaultCPURequest);
+
+    assertEquals(
+        machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), String.valueOf(recipeRequest));
+    assertEquals(
+        machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE), String.valueOf(recipeRequest));
+  }
+
+  @Test
+  public void testWhenCPUAttributesAreNotPresentInMachineConfigAndOnlyLimitIsProvidedInRecipe() {
+    float defaultCPULimit = 0.2f;
+    float defaultCPURequest = 0.5f;
+    InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
+
+    float recipeLimit = 0.152f;
+    ResourceLimitAttributesProvisioner.provisionCPU(
+        machineConfig, recipeLimit, 0, defaultCPULimit, defaultCPURequest);
+
+    assertEquals(
+        machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), String.valueOf(recipeLimit));
+    assertEquals(
+        machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE), String.valueOf(recipeLimit));
+  }
+
   private static InternalMachineConfig mockInternalMachineConfig(Map<String, String> attributes) {
     final InternalMachineConfig machineConfigMock = mock(InternalMachineConfig.class);
     when(machineConfigMock.getAttributes()).thenReturn(attributes);
     return machineConfigMock;
   }
-
-  // TODO: CPU tests
 }

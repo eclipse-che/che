@@ -24,13 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Configures memory attributes for a given machine, if they are not present in {@link
+ * Configures resource limits attributes for a given machine, if they are not present in {@link
  * MachineConfig} the attributes are taken from recipe, when available, by the specific
  * infrastructure implementation, or from wsmaster properties as a fallback
- *
- * <p>There are two memory-related properties: - che.workspace.default_memory_limit_mb - defines
- * default machine memory limit - che.workspace.default_memory_request_mb - defines default
- * requested machine memory allocation
  *
  * <p>if default requested memory allocation is greater then default memory limit, requested memory
  * allocation is set to be equal to memory limit.
@@ -47,41 +43,43 @@ public class ResourceLimitAttributesProvisioner {
    * memoryRequest are null or 0, otherwise the provided value will be used for both parameters.
    *
    * @param machineConfig - given machine configuration
-   * @param limit - resource limit parameter configured by user in specific infra recipe. Can be 0
-   *     if defaults should be used
-   * @param request - memory request parameter configured by user in specific infra recipe. Can be 0
-   *     if defaults should be used
+   * @param memoryLimit - resource limit parameter configured by user in specific infra recipe. Can
+   *     be 0 if defaults should be used
+   * @param memoryRequest - memory request parameter configured by user in specific infra recipe.
+   *     Can be 0 if defaults should be used
+   * @param defaultMemoryLimit - default memory limit resource parameter value
+   * @param defaultMemoryRequest - default memory request resource parameter value
    */
   public static void provisionMemory(
       InternalMachineConfig machineConfig,
-      @Nullable long limit,
-      @Nullable long request,
-      long defaultLimit,
-      long defaultRequest) {
-    if (defaultRequest > defaultLimit) {
-      defaultRequest = defaultLimit;
+      @Nullable long memoryLimit,
+      @Nullable long memoryRequest,
+      long defaultMemoryLimit,
+      long defaultMemoryRequest) {
+    if (defaultMemoryRequest > defaultMemoryLimit) {
+      defaultMemoryRequest = defaultMemoryLimit;
       LOG.error(
           "Requested default container resource limit is less than default request. Request parameter will be ignored.");
     }
 
     // if both properties are not defined
-    if (limit <= 0 && request <= 0) {
-      limit = defaultLimit;
-      request = defaultRequest;
-    } else if (limit <= 0) { // if limit only is undefined
-      limit = request;
-    } else if (request <= 0) { // if request only is undefined
-      request = limit;
-    } else if (request > limit) { // if both properties are defined, but not consistent
-      request = limit;
+    if (memoryLimit <= 0 && memoryRequest <= 0) {
+      memoryLimit = defaultMemoryLimit;
+      memoryRequest = defaultMemoryRequest;
+    } else if (memoryLimit <= 0) { // if limit only is undefined
+      memoryLimit = memoryRequest;
+    } else if (memoryRequest <= 0) { // if request only is undefined
+      memoryRequest = memoryLimit;
+    } else if (memoryRequest > memoryLimit) { // if both properties are defined, but not consistent
+      memoryRequest = memoryLimit;
     }
 
     final Map<String, String> attributes = machineConfig.getAttributes();
     String configuredLimit = attributes.get(MEMORY_LIMIT_ATTRIBUTE);
     String configuredRequest = attributes.get(MEMORY_REQUEST_ATTRIBUTE);
     if (isNullOrEmpty(configuredLimit) && isNullOrEmpty(configuredRequest)) {
-      attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(limit));
-      attributes.put(MEMORY_REQUEST_ATTRIBUTE, String.valueOf(request));
+      attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(memoryLimit));
+      attributes.put(MEMORY_REQUEST_ATTRIBUTE, String.valueOf(memoryRequest));
     } else if (isNullOrEmpty(configuredLimit)) {
       attributes.put(MEMORY_LIMIT_ATTRIBUTE, configuredRequest);
     } else if (isNullOrEmpty(configuredRequest)) {
@@ -96,41 +94,43 @@ public class ResourceLimitAttributesProvisioner {
    * are null or 0, otherwise the provided value will be used for both parameters.
    *
    * @param machineConfig - given machine configuration
-   * @param limit - resource limit parameter configured by user in specific infra recipe. Can be 0
-   *     if defaults should be used
-   * @param request - memory request parameter configured by user in specific infra recipe. Can be 0
-   *     if defaults should be used
+   * @param cpuLimit - CPU resource limit parameter configured by user in specific infra recipe. Can
+   *     be 0 if defaults should be used
+   * @param cpuRequest - CPU resource request parameter configured by user in specific infra recipe.
+   *     Can be 0 if defaults should be used
+   * @param defaultCPULimit - default CPU limit resource parameter value
+   * @param defaultCPURequest - default CPU request resource parameter value
    */
   public static void provisionCPU(
       InternalMachineConfig machineConfig,
-      @Nullable float limit,
-      @Nullable float request,
-      float defaultLimit,
-      float defaultRequest) {
-    if (defaultRequest > defaultLimit) {
-      defaultRequest = defaultLimit;
+      @Nullable float cpuLimit,
+      @Nullable float cpuRequest,
+      float defaultCPULimit,
+      float defaultCPURequest) {
+    if (defaultCPURequest > defaultCPULimit) {
+      defaultCPURequest = defaultCPULimit;
       LOG.error(
           "Requested default container resource limit is less than default request. Request parameter will be ignored.");
     }
 
     // if both properties are not defined
-    if (limit <= 0 && request <= 0) {
-      limit = defaultLimit;
-      request = defaultRequest;
-    } else if (limit <= 0) { // if limit only is undefined
-      limit = request;
-    } else if (request <= 0) { // if request only is undefined
-      request = limit;
-    } else if (request > limit) { // if both properties are defined, but not consistent
-      request = limit;
+    if (cpuLimit <= 0 && cpuRequest <= 0) {
+      cpuLimit = defaultCPULimit;
+      cpuRequest = defaultCPURequest;
+    } else if (cpuLimit <= 0) { // if limit only is undefined
+      cpuLimit = cpuRequest;
+    } else if (cpuRequest <= 0) { // if request only is undefined
+      cpuRequest = cpuLimit;
+    } else if (cpuRequest > cpuLimit) { // if both properties are defined, but not consistent
+      cpuRequest = cpuLimit;
     }
 
     final Map<String, String> attributes = machineConfig.getAttributes();
     String configuredLimit = attributes.get(CPU_LIMIT_ATTRIBUTE);
     String configuredRequest = attributes.get(CPU_REQUEST_ATTRIBUTE);
     if (isNullOrEmpty(configuredLimit) && isNullOrEmpty(configuredRequest)) {
-      attributes.put(CPU_LIMIT_ATTRIBUTE, Float.toString(limit));
-      attributes.put(CPU_REQUEST_ATTRIBUTE, Float.toString(request));
+      attributes.put(CPU_LIMIT_ATTRIBUTE, Float.toString(cpuLimit));
+      attributes.put(CPU_REQUEST_ATTRIBUTE, Float.toString(cpuRequest));
     } else if (isNullOrEmpty(configuredLimit)) {
       attributes.put(CPU_LIMIT_ATTRIBUTE, configuredRequest);
     } else if (isNullOrEmpty(configuredRequest)) {
