@@ -278,6 +278,16 @@ public class KubernetesMachinesCacheTest {
     assertEquals(machineCache.getMachines(runtimeId).size(), 0);
   }
 
+  // This test ensure that if during cascade removal of machine from cache (initiated during removal
+  // of runtime
+  // from cache) will happen an exception then transaction in runtime cache will rollback removal of
+  // machine cache.
+  // see
+  // @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
+  // protected void doRemove(RuntimeIdentity runtimeIdentity) throws ServerException
+  // Note that any checked exception that happened during RemoveEvent(extends CascadeEvent) would be
+  // transformed to
+  // ServerException. See RemoveEvent.propagateException.
   @Test
   public void shouldRollbackTransactionOnFailedCascadeMachine() throws Exception {
     // given

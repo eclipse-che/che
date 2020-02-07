@@ -144,6 +144,12 @@ public class KubernetesRuntimeStateCacheTest {
     assertEquals(new CommandImpl(updatedCommands.get(0)), newCommand);
   }
 
+  // Ensure that we are not affected https://bugs.eclipse.org/bugs/show_bug.cgi?id=474203 Orphan
+  // Removal not working
+  // when, object is added to collection and then same object is removed from collection in same
+  // transaction.
+  //
+  // Probable reason - two different transactions was used.
   @Test(dependsOnMethods = "shouldReturnCommands")
   public void shouldUpdateCommandsAndDeleteRuntime() throws Exception {
     // given
@@ -155,7 +161,6 @@ public class KubernetesRuntimeStateCacheTest {
     runtimesStatesCache.updateCommands(runtimesStates[0].getRuntimeId(), newCommands);
     runtimesStatesCache.remove(runtimesStates[0].getRuntimeId());
     // then
-
     // ok
   }
 
