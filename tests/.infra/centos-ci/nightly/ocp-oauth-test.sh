@@ -25,7 +25,7 @@ prepareCustomResourceFile
 installCheCtl
 deployCheIntoCluster  --chenamespace=eclipse-che --che-operator-cr-yaml=/tmp/custom-resource.yaml
 seleniumTestsSetup
-bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh --threads=1 --host=${CHE_ROUTE} --port=80 --multiuser --test=org.eclipse.che.selenium.site.ocpoauth.**
+bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh --threads=1 --host=${CHE_ROUTE} --port=80 --multiuser --test=org.eclipse.che.selenium.site.ocpoauth.** --fail-script-on-failed-tests
 saveSeleniumTestResult
 getOpenshiftLogs
 archiveArtifacts "nightly-ocp-oauth-test"

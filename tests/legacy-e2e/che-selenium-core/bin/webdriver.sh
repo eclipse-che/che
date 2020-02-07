@@ -80,6 +80,7 @@ initVariables() {
     PRODUCT_PORT=8080
     INCLUDE_TESTS_UNDER_REPAIR=false
     INCLUDE_FLAKY_TESTS=false
+    FAIL_SCRIPT_ON_FAILED_TESTS=false
 
     unset DEBUG_OPTIONS
     unset MAVEN_OPTIONS
@@ -153,6 +154,7 @@ checkParameters() {
         elif [[ "$var" =~ --exclude=.* ]]; then :
         elif [[ "$var" =~ --include-tests-under-repair ]]; then :
         elif [[ "$var" =~ --include-flaky-tests ]]; then :
+        elif [[ "$var" =~ --fail-script-on-failed-tests ]]; then :
 
         else
             printHelp
@@ -218,6 +220,9 @@ applyCustomOptions() {
 
         elif [[ "$var" == --include-flaky-tests ]]; then
             INCLUDE_FLAKY_TESTS=true
+
+        elif [[ "$var" == --fail-script-on-failed-tests ]]; then
+            FAIL_SCRIPT_ON_FAILED_TESTS=true
 
         fi
     done
@@ -422,6 +427,7 @@ Handle failing tests:
                                         Default attempts number is 1.
     --compare-with-ci [BUILD NUMBER]    Compare failed tests with results on CI server.
                                         Default build is the latest.
+    --fail-script-on-failed-tests       Fail webdriver.sh if tests failed.
 
 Other options:
     --debug                             Run tests in debug mode
@@ -649,6 +655,10 @@ analyseTestsResults() {
 
     echo "[TEST]"
     echo "[TEST]"
+
+    if [[ ${totalFails} -ne 0 && ${FAIL_SCRIPT_ON_FAILED_TESTS} == true ]]; then
+        exit 1
+    fi
 }
 
 printProposals() {
