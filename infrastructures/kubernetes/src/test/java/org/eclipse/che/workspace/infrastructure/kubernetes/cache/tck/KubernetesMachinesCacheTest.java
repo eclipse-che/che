@@ -308,7 +308,6 @@ public class KubernetesMachinesCacheTest {
       fail("Should fail with InfrastructureException");
     } catch (InfrastructureException exc) {
       // ok
-      exc.printStackTrace();
     } finally {
       eventService.unsubscribe(subscriber, BeforeKubernetesRuntimeStateRemovedEvent.class);
     }
