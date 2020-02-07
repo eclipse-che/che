@@ -46,13 +46,13 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class ContainerResourceLimitRequestProvisionerTest {
 
-  public static final String POD_NAME = "web";
-  public static final String CONTAINER_NAME = "app";
-  public static final String MACHINE_NAME = POD_NAME + '/' + CONTAINER_NAME;
-  public static final String RAM_LIMIT_VALUE = "2147483648";
-  public static final String RAM_REQUEST_VALUE = "1234567890";
-  public static final String CPU_LIMIT_VALUE = "0.4";
-  public static final String CPU_REQUEST_VALUE = "0.150";
+  private static final String POD_NAME = "web";
+  private static final String CONTAINER_NAME = "app";
+  private static final String MACHINE_NAME = POD_NAME + '/' + CONTAINER_NAME;
+  private static final String RAM_LIMIT_VALUE = "2147483648";
+  private static final String RAM_REQUEST_VALUE = "1234567890";
+  private static final String CPU_LIMIT_VALUE = "0.4";
+  private static final String CPU_REQUEST_VALUE = "0.15";
 
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private RuntimeIdentity identity;
@@ -60,11 +60,11 @@ public class ContainerResourceLimitRequestProvisionerTest {
   @Mock private ResourceLimitAttributesProvisioner resourceLimitAttributesProvisioner;
 
   private Container container;
-  private ContainerResourceLimitRequestProvisioner ramProvisioner;
+  private ContainerResourceLimitRequestProvisioner resourceProvisioner;
 
   @BeforeMethod
   public void setup() {
-    ramProvisioner =
+    resourceProvisioner =
         new ContainerResourceLimitRequestProvisioner(
             1024, 512, "500m", "100m", resourceLimitAttributesProvisioner);
     container = new Container();
@@ -89,44 +89,30 @@ public class ContainerResourceLimitRequestProvisionerTest {
   }
 
   @Test
-  public void testProvisionRamLimitAttributeToContainer() throws Exception {
-    ramProvisioner.provision(k8sEnv, identity);
-
+  public void testProvisionResourcesLimitAndRequestAttributeToContainer() throws Exception {
+    resourceProvisioner.provision(k8sEnv, identity);
     assertEquals(container.getResources().getLimits().get("memory").getAmount(), RAM_LIMIT_VALUE);
+    assertEquals(container.getResources().getLimits().get("cpu").getAmount(), CPU_LIMIT_VALUE);
+    assertEquals(
+        container.getResources().getRequests().get("memory").getAmount(), RAM_REQUEST_VALUE);
+    assertEquals(container.getResources().getRequests().get("cpu").getAmount(), CPU_REQUEST_VALUE);
   }
 
   @Test
-  public void testOverridesContainerRamLimitFromMachineAttribute() throws Exception {
+  public void testOverridesContainerRamLimitAndRequestFromMachineAttribute() throws Exception {
     ResourceRequirements resourceRequirements =
         new ResourceRequirementsBuilder()
-            .addToLimits(of("memory", new Quantity("3221225472")))
+            .addToLimits(of("memory", new Quantity("3221225472"), "cpu", new Quantity("0.678")))
+            .addToRequests(of("memory", new Quantity("1231231423"), "cpu", new Quantity("0.333")))
             .build();
     container.setResources(resourceRequirements);
 
-    ramProvisioner.provision(k8sEnv, identity);
+    resourceProvisioner.provision(k8sEnv, identity);
 
     assertEquals(container.getResources().getLimits().get("memory").getAmount(), RAM_LIMIT_VALUE);
-  }
-
-  @Test
-  public void testProvisionRamRequestAttributeToContainer() throws Exception {
-    ramProvisioner.provision(k8sEnv, identity);
-
+    assertEquals(container.getResources().getLimits().get("cpu").getAmount(), CPU_LIMIT_VALUE);
     assertEquals(
         container.getResources().getRequests().get("memory").getAmount(), RAM_REQUEST_VALUE);
-  }
-
-  @Test
-  public void testOverridesContainerRamRequestFromMachineAttribute() throws Exception {
-    ResourceRequirements resourceRequirements =
-        new ResourceRequirementsBuilder()
-            .addToRequests(of("memory", new Quantity("3221225472")))
-            .build();
-    container.setResources(resourceRequirements);
-
-    ramProvisioner.provision(k8sEnv, identity);
-
-    assertEquals(
-        container.getResources().getRequests().get("memory").getAmount(), RAM_REQUEST_VALUE);
+    assertEquals(container.getResources().getRequests().get("cpu").getAmount(), CPU_REQUEST_VALUE);
   }
 }

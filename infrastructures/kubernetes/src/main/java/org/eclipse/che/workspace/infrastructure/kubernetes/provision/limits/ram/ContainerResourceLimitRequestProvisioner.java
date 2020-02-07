@@ -40,9 +40,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
  *
  * <p>There are two memory-related properties: - che.workspace.default_memory_limit_mb - defines
  * default machine memory limit - che.workspace.default_memory_request_mb - defines default
- * requested machine memory allocation. Similarly, two CPU-related properties:
- * - che.workspace.default_cpu_limit_cores - defines default machine CPU limit and
- *  - che.workspace.default_cpu_request_cores - defines default machine CPU request
+ * requested machine memory allocation. Similarly, two CPU-related properties: -
+ * che.workspace.default_cpu_limit_cores - defines default machine CPU limit and -
+ * che.workspace.default_cpu_request_cores - defines default machine CPU request
  *
  * @author Anton Korneta
  * @auhtor Max Shaposhnyk

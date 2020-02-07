@@ -116,6 +116,7 @@ public class MachineResolver {
     if (ramRequest == 0) {
       machineConfig.getAttributes().put(MEMORY_REQUEST_ATTRIBUTE, defaultSidecarMemoryRequestBytes);
     }
+    // TODO: uncomment when CPU limit added into devfile
     //    String overriddenSidecarMemRequest = component.getRamRequest();
     //    if (!isNullOrEmpty(overriddenSidecarMemRequest)) {
     //      machineConfig
@@ -131,6 +132,7 @@ public class MachineResolver {
     if (cpuLimit == 0) {
       machineConfig.getAttributes().put(CPU_LIMIT_ATTRIBUTE, defaultSidecarCpuLimitCores);
     }
+    // TODO: uncomment when CPU limit added into devfile
     //    String overriddenSidecarCpuLimit = component.getCpuLimit();
     //    if (!isNullOrEmpty(overriddenSidecarCpuLimit)) {
     //      machineConfig
@@ -144,6 +146,7 @@ public class MachineResolver {
     if (cpuRequest == 0) {
       machineConfig.getAttributes().put(CPU_REQUEST_ATTRIBUTE, defaultSidecarCpuRequestCores);
     }
+    // TODO: uncomment when CPU limit added into devfile
     //    String overriddenSidecarCpuRequest = component.getCpuRequest();
     //    if (!isNullOrEmpty(overriddenSidecarCpuRequest)) {
     //      machineConfig
