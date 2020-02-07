@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.hotupdate.rolling;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.util.Collections;
@@ -72,7 +73,6 @@ public class RollingUpdateStrategyWithStartedWorkspaceTest {
 
   @Test
   public void startStopWorkspaceFunctionsShouldBeAvailableDuringRollingUpdate() throws Exception {
-    int currentRevision = hotUpdateUtil.getMasterPodRevision();
     theiaIde.waitOpenedWorkspaceIsReadyToUse();
 
     theiaProjectTree.waitFilesTab();
@@ -94,8 +94,8 @@ public class RollingUpdateStrategyWithStartedWorkspaceTest {
     hotUpdateUtil.executeMasterPodUpdateCommand();
 
     // check that Che is updated
-    hotUpdateUtil.waitMasterPodRevision(currentRevision + 1);
-    hotUpdateUtil.waitFullMasterPodUpdate(currentRevision);
+    assertTrue(
+        hotUpdateUtil.getRolloutStatus().contains("deployment \"che\" successfully rolled out"));
 
     assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
     workspaces.waitWorkspaceIsPresent(WORKSPACE_NAME);

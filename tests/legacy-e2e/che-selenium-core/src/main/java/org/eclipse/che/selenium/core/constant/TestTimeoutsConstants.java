@@ -15,7 +15,7 @@ package org.eclipse.che.selenium.core.constant;
 public final class TestTimeoutsConstants {
   public static final int MULTIPLE = 1;
   public static final int APPLICATION_START_TIMEOUT_SEC = 300 * MULTIPLE;
-  public static final int PREPARING_WS_TIMEOUT_SEC = 240 * MULTIPLE;
+  public static final int PREPARING_WS_TIMEOUT_SEC = 30 * MULTIPLE;
   public static final int UPDATING_PROJECT_TIMEOUT_SEC = 180 * MULTIPLE;
   public static final int EXPECTED_MESS_IN_CONSOLE_SEC = 120 * MULTIPLE;
   public static final int LOADER_TIMEOUT_SEC = 60 * MULTIPLE;
