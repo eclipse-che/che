@@ -140,6 +140,12 @@ objects:
             value: "${CHE_OAUTH_GITHUB_CLIENTID}"
           - name: CHE_OAUTH_GITHUB_CLIENTSECRET
             value: "${CHE_OAUTH_GITHUB_CLIENTSECRET}"
+          - name: CHE_OAUTH_OPENSHIFT_CLIENTID
+            value: "${CHE_OAUTH_OPENSHIFT_CLIENTID}"
+          - name: CHE_OAUTH_OPENSHIFT_CLIENTSECRET
+            value: "${CHE_OAUTH_OPENSHIFT_CLIENTSECRET}"
+          - name: CHE_OAUTH_OPENSHIFT_ENDPOINT
+            value: "${CHE_OAUTH_OPENSHIFT_ENDPOINT}"
           - name: JAVA_OPTS
             value: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10
               -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
@@ -341,7 +347,19 @@ parameters:
   value: ''
 - name: CHE_OAUTH_GITHUB_CLIENTSECRET
   displayName: GitHub Client Secret
-  description: GitHub OAuth app client servet. Applicable to Che single user only!
+  description: GitHub OAuth app client secret. Applicable to Che single user only!
+  value: ''
+- name: CHE_OAUTH_OPENSHIFT_CLIENTID
+  displayName: OpenShift Client ID
+  description: OpenShift OAuth app client ID. Applicable to Che single user only!
+  value: ''
+- name: CHE_OAUTH_OPENSHIFT_CLIENTSECRET
+  displayName: OpenShift Client Secret
+  description: OpenShift OAuth app client secret. Applicable to Che single user only!
+  value: ''
+- name: CHE_OAUTH_OPENSHIFT_ENDPOINT
+  displayName: OpenShift endpoint
+  description: OpenShift endpoint. Applicable to Che single user only!
   value: ''
 - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
   displayName: Eclipse Che plugin registry URL
