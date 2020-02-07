@@ -29,6 +29,7 @@ import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -59,6 +60,8 @@ public class KubernetesRuntimeStateCacheTest {
   @Inject private TckRepository<KubernetesRuntimeState> runtimesRepository;
 
   @Inject private KubernetesRuntimeStateCache runtimesStatesCache;
+
+  @Inject private EventService eventService;
 
   private WorkspaceImpl[] workspaces;
   private KubernetesRuntimeState[] runtimesStates;
@@ -139,6 +142,21 @@ public class KubernetesRuntimeStateCacheTest {
         runtimesStatesCache.getCommands(runtimesStates[0].getRuntimeId());
     assertEquals(updatedCommands.size(), 1);
     assertEquals(new CommandImpl(updatedCommands.get(0)), newCommand);
+  }
+
+  @Test(dependsOnMethods = "shouldReturnCommands")
+  public void shouldUpdateCommandsAndDeleteRuntime() throws Exception {
+    // given
+    List<CommandImpl> newCommands = new ArrayList<>();
+    CommandImpl newCommand = new CommandImpl("new", "build", "custom");
+    newCommands.add(newCommand);
+
+    // when
+    runtimesStatesCache.updateCommands(runtimesStates[0].getRuntimeId(), newCommands);
+    runtimesStatesCache.remove(runtimesStates[0].getRuntimeId());
+    // then
+
+    // ok
   }
 
   @Test(
