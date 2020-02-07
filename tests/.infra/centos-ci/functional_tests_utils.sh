@@ -383,8 +383,8 @@ function saveSeleniumTestResult() {
 }
 
 function createIndentityProvider() {
-  CHE_MULTI_USER_GITHUB_CLIENTID_OCP=04cbc0f8172109d5e2e5
-  CHE_MULTI_USER_GITHUB_SECRET_OCP=a0a9b8602bb0916d8b4a62e71b7ed92036563b7a
+  CHE_MULTI_USER_GITHUB_CLIENTID_OCP=04cbc0f8172109322223
+  CHE_MULTI_USER_GITHUB_SECRET_OCP=a0a9b8602bb0916d322223e71b7ed92036563b7a
   CHE_OPENSHIFT_PROJECT=eclipse-che
   keycloakPodName=$(oc get pod --namespace=$CHE_OPENSHIFT_PROJECT | grep keycloak | awk '{print $1}')
   /tmp/oc exec $keycloakPodName --namespace=$CHE_OPENSHIFT_PROJECT -- /opt/jboss/keycloak/bin/kcadm.sh create identity-provider/instances -r che -s alias=github -s providerId=github -s enabled=true -s storeToken=true -s addReadTokenRoleOnCreate=true -s 'config.useJwksUrl="true"' -s config.clientId=$CHE_MULTI_USER_GITHUB_CLIENTID_OCP -s config.clientSecret=$CHE_MULTI_USER_GITHUB_SECRET_OCP -s 'config.defaultScope="repo,user,write:public_key"' --no-config --server http://localhost:8080/auth --user admin --password admin --realm master
