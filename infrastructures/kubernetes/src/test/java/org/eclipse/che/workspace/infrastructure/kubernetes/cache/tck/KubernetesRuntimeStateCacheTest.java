@@ -19,6 +19,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,17 +152,21 @@ public class KubernetesRuntimeStateCacheTest {
   //
   // Probable reason - two different transactions was used.
   @Test(dependsOnMethods = "shouldReturnCommands")
-  public void shouldUpdateCommandsAndDeleteRuntime() throws Exception {
+  public void shouldUpdateCommandsAndDeleteRuntime() {
     // given
     List<CommandImpl> newCommands = new ArrayList<>();
     CommandImpl newCommand = new CommandImpl("new", "build", "custom");
     newCommands.add(newCommand);
 
     // when
-    runtimesStatesCache.updateCommands(runtimesStates[0].getRuntimeId(), newCommands);
-    runtimesStatesCache.remove(runtimesStates[0].getRuntimeId());
+    try {
+      runtimesStatesCache.updateCommands(runtimesStates[0].getRuntimeId(), newCommands);
+      runtimesStatesCache.remove(runtimesStates[0].getRuntimeId());
+    } catch (InfrastructureException e) {
+      fail("No exception expected here, got " + e.getLocalizedMessage());
+    }
     // then
-    // ok
+    // if no exception happened during remove operation that means test passed correctly.
   }
 
   @Test(
