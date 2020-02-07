@@ -26,6 +26,10 @@ public interface Server {
   /** @return the status */
   ServerStatus getStatus();
 
-  /** Returns attributes of the server with some metadata */
+  /**
+   * Returns attributes of the server with some metadata. You can use static methods on {@link
+   * org.eclipse.che.api.core.model.workspace.config.ServerConfig} to evaluate attributes in this
+   * map easily.
+   */
   Map<String, String> getAttributes();
 }

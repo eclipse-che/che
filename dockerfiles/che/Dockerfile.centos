@@ -20,21 +20,14 @@
 #            -v ~/.che/workspaces:/data \
 #            quay.io/eclipse/che-server:nightly
 #           
-FROM registry.centos.org/centos/centos:latest
+FROM registry.centos.org/centos/centos:7
 
 ENV LANG=C.UTF-8 \
     JAVA_HOME=/usr/lib/jvm/jre-1.8.0 \
-    PATH=${PATH}:${JAVA_HOME}/bin \
-    CHE_HOME=/home/user/che \
-    DOCKER_VERSION=1.6.0 \
-    DOCKER_BUCKET=get.docker.com \
-    CHE_IN_CONTAINER=true
+    PATH=${PATH}:${JAVA_HOME}/bin
 
 RUN yum -y update && \
-    yum -y install openssl java sudo && \
-    curl -sSL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-${DOCKER_VERSION}" -o /usr/bin/docker && \
-    chmod +x /usr/bin/docker && \
-    yum -y remove openssl && \
+    yum -y install java-1.8.0-openjdk-1.8.0.232.b09-0.el7_7.x86_64 sudo && \
     yum clean all && \
     echo "%root ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     sed -i 's/Defaults    requiretty/#Defaults    requiretty/g' /etc/sudoers && \
@@ -48,8 +41,6 @@ ENV LANG="C.UTF-8"
 EXPOSE 8000 8080
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
-RUN mkdir /logs /data && \
-    chmod 0777 /logs /data
-ADD eclipse-che /home/user/eclipse-che
+RUN mkdir -m 0777 /logs /data
+COPY eclipse-che /home/user/eclipse-che
 RUN find /home/user -type d -exec chmod 777 {} \;
-

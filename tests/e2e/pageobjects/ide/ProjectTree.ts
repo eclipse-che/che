@@ -188,10 +188,10 @@ export class ProjectTree {
         await this.waitItemCollapsed(itemPath, timeout);
     }
 
-    async expandPathAndOpenFile(pathToItem: string, fileName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug(`ProjectTree.expandPathAndOpenFile "${pathToItem}"`);
+    async expandPath(path: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`ProjectTree.expandPath "${path}"`);
 
-        let items: Array<string> = pathToItem.split('/');
+        let items: Array<string> = path.split('/');
         let projectName: string = items[0];
         let paths: Array<string> = new Array();
         paths.push(projectName);
@@ -207,11 +207,14 @@ export class ProjectTree {
         for (const path of paths) {
             await this.expandItem(path, timeout);
         }
+    }
 
-        // open file
+    async expandPathAndOpenFile(pathToItem: string, fileName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`ProjectTree.expandPathAndOpenFile "${pathToItem}" filename: ${fileName}`);
+
+        await this.expandPath(pathToItem, timeout);
         await this.clickOnItem(`${pathToItem}/${fileName}`, timeout);
 
-        // check file appearance in the editor
         await this.editor.waitEditorOpened(fileName, timeout);
         await this.editor.waitTab(fileName);
     }

@@ -285,6 +285,16 @@ public class WorkspaceRuntimes {
       throws InfrastructureException {
     return infrastructure.evaluateLegacyInfraNamespace(resolutionContext);
   }
+
+  /**
+   * This method just passes on the question down to the underlying infrastructure.
+   *
+   * @see RuntimeInfrastructure#isNamespaceValid(String)
+   */
+  public boolean isInfrastructureNamespaceValid(String namespaceName) {
+    return infrastructure.isNamespaceValid(namespaceName);
+  }
+
   /**
    * Injects runtime information such as status and {@link
    * org.eclipse.che.api.core.model.workspace.Runtime} into the workspace object, if the workspace
@@ -833,16 +843,24 @@ public class WorkspaceRuntimes {
     public void run() {
       long startTime = System.currentTimeMillis();
       LOG.info("Recovering of runtimes is started.");
-
       for (RuntimeIdentity identity : identities) {
-        try {
-          recoverOne(infrastructure, identity);
-        } catch (Exception e) {
-          LOG.error(
-              "An error occurred while attempting to recover runtime '{}' using infrastructure '{}'. Reason: '{}'",
-              identity.getWorkspaceId(),
-              infrastructure.getName(),
-              e.getMessage());
+        try (Unlocker ignored = lockService.writeLock(identity.getWorkspaceId())) {
+          try {
+            InternalRuntime<?> runtime = runtimes.get(identity.getWorkspaceId());
+            if (runtime == null) {
+              LOG.info("Recovering runtime {}", identity.getWorkspaceId());
+              recoverOne(infrastructure, identity);
+            } else {
+              LOG.info("Runtime {} already restored. Skipping it.", identity.getWorkspaceId());
+            }
+          } catch (Exception e) {
+            LOG.error(
+                "An error occurred while attempting to recover runtime '{}' using infrastructure '{}'. Reason: '{}'",
+                identity.getWorkspaceId(),
+                infrastructure.getName(),
+                e.getMessage(),
+                e);
+          }
         }
       }
 

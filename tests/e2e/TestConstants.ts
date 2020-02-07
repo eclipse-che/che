@@ -47,7 +47,7 @@ export const TestConstants = {
     /**
      * Timeout in milliseconds waiting for workspace start, "240 000" by default.
      */
-    TS_SELENIUM_START_WORKSPACE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 240000,
+    TS_SELENIUM_START_WORKSPACE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 360000,
 
     /**
      * Timeout in milliseconds waiting for page load, "120 000" by default.

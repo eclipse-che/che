@@ -4,7 +4,6 @@ export * from './inversify.types';
 export * from './TestConstants';
 
 export * from './driver/ChromeDriver';
-export * from './driver/ContainerInitializer';
 export * from './driver/IDriver';
 export * from './utils/DriverHelper';
 export * from './utils/Logger';
@@ -24,6 +23,7 @@ export * from './pageobjects/ide/DialogWindow';
 export * from './pageobjects/ide/Editor';
 export * from './pageobjects/ide/GitHubPlugin';
 export * from './pageobjects/ide/Ide';
+export * from './pageobjects/ide/NotificationCenter';
 export * from './pageobjects/ide/OpenWorkspaceWidget';
 export * from './pageobjects/ide/PreviewWidget';
 export * from './pageobjects/ide/ProjectTree';

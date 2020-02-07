@@ -447,12 +447,35 @@ public class WorkspaceManager {
     // namespace stored for it. We use the legacy-aware method to figure out the namespace to
     // correctly capture the workspaces which have PVCs already in a namespace defined by the legacy
     // configuration variable.
-    if (isNullOrEmpty(
-        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE))) {
+    String targetNamespace =
+        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
+    if (isNullOrEmpty(targetNamespace)) {
       try {
-        String namespace =
+        targetNamespace =
             runtimes.evalLegacyInfrastructureNamespace(buildResolutionContext(workspace));
-        workspace.getAttributes().put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
+        workspace
+            .getAttributes()
+            .put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, targetNamespace);
+      } catch (InfrastructureException e) {
+        throw new ServerException(e);
+      }
+    }
+
+    if (!runtimes.isInfrastructureNamespaceValid(targetNamespace)) {
+      try {
+        targetNamespace = runtimes.evalInfrastructureNamespace(buildResolutionContext(workspace));
+
+        if (targetNamespace == null || !runtimes.isInfrastructureNamespaceValid(targetNamespace)) {
+          throw new ServerException(
+              format(
+                  "The workspace would be started in a namespace/project"
+                      + " '%s', which is not a valid namespace/project name.",
+                  targetNamespace));
+        }
+
+        workspace
+            .getAttributes()
+            .put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, targetNamespace);
       } catch (InfrastructureException e) {
         throw new ServerException(e);
       }
@@ -593,14 +616,25 @@ public class WorkspaceManager {
             .build();
     workspace.getAttributes().put(CREATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
 
-    if (isNullOrEmpty(
-        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE))) {
+    String targetNamespace =
+        workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
+    if (isNullOrEmpty(targetNamespace)) {
       try {
-        String namespace = runtimes.evalInfrastructureNamespace(buildResolutionContext(workspace));
-        workspace.getAttributes().put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
+        targetNamespace = runtimes.evalInfrastructureNamespace(buildResolutionContext(workspace));
+        workspace
+            .getAttributes()
+            .put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, targetNamespace);
       } catch (InfrastructureException e) {
         throw new ServerException(e);
       }
+    }
+
+    if (targetNamespace == null || !runtimes.isInfrastructureNamespaceValid(targetNamespace)) {
+      throw new ServerException(
+          format(
+              "The workspace would be started in a namespace/project"
+                  + " '%s', which is not a valid namespace/project name.",
+              targetNamespace));
     }
 
     workspaceDao.create(workspace);

@@ -1,9 +1,10 @@
-.getting-started-toolbar
+div.getting-started-toolbar
   border-bottom 1px solid $very-light-grey-background-color
   user-select none
 
   md-toolbar
-    height: 110px;
+    height 110px
+    max-height 110px
 
   div.che-toolbar-header div:last-child
     bottom initial
@@ -28,15 +29,13 @@
         line-height 40px !important
 
 md-content.getting-started
-  background-color $very-light-grey-background-color
-  padding-left 10px
-
   & > *
     background-color $background-color
 
   .getting-started-list
     che-box-shadow()
-    margin 15px
+    border 15px solid $very-light-grey-background-color
+    border-left-width 25px
 
     .template-header
       margin 15px

@@ -19,6 +19,7 @@ import io.fabric8.openshift.api.model.Route;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.Deserializer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
@@ -39,12 +40,14 @@ public class OpenShiftExternalServerExposerTest {
     // given
     OpenShiftEnvironment osEnv = OpenShiftEnvironment.builder().build();
     Map<String, ServerConfig> servers = new HashMap<>();
+    servers.put("server", new ServerConfigImpl());
 
     // when
     osExternalServerExposer.expose(
         osEnv,
         "machine123",
         "service123",
+        null,
         new ServicePort("servicePort", null, null, "TCP", null),
         servers);
 

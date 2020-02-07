@@ -79,7 +79,9 @@ export class OrganizationsConfig {
       controllerAs: 'organizationDetailsController',
       resolve: {
         initData: ['organizationsConfigService', (organizationConfigService: OrganizationsConfigService) => {
-          return organizationConfigService.resolveOrganizationDetailsRoute();
+          return organizationConfigService.allowOrganizationsRoutes().then(() => {
+            return organizationConfigService.resolveOrganizationDetailsRoute();
+          });
         }]
       }
     };
@@ -91,7 +93,9 @@ export class OrganizationsConfig {
       controllerAs: 'createOrganizationController',
       resolve: {
         initData: ['organizationsConfigService', (organizationsConfigService: OrganizationsConfigService) => {
-          return organizationsConfigService.resolveCreateOrganizationRoute();
+          return organizationsConfigService.allowOrganizationsRoutes().then(() => {
+            return organizationsConfigService.resolveCreateOrganizationRoute();
+          });
         }]
       }
     };
@@ -102,7 +106,12 @@ export class OrganizationsConfig {
         title: 'organizations',
         templateUrl: 'app/organizations/organizations.html',
         controller: 'OrganizationsController',
-        controllerAs: 'organizationsController'
+        controllerAs: 'organizationsController',
+        resolve: {
+          initData: ['organizationsConfigService', (organizationsConfigService: OrganizationsConfigService) => {
+            return organizationsConfigService.allowOrganizationsRoutes();
+          }]
+        }
       })
         .accessWhen('/admin/create-organization', createOrganizationLocationProvider)
         .accessWhen('/admin/create-organization/:parentQualifiedName*', createOrganizationLocationProvider)

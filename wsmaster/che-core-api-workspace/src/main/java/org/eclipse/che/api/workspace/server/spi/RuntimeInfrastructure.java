@@ -132,6 +132,14 @@ public abstract class RuntimeInfrastructure {
       throws InfrastructureException;
 
   /**
+   * Checks whether the infrastructure namespace is valid in this infrastructure.
+   *
+   * @param namespaceName the namespace name
+   * @return true if the name is valid namespace name, false otherwise
+   */
+  public abstract boolean isNamespaceValid(String namespaceName);
+
+  /**
    * An Infrastructure implementation should be able to prepare RuntimeContext. This method is not
    * supposed to be called by clients of class {@link RuntimeInfrastructure}.
    *

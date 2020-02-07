@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.server;
 
-import io.fabric8.kubernetes.api.model.ServicePort;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 
 /**
@@ -21,12 +20,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Exter
  */
 public class OpenShiftServerExposureStrategy implements ExternalServiceExposureStrategy {
   @Override
-  public String getExternalHost(String serviceName, ServicePort servicePort) {
+  public String getExternalHost(String serviceName, String serverName) {
     return null;
   }
 
   @Override
-  public String getExternalPath(String serviceName, ServicePort servicePort) {
+  public String getExternalPath(String serviceName, String serverName) {
     return "/";
   }
 }

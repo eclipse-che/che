@@ -32,6 +32,8 @@ public interface SecureServerExposer<T extends KubernetesEnvironment> {
    * @param k8sEnv Kubernetes environment that should be modified.
    * @param machineName machine name to which secure servers belong to
    * @param serviceName service name that exposes secure servers
+   * @param serverId non-null for a unique server, null for a compound set of servers that should be
+   *     exposed together.
    * @param servicePort service port that exposes secure servers
    * @param secureServers secure servers to expose
    * @throws InfrastructureException when any exception occurs during servers exposing
@@ -40,6 +42,7 @@ public interface SecureServerExposer<T extends KubernetesEnvironment> {
       T k8sEnv,
       String machineName,
       String serviceName,
+      String serverId,
       ServicePort servicePort,
       Map<String, ServerConfig> secureServers)
       throws InfrastructureException;

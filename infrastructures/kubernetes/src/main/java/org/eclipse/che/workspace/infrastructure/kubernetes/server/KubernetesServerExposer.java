@@ -13,10 +13,10 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 
 import static java.lang.Integer.parseInt;
 import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.INTERNAL_SERVER_ATTRIBUTE;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
@@ -127,6 +127,41 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
   }
 
   /**
+   * A helper method to split the servers to unique sets that should be exposed together.
+   *
+   * <p>The consumer is responsible for doing the actual exposure and is supplied 2 pieces of data.
+   * The first is the server ID, which is non-null for any unique server from the input set and null
+   * for any compound set of servers that should be exposed together. The caller is responsible for
+   * figuring out an appropriate ID in such case.
+   *
+   * @param allServers all unique and non-unique servers mixed together
+   * @param consumer the consumer responsible for handling the split sets of servers
+   */
+  private static void onEachExposableServerSet(
+      Map<String, ServerConfig> allServers, ServerSetExposer consumer)
+      throws InfrastructureException {
+    Map<String, ServerConfig> nonUniqueServers = new HashMap<>();
+
+    for (Map.Entry<String, ServerConfig> e : allServers.entrySet()) {
+      String serverId = makeServerNameValidForDns(e.getKey());
+      if (e.getValue().isUnique()) {
+        consumer.expose(serverId, ImmutableMap.of(serverId, e.getValue()));
+      } else {
+        nonUniqueServers.put(serverId, e.getValue());
+      }
+    }
+
+    if (!nonUniqueServers.isEmpty()) {
+      consumer.expose(null, nonUniqueServers);
+    }
+  }
+
+  /** Replaces {@code /} with {@code -} in the provided name in an attempt to make it DNS safe. */
+  public static String makeServerNameValidForDns(String name) {
+    return name.replaceAll("/", "-");
+  }
+
+  /**
    * Exposes specified servers.
    *
    * <p>Note that created Kubernetes objects will select the corresponding pods by {@link
@@ -143,13 +178,13 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
 
     servers.forEach(
         (key, value) -> {
-          if ("true".equals(value.getAttributes().get(INTERNAL_SERVER_ATTRIBUTE))) {
+          if (value.isInternal()) {
             // Server is internal. It doesn't make sense to make an it secure since
             // it is available only within workspace servers
             internalServers.put(key, value);
           } else {
             // Server is external. Check if it should be secure or not
-            if ("true".equals(value.getAttributes().get(ServerConfig.SECURE_SERVER_ATTRIBUTE))) {
+            if (value.isSecure()) {
               secureServers.put(key, value);
             } else {
               externalServers.put(key, value);
@@ -174,15 +209,23 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
       // expose service port related external servers if exist
       Map<String, ServerConfig> matchedExternalServers = match(externalServers, servicePort);
       if (!matchedExternalServers.isEmpty()) {
-        externalServerExposer.expose(
-            k8sEnv, machineName, serviceName, servicePort, matchedExternalServers);
+        onEachExposableServerSet(
+            matchedExternalServers,
+            (serverId, srvrs) -> {
+              externalServerExposer.expose(
+                  k8sEnv, machineName, serviceName, serverId, servicePort, srvrs);
+            });
       }
 
       // expose service port related secure servers if exist
       Map<String, ServerConfig> matchedSecureServers = match(secureServers, servicePort);
       if (!matchedSecureServers.isEmpty()) {
-        secureServerExposer.expose(
-            k8sEnv, machineName, serviceName, servicePort, matchedSecureServers);
+        onEachExposableServerSet(
+            matchedSecureServers,
+            (serverId, srvrs) -> {
+              secureServerExposer.expose(
+                  k8sEnv, machineName, serviceName, serverId, servicePort, matchedSecureServers);
+            });
       }
     }
   }
@@ -232,5 +275,11 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
               .build());
     }
     return exposedPorts.values();
+  }
+
+  @FunctionalInterface
+  private interface ServerSetExposer {
+    void expose(String serverId, Map<String, ServerConfig> serverSet)
+        throws InfrastructureException;
   }
 }

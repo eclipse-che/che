@@ -12,7 +12,7 @@ pipeline {
 
     parameters {
         string(name: 'emails',
-                defaultValue: 'dnochevn@redhat.com',
+                defaultValue: 'dnochevn@redhat.com,kfoniok@redhat.com',
                 description: 'Comma-separated list of emails to send results')
     }
 
@@ -24,7 +24,7 @@ pipeline {
                         build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                 parameters: [
                                         string(name: 'cheImageRepo',
-                                                value: 'eclipse/che-server'),
+                                                value: 'quay.io/eclipse/che-server'),
 
                                         string(name: 'cheImageTag',
                                                 value: 'nightly'),
@@ -58,7 +58,7 @@ pipeline {
                         build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                 parameters: [
                                         string(name: 'cheImageRepo',
-                                                value: 'eclipse/che-server'),
+                                                value: 'quay.io/eclipse/che-server'),
 
                                         string(name: 'cheImageTag',
                                                 value: 'nightly'),

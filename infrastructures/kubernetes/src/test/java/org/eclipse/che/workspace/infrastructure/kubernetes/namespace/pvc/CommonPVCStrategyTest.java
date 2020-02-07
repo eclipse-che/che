@@ -18,6 +18,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -283,11 +284,15 @@ public class CommonPVCStrategyTest {
     Map<String, String> workspaceConfigAttributes = new HashMap<>();
     lenient().when(workspaceConfig.getAttributes()).thenReturn(workspaceConfigAttributes);
 
+    KubernetesNamespace ns = mock(KubernetesNamespace.class);
+    when(factory.get(eq(workspace))).thenReturn(ns);
+    when(ns.getName()).thenReturn("ns");
+
     // when
     commonPVCStrategy.cleanup(workspace);
 
     // then
-    verify(pvcSubPathHelper).removeDirsAsync(WORKSPACE_ID, null, PVC_NAME, WORKSPACE_ID);
+    verify(pvcSubPathHelper).removeDirsAsync(WORKSPACE_ID, "ns", PVC_NAME, WORKSPACE_ID);
   }
 
   @Test
@@ -305,11 +310,15 @@ public class CommonPVCStrategyTest {
     lenient().when(workspaceConfig.getAttributes()).thenReturn(workspaceConfigAttributes);
     workspaceConfigAttributes.put(PERSIST_VOLUMES_ATTRIBUTE, "true");
 
+    KubernetesNamespace ns = mock(KubernetesNamespace.class);
+    when(factory.get(eq(workspace))).thenReturn(ns);
+    when(ns.getName()).thenReturn("ns");
+
     // when
     commonPVCStrategy.cleanup(workspace);
 
     // then
-    verify(pvcSubPathHelper).removeDirsAsync(WORKSPACE_ID, null, PVC_NAME, WORKSPACE_ID);
+    verify(pvcSubPathHelper).removeDirsAsync(WORKSPACE_ID, "ns", PVC_NAME, WORKSPACE_ID);
   }
 
   @Test

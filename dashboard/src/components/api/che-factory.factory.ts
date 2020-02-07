@@ -45,7 +45,7 @@ export class CheFactory {
   private factoryContentsByWorkspaceId: Map<string, any>;
   private pageFactories: Array<che.IFactory>;
   private factoryPagesMap: Map<number, any>;
-  private pageInfo: any;
+  private pageInfo: {currentPageNumber: number, countOfPages: number} = {currentPageNumber: 1, countOfPages: 1};
   private itemsPerPage: number;
   private cheUser: CheUser;
 
@@ -70,7 +70,6 @@ export class CheFactory {
     // paging
     this.pageFactories = [];
     this.factoryPagesMap = new Map();
-    this.pageInfo = {};
 
     this.remoteFactoryAPI = <IFactoriesResource<any>>this.$resource('/api/factory/:factoryId', {factoryId: '@id'}, {
       updateFactory: {method: 'PUT', url: '/api/factory/:factoryId'},
@@ -96,26 +95,6 @@ export class CheFactory {
 
   _getPageFromResponse(data: any, headersLink: any): any {
     let links = new Map();
-    if (!headersLink) {
-      // TODO remove it after adding headers paging links on server side
-      let user = this.cheUser.getUser();
-      if (!this.itemsPerPage || !user) {
-        return {factories: data};
-      }
-      this.pageInfo.currentPageNumber = this.pageInfo.currentPageNumber ? this.pageInfo.currentPageNumber : 1;
-      let link = '/api/factory/find?creator.userId=' + user.id + '&maxItems=' + this.itemsPerPage;
-      links.set('first', link + '&skipCount=0');
-      if (data && data.length > 0) {
-        links.set('next', link + '&skipCount=' + this.pageInfo.currentPageNumber * this.itemsPerPage);
-      }
-      if (this.pageInfo.currentPageNumber > 1) {
-        links.set('prev', link + '&skipCount=' + (this.pageInfo.currentPageNumber - 2) * this.itemsPerPage);
-      }
-      return {
-        factories: data,
-        links: links
-      };
-    }
     let pattern = new RegExp('<([^>]+?)>.+?rel="([^"]+?)"', 'g');
     let result;
     while (result = pattern.exec(headersLink)) {
@@ -253,8 +232,8 @@ export class CheFactory {
   }
 
   /**
-   * Ask for loading the factories page in asynchronous way
-   * If there are no changes, it's not updated
+   * Ask for loading the factories page in asynchronous way.
+   * If there are no changes, page info won't be updated.
    * @param pageKey - the key of page ('first', 'prev', 'next', 'last'  or '1', '2', '3' ...)
    * @returns {*} the promise
    */
@@ -278,7 +257,7 @@ export class CheFactory {
       pageNumber = this.pageInfo.countOfPages;
     }
     let pageData = this.factoryPagesMap.get(pageNumber);
-    if (pageData.link) {
+    if (pageData && pageData.link) {
       this.pageInfo.currentPageNumber = pageNumber;
       let queryData = this._getPageParamByLink(pageData.link);
       if (!queryData) {
@@ -316,23 +295,15 @@ export class CheFactory {
       });
     }
 
-    let resultPromise = deferred.promise.then((userId: string) => {
+    return deferred.promise.then((userId: string) => {
       queryData.userId = userId;
       return this.remoteFactoryAPI.getFactories(queryData).$promise.then((data: any) => {
         return this._updateFactoriesDetails(data.factories).then((factoriesDetails: any) => {
           data.factories = factoriesDetails;
           return this.$q.when(data);
-        }, (error: any) => {
-          return this.$q.reject(error);
         });
-      }, (error: any) => {
-        return this.$q.reject(error);
       });
-    }, (error: any) => {
-      return this.$q.reject(error);
     });
-
-    return resultPromise;
   }
 
   _updateFactoriesDetails(factories: Array<any>): ng.IPromise<any> {
@@ -526,13 +497,11 @@ export class CheFactory {
    * @returns {Array<string>} links acceptance links
    */
   detectLinks(factory: che.IFactory): Array<string> {
-    let links = [];
-
-    if (!factory || !factory.links) {
+    const links = [];
+    if (!factory || !angular.isArray(factory.links)) {
       return links;
     }
-
-    this.lodash.find(factory.links, (link: any) => {
+    factory.links.forEach((link: any) => {
       if (link.rel === 'accept' || link.rel === 'accept-named') {
         links.push(link.href);
       }
@@ -567,18 +536,15 @@ export class CheFactory {
    * @returns {ng.IPromise<any>} the promise
    */
   setFactory(factory: che.IFactory): ng.IPromise<any> {
-    let deferred = this.$q.defer();
-    // check factory
+    const deferred = this.$q.defer();
     if (!factory || !factory.id) {
       deferred.reject({data: {message: 'Read factory error.'}});
       return deferred.promise;
     }
 
-    let promise = this.remoteFactoryAPI.updateFactory({factoryId: factory.id}, factory).$promise;
-    // check if was OK or not
-    promise.then((factory: any) => {
+    this.remoteFactoryAPI.updateFactory({factoryId: factory.id}, factory).$promise.then((factory: any) => {
       factory.name = factory.name ? factory.name : '';
-      this.fetchFactoryPage(this.pageInfo.currentPageNumber);
+      this.fetchFactoryPage(this.pageInfo.currentPageNumber.toString());
       deferred.resolve(factory);
     }, (error: any) => {
       deferred.reject(error);
@@ -594,14 +560,14 @@ export class CheFactory {
    * @returns {ng.IPromise<any>} the promise
    */
   setFactoryContent(factoryId: string, factoryContent: any): ng.IPromise<any> {
-    let deferred = this.$q.defer();
-    let promise = this.remoteFactoryAPI.updateFactory({factoryId: factoryId}, factoryContent).$promise;
+    const deferred = this.$q.defer();
+    const promise = this.remoteFactoryAPI.updateFactory({factoryId: factoryId}, factoryContent).$promise;
 
     promise.then(() => {
       let fetchFactoryPromise = this.fetchFactoryById(factoryId);
       // check if was OK or not
       fetchFactoryPromise.then((factory: any) => {
-        this.fetchFactoryPage(this.pageInfo.currentPageNumber);
+        this.fetchFactoryPage(this.pageInfo.currentPageNumber.toString());
         deferred.resolve(factory);
       }, (error: any) => {
         deferred.reject(error);
@@ -619,26 +585,11 @@ export class CheFactory {
    * @returns {ng.IPromise<any>} the promise
    */
   deleteFactoryById(factoryId: string): ng.IPromise<any> {
-    let promise = this.remoteFactoryAPI.delete({factoryId: factoryId}).$promise;
-    // check if was OK or not
+    const promise = this.remoteFactoryAPI.delete({factoryId: factoryId}).$promise;
+
     return promise.then(() => {
       this.factoriesById.delete(factoryId);
-      if (this.pageInfo && this.pageInfo.currentPageNumber) {
-        this.fetchFactoryPage(this.pageInfo.currentPageNumber);
-      }
     });
-  }
-
-  /**
-   * Helper method that extract the factory ID from a factory URL
-   * @param factoryURL the factory URL to analyze
-   * @returns the stringified ID of a factory
-   */
-  getIDFromFactoryAPIURL(factoryURL: string): string {
-    let index = factoryURL.lastIndexOf('/factory/');
-    if (index > 0) {
-      return factoryURL.slice(index + '/factory/'.length, factoryURL.length);
-    }
   }
 
   /**
@@ -646,10 +597,10 @@ export class CheFactory {
    * @returns {link.href|*} link value
    */
   getFactoryIdUrl(factory: che.IFactory): string {
-    let link = this.lodash.find(factory.links, (link: any) => {
+    const link = this.lodash.find(factory.links, (link: any) => {
       return 'accept' === link.rel;
     });
-    return link ? link.href : 'No value';
+    return link ? link.href : '';
   }
 
   /**
@@ -658,10 +609,9 @@ export class CheFactory {
    * @returns {link.href|*} link value
    */
   getFactoryNamedUrl(factory: che.IFactory): string {
-    let link = this.lodash.find(factory.links, (link: any) => {
+    const link = this.lodash.find(factory.links, (link: any) => {
       return 'accept-named' === link.rel;
     });
-
-    return link ? link.href : null;
+    return link ? link.href : '';
   }
 }

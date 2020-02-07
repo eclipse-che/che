@@ -229,7 +229,7 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
 
     String isPublic = attributes.remove(PUBLIC_ENDPOINT_ATTRIBUTE);
     if ("false".equals(isPublic)) {
-      attributes.put(ServerConfig.INTERNAL_SERVER_ATTRIBUTE, "true");
+      ServerConfig.setInternal(attributes, true);
     }
 
     return new ServerConfigImpl(Integer.toString(endpoint.getPort()), protocol, path, attributes);
