@@ -80,6 +80,7 @@ initVariables() {
     PRODUCT_PORT=8080
     INCLUDE_TESTS_UNDER_REPAIR=false
     INCLUDE_FLAKY_TESTS=false
+    FAIL_SCRIPT_ON_FAILED_TESTS=false
 
     unset DEBUG_OPTIONS
     unset MAVEN_OPTIONS
@@ -87,6 +88,7 @@ initVariables() {
     unset ORIGIN_TESTS_SCOPE
     unset TMP_DIR
     unset EXCLUDE_PARAM
+    unset TOTAL_FAILS
 }
 
 cleanUpEnvironment() {
@@ -153,6 +155,7 @@ checkParameters() {
         elif [[ "$var" =~ --exclude=.* ]]; then :
         elif [[ "$var" =~ --include-tests-under-repair ]]; then :
         elif [[ "$var" =~ --include-flaky-tests ]]; then :
+        elif [[ "$var" =~ --fail-script-on-failed-tests ]]; then :
 
         else
             printHelp
@@ -218,6 +221,9 @@ applyCustomOptions() {
 
         elif [[ "$var" == --include-flaky-tests ]]; then
             INCLUDE_FLAKY_TESTS=true
+
+        elif [[ "$var" == --fail-script-on-failed-tests ]]; then
+            FAIL_SCRIPT_ON_FAILED_TESTS=true
 
         fi
     done
@@ -422,6 +428,7 @@ Handle failing tests:
                                         Default attempts number is 1.
     --compare-with-ci [BUILD NUMBER]    Compare failed tests with results on CI server.
                                         Default build is the latest.
+    --fail-script-on-failed-tests       Fail webdriver.sh if tests failed.
 
 Other options:
     --debug                             Run tests in debug mode
@@ -598,15 +605,15 @@ analyseTestsResults() {
     local run=$(fetchRunTestsNumber)
     local runToDisplay=$(printf "%7s" "${run}")
     local fails=$(fetchFailedTests)
-    local totalFails=$(echo ${fails[@]} | wc -w)
-    local totalFailsToDisplay=$(printf "%5s" "${totalFails}")
+    TOTAL_FAILS=$(echo ${fails[@]} | wc -w)
+    local totalFailsToDisplay=$(printf "%5s" "${TOTAL_FAILS}")
 
     echo "[TEST] Local results:"
     echo -e "[TEST] \t- Run: \t${runToDisplay}"
     echo -e "[TEST] \t- Failed: ${totalFailsToDisplay}"
 
     if [[ ${COMPARE_WITH_CI} == true ]]; then
-        if [[ ! ${totalFails} -eq 0 ]]; then
+        if [[ ! ${TOTAL_FAILS} -eq 0 ]]; then
             for r in $(echo ${fails[@]} | tr ' ' '\n' | sort)
             do
                 echo -e "[TEST] \t"${r}
@@ -632,7 +639,7 @@ analyseTestsResults() {
         local totalRegressions=$(echo ${regressions[@]} | wc -w)
         if [[ ${totalRegressions} -eq 0 ]]; then
             echo -e -n "[TEST] "${GREEN}"NO REGRESSION! "${NO_COLOUR}
-            if [[ ! ${totalFails} -eq 0 ]]; then
+            if [[ ! ${TOTAL_FAILS} -eq 0 ]]; then
                 echo -e ${RED}"CHECK THE FAILED TESTS. THEY MIGHT FAIL DUE TO DIFFERENT REASON."${NO_COLOUR}
             else
                 echo -e ${GREEN}"NO FAILED TESTS, GREAT JOB!"${NO_COLOUR}
@@ -982,3 +989,7 @@ run() {
 }
 
 run "$@"
+
+if [[ ${TOTAL_FAILS} -ne 0 && ${FAIL_SCRIPT_ON_FAILED_TESTS} == true ]]; then
+    exit 1
+fi
