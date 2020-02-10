@@ -10,11 +10,12 @@
 import axios from 'axios';
 import querystring from 'querystring';
 import { injectable } from 'inversify';
-import { TestConstants } from '../TestConstants';
+import { TestConstants } from '../../../TestConstants';
+import { ITokenHandler } from './ITokenHandler';
 
 @injectable()
-export class TokenHandler {
-    async getCheBearerToken(): Promise<string> {
+export class CheMultiuserTokenHandler implements ITokenHandler {
+    async get(): Promise<string> {
         let params = {};
 
         let keycloakUrl = TestConstants.TS_SELENIUM_BASE_URL;

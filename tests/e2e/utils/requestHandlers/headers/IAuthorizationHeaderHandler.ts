@@ -10,8 +10,6 @@
 
 import { AxiosRequestConfig } from 'axios';
 
-export interface IHeaderHandler {
-    getHeaders() : Promise<AxiosRequestConfig> ;
+export interface IAuthorizationHeaderHandler {
+    get(): Promise<AxiosRequestConfig>;
 }
-
-

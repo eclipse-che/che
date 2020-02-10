@@ -8,15 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { IHeaderHandler } from './IHeaderHandler';
-import { injectable } from 'inversify';
 
-@injectable()
-export class SingleUserHeaderHandler implements IHeaderHandler {
-    async getHeaders() {
-        // no headers needs to be set to single user
-        return {};
-    }
+export interface ITokenHandler {
+    get(): Promise<string>;
 }
-
-
