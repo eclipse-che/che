@@ -37,10 +37,10 @@ public class CheContainer {
   @JsonProperty("memoryRequest")
   private String memoryRequest = null;
 
-  @JsonProperty("CPULimit")
+  @JsonProperty("cpuLimit")
   private String cpuLimit = null;
 
-  @JsonProperty("CPURequest")
+  @JsonProperty("cpuRequest")
   private String cpuRequest = null;
 
   @JsonProperty("mountSources")

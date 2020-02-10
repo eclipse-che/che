@@ -141,7 +141,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
             .setRoutes(routes)
             .build();
 
-    //addRamAttributes(osEnv.getMachines(), osEnv.getPodsData().values());
+    // addRamAttributes(osEnv.getMachines(), osEnv.getPodsData().values());
 
     envValidator.validate(osEnv);
 
@@ -208,21 +208,22 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
     }
   }
 
-//  @VisibleForTesting
-//  void addRamAttributes(Map<String, InternalMachineConfig> machines, Collection<PodData> pods) {
-//    for (PodData pod : pods) {
-//      for (Container container : pod.getSpec().getContainers()) {
-//        final String machineName = Names.machineName(pod, container);
-//        InternalMachineConfig machineConfig;
-//        if ((machineConfig = machines.get(machineName)) == null) {
-//          machineConfig = new InternalMachineConfig();
-//          machines.put(machineName, machineConfig);
-//        }
-//        resourceLimitAttributesProvisioner.provision(
-//            machineConfig, Containers.getRamLimit(container), Containers.getRamRequest(container));
-//      }
-//    }
-//  }
+  //  @VisibleForTesting
+  //  void addRamAttributes(Map<String, InternalMachineConfig> machines, Collection<PodData> pods) {
+  //    for (PodData pod : pods) {
+  //      for (Container container : pod.getSpec().getContainers()) {
+  //        final String machineName = Names.machineName(pod, container);
+  //        InternalMachineConfig machineConfig;
+  //        if ((machineConfig = machines.get(machineName)) == null) {
+  //          machineConfig = new InternalMachineConfig();
+  //          machines.put(machineName, machineConfig);
+  //        }
+  //        resourceLimitAttributesProvisioner.provision(
+  //            machineConfig, Containers.getRamLimit(container),
+  // Containers.getRamRequest(container));
+  //      }
+  //    }
+  //  }
 
   private void checkNotNull(Object object, String errorMessage) throws ValidationException {
     if (object == null) {
