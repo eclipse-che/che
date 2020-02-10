@@ -430,7 +430,6 @@
                                 <dep>com.h2database:h2</dep>
                                 <dep>org.eclipse.che.core:che-core-db-vendor-mysql</dep>
                                 <dep>org.eclipse.che.core:che-core-sql-schema</dep>
-                                <dep>org.eclipse.che.core:che-core-api-auth-openshift</dep>
                                 <dep>org.eclipse.che.core:che-core-api-ssh-shared</dep>
                                 <dep>org.eclipse.che.multiuser:che-multiuser-sql-schema</dep>
                                 <dep>org.jgroups:jgroups</dep>

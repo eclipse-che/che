@@ -13,15 +13,13 @@ package org.eclipse.che.security.oauth;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
-import org.eclipse.che.inject.DynaModule;
 
 /**
  * Setup OpenShiftOAuthAuthenticator in guice container.
  *
  * @author Igor Vinokur
  */
-@DynaModule
-public class OpenShiftModule extends AbstractModule {
+public class OpenShiftOAuthModule extends AbstractModule {
   @Override
   protected void configure() {
     Multibinder<OAuthAuthenticator> oAuthAuthenticators =
