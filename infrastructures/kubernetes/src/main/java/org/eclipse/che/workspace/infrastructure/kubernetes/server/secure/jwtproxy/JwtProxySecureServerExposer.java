@@ -13,13 +13,16 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.assistedinject.Assisted;
+import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
+import java.util.Collection;
 import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyProvisionerFactory;
@@ -61,8 +64,18 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
   }
 
   @Override
+  public Service createService(
+      Collection<ServicePort> allSecurePorts,
+      PodData pod,
+      String machineName,
+      Map<String, ? extends ServerConfig> secureServers) {
+    return null;
+  }
+
+  @Override
   public void expose(
       T k8sEnv,
+      PodData pod,
       String machineName,
       String serviceName,
       String serverId,
@@ -73,6 +86,7 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
     ServicePort exposedServicePort =
         proxyProvisioner.expose(
             k8sEnv,
+            pod,
             machineName,
             serviceName,
             servicePort,

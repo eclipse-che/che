@@ -57,6 +57,7 @@ import org.eclipse.che.multiuser.machine.authentication.server.signature.Signatu
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManagerException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ServerServiceBuilder;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
@@ -150,6 +151,7 @@ public class JwtProxyProvisioner {
    * Modifies Kubernetes environment to expose the specified service port via JWTProxy.
    *
    * @param k8sEnv Kubernetes environment to modify
+   * @param pod the pod that runs the server being exposed
    * @param backendServiceName service name that will be exposed
    * @param backendServicePort service port that will be exposed
    * @param protocol protocol that will be used for exposed port
@@ -159,6 +161,7 @@ public class JwtProxyProvisioner {
    */
   public ServicePort expose(
       KubernetesEnvironment k8sEnv,
+      PodData pod,
       String machineName,
       String backendServiceName,
       ServicePort backendServicePort,
@@ -167,7 +170,7 @@ public class JwtProxyProvisioner {
       throws InfrastructureException {
     Preconditions.checkArgument(
         secureServers != null && !secureServers.isEmpty(), "Secure servers are missing");
-    ensureJwtProxyInjected(k8sEnv, machineName);
+    ensureJwtProxyInjected(k8sEnv, machineName, pod);
 
     Set<String> excludes = new HashSet<>();
     Boolean cookiesAuthEnabled = null;
@@ -203,6 +206,11 @@ public class JwtProxyProvisioner {
 
     k8sEnv.getServices().get(serviceName).getSpec().getPorts().add(exposedPort);
 
+    // secure servers should not be exposed through services, but only on localhost
+    // We're making an attempt to expose such servers securely because jwt proxy is colocated
+    // in the same pod (it is just an injectable pod). This will of course not work if the server
+    // in the pod doesn't listen on 127.0.0.1.
+    backendServiceName = backendServiceName == null ? "127.0.0.1" : backendServiceName;
     proxyConfigBuilder.addVerifierProxy(
         listenPort,
         "http://" + backendServiceName + ":" + backendServicePort.getTargetPort().getIntVal(),
@@ -230,12 +238,12 @@ public class JwtProxyProvisioner {
     return "jwtproxy-config";
   }
 
-  private void ensureJwtProxyInjected(KubernetesEnvironment k8sEnv, String machineName)
+  private void ensureJwtProxyInjected(KubernetesEnvironment k8sEnv, String machineName, PodData pod)
       throws InfrastructureException {
     if (!k8sEnv.getMachines().containsKey(JWT_PROXY_MACHINE_NAME)) {
       k8sEnv.getMachines().put(JWT_PROXY_MACHINE_NAME, createJwtProxyMachine());
       Pod jwtProxyPod = createJwtProxyPod();
-      k8sEnv.addInjectablePod(machineName, jwtProxyPod);
+      k8sEnv.addInjectablePod(machineName, JWT_PROXY_MACHINE_NAME, jwtProxyPod);
 
       KeyPair keyPair;
       try {
@@ -266,7 +274,9 @@ public class JwtProxyProvisioner {
       Service jwtProxyService =
           new ServerServiceBuilder()
               .withName(serviceName)
-              .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, JWT_PROXY_MACHINE_NAME)
+              // we're merely injecting the pod, so we need a selector that is going to hit the
+              // pod that runs the server that we're exposing
+              .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
               .withMachineName(JWT_PROXY_MACHINE_NAME)
               .withPorts(emptyList())
               .build();

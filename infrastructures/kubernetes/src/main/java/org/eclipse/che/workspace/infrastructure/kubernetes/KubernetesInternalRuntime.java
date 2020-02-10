@@ -682,7 +682,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     final String workspaceId = getContext().getIdentity().getWorkspaceId();
     LOG.debug("Begin pods creation for workspace '{}'", workspaceId);
     PodMerger podMerger = new PodMerger();
-    Map<String, Pod> injectablePods = environment.getInjectablePodsCopy();
+    Map<String, Map<String, Pod>> injectablePods = environment.getInjectablePodsCopy();
     for (Pod toCreate : environment.getPodsCopy().values()) {
       ObjectMeta toCreateMeta = toCreate.getMetadata();
       List<PodData> injectables = getAllInjectablePods(toCreate, injectablePods);
@@ -739,18 +739,22 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     LOG.debug("Pods creation finished in workspace '{}'", workspaceId);
   }
 
-  private List<PodData> getAllInjectablePods(Pod podToCreate, Map<String, Pod> injectables) {
+  private List<PodData> getAllInjectablePods(
+      Pod podToCreate, Map<String, Map<String, Pod>> injectables) {
     return getAllInjectablePods(
         podToCreate.getMetadata(), podToCreate.getSpec().getContainers(), injectables);
   }
 
   private List<PodData> getAllInjectablePods(
-      ObjectMeta toCreateMeta, List<Container> toCreateContainers, Map<String, Pod> injectables) {
+      ObjectMeta toCreateMeta,
+      List<Container> toCreateContainers,
+      Map<String, Map<String, Pod>> injectables) {
     Set<String> machinesInPod = getMachineNames(toCreateMeta, toCreateContainers);
     return machinesInPod
         .stream()
         .map(injectables::get)
         .filter(Objects::nonNull)
+        .flatMap(m -> m.values().stream())
         .map(PodData::new)
         .collect(toCollection(ArrayList::new));
   }

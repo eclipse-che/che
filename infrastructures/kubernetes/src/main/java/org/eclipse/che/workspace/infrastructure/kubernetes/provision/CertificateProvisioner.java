@@ -30,6 +30,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
 
 /**
  * Mount configured self-signed certificate as file in each workspace machines if configured.
@@ -83,6 +84,10 @@ public class CertificateProvisioner implements ConfigurationProvisioner<Kubernet
                 .build());
 
     for (PodData pod : k8sEnv.getPodsData().values()) {
+      if (pod.getRole() == PodRole.INJECTABLE) {
+        continue;
+      }
+
       Optional<Volume> certVolume =
           pod.getSpec()
               .getVolumes()

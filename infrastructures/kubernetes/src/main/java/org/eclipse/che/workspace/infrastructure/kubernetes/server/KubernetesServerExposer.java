@@ -25,12 +25,9 @@ import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -175,57 +172,89 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
     Map<String, ServerConfig> internalServers = new HashMap<>();
     Map<String, ServerConfig> externalServers = new HashMap<>();
     Map<String, ServerConfig> secureServers = new HashMap<>();
+    Map<String, ServicePort> servicePorts = new HashMap<>();
+    Map<String, ServicePort> securePorts = new HashMap<>();
 
     servers.forEach(
         (key, value) -> {
+          ServicePort sp = getServicePort(value);
+          exposeInContainerIfNeeded(sp);
           if (value.isInternal()) {
             // Server is internal. It doesn't make sense to make an it secure since
             // it is available only within workspace servers
             internalServers.put(key, value);
+            servicePorts.put(value.getPort(), sp);
           } else {
             // Server is external. Check if it should be secure or not
             if (value.isSecure()) {
               secureServers.put(key, value);
+              securePorts.put(value.getPort(), sp);
             } else {
               externalServers.put(key, value);
+              servicePorts.put(value.getPort(), sp);
             }
           }
         });
 
-    Collection<ServicePort> servicePorts = exposePorts(servers.values());
-    Service service =
-        new ServerServiceBuilder()
-            .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
-            .withMachineName(machineName)
-            .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
-            .withPorts(new ArrayList<>(servicePorts))
-            .withServers(internalServers)
-            .build();
+    Map<String, ServerConfig> allNonSecureServers = new HashMap<>(internalServers);
+    allNonSecureServers.putAll(externalServers);
+    // only explicitly expose the service for the non-secure servers
+    if (!servicePorts.isEmpty()) {
+      Service service =
+          new ServerServiceBuilder()
+              .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
+              .withMachineName(machineName)
+              .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
+              .withPorts(new ArrayList<>(servicePorts.values()))
+              .withServers(allNonSecureServers)
+              .build();
 
-    String serviceName = service.getMetadata().getName();
-    k8sEnv.getServices().put(serviceName, service);
+      String serviceName = service.getMetadata().getName();
+      k8sEnv.getServices().put(serviceName, service);
 
-    for (ServicePort servicePort : servicePorts) {
-      // expose service port related external servers if exist
-      Map<String, ServerConfig> matchedExternalServers = match(externalServers, servicePort);
-      if (!matchedExternalServers.isEmpty()) {
-        onEachExposableServerSet(
-            matchedExternalServers,
-            (serverId, srvrs) -> {
-              externalServerExposer.expose(
-                  k8sEnv, machineName, serviceName, serverId, servicePort, srvrs);
-            });
+      for (ServicePort servicePort : servicePorts.values()) {
+        // expose service port related external servers if exist
+        Map<String, ServerConfig> matchedExternalServers = match(externalServers, servicePort);
+        if (!matchedExternalServers.isEmpty()) {
+          onEachExposableServerSet(
+              matchedExternalServers,
+              (serverId, srvrs) -> {
+                externalServerExposer.expose(
+                    k8sEnv, machineName, serviceName, serverId, servicePort, srvrs);
+              });
+        }
+      }
+    }
+
+    if (!secureServers.isEmpty()) {
+      Service secureService =
+          secureServerExposer.createService(securePorts.values(), pod, machineName, secureServers);
+
+      String secureServiceName;
+      if (secureService == null) {
+        secureServiceName = null;
+      } else {
+        secureServiceName = secureService.getMetadata().getName();
+        k8sEnv.getServices().put(secureServiceName, secureService);
       }
 
-      // expose service port related secure servers if exist
-      Map<String, ServerConfig> matchedSecureServers = match(secureServers, servicePort);
-      if (!matchedSecureServers.isEmpty()) {
-        onEachExposableServerSet(
-            matchedSecureServers,
-            (serverId, srvrs) -> {
-              secureServerExposer.expose(
-                  k8sEnv, machineName, serviceName, serverId, servicePort, matchedSecureServers);
-            });
+      for (ServicePort servicePort : securePorts.values()) {
+        // expose service port related secure servers if exist
+        Map<String, ServerConfig> matchedSecureServers = match(secureServers, servicePort);
+        if (!matchedSecureServers.isEmpty()) {
+          onEachExposableServerSet(
+              matchedSecureServers,
+              (serverId, srvrs) -> {
+                secureServerExposer.expose(
+                    k8sEnv,
+                    pod,
+                    machineName,
+                    secureServiceName,
+                    serverId,
+                    servicePort,
+                    matchedSecureServers);
+              });
+        }
       }
     }
   }
@@ -240,41 +269,37 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
         .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
-  private Collection<ServicePort> exposePorts(Collection<? extends ServerConfig> serverConfig) {
-    Map<String, ServicePort> exposedPorts = new HashMap<>();
-    Set<String> portsToExpose =
-        serverConfig.stream().map(ServerConfig::getPort).collect(Collectors.toSet());
+  private ServicePort getServicePort(ServerConfig serverConfig) {
+    String[] portProtocol = serverConfig.getPort().split("/");
+    int port = parseInt(portProtocol[0]);
+    String protocol = portProtocol.length > 1 ? portProtocol[1].toUpperCase() : "TCP";
+    return new ServicePortBuilder()
+        .withName("server-" + port)
+        .withPort(port)
+        .withProtocol(protocol)
+        .withNewTargetPort(port)
+        .build();
+  }
 
-    for (String portToExpose : portsToExpose) {
-      String[] portProtocol = portToExpose.split("/");
-      int port = parseInt(portProtocol[0]);
-      String protocol = portProtocol.length > 1 ? portProtocol[1].toUpperCase() : "TCP";
-      Optional<ContainerPort> exposedOpt =
-          container
-              .getPorts()
-              .stream()
-              .filter(p -> p.getContainerPort().equals(port) && protocol.equals(p.getProtocol()))
-              .findAny();
+  private void exposeInContainerIfNeeded(ServicePort servicePort) {
+    Optional<ContainerPort> exposedOpt =
+        container
+            .getPorts()
+            .stream()
+            .filter(
+                p ->
+                    p.getContainerPort().equals(servicePort.getPort())
+                        && servicePort.getProtocol().equals(p.getProtocol()))
+            .findAny();
 
-      ContainerPort containerPort;
-      if (exposedOpt.isPresent()) {
-        containerPort = exposedOpt.get();
-      } else {
-        containerPort =
-            new ContainerPortBuilder().withContainerPort(port).withProtocol(protocol).build();
-        container.getPorts().add(containerPort);
-      }
-
-      exposedPorts.put(
-          portToExpose,
-          new ServicePortBuilder()
-              .withName("server-" + containerPort.getContainerPort())
-              .withPort(containerPort.getContainerPort())
-              .withProtocol(protocol)
-              .withNewTargetPort(containerPort.getContainerPort())
-              .build());
+    if (!exposedOpt.isPresent()) {
+      ContainerPort containerPort =
+          new ContainerPortBuilder()
+              .withContainerPort(servicePort.getPort())
+              .withProtocol(servicePort.getProtocol())
+              .build();
+      container.getPorts().add(containerPort);
     }
-    return exposedPorts.values();
   }
 
   @FunctionalInterface
