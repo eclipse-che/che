@@ -127,14 +127,14 @@ public class AbstractExhaustibleResourceTest {
     }
   }
 
-  @Test(expectedExceptions = IllegalArgumentException.class, dataProvider = "getResources")
+  @Test(expectedExceptions = IllegalArgumentException.class, dataProvider = "resources")
   public void
       shouldThrowIllegalArgumentExceptionWhenOneOfResourcesHasUnsupportedTypeOrUnitOnResourcesAggregation(
           ResourceImpl resourceA, ResourceImpl resourceB) {
     resourceType.aggregate(resourceA, resourceB);
   }
 
-  @Test(expectedExceptions = IllegalArgumentException.class, dataProvider = "getResources")
+  @Test(expectedExceptions = IllegalArgumentException.class, dataProvider = "resources")
   public void
       shouldThrowIllegalArgumentExceptionWhenOneOfResourcesHasUnsupportedTypeOrUnitOnResourcesDeduction(
           ResourceImpl resourceA, ResourceImpl resourceB) {
