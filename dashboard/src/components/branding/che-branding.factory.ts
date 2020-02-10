@@ -41,6 +41,7 @@ interface IBrandingDocs {
   organization?: string;
   general?: string;
   converting?: string;
+  faq?: string;
 }
 interface IBrandingWorkspace {
   priorityStacks?: Array<string>;
@@ -60,6 +61,14 @@ interface IBrandingConfiguration {
     cheCDN: string;
     resources: string[];
   };
+  features: {
+    disabled: TogglableFeature[];
+  };
+}
+
+export enum TogglableFeature {
+  WORKSPACE_SHARING = 'workspaceSharing',
+  KUBERNETES_NAMESPACE_SELECTOR = 'kubernetesNamespaceSelector',
 }
 
 const ASSET_PREFIX = 'assets/branding/';
@@ -321,7 +330,8 @@ export class CheBranding {
       factory: this.branding.docs && this.branding.docs.factory ? this.branding.docs.factory : DEFAULT_DOCS_FACTORY,
       organization: this.branding.docs && this.branding.docs.organization ? this.branding.docs.organization : DEFAULT_DOCS_ORGANIZATION,
       general: this.branding.docs && this.branding.docs.general ? this.branding.docs.general : DEFAULT_DOCS_GENERAL,
-      converting: this.branding.docs && this.branding.docs.converting ? this.branding.docs.converting : DEFAULT_DOCS_CONVERTING
+      converting: this.branding.docs && this.branding.docs.converting ? this.branding.docs.converting : DEFAULT_DOCS_CONVERTING,
+      faq: this.branding.docs && this.branding.docs.faq ? this.branding.docs.faq : undefined
     };
   }
 
@@ -344,8 +354,16 @@ export class CheBranding {
       menu: {
         disabled:
           this.branding.configuration &&
-          this.branding.configuration.menu && this.branding.configuration.menu.disabled
+            this.branding.configuration.menu && this.branding.configuration.menu.disabled
             ? this.branding.configuration.menu.disabled
+            : []
+      },
+      features: {
+        disabled:
+          this.branding.configuration &&
+            this.branding.configuration.features &&
+            this.branding.configuration.features.disabled
+            ? this.branding.configuration.features.disabled
             : []
       },
       prefetch: {
