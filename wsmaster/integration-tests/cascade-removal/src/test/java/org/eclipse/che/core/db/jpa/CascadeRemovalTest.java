@@ -110,8 +110,10 @@ import org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.inject.lifecycle.InitModule;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.BeforeKubernetesRuntimeStateRemovedEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeCommandImpl;
@@ -167,6 +169,7 @@ public class CascadeRemovalTest {
   private SshPairImpl sshPair2;
 
   private KubernetesRuntimeState k8sRuntimeState;
+  private KubernetesRuntimeState k8sRuntimeState2;
 
   private H2DBTestServer server;
 
@@ -348,6 +351,28 @@ public class CascadeRemovalTest {
     };
   }
 
+  @Test
+  public void shouldRollbackTransactionWhenFailedToRemoveMachinesDuringRuntimeRemoving()
+      throws Exception {
+    createTestData();
+    JpaKubernetesMachineCache.RemoveKubernetesMachinesBeforeRuntimesRemoved instance =
+        injector.getInstance(
+            JpaKubernetesMachineCache.RemoveKubernetesMachinesBeforeRuntimesRemoved.class);
+    eventService.unsubscribe(instance, BeforeKubernetesRuntimeStateRemovedEvent.class);
+    // Remove the user, all entries must be rolled back after fail
+    try {
+      k8sRuntimes.remove(k8sRuntimeState.getRuntimeId());
+      fail("k8sRuntimes#remove had to throw exception");
+    } catch (Exception ignored) {
+    }
+    try {
+      assertNotNull(k8sRuntimes.get(k8sRuntimeState.getRuntimeId()));
+    } finally {
+      eventService.subscribe(instance, BeforeKubernetesRuntimeStateRemovedEvent.class);
+      wipeTestData();
+    }
+  }
+
   @Test(dataProvider = "beforeAccountRemoveRollbackActions")
   public void shouldRollbackTransactionWhenFailedToRemoveAnyOfEntriesDuringAccountRemoving(
       Class<CascadeEventSubscriber<CascadeEvent>> subscriberClass, Class<CascadeEvent> eventClass)
@@ -395,9 +420,12 @@ public class CascadeRemovalTest {
     sshDao.create(sshPair2 = createSshPair(user.getId(), "service", "name2"));
 
     k8sRuntimes.putIfAbsent(k8sRuntimeState = createK8sRuntimeState(workspace1.getId()));
+    k8sRuntimes.putIfAbsent(k8sRuntimeState2 = createK8sRuntimeState(workspace2.getId()));
 
     k8sMachines.put(
         k8sRuntimeState.getRuntimeId(), TestObjectsFactory.createK8sMachine(k8sRuntimeState));
+    k8sMachines.put(
+        k8sRuntimeState2.getRuntimeId(), TestObjectsFactory.createK8sMachine(k8sRuntimeState2));
   }
 
   private void wipeTestData() throws Exception {
@@ -409,6 +437,8 @@ public class CascadeRemovalTest {
 
     k8sMachines.remove(k8sRuntimeState.getRuntimeId());
     k8sRuntimes.remove(k8sRuntimeState.getRuntimeId());
+
+    k8sRuntimes.remove(k8sRuntimeState2.getRuntimeId());
 
     workspaceDao.remove(workspace1.getId());
     workspaceDao.remove(workspace2.getId());

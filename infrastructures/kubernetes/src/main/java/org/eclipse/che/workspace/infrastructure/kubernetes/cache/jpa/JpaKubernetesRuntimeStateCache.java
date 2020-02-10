@@ -179,7 +179,7 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
     }
   }
 
-  @Transactional
+  @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
   protected void doRemove(RuntimeIdentity runtimeIdentity) throws ServerException {
     EntityManager em = managerProvider.get();
 
