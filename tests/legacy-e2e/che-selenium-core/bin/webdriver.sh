@@ -88,6 +88,7 @@ initVariables() {
     unset ORIGIN_TESTS_SCOPE
     unset TMP_DIR
     unset EXCLUDE_PARAM
+    unset TOTAL_FAILS
 }
 
 cleanUpEnvironment() {
@@ -604,15 +605,15 @@ analyseTestsResults() {
     local run=$(fetchRunTestsNumber)
     local runToDisplay=$(printf "%7s" "${run}")
     local fails=$(fetchFailedTests)
-    local totalFails=$(echo ${fails[@]} | wc -w)
-    local totalFailsToDisplay=$(printf "%5s" "${totalFails}")
+    TOTAL_FAILS=$(echo ${fails[@]} | wc -w)
+    local totalFailsToDisplay=$(printf "%5s" "${TOTAL_FAILS}")
 
     echo "[TEST] Local results:"
     echo -e "[TEST] \t- Run: \t${runToDisplay}"
     echo -e "[TEST] \t- Failed: ${totalFailsToDisplay}"
 
     if [[ ${COMPARE_WITH_CI} == true ]]; then
-        if [[ ! ${totalFails} -eq 0 ]]; then
+        if [[ ! ${TOTAL_FAILS} -eq 0 ]]; then
             for r in $(echo ${fails[@]} | tr ' ' '\n' | sort)
             do
                 echo -e "[TEST] \t"${r}
@@ -638,7 +639,7 @@ analyseTestsResults() {
         local totalRegressions=$(echo ${regressions[@]} | wc -w)
         if [[ ${totalRegressions} -eq 0 ]]; then
             echo -e -n "[TEST] "${GREEN}"NO REGRESSION! "${NO_COLOUR}
-            if [[ ! ${totalFails} -eq 0 ]]; then
+            if [[ ! ${TOTAL_FAILS} -eq 0 ]]; then
                 echo -e ${RED}"CHECK THE FAILED TESTS. THEY MIGHT FAIL DUE TO DIFFERENT REASON."${NO_COLOUR}
             else
                 echo -e ${GREEN}"NO FAILED TESTS, GREAT JOB!"${NO_COLOUR}
@@ -655,10 +656,6 @@ analyseTestsResults() {
 
     echo "[TEST]"
     echo "[TEST]"
-
-    if [[ ${totalFails} -ne 0 && ${FAIL_SCRIPT_ON_FAILED_TESTS} == true ]]; then
-        exit 1
-    fi
 }
 
 printProposals() {
@@ -992,3 +989,7 @@ run() {
 }
 
 run "$@"
+
+if [[ ${TOTAL_FAILS} -ne 0 && ${FAIL_SCRIPT_ON_FAILED_TESTS} == true ]]; then
+    exit 1
+fi
