@@ -31,28 +31,26 @@ import org.eclipse.che.security.oauth.shared.User;
  */
 @Singleton
 public class OpenShiftOAuthAuthenticator extends OAuthAuthenticator {
-  private final String openshiftEndpoint;
+  private final String verifyTokenUrl;
 
   @Inject
   public OpenShiftOAuthAuthenticator(
       @Nullable @Named("che.oauth.openshift.clientid") String clientId,
       @Nullable @Named("che.oauth.openshift.clientsecret") String clientSecret,
-      @Nullable @Named("che.oauth.openshift.endpoint") String openshiftEndpoint,
+      @Nullable @Named("che.oauth.openshift.oauth_endpoint") String oauthEndpoint,
+      @Nullable @Named("che.oauth.openshift.verify_token_url") String verifyTokenUrl,
       @Named("che.api") String apiEndpoint)
       throws IOException {
-    openshiftEndpoint =
-        openshiftEndpoint.endsWith("/") ? openshiftEndpoint : openshiftEndpoint + "/";
-    this.openshiftEndpoint = openshiftEndpoint;
+    this.verifyTokenUrl = verifyTokenUrl;
     String[] redirectUrl = {apiEndpoint + "/oauth/callback"};
-    if (!isNullOrEmpty(clientId)
-        && !isNullOrEmpty(clientSecret)
-        && !isNullOrEmpty(openshiftEndpoint)) {
+    if (!isNullOrEmpty(clientId) && !isNullOrEmpty(clientSecret) && !isNullOrEmpty(oauthEndpoint)) {
+      oauthEndpoint = oauthEndpoint.endsWith("/") ? oauthEndpoint : oauthEndpoint + "/";
       configure(
           clientId,
           clientSecret,
           redirectUrl,
-          openshiftEndpoint + "oauth/authorize",
-          openshiftEndpoint + "oauth/token",
+          oauthEndpoint + "oauth/authorize",
+          oauthEndpoint + "oauth/token",
           new MemoryDataStoreFactory());
     }
   }
@@ -72,10 +70,9 @@ public class OpenShiftOAuthAuthenticator extends OAuthAuthenticator {
     final OAuthToken token = super.getToken(userId);
     // Check if the token is valid for requests.
     if (!(token == null || token.getToken() == null || token.getToken().isEmpty())) {
-      String tokenVerifyUrl = this.openshiftEndpoint + "oapi/v1/projects";
       HttpURLConnection http = null;
       try {
-        http = (HttpURLConnection) new URL(tokenVerifyUrl).openConnection();
+        http = (HttpURLConnection) new URL(verifyTokenUrl).openConnection();
         http.setInstanceFollowRedirects(false);
         http.setRequestMethod("GET");
         http.setRequestProperty("Authorization", "Bearer " + token.getToken());

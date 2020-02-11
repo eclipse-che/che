@@ -144,8 +144,10 @@ objects:
             value: "${CHE_OAUTH_OPENSHIFT_CLIENTID}"
           - name: CHE_OAUTH_OPENSHIFT_CLIENTSECRET
             value: "${CHE_OAUTH_OPENSHIFT_CLIENTSECRET}"
-          - name: CHE_OAUTH_OPENSHIFT_ENDPOINT
-            value: "${CHE_OAUTH_OPENSHIFT_ENDPOINT}"
+          - name: CHE_OAUTH_OPENSHIFT_OAUTH__ENDPOINT
+            value: "${CHE_OAUTH_OPENSHIFT_OAUTH__ENDPOINT}"
+          - name: CHE_OAUTH_OPENSHIFT_VERIFY__TOKEN__URL
+            value: "${CHE_OAUTH_OPENSHIFT_VERIFY__TOKEN__URL}"
           - name: JAVA_OPTS
             value: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10
               -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
@@ -357,9 +359,13 @@ parameters:
   displayName: OpenShift Client Secret
   description: OpenShift OAuth app client secret. Applicable to Che single user only!
   value: ''
-- name: CHE_OAUTH_OPENSHIFT_ENDPOINT
-  displayName: OpenShift endpoint
-  description: OpenShift endpoint. Applicable to Che single user only!
+- name: CHE_OAUTH_OPENSHIFT_OAUTH__ENDPOINT
+  displayName: OpenShift oauth endpoint
+  description: OpenShift oauth endpoint. Applicable to Che single user only!
+  value: ''
+- name: CHE_OAUTH_OPENSHIFT_VERIFY__TOKEN__URL
+  displayName: OpenShift verify token url
+  description: A url that requests some OpenShift resource. Is used to verify the OpenShift token. Applicable to Che single user only!
   value: ''
 - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
   displayName: Eclipse Che plugin registry URL
