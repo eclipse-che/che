@@ -51,13 +51,11 @@ import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.extensions.IngressBuilder;
-import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
-import org.eclipse.che.api.workspace.server.spi.environment.ResourceLimitAttributesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.mockito.Mock;
@@ -84,19 +82,14 @@ public class KubernetesEnvironmentFactoryTest {
   @Mock private InternalRecipe internalRecipe;
   @Mock private InternalMachineConfig machineConfig1;
   @Mock private InternalMachineConfig machineConfig2;
-  @Mock private ResourceLimitAttributesProvisioner memoryProvisioner;
   @Mock private KubernetesRecipeParser k8sRecipeParser;
   @Mock private PodMerger podMerger;
-
-  private Map<String, InternalMachineConfig> machines;
 
   @BeforeMethod
   public void setup() throws Exception {
     k8sEnvFactory =
-        new KubernetesEnvironmentFactory(
-            null, null, k8sRecipeParser, k8sEnvValidator, memoryProvisioner, podMerger);
+        new KubernetesEnvironmentFactory(null, null, k8sRecipeParser, k8sEnvValidator, podMerger);
     lenient().when(internalEnvironment.getRecipe()).thenReturn(internalRecipe);
-    machines = ImmutableMap.of(MACHINE_NAME_1, machineConfig1, MACHINE_NAME_2, machineConfig2);
   }
 
   @Test
@@ -434,27 +427,6 @@ public class KubernetesEnvironmentFactoryTest {
 
     k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }
-
-  //  @Test
-  //  public void testProvisionRamAttributesIsInvoked() {
-  //    final long firstMachineRamLimit = 3072;
-  //    final long firstMachineRamRequest = 1536;
-  //    final long secondMachineRamLimit = 1024;
-  //    final long secondMachineRamRequest = 512;
-  //    when(machineConfig1.getAttributes()).thenReturn(new HashMap<>());
-  //    when(machineConfig2.getAttributes()).thenReturn(new HashMap<>());
-  //    final Set<PodData> pods =
-  //        ImmutableSet.of(
-  //            createPodData(MACHINE_NAME_1, firstMachineRamLimit, firstMachineRamRequest),
-  //            createPodData(MACHINE_NAME_2, secondMachineRamLimit, secondMachineRamRequest));
-  //
-  //    k8sEnvFactory.addRamAttributes(machines, pods);
-  //
-  //    verify(memoryProvisioner)
-  //        .provision(eq(machineConfig1), eq(firstMachineRamLimit), eq(firstMachineRamRequest));
-  //    verify(memoryProvisioner)
-  //        .provision(eq(machineConfig2), eq(secondMachineRamLimit), eq(secondMachineRamRequest));
-  //  }
 
   private static PodData createPodData(String machineName, long ramLimit, long ramRequest) {
     final String containerName = "container_" + machineName;

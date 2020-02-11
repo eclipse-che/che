@@ -53,7 +53,6 @@ import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
-import org.eclipse.che.api.workspace.server.spi.environment.ResourceLimitAttributesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
@@ -73,7 +72,6 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class OpenShiftEnvironmentFactoryTest {
 
-  private static final long BYTES_IN_MB = 1024 * 1024;
   private static final String MACHINE_NAME_1 = "machine1";
   private static final String MACHINE_NAME_2 = "machine2";
 
@@ -83,7 +81,6 @@ public class OpenShiftEnvironmentFactoryTest {
   @Mock private InternalRecipe internalRecipe;
   @Mock private InternalMachineConfig machineConfig1;
   @Mock private InternalMachineConfig machineConfig2;
-  @Mock private ResourceLimitAttributesProvisioner memoryProvisioner;
   @Mock private KubernetesRecipeParser k8sRecipeParser;
   @Mock private PodMerger podMerger;
 
@@ -93,7 +90,7 @@ public class OpenShiftEnvironmentFactoryTest {
   public void setup() throws Exception {
     osEnvFactory =
         new OpenShiftEnvironmentFactory(
-            null, null, openShiftEnvValidator, k8sRecipeParser, memoryProvisioner, podMerger);
+            null, null, openShiftEnvValidator, k8sRecipeParser, podMerger);
     machines = ImmutableMap.of(MACHINE_NAME_1, machineConfig1, MACHINE_NAME_2, machineConfig2);
   }
 
@@ -430,27 +427,6 @@ public class OpenShiftEnvironmentFactoryTest {
 
     osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }
-
-  //  @Test
-  //  public void testProvisionRamAttributesIsInvoked() {
-  //    final long firstMachineRamLimit = 3072 * BYTES_IN_MB;
-  //    final long secondMachineRamLimit = 1024 * BYTES_IN_MB;
-  //    final long firstMachineRamRequest = 1536 * BYTES_IN_MB;
-  //    final long secondMachineRamRequest = 512 * BYTES_IN_MB;
-  //    when(machineConfig1.getAttributes()).thenReturn(new HashMap<>());
-  //    when(machineConfig2.getAttributes()).thenReturn(new HashMap<>());
-  //    final Set<PodData> pods =
-  //        ImmutableSet.of(
-  //            createPodData(MACHINE_NAME_1, firstMachineRamLimit, firstMachineRamRequest),
-  //            createPodData(MACHINE_NAME_2, secondMachineRamLimit, secondMachineRamRequest));
-  //
-  //    osEnvFactory.addRamAttributes(machines, pods);
-  //
-  //    verify(memoryProvisioner)
-  //        .provision(eq(machineConfig1), eq(firstMachineRamLimit), eq(firstMachineRamRequest));
-  //    verify(memoryProvisioner)
-  //        .provision(eq(machineConfig2), eq(secondMachineRamLimit), eq(secondMachineRamRequest));
-  //  }
 
   /** If provided {@code ramLimit} is {@code null} ram limit won't be set in POD */
   private static PodData createPodData(String machineName, Long ramLimit, Long ramRequest) {

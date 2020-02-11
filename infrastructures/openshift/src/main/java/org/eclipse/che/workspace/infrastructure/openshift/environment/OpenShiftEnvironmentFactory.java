@@ -40,7 +40,6 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
-import org.eclipse.che.api.workspace.server.spi.environment.ResourceLimitAttributesProvisioner;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
@@ -55,7 +54,6 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
 
   private final OpenShiftEnvironmentValidator envValidator;
   private final KubernetesRecipeParser k8sObjectsParser;
-  private final ResourceLimitAttributesProvisioner resourceLimitAttributesProvisioner;
   private final PodMerger podMerger;
 
   @Inject
@@ -64,12 +62,10 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       MachineConfigsValidator machinesValidator,
       OpenShiftEnvironmentValidator envValidator,
       KubernetesRecipeParser k8sObjectsParser,
-      ResourceLimitAttributesProvisioner resourceLimitAttributesProvisioner,
       PodMerger podMerger) {
     super(recipeRetriever, machinesValidator);
     this.envValidator = envValidator;
     this.k8sObjectsParser = k8sObjectsParser;
-    this.resourceLimitAttributesProvisioner = resourceLimitAttributesProvisioner;
     this.podMerger = podMerger;
   }
 
@@ -141,8 +137,6 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
             .setRoutes(routes)
             .build();
 
-    // addRamAttributes(osEnv.getMachines(), osEnv.getPodsData().values());
-
     envValidator.validate(osEnv);
 
     return osEnv;
@@ -207,23 +201,6 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
               "Environment can not contain two '%s' objects with the same name '%s'", kind, name));
     }
   }
-
-  //  @VisibleForTesting
-  //  void addRamAttributes(Map<String, InternalMachineConfig> machines, Collection<PodData> pods) {
-  //    for (PodData pod : pods) {
-  //      for (Container container : pod.getSpec().getContainers()) {
-  //        final String machineName = Names.machineName(pod, container);
-  //        InternalMachineConfig machineConfig;
-  //        if ((machineConfig = machines.get(machineName)) == null) {
-  //          machineConfig = new InternalMachineConfig();
-  //          machines.put(machineName, machineConfig);
-  //        }
-  //        resourceLimitAttributesProvisioner.provision(
-  //            machineConfig, Containers.getRamLimit(container),
-  // Containers.getRamRequest(container));
-  //      }
-  //    }
-  //  }
 
   private void checkNotNull(Object object, String errorMessage) throws ValidationException {
     if (object == null) {

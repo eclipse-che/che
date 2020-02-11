@@ -40,7 +40,6 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
-import org.eclipse.che.api.workspace.server.spi.environment.ResourceLimitAttributesProvisioner;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
@@ -55,7 +54,6 @@ public class KubernetesEnvironmentFactory
 
   private final KubernetesRecipeParser recipeParser;
   private final KubernetesEnvironmentValidator envValidator;
-  private final ResourceLimitAttributesProvisioner memoryProvisioner;
   private final PodMerger podMerger;
 
   @Inject
@@ -64,12 +62,10 @@ public class KubernetesEnvironmentFactory
       MachineConfigsValidator machinesValidator,
       KubernetesRecipeParser recipeParser,
       KubernetesEnvironmentValidator envValidator,
-      ResourceLimitAttributesProvisioner memoryProvisioner,
       PodMerger podMerger) {
     super(recipeRetriever, machinesValidator);
     this.recipeParser = recipeParser;
     this.envValidator = envValidator;
-    this.memoryProvisioner = memoryProvisioner;
     this.podMerger = podMerger;
   }
 
@@ -146,8 +142,6 @@ public class KubernetesEnvironmentFactory
             .setConfigMaps(configMaps)
             .build();
 
-    // addRamAttributes(k8sEnv.getMachines(), k8sEnv.getPodsData().values());
-
     envValidator.validate(k8sEnv);
 
     return k8sEnv;
@@ -212,23 +206,6 @@ public class KubernetesEnvironmentFactory
               "Environment can not contain two '%s' objects with the same name '%s'", kind, name));
     }
   }
-
-  //  @VisibleForTesting
-  //  void addRamAttributes(Map<String, InternalMachineConfig> machines, Collection<PodData> pods) {
-  //    for (PodData pod : pods) {
-  //      for (Container container : pod.getSpec().getContainers()) {
-  //        final String machineName = Names.machineName(pod, container);
-  //        InternalMachineConfig machineConfig;
-  //        if ((machineConfig = machines.get(machineName)) == null) {
-  //          machineConfig = new InternalMachineConfig();
-  //          machines.put(machineName, machineConfig);
-  //        }
-  //        memoryProvisioner.provisionMemory(
-  //            machineConfig, Containers.getRamLimit(container),
-  // Containers.getRamRequest(container));
-  //      }
-  //    }
-  //  }
 
   private void checkNotNull(Object object, String errorMessage) throws ValidationException {
     if (object == null) {
