@@ -15,6 +15,7 @@ import io.fabric8.kubernetes.client.dsl.LogWatch;
 import java.io.IOException;
 
 public interface PodLogHandler {
+
   void handle(LogWatch log, String podName, String containerName)
       throws IOException;
 }

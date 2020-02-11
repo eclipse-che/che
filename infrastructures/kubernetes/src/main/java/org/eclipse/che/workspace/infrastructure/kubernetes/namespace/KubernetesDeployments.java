@@ -72,12 +72,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import okhttp3.Response;
+import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEventHandler;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatcher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.slf4j.Logger;
@@ -121,6 +123,7 @@ public class KubernetesDeployments {
   private Watch podWatch;
   private Watch containerWatch;
   private Date watcherInitializationDate;
+  private final List<LogWatcher> logWatchers = new ArrayList<>();
 
   protected KubernetesDeployments(
       String namespace, String workspaceId, KubernetesClientFactory clientFactory) {
@@ -590,73 +593,9 @@ public class KubernetesDeployments {
   }
 
   public void watchLogs(PodLogHandler handler) throws InfrastructureException {
-    KubernetesClient client = clientFactory.create(workspaceId);
-    watchEvents(
-        event -> {
-          String podName = event.getPodName();
-          String containerName = event.getContainerName();
-          String reason = event.getReason();
-          try {
-            if (!client.pods().inNamespace(namespace).withName(podName).isReady()) {
-              LOG.info("waiting for pod [{}] to became ready", podName);
-              client.pods().inNamespace(namespace).withName(podName)
-                  .waitUntilReady(30, TimeUnit.SECONDS);
-              LOG.info("it's ready now! [{}]", podName);
-            }
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
-
-          LOG.info("[{}][{}] reason [{}]", podName, containerName, reason);
-          if (containerName != null && "Started".equals(reason)) {
-            LOG.info("starting watchnig logs for [{}]:[{}]", podName, containerName);
-            try {
-              LogWatch log = client.pods().inNamespace(namespace).withName(podName).watchLog();
-              handler.handle(
-                  log,
-                  podName,
-                  containerName);
-            } catch (IOException e) {
-              throw new RuntimeException(e);
-            }
-          }
-
-          //        try {
-          //          //        "spec.containers{che-machine-execnlu}"
-          //          String c = involvedObject.getFieldPath();
-          //          if (c.startsWith("spec.containers{")) {
-          //            c = c.replace("spec.containers{", "");
-          //            c = c.replace("}", "");
-          //
-          //            LOG.info("watch [{}:{}] logs !!!", podName, c);
-          //
-          //            PrintStream print =
-          //                new PrintStream(
-          //                    "/home/mvala/tmp/eh_logs/"
-          //                        + Instant.now().toEpochMilli()
-          //                        + "_"
-          //                        + podName
-          //                        + ".log");
-          //            try (LogWatch watch =
-          //                client
-          //                    .pods()
-          //                    .inNamespace(namespace)
-          //                    .withName(podName)
-          //                    .inContainer(c)
-          //                    .withPrettyOutput()
-          //                    .watchLog(print)) {
-          //              if (watch.getOutput() != null) {
-          //                String message = IOUtils.toString(watch.getOutput(), UTF_8);
-          //                LOG.info("podddd[{}] ->> {}", podName, message);
-          //              } else {
-          //                LOG.info("hmmmmmmm null again");
-          //              }
-          //            }
-          //          }
-          //        } catch (InfrastructureException | IOException e) {
-          //          e.printStackTrace();
-          //        }
-        });
+    LogWatcher lw = new LogWatcher(clientFactory, workspaceId, namespace, handler);
+    logWatchers.add(lw);
+    watchEvents(lw);
   }
 
   /**
@@ -684,6 +623,15 @@ public class KubernetesDeployments {
           ex.getMessage());
     }
     containerEventsHandlers.clear();
+
+    for (LogWatcher lw : logWatchers) {
+      try {
+        lw.close();
+        logWatchers.remove(lw);
+      } catch (IOException ioe) {
+        LOG.error("failed to stop wathing log [{}]", lw, ioe);
+      }
+    }
   }
 
   /**
