@@ -19,7 +19,6 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,8 +51,8 @@ public class ResourceLimitAttributesProvisioner {
    */
   public static void provisionMemory(
       InternalMachineConfig machineConfig,
-      @Nullable long memoryLimit,
-      @Nullable long memoryRequest,
+      long memoryLimit,
+      long memoryRequest,
       long defaultMemoryLimit,
       long defaultMemoryRequest) {
     if (defaultMemoryRequest > defaultMemoryLimit) {
@@ -101,13 +100,13 @@ public class ResourceLimitAttributesProvisioner {
    */
   public static void provisionCPU(
       InternalMachineConfig machineConfig,
-      @Nullable float cpuLimit,
-      @Nullable float cpuRequest,
+      float cpuLimit,
+      float cpuRequest,
       float defaultCPULimit,
       float defaultCPURequest) {
     if (defaultCPURequest > defaultCPULimit) {
       defaultCPURequest = defaultCPULimit;
-      LOG.error(
+      LOG.warn(
           "Requested default container resource limit is less than default request. Request parameter will be ignored.");
     }
 
