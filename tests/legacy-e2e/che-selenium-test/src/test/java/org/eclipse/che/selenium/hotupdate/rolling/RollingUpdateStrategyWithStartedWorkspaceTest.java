@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.hotupdate.rolling;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
@@ -96,9 +95,8 @@ public class RollingUpdateStrategyWithStartedWorkspaceTest {
     // check that Che is updated
     assertTrue(
         hotUpdateUtil.getRolloutStatus().contains("deployment \"che\" successfully rolled out"));
-    assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
+    cheTestSystemClient.waitWorkspaceMasterStatus(60, 1, SystemStatus.RUNNING);
 
-    assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
     workspaces.waitWorkspaceIsPresent(WORKSPACE_NAME);
     workspaces.waitWorkspaceStatus(WORKSPACE_NAME, Workspaces.Status.RUNNING);
   }

@@ -82,7 +82,8 @@ public class RollingUpdateStrategyWithEditorTest {
     // check that che is updated
     assertTrue(
         hotUpdateUtil.getRolloutStatus().contains("deployment \"che\" successfully rolled out"));
-    assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
+    cheTestSystemClient.waitWorkspaceMasterStatus(60, 1, SystemStatus.RUNNING);
+
     // check that workspace is successfully migrated to the new master
     assertTrue(testWorkspaceServiceClient.exists(WORKSPACE_NAME, defaultTestUser.getName()));
 
