@@ -23,6 +23,7 @@ import org.eclipse.che.selenium.core.client.CheTestSystemClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.hotupdate.HotUpdateUtil;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
@@ -89,6 +90,10 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
     workspaces.waitWorkspaceStatus(STARTED_WORKSPACE_NAME, Workspaces.Status.STOPPED);
 
     hotUpdateUtil.executeMasterPodUpdateCommand();
+    // check that che is updated
+    assertTrue(
+        hotUpdateUtil.getRolloutStatus().contains("deployment \"che\" successfully rolled out"));
+    WaitUtils.sleepQuietly(60);
 
     // execute stop-start commands for existing workspaces
     assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
@@ -98,9 +103,5 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
     // wait successful results of the stop-start requests
     workspaces.waitWorkspaceStatus(STOPPED_WORKSPACE_NAME, Workspaces.Status.STOPPED);
     workspaces.waitWorkspaceStatus(STARTED_WORKSPACE_NAME, Workspaces.Status.RUNNING);
-
-    // check that che is updated
-    assertTrue(
-        hotUpdateUtil.getRolloutStatus().contains("deployment \"che\" successfully rolled out"));
   }
 }
