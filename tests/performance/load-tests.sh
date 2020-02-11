@@ -1,9 +1,10 @@
 #!/bin/bash
 set -e
 
-# set constants
+# set constants and defaults
 TIMESTAMP=$(date +%s)
 TEST_FOLDER=$(pwd)
+LOG_LEVEL="INFO"
 
 function printHelp {
   YELLOW="\\033[93;1m"
@@ -21,7 +22,8 @@ function printHelp {
   echo -e "-r    URL of Che"
   echo -e "-f    full path to folder ${NC} all reports will be saved in this folder"${WHITE}
   echo -e "-c    credential file ${NC} with usernames and passwords in *.csv format: \`user,pass\`"${WHITE}
-  echo -e "-t    count on how many times one user should run a workspace"${NC} 
+  echo -e "-t    count on how many times one user should run a workspace"
+  echo -e "-l    log level for test [ 'INFO' (default), 'DEBUG', 'TRACE' ]"${NC} 
 }
 
 oc whoami 1>/dev/null
@@ -31,8 +33,7 @@ if [ $? -gt 0 ] ; then
 fi
 
 echo "You are logged in OC: $(oc whoami -c)"
-
-while getopts "hu:p:r:n:f:i:c:t:" opt; do 
+while getopts "c:f:hi:l:n:p:r:t:u:" opt; do 
   case $opt in
     h) printHelp
       exit 0
@@ -42,6 +43,8 @@ while getopts "hu:p:r:n:f:i:c:t:" opt; do
     f) export FOLDER=$OPTARG
       ;;
     i) export TEST_IMAGE=$OPTARG
+      ;;
+    l) export LOG_LEVEL=$OPTARG
       ;;
     n) export USER_COUNT=$OPTARG
       ;;
@@ -146,6 +149,7 @@ sed -i "s/REPLACE_COMPLETITIONS/$COMPLETITIONS_COUNT/g" template.yaml
 sed -i "s/REPLACE_URL/\"$parsed_url\"/g" template.yaml
 sed -i "s/REPLACE_TIMESTAMP/\"$TIMESTAMP\"/g" template.yaml
 sed -i "s/REPLACE_IMAGE/\"$parsed_image\"/g" template.yaml
+sed -i "s/REPLACE_LOG_LEVEL/$LOG_LEVEL/g" template.yaml
 
 # ----------- RUNNING TEST ----------- #
 echo "-- Running pods with tests."
