@@ -57,7 +57,7 @@ public class ResourceLimitAttributesProvisioner {
       long defaultMemoryRequest) {
     if (defaultMemoryRequest > defaultMemoryLimit) {
       defaultMemoryRequest = defaultMemoryLimit;
-      LOG.error(
+      LOG.warn(
           "Requested default container resource limit is less than default request. Request parameter will be ignored.");
     }
 
