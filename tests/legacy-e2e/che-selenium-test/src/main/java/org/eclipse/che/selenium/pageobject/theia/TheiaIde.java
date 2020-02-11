@@ -64,7 +64,7 @@ public class TheiaIde {
     String NOTIFICATION_MESSAGE_EQUALS_TO_XPATH_TEMPLATE =
         "//div[@class='theia-notification-list-item']//div[@class='theia-notification-message']//span[text()='%s']";
     String NOTIFICATION_MESSAGE_CONTAINS_XPATH_TEMPLATE =
-        "//div[@class='theia-notification-list-item']//div[@class='theia-notification-message']//span[contains(text(), 'Che Workspace: Finished importing projects.')]";
+        "//div[@class='theia-notification-list-item']//div[@class='theia-notification-message']//span[contains(text(), '%s')]";
     String NOTIFICATION_CLOSE_BUTTON =
         "//div[@class='theia-notification-buttons']//button[@data-action='Close']";
     String NOTIFICATION_NUMBER =
