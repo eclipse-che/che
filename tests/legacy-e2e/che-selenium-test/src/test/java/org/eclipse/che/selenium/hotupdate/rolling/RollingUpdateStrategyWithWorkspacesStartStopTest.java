@@ -17,11 +17,11 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.util.Collections;
-import org.eclipse.che.api.system.shared.SystemStatus;
 import org.eclipse.che.selenium.core.client.CheTestSystemClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.hotupdate.HotUpdateUtil;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
@@ -91,7 +91,7 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
     // check that che is updated
     assertTrue(
         hotUpdateUtil.getRolloutStatus().contains("deployment \"che\" successfully rolled out"));
-    cheTestSystemClient.waitWorkspaceMasterStatus(60, 1, SystemStatus.RUNNING);
+    WaitUtils.sleepQuietly(60);
 
     // execute stop-start commands for existing workspaces
     workspaces.clickOnWorkspaceStopStartButton(STOPPED_WORKSPACE_NAME);

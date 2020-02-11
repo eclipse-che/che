@@ -24,6 +24,7 @@ import org.eclipse.che.selenium.core.client.CheTestSystemClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.hotupdate.HotUpdateUtil;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
@@ -82,7 +83,7 @@ public class RollingUpdateStrategyWithEditorTest {
     // check that che is updated
     assertTrue(
         hotUpdateUtil.getRolloutStatus().contains("deployment \"che\" successfully rolled out"));
-    cheTestSystemClient.waitWorkspaceMasterStatus(60, 1, SystemStatus.RUNNING);
+    WaitUtils.sleepQuietly(60);
 
     // check that workspace is successfully migrated to the new master
     assertTrue(testWorkspaceServiceClient.exists(WORKSPACE_NAME, defaultTestUser.getName()));
