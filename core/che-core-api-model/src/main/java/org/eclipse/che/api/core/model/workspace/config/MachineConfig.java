@@ -40,15 +40,15 @@ public interface MachineConfig {
 
   /**
    * Name of the attribute from {@link #getAttributes()} which if present defines CPU limit of the
-   * machine in millicores.
+   * machine in cores.
    */
-  String CPU_LIMIT_ATTRIBUTE = "cpuLimitMillicores";
+  String CPU_LIMIT_ATTRIBUTE = "cpuLimitCores";
 
   /**
    * Name of the attribute from {@link #getAttributes()} which if present defines requested CPU
-   * allocation of the machine in millicores.
+   * allocation of the machine in cores.
    */
-  String CPU_REQUEST_ATTRIBUTE = "cpuRequestMillicores";
+  String CPU_REQUEST_ATTRIBUTE = "cpuRequestCores";
 
   /**
    * Name of the attribute from {@link #getAttributes()} which, if present, defines the entrypoint
