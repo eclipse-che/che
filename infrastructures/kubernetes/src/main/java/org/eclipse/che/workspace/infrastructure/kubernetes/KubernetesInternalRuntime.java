@@ -28,9 +28,16 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import io.fabric8.kubernetes.client.dsl.LogWatch;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.CharBuffer;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -81,6 +88,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachi
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
@@ -598,6 +606,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     List<Ingress> readyIngresses = createIngresses(k8sEnv, workspaceId);
 
     listenEvents();
+//    watchLogs();
 
     final KubernetesServerResolver serverResolver =
         new KubernetesServerResolver(ingressPathTransformInverter, createdServices, readyIngresses);
@@ -620,8 +629,40 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     }
   }
 
+  protected void watchLogs() throws InfrastructureException {
+    namespace
+        .deployments()
+        .watchLogs(
+            new PodLogHandler() {
+              private final Logger LOG = LoggerFactory.getLogger(this.getClass());
+
+              @Override
+              public void handle(LogWatch log, String podName, String containerName) {
+                new Thread(
+                        () -> {
+                          LOG.info("start watchin log");
+                          try (BufferedReader in = new BufferedReader(new InputStreamReader(log.getOutput()))) {
+                            String line;
+                            while ((line = in.readLine()) != null) {
+                              LOG.info("[{}: {}] -> {}", podName, containerName, line);
+                              eventPublisher.sendRuntimeLogEvent(
+                                  String.format("[%s: %s] -> %s", podName, containerName, line),
+                                  ZonedDateTime.now().toString(),
+                                  getContext().getIdentity());
+                            }
+                            LOG.info("endehere, done, finito");
+                          } catch (IOException e) {
+                            e.printStackTrace();
+                          }
+                        })
+                    .start();
+              }
+            });
+  }
+
   @Traced
-  @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
+  @SuppressWarnings("WeakerAccess")
+  // package-private so that interception is possible
   void createSecrets(KubernetesEnvironment env, String workspaceId) throws InfrastructureException {
     TracingTags.WORKSPACE_ID.set(workspaceId);
     for (Secret secret : env.getSecrets().values()) {
