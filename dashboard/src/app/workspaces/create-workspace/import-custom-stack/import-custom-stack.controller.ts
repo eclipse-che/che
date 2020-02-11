@@ -17,6 +17,8 @@ import {RandomSvc} from '../../../../components/utils/random.service';
 import {NamespaceSelectorSvc} from '../ready-to-go-stacks/namespace-selector/namespace-selector.service';
 import { CheKubernetesNamespace } from '../../../../components/api/che-kubernetes-namespace.factory';
 import { CheWorkspace } from '../../../../components/api/workspace/che-workspace.factory';
+import { CheDashboardConfigurationService } from '../../../../components/branding/che-dashboard-configuration.service';
+import { TogglableFeature } from '../../../../components/branding/che-branding.factory';
 
 /**
  * This class is handling the controller for stack importing directive.
@@ -26,18 +28,18 @@ import { CheWorkspace } from '../../../../components/api/workspace/che-workspace
 export class ImportStackController implements IImportStackScopeBindings {
 
   static $inject = [
+    'cheDashboardConfigurationService',
     'cheKubernetesNamespace',
     'cheWorkspace',
     'createWorkspaceSvc',
     'namespaceSelectorSvc',
-    'randomSvc'
+    'randomSvc',
   ];
 
   onChange: IImportStackScopeOnChange;
-
   infrastructureNamespaceHint: string;
-
   ephemeralMode: boolean;
+  enabledKubernetesNamespaceSelector: boolean = false;
 
   /**
    * Kubernetes Namespace API interaction.
@@ -59,6 +61,10 @@ export class ImportStackController implements IImportStackScopeBindings {
    * Workspace creation service.
    */
   private createWorkspaceSvc: CreateWorkspaceSvc;
+  /**
+   * Dashboard configuration service.
+   */
+  private cheDashboardConfigurationService: CheDashboardConfigurationService;
   /**
    * The selected source for devfile importing(URL or YAML).
    */
@@ -88,12 +94,14 @@ export class ImportStackController implements IImportStackScopeBindings {
    * Default constructor that is using resource injection
    */
   constructor(
+    cheDashboardConfigurationService: CheDashboardConfigurationService,
     cheKubernetesNamespace: CheKubernetesNamespace,
     cheWorkspace: CheWorkspace,
     createWorkspaceSvc: CreateWorkspaceSvc,
     namespaceSelectorSvc: NamespaceSelectorSvc,
-    randomSvc: RandomSvc
+    randomSvc: RandomSvc,
   ) {
+    this.cheDashboardConfigurationService = cheDashboardConfigurationService;
     this.cheKubernetesNamespace = cheKubernetesNamespace;
     this.cheWorkspace = cheWorkspace;
     this.createWorkspaceSvc = createWorkspaceSvc;
@@ -105,6 +113,9 @@ export class ImportStackController implements IImportStackScopeBindings {
     this.cheKubernetesNamespace.fetchKubernetesNamespace().then(() => this.setInfrastructureNamespaceHint());
     this.cheWorkspace.fetchWorkspaceSettings().then((settings: che.IWorkspaceSettings) => {
       this.ephemeralMode = settings['che.workspace.persist_volumes.default'] === 'false';
+    });
+    this.cheDashboardConfigurationService.ready.then(() => {
+      this.enabledKubernetesNamespaceSelector = this.cheDashboardConfigurationService.enabledFeature(TogglableFeature.KUBERNETES_NAMESPACE_SELECTOR);
     });
   }
 
