@@ -64,9 +64,11 @@ public class TheiaIde {
     String NOTIFICATION_MESSAGE_EQUALS_TO_XPATH_TEMPLATE =
         "//div[@class='theia-notification-list-item']//div[@class='theia-notification-message']//span[text()='%s']";
     String NOTIFICATION_MESSAGE_CONTAINS_XPATH_TEMPLATE =
-        "//div[@class='theia-notification-list-item']//div[@class='theia-notification-message']//span[contains(text(), '%s')]";
+        "//div[@class='theia-notification-list-item']//div[@class='theia-notification-message']//span[contains(text(), 'Che Workspace: Finished importing projects.')]";
     String NOTIFICATION_CLOSE_BUTTON =
         "//div[@class='theia-notification-buttons']//button[@data-action='Close']";
+    String NOTIFICATION_NUMBER =
+        "//div[@id='theia-statusBar']//div[contains(@title,'%s Notifications')]";
     String BRANCH_NAME_XPATH = "//div[@id='theia-statusBar']//div[contains(@title,'Git')]";
   }
 
@@ -251,5 +253,10 @@ public class TheiaIde {
 
   public String getBranchName() {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(branchName, WIDGET_TIMEOUT_SEC);
+  }
+
+  public void waitNotificationsNumber(int number) {
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath(String.format(Locators.NOTIFICATION_NUMBER, number)), 60);
   }
 }

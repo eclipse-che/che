@@ -75,6 +75,7 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
     theiaIde.switchToIdeFrame();
     theiaIde.waitTheiaIde();
     theiaIde.waitLoaderInvisibility();
+    theiaIde.waitNotificationsNumber(3);
     theiaIde.waitAllNotificationsClosed();
 
     theiaProjectTree.waitFilesTab();

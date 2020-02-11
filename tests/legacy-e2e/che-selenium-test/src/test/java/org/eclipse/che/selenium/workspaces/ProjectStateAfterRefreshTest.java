@@ -70,6 +70,7 @@ public class ProjectStateAfterRefreshTest {
     theiaProjectTree.waitProjectAreaOpened();
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
     theiaIde.waitAllNotificationsClosed();
+    theiaIde.waitNotificationsNumber(3);
 
     openFilesInEditor();
     checkFilesAreOpened();

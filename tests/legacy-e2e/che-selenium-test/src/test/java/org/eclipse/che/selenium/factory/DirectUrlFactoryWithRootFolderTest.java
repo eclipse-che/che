@@ -97,6 +97,7 @@ public class DirectUrlFactoryWithRootFolderTest {
     theiaIde.waitTheiaIde();
     theiaIde.waitLoaderInvisibility();
     theiaIde.waitTheiaIdeTopPanel();
+    theiaIde.waitNotificationsNumber(3);
     theiaIde.waitAllNotificationsClosed();
 
     theiaProjectTree.waitFilesTab();

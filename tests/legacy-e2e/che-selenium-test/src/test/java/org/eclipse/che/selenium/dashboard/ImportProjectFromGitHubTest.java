@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GITHUB;
 import static org.testng.AssertJUnit.assertTrue;
@@ -121,6 +122,9 @@ public class ImportProjectFromGitHubTest {
     theiaIde.waitTheiaIde();
     theiaIde.waitLoaderInvisibility();
     theiaIde.waitTheiaIdeTopPanel();
+    theiaIde.waitNotificationsNumber(3);
+    theiaIde.waitNotificationDisappearance(
+        "Che Workspace: Finished importing projects.", UPDATING_PROJECT_TIMEOUT_SEC);
 
     // wait the project in the tree
     theiaProjectTree.clickOnFilesTab();
