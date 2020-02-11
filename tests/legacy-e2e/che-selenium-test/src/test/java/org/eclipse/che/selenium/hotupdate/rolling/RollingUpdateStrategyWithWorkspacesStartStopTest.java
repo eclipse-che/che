@@ -98,10 +98,8 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
     // execute stop-start commands for existing workspaces
     assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
     workspaces.clickOnWorkspaceStopStartButton(STOPPED_WORKSPACE_NAME);
-    workspaces.clickOnWorkspaceStopStartButton(STARTED_WORKSPACE_NAME);
-
-    // wait successful results of the stop-start requests
     workspaces.waitWorkspaceStatus(STOPPED_WORKSPACE_NAME, Workspaces.Status.STOPPED);
+    workspaces.clickOnWorkspaceStopStartButton(STARTED_WORKSPACE_NAME);
     workspaces.waitWorkspaceStatus(STARTED_WORKSPACE_NAME, Workspaces.Status.RUNNING);
   }
 }
