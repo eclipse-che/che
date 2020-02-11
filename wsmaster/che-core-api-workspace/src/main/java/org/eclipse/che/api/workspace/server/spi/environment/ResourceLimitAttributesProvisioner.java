@@ -77,13 +77,11 @@ public class ResourceLimitAttributesProvisioner {
     final Map<String, String> attributes = machineConfig.getAttributes();
     String configuredLimit = attributes.get(MEMORY_LIMIT_ATTRIBUTE);
     String configuredRequest = attributes.get(MEMORY_REQUEST_ATTRIBUTE);
-    if (isNullOrEmpty(configuredLimit) && isNullOrEmpty(configuredRequest)) {
+    if (isNullOrEmpty(configuredLimit)) {
       attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(memoryLimit));
+    }
+    if (isNullOrEmpty(configuredRequest)) {
       attributes.put(MEMORY_REQUEST_ATTRIBUTE, String.valueOf(memoryRequest));
-    } else if (isNullOrEmpty(configuredLimit)) {
-      attributes.put(MEMORY_LIMIT_ATTRIBUTE, configuredRequest);
-    } else if (isNullOrEmpty(configuredRequest)) {
-      attributes.put(MEMORY_REQUEST_ATTRIBUTE, configuredLimit);
     }
   }
 
@@ -128,13 +126,11 @@ public class ResourceLimitAttributesProvisioner {
     final Map<String, String> attributes = machineConfig.getAttributes();
     String configuredLimit = attributes.get(CPU_LIMIT_ATTRIBUTE);
     String configuredRequest = attributes.get(CPU_REQUEST_ATTRIBUTE);
-    if (isNullOrEmpty(configuredLimit) && isNullOrEmpty(configuredRequest)) {
+    if (isNullOrEmpty(configuredLimit)) {
       attributes.put(CPU_LIMIT_ATTRIBUTE, Float.toString(cpuLimit));
+    }
+    if (isNullOrEmpty(configuredRequest)) {
       attributes.put(CPU_REQUEST_ATTRIBUTE, Float.toString(cpuRequest));
-    } else if (isNullOrEmpty(configuredLimit)) {
-      attributes.put(CPU_LIMIT_ATTRIBUTE, configuredRequest);
-    } else if (isNullOrEmpty(configuredRequest)) {
-      attributes.put(CPU_REQUEST_ATTRIBUTE, configuredLimit);
     }
   }
 }

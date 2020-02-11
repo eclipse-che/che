@@ -126,7 +126,8 @@ public class ResourceLimitAttributesProvisionerTest {
     ResourceLimitAttributesProvisioner.provisionMemory(
         machineConfig, recipeLimit, recipeRequest, defaultMemoryLimit, defaultMemoryRequest);
 
-    assertEquals(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), String.valueOf(512L));
+    assertEquals(
+        machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), String.valueOf(recipeLimit));
     assertEquals(machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE), String.valueOf(512L));
   }
 
@@ -145,7 +146,8 @@ public class ResourceLimitAttributesProvisionerTest {
 
     assertEquals(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), String.valueOf(1526L));
     assertEquals(
-        machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE), String.valueOf(1526L));
+        machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE),
+        String.valueOf(defaultMemoryRequest));
   }
 
   @Test
@@ -248,14 +250,14 @@ public class ResourceLimitAttributesProvisionerTest {
 
   @Test
   public void testWhenCPUAttributesArePresentInMachineConfigValuesInRecipeAreIgnored() {
-    float defaultCPULimit = 0.2f;
-    float defaultCPURequest = 0.5f;
+    float defaultCPULimit = 0.5f;
+    float defaultCPURequest = 0.2f;
     InternalMachineConfig machineConfig =
         mockInternalMachineConfig(
             ImmutableMap.of(CPU_LIMIT_ATTRIBUTE, "0.512", CPU_REQUEST_ATTRIBUTE, "0.152"));
 
-    float recipeLimit = 0.3f;
-    float recipeRequest = 0.6f;
+    float recipeLimit = 0.6f;
+    float recipeRequest = 0.3f;
     ResourceLimitAttributesProvisioner.provisionCPU(
         machineConfig, recipeLimit, recipeRequest, defaultCPULimit, defaultCPURequest);
 
@@ -265,42 +267,44 @@ public class ResourceLimitAttributesProvisionerTest {
 
   @Test
   public void testWhenCPURequestAttributeIsPresentInMachineConfigValuesInRecipeAreIgnored() {
-    float defaultCPULimit = 0.2f;
-    float defaultCPURequest = 0.5f;
+    float defaultCPULimit = 0.5f;
+    float defaultCPURequest = 0.2f;
     Map<String, String> attributes = new HashMap<>();
     attributes.put(CPU_REQUEST_ATTRIBUTE, "0.512");
     InternalMachineConfig machineConfig = mockInternalMachineConfig(attributes);
 
-    float recipeLimit = 0.3f;
-    float recipeRequest = 0.6f;
+    float recipeLimit = 0.6f;
+    float recipeRequest = 0.3f;
     ResourceLimitAttributesProvisioner.provisionCPU(
         machineConfig, recipeLimit, recipeRequest, defaultCPULimit, defaultCPURequest);
 
-    assertEquals(machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), String.valueOf(0.512f));
+    assertEquals(
+        machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), String.valueOf(recipeLimit));
     assertEquals(machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE), String.valueOf(0.512f));
   }
 
   @Test
   public void testWhenCPULimitAttributeIsPresentInMachineConfigValuesInRecipeAreIgnored() {
-    float defaultCPULimit = 0.2f;
-    float defaultCPURequest = 0.5f;
+    float defaultCPULimit = 0.5f;
+    float defaultCPURequest = 0.2f;
     Map<String, String> attributes = new HashMap<>();
     attributes.put(CPU_LIMIT_ATTRIBUTE, "0.152");
     InternalMachineConfig machineConfig = mockInternalMachineConfig(attributes);
 
-    float recipeLimit = 0.3f;
-    float recipeRequest = 0.6f;
+    float recipeLimit = 0.6f;
+    float recipeRequest = 0.3f;
     ResourceLimitAttributesProvisioner.provisionCPU(
         machineConfig, recipeLimit, recipeRequest, defaultCPULimit, defaultCPURequest);
 
     assertEquals(machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), String.valueOf(0.152f));
-    assertEquals(machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE), String.valueOf(0.152f));
+    assertEquals(
+        machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE), String.valueOf(recipeRequest));
   }
 
   @Test
   public void testWhenCPUAttributesAreNotPresentInMachineConfigAndOnlyRequestIsProvidedInRecipe() {
-    float defaultCPULimit = 0.2f;
-    float defaultCPURequest = 0.5f;
+    float defaultCPULimit = 0.5f;
+    float defaultCPURequest = 0.2f;
     InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
 
     float recipeRequest = 0.1526f;
@@ -315,8 +319,8 @@ public class ResourceLimitAttributesProvisionerTest {
 
   @Test
   public void testWhenCPUAttributesAreNotPresentInMachineConfigAndOnlyLimitIsProvidedInRecipe() {
-    float defaultCPULimit = 0.2f;
-    float defaultCPURequest = 0.5f;
+    float defaultCPULimit = 0.5f;
+    float defaultCPURequest = 0.2f;
     InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
 
     float recipeLimit = 0.152f;
