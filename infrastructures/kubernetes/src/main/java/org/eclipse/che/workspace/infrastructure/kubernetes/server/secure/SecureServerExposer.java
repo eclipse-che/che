@@ -67,8 +67,8 @@ public interface SecureServerExposer<T extends KubernetesEnvironment> {
       T k8sEnv,
       PodData pod,
       String machineName,
-      String serviceName,
-      String serverId,
+      @Nullable String serviceName,
+      @Nullable String serverId,
       ServicePort servicePort,
       Map<String, ServerConfig> secureServers)
       throws InfrastructureException;

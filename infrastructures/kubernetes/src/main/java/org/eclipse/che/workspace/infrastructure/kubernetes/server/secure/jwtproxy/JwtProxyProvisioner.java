@@ -206,10 +206,15 @@ public class JwtProxyProvisioner {
 
     k8sEnv.getServices().get(serviceName).getSpec().getPorts().add(exposedPort);
 
-    // secure servers should not be exposed through services, but only on localhost
-    // We're making an attempt to expose such servers securely because jwt proxy is colocated
-    // in the same pod (it is just an injectable pod). This will of course not work if the server
-    // in the pod doesn't listen on 127.0.0.1.
+    // JwtProxySecureServerExposer creates no service for the exposed secure servers and
+    // assumes everything will be proxied from localhost, because JWT proxy is collocated
+    // with the workspace pod (because it is added to the environment as an injectable pod).
+    // This method historically supported proxying secure servers exposed through a service
+    // (which is not secure in absence of a appropriate network policy). The support for
+    // accessing the backend server through a service was kept here because it doesn't add
+    // any additional complexity to this method and keeps the door open for the
+    // JwtProxySecureServerExposer to be enhanced in the future with support for service-handled
+    // secure servers.
     backendServiceName = backendServiceName == null ? "127.0.0.1" : backendServiceName;
     proxyConfigBuilder.addVerifierProxy(
         listenPort,
@@ -289,7 +294,7 @@ public class JwtProxyProvisioner {
   }
 
   private Pod createJwtProxyPod() {
-    String containerName = Names.generateName("verifier");
+    String containerName = Names.generateName("che-jwtproxy");
     return new PodBuilder()
         .withNewMetadata()
         .withName(JWT_PROXY_POD_NAME)

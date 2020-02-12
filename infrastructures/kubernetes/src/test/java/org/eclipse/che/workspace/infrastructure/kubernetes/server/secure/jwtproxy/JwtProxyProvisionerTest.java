@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_UNIQUE_PART_SIZE;
@@ -23,6 +24,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -266,7 +268,40 @@ public class JwtProxyProvisionerTest {
         ImmutableMap.of("server1", server1));
 
     // then
-    verify(configBuilder).addVerifierProxy(any(), any(), any(), eq(false), any(), any());
+    verify(configBuilder)
+        .addVerifierProxy(
+            eq(4400), eq("http://terminal:4401"), eq(emptySet()), eq(false), eq("/"), isNull());
+  }
+
+  @Test
+  public void shouldBindToLocalhostWhenNoServiceForServerExists() throws Exception {
+    // given
+    JwtProxyConfigBuilder configBuilder = mock(JwtProxyConfigBuilder.class);
+    when(configBuilderFactory.create(any())).thenReturn(configBuilder);
+
+    jwtProxyProvisioner =
+        new JwtProxyProvisioner(
+            signatureKeyManager,
+            configBuilderFactory,
+            externalServiceExposureStrategy,
+            cookiePathStrategy,
+            "eclipse/che-jwtproxy",
+            "128mb",
+            runtimeId);
+
+    ServerConfigImpl server1 = new ServerConfigImpl("4401/tcp", "http", "/", emptyMap());
+
+    ServicePort port = new ServicePort();
+    port.setTargetPort(new IntOrString(4401));
+
+    // when
+    jwtProxyProvisioner.expose(
+        k8sEnv, podWithName(), "machine", null, port, "TCP", ImmutableMap.of("server1", server1));
+
+    // then
+    verify(configBuilder)
+        .addVerifierProxy(
+            eq(4400), eq("http://127.0.0.1:4401"), eq(emptySet()), eq(false), eq("/"), isNull());
   }
 
   private static PodData podWithName() {

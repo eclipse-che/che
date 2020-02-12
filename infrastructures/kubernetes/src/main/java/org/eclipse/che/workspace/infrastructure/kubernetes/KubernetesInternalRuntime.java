@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
-import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.CHECK_SERVERS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_MACHINES_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_RUNNING_ASYNC;
@@ -37,6 +37,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -753,10 +754,19 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     return machinesInPod
         .stream()
         .map(injectables::get)
+        // we're only intersted in pods for which we require injection
         .filter(Objects::nonNull)
-        .flatMap(m -> m.values().stream())
+        // now reduce to a map keyed by injected pod name so that if 2 pods require injection
+        // of the same thing, we don't inject twice
+        .flatMap(m -> m.entrySet().stream())
+        // collect to map, ignoring duplicate entries
+        .collect(toMap(Entry::getKey, Entry::getValue, (v1, v2) -> v1))
+        // ok, we only have 1 injectable pod keyed by their names, so let's just get them all
+        // and return as list
+        .values()
+        .stream()
         .map(PodData::new)
-        .collect(toCollection(ArrayList::new));
+        .collect(Collectors.toList());
   }
 
   private Set<String> getMachineNames(ObjectMeta podMeta, List<Container> containers) {

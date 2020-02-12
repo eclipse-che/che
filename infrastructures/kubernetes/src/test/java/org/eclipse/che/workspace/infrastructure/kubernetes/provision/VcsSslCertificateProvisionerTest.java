@@ -138,6 +138,44 @@ public class VcsSslCertificateProvisionerTest {
     }
   }
 
+  @Test
+  public void shouldNotAddVolumeButAddVolumeMountsToInjectablePods() throws Exception {
+    k8sEnv.addPod(createPod("pod"));
+    k8sEnv.addInjectablePod("r", "i", createPod("pod2"));
+
+    provisioner.provision(k8sEnv, runtimeId);
+
+    for (Pod pod : k8sEnv.getPodsCopy().values()) {
+      verifyVolumeIsPresent(pod);
+
+      for (Container container : pod.getSpec().getInitContainers()) {
+        verifyVolumeMountIsPresent(container);
+      }
+
+      for (Container container : pod.getSpec().getContainers()) {
+        verifyVolumeMountIsPresent(container);
+      }
+    }
+
+    for (Pod pod :
+        k8sEnv
+            .getInjectablePodsCopy()
+            .values()
+            .stream()
+            .flatMap(v -> v.values().stream())
+            .toArray(Pod[]::new)) {
+      assertTrue(pod.getSpec().getVolumes().isEmpty());
+
+      for (Container container : pod.getSpec().getInitContainers()) {
+        verifyVolumeMountIsPresent(container);
+      }
+
+      for (Container container : pod.getSpec().getContainers()) {
+        verifyVolumeMountIsPresent(container);
+      }
+    }
+  }
+
   private void verifyVolumeIsPresent(Pod pod) {
     List<Volume> podVolumes = pod.getSpec().getVolumes();
     assertEquals(podVolumes.size(), 1);

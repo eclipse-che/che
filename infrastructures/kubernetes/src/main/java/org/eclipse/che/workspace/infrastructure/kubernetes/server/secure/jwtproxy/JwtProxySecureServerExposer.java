@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
@@ -77,8 +78,8 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
       T k8sEnv,
       PodData pod,
       String machineName,
-      String serviceName,
-      String serverId,
+      @Nullable String serviceName,
+      @Nullable String serverId,
       ServicePort servicePort,
       Map<String, ServerConfig> secureServers)
       throws InfrastructureException {
