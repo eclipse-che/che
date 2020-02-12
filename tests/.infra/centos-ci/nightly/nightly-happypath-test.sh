@@ -21,4 +21,3 @@ deployCheIntoCluster
 createTestUserAndObtainUserToken
 createTestWorkspaceAndRunTest
 archiveArtifacts "che-nightly-happy-path"
-
