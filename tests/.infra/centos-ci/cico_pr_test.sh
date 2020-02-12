@@ -64,4 +64,4 @@ saveSeleniumTestResult
 getOpenshiftLogs
 archiveArtifacts "che-pullrequests-test-temporary"
 
-[[ $IS_TESTS_FAILED == true ]] && exit 1
+if [ "$IS_TESTS_FAILED" == "true" ]; then { echo >&2 "Java selenium tests failed"; exit 1; } fi
