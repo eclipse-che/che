@@ -122,7 +122,7 @@ public class ImportProjectFromGitHubTest {
     theiaIde.waitTheiaIde();
     theiaIde.waitLoaderInvisibility();
     theiaIde.waitTheiaIdeTopPanel();
-    theiaIde.waitNotificationsNumber(3);
+    theiaIde.waitNotificationsNumber(4);
     theiaIde.waitNotificationDisappearance(
         "Che Workspace: Finished importing projects.", UPDATING_PROJECT_TIMEOUT_SEC);
 
