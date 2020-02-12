@@ -36,20 +36,14 @@ import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.ExecListener;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
-import io.fabric8.kubernetes.client.dsl.LogWatch;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.ScalableResource;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.ParseException;
@@ -72,7 +66,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import okhttp3.Response;
-import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
@@ -123,7 +116,7 @@ public class KubernetesDeployments {
   private Watch podWatch;
   private Watch containerWatch;
   private Date watcherInitializationDate;
-  private final List<LogWatcher> logWatchers = new ArrayList<>();
+  private LogWatcher logWatcher;
 
   protected KubernetesDeployments(
       String namespace, String workspaceId, KubernetesClientFactory clientFactory) {
@@ -593,14 +586,16 @@ public class KubernetesDeployments {
   }
 
   public void watchLogs(PodLogHandler handler) throws InfrastructureException {
-    LogWatcher lw = new LogWatcher(clientFactory, workspaceId, namespace, handler);
-    logWatchers.add(lw);
-    watchEvents(lw);
+    LOG.info("about to create a logwatcher");
+    if (logWatcher == null) {
+      LOG.info("creating logwatcher for [{}]", workspaceId);
+      logWatcher = new LogWatcher(clientFactory, workspaceId, namespace, handler);
+      watchEvents(logWatcher);
+    }
+    LOG.info("logwatcher created");
   }
 
-  /**
-   * Stops watching the pods inside Kubernetes namespace.
-   */
+  /** Stops watching the pods inside Kubernetes namespace. */
   public void stopWatch() {
     try {
       if (podWatch != null) {
@@ -624,13 +619,10 @@ public class KubernetesDeployments {
     }
     containerEventsHandlers.clear();
 
-    for (LogWatcher lw : logWatchers) {
-      try {
-        lw.close();
-        logWatchers.remove(lw);
-      } catch (IOException ioe) {
-        LOG.error("failed to stop wathing log [{}]", lw, ioe);
-      }
+    if (logWatcher != null) {
+      LOG.info("Cleaning logwatchers");
+      logWatcher.close();
+      LOG.info("done cleaning");
     }
   }
 

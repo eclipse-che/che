@@ -11,11 +11,11 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
-import io.fabric8.kubernetes.client.dsl.LogWatch;
 import java.io.IOException;
 
 public interface PodLogHandler {
 
-  void handle(LogWatch log, String podName, String containerName)
-      throws IOException;
+  boolean handle(PrefixedPipedInputStream is) throws IOException;
+
+  boolean matchPod(String podName);
 }

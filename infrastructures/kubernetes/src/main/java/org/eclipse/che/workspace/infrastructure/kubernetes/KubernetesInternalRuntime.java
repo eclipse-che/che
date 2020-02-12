@@ -599,7 +599,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     List<Ingress> readyIngresses = createIngresses(k8sEnv, workspaceId);
 
     listenEvents();
-    watchLogs();
+        watchLogs();
 
     final KubernetesServerResolver serverResolver =
         new KubernetesServerResolver(ingressPathTransformInverter, createdServices, readyIngresses);
@@ -625,7 +625,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   protected void watchLogs() throws InfrastructureException {
     namespace
         .deployments()
-        .watchLogs(new PodLogHandlerToEventPublisher(this.eventPublisher, this.getContext().getIdentity()));
+        .watchLogs(
+            new PodLogHandlerToEventPublisher(
+                this.eventPublisher, this.getContext().getIdentity(), machines));
   }
 
   @Traced
@@ -971,5 +973,4 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       }
     }
   }
-
 }
