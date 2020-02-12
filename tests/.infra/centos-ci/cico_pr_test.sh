@@ -20,8 +20,8 @@ function prepareCustomResourceFile() {
   wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml -O custom-resource.yaml
   sed -i "s@server:@server:\n    customCheProperties:\n      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'@g" /tmp/custom-resource.yaml
   sed -i "s/customCheProperties:/customCheProperties:\n      CHE_WORKSPACE_AGENT_DEV_INACTIVE__STOP__TIMEOUT__MS: '300000'/" /tmp/custom-resource.yaml
-  sed -i "s@cheImage: ''@cheImage: 'quay.io/eclipse/che-server'@g" /tmp/custom-resource.yaml
-  sed -i "s@cheImageTag: 'nightly'@cheImageTag: '${TAG}'@g" /tmp/custom-resource.yaml
+#  sed -i "s@cheImage: ''@cheImage: 'quay.io/eclipse/che-server'@g" /tmp/custom-resource.yaml
+#  sed -i "s@cheImageTag: 'nightly'@cheImageTag: '${TAG}'@g" /tmp/custom-resource.yaml
   cat /tmp/custom-resource.yaml
 }
 
@@ -38,8 +38,8 @@ function pushImageToRegistry() {
 setupEnvs
 installDependencies
 installDockerCompose
-buidCheServer
-pushImageToRegistry
+#buidCheServer
+#pushImageToRegistry
 installKVM
 installAndStartMinishift
 loginToOpenshiftAndSetDevRole
@@ -51,7 +51,7 @@ seleniumTestsSetup
 createIndentityProvider
 
 bash /root/payload/tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
-   --threads=3 \
+   --threads=5 \
    --host=${CHE_ROUTE} \
    --port=80 \
    --multiuser \
