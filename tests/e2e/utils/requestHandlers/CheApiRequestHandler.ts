@@ -18,24 +18,20 @@ import { IAuthorizationHeaderHandler } from './headers/IAuthorizationHeaderHandl
 export class CheApiRequestHandler {
     constructor(@inject(TYPES.IAuthorizationHeaderHandler) private readonly headerHandler: IAuthorizationHeaderHandler) { }
 
-    async get(url: string): Promise<AxiosResponse> {
-        return await axios.get(this.assembleUrl(url), await this.headerHandler.get());
+    async get(relativeUrl: string): Promise<AxiosResponse> {
+        return await axios.get(this.assembleUrl(relativeUrl), await this.headerHandler.get());
     }
 
-    async post(url: string, data?: string): Promise<AxiosResponse> {
-        if (data === undefined) {
-            return await axios.post(this.assembleUrl(url), await this.headerHandler.get());
-        } else {
-            return await axios.post(this.assembleUrl(url), data, await this.headerHandler.get());
-        }
+    async post(relativeUrl: string, data?: string): Promise<AxiosResponse> {
+        return await axios.post(this.assembleUrl(relativeUrl), data, await this.headerHandler.get());
     }
 
-    async delete(url: string): Promise<AxiosResponse> {
-        return await axios.delete(this.assembleUrl(url), await this.headerHandler.get());
+    async delete(relativeUrl: string): Promise<AxiosResponse> {
+        return await axios.delete(this.assembleUrl(relativeUrl), await this.headerHandler.get());
     }
 
-    private assembleUrl(url: string): string {
-        return `${TestConstants.TS_SELENIUM_BASE_URL}/${url}`;
+    private assembleUrl(relativeUrl: string): string {
+        return `${TestConstants.TS_SELENIUM_BASE_URL}/${relativeUrl}`;
     }
 
 }

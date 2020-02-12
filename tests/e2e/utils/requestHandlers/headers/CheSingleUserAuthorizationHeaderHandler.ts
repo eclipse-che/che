@@ -10,10 +10,11 @@
 
 import { IAuthorizationHeaderHandler } from './IAuthorizationHeaderHandler';
 import { injectable } from 'inversify';
+import { AxiosRequestConfig } from 'axios';
 
 @injectable()
 export class CheSingleUserAuthorizationHeaderHandler implements IAuthorizationHeaderHandler {
-    async get() {
+    async get() : Promise<AxiosRequestConfig> {
         // no headers needs to be set to single user
         return {};
     }
