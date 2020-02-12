@@ -29,7 +29,9 @@
     <div che-compile="section.content"></div>
   </che-label-container>
   <!-- Infrastructure Namespace -->
-  <che-label-container class="infrastructure-namespace-input-container"
+  <che-label-container
+    ng-if="workspaceDetailsOverviewController.enabledKubernetesNamespaceSelector"
+    class="infrastructure-namespace-input-container"
     che-label-name="Kubernetes Namespace"
     ng-if="workspaceDetailsOverviewController.infrastructureNamespace">
     <che-input

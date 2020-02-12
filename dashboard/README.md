@@ -274,3 +274,17 @@ The `"configuration.prefetch"` section allows to define resources that UD should
     ...
   ]
   ```
+
+The `"configuration.features.disabled"` field defines features that should be disabled and not displayed in User Dashboard. Available values are `"workspaceSharing"`, `"kubernetesNamespaceSelector"`.
+
+For example, this config disables kubernetes namespace selector:
+
+```json
+{
+  "configuration": {
+    "features": {
+      "disabled": ["kubernetesNamespaceSelector"]
+    }
+  }
+}
+```

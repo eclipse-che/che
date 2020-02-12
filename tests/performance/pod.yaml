@@ -33,8 +33,8 @@ spec:
           value: "600000"
         - name: TS_SELENIUM_DEFAULT_TIMEOUT
           value: "600000"
-        - name: TESTED_ENVIRONMENT
-          value: 'CRW'
+        - name: TS_SELENIUM_LOG_LEVEL
+          value: "REPLACE_LOG_LEVEL"
         image: REPLACE_IMAGE 
         imagePullPolicy: Always
         name: load-testing-container
