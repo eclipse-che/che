@@ -77,15 +77,9 @@ export class CheFooter {
     this.controllerAs = 'cheFooterController';
 
     this.scope = {
-      supportHelpPath: '@cheSupportHelpPath',
-      supportHelpTitle: '@cheSupportHelpTitle',
-      supportEmail: '@cheSupportEmail',
       logo: '@cheLogo',
-      docs: '@cheDocs',
       version: '@cheVersion',
       productName: '@cheProductName',
-      links: '=cheLinks',
-      email: '=?cheEmail'
     };
   }
 }

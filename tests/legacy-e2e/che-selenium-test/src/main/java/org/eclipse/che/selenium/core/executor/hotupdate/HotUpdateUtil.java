@@ -39,8 +39,11 @@ public class HotUpdateUtil {
       "get dc che | awk 'NR==2{print $2}'";
   private static final String COMMAND_TO_GET_NAME_OF_CHE_DEPLOYMENT =
       "get dc che | awk 'NR==2{print $1}'";
-  private static final String UPDATE_COMMAND_TEMPLATE = "rollout latest %s";
-
+  private static final String UPDATE_COMMAND_TEMPLATE =
+      "patch deployment che -p \"{\\\"spec\\\": {\\\"template\\\": {\\\"spec\\\":{\\\"terminationGracePeriodSeconds\\\":%s}}}}\"";
+  private static final String COMMAND_TO_GET_CURRENT_TERMINATION_GRACE_PERIOD =
+      "get deployments/che -o jsonpath={..terminationGracePeriodSeconds}";
+  private static final String COMMAND_TO_GET_ROLLOUT_STATUS = "rollout status deployment/che";
   protected final OpenShiftCliCommandExecutor openShiftCliCommandExecutor;
   protected final TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
@@ -83,6 +86,19 @@ public class HotUpdateUtil {
   }
 
   /**
+   * Performs CLI request to the master pod for current Rollout status
+   *
+   * @return rollout status of CHE
+   */
+  public String getRolloutStatus() {
+    try {
+      return openShiftCliCommandExecutor.execute(COMMAND_TO_GET_ROLLOUT_STATUS);
+    } catch (IOException ex) {
+      throw new RuntimeException(ex.getLocalizedMessage(), ex);
+    }
+  }
+
+  /**
    * Waits during {@code timeoutInSec} until master pod has a specified {@code expectedRevision}.
    *
    * @param expectedRevision revision of the master pod.
@@ -109,7 +125,8 @@ public class HotUpdateUtil {
    * @throws Exception
    */
   public void executeMasterPodUpdateCommand() throws Exception {
-    String updateCommand = String.format(UPDATE_COMMAND_TEMPLATE, getMasterPodName());
+    int currentTerminationGracePeriod = getCurrentTerminationGracePeriod() + 1;
+    String updateCommand = String.format(UPDATE_COMMAND_TEMPLATE, currentTerminationGracePeriod);
     openShiftCliCommandExecutor.execute(updateCommand);
   }
 
@@ -131,6 +148,20 @@ public class HotUpdateUtil {
     try {
       return Integer.parseInt(
           openShiftCliCommandExecutor.execute(COMMAND_TO_GET_REVISION_OF_CHE_DEPLOYMENT));
+    } catch (IOException ex) {
+      throw new RuntimeException(ex.getLocalizedMessage(), ex);
+    }
+  }
+
+  /**
+   * Performs CLI request to the master pod for getting its termination grace period.
+   *
+   * @return current termination grace period
+   */
+  public int getCurrentTerminationGracePeriod() {
+    try {
+      return Integer.parseInt(
+          openShiftCliCommandExecutor.execute(COMMAND_TO_GET_CURRENT_TERMINATION_GRACE_PERIOD));
     } catch (IOException ex) {
       throw new RuntimeException(ex.getLocalizedMessage(), ex);
     }

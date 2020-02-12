@@ -35,14 +35,13 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -836,8 +835,8 @@ public class WorkspaceManagerTest {
 
   private TestRuntime mockRuntime(WorkspaceImpl workspace, WorkspaceStatus status)
       throws Exception {
-    MachineImpl machine1 = spy(createMachine());
-    MachineImpl machine2 = spy(createMachine());
+    MachineImpl machine1 = createMachine();
+    MachineImpl machine2 = createMachine();
     Map<String, Machine> machines = new HashMap<>();
     machines.put("machine1", machine1);
     machines.put("machine2", machine2);

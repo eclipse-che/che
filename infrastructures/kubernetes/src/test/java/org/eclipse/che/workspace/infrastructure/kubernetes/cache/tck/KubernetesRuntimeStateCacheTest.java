@@ -19,6 +19,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -59,6 +61,8 @@ public class KubernetesRuntimeStateCacheTest {
   @Inject private TckRepository<KubernetesRuntimeState> runtimesRepository;
 
   @Inject private KubernetesRuntimeStateCache runtimesStatesCache;
+
+  @Inject private EventService eventService;
 
   private WorkspaceImpl[] workspaces;
   private KubernetesRuntimeState[] runtimesStates;
@@ -139,6 +143,30 @@ public class KubernetesRuntimeStateCacheTest {
         runtimesStatesCache.getCommands(runtimesStates[0].getRuntimeId());
     assertEquals(updatedCommands.size(), 1);
     assertEquals(new CommandImpl(updatedCommands.get(0)), newCommand);
+  }
+
+  // Ensure that we are not affected https://bugs.eclipse.org/bugs/show_bug.cgi?id=474203 Orphan
+  // Removal not working
+  // when, object is added to collection and then same object is removed from collection in same
+  // transaction.
+  //
+  // Probable reason - two different transactions was used.
+  @Test(dependsOnMethods = "shouldReturnCommands")
+  public void shouldUpdateCommandsAndDeleteRuntime() {
+    // given
+    List<CommandImpl> newCommands = new ArrayList<>();
+    CommandImpl newCommand = new CommandImpl("new", "build", "custom");
+    newCommands.add(newCommand);
+
+    // when
+    try {
+      runtimesStatesCache.updateCommands(runtimesStates[0].getRuntimeId(), newCommands);
+      runtimesStatesCache.remove(runtimesStates[0].getRuntimeId());
+    } catch (InfrastructureException e) {
+      fail("No exception expected here, got " + e.getLocalizedMessage());
+    }
+    // then
+    // if no exception happened during remove operation that means test passed correctly.
   }
 
   @Test(

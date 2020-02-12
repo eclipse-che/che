@@ -246,7 +246,10 @@ describe(`WorkspaceDetailsController >`, () => {
               menu: {
                 disabled: []
               },
-              prefetch: {}
+              prefetch: {},
+              features: {
+                disabled: []
+              }
             };
           }
         };

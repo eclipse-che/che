@@ -227,6 +227,23 @@ function installAndStartMinishift() {
   chmod +x ./minishift
   mv ./minishift /usr/local/bin/minishift
 
+  #Setup GitHub token for minishift
+  if [ -z "$CHE_BOT_GITHUB_TOKEN" ]
+  then
+    echo "\$CHE_BOT_GITHUB_TOKEN is empty. Minishift start might fail with GitGub API rate limit reached."
+  else
+    echo "\$CHE_BOT_GITHUB_TOKEN is set, checking limits."
+    GITHUB_RATE_REMAINING=$(curl -slL "https://api.github.com/rate_limit?access_token=$CHE_BOT_GITHUB_TOKEN" | jq .rate.remaining)
+    if [ "$GITHUB_RATE_REMAINING" -gt 1000 ]
+    then
+      echo "Github rate greater than 1000. Using che-bot token for minishift startup."
+      export MINISHIFT_GITHUB_API_TOKEN=$CHE_BOT_GITHUB_TOKEN
+    else
+      echo "Github rate is lower than 1000. *Not* using che-bot for minishift startup."
+      echo "If minishift startup fails, please try again later."
+    fi
+  fi
+
   minishift version
   minishift config set memory 14GB
   minishift config set cpus 4
@@ -383,8 +400,8 @@ function saveSeleniumTestResult() {
 }
 
 function createIndentityProvider() {
-  CHE_MULTI_USER_GITHUB_CLIENTID_OCP=04cbc0f8172109d5e2e5
-  CHE_MULTI_USER_GITHUB_SECRET_OCP=a0a9b8602bb0916d8b4a62e71b7ed92036563b7a
+  CHE_MULTI_USER_GITHUB_CLIENTID_OCP=04cbc0f8172109322223
+  CHE_MULTI_USER_GITHUB_SECRET_OCP=a0a9b8602bb0916d322223e71b7ed92036563b7a
   CHE_OPENSHIFT_PROJECT=eclipse-che
   keycloakPodName=$(oc get pod --namespace=$CHE_OPENSHIFT_PROJECT | grep keycloak | awk '{print $1}')
   /tmp/oc exec $keycloakPodName --namespace=$CHE_OPENSHIFT_PROJECT -- /opt/jboss/keycloak/bin/kcadm.sh create identity-provider/instances -r che -s alias=github -s providerId=github -s enabled=true -s storeToken=true -s addReadTokenRoleOnCreate=true -s 'config.useJwksUrl="true"' -s config.clientId=$CHE_MULTI_USER_GITHUB_CLIENTID_OCP -s config.clientSecret=$CHE_MULTI_USER_GITHUB_SECRET_OCP -s 'config.defaultScope="repo,user,write:public_key"' --no-config --server http://localhost:8080/auth --user admin --password admin --realm master
