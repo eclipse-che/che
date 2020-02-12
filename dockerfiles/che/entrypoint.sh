@@ -290,6 +290,7 @@ init() {
   export JAVA_OPTS="${JAVA_OPTS} -Dche.docker.network=$NETWORK_NAME"
 }
 
+trust_store_defined=false
 add_cert_to_truststore() {
   DEFAULT_JAVA_TRUST_STORE=$JAVA_HOME/lib/security/cacerts
   DEFAULT_JAVA_TRUST_STOREPASS="changeit"
@@ -310,7 +311,10 @@ add_cert_to_truststore() {
   # allow only read by all groups
   chmod 444 $JAVA_TRUST_STORE
 
-  export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=$JAVA_TRUST_STORE -Djavax.net.ssl.trustStorePassword=$DEFAULT_JAVA_TRUST_STOREPASS"
+  if [ "$trust_store_defined" == false ]; then
+    export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=$JAVA_TRUST_STORE -Djavax.net.ssl.trustStorePassword=$DEFAULT_JAVA_TRUST_STOREPASS"
+  fi
+  trust_store_defined=true
 }
 
 add_che_cert_to_truststore() {
@@ -384,6 +388,7 @@ trap 'responsible_shutdown' SIGHUP SIGTERM SIGINT
 init
 init_global_variables
 set_environment_variables
+configure_java_trust_store
 add_che_cert_to_truststore
 add_public_cert_to_truststore
 
