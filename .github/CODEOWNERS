@@ -66,7 +66,7 @@ deploy/** @sleshchenko @l0rd @rhopp @nickboldt
 deploy/openshift/templates/monitoring/** @skabashnyuk @metlos @l0rd @rhopp @nickboldt
 
 # selenium tests
-selenium/** @musienko-maxim @dmytro-ndp @Ohrimenko1988 @l0rd @rhopp @nickboldt
+tests/legacy-e2e/** @musienko-maxim @dmytro-ndp @Ohrimenko1988 @l0rd @rhopp @nickboldt
 
 # e2e tests
 tests/e2e/**  @musienko-maxim @Ohrimenko1988 @l0rd @rhopp @nickboldt
