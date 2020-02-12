@@ -696,6 +696,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         try {
           injectables.add(new PodData(toCreate));
           Deployment merged = podMerger.merge(injectables);
+          merged.getMetadata().setName(toCreate.getMetadata().getName());
 
           final Pod createdPod = namespace.deployments().deploy(merged);
           LOG.debug("Creating pod '{}' in workspace '{}'", toCreateMeta.getName(), workspaceId);
@@ -724,7 +725,10 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         try {
           ObjectMeta toCreateMeta = toCreate.getMetadata();
           injectables.add(new PodData(toCreate));
-          final Pod createdPod = namespace.deployments().deploy(podMerger.merge(injectables));
+          Deployment deployment = podMerger.merge(injectables);
+          deployment.getMetadata().setName(toCreate.getMetadata().getName());
+
+          final Pod createdPod = namespace.deployments().deploy(deployment);
 
           LOG.debug(
               "Creating deployment '{}' in workspace '{}'", toCreateMeta.getName(), workspaceId);
