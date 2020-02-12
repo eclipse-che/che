@@ -291,27 +291,37 @@ init() {
 }
 
 add_cert_to_truststore() {
+  DEFAULT_JAVA_TRUST_STORE=$JAVA_HOME/lib/security/cacerts
+  DEFAULT_JAVA_TRUST_STOREPASS="changeit"
+
+  JAVA_TRUST_STORE=/home/user/cacerts
+  SELF_SIGNED_CERT=/home/user/self-signed.crt
+
+  echo "Found a custom cert. Adding it to java trust store based on $DEFAULT_JAVA_TRUST_STORE"
+  cp $DEFAULT_JAVA_TRUST_STORE $JAVA_TRUST_STORE
+
+  echo "$1" > $SELF_SIGNED_CERT
+
+  # make sure that owner has permissions to write and other groups have permissions to read
+  chmod 644 $JAVA_TRUST_STORE
+
+  echo yes | keytool -keystore $JAVA_TRUST_STORE -importcert -alias HOSTDOMAIN -file $SELF_SIGNED_CERT -storepass $DEFAULT_JAVA_TRUST_STOREPASS > /dev/null
+
+  # allow only read by all groups
+  chmod 444 $JAVA_TRUST_STORE
+
+  export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=$JAVA_TRUST_STORE -Djavax.net.ssl.trustStorePassword=$DEFAULT_JAVA_TRUST_STOREPASS"
+}
+
+add_che_cert_to_truststore() {
   if [ "${CHE_SELF__SIGNED__CERT}" != "" ]; then
-    DEFAULT_JAVA_TRUST_STORE=$JAVA_HOME/lib/security/cacerts
-    DEFAULT_JAVA_TRUST_STOREPASS="changeit"
+    add_cert_to_truststore "${CHE_SELF__SIGNED__CERT}"
+  fi
+}
 
-    JAVA_TRUST_STORE=/home/user/cacerts
-    SELF_SIGNED_CERT=/home/user/self-signed.crt
-
-    echo "Found a custom cert. Adding it to java trust store based on $DEFAULT_JAVA_TRUST_STORE"
-    cp $DEFAULT_JAVA_TRUST_STORE $JAVA_TRUST_STORE
-
-    echo "$CHE_SELF__SIGNED__CERT" > $SELF_SIGNED_CERT
-
-    # make sure that owner has permissions to write and other groups have permissions to read
-    chmod 644 $JAVA_TRUST_STORE
-
-    echo yes | keytool -keystore $JAVA_TRUST_STORE -importcert -alias HOSTDOMAIN -file $SELF_SIGNED_CERT -storepass $DEFAULT_JAVA_TRUST_STOREPASS > /dev/null
-
-    # allow only read by all groups
-    chmod 444 $JAVA_TRUST_STORE
-
-    export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=$JAVA_TRUST_STORE -Djavax.net.ssl.trustStorePassword=$DEFAULT_JAVA_TRUST_STOREPASS"
+add_public_cert_to_truststore() {
+  if [ "${CHE_PUBLIC_CERT}" != "" ]; then
+    add_cert_to_truststore "${CHE_PUBLIC_CERT}"
   fi
 }
 
@@ -374,7 +384,8 @@ trap 'responsible_shutdown' SIGHUP SIGTERM SIGINT
 init
 init_global_variables
 set_environment_variables
-add_cert_to_truststore
+add_che_cert_to_truststore
+add_public_cert_to_truststore
 
 # run che
 start_che_server &
