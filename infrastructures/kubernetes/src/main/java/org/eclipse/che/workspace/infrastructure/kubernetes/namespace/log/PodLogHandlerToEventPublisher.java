@@ -22,9 +22,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPub
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * This class is responsible for reading the logs. It is aware of machines it should follow.
- */
+/** This class is responsible for reading the logs. It is aware of machines it should follow. */
 public class PodLogHandlerToEventPublisher implements PodLogHandler {
 
   private final RuntimeEventsPublisher eventsPublisher;
@@ -50,13 +48,17 @@ public class PodLogHandlerToEventPublisher implements PodLogHandler {
   @Override
   public boolean matchPod(String podName) {
     try {
-      return machines.getMachines(identity).values().stream()
+      return machines
+          .getMachines(identity)
+          .values()
+          .stream()
           .filter(m -> m.getPodName() != null)
           .anyMatch(m -> m.getPodName().equals(podName));
     } catch (InfrastructureException e) {
       LOG.error(
           "Failed to get the machines when checking whether LogHandler do care about pod [{}]. Not much to do here.",
-          podName, e);
+          podName,
+          e);
       return false;
     }
   }
@@ -65,8 +67,8 @@ public class PodLogHandlerToEventPublisher implements PodLogHandler {
    * Read the logs from given inputStream. It recognizes if received message has error state and
    * returns false immediately in that case. When there is no error, this method keeps reading the
    * logs from given inputStream, which is blocking operation.
-   * <p>
-   * Method can't recognize intentional close, which is "Broken pipe" IOException, and real
+   *
+   * <p>Method can't recognize intentional close, which is "Broken pipe" IOException, and real
    * communication failure. It returns true in both case, which is considered as finished
    * communication (which is ok maybe).
    *

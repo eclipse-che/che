@@ -62,7 +62,9 @@ public class LogWatcher implements PodEventHandler, Closeable {
       final String containerName = event.getContainerName();
       if (containerName != null && !watchingContainers.contains(containerName)) {
         watchingContainers.add(containerName);
-        LOG.trace("adding [{}] to watching containers now watching [{}]", containerName,
+        LOG.trace(
+            "adding [{}] to watching containers now watching [{}]",
+            containerName,
             watchingContainers);
         pool.submit(new ContainerLogWatch(podName, containerName));
       }
@@ -71,17 +73,19 @@ public class LogWatcher implements PodEventHandler, Closeable {
 
   @Override
   public void close() {
-    new Thread(() -> {
-      try {
-        LOG.debug("Waiting 5s before exit to get all the logs");
-        Thread.sleep(5000);
-      } catch (InterruptedException e) {
-        LOG.error("Interrupted waiting for the logs", e);
-      } finally {
-        currentWatchers.forEach(LogWatch::close);
-        currentWatchers.clear();
-      }
-    }).start();
+    new Thread(
+            () -> {
+              try {
+                LOG.debug("Waiting 5s before exit to get all the logs");
+                Thread.sleep(5000);
+              } catch (InterruptedException e) {
+                LOG.error("Interrupted waiting for the logs", e);
+              } finally {
+                currentWatchers.forEach(LogWatch::close);
+                currentWatchers.clear();
+              }
+            })
+        .start();
   }
 
   private class ContainerLogWatch implements Runnable {
@@ -98,8 +102,6 @@ public class LogWatcher implements PodEventHandler, Closeable {
      * Do the best effort to get the logs from the container. The method tries N times to get the
      * logs from the container. If response on log request from the k8s is 40x, it possibly means
      * that container is not ready to get the logs and we'll try again.
-     *
-     *
      */
     @Override
     public void run() {
