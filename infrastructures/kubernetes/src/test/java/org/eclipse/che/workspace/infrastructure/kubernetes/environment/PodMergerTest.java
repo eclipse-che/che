@@ -308,7 +308,7 @@ public class PodMergerTest {
   }
 
   @Test(expectedExceptions = ValidationException.class)
-  public void shouldFailServiceAccountDiffersINPods() throws Exception {
+  public void shouldFailServiceAccountDiffersInPods() throws Exception {
     // given
     PodSpec podSpec1 = new PodSpecBuilder().withServiceAccount("sa").build();
     podSpec1.setAdditionalProperty("add1", 1L);
@@ -346,7 +346,7 @@ public class PodMergerTest {
   }
 
   @Test(expectedExceptions = ValidationException.class)
-  public void shouldFailServiceAccountNameDiffersINPods() throws Exception {
+  public void shouldFailServiceAccountNameDiffersInPods() throws Exception {
     // given
     PodSpec podSpec1 = new PodSpecBuilder().withServiceAccountName("sa").build();
     podSpec1.setAdditionalProperty("add1", 1L);

@@ -162,7 +162,7 @@ public class PodMerger {
 
   private String mergeServiceAccount(@Nullable String a, @Nullable String b)
       throws ValidationException {
-    return nonNullOrEqual(a, b, "Cannot merge pods with different service accounts: %, %s");
+    return nonNullOrEqual(a, b, "Cannot merge pods with different service accounts: %s, %s");
   }
 
   private String mergeServiceAccountName(@Nullable String a, @Nullable String b)
