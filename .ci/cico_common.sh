@@ -72,7 +72,11 @@ install_deps(){
 
 mvn_build() {
     set -x
-    scl enable rh-maven33 'mvn clean install -U -Pintegration'
+    if [[ $DO_NOT_IGNORE_TESTS == "true" ]]; then
+        scl enable rh-maven33 'mvn clean install -U -Pintegration -Dmaven.test.failure.ignore=false'
+    else
+        scl enable rh-maven33 'mvn clean install -U -Pintegration'
+    fi
     if [[ $? -eq 0 ]]; then
         echo 'Build Success!'
     else
