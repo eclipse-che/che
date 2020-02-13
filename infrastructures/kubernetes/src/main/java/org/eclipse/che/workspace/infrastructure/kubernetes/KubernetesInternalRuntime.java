@@ -688,23 +688,21 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       ObjectMeta toCreateMeta = toCreate.getMetadata();
       List<PodData> injectables = getAllInjectablePods(toCreate, injectablePods);
 
+      Pod createdPod;
       if (injectables.isEmpty()) {
-        final Pod createdPod = namespace.deployments().deploy(toCreate);
-        LOG.debug("Creating pod '{}' in workspace '{}'", toCreateMeta.getName(), workspaceId);
-        storeStartingMachine(createdPod, toCreateMeta, machineConfigs, serverResolver);
+        createdPod = namespace.deployments().deploy(toCreate);
       } else {
         try {
           injectables.add(new PodData(toCreate));
           Deployment merged = podMerger.merge(injectables);
           merged.getMetadata().setName(toCreate.getMetadata().getName());
-
-          final Pod createdPod = namespace.deployments().deploy(merged);
-          LOG.debug("Creating pod '{}' in workspace '{}'", toCreateMeta.getName(), workspaceId);
-          storeStartingMachine(createdPod, toCreateMeta, machineConfigs, serverResolver);
+          createdPod = namespace.deployments().deploy(merged);
         } catch (ValidationException e) {
           throw new InfrastructureException(e);
         }
       }
+      LOG.debug("Creating pod '{}' in workspace '{}'", toCreateMeta.getName(), workspaceId);
+      storeStartingMachine(createdPod, createdPod.getMetadata(), machineConfigs, serverResolver);
     }
 
     for (Deployment toCreate : environment.getDeploymentsCopy().values()) {
@@ -712,34 +710,26 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       List<PodData> injectables =
           getAllInjectablePods(
               template.getMetadata(), template.getSpec().getContainers(), injectablePods);
+
+      Pod createdPod;
       if (injectables.isEmpty()) {
-        ObjectMeta toCreateMeta = toCreate.getMetadata();
-        final Pod createdPod = namespace.deployments().deploy(toCreate);
-        LOG.debug(
-            "Creating deployment '{}' in workspace '{}'", toCreateMeta.getName(), workspaceId);
-        // We need to pass the meta from the pod in the deployment as that is what matches
-        // machine name
-        final ObjectMeta templateMeta = toCreate.getSpec().getTemplate().getMetadata();
-        storeStartingMachine(createdPod, templateMeta, machineConfigs, serverResolver);
+        createdPod = namespace.deployments().deploy(toCreate);
       } else {
         try {
-          ObjectMeta toCreateMeta = toCreate.getMetadata();
           injectables.add(new PodData(toCreate));
           Deployment deployment = podMerger.merge(injectables);
           deployment.getMetadata().setName(toCreate.getMetadata().getName());
 
-          final Pod createdPod = namespace.deployments().deploy(deployment);
-
-          LOG.debug(
-              "Creating deployment '{}' in workspace '{}'", toCreateMeta.getName(), workspaceId);
-          // We need to pass the meta from the pod in the deployment as that is what matches
-          // machine name
-          final ObjectMeta createdMeta = createdPod.getMetadata();
-          storeStartingMachine(createdPod, createdMeta, machineConfigs, serverResolver);
+          createdPod = namespace.deployments().deploy(deployment);
         } catch (ValidationException e) {
           throw new InfrastructureException(e);
         }
       }
+      LOG.debug(
+          "Creating deployment '{}' in workspace '{}'",
+          createdPod.getMetadata().getName(),
+          workspaceId);
+      storeStartingMachine(createdPod, createdPod.getMetadata(), machineConfigs, serverResolver);
     }
     LOG.debug("Pods creation finished in workspace '{}'", workspaceId);
   }
