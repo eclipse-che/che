@@ -89,6 +89,7 @@ public class ShareWorkspaceMemberTest {
   @Test
   public void checkSharingByWorkspaceOwner() {
     createWorkspace(WORKSPACE_NAME);
+
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
@@ -180,6 +181,7 @@ public class ShareWorkspaceMemberTest {
     theiaIde.waitNotificationDisappearance(
         "Che Workspace: Finished importing projects.", UPDATING_PROJECT_TIMEOUT_SEC);
     theiaIde.waitAllNotificationsClosed();
+
     theiaProjectTree.expandItem(CONSOLE_JAVA_SIMPLE);
     theiaProjectTree.openItem(CONSOLE_JAVA_SIMPLE + "/README.md");
     theiaEditor.waitEditorTab("README.md");
