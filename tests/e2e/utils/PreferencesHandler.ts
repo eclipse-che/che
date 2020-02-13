@@ -11,8 +11,7 @@ export class PreferencesHandler {
     }
 
     /**
-     * Works properly only if set before workspace creation,
-     * or in the case when workspace created but wasn't launched.
+     * Works properly only if set before workspace startup.
      */
     public async setTerminalType(type: string) {
         Logger.debug('PreferencesHandler.setTerminalToDom');
