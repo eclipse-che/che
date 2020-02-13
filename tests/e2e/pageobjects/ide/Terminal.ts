@@ -17,8 +17,7 @@ import { PreferencesHandler } from '../../utils/PreferencesHandler';
 
 @injectable()
 export class Terminal {
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.PreferencesHandler) private readonly preferencesHandler: PreferencesHandler) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Terminal.waitTab "${tabTitle}"`);
