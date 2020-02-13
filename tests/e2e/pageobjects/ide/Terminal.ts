@@ -13,10 +13,28 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { By, Key, WebElement, error } from 'selenium-webdriver';
 import { TestConstants } from '../../TestConstants';
 import { Logger } from '../../utils/Logger';
+import { PreferencesHandler } from '../../utils/PreferencesHandler';
 
 @injectable()
 export class Terminal {
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.PreferencesHandler) private readonly preferencesHandler: PreferencesHandler) { }
+
+    /**
+     * Works properly only if set before workspace creation,
+     * or in the case when workspace created but wasn't launched.
+     */
+    async setCanvasTerminalType() {
+        await this.preferencesHandler.setTerminalType('canvas');
+    }
+
+    /**
+     * Works properly only if set before workspace creation,
+     * or in the case when workspace created but wasn't launched.
+     */
+    async setDomTerminalType() {
+        await this.preferencesHandler.setTerminalType('dom');
+    }
 
     async waitTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Terminal.waitTab "${tabTitle}"`);
@@ -87,6 +105,27 @@ export class Terminal {
 
         await this.selectTerminalTab(tabTitle, timeout);
         await this.type(tabTitle, Key.chord(Key.CONTROL, 'c'));
+    }
+
+    async getText(terminalTab: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
+        Logger.debug('Terminal.getText');
+
+        const terminalIndex: number = await this.getTerminalIndex(terminalTab);
+        const terminalRowsXpathLocator: string = `(//div[contains(@class, 'terminal-container')]` +
+            `//div[contains(@class, 'terminal')]//div[contains(@class, 'xterm-rows')])[${terminalIndex}]`;
+
+        await this.selectTerminalTab(terminalTab, timeout);
+        return await this.driverHelper.waitAndGetText(By.xpath(terminalRowsXpathLocator), timeout);
+    }
+
+    async waitText(terminalTab: string, expectedText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Terminal.waitText tab: ${terminalTab} text: ${expectedText}`);
+
+        await this.driverHelper.waitUntilTrue(async () => {
+            const terminalText: string = await this.getText(terminalTab, timeout);
+            return terminalText.includes(expectedText);
+
+        }, timeout);
     }
 
     private getTerminalTabCssLocator(tabTitle: string): string {

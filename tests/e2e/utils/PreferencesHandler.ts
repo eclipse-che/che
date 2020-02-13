@@ -10,6 +10,10 @@ export class PreferencesHandler {
     constructor(@inject(CLASSES.CheApiRequestHandler) private readonly requestHandler: CheApiRequestHandler) {
     }
 
+    /**
+     * Works properly only if set before workspace creation,
+     * or in the case when workspace created but wasn't launched.
+     */
     public async setTerminalType(type: string) {
         Logger.debug('PreferencesHandler.setTerminalToDom');
         const response = await this.requestHandler.get('api/preferences');
