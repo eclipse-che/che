@@ -15,7 +15,6 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.PipedOutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -109,12 +108,12 @@ public class LogWatcher implements PodEventHandler, Closeable {
       while (retries < 10) {
         LOG.debug("try watching the logs [{}]", retries);
         try (LogWatch log =
-                client
-                    .pods()
-                    .inNamespace(namespace)
-                    .withName(podName)
-                    .inContainer(containerName)
-                    .watchLog()) {
+            client
+                .pods()
+                .inNamespace(namespace)
+                .withName(podName)
+                .inContainer(containerName)
+                .watchLog()) {
           currentWatchers.add(log);
           if (!logHandler.handle(log.getOutput(), containerName)) {
             // failed to get the logs this time, so removing this watcher
