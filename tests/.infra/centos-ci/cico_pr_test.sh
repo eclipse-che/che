@@ -56,6 +56,7 @@ bash /root/payload/tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
    --port=80 \
    --multiuser \
    --fail-script-on-failed-tests \
+   --test=org.eclipse.che.selenium.dashboard.ImportProjectFromGitHubTest \
    || IS_TESTS_FAILED=true
 
 
