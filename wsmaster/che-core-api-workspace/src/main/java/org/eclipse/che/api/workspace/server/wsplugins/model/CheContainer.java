@@ -257,6 +257,9 @@ public class CheContainer {
         && Objects.equals(getVolumes(), that.getVolumes())
         && Objects.equals(getPorts(), that.getPorts())
         && Objects.equals(getMemoryLimit(), that.getMemoryLimit())
+        && Objects.equals(getMemoryRequest(), that.getMemoryRequest())
+        && Objects.equals(getCpuLimit(), that.getCpuLimit())
+        && Objects.equals(getCpuRequest(), that.getCpuRequest())
         && Objects.equals(getName(), that.getName())
         && isMountSources() == that.isMountSources()
         && Objects.equals(getCommand(), that.getCommand())
@@ -272,6 +275,9 @@ public class CheContainer {
         getVolumes(),
         getPorts(),
         getMemoryLimit(),
+        getMemoryRequest(),
+        getCpuLimit(),
+        getCpuRequest(),
         getName(),
         isMountSources(),
         getCommand(),
@@ -294,6 +300,12 @@ public class CheContainer {
         + ports
         + ", memoryLimit="
         + memoryLimit
+        + ", memoryRequest="
+        + memoryRequest
+        + ", cpuLimit="
+        + cpuLimit
+        + ", cpuRequest="
+        + cpuRequest
         + ", name="
         + name
         + ", mountSources="
