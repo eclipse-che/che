@@ -20,22 +20,6 @@ export class Terminal {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.PreferencesHandler) private readonly preferencesHandler: PreferencesHandler) { }
 
-    /**
-     * Works properly only if set before workspace creation,
-     * or in the case when workspace created but wasn't launched.
-     */
-    async setCanvasTerminalType() {
-        await this.preferencesHandler.setTerminalType('canvas');
-    }
-
-    /**
-     * Works properly only if set before workspace creation,
-     * or in the case when workspace created but wasn't launched.
-     */
-    async setDomTerminalType() {
-        await this.preferencesHandler.setTerminalType('dom');
-    }
-
     async waitTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Terminal.waitTab "${tabTitle}"`);
 
