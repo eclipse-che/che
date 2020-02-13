@@ -11,7 +11,7 @@
  */
 package io.micrometer.core.instrument.internal;
 
-import static org.testng.Assert.assertEquals;
+import static org.eclipse.che.commons.test.AssertRetry.assertWithRetry;
 
 import io.micrometer.core.instrument.MockClock;
 import io.micrometer.core.instrument.Tag;
@@ -56,21 +56,28 @@ public class TimedCronExecutorServiceTest {
 
     lock.await();
     // then
-    assertEquals(
-        registry
-            .get("executor.scheduled.cron")
-            .tags(userTags)
-            .tag("name", TimedCronExecutorServiceTest.class.getName())
-            .counter()
-            .count(),
-        1.0);
-    assertEquals(
-        registry
-            .get("executor")
-            .tags(userTags)
-            .tag("name", TimedCronExecutorServiceTest.class.getName())
-            .timer()
-            .count(),
-        1L);
+    assertWithRetry(
+        () ->
+            registry
+                .get("executor.scheduled.cron")
+                .tags(userTags)
+                .tag("name", TimedCronExecutorServiceTest.class.getName())
+                .counter()
+                .count(),
+        1.0,
+        10,
+        50);
+
+    assertWithRetry(
+        () ->
+            registry
+                .get("executor")
+                .tags(userTags)
+                .tag("name", TimedCronExecutorServiceTest.class.getName())
+                .timer()
+                .count(),
+        1L,
+        10,
+        50);
   }
 }

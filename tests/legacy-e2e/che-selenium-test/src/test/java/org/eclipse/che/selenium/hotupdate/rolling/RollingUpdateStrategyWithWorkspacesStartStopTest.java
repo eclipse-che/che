@@ -13,15 +13,15 @@ package org.eclipse.che.selenium.hotupdate.rolling;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.util.Collections;
-import org.eclipse.che.api.system.shared.SystemStatus;
 import org.eclipse.che.selenium.core.client.CheTestSystemClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.hotupdate.HotUpdateUtil;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
@@ -68,7 +68,6 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
 
   @Test
   public void startStopWorkspaceFunctionsShouldBeAvailableDuringRollingUpdate() throws Exception {
-    int currentRevision = hotUpdateUtil.getMasterPodRevision();
     theiaIde.waitOpenedWorkspaceIsReadyToUse();
 
     theiaProjectTree.waitFilesTab();
@@ -89,18 +88,15 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
     workspaces.waitWorkspaceStatus(STARTED_WORKSPACE_NAME, Workspaces.Status.STOPPED);
 
     hotUpdateUtil.executeMasterPodUpdateCommand();
+    // check that che is updated
+    assertTrue(
+        hotUpdateUtil.getRolloutStatus().contains("deployment \"che\" successfully rolled out"));
+    WaitUtils.sleepQuietly(60);
 
     // execute stop-start commands for existing workspaces
-    assertEquals(cheTestSystemClient.getStatus(), SystemStatus.RUNNING);
     workspaces.clickOnWorkspaceStopStartButton(STOPPED_WORKSPACE_NAME);
-    workspaces.clickOnWorkspaceStopStartButton(STARTED_WORKSPACE_NAME);
-
-    // wait successful results of the stop-start requests
     workspaces.waitWorkspaceStatus(STOPPED_WORKSPACE_NAME, Workspaces.Status.STOPPED);
+    workspaces.clickOnWorkspaceStopStartButton(STARTED_WORKSPACE_NAME);
     workspaces.waitWorkspaceStatus(STARTED_WORKSPACE_NAME, Workspaces.Status.RUNNING);
-
-    // check that che is updated
-    hotUpdateUtil.waitMasterPodRevision(currentRevision + 1);
-    hotUpdateUtil.waitFullMasterPodUpdate(currentRevision);
   }
 }
