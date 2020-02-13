@@ -108,7 +108,7 @@ export class Terminal {
     }
 
     async getText(terminalTab: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
-        Logger.debug('Terminal.getText');
+        Logger.debug(`Terminal.getText tab: ${terminalTab}`);
 
         const terminalIndex: number = await this.getTerminalIndex(terminalTab);
         const terminalRowsXpathLocator: string = `(//div[contains(@class, 'terminal-container')]` +
