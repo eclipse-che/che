@@ -17,8 +17,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.PipedOutputStream;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,8 +36,12 @@ public class LogWatcher implements PodEventHandler, Closeable {
   private final String namespace;
   private final KubernetesClient client;
   private final PodLogHandler logHandler;
-  private final Set<LogWatch> lw = new HashSet<>();
-  private final Set<String> watching = new HashSet<>();
+
+  // set of current watchers. This is used so we're able to cut-off the watchers from outside.
+  private final Set<LogWatch> currentWatchers = new HashSet<>();
+
+  // set of currently observed containers so we're not try to follow same container multiple-times.
+  private final Set<String> watchingContainers = new HashSet<>();
 
   public LogWatcher(
       KubernetesClientFactory clientFactory,
@@ -58,61 +60,79 @@ public class LogWatcher implements PodEventHandler, Closeable {
 
     if (logHandler.matchPod(podName)) {
       final String containerName = event.getContainerName();
-      final String reason = event.getReason();
-      LOG.info("[{}][{}] reason [{}]", podName, containerName, reason);
-      LOG.info("already watching [{}]", watching);
-      if (containerName != null && !watching.contains(containerName)) {
-        LOG.info("adding [{}] to watching containers now watching [{}]", containerName, watching);
-        pool.submit(
-            () -> {
-              watching.add(containerName);
-              int retries = 0;
-              while (retries < 10) {
-                LOG.info("watchin, try [{}]", retries);
-                try (PrefixedPipedInputStream is = new PrefixedPipedInputStream(containerName);
-                    LogWatch log =
-                        client
-                            .pods()
-                            .inNamespace(namespace)
-                            .withName(podName)
-                            .inContainer(containerName)
-                            .watchLog(new PipedOutputStream(is))) {
-                  lw.add(log);
-                  if (!logHandler.handle(is)) {
-                    lw.remove(log);
-                    LOG.info("failed to get the logs [{}]", retries);
-                    retries++;
-                  } else {
-                    LOG.info("watched and ended");
-                    break;
-                  }
-                  LOG.info("end of one log, should close now");
-                } catch (IOException e) {
-                  throw new RuntimeException(e);
-                }
-                try {
-                  LOG.info("waiting 1s before next try");
-                  Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                  e.printStackTrace();
-                }
-              }
-            });
+      if (containerName != null && !watchingContainers.contains(containerName)) {
+        watchingContainers.add(containerName);
+        LOG.trace("adding [{}] to watching containers now watching [{}]", containerName,
+            watchingContainers);
+        pool.submit(new ContainerLogWatch(podName, containerName));
       }
     }
   }
 
   @Override
   public void close() {
-    try {
-      LOG.info("waiting 5s before exit to get lal the logs");
-      Thread.sleep(5000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
+    new Thread(() -> {
+      try {
+        LOG.debug("Waiting 5s before exit to get all the logs");
+        Thread.sleep(5000);
+      } catch (InterruptedException e) {
+        LOG.error("Interrupted waiting for the logs", e);
+      } finally {
+        currentWatchers.forEach(LogWatch::close);
+        currentWatchers.clear();
+      }
+    }).start();
+  }
+
+  private class ContainerLogWatch implements Runnable {
+
+    private final String podName;
+    private final String containerName;
+
+    private ContainerLogWatch(String podName, String containerName) {
+      this.podName = podName;
+      this.containerName = containerName;
     }
-    LOG.info("cleaning logwatches");
-    lw.forEach(LogWatch::close);
-    lw.clear();
-    LOG.info("cleared");
+
+    /**
+     * Do the best effort to get the logs from the container. The method tries N times to get the
+     * logs from the container. If response on log request from the k8s is 40x, it possibly means
+     * that container is not ready to get the logs and we'll try again.
+     *
+     *
+     */
+    @Override
+    public void run() {
+      int retries = 0;
+      while (retries < 10) {
+        LOG.debug("try watching the logs [{}]", retries);
+        try (PrefixedPipedInputStream is = new PrefixedPipedInputStream(containerName);
+            LogWatch log =
+                client
+                    .pods()
+                    .inNamespace(namespace)
+                    .withName(podName)
+                    .inContainer(containerName)
+                    .watchLog(new PipedOutputStream(is))) {
+
+          currentWatchers.add(log);
+          if (!logHandler.handle(is)) {
+            // failed to get the logs this time, so removing this watcher
+            currentWatchers.remove(log);
+            LOG.debug("failed to get the logs [{}]", retries);
+            retries++;
+          } else {
+            LOG.info("watched and ended");
+            break;
+          }
+
+          LOG.info("waiting 1s before next try");
+          Thread.sleep(1000);
+        } catch (IOException | InterruptedException e) {
+          LOG.error("Failed watching the logs, nothing better to do here.", e);
+          return;
+        }
+      }
+    }
   }
 }

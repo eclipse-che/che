@@ -22,6 +22,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPub
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class is responsible for reading the logs. It is aware of machines it should follow.
+ */
 public class PodLogHandlerToEventPublisher implements PodLogHandler {
 
   private final RuntimeEventsPublisher eventsPublisher;
@@ -38,6 +41,12 @@ public class PodLogHandlerToEventPublisher implements PodLogHandler {
     this.machines = machines;
   }
 
+  /**
+   * Check if given pod is in interest of this log handler.
+   *
+   * @param podName pod to check
+   * @return true if this class cares about given podName, false otherwise
+   */
   @Override
   public boolean matchPod(String podName) {
     try {
@@ -45,29 +54,43 @@ public class PodLogHandlerToEventPublisher implements PodLogHandler {
           .filter(m -> m.getPodName() != null)
           .anyMatch(m -> m.getPodName().equals(podName));
     } catch (InfrastructureException e) {
-      throw new RuntimeException(e);
+      LOG.error(
+          "Failed to get the machines when checking whether LogHandler do care about pod [{}]. Not much to do here.",
+          podName, e);
+      return false;
     }
   }
 
+  /**
+   * Read the logs from given inputStream. It recognizes if received message has error state and
+   * returns false immediately in that case. When there is no error, this method keeps reading the
+   * logs from given inputStream, which is blocking operation.
+   * <p>
+   * Method can't recognize intentional close, which is "Broken pipe" IOException, and real
+   * communication failure. It returns true in both case, which is considered as finished
+   * communication (which is ok maybe).
+   *
+   * @param inputStream to read from
+   * @return false if error message. true at the end of the stream or interrupted stream
+   */
   @Override
-  public boolean handle(PrefixedPipedInputStream is) {
-    LOG.info("start watchin log");
-    try (BufferedReader in = new BufferedReader(new InputStreamReader(is))) {
-      String line;
-      while ((line = in.readLine()) != null) {
-        LOG.info("[{}] -> {}", is.prefix(), line);
-        if (line.contains("\"code\":40")) {
-          LOG.info("failed to get the logs, should try again");
+  public boolean handle(PrefixedPipedInputStream inputStream) {
+    try (BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
+      String logMessage;
+      while ((logMessage = in.readLine()) != null) {
+        if (logMessage.contains("\"code\":40")) {
+          LOG.debug("failed to get the logs, should try again");
           return false;
+        } else {
+          eventsPublisher.sendRuntimeLogEvent(
+              String.format("[%s] -> %s", inputStream.prefix(), logMessage),
+              ZonedDateTime.now().toString(),
+              identity);
         }
-        eventsPublisher.sendRuntimeLogEvent(
-            String.format("[%s] -> %s", is.prefix(), line),
-            ZonedDateTime.now().toString(),
-            identity);
       }
-      LOG.info("endehere, done, finito");
     } catch (IOException e) {
-      LOG.info("ended beautifuly eh ?", e);
+      // TODO: do more clever cut-off
+      LOG.debug("End of watching log. It could be either intended or some connection failure.");
     }
     return true;
   }

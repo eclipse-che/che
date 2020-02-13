@@ -599,7 +599,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     List<Ingress> readyIngresses = createIngresses(k8sEnv, workspaceId);
 
     listenEvents();
-        watchLogs();
+    // TODO: hide this behind some configuration flag
+    watchLogs();
 
     final KubernetesServerResolver serverResolver =
         new KubernetesServerResolver(ingressPathTransformInverter, createdServices, readyIngresses);
@@ -631,8 +632,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   }
 
   @Traced
-  @SuppressWarnings("WeakerAccess")
-  // package-private so that interception is possible
+  @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
   void createSecrets(KubernetesEnvironment env, String workspaceId) throws InfrastructureException {
     TracingTags.WORKSPACE_ID.set(workspaceId);
     for (Secret secret : env.getSecrets().values()) {

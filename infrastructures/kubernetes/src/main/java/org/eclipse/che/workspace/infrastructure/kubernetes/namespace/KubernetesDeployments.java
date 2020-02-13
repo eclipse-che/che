@@ -586,13 +586,13 @@ public class KubernetesDeployments {
   }
 
   public void watchLogs(PodLogHandler handler) throws InfrastructureException {
-    LOG.info("about to create a logwatcher");
     if (logWatcher == null) {
-      LOG.info("creating logwatcher for [{}]", workspaceId);
+      LOG.debug("start watching logs of workspace [{}]", workspaceId);
       logWatcher = new LogWatcher(clientFactory, workspaceId, namespace, handler);
       watchEvents(logWatcher);
+    } else {
+      LOG.debug("Already watching logs of workspace [{}]", workspaceId);
     }
-    LOG.info("logwatcher created");
   }
 
   /** Stops watching the pods inside Kubernetes namespace. */
@@ -620,9 +620,7 @@ public class KubernetesDeployments {
     containerEventsHandlers.clear();
 
     if (logWatcher != null) {
-      LOG.info("Cleaning logwatchers");
       logWatcher.close();
-      LOG.info("done cleaning");
     }
   }
 
