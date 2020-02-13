@@ -163,17 +163,18 @@ public class ShareWorkspaceMemberTest {
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.waitWorkspaceIsPresent(WORKSPACE_NAME);
     workspaces.waitWorkspaceStatus(WORKSPACE_NAME, STOPPED);
+
+    workspaces.selectWorkspaceByCheckbox(WORKSPACE_NAME);
+    workspaces.clickOnDeleteWorkspacesBtn();
+    workspaces.clickOnDeleteButtonInDialogWindow();
+    workspaces.waitWorkspaceIsNotPresent(WORKSPACE_NAME);
   }
 
   private void createWorkspace(String workspaceName) {
     createWorkspaceHelper.createAndStartWorkspaceFromStack(
         Devfile.JAVA_MAVEN, workspaceName, Collections.emptyList(), null);
 
-    theiaIde.switchToIdeFrame();
-    theiaIde.waitTheiaIde();
-    theiaIde.waitLoaderInvisibility();
-    theiaIde.waitTheiaIdeTopPanel();
-    theiaIde.waitAllNotificationsClosed();
+    theiaIde.waitOpenedWorkspaceIsReadyToUse();
 
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
