@@ -147,9 +147,8 @@ public class KubernetesSize {
       if (suffix == null) {
         return size;
       }
-      switch (suffix.toLowerCase()) {
-        case "m":
-          return size / K;
+      if (suffix.toLowerCase().equals("m")) {
+        return size / K;
       }
     }
     throw new IllegalArgumentException("Invalid Kubernetes CPU size format provided: " + cpuString);

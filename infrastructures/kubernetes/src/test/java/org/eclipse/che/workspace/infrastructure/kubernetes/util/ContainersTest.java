@@ -75,7 +75,7 @@ public class ContainersTest {
   @Test
   public void testReturnContainerRamLimitAndRequest() {
     long limit = Containers.getRamLimit(container);
-    long request = (Containers.getRamRequest(container));
+    long request = Containers.getRamRequest(container);
 
     assertEquals(limit, RAM_LIMIT);
     assertEquals(request, RAM_REQUEST);
@@ -84,7 +84,7 @@ public class ContainersTest {
   @Test
   public void testReturnContainerCPULimitAndRequest() {
     float limit = Containers.getCpuLimit(container);
-    float request = (Containers.getCpuRequest(container));
+    float request = Containers.getCpuRequest(container);
 
     assertEquals(limit, CPU_LIMIT);
     assertEquals(request, CPU_REQUEST);
@@ -128,25 +128,6 @@ public class ContainersTest {
     assertEquals(Containers.getRamRequest(container), 0);
     assertEquals(Containers.getCpuRequest(container), 0, 0.0);
   }
-
-  //  I cannot understand what we're testing here. Can you?
-  //  @Test
-  //  public void testOverridesContainerRamLimit() {
-  //    Containers.addRamLimit(container, 3221225472L);
-  //
-  //    assertTrue(limits.containsKey("cpu"));
-  //    assertNotEquals(limits.get("memory"), "3221225472");
-  //  }
-  //
-  //  @Test
-  //  public void testAddContainerRamLimitWhenItNotPresent() {
-  //    final Map<String, Quantity> limits = new HashMap<>();
-  //    when(resource.getLimits()).thenReturn(limits);
-  //
-  //    Containers.addRamLimit(container, RAM_LIMIT);
-  //
-  //    assertNotEquals(limits.get("memory"), String.valueOf(RAM_LIMIT));
-  //  }
 
   @Test
   public void testAddContainerRamLimitWhenResourceIsNull() {

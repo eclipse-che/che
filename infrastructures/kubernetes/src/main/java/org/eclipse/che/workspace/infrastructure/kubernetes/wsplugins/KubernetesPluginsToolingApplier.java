@@ -94,9 +94,8 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider,
       ChePluginsVolumeApplier chePluginsVolumeApplier,
       EnvVars envVars) {
-    this.defaultSidecarMemoryLimitBytes = String.valueOf(defaultSidecarMemoryLimitMB * 1024 * 1024);
-    this.defaultSidecarMemoryRequestBytes =
-        String.valueOf(defaultSidecarMemoryRequestMB * 1024 * 1024);
+    this.defaultSidecarMemoryLimitBytes = toBytesString(defaultSidecarMemoryLimitMB);
+    this.defaultSidecarMemoryRequestBytes = toBytesString(defaultSidecarMemoryRequestMB);
     this.defaultSidecarCpuLimitCores =
         Float.toString(KubernetesSize.toCores(defaultSidecarCpuLimitCores));
     this.defaultSidecarCpuRequestCores =
@@ -305,6 +304,10 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     cmd.getAttributes().put(WORKING_DIRECTORY_ATTRIBUTE, command.getWorkingDir());
     cmd.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName);
     return cmd;
+  }
+
+  private String toBytesString(long memoryLimitMB) {
+    return String.valueOf(memoryLimitMB * 1024L * 1024L);
   }
 
   private static class CommandsResolver {
