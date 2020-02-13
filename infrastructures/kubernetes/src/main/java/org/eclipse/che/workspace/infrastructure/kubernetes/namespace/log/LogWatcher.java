@@ -108,17 +108,15 @@ public class LogWatcher implements PodEventHandler, Closeable {
       int retries = 0;
       while (retries < 10) {
         LOG.debug("try watching the logs [{}]", retries);
-        try (PrefixedPipedInputStream is = new PrefixedPipedInputStream(containerName);
-            LogWatch log =
+        try (LogWatch log =
                 client
                     .pods()
                     .inNamespace(namespace)
                     .withName(podName)
                     .inContainer(containerName)
-                    .watchLog(new PipedOutputStream(is))) {
-
+                    .watchLog()) {
           currentWatchers.add(log);
-          if (!logHandler.handle(is)) {
+          if (!logHandler.handle(log.getOutput(), containerName)) {
             // failed to get the logs this time, so removing this watcher
             currentWatchers.remove(log);
             LOG.debug("failed to get the logs [{}]", retries);

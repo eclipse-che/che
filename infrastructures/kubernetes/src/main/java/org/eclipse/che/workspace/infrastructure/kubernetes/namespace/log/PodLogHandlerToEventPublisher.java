@@ -13,7 +13,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PipedInputStream;
 import java.time.ZonedDateTime;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -73,10 +75,11 @@ public class PodLogHandlerToEventPublisher implements PodLogHandler {
    * communication (which is ok maybe).
    *
    * @param inputStream to read from
+   * @param containerName source container of the inputStream
    * @return false if error message. true at the end of the stream or interrupted stream
    */
   @Override
-  public boolean handle(PrefixedPipedInputStream inputStream) {
+  public boolean handle(InputStream inputStream, String containerName) {
     try (BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
       String logMessage;
       while ((logMessage = in.readLine()) != null) {
@@ -85,7 +88,7 @@ public class PodLogHandlerToEventPublisher implements PodLogHandler {
           return false;
         } else {
           eventsPublisher.sendRuntimeLogEvent(
-              String.format("[%s] -> %s", inputStream.prefix(), logMessage),
+              String.format("[%s] -> %s", containerName, logMessage),
               ZonedDateTime.now().toString(),
               identity);
         }

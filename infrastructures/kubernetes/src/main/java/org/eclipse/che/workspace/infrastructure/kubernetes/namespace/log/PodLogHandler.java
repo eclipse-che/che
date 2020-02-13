@@ -12,10 +12,11 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 public interface PodLogHandler {
 
-  boolean handle(PrefixedPipedInputStream is) throws IOException;
+  boolean handle(InputStream is, String containerName) throws IOException;
 
   boolean matchPod(String podName);
 }
