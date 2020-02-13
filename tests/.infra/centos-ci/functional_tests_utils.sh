@@ -302,14 +302,14 @@ function archiveArtifacts() {
   rsync --password-file=./artifacts.key -Hva --partial --relative ./che/${JOB_NAME}/${BUILD_NUMBER} devtools@artifacts.ci.centos.org::devtools/
 }
 
-function defindCheRoute(){
+function defineCheRoute(){
 CHE_ROUTE=$(oc get route che --template='{{ .spec.host }}')
   echo "====== Check CHE ROUTE ======"
   curl -vL $CHE_ROUTE
 }
 
 createTestWorkspaceAndRunTest() {
-  defindCheRoute
+  defineCheRoute
    ### Create workspace
   chectl workspace:start --access-token "$USER_ACCESS_TOKEN" -f https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
 
@@ -387,7 +387,7 @@ function seleniumTestsSetup() {
   echo "Start selenium tests"
   cd /root/payload
   export CHE_INFRASTRUCTURE=openshift
-  defindCheRoute
+  defineCheRoute
 
   mvn clean install -pl :che-selenium-test -am -DskipTests=true -U
   configureGithubTestUser
@@ -408,7 +408,7 @@ function createIndentityProvider() {
 }
 
 function runDevfileTestSuite() {
-  defindCheRoute
+  defineCheRoute
   ### Create directory for report
   mkdir report
   REPORT_FOLDER=$(pwd)/report
