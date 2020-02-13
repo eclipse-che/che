@@ -290,7 +290,6 @@ init() {
   export JAVA_OPTS="${JAVA_OPTS} -Dche.docker.network=$NETWORK_NAME"
 }
 
-trust_store_defined=false
 add_cert_to_truststore() {
   DEFAULT_JAVA_TRUST_STORE=$JAVA_HOME/lib/security/cacerts
   DEFAULT_JAVA_TRUST_STOREPASS="changeit"
@@ -299,33 +298,32 @@ add_cert_to_truststore() {
   SELF_SIGNED_CERT=/home/user/self-signed.crt
 
   echo "Found a custom cert. Adding it to java trust store based on $DEFAULT_JAVA_TRUST_STORE"
-  cp $DEFAULT_JAVA_TRUST_STORE $JAVA_TRUST_STORE
+  if [ ! -f "$JAVA_TRUST_STORE" ]; then
+      cp $DEFAULT_JAVA_TRUST_STORE $JAVA_TRUST_STORE
+  fi
 
   echo "$1" > $SELF_SIGNED_CERT
 
   # make sure that owner has permissions to write and other groups have permissions to read
   chmod 644 $JAVA_TRUST_STORE
 
-  echo yes | keytool -keystore $JAVA_TRUST_STORE -importcert -alias HOSTDOMAIN -file $SELF_SIGNED_CERT -storepass $DEFAULT_JAVA_TRUST_STOREPASS > /dev/null
-
+  echo yes | keytool -keystore $JAVA_TRUST_STORE -importcert -alias "$2" -file $SELF_SIGNED_CERT -storepass $DEFAULT_JAVA_TRUST_STOREPASS > /dev/null
   # allow only read by all groups
   chmod 444 $JAVA_TRUST_STORE
-
-  if [ "$trust_store_defined" == false ]; then
+  if [[ "$JAVA_OPTS" != *"-Djavax.net.ssl.trustStore"* && "$JAVA_OPTS" != *"-Djavax.net.ssl.trustStorePassword"* ]]; then
     export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=$JAVA_TRUST_STORE -Djavax.net.ssl.trustStorePassword=$DEFAULT_JAVA_TRUST_STOREPASS"
   fi
-  trust_store_defined=true
 }
 
 add_che_cert_to_truststore() {
   if [ "${CHE_SELF__SIGNED__CERT}" != "" ]; then
-    add_cert_to_truststore "${CHE_SELF__SIGNED__CERT}"
+    add_cert_to_truststore "${CHE_SELF__SIGNED__CERT}" "HOSTDOMAIN1"
   fi
 }
 
 add_public_cert_to_truststore() {
   if [ "${CHE_PUBLIC_CERT}" != "" ]; then
-    add_cert_to_truststore "${CHE_PUBLIC_CERT}"
+    add_cert_to_truststore "${CHE_PUBLIC_CERT}" "HOSTDOMAIN2"
   fi
 }
 
@@ -388,7 +386,6 @@ trap 'responsible_shutdown' SIGHUP SIGTERM SIGINT
 init
 init_global_variables
 set_environment_variables
-configure_java_trust_store
 add_che_cert_to_truststore
 add_public_cert_to_truststore
 
