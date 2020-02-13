@@ -302,14 +302,14 @@ function archiveArtifacts() {
   rsync --password-file=./artifacts.key -Hva --partial --relative ./che/${JOB_NAME}/${BUILD_NUMBER} devtools@artifacts.ci.centos.org::devtools/
 }
 
-function defindCheRoute(){
+function defineCheRoute(){
 CHE_ROUTE=$(oc get route che --template='{{ .spec.host }}')
   echo "====== Check CHE ROUTE ======"
   curl -vL $CHE_ROUTE
 }
 
 createTestWorkspaceAndRunTest() {
-  defindCheRoute
+  defineCheRoute
    ### Create workspace
   chectl workspace:start --access-token "$USER_ACCESS_TOKEN" -f https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
 
@@ -387,7 +387,7 @@ function seleniumTestsSetup() {
   echo "Start selenium tests"
   cd /root/payload
   export CHE_INFRASTRUCTURE=openshift
-  defindCheRoute
+  defineCheRoute
 
   mvn clean install -pl :che-selenium-test -am -DskipTests=true -U
   configureGithubTestUser
@@ -405,4 +405,22 @@ function createIndentityProvider() {
   CHE_OPENSHIFT_PROJECT=eclipse-che
   keycloakPodName=$(oc get pod --namespace=$CHE_OPENSHIFT_PROJECT | grep keycloak | awk '{print $1}')
   /tmp/oc exec $keycloakPodName --namespace=$CHE_OPENSHIFT_PROJECT -- /opt/jboss/keycloak/bin/kcadm.sh create identity-provider/instances -r che -s alias=github -s providerId=github -s enabled=true -s storeToken=true -s addReadTokenRoleOnCreate=true -s 'config.useJwksUrl="true"' -s config.clientId=$CHE_MULTI_USER_GITHUB_CLIENTID_OCP -s config.clientSecret=$CHE_MULTI_USER_GITHUB_SECRET_OCP -s 'config.defaultScope="repo,user,write:public_key"' --no-config --server http://localhost:8080/auth --user admin --password admin --realm master
+}
+
+function runDevfileTestSuite() {
+  defineCheRoute
+  ### Create directory for report
+  mkdir report
+  REPORT_FOLDER=$(pwd)/report
+  ### Run tests
+  docker run --shm-size=1g --net=host  --ipc=host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
+  -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" \
+  -e TS_SELENIUM_LOG_LEVEL=DEBUG \
+  -e TS_SELENIUM_MULTIUSER=true \
+  -e TS_SELENIUM_USERNAME="${TEST_USERNAME}" \
+  -e TS_SELENIUM_PASSWORD="${TEST_USERNAME}" \
+  -e TEST_SUITE=test-all-devfiles -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \
+  -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \
+  -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
+  quay.io/eclipse/che-e2e:nightly
 }

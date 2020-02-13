@@ -11,6 +11,7 @@ echo "========Starting nigtly test job $(date)========"
 source tests/.infra/centos-ci/functional_tests_utils.sh
 source .ci/cico_common.sh
 
+setupEnvs
 installKVM
 installDependencies
 installCheCtl
@@ -20,4 +21,3 @@ deployCheIntoCluster
 createTestUserAndObtainUserToken
 createTestWorkspaceAndRunTest
 archiveArtifacts "che-nightly-happy-path"
-
