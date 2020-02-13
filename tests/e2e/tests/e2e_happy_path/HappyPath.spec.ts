@@ -97,7 +97,7 @@ suite('Language server validation', async () => {
             await ide.waitStatusBarContains('Activating Language Support for Java');
         }
 
-        await ide.waitStatusBarTextAbsence('Starting Java Language Server', 1800000);
+        await ide.waitStatusBarTextAbsence('Activating Language Support for Java', 1800000);
         await checkJavaPathCompletion();
     });
 
