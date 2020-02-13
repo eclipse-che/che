@@ -13,7 +13,6 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { By, Key, WebElement, error } from 'selenium-webdriver';
 import { TestConstants } from '../../TestConstants';
 import { Logger } from '../../utils/Logger';
-import { PreferencesHandler } from '../../utils/PreferencesHandler';
 
 @injectable()
 export class Terminal {
