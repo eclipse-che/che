@@ -30,6 +30,20 @@
         <div class="header-title">Select a Sample</div>
         <div class="header-description">Use a sample to create your first workspace.</div>
       </div>
+      <div class="temporary-storage" layout="row" layout-align="start center">
+        <div class="temporary-storage-label">Temporary Storage</div>
+        <span class="temporary-storage-tooltip"
+          uib-tooltip-html="'Temporary Storage allows for faster I/O but may have limited storage and is not persistent.'"
+          tooltip-trigger="mouseenter"
+          tabindex="-1"
+          tooltip-append-to-body="true">
+          <i class="fa fa-question-circle" aria-hidden="true"></i>
+        </span>
+        <md-switch ng-model="templateListController.ephemeralMode"
+          ng-change="templateListController.onEphemeralModeChange()"
+          aria-label="Enables Temporary Storage.">
+        </md-switch>
+      </div>
       <div flex class="template-search">
         <div flex="100" layout="row">
           <div flex="15" class="search-icon" ng-hide="templateListController.searchValue"><i class="fa fa-search"></i>
