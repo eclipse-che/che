@@ -422,5 +422,5 @@ function runDevfileTestSuite() {
   -e TEST_SUITE=test-all-devfiles -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \
   -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \
   -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
-  quay.io/eclipse/che-e2e:nightly
+  quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
 }
