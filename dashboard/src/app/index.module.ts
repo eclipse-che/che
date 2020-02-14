@@ -82,8 +82,8 @@ function keycloakLoad(keycloakSettings: any) {
     script.addEventListener('load', resolve);
     script.addEventListener('error', () => {
       return cheBranding.ready.then(() => {
-        reject(`<div  class="certificate-header"><span>Certificate Error</span><a href="/"><i class="fa fa-times"></i></a></div>
- <div class="certificate-error"><p>Your Che host may be signed with a self-signed certificate. To resolve this issue, try these possible solutions:</p>
+        reject(`<div  class="error-header"><span>Certificate Error</span><a href="/"><i class="fa fa-times"></i></a></div>
+ <div class="error-body"><p>Your Che host may be signed with a self-signed certificate. To resolve this issue, try these possible solutions:</p>
  <p>1.) Import CA certificate info into your browser. You can find instructions on how to do this in you 
  <a href="${cheBranding.getDocs().certificate}" target="_blank">Che documentation</a>.</p>
  <p>2.) Open <a href="${script.src}" target="_blank">the link for your Che host</a> in a new tab and add an exclusion.</p>
@@ -141,7 +141,7 @@ function getApis(keycloak: any): Promise<void> {
         if (xhr.status === 200) {
           resolve();
         } else {
-          reject(xhr.responseText ? xhr.responseText : 'Unknown error');
+          reject(xhr.responseText ? xhr.responseText : '<div class="error-header"><span>Unknown error</span><a href="/"><i class="fa fa-times"></i></a></div>');
         }
       };
     });
@@ -210,7 +210,7 @@ angular.element(document).ready(() => {
   }).catch((error: string) => {
     console.error(`Can't GET "/api". ${error ? 'Error: ' : ''}`, error);
     if (!hasCertificateError) {
-      error = `${error}<br/>Click <a href="/">here</a> to reload page.`
+      error = `${error}<div class="error-body">Click <a href="/">here</a> to reload page.</div>`
     }
     showErrorMessage(error);
   });
