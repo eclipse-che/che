@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
+import com.google.common.base.Stopwatch;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
 import java.io.Closeable;
@@ -19,6 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
@@ -26,6 +28,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEv
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class watches workspace's pod events and tries hard to read the logs of all it's containers.
+ *
+ * <p>Current implementation have static thread-pool and each container log watch session runs in
+ * separate thread. This keeps connections under control, but does it provide enough robustness and
+ * performance?
+ */
 public class LogWatcher implements PodEventHandler, Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(LogWatcher.class);
@@ -57,16 +66,23 @@ public class LogWatcher implements PodEventHandler, Closeable {
   public void handle(PodEvent event) {
     final String podName = event.getPodName();
 
-    if (logHandler.matchPod(podName)) {
-      final String containerName = event.getContainerName();
-      if (containerName != null && !watchingContainers.contains(containerName)) {
+    LOG.debug("the reason for [{}]'s event is [{}]", event.getContainerName(), event.getReason());
+    final String containerName = event.getContainerName();
+    if (containerName != null
+        && logHandler.matchPod(podName)
+        && event.getReason().equals("Started")) {
+      if (!watchingContainers.contains(containerName)) {
         watchingContainers.add(containerName);
         LOG.trace(
             "adding [{}] to watching containers now watching [{}]",
             containerName,
             watchingContainers);
         pool.submit(new ContainerLogWatch(podName, containerName));
+      } else {
+        LOG.debug("sorry, already watching [{}]", containerName);
       }
+    } else {
+      LOG.debug("don't want to watch this [{}] [{}]", podName, containerName);
     }
   }
 
@@ -88,6 +104,8 @@ public class LogWatcher implements PodEventHandler, Closeable {
   }
 
   private class ContainerLogWatch implements Runnable {
+    private static final long WAIT_FOR_SECONDS = 30;
+    private static final int WAIT_TIMEOUT = 200;
 
     private final String podName;
     private final String containerName;
@@ -104,9 +122,10 @@ public class LogWatcher implements PodEventHandler, Closeable {
      */
     @Override
     public void run() {
-      int retries = 0;
-      while (retries < 10) {
-        LOG.debug("try watching the logs [{}]", retries);
+      Stopwatch stopwatch = Stopwatch.createStarted();
+      while (stopwatch.elapsed(TimeUnit.SECONDS) < WAIT_FOR_SECONDS) {
+        LOG.debug(
+            "try watching the logs [{}] [{}]s", containerName, stopwatch.elapsed(TimeUnit.SECONDS));
         try (LogWatch log =
             client
                 .pods()
@@ -118,15 +137,18 @@ public class LogWatcher implements PodEventHandler, Closeable {
           if (!logHandler.handle(log.getOutput(), containerName)) {
             // failed to get the logs this time, so removing this watcher
             currentWatchers.remove(log);
-            LOG.debug("failed to get the logs [{}]", retries);
-            retries++;
+            LOG.debug(
+                "failed to get the logs for [{}] time [{}]s",
+                containerName,
+                stopwatch.elapsed(TimeUnit.SECONDS));
           } else {
-            LOG.info("watched and ended");
+            LOG.info(
+                "finished watching the logs of [{} : {} : {}]", namespace, podName, containerName);
             break;
           }
 
-          LOG.info("waiting 1s before next try");
-          Thread.sleep(1000);
+          // wait before next try
+          Thread.sleep(WAIT_TIMEOUT);
         } catch (IOException | InterruptedException e) {
           LOG.error("Failed watching the logs, nothing better to do here.", e);
           return;
