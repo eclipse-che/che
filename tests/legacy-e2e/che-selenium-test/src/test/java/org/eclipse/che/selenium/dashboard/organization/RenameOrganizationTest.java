@@ -127,8 +127,8 @@ public class RenameOrganizationTest {
     organizationPage.clickBackButton();
     organizationListPage.waitForOrganizationsList();
 
-    assertTrue(organizationListPage.getValues(NAME).contains(newChildOrgQualifiedName));
-    assertTrue(organizationListPage.getValues(NAME).contains(NEW_PARENT_ORG_NAME));
+    organizationListPage.waitOrganizationInList(newChildOrgQualifiedName);
+    organizationListPage.waitOrganizationInList(NEW_PARENT_ORG_NAME);
   }
 
   private void renameOrganizationWithInvalidName(String organizationName) {

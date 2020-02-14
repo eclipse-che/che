@@ -10,10 +10,10 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheAPI} from '../../../../../components/api/che-api.factory';
-import {CheNotification} from '../../../../../components/notification/che-notification.factory';
-import {ConfirmDialogService} from '../../../../../components/service/confirm-dialog/confirm-dialog.service';
-import {CheBranding} from '../../../../../components/branding/che-branding.factory';
+import { CheAPI } from '../../../../../components/api/che-api.factory';
+import { CheNotification } from '../../../../../components/notification/che-notification.factory';
+import { ConfirmDialogService } from '../../../../../components/service/confirm-dialog/confirm-dialog.service';
+import { CheBranding } from '../../../../../components/branding/che-branding';
 
 /**
  * Controller for a factory information.
@@ -55,16 +55,16 @@ export class FactoryInformationController {
    * Default constructor that is using resource injection
    */
   constructor($scope: ng.IScope,
-              cheAPI: CheAPI,
-              cheNotification: CheNotification,
-              $location: ng.ILocationService,
-              $log: ng.ILogService,
-              $timeout: ng.ITimeoutService,
-              lodash: any,
-              $filter: ng.IFilterService,
-              $q: ng.IQService,
-              cheBranding: CheBranding,
-              confirmDialogService: ConfirmDialogService) {
+    cheAPI: CheAPI,
+    cheNotification: CheNotification,
+    $location: ng.ILocationService,
+    $log: ng.ILogService,
+    $timeout: ng.ITimeoutService,
+    lodash: any,
+    $filter: ng.IFilterService,
+    $q: ng.IQService,
+    cheBranding: CheBranding,
+    confirmDialogService: ConfirmDialogService) {
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
     this.$location = $location;

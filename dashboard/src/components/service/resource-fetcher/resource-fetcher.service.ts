@@ -11,9 +11,7 @@
  */
 'use strict';
 
-import { CheBranding } from '../../branding/che-branding.factory';
-
-const IDE_FETCHER_CALLBACK_ID = 'cheIdeFetcherCallback';
+import { CheBranding } from '../../branding/che-branding';
 
 /**
  * Provides a way to download IDE .js and then cache it before trying to load the IDE
@@ -45,13 +43,9 @@ export class ResourceFetcherService {
     this.$http = $http;
     this.cheBranding = cheBranding;
 
-    const callback = () => {
-      const prefetch = this.cheBranding.getConfiguration().prefetch;
-      this.prefetchCheCDNResources(prefetch.cheCDN);
-      this.prefetchResources(prefetch.resources);
-      this.cheBranding.unregisterCallback(IDE_FETCHER_CALLBACK_ID);
-    };
-    this.cheBranding.registerCallback(IDE_FETCHER_CALLBACK_ID, callback.bind(this));
+    const prefetch = this.cheBranding.getConfiguration().prefetch;
+    this.prefetchCheCDNResources(prefetch.cheCDN);
+    this.prefetchResources(prefetch.resources);
   }
 
   /**

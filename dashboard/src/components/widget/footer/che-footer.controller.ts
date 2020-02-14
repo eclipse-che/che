@@ -35,9 +35,7 @@ export class CheFooterController {
   }
 
   $onInit(): void {
-    this.cheDashboardConfigurationService.ready.then(() => {
-      this.links = this.cheDashboardConfigurationService.getFooterLinks();
-    });
+    this.links = this.cheDashboardConfigurationService.getFooterLinks();
   }
 
   /**
