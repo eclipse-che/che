@@ -317,7 +317,13 @@ createTestWorkspaceAndRunTest() {
   mkdir report
   REPORT_FOLDER=$(pwd)/report
   ### Run tests
-  docker run --shm-size=256m --network host -v $REPORT_FOLDER:/tmp/e2e/report:Z -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" -e TS_SELENIUM_MULTIUSER="true" -e TS_SELENIUM_USERNAME="${TEST_USERNAME}" -e TS_SELENIUM_PASSWORD="${TEST_USERNAME}" -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=420000 quay.io/eclipse/che-e2e:nightly
+  docker run --shm-size=256m --network host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
+  -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" \
+  -e TS_SELENIUM_MULTIUSER="true" \
+  -e TS_SELENIUM_USERNAME="${TEST_USERNAME}" \
+  -e TS_SELENIUM_PASSWORD="${TEST_USERNAME}" \
+  -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=420000 \
+  quay.io/eclipse/che-e2e:nightly ||IS_TESTS_FAILED=true
 }
 
 function createTestUserAndObtainUserToken() {
