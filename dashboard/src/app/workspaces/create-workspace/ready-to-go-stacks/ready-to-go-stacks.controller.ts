@@ -138,9 +138,7 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
     this.cheWorkspace.fetchWorkspaceSettings().then((settings: che.IWorkspaceSettings) => {
       this.ephemeralMode = settings['che.workspace.persist_volumes.default'] === 'false';
     });
-    this.cheDashboardConfigurationService.ready.then(() => {
-      this.enabledKubernetesNamespaceSelector = this.cheDashboardConfigurationService.enabledFeature(TogglableFeature.KUBERNETES_NAMESPACE_SELECTOR);
-    });
+    this.enabledKubernetesNamespaceSelector = this.cheDashboardConfigurationService.enabledFeature(TogglableFeature.KUBERNETES_NAMESPACE_SELECTOR);
   }
 
   /**

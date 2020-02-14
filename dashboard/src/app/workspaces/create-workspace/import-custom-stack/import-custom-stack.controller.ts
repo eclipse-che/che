@@ -114,9 +114,7 @@ export class ImportStackController implements IImportStackScopeBindings {
     this.cheWorkspace.fetchWorkspaceSettings().then((settings: che.IWorkspaceSettings) => {
       this.ephemeralMode = settings['che.workspace.persist_volumes.default'] === 'false';
     });
-    this.cheDashboardConfigurationService.ready.then(() => {
-      this.enabledKubernetesNamespaceSelector = this.cheDashboardConfigurationService.enabledFeature(TogglableFeature.KUBERNETES_NAMESPACE_SELECTOR);
-    });
+    this.enabledKubernetesNamespaceSelector = this.cheDashboardConfigurationService.enabledFeature(TogglableFeature.KUBERNETES_NAMESPACE_SELECTOR);
   }
 
   updateDevfileFromRemote(devfile: che.IWorkspaceDevfile, attrs: { factoryurl?: string } | undefined): void {

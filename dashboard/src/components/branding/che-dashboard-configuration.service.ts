@@ -41,10 +41,6 @@ export class CheDashboardConfigurationService {
     this.cheBranding = cheBranding;
   }
 
-  get ready(): ng.IPromise<void> {
-    return this.$q.resolve();
-  }
-
   allowedMenuItem(menuItem: che.ConfigurableMenuItem | string): boolean {
     const disabledItems = this.cheBranding.getConfiguration().menu.disabled;
     return (disabledItems as string[]).indexOf(menuItem) === -1;

@@ -128,9 +128,7 @@ export class WorkspaceDetailsOverviewController {
       deRegistrationFn();
     });
 
-    this.cheDashboardConfigurationService.ready.then(() => {
-      this.enabledKubernetesNamespaceSelector = this.cheDashboardConfigurationService.enabledFeature(TogglableFeature.KUBERNETES_NAMESPACE_SELECTOR);
-    });
+    this.enabledKubernetesNamespaceSelector = this.cheDashboardConfigurationService.enabledFeature(TogglableFeature.KUBERNETES_NAMESPACE_SELECTOR);
 
     this.init();
   }
