@@ -16,9 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.ZonedDateTime;
+import java.util.List;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,16 +27,14 @@ public class PodLogHandlerToEventPublisher implements PodLogHandler {
 
   private final RuntimeEventsPublisher eventsPublisher;
   private final RuntimeIdentity identity;
-  private final KubernetesMachineCache machines;
+  private final List<String> podNames;
   private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
   public PodLogHandlerToEventPublisher(
-      RuntimeEventsPublisher eventsPublisher,
-      RuntimeIdentity identity,
-      KubernetesMachineCache machines) {
+      RuntimeEventsPublisher eventsPublisher, RuntimeIdentity identity, List<String> machines) {
     this.eventsPublisher = eventsPublisher;
     this.identity = identity;
-    this.machines = machines;
+    this.podNames = machines;
   }
 
   /**
@@ -48,20 +45,7 @@ public class PodLogHandlerToEventPublisher implements PodLogHandler {
    */
   @Override
   public boolean matchPod(String podName) {
-    try {
-      return machines
-          .getMachines(identity)
-          .values()
-          .stream()
-          .filter(m -> m.getPodName() != null)
-          .anyMatch(m -> m.getPodName().equals(podName));
-    } catch (InfrastructureException e) {
-      LOG.error(
-          "Failed to get the machines when checking whether LogHandler do care about pod [{}]. Not much to do here.",
-          podName,
-          e);
-      return false;
-    }
+    return podNames.stream().anyMatch(p -> p.equals(podName));
   }
 
   /**

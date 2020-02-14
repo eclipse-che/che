@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -600,12 +601,15 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
     listenEvents();
     // TODO: hide this behind some configuration flag
-    watchLogs();
 
     final KubernetesServerResolver serverResolver =
         new KubernetesServerResolver(ingressPathTransformInverter, createdServices, readyIngresses);
 
     doStartMachine(serverResolver);
+
+    // we'll start watching for logs after start machines, at this point we know exact pod/container
+    // names
+    watchLogs();
   }
 
   @Traced
@@ -624,11 +628,25 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   }
 
   protected void watchLogs() throws InfrastructureException {
+    LOG.debug("Hey, start watchnig here");
+    List<String> podNames =
+        machines
+            .getMachines(getContext().getIdentity())
+            .values()
+            .stream()
+            .filter(Objects::nonNull)
+            .map(KubernetesMachineImpl::getPodName)
+            .filter(Objects::nonNull)
+            .distinct()
+            .collect(Collectors.toList());
+
+    LOG.debug("we will watch pods [{}]", podNames);
+
     namespace
         .deployments()
         .watchLogs(
             new PodLogHandlerToEventPublisher(
-                this.eventPublisher, this.getContext().getIdentity(), machines));
+                this.eventPublisher, this.getContext().getIdentity(), podNames));
   }
 
   @Traced
