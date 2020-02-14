@@ -65,6 +65,12 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
     this.proxyProvisioner = jwtProxyProvisionerFactory.create(identity);
   }
 
+  /**
+   * This always returns an empty optional because JWT proxy is injected into the workspace pod and
+   * assumes the servers it exposes listen on localhost.
+   *
+   * @see SecureServerExposer#createService(Collection, PodData, String, Map)
+   */
   @Override
   public Optional<Service> createService(
       Collection<ServicePort> allSecurePorts,
