@@ -104,6 +104,17 @@ spec:
               optional: false
         {{- end }}
 
+        # If custom public certificate is used then configure Che Server with certificate content
+        # to propagate it to trust store
+        {{- if .Values.global.tls.useCustomPublicCerts }}
+        - name: CHE_CUSTOM_PUBLIC_CERT
+          valueFrom:
+            secretKeyRef:
+              key: ca.crt
+              name: {{ .Values.global.tls.customPublicCertConfigMapName }}
+              optional: false
+        {{- end }}
+
         # If workspaces are created in a separate precreated namespace
         # then configure Che Server to propagate TLS secret to workspaces' namespaces
         {{- if not (contains "<" .Values.global.cheWorkspacesNamespace) }}

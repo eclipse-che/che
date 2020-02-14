@@ -161,6 +161,12 @@ objects:
                 key: ca.crt
                 name: self-signed-certificate
                 optional: true
+          - name: CHE_CUSTOM_PUBLIC_CERT
+            valueFrom:
+              configMapKeyRef:
+                name: custom-public-cert
+                key: ca.crt
+                optional: true
           - name: CHE_GIT_SELF__SIGNED__CERT
             valueFrom:
               configMapKeyRef:
@@ -172,12 +178,6 @@ objects:
               configMapKeyRef:
                 name: che-git-self-signed-cert
                 key: githost
-                optional: true
-          - name: CHE_PUBLIC_CERT
-            valueFrom:
-              configMapKeyRef:
-                name: che-public-cert
-                key: ca.crt
                 optional: true
           - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
             value: "${CHE_WORKSPACE_PLUGIN__REGISTRY__URL}"

@@ -322,8 +322,8 @@ add_che_cert_to_truststore() {
 }
 
 add_public_cert_to_truststore() {
-  if [ "${CHE_PUBLIC_CERT}" != "" ]; then
-    add_cert_to_truststore "${CHE_PUBLIC_CERT}" "HOSTDOMAIN2"
+  if [ "${CHE_CUSTOM_PUBLIC_CERT}" != "" ]; then
+    add_cert_to_truststore "${CHE_CUSTOM_PUBLIC_CERT}" "HOSTDOMAIN2"
   fi
 }
 
