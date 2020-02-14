@@ -31,7 +31,19 @@ createTestUserAndObtainUserToken
 installDockerCompose
 seleniumTestsSetup
 createIndentityProvider
-bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh --threads=3 --host=${CHE_ROUTE} --port=80 --multiuser --include-tests-under-repair --include-flaky-tests
+
+bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
+  --threads=3 \
+  --host=${CHE_ROUTE} \
+  --port=80 \
+  --multiuser \
+  --include-tests-under-repair \
+  --include-flaky-tests \
+  || IS_TESTS_FAILED=true
+
+echo "=========================== THIS IS POST TEST ACTIONS =============================="
 saveSeleniumTestResult
 getOpenshiftLogs
 archiveArtifacts "che-nigthly-multiuser-all-test"
+
+if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi
