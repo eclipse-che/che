@@ -28,24 +28,32 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 
 @Singleton
 public class TheiaProjectTree {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final SeleniumWebDriver seleniumWebDriver;
+  private final TheiaIde theiaIde;
   private final TestWebElementRenderChecker renderChecker;
   private final TheiaEditor theiaEditor;
 
   @Inject
   private TheiaProjectTree(
       SeleniumWebDriverHelper seleniumWebDriverHelper,
+      SeleniumWebDriver seleniumWebDriver,
+      TheiaIde theiaIde,
       TestWebElementRenderChecker renderChecker,
       TheiaEditor theiaEditor) {
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    this.seleniumWebDriver = seleniumWebDriver;
+    this.theiaIde = theiaIde;
     this.renderChecker = renderChecker;
     this.theiaEditor = theiaEditor;
   }
@@ -99,7 +107,15 @@ public class TheiaProjectTree {
 
   public void waitItem(String itemPath) {
     String itemId = getProjectItemId(itemPath);
-    seleniumWebDriverHelper.waitVisibility(By.id(itemId), ELEMENT_TIMEOUT_SEC);
+
+    try {
+      seleniumWebDriverHelper.waitVisibility(By.id(itemId), ELEMENT_TIMEOUT_SEC);
+    } catch (TimeoutException ex) {
+      seleniumWebDriver.navigate().refresh();
+      theiaIde.waitOpenedWorkspaceIsReadyToUse();
+
+      seleniumWebDriverHelper.waitVisibility(By.id(itemId), ELEMENT_TIMEOUT_SEC);
+    }
   }
 
   public void waitItemDisappearance(String itemPath) {
@@ -137,7 +153,6 @@ public class TheiaProjectTree {
   public void expandItem(String itemName) {
     if (!isItemExpanded(itemName)) {
       clickOnItem(itemName);
-
       waitItemExpanded(itemName);
     }
   }
