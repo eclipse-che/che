@@ -152,8 +152,8 @@ public class ResourceLimitAttributesProvisionerTest {
 
   @Test
   public void testWhenRamAttributesAreNotPresentInMachineConfigAndOnlyRequestIsProvidedInRecipe() {
-    long defaultMemoryLimit = 1024L;
-    long defaultMemoryRequest = 2048L;
+    long defaultMemoryLimit = 2048L;
+    long defaultMemoryRequest = 1024L;
     InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
 
     long recipeRequest = 1526L;
@@ -161,15 +161,16 @@ public class ResourceLimitAttributesProvisionerTest {
         machineConfig, 0, recipeRequest, defaultMemoryLimit, defaultMemoryRequest);
 
     assertEquals(
-        machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), String.valueOf(recipeRequest));
+        machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE),
+        String.valueOf(defaultMemoryLimit));
     assertEquals(
         machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE), String.valueOf(recipeRequest));
   }
 
   @Test
   public void testWhenRamAttributesAreNotPresentInMachineConfigAndOnlyLimitIsProvidedInRecipe() {
-    long defaultMemoryLimit = 1024L;
-    long defaultMemoryRequest = 2048L;
+    long defaultMemoryLimit = 2048L;
+    long defaultMemoryRequest = 1024L;
     InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
 
     long recipeLimit = 1526L;
@@ -179,7 +180,8 @@ public class ResourceLimitAttributesProvisionerTest {
     assertEquals(
         machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), String.valueOf(recipeLimit));
     assertEquals(
-        machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE), String.valueOf(recipeLimit));
+        machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE),
+        String.valueOf(defaultMemoryRequest));
   }
 
   @Test
@@ -312,7 +314,7 @@ public class ResourceLimitAttributesProvisionerTest {
         machineConfig, 0, recipeRequest, defaultCPULimit, defaultCPURequest);
 
     assertEquals(
-        machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), String.valueOf(recipeRequest));
+        machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), String.valueOf(defaultCPULimit));
     assertEquals(
         machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE), String.valueOf(recipeRequest));
   }

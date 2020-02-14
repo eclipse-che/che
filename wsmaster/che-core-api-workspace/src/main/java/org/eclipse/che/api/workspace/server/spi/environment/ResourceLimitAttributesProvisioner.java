@@ -38,9 +38,6 @@ public class ResourceLimitAttributesProvisioner {
   /**
    * Configures memory attributes, if they are missing in {@link MachineConfig}
    *
-   * <p>Note: Default memory request and limit will only be used if BOTH memoryLimit and
-   * memoryRequest are null or 0, otherwise the provided value will be used for both parameters.
-   *
    * @param machineConfig - given machine configuration
    * @param memoryLimit - resource limit parameter configured by user in specific infra recipe. Can
    *     be 0 if defaults should be used
@@ -61,15 +58,13 @@ public class ResourceLimitAttributesProvisioner {
           "Requested default container resource limit is less than default request. Request parameter will be ignored.");
     }
 
-    // if both properties are not defined
-    if (memoryLimit <= 0 && memoryRequest <= 0) {
+    if (memoryLimit <= 0) { // if limit only is undefined
       memoryLimit = defaultMemoryLimit;
+    }
+    if (memoryRequest <= 0) { // if request only is undefined
       memoryRequest = defaultMemoryRequest;
-    } else if (memoryLimit <= 0) { // if limit only is undefined
-      memoryLimit = memoryRequest;
-    } else if (memoryRequest <= 0) { // if request only is undefined
-      memoryRequest = memoryLimit;
-    } else if (memoryRequest > memoryLimit) { // if both properties are defined, but not consistent
+    }
+    if (memoryRequest > memoryLimit) { // if both properties are defined, but not consistent
       memoryRequest = memoryLimit;
     }
 
@@ -86,9 +81,6 @@ public class ResourceLimitAttributesProvisioner {
 
   /**
    * Configures CPU attributes, if they are missing in {@link MachineConfig}
-   *
-   * <p>Note: Default CPU request and memory will only be used if BOTH memoryLimit and memoryRequest
-   * are null or 0, otherwise the provided value will be used for both parameters.
    *
    * @param machineConfig - given machine configuration
    * @param cpuLimit - CPU resource limit parameter configured by user in specific infra recipe. Can
@@ -110,15 +102,13 @@ public class ResourceLimitAttributesProvisioner {
           "Requested default container resource limit is less than default request. Request parameter will be ignored.");
     }
 
-    // if both properties are not defined
-    if (cpuLimit <= 0 && cpuRequest <= 0) {
+    if (cpuLimit <= 0) { // if limit only is undefined
       cpuLimit = defaultCPULimit;
+    }
+    if (cpuRequest <= 0) { // if request only is undefined
       cpuRequest = defaultCPURequest;
-    } else if (cpuLimit <= 0) { // if limit only is undefined
-      cpuLimit = cpuRequest;
-    } else if (cpuRequest <= 0) { // if request only is undefined
-      cpuRequest = cpuLimit;
-    } else if (cpuRequest > cpuLimit) { // if both properties are defined, but not consistent
+    }
+    if (cpuRequest > cpuLimit) { // if both properties are defined, but not consistent
       cpuRequest = cpuLimit;
     }
 
