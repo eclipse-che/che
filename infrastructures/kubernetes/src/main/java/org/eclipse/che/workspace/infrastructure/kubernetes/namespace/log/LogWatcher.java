@@ -127,14 +127,20 @@ public class LogWatcher implements PodEventHandler, Closeable {
   }
 
   private class ContainerLogWatch implements Runnable {
+
+    private static final String ERROR_MESSAGE_MATCH_FORMAT =
+        "container \\\"%s\\\" in pod \\\"%s\\\" is waiting to start: PodInitializing";
+
     private final String podName;
     private final String containerName;
     private final PodLogHandler logHandler;
+    private final String errorMessageMatch;
 
     private ContainerLogWatch(String podName, String containerName, PodLogHandler logHandler) {
       this.podName = podName;
       this.containerName = containerName;
       this.logHandler = logHandler;
+      this.errorMessageMatch = String.format(ERROR_MESSAGE_MATCH_FORMAT, containerName, podName);
     }
 
     /**
@@ -159,7 +165,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
                 .watchLog()) {
           currentWatchers.add(log);
 
-          successfullWatch = readAndHandle(log.getOutput(), logHandler, containerName);
+          successfullWatch = readAndHandle(log.getOutput(), logHandler);
           if (!successfullWatch) {
             // failed to get the logs this time, so removing this watcher
             currentWatchers.remove(log);
@@ -181,34 +187,46 @@ public class LogWatcher implements PodEventHandler, Closeable {
         }
       }
     }
-  }
 
-  /**
-   * Reads given inputStream. If there is 40x error message message from k8s, returns false
-   * immediately so we can try again later. Otherwise keeps reading the messages from the stream and
-   * gives them to given handler. Be aware that it is blocking and potentially long operation!
-   *
-   * @param inputStream to read log messages from
-   * @param handler we delegate log messages to this handler.
-   * @param containerName handler needs this so it knows who sends the log message
-   * @return false if 40x error received from k8s, true at the end of the stream or if interrupted
-   */
-  private boolean readAndHandle(
-      InputStream inputStream, PodLogHandler handler, String containerName) {
-    try (BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
-      String logMessage;
-      while ((logMessage = in.readLine()) != null) {
-        if (logMessage.contains("\"code\":40")) {
-          LOG.debug("failed to get the logs, should try again [{}]", logMessage);
-          return false;
-        } else {
-          handler.handle(logMessage, containerName);
+    /**
+     * Reads given inputStream. If we receive error message about pod is initializing from k8s (see:
+     * {@link ContainerLogWatch#isErrorMessage(String)} and {@link ContainerLogWatch#ERROR_MESSAGE_MATCH_FORMAT}),
+     * returns false immediately so we can try again later. Otherwise keeps reading the messages
+     * from the stream and gives them to given handler. Be aware that it is blocking and potentially
+     * long operation!
+     *
+     * @param inputStream to read log messages from
+     * @param handler     we delegate log messages to this handler.
+     * @return false if 40x error received from k8s, true at the end of the stream or if interrupted
+     */
+    private boolean readAndHandle(InputStream inputStream, PodLogHandler handler) {
+      try (BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
+        String logMessage;
+        while ((logMessage = in.readLine()) != null) {
+          if (this.isErrorMessage(logMessage)) {
+            LOG.trace(
+                "failed to get the logs for [{} : {}], should try again if enough time.",
+                podName,
+                containerName);
+            return false;
+          } else {
+            handler.handle(logMessage, containerName);
+          }
         }
+      } catch (IOException e) {
+        // TODO: can we somehow recognize if it is failure or intended close()?
+        LOG.debug(
+            "End of watching log of [{} : {} : {}]. It could be either intended or some connection failure.",
+            namespace,
+            podName,
+            containerName);
+        LOG.trace("End of watching log of [{} : {} : {}]", namespace, podName, containerName, e);
       }
-    } catch (IOException e) {
-      // TODO: can we somehow recognize if it is failure or intended close()?
-      LOG.debug("End of watching log. It could be either intended or some connection failure.", e);
+      return true;
     }
-    return true;
+
+    private boolean isErrorMessage(String message) {
+      return message.contains(this.errorMessageMatch);
+    }
   }
 }
