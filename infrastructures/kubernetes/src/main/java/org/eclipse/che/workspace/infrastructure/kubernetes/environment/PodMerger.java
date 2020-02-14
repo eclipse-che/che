@@ -175,12 +175,10 @@ public class PodMerger {
       throws ValidationException {
     if (a == null) {
       return b;
+    } else if (b == null || a.equals(b)) {
+      return a;
     } else {
-      if (b == null || a.equals(b)) {
-        return a;
-      } else {
-        throw new ValidationException(String.format(errorMessageTemplate, a, b));
-      }
+      throw new ValidationException(String.format(errorMessageTemplate, a, b));
     }
   }
 }

@@ -23,7 +23,6 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
-import java.util.Optional;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -105,14 +104,10 @@ public class VcsSslCertificateProvisioner
 
     for (PodData pod : k8sEnv.getPodsData().values()) {
       if (pod.getRole() != PodRole.INJECTABLE) {
-        Optional<Volume> certVolume =
-            pod.getSpec()
-                .getVolumes()
-                .stream()
-                .filter(v -> v.getName().equals(CHE_GIT_SELF_SIGNED_VOLUME))
-                .findAny();
-
-        if (!certVolume.isPresent()) {
+        if (pod.getSpec()
+            .getVolumes()
+            .stream()
+            .noneMatch(v -> v.getName().equals(CHE_GIT_SELF_SIGNED_VOLUME))) {
           pod.getSpec().getVolumes().add(buildCertVolume(selfSignedCertConfigMapName));
         }
       }
@@ -127,13 +122,10 @@ public class VcsSslCertificateProvisioner
   }
 
   private void provisionCertVolumeMountIfNeeded(Container container) {
-    Optional<VolumeMount> certVolumeMount =
-        container
-            .getVolumeMounts()
-            .stream()
-            .filter(vm -> vm.getName().equals(CHE_GIT_SELF_SIGNED_VOLUME))
-            .findAny();
-    if (!certVolumeMount.isPresent()) {
+    if (container
+        .getVolumeMounts()
+        .stream()
+        .noneMatch(vm -> vm.getName().equals(CHE_GIT_SELF_SIGNED_VOLUME))) {
       container.getVolumeMounts().add(buildCertVolumeMount());
     }
   }

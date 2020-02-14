@@ -15,6 +15,7 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -39,11 +40,10 @@ public interface SecureServerExposer<T extends KubernetesEnvironment> {
    *
    * @param allSecurePorts the secure ports on the container
    * @param pod the pod containing the container
-   * @return a service to put "in front of" the pod to service the ports or null if no such service
-   *     should be created.
+   * @return an optional service to put "in front of" the pod to service the ports, empty if no such
+   *     service should be created.
    */
-  @Nullable
-  Service createService(
+  Optional<Service> createService(
       Collection<ServicePort> allSecurePorts,
       PodData pod,
       String machineName,
@@ -56,7 +56,7 @@ public interface SecureServerExposer<T extends KubernetesEnvironment> {
    * @param pod the pod containing the exposed server
    * @param machineName machine name to which secure servers belong to
    * @param serviceName service name that exposes secure servers. Will be null if {@link
-   *     #createService(Collection, PodData, String, Map)} returned null
+   *     #createService(Collection, PodData, String, Map)} returned empty optional
    * @param serverId non-null for a unique server, null for a compound set of servers that should be
    *     exposed together.
    * @param servicePort service port that exposes secure servers

@@ -191,9 +191,11 @@ public class KubernetesEnvironment extends InternalEnvironment {
   }
 
   /**
-   * Get the pods that are meant to be injected into other deployments, like JWT proxy. The keys are
-   * machine names of machines that require the pods to be injected into their deployments. The
-   * values are the injectable pods keyed by their names.
+   * Get the pods that are meant to be injected into other deployments, like JWT proxy.
+   *
+   * <p>The keys in the returned map are machine names of machines that require the pods to be
+   * injected into their deployments. The values are maps of the injectable pods keyed by their
+   * names.
    */
   public Map<String, Map<String, Pod>> getInjectablePodsCopy() {
     return ImmutableMap.copyOf(injectablePods);

@@ -227,16 +227,18 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
     }
 
     if (!secureServers.isEmpty()) {
-      Service secureService =
+      Optional<Service> secureService =
           secureServerExposer.createService(securePorts.values(), pod, machineName, secureServers);
 
-      String secureServiceName;
-      if (secureService == null) {
-        secureServiceName = null;
-      } else {
-        secureServiceName = secureService.getMetadata().getName();
-        k8sEnv.getServices().put(secureServiceName, secureService);
-      }
+      String secureServiceName =
+          secureService
+              .map(
+                  s -> {
+                    String n = s.getMetadata().getName();
+                    k8sEnv.getServices().put(n, s);
+                    return n;
+                  })
+              .orElse(null);
 
       for (ServicePort servicePort : securePorts.values()) {
         // expose service port related secure servers if exist
@@ -282,17 +284,13 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
   }
 
   private void exposeInContainerIfNeeded(ServicePort servicePort) {
-    Optional<ContainerPort> exposedOpt =
-        container
-            .getPorts()
-            .stream()
-            .filter(
-                p ->
-                    p.getContainerPort().equals(servicePort.getPort())
-                        && servicePort.getProtocol().equals(p.getProtocol()))
-            .findAny();
-
-    if (!exposedOpt.isPresent()) {
+    if (container
+        .getPorts()
+        .stream()
+        .noneMatch(
+            p ->
+                p.getContainerPort().equals(servicePort.getPort())
+                    && servicePort.getProtocol().equals(p.getProtocol()))) {
       ContainerPort containerPort =
           new ContainerPortBuilder()
               .withContainerPort(servicePort.getPort())

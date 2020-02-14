@@ -744,27 +744,23 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       ObjectMeta toCreateMeta,
       List<Container> toCreateContainers,
       Map<String, Map<String, Pod>> injectables) {
-    Set<String> machinesInPod = getMachineNames(toCreateMeta, toCreateContainers);
-    return machinesInPod
+    return toCreateContainers
         .stream()
+        .map(c -> Names.machineName(toCreateMeta, c))
         .map(injectables::get)
-        // we're only intersted in pods for which we require injection
+        // we're only interested in pods for which we require injection
         .filter(Objects::nonNull)
         // now reduce to a map keyed by injected pod name so that if 2 pods require injection
         // of the same thing, we don't inject twice
         .flatMap(m -> m.entrySet().stream())
         // collect to map, ignoring duplicate entries
         .collect(toMap(Entry::getKey, Entry::getValue, (v1, v2) -> v1))
-        // ok, we only have 1 injectable pod keyed by their names, so let's just get them all
-        // and return as list
+        // ok, we only have 1 of each injectable pods keyed by their names, so let's just get them
+        // all and return as list
         .values()
         .stream()
         .map(PodData::new)
         .collect(Collectors.toList());
-  }
-
-  private Set<String> getMachineNames(ObjectMeta podMeta, List<Container> containers) {
-    return containers.stream().map(c -> Names.machineName(podMeta, c)).collect(Collectors.toSet());
   }
 
   /** Puts createdPod in the {@code machines} map and sends the starting event for this machine */

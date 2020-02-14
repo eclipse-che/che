@@ -17,6 +17,7 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -65,12 +66,12 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
   }
 
   @Override
-  public Service createService(
+  public Optional<Service> createService(
       Collection<ServicePort> allSecurePorts,
       PodData pod,
       String machineName,
       Map<String, ? extends ServerConfig> secureServers) {
-    return null;
+    return Optional.empty();
   }
 
   @Override
