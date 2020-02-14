@@ -596,6 +596,10 @@ public class KubernetesDeployments {
     }
   }
 
+  public void stopWatch() {
+    stopWatch(false);
+  }
+
   /**
    * Stops watching the pods inside Kubernetes namespace.
    *

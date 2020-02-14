@@ -275,7 +275,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       }
       wrapAndRethrow(startFailureCause);
     } finally {
-      namespace.deployments().stopWatch(false);
+      namespace.deployments().stopWatch();
     }
   }
 

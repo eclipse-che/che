@@ -36,8 +36,11 @@ import org.slf4j.LoggerFactory;
  * performance?
  */
 public class LogWatcher implements PodEventHandler {
-
   private static final Logger LOG = LoggerFactory.getLogger(LogWatcher.class);
+
+  // TODO: extract to properties
+  private static final long WAIT_FOR_SECONDS = 30;
+  private static final int WAIT_TIMEOUT = 2000;
 
   private final String namespace;
   private final KubernetesClient client;
@@ -100,9 +103,11 @@ public class LogWatcher implements PodEventHandler {
    */
   public void close(boolean needWait) {
     try {
-      if (needWait) {
-        LOG.debug("Waiting 5s before exit to get all the logs");
-        Thread.sleep(5000);
+      if (needWait && !currentWatchers.isEmpty()) {
+        LOG.debug("Waiting '{}ms' before closing all log watchers.", WAIT_TIMEOUT * 2);
+        Thread.sleep(WAIT_TIMEOUT * 2);
+      } else {
+        LOG.debug("Just close it now!");
       }
     } catch (InterruptedException e) {
       LOG.error("Interrupted waiting for the logs. This should not happen.", e);
@@ -113,9 +118,6 @@ public class LogWatcher implements PodEventHandler {
   }
 
   private class ContainerLogWatch implements Runnable {
-
-    private static final long WAIT_FOR_SECONDS = 30;
-    private static final int WAIT_TIMEOUT = 2000;
 
     private final String podName;
     private final String containerName;

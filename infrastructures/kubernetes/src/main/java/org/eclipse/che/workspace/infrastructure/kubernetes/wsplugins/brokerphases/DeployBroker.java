@@ -125,7 +125,7 @@ public class DeployBroker extends BrokerPhase {
       tracingSpan.finish();
       throw e;
     } finally {
-      namespace.deployments().stopWatch(false);
+      namespace.deployments().stopWatch();
       try {
         deployments.delete();
       } catch (InfrastructureException e) {

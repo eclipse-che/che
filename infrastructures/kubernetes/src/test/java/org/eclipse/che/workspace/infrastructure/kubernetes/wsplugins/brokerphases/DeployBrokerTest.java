@@ -123,7 +123,7 @@ public class DeployBrokerTest {
     verify(k8sDeployments).create(pod);
     verify(k8sSecrets).create(tlsSecret);
 
-    verify(k8sDeployments).stopWatch(false);
+    verify(k8sDeployments).stopWatch();
     verify(k8sDeployments).delete();
     verify(k8sConfigMaps).delete();
     verify(k8sSecrets).delete();
@@ -144,7 +144,7 @@ public class DeployBrokerTest {
     verify(unrecoverableEventListenerFactory)
         .create(eq(ImmutableSet.of(PLUGIN_BROKER_POD_NAME)), any());
     verify(k8sDeployments).watchEvents(listener);
-    verify(k8sDeployments).stopWatch(false);
+    verify(k8sDeployments).stopWatch();
   }
 
   @Test
@@ -155,7 +155,7 @@ public class DeployBrokerTest {
 
     // then
     verify(k8sDeployments).watchEvents(any(RuntimeLogsPublisher.class));
-    verify(k8sDeployments).stopWatch(false);
+    verify(k8sDeployments).stopWatch();
   }
 
   @Test
@@ -171,7 +171,7 @@ public class DeployBrokerTest {
     verify(unrecoverableEventListenerFactory, never())
         .create(eq(ImmutableSet.of(PLUGIN_BROKER_POD_NAME)), any());
     verify(k8sDeployments, never()).watchEvents(any(UnrecoverablePodEventListener.class));
-    verify(k8sDeployments).stopWatch(false);
+    verify(k8sDeployments).stopWatch();
   }
 
   @Test(
