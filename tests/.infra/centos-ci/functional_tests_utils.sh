@@ -285,9 +285,9 @@ function deployCheIntoCluster() {
 }
 
 function loginToOpenshiftAndSetDevRole() {
-  oc login -u system:admin
+  oc login -u system:admin --insecure-skip-tls-verify
   oc adm policy add-cluster-role-to-user cluster-admin developer
-  oc login -u developer -p pass
+  oc login -u developer -p pass --insecure-skip-tls-verify
 }
 
 function archiveArtifacts() {
