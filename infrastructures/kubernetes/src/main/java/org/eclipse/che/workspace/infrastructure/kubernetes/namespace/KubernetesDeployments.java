@@ -57,6 +57,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
@@ -585,18 +586,22 @@ public class KubernetesDeployments {
     containerEventsHandlers.add(handler);
   }
 
-  public void watchLogs(PodLogHandler handler) throws InfrastructureException {
+  public void watchLogs(PodLogHandler handler, Executor executor) throws InfrastructureException {
     if (logWatcher == null) {
       LOG.debug("start watching logs of workspace [{}]", workspaceId);
-      logWatcher = new LogWatcher(clientFactory, workspaceId, namespace, handler);
+      logWatcher = new LogWatcher(clientFactory, workspaceId, namespace, handler, executor);
       watchEvents(logWatcher);
     } else {
       LOG.debug("Already watching logs of workspace [{}]", workspaceId);
     }
   }
 
-  /** Stops watching the pods inside Kubernetes namespace. */
-  public void stopWatch() {
+  /**
+   * Stops watching the pods inside Kubernetes namespace.
+   *
+   * @param failed true if is this stopWatch called by failed workspace. false otherwise.
+   */
+  public void stopWatch(boolean failed) {
     try {
       if (podWatch != null) {
         podWatch.close();
@@ -620,7 +625,8 @@ public class KubernetesDeployments {
     containerEventsHandlers.clear();
 
     if (logWatcher != null) {
-      logWatcher.close();
+      logWatcher.close(failed);
+      logWatcher = null;
     }
   }
 

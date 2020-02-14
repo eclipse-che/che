@@ -398,7 +398,7 @@ public class KubernetesInternalRuntimeTest {
     verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
     verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
     verify(serversChecker, times(2)).startAsync(any());
-    verify(namespace.deployments(), times(1)).stopWatch();
+    verify(namespace.deployments(), times(1)).stopWatch(false);
   }
 
   @Test
@@ -435,7 +435,7 @@ public class KubernetesInternalRuntimeTest {
     verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
     verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
     verify(serversChecker, times(2)).startAsync(any());
-    verify(namespace.deployments(), times(1)).stopWatch();
+    verify(namespace.deployments(), times(1)).stopWatch(false);
   }
 
   @Test
@@ -476,7 +476,7 @@ public class KubernetesInternalRuntimeTest {
     verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
     verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
     verify(serversChecker, times(2)).startAsync(any());
-    verify(namespace.deployments(), times(1)).stopWatch();
+    verify(namespace.deployments(), times(1)).stopWatch(false);
   }
 
   @Test
@@ -530,7 +530,7 @@ public class KubernetesInternalRuntimeTest {
     verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
     verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
     verify(serversChecker, times(2)).startAsync(any());
-    verify(namespace.deployments(), times(1)).stopWatch();
+    verify(namespace.deployments(), times(1)).stopWatch(false);
   }
 
   @Test
@@ -550,7 +550,7 @@ public class KubernetesInternalRuntimeTest {
     verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
     verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
     verify(serversChecker, times(2)).startAsync(any());
-    verify(namespace.deployments(), times(1)).stopWatch();
+    verify(namespace.deployments(), times(1)).stopWatch(false);
   }
 
   @Test(expectedExceptions = InternalInfrastructureException.class)
@@ -566,7 +566,7 @@ public class KubernetesInternalRuntimeTest {
       verify(namespace, never()).ingresses();
       throw rethrow;
     } finally {
-      verify(namespace.deployments(), times(2)).stopWatch();
+      verify(namespace.deployments(), times(2)).stopWatch(false);
     }
   }
 
@@ -611,7 +611,7 @@ public class KubernetesInternalRuntimeTest {
       verify(namespace, never()).ingresses();
       throw rethrow;
     } finally {
-      verify(namespace.deployments(), times(2)).stopWatch();
+      verify(namespace.deployments(), times(2)).stopWatch(false);
     }
   }
 

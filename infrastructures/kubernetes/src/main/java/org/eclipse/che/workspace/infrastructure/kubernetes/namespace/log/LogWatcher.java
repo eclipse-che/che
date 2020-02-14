@@ -18,8 +18,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -29,21 +28,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class watches workspace's pod events and tries hard to read the logs of all it's containers.
+ * This class watches workspace's pod events and tries hard to read the logs of all it's
+ * containers.
  *
  * <p>Current implementation have static thread-pool and each container log watch session runs in
  * separate thread. This keeps connections under control, but does it provide enough robustness and
  * performance?
  */
-public class LogWatcher implements PodEventHandler, Closeable {
+public class LogWatcher implements PodEventHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(LogWatcher.class);
-
-  private static final ExecutorService pool = Executors.newFixedThreadPool(10);
 
   private final String namespace;
   private final KubernetesClient client;
   private final PodLogHandler logHandler;
+
+  private final Executor containerWatchersThreadPool;
 
   // set of current watchers. This is used so we're able to cut-off the watchers from outside.
   private final Set<LogWatch> currentWatchers = new HashSet<>();
@@ -55,11 +55,13 @@ public class LogWatcher implements PodEventHandler, Closeable {
       KubernetesClientFactory clientFactory,
       String workspaceId,
       String namespace,
-      PodLogHandler handler)
+      PodLogHandler handler,
+      Executor executor)
       throws InfrastructureException {
     this.logHandler = handler;
     this.client = clientFactory.create(workspaceId);
     this.namespace = namespace;
+    this.containerWatchersThreadPool = executor;
   }
 
   @Override
@@ -77,7 +79,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
             "adding [{}] to watching containers now watching [{}]",
             containerName,
             watchingContainers);
-        pool.submit(new ContainerLogWatch(podName, containerName));
+        containerWatchersThreadPool.execute(new ContainerLogWatch(podName, containerName));
       } else {
         LOG.debug("sorry, already watching [{}]", containerName);
       }
@@ -86,26 +88,34 @@ public class LogWatcher implements PodEventHandler, Closeable {
     }
   }
 
-  @Override
-  public void close() {
-    new Thread(
-            () -> {
-              try {
-                LOG.debug("Waiting 5s before exit to get all the logs");
-                Thread.sleep(5000);
-              } catch (InterruptedException e) {
-                LOG.error("Interrupted waiting for the logs", e);
-              } finally {
-                currentWatchers.forEach(LogWatch::close);
-                currentWatchers.clear();
-              }
-            })
-        .start();
+  /**
+   * Closes all opened log watchers.
+   * </p>
+   * In case of failed workspace, we want to block the pod for some time before removing it so we
+   * has better change to get all the logs from it. If that's the case, use {@code needWait=false}.
+   * Otherwise watchers will be cleaned immediately, which does not ensure that we get all the
+   * logs.
+   *
+   * @param needWait true if we need to block before cleanup
+   */
+  public void close(boolean needWait) {
+    try {
+      if (needWait) {
+        LOG.debug("Waiting 5s before exit to get all the logs");
+        Thread.sleep(5000);
+      }
+    } catch (InterruptedException e) {
+      LOG.error("Interrupted waiting for the logs. This should not happen.", e);
+    } finally {
+      currentWatchers.forEach(LogWatch::close);
+      currentWatchers.clear();
+    }
   }
 
   private class ContainerLogWatch implements Runnable {
+
     private static final long WAIT_FOR_SECONDS = 30;
-    private static final int WAIT_TIMEOUT = 200;
+    private static final int WAIT_TIMEOUT = 2000;
 
     private final String podName;
     private final String containerName;

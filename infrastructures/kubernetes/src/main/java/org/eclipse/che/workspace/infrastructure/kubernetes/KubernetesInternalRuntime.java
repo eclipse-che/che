@@ -260,7 +260,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // Cancels workspace servers probes if any
       probeScheduler.cancel(workspaceId);
       // stop watching before namespace cleaning up
-      namespace.deployments().stopWatch();
+      namespace.deployments().stopWatch(true);
       try {
         namespace.cleanUp();
       } catch (InfrastructureException cleanUppingEx) {
@@ -275,7 +275,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       }
       wrapAndRethrow(startFailureCause);
     } finally {
-      namespace.deployments().stopWatch();
+      namespace.deployments().stopWatch(false);
     }
   }
 
@@ -646,7 +646,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         .deployments()
         .watchLogs(
             new PodLogHandlerToEventPublisher(
-                this.eventPublisher, this.getContext().getIdentity(), podNames));
+                this.eventPublisher, this.getContext().getIdentity(), podNames),
+            executor);
   }
 
   @Traced
