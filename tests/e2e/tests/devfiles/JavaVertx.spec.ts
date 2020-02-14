@@ -20,7 +20,7 @@ const fileFolderPath: string = `${sampleName}/src/main/java/io/openshift/example
 const tabTitle: string = 'HttpApplication.java';
 const codeNavigationClassName: string = 'RouterImpl.class';
 const buildTaskName: string = 'maven build';
-const LSstarting: string = 'Starting Java Language Server';
+const LSstarting: string = 'Activating Language Support for Java';
 const stack: string = 'Java Vert.x';
 
 suite('Java Vert.x test', async () => {

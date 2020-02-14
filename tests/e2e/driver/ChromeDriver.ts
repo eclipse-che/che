@@ -37,7 +37,8 @@ export class ChromeDriver implements IDriver {
         let options: Options = new Options()
             .addArguments('--no-sandbox')
             .addArguments('--disable-web-security')
-            .addArguments('--allow-running-insecure-content');
+            .addArguments('--allow-running-insecure-content')
+            .addArguments('--ignore-certificate-errors');
         // if 'true' run in 'headless' mode
         if (TestConstants.TS_SELENIUM_HEADLESS) {
             options = options.addArguments('headless');
