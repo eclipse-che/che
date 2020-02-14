@@ -19,7 +19,7 @@ import { ProjectSourceSelectorService } from './project-source-selector/project-
 import { CheKubernetesNamespace } from '../../../../components/api/che-kubernetes-namespace.factory';
 import { CheWorkspace } from '../../../../components/api/workspace/che-workspace.factory';
 import { CheDashboardConfigurationService } from '../../../../components/branding/che-dashboard-configuration.service';
-import { TogglableFeature } from '../../../../components/branding/che-branding.factory';
+import { TogglableFeature } from '../../../../components/branding/branding.constant';
 
 /**
  * This class is handling the controller for predefined stacks.
@@ -138,9 +138,7 @@ export class ReadyToGoStacksController implements IReadyToGoStacksScopeBindings 
     this.cheWorkspace.fetchWorkspaceSettings().then((settings: che.IWorkspaceSettings) => {
       this.ephemeralMode = settings['che.workspace.persist_volumes.default'] === 'false';
     });
-    this.cheDashboardConfigurationService.ready.then(() => {
-      this.enabledKubernetesNamespaceSelector = this.cheDashboardConfigurationService.enabledFeature(TogglableFeature.KUBERNETES_NAMESPACE_SELECTOR);
-    });
+    this.enabledKubernetesNamespaceSelector = this.cheDashboardConfigurationService.enabledFeature(TogglableFeature.KUBERNETES_NAMESPACE_SELECTOR);
   }
 
   /**

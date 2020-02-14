@@ -273,10 +273,46 @@ md-tabs-wrapper
   font-size 12px
   border-radius 2px
 
-.authorization-error
-  color: $error-color
+.keycloak-error
   font-weight: 600
-  width: 100%
-  text-align: center
+  border-radius: 2px
+  font-size: 16px
+  color: $black-color
+  background-color: $white-color
   position: absolute
   top: 50%
+  left: 25%;
+  width: 50%;
+  transform: translate(0, -50%)
+  .error-header
+    display inline-block
+    margin 0
+    padding 0
+    width 100%
+    height 40px
+    line-height 40px
+    text-align center
+    vertical-align middle
+    border-radius 2px 2px 0 0
+    color $white-color
+    background $error-color
+    span
+      font-size 22px
+      font-weight 600
+      color inherit
+    a
+      float right
+      width 40px
+      color inherit
+      font-size 20px
+      text-align center
+  .error-body
+    border-radius 0 0 2px 2px
+    text-align center
+    color $black-color
+    background-color $white-color
+    margin 15px
+    p
+      text-align left
+    a
+      color $link-color

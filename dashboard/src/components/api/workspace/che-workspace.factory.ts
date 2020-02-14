@@ -11,12 +11,12 @@
  */
 'use strict';
 
-import {CheJsonRpcMasterApi} from '../json-rpc/che-json-rpc-master-api';
-import {CheJsonRpcApi} from '../json-rpc/che-json-rpc-api.factory';
-import {IObservableCallbackFn, Observable} from '../../utils/observable';
-import {CheBranding} from '../../branding/che-branding.factory';
-import {CheNotification} from '../../notification/che-notification.factory';
-import {WorkspaceDataManager} from './workspace-data-manager';
+import { CheJsonRpcMasterApi } from '../json-rpc/che-json-rpc-master-api';
+import { CheJsonRpcApi } from '../json-rpc/che-json-rpc-api.factory';
+import { IObservableCallbackFn, Observable } from '../../utils/observable';
+import { CheBranding } from '../../branding/che-branding';
+import { CheNotification } from '../../notification/che-notification.factory';
+import { WorkspaceDataManager } from './workspace-data-manager';
 
 interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   createDevfile: any;
@@ -98,16 +98,16 @@ export class CheWorkspace {
    * Default constructor that is using resource
    */
   constructor($resource: ng.resource.IResourceService,
-              $http: ng.IHttpService,
-              $q: ng.IQService,
-              cheJsonRpcApi: CheJsonRpcApi,
-              cheNotification: CheNotification,
-              $websocket: any,
-              $location: ng.ILocationService,
-              proxySettings: string,
-              userDashboardConfig: any,
-              lodash: any,
-              cheBranding: CheBranding
+    $http: ng.IHttpService,
+    $q: ng.IQService,
+    cheJsonRpcApi: CheJsonRpcApi,
+    cheNotification: CheNotification,
+    $websocket: any,
+    $location: ng.ILocationService,
+    proxySettings: string,
+    userDashboardConfig: any,
+    lodash: any,
+    cheBranding: CheBranding
   ) {
     this.$q = $q;
     this.$resource = $resource;
@@ -135,26 +135,20 @@ export class CheWorkspace {
 
     // remote call
     this.remoteWorkspaceAPI = <ICHELicenseResource<any>>this.$resource('/api/workspace', {}, {
-        createDevfile: {method: 'POST', url: '/api/workspace/devfile'},
-        deleteWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId'},
-        updateWorkspace: {method: 'PUT', url: '/api/workspace/:workspaceId'},
-        addProject: {method: 'POST', url: '/api/workspace/:workspaceId/project'},
-        deleteProject: {method: 'DELETE', url: '/api/workspace/:workspaceId/project/:path'},
-        stopWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId/runtime'},
-        startWorkspace: {method: 'POST', url: '/api/workspace/:workspaceId/runtime?environment=:envName'},
-        startWorkspaceWithNoEnvironment: {method: 'POST', url: '/api/workspace/:workspaceId/runtime'},
-        startTemporaryWorkspace: {method: 'POST', url: '/api/workspace/runtime?temporary=true'},
-        getSettings: {method: 'GET', url: '/api/workspace/settings'}
-      }
+      createDevfile: { method: 'POST', url: '/api/workspace/devfile' },
+      deleteWorkspace: { method: 'DELETE', url: '/api/workspace/:workspaceId' },
+      updateWorkspace: { method: 'PUT', url: '/api/workspace/:workspaceId' },
+      addProject: { method: 'POST', url: '/api/workspace/:workspaceId/project' },
+      deleteProject: { method: 'DELETE', url: '/api/workspace/:workspaceId/project/:path' },
+      stopWorkspace: { method: 'DELETE', url: '/api/workspace/:workspaceId/runtime' },
+      startWorkspace: { method: 'POST', url: '/api/workspace/:workspaceId/runtime?environment=:envName' },
+      startWorkspaceWithNoEnvironment: { method: 'POST', url: '/api/workspace/:workspaceId/runtime' },
+      startTemporaryWorkspace: { method: 'POST', url: '/api/workspace/runtime?temporary=true' },
+      getSettings: { method: 'GET', url: '/api/workspace/settings' }
+    }
     );
-
-    const CONTEXT_FETCHER_ID = 'websocketContextFetcher';
-    const callback = () => {
-      this.jsonRpcApiLocation = this.formJsonRpcApiLocation($location, proxySettings, userDashboardConfig.developmentMode) + cheBranding.getWebsocketContext();
-      this.cheJsonRpcMasterApi = cheJsonRpcApi.getJsonRpcMasterApi(this.jsonRpcApiLocation);
-      cheBranding.unregisterCallback(CONTEXT_FETCHER_ID);
-    };
-    cheBranding.registerCallback(CONTEXT_FETCHER_ID, callback.bind(this));
+    this.jsonRpcApiLocation = this.formJsonRpcApiLocation($location, proxySettings, userDashboardConfig.developmentMode) + cheBranding.getWebsocketContext();
+    this.cheJsonRpcMasterApi = cheJsonRpcApi.getJsonRpcMasterApi(this.jsonRpcApiLocation);
 
     this.checkWorkspaceLoader(userDashboardConfig.developmentMode, proxySettings);
   }
@@ -285,7 +279,7 @@ export class CheWorkspace {
    * If there are no changes, it's not updated
    */
   fetchWorkspaces(): ng.IPromise<Array<che.IWorkspace>> {
-    const promise = this.remoteWorkspaceAPI.query({'maxItems': 256}).$promise;
+    const promise = this.remoteWorkspaceAPI.query({ 'maxItems': 256 }).$promise;
 
     return promise.then((workspaces: Array<che.IWorkspace>) => {
       this.workspaceIds.length = 0;
@@ -380,7 +374,7 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>}
    */
   addProject(workspaceId: string, project: che.IProject): ng.IPromise<any> {
-    return this.remoteWorkspaceAPI.addProject({workspaceId: workspaceId}, project).$promise;
+    return this.remoteWorkspaceAPI.addProject({ workspaceId: workspaceId }, project).$promise;
   }
 
   /**
@@ -390,7 +384,7 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>}
    */
   deleteProject(workspaceId: string, path: string): ng.IPromise<any> {
-    return this.remoteWorkspaceAPI.deleteProject({workspaceId: workspaceId, path: path}).$promise;
+    return this.remoteWorkspaceAPI.deleteProject({ workspaceId: workspaceId, path: path }).$promise;
   }
 
   createWorkspaceFromDevfile(cheNamespaceId: string, infrastructureNamespaceId: string, devfile: che.IWorkspaceDevfile, attributes: any): ng.IPromise<che.IWorkspace> {
@@ -417,7 +411,10 @@ export class CheWorkspace {
       return this.workspacePromises.get(workspacePromisesKey);
     }
 
-    const promise = envName ? this.remoteWorkspaceAPI.startWorkspace({workspaceId: workspaceId, envName: envName}, {}).$promise : this.remoteWorkspaceAPI.startWorkspaceWithNoEnvironment({workspaceId: workspaceId}, {}).$promise;
+    const promise = envName ? this.remoteWorkspaceAPI.startWorkspace({
+      workspaceId: workspaceId,
+      envName: envName
+    }, {}).$promise : this.remoteWorkspaceAPI.startWorkspaceWithNoEnvironment({ workspaceId: workspaceId }, {}).$promise;
     this.workspacePromises.set(workspacePromisesKey, promise);
     promise.finally(() => {
       this.workspacePromises.delete(workspacePromisesKey);
@@ -475,7 +472,7 @@ export class CheWorkspace {
    * @param data {che.IWorkspace} the new workspace details
    */
   updateWorkspace(workspaceId: string, data: che.IWorkspace): ng.IPromise<che.IWorkspace> {
-    const promise = this.remoteWorkspaceAPI.updateWorkspace({workspaceId: workspaceId}, data).$promise;
+    const promise = this.remoteWorkspaceAPI.updateWorkspace({ workspaceId: workspaceId }, data).$promise;
 
     return promise.then(data => {
       this.updateWorkspacesList(data);
@@ -496,7 +493,7 @@ export class CheWorkspace {
    */
   deleteWorkspace(workspaceId: string): ng.IPromise<any> {
     let defer = this.$q.defer();
-    let promise = this.remoteWorkspaceAPI.deleteWorkspace({workspaceId: workspaceId}).$promise;
+    let promise = this.remoteWorkspaceAPI.deleteWorkspace({ workspaceId: workspaceId }).$promise;
     promise.then(() => {
       const onDeleteHandlers = this.handlers['onDeleteWorkspace'];
       if (onDeleteHandlers) {
@@ -613,6 +610,7 @@ export class CheWorkspace {
       return this.$q.reject(error);
     });
   }
+
   /**
    * Returns the system settings for workspaces.
    *
@@ -679,7 +677,7 @@ export class CheWorkspace {
     let url = '/workspace-loader/';
 
     let promise = this.$http.get(url);
-    promise.then((response: {data: any}) => {
+    promise.then((response: { data: any }) => {
       this.workspaceLoaderUrl = devmode ? proxySettings + url : url;
     }, (error: any) => {
       if (error.status !== 304) {

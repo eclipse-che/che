@@ -20,7 +20,7 @@ import {PluginRegistry} from '../../../components/api/plugin-registry.factory';
 import {WorkspaceDataManager} from '../../../components/api/workspace/workspace-data-manager';
 import { ConfirmDialogService } from '../../../components/service/confirm-dialog/confirm-dialog.service';
 import { CheDashboardConfigurationService } from '../../../components/branding/che-dashboard-configuration.service';
-import { TogglableFeature } from '../../../components/branding/che-branding.factory';
+import { TogglableFeature } from '../../../components/branding/branding.constant';
 
 interface IPage {
   title: string;
