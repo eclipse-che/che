@@ -101,7 +101,7 @@ public class DirectUrlFactoryWithRootFolderTest {
 
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
-    theiaProjectTree.waitItem(repositoryName);
+    theiaProjectTree.waitItemWithRefresh(repositoryName);
     theiaIde.waitNotificationDisappearance(
         "Che Workspace: Finished importing projects.", UPDATING_PROJECT_TIMEOUT_SEC);
     theiaIde.waitAllNotificationsClosed();
@@ -109,7 +109,7 @@ public class DirectUrlFactoryWithRootFolderTest {
 
     expectedItemsAfterCloning.forEach(
         name -> {
-          theiaProjectTree.waitItem(repositoryName + "/" + name);
+          theiaProjectTree.waitItemWithRefresh(repositoryName + "/" + name);
         });
   }
 
