@@ -12,5 +12,8 @@ installAndStartMinishift
 loginToOpenshiftAndSetDevRole
 deployCheIntoCluster
 createTestUserAndObtainUserToken
-runDevfileTestSuite
+runDevfileTestSuite 
+echo "=========================== THIS IS POST TEST ACTIONS =============================="
 archiveArtifacts "che-devfile-test"
+echo '=======================FAILURE STATUS-----------------------:'$IS_TESTS_FAILED
+if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi

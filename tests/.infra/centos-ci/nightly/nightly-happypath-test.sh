@@ -20,4 +20,6 @@ loginToOpenshiftAndSetDevRole
 deployCheIntoCluster
 createTestUserAndObtainUserToken
 createTestWorkspaceAndRunTest
+echo "=========================== THIS IS POST TEST ACTIONS =============================="
 archiveArtifacts "che-nightly-happy-path"
+if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi

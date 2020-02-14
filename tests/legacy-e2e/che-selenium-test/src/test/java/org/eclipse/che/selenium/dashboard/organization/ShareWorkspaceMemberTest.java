@@ -89,6 +89,7 @@ public class ShareWorkspaceMemberTest {
   @Test
   public void checkSharingByWorkspaceOwner() {
     createWorkspace(WORKSPACE_NAME);
+
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
@@ -162,17 +163,18 @@ public class ShareWorkspaceMemberTest {
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.waitWorkspaceIsPresent(WORKSPACE_NAME);
     workspaces.waitWorkspaceStatus(WORKSPACE_NAME, STOPPED);
+
+    workspaces.selectWorkspaceByCheckbox(WORKSPACE_NAME);
+    workspaces.clickOnDeleteWorkspacesBtn();
+    workspaces.clickOnDeleteButtonInDialogWindow();
+    workspaces.waitWorkspaceIsNotPresent(WORKSPACE_NAME);
   }
 
   private void createWorkspace(String workspaceName) {
     createWorkspaceHelper.createAndStartWorkspaceFromStack(
         Devfile.JAVA_MAVEN, workspaceName, Collections.emptyList(), null);
 
-    theiaIde.switchToIdeFrame();
-    theiaIde.waitTheiaIde();
-    theiaIde.waitLoaderInvisibility();
-    theiaIde.waitTheiaIdeTopPanel();
-    theiaIde.waitAllNotificationsClosed();
+    theiaIde.waitOpenedWorkspaceIsReadyToUse();
 
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
@@ -180,6 +182,7 @@ public class ShareWorkspaceMemberTest {
     theiaIde.waitNotificationDisappearance(
         "Che Workspace: Finished importing projects.", UPDATING_PROJECT_TIMEOUT_SEC);
     theiaIde.waitAllNotificationsClosed();
+
     theiaProjectTree.expandItem(CONSOLE_JAVA_SIMPLE);
     theiaProjectTree.openItem(CONSOLE_JAVA_SIMPLE + "/README.md");
     theiaEditor.waitEditorTab("README.md");
