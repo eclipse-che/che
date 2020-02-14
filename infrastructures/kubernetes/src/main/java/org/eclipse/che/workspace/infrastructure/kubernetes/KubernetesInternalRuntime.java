@@ -600,7 +600,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     List<Ingress> readyIngresses = createIngresses(k8sEnv, workspaceId);
 
     listenEvents();
-    // TODO: hide this behind some configuration flag
 
     final KubernetesServerResolver serverResolver =
         new KubernetesServerResolver(ingressPathTransformInverter, createdServices, readyIngresses);
@@ -608,7 +607,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     doStartMachine(serverResolver);
 
     // we'll start watching for logs after start machines, at this point we know exact pod/container
-    // names
+    // names that are in our interest
+    // TODO: hide this behind some configuration flag
     watchLogs();
   }
 
@@ -628,7 +628,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   }
 
   protected void watchLogs() throws InfrastructureException {
-    LOG.debug("Hey, start watchnig here");
+    // get all the pods we care about
     List<String> podNames =
         machines
             .getMachines(getContext().getIdentity())
@@ -640,7 +640,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
             .distinct()
             .collect(Collectors.toList());
 
-    LOG.debug("we will watch pods [{}]", podNames);
+    LOG.debug("Watch logs of pods [{}]", podNames);
 
     namespace
         .deployments()

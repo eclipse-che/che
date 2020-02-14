@@ -589,10 +589,12 @@ public class KubernetesDeployments {
   public void watchLogs(PodLogHandler handler, Executor executor) throws InfrastructureException {
     if (logWatcher == null) {
       LOG.debug("start watching logs of workspace [{}]", workspaceId);
-      logWatcher = new LogWatcher(clientFactory, workspaceId, namespace, handler, executor);
+      logWatcher = new LogWatcher(clientFactory, workspaceId, namespace, executor);
+      logWatcher.addLogHandler(handler);
       watchEvents(logWatcher);
     } else {
-      LOG.debug("Already watching logs of workspace [{}]", workspaceId);
+      LOG.debug("Already watching logs of workspace [{}], just adding log handler", workspaceId);
+      logWatcher.addLogHandler(handler);
     }
   }
 
@@ -603,7 +605,7 @@ public class KubernetesDeployments {
   /**
    * Stops watching the pods inside Kubernetes namespace.
    *
-   * @param failed true if is this stopWatch called by failed workspace. false otherwise.
+   * @param failed use true if is this stopWatch called by failed workspace. false otherwise.
    */
   public void stopWatch(boolean failed) {
     try {

@@ -11,10 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.time.ZonedDateTime;
 import java.util.List;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -49,37 +45,16 @@ public class PodLogHandlerToEventPublisher implements PodLogHandler {
   }
 
   /**
-   * Read the logs from given inputStream. It recognizes if received message has error state and
-   * returns false immediately in that case. When there is no error, this method keeps reading the
-   * logs from given inputStream, which is blocking operation.
+   * Receives the message, formats it and send it to {@link
+   * PodLogHandlerToEventPublisher#eventsPublisher}
    *
-   * <p>Method can't recognize intentional close, which is "Broken pipe" IOException, and real
-   * communication failure. It returns true in both case, which is considered as finished
-   * communication (which is ok maybe).
-   *
-   * @param inputStream to read from
-   * @param containerName source container of the inputStream
-   * @return false if error message. true at the end of the stream or interrupted stream
+   * @param message to handle
+   * @param containerName source container of the log message
    */
   @Override
-  public boolean handle(InputStream inputStream, String containerName) {
-    try (BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
-      String logMessage;
-      while ((logMessage = in.readLine()) != null) {
-        if (logMessage.contains("\"code\":40")) {
-          LOG.debug("failed to get the logs, should try again");
-          return false;
-        } else {
-          eventsPublisher.sendRuntimeLogEvent(
-              String.format("[%s] -> %s", containerName, logMessage),
-              ZonedDateTime.now().toString(),
-              identity);
-        }
-      }
-    } catch (IOException e) {
-      // TODO: do more clever cut-off
-      LOG.debug("End of watching log. It could be either intended or some connection failure.");
-    }
-    return true;
+  public void handle(String message, String containerName) {
+    LOG.trace("forwarding message '{}' from the container '{}'", message, containerName);
+    eventsPublisher.sendRuntimeLogEvent(
+        "[" + containerName + "] -> " + message, ZonedDateTime.now().toString(), identity);
   }
 }

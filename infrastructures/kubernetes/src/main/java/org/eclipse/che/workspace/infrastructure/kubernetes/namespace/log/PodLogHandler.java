@@ -11,12 +11,26 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
-import java.io.IOException;
-import java.io.InputStream;
-
+/**
+ * Handle log message of the pod's container. Implementors must be also aware of pods that are
+ * interest of this handler.
+ */
 public interface PodLogHandler {
 
-  boolean handle(InputStream is, String containerName) throws IOException;
+  /**
+   * Receives single log message and do something with it. It receives also containerName so we can
+   * better format the message for the end-user.
+   *
+   * @param message single log message
+   * @param containerName source container of this log message
+   */
+  void handle(String message, String containerName);
 
+  /**
+   * Tells whether given podName is in the interest of this {@link PodLogHandler}.
+   *
+   * @param podName name of the pod to check
+   * @return true if we care about the given podName, false otherwise.
+   */
   boolean matchPod(String podName);
 }
