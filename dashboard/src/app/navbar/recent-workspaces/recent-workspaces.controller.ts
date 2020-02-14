@@ -12,7 +12,7 @@
 'use strict';
 import { CheWorkspace } from '../../../components/api/workspace/che-workspace.factory';
 import IdeSvc from '../../../app/ide/ide.service';
-import { CheBranding } from '../../../components/branding/che-branding.factory';
+import { CheBranding } from '../../../components/branding/che-branding';
 import { WorkspacesService } from '../../workspaces/workspaces.service';
 import { CheNotification } from '../../../components/notification/che-notification.factory';
 import { WorkspaceDetailsService } from '../../workspaces/workspace-details/workspace-details.service';
