@@ -190,14 +190,15 @@ public class LogWatcher implements PodEventHandler, Closeable {
 
     /**
      * Reads given inputStream. If we receive error message about pod is initializing from k8s (see:
-     * {@link ContainerLogWatch#isErrorMessage(String)} and {@link ContainerLogWatch#ERROR_MESSAGE_MATCH_FORMAT}),
-     * returns false immediately so we can try again later. Otherwise keeps reading the messages
-     * from the stream and gives them to given handler. Be aware that it is blocking and potentially
-     * long operation!
+     * {@link ContainerLogWatch#isErrorMessage(String)} and {@link
+     * ContainerLogWatch#ERROR_MESSAGE_MATCH_FORMAT}), returns false immediately so we can try again
+     * later. Otherwise keeps reading the messages from the stream and gives them to given handler.
+     * Be aware that it is blocking and potentially long operation!
      *
      * @param inputStream to read log messages from
-     * @param handler     we delegate log messages to this handler.
-     * @return false if 40x error received from k8s, true at the end of the stream or if interrupted
+     * @param handler we delegate log messages to this handler.
+     * @return false if error message received from k8s, true at the end of the stream or if
+     *     interrupted
      */
     private boolean readAndHandle(InputStream inputStream, PodLogHandler handler) {
       try (BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
