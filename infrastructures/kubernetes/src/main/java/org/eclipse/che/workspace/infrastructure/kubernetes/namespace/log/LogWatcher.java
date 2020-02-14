@@ -14,7 +14,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 import com.google.common.base.Stopwatch;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,8 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class watches workspace's pod events and tries hard to read the logs of all it's
- * containers.
+ * This class watches workspace's pod events and tries hard to read the logs of all it's containers.
  *
  * <p>Current implementation have static thread-pool and each container log watch session runs in
  * separate thread. This keeps connections under control, but does it provide enough robustness and
@@ -92,12 +90,10 @@ public class LogWatcher implements PodEventHandler {
   }
 
   /**
-   * Closes all opened log watchers.
-   * </p>
-   * In case of failed workspace, we want to block the pod for some time before removing it so we
-   * has better change to get all the logs from it. If that's the case, use {@code needWait=false}.
-   * Otherwise watchers will be cleaned immediately, which does not ensure that we get all the
-   * logs.
+   * Closes all opened log watchers. In case of failed workspace, we want to block the pod for some
+   * time before removing it so we has better change to get all the logs from it. If that's the
+   * case, use {@code needWait=false}. Otherwise watchers will be cleaned immediately, which does
+   * not ensure that we get all the logs.
    *
    * @param needWait true if we need to block before cleanup
    */
