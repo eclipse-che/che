@@ -11,10 +11,14 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Stream.concat;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STARTING;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -81,7 +85,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
@@ -109,6 +112,7 @@ import org.eclipse.che.commons.observability.NoopExecutorServiceWrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl.MachineId;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeCommandImpl;
@@ -289,7 +293,18 @@ public class KubernetesInternalRuntimeTest {
     when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.wait(anyString(), anyLong(), any(), any())).thenReturn(ingress);
-    when(deployments.deploy(any(Pod.class))).thenAnswer(a -> a.getArguments()[0]);
+
+    when(deployments.deploy(any(Pod.class))).thenAnswer(inv -> inv.getArgument(0));
+    when(deployments.deploy(any(Deployment.class)))
+        .thenAnswer(
+            inv -> {
+              Deployment d = inv.getArgument(0);
+              Pod pod = new Pod();
+              pod.setSpec(d.getSpec().getTemplate().getSpec());
+              pod.setMetadata(d.getSpec().getTemplate().getMetadata());
+              return pod;
+            });
+
     when(k8sEnv.getServices()).thenReturn(allServices);
     when(k8sEnv.getIngresses()).thenReturn(allIngresses);
     when(k8sEnv.getPodsCopy()).thenReturn(podsMap);
@@ -407,15 +422,6 @@ public class KubernetesInternalRuntimeTest {
     when(k8sEnv.getDeploymentsCopy()).thenReturn(deploymentsMap);
     when(k8sEnv.getSecrets()).thenReturn(ImmutableMap.of("secret", new Secret()));
     when(k8sEnv.getConfigMaps()).thenReturn(ImmutableMap.of("configMap", new ConfigMap()));
-    when(deployments.deploy(any(Deployment.class)))
-        .thenAnswer(
-            a -> {
-              Deployment deployment = (Deployment) a.getArguments()[0];
-              return new PodBuilder()
-                  .withMetadata(deployment.getSpec().getTemplate().getMetadata())
-                  .withSpec(deployment.getSpec().getTemplate().getSpec())
-                  .build();
-            });
 
     internalRuntime.start(emptyMap());
 
@@ -443,15 +449,6 @@ public class KubernetesInternalRuntimeTest {
     when(k8sEnv.getDeploymentsCopy()).thenReturn(deploymentsMap);
     when(k8sEnv.getSecrets()).thenReturn(ImmutableMap.of("secret", new Secret()));
     when(k8sEnv.getConfigMaps()).thenReturn(ImmutableMap.of("configMap", new ConfigMap()));
-    when(deployments.deploy(any(Deployment.class)))
-        .thenAnswer(
-            a -> {
-              Deployment deployment = (Deployment) a.getArguments()[0];
-              return new PodBuilder()
-                  .withMetadata(deployment.getSpec().getTemplate().getMetadata())
-                  .withSpec(deployment.getSpec().getTemplate().getSpec())
-                  .build();
-            });
 
     internalRuntime.start(emptyMap());
 
@@ -861,6 +858,167 @@ public class KubernetesInternalRuntimeTest {
     return new Object[][] {{WorkspaceStatus.STOPPED}, {WorkspaceStatus.STOPPING}};
   }
 
+  @Test
+  public void testInjectablePodsMergedIntoRuntimePods() throws Exception {
+    // given
+    Map<String, Pod> injectedPods =
+        ImmutableMap.of("injected", mockPod(singletonList(mockContainer("injectedContainer"))));
+
+    doReturn(ImmutableMap.of(M1_NAME, injectedPods)).when(k8sEnv).getInjectablePodsCopy();
+
+    doReturn(
+            concat(podsMap.entrySet().stream(), injectedPods.entrySet().stream())
+                .collect(toMap(Map.Entry::getKey, e -> new PodData(e.getValue()))))
+        .when(k8sEnv)
+        .getPodsData();
+
+    doReturn(
+            ImmutableMap.of(
+                M1_NAME,
+                mock(InternalMachineConfig.class),
+                M2_NAME,
+                mock(InternalMachineConfig.class),
+                WORKSPACE_POD_NAME + "/injectedContainer",
+                mock(InternalMachineConfig.class)))
+        .when(k8sEnv)
+        .getMachines();
+
+    // when
+    internalRuntime.start(emptyMap());
+
+    // then
+    ArgumentCaptor<Deployment> podCaptor = ArgumentCaptor.forClass(Deployment.class);
+
+    verify(deployments).deploy(podCaptor.capture());
+
+    List<Deployment> depls = podCaptor.getAllValues();
+    assertEquals(depls.size(), 1);
+    Deployment deployedPod = depls.get(0);
+    List<String> containerNames =
+        deployedPod
+            .getSpec()
+            .getTemplate()
+            .getSpec()
+            .getContainers()
+            .stream()
+            .map(Container::getName)
+            .collect(toList());
+
+    assertEquals(containerNames.size(), 3);
+    assertEquals(
+        new HashSet<>(containerNames),
+        new HashSet<>(asList(CONTAINER_NAME_1, CONTAINER_NAME_2, "injectedContainer")));
+  }
+
+  @Test
+  public void testMultipleMachinesRequiringSamePodInjectionResultInOnePodInjected()
+      throws Exception {
+    // given
+    Map<String, Pod> injectedPods =
+        ImmutableMap.of("injected", mockPod(singletonList(mockContainer("injectedContainer"))));
+    Map<String, Pod> injectedPods2 =
+        ImmutableMap.of("injected", mockPod(singletonList(mockContainer("injectedContainer"))));
+
+    doReturn(ImmutableMap.of(M1_NAME, injectedPods, M2_NAME, injectedPods2))
+        .when(k8sEnv)
+        .getInjectablePodsCopy();
+
+    doReturn(
+            concat(podsMap.entrySet().stream(), injectedPods.entrySet().stream())
+                .collect(toMap(Map.Entry::getKey, e -> new PodData(e.getValue()))))
+        .when(k8sEnv)
+        .getPodsData();
+
+    doReturn(
+            ImmutableMap.of(
+                M1_NAME,
+                mock(InternalMachineConfig.class),
+                M2_NAME,
+                mock(InternalMachineConfig.class),
+                WORKSPACE_POD_NAME + "/injectedContainer",
+                mock(InternalMachineConfig.class)))
+        .when(k8sEnv)
+        .getMachines();
+
+    // when
+    internalRuntime.start(emptyMap());
+
+    // then
+    ArgumentCaptor<Deployment> podCaptor = ArgumentCaptor.forClass(Deployment.class);
+
+    verify(deployments).deploy(podCaptor.capture());
+
+    List<Deployment> depls = podCaptor.getAllValues();
+    assertEquals(depls.size(), 1);
+    Deployment deployedPod = depls.get(0);
+    List<String> containerNames =
+        deployedPod
+            .getSpec()
+            .getTemplate()
+            .getSpec()
+            .getContainers()
+            .stream()
+            .map(Container::getName)
+            .collect(toList());
+
+    assertEquals(containerNames.size(), 3);
+    assertEquals(
+        new HashSet<>(containerNames),
+        new HashSet<>(asList(CONTAINER_NAME_1, CONTAINER_NAME_2, "injectedContainer")));
+  }
+
+  @Test
+  public void testInjectablePodsMergedIntoRuntimeDeployments() throws Exception {
+    // given
+    Map<String, Pod> injectedPods =
+        ImmutableMap.of("injected", mockPod(singletonList(mockContainer("injectedContainer"))));
+
+    doReturn(ImmutableMap.of(M1_NAME, injectedPods)).when(k8sEnv).getInjectablePodsCopy();
+
+    doReturn(emptyMap()).when(k8sEnv).getPodsCopy();
+
+    doReturn(
+            ImmutableMap.of(
+                WORKSPACE_POD_NAME, mockDeployment(singletonList(mockContainer(CONTAINER_NAME_1)))))
+        .when(k8sEnv)
+        .getDeploymentsCopy();
+
+    doReturn(
+            ImmutableMap.of(
+                M1_NAME,
+                mock(InternalMachineConfig.class),
+                WORKSPACE_POD_NAME + "/injectedContainer",
+                mock(InternalMachineConfig.class)))
+        .when(k8sEnv)
+        .getMachines();
+
+    // when
+    internalRuntime.start(emptyMap());
+
+    // then
+    ArgumentCaptor<Deployment> podCaptor = ArgumentCaptor.forClass(Deployment.class);
+
+    verify(deployments).deploy(podCaptor.capture());
+
+    List<Deployment> depls = podCaptor.getAllValues();
+    assertEquals(depls.size(), 1);
+    Deployment deployedPod = depls.get(0);
+    List<String> containerNames =
+        deployedPod
+            .getSpec()
+            .getTemplate()
+            .getSpec()
+            .getContainers()
+            .stream()
+            .map(Container::getName)
+            .collect(toList());
+
+    assertEquals(containerNames.size(), 2);
+    assertEquals(
+        new HashSet<>(containerNames),
+        new HashSet<>(asList(CONTAINER_NAME_1, "injectedContainer")));
+  }
+
   private static MachineStatusEvent newEvent(String machineName, MachineStatus status) {
     return newDto(MachineStatusEvent.class)
         .withIdentity(DtoConverter.asDto(IDENTITY))
@@ -1099,7 +1257,7 @@ public class KubernetesInternalRuntimeTest {
         throw new InfrastructureException("Runtime state is not stored");
       }
       runtimeState.setCommands(
-          commands.stream().map(KubernetesRuntimeCommandImpl::new).collect(Collectors.toList()));
+          commands.stream().map(KubernetesRuntimeCommandImpl::new).collect(toList()));
     }
 
     @Override
@@ -1183,7 +1341,7 @@ public class KubernetesInternalRuntimeTest {
           .entrySet()
           .stream()
           .filter(e -> e.getKey().getWorkspaceId().equals(runtimeIdentity.getWorkspaceId()))
-          .collect(Collectors.toMap(e -> e.getValue().getName(), Entry::getValue));
+          .collect(toMap(e -> e.getValue().getName(), Entry::getValue));
     }
 
     @Override

@@ -23,13 +23,13 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
-import java.util.Optional;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
 
 /**
  * Mount configured self-signed certificate as file in each workspace machines if configured.
@@ -83,15 +83,13 @@ public class CertificateProvisioner implements ConfigurationProvisioner<Kubernet
                 .build());
 
     for (PodData pod : k8sEnv.getPodsData().values()) {
-      Optional<Volume> certVolume =
-          pod.getSpec()
-              .getVolumes()
-              .stream()
-              .filter(v -> v.getName().equals(CHE_SELF_SIGNED_CERT_VOLUME))
-              .findAny();
-
-      if (!certVolume.isPresent()) {
-        pod.getSpec().getVolumes().add(buildCertSecretVolume(selfSignedCertSecretName));
+      if (pod.getRole() == PodRole.DEPLOYMENT) {
+        if (pod.getSpec()
+            .getVolumes()
+            .stream()
+            .noneMatch(v -> v.getName().equals(CHE_SELF_SIGNED_CERT_VOLUME))) {
+          pod.getSpec().getVolumes().add(buildCertSecretVolume(selfSignedCertSecretName));
+        }
       }
 
       for (Container container : pod.getSpec().getInitContainers()) {
@@ -104,13 +102,10 @@ public class CertificateProvisioner implements ConfigurationProvisioner<Kubernet
   }
 
   private void provisionCertVolumeMountIfNeeded(Container container) {
-    Optional<VolumeMount> certVolumeMount =
-        container
-            .getVolumeMounts()
-            .stream()
-            .filter(vm -> vm.getName().equals(CHE_SELF_SIGNED_CERT_VOLUME))
-            .findAny();
-    if (!certVolumeMount.isPresent()) {
+    if (container
+        .getVolumeMounts()
+        .stream()
+        .noneMatch(vm -> vm.getName().equals(CHE_SELF_SIGNED_CERT_VOLUME))) {
       container.getVolumeMounts().add(buildCertVolumeMount());
     }
   }
