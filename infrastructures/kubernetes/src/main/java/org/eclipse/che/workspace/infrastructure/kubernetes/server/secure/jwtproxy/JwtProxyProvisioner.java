@@ -57,6 +57,7 @@ import org.eclipse.che.multiuser.machine.authentication.server.signature.Signatu
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManagerException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ServerServiceBuilder;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
@@ -93,7 +94,7 @@ public class JwtProxyProvisioner {
   static final String JWT_PROXY_CONFIG_FILE = "config.yaml";
   static final String JWT_PROXY_MACHINE_NAME = "che-jwtproxy";
 
-  static final String JWT_PROXY_CONFIG_FOLDER = "/config";
+  static final String JWT_PROXY_CONFIG_FOLDER = "/che-jwtproxy-config";
   static final String JWT_PROXY_PUBLIC_KEY_FILE = "mykey.pub";
 
   public static final String JWT_PROXY_POD_NAME = JWT_PROXY_MACHINE_NAME;
@@ -150,6 +151,7 @@ public class JwtProxyProvisioner {
    * Modifies Kubernetes environment to expose the specified service port via JWTProxy.
    *
    * @param k8sEnv Kubernetes environment to modify
+   * @param pod the pod that runs the server being exposed
    * @param backendServiceName service name that will be exposed
    * @param backendServicePort service port that will be exposed
    * @param protocol protocol that will be used for exposed port
@@ -159,6 +161,8 @@ public class JwtProxyProvisioner {
    */
   public ServicePort expose(
       KubernetesEnvironment k8sEnv,
+      PodData pod,
+      String machineName,
       String backendServiceName,
       ServicePort backendServicePort,
       String protocol,
@@ -166,7 +170,7 @@ public class JwtProxyProvisioner {
       throws InfrastructureException {
     Preconditions.checkArgument(
         secureServers != null && !secureServers.isEmpty(), "Secure servers are missing");
-    ensureJwtProxyInjected(k8sEnv);
+    ensureJwtProxyInjected(k8sEnv, machineName, pod);
 
     Set<String> excludes = new HashSet<>();
     Boolean cookiesAuthEnabled = null;
@@ -202,6 +206,16 @@ public class JwtProxyProvisioner {
 
     k8sEnv.getServices().get(serviceName).getSpec().getPorts().add(exposedPort);
 
+    // JwtProxySecureServerExposer creates no service for the exposed secure servers and
+    // assumes everything will be proxied from localhost, because JWT proxy is collocated
+    // with the workspace pod (because it is added to the environment as an injectable pod).
+    // This method historically supported proxying secure servers exposed through a service
+    // (which is not secure in absence of a appropriate network policy). The support for
+    // accessing the backend server through a service was kept here because it doesn't add
+    // any additional complexity to this method and keeps the door open for the
+    // JwtProxySecureServerExposer to be enhanced in the future with support for service-handled
+    // secure servers.
+    backendServiceName = backendServiceName == null ? "127.0.0.1" : backendServiceName;
     proxyConfigBuilder.addVerifierProxy(
         listenPort,
         "http://" + backendServiceName + ":" + backendServicePort.getTargetPort().getIntVal(),
@@ -226,13 +240,15 @@ public class JwtProxyProvisioner {
   /** Returns config map name that will be mounted into JWTProxy Pod. */
   @VisibleForTesting
   String getConfigMapName() {
-    return "jwtproxy-config-" + identity.getWorkspaceId();
+    return "jwtproxy-config";
   }
 
-  private void ensureJwtProxyInjected(KubernetesEnvironment k8sEnv) throws InfrastructureException {
+  private void ensureJwtProxyInjected(KubernetesEnvironment k8sEnv, String machineName, PodData pod)
+      throws InfrastructureException {
     if (!k8sEnv.getMachines().containsKey(JWT_PROXY_MACHINE_NAME)) {
       k8sEnv.getMachines().put(JWT_PROXY_MACHINE_NAME, createJwtProxyMachine());
-      k8sEnv.addPod(createJwtProxyPod());
+      Pod jwtProxyPod = createJwtProxyPod();
+      k8sEnv.addInjectablePod(machineName, JWT_PROXY_MACHINE_NAME, jwtProxyPod);
 
       KeyPair keyPair;
       try {
@@ -263,7 +279,9 @@ public class JwtProxyProvisioner {
       Service jwtProxyService =
           new ServerServiceBuilder()
               .withName(serviceName)
-              .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, JWT_PROXY_MACHINE_NAME)
+              // we're merely injecting the pod, so we need a selector that is going to hit the
+              // pod that runs the server that we're exposing
+              .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
               .withMachineName(JWT_PROXY_MACHINE_NAME)
               .withPorts(emptyList())
               .build();
@@ -276,25 +294,30 @@ public class JwtProxyProvisioner {
   }
 
   private Pod createJwtProxyPod() {
+    String containerName = Names.generateName("che-jwtproxy");
     return new PodBuilder()
         .withNewMetadata()
         .withName(JWT_PROXY_POD_NAME)
-        .withAnnotations(Names.createMachineNameAnnotations("verifier", JWT_PROXY_MACHINE_NAME))
+        .withAnnotations(Names.createMachineNameAnnotations(containerName, JWT_PROXY_MACHINE_NAME))
         .endMetadata()
         .withNewSpec()
         .withContainers(
             new ContainerBuilder()
                 .withImagePullPolicy("Always")
-                .withName("verifier")
+                .withName(containerName)
                 .withImage(jwtProxyImage)
                 .withVolumeMounts(
                     new VolumeMount(
-                        JWT_PROXY_CONFIG_FOLDER + "/", null, "jwtproxy-config-volume", false, null))
+                        JWT_PROXY_CONFIG_FOLDER + "/",
+                        null,
+                        "che-jwtproxy-config-volume",
+                        false,
+                        null))
                 .withArgs("-config", JWT_PROXY_CONFIG_FOLDER + "/" + JWT_PROXY_CONFIG_FILE)
                 .build())
         .withVolumes(
             new VolumeBuilder()
-                .withName("jwtproxy-config-volume")
+                .withName("che-jwtproxy-config-volume")
                 .withNewConfigMap()
                 .withName(getConfigMapName())
                 .endConfigMap()
