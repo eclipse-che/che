@@ -57,7 +57,7 @@ testImages() {
     eclipse/che-postgres
     eclipse/che-dev
     eclipse/che-server
-    eclipse/che-dashboard-devRH
+    eclipse/che-dashboard-dev
     eclipse/che-e2e
   )
 
