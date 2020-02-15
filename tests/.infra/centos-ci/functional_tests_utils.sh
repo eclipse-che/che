@@ -57,7 +57,7 @@ testImages() {
     eclipse/che-postgres
     eclipse/che-dev
     eclipse/che-server
-    eclipse/che-dashboard-dev
+    eclipse/che-dashboard-devRH
     eclipse/che-e2e
   )
 
@@ -312,10 +312,10 @@ createTestWorkspaceAndRunTest() {
   defineCheRoute
   ### Create workspace
   DEV_FILE_URL=$1
-  if [[ ${DEV_FILE_URL} = "" ]]; then
+  if [[ ${DEV_FILE_URL} = "" ]]; then # by default it is used 'happy-path-devfile' yaml from CHE 'master' branch
     chectl workspace:start --access-token "$USER_ACCESS_TOKEN" --devfile=https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
   else
-    chectl workspace:start --access-token "$USER_ACCESS_TOKEN" $1
+    chectl workspace:start --access-token "$USER_ACCESS_TOKEN" $1 # it can be directly indicated other URL to 'devfile' yaml
   fi
 
   ### Create directory for report
@@ -328,7 +328,7 @@ createTestWorkspaceAndRunTest() {
   -e TS_SELENIUM_USERNAME="${TEST_USERNAME}" \
   -e TS_SELENIUM_PASSWORD="${TEST_USERNAME}" \
   -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=420000 \
-  quay.io/eclipse/che-e2e:nightly ||IS_TESTS_FAILED=true
+  quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
 }
 
 function createTestUserAndObtainUserToken() {
@@ -441,7 +441,7 @@ function getReleaseVersion() {
 }
 
 function setupReleaseVersionAndTag() {
-  echo "======== Starting RH-Che RC check $(date) ========"
+  echo "======== Starting Che RC test job $(date) ========"
   RELEASE_VERSION=$(getReleaseVersion)
   RELEASE_TAG="rc"
 
