@@ -49,7 +49,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
  * <p>Similarly, there are two CPU-related properties:
  *
  * <ul>
- *   <li>-che.workspace.default_cpu_limit_cores - defines default machine CPU limit
+ *   <li>che.workspace.default_cpu_limit_cores - defines default machine CPU limit
  *   <li>-che.workspace.default_cpu_request_cores - defines default machine CPU request
  * </ul>
  *
