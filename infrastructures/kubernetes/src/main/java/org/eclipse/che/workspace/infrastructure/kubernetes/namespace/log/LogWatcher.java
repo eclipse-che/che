@@ -14,7 +14,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import java.io.Closeable;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -29,6 +31,8 @@ import org.slf4j.LoggerFactory;
  *
  * <p>Current implementation uses provided thread-pool and each container log watch session runs in
  * separate thread from this thread-pool.
+ *
+ * <p>Watching logs of individual containers is delegated to instances of {@link ContainerLogWatch}.
  */
 public class LogWatcher implements PodEventHandler, Closeable {
 
@@ -39,10 +43,11 @@ public class LogWatcher implements PodEventHandler, Closeable {
 
   private static final String STARTED_EVENT_REASON = "Started";
 
-  private final String namespace;
   private final KubernetesClient client;
   private final Set<PodLogHandler> logHandlers = ConcurrentHashMap.newKeySet();
   private final Executor containerWatchersThreadPool;
+
+  private final String namespace;
   private final String workspaceId;
 
   /**
@@ -126,5 +131,31 @@ public class LogWatcher implements PodEventHandler, Closeable {
       currentContainerWatchers.forEach((k, v) -> v.close());
       currentContainerWatchers.clear();
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    LogWatcher that = (LogWatcher) o;
+    return Objects.equals(namespace, that.namespace)
+        && Objects.equals(workspaceId, that.workspaceId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(namespace, workspaceId);
+  }
+
+  @Override
+  public String toString() {
+    return new StringJoiner(", ", LogWatcher.class.getSimpleName() + "[", "]")
+        .add("namespace='" + namespace + "'")
+        .add("workspaceId='" + workspaceId + "'")
+        .toString();
   }
 }

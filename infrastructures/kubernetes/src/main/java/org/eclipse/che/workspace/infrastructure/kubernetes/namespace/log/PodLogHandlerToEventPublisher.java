@@ -20,11 +20,11 @@ import org.slf4j.LoggerFactory;
 
 /** This class is responsible for reading the logs. It is aware of machines it should follow. */
 public class PodLogHandlerToEventPublisher implements PodLogHandler {
+  private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
   private final RuntimeEventsPublisher eventsPublisher;
   private final RuntimeIdentity identity;
   private final List<String> podNames;
-  private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
   public PodLogHandlerToEventPublisher(
       RuntimeEventsPublisher eventsPublisher, RuntimeIdentity identity, List<String> machines) {

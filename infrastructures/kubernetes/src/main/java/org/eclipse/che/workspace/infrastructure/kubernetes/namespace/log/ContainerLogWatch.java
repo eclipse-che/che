@@ -19,6 +19,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +41,12 @@ class ContainerLogWatch implements Runnable, Closeable {
       "container \\\"%s\\\" in pod \\\"%s\\\" is waiting to start: PodInitializing";
 
   private final KubernetesClient client;
+  private final PodLogHandler logHandler;
+  private final String errorMessageMatch;
+
   private final String namespace;
   private final String podName;
   private final String containerName;
-  private final PodLogHandler logHandler;
-  private final String errorMessageMatch;
 
   // current LogWatch instance. We need it so we can close it from outside in close() method.
   private LogWatch currentLogWatch;
@@ -168,5 +171,33 @@ class ContainerLogWatch implements Runnable, Closeable {
     if (currentLogWatch != null) {
       currentLogWatch.close();
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ContainerLogWatch that = (ContainerLogWatch) o;
+    return Objects.equals(namespace, that.namespace)
+        && Objects.equals(podName, that.podName)
+        && Objects.equals(containerName, that.containerName);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(namespace, podName, containerName);
+  }
+
+  @Override
+  public String toString() {
+    return new StringJoiner(", ", ContainerLogWatch.class.getSimpleName() + "[", "]")
+        .add("namespace='" + namespace + "'")
+        .add("podName='" + podName + "'")
+        .add("containerName='" + containerName + "'")
+        .toString();
   }
 }
