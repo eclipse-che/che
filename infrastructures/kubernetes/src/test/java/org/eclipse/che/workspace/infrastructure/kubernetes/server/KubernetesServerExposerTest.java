@@ -17,6 +17,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.server.Kuberne
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_UNIQUE_PART_SIZE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -451,19 +452,29 @@ public class KubernetesServerExposerTest {
     Service service = findContainerRelatedService();
     assertNotNull(service);
 
-    // ensure that required service port is exposed
-    ServicePort servicePort = assertThatServicePortIsExposed(port, service);
+    // ensure that no service port is exposed
+    assertTrue(
+        service
+            .getSpec()
+            .getPorts()
+            .stream()
+            .noneMatch(p -> p.getTargetPort().getIntVal().equals(port)));
 
-    Annotations.Deserializer serviceAnnotations =
-        Annotations.newDeserializer(service.getMetadata().getAnnotations());
-    assertEquals(serviceAnnotations.machineName(), machineName);
+    ServicePort servicePort =
+        new ServicePortBuilder()
+            .withName("server-" + port)
+            .withPort(port)
+            .withProtocol(portProtocol.toUpperCase())
+            .withNewTargetPort(port)
+            .build();
 
     verify(secureServerExposer)
         .expose(
             eq(kubernetesEnvironment),
-            eq(machineName),
-            eq(service.getMetadata().getName()),
             any(),
+            eq(machineName),
+            isNull(), // no service exists for the backed server
+            isNull(), // a non-unique server
             eq(servicePort),
             eq(ImmutableMap.of(serverName, serverConfig)));
   }

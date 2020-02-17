@@ -51,7 +51,7 @@ seleniumTestsSetup
 createIndentityProvider
 
 bash /root/payload/tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
-  --threads=3 \
+  --threads=4 \
   --host=${CHE_ROUTE} \
   --port=80 \
   --multiuser \

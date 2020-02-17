@@ -62,7 +62,7 @@ describe('unique-project-name-validator', function() {
 
   describe('Validate Project Name', function() {
 
-    it('projectAlready exists', function() {
+    it('project already exists', function() {
 
       // setup tests objects
       let idWorkspace1 = 'idOfMyWorkspace1';

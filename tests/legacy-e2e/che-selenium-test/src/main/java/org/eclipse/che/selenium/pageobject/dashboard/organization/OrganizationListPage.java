@@ -292,7 +292,7 @@ public class OrganizationListPage {
   }
 
   public void waitOrganizationInList(String name) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(format(Locators.ORGANIZATION_XPATH, name))));
   }
 
