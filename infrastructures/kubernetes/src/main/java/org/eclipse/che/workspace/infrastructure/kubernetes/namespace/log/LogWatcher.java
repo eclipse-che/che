@@ -123,7 +123,10 @@ public class LogWatcher implements PodEventHandler, Closeable {
         Thread.sleep(waitBeforeClose);
       }
     } catch (InterruptedException e) {
-      LOG.error("Interrupted waiting for the logs. This should not happen.", e);
+      LOG.error(
+          "Interrupted while waiting before closing the log watch for workspace '{}'.",
+          workspaceId,
+          e);
     } finally {
       LOG.debug("Closing all log watchers for '{}'", workspaceId);
       currentWatchers.forEach(LogWatch::close);
@@ -188,7 +191,12 @@ public class LogWatcher implements PodEventHandler, Closeable {
                 "finished watching the logs of '{} : {} : {}'", namespace, podName, containerName);
           }
         } catch (InterruptedException e) {
-          LOG.error("Failed watch the logs, nothing better to do here.", e);
+          LOG.error(
+              "Failed watch the logs '{} : {} : {}', nothing better to do here.",
+              namespace,
+              podName,
+              containerName,
+              e);
           return;
         }
       }
