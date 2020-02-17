@@ -31,7 +31,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNames
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSshKeysProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.ContainerResourceLimitRequestProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.ContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
@@ -62,7 +62,7 @@ public class OpenShiftEnvironmentProvisioner
   private final ServersConverter<OpenShiftEnvironment> serversConverter;
   private final EnvVarsConverter envVarsConverter;
   private final RestartPolicyRewriter restartPolicyRewriter;
-  private final ContainerResourceLimitRequestProvisioner resourceLimitRequestProvisioner;
+  private final ContainerResourceProvisioner resourceLimitRequestProvisioner;
   private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
   private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
   private final ImagePullSecretProvisioner imagePullSecretProvisioner;
@@ -83,7 +83,7 @@ public class OpenShiftEnvironmentProvisioner
       EnvVarsConverter envVarsConverter,
       RestartPolicyRewriter restartPolicyRewriter,
       WorkspaceVolumesStrategy volumesStrategy,
-      ContainerResourceLimitRequestProvisioner resourceLimitRequestProvisioner,
+      ContainerResourceProvisioner resourceLimitRequestProvisioner,
       LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
       PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
       ImagePullSecretProvisioner imagePullSecretProvisioner,

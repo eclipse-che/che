@@ -116,15 +116,6 @@ public class MachineResolver {
     if (ramRequest == 0) {
       machineConfig.getAttributes().put(MEMORY_REQUEST_ATTRIBUTE, defaultSidecarMemoryRequestBytes);
     }
-    // TODO: uncomment when CPU limit added into devfile
-    //    String overriddenSidecarMemRequest = component.getRamRequest();
-    //    if (!isNullOrEmpty(overriddenSidecarMemRequest)) {
-    //      machineConfig
-    //          .getAttributes()
-    //          .put(
-    //              MEMORY_REQUEST_ATTRIBUTE,
-    //              Long.toString(KubernetesSize.toBytes(overriddenSidecarMemRequest)));
-    //    }
   }
 
   private void normalizeCpu(Container container, InternalMachineConfig machineConfig) {
@@ -132,29 +123,11 @@ public class MachineResolver {
     if (cpuLimit == 0) {
       machineConfig.getAttributes().put(CPU_LIMIT_ATTRIBUTE, defaultSidecarCpuLimitCores);
     }
-    // TODO: uncomment when CPU limit added into devfile
-    //    String overriddenSidecarCpuLimit = component.getCpuLimit();
-    //    if (!isNullOrEmpty(overriddenSidecarCpuLimit)) {
-    //      machineConfig
-    //          .getAttributes()
-    //          .put(
-    //              CPU_LIMIT_ATTRIBUTE,
-    //              Long.toString(KubernetesSize.toCores(overriddenSidecarCpuLimit)));
-    //    }
 
     float cpuRequest = Containers.getCpuRequest(container);
     if (cpuRequest == 0) {
       machineConfig.getAttributes().put(CPU_REQUEST_ATTRIBUTE, defaultSidecarCpuRequestCores);
     }
-    // TODO: uncomment when CPU limit added into devfile
-    //    String overriddenSidecarCpuRequest = component.getCpuRequest();
-    //    if (!isNullOrEmpty(overriddenSidecarCpuRequest)) {
-    //      machineConfig
-    //          .getAttributes()
-    //          .put(
-    //              CPU_REQUEST_ATTRIBUTE,
-    //              Long.toString(KubernetesSize.toCores(overriddenSidecarCpuRequest)));
-    //    }
   }
 
   private Map<String, ? extends org.eclipse.che.api.core.model.workspace.config.Volume>

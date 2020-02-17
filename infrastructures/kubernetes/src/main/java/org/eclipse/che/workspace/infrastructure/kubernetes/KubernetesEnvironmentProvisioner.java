@@ -33,7 +33,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNames
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSshKeysProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.ContainerResourceLimitRequestProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.ContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
@@ -64,7 +64,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final ServersConverter<KubernetesEnvironment> serversConverter;
     private final EnvVarsConverter envVarsConverter;
     private final RestartPolicyRewriter restartPolicyRewriter;
-    private final ContainerResourceLimitRequestProvisioner resourceLimitRequestProvisioner;
+    private final ContainerResourceProvisioner resourceLimitRequestProvisioner;
     private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
     private final SecurityContextProvisioner securityContextProvisioner;
     private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
@@ -86,7 +86,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         EnvVarsConverter envVarsConverter,
         RestartPolicyRewriter restartPolicyRewriter,
         WorkspaceVolumesStrategy volumesStrategy,
-        ContainerResourceLimitRequestProvisioner resourceLimitRequestProvisioner,
+        ContainerResourceProvisioner resourceLimitRequestProvisioner,
         LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
         SecurityContextProvisioner securityContextProvisioner,
         PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,

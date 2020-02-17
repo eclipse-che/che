@@ -57,7 +57,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
  * @auhtor Max Shaposhnyk
  */
 @Singleton
-public class ContainerResourceLimitRequestProvisioner implements ConfigurationProvisioner {
+public class ContainerResourceProvisioner implements ConfigurationProvisioner {
 
   private final ResourceLimitAttributesProvisioner resourceLimitAttributesProvisioner;
 
@@ -67,7 +67,7 @@ public class ContainerResourceLimitRequestProvisioner implements ConfigurationPr
   private final float defaultMachineCpuRequestAttribute;
 
   @Inject
-  public ContainerResourceLimitRequestProvisioner(
+  public ContainerResourceProvisioner(
       @Named("che.workspace.default_memory_limit_mb") long defaultMachineMaxMemorySizeAttribute,
       @Named("che.workspace.default_memory_request_mb")
           long defaultMachineRequestMemorySizeAttribute,
