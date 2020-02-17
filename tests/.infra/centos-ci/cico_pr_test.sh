@@ -50,8 +50,18 @@ deployCheIntoCluster  --chenamespace=eclipse-che --che-operator-cr-yaml=/tmp/cus
 seleniumTestsSetup
 createIndentityProvider
 
-bash /root/payload/tests/legacy-e2e/che-selenium-test/selenium-tests.sh --threads=3 --host=${CHE_ROUTE} --port=80 --multiuser
+bash /root/payload/tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
+  --threads=4 \
+  --host=${CHE_ROUTE} \
+  --port=80 \
+  --multiuser \
+  --fail-script-on-failed-tests \
+  || IS_TESTS_FAILED=true
 
+
+echo "=========================== THIS IS POST TEST ACTIONS =============================="
 saveSeleniumTestResult
 getOpenshiftLogs
 archiveArtifacts "che-pullrequests-test-temporary"
+
+if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi

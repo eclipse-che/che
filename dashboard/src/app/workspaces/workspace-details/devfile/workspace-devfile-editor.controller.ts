@@ -11,7 +11,7 @@
  */
 'use strict';
 
-import {CheBranding} from '../../../../components/branding/che-branding.factory';
+import { CheBranding } from '../../../../components/branding/che-branding';
 import { CheAPI } from '../../../../components/api/che-api.factory';
 
 /**
@@ -154,14 +154,14 @@ export class WorkspaceDevfileEditorController {
         return;
       }
 
-      const devfile =  jsyaml.safeLoad(this.devfileYaml);
+      const devfile = jsyaml.safeLoad(this.devfileYaml);
       Object.keys(this.workspaceDevfile).forEach((key: string) => {
         if (!devfile[key]) {
           delete this.workspaceDevfile[key];
         }
       });
       angular.extend(this.workspaceDevfile, devfile);
-      this.workspaceDevfileOnChange({devfile});
+      this.workspaceDevfileOnChange({ devfile });
     }, 500);
   }
 

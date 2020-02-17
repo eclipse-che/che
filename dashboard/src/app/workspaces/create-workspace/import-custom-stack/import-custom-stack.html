@@ -16,7 +16,10 @@
   </che-label-container>
 
   <!-- Kubernetes namespace selector -->
-  <che-label-container che-label-name="Kubernetes Namespace" che-label-description="{{importStackController.infrastructureNamespaceHint}}">
+  <che-label-container
+    ng-if="importStackController.enabledKubernetesNamespaceSelector"
+    che-label-name="Kubernetes Namespace"
+    che-label-description="{{importStackController.infrastructureNamespaceHint}}">
     <kubernetes-namespace-selector on-change="importStackController.onInfrastructureNamespaceChange(namespaceId)"></kubernetes-namespace-selector>
   </che-label-container>
 

@@ -18,6 +18,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.cache.tck.Test
 import static org.eclipse.che.workspace.infrastructure.kubernetes.cache.tck.TestObjects.createWorkspace;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
@@ -28,12 +29,16 @@ import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.BeforeKubernetesRuntimeStateRemovedEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
@@ -60,6 +65,10 @@ public class KubernetesMachinesCacheTest {
   @Inject private TckRepository<KubernetesMachineImpl> machineRepository;
 
   @Inject private KubernetesMachineCache machineCache;
+
+  @Inject private KubernetesRuntimeStateCache runtimesStatesCache;
+
+  @Inject private EventService eventService;
 
   private WorkspaceImpl[] workspaces;
   private KubernetesRuntimeState[] runtimeStates;
@@ -267,5 +276,43 @@ public class KubernetesMachinesCacheTest {
 
     // then
     assertEquals(machineCache.getMachines(runtimeId).size(), 0);
+  }
+
+  // This test ensure that if during cascade removal of machine from cache (initiated during removal
+  // of runtime
+  // from cache) will happen an exception then transaction in runtime cache will rollback removal of
+  // machine cache.
+  // see
+  // @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
+  // protected void doRemove(RuntimeIdentity runtimeIdentity) throws ServerException
+  // Note that any checked exception that happened during RemoveEvent(extends CascadeEvent) would be
+  // transformed to
+  // ServerException. See RemoveEvent.propagateException.
+  @Test
+  public void shouldRollbackTransactionOnFailedCascadeMachine() throws Exception {
+    // given
+    assertTrue(machineCache.getMachines(runtimeStates[0].getRuntimeId()).size() > 0);
+    CascadeEventSubscriber subscriber =
+        new CascadeEventSubscriber<BeforeKubernetesRuntimeStateRemovedEvent>() {
+          @Override
+          public void onCascadeEvent(BeforeKubernetesRuntimeStateRemovedEvent event)
+              throws Exception {
+            machineCache.remove(event.getRuntimeState().getRuntimeId());
+            throw new InfrastructureException("exception");
+          }
+        };
+    eventService.subscribe(subscriber, BeforeKubernetesRuntimeStateRemovedEvent.class);
+    // when
+    try {
+      runtimesStatesCache.remove(runtimeStates[0].getRuntimeId());
+      fail("Should fail with InfrastructureException");
+    } catch (InfrastructureException exc) {
+      // ok
+    } finally {
+      eventService.unsubscribe(subscriber, BeforeKubernetesRuntimeStateRemovedEvent.class);
+    }
+
+    // then
+    assertTrue(machineCache.getMachines(runtimeStates[0].getRuntimeId()).size() > 0);
   }
 }

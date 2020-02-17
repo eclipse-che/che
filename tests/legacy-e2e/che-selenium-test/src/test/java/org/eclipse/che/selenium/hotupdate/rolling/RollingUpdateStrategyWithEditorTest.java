@@ -24,11 +24,13 @@ import org.eclipse.che.selenium.core.client.CheTestSystemClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.hotupdate.HotUpdateUtil;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -63,7 +65,6 @@ public class RollingUpdateStrategyWithEditorTest {
 
   @Test
   public void shouldUpdateMasterByRollingStrategyWithAccessibleEditorInProcess() throws Exception {
-    int currentRevision = hotUpdateUtil.getMasterPodRevision();
     theiaIde.waitOpenedWorkspaceIsReadyToUse();
 
     theiaProjectTree.waitFilesTab();
@@ -80,8 +81,9 @@ public class RollingUpdateStrategyWithEditorTest {
     checkIdeAvailability();
 
     // check that che is updated
-    hotUpdateUtil.waitMasterPodRevision(currentRevision + 1);
-    hotUpdateUtil.waitFullMasterPodUpdate(currentRevision);
+    assertTrue(
+        hotUpdateUtil.getRolloutStatus().contains("deployment \"che\" successfully rolled out"));
+    WaitUtils.sleepQuietly(60);
 
     // check that workspace is successfully migrated to the new master
     assertTrue(testWorkspaceServiceClient.exists(WORKSPACE_NAME, defaultTestUser.getName()));
@@ -92,6 +94,13 @@ public class RollingUpdateStrategyWithEditorTest {
   private void checkIdeAvailability() {
     hotUpdateUtil.checkMasterPodAvailabilityByPreferencesRequest();
     seleniumWebDriver.navigate().refresh();
-    theiaIde.waitOpenedWorkspaceIsReadyToUse();
+    try {
+      theiaIde.switchToIdeFrame();
+      theiaIde.waitTheiaIde();
+    } catch (TimeoutException ex) {
+      seleniumWebDriver.navigate().refresh();
+      theiaIde.switchToIdeFrame();
+      theiaIde.waitTheiaIde();
+    }
   }
 }

@@ -10,15 +10,15 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace, WorkspaceStatus} from '../../../components/api/workspace/che-workspace.factory';
-import {CheNotification} from '../../../components/notification/che-notification.factory';
-import {WorkspaceDetailsService} from './workspace-details.service';
-import {WorkspacesService} from '../workspaces.service';
-import {ICheEditModeOverlayConfig} from '../../../components/widget/edit-mode-overlay/che-edit-mode-overlay.directive';
-import {CheBranding} from '../../../components/branding/che-branding.factory';
-import {WorkspaceDataManager} from '../../../components/api/workspace/workspace-data-manager';
+import { CheWorkspace, WorkspaceStatus } from '../../../components/api/workspace/che-workspace.factory';
+import { CheNotification } from '../../../components/notification/che-notification.factory';
+import { WorkspaceDetailsService } from './workspace-details.service';
+import { WorkspacesService } from '../workspaces.service';
+import { ICheEditModeOverlayConfig } from '../../../components/widget/edit-mode-overlay/che-edit-mode-overlay.directive';
+import { CheBranding } from '../../../components/branding/che-branding';
+import { WorkspaceDataManager } from '../../../components/api/workspace/workspace-data-manager';
 
-export  interface IInitData {
+export interface IInitData {
   namespaceId: string;
   workspaceName: string;
   workspaceDetails: che.IWorkspace;

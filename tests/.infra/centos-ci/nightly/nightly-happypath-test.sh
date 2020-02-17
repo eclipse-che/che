@@ -11,6 +11,7 @@ echo "========Starting nigtly test job $(date)========"
 source tests/.infra/centos-ci/functional_tests_utils.sh
 source .ci/cico_common.sh
 
+setupEnvs
 installKVM
 installDependencies
 installCheCtl
@@ -19,5 +20,6 @@ loginToOpenshiftAndSetDevRole
 deployCheIntoCluster
 createTestUserAndObtainUserToken
 createTestWorkspaceAndRunTest
+echo "=========================== THIS IS POST TEST ACTIONS =============================="
 archiveArtifacts "che-nightly-happy-path"
-
+if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi

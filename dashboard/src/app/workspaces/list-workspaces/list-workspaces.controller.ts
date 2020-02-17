@@ -10,12 +10,12 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheAPI} from '../../../components/api/che-api.factory';
-import {CheNotification} from '../../../components/notification/che-notification.factory';
-import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
-import {CheNamespaceRegistry} from '../../../components/api/namespace/che-namespace-registry.factory';
-import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
-import {CheBranding} from '../../../components/branding/che-branding.factory';
+import { CheAPI } from '../../../components/api/che-api.factory';
+import { CheNotification } from '../../../components/notification/che-notification.factory';
+import { CheWorkspace } from '../../../components/api/workspace/che-workspace.factory';
+import { CheNamespaceRegistry } from '../../../components/api/namespace/che-namespace-registry.factory';
+import { ConfirmDialogService } from '../../../components/service/confirm-dialog/confirm-dialog.service';
+import { CheBranding } from '../../../components/branding/che-branding';
 
 /**
  * @ngdoc controller
@@ -26,7 +26,7 @@ import {CheBranding} from '../../../components/branding/che-branding.factory';
 export class ListWorkspacesCtrl {
 
   static $inject = ['$log', '$mdDialog', '$q', 'lodash', 'cheAPI', 'cheNotification', 'cheBranding', 'cheWorkspace', 'cheNamespaceRegistry',
-   'confirmDialogService', '$scope', 'cheListHelperFactory'];
+    'confirmDialogService', '$scope', 'cheListHelperFactory'];
 
   $q: ng.IQService;
   $log: ng.ILogService;
@@ -46,7 +46,7 @@ export class ListWorkspacesCtrl {
   workspaceUsedResources: Map<string, string>;
 
   isExactMatch: boolean = false;
-  namespaceFilter: {namespace: string};
+  namespaceFilter: { namespace: string };
   namespaceLabels: string[];
   onFilterChanged: Function;
   onSearchChanged: Function;
@@ -59,9 +59,9 @@ export class ListWorkspacesCtrl {
    * Default constructor that is using resource
    */
   constructor($log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService, lodash: any,
-              cheAPI: CheAPI, cheNotification: CheNotification, cheBranding: CheBranding,
-              cheWorkspace: CheWorkspace, cheNamespaceRegistry: CheNamespaceRegistry,
-              confirmDialogService: ConfirmDialogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
+    cheAPI: CheAPI, cheNotification: CheNotification, cheBranding: CheBranding,
+    cheWorkspace: CheWorkspace, cheNamespaceRegistry: CheNamespaceRegistry,
+    confirmDialogService: ConfirmDialogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
     this.cheAPI = cheAPI;
     this.$q = $q;
     this.$log = $log;
@@ -83,7 +83,7 @@ export class ListWorkspacesCtrl {
     this.state = 'loading';
     this.isInfoLoading = true;
     this.isExactMatch = false;
-    this.namespaceFilter = {namespace: ''};
+    this.namespaceFilter = { namespace: '' };
 
     // map of all workspaces with additional info by id:
     this.workspacesById = new Map();
@@ -102,7 +102,7 @@ export class ListWorkspacesCtrl {
     };
 
     // callback when namespace is changed
-    this.onFilterChanged = (label :  string) => {
+    this.onFilterChanged = (label: string) => {
       if (label === this.ALL_NAMESPACES) {
         this.namespaceFilter.namespace = '';
       } else {
@@ -140,7 +140,7 @@ export class ListWorkspacesCtrl {
       return this.$q.reject(error);
     }).then(() => {
       this.cheListHelper.setList(this.userWorkspaces, 'id');
-    }).finally(()=> {
+    }).finally(() => {
       this.isInfoLoading = false;
     });
   }
@@ -190,9 +190,9 @@ export class ListWorkspacesCtrl {
         let promise = stoppedStatusPromise.then(() => {
           return this.cheWorkspace.deleteWorkspace(workspace.id);
         }).then(() => {
-            this.workspacesById.delete(workspace.id);
-            queueLength--;
-          },
+          this.workspacesById.delete(workspace.id);
+          queueLength--;
+        },
           (error: any) => {
             isError = true;
             this.$log.error('Cannot delete workspace: ', error);

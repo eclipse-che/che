@@ -73,17 +73,24 @@ public class JwtProxySecureServerExposerTest {
     ServicePort jwtProxyServicePort = new ServicePort();
     doReturn(jwtProxyServicePort)
         .when(jwtProxyProvisioner)
-        .expose(any(), anyString(), any(), anyString(), any());
+        .expose(any(), any(), anyString(), anyString(), any(), anyString(), any());
 
     when(jwtProxyProvisioner.getServiceName()).thenReturn(JWT_PROXY_SERVICE_NAME);
 
     // when
     secureServerExposer.expose(
-        k8sEnv, MACHINE_NAME, MACHINE_SERVICE_NAME, null, machineServicePort, servers);
+        k8sEnv, null, MACHINE_NAME, MACHINE_SERVICE_NAME, null, machineServicePort, servers);
 
     // then
     verify(jwtProxyProvisioner)
-        .expose(eq(k8sEnv), eq(MACHINE_SERVICE_NAME), eq(machineServicePort), eq("TCP"), any());
+        .expose(
+            eq(k8sEnv),
+            any(),
+            anyString(),
+            eq(MACHINE_SERVICE_NAME),
+            eq(machineServicePort),
+            eq("TCP"),
+            any());
     verify(externalServerExposer)
         .expose(
             eq(k8sEnv),

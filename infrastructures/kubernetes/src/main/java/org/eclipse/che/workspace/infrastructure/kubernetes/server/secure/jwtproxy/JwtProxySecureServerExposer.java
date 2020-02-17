@@ -13,13 +13,18 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.assistedinject.Assisted;
+import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyProvisionerFactory;
@@ -60,19 +65,41 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
     this.proxyProvisioner = jwtProxyProvisionerFactory.create(identity);
   }
 
+  /**
+   * This always returns an empty optional because JWT proxy is injected into the workspace pod and
+   * assumes the servers it exposes listen on localhost.
+   *
+   * @see SecureServerExposer#createService(Collection, PodData, String, Map)
+   */
+  @Override
+  public Optional<Service> createService(
+      Collection<ServicePort> allSecurePorts,
+      PodData pod,
+      String machineName,
+      Map<String, ? extends ServerConfig> secureServers) {
+    return Optional.empty();
+  }
+
   @Override
   public void expose(
       T k8sEnv,
+      PodData pod,
       String machineName,
-      String serviceName,
-      String serverId,
+      @Nullable String serviceName,
+      @Nullable String serverId,
       ServicePort servicePort,
       Map<String, ServerConfig> secureServers)
       throws InfrastructureException {
 
     ServicePort exposedServicePort =
         proxyProvisioner.expose(
-            k8sEnv, serviceName, servicePort, servicePort.getProtocol(), secureServers);
+            k8sEnv,
+            pod,
+            machineName,
+            serviceName,
+            servicePort,
+            servicePort.getProtocol(),
+            secureServers);
 
     exposer.expose(
         k8sEnv,
