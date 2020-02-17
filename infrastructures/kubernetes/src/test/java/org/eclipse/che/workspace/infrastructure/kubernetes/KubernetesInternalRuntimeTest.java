@@ -100,6 +100,7 @@ import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbes;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
@@ -125,6 +126,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesPreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
@@ -474,6 +476,35 @@ public class KubernetesInternalRuntimeTest {
     verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
     verify(serversChecker, times(2)).startAsync(any());
     verify(namespace.deployments(), times(1)).stopWatch();
+  }
+
+  @Test
+  public void shouldWatchLogsWhenSetInDevfile() throws InfrastructureException {
+    DevfileImpl devfile = new DevfileImpl();
+    devfile.setAttributes(singletonMap("debug", "true"));
+    when(k8sEnv.getDevfile()).thenReturn(devfile);
+    internalRuntime.start(emptyMap());
+
+    verify(namespace.deployments(), times(1)).watchLogs(any(PodLogHandler.class));
+  }
+
+  @Test
+  public void shouldNotWatchLogsWhenSetFalseInDevfile() throws InfrastructureException {
+    DevfileImpl devfile = new DevfileImpl();
+    devfile.setAttributes(singletonMap("debug", "false"));
+    when(k8sEnv.getDevfile()).thenReturn(devfile);
+    internalRuntime.start(emptyMap());
+
+    verify(namespace.deployments(), times(0)).watchLogs(any(PodLogHandler.class));
+  }
+
+  @Test
+  public void shouldNotWatchLogsWhenNotSetInDevfile() throws InfrastructureException {
+    DevfileImpl devfile = new DevfileImpl();
+    when(k8sEnv.getDevfile()).thenReturn(devfile);
+    internalRuntime.start(emptyMap());
+
+    verify(namespace.deployments(), times(0)).watchLogs(any(PodLogHandler.class));
   }
 
   @Test
