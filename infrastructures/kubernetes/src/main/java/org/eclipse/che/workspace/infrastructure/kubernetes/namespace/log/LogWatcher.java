@@ -131,6 +131,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
       LOG.debug("Closing all log watchers for '{}'", workspaceId);
       currentWatchers.forEach(LogWatch::close);
       currentWatchers.clear();
+      watchingContainers.clear();
     }
   }
 
@@ -215,6 +216,14 @@ public class LogWatcher implements PodEventHandler, Closeable {
      *     interrupted
      */
     private boolean readAndHandle(InputStream inputStream, PodLogHandler handler) {
+      if (inputStream == null) {
+        LOG.error(
+            "Given InputStream for reading the logs for '{} {} {}' is null.",
+            namespace,
+            podName,
+            containerName);
+        return false;
+      }
       try (BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
         String logMessage;
         while ((logMessage = in.readLine()) != null) {
