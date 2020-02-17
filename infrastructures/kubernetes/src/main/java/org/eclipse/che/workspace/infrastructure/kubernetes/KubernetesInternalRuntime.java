@@ -652,8 +652,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           .deployments()
           .watchLogs(
               new PodLogHandlerToEventPublisher(
-                  this.eventPublisher, this.getContext().getIdentity(), podNames),
-              executor);
+                  this.eventPublisher, this.getContext().getIdentity(), podNames));
     }
   }
 

@@ -114,18 +114,23 @@ public class KubernetesDeployments {
   private final KubernetesClientFactory clientFactory;
   private final ConcurrentLinkedQueue<PodActionHandler> podActionHandlers;
   private final ConcurrentLinkedQueue<PodEventHandler> containerEventsHandlers;
+  private final Executor executor;
   private Watch podWatch;
   private Watch containerWatch;
   private Date watcherInitializationDate;
   private LogWatcher logWatcher;
 
   protected KubernetesDeployments(
-      String namespace, String workspaceId, KubernetesClientFactory clientFactory) {
+      String namespace,
+      String workspaceId,
+      KubernetesClientFactory clientFactory,
+      Executor executor) {
     this.namespace = namespace;
     this.workspaceId = workspaceId;
     this.clientFactory = clientFactory;
     this.containerEventsHandlers = new ConcurrentLinkedQueue<>();
     this.podActionHandlers = new ConcurrentLinkedQueue<>();
+    this.executor = executor;
   }
 
   /**
@@ -587,13 +592,11 @@ public class KubernetesDeployments {
   }
 
   /**
-   * Start watching logs of this deployment with given handler.
+   * Start watching the logs of this deployment.
    *
    * @param handler is processing log messages
-   * @param executor each container is watched in it's own thread from this executor
-   * @throws InfrastructureException in case of some failure, most probably k8s client
    */
-  public void watchLogs(PodLogHandler handler, Executor executor) throws InfrastructureException {
+  public void watchLogs(PodLogHandler handler) throws InfrastructureException {
     if (logWatcher == null) {
       LOG.debug("start watching logs of workspace [{}]", workspaceId);
       logWatcher = new LogWatcher(clientFactory, workspaceId, namespace, executor);

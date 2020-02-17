@@ -61,8 +61,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
       KubernetesClientFactory clientFactory,
       String workspaceId,
       String namespace,
-      Executor executor)
-      throws InfrastructureException {
+      Executor executor) throws InfrastructureException {
     this.client = clientFactory.create(workspaceId);
     this.namespace = namespace;
     this.containerWatchersThreadPool = executor;
@@ -113,8 +112,9 @@ public class LogWatcher implements PodEventHandler, Closeable {
   public void close(boolean needWait) {
     try {
       if (needWait && !currentWatchers.isEmpty()) {
-        LOG.debug("Waiting '{}ms' before closing all log watchers.", WAIT_TIMEOUT * 2);
-        Thread.sleep(WAIT_TIMEOUT * 2);
+        int waitBeforeClose = WAIT_TIMEOUT * 2;
+        LOG.debug("Waiting '{}ms' before closing all log watchers.", waitBeforeClose);
+        Thread.sleep(waitBeforeClose);
       } else {
         LOG.debug("Just close it now!");
       }
