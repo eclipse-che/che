@@ -109,7 +109,7 @@ spec:
         {{- if .Values.global.tls.useCustomPublicCerts }}
         - name: CHE_CUSTOM_PUBLIC_CERT
           valueFrom:
-            secretKeyRef:
+            configMapKeyRef:
               key: ca.crt
               name: {{ .Values.global.tls.customPublicCertConfigMapName }}
               optional: false

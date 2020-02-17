@@ -51,7 +51,7 @@ global:
     selfSignedCertSecretName: self-signed-cert
 
     ## If using a custom public certificate is enabled
-    ## then certificate from `tls.customPublicCertConfigMapName` will be propagated to Che components' trust stores
+    ## then certificate from `tls.customPublicCertConfigMapName` will be propagated to Che server's trust store
     useCustomPublicCerts: false
     customPublicCertConfigMapName: custom-public-cert
 
