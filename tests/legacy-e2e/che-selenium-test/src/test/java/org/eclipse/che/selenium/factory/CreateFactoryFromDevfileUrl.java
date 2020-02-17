@@ -75,7 +75,7 @@ public class CreateFactoryFromDevfileUrl {
     theiaIde.waitAllNotificationsClosed();
 
     theiaProjectTree.waitItem(repositoryName);
-    theiaProjectTree.expandItem(repositoryName);
+    theiaProjectTree.expandItemWithIgnoreExceptions(repositoryName);
     theiaProjectTree.waitItem(repositoryName + "/pom.xml");
   }
 

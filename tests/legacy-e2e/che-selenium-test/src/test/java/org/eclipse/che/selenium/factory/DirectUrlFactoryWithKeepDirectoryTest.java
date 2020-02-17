@@ -84,7 +84,7 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
     theiaIde.waitAllNotificationsClosed();
 
     theiaProjectTree.waitItem(repositoryName);
-    theiaProjectTree.expandItem(repositoryName);
+    theiaProjectTree.expandItemWithIgnoreExceptions(repositoryName);
     theiaProjectTree.waitItem(repositoryName + "/my-lib");
 
     Assert.assertFalse(theiaProjectTree.isItemVisible(repositoryName + "/my-webapp"));

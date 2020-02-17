@@ -105,7 +105,7 @@ public class DirectUrlFactoryWithRootFolderTest {
     theiaIde.waitNotificationDisappearance(
         "Che Workspace: Finished importing projects.", UPDATING_PROJECT_TIMEOUT_SEC);
     theiaIde.waitAllNotificationsClosed();
-    theiaProjectTree.expandItem(repositoryName);
+    theiaProjectTree.expandItemWithIgnoreExceptions(repositoryName);
 
     expectedItemsAfterCloning.forEach(
         name -> {
