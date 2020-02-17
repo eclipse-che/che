@@ -42,7 +42,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
  *
  * <ul>
  *   <li>che.workspace.default_memory_limit_mb - defines default machine memory limit
- *   <li>-che.workspace.default_memory_request_mb - defines default requested machine memory
+ *   <li>che.workspace.default_memory_request_mb - defines default requested machine memory
  *       allocation.
  * </ul>
  *
