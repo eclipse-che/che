@@ -586,6 +586,13 @@ public class KubernetesDeployments {
     containerEventsHandlers.add(handler);
   }
 
+  /**
+   * Start watching logs of this deployment with given handler.
+   *
+   * @param handler is processing log messages
+   * @param executor each container is watched in it's own thread from this executor
+   * @throws InfrastructureException in case of some failure, most probably k8s client
+   */
   public void watchLogs(PodLogHandler handler, Executor executor) throws InfrastructureException {
     if (logWatcher == null) {
       LOG.debug("start watching logs of workspace [{}]", workspaceId);

@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_START_DEBUG;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.CHECK_SERVERS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_MACHINES_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_RUNNING_ASYNC;
@@ -215,6 +216,11 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       startSynchronizer.checkFailure();
 
       startMachines();
+
+      if (startOptions.containsKey(WORKSPACE_START_DEBUG)
+          && Boolean.TRUE.toString().equals(startOptions.get(WORKSPACE_START_DEBUG))) {
+        watchLogs();
+      }
 
       previewUrlCommandProvisioner.provision(context.getEnvironment(), namespace);
       runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
@@ -610,11 +616,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         new KubernetesServerResolver(ingressPathTransformInverter, createdServices, readyIngresses);
 
     doStartMachine(serverResolver);
-
-    // we'll start watching for logs after start machines, at this point we know exact pod/container
-    // names that are in our interest
-    // TODO: hide this behind some configuration flag
-    watchLogs();
   }
 
   @Traced

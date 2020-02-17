@@ -14,6 +14,7 @@ package org.eclipse.che.api.workspace.server;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -24,6 +25,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_DEVFI
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_START_DEBUG;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
@@ -450,12 +452,14 @@ public class WorkspaceService extends Service {
       @ApiParam("The workspace id") @PathParam("id") String workspaceId,
       @ApiParam("The name of the workspace environment that should be used for start")
           @QueryParam("environment")
-          String envName)
+          String envName,
+      @QueryParam("debug") @DefaultValue("false") Boolean debug)
       throws ServerException, BadRequestException, NotFoundException, ForbiddenException,
           ConflictException {
 
     return asDtoWithLinksAndToken(
-        workspaceManager.startWorkspace(workspaceId, envName, emptyMap()));
+        workspaceManager.startWorkspace(
+            workspaceId, envName, singletonMap(WORKSPACE_START_DEBUG, debug.toString())));
   }
 
   @POST
