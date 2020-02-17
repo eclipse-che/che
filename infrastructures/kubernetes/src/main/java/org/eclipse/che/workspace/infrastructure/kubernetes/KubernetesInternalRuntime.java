@@ -58,6 +58,7 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
+import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
@@ -216,11 +217,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       startSynchronizer.checkFailure();
 
       startMachines();
-
-      if (startOptions.containsKey(WORKSPACE_START_DEBUG)
-          && Boolean.TRUE.toString().equals(startOptions.get(WORKSPACE_START_DEBUG))) {
-        watchLogs();
-      }
+      watchLogsIfDebugEnabled(context.getEnvironment().getDevfile());
 
       previewUrlCommandProvisioner.provision(context.getEnvironment(), namespace);
       runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
@@ -633,27 +630,31 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     }
   }
 
-  protected void watchLogs() throws InfrastructureException {
-    // get all the pods we care about
-    List<String> podNames =
-        machines
-            .getMachines(getContext().getIdentity())
-            .values()
-            .stream()
-            .filter(Objects::nonNull)
-            .map(KubernetesMachineImpl::getPodName)
-            .filter(Objects::nonNull)
-            .distinct()
-            .collect(Collectors.toList());
+  private void watchLogsIfDebugEnabled(Devfile devfile) throws InfrastructureException {
+    String debugAttr =
+        devfile.getAttributes().getOrDefault(WORKSPACE_START_DEBUG, Boolean.FALSE.toString());
+    if (Boolean.parseBoolean(debugAttr)) {
+      // get all the pods we care about
+      List<String> podNames =
+          machines
+              .getMachines(getContext().getIdentity())
+              .values()
+              .stream()
+              .filter(Objects::nonNull)
+              .map(KubernetesMachineImpl::getPodName)
+              .filter(Objects::nonNull)
+              .distinct()
+              .collect(Collectors.toList());
 
-    LOG.debug("Watch logs of pods [{}]", podNames);
+      LOG.debug("Watch logs of pods [{}]", podNames);
 
-    namespace
-        .deployments()
-        .watchLogs(
-            new PodLogHandlerToEventPublisher(
-                this.eventPublisher, this.getContext().getIdentity(), podNames),
-            executor);
+      namespace
+          .deployments()
+          .watchLogs(
+              new PodLogHandlerToEventPublisher(
+                  this.eventPublisher, this.getContext().getIdentity(), podNames),
+              executor);
+    }
   }
 
   @Traced
