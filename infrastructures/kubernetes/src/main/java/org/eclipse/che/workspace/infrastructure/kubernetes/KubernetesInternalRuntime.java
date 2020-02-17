@@ -631,9 +631,18 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   }
 
   private void watchLogsIfDebugEnabled(Devfile devfile) throws InfrastructureException {
-    String debugAttr =
-        devfile.getAttributes().getOrDefault(WORKSPACE_START_DEBUG, Boolean.FALSE.toString());
-    if (Boolean.parseBoolean(debugAttr)) {
+    final boolean debug;
+    if (devfile == null || devfile.getAttributes() == null) {
+      debug = false;
+    } else {
+      debug =
+          Boolean.parseBoolean(
+              devfile
+                  .getAttributes()
+                  .getOrDefault(WORKSPACE_START_DEBUG, Boolean.FALSE.toString()));
+    }
+
+    if (debug) {
       // get all the pods we care about
       List<String> podNames =
           machines

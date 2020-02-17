@@ -563,7 +563,8 @@ public class KubernetesInternalRuntimeTest {
       verify(namespace, never()).ingresses();
       throw rethrow;
     } finally {
-      verify(namespace.deployments(), times(2)).stopWatch();
+      verify(namespace.deployments(), times(1)).stopWatch();
+      verify(namespace.deployments(), times(1)).stopWatch(true);
     }
   }
 
@@ -608,7 +609,8 @@ public class KubernetesInternalRuntimeTest {
       verify(namespace, never()).ingresses();
       throw rethrow;
     } finally {
-      verify(namespace.deployments(), times(2)).stopWatch();
+      verify(namespace.deployments(), times(1)).stopWatch();
+      verify(namespace.deployments(), times(1)).stopWatch(true);
     }
   }
 
