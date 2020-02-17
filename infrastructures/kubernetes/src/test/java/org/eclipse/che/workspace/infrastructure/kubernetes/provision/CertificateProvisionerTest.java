@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
+import static java.util.Collections.emptyMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner.CA_CERT_FILE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner.CERT_MOUNT_PATH;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner.CHE_SELF_SIGNED_CERT_SECRET_SUFFIX;
@@ -154,6 +155,30 @@ public class CertificateProvisionerTest {
         assertTrue(container.getVolumeMounts().isEmpty());
       }
     }
+  }
+
+  @Test
+  public void shouldNotAddVolumeButAddMountToInjectablePod() throws Exception {
+    // given
+    provisioner = new CertificateProvisioner(CERT_CONTENT);
+    k8sEnv.addPod(createPod("pod"));
+    k8sEnv.addInjectablePod("r", "i", createPod("injected"));
+
+    // when
+    provisioner.provision(k8sEnv, runtimeId);
+
+    // then
+    Pod pod = k8sEnv.getPodsCopy().get("pod");
+    Pod injected = k8sEnv.getInjectablePodsCopy().getOrDefault("r", emptyMap()).get("i");
+
+    assertNotNull(pod);
+    assertNotNull(injected);
+
+    verifyVolumeIsPresent(pod);
+    pod.getSpec().getContainers().forEach(this::verifyVolumeMountIsPresent);
+
+    assertTrue(injected.getSpec().getVolumes().isEmpty());
+    injected.getSpec().getContainers().forEach(this::verifyVolumeMountIsPresent);
   }
 
   private void verifyVolumeIsPresent(Pod pod) {

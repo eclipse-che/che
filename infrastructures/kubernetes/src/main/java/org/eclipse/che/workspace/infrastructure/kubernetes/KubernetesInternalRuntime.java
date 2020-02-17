@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.CHECK_SERVERS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_MACHINES_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_RUNNING_ASYNC;
@@ -36,6 +37,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -51,6 +54,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
@@ -77,6 +81,8 @@ import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.PodMerger;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -676,23 +682,85 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     final Map<String, InternalMachineConfig> machineConfigs = environment.getMachines();
     final String workspaceId = getContext().getIdentity().getWorkspaceId();
     LOG.debug("Begin pods creation for workspace '{}'", workspaceId);
+    PodMerger podMerger = new PodMerger();
+    Map<String, Map<String, Pod>> injectablePods = environment.getInjectablePodsCopy();
     for (Pod toCreate : environment.getPodsCopy().values()) {
       ObjectMeta toCreateMeta = toCreate.getMetadata();
-      final Pod createdPod = namespace.deployments().deploy(toCreate);
+      List<PodData> injectables = getAllInjectablePods(toCreate, injectablePods);
+
+      Pod createdPod;
+      if (injectables.isEmpty()) {
+        createdPod = namespace.deployments().deploy(toCreate);
+      } else {
+        try {
+          injectables.add(new PodData(toCreate));
+          Deployment merged = podMerger.merge(injectables);
+          merged.getMetadata().setName(toCreate.getMetadata().getName());
+          createdPod = namespace.deployments().deploy(merged);
+        } catch (ValidationException e) {
+          throw new InfrastructureException(e);
+        }
+      }
       LOG.debug("Creating pod '{}' in workspace '{}'", toCreateMeta.getName(), workspaceId);
-      storeStartingMachine(createdPod, toCreateMeta, machineConfigs, serverResolver);
+      storeStartingMachine(createdPod, createdPod.getMetadata(), machineConfigs, serverResolver);
     }
+
     for (Deployment toCreate : environment.getDeploymentsCopy().values()) {
       PodTemplateSpec template = toCreate.getSpec().getTemplate();
-      ObjectMeta toCreateMeta = toCreate.getMetadata();
-      final Pod createdPod = namespace.deployments().deploy(toCreate);
-      LOG.debug("Creating deployment '{}' in workspace '{}'", toCreateMeta.getName(), workspaceId);
-      // We need to pass the meta from the pod in the deployment as that is what matches
-      // machine name
-      final ObjectMeta templateMeta = toCreate.getSpec().getTemplate().getMetadata();
-      storeStartingMachine(createdPod, templateMeta, machineConfigs, serverResolver);
+      List<PodData> injectables =
+          getAllInjectablePods(
+              template.getMetadata(), template.getSpec().getContainers(), injectablePods);
+
+      Pod createdPod;
+      if (injectables.isEmpty()) {
+        createdPod = namespace.deployments().deploy(toCreate);
+      } else {
+        try {
+          injectables.add(new PodData(toCreate));
+          Deployment deployment = podMerger.merge(injectables);
+          deployment.getMetadata().setName(toCreate.getMetadata().getName());
+
+          createdPod = namespace.deployments().deploy(deployment);
+        } catch (ValidationException e) {
+          throw new InfrastructureException(e);
+        }
+      }
+      LOG.debug(
+          "Creating deployment '{}' in workspace '{}'",
+          createdPod.getMetadata().getName(),
+          workspaceId);
+      storeStartingMachine(createdPod, createdPod.getMetadata(), machineConfigs, serverResolver);
     }
     LOG.debug("Pods creation finished in workspace '{}'", workspaceId);
+  }
+
+  private List<PodData> getAllInjectablePods(
+      Pod podToCreate, Map<String, Map<String, Pod>> injectables) {
+    return getAllInjectablePods(
+        podToCreate.getMetadata(), podToCreate.getSpec().getContainers(), injectables);
+  }
+
+  private List<PodData> getAllInjectablePods(
+      ObjectMeta toCreateMeta,
+      List<Container> toCreateContainers,
+      Map<String, Map<String, Pod>> injectables) {
+    return toCreateContainers
+        .stream()
+        .map(c -> Names.machineName(toCreateMeta, c))
+        .map(injectables::get)
+        // we're only interested in pods for which we require injection
+        .filter(Objects::nonNull)
+        // now reduce to a map keyed by injected pod name so that if 2 pods require injection
+        // of the same thing, we don't inject twice
+        .flatMap(m -> m.entrySet().stream())
+        // collect to map, ignoring duplicate entries
+        .collect(toMap(Entry::getKey, Entry::getValue, (v1, v2) -> v1))
+        // ok, we only have 1 of each injectable pods keyed by their names, so let's just get them
+        // all and return as list
+        .values()
+        .stream()
+        .map(PodData::new)
+        .collect(Collectors.toList());
   }
 
   /** Puts createdPod in the {@code machines} map and sends the starting event for this machine */

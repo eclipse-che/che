@@ -16,7 +16,7 @@ jwtproxy:
         options:
           issuer: "wsmaster"
           key_id: "workspace123"
-          public_key_path: "/config/mykey.pub"
+          public_key_path: "/che-jwtproxy-config/mykey.pub"
         type: "preshared"
       max_skew: "1m"
       max_ttl: "1m"
@@ -41,7 +41,7 @@ jwtproxy:
         options:
           issuer: "wsmaster"
           key_id: "workspace123"
-          public_key_path: "/config/mykey.pub"
+          public_key_path: "/che-jwtproxy-config/mykey.pub"
         type: "preshared"
       max_skew: "1m"
       max_ttl: "1m"

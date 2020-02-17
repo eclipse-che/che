@@ -10,9 +10,10 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheAPIBuilder} from '../../components/api/builder/che-api-builder.factory';
-import {CheHttpBackend} from '../../components/api/test/che-http-backend';
-import {OrganizationsConfigServiceMock} from './organizations-config.service.mock';
+import { CheAPIBuilder } from '../../components/api/builder/che-api-builder.factory';
+import { CheHttpBackend } from '../../components/api/test/che-http-backend';
+import { OrganizationsConfigServiceMock } from './organizations-config.service.mock';
+import { CheBranding } from '../../components/branding/che-branding';
 
 /* tslint:disable:no-empty */
 describe('OrganizationsConfig >', () => {
@@ -23,11 +24,11 @@ describe('OrganizationsConfig >', () => {
 
   let $rootScope;
 
-  let $location;
-
   let $httpBackend;
 
   let mock;
+
+  let setPath: (path: string) => void;
 
   /**
    * Setup module
@@ -49,10 +50,14 @@ describe('OrganizationsConfig >', () => {
     _cheAPIBuilder_: CheAPIBuilder
   ) => {
     $injector = _$injector_;
-    $location = _$location_;
     $route = _$route_;
     $rootScope = _$rootScope_;
     $httpBackend = _cheHttpBackend_.getHttpBackend();
+
+    setPath = path => {
+      _$location_.path(path);
+      _$rootScope_.$digest();
+    };
 
     mock = new OrganizationsConfigServiceMock(_cheAPIBuilder_, _cheHttpBackend_);
     mock.mockData();
@@ -83,7 +88,7 @@ describe('OrganizationsConfig >', () => {
       spyOn(callbacks, 'testResolve');
       spyOn(callbacks, 'testReject');
 
-      $location.path('/admin/create-organization');
+      setPath('/admin/create-organization');
 
       const service = $injector.invoke(resolveBlock);
 
@@ -136,7 +141,7 @@ describe('OrganizationsConfig >', () => {
       spyOn(callbacks, 'testResolve').and.callThrough();
       spyOn(callbacks, 'testReject');
 
-      $location.path(`/admin/create-organization/${parentOrg.qualifiedName}`);
+      setPath(`/admin/create-organization/${parentOrg.qualifiedName}`);
 
       const service = $injector.invoke(resolveBlock);
 
@@ -168,7 +173,7 @@ describe('OrganizationsConfig >', () => {
       spyOn(callbacks, 'testResolve');
       spyOn(callbacks, 'testReject');
 
-      $location.path(`/admin/create-organization/${parentOrg.qualifiedName}`);
+      setPath(`/admin/create-organization/${parentOrg.qualifiedName}`);
 
       // make response for organizations list fail
       $httpBackend.expect('GET', /\/api\/organization(\?.*$)?/).respond(500, [], {message: 'response failed'});
@@ -206,8 +211,7 @@ describe('OrganizationsConfig >', () => {
       spyOn(callbacks, 'testResolve');
       spyOn(callbacks, 'testReject');
 
-      $location.path(`/admin/create-organization/${fakeQualifiedName}`);
-      $rootScope.$digest();
+      setPath(`/admin/create-organization/${fakeQualifiedName}`);
 
       const service = $injector.invoke(resolveBlock);
 
@@ -252,7 +256,7 @@ describe('OrganizationsConfig >', () => {
       spyOn(callbacks, 'testResolve').and.callThrough();
       spyOn(callbacks, 'testReject');
 
-      $location.path(`/organization/${parentOrg.qualifiedName}`);
+      setPath(`/organization/${parentOrg.qualifiedName}`);
 
       const service = $injector.invoke(resolveBlock);
 
@@ -287,7 +291,7 @@ describe('OrganizationsConfig >', () => {
       spyOn(callbacks, 'testResolve').and.callThrough();
       spyOn(callbacks, 'testReject');
 
-      $location.path(`/organization/${parentOrg.qualifiedName}`);
+      setPath(`/organization/${parentOrg.qualifiedName}`);
 
       // make response for organizations list fail
       $httpBackend.expect('GET', /\/api\/organization(\?.*$)?/).respond(500, [], {message: 'response failed'});
@@ -344,7 +348,7 @@ describe('OrganizationsConfig >', () => {
       spyOn(callbacks, 'testResolve').and.callThrough();
       spyOn(callbacks, 'testReject');
 
-      $location.path(`/organization/${subOrg.qualifiedName}`);
+      setPath(`/organization/${subOrg.qualifiedName}`);
 
       const service = $injector.invoke(resolveBlock);
 
@@ -379,10 +383,10 @@ describe('OrganizationsConfig >', () => {
       spyOn(callbacks, 'testResolve').and.callThrough();
       spyOn(callbacks, 'testReject');
 
-      $location.path(`/organization/${subOrg.qualifiedName}`);
+      setPath(`/organization/${subOrg.qualifiedName}`);
 
       // make response for organizations list fail
-      $httpBackend.expect('GET', /\/api\/organization(\?.*$)?/).respond(500, [], {message: 'response failed'});
+      $httpBackend.expect('GET', /\/api\/organization(\?.*$)?/).respond(500, [], { message: 'response failed' });
 
       const service = $injector.invoke(resolveBlock);
 

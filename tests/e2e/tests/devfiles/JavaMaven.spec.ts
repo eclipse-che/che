@@ -35,7 +35,7 @@ suite('Java Maven test', async () => {
 
     suite('Language server validation', async () => {
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
-        commonLsTests.waitLSInitialization('Starting Java Language Server', 1800000, 360000);
+        commonLsTests.waitLSInitialization('Activating Language Support for Java', 1800000, 360000);
         commonLsTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
         commonLsTests.errorHighlighting(tabTitle, 'error', 11);
         commonLsTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');

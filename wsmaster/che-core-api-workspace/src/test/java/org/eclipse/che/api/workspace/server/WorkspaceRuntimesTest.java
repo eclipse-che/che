@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import org.eclipse.che.account.spi.AccountImpl;
@@ -88,6 +89,7 @@ import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
+import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.core.db.DBInitializer;
@@ -127,15 +129,17 @@ public class WorkspaceRuntimesTest {
   private RuntimeInfrastructure infrastructure;
 
   @Mock private InternalEnvironmentFactory<InternalEnvironment> testEnvFactory;
+  private ConcurrentMap<String, InternalRuntime<?>> runtimesMap;
 
   private WorkspaceRuntimes runtimes;
 
   @BeforeMethod
   public void setUp() throws Exception {
     infrastructure = spy(new TestInfrastructure());
-
+    runtimesMap = new ConcurrentHashMap<>();
     runtimes =
         new WorkspaceRuntimes(
+            runtimesMap,
             eventService,
             ImmutableMap.of(TEST_ENVIRONMENT_TYPE, testEnvFactory),
             infrastructure,
@@ -292,6 +296,57 @@ public class WorkspaceRuntimesTest {
     assertEquals(workspace.getStatus(), WorkspaceStatus.STARTING);
 
     verify(devfileConverter).convert(workspaceMock.getDevfile());
+  }
+
+  @Test
+  public void shouldSuspendRecoverIfEnvironmentFactoryCannotBeFound() throws Exception {
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", "default", "myId", "infraNamespace");
+
+    // WorkspaceImpl workspaceMock = mockWorkspaceWithDevfile(identity);
+
+    WorkspaceConfigImpl config = mock(WorkspaceConfigImpl.class);
+    // EnvironmentImpl environment = mockEnvironment();
+    EnvironmentImpl environment = mock(EnvironmentImpl.class);
+    when(environment.getRecipe())
+        .thenReturn(new RecipeImpl("UNKNOWN", "contentType1", "content1", null));
+
+    doReturn(ImmutableMap.of(identity.getEnvName(), environment)).when(config).getEnvironments();
+
+    WorkspaceImpl workspace = mock(WorkspaceImpl.class);
+    when(workspace.getConfig()).thenReturn(config);
+    when(workspace.getId()).thenReturn(identity.getWorkspaceId());
+    when(workspace.getAttributes()).thenReturn(new HashMap<>());
+
+    lenient().when(workspaceDao.get(identity.getWorkspaceId())).thenReturn(workspace);
+
+    RuntimeContext context = mockContext(identity);
+    when(context.getRuntime())
+        .thenReturn(new TestInternalRuntime(context, emptyMap(), WorkspaceStatus.STARTING));
+    doReturn(context).when(infrastructure).prepare(eq(identity), any());
+    doReturn(null).when(testEnvFactory).create(any());
+    when(statuses.get(anyString())).thenReturn(WorkspaceStatus.STARTING);
+
+    // try recover
+    try {
+      runtimes.recoverOne(infrastructure, identity);
+      fail("Not expected");
+    } catch (ServerException e) {
+
+    }
+    ;
+    verify(statuses).remove("workspace123");
+    ArgumentCaptor<WorkspaceStatusEvent> captor =
+        ArgumentCaptor.forClass(WorkspaceStatusEvent.class);
+    verify(eventService).publish(captor.capture());
+    WorkspaceStatusEvent event = captor.getValue();
+    assertEquals("workspace123", event.getWorkspaceId());
+    assertEquals(WorkspaceStatus.STOPPING, event.getPrevStatus());
+    assertEquals(WorkspaceStatus.STOPPED, event.getStatus());
+    assertEquals(
+        "Workspace is stopped. Reason: InternalEnvironmentFactory is not configured for recipe type: 'UNKNOWN'",
+        event.getError());
+    assertFalse(runtimesMap.containsKey("workspace123"));
   }
 
   @Test(
