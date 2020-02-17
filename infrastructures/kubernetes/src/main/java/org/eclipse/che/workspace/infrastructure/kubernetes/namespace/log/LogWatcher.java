@@ -50,6 +50,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
   private final KubernetesClient client;
   private final Set<PodLogHandler> logHandlers = ConcurrentHashMap.newKeySet();
   private final Executor containerWatchersThreadPool;
+  private final String workspaceId;
 
   // set of current watchers. This is used so we're able to cut-off the watchers from outside.
   private final Set<LogWatch> currentWatchers = ConcurrentHashMap.newKeySet();
@@ -61,8 +62,10 @@ public class LogWatcher implements PodEventHandler, Closeable {
       KubernetesClientFactory clientFactory,
       String workspaceId,
       String namespace,
-      Executor executor) throws InfrastructureException {
+      Executor executor)
+      throws InfrastructureException {
     this.client = clientFactory.create(workspaceId);
+    this.workspaceId = workspaceId;
     this.namespace = namespace;
     this.containerWatchersThreadPool = executor;
   }
@@ -103,7 +106,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
 
   /**
    * Closes all opened log watchers. In case of failed workspace, we want to block the pod for some
-   * time before removing it so we has better change to get all the logs from it. If that's the
+   * time before removing it so we have better chance to get all the logs from it. If that's the
    * case, use {@code needWait=false}. Otherwise watchers will be cleaned immediately, which does
    * not ensure that we get all the logs.
    *
@@ -113,14 +116,16 @@ public class LogWatcher implements PodEventHandler, Closeable {
     try {
       if (needWait && !currentWatchers.isEmpty()) {
         int waitBeforeClose = WAIT_TIMEOUT * 2;
-        LOG.debug("Waiting '{}ms' before closing all log watchers.", waitBeforeClose);
+        LOG.debug(
+            "Waiting '{}ms' before closing all log watchers for workspace '{}'.",
+            waitBeforeClose,
+            workspaceId);
         Thread.sleep(waitBeforeClose);
-      } else {
-        LOG.debug("Just close it now!");
       }
     } catch (InterruptedException e) {
       LOG.error("Interrupted waiting for the logs. This should not happen.", e);
     } finally {
+      LOG.debug("Closing all log watchers for '{}'", workspaceId);
       currentWatchers.forEach(LogWatch::close);
       currentWatchers.clear();
     }
@@ -128,7 +133,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
 
   private class ContainerLogWatch implements Runnable {
 
-    private static final String ERROR_MESSAGE_MATCH_FORMAT =
+    private static final String POD_INITIALIZING_MESSAGE_MATCH_FORMAT =
         "container \\\"%s\\\" in pod \\\"%s\\\" is waiting to start: PodInitializing";
 
     private final String podName;
@@ -140,7 +145,8 @@ public class LogWatcher implements PodEventHandler, Closeable {
       this.podName = podName;
       this.containerName = containerName;
       this.logHandler = logHandler;
-      this.errorMessageMatch = String.format(ERROR_MESSAGE_MATCH_FORMAT, containerName, podName);
+      this.errorMessageMatch =
+          String.format(POD_INITIALIZING_MESSAGE_MATCH_FORMAT, containerName, podName);
     }
 
     /**
@@ -191,9 +197,9 @@ public class LogWatcher implements PodEventHandler, Closeable {
     /**
      * Reads given inputStream. If we receive error message about pod is initializing from k8s (see:
      * {@link ContainerLogWatch#isErrorMessage(String)} and {@link
-     * ContainerLogWatch#ERROR_MESSAGE_MATCH_FORMAT}), returns false immediately so we can try again
-     * later. Otherwise keeps reading the messages from the stream and gives them to given handler.
-     * Be aware that it is blocking and potentially long operation!
+     * ContainerLogWatch#POD_INITIALIZING_MESSAGE_MATCH_FORMAT}), returns false immediately so we
+     * can try again later. Otherwise keeps reading the messages from the stream and gives them to
+     * given handler. Be aware that it is blocking and potentially long operation!
      *
      * @param inputStream to read log messages from
      * @param handler we delegate log messages to this handler.
