@@ -14,7 +14,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import java.io.Closeable;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
@@ -131,24 +130,6 @@ public class LogWatcher implements PodEventHandler, Closeable {
       currentContainerWatchers.forEach((k, v) -> v.close());
       currentContainerWatchers.clear();
     }
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    LogWatcher that = (LogWatcher) o;
-    return Objects.equals(namespace, that.namespace)
-        && Objects.equals(workspaceId, that.workspaceId);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(namespace, workspaceId);
   }
 
   @Override
