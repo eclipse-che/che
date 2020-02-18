@@ -157,6 +157,10 @@ public class TheiaProjectTree {
     }
   }
 
+  public void expandItemWithIgnoreExceptions(String itemName) {
+    seleniumWebDriverHelper.waitNoExceptions(() -> expandItem(itemName), WebDriverException.class);
+  }
+
   public void waitItemExpanded(String itemPath) {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> isItemExpanded(itemPath));
   }
