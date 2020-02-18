@@ -653,7 +653,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
               .filter(Objects::nonNull)
               .map(KubernetesMachineImpl::getPodName)
               .filter(Objects::nonNull)
-              .distinct()
               .collect(Collectors.toSet());
       LOG.debug(
           "Watch '{}' pods in workspace '{}'",
