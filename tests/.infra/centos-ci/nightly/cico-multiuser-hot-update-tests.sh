@@ -25,6 +25,7 @@ bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
  --port=80 \
  --multiuser \
  --threads=1 \
+ --fail-script-on-failed-tests \
  --test=org.eclipse.che.selenium.hotupdate.rolling.** \
  || IS_TESTS_FAILED=true
 

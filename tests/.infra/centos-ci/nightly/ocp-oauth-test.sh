@@ -31,8 +31,8 @@ bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
   --host=${CHE_ROUTE} \
   --port=80 \
   --multiuser \
-  --test=org.eclipse.che.selenium.site.ocpoauth.** \
   --fail-script-on-failed-tests \
+  --test=org.eclipse.che.selenium.site.ocpoauth.** \
   || IS_TESTS_FAILED=true
 
 echo "=========================== THIS IS POST TEST ACTIONS =============================="
