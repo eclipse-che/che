@@ -36,7 +36,7 @@ class ContainerLogWatch implements Runnable, Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(ContainerLogWatch.class);
 
-  private static final long WAIT_FOR_SECONDS = 30;
+  private static final long CONTAINER_LOGGER_CONNECTING_TIMEOUT_SECONDS = 30;
   private static final String POD_INITIALIZING_MESSAGE_MATCH_FORMAT =
       "container \\\"%s\\\" in pod \\\"%s\\\" is waiting to start: PodInitializing";
 
@@ -68,9 +68,10 @@ class ContainerLogWatch implements Runnable, Closeable {
 
   /**
    * Do the best effort to get the logs from the container. The method is trying for {@link
-   * ContainerLogWatch#WAIT_FOR_SECONDS} seconds to get the logs from the container. If response on
-   * log request from the k8s is 40x, it possibly means that container is not ready to get the logs
-   * and we'll try again after {@link LogWatcher#WAIT_TIMEOUT} milliseconds.
+   * ContainerLogWatch#CONTAINER_LOGGER_CONNECTING_TIMEOUT_SECONDS} seconds to get the logs from the
+   * container. If response on log request from the k8s is 40x, it possibly means that container is
+   * not ready to get the logs and we'll try again after {@link LogWatcher#WAIT_TIMEOUT}
+   * milliseconds.
    */
   @Override
   public void run() {
@@ -78,7 +79,8 @@ class ContainerLogWatch implements Runnable, Closeable {
     Stopwatch stopwatch = Stopwatch.createStarted();
     // we try to get logs for WAIT_FOR_SECONDS
     while (!successfullWatch
-        || stopwatch.elapsed(TimeUnit.SECONDS) < ContainerLogWatch.WAIT_FOR_SECONDS) {
+        || stopwatch.elapsed(TimeUnit.SECONDS)
+            < ContainerLogWatch.CONTAINER_LOGGER_CONNECTING_TIMEOUT_SECONDS) {
       // request k8s to get the logs from the container
       try (LogWatch logWatch =
           client

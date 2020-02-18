@@ -14,7 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_START_DEBUG;
+import static org.eclipse.che.api.workspace.shared.Constants.WATCH_CONTAINER_LOGS_ON_WORKSPACE_STARTUP;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.CHECK_SERVERS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_MACHINES_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_RUNNING_ASYNC;
@@ -631,20 +631,21 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   }
 
   private void watchLogsIfDebugEnabled(Devfile devfile) throws InfrastructureException {
-    final boolean debug;
     if (devfile == null || devfile.getAttributes() == null) {
-      debug = false;
-    } else {
-      debug =
-          Boolean.parseBoolean(
-              devfile
-                  .getAttributes()
-                  .getOrDefault(WORKSPACE_START_DEBUG, Boolean.FALSE.toString()));
+      LOG.debug(
+          "devfile or it's attributes are null so we won't watch the container logs for workspace '{}'",
+          getContext().getIdentity().getWorkspaceId());
+      return;
     }
+    boolean shouldWatchContainerStartupLogs =
+        Boolean.parseBoolean(
+            devfile
+                .getAttributes()
+                .getOrDefault(WATCH_CONTAINER_LOGS_ON_WORKSPACE_STARTUP, Boolean.FALSE.toString()));
 
-    if (debug) {
+    if (shouldWatchContainerStartupLogs) {
       // get all the pods we care about
-      List<String> podNames =
+      Set<String> podNames =
           machines
               .getMachines(getContext().getIdentity())
               .values()
@@ -653,9 +654,11 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
               .map(KubernetesMachineImpl::getPodName)
               .filter(Objects::nonNull)
               .distinct()
-              .collect(Collectors.toList());
-
-      LOG.debug("Watch logs of pods [{}]", podNames);
+              .collect(Collectors.toSet());
+      LOG.debug(
+          "Watch '{}' pods in workspace '{}'",
+          podNames,
+          getContext().getIdentity().getWorkspaceId());
 
       namespace
           .deployments()

@@ -12,7 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
 import java.time.ZonedDateTime;
-import java.util.List;
+import java.util.Set;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.slf4j.Logger;
@@ -24,10 +24,10 @@ public class PodLogHandlerToEventPublisher implements PodLogHandler {
 
   private final RuntimeEventsPublisher eventsPublisher;
   private final RuntimeIdentity identity;
-  private final List<String> podNames;
+  private final Set<String> podNames;
 
   public PodLogHandlerToEventPublisher(
-      RuntimeEventsPublisher eventsPublisher, RuntimeIdentity identity, List<String> machines) {
+      RuntimeEventsPublisher eventsPublisher, RuntimeIdentity identity, Set<String> machines) {
     this.eventsPublisher = eventsPublisher;
     this.identity = identity;
     this.podNames = machines;
@@ -41,7 +41,7 @@ public class PodLogHandlerToEventPublisher implements PodLogHandler {
    */
   @Override
   public boolean matchPod(String podName) {
-    return podNames.stream().anyMatch(p -> p.equals(podName));
+    return podNames.contains(podName);
   }
 
   /**
