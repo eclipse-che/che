@@ -339,7 +339,8 @@ pipeline {
         cleanup {
             sh """                   
                 mkdir -p $LOGS_AND_CONFIGS/kubectl
-                kubectl --namespace=che get events -o json > $LOGS_AND_CONFIGS/kubectl/events.txt || true
+                kubectl --namespace=che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
+                kubectl --namespace=che get events -o json > $LOGS_AND_CONFIGS/kubectl/events.json || true
 
                 mkdir -p $LOGS_AND_CONFIGS/che-config
 
