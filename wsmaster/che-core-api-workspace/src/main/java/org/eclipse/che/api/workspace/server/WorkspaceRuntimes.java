@@ -731,7 +731,26 @@ public class WorkspaceRuntimes {
           identity.getWorkspaceId(),
           runtimeStatus);
       return runtime;
-    } catch (InfrastructureException | ValidationException | NotFoundException x) {
+    } catch (NotFoundException x) {
+      LOG.warn(
+          "Not able to create internal environment for  '{}'. Reason: '{}'",
+          identity.getWorkspaceId(),
+          x.getMessage());
+      try (Unlocker ignored = lockService.writeLock(identity.getWorkspaceId())) {
+        runtimes.remove(identity.getWorkspaceId());
+        statuses.remove(identity.getWorkspaceId());
+      }
+      publishWorkspaceStatusEvent(
+          identity.getWorkspaceId(),
+          STOPPED,
+          STOPPING,
+          "Workspace is stopped. Reason: " + x.getMessage());
+      throw new ServerException(
+          format(
+              "Couldn't recover runtime '%s:%s'. Error: %s",
+              identity.getWorkspaceId(), identity.getEnvName(), x.getMessage()));
+
+    } catch (InfrastructureException | ValidationException x) {
       throw new ServerException(
           format(
               "Couldn't recover runtime '%s:%s'. Error: %s",

@@ -9,17 +9,29 @@ set -e
 echo "========Starting nigtly test job $(date)========"
 
 source tests/.infra/centos-ci/functional_tests_utils.sh
-source .ci/cico_common.sh
 
 setupEnvs
 installKVM
 installDependencies
-installCheCtl
+installDockerCompose
 installAndStartMinishift
 loginToOpenshiftAndSetDevRole
+installCheCtl
 deployCheIntoCluster
-createTestUserAndObtainUserToken
-createTestWorkspaceAndRunTest
+seleniumTestsSetup
+
+bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
+--host=${CHE_ROUTE} \
+ --port=80 \
+ --multiuser \
+ --threads=1 \
+ --fail-script-on-failed-tests \
+ --test=org.eclipse.che.selenium.hotupdate.rolling.** \
+ || IS_TESTS_FAILED=true
+
 echo "=========================== THIS IS POST TEST ACTIONS =============================="
-archiveArtifacts "che-nightly-happy-path"
+saveSeleniumTestResult
+getOpenshiftLogs
+archiveArtifacts "cico-nightly-hot-update-test"
+
 if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi

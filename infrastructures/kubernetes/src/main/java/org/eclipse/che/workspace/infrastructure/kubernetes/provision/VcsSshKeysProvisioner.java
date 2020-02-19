@@ -43,6 +43,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,21 +156,28 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
     k8sEnv
         .getPodsData()
         .values()
-        .forEach(p -> mountSshKeySecret(secret.getMetadata().getName(), p.getSpec()));
+        .forEach(
+            p -> {
+              mountSshKeySecret(
+                  secret.getMetadata().getName(), p.getSpec(), p.getRole() != PodRole.INJECTABLE);
+            });
   }
 
-  private void mountSshKeySecret(String secretName, PodSpec podSpec) {
-    podSpec
-        .getVolumes()
-        .add(
-            new VolumeBuilder()
-                .withName(secretName)
-                .withSecret(
-                    new SecretVolumeSourceBuilder()
-                        .withSecretName(secretName)
-                        .withDefaultMode(0600)
-                        .build())
-                .build());
+  private void mountSshKeySecret(String secretName, PodSpec podSpec, boolean addVolume) {
+    if (addVolume) {
+      podSpec
+          .getVolumes()
+          .add(
+              new VolumeBuilder()
+                  .withName(secretName)
+                  .withSecret(
+                      new SecretVolumeSourceBuilder()
+                          .withSecretName(secretName)
+                          .withDefaultMode(0600)
+                          .build())
+                  .build());
+    }
+
     List<Container> containers = podSpec.getContainers();
     containers.forEach(
         container -> {
@@ -197,19 +205,25 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
             .build();
 
     k8sEnv.getConfigMaps().put(configMap.getMetadata().getName(), configMap);
-    k8sEnv.getPodsData().values().forEach(p -> mountConfigFile(p.getSpec(), sshConfigMapName));
+    k8sEnv
+        .getPodsData()
+        .values()
+        .forEach(
+            p -> mountConfigFile(p.getSpec(), sshConfigMapName, p.getRole() != PodRole.INJECTABLE));
   }
 
-  private void mountConfigFile(PodSpec podSpec, String sshConfigMapName) {
+  private void mountConfigFile(PodSpec podSpec, String sshConfigMapName, boolean addVolume) {
     String configMapVolumeName = "ssshkeyconfigvolume";
-    podSpec
-        .getVolumes()
-        .add(
-            new VolumeBuilder()
-                .withName(configMapVolumeName)
-                .withConfigMap(
-                    new ConfigMapVolumeSourceBuilder().withName(sshConfigMapName).build())
-                .build());
+    if (addVolume) {
+      podSpec
+          .getVolumes()
+          .add(
+              new VolumeBuilder()
+                  .withName(configMapVolumeName)
+                  .withConfigMap(
+                      new ConfigMapVolumeSourceBuilder().withName(sshConfigMapName).build())
+                  .build());
+    }
 
     List<Container> containers = podSpec.getContainers();
     containers.forEach(

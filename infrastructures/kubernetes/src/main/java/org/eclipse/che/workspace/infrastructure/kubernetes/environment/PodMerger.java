@@ -17,6 +17,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.fabric8.kubernetes.api.model.PodSecurityContext;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.PodTemplateSpec;
 import io.fabric8.kubernetes.api.model.Volume;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
@@ -114,6 +116,17 @@ public class PodMerger {
         }
       }
 
+      baseSpec.setSecurityContext(
+          mergeSecurityContexts(
+              baseSpec.getSecurityContext(), podData.getSpec().getSecurityContext()));
+
+      baseSpec.setServiceAccount(
+          mergeServiceAccount(baseSpec.getServiceAccount(), podData.getSpec().getServiceAccount()));
+
+      baseSpec.setServiceAccountName(
+          mergeServiceAccountName(
+              baseSpec.getServiceAccountName(), podData.getSpec().getServiceAccountName()));
+
       // if there are entries with such keys then values will be overridden
       baseSpec.getAdditionalProperties().putAll(podData.getSpec().getAdditionalProperties());
     }
@@ -140,5 +153,32 @@ public class PodMerger {
         .endTemplate()
         .endSpec()
         .build();
+  }
+
+  private PodSecurityContext mergeSecurityContexts(
+      @Nullable PodSecurityContext a, @Nullable PodSecurityContext b) throws ValidationException {
+    return nonNullOrEqual(a, b, "Cannot merge pods with different security contexts: %s, %s");
+  }
+
+  private String mergeServiceAccount(@Nullable String a, @Nullable String b)
+      throws ValidationException {
+    return nonNullOrEqual(a, b, "Cannot merge pods with different service accounts: %s, %s");
+  }
+
+  private String mergeServiceAccountName(@Nullable String a, @Nullable String b)
+      throws ValidationException {
+    return nonNullOrEqual(a, b, "Cannot merge pods with different service account names: %s, %s");
+  }
+
+  @Nullable
+  private static <T> T nonNullOrEqual(@Nullable T a, @Nullable T b, String errorMessageTemplate)
+      throws ValidationException {
+    if (a == null) {
+      return b;
+    } else if (b == null || a.equals(b)) {
+      return a;
+    } else {
+      throw new ValidationException(String.format(errorMessageTemplate, a, b));
+    }
   }
 }

@@ -285,9 +285,9 @@ function deployCheIntoCluster() {
 }
 
 function loginToOpenshiftAndSetDevRole() {
-  oc login -u system:admin
+  oc login -u system:admin --insecure-skip-tls-verify
   oc adm policy add-cluster-role-to-user cluster-admin developer
-  oc login -u developer -p pass
+  oc login -u developer -p pass --insecure-skip-tls-verify
 }
 
 function archiveArtifacts() {
@@ -317,7 +317,13 @@ createTestWorkspaceAndRunTest() {
   mkdir report
   REPORT_FOLDER=$(pwd)/report
   ### Run tests
-  docker run --shm-size=256m --network host -v $REPORT_FOLDER:/tmp/e2e/report:Z -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" -e TS_SELENIUM_MULTIUSER="true" -e TS_SELENIUM_USERNAME="${TEST_USERNAME}" -e TS_SELENIUM_PASSWORD="${TEST_USERNAME}" -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=420000 quay.io/eclipse/che-e2e:nightly
+  docker run --shm-size=256m --network host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
+  -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" \
+  -e TS_SELENIUM_MULTIUSER="true" \
+  -e TS_SELENIUM_USERNAME="${TEST_USERNAME}" \
+  -e TS_SELENIUM_PASSWORD="${TEST_USERNAME}" \
+  -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=420000 \
+  quay.io/eclipse/che-e2e:nightly ||IS_TESTS_FAILED=true
 }
 
 function createTestUserAndObtainUserToken() {
@@ -422,5 +428,5 @@ function runDevfileTestSuite() {
   -e TEST_SUITE=test-all-devfiles -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \
   -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \
   -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
-  quay.io/eclipse/che-e2e:nightly
+  quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
 }

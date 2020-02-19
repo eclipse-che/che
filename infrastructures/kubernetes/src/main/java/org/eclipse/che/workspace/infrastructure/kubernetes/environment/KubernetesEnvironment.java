@@ -57,6 +57,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
   private final Map<String, PersistentVolumeClaim> persistentVolumeClaims;
   private final Map<String, Secret> secrets;
   private final Map<String, ConfigMap> configMaps;
+  private final Map<String, Map<String, Pod>> injectablePods;
 
   /** Returns builder for creating environment from blank {@link KubernetesEnvironment}. */
   public static Builder builder() {
@@ -104,6 +105,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
     this.secrets = secrets;
     this.configMaps = configMaps;
     this.podData = new HashMap<>();
+    this.injectablePods = new HashMap<>();
     pods.forEach((name, pod) -> podData.put(name, new PodData(pod)));
     deployments.forEach((name, deployment) -> podData.put(name, new PodData(deployment)));
   }
@@ -129,6 +131,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
     this.secrets = secrets;
     this.configMaps = configMaps;
     this.podData = new HashMap<>();
+    this.injectablePods = new HashMap<>();
     pods.forEach((name, pod) -> podData.put(name, new PodData(pod)));
     deployments.forEach((name, deployment) -> podData.put(name, new PodData(deployment)));
   }
@@ -185,6 +188,33 @@ public class KubernetesEnvironment extends InternalEnvironment {
     String podName = pod.getMetadata().getName();
     pods.put(podName, pod);
     podData.put(podName, new PodData(pod.getSpec(), pod.getMetadata()));
+  }
+
+  /**
+   * Get the pods that are meant to be injected into other deployments, like JWT proxy.
+   *
+   * <p>The keys in the returned map are machine names of machines that require the pods to be
+   * injected into their deployments. The values are maps of the injectable pods keyed by their
+   * names.
+   */
+  public Map<String, Map<String, Pod>> getInjectablePodsCopy() {
+    return ImmutableMap.copyOf(injectablePods);
+  }
+
+  /**
+   * An injectable pod is a pod that is intended to be merged into all deployments that require it.
+   * This is established by tracking the names of the machines that require this additional pod.
+   *
+   * @param requiringMachine the name of the machine that has been determined to require this
+   *     additional pod
+   * @param injectablePodMachineName the name of the injectable pod
+   * @param pod the pod to merge into the deployment containing the machine
+   */
+  public void addInjectablePod(String requiringMachine, String injectablePodMachineName, Pod pod) {
+    this.injectablePods
+        .computeIfAbsent(requiringMachine, __ -> new HashMap<>())
+        .put(injectablePodMachineName, pod);
+    this.podData.put(injectablePodMachineName, new PodData(pod, PodRole.INJECTABLE));
   }
 
   /** Returns services that should be created when environment starts. */
@@ -299,25 +329,43 @@ public class KubernetesEnvironment extends InternalEnvironment {
     }
   }
 
+  public enum PodRole {
+    DEPLOYMENT,
+    INJECTABLE
+  }
+
   /**
    * Abstraction of pod, since deployments store pod spec and meta within a PodSpecTemplate instead
    * of a pod object. This class allows us to use one class to support passing of the relevant parts
    * of a pod or deployment when it comes to provisioning.
    *
    * <p>The methods for accessing metadata and spec are identical to that of the Pod class (i.e.
-   * {@code getSpec()} and {@code getMetadata()}
+   * {@code getSpec()} and {@code getMetadata()}.
+   *
+   * <p>This class additionally specifies the role of the pod in the final workspace which the
+   * provisioners can use to specialize their behavior for.
    */
   public static class PodData {
     private PodSpec podSpec;
     private ObjectMeta podMeta;
+    private PodRole role;
 
-    public PodData(PodSpec podSpec, ObjectMeta podMeta) {
+    public PodData(PodSpec podSpec, ObjectMeta podMeta, PodRole role) {
       this.podSpec = podSpec;
       this.podMeta = podMeta;
+      this.role = role;
+    }
+
+    public PodData(PodSpec podSpec, ObjectMeta podMeta) {
+      this(podSpec, podMeta, PodRole.DEPLOYMENT);
     }
 
     public PodData(Pod pod) {
       this(pod.getSpec(), pod.getMetadata());
+    }
+
+    public PodData(Pod pod, PodRole role) {
+      this(pod.getSpec(), pod.getMetadata(), role);
     }
 
     public PodData(Deployment deployment) {
@@ -338,6 +386,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
 
       this.podSpec = podTemplate.getSpec();
       this.podMeta = podTemplate.getMetadata();
+      this.role = PodRole.DEPLOYMENT;
     }
 
     public PodSpec getSpec() {
@@ -356,6 +405,14 @@ public class KubernetesEnvironment extends InternalEnvironment {
       this.podMeta = podMeta;
     }
 
+    public PodRole getRole() {
+      return role;
+    }
+
+    public void setRole(PodRole role) {
+      this.role = role;
+    }
+
     @Override
     public boolean equals(Object obj) {
       if (this == obj) {
@@ -365,17 +422,19 @@ public class KubernetesEnvironment extends InternalEnvironment {
         return false;
       }
       final PodData that = (PodData) obj;
-      return Objects.equals(podSpec, that.podSpec) && Objects.equals(podMeta, that.podMeta);
+      return Objects.equals(podSpec, that.podSpec)
+          && Objects.equals(podMeta, that.podMeta)
+          && Objects.equals(role, that.role);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(podSpec, podMeta);
+      return Objects.hash(podSpec, podMeta, role);
     }
 
     @Override
     public String toString() {
-      return "PodData{" + "podSpec=" + podSpec + ", podMeta=" + podMeta + '}';
+      return "PodData{" + "podSpec=" + podSpec + ", podMeta=" + podMeta + ", role=" + role + '}';
     }
   }
 }

@@ -17,7 +17,7 @@
  */
 export class CheService {
 
-  static $inject = ['$http'];
+  static $inject = ['$http', '$rootScope'];
 
   /**
    * Service for performing HTTP requests.
@@ -32,21 +32,22 @@ export class CheService {
   /**
    * Information about services.
    */
-  private servicesInfo: any;
+  private servicesInfo: { [propName: string]: string; } = {};
 
   /**
    * Default constructor that is using resource
    */
-  constructor ($http: ng.IHttpService) {
+  constructor($http: ng.IHttpService, $rootScope: ng.IRootScopeService) {
     this.$http = $http;
 
     this.fetchServices();
+    this.fetchServicesInfo().then(() => {
+      ($rootScope as any).productVersion = this.servicesInfo.buildInfo || '';
+    });
   }
 
   /**
    * Fetches all available services.
-   *
-   * @returns {ng.IPromise<any>}
    */
   fetchServices(): ng.IPromise<any> {
     if (this.servicesPromise) {
@@ -68,7 +69,6 @@ export class CheService {
   /**
    * Checks whether service is available.
    * @param name service name
-   * @returns {Boolean|*}
    */
   isServiceAvailable(name: string): boolean {
     if (!this.services) {
@@ -84,7 +84,7 @@ export class CheService {
    * @returns {IHttpPromise<any>}
    */
   fetchServicesInfo(): ng.IPromise<any> {
-    let promise = this.$http({'method': 'OPTIONS', 'url': '/api/'});
+    let promise = this.$http({ 'method': 'OPTIONS', 'url': '/api/' });
     let infoPromise = promise.then((response: any) => {
       this.servicesInfo = response.data;
     });
@@ -93,10 +93,8 @@ export class CheService {
 
   /**
    * Returns services information.
-   *
-   * @returns {any} servies information
    */
-  getServicesInfo(): any {
+  getServicesInfo(): { [propName: string]: string; } {
     return this.servicesInfo;
   }
 }

@@ -10,10 +10,10 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace, WorkspaceStatus} from '../../../../components/api/workspace/che-workspace.factory';
-import {CheBranding} from '../../../../components/branding/che-branding.factory';
-import {WorkspacesService} from '../../workspaces.service';
-import {WorkspaceDataManager} from '../../../../components/api/workspace/workspace-data-manager';
+import { CheWorkspace, WorkspaceStatus } from '../../../../components/api/workspace/che-workspace.factory';
+import { CheBranding } from '../../../../components/branding/che-branding';
+import { WorkspacesService } from '../../workspaces.service';
+import { WorkspaceDataManager } from '../../../../components/api/workspace/workspace-data-manager';
 
 const BLUR_TIMEOUT = 5000;
 
@@ -128,7 +128,7 @@ export class WorkspaceItemCtrl {
    * @param tab {string}
    */
   redirectToWorkspaceDetails(tab: string = 'Overview'): void {
-    this.$location.path(`/workspace/${this.workspace.namespace}/${this.workspaceName}`).search({tab});
+    this.$location.path(`/workspace/${this.workspace.namespace}/${this.workspaceName}`).search({ tab });
   }
 
   getMemoryLimit(): string {
@@ -176,7 +176,7 @@ export class WorkspaceItemCtrl {
   }
 
   isCheckboxEnable(): boolean {
-    const status =  WorkspaceStatus[this.getWorkspaceStatus()];
+    const status = WorkspaceStatus[this.getWorkspaceStatus()];
     return status === WorkspaceStatus.RUNNING || status === WorkspaceStatus.STOPPED;
   }
 }
