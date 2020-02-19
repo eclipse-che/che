@@ -312,6 +312,7 @@ pipeline {
                        -e TS_SELENIUM_USERNAME="admin" \\
                        -e TS_SELENIUM_PASSWORD="admin" \\
                        -e TEST_SUITE="${e2eTestToRun}" \\
+                       -e TS_SELENIUM_START_WORKSPACE_TIMEOUT=900000 \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
                        quay.io/eclipse/che-e2e:nightly
                 """
