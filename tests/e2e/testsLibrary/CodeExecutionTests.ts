@@ -8,16 +8,19 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { CLASSES, Terminal, TopMenu, Ide, DialogWindow } from '..';
+import { CLASSES, Terminal, TopMenu, Ide, DialogWindow, DriverHelper } from '..';
 import { e2eContainer } from '../inversify.config';
+import Axios from 'axios';
+import https from 'https';
 
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const dialogWindow: DialogWindow = e2eContainer.get(CLASSES.DialogWindow);
+const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
 export function runTask(taskName: string, timeout: number) {
-    test( `Run command '${taskName}'`, async () => {
+    test(`Run command '${taskName}'`, async () => {
         await topMenu.runTask(taskName);
         await ide.waitNotification('has exited with code 0.', timeout);
     });
@@ -27,6 +30,24 @@ export function runTaskWithDialogShellAndOpenLink(taskName: string, expectedDial
     test(`Run command '${taskName}' expecting dialog shell`, async () => {
         await topMenu.runTask(taskName);
         await dialogWindow.waitDialogAndOpenLink(timeout, expectedDialogText);
+    });
+}
+
+export function runTaskWithDialogShellDjangoWorkaround(taskName: string, expectedDialogText: string, urlSubPath: string, timeout: number) {
+    test(`Run command '${taskName}' expecting dialog shell`, async () => {
+        await topMenu.runTask(taskName);
+        await dialogWindow.waitDialog(timeout, expectedDialogText);
+        const dialogRedirectUrl: string = await dialogWindow.getApplicationUrlFromDialog(expectedDialogText);
+        const augmentedPreviewUrl: string = dialogRedirectUrl + urlSubPath;
+        await dialogWindow.closeDialog();
+        await dialogWindow.waitDialogDissappearance();
+        await driverHelper.getDriver().wait(async () => {
+            try {
+                const agent = new https.Agent({ rejectUnauthorized: false });
+                const res = await Axios.get(augmentedPreviewUrl, { httpsAgent: agent });
+                if (res.status === 200) { return true; }
+            } catch (error) { await driverHelper.wait(1_000); }
+        }, timeout);
     });
 }
 
