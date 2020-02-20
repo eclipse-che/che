@@ -76,7 +76,7 @@ class ContainerLogWatch implements Runnable, Closeable {
   @Override
   public void run() {
     Stopwatch stopwatch = Stopwatch.createStarted();
-    // we try to get logs for WAIT_FOR_SECONDS
+    // we try to get logs for CONTAINER_LOGGER_CONNECTING_TIMEOUT_SECONDS seconds
     while (stopwatch.elapsed(TimeUnit.SECONDS)
         < ContainerLogWatch.CONTAINER_LOGGER_CONNECTING_TIMEOUT_SECONDS) {
       // request k8s to get the logs from the container
