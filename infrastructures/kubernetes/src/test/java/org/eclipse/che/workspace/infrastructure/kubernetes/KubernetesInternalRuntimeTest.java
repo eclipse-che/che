@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.concat;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STARTING;
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.mockito.ArgumentMatchers.any;
@@ -100,7 +101,6 @@ import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbes;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
@@ -479,29 +479,21 @@ public class KubernetesInternalRuntimeTest {
   }
 
   @Test
-  public void shouldWatchLogsWhenSetInDevfile() throws InfrastructureException {
-    DevfileImpl devfile = new DevfileImpl();
-    devfile.setAttributes(singletonMap("debug", "true"));
-    when(k8sEnv.getDevfile()).thenReturn(devfile);
-    internalRuntime.start(emptyMap());
+  public void shouldWatchLogsWhenSetInOptions() throws InfrastructureException {
+    internalRuntime.start(singletonMap(DEBUG_WORKSPACE_START, "true"));
 
     verify(namespace.deployments(), times(1)).watchLogs(any(PodLogHandler.class));
   }
 
   @Test
-  public void shouldNotWatchLogsWhenSetFalseInDevfile() throws InfrastructureException {
-    DevfileImpl devfile = new DevfileImpl();
-    devfile.setAttributes(singletonMap("debug", "false"));
-    when(k8sEnv.getDevfile()).thenReturn(devfile);
-    internalRuntime.start(emptyMap());
+  public void shouldNotWatchLogsWhenSetFalseInOptions() throws InfrastructureException {
+    internalRuntime.start(singletonMap(DEBUG_WORKSPACE_START, "false"));
 
     verify(namespace.deployments(), times(0)).watchLogs(any(PodLogHandler.class));
   }
 
   @Test
-  public void shouldNotWatchLogsWhenNotSetInDevfile() throws InfrastructureException {
-    DevfileImpl devfile = new DevfileImpl();
-    when(k8sEnv.getDevfile()).thenReturn(devfile);
+  public void shouldNotWatchLogsWhenNotSetInOptions() throws InfrastructureException {
     internalRuntime.start(emptyMap());
 
     verify(namespace.deployments(), times(0)).watchLogs(any(PodLogHandler.class));

@@ -452,7 +452,7 @@ public class WorkspaceService extends Service {
       @ApiParam("The name of the workspace environment that should be used for start")
           @QueryParam("environment")
           String envName,
-      @QueryParam("debugWorkspaceStart") @DefaultValue("false") Boolean debugWorkspaceStart)
+      @QueryParam(DEBUG_WORKSPACE_START) @DefaultValue("false") Boolean debugWorkspaceStart)
       throws ServerException, BadRequestException, NotFoundException, ForbiddenException,
           ConflictException {
 

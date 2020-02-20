@@ -24,6 +24,7 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY;
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
@@ -926,7 +927,42 @@ public class WorkspaceServiceTest {
     assertEquals(
         new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
     verify(wsManager)
-        .startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), emptyMap());
+        .startWorkspace(
+            workspace.getId(),
+            workspace.getConfig().getDefaultEnv(),
+            singletonMap(DEBUG_WORKSPACE_START, Boolean.FALSE.toString()));
+  }
+
+  @Test
+  public void shouldStartWorkspaceWithStartupDebug() throws Exception {
+    final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+    when(wsManager.startWorkspace(any(), any(), any())).thenReturn(workspace);
+    when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .when()
+            .post(
+                SECURE_PATH
+                    + "/workspace/"
+                    + workspace.getId()
+                    + "/runtime"
+                    + "?environment="
+                    + workspace.getConfig().getDefaultEnv()
+                    + "&"
+                    + DEBUG_WORKSPACE_START
+                    + "=true");
+
+    assertEquals(response.getStatusCode(), 200);
+    assertEquals(
+        new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
+    verify(wsManager)
+        .startWorkspace(
+            workspace.getId(),
+            workspace.getConfig().getDefaultEnv(),
+            singletonMap(DEBUG_WORKSPACE_START, Boolean.TRUE.toString()));
   }
 
   @Test
