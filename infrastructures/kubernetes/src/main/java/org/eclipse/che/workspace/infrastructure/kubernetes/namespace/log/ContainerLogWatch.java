@@ -105,6 +105,7 @@ class ContainerLogWatch implements Runnable, Closeable {
         } else {
           LOG.debug(
               "finished watching the logs of '{} : {} : {}'", namespace, podName, containerName);
+          return;
         }
       } catch (InterruptedException e) {
         LOG.error(
