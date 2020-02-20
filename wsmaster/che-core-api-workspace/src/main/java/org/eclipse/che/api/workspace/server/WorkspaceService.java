@@ -23,6 +23,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY;
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 
 import com.google.common.base.Joiner;
@@ -450,12 +451,15 @@ public class WorkspaceService extends Service {
       @ApiParam("The workspace id") @PathParam("id") String workspaceId,
       @ApiParam("The name of the workspace environment that should be used for start")
           @QueryParam("environment")
-          String envName)
+          String envName,
+      @QueryParam("debugWorkspaceStart") @DefaultValue("false") Boolean debugWorkspaceStart)
       throws ServerException, BadRequestException, NotFoundException, ForbiddenException,
           ConflictException {
 
-    return asDtoWithLinksAndToken(
-        workspaceManager.startWorkspace(workspaceId, envName, emptyMap()));
+    Map<String, String> options = new HashMap<>();
+    options.put(DEBUG_WORKSPACE_START, debugWorkspaceStart.toString());
+
+    return asDtoWithLinksAndToken(workspaceManager.startWorkspace(workspaceId, envName, options));
   }
 
   @POST

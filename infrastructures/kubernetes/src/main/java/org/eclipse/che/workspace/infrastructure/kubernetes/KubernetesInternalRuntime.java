@@ -14,7 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.api.workspace.shared.Constants.WATCH_CONTAINER_LOGS_ON_WORKSPACE_STARTUP;
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.CHECK_SERVERS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_MACHINES_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_RUNNING_ASYNC;
@@ -58,7 +58,6 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
-import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
@@ -217,7 +216,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       startSynchronizer.checkFailure();
 
       startMachines();
-      watchLogsIfDebugEnabled(context.getEnvironment().getDevfile());
+      watchLogsIfDebugEnabled(startOptions);
 
       previewUrlCommandProvisioner.provision(context.getEnvironment(), namespace);
       runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
@@ -630,18 +629,17 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     }
   }
 
-  private void watchLogsIfDebugEnabled(Devfile devfile) throws InfrastructureException {
-    if (devfile == null || devfile.getAttributes() == null) {
+  private void watchLogsIfDebugEnabled(Map<String, String> startOptions)
+      throws InfrastructureException {
+    if (startOptions == null) {
       LOG.debug(
-          "devfile or it's attributes are null so we won't watch the container logs for workspace '{}'",
+          "'startOptions' is null so we won't watch the container logs for workspace '{}'",
           getContext().getIdentity().getWorkspaceId());
       return;
     }
     boolean shouldWatchContainerStartupLogs =
         Boolean.parseBoolean(
-            devfile
-                .getAttributes()
-                .getOrDefault(WATCH_CONTAINER_LOGS_ON_WORKSPACE_STARTUP, Boolean.FALSE.toString()));
+            startOptions.getOrDefault(DEBUG_WORKSPACE_START, Boolean.FALSE.toString()));
 
     if (shouldWatchContainerStartupLogs) {
       // get all the pods we care about
