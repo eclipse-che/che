@@ -75,12 +75,10 @@ class ContainerLogWatch implements Runnable, Closeable {
    */
   @Override
   public void run() {
-    boolean successfullWatch = false;
     Stopwatch stopwatch = Stopwatch.createStarted();
     // we try to get logs for WAIT_FOR_SECONDS
-    while (!successfullWatch
-        || stopwatch.elapsed(TimeUnit.SECONDS)
-            < ContainerLogWatch.CONTAINER_LOGGER_CONNECTING_TIMEOUT_SECONDS) {
+    while (stopwatch.elapsed(TimeUnit.SECONDS)
+        < ContainerLogWatch.CONTAINER_LOGGER_CONNECTING_TIMEOUT_SECONDS) {
       // request k8s to get the logs from the container
       try (LogWatch logWatch =
           client
@@ -91,8 +89,7 @@ class ContainerLogWatch implements Runnable, Closeable {
               .watchLog()) {
         currentLogWatch = logWatch;
 
-        successfullWatch = readAndHandle(currentLogWatch.getOutput(), logHandler);
-        if (!successfullWatch) {
+        if (!readAndHandle(currentLogWatch.getOutput(), logHandler)) {
           // failed to get the logs this time, so removing this watcher
           LOG.trace(
               "failed to get the logs for '{} : {} : {}'. Container probably still starting after [{}]ms.",
