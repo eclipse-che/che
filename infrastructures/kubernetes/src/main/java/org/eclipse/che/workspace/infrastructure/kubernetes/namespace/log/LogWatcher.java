@@ -79,13 +79,14 @@ public class LogWatcher implements PodEventHandler, Closeable {
     if (containerName != null && event.getReason().equals(STARTED_EVENT_REASON)) {
       for (PodLogHandler logHandler : logHandlers) {
         if (logHandler.matchPod(podName) && !currentContainerWatchers.containsKey(containerName)) {
+          ContainerLogWatch logWatch =
+              new ContainerLogWatch(
+                  client, namespace, podName, containerName, logHandler, WAIT_TIMEOUT);
+          currentContainerWatchers.put(containerName, logWatch);
           LOG.trace(
               "adding [{}] to watching containers now watching [{}]",
               containerName,
               currentContainerWatchers.keySet());
-          ContainerLogWatch logWatch =
-              new ContainerLogWatch(client, namespace, podName, containerName, logHandler);
-          currentContainerWatchers.put(containerName, logWatch);
           containerWatchersThreadPool.execute(logWatch);
         } else {
           LOG.debug(

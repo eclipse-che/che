@@ -43,6 +43,7 @@ class ContainerLogWatch implements Runnable, Closeable {
   private final KubernetesClient client;
   private final PodLogHandler logHandler;
   private final String errorMessageMatch;
+  private final long timeoutBetweenTries;
 
   private final String namespace;
   private final String podName;
@@ -56,7 +57,8 @@ class ContainerLogWatch implements Runnable, Closeable {
       String namespace,
       String podName,
       String containerName,
-      PodLogHandler logHandler) {
+      PodLogHandler logHandler,
+      long timeoutBetweenTries) {
     this.client = client;
     this.namespace = namespace;
     this.podName = podName;
@@ -64,6 +66,7 @@ class ContainerLogWatch implements Runnable, Closeable {
     this.logHandler = logHandler;
     this.errorMessageMatch =
         String.format(POD_INITIALIZING_MESSAGE_MATCH_FORMAT, containerName, podName);
+    this.timeoutBetweenTries = timeoutBetweenTries;
   }
 
   /**
@@ -98,7 +101,7 @@ class ContainerLogWatch implements Runnable, Closeable {
               containerName,
               stopwatch.elapsed(TimeUnit.MILLISECONDS));
           // wait before next try
-          Thread.sleep(LogWatcher.WAIT_TIMEOUT);
+          Thread.sleep(timeoutBetweenTries);
         } else {
           LOG.debug(
               "finished watching the logs of '{} : {} : {}'", namespace, podName, containerName);
