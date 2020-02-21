@@ -104,17 +104,6 @@ spec:
               optional: false
         {{- end }}
 
-        # If custom public certificate is used then configure Che Server with certificate content
-        # to propagate it to trust store
-        {{- if .Values.global.tls.useCustomPublicCerts }}
-        - name: CHE_CUSTOM_PUBLIC_CERT
-          valueFrom:
-            configMapKeyRef:
-              key: ca.crt
-              name: {{ .Values.global.tls.customPublicCertConfigMapName }}
-              optional: false
-        {{- end }}
-
         # If workspaces are created in a separate precreated namespace
         # then configure Che Server to propagate TLS secret to workspaces' namespaces
         {{- if not (contains "<" .Values.global.cheWorkspacesNamespace) }}
@@ -167,14 +156,30 @@ spec:
             memory: 600Mi
           requests:
             memory: 256Mi
-{{- if not .Values.global.multiuser }}
+{{- if or (not .Values.global.multiuser) .Values.global.tls.useCustomPublicCerts }}
         volumeMounts:
+{{- if not .Values.global.multiuser }}
         - mountPath: /data
           name: che-data-volume
+{{- end }}
+# If useCustomPublicCerts is enabled, then add the che-public-certs volume mount with certificate contents
+# to propagate them to trust store.
+{{- if .Values.global.tls.useCustomPublicCerts }}
+        - mountPath: /public-certs
+          name: che-public-certs
+{{- end }}
       volumes:
+{{- if not .Values.global.multiuser }}
       - name: che-data-volume
         persistentVolumeClaim:
           claimName: che-data-volume
+{{- end }}
+# If useCustomPublicCerts is enabled, then add the che-public-certs config-map volume.
+{{- if .Values.global.tls.useCustomPublicCerts }}
+      - name: che-public-certs
+        configMap:
+          name: {{ .Values.global.tls.customPublicCertsConfigMapName }}
+{{- end }}
 {{- end }}
 {{- if .Values.registry }}
 {{- if and .Values.registry.password .Values.registry.username }}

@@ -320,13 +320,18 @@ add_cert_to_truststore() {
 
 add_che_cert_to_truststore() {
   if [ "${CHE_SELF__SIGNED__CERT}" != "" ]; then
-    add_cert_to_truststore "${CHE_SELF__SIGNED__CERT}" "HOSTDOMAIN1"
+    add_cert_to_truststore "${CHE_SELF__SIGNED__CERT}" "HOSTDOMAIN"
   fi
 }
 
 add_public_cert_to_truststore() {
-  if [ "${CHE_CUSTOM_PUBLIC_CERT}" != "" ]; then
-    add_cert_to_truststore "${CHE_CUSTOM_PUBLIC_CERT}" "HOSTDOMAIN2"
+  CUSTOM_PUBLIC_CERTIFICATES="/public-certs"
+  if [[ -d "$CUSTOM_PUBLIC_CERTIFICATES" && -n "$(find $CUSTOM_PUBLIC_CERTIFICATES -type f)" ]]; then
+    FILES="$CUSTOM_PUBLIC_CERTIFICATES/*"
+    for cert in $FILES
+    do
+      add_cert_to_truststore "$(<$cert)" "HOSTDOMAIN-$(basename $cert)"
+    done
   fi
 }
 
