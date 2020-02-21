@@ -92,7 +92,7 @@ export const TestConstants = {
     /**
      * Delay in milliseconds between checking plugin precence.
      */
-    TS_SELENIUM_PLUGIN_PRECENCE_POLLING: Number(process.env.TS_SELENIUM_PLUGIN_PRECENCE_POLLING) || 2000,
+    TS_SELENIUM_PLUGIN_PRESENCE_POLLING: Number(process.env.TS_SELENIUM_PLUGIN_PRECENCE_POLLING) || 2000,
 
     /**
      * Name of workspace created for 'Happy Path' scenario validation.
@@ -238,5 +238,16 @@ export const TestConstants = {
     /**
      * Running test suite - possible variants can be found in package.json scripts part.
      */
-    TEST_SUITE: process.env.TEST_SUITE || 'test-happy-path'
+    TEST_SUITE: process.env.TEST_SUITE || 'test-happy-path',
+
+    /**
+     * The repo (with README.md in root) and access token are needed for to run test-git-ssh
+     */
+    TS_GITHUB_TEST_REPO: process.env.TS_GITHUB_TEST_REPO || '',
+
+    /**
+     * Token for a github repository with permissions which allow add the ssh keys
+     */
+    TS_GITHUB_TEST_REPO_ACCESS_TOKEN: process.env.TS_GITHUB_TEST_REPO_ACCESS_TOKEN || ''
+
 };
