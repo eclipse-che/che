@@ -14,8 +14,9 @@ import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 
-const sampleName: string = 'console-java-simple';
-const fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
+const workspaceSampleName: string = 'console-java-simple';
+const workspaceRootFolderName: string = 'src';
+const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/main/java/org/eclipse/che/examples`;
 const tabTitle: string = 'HelloWorld.java';
 const codeNavigationClassName: string = 'String.class';
 const stack : string = 'Java Maven';
@@ -24,7 +25,7 @@ const taskName: string = 'maven build';
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
         workspaceHandling.createAndOpenWorkspace(stack);
-        projectAndFileTests.waitWorkspaceReadiness(sampleName, 'src');
+        projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
     suite('Validation of workspace build and run', async () => {
