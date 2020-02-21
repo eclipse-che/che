@@ -13,7 +13,11 @@ const TYPES = {
     Driver: Symbol.for('Driver'),
     CheLogin: Symbol.for('CheLogin'),
     OcpLogin: Symbol.for('OcpLogin'),
-    WorkspaceUtil: Symbol.for('WorkspaceUtil')
+    WorkspaceUtil: Symbol.for('WorkspaceUtil'),
+    IAuthorizationHeaderHandler: Symbol.for('IAuthorizationHeaderHandler'),
+    ITokenHandler: Symbol.for('ITokenHandler')
+
+
 };
 
 const CLASSES = {
@@ -40,7 +44,10 @@ const CLASSES = {
     OpenWorkspaceWidget: 'OpenWorkspaceWidget',
     ContextMenu: 'ContextMenu',
     CheLoginPage: 'CheLoginPage',
-    TestWorkspaceUtil: 'TestWorkspaceUtil'
+    TestWorkspaceUtil: 'TestWorkspaceUtil',
+    NotificationCenter: 'NotificationCenter',
+    PreferencesHandler: 'PreferencesHandler',
+    CheApiRequestHandler: 'CheApiRequestHandler'
 };
 
 export { TYPES, CLASSES };

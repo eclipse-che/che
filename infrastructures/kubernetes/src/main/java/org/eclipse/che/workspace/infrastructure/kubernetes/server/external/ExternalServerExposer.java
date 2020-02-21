@@ -19,6 +19,7 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 
 public class ExternalServerExposer<T extends KubernetesEnvironment> {
@@ -44,34 +45,47 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
   }
 
   /**
-   * Exposes service ports on given service externally (outside kubernetes cluster). Each exposed
+   * Exposes service port on given service externally (outside kubernetes cluster). The exposed
    * service port is associated with a specific Server configuration. Server configuration should be
    * encoded in the exposing object's annotations, to be used by {@link KubernetesServerResolver}.
    *
    * @param k8sEnv Kubernetes environment
    * @param machineName machine containing servers
    * @param serviceName service associated with machine, mapping all machine server ports
+   * @param serverId non-null for a unique server, null for a compound set of servers that should be
+   *     exposed together.
    * @param servicePort specific service port to be exposed externally
    * @param externalServers server configs of servers to be exposed externally
    */
   public void expose(
       T k8sEnv,
-      String machineName,
+      @Nullable String machineName,
       String serviceName,
+      String serverId,
       ServicePort servicePort,
       Map<String, ServerConfig> externalServers) {
-    Ingress ingress = generateIngress(machineName, serviceName, servicePort, externalServers);
+
+    if (serverId == null) {
+      // this is the ID for non-unique servers
+      serverId = servicePort.getName();
+    }
+
+    Ingress ingress =
+        generateIngress(machineName, serviceName, serverId, servicePort, externalServers);
+
     k8sEnv.getIngresses().put(ingress.getMetadata().getName(), ingress);
   }
 
   private Ingress generateIngress(
       String machineName,
       String serviceName,
+      String serverId,
       ServicePort servicePort,
-      Map<String, ServerConfig> ingressesServers) {
+      Map<String, ServerConfig> servers) {
 
+    String serverName = KubernetesServerExposer.makeServerNameValidForDns(serverId);
     ExternalServerIngressBuilder ingressBuilder = new ExternalServerIngressBuilder();
-    String host = strategy.getExternalHost(serviceName, servicePort);
+    String host = strategy.getExternalHost(serviceName, serverName);
     if (host != null) {
       ingressBuilder = ingressBuilder.withHost(host);
     }
@@ -80,13 +94,13 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
         .withPath(
             String.format(
                 pathTransformFmt,
-                ensureEndsWithSlash(strategy.getExternalPath(serviceName, servicePort))))
-        .withName(getIngressName(serviceName, servicePort))
+                ensureEndsWithSlash(strategy.getExternalPath(serviceName, serverName))))
+        .withName(getIngressName(serviceName, serverName))
         .withMachineName(machineName)
         .withServiceName(serviceName)
         .withAnnotations(ingressAnnotations)
         .withServicePort(servicePort.getName())
-        .withServers(ingressesServers)
+        .withServers(servers)
         .build();
   }
 
@@ -94,7 +108,7 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
     return path.endsWith("/") ? path : path + '/';
   }
 
-  private static String getIngressName(String serviceName, ServicePort servicePort) {
-    return serviceName + "-" + servicePort.getName();
+  private static String getIngressName(String serviceName, String serverName) {
+    return serviceName + "-" + serverName;
   }
 }

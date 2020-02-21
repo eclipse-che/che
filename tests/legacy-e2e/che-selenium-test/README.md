@@ -118,6 +118,7 @@ Handle failing tests:
                                         Default attempts number is 1.
     --compare-with-ci [BUILD NUMBER]    Compare failed tests with results on CI server.
                                         Default build is the latest.
+    --fail-script-on-failed-tests       Fail webdriver.sh if tests failed.
 
 Other options:
     --debug                             Run tests in debug mode

@@ -25,7 +25,6 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
@@ -162,18 +161,6 @@ public class MachineResolverTest {
     InternalMachineConfig machineConfig = resolver.resolve();
 
     assertEquals(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), expectedMemLimit);
-  }
-
-  @Test
-  public void
-      shouldProvisionEnvironmentVarsIntoMachineConfigOfASidecarIfTheyAreSetInTheCorrespondingComponent()
-          throws InfrastructureException {
-    component.getEnv().add(new EnvImpl("test", "value"));
-
-    InternalMachineConfig machineConfig = resolver.resolve();
-
-    assertEquals(machineConfig.getEnv().size(), 1);
-    assertEquals(machineConfig.getEnv().get("test"), "value");
   }
 
   @Test

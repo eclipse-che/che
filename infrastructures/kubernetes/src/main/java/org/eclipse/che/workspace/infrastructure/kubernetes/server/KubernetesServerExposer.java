@@ -13,10 +13,10 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 
 import static java.lang.Integer.parseInt;
 import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.INTERNAL_SERVER_ATTRIBUTE;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
@@ -25,12 +25,9 @@ import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -127,6 +124,41 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
   }
 
   /**
+   * A helper method to split the servers to unique sets that should be exposed together.
+   *
+   * <p>The consumer is responsible for doing the actual exposure and is supplied 2 pieces of data.
+   * The first is the server ID, which is non-null for any unique server from the input set and null
+   * for any compound set of servers that should be exposed together. The caller is responsible for
+   * figuring out an appropriate ID in such case.
+   *
+   * @param allServers all unique and non-unique servers mixed together
+   * @param consumer the consumer responsible for handling the split sets of servers
+   */
+  private static void onEachExposableServerSet(
+      Map<String, ServerConfig> allServers, ServerSetExposer consumer)
+      throws InfrastructureException {
+    Map<String, ServerConfig> nonUniqueServers = new HashMap<>();
+
+    for (Map.Entry<String, ServerConfig> e : allServers.entrySet()) {
+      String serverId = makeServerNameValidForDns(e.getKey());
+      if (e.getValue().isUnique()) {
+        consumer.expose(serverId, ImmutableMap.of(serverId, e.getValue()));
+      } else {
+        nonUniqueServers.put(serverId, e.getValue());
+      }
+    }
+
+    if (!nonUniqueServers.isEmpty()) {
+      consumer.expose(null, nonUniqueServers);
+    }
+  }
+
+  /** Replaces {@code /} with {@code -} in the provided name in an attempt to make it DNS safe. */
+  public static String makeServerNameValidForDns(String name) {
+    return name.replaceAll("/", "-");
+  }
+
+  /**
    * Exposes specified servers.
    *
    * <p>Note that created Kubernetes objects will select the corresponding pods by {@link
@@ -140,49 +172,121 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
     Map<String, ServerConfig> internalServers = new HashMap<>();
     Map<String, ServerConfig> externalServers = new HashMap<>();
     Map<String, ServerConfig> secureServers = new HashMap<>();
+    Map<String, ServicePort> unsecuredPorts = new HashMap<>();
+    Map<String, ServicePort> securedPorts = new HashMap<>();
+
+    splitServersAndPortsByExposureType(
+        servers, internalServers, externalServers, secureServers, unsecuredPorts, securedPorts);
+
+    exposeNonSecureServers(internalServers, externalServers, unsecuredPorts);
+
+    exposeSecureServers(secureServers, securedPorts);
+  }
+
+  private void splitServersAndPortsByExposureType(
+      Map<String, ? extends ServerConfig> servers,
+      Map<String, ServerConfig> internalServers,
+      Map<String, ServerConfig> externalServers,
+      Map<String, ServerConfig> secureServers,
+      Map<String, ServicePort> unsecuredPorts,
+      Map<String, ServicePort> securedPorts) {
 
     servers.forEach(
         (key, value) -> {
-          if ("true".equals(value.getAttributes().get(INTERNAL_SERVER_ATTRIBUTE))) {
+          ServicePort sp = getServicePort(value);
+          exposeInContainerIfNeeded(sp);
+          if (value.isInternal()) {
             // Server is internal. It doesn't make sense to make an it secure since
             // it is available only within workspace servers
             internalServers.put(key, value);
+            unsecuredPorts.put(value.getPort(), sp);
           } else {
             // Server is external. Check if it should be secure or not
-            if ("true".equals(value.getAttributes().get(ServerConfig.SECURE_SERVER_ATTRIBUTE))) {
+            if (value.isSecure()) {
               secureServers.put(key, value);
+              securedPorts.put(value.getPort(), sp);
             } else {
               externalServers.put(key, value);
+              unsecuredPorts.put(value.getPort(), sp);
             }
           }
         });
+  }
 
-    Collection<ServicePort> servicePorts = exposePorts(servers.values());
+  private void exposeNonSecureServers(
+      Map<String, ServerConfig> internalServers,
+      Map<String, ServerConfig> externalServers,
+      Map<String, ServicePort> unsecuredPorts)
+      throws InfrastructureException {
+
+    if (unsecuredPorts.isEmpty()) {
+      return;
+    }
+
+    Map<String, ServerConfig> allNonSecureServers = new HashMap<>(internalServers);
+    allNonSecureServers.putAll(externalServers);
     Service service =
         new ServerServiceBuilder()
             .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
             .withMachineName(machineName)
             .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
-            .withPorts(new ArrayList<>(servicePorts))
-            .withServers(internalServers)
+            .withPorts(new ArrayList<>(unsecuredPorts.values()))
+            .withServers(allNonSecureServers)
             .build();
 
     String serviceName = service.getMetadata().getName();
     k8sEnv.getServices().put(serviceName, service);
 
-    for (ServicePort servicePort : servicePorts) {
+    for (ServicePort servicePort : unsecuredPorts.values()) {
       // expose service port related external servers if exist
       Map<String, ServerConfig> matchedExternalServers = match(externalServers, servicePort);
       if (!matchedExternalServers.isEmpty()) {
-        externalServerExposer.expose(
-            k8sEnv, machineName, serviceName, servicePort, matchedExternalServers);
+        onEachExposableServerSet(
+            matchedExternalServers,
+            (serverId, srvrs) ->
+                externalServerExposer.expose(
+                    k8sEnv, machineName, serviceName, serverId, servicePort, srvrs));
       }
+    }
+  }
 
+  private void exposeSecureServers(
+      Map<String, ServerConfig> securedServers, Map<String, ServicePort> securedPorts)
+      throws InfrastructureException {
+
+    if (securedPorts.isEmpty()) {
+      return;
+    }
+
+    Optional<Service> secureService =
+        secureServerExposer.createService(securedPorts.values(), pod, machineName, securedServers);
+
+    String secureServiceName =
+        secureService
+            .map(
+                s -> {
+                  String n = s.getMetadata().getName();
+                  k8sEnv.getServices().put(n, s);
+                  return n;
+                })
+            .orElse(null);
+
+    for (ServicePort servicePort : securedPorts.values()) {
       // expose service port related secure servers if exist
-      Map<String, ServerConfig> matchedSecureServers = match(secureServers, servicePort);
+      Map<String, ServerConfig> matchedSecureServers = match(securedServers, servicePort);
       if (!matchedSecureServers.isEmpty()) {
-        secureServerExposer.expose(
-            k8sEnv, machineName, serviceName, servicePort, matchedSecureServers);
+        onEachExposableServerSet(
+            matchedSecureServers,
+            (serverId, srvrs) -> {
+              secureServerExposer.expose(
+                  k8sEnv,
+                  pod,
+                  machineName,
+                  secureServiceName,
+                  serverId,
+                  servicePort,
+                  matchedSecureServers);
+            });
       }
     }
   }
@@ -197,40 +301,38 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
         .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
-  private Collection<ServicePort> exposePorts(Collection<? extends ServerConfig> serverConfig) {
-    Map<String, ServicePort> exposedPorts = new HashMap<>();
-    Set<String> portsToExpose =
-        serverConfig.stream().map(ServerConfig::getPort).collect(Collectors.toSet());
+  private ServicePort getServicePort(ServerConfig serverConfig) {
+    String[] portProtocol = serverConfig.getPort().split("/");
+    int port = parseInt(portProtocol[0]);
+    String protocol = portProtocol.length > 1 ? portProtocol[1].toUpperCase() : "TCP";
+    return new ServicePortBuilder()
+        .withName("server-" + port)
+        .withPort(port)
+        .withProtocol(protocol)
+        .withNewTargetPort(port)
+        .build();
+  }
 
-    for (String portToExpose : portsToExpose) {
-      String[] portProtocol = portToExpose.split("/");
-      int port = parseInt(portProtocol[0]);
-      String protocol = portProtocol.length > 1 ? portProtocol[1].toUpperCase() : "TCP";
-      Optional<ContainerPort> exposedOpt =
-          container
-              .getPorts()
-              .stream()
-              .filter(p -> p.getContainerPort().equals(port) && protocol.equals(p.getProtocol()))
-              .findAny();
-
-      ContainerPort containerPort;
-      if (exposedOpt.isPresent()) {
-        containerPort = exposedOpt.get();
-      } else {
-        containerPort =
-            new ContainerPortBuilder().withContainerPort(port).withProtocol(protocol).build();
-        container.getPorts().add(containerPort);
-      }
-
-      exposedPorts.put(
-          portToExpose,
-          new ServicePortBuilder()
-              .withName("server-" + containerPort.getContainerPort())
-              .withPort(containerPort.getContainerPort())
-              .withProtocol(protocol)
-              .withNewTargetPort(containerPort.getContainerPort())
-              .build());
+  private void exposeInContainerIfNeeded(ServicePort servicePort) {
+    if (container
+        .getPorts()
+        .stream()
+        .noneMatch(
+            p ->
+                p.getContainerPort().equals(servicePort.getPort())
+                    && servicePort.getProtocol().equals(p.getProtocol()))) {
+      ContainerPort containerPort =
+          new ContainerPortBuilder()
+              .withContainerPort(servicePort.getPort())
+              .withProtocol(servicePort.getProtocol())
+              .build();
+      container.getPorts().add(containerPort);
     }
-    return exposedPorts.values();
+  }
+
+  @FunctionalInterface
+  private interface ServerSetExposer {
+    void expose(String serverId, Map<String, ServerConfig> serverSet)
+        throws InfrastructureException;
   }
 }

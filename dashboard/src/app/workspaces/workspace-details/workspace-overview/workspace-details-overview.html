@@ -29,7 +29,9 @@
     <div che-compile="section.content"></div>
   </che-label-container>
   <!-- Infrastructure Namespace -->
-  <che-label-container class="infrastructure-namespace-input-container"
+  <che-label-container
+    ng-if="workspaceDetailsOverviewController.enabledKubernetesNamespaceSelector"
+    class="infrastructure-namespace-input-container"
     che-label-name="Kubernetes Namespace"
     ng-if="workspaceDetailsOverviewController.infrastructureNamespace">
     <che-input
@@ -56,10 +58,10 @@
     </div>
   </che-label-container>
   <!-- Ephemeral mode -->
-  <che-label-container che-label-name="Ephemeral mode" che-label-description="In ephemeral mode workspace has no PVC attached.">
+  <che-label-container che-label-name="Temporary Storage" che-label-description="Temporary Storage allows for faster I/O. It may have limited storage for certain configurations and is not persistent.">
       <md-switch ng-model="workspaceDetailsOverviewController.isEphemeralMode"
         ng-change="workspaceDetailsOverviewController.onEphemeralModeChange()"
-        aria-label="ephemeral-mode">
+        aria-label="Enables Temporary Storage.">
       </md-switch>
   </che-label-container>
   <!-- Export workspace -->

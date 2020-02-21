@@ -73,12 +73,9 @@ public class PreviewUrlExposer<T extends KubernetesEnvironment> {
                               String.format(
                                   "Port '%d' in service '%s' not found. This is not expected, please report a bug!",
                                   port, foundService.get().getMetadata().getName())));
+          String serviceName = foundService.get().getMetadata().getName();
           externalServerExposer.expose(
-              env,
-              null,
-              foundService.get().getMetadata().getName(),
-              servicePort,
-              Collections.emptyMap());
+              env, null, serviceName, serviceName, servicePort, Collections.emptyMap());
         }
       } else {
         portsToProvision.add(createServicePort(port));
@@ -86,16 +83,19 @@ public class PreviewUrlExposer<T extends KubernetesEnvironment> {
     }
 
     if (!portsToProvision.isEmpty()) {
+      String serverName = generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + "-previewUrl";
       Service service =
-          new ServerServiceBuilder()
-              .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + "-previewUrl")
-              .withPorts(portsToProvision)
-              .build();
-      env.getServices().put(service.getMetadata().getName(), service);
+          new ServerServiceBuilder().withName(serverName).withPorts(portsToProvision).build();
+      env.getServices().put(serverName, service);
       portsToProvision.forEach(
           port ->
               externalServerExposer.expose(
-                  env, null, service.getMetadata().getName(), port, Collections.emptyMap()));
+                  env,
+                  null,
+                  service.getMetadata().getName(),
+                  service.getMetadata().getName(),
+                  port,
+                  Collections.emptyMap()));
     }
   }
 

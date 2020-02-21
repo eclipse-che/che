@@ -54,6 +54,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFacto
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -93,6 +94,11 @@ public class KubernetesNamespaceFactoryTest {
     lenient()
         .when(userManager.getById(USER_ID))
         .thenReturn(new UserImpl(USER_ID, "test@mail.com", USER_NAME));
+  }
+
+  @AfterMethod
+  public void tearDown() {
+    EnvironmentContext.reset();
   }
 
   @Test
@@ -378,7 +384,7 @@ public class KubernetesNamespaceFactoryTest {
 
     WorkspaceImpl workspace =
         new WorkspaceImplBuilder().setId("workspace123").setAttributes(emptyMap()).build();
-    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("JonDoe", "123", null, false));
+    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("jondoe", "123", null, false));
     String namespace = namespaceFactory.getNamespaceName(workspace);
 
     assertEquals(namespace, "che-123");
@@ -391,7 +397,7 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>--",
+            "blabol-<userid>-<username>-<userid>-<username>",
             "",
             "",
             "che-<userid>",
@@ -401,11 +407,11 @@ public class KubernetesNamespaceFactoryTest {
 
     WorkspaceImpl workspace = new WorkspaceImplBuilder().build();
 
-    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("JonDoe", "123", null, false));
+    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("jondoe", "123", null, false));
 
     String namespace = namespaceFactory.getNamespaceName(workspace);
 
-    assertEquals(namespace, "blabol-123-JonDoe-123-JonDoe--");
+    assertEquals(namespace, "blabol-123-jondoe-123-jondoe");
   }
 
   @Test
@@ -414,7 +420,7 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>--",
+            "blabol-<userid>-<username>-<userid>-<username>",
             "",
             "",
             "che-<userid>",
@@ -439,7 +445,7 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>--",
+            "blabol-<userid>-<username>-<userid>-<username>",
             "",
             "",
             "che-<userid>",

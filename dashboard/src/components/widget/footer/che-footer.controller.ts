@@ -11,6 +11,7 @@
  */
 'use strict';
 
+import { CheDashboardConfigurationService, FooterLink } from '../../branding/che-dashboard-configuration.service';
 
 /**
  * This class is handling the controller for the footer.
@@ -19,7 +20,23 @@
  */
 export class CheFooterController {
 
-  $onInit(): void { }
+  static $inject = [
+    'cheDashboardConfigurationService',
+  ];
+
+  links: { [key: string]: FooterLink };
+
+  private cheDashboardConfigurationService: CheDashboardConfigurationService;
+
+  constructor(
+    cheDashboardConfigurationService: CheDashboardConfigurationService,
+  ) {
+    this.cheDashboardConfigurationService = cheDashboardConfigurationService;
+  }
+
+  $onInit(): void {
+    this.links = this.cheDashboardConfigurationService.getFooterLinks();
+  }
 
   /**
    * Returns 'Make a wish' email subject.

@@ -12,8 +12,9 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
-import { By, WebElement, error } from 'selenium-webdriver';
+import { By, error } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
+import { NotificationCenter } from './NotificationCenter';
 
 export enum RightToolbarButton {
     Explorer = 'Explorer',
@@ -33,7 +34,9 @@ export class Ide {
     private static readonly IDE_IFRAME_CSS: string = 'iframe#ide-application-iframe';
 
     constructor(
-        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.NotificationCenter) private readonly notificationCenter: NotificationCenter
+    ) { }
 
     async waitAndSwitchToIdeFrame(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         Logger.debug('Ide.waitAndSwitchToIdeFrame');
@@ -218,34 +221,6 @@ export class Ide {
         await this.waitStatusBarContains(expectedTextInStatusBar, 20000);
     }
 
-    async closeAllNotifications() {
-        const notificationLocator: By = By.css('.theia-Notification');
-
-        Logger.debug('Ide.closeAllNotifications');
-
-        if (! await this.driverHelper.isVisible(notificationLocator)) {
-            return;
-        }
-
-        const notifications: WebElement[] = await this.driverHelper.waitAllPresence(notificationLocator);
-        const notificationsCapacity: number = notifications.length;
-
-        for (let i = 1; i <= notificationsCapacity; i++) {
-            const notificationLocator: By = By.xpath('//div[@class=\'theia-Notification\']//button[text()=\'Close\']');
-
-            try {
-                await this.driverHelper.waitAndClick(notificationLocator);
-            } catch (err) {
-                if (err instanceof error.TimeoutError) {
-                    console.log(`The '${notificationLocator}' element is not visible and can't be clicked`);
-                    continue;
-                }
-
-                throw err;
-            }
-        }
-    }
-
     async performKeyCombination(keyCombination: string) {
         Logger.debug(`Ide.performKeyCombination "${keyCombination}"`);
 
@@ -272,6 +247,13 @@ export class Ide {
         }
 
         return notification.split(regexp)[1];
+    }
+
+    async closeAllNotifications(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Ide.closeAllNotifications`);
+
+        await this.notificationCenter.open(timeout);
+        await this.notificationCenter.closeAll(timeout);
     }
 
     async waitApllicationIsReady(url: string,

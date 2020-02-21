@@ -233,9 +233,13 @@ Mocks are also provided for the Che API, allowing to emulate a real backend for 
 
 ## Configurability
 
-The `configuration.menu.disabled` field in [product.json](/src/assets/branding/product.json) allows users to list there menu entries they want to hide in left navigation bar. Along with that corresponding routes also will be disabled.
+Configurations for User Dashboard could be applied in [product.json](/src/assets/branding/product.json) in `"configuration"` section.
 
-Available values are `'administration'`, `'factories'`,  `'getstarted'`, `'organizations'`, `'stacks'`.
+Adding the `"configuration.menu.disabled"` field allows Che Admins to list menu entries they want to hide in the left navigation bar, along with the corresponding routes which will be disabled.
+
+Available values are `"administration"`, `"factories"`,  `"getstarted"`, `"organizations"`, `"stacks"`.
+
+For example,
 
 ```json
 // product.json
@@ -245,6 +249,41 @@ Available values are `'administration'`, `'factories'`,  `'getstarted'`, `'organ
   "configuration": {
     "menu": {
       "disabled": ["organizations"]
+    }
+  }
+}
+```
+
+The `"configuration.prefetch"` section allows to define resources that UD should pre-fetch. This section consists of following optional fields:
+
+- `"resources"` is an array of urls to resources to pre-fetch;
+- `"cheCDN"` which is Che specific and points to API endpoint that gives resources to pre-fetch,
+  e.g. response from `"/api/cdn-support/paths"` on `che.openshift.io` has following structure and each of these entries will be pre-fetched:
+
+  ```json
+  [
+    {
+      "chunk": "che.12debab20b181e07ac86.js",
+      "cdn": "https://static.developers.redhat.com/che/theia_artifacts/che.12debab20b181e07ac86.js"
+    },
+    ...
+    {
+      "external": "vs/editor/editor.main.css",
+      "cdn": "https://cdn.jsdelivr.net/npm/@typefox/monaco-editor-core@0.18.0-next.1/min/vs/editor/editor.main.css"
+    },
+    ...
+  ]
+  ```
+
+The `"configuration.features.disabled"` field defines features that should be disabled and not displayed in User Dashboard. Available values are `"workspaceSharing"`, `"kubernetesNamespaceSelector"`.
+
+For example, this config disables kubernetes namespace selector:
+
+```json
+{
+  "configuration": {
+    "features": {
+      "disabled": ["kubernetesNamespaceSelector"]
     }
   }
 }

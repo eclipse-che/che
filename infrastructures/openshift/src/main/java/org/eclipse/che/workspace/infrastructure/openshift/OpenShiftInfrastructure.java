@@ -30,6 +30,7 @@ import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentPro
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 
@@ -78,6 +79,11 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
   public String evaluateInfraNamespace(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
     return projectFactory.evaluateNamespaceName(resolutionCtx);
+  }
+
+  @Override
+  public boolean isNamespaceValid(String namespaceName) {
+    return NamespaceNameValidator.isValid(namespaceName);
   }
 
   @Override

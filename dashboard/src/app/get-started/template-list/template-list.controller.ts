@@ -37,6 +37,8 @@ export class TemplateListController {
     '$log',
     'cheNotification'];
 
+  ephemeralMode: boolean;
+
   private $q: ng.IQService;
   private $log: ng.ILogService;
   private $filter: ng.IFilterService;
@@ -104,6 +106,7 @@ export class TemplateListController {
     cheWorkspace.fetchWorkspaceSettings().then(() => {
       const workspaceSettings = cheWorkspace.getWorkspaceSettings();
       this.devfileRegistryUrl = workspaceSettings && workspaceSettings.cheWorkspaceDevfileRegistryUrl;
+      this.ephemeralMode = workspaceSettings['che.workspace.persist_volumes.default'] === 'false';
       this.init();
     });
   }
@@ -140,6 +143,12 @@ export class TemplateListController {
     const selfLink = this.selectedDevfile.links.self;
     return this.devfileRegistry.fetchDevfile(this.devfileRegistryUrl, selfLink).then(() => {
       const devfile = this.devfileRegistry.getDevfile(this.devfileRegistryUrl, selfLink);
+      if (this.ephemeralMode) {
+        if (!devfile.attributes) {
+          devfile.attributes = {};
+        }
+        devfile.attributes.persistVolumes = 'false';
+      }
       const attributes = {stackName: this.selectedDevfile.displayName};
       return this.createWorkspaceSvc.createWorkspaceFromDevfile(undefined, devfile, attributes, true);
     });

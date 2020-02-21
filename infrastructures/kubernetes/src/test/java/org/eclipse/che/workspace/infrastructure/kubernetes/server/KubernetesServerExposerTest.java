@@ -15,6 +15,9 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_UNIQUE_PART_SIZE;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -24,10 +27,12 @@ import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
+import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,6 +40,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
@@ -67,6 +73,9 @@ public class KubernetesServerExposerTest {
   private static final Pattern SERVER_PREFIX_REGEX =
       Pattern.compile('^' + SERVER_PREFIX + "[A-z0-9]{" + SERVER_UNIQUE_PART_SIZE + "}-pod-main$");
   private static final String MACHINE_NAME = "pod/main";
+  private static final Map<String, String> UNIQUE_SERVER_ATTRIBUTES =
+      ImmutableMap.of("key", "value", ServerConfig.UNIQUE_SERVER_ATTRIBUTE, "true");
+  private static final String SERVICE_NAME = SERVER_PREFIX + "12345678" + "-" + MACHINE_NAME;
 
   private KubernetesServerExposer<KubernetesEnvironment> serverExposer;
   private KubernetesEnvironment kubernetesEnvironment;
@@ -313,6 +322,80 @@ public class KubernetesServerExposerTest {
         MACHINE_NAME, "tcp", 8282, "secure-server", new ServerConfigImpl(secureServerConfig));
   }
 
+  @Test
+  public void shouldCreateIngressPerUniqueServerWithTheSamePort() throws Exception {
+    // given
+    ServerConfigImpl httpServerConfig =
+        new ServerConfigImpl("8080/tcp", "http", "/api", UNIQUE_SERVER_ATTRIBUTES);
+    ServerConfigImpl wsServerConfig =
+        new ServerConfigImpl("8080/tcp", "ws", "/connect", UNIQUE_SERVER_ATTRIBUTES);
+    ServicePort servicePort =
+        new ServicePortBuilder()
+            .withName("server-8080")
+            .withPort(8080)
+            .withProtocol("TCP")
+            .withTargetPort(new IntOrString(8080))
+            .build();
+
+    Map<String, ServerConfig> serversToExpose =
+        ImmutableMap.of(
+            "http-server", httpServerConfig,
+            "ws-server", wsServerConfig);
+
+    // when
+    serverExposer.expose(serversToExpose);
+
+    // then
+    assertThatExternalServerIsExposed(
+        MACHINE_NAME,
+        "tcp",
+        8080,
+        "http-server",
+        new ServerConfigImpl(httpServerConfig).withAttributes(UNIQUE_SERVER_ATTRIBUTES));
+    assertThatExternalServerIsExposed(
+        MACHINE_NAME,
+        "tcp",
+        8080,
+        "ws-server",
+        new ServerConfigImpl(wsServerConfig).withAttributes(UNIQUE_SERVER_ATTRIBUTES));
+  }
+
+  @Test
+  public void shouldCreateIngressForServerWhenTwoServersHasTheSamePort()
+      throws InfrastructureException {
+    // given
+    ServerConfigImpl httpServerConfig =
+        new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
+    ServerConfigImpl wsServerConfig =
+        new ServerConfigImpl("8080/tcp", "ws", "/connect", ATTRIBUTES_MAP);
+    IntOrString targetPort = new IntOrString(8080);
+
+    ServicePort servicePort =
+        new ServicePortBuilder()
+            .withName("server-8080")
+            .withPort(8080)
+            .withProtocol("TCP")
+            .withTargetPort(targetPort)
+            .build();
+
+    Map<String, ServerConfig> serversToExpose =
+        ImmutableMap.of(
+            "http-server", httpServerConfig,
+            "ws-server", wsServerConfig);
+
+    // when
+    serverExposer.expose(serversToExpose);
+
+    // then
+    assertThatExternalServersAreExposed(
+        MACHINE_NAME,
+        "tcp",
+        8080,
+        ImmutableMap.of(
+            "http-server", new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP),
+            "ws-server", new ServerConfigImpl(wsServerConfig).withAttributes(ATTRIBUTES_MAP)));
+  }
+
   @SuppressWarnings("SameParameterValue")
   private void assertThatExternalServerIsExposed(
       String machineName,
@@ -346,11 +429,12 @@ public class KubernetesServerExposerTest {
 
     verify(externalServerExposer)
         .expose(
-            kubernetesEnvironment,
-            machineName,
-            service.getMetadata().getName(),
-            servicePort,
-            expectedServers);
+            eq(kubernetesEnvironment),
+            eq(machineName),
+            eq(service.getMetadata().getName()),
+            any(),
+            eq(servicePort),
+            eq(expectedServers));
   }
 
   @SuppressWarnings("SameParameterValue")
@@ -368,20 +452,31 @@ public class KubernetesServerExposerTest {
     Service service = findContainerRelatedService();
     assertNotNull(service);
 
-    // ensure that required service port is exposed
-    ServicePort servicePort = assertThatServicePortIsExposed(port, service);
+    // ensure that no service port is exposed
+    assertTrue(
+        service
+            .getSpec()
+            .getPorts()
+            .stream()
+            .noneMatch(p -> p.getTargetPort().getIntVal().equals(port)));
 
-    Annotations.Deserializer serviceAnnotations =
-        Annotations.newDeserializer(service.getMetadata().getAnnotations());
-    assertEquals(serviceAnnotations.machineName(), machineName);
+    ServicePort servicePort =
+        new ServicePortBuilder()
+            .withName("server-" + port)
+            .withPort(port)
+            .withProtocol(portProtocol.toUpperCase())
+            .withNewTargetPort(port)
+            .build();
 
     verify(secureServerExposer)
         .expose(
-            kubernetesEnvironment,
-            machineName,
-            service.getMetadata().getName(),
-            servicePort,
-            ImmutableMap.of(serverName, serverConfig));
+            eq(kubernetesEnvironment),
+            any(),
+            eq(machineName),
+            isNull(), // no service exists for the backed server
+            isNull(), // a non-unique server
+            eq(servicePort),
+            eq(ImmutableMap.of(serverName, serverConfig)));
   }
 
   @SuppressWarnings("SameParameterValue")

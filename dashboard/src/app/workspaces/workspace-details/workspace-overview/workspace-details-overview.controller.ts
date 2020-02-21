@@ -16,6 +16,8 @@ import {ConfirmDialogService} from '../../../../components/service/confirm-dialo
 import {NamespaceSelectorSvc} from '../../create-workspace/ready-to-go-stacks/namespace-selector/namespace-selector.service';
 import {WorkspaceDetailsService} from '../workspace-details.service';
 import { CheKubernetesNamespace } from '../../../../components/api/che-kubernetes-namespace.factory';
+import { CheDashboardConfigurationService } from '../../../../components/branding/che-dashboard-configuration.service';
+import { TogglableFeature } from '../../../../components/branding/branding.constant';
 
 const STARTING = WorkspaceStatus[WorkspaceStatus.STARTING];
 const RUNNING = WorkspaceStatus[WorkspaceStatus.RUNNING];
@@ -35,6 +37,7 @@ export class WorkspaceDetailsOverviewController {
     '$route',
     '$scope',
     '$timeout',
+    'cheDashboardConfigurationService',
     'cheKubernetesNamespace',
     'cheNotification',
     'cheWorkspace',
@@ -49,12 +52,14 @@ export class WorkspaceDetailsOverviewController {
    * Displaying name of infrastructure namespace.
    */
   infrastructureNamespace: string;
+  enabledKubernetesNamespaceSelector: boolean = false;
 
   private $location: ng.ILocationService;
   private $q: ng.IQService;
   private $route: ng.route.IRouteService;
   private $scope: ng.IScope;
   private $timeout: ng.ITimeoutService;
+  private cheDashboardConfigurationService: CheDashboardConfigurationService;
   private cheKubernetesNamespace: CheKubernetesNamespace;
   private cheNotification: CheNotification;
   private cheWorkspace: CheWorkspace;
@@ -83,6 +88,7 @@ export class WorkspaceDetailsOverviewController {
     $route: ng.route.IRouteService,
     $scope: ng.IScope,
     $timeout: ng.ITimeoutService,
+    cheDashboardConfigurationService: CheDashboardConfigurationService,
     cheKubernetesNamespace: CheKubernetesNamespace,
     cheNotification: CheNotification,
     cheWorkspace: CheWorkspace,
@@ -95,6 +101,7 @@ export class WorkspaceDetailsOverviewController {
     this.$route = $route;
     this.$scope = $scope;
     this.$timeout = $timeout;
+    this.cheDashboardConfigurationService = cheDashboardConfigurationService;
     this.cheKubernetesNamespace = cheKubernetesNamespace;
     this.cheNotification = cheNotification;
     this.cheWorkspace = cheWorkspace;
@@ -120,6 +127,8 @@ export class WorkspaceDetailsOverviewController {
     this.$scope.$on('$destroy', () => {
       deRegistrationFn();
     });
+
+    this.enabledKubernetesNamespaceSelector = this.cheDashboardConfigurationService.enabledFeature(TogglableFeature.KUBERNETES_NAMESPACE_SELECTOR);
 
     this.init();
   }
@@ -327,12 +336,15 @@ export class WorkspaceDetailsOverviewController {
       this.attributes.persistVolumes = 'false';
     } else {
       if (!this.attributesCopy) {
-        this.attributes = null;
+        this.attributes = undefined;
       } else {
-        if (this.attributesCopy.persistVolumes) {
-          this.attributes.persistVolumes = 'true';
+        if ((this.attributesCopy.persistVolumes as string) === 'true') {
+          (this.attributes.persistVolumes as string) = 'true';
         } else {
           delete this.attributes.persistVolumes;
+          if (Object.keys(this.attributes).length === 0) {
+            this.attributes = undefined;
+          }
         }
       }
     }

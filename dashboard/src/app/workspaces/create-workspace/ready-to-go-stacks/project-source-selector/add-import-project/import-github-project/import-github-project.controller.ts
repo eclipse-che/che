@@ -11,7 +11,7 @@
  */
 'use strict';
 
-import { CheBranding } from '../../../../../../../components/branding/che-branding.factory';
+import { CheBranding } from '../../../../../../../components/branding/che-branding';
 import { ImportGithubProjectService, LoadingState } from './import-github-project.service';
 import { ProjectSource } from '../../project-source.enum';
 import { IGithubRepository } from './github-repository-interface';

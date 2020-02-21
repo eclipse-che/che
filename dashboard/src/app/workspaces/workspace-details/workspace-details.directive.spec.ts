@@ -237,9 +237,17 @@ describe(`WorkspaceDetailsController >`, () => {
             const converting = 'converting-a-che-6-workspace-to-a-che-7-devfile';
             return { converting };
           },
+          registerCallback: (callbackId: string, callback: Function): void => {
+            callback();
+          },
+          unregisterCallback: (callbackId: string): void => {},
           getConfiguration: () => {
             return {
               menu: {
+                disabled: []
+              },
+              prefetch: {},
+              features: {
                 disabled: []
               }
             };

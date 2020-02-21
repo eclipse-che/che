@@ -11,7 +11,13 @@
  */
 'use strict';
 
-import { CheBranding } from './che-branding.factory';
+import { TogglableFeature } from './branding.constant';
+import { CheBranding } from './che-branding';
+
+export type FooterLink = {
+  title: string;
+  reference: string;
+};
 
 /**
  * This class handles configuration data of Dashboard.
@@ -41,11 +47,55 @@ export class CheDashboardConfigurationService {
   }
 
   allowRoutes(menuItem: che.ConfigurableMenuItem): ng.IPromise<void> {
-    return this.cheBranding.ready.then(() => {
-      if (this.allowedMenuItem(menuItem) === false) {
-        return this.$q.reject();
+    const defer = this.$q.defer<void>();
+      if (this.allowedMenuItem(menuItem)) {
+        defer.resolve();
+      } else {
+        defer.reject();
       }
-    });
+
+    return defer.promise;
+  }
+
+  enabledFeature(feature: TogglableFeature): boolean {
+    const disabledFeatures = this.cheBranding.getConfiguration().features.disabled;
+    return disabledFeatures.indexOf(feature) === -1;
+  }
+
+  getFooterLinks(): { [key: string]: FooterLink } {
+    const links: { [key: string]: FooterLink } = {};
+    if (this.cheBranding.getProductSupportEmail()) {
+      links.supportEmail = {
+        title: 'Make a wish',
+        reference: this.cheBranding.getProductSupportEmail()
+      };
+    }
+    if (this.cheBranding.getFooter().email) {
+      const email = this.cheBranding.getFooter().email;
+      links.email = {
+        title: email.title,
+        reference: email.address
+      };
+    }
+    if (this.cheBranding.getDocs().general) {
+      links.docs = {
+        title: 'Docs',
+        reference: this.cheBranding.getDocs().general
+      };
+    }
+    if (this.cheBranding.getDocs().faq) {
+      links.faq = {
+        title: 'FAQ',
+        reference: this.cheBranding.getDocs().faq
+      };
+    }
+    if (this.cheBranding.getProductHelpPath() && this.cheBranding.getProductHelpTitle()) {
+      links.supportPath = {
+        title: this.cheBranding.getProductHelpTitle(),
+        reference: this.cheBranding.getProductHelpPath()
+      };
+    }
+    return links;
   }
 
 }

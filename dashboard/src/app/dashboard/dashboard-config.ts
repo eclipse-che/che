@@ -35,16 +35,13 @@ export class DashboardConfig {
         templateUrl: 'app/dashboard/dashboard.html',
         resolve: {
           check: ['$q', '$window', 'cheWorkspace', ($q: ng.IQService, $window: ng.IWindowService, cheWorkspace: CheWorkspace) => {
-            const defer = $q.defer();
-            cheWorkspace.fetchWorkspaces().then(() => {
+            return cheWorkspace.fetchWorkspaces().then(() => {
               if (cheWorkspace.getWorkspaces().length === 0) {
-                $window.open(MENU_ITEM.getstarted, '_self');
-                defer.reject();
-              } else {
-                defer.resolve();
+                return $q.reject();
               }
+            }).catch(() => {
+                $window.open(MENU_ITEM.getstarted, '_self');
             });
-            return defer.promise;
           }]
         }
       });

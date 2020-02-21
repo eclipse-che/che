@@ -106,9 +106,9 @@ public class DirectUrlFactoryWithSpecificBranchTest {
         "Che Workspace: Finished importing projects.", UPDATING_PROJECT_TIMEOUT_SEC);
     theiaIde.waitAllNotificationsClosed();
 
-    theiaProjectTree.expandItem(repositoryName);
+    theiaProjectTree.expandItemWithIgnoreExceptions(repositoryName);
     theiaProjectTree.waitItem(repositoryName + "/pom.xml");
-    theiaProjectTree.expandItem(repositoryName + "/my-lib");
+    theiaProjectTree.expandItemWithIgnoreExceptions(repositoryName + "/my-lib");
     theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
 
     expectedItemsAfterCloning.forEach(

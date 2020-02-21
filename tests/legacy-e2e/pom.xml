@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>7.8.0-SNAPSHOT</version>
+        <version>7.10.0-SNAPSHOT</version>
         <relativePath>../..</relativePath>
     </parent>
     <groupId>org.eclipse.che.selenium</groupId>
@@ -28,18 +28,22 @@
         <module>che-selenium-core</module>
         <module>che-selenium-test</module>
     </modules>
-
     <properties>
         <!-- fix of conflict of seleniumhq 3.0.1 with guava 27.0.1-jre (https://github.com/eclipse/che/issues/12184) -->
         <com.google.guava.version>20.0</com.google.guava.version>
+        <org.testng.version>6.8.21</org.testng.version>
     </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${com.google.guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>${org.testng.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

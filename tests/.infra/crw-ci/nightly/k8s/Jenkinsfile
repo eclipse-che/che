@@ -12,7 +12,7 @@ pipeline {
 
     parameters {
         string(name: 'emails',
-                defaultValue: 'dnochevn@redhat.com',
+                defaultValue: 'dnochevn@redhat.com,kfoniok@redhat.com',
                 description: 'Comma-separated list of emails to send results')
     }
 
