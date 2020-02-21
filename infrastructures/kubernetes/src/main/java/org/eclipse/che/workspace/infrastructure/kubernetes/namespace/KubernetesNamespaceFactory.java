@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Named;
@@ -85,7 +84,7 @@ public class KubernetesNamespaceFactory {
   private final String clusterRoleName;
   private final KubernetesClientFactory clientFactory;
   private final UserManager userManager;
-  protected final Executor executor;
+  protected final KubernetesSharedPool sharedPool;
 
   @Inject
   public KubernetesNamespaceFactory(
@@ -106,7 +105,7 @@ public class KubernetesNamespaceFactory {
     this.clientFactory = clientFactory;
     this.defaultNamespaceName = defaultNamespaceName;
     this.allowUserDefinedNamespaces = allowUserDefinedNamespaces;
-    this.executor = sharedPool.getExecutor();
+    this.sharedPool = sharedPool;
 
     if (isNullOrEmpty(defaultNamespaceName)) {
       throw new ConfigurationException("che.infra.kubernetes.namespace.default must be configured");
@@ -132,7 +131,7 @@ public class KubernetesNamespaceFactory {
 
   @VisibleForTesting
   KubernetesNamespace doCreateNamespaceAccess(String workspaceId, String name) {
-    return new KubernetesNamespace(clientFactory, executor, name, workspaceId);
+    return new KubernetesNamespace(clientFactory, sharedPool.getExecutor(), name, workspaceId);
   }
 
   /**

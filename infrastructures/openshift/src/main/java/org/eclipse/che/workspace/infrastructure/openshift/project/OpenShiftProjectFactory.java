@@ -131,7 +131,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
 
   @VisibleForTesting
   OpenShiftProject doCreateProjectAccess(String workspaceId, String name) {
-    return new OpenShiftProject(clientFactory, executor, name, workspaceId);
+    return new OpenShiftProject(clientFactory, sharedPool.getExecutor(), name, workspaceId);
   }
 
   @VisibleForTesting
