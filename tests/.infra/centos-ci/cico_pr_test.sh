@@ -62,6 +62,6 @@ bash /root/payload/tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
 echo "=========================== THIS IS POST TEST ACTIONS =============================="
 saveSeleniumTestResult
 getOpenshiftLogs
-archiveArtifacts "che-pullrequests-test-temporary"
+archiveArtifacts "che-pullrequests-java-selenium-tests"
 
 if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi
