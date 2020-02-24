@@ -41,7 +41,7 @@ export * from './pageobjects/ide/TopMenu';
 export * from './pageobjects/login/ICheLoginPage';
 export * from './pageobjects/login/IOcpLoginPage';
 export * from './pageobjects/login/MultiUserLoginPage';
-export * from './pageobjects/login/OcpLoginByTempAdmin';
+export * from './pageobjects/login/OcpUserLoginPage';
 export * from './pageobjects/login/RegularUserOcpCheLoginPage';
 export * from './pageobjects/login/SingleUserLoginPage';
 export * from './pageobjects/openshift/CheLoginPage';

@@ -16,21 +16,21 @@ import { TestConstants } from '../../TestConstants';
 import { Logger } from '../../utils/Logger';
 
 @injectable()
-export class OcpLoginByTempAdmin implements IOcpLoginPage {
+export class OcpUserLoginPage implements IOcpLoginPage {
 
     constructor(
         @inject(CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage) { }
 
     async login() {
-        Logger.debug('OcpLoginByTempAdmin.login');
+        Logger.debug('OcpUserLoginPage.login');
 
-        if (TestConstants.TS_OCP_LOGIN_PAGE_HTPASW) {
-            await this.ocpLogin.clickOnLoginWitnKubeAdmin();
+        if (TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE !== '') {
+            await this.ocpLogin.clickOnLoginProviderTitle();
             await this.ocpLogin.waitOpenShiftLoginPage();
         }
 
-        await this.ocpLogin.enterUserNameOpenShift(TestConstants.TS_SELENIUM_OCP_TEMP_ADMIN_USERNAME);
-        await this.ocpLogin.enterPasswordOpenShift(TestConstants.TS_SELENIUM_OCP_TEMP_ADMIN_PASSWORD);
+        await this.ocpLogin.enterUserNameOpenShift(TestConstants.TS_SELENIUM_OCP_USERNAME);
+        await this.ocpLogin.enterPasswordOpenShift(TestConstants.TS_SELENIUM_OCP_PASSWORD);
         await this.ocpLogin.clickOnLoginButton();
         await this.ocpLogin.waitDisappearanceOpenShiftLoginPage();
     }

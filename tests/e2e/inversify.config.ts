@@ -15,7 +15,7 @@ import { TYPES, CLASSES } from './inversify.types';
 import { ITestWorkspaceUtil } from './utils/workspace/ITestWorkspaceUtil';
 import { TestWorkspaceUtil } from './utils/workspace/TestWorkspaceUtil';
 import { IOcpLoginPage } from './pageobjects/login/IOcpLoginPage';
-import { OcpLoginByTempAdmin } from './pageobjects/login/OcpLoginByTempAdmin';
+import { OcpUserLoginPage } from './pageobjects/login/OcpUserLoginPage';
 import { TestConstants } from './TestConstants';
 import { ICheLoginPage } from './pageobjects/login/ICheLoginPage';
 import { RegularUserOcpCheLoginPage } from './pageobjects/login/RegularUserOcpCheLoginPage';
@@ -59,7 +59,7 @@ const e2eContainer: Container = new Container();
 
 e2eContainer.bind<IDriver>(TYPES.Driver).to(ChromeDriver).inSingletonScope();
 e2eContainer.bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil).inSingletonScope();
-e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpLoginByTempAdmin).inSingletonScope();
+e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpUserLoginPage).inSingletonScope();
 
 if (TestConstants.TS_SELENIUM_MULTIUSER) {
     e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheMultiuserAuthorizationHeaderHandler).inSingletonScope();
