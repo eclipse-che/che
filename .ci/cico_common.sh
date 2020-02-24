@@ -181,7 +181,7 @@ tagLatestImages() {
 
 pushImagesOnQuay() {
     #PUSH IMAGES
-      if [[ -n "${QUAY_ECLIPSE_CHE_USERNAME}" ]] && [[ -n "${QUAY_ECLIPSE_CHE_PASSWORD}" ]]; then
+    if [[ -n "${QUAY_ECLIPSE_CHE_USERNAME}" ]] && [[ -n "${QUAY_ECLIPSE_CHE_PASSWORD}" ]]; then
         docker login -u "${QUAY_ECLIPSE_CHE_USERNAME}" -p "${QUAY_ECLIPSE_CHE_PASSWORD}" "${REGISTRY}"
     else
         echo "Could not login, missing credentials for pushing to the '${ORGANIZATION}' organization"
