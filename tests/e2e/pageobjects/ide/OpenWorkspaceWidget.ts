@@ -69,7 +69,7 @@ export class OpenWorkspaceWidget {
         if (rootProject.length === 0 || rootProject === '/') {
             await this.driverHelper.waitAndClick(By.css(OpenWorkspaceWidget.THEIA_LOCATION_LIST_CSS));
             await this.driverHelper.waitAndClick(By.css('option[value=\'file:///\']'));
-        } 
+        }
     }
 
 }

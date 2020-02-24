@@ -24,29 +24,29 @@ export class GitPlugin {
     async openGitPluginContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('GitPlugin.openGitPluginContainer');
 
-        const sourceControlGitBtn: string = '//li[@id=\'shell-tab-scm-view-container\' and contains(@style, \'height\')]';
-        await this.driverHelper.waitAndClick(By.xpath(sourceControlGitBtn), timeout);
-        await this.waitViewOfContainer(TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT);
+        const sourceControlGitBtnXpathLocator: string = '//li[@id=\'shell-tab-scm-view-container\' and contains(@style, \'height\')]';
+        await this.driverHelper.waitAndClick(By.xpath(sourceControlGitBtnXpathLocator), timeout);
+        await this.waitViewOfContainer(timeout);
     }
 
     async waitViewOfContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('GitPlugin.waitViewOfContainer');
 
-        const gitHubContainerLocator: By = By.id('scm-view-container--scm-view');
-        await this.driverHelper.waitVisibility(gitHubContainerLocator, timeout);
+        const gitHubContainerIdLocator: By = By.id('scm-view-container--scm-view');
+        await this.driverHelper.waitVisibility(gitHubContainerIdLocator, timeout);
     }
 
     async waitCommitMessageTextArea(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('GitPlugin.waitCommitMessageTextArea');
 
-        const textArea: By = By.css(GitPlugin.COMMIT_MESSAGE_TEXTAREA_CSS);
-        await this.driverHelper.waitVisibility(textArea, timeout);
+        const textAreaCssLocator: By = By.css(GitPlugin.COMMIT_MESSAGE_TEXTAREA_CSS);
+        await this.driverHelper.waitVisibility(textAreaCssLocator, timeout);
     }
 
     async typeCommitMessage(commitMessage: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('GitPlugin.typeCommitMessage');
 
-        this.waitCommitMessageTextArea(timeout);
+        await this.waitCommitMessageTextArea(timeout);
         await this.driverHelper.type(By.css(GitPlugin.COMMIT_MESSAGE_TEXTAREA_CSS), commitMessage, timeout);
     }
 
@@ -54,7 +54,7 @@ export class GitPlugin {
         Logger.debug('GitPlugin.selectCommandInMoreActionsMenu');
 
         await this.clickOnMoreActions();
-        this.driverHelper.waitAndClick(By.xpath(`//li[@data-command]/div[text()=\'${commandName}\']`), timeout);
+        await this.driverHelper.waitAndClick(By.xpath(`//li[@data-command]/div[text()=\'${commandName}\']`), timeout);
     }
 
     async clickOnMoreActions() {
