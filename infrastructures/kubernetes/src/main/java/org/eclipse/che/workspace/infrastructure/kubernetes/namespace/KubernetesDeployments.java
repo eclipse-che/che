@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
@@ -73,6 +74,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastruct
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEventHandler;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatchTimeouts;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatcher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
@@ -595,11 +597,14 @@ public class KubernetesDeployments {
    * Start watching the logs of this deployment.
    *
    * @param handler is processing log messages
+   * @param podNames pods of interest for watching the logs
    */
-  public void watchLogs(PodLogHandler handler) throws InfrastructureException {
+  public void watchLogs(PodLogHandler handler, LogWatchTimeouts timeouts, Set<String> podNames)
+      throws InfrastructureException {
     if (logWatcher == null) {
-      LOG.debug("start watching logs of workspace [{}]", workspaceId);
-      logWatcher = new LogWatcher(clientFactory, workspaceId, namespace, executor);
+      LOG.debug("start watching logs of pods '{}' of  workspace '{}'", podNames, workspaceId);
+      logWatcher =
+          new LogWatcher(clientFactory, workspaceId, namespace, podNames, executor, timeouts);
       logWatcher.addLogHandler(handler);
       watchEvents(logWatcher);
     } else {

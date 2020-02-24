@@ -126,6 +126,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatchTimeouts;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesPreviewUrlCommandProvisioner;
@@ -482,21 +483,24 @@ public class KubernetesInternalRuntimeTest {
   public void shouldWatchLogsWhenSetInOptions() throws InfrastructureException {
     internalRuntime.start(singletonMap(DEBUG_WORKSPACE_START, "true"));
 
-    verify(namespace.deployments(), times(1)).watchLogs(any(PodLogHandler.class));
+    verify(namespace.deployments(), times(1))
+        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any());
   }
 
   @Test
   public void shouldNotWatchLogsWhenSetFalseInOptions() throws InfrastructureException {
     internalRuntime.start(singletonMap(DEBUG_WORKSPACE_START, "false"));
 
-    verify(namespace.deployments(), times(0)).watchLogs(any(PodLogHandler.class));
+    verify(namespace.deployments(), times(0))
+        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any());
   }
 
   @Test
   public void shouldNotWatchLogsWhenNotSetInOptions() throws InfrastructureException {
     internalRuntime.start(emptyMap());
 
-    verify(namespace.deployments(), times(0)).watchLogs(any(PodLogHandler.class));
+    verify(namespace.deployments(), times(0))
+        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any());
   }
 
   @Test

@@ -25,12 +25,4 @@ public interface PodLogHandler {
    * @param containerName source container of this log message
    */
   void handle(String message, String containerName);
-
-  /**
-   * Tells whether given podName is in the interest of this {@link PodLogHandler}.
-   *
-   * @param podName name of the pod to check
-   * @return true if we care about the given podName, false otherwise.
-   */
-  boolean matchPod(String podName);
 }

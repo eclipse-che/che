@@ -12,7 +12,6 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
 import java.time.ZonedDateTime;
-import java.util.Set;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.slf4j.Logger;
@@ -24,24 +23,11 @@ public class PodLogHandlerToEventPublisher implements PodLogHandler {
 
   private final RuntimeEventsPublisher eventsPublisher;
   private final RuntimeIdentity identity;
-  private final Set<String> podNames;
 
   public PodLogHandlerToEventPublisher(
-      RuntimeEventsPublisher eventsPublisher, RuntimeIdentity identity, Set<String> machines) {
+      RuntimeEventsPublisher eventsPublisher, RuntimeIdentity identity) {
     this.eventsPublisher = eventsPublisher;
     this.identity = identity;
-    this.podNames = machines;
-  }
-
-  /**
-   * Check if given pod is in interest of this log handler.
-   *
-   * @param podName pod to check
-   * @return true if this class cares about given podName, false otherwise
-   */
-  @Override
-  public boolean matchPod(String podName) {
-    return podNames.contains(podName);
   }
 
   /**

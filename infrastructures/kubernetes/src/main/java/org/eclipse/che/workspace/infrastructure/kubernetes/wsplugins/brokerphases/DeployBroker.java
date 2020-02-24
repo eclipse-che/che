@@ -34,6 +34,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatchTimeouts;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandlerToEventPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListener;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
@@ -113,6 +115,14 @@ public class DeployBroker extends BrokerPhase {
                   runtimeEventsPublisher,
                   runtimeId,
                   ImmutableSet.of(pluginBrokerPod.getMetadata().getName())));
+
+      // TODO: check whether we're running in debug
+      namespace
+          .deployments()
+          .watchLogs(
+              new PodLogHandlerToEventPublisher(runtimeEventsPublisher, runtimeId),
+              new LogWatchTimeouts(5_000, 100, 1_000),
+              ImmutableSet.of(pluginBrokerPod.getMetadata().getName()));
 
       deployments.create(pluginBrokerPod);
 

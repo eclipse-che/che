@@ -37,6 +37,7 @@ public class ContainerLogWatchTest {
   private final String namespace = "namespace123";
   private final String podname = "pod123";
   private final String container = "containre123";
+  private final LogWatchTimeouts TIMEOUTS = new LogWatchTimeouts(100, 0, 0);
 
   @Mock KubernetesClient client;
 
@@ -67,7 +68,7 @@ public class ContainerLogWatchTest {
     logWatch.setInputStream(inputStream);
 
     ContainerLogWatch clw =
-        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, 1);
+        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, TIMEOUTS);
     clw.run();
 
     verify(podLogHandler).handle("first", container);
@@ -93,7 +94,7 @@ public class ContainerLogWatchTest {
         .handle("message", container);
 
     ContainerLogWatch clw =
-        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, 1);
+        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, TIMEOUTS);
     new Thread(clw).start();
 
     latch.await(1, TimeUnit.SECONDS);
@@ -119,7 +120,7 @@ public class ContainerLogWatchTest {
         .handle("message", container);
 
     ContainerLogWatch clw =
-        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, 1);
+        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, TIMEOUTS);
     new Thread(clw).start();
 
     messageHandleLatch.await(1, TimeUnit.SECONDS);
@@ -135,11 +136,17 @@ public class ContainerLogWatchTest {
   public void shouldRetryWhenErrorMessageReceived() throws IOException, InterruptedException {
     // prepare error message logWatch
     String podInitializingMessage =
-        "container \\\""
+        "{\"kind\":\"Status\","
+            + "\"apiVersion\":\"v1\","
+            + "\"metadata\":{},"
+            + "\"status\":\"Failure\","
+            + "\"message\":\"container \\\""
             + container
             + "\\\" in pod \\\""
             + podname
-            + "\\\" is waiting to start: PodInitializing";
+            + "\\\" is waiting to start: ContainerCreating\","
+            + "\"reason\":\"BadRequest\","
+            + "\"code\":400}";
     PipedInputStream inputStream = new PipedInputStream();
     PipedOutputStream outputStream = new PipedOutputStream(inputStream);
     outputStream.write((podInitializingMessage + "\n").getBytes());
@@ -167,7 +174,7 @@ public class ContainerLogWatchTest {
     when(pods.watchLog()).thenReturn(logWatch).thenReturn(logWatchRegularMessage);
 
     ContainerLogWatch clw =
-        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, 1);
+        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, TIMEOUTS);
     new Thread(clw).start();
 
     // wait for logwatch close, it means that error message was processed
@@ -209,7 +216,7 @@ public class ContainerLogWatchTest {
     when(pods.watchLog()).thenReturn(logWatch).thenReturn(logWatchRegularMessage);
 
     ContainerLogWatch clw =
-        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, 1);
+        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, TIMEOUTS);
     new Thread(clw).start();
 
     // wait for logwatch close, it means that error message was processed

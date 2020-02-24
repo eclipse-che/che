@@ -37,17 +37,16 @@ public class LogWatcher implements PodEventHandler, Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(LogWatcher.class);
 
-  // TODO: extract to che.properties
-  protected static final int WAIT_TIMEOUT = 2000;
-
   private static final String STARTED_EVENT_REASON = "Started";
 
   private final KubernetesClient client;
   private final Set<PodLogHandler> logHandlers = ConcurrentHashMap.newKeySet();
   private final Executor containerWatchersThreadPool;
+  private final LogWatchTimeouts timeouts;
 
   private final String namespace;
   private final String workspaceId;
+  private final Set<String> podsOfInterest;
 
   /**
    * Map of current watchers where key is name of the container and value is {@link
@@ -59,12 +58,16 @@ public class LogWatcher implements PodEventHandler, Closeable {
       KubernetesClientFactory clientFactory,
       String workspaceId,
       String namespace,
-      Executor executor)
+      Set<String> podsOfInterest,
+      Executor executor,
+      LogWatchTimeouts timeouts)
       throws InfrastructureException {
     this.client = clientFactory.create(workspaceId);
     this.workspaceId = workspaceId;
     this.namespace = namespace;
     this.containerWatchersThreadPool = executor;
+    this.timeouts = timeouts;
+    this.podsOfInterest = podsOfInterest;
   }
 
   public void addLogHandler(PodLogHandler handler) {
@@ -78,11 +81,12 @@ public class LogWatcher implements PodEventHandler, Closeable {
     final String containerName = event.getContainerName();
     if (containerName != null && event.getReason().equals(STARTED_EVENT_REASON)) {
       for (PodLogHandler logHandler : logHandlers) {
-        if (logHandler.matchPod(podName) && !currentContainerWatchers.containsKey(containerName)) {
+        if (podsOfInterest.contains(podName)
+            && !currentContainerWatchers.containsKey(podContainerKey(podName, containerName))) {
           ContainerLogWatch logWatch =
               new ContainerLogWatch(
-                  client, namespace, podName, containerName, logHandler, WAIT_TIMEOUT);
-          currentContainerWatchers.put(containerName, logWatch);
+                  client, namespace, podName, containerName, logHandler, timeouts);
+          currentContainerWatchers.put(podContainerKey(podName, containerName), logWatch);
           LOG.trace(
               "adding [{}] to watching containers now watching [{}]",
               containerName,
@@ -97,6 +101,10 @@ public class LogWatcher implements PodEventHandler, Closeable {
         }
       }
     }
+  }
+
+  private String podContainerKey(String podName, String containerName) {
+    return podName + ":" + containerName;
   }
 
   public void close() {
@@ -114,12 +122,11 @@ public class LogWatcher implements PodEventHandler, Closeable {
   public void close(boolean needWait) {
     try {
       if (needWait && !currentContainerWatchers.isEmpty()) {
-        int waitBeforeClose = WAIT_TIMEOUT * 2;
         LOG.debug(
             "Waiting '{}ms' before closing all log watchers for workspace '{}'.",
-            waitBeforeClose,
+            timeouts.getWaitBeforeCleanupMs(),
             workspaceId);
-        Thread.sleep(waitBeforeClose);
+        Thread.sleep(timeouts.getWaitBeforeCleanupMs());
       }
     } catch (InterruptedException e) {
       LOG.error(
@@ -128,7 +135,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
           e);
     } finally {
       LOG.debug("Closing all log watchers for '{}'", workspaceId);
-      currentContainerWatchers.forEach((k, v) -> v.close());
+      currentContainerWatchers.values().forEach(ContainerLogWatch::close);
       currentContainerWatchers.clear();
     }
   }

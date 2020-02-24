@@ -12,11 +12,11 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -30,8 +30,11 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class LogWatcherTest {
 
+  private final String POD = "pod123";
+  private final Set<String> PODNAMES = Collections.singleton(POD);
   private final String WORKSPACE_ID = "workspace123";
   private final String NAMESPACE = "namespace123";
+  private final LogWatchTimeouts TIMEOUTS = new LogWatchTimeouts(100, 0, 0);
 
   @Mock private PodLogHandler handler;
   @Mock private KubernetesClientFactory clientFactory;
@@ -43,18 +46,12 @@ public class LogWatcherTest {
   @Test
   public void executorIsNotCalledWhenContainerIsNull() throws InfrastructureException {
     // given
-    when(handler.matchPod(any())).thenReturn(true);
-
-    LogWatcher logWatcher = new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, executor);
+    LogWatcher logWatcher =
+        new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
-            "pod123",
-            null,
-            "somereallygoodreason",
-            "someevenbettermessage",
-            "123456789",
-            "987654321");
+            POD, null, "somereallygoodreason", "someevenbettermessage", "123456789", "987654321");
 
     // when
     logWatcher.handle(podEvent);
@@ -66,35 +63,14 @@ public class LogWatcherTest {
   @Test
   public void executorIsNotCalledWhenPodNameDontMatch() throws InfrastructureException {
     // given
-    String podName = "beautifulContainer";
-    when(handler.matchPod(podName)).thenReturn(false);
-
-    LogWatcher logWatcher = new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, executor);
+    LogWatcher logWatcher =
+        new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
-            podName, "container123", "Started", "someevenbettermessage", "123456789", "987654321");
-
-    // when
-    logWatcher.handle(podEvent);
-
-    // then
-    verify(executor, times(0)).execute(any());
-  }
-
-  @Test
-  public void executorIsNotCalledWhenReasonIsNotStarted() throws InfrastructureException {
-    // given
-    String podName = "beautifulPod";
-    when(handler.matchPod(podName)).thenReturn(true);
-
-    LogWatcher logWatcher = new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, executor);
-    logWatcher.addLogHandler(handler);
-    PodEvent podEvent =
-        new PodEvent(
-            podName,
+            "someOtherPod",
             "container123",
-            "NotStarted",
+            "Started",
             "someevenbettermessage",
             "123456789",
             "987654321");
@@ -107,17 +83,31 @@ public class LogWatcherTest {
   }
 
   @Test
-  public void executorIsCalledWhenAllIsSet() throws InfrastructureException {
+  public void executorIsNotCalledWhenReasonIsNotStarted() throws InfrastructureException {
     // given
-    String podName = "beautifulPod";
-    PodLogHandler handler = mock(PodLogHandler.class);
-    when(handler.matchPod(podName)).thenReturn(true);
-
-    LogWatcher logWatcher = new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, executor);
+    LogWatcher logWatcher =
+        new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
-            podName, "container123", "Started", "someevenbettermessage", "123456789", "987654321");
+            POD, "container123", "NotStarted", "someevenbettermessage", "123456789", "987654321");
+
+    // when
+    logWatcher.handle(podEvent);
+
+    // then
+    verify(executor, times(0)).execute(any());
+  }
+
+  @Test
+  public void executorIsCalledWhenAllIsSet() throws InfrastructureException {
+    // given
+    LogWatcher logWatcher =
+        new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS);
+    logWatcher.addLogHandler(handler);
+    PodEvent podEvent =
+        new PodEvent(
+            POD, "container123", "Started", "someevenbettermessage", "123456789", "987654321");
 
     // when
     logWatcher.handle(podEvent);
@@ -129,15 +119,12 @@ public class LogWatcherTest {
   @Test
   public void executorIsCalledJustOnceWhenSameEventArriveAgain() throws InfrastructureException {
     // given
-    String podName = "beautifulPod";
-    PodLogHandler handler = mock(PodLogHandler.class);
-    when(handler.matchPod(podName)).thenReturn(true);
-
-    LogWatcher logWatcher = new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, executor);
+    LogWatcher logWatcher =
+        new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
-            podName, "container123", "Started", "someevenbettermessage", "123456789", "987654321");
+            POD, "container123", "Started", "someevenbettermessage", "123456789", "987654321");
 
     // when
     logWatcher.handle(podEvent);
@@ -150,15 +137,12 @@ public class LogWatcherTest {
   @Test
   public void executorIsCalledAgainAfterCleanup() throws InfrastructureException {
     // given
-    String podName = "beautifulPod";
-    PodLogHandler handler = mock(PodLogHandler.class);
-    when(handler.matchPod(podName)).thenReturn(true);
-
-    LogWatcher logWatcher = new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, executor);
+    LogWatcher logWatcher =
+        new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
-            podName, "container123", "Started", "someevenbettermessage", "123456789", "987654321");
+            POD, "container123", "Started", "someevenbettermessage", "123456789", "987654321");
 
     // when
     logWatcher.handle(podEvent);

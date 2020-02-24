@@ -12,6 +12,9 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
 import com.google.common.base.Stopwatch;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
 import java.io.BufferedReader;
@@ -22,6 +25,7 @@ import java.io.InputStreamReader;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,14 +40,9 @@ class ContainerLogWatch implements Runnable, Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(ContainerLogWatch.class);
 
-  private static final long CONTAINER_LOGGER_CONNECTING_TIMEOUT_SECONDS = 30;
-  private static final String POD_INITIALIZING_MESSAGE_MATCH_FORMAT =
-      "container \\\"%s\\\" in pod \\\"%s\\\" is waiting to start: PodInitializing";
-
   private final KubernetesClient client;
   private final PodLogHandler logHandler;
-  private final String errorMessageMatch;
-  private final long timeoutBetweenTries;
+  private final LogWatchTimeouts timeouts;
 
   private final String namespace;
   private final String podName;
@@ -52,36 +51,40 @@ class ContainerLogWatch implements Runnable, Closeable {
   // current LogWatch instance. We need it so we can close it from outside in close() method.
   private LogWatch currentLogWatch;
 
+  // json parser used to parse log messages to check for errorness
+  private final JsonParser jsonParser = new JsonParser();
+
+  // flag whether we should still try to get the logs
+  private final AtomicBoolean running = new AtomicBoolean(false);
+
   ContainerLogWatch(
       KubernetesClient client,
       String namespace,
       String podName,
       String containerName,
       PodLogHandler logHandler,
-      long timeoutBetweenTries) {
+      LogWatchTimeouts timeouts) {
     this.client = client;
     this.namespace = namespace;
     this.podName = podName;
     this.containerName = containerName;
     this.logHandler = logHandler;
-    this.errorMessageMatch =
-        String.format(POD_INITIALIZING_MESSAGE_MATCH_FORMAT, containerName, podName);
-    this.timeoutBetweenTries = timeoutBetweenTries;
+    this.timeouts = timeouts;
   }
 
   /**
    * Do the best effort to get the logs from the container. The method is trying for {@link
-   * ContainerLogWatch#CONTAINER_LOGGER_CONNECTING_TIMEOUT_SECONDS} seconds to get the logs from the
-   * container. If response on log request from the k8s is 40x, it possibly means that container is
-   * not ready to get the logs and we'll try again after {@link LogWatcher#WAIT_TIMEOUT}
-   * milliseconds.
+   * LogWatchTimeouts#getWatchTimeoutMs()} to get the logs from the container. If response on log
+   * request from the k8s is 40x, it possibly means that container is not ready to get the logs and
+   * we'll try again after {@link LogWatchTimeouts#getWaitBeforeNextTry()} milliseconds.
    */
   @Override
   public void run() {
     Stopwatch stopwatch = Stopwatch.createStarted();
-    // we try to get logs for CONTAINER_LOGGER_CONNECTING_TIMEOUT_SECONDS seconds
-    while (stopwatch.elapsed(TimeUnit.SECONDS)
-        < ContainerLogWatch.CONTAINER_LOGGER_CONNECTING_TIMEOUT_SECONDS) {
+    running.set(true);
+    // we try to get logs for `timeouts.getWatchTimeoutMs()`
+    while (running.get()
+        && stopwatch.elapsed(TimeUnit.MILLISECONDS) < timeouts.getWatchTimeoutMs()) {
       // request k8s to get the logs from the container
       try (LogWatch logWatch =
           client
@@ -100,8 +103,9 @@ class ContainerLogWatch implements Runnable, Closeable {
               podName,
               containerName,
               stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
           // wait before next try
-          Thread.sleep(timeoutBetweenTries);
+          Thread.sleep(timeouts.getWaitBeforeNextTry());
         } else {
           LOG.debug(
               "finished watching the logs of '{} : {} : {}'", namespace, podName, containerName);
@@ -121,10 +125,9 @@ class ContainerLogWatch implements Runnable, Closeable {
 
   /**
    * Reads given inputStream. If we receive error message about pod is initializing from k8s (see:
-   * {@link ContainerLogWatch#isErrorMessage(String)} and {@link
-   * ContainerLogWatch#POD_INITIALIZING_MESSAGE_MATCH_FORMAT}), returns false immediately so we can
-   * try again later. Otherwise keeps reading the messages from the stream and gives them to given
-   * handler. Be aware that it is blocking and potentially long operation!
+   * {@link ContainerLogWatch#isErrorMessage(String)}, returns false immediately so we can try again
+   * later. Otherwise keeps reading the messages from the stream and gives them to given handler. Be
+   * aware that it is blocking and potentially long operation!
    *
    * @param inputStream to read log messages from
    * @param handler we delegate log messages to this handler.
@@ -144,7 +147,8 @@ class ContainerLogWatch implements Runnable, Closeable {
       String logMessage;
       while ((logMessage = in.readLine()) != null) {
         if (this.isErrorMessage(logMessage)) {
-          LOG.trace(
+          LOG.debug("error message [{}]", logMessage);
+          LOG.debug(
               "failed to get the logs for [{} : {}], should try again if enough time.",
               podName,
               containerName);
@@ -165,12 +169,50 @@ class ContainerLogWatch implements Runnable, Closeable {
     return true;
   }
 
+  /**
+   * Tells whether given `message` is error message so we should try to watch again.
+   *
+   * <p>error message should look like this:
+   *
+   * <pre>
+   *   {
+   *    "kind":"Status",
+   *    "apiVersion":"v1",
+   *    "metadata":{},
+   *    "status":"Failure",
+   *    "message":"container \"che-plugin-metadata-broker-v3-1-1\" in pod
+   *      \"workspace1a7u0mmfknhsgzqc.che-plugin-broker\" is waiting to start: ContainerCreating",
+   *    "reason":"BadRequest",
+   *    "code":400}
+   * </pre>
+   *
+   * <p>Regular message is usually not a json, so we first try to find pod name. That should
+   * eliminate close to 100% regular messages to being checked for error, because container app
+   * should not know where it runs. If this initial check fails, we try to parse the message as a
+   * json and match it for more details.
+   *
+   * @param message to check
+   * @return true if message is an json error message, false otherwise
+   */
   private boolean isErrorMessage(String message) {
-    return message.contains(this.errorMessageMatch);
+    if (!message.contains(podName)) {
+      return false;
+    }
+    try {
+      JsonObject json = jsonParser.parse(message).getAsJsonObject();
+      return !(!"Status".equals(json.get("kind").getAsString())
+          || !"Failure".equals(json.get("status").getAsString())
+          || !json.has("code")
+          || !json.get("code").getAsString().contains("40"));
+    } catch (JsonParseException jpe) {
+      LOG.debug("Can't parse the message as a json.", jpe);
+      return false;
+    }
   }
 
   @Override
   public void close() {
+    running.set(false);
     if (currentLogWatch != null) {
       currentLogWatch.close();
     }

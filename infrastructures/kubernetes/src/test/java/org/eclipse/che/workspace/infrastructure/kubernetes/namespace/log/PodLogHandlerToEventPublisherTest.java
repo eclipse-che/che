@@ -15,9 +15,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.*;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.mockito.ArgumentCaptor;
@@ -34,29 +31,8 @@ public class PodLogHandlerToEventPublisherTest {
   @Mock RuntimeIdentity identity;
 
   @Test
-  public void matchPodWhenInSet() {
-    PodLogHandler handler =
-        new PodLogHandlerToEventPublisher(
-            eventsPublisher, identity, new HashSet<>(Arrays.asList("one", "two", "three")));
-
-    assertTrue(handler.matchPod("one"));
-    assertTrue(handler.matchPod("two"));
-    assertTrue(handler.matchPod("three"));
-    assertFalse(handler.matchPod("zero"));
-  }
-
-  @Test
-  public void dontMatchPodWhenEmptySet() {
-    PodLogHandler handler =
-        new PodLogHandlerToEventPublisher(eventsPublisher, identity, Collections.emptySet());
-
-    assertFalse(handler.matchPod("anything"));
-  }
-
-  @Test
   public void sendMessageToPublisher() {
-    PodLogHandler handler =
-        new PodLogHandlerToEventPublisher(eventsPublisher, identity, Collections.emptySet());
+    PodLogHandler handler = new PodLogHandlerToEventPublisher(eventsPublisher, identity);
 
     handler.handle("message", "containerName");
 
