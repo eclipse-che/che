@@ -210,7 +210,7 @@
                         <package>org.eclipse.che.multiuser.api.permission.shared.dto</package>
                     </dtoPackages>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                    <genClassName>org.ecipse.che.api.multiuser.permission.server.dto.DtoServerImpls</genClassName>
+                    <genClassName>org.eclipse.che.api.multiuser.permission.server.dto.DtoServerImpls</genClassName>
                     <impl>server</impl>
                 </configuration>
             </plugin>
