@@ -169,7 +169,7 @@ buildImages() {
 tagLatestImages() {
     for image in ${IMAGES_LIST[@]}
      do
-         echo y | docker tag "${image}:$1" /"${image}:latest"
+         echo y | docker tag "${image}:$1" "${image}:latest"
          if [[ ${image} == "${ORGANIZATION}/che-server" ]]; then
            docker tag "${image}:$1-centos" "${image}:latest-centos"
          fi
