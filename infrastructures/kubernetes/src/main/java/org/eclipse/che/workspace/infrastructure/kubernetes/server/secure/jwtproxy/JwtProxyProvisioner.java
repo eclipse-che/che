@@ -113,6 +113,7 @@ public class JwtProxyProvisioner {
 
   private final ExternalServiceExposureStrategy externalServiceExposureStrategy;
   private final CookiePathStrategy cookiePathStrategy;
+  private final String imagePullPolicy;
 
   @Inject
   public JwtProxyProvisioner(
@@ -122,10 +123,12 @@ public class JwtProxyProvisioner {
       CookiePathStrategy cookiePathStrategy,
       @Named("che.server.secure_exposer.jwtproxy.image") String jwtProxyImage,
       @Named("che.server.secure_exposer.jwtproxy.memory_limit") String memoryLimitBytes,
+      @Named("che.workspace.sidecar.image_pull_policy") String imagePullPolicy,
       @Assisted RuntimeIdentity identity) {
     this.signatureKeyManager = signatureKeyManager;
 
     this.jwtProxyImage = jwtProxyImage;
+    this.imagePullPolicy = imagePullPolicy;
 
     this.proxyConfigBuilder = jwtProxyConfigBuilderFactory.create(identity.getWorkspaceId());
 
@@ -303,7 +306,7 @@ public class JwtProxyProvisioner {
         .withNewSpec()
         .withContainers(
             new ContainerBuilder()
-                .withImagePullPolicy("Always")
+                .withImagePullPolicy(imagePullPolicy)
                 .withName(containerName)
                 .withImage(jwtProxyImage)
                 .withVolumeMounts(
