@@ -156,15 +156,15 @@ spec:
             memory: 600Mi
           requests:
             memory: 256Mi
-{{- if or (not .Values.global.multiuser) .Values.global.tls.useCustomPublicCerts }}
+{{- if or (not .Values.global.multiuser) (not (eq .Values.global.tls.customPublicCertsConfigMapName "")) }}
         volumeMounts:
 {{- if not .Values.global.multiuser }}
         - mountPath: /data
           name: che-data-volume
 {{- end }}
-# If useCustomPublicCerts is enabled, then add the che-public-certs volume mount with certificate contents
+# If customPublicCertsConfigMapName is defined, then add the che-public-certs volume mount with certificate contents
 # to propagate them to trust store.
-{{- if .Values.global.tls.useCustomPublicCerts }}
+{{- if not (eq .Values.global.tls.customPublicCertsConfigMapName "") }}
         - mountPath: /public-certs
           name: che-public-certs
 {{- end }}
@@ -174,8 +174,8 @@ spec:
         persistentVolumeClaim:
           claimName: che-data-volume
 {{- end }}
-# If useCustomPublicCerts is enabled, then add the che-public-certs config-map volume.
-{{- if .Values.global.tls.useCustomPublicCerts }}
+# If customPublicCertsConfigMapName is defined, then add config-map volume.
+{{- if not (eq .Values.global.tls.customPublicCertsConfigMapName "") }}
       - name: che-public-certs
         configMap:
           name: {{ .Values.global.tls.customPublicCertsConfigMapName }}
