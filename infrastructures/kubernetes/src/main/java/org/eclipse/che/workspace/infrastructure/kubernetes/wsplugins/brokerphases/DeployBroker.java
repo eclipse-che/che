@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases;
 
 import static java.lang.String.format;
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.DEPLOY_BROKER_PHASE;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -62,6 +63,7 @@ public class DeployBroker extends BrokerPhase {
   private final UnrecoverablePodEventListenerFactory factory;
   private final RuntimeIdentity runtimeId;
   private final Tracer tracer;
+  private final Map<String, String> startOptions;
 
   public DeployBroker(
       RuntimeIdentity runtimeId,
@@ -70,7 +72,8 @@ public class DeployBroker extends BrokerPhase {
       BrokersResult brokersResult,
       UnrecoverablePodEventListenerFactory factory,
       RuntimeEventsPublisher runtimeEventsPublisher,
-      Tracer tracer) {
+      Tracer tracer,
+      Map<String, String> startOptions) {
     this.runtimeId = runtimeId;
     this.namespace = namespace;
     this.brokerEnvironment = brokerEnvironment;
@@ -78,6 +81,7 @@ public class DeployBroker extends BrokerPhase {
     this.factory = factory;
     this.runtimeEventsPublisher = runtimeEventsPublisher;
     this.tracer = tracer;
+    this.startOptions = startOptions;
   }
 
   @Override
@@ -116,15 +120,9 @@ public class DeployBroker extends BrokerPhase {
                   runtimeId,
                   ImmutableSet.of(pluginBrokerPod.getMetadata().getName())));
 
-      // TODO: check whether we're running in debug
-      namespace
-          .deployments()
-          .watchLogs(
-              new PodLogHandlerToEventPublisher(runtimeEventsPublisher, runtimeId),
-              new LogWatchTimeouts(5_000, 100, 2_500),
-              ImmutableSet.of(pluginBrokerPod.getMetadata().getName()));
-
       deployments.create(pluginBrokerPod);
+
+      watchLogsIfDebugEnabled(startOptions, pluginBrokerPod);
 
       LOG.debug("Brokers pod is created for workspace '{}'", runtimeId.getWorkspaceId());
       tracingSpan.finish();
@@ -153,6 +151,28 @@ public class DeployBroker extends BrokerPhase {
       } catch (InfrastructureException ex) {
         LOG.error("Brokers config map removal failed. Error: " + ex.getLocalizedMessage(), ex);
       }
+    }
+  }
+
+  private void watchLogsIfDebugEnabled(Map<String, String> startOptions, Pod pluginBrokerPod)
+      throws InfrastructureException {
+    if (startOptions == null) {
+      LOG.debug(
+          "'startOptions' is null so we won't watch the plugin broker pod logs for workspace '{}'",
+          runtimeId.getWorkspaceId());
+      return;
+    }
+    boolean shouldWatchContainerStartupLogs =
+        Boolean.parseBoolean(
+            startOptions.getOrDefault(DEBUG_WORKSPACE_START, Boolean.FALSE.toString()));
+
+    if (shouldWatchContainerStartupLogs) {
+      namespace
+          .deployments()
+          .watchLogs(
+              new PodLogHandlerToEventPublisher(runtimeEventsPublisher, runtimeId),
+              new LogWatchTimeouts(5_000, 100, 2_500),
+              ImmutableSet.of(pluginBrokerPod.getMetadata().getName()));
     }
   }
 

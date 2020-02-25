@@ -13,6 +13,8 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphas
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -40,6 +42,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesC
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatchTimeouts;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListener;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
@@ -95,7 +99,8 @@ public class DeployBrokerTest {
             brokersResult,
             unrecoverableEventListenerFactory,
             runtimeEventPublisher,
-            tracer);
+            tracer,
+            emptyMap());
     deployBrokerPhase.then(nextBrokerPhase);
 
     when(nextBrokerPhase.execute()).thenReturn(plugins);
@@ -155,6 +160,92 @@ public class DeployBrokerTest {
 
     // then
     verify(k8sDeployments).watchEvents(any(RuntimeLogsPublisher.class));
+    verify(k8sDeployments).stopWatch();
+  }
+
+  @Test
+  public void shouldWatchTheLogsWhenSetInStartOptions() throws Exception {
+    // given
+    deployBrokerPhase =
+        new DeployBroker(
+            RUNTIME_ID,
+            k8sNamespace,
+            k8sEnvironment,
+            brokersResult,
+            unrecoverableEventListenerFactory,
+            runtimeEventPublisher,
+            tracer,
+            singletonMap(DEBUG_WORKSPACE_START, Boolean.TRUE.toString()));
+    deployBrokerPhase.then(nextBrokerPhase);
+    when(nextBrokerPhase.execute()).thenReturn(plugins);
+
+    // when
+    deployBrokerPhase.execute();
+
+    // then
+    verify(k8sDeployments).watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any());
+    verify(k8sDeployments).stopWatch();
+  }
+
+  @Test
+  public void shouldNotWatchTheLogsWhenSetFalseInStartOptions() throws Exception {
+    // given
+    deployBrokerPhase =
+        new DeployBroker(
+            RUNTIME_ID,
+            k8sNamespace,
+            k8sEnvironment,
+            brokersResult,
+            unrecoverableEventListenerFactory,
+            runtimeEventPublisher,
+            tracer,
+            singletonMap(DEBUG_WORKSPACE_START, Boolean.FALSE.toString()));
+    deployBrokerPhase.then(nextBrokerPhase);
+    when(nextBrokerPhase.execute()).thenReturn(plugins);
+
+    // when
+    deployBrokerPhase.execute();
+
+    // then
+    verify(k8sDeployments, never())
+        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any());
+    verify(k8sDeployments).stopWatch();
+  }
+
+  @Test
+  public void shouldNotWatchTheLogsWhenEmptyStartOptions() throws Exception {
+    // given
+    // when
+    deployBrokerPhase.execute();
+
+    // then
+    verify(k8sDeployments, never())
+        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any());
+    verify(k8sDeployments).stopWatch();
+  }
+
+  @Test
+  public void shouldNotWatchTheLogsWhenNullStartOptions() throws Exception {
+    // given
+    deployBrokerPhase =
+        new DeployBroker(
+            RUNTIME_ID,
+            k8sNamespace,
+            k8sEnvironment,
+            brokersResult,
+            unrecoverableEventListenerFactory,
+            runtimeEventPublisher,
+            tracer,
+            null);
+    deployBrokerPhase.then(nextBrokerPhase);
+    when(nextBrokerPhase.execute()).thenReturn(plugins);
+
+    // when
+    deployBrokerPhase.execute();
+
+    // then
+    verify(k8sDeployments, never())
+        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any());
     verify(k8sDeployments).stopWatch();
   }
 

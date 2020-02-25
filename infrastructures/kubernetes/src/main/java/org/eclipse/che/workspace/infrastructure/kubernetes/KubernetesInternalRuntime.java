@@ -189,7 +189,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // Tooling side car provisioner should be applied before other provisioners
       // because new machines may be provisioned there
       toolingProvisioner.provision(
-          context.getIdentity(), startSynchronizer, context.getEnvironment());
+          context.getIdentity(), startSynchronizer, context.getEnvironment(), startOptions);
 
       startSynchronizer.checkFailure();
 

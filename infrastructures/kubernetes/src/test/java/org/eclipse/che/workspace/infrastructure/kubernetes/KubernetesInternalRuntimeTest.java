@@ -400,7 +400,7 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.start(emptyMap());
 
-    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
+    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv, emptyMap());
     verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
     verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
     verify(deployments).deploy(any(Pod.class));
@@ -428,7 +428,7 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.start(emptyMap());
 
-    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
+    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv, emptyMap());
     verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
     verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
     verify(deployments).deploy(any(Deployment.class));
@@ -455,7 +455,7 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.start(emptyMap());
 
-    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
+    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv, emptyMap());
     verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
     verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
     verify(deployments).deploy(any(Deployment.class));
