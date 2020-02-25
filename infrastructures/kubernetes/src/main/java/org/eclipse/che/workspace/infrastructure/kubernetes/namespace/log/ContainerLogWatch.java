@@ -146,15 +146,15 @@ class ContainerLogWatch implements Runnable, Closeable {
     try (BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
       String logMessage;
       while ((logMessage = in.readLine()) != null) {
-        if (this.isErrorMessage(logMessage)) {
+        if (!this.isErrorMessage(logMessage)) {
+          handler.handle(logMessage, containerName);
+        } else {
           LOG.debug("error message [{}]", logMessage);
           LOG.debug(
               "failed to get the logs for [{} : {}], should try again if enough time.",
               podName,
               containerName);
           return false;
-        } else {
-          handler.handle(logMessage, containerName);
         }
       }
     } catch (IOException e) {

@@ -121,7 +121,7 @@ public class DeployBroker extends BrokerPhase {
           .deployments()
           .watchLogs(
               new PodLogHandlerToEventPublisher(runtimeEventsPublisher, runtimeId),
-              new LogWatchTimeouts(5_000, 100, 1_000),
+              new LogWatchTimeouts(5_000, 100, 2_500),
               ImmutableSet.of(pluginBrokerPod.getMetadata().getName()));
 
       deployments.create(pluginBrokerPod);
@@ -130,6 +130,8 @@ public class DeployBroker extends BrokerPhase {
       tracingSpan.finish();
       return nextPhase.execute();
     } catch (InfrastructureException e) {
+
+      namespace.deployments().stopWatch(true);
       // Ensure span is finished with exception message
       TracingTags.setErrorStatus(tracingSpan, e);
       tracingSpan.finish();
