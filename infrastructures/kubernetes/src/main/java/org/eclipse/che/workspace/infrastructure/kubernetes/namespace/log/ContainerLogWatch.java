@@ -55,7 +55,7 @@ class ContainerLogWatch implements Runnable, Closeable {
   private final JsonParser jsonParser = new JsonParser();
 
   // flag whether we should still try to get the logs
-  private final AtomicBoolean running = new AtomicBoolean(false);
+  private final AtomicBoolean closed = new AtomicBoolean(false);
 
   ContainerLogWatch(
       KubernetesClient client,
@@ -81,10 +81,9 @@ class ContainerLogWatch implements Runnable, Closeable {
   @Override
   public void run() {
     Stopwatch stopwatch = Stopwatch.createStarted();
-    running.set(true);
     // we try to get logs for `timeouts.getWatchTimeoutMs()`
-    while (running.get()
-        && stopwatch.elapsed(TimeUnit.MILLISECONDS) < timeouts.getWatchTimeoutMs()) {
+    while (stopwatch.elapsed(TimeUnit.MILLISECONDS) < timeouts.getWatchTimeoutMs()) {
+
       // request k8s to get the logs from the container
       try (LogWatch logWatch =
           client
@@ -93,7 +92,14 @@ class ContainerLogWatch implements Runnable, Closeable {
               .withName(podName)
               .inContainer(containerName)
               .watchLog()) {
-        currentLogWatch = logWatch;
+
+        // we need to synchroinze here to avoid adding new `currentLogWatch` after we close it
+        synchronized (this) {
+          if (closed.get()) {
+            return;
+          }
+          currentLogWatch = logWatch;
+        }
 
         if (!readAndHandle(currentLogWatch.getOutput(), logHandler)) {
           // failed to get the logs this time, so removing this watcher
@@ -212,9 +218,11 @@ class ContainerLogWatch implements Runnable, Closeable {
 
   @Override
   public void close() {
-    running.set(false);
-    if (currentLogWatch != null) {
-      currentLogWatch.close();
+    synchronized (this) {
+      closed.set(true);
+      if (currentLogWatch != null) {
+        currentLogWatch.close();
+      }
     }
   }
 
