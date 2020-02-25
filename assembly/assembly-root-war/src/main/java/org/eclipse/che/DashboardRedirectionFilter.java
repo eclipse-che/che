@@ -24,13 +24,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Redirect user to dashboard if request wasn't made to namespace/workspacename address.
+ * Redirect user to dashboard if request wasn't made to namespace/workspaceName or app resources.
  *
  * @author Max Shaposhnik
  */
 @Singleton
 public class DashboardRedirectionFilter implements Filter {
-  private static Pattern projectPattern = Pattern.compile("^/(_app|[^/]+?)/.+");
+
+  // Describes IDE direct URL in format namespace/workspaceName, like user123/java-mysql
+  private static final String IDE_DIRECT_URL = "/\\w+/\\w+";
+  // Describes URL to app resources, like /_ide/loader.html
+  private static final String APP_RESOURCES = "/_app/.*";
+
+  private static final Pattern EXCLUDES =
+      Pattern.compile("^(" + APP_RESOURCES + ")|(" + IDE_DIRECT_URL + ")$");
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -38,7 +45,7 @@ public class DashboardRedirectionFilter implements Filter {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse resp = (HttpServletResponse) response;
 
-    if ("GET".equals(req.getMethod()) && !projectPattern.matcher(req.getRequestURI()).matches()) {
+    if ("GET".equals(req.getMethod()) && !EXCLUDES.matcher(req.getRequestURI()).matches()) {
       resp.sendRedirect("/dashboard/");
       return;
     }

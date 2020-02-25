@@ -41,23 +41,8 @@ public class DashboardRedirectionFilterTest {
 
   @InjectMocks private DashboardRedirectionFilter filter;
 
-  @Test
-  public void shouldSkipRequestToProject() throws Exception {
-    // given
-    when(request.getMethod()).thenReturn("GET");
-    when(request.getRequestURI()).thenReturn("/namespace/ws-id/project1");
-    when(request.getRequestURL())
-        .thenReturn(new StringBuffer("http://localhost:8080/namespace/ws-id/project1"));
-
-    // when
-    filter.doFilter(request, response, chain);
-
-    // then
-    verify(chain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
-  }
-
   @Test(dataProvider = "nonNamespacePathProvider")
-  public void shouldRedirectIfRequestWithoutNamespace(String uri, String url) throws Exception {
+  public void shouldRedirectIfRequestIsNotNamespaceWorkspaceName(String uri) throws Exception {
     // given
     when(request.getMethod()).thenReturn("GET");
     when(request.getRequestURI()).thenReturn(uri);
@@ -75,18 +60,28 @@ public class DashboardRedirectionFilterTest {
   @DataProvider(name = "nonNamespacePathProvider")
   public Object[][] nonProjectPathProvider() {
     return new Object[][] {
-      {"/ws-id/", "http://localhost:8080/ws-id123123/"},
-      {"/wsname", "http://localhost:8080/wsname_only"},
+      {"/"}, {"/ws-id/"}, {"/wsname"}, {"/unknown/resource/index.html"},
     };
+  }
+
+  @Test
+  public void shouldSkipRequestToAppResources() throws Exception {
+    // given
+    when(request.getMethod()).thenReturn("GET");
+    when(request.getRequestURI()).thenReturn("/_app/loader.html");
+
+    // when
+    filter.doFilter(request, response, chain);
+
+    // then
+    verify(chain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
   }
 
   @Test(dataProvider = "notGETMethodProvider")
   public void shouldSkipNotGETRequest(String method) throws Exception {
     // given
     when(request.getMethod()).thenReturn(method);
-    when(request.getRequestURI()).thenReturn("/ws-id/project1");
-    when(request.getRequestURL())
-        .thenReturn(new StringBuffer("http://localhost:8080/ws-id/project1"));
+    when(request.getRequestURI()).thenReturn("/namespace/workspaceName");
 
     // when
     filter.doFilter(request, response, chain);
