@@ -43,6 +43,7 @@ public class GithubURLParser {
           ".*<div class=\"State[\\s|\\S]+(?<prState>Closed|Open|Merged)[\\s|\\S]+<\\/div>[\\s|\\S]+into[\\s]+(from[\\s]*)*<span title=\"(?<prRepoUser>[^\\\\/]+)\\/(?<prRepoName>[^\\:]+):(?<prBranch>[^\\\"]+).*",
           Pattern.DOTALL);
 
+  /** Regexp to check if repository name contains .git extension and make matching group w/out it */
   protected static final Pattern GIT_EXTENSION_PATTERN =
       Pattern.compile("^([\\S]+(?=\\.git))(?:\\.git|(/))?$");
 
