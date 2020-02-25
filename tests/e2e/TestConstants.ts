@@ -151,9 +151,9 @@ export const TestConstants = {
     TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || '',
 
     /**
-     * Log into OCP if configured an HTPasswd identity provider, "false" by default.
+     * Log into OCP by using appropriate provider title.
      */
-    TS_OCP_LOGIN_PAGE_HTPASW: process.env.TS_OCP_LOGIN_PAGE_HTPASW === 'true',
+    TS_OCP_LOGIN_PAGE_PROVIDER_TITLE: process.env.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE || '',
 
     /**
      * Log into CHE in MultiUser mode, "false" by default.
@@ -161,19 +161,9 @@ export const TestConstants = {
     TS_SELENIUM_MULTIUSER: process.env.TS_SELENIUM_MULTIUSER === 'true',
 
     /**
-     * Temp admin username used to log in OCP.
-     */
-    TS_SELENIUM_OCP_TEMP_ADMIN_USERNAME: process.env.TS_SELENIUM_OCP_TEMP_ADMIN_USERNAME || 'kubeadmin',
-
-    /**
      * Path to folder with load tests execution report.
      */
     TS_SELENIUM_LOAD_TEST_REPORT_FOLDER: process.env.TS_SELENIUM_LOAD_TEST_REPORT_FOLDER || './load-test-folder',
-
-    /**
-     * Enable or disable storing of execution screencast, "true" by default.
-     */
-    TS_SELENIUM_OCP_TEMP_ADMIN_PASSWORD: process.env.TS_SELENIUM_OCP_TEMP_ADMIN_PASSWORD || '',
 
     /**
      * Regular username used to login in OCP.

@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-api</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>7.9.0-SNAPSHOT</version>
+        <version>7.10.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-api-permission</artifactId>
     <packaging>jar</packaging>
@@ -210,7 +210,7 @@
                         <package>org.eclipse.che.multiuser.api.permission.shared.dto</package>
                     </dtoPackages>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                    <genClassName>org.ecipse.che.api.multiuser.permission.server.dto.DtoServerImpls</genClassName>
+                    <genClassName>org.eclipse.che.api.multiuser.permission.server.dto.DtoServerImpls</genClassName>
                     <impl>server</impl>
                 </configuration>
             </plugin>

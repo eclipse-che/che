@@ -37,8 +37,10 @@ bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
   --host=${CHE_ROUTE} \
   --port=80 \
   --multiuser \
+  --fail-script-on-failed-tests \
   --include-tests-under-repair \
   --include-flaky-tests \
+  --fail-script-on-failed-tests \
   || IS_TESTS_FAILED=true
 
 echo "=========================== THIS IS POST TEST ACTIONS =============================="

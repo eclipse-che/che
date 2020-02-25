@@ -43,7 +43,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S})
+@Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S, TestGroup.UNDER_REPAIR})
 public class ShareWorkspaceMemberTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
