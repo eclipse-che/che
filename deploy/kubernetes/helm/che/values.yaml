@@ -51,7 +51,7 @@ global:
     selfSignedCertSecretName: self-signed-cert
 
     ## Name of the config-map with public certificates to add to Java trust store of the Che server.
-    customPublicCertsConfigMapName: ""
+    serverTrustStoreConfigMapName: ""
 
 
   ## If using git self-signed certificate is enabled
