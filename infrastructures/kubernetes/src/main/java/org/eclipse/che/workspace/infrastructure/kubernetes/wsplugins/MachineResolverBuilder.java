@@ -40,7 +40,7 @@ public class MachineResolverBuilder {
         || defaultSidecarCpuRequestAttribute == null
         || containerEndpoints == null
         || projectsRootPathEnvVar == null) {
-      throw new IllegalStateException("Unable to build MachineResolver cause some fields are null");
+      throw new IllegalStateException("Unable to build MachineResolver because some fields are null");
     }
 
     return new MachineResolver(
