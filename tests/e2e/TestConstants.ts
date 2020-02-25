@@ -90,11 +90,6 @@ export const TestConstants = {
     TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS: Number(process.env.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS) || 20,
 
     /**
-     * Delay in milliseconds between checking plugin precence.
-     */
-    TS_SELENIUM_PLUGIN_PRESENCE_POLLING: Number(process.env.TS_SELENIUM_PLUGIN_PRECENCE_POLLING) || 2000,
-
-    /**
      * Name of workspace created for 'Happy Path' scenario validation.
      */
     TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: process.env.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME || 'petclinic-dev-environment',

@@ -53,14 +53,14 @@ export class GitPlugin {
     async selectCommandInMoreActionsMenu(commandName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('GitPlugin.selectCommandInMoreActionsMenu');
 
-        await this.clickOnMoreActions();
+        await this.clickOnMoreActions(timeout);
         await this.driverHelper.waitAndClick(By.xpath(`//li[@data-command]/div[text()=\'${commandName}\']`), timeout);
     }
 
-    async clickOnMoreActions() {
+    async clickOnMoreActions(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('GitPlugin.clickOnMoreActions');
 
-        await this.driverHelper.waitAndClick(By.id('__more__'));
+        await this.driverHelper.waitAndClick(By.id('__more__'), timeout);
     }
 
     async waitChangedFileInChagesList(expectedItem: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {

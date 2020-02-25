@@ -58,7 +58,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     public async waitPluginAdding(namespace: string, workspaceName: string, pluginName: string) {
         const workspaceStatusApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${namespace}:${workspaceName}`;
         const attempts: number = TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS;
-        const polling: number = TestConstants.TS_SELENIUM_PLUGIN_PRESENCE_POLLING;
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
 
         for (let i = 0; i < attempts; i++) {
             const response = await this.processRequestHandler.get(workspaceStatusApiUrl);
@@ -162,7 +162,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
                 if (wsStatus.data.status === 'STOPPED') {
                     break;
                 }
-                await this.driverHelper.wait(TestConstants.TS_SELENIUM_PLUGIN_PRESENCE_POLLING);
+                await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
             }
         } catch (err) {
             console.log(`Stopping workspace failed. URL used: ${stopWorkspaceApiUrl}`);

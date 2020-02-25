@@ -50,14 +50,14 @@ suite('Git with ssh workflow', async () => {
     const committedFile = 'README.md';
 
     suiteSetup(async function () {
-        let wsConfig = await testWorkspaceUtils.getBaseDevfile();
+        const wsConfig = await testWorkspaceUtils.getBaseDevfile();
         wsConfig.metadata!.name = wsNameCheckGeneratingKeys;
         await testWorkspaceUtils.createWsFromDevFile(wsConfig);
     });
 
     test('Login into workspace and open tree container', async () => {
-        await loginPage.login();
         await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckGeneratingKeys);
+        await loginPage.login();
         await ide.waitWorkspaceAndIde(namespace, workspaceName);
         await projectTree.openProjectTreeContainer();
     });
@@ -97,7 +97,7 @@ suite('Git with ssh workflow', async () => {
     });
 
     test('Check ssh key in  a new workspace', async () => {
-        let data = await testWorkspaceUtils.getBaseDevfile();
+        const data = await testWorkspaceUtils.getBaseDevfile();
 
         data.metadata!.name = wsNameCheckPropagatingKeys;
         await testWorkspaceUtils.createWsFromDevFile(data);
