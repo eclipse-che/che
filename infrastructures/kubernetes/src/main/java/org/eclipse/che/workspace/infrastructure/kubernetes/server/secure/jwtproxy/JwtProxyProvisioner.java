@@ -317,6 +317,10 @@ public class JwtProxyProvisioner {
                         false,
                         null))
                 .withArgs("-config", JWT_PROXY_CONFIG_FOLDER + "/" + JWT_PROXY_CONFIG_FILE)
+                .addNewEnv()
+                .withName("XDG_CONFIG_HOME")
+                .withValue(JWT_PROXY_CONFIG_FOLDER)
+                .endEnv()
                 .build())
         .withVolumes(
             new VolumeBuilder()
