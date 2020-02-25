@@ -44,7 +44,7 @@ public class GithubURLParser {
           Pattern.DOTALL);
 
   protected static final Pattern GIT_EXTENSION_PATTERN =
-      Pattern.compile("^([a-zA-Z-.]+(?=\\.git))(?:\\.git|(/))?$");
+      Pattern.compile("^([\\S]+(?=\\.git))(?:\\.git|(/))?$");
 
   public boolean isValid(@NotNull String url) {
     return GITHUB_PATTERN.matcher(url).matches();
