@@ -297,7 +297,7 @@ add_cert_to_truststore() {
   JAVA_TRUST_STORE=/home/user/cacerts
   SELF_SIGNED_CERT=/home/user/self-signed.crt
 
-  MESSAGE="Found a custom cert. Adding it to java trust store"
+  MESSAGE="Found a custom cert. Adding it to java trust store $JAVA_TRUST_STORE"
   if [ ! -f "$JAVA_TRUST_STORE" ]; then
     echo "$MESSAGE based on $DEFAULT_JAVA_TRUST_STORE"
     cp $DEFAULT_JAVA_TRUST_STORE $JAVA_TRUST_STORE
