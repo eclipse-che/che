@@ -302,7 +302,7 @@ add_cert_to_truststore() {
     echo "$MESSAGE based on $DEFAULT_JAVA_TRUST_STORE"
     cp $DEFAULT_JAVA_TRUST_STORE $JAVA_TRUST_STORE
   else
-    echo "$MESSAGE $JAVA_TRUST_STORE"
+    echo "$MESSAGE"
   fi
 
   echo "$1" > $SELF_SIGNED_CERT
