@@ -135,7 +135,7 @@ public class LogWatcherTest {
   }
 
   @Test
-  public void executorIsCalledAgainAfterCleanup() throws InfrastructureException {
+  public void executorIsNotCalledAgainAfterCleanup() throws InfrastructureException {
     // given
     LogWatcher logWatcher =
         new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS);
@@ -150,6 +150,6 @@ public class LogWatcherTest {
     logWatcher.handle(podEvent);
 
     // then
-    verify(executor, times(2)).execute(any());
+    verify(executor, times(1)).execute(any());
   }
 }
