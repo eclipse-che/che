@@ -13,6 +13,7 @@ import { TYPES } from '../../../inversify.types';
 import { IAuthorizationHeaderHandler } from './IAuthorizationHeaderHandler';
 import { injectable, inject } from 'inversify';
 import { ITokenHandler } from '../tokens/ITokenHandler';
+import https from 'https';
 
 @injectable()
 export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHeaderHandler {
@@ -22,6 +23,6 @@ export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHea
 
     async get(): Promise<AxiosRequestConfig> {
         const token = await this.tokenHandler.get();
-        return { headers: { 'Authorization': `Bearer ${token}` } };
+        return { headers: { 'Authorization': `Bearer ${token}` }, httpsAgent: new https.Agent({ rejectUnauthorized: false }) };
     }
 }
