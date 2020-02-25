@@ -78,7 +78,9 @@ public class GithubURLParserTest {
       {"https://github.com/eclipse/che/tree/master/dashboard/"},
       {"https://github.com/eclipse/che/tree/master/plugins/plugin-git/che-plugin-git-ext-git"},
       {"https://github.com/eclipse/che/tree/master/plugins/plugin-git/che-plugin-git-ext-git/"},
-      {"https://github.com/eclipse/che/pull/11103"}
+      {"https://github.com/eclipse/che/pull/11103"},
+      {"https://github.com/eclipse/che.git"},
+      {"https://github.com/eclipse/che.with.dots.git"}
     };
   }
 
@@ -86,6 +88,8 @@ public class GithubURLParserTest {
   public Object[][] expectedParsing() {
     return new Object[][] {
       {"https://github.com/eclipse/che", "eclipse", "che", "master", null},
+      {"https://github.com/eclipse/che.git", "eclipse", "che", "master", null},
+      {"https://github.com/eclipse/che.with.dot.git", "eclipse", "che.with.dot", "master", null},
       {"https://github.com/eclipse/che/", "eclipse", "che", "master", null},
       {"https://github.com/eclipse/che/tree/4.2.x", "eclipse", "che", "4.2.x", null},
       {

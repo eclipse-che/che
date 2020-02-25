@@ -43,6 +43,9 @@ public class GithubURLParser {
           ".*<div class=\"State[\\s|\\S]+(?<prState>Closed|Open|Merged)[\\s|\\S]+<\\/div>[\\s|\\S]+into[\\s]+(from[\\s]*)*<span title=\"(?<prRepoUser>[^\\\\/]+)\\/(?<prRepoName>[^\\:]+):(?<prBranch>[^\\\"]+).*",
           Pattern.DOTALL);
 
+  protected static final Pattern GIT_EXTENSION_PATTERN =
+      Pattern.compile("^([a-zA-Z-.]+(?=\\.git))(?:\\.git|(/))?$");
+
   public boolean isValid(@NotNull String url) {
     return GITHUB_PATTERN.matcher(url).matches();
   }
@@ -59,6 +62,10 @@ public class GithubURLParser {
 
     String repoUser = matcher.group("repoUser");
     String repoName = matcher.group("repoName");
+    Matcher gitExtensionMatcher = GIT_EXTENSION_PATTERN.matcher(repoName);
+    if (gitExtensionMatcher.matches()) {
+      repoName = gitExtensionMatcher.group(1);
+    }
     String branchName = matcher.group("branchName");
 
     String pullRequestId = matcher.group("pullRequestId");
