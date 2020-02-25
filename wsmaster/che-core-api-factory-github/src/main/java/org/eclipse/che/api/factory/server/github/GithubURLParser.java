@@ -45,7 +45,7 @@ public class GithubURLParser {
 
   /** Regexp to check if repository name contains .git extension and make matching group w/out it */
   protected static final Pattern GIT_EXTENSION_PATTERN =
-      Pattern.compile("^([\\S]+(?=\\.git))(?:\\.git|(/))?$");
+      Pattern.compile("^([\\w\\d._-]+(?=\\.git))(?:\\.git)?$");
 
   public boolean isValid(@NotNull String url) {
     return GITHUB_PATTERN.matcher(url).matches();
