@@ -207,7 +207,7 @@
                             var attributes = servers[serverId].attributes;
                             if (attributes['type'] === 'ide') {
                                 //Avoid redirection loop in case if gwt-ide loaded in the sidecar
-                                if(servers[serverId].url.contains("gwt/ide/sidecar/entrypoint")){
+                                if(servers[serverId].url.includes("gwt/ide/sidecar/entrypoint")){
                                     return;
                                 }
                                 var url = servers[serverId].url + location.search;
