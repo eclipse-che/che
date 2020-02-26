@@ -24,7 +24,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
-public class PodLogHandlerToEventPublisherTest {
+public class PodLogToEventPublisherTest {
 
   @Mock RuntimeEventsPublisher eventsPublisher;
 
@@ -32,7 +32,7 @@ public class PodLogHandlerToEventPublisherTest {
 
   @Test
   public void sendMessageToPublisher() {
-    PodLogHandler handler = new PodLogHandlerToEventPublisher(eventsPublisher, identity);
+    PodLogHandler handler = new PodLogToEventPublisher(eventsPublisher, identity);
 
     handler.handle("message", "containerName");
 

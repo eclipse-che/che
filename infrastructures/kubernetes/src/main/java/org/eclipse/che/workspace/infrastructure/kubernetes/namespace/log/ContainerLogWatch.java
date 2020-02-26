@@ -30,11 +30,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class is responsible for single container instance log watch. It tries the best to watch the
- * logs. It sends single messages to provided {@link PodLogHandler}. Be aware that reading the logs
- * is blocking operation. This class implements {@link Runnable} so it can be easily run in
- * dedicated Thread. The watching log session can be closed anytime with `close()`. It implements
- * {@link Closeable}, so all benefits coming from this may be used as well.
+ * This class is responsible for watching logs in a single container instance. Messages are
+ * provided, unbuffered, to a provided {@link PodLogHandler}
+ * <p>
+ * Reading logs is a blocking operation.
  */
 class ContainerLogWatch implements Runnable, Closeable {
 
@@ -142,7 +141,7 @@ class ContainerLogWatch implements Runnable, Closeable {
    */
   private boolean readAndHandle(InputStream inputStream, PodLogHandler handler) {
     if (inputStream == null) {
-      LOG.error(
+      LOG.debug(
           "Given InputStream for reading the logs for '{} {} {}' is null.",
           namespace,
           podName,

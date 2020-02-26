@@ -126,7 +126,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
    * case, use {@code needWait=false}. Otherwise watchers will be cleaned immediately, which does
    * not ensure that we get all the logs.
    *
-   * @param needWait true if we need to block before cleanup
+   * @param needWait true if we need to pause before cleanup
    */
   public void close(boolean needWait) {
     try {
