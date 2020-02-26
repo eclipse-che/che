@@ -12,8 +12,10 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -25,6 +27,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -38,6 +41,7 @@ public class ContainerLogWatchTest {
   private final String podname = "pod123";
   private final String container = "containre123";
   private final LogWatchTimeouts TIMEOUTS = new LogWatchTimeouts(100, 0, 0);
+  private final long LOG_LIMIT_BYTES = 1024;
 
   @Mock KubernetesClient client;
 
@@ -68,12 +72,33 @@ public class ContainerLogWatchTest {
     logWatch.setInputStream(inputStream);
 
     ContainerLogWatch clw =
-        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, TIMEOUTS);
+        new ContainerLogWatch(
+            client, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
     clw.run();
 
     verify(podLogHandler).handle("first", container);
     verify(podLogHandler).handle("second", container);
     verify(podLogHandler).handle("third", container);
+    assertTrue(logWatch.isClosed);
+  }
+
+  @Test
+  public void testLimitInputStreamBytes() throws IOException {
+    PipedInputStream inputStream = new PipedInputStream();
+    PipedOutputStream outputStream = new PipedOutputStream(inputStream);
+    outputStream.write("This is long message that won't fit into the limit.".getBytes());
+    outputStream.close();
+    logWatch.setInputStream(inputStream);
+
+    ContainerLogWatch clw =
+        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, TIMEOUTS, 4);
+    clw.run();
+
+    ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> containerCaptor = ArgumentCaptor.forClass(String.class);
+    verify(podLogHandler, times(1)).handle(messageCaptor.capture(), containerCaptor.capture());
+    assertEquals(messageCaptor.getValue(), "This");
+    assertEquals(containerCaptor.getValue(), container);
     assertTrue(logWatch.isClosed);
   }
 
@@ -94,7 +119,8 @@ public class ContainerLogWatchTest {
         .handle("message", container);
 
     ContainerLogWatch clw =
-        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, TIMEOUTS);
+        new ContainerLogWatch(
+            client, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
     new Thread(clw).start();
 
     latch.await(1, TimeUnit.SECONDS);
@@ -120,7 +146,8 @@ public class ContainerLogWatchTest {
         .handle("message", container);
 
     ContainerLogWatch clw =
-        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, TIMEOUTS);
+        new ContainerLogWatch(
+            client, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
     new Thread(clw).start();
 
     messageHandleLatch.await(1, TimeUnit.SECONDS);
@@ -174,7 +201,8 @@ public class ContainerLogWatchTest {
     when(pods.watchLog()).thenReturn(logWatch).thenReturn(logWatchRegularMessage);
 
     ContainerLogWatch clw =
-        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, TIMEOUTS);
+        new ContainerLogWatch(
+            client, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
     new Thread(clw).start();
 
     // wait for logwatch close, it means that error message was processed
@@ -216,7 +244,8 @@ public class ContainerLogWatchTest {
     when(pods.watchLog()).thenReturn(logWatch).thenReturn(logWatchRegularMessage);
 
     ContainerLogWatch clw =
-        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, TIMEOUTS);
+        new ContainerLogWatch(
+            client, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
     new Thread(clw).start();
 
     // wait for logwatch close, it means that error message was processed

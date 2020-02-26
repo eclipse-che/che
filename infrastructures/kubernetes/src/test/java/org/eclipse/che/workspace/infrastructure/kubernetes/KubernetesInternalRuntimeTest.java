@@ -22,6 +22,7 @@ import static java.util.stream.Stream.concat;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STARTING;
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.mockito.ArgumentMatchers.any;
@@ -127,6 +128,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesS
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatchTimeouts;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatcher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesPreviewUrlCommandProvisioner;
@@ -480,11 +482,25 @@ public class KubernetesInternalRuntimeTest {
   }
 
   @Test
+  public void shouldWatchLogsWithLogLimitBytesSetInStartOptions() throws InfrastructureException {
+    internalRuntime.start(
+        ImmutableMap.of(
+            DEBUG_WORKSPACE_START, "true", DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES, "123"));
+
+    verify(namespace.deployments(), times(1))
+        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any(), eq(123L));
+  }
+
+  @Test
   public void shouldWatchLogsWhenSetInOptions() throws InfrastructureException {
     internalRuntime.start(singletonMap(DEBUG_WORKSPACE_START, "true"));
 
     verify(namespace.deployments(), times(1))
-        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any());
+        .watchLogs(
+            any(PodLogHandler.class),
+            any(LogWatchTimeouts.class),
+            any(),
+            eq(LogWatcher.DEFAULT_LOG_LIMIT_BYTES));
   }
 
   @Test
@@ -492,7 +508,11 @@ public class KubernetesInternalRuntimeTest {
     internalRuntime.start(singletonMap(DEBUG_WORKSPACE_START, "false"));
 
     verify(namespace.deployments(), times(0))
-        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any());
+        .watchLogs(
+            any(PodLogHandler.class),
+            any(LogWatchTimeouts.class),
+            any(),
+            eq(LogWatcher.DEFAULT_LOG_LIMIT_BYTES));
   }
 
   @Test
@@ -500,7 +520,11 @@ public class KubernetesInternalRuntimeTest {
     internalRuntime.start(emptyMap());
 
     verify(namespace.deployments(), times(0))
-        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any());
+        .watchLogs(
+            any(PodLogHandler.class),
+            any(LogWatchTimeouts.class),
+            any(),
+            eq(LogWatcher.DEFAULT_LOG_LIMIT_BYTES));
   }
 
   @Test

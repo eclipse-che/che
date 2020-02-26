@@ -600,12 +600,22 @@ public class KubernetesDeployments {
    * @param podNames pods of interest for watching the logs
    */
   public synchronized void watchLogs(
-      PodLogHandler handler, LogWatchTimeouts timeouts, Set<String> podNames)
+      PodLogHandler handler,
+      LogWatchTimeouts timeouts,
+      Set<String> podNames,
+      long limitInputStreamBytes)
       throws InfrastructureException {
     if (logWatcher == null) {
       LOG.debug("start watching logs of pods '{}' of  workspace '{}'", podNames, workspaceId);
       logWatcher =
-          new LogWatcher(clientFactory, workspaceId, namespace, podNames, executor, timeouts);
+          new LogWatcher(
+              clientFactory,
+              workspaceId,
+              namespace,
+              podNames,
+              executor,
+              timeouts,
+              limitInputStreamBytes);
       logWatcher.addLogHandler(handler);
       watchEvents(logWatcher);
     } else {

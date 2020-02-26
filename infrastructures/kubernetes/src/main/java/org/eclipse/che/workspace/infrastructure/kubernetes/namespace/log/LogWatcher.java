@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES;
+
 import io.fabric8.kubernetes.client.KubernetesClient;
 import java.io.Closeable;
 import java.util.Map;
@@ -38,12 +40,16 @@ public class LogWatcher implements PodEventHandler, Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(LogWatcher.class);
 
+  // 10MB
+  public static final Long DEFAULT_LOG_LIMIT_BYTES = 10L * 1024 * 1024;
+
   private static final String STARTED_EVENT_REASON = "Started";
 
   private final KubernetesClient client;
   private final Set<PodLogHandler> logHandlers = ConcurrentHashMap.newKeySet();
   private final Executor containerWatchersThreadPool;
   private final LogWatchTimeouts timeouts;
+  private final long inputStreamLimit;
 
   private final String namespace;
   private final String workspaceId;
@@ -63,7 +69,8 @@ public class LogWatcher implements PodEventHandler, Closeable {
       String namespace,
       Set<String> podsOfInterest,
       Executor executor,
-      LogWatchTimeouts timeouts)
+      LogWatchTimeouts timeouts,
+      long inputStreamLimit)
       throws InfrastructureException {
     this.client = clientFactory.create(workspaceId);
     this.workspaceId = workspaceId;
@@ -71,6 +78,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
     this.containerWatchersThreadPool = executor;
     this.timeouts = timeouts;
     this.podsOfInterest = podsOfInterest;
+    this.inputStreamLimit = inputStreamLimit;
   }
 
   public void addLogHandler(PodLogHandler handler) {
@@ -93,7 +101,13 @@ public class LogWatcher implements PodEventHandler, Closeable {
               && !currentContainerWatchers.containsKey(podContainerKey(podName, containerName))) {
             ContainerLogWatch logWatch =
                 new ContainerLogWatch(
-                    client, namespace, podName, containerName, logHandler, timeouts);
+                    client,
+                    namespace,
+                    podName,
+                    containerName,
+                    logHandler,
+                    timeouts,
+                    inputStreamLimit);
             currentContainerWatchers.put(podContainerKey(podName, containerName), logWatch);
             LOG.trace(
                 "adding [{}] to watching containers now watching [{}]",
@@ -158,5 +172,23 @@ public class LogWatcher implements PodEventHandler, Closeable {
         .add("namespace='" + namespace + "'")
         .add("workspaceId='" + workspaceId + "'")
         .toString();
+  }
+
+  public static long getLogLimitBytes(Map<String, String> startOptions) {
+    if (startOptions == null
+        || startOptions.isEmpty()
+        || !startOptions.containsKey(DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES)) {
+      return DEFAULT_LOG_LIMIT_BYTES;
+    } else {
+      try {
+        return Long.parseLong(startOptions.get(DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES));
+      } catch (NumberFormatException nfe) {
+        LOG.debug(
+            "failed to parse log limit bytes value from startOptions. Value '{}'",
+            startOptions.get(DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES),
+            nfe);
+        return DEFAULT_LOG_LIMIT_BYTES;
+      }
+    }
   }
 }

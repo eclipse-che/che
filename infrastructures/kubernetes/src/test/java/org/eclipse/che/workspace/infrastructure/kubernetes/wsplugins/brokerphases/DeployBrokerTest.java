@@ -36,6 +36,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeLogsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
@@ -43,6 +44,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesD
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatchTimeouts;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatcher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListener;
@@ -183,7 +185,41 @@ public class DeployBrokerTest {
     deployBrokerPhase.execute();
 
     // then
-    verify(k8sDeployments).watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any());
+    verify(k8sDeployments)
+        .watchLogs(
+            any(PodLogHandler.class),
+            any(LogWatchTimeouts.class),
+            any(),
+            eq(LogWatcher.DEFAULT_LOG_LIMIT_BYTES));
+    verify(k8sDeployments).stopWatch();
+  }
+
+  @Test
+  public void shouldWatchTheLogsWithProperBytesLimitWhenSet() throws Exception {
+    // given
+    deployBrokerPhase =
+        new DeployBroker(
+            RUNTIME_ID,
+            k8sNamespace,
+            k8sEnvironment,
+            brokersResult,
+            unrecoverableEventListenerFactory,
+            runtimeEventPublisher,
+            tracer,
+            ImmutableMap.of(
+                DEBUG_WORKSPACE_START,
+                Boolean.TRUE.toString(),
+                Constants.DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES,
+                "123"));
+    deployBrokerPhase.then(nextBrokerPhase);
+    when(nextBrokerPhase.execute()).thenReturn(plugins);
+
+    // when
+    deployBrokerPhase.execute();
+
+    // then
+    verify(k8sDeployments)
+        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any(), eq(123L));
     verify(k8sDeployments).stopWatch();
   }
 
@@ -208,7 +244,11 @@ public class DeployBrokerTest {
 
     // then
     verify(k8sDeployments, never())
-        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any());
+        .watchLogs(
+            any(PodLogHandler.class),
+            any(LogWatchTimeouts.class),
+            any(),
+            eq(LogWatcher.DEFAULT_LOG_LIMIT_BYTES));
     verify(k8sDeployments).stopWatch();
   }
 
@@ -220,7 +260,11 @@ public class DeployBrokerTest {
 
     // then
     verify(k8sDeployments, never())
-        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any());
+        .watchLogs(
+            any(PodLogHandler.class),
+            any(LogWatchTimeouts.class),
+            any(),
+            eq(LogWatcher.DEFAULT_LOG_LIMIT_BYTES));
     verify(k8sDeployments).stopWatch();
   }
 
@@ -245,7 +289,11 @@ public class DeployBrokerTest {
 
     // then
     verify(k8sDeployments, never())
-        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any());
+        .watchLogs(
+            any(PodLogHandler.class),
+            any(LogWatchTimeouts.class),
+            any(),
+            eq(LogWatcher.DEFAULT_LOG_LIMIT_BYTES));
     verify(k8sDeployments).stopWatch();
   }
 

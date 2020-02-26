@@ -11,19 +11,27 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatcher.DEFAULT_LOG_LIMIT_BYTES;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.testng.Assert.assertEquals;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -35,6 +43,7 @@ public class LogWatcherTest {
   private final String WORKSPACE_ID = "workspace123";
   private final String NAMESPACE = "namespace123";
   private final LogWatchTimeouts TIMEOUTS = new LogWatchTimeouts(100, 0, 0);
+  private final long LIMIT_BYTES = 64;
 
   @Mock private PodLogHandler handler;
   @Mock private KubernetesClientFactory clientFactory;
@@ -47,7 +56,8 @@ public class LogWatcherTest {
   public void executorIsNotCalledWhenContainerIsNull() throws InfrastructureException {
     // given
     LogWatcher logWatcher =
-        new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS);
+        new LogWatcher(
+            clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS, LIMIT_BYTES);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
@@ -64,7 +74,8 @@ public class LogWatcherTest {
   public void executorIsNotCalledWhenPodNameDontMatch() throws InfrastructureException {
     // given
     LogWatcher logWatcher =
-        new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS);
+        new LogWatcher(
+            clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS, LIMIT_BYTES);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
@@ -86,7 +97,8 @@ public class LogWatcherTest {
   public void executorIsNotCalledWhenReasonIsNotStarted() throws InfrastructureException {
     // given
     LogWatcher logWatcher =
-        new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS);
+        new LogWatcher(
+            clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS, LIMIT_BYTES);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
@@ -103,7 +115,8 @@ public class LogWatcherTest {
   public void executorIsCalledWhenAllIsSet() throws InfrastructureException {
     // given
     LogWatcher logWatcher =
-        new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS);
+        new LogWatcher(
+            clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS, LIMIT_BYTES);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
@@ -120,7 +133,8 @@ public class LogWatcherTest {
   public void executorIsCalledJustOnceWhenSameEventArriveAgain() throws InfrastructureException {
     // given
     LogWatcher logWatcher =
-        new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS);
+        new LogWatcher(
+            clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS, LIMIT_BYTES);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
@@ -138,7 +152,8 @@ public class LogWatcherTest {
   public void executorIsNotCalledAgainAfterCleanup() throws InfrastructureException {
     // given
     LogWatcher logWatcher =
-        new LogWatcher(clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS);
+        new LogWatcher(
+            clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS, LIMIT_BYTES);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
@@ -151,5 +166,23 @@ public class LogWatcherTest {
 
     // then
     verify(executor, times(1)).execute(any());
+  }
+
+  @DataProvider
+  public Object[][] logLimitData() {
+    return new Object[][] {
+      {null, DEFAULT_LOG_LIMIT_BYTES},
+      {emptyMap(), DEFAULT_LOG_LIMIT_BYTES},
+      {singletonMap("bla", "bol"), DEFAULT_LOG_LIMIT_BYTES},
+      {
+        ImmutableMap.of(Constants.DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES, "123", "other", "value"),
+        123
+      }
+    };
+  }
+
+  @Test(dataProvider = "logLimitData")
+  public void testGettingLogLimitBytes(Map<String, String> startOptions, long expectedLimit) {
+    assertEquals(LogWatcher.getLogLimitBytes(startOptions), expectedLimit);
   }
 }

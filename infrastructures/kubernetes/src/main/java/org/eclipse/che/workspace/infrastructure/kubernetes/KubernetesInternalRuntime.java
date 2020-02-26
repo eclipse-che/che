@@ -89,6 +89,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRunti
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatchTimeouts;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatcher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogToEventPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
@@ -663,7 +664,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           .watchLogs(
               new PodLogToEventPublisher(this.eventPublisher, this.getContext().getIdentity()),
               LogWatchTimeouts.DEFAULT,
-              podNames);
+              podNames,
+              LogWatcher.getLogLimitBytes(startOptions));
     }
   }
 

@@ -24,6 +24,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_DEVFI
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 
 import com.google.common.base.Joiner;
@@ -110,6 +111,7 @@ public class WorkspaceService extends Service {
   private final boolean cheWorkspaceAutoStart;
   private final FileContentProvider devfileContentProvider;
   private final boolean defaultPersistVolumes;
+  private final Long logLimitBytes;
 
   @Inject
   public WorkspaceService(
@@ -121,7 +123,8 @@ public class WorkspaceService extends Service {
       @Named(CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY) @Nullable String pluginRegistryUrl,
       @Named(CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY) @Nullable String devfileRegistryUrl,
       @Named(CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY) boolean defaultPersistVolumes,
-      URLFetcher urlFetcher) {
+      URLFetcher urlFetcher,
+      @Named(DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES) Long logLimitBytes) {
     this.apiEndpoint = apiEndpoint;
     this.cheWorkspaceAutoStart = cheWorkspaceAutoStart;
     this.workspaceManager = workspaceManager;
@@ -131,6 +134,7 @@ public class WorkspaceService extends Service {
     this.devfileRegistryUrl = devfileRegistryUrl;
     this.devfileContentProvider = new URLFileContentProvider(null, urlFetcher);
     this.defaultPersistVolumes = defaultPersistVolumes;
+    this.logLimitBytes = logLimitBytes;
   }
 
   @POST
@@ -457,7 +461,10 @@ public class WorkspaceService extends Service {
           ConflictException {
 
     Map<String, String> options = new HashMap<>();
-    options.put(DEBUG_WORKSPACE_START, debugWorkspaceStart.toString());
+    if (debugWorkspaceStart) {
+      options.put(DEBUG_WORKSPACE_START, debugWorkspaceStart.toString());
+      options.put(DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES, logLimitBytes.toString());
+    }
 
     return asDtoWithLinksAndToken(workspaceManager.startWorkspace(workspaceId, envName, options));
   }

@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.io.ByteStreams;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
@@ -41,6 +42,7 @@ class ContainerLogWatch implements Runnable, Closeable {
   private final KubernetesClient client;
   private final PodLogHandler logHandler;
   private final LogWatchTimeouts timeouts;
+  private final long inputStreamLimit;
 
   private final String namespace;
   private final String podName;
@@ -61,13 +63,15 @@ class ContainerLogWatch implements Runnable, Closeable {
       String podName,
       String containerName,
       PodLogHandler logHandler,
-      LogWatchTimeouts timeouts) {
+      LogWatchTimeouts timeouts,
+      long inputStreamLimit) {
     this.client = client;
     this.namespace = namespace;
     this.podName = podName;
     this.containerName = containerName;
     this.logHandler = logHandler;
     this.timeouts = timeouts;
+    this.inputStreamLimit = inputStreamLimit;
   }
 
   /**
@@ -99,8 +103,10 @@ class ContainerLogWatch implements Runnable, Closeable {
           currentLogWatch = logWatch;
         }
 
+        // TODO: test that limit works
         if (currentLogWatch.getOutput() == null
-            || !readAndHandle(currentLogWatch.getOutput(), logHandler)) {
+            || !readAndHandle(
+                ByteStreams.limit(currentLogWatch.getOutput(), inputStreamLimit), logHandler)) {
           // failed to get the logs this time, so removing this watcher
           LOG.trace(
               "failed to get the logs for '{} : {} : {}'. Container probably still starting after [{}]ms.",
