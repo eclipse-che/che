@@ -8,39 +8,35 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
+import { che } from '@eclipse-che/api';
 import { TestConstants } from '../../TestConstants';
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../DriverHelper';
-import { CLASSES } from '../../inversify.types';
 import 'reflect-metadata';
 import { WorkspaceStatus } from './WorkspaceStatus';
 import { ITestWorkspaceUtil } from './ITestWorkspaceUtil';
-import axios from 'axios';
-import querystring from 'querystring';
 import { error } from 'selenium-webdriver';
-enum RequestType {
-    GET,
-    POST,
-    DELETE
-}
+import { CheApiRequestHandler } from '../requestHandlers/CheApiRequestHandler';
+import { CLASSES } from '../../inversify.types';
 
 @injectable()
 export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
-    workspaceApiUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/api/workspace`;
+    static readonly WORKSPACE_API_URL: string = 'api/workspace';
 
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) {
-
-    }
+    constructor(
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.CheApiRequestHandler) private readonly processRequestHandler: CheApiRequestHandler
+    ) { }
 
     public async waitWorkspaceStatus(namespace: string, workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus) {
-        const workspaceStatusApiUrl: string = `${this.workspaceApiUrl}/${namespace}:${workspaceName}`;
+        const workspaceStatusApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${namespace}:${workspaceName}`;
         const attempts: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_POLLING;
         let workspaceStatus: string = '';
 
         for (let i = 0; i < attempts; i++) {
-            const response = await this.processRequest(RequestType.GET, workspaceStatusApiUrl);
+            const response = await this.processRequestHandler.get(workspaceStatusApiUrl);
 
             if (response.status !== 200) {
                 await this.driverHelper.wait(polling);
@@ -60,12 +56,12 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     public async waitPluginAdding(namespace: string, workspaceName: string, pluginName: string) {
-        const workspaceStatusApiUrl: string = `${this.workspaceApiUrl}/${namespace}:${workspaceName}`;
+        const workspaceStatusApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${namespace}:${workspaceName}`;
         const attempts: number = TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS;
-        const polling: number = TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_POLLING;
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
 
         for (let i = 0; i < attempts; i++) {
-            const response = await this.processRequest(RequestType.GET, workspaceStatusApiUrl);
+            const response = await this.processRequestHandler.get(workspaceStatusApiUrl);
 
             if (response.status !== 200) {
                 await this.driverHelper.wait(polling);
@@ -87,25 +83,34 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         }
     }
 
-    public async getListOfWorkspaceId() {
-        const getAllWorkspacesResponse = await this.processRequest(RequestType.GET, this.workspaceApiUrl);
+    public async getListOfWorkspaceId(): Promise<string[]> {
+        const getAllWorkspacesResponse = await this.processRequestHandler.get(TestWorkspaceUtil.WORKSPACE_API_URL);
 
         interface IMyObj {
             id: string;
             status: string;
         }
+
         let stringified = JSON.stringify(getAllWorkspacesResponse.data);
         let arrayOfWorkspaces = <IMyObj[]>JSON.parse(stringified);
         let wsList: Array<string> = [];
+
         for (let entry of arrayOfWorkspaces) {
             wsList.push(entry.id);
         }
+
         return wsList;
+    }
+
+    public async getIdOfRunningWorkspace(wsName: string): Promise<string> {
+        const getWorkspacesByNameResponse = await this.processRequestHandler.get(`${TestWorkspaceUtil.WORKSPACE_API_URL}/:${wsName}`);
+        return getWorkspacesByNameResponse.data.id;
+
     }
 
     public async getIdOfRunningWorkspaces(): Promise<Array<string>> {
         try {
-            const getAllWorkspacesResponse = await this.processRequest(RequestType.GET, this.workspaceApiUrl);
+            const getAllWorkspacesResponse = await this.processRequestHandler.get(TestWorkspaceUtil.WORKSPACE_API_URL);
 
             interface IMyObj {
                 id: string;
@@ -123,97 +128,46 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
             return idOfRunningWorkspace;
         } catch (err) {
-            console.log(`Getting id of running workspaces failed. URL used: ${this.workspaceApiUrl}`);
+            console.log(`Getting id of running workspaces failed. URL used: ${TestWorkspaceUtil.WORKSPACE_API_URL}`);
             throw err;
         }
-    }
-
-    getIdOfRunningWorkspace(namespace: string): Promise<string> {
-        throw new Error('Method not implemented.');
     }
 
     public async removeWorkspaceById(id: string) {
-        const workspaceIdUrl: string = `${this.workspaceApiUrl}/${id}`;
-        const attempts: number = TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS;
-        const polling: number = TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_POLLING;
-        let stopped: Boolean = false;
-
-        for (let i = 0; i < attempts; i++) {
-
-            const getInfoResponse = await this.processRequest(RequestType.GET, workspaceIdUrl);
-
-            if (getInfoResponse.data.status === 'STOPPED') {
-                stopped = true;
-                break;
-            }
-            await this.driverHelper.wait(polling);
-        }
-
-        if (stopped) {
-            try {
-                const deleteWorkspaceResponse = await this.processRequest(RequestType.DELETE, workspaceIdUrl);
-
-                // response code 204: "No Content" expected
-                if (deleteWorkspaceResponse.status !== 204) {
-                    throw new Error(`Can not remove workspace. Code: ${deleteWorkspaceResponse.status} Data: ${deleteWorkspaceResponse.data}`);
-                }
-            } catch (err) {
-                console.log(`Removing of workspace failed.`);
-                throw err;
-            }
-        } else {
-            throw new Error(`Can not remove workspace with id ${id}, because it is still not in STOPPED state.`);
-        }
-    }
-
-    async getCheBearerToken(): Promise<string> {
-        let params = {};
-
-        let keycloakUrl = TestConstants.TS_SELENIUM_BASE_URL;
-        if ( keycloakUrl.substr(7, 4).includes('che')) {
-            const keycloakAuthSuffix = '/auth/realms/che/protocol/openid-connect/token';
-            keycloakUrl = keycloakUrl.replace('che', 'keycloak') + keycloakAuthSuffix;
-            params = {
-                client_id: 'che-public',
-                username: TestConstants.TS_SELENIUM_USERNAME,
-                password: TestConstants.TS_SELENIUM_PASSWORD,
-                grant_type: 'password'
-            };
-        } else {
-            const keycloakAuthSuffix = '/auth/realms/codeready/protocol/openid-connect/token';
-            keycloakUrl = keycloakUrl.replace('codeready', 'keycloak') + keycloakAuthSuffix;
-            params = {
-                client_id: 'codeready-public',
-                username: TestConstants.TS_SELENIUM_USERNAME,
-                password: TestConstants.TS_SELENIUM_PASSWORD,
-                grant_type: 'password'
-            };
-        }
-
+        const workspaceIdUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${id}`;
         try {
-            const responseToObtainBearerToken = await axios.post(keycloakUrl, querystring.stringify(params));
-            return responseToObtainBearerToken.data.access_token;
+            const deleteWorkspaceResponse = await this.processRequestHandler.delete(workspaceIdUrl);
+            // response code 204: "No Content" expected
+            if (deleteWorkspaceResponse.status !== 204) {
+                throw new Error(`Can not remove workspace. Code: ${deleteWorkspaceResponse.status} Data: ${deleteWorkspaceResponse.data}`);
+            }
         } catch (err) {
-            console.log(`Can not get bearer token. URL used: ${keycloakUrl}`);
+            console.log(`Removing of workspace failed.`);
             throw err;
         }
-
     }
 
     public async stopWorkspaceById(id: string) {
-        const stopWorkspaceApiUrl: string = `${this.workspaceApiUrl}/${id}/runtime`;
-        try {
-            const stopWorkspaceResponse = await this.processRequest(RequestType.DELETE, stopWorkspaceApiUrl);
+        const stopWorkspaceApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${id}`;
 
+        try {
+            const stopWorkspaceResponse = await this.processRequestHandler.delete(`${stopWorkspaceApiUrl}/runtime`);
             // response code 204: "No Content" expected
             if (stopWorkspaceResponse.status !== 204) {
                 throw new Error(`Can not stop workspace. Code: ${stopWorkspaceResponse.status} Data: ${stopWorkspaceResponse.data}`);
+            }
+
+            for (let i = 0; i < TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS; i++) {
+                const wsStatus = await this.processRequestHandler.get(stopWorkspaceApiUrl);
+                if (wsStatus.data.status === 'STOPPED') {
+                    break;
+                }
+                await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
             }
         } catch (err) {
             console.log(`Stopping workspace failed. URL used: ${stopWorkspaceApiUrl}`);
             throw err;
         }
-
     }
 
     public async cleanUpAllWorkspaces() {
@@ -225,40 +179,29 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         let listAllWorkspaces: Array<string> = await this.getListOfWorkspaceId();
 
         for (const entry of listAllWorkspaces) {
-            this.removeWorkspaceById(entry);
+            await this.removeWorkspaceById(entry);
         }
 
     }
 
-    removeWorkspace(namespace: string, workspaceId: string): void {
-        throw new Error('Method not implemented.');
+    async createWsFromDevFile(customTemplate: che.workspace.devfile.Devfile) {
+        try {
+             await this.processRequestHandler.post(TestWorkspaceUtil.WORKSPACE_API_URL + '/devfile', customTemplate);
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
     }
 
-    stopWorkspace(namespace: string, workspaceId: string): void {
-        throw new Error('Method not implemented.');
-    }
+    async getBaseDevfile(): Promise<che.workspace.devfile.Devfile> {
+        const baseDevfile: che.workspace.devfile.Devfile = {
+            apiVersion: '1.0.0',
+            metadata: {
+                name: 'test-workspace'
+            }
+        };
 
-    async processRequest(reqType: RequestType, url: string) {
-        let response;
-        // maybe this check can be moved somewhere else at the begining so it will be executed just once
-        if (TestConstants.TS_SELENIUM_MULTIUSER === true) {
-            let authorization = 'Authorization';
-            axios.defaults.headers.common[authorization] = 'Bearer ' + await this.getCheBearerToken();
-        }
-        switch (reqType) {
-            case RequestType.GET: {
-                response = await axios.get(url);
-                break;
-            }
-            case RequestType.DELETE: {
-                response = await axios.delete(url);
-                break;
-            }
-            default: {
-                throw new Error('Unknown RequestType: ' + reqType);
-            }
-        }
-        return response;
+        return baseDevfile;
     }
 
 }

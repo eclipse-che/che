@@ -55,6 +55,9 @@ pipeline {
 
         string(name: 'ghprbSourceBranch',
                 defaultValue: "master")
+
+        string(name: 'e2eTestParameters',
+                defaultValue: "")
     }
 
     stages {
@@ -311,7 +314,7 @@ pipeline {
                        -e TS_SELENIUM_MULTIUSER="true" \\
                        -e TS_SELENIUM_USERNAME="admin" \\
                        -e TS_SELENIUM_PASSWORD="admin" \\
-                       -e TEST_SUITE="${e2eTestToRun}" \\
+                       -e TEST_SUITE="${e2eTestToRun}" ${e2eTestParameters} \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
                        quay.io/eclipse/che-e2e:nightly
                 """
