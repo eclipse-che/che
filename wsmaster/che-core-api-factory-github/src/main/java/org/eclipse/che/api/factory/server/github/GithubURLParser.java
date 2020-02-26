@@ -59,7 +59,7 @@ public class GithubURLParser {
 
     String repoUser = matcher.group("repoUser");
     String repoName = matcher.group("repoName");
-    if (repoName.matches("[\\w-][\\w.-]*?.git$")) {
+    if (repoName.matches("[\\w-][\\w.-]*?\\.git$")) {
       repoName = repoName.substring(0, repoName.length() - 4);
     }
     String branchName = matcher.group("branchName");

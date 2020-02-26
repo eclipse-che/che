@@ -141,6 +141,7 @@ public class GithubURLParserTest {
       {"https://github.com/eclipse/івапівап.git", "івапівап.git"},
       {"https://github.com/eclipse/ ", " "},
       {"https://github.com/eclipse/.", "."},
+      {"https://github.com/eclipse/repositorygit", "repositorygit"},
       {"https://github.com/eclipse/ .git", " .git"}
     };
   }
