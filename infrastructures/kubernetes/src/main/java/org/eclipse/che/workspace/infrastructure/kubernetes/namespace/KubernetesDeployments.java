@@ -620,7 +620,7 @@ public class KubernetesDeployments {
   /**
    * Stops watching the pods inside Kubernetes namespace.
    *
-   * @param failed use true if is this stopWatch called by failed workspace. false otherwise.
+   * @param failed true if workspace startup ended in failure.
    */
   public void stopWatch(boolean failed) {
     try {
