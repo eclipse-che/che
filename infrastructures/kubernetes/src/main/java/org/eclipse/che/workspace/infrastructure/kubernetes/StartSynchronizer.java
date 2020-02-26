@@ -137,8 +137,7 @@ public class StartSynchronizer {
       startTimeMillis = System.currentTimeMillis();
       completionLatch = new CountDownLatch(1);
       eventService.subscribe(runtimeStartInterrupter, KubernetesRuntimeStoppingEvent.class);
-      eventService.subscribe(
-          event -> completionLatch.countDown(), KubernetesRuntimeStoppedEvent.class);
+      eventService.subscribe(runtimeStopWatcher, KubernetesRuntimeStoppedEvent.class);
     }
   }
 
@@ -319,7 +318,7 @@ public class StartSynchronizer {
   }
 
   /**
-   * Listens {@link KubernetesRuntimeStoppedEvent} and realises {@link #completionLatch} when
+   * Listens {@link KubernetesRuntimeStoppedEvent} and releases {@link #completionLatch} when
    * workspace become {@link WorkspaceStatus#STOPPED}.
    */
   private class RuntimeStopWatcher implements EventSubscriber<KubernetesRuntimeStoppedEvent> {
