@@ -25,7 +25,6 @@ import java.io.InputStreamReader;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +53,7 @@ class ContainerLogWatch implements Runnable, Closeable {
   private final JsonParser jsonParser = new JsonParser();
 
   // flag whether we should still try to get the logs
-  private final AtomicBoolean closed = new AtomicBoolean(false);
+  private boolean closed = false;
 
   ContainerLogWatch(
       KubernetesClient client,
@@ -94,13 +93,14 @@ class ContainerLogWatch implements Runnable, Closeable {
 
         // we need to synchroinze here to avoid adding new `currentLogWatch` after we close it
         synchronized (this) {
-          if (closed.get()) {
+          if (closed) {
             return;
           }
           currentLogWatch = logWatch;
         }
 
-        if (!readAndHandle(currentLogWatch.getOutput(), logHandler)) {
+        if (currentLogWatch.getOutput() == null
+            || !readAndHandle(currentLogWatch.getOutput(), logHandler)) {
           // failed to get the logs this time, so removing this watcher
           LOG.trace(
               "failed to get the logs for '{} : {} : {}'. Container probably still starting after [{}]ms.",
@@ -140,14 +140,6 @@ class ContainerLogWatch implements Runnable, Closeable {
    *     interrupted
    */
   private boolean readAndHandle(InputStream inputStream, PodLogHandler handler) {
-    if (inputStream == null) {
-      LOG.debug(
-          "Given InputStream for reading the logs for '{} {} {}' is null.",
-          namespace,
-          podName,
-          containerName);
-      return false;
-    }
     try (BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
       String logMessage;
       while ((logMessage = in.readLine()) != null) {
@@ -218,7 +210,7 @@ class ContainerLogWatch implements Runnable, Closeable {
   @Override
   public void close() {
     synchronized (this) {
-      closed.set(true);
+      closed = true;
       if (currentLogWatch != null) {
         currentLogWatch.close();
       }

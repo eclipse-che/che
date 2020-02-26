@@ -632,9 +632,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
   private void watchLogsIfDebugEnabled(Map<String, String> startOptions)
       throws InfrastructureException {
-    if (startOptions == null) {
+    if (startOptions == null || startOptions.isEmpty()) {
       LOG.debug(
-          "'startOptions' is null so we won't watch the container logs for workspace '{}'",
+          "'startOptions' is null or empty so we won't watch the container logs for workspace '{}'",
           getContext().getIdentity().getWorkspaceId());
       return;
     }
