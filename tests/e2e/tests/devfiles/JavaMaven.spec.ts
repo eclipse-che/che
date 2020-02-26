@@ -22,20 +22,20 @@ const codeNavigationClassName: string = 'String.class';
 const stack : string = 'Java Maven';
 const taskName: string = 'maven build';
 
-suite('Java Maven test', async () => {
+suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace ${workspaceName}`, async () => {
         workspaceHandling.createAndOpenWorkspace(workspaceName, stack);
         projectAndFileTests.waitWorkspaceReadiness(workspaceName, sampleName, 'src');
     });
 
     suite('Validation of workspace build and run', async () => {
-        codeExecutionTests.runTask(taskName, 120000);
+        codeExecutionTests.runTask(taskName, 120_000);
         codeExecutionTests.closeTerminal(taskName);
     });
 
     suite('Language server validation', async () => {
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
-        commonLsTests.waitLSInitialization('Activating Language Support for Java', 1800000, 360000);
+        commonLsTests.waitLSInitialization('Activating Language Support for Java', 1_800_000, 360_000);
         commonLsTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
         commonLsTests.errorHighlighting(tabTitle, 'error', 11);
         commonLsTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');

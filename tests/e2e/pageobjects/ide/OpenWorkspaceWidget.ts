@@ -18,7 +18,6 @@ import { Logger } from '../../utils/Logger';
 export class OpenWorkspaceWidget {
     private static readonly OPEN_WORKSPACE_MAIN_VIEW_XPATH = '//div[@class=\'dialogTitle\']/div[text()=\'Open Workspace\']';
     private static readonly OPEN_WORKSPACE_OPEN_BTN_CSS = 'div.dialogControl>button.main';
-    private static readonly THEIA_LOCATION_LIST_CSS = 'select.theia-LocationList';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) {
     }
@@ -63,12 +62,4 @@ export class OpenWorkspaceWidget {
             await this.driverHelper.waitAndClick(By.id(`/${currentPath}`));
         }
     }
-
-    async selectRootWorkspaceItemInDropDawn(rootProject: string) {
-        Logger.debug(`OpenWorkspaceWidget.selectRootWorkspaceItemInDropDawn "${rootProject}"`);
-
-        await this.driverHelper.waitAndClick(By.css(OpenWorkspaceWidget.THEIA_LOCATION_LIST_CSS));
-        await this.driverHelper.waitAndClick(By.css(`option[value=\'file:///${rootProject}']`));
-    }
-
 }

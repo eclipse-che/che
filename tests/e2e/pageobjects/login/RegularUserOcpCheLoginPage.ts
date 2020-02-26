@@ -27,7 +27,7 @@ export class RegularUserOcpCheLoginPage implements ICheLoginPage {
         Logger.debug('RegularUserOcpCheLoginPage.login');
 
         await this.ocpLogin.waitOpenShiftLoginPage();
-        await this.ocpLogin.clickOnLoginWitnHtpasswd();
+        await this.ocpLogin.clickOnLoginProviderTitle();
         await this.ocpLogin.waitOpenShiftLoginPage();
         await this.ocpLogin.enterUserNameOpenShift(TestConstants.TS_SELENIUM_OCP_USERNAME);
         await this.ocpLogin.enterPasswordOpenShift(TestConstants.TS_SELENIUM_OCP_PASSWORD);
