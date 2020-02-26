@@ -68,6 +68,13 @@ public class GithubURLParserTest {
     assertEquals(githubUrl.getSubfolder(), subfolder);
   }
 
+  /** Compare parsing */
+  @Test(dataProvider = "parsingBadRepository")
+  public void checkParsingBadRepositoryDoNotModifiesInitialInput(String url, String repository) {
+    GithubUrl githubUrl = githubUrlParser.parse(url);
+    assertEquals(githubUrl.getRepository(), repository);
+  }
+
   @DataProvider(name = "UrlsProvider")
   public Object[][] urls() {
     return new Object[][] {
@@ -118,6 +125,15 @@ public class GithubURLParserTest {
         "master",
         "plugins/plugin-git/che-plugin-git-ext-git"
       }
+    };
+  }
+
+  @DataProvider(name = "parsingBadRepository")
+  public Object[][] parsingBadRepository() {
+    return new Object[][]{
+        {"https://github.com/eclipse/che .git", "che .git"},
+        {"https://github.com/eclipse/.git", ".git"},
+        {"https://github.com/eclipse/myB@dR&pository.git", "myB@dR&pository.git"}
     };
   }
 
