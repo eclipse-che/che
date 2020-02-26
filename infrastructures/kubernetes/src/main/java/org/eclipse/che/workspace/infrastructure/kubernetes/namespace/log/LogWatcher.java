@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class watches workspace's pod events and tries hard to read the logs of all it's containers.
+ * This class watches workspace's pod events and tries to read the logs of all its containers.
  *
  * <p>Current implementation uses provided thread-pool and each container log watch session runs in
  * separate thread from this thread-pool.
