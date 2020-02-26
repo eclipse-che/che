@@ -103,7 +103,6 @@ class ContainerLogWatch implements Runnable, Closeable {
           currentLogWatch = logWatch;
         }
 
-        // TODO: test that limit works
         if (currentLogWatch.getOutput() == null
             || !readAndHandle(
                 ByteStreams.limit(currentLogWatch.getOutput(), inputStreamLimit), logHandler)) {
