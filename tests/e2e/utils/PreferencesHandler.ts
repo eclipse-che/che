@@ -30,15 +30,15 @@ export class PreferencesHandler {
     private async setPreference(attribute: string, value: string) {
         Logger.debug(`PreferencesHandler.setPreferences ${attribute} to ${value}`);
         const response = await this.requestHandler.get('api/preferences');
-        let userPref = response.data;
+        const userPref = response.data;
         try {
-            let theiaPref = JSON.parse(userPref['theia-user-preferences']);
+            const theiaPref = JSON.parse(userPref['theia-user-preferences']);
             theiaPref[attribute] = value;
             userPref['theia-user-preferences'] = JSON.stringify(theiaPref);
             this.requestHandler.post('api/preferences', userPref);
         } catch (e) {
             // setting terminal before running a workspace, so no theia preferences are set
-            let theiaPref = `{ "${attribute}":"${value}" }`;
+            const theiaPref = `{ "${attribute}":"${value}" }`;
             userPref['theia-user-preferences'] = JSON.stringify(JSON.parse(theiaPref));
             this.requestHandler.post('api/preferences', userPref);
         }
