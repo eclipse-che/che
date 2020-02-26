@@ -43,10 +43,6 @@ public class GithubURLParser {
           ".*<div class=\"State[\\s|\\S]+(?<prState>Closed|Open|Merged)[\\s|\\S]+<\\/div>[\\s|\\S]+into[\\s]+(from[\\s]*)*<span title=\"(?<prRepoUser>[^\\\\/]+)\\/(?<prRepoName>[^\\:]+):(?<prBranch>[^\\\"]+).*",
           Pattern.DOTALL);
 
-  /** Regexp to check if repository name contains .git extension and make matching group w/out it */
-  protected static final Pattern GIT_EXTENSION_PATTERN =
-      Pattern.compile("^([\\w\\d._-]+(?=\\.git))(?:\\.git)?$");
-
   public boolean isValid(@NotNull String url) {
     return GITHUB_PATTERN.matcher(url).matches();
   }
@@ -63,9 +59,8 @@ public class GithubURLParser {
 
     String repoUser = matcher.group("repoUser");
     String repoName = matcher.group("repoName");
-    Matcher gitExtensionMatcher = GIT_EXTENSION_PATTERN.matcher(repoName);
-    if (gitExtensionMatcher.matches()) {
-      repoName = gitExtensionMatcher.group(1);
+    if (repoName.matches("[\\w-][\\w.-]*?.git$")) {
+      repoName = repoName.substring(0, repoName.length() -4);
     }
     String branchName = matcher.group("branchName");
 

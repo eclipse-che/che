@@ -133,7 +133,8 @@ public class GithubURLParserTest {
     return new Object[][]{
         {"https://github.com/eclipse/che .git", "che .git"},
         {"https://github.com/eclipse/.git", ".git"},
-        {"https://github.com/eclipse/myB@dR&pository.git", "myB@dR&pository.git"}
+        {"https://github.com/eclipse/myB@dR&pository.git", "myB@dR&pository.git"},
+        {"https://github.com/eclipse/.", "."}
     };
   }
 
