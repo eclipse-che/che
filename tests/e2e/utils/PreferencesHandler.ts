@@ -15,19 +15,32 @@ export class PreferencesHandler {
      */
     public async setTerminalType(type: string) {
         Logger.debug('PreferencesHandler.setTerminalToDom');
+        await this.setPreference('terminal.integrated.rendererType', type);
+    }
+
+    /**
+     *
+     * @param askForConfirmation possible values are "never", "ifRequired" and "always"
+     */
+    public async setConfirmExit(askForConfirmation: string) {
+        Logger.debug(`PreferencesHandler.setConfirmExit to ${askForConfirmation}`);
+        await this.setPreference(`application.confirmExit`, askForConfirmation);
+    }
+
+    private async setPreference(attribute: string, value: string) {
+        Logger.debug(`PreferencesHandler.setPreferences ${attribute} to ${value}`);
         const response = await this.requestHandler.get('api/preferences');
         let userPref = response.data;
         try {
             let theiaPref = JSON.parse(userPref['theia-user-preferences']);
-            theiaPref['terminal.integrated.rendererType'] = type;
+            theiaPref[attribute] = value;
             userPref['theia-user-preferences'] = JSON.stringify(theiaPref);
             this.requestHandler.post('api/preferences', userPref);
         } catch (e) {
             // setting terminal before running a workspace, so no theia preferences are set
-            let theiaPref = `{ "terminal.integrated.rendererType":"${type}" }`;
+            let theiaPref = `{ "${attribute}":"${value}" }`;
             userPref['theia-user-preferences'] = JSON.stringify(JSON.parse(theiaPref));
             this.requestHandler.post('api/preferences', userPref);
         }
-
     }
 }
