@@ -13,6 +13,13 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
 /** Various timeouts used in watching workspace logs logic. All values are in milliseconds. */
 public class LogWatchTimeouts {
+
+  /** Standard timeouts gentle to io resources. Use this unless you need something more eager. */
+  public static final LogWatchTimeouts DEFAULT = new LogWatchTimeouts(30_000, 2_000, 5_000);
+
+  /** Aggressive timeouts for more short-lived tasks. */
+  public static final LogWatchTimeouts AGGRESSIVE = new LogWatchTimeouts(5_000, 100, 2_500);
+
   private final long watchTimeoutMs;
   private final long waitBetweenTriesMs;
   private final long waitBeforeCleanupMs;

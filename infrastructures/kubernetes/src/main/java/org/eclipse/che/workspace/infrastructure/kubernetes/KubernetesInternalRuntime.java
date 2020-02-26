@@ -662,7 +662,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           .deployments()
           .watchLogs(
               new PodLogToEventPublisher(this.eventPublisher, this.getContext().getIdentity()),
-              new LogWatchTimeouts(30_000, 2_000, 5_000),
+              LogWatchTimeouts.DEFAULT,
               podNames);
     }
   }
