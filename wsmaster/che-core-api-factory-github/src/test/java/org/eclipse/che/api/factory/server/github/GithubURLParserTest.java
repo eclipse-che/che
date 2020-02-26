@@ -101,6 +101,9 @@ public class GithubURLParserTest {
       {"https://github.com/eclipse/che123", "eclipse", "che123", "master", null},
       {"https://github.com/eclipse/che.git", "eclipse", "che", "master", null},
       {"https://github.com/eclipse/che.with.dot.git", "eclipse", "che.with.dot", "master", null},
+      {"https://github.com/eclipse/-.git", "eclipse", "-", "master", null},
+      {"https://github.com/eclipse/-j.git", "eclipse", "-j", "master", null},
+      {"https://github.com/eclipse/-", "eclipse", "-", "master", null},
       {"https://github.com/eclipse/che-with-hyphen", "eclipse", "che-with-hyphen", "master", null},
       {
         "https://github.com/eclipse/che-with-hyphen.git",
@@ -134,7 +137,11 @@ public class GithubURLParserTest {
       {"https://github.com/eclipse/che .git", "che .git"},
       {"https://github.com/eclipse/.git", ".git"},
       {"https://github.com/eclipse/myB@dR&pository.git", "myB@dR&pository.git"},
-      {"https://github.com/eclipse/.", "."}
+      {"https://github.com/eclipse/.", "."},
+      {"https://github.com/eclipse/івапівап.git", "івапівап.git"},
+      {"https://github.com/eclipse/ ", " "},
+      {"https://github.com/eclipse/.", "."},
+      {"https://github.com/eclipse/ .git", " .git"}
     };
   }
 
