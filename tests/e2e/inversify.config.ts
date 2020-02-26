@@ -15,7 +15,7 @@ import { TYPES, CLASSES } from './inversify.types';
 import { ITestWorkspaceUtil } from './utils/workspace/ITestWorkspaceUtil';
 import { TestWorkspaceUtil } from './utils/workspace/TestWorkspaceUtil';
 import { IOcpLoginPage } from './pageobjects/login/IOcpLoginPage';
-import { OcpLoginByTempAdmin } from './pageobjects/login/OcpLoginByTempAdmin';
+import { OcpUserLoginPage } from './pageobjects/login/OcpUserLoginPage';
 import { TestConstants } from './TestConstants';
 import { ICheLoginPage } from './pageobjects/login/ICheLoginPage';
 import { RegularUserOcpCheLoginPage } from './pageobjects/login/RegularUserOcpCheLoginPage';
@@ -34,7 +34,7 @@ import { Editor } from './pageobjects/ide/Editor';
 import { TopMenu } from './pageobjects/ide/TopMenu';
 import { QuickOpenContainer } from './pageobjects/ide/QuickOpenContainer';
 import { PreviewWidget } from './pageobjects/ide/PreviewWidget';
-import { GitHubPlugin } from './pageobjects/ide/GitHubPlugin';
+import { GitPlugin } from './pageobjects/ide/GitPlugin';
 import { RightToolbar } from './pageobjects/ide/RightToolbar';
 import { Terminal } from './pageobjects/ide/Terminal';
 import { DebugView } from './pageobjects/ide/DebugView';
@@ -52,14 +52,15 @@ import { CheMultiuserTokenHandler } from './utils/requestHandlers/tokens/CheMult
 import { CheSingleUserAuthorizationHeaderHandler } from './utils/requestHandlers/headers/CheSingleUserAuthorizationHeaderHandler';
 import { ITokenHandler } from './utils/requestHandlers/tokens/ITokenHandler';
 import { CheApiRequestHandler } from './utils/requestHandlers/CheApiRequestHandler';
-
+import { CheGitApi } from './utils/VCS/CheGitApi';
+import { GitHubUtil} from './utils/VCS/github/GitHubUtil';
 
 const e2eContainer: Container = new Container();
 
 
 e2eContainer.bind<IDriver>(TYPES.Driver).to(ChromeDriver).inSingletonScope();
 e2eContainer.bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil).inSingletonScope();
-e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpLoginByTempAdmin).inSingletonScope();
+e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpUserLoginPage).inSingletonScope();
 
 if (TestConstants.TS_SELENIUM_MULTIUSER) {
     e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheMultiuserAuthorizationHeaderHandler).inSingletonScope();
@@ -89,7 +90,7 @@ e2eContainer.bind<Editor>(CLASSES.Editor).to(Editor).inSingletonScope();
 e2eContainer.bind<TopMenu>(CLASSES.TopMenu).to(TopMenu).inSingletonScope();
 e2eContainer.bind<QuickOpenContainer>(CLASSES.QuickOpenContainer).to(QuickOpenContainer).inSingletonScope();
 e2eContainer.bind<PreviewWidget>(CLASSES.PreviewWidget).to(PreviewWidget).inSingletonScope();
-e2eContainer.bind<GitHubPlugin>(CLASSES.GitHubPlugin).to(GitHubPlugin).inSingletonScope();
+e2eContainer.bind<GitPlugin>(CLASSES.GitPlugin).to(GitPlugin).inSingletonScope();
 e2eContainer.bind<RightToolbar>(CLASSES.RightToolbar).to(RightToolbar).inSingletonScope();
 e2eContainer.bind<Terminal>(CLASSES.Terminal).to(Terminal).inSingletonScope();
 e2eContainer.bind<DebugView>(CLASSES.DebugView).to(DebugView).inSingletonScope();
@@ -102,5 +103,6 @@ e2eContainer.bind<CheLoginPage>(CLASSES.CheLoginPage).to(CheLoginPage).inSinglet
 e2eContainer.bind<NotificationCenter>(CLASSES.NotificationCenter).to(NotificationCenter).inSingletonScope();
 e2eContainer.bind<PreferencesHandler>(CLASSES.PreferencesHandler).to(PreferencesHandler).inSingletonScope();
 e2eContainer.bind<CheApiRequestHandler>(CLASSES.CheApiRequestHandler).to(CheApiRequestHandler).inSingletonScope();
-
+e2eContainer.bind<CheGitApi>(CLASSES.CheGitApi).to(CheGitApi).inSingletonScope();
+e2eContainer.bind<GitHubUtil>(CLASSES.GitHubUtil).to(GitHubUtil).inSingletonScope();
 export { e2eContainer };

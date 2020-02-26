@@ -13,6 +13,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
+import { TestConstants } from '../../TestConstants';
 
 @injectable()
 export class OcpLoginPage {
@@ -34,18 +35,11 @@ export class OcpLoginPage {
         await this.driverHelper.waitVisibility(By.css(OcpLoginPage.LOGIN_PAGE_OPENSHIFT));
     }
 
-    async clickOnLoginWitnKubeAdmin() {
-        Logger.debug('OcpLoginPage.clickOnLoginWitnKubeAdmin');
+    async clickOnLoginProviderTitle() {
+        Logger.debug('OcpLoginPage.clickOnLoginProviderTitle');
 
-        const loginWithKubeAdminLocator: By = By.css('a[title=\'Log in with kube:admin\']');
-        await this.driverHelper.waitAndClick(loginWithKubeAdminLocator);
-    }
-
-    async clickOnLoginWitnHtpasswd() {
-        Logger.debug('OcpLoginPage.clickOnLoginWitnHtpasswd');
-
-        const loginWithHtpaswdLocator: By = By.css('a[title=\'Log in with htpasswd\']');
-        await this.driverHelper.waitAndClick(loginWithHtpaswdLocator);
+        const loginProviderTitleLocator: By = By.css(`a[title=\'Log in with ${TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
+        await this.driverHelper.waitAndClick(loginProviderTitleLocator);
     }
 
     async waitAuthorizeOpenShiftIdentityProviderPage() {

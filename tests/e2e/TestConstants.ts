@@ -90,11 +90,6 @@ export const TestConstants = {
     TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS: Number(process.env.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS) || 20,
 
     /**
-     * Delay in milliseconds between checking plugin precence.
-     */
-    TS_SELENIUM_PLUGIN_PRECENCE_POLLING: Number(process.env.TS_SELENIUM_PLUGIN_PRECENCE_POLLING) || 2000,
-
-    /**
      * Name of workspace created for 'Happy Path' scenario validation.
      */
     TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: process.env.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME || 'petclinic-dev-environment',
@@ -151,9 +146,9 @@ export const TestConstants = {
     TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || '',
 
     /**
-     * Log into OCP if configured an HTPasswd identity provider, "false" by default.
+     * Log into OCP by using appropriate provider title.
      */
-    TS_OCP_LOGIN_PAGE_HTPASW: process.env.TS_OCP_LOGIN_PAGE_HTPASW === 'true',
+    TS_OCP_LOGIN_PAGE_PROVIDER_TITLE: process.env.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE || '',
 
     /**
      * Log into CHE in MultiUser mode, "false" by default.
@@ -161,19 +156,9 @@ export const TestConstants = {
     TS_SELENIUM_MULTIUSER: process.env.TS_SELENIUM_MULTIUSER === 'true',
 
     /**
-     * Temp admin username used to log in OCP.
-     */
-    TS_SELENIUM_OCP_TEMP_ADMIN_USERNAME: process.env.TS_SELENIUM_OCP_TEMP_ADMIN_USERNAME || 'kubeadmin',
-
-    /**
      * Path to folder with load tests execution report.
      */
     TS_SELENIUM_LOAD_TEST_REPORT_FOLDER: process.env.TS_SELENIUM_LOAD_TEST_REPORT_FOLDER || './load-test-folder',
-
-    /**
-     * Enable or disable storing of execution screencast, "true" by default.
-     */
-    TS_SELENIUM_OCP_TEMP_ADMIN_PASSWORD: process.env.TS_SELENIUM_OCP_TEMP_ADMIN_PASSWORD || '',
 
     /**
      * Regular username used to login in OCP.
@@ -238,5 +223,16 @@ export const TestConstants = {
     /**
      * Running test suite - possible variants can be found in package.json scripts part.
      */
-    TEST_SUITE: process.env.TEST_SUITE || 'test-happy-path'
+    TEST_SUITE: process.env.TEST_SUITE || 'test-happy-path',
+
+    /**
+     * The repo (with README.md in root) and access token are needed for to run test-git-ssh
+     */
+    TS_GITHUB_TEST_REPO: process.env.TS_GITHUB_TEST_REPO || '',
+
+    /**
+     * Token for a github repository with permissions which allow add the ssh keys
+     */
+    TS_GITHUB_TEST_REPO_ACCESS_TOKEN: process.env.TS_GITHUB_TEST_REPO_ACCESS_TOKEN || ''
+
 };

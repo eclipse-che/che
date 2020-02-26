@@ -22,7 +22,7 @@ export class CheApiRequestHandler {
         return await axios.get(this.assembleUrl(relativeUrl), await this.headerHandler.get());
     }
 
-    async post(relativeUrl: string, data?: string): Promise<AxiosResponse> {
+    async post(relativeUrl: string, data?: string | any ): Promise<AxiosResponse> {
         return await axios.post(this.assembleUrl(relativeUrl), data, await this.headerHandler.get());
     }
 

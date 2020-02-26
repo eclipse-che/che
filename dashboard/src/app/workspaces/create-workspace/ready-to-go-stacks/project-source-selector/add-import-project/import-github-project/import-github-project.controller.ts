@@ -16,6 +16,7 @@ import { ImportGithubProjectService, LoadingState } from './import-github-projec
 import { ProjectSource } from '../../project-source.enum';
 import { IGithubRepository } from './github-repository-interface';
 import { AddImportProjectService } from '../add-import-project.service';
+import { CheNotification } from '../../../../../../../components/notification/che-notification.factory';
 
 /**
  * This class is handling the controller for the GitHub part
@@ -25,9 +26,23 @@ import { AddImportProjectService } from '../add-import-project.service';
  */
 export class ImportGithubProjectController {
 
-  static $inject = ['$q', '$mdDialog', '$location', '$browser', '$scope', 'githubPopup', 'cheBranding', 'githubOrganizationNameResolver',
-    'importGithubProjectService', 'cheListHelperFactory', 'addImportProjectService', 'keycloakAuth'];
+  static $inject = [
+    '$browser',
+    '$location',
+    '$mdDialog',
+    '$q',
+    '$scope',
+    'addImportProjectService',
+    'cheBranding',
+    'cheListHelperFactory',
+    'cheNotification',
+    'githubOrganizationNameResolver',
+    'githubPopup',
+    'importGithubProjectService',
+    'keycloakAuth',
+  ];
 
+  private cheNotification: CheNotification
   /**
    * Promises service.
    */
@@ -121,21 +136,33 @@ export class ImportGithubProjectController {
   /**
    * Default constructor that is using resource
    */
-  constructor($q: ng.IQService, $mdDialog: ng.material.IDialogService, $location: ng.ILocationService,
-    $browser: any, $scope: ng.IScope, githubPopup: any, cheBranding: CheBranding,
-    githubOrganizationNameResolver: any, importGithubProjectService: ImportGithubProjectService,
-    cheListHelperFactory: che.widget.ICheListHelperFactory, addImportProjectService: AddImportProjectService, keycloakAuth: any) {
-    this.$q = $q;
-    this.$mdDialog = $mdDialog;
-    this.$location = $location;
+  constructor(
+    $browser: any,
+    $location: ng.ILocationService,
+    $mdDialog: ng.material.IDialogService,
+    $q: ng.IQService,
+    $scope: ng.IScope,
+    addImportProjectService: AddImportProjectService,
+    cheBranding: CheBranding,
+    cheListHelperFactory: che.widget.ICheListHelperFactory,
+    cheNotification: CheNotification,
+    githubOrganizationNameResolver: any,
+    githubPopup: any,
+    importGithubProjectService: ImportGithubProjectService,
+    keycloakAuth: any,
+  ) {
     this.$browser = $browser;
-    this.githubPopup = githubPopup;
-    this.cheBranding = cheBranding;
-    this.githubOrganizationNameResolver = githubOrganizationNameResolver;
-    this.resolveOrganizationName = this.githubOrganizationNameResolver.resolve;
+    this.$location = $location;
+    this.$mdDialog = $mdDialog;
+    this.$q = $q;
     this.addImportProjectService = addImportProjectService;
-    this.keycloakAuth = keycloakAuth;
+    this.cheBranding = cheBranding;
+    this.cheNotification = cheNotification;
+    this.githubOrganizationNameResolver = githubOrganizationNameResolver;
+    this.githubPopup = githubPopup;
     this.importGithubProjectService = importGithubProjectService;
+    this.keycloakAuth = keycloakAuth;
+    this.resolveOrganizationName = this.githubOrganizationNameResolver.resolve;
 
     this.productName = cheBranding.getName();
     this.loadingState = LoadingState;
@@ -232,25 +259,31 @@ export class ImportGithubProjectController {
       return;
     }
 
-    if (this.keycloakAuth.isPresent) {
-      this.keycloakAuth.keycloak.updateToken(5).success(() => {
-        let token = '&token=' + this.keycloakAuth.keycloak.token;
-        this.openGithubPopup(token);
-      }).error(() => {
-        window.sessionStorage.setItem('oidcDashboardRedirectUrl', location.href);
-        this.keycloakAuth.keycloak.login();
-      });
-    } else {
-      this.openGithubPopup('');
-    }
+    this.importGithubProjectService.getOrFetchUserId().then((userId: string) => {
+      if (this.keycloakAuth.isPresent) {
+        this.keycloakAuth.keycloak.updateToken(5).success(() => {
+          let token = '&token=' + this.keycloakAuth.keycloak.token;
+          this.openGithubPopup(userId, token);
+        }).error(() => {
+          window.sessionStorage.setItem('oidcDashboardRedirectUrl', location.href);
+          this.keycloakAuth.keycloak.login();
+        });
+      } else {
+        this.openGithubPopup(userId, '');
+      }
+    }).catch((error: any) => {
+      this.cheNotification.showError('Authentication to GitHub failed.');
+      console.error('Authentication to GitHub failed:', error);
+    });
   }
 
   /**
    * Opens Github popup.
    *
+   * @param {string} userId
    * @param {string} token
    */
-  openGithubPopup(token: string): void {
+  openGithubPopup(userId: string, token: string): void {
     // given URL http://example.com - returns port => 80 (or 443 with https), which causes wrong redirect URL value:
     let port = (this.$location.port() === 80 || this.$location.port() === 443) ? '' : ':' + this.$location.port();
     const redirectUrl = this.$location.protocol() + '://'
@@ -261,7 +294,7 @@ export class ImportGithubProjectController {
     let link = '/api/oauth/authenticate'
       + '?oauth_provider=github'
       + '&scope=' + ['user', 'repo', 'write:public_key'].join(',')
-      + '&userId=' + this.importGithubProjectService.getCurrentUserId()
+      + '&userId=' + userId
       + token
       + '&redirect_after_login='
       + redirectUrl;
