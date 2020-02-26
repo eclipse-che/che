@@ -32,8 +32,8 @@ import org.slf4j.LoggerFactory;
 /**
  * This class is responsible for watching logs in a single container instance. Messages are
  * provided, unbuffered, to a provided {@link PodLogHandler}
- * <p>
- * Reading logs is a blocking operation.
+ *
+ * <p>Reading logs is a blocking operation.
  */
 class ContainerLogWatch implements Runnable, Closeable {
 
