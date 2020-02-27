@@ -4,6 +4,17 @@ import { Logger } from './Logger';
 import { CLASSES } from '../inversify.types';
 import { CheApiRequestHandler } from './requestHandlers/CheApiRequestHandler';
 
+export enum TerminalRendererType {
+    canvas = 'canvas',
+    dom = 'dom'
+}
+
+export enum AskForConfirmationType {
+    never = 'never',
+    ifRquired = 'ifRequired',
+    always = 'always'
+}
+
 @injectable()
 export class PreferencesHandler {
 
@@ -13,7 +24,7 @@ export class PreferencesHandler {
     /**
      * Works properly only if set before workspace startup.
      */
-    public async setTerminalType(type: string) {
+    public async setTerminalType(type: TerminalRendererType) {
         Logger.debug('PreferencesHandler.setTerminalToDom');
         await this.setPreference('terminal.integrated.rendererType', type);
     }
@@ -22,7 +33,7 @@ export class PreferencesHandler {
      *
      * @param askForConfirmation possible values are "never", "ifRequired" and "always"
      */
-    public async setConfirmExit(askForConfirmation: string) {
+    public async setConfirmExit(askForConfirmation: AskForConfirmationType) {
         Logger.debug(`PreferencesHandler.setConfirmExit to ${askForConfirmation}`);
         await this.setPreference(`application.confirmExit`, askForConfirmation);
     }
