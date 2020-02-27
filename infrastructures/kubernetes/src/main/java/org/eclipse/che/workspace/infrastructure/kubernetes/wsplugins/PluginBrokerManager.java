@@ -15,6 +15,7 @@ import com.google.common.annotations.Beta;
 import io.opentracing.Tracer;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -100,7 +101,8 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
       RuntimeIdentity identity,
       StartSynchronizer startSynchronizer,
       Collection<PluginFQN> pluginFQNs,
-      boolean isEphemeral)
+      boolean isEphemeral,
+      Map<String, String> startOptions)
       throws InfrastructureException {
 
     String workspaceId = identity.getWorkspaceId();
@@ -118,7 +120,8 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
         getPrepareStoragePhase(identity, startSynchronizer, brokerEnvironment);
     WaitBrokerResult waitBrokerResult = getWaitBrokerPhase(workspaceId, brokersResult);
     DeployBroker deployBroker =
-        getDeployBrokerPhase(identity, kubernetesNamespace, brokerEnvironment, brokersResult);
+        getDeployBrokerPhase(
+            identity, kubernetesNamespace, brokerEnvironment, brokersResult, startOptions);
     LOG.debug("Entering plugin brokers deployment chain workspace '{}'", workspaceId);
     listenBrokerEvents.then(prepareStorage).then(deployBroker).then(waitBrokerResult);
     return listenBrokerEvents.execute();
@@ -140,7 +143,8 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
       RuntimeIdentity runtimeId,
       KubernetesNamespace kubernetesNamespace,
       KubernetesEnvironment brokerEnvironment,
-      BrokersResult brokersResult) {
+      BrokersResult brokersResult,
+      Map<String, String> startOptions) {
     return new DeployBroker(
         runtimeId,
         kubernetesNamespace,
@@ -148,7 +152,8 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
         brokersResult,
         unrecoverablePodEventListenerFactory,
         runtimeEventsPublisher,
-        tracer);
+        tracer,
+        startOptions);
   }
 
   private WaitBrokerResult getWaitBrokerPhase(String workspaceId, BrokersResult brokersResult) {

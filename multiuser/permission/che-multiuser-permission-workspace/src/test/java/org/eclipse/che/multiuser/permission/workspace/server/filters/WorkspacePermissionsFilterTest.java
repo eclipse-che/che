@@ -313,7 +313,7 @@ public class WorkspacePermissionsFilterTest {
             .post(SECURE_PATH + "/workspace/{id}/runtime");
 
     assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).startById(eq("workspace123"), nullable(String.class));
+    verify(workspaceService).startById(eq("workspace123"), nullable(String.class), eq(false));
     verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("run"));
   }
 

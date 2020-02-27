@@ -59,6 +59,7 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -81,6 +82,7 @@ public class KubernetesDeploymentsTest {
   private static final String DEPLOYMENT_OBJECT_KIND = "Deployment";
 
   @Mock private KubernetesClientFactory clientFactory;
+  @Mock private Executor executor;
   @Mock private KubernetesClient kubernetesClient;
 
   // Deployments Mocks
@@ -160,7 +162,8 @@ public class KubernetesDeploymentsTest {
     futureDate.setYear(3000);
     when(event.getLastTimestamp()).thenReturn(PodEvents.convertDateToEventTimestamp(futureDate));
 
-    kubernetesDeployments = new KubernetesDeployments("namespace", "workspace123", clientFactory);
+    kubernetesDeployments =
+        new KubernetesDeployments("namespace", "workspace123", clientFactory, executor);
   }
 
   @Test
@@ -431,7 +434,9 @@ public class KubernetesDeploymentsTest {
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 
-    new KubernetesDeployments("", "", clientFactory).doDeletePod(POD_NAME).get(5, TimeUnit.SECONDS);
+    new KubernetesDeployments("", "", clientFactory, executor)
+        .doDeletePod(POD_NAME)
+        .get(5, TimeUnit.SECONDS);
 
     verify(watch).close();
   }
@@ -446,7 +451,7 @@ public class KubernetesDeploymentsTest {
     doReturn(watch).when(podResource).watch(any());
 
     try {
-      new KubernetesDeployments("", "", clientFactory)
+      new KubernetesDeployments("", "", clientFactory, executor)
           .doDeletePod(POD_NAME)
           .get(5, TimeUnit.SECONDS);
     } catch (KubernetesInfrastructureException e) {
@@ -466,7 +471,7 @@ public class KubernetesDeploymentsTest {
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 
-    new KubernetesDeployments("", "", clientFactory)
+    new KubernetesDeployments("", "", clientFactory, executor)
         .doDeleteDeployment(DEPLOYMENT_NAME)
         .get(5, TimeUnit.SECONDS);
 
@@ -484,7 +489,7 @@ public class KubernetesDeploymentsTest {
     doReturn(watch).when(podResource).watch(any());
 
     try {
-      new KubernetesDeployments("", "", clientFactory)
+      new KubernetesDeployments("", "", clientFactory, executor)
           .doDeleteDeployment(DEPLOYMENT_NAME)
           .get(5, TimeUnit.SECONDS);
     } catch (KubernetesInfrastructureException e) {
@@ -505,7 +510,7 @@ public class KubernetesDeploymentsTest {
     doReturn(watch).when(podResource).watch(any());
 
     try {
-      new KubernetesDeployments("", "", clientFactory)
+      new KubernetesDeployments("", "", clientFactory, executor)
           .doDeletePod(POD_NAME)
           .get(5, TimeUnit.SECONDS);
     } catch (RuntimeException e) {
@@ -524,7 +529,7 @@ public class KubernetesDeploymentsTest {
     doReturn(watch).when(podResource).watch(any());
 
     try {
-      new KubernetesDeployments("", "", clientFactory)
+      new KubernetesDeployments("", "", clientFactory, executor)
           .doDeleteDeployment(DEPLOYMENT_NAME)
           .get(5, TimeUnit.SECONDS);
     } catch (RuntimeException e) {

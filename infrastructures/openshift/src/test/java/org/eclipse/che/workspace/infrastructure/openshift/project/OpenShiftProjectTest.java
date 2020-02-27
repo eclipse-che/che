@@ -37,6 +37,7 @@ import io.fabric8.openshift.api.model.ProjectRequestFluent.MetadataNested;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.ProjectRequestOperation;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
@@ -70,6 +71,7 @@ public class OpenShiftProjectTest {
   @Mock private KubernetesSecrets secrets;
   @Mock private KubernetesConfigsMaps configsMaps;
   @Mock private OpenShiftClientFactory clientFactory;
+  @Mock private Executor executor;
   @Mock private OpenShiftClient openShiftClient;
   @Mock private KubernetesClient kubernetesClient;
   @Mock private Resource<ServiceAccount, DoneableServiceAccount> serviceAccountResource;
@@ -110,7 +112,8 @@ public class OpenShiftProjectTest {
     MetadataNested projectMeta = prepareProjectRequest();
 
     prepareProject(PROJECT_NAME);
-    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    OpenShiftProject project =
+        new OpenShiftProject(clientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
 
     // when
     project.prepare(false, true);
@@ -126,7 +129,8 @@ public class OpenShiftProjectTest {
 
     Resource resource = prepareProjectResource(PROJECT_NAME);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
-    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    OpenShiftProject project =
+        new OpenShiftProject(clientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
 
     // when
     openShiftProject.prepare(false, true);
@@ -140,7 +144,8 @@ public class OpenShiftProjectTest {
     // given
     Resource resource = prepareProjectResource(PROJECT_NAME);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
-    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    OpenShiftProject project =
+        new OpenShiftProject(clientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
 
     // when
     project.prepare(false, false);
@@ -161,7 +166,8 @@ public class OpenShiftProjectTest {
     when(projectResource.getMetadata()).thenReturn(metadata);
     when(metadata.getLabels()).thenReturn(labels);
 
-    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    OpenShiftProject project =
+        new OpenShiftProject(clientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
 
     // when
     project.prepare(true, false);
@@ -183,7 +189,8 @@ public class OpenShiftProjectTest {
     when(projectResource.getMetadata()).thenReturn(metadata);
     when(metadata.getLabels()).thenReturn(labels);
 
-    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    OpenShiftProject project =
+        new OpenShiftProject(clientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
 
     // when
     project.prepare(false, false);
@@ -229,7 +236,8 @@ public class OpenShiftProjectTest {
   @Test
   public void testDeletesExistingManagedProject() throws Exception {
     // given
-    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    OpenShiftProject project =
+        new OpenShiftProject(clientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
     Resource resource = prepareManagedProjectResource(PROJECT_NAME);
 
     // when
@@ -242,7 +250,8 @@ public class OpenShiftProjectTest {
   @Test
   public void testDoesntDeleteExistingNonManagedNamespace() throws Exception {
     // given
-    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    OpenShiftProject project =
+        new OpenShiftProject(clientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
     Resource resource = prepareProjectResource(PROJECT_NAME);
 
     // when
@@ -255,7 +264,8 @@ public class OpenShiftProjectTest {
   @Test
   public void testDoesntFailIfDeletedProjectDoesntExist() throws Exception {
     // given
-    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    OpenShiftProject project =
+        new OpenShiftProject(clientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
     Resource resource = prepareManagedProjectResource(PROJECT_NAME);
     when(resource.get()).thenThrow(new KubernetesClientException("err", 404, null));
     when(resource.delete()).thenThrow(new KubernetesClientException("err", 404, null));
@@ -271,7 +281,8 @@ public class OpenShiftProjectTest {
   @Test
   public void testDoesntFailIfDeletedProjectIsBeingDeleted() throws Exception {
     // given
-    OpenShiftProject project = new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
+    OpenShiftProject project =
+        new OpenShiftProject(clientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
     Resource resource = prepareManagedProjectResource(PROJECT_NAME);
     when(resource.delete()).thenThrow(new KubernetesClientException("err", 409, null));
 

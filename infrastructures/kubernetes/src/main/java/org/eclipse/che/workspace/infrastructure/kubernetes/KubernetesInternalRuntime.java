@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.CHECK_SERVERS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_MACHINES_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_RUNNING_ASYNC;
@@ -87,6 +88,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachi
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatchTimeouts;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatcher;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogToEventPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
@@ -186,7 +190,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // Tooling side car provisioner should be applied before other provisioners
       // because new machines may be provisioned there
       toolingProvisioner.provision(
-          context.getIdentity(), startSynchronizer, context.getEnvironment());
+          context.getIdentity(), startSynchronizer, context.getEnvironment(), startOptions);
 
       startSynchronizer.checkFailure();
 
@@ -214,6 +218,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       startSynchronizer.checkFailure();
 
       startMachines();
+      watchLogsIfDebugEnabled(startOptions);
 
       previewUrlCommandProvisioner.provision(context.getEnvironment(), namespace);
       runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
@@ -264,7 +269,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // Cancels workspace servers probes if any
       probeScheduler.cancel(workspaceId);
       // stop watching before namespace cleaning up
-      namespace.deployments().stopWatch();
+      namespace.deployments().stopWatch(true);
       try {
         namespace.cleanUp();
       } catch (InfrastructureException cleanUppingEx) {
@@ -623,6 +628,44 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           .watchEvents(
               unrecoverableEventListenerFactory.create(
                   getContext().getEnvironment(), this::handleUnrecoverableEvent));
+    }
+  }
+
+  private void watchLogsIfDebugEnabled(Map<String, String> startOptions)
+      throws InfrastructureException {
+    if (startOptions == null || startOptions.isEmpty()) {
+      LOG.debug(
+          "'startOptions' is null or empty so we won't watch the container logs for workspace '{}'",
+          getContext().getIdentity().getWorkspaceId());
+      return;
+    }
+    boolean shouldWatchContainerStartupLogs =
+        Boolean.parseBoolean(
+            startOptions.getOrDefault(DEBUG_WORKSPACE_START, Boolean.FALSE.toString()));
+
+    if (shouldWatchContainerStartupLogs) {
+      // get all the pods we care about
+      Set<String> podNames =
+          machines
+              .getMachines(getContext().getIdentity())
+              .values()
+              .stream()
+              .filter(Objects::nonNull)
+              .map(KubernetesMachineImpl::getPodName)
+              .filter(Objects::nonNull)
+              .collect(Collectors.toSet());
+      LOG.debug(
+          "Watch '{}' pods in workspace '{}'",
+          podNames,
+          getContext().getIdentity().getWorkspaceId());
+
+      namespace
+          .deployments()
+          .watchLogs(
+              new PodLogToEventPublisher(this.eventPublisher, this.getContext().getIdentity()),
+              LogWatchTimeouts.DEFAULT,
+              podNames,
+              LogWatcher.getLogLimitBytes(startOptions));
     }
   }
 
