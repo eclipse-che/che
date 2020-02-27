@@ -17,7 +17,6 @@ import { Logger } from '../../Logger';
 @injectable()
 export class CheMultiuserTokenHandler implements ITokenHandler {
     async get(): Promise<string> {
-        Logger.debug('==================>>>>>>>>>>>>>>>>>> Upstream');
         let params = {};
 
         let keycloakUrl = TestConstants.TS_SELENIUM_BASE_URL;
@@ -40,5 +39,3 @@ export class CheMultiuserTokenHandler implements ITokenHandler {
 
     }
 }
-
-
