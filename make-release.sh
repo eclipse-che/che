@@ -5,14 +5,53 @@
 
 # set to 1 to actually trigger changes in the release branch
 TRIGGER_RELEASE=0 
-NOCOMMIT=0
+PRERELEASE_TESTING=0
+
+bump_version() {
+  CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+  NEXTVERSION=$1
+  BUMP_BRANCH=$2
+
+  git checkout ${BUMP_BRANCH}
+
+  echo "Updating project version to ${NEXTVERSION}"
+  mvn versions:set -DnewVersion=${NEXTVERSION}
+  mvn versions:update-parent -DallowSnapshots=true -DparentVersion=${NEXTVERSION}
+  mvn versions:commit
+
+  echo "removing files"
+  #TODO investigate why these files sometimes need to be cleaned up manually
+  rm	wsmaster/integration-tests/mysql-tck/pom.xml.versionsBackup
+  rm	wsmaster/integration-tests/postgresql-tck/pom.xml.versionsBackup
+
+  echo "sed"
+  # set new dependencies versions 
+  sed -i -e "s#${VERSION}-SNAPSHOT#${NEXTVERSION}#" pom.xml
+
+  COMMIT_MSG="[release] Bump to ${NEXTVERSION} in ${BUMP_BRANCH}"
+  git commit -a -s -m "${COMMIT_MSG}"
+
+  PR_BRANCH=pr-master-to-${NEXTVERSION}
+  # create pull request for master branch, as branch is restricted
+  git branch "${PR_BRANCH}"
+  git checkout "${PR_BRANCH}"
+  git pull origin "${PR_BRANCH}"
+  git push origin "${PR_BRANCH}"
+  lastCommitComment="$(git log -1 --pretty=%B)"
+  hub pull-request -o -f -m "${lastCommitComment}
+  ${lastCommitComment}" -b "${BRANCH}" -h "${PR_BRANCH}"
+
+  git checkout ${CURRENT_BRANCH}
+}
 
 while [[ "$#" -gt 0 ]]; do
   case $1 in
-    '-t'|'--trigger-release') TRIGGER_RELEASE=1; NOCOMMIT=0; shift 0;;
+    '-t'|'--trigger-release') TRIGGER_RELEASE=1; PRERELEASE_TESTING=0; shift 0;;
     '-r'|'--repo') REPO="$2"; shift 1;;
     '-v'|'--version') VERSION="$2"; shift 1;;
-    '-n'|'--no-commit') NOCOMMIT=1; TRIGGER_RELEASE=0; shift 0;;
+    '-p'|'--prerelease-testing') PRERELEASE_TESTING=1; TRIGGER_RELEASE=0; shift 0;;
+    ''
   esac
   shift 1
 done
@@ -54,15 +93,27 @@ if [[ "${BASEBRANCH}" != "${BRANCH}" ]]; then
   git push origin "${BRANCH}"
   git fetch origin "${BRANCH}:${BRANCH}"
   git checkout "${BRANCH}"
+
+  cd .ci 
+  ./set_tag_version_images_linux.sh ${VERSION}
+  cd ..
+  git commit -a -s -m "Update image tags to ${VERSION} version"
 fi
 
+if [[ $PRERELEASE_TESTING]]; then
+  # create pre-release branch and update image tags
+  git checkout release-candidate
+  cd .ci 
+  ./set_tag_version_images_linux.sh ${VERSION}
+  cd ..
+  git commit -a -s -m "Update image tags to ${VERSION} version"
+  git push origin release-candidate -f
+fi
 if [[ $TRIGGER_RELEASE -eq 1 ]]; then
   # push new branch to release branch to trigger CI build
-  git fetch origin "${BRANCH}:${BRANCH}"
-  git checkout "${BRANCH}"
+  git fetch origin "release-candidate:release-candidate"
+  git checkout "release-candidate"
   git branch release -f
-  echo "updating tags"
-  .ci/.set_tag_version_images_linux.sh ${VERSION}
   git push origin release -f
 fi
 
@@ -74,49 +125,13 @@ git checkout "${BASEBRANCH}"
 if [[ "${BASEBRANCH}" != "${BRANCH}" ]]; then
   # bump the y digit
   [[ $BRANCH =~ ^([0-9]+)\.([0-9]+)\.x ]] && BASE=${BASH_REMATCH[1]}; NEXT=${BASH_REMATCH[2]}; (( NEXT=NEXT+1 )) # for BRANCH=7.10.x, get BASE=7, NEXT=11
-  NEXTVERSION="${BASE}.${NEXT}.0-SNAPSHOT"
-else
-  # bump the z digit
-  [[ $VERSION =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]] && BASE="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"; NEXT="${BASH_REMATCH[3]}"; (( NEXT=NEXT+1 )) # for VERSION=7.7.1, get BASE=7.7, NEXT=2
-  NEXTVERSION="${BASE}.${NEXT}-SNAPSHOT"
+  NEXTVERSION_Y="${BASE}.${NEXT}.0-SNAPSHOT"
+  bump_version ${NEXTVERSION_Y} ${BASEBRANCH}
 fi
-
-# change project version
-echo "Updating project version to ${NEXTVERSION}"
-mvn versions:set -DnewVersion=${NEXTVERSION}
-mvn versions:update-parent -DallowSnapshots=true -DparentVersion=${NEXTVERSION}
-mvn versions:commit
-
-echo "removing files"
-#TODO investigate why these files sometimes need to be cleaned up manually
-rm	wsmaster/integration-tests/mysql-tck/pom.xml.versionsBackup
-rm	wsmaster/integration-tests/postgresql-tck/pom.xml.versionsBackup
-
-echo "sed"
-# set new dependencies versions 
-sed -i -e "s#${VERSION}-SNAPSHOT#${NEXTVERSION}#" pom.xml
-
-if [[ ${NOCOMMIT} -eq 0 ]]; then
-  BRANCH=${BASEBRANCH}
-  # commit change into branch
-  COMMIT_MSG="[release] Bump to ${NEXTVERSION} in ${BRANCH}"
-  git commit -a -s -m "${COMMIT_MSG}"
-  git pull origin "${BRANCH}"
-
-  PUSH_TRY="$(git push origin "${BRANCH}")"
-  # shellcheck disable=SC2181
-  if [[ $? -gt 0 ]] || [[ $PUSH_TRY == *"protected branch hook declined"* ]]; then
-  PR_BRANCH=pr-master-to-${NEXTVERSION}
-    # create pull request for master branch, as branch is restricted
-    git branch "${PR_BRANCH}"
-    git checkout "${PR_BRANCH}"
-    git pull origin "${PR_BRANCH}"
-    git push origin "${PR_BRANCH}"
-    lastCommitComment="$(git log -1 --pretty=%B)"
-    hub pull-request -o -f -m "${lastCommitComment}
-${lastCommitComment}" -b "${BRANCH}" -h "${PR_BRANCH}"
-  fi 
-fi
+# bump the z digit
+[[ $VERSION =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]] && BASE="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"; NEXT="${BASH_REMATCH[3]}"; (( NEXT=NEXT+1 )) # for VERSION=7.7.1, get BASE=7.7, NEXT=2
+NEXTVERSION_Z="${BASE}.${NEXT}-SNAPSHOT"
+bump_version ${NEXTVERSION_Z} ${BUGFIX}
 
 popd > /dev/null || exit
 
