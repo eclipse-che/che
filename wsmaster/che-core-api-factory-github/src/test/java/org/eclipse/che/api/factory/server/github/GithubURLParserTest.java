@@ -113,6 +113,7 @@ public class GithubURLParserTest {
         null
       },
       {"https://github.com/eclipse/che/", "eclipse", "che", "master", null},
+      {"https://github.com/eclipse/repositorygit", "eclipse", "repositorygit", "master", null},
       {"https://github.com/eclipse/che/tree/4.2.x", "eclipse", "che", "4.2.x", null},
       {
         "https://github.com/eclipse/che/tree/master/dashboard/",
