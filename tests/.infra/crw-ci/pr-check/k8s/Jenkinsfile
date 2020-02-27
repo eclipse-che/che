@@ -5,7 +5,7 @@ pipeline {
 
     options {
         timestamps()
-        timeout(time: 1, unit: 'HOURS')
+        timeout(time: 90, unit: 'MINUTES')
         buildDiscarder(logRotator(artifactDaysToKeepStr: '',
                 artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '100'))
     }
@@ -332,7 +332,7 @@ pipeline {
                   # remove first screenshot which has lower resolution 800x600 and breaks screencast video
                   sudo rm -f 00100001* || true
                   
-                  sudo ffmpeg -framerate 1 -pattern_type glob -i '*.png' -c:v libx264 -r 30 -pix_fmt yuv420p $WORKSPACE/tests/e2e/report/screencast.mp4
+                  sudo ffmpeg -framerate 1 -pattern_type glob -i '*.png' -c:v libx264 -r 30  -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -pix_fmt yuv420p $WORKSPACE/tests/e2e/report/screencast.mp4
                   cd $WORKSPACE/tests/e2e/report/
                   sudo rm -rf $WORKSPACE/tests/e2e/report/executionScreencast
                 fi
