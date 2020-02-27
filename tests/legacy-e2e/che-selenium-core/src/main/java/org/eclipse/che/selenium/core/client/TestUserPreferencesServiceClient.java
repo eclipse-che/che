@@ -42,7 +42,7 @@ public class TestUserPreferencesServiceClient {
     this.apiEndpoint = apiEndpointProvider.get().toString();
     this.httpRequestFactory = httpRequestFactory;
 
-    //
+    // Set application.confirmExit property to 'never' to avoid web page closing confirmation pop-up
     this.setProperty("theia-user-preferences", "{\"application.confirmExit\":\"never\"}");
   }
 
