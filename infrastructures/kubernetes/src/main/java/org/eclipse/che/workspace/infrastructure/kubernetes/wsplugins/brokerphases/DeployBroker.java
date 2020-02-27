@@ -157,9 +157,9 @@ public class DeployBroker extends BrokerPhase {
 
   private void watchLogsIfDebugEnabled(Map<String, String> startOptions, Pod pluginBrokerPod)
       throws InfrastructureException {
-    if (startOptions == null) {
+    if (startOptions == null || startOptions.isEmpty()) {
       LOG.debug(
-          "'startOptions' is null so we won't watch the plugin broker pod logs for workspace '{}'",
+          "'startOptions' is null or empty so we won't watch the plugin broker pod logs for workspace '{}'",
           runtimeId.getWorkspaceId());
       return;
     }

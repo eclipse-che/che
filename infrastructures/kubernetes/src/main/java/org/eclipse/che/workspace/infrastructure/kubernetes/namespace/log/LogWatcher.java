@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
@@ -55,7 +54,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
   private final String workspaceId;
   private final Set<String> podsOfInterest;
 
-  private final AtomicBoolean closed = new AtomicBoolean(false);
+  private boolean closed = false;
 
   /**
    * Map of current watchers where key is name of the container and value is {@link
@@ -94,7 +93,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
       for (PodLogHandler logHandler : logHandlers) {
         // we need to synchronize here so we won't add new watcher while we're cleaning them
         synchronized (this) {
-          if (closed.get()) {
+          if (closed) {
             return;
           }
           if (podsOfInterest.contains(podName)
@@ -159,7 +158,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
     } finally {
       LOG.debug("Closing all log watchers for '{}'", workspaceId);
       synchronized (this) {
-        closed.set(true);
+        closed = true;
         currentContainerWatchers.values().forEach(ContainerLogWatch::close);
         currentContainerWatchers.clear();
       }
@@ -174,6 +173,14 @@ public class LogWatcher implements PodEventHandler, Closeable {
         .toString();
   }
 
+  /**
+   * Gets log limit bytes from given `startOptions` if it's set there under {@link
+   * org.eclipse.che.api.workspace.shared.Constants#DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES} key.
+   * Otherwise returns default {@link LogWatcher#DEFAULT_LOG_LIMIT_BYTES}.
+   *
+   * @param startOptions options where we'll try to find log limit param
+   * @return valid log limit bytes
+   */
   public static long getLogLimitBytes(Map<String, String> startOptions) {
     if (startOptions == null
         || startOptions.isEmpty()
