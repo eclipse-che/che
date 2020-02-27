@@ -248,14 +248,17 @@ declare namespace che {
     hasLicenseService: boolean;
   }
 
+  export type IComponentOptionsConstructor = (new (...args: any[]) => ng.IComponentOptions);
+
   export interface IRegisterService {
     app: ng.IModule;
+    component(name: string, constructorFn: che.IComponentOptionsConstructor): IRegisterService;
     directive(name: string, constructorFn: Function);
-    filter(name: string, constructorFn: any): IRegisterService;
-    controller(name: string, constructorFn: Function): IRegisterService;
-    service(name: string, constructorFn: Function): IRegisterService;
+    filter(name: string, constructorFn: ng.Injectable<ng.FilterFactory>): IRegisterService;
+    controller(name: string, constructorFn: ng.Injectable<ng.IControllerConstructor>): IRegisterService;
+    service(name: string, constructorFn: ng.Injectable<Function>): IRegisterService;
     provider(name: string, constructorFn: ng.IServiceProvider): IRegisterService;
-    factory(name: string, constructorFn: Function): IRegisterService;
+    factory(name: string, constructorFn: ng.Injectable<Function>): IRegisterService;
   }
 
   export interface IWorkspaceCommand {
