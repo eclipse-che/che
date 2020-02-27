@@ -23,6 +23,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 
 /** @author Musienko Maxim */
@@ -36,9 +37,13 @@ public class TestUserPreferencesServiceClient {
 
   @Inject
   public TestUserPreferencesServiceClient(
-      TestApiEndpointUrlProvider apiEndpointProvider, HttpJsonRequestFactory httpRequestFactory) {
+      TestApiEndpointUrlProvider apiEndpointProvider, HttpJsonRequestFactory httpRequestFactory)
+      throws Exception {
     this.apiEndpoint = apiEndpointProvider.get().toString();
     this.httpRequestFactory = httpRequestFactory;
+
+    // Set application.confirmExit property to 'never' to avoid web page closing confirmation pop-up
+    this.setProperty("theia-user-preferences", "{\"application.confirmExit\":\"never\"}");
   }
 
   public void addGitCommitter(String committerName, String committerEmail) throws Exception {
@@ -49,6 +54,14 @@ public class TestUserPreferencesServiceClient {
             ImmutableMap.of(
                 "git.committer.name", committerName,
                 "git.committer.email", committerEmail))
+        .request();
+  }
+
+  public HttpJsonResponse setProperty(String propertyName, String propertyValue) throws Exception {
+    return httpRequestFactory
+        .fromUrl(apiEndpoint + "preferences")
+        .usePutMethod()
+        .setBody(ImmutableMap.of(propertyName, propertyValue))
         .request();
   }
 
