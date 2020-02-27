@@ -27,6 +27,7 @@ import {CheErrorMessagesConfig} from './error-messages/che-error-messages-config
 import {ServiceConfig} from './service/service-config';
 import {RandomSvc} from './utils/random.service';
 import {InterceptorConfig} from './interceptor/interceptor-config';
+import { ChePfWidgetConfig } from './che-pf-widget/che-pf-widget.config';
 
 export class ComponentsConfig {
 
@@ -44,6 +45,7 @@ export class ComponentsConfig {
     new CheErrorMessagesConfig(register);
     new ServiceConfig(register);
     new InterceptorConfig(register);
+    new ChePfWidgetConfig(register);
     /* tslint:enable */
 
     register.directive('cheStepsContainer', CheStepsContainer);
