@@ -56,7 +56,7 @@
     <ide-iframe id="ide-iframe-window" ng-show="showIDE && ideIframeLink" flex style="height: 100%"></ide-iframe>
     <che-footer che-logo="{{branding.logoURL}}"
                 che-version="{{productVersion}}"
-                che-product-name="Eclipse Che"
+                che-product-name="{{branding.name}}"
                 ng-show="waitingLoaded && !showIDE">
       {{branding.footer.content}}
     </che-footer>
