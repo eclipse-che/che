@@ -68,17 +68,29 @@ public class GithubURLParserTest {
     assertEquals(githubUrl.getSubfolder(), subfolder);
   }
 
+  /** Compare parsing */
+  @Test(dataProvider = "parsingBadRepository")
+  public void checkParsingBadRepositoryDoNotModifiesInitialInput(String url, String repository) {
+    GithubUrl githubUrl = githubUrlParser.parse(url);
+    assertEquals(githubUrl.getRepository(), repository);
+  }
+
   @DataProvider(name = "UrlsProvider")
   public Object[][] urls() {
     return new Object[][] {
       {"https://github.com/eclipse/che"},
+      {"https://github.com/eclipse/che123"},
       {"https://github.com/eclipse/che/"},
       {"https://github.com/eclipse/che/tree/4.2.x"},
       {"https://github.com/eclipse/che/tree/master/"},
       {"https://github.com/eclipse/che/tree/master/dashboard/"},
       {"https://github.com/eclipse/che/tree/master/plugins/plugin-git/che-plugin-git-ext-git"},
       {"https://github.com/eclipse/che/tree/master/plugins/plugin-git/che-plugin-git-ext-git/"},
-      {"https://github.com/eclipse/che/pull/11103"}
+      {"https://github.com/eclipse/che/pull/11103"},
+      {"https://github.com/eclipse/che.git"},
+      {"https://github.com/eclipse/che.with.dots.git"},
+      {"https://github.com/eclipse/che-with-hyphen"},
+      {"https://github.com/eclipse/che-with-hyphen.git"}
     };
   }
 
@@ -86,7 +98,22 @@ public class GithubURLParserTest {
   public Object[][] expectedParsing() {
     return new Object[][] {
       {"https://github.com/eclipse/che", "eclipse", "che", "master", null},
+      {"https://github.com/eclipse/che123", "eclipse", "che123", "master", null},
+      {"https://github.com/eclipse/che.git", "eclipse", "che", "master", null},
+      {"https://github.com/eclipse/che.with.dot.git", "eclipse", "che.with.dot", "master", null},
+      {"https://github.com/eclipse/-.git", "eclipse", "-", "master", null},
+      {"https://github.com/eclipse/-j.git", "eclipse", "-j", "master", null},
+      {"https://github.com/eclipse/-", "eclipse", "-", "master", null},
+      {"https://github.com/eclipse/che-with-hyphen", "eclipse", "che-with-hyphen", "master", null},
+      {
+        "https://github.com/eclipse/che-with-hyphen.git",
+        "eclipse",
+        "che-with-hyphen",
+        "master",
+        null
+      },
       {"https://github.com/eclipse/che/", "eclipse", "che", "master", null},
+      {"https://github.com/eclipse/repositorygit", "eclipse", "repositorygit", "master", null},
       {"https://github.com/eclipse/che/tree/4.2.x", "eclipse", "che", "4.2.x", null},
       {
         "https://github.com/eclipse/che/tree/master/dashboard/",
@@ -102,6 +129,20 @@ public class GithubURLParserTest {
         "master",
         "plugins/plugin-git/che-plugin-git-ext-git"
       }
+    };
+  }
+
+  @DataProvider(name = "parsingBadRepository")
+  public Object[][] parsingBadRepository() {
+    return new Object[][] {
+      {"https://github.com/eclipse/che .git", "che .git"},
+      {"https://github.com/eclipse/.git", ".git"},
+      {"https://github.com/eclipse/myB@dR&pository.git", "myB@dR&pository.git"},
+      {"https://github.com/eclipse/.", "."},
+      {"https://github.com/eclipse/івапівап.git", "івапівап.git"},
+      {"https://github.com/eclipse/ ", " "},
+      {"https://github.com/eclipse/.", "."},
+      {"https://github.com/eclipse/ .git", " .git"}
     };
   }
 
