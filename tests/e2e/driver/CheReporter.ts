@@ -18,6 +18,7 @@ import { logging } from 'selenium-webdriver';
 import { DriverHelper } from '../utils/DriverHelper';
 import { ScreenCatcher } from '../utils/ScreenCatcher';
 import { ITestWorkspaceUtil } from '../utils/workspace/ITestWorkspaceUtil';
+import { PreferencesHandler, AskForConfirmationType } from '../utils/PreferencesHandler';
 
 const e2eContainer = inversifyConfig.e2eContainer;
 const driver: IDriver = e2eContainer.get(TYPES.Driver);
@@ -26,6 +27,7 @@ const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
 let methodIndex: number = 0;
 let deleteScreencast: boolean = true;
 let testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
+let preferencesHalder: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
 class CheReporter extends mocha.reporters.Spec {
   constructor(runner: mocha.Runner, options: mocha.MochaOptions) {
@@ -65,6 +67,7 @@ class CheReporter extends mocha.reporters.Spec {
       console.log(launchInformation);
 
       rm.sync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
+      preferencesHalder.setConfirmExit(AskForConfirmationType.never);
     });
 
     runner.on('test', async function (test: mocha.Test) {

@@ -3,7 +3,7 @@ pipeline {
 
     options {
         timestamps()
-        timeout(time: 2, unit: 'HOURS')
+        timeout(time: 3, unit: 'HOURS')
         buildDiscarder(logRotator(artifactDaysToKeepStr: '',
                 artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '30'))
     }
@@ -108,7 +108,7 @@ pipeline {
                                                         value: false),
 
                                                 string(name: 'ghprbSourceBranch',
-                                                        value: 'CRW-391'),
+                                                        value: 'master'),
 
                                                 string(name: 'ghprbPullId',
                                                         value: ''),
