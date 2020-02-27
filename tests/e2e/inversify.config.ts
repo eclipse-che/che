@@ -55,54 +55,55 @@ import { CheApiRequestHandler } from './utils/requestHandlers/CheApiRequestHandl
 import { CheGitApi } from './utils/VCS/CheGitApi';
 import { GitHubUtil } from './utils/VCS/github/GitHubUtil';
 
-const e2eContainer: Container = new Container();
+const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
 
 e2eContainer.bind<IDriver>(TYPES.Driver).to(ChromeDriver).inSingletonScope();
-e2eContainer.bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil).inTransientScope();
-e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpUserLoginPage).inTransientScope();
+e2eContainer.bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil);
+e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpUserLoginPage);
 
 if (TestConstants.TS_SELENIUM_MULTIUSER) {
-    e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheMultiuserAuthorizationHeaderHandler).inTransientScope();
-    e2eContainer.bind<ITokenHandler>(TYPES.ITokenHandler).to(CheMultiuserTokenHandler).inTransientScope();
+    e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheMultiuserAuthorizationHeaderHandler);
+    e2eContainer.bind<ITokenHandler>(TYPES.ITokenHandler).to(CheMultiuserTokenHandler);
 
     if (JSON.parse(TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH)) {
-        e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage).inTransientScope();
+        e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage);
     } else {
-        e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(MultiUserLoginPage).inTransientScope();
+        e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(MultiUserLoginPage);
     }
 
 } else {
-    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(SingleUserLoginPage).inTransientScope();
-    e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheSingleUserAuthorizationHeaderHandler).inTransientScope();
+    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(SingleUserLoginPage);
+    e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheSingleUserAuthorizationHeaderHandler);
 }
 
-e2eContainer.bind<ContextMenu>(CLASSES.ContextMenu).to(ContextMenu).inTransientScope();
-e2eContainer.bind<DriverHelper>(CLASSES.DriverHelper).to(DriverHelper).inTransientScope();
-e2eContainer.bind<Dashboard>(CLASSES.Dashboard).to(Dashboard).inTransientScope();
-e2eContainer.bind<Workspaces>(CLASSES.Workspaces).to(Workspaces).inTransientScope();
-e2eContainer.bind<NewWorkspace>(CLASSES.NewWorkspace).to(NewWorkspace).inTransientScope();
-e2eContainer.bind<WorkspaceDetails>(CLASSES.WorkspaceDetails).to(WorkspaceDetails).inTransientScope();
-e2eContainer.bind<WorkspaceDetailsPlugins>(CLASSES.WorkspaceDetailsPlugins).to(WorkspaceDetailsPlugins).inSingletonScope();
-e2eContainer.bind<Ide>(CLASSES.Ide).to(Ide).inTransientScope();
-e2eContainer.bind<ProjectTree>(CLASSES.ProjectTree).to(ProjectTree).inTransientScope();
-e2eContainer.bind<Editor>(CLASSES.Editor).to(Editor).inTransientScope();
-e2eContainer.bind<TopMenu>(CLASSES.TopMenu).to(TopMenu).inTransientScope();
-e2eContainer.bind<QuickOpenContainer>(CLASSES.QuickOpenContainer).to(QuickOpenContainer).inTransientScope();
-e2eContainer.bind<PreviewWidget>(CLASSES.PreviewWidget).to(PreviewWidget).inTransientScope();
-e2eContainer.bind<GitPlugin>(CLASSES.GitPlugin).to(GitPlugin).inTransientScope();
-e2eContainer.bind<RightToolbar>(CLASSES.RightToolbar).to(RightToolbar).inTransientScope();
-e2eContainer.bind<Terminal>(CLASSES.Terminal).to(Terminal).inTransientScope();
-e2eContainer.bind<DebugView>(CLASSES.DebugView).to(DebugView).inTransientScope();
-e2eContainer.bind<DialogWindow>(CLASSES.DialogWindow).to(DialogWindow).inTransientScope();
-e2eContainer.bind<ScreenCatcher>(CLASSES.ScreenCatcher).to(ScreenCatcher).inTransientScope();
-e2eContainer.bind<OcpLoginPage>(CLASSES.OcpLoginPage).to(OcpLoginPage).inTransientScope();
-e2eContainer.bind<OcpWebConsolePage>(CLASSES.OcpWebConsolePage).to(OcpWebConsolePage).inTransientScope();
-e2eContainer.bind<OpenWorkspaceWidget>(CLASSES.OpenWorkspaceWidget).to(OpenWorkspaceWidget).inTransientScope();
-e2eContainer.bind<CheLoginPage>(CLASSES.CheLoginPage).to(CheLoginPage).inTransientScope();
-e2eContainer.bind<NotificationCenter>(CLASSES.NotificationCenter).to(NotificationCenter).inTransientScope();
-e2eContainer.bind<PreferencesHandler>(CLASSES.PreferencesHandler).to(PreferencesHandler).inTransientScope();
-e2eContainer.bind<CheApiRequestHandler>(CLASSES.CheApiRequestHandler).to(CheApiRequestHandler).inTransientScope();
-e2eContainer.bind<CheGitApi>(CLASSES.CheGitApi).to(CheGitApi).inTransientScope();
-e2eContainer.bind<GitHubUtil>(CLASSES.GitHubUtil).to(GitHubUtil).inTransientScope();
+e2eContainer.bind<ContextMenu>(CLASSES.ContextMenu).to(ContextMenu);
+e2eContainer.bind<DriverHelper>(CLASSES.DriverHelper).to(DriverHelper);
+e2eContainer.bind<Dashboard>(CLASSES.Dashboard).to(Dashboard);
+e2eContainer.bind<Workspaces>(CLASSES.Workspaces).to(Workspaces);
+e2eContainer.bind<NewWorkspace>(CLASSES.NewWorkspace).to(NewWorkspace);
+e2eContainer.bind<WorkspaceDetails>(CLASSES.WorkspaceDetails).to(WorkspaceDetails);
+e2eContainer.bind<WorkspaceDetailsPlugins>(CLASSES.WorkspaceDetailsPlugins).to(WorkspaceDetailsPlugins);
+e2eContainer.bind<Ide>(CLASSES.Ide).to(Ide);
+e2eContainer.bind<ProjectTree>(CLASSES.ProjectTree).to(ProjectTree);
+e2eContainer.bind<Editor>(CLASSES.Editor).to(Editor);
+e2eContainer.bind<TopMenu>(CLASSES.TopMenu).to(TopMenu);
+e2eContainer.bind<QuickOpenContainer>(CLASSES.QuickOpenContainer).to(QuickOpenContainer);
+e2eContainer.bind<PreviewWidget>(CLASSES.PreviewWidget).to(PreviewWidget);
+e2eContainer.bind<GitPlugin>(CLASSES.GitPlugin).to(GitPlugin);
+e2eContainer.bind<RightToolbar>(CLASSES.RightToolbar).to(RightToolbar);
+e2eContainer.bind<Terminal>(CLASSES.Terminal).to(Terminal);
+e2eContainer.bind<DebugView>(CLASSES.DebugView).to(DebugView);
+e2eContainer.bind<DialogWindow>(CLASSES.DialogWindow).to(DialogWindow);
+e2eContainer.bind<ScreenCatcher>(CLASSES.ScreenCatcher).to(ScreenCatcher);
+e2eContainer.bind<OcpLoginPage>(CLASSES.OcpLoginPage).to(OcpLoginPage);
+e2eContainer.bind<OcpWebConsolePage>(CLASSES.OcpWebConsolePage).to(OcpWebConsolePage);
+e2eContainer.bind<OpenWorkspaceWidget>(CLASSES.OpenWorkspaceWidget).to(OpenWorkspaceWidget);
+e2eContainer.bind<CheLoginPage>(CLASSES.CheLoginPage).to(CheLoginPage);
+e2eContainer.bind<NotificationCenter>(CLASSES.NotificationCenter).to(NotificationCenter);
+e2eContainer.bind<PreferencesHandler>(CLASSES.PreferencesHandler).to(PreferencesHandler);
+e2eContainer.bind<CheApiRequestHandler>(CLASSES.CheApiRequestHandler).to(CheApiRequestHandler);
+e2eContainer.bind<CheGitApi>(CLASSES.CheGitApi).to(CheGitApi);
+e2eContainer.bind<GitHubUtil>(CLASSES.GitHubUtil).to(GitHubUtil);
+
 export { e2eContainer };
