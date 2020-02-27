@@ -12,7 +12,6 @@ import querystring from 'querystring';
 import { injectable } from 'inversify';
 import { TestConstants } from '../../../TestConstants';
 import { ITokenHandler } from './ITokenHandler';
-import https from 'https';
 
 @injectable()
 export class CheMultiuserTokenHandler implements ITokenHandler {
@@ -30,7 +29,7 @@ export class CheMultiuserTokenHandler implements ITokenHandler {
         };
 
         try {
-            const responseToObtainBearerToken = await axios.post(keycloakUrl, querystring.stringify(params), {httpsAgent: new https.Agent({ rejectUnauthorized: false })});
+            const responseToObtainBearerToken = await axios.post(keycloakUrl, querystring.stringify(params));
             return responseToObtainBearerToken.data.access_token;
         } catch (err) {
             console.log(`Can not get bearer token. URL used: ${keycloakUrl}`);

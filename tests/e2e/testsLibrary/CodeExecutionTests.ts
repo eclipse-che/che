@@ -11,7 +11,6 @@
 import { CLASSES, Terminal, TopMenu, Ide, DialogWindow, DriverHelper } from '..';
 import { e2eContainer } from '../inversify.config';
 import Axios from 'axios';
-import https from 'https';
 
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
@@ -43,8 +42,7 @@ export function runTaskWithDialogShellDjangoWorkaround(taskName: string, expecte
         await dialogWindow.waitDialogDissappearance();
         await driverHelper.getDriver().wait(async () => {
             try {
-                const agent = new https.Agent({ rejectUnauthorized: false });
-                const res = await Axios.get(augmentedPreviewUrl, { httpsAgent: agent });
+                const res = await Axios.get(augmentedPreviewUrl);
                 if (res.status === 200) { return true; }
             } catch (error) { await driverHelper.wait(1_000); }
         }, timeout);
