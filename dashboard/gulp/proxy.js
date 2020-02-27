@@ -43,6 +43,8 @@ patterns.forEach(function(pattern) {
     proxyOptions.route = '/api';
   }
   proxyOptions.preserveHost = false;
+  proxyOptions.rejectUnauthorized = false;
+  proxyOptions.secure = false;
   proxies.push(proxy(proxyOptions));
 
 });
