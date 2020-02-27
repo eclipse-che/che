@@ -13,7 +13,6 @@ import { TYPES } from '../../../inversify.types';
 import { IAuthorizationHeaderHandler } from './IAuthorizationHeaderHandler';
 import { injectable, inject } from 'inversify';
 import { ITokenHandler } from '../tokens/ITokenHandler';
-import { Logger } from '../../Logger';
 
 @injectable()
 export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHeaderHandler {

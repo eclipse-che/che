@@ -12,7 +12,6 @@ import querystring from 'querystring';
 import { injectable } from 'inversify';
 import { TestConstants } from '../../../TestConstants';
 import { ITokenHandler } from './ITokenHandler';
-import { Logger } from '../../Logger';
 
 @injectable()
 export class CheMultiuserTokenHandler implements ITokenHandler {
