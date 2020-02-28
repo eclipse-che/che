@@ -36,10 +36,10 @@
     "ts-node": "^8.0.3",
     "tslint": "5.10.0",
     "typed-rest-client": "^1.2.0",
-    "typescript": "^3.4.3",
-    "@eclipse-che/api": "^7.5.0-SNAPSHOT"
+    "typescript": "^3.4.3"
   },
   "dependencies": {
+    "@eclipse-che/api": "^7.5.0-SNAPSHOT",
     "inversify": "^5.0.1",
     "reflect-metadata": "^0.1.13"
   }
