@@ -16,7 +16,8 @@ import {
   IBrandingDocs,
   IBrandingFooter,
   IBrandingWorkspace
-} from './branding.constant'
+} from './branding.constant';
+import * as _ from 'lodash';
 
 const BRANDING_SERVICE_SYMBOL = Symbol('CheBranding');
 const ASSET_PREFIX = 'assets/branding/';
@@ -52,7 +53,7 @@ export class CheBranding {
   private updateData(): Promise<void> {
     return angular.element.get(`${ASSET_PREFIX}product.json`).then(branding => {
       if (branding) {
-        this.branding = angular.extend(BRANDING_DEFAULT, branding);
+        this.branding = _.merge(BRANDING_DEFAULT, branding);
         this.callbacks.forEach(callback => {
           if (angular.isFunction(callback)) {
             callback(this.branding);
