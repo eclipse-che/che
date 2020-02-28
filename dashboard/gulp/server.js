@@ -11,7 +11,7 @@
  *******************************************************************************/
 
 'use strict';
-
+var minimist = require('minimist');
 var path = require('path');
 var gulp = require('gulp');
 var conf = require('./conf');
@@ -39,6 +39,11 @@ function browserSyncInit(baseDir, browser) {
     routes: routes
   };
 
+  var options = minimist(process.argv.slice(2), {
+    string: 'server',
+    default: { port: 3000 }
+  });
+
   /*
    * You can add a proxy to your backend by uncommenting the line below.
    * You just have to configure a context which will we redirected and the target url.
@@ -51,7 +56,8 @@ function browserSyncInit(baseDir, browser) {
   browserSync.instance = browserSync.init({
     startPath: '/',
     server: server,
-    browser: browser
+    browser: browser,
+    port: options.port
   });
 }
 
