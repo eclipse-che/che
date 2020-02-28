@@ -14,7 +14,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.CHECK_SERVERS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_MACHINES_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_RUNNING_ASYNC;
@@ -213,7 +212,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       volumesStrategy.prepare(
           context.getEnvironment(),
           context.getIdentity(),
-          startSynchronizer.getStartTimeoutMillis());
+          startSynchronizer.getStartTimeoutMillis(),
+          startOptions);
 
       startSynchronizer.checkFailure();
 
@@ -633,17 +633,10 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
   private void watchLogsIfDebugEnabled(Map<String, String> startOptions)
       throws InfrastructureException {
-    if (startOptions == null || startOptions.isEmpty()) {
-      LOG.debug(
-          "'startOptions' is null or empty so we won't watch the container logs for workspace '{}'",
+    if (LogWatcher.shouldWatchLogs(startOptions)) {
+      LOG.info(
+          "Debug workspace startup. Will watch the logs of '{}'",
           getContext().getIdentity().getWorkspaceId());
-      return;
-    }
-    boolean shouldWatchContainerStartupLogs =
-        Boolean.parseBoolean(
-            startOptions.getOrDefault(DEBUG_WORKSPACE_START, Boolean.FALSE.toString()));
-
-    if (shouldWatchContainerStartupLogs) {
       // get all the pods we care about
       Set<String> podNames =
           machines
