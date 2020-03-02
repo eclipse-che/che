@@ -71,6 +71,7 @@ import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
 import io.fabric8.kubernetes.api.model.extensions.IngressRule;
 import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.opentracing.Tracer;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -204,6 +205,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private IngressPathTransformInverter pathTransformInverter;
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
   @Mock private KubernetesPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
+  @Mock private MeterRegistry meterRegistry;
 
   @Mock
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> kubernetesEnvironmentProvisioner;
@@ -271,6 +273,7 @@ public class KubernetesInternalRuntimeTest {
             runtimeHangingDetector,
             previewUrlCommandProvisioner,
             tracer,
+            meterRegistry,
             context,
             namespace);
 

@@ -29,6 +29,7 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
@@ -130,6 +131,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final RuntimeHangingDetector runtimeHangingDetector;
   private final PreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   protected final Tracer tracer;
+  private final MeterRegistry meterRegistry;
 
   @Inject
   public KubernetesInternalRuntime(
@@ -153,6 +155,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       RuntimeHangingDetector runtimeHangingDetector,
       PreviewUrlCommandProvisioner previewUrlCommandProvisioner,
       Tracer tracer,
+      MeterRegistry meterRegistry,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace) {
     super(context, urlRewriter);
@@ -176,6 +179,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
     this.previewUrlCommandProvisioner = previewUrlCommandProvisioner;
     this.tracer = tracer;
+    this.meterRegistry = meterRegistry;
   }
 
   @Override

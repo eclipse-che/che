@@ -47,6 +47,7 @@ import io.fabric8.kubernetes.api.model.ServiceSpec;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteSpec;
 import io.fabric8.openshift.api.model.RouteTargetReference;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.opentracing.Tracer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -141,6 +142,7 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
   @Mock private OpenShiftPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
+  @Mock private MeterRegistry meterRegistry;
 
   @Mock(answer = Answers.RETURNS_MOCKS)
   private Tracer tracer;
@@ -179,6 +181,7 @@ public class OpenShiftInternalRuntimeTest {
             runtimeHangingDetector,
             previewUrlCommandProvisioner,
             tracer,
+            meterRegistry,
             context,
             project);
 

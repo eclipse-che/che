@@ -21,6 +21,8 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.utils.HttpClientUtils;
 import io.fabric8.kubernetes.client.utils.ImpersonatorInterceptor;
 import io.fabric8.kubernetes.client.utils.Utils;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -44,6 +46,8 @@ import org.eclipse.che.commons.annotation.Nullable;
 @Singleton
 public class KubernetesClientFactory {
 
+  protected final Counter clientInvocationCounter;
+
   /** {@link OkHttpClient} instance shared by all Kubernetes clients. */
   private OkHttpClient httpClient;
 
@@ -63,7 +67,8 @@ public class KubernetesClientFactory {
       @Named("che.infra.kubernetes.client.http.connection_pool.max_idle") int maxIdleConnections,
       @Named("che.infra.kubernetes.client.http.connection_pool.keep_alive_min")
           int connectionPoolKeepAlive,
-      EventListener eventListener) {
+      EventListener eventListener,
+      MeterRegistry meterRegistry) {
     this.defaultConfig = buildDefaultConfig(masterUrl, doTrustCerts);
     OkHttpClient temporary = HttpClientUtils.createHttpClient(defaultConfig);
     OkHttpClient.Builder builder = temporary.newBuilder();
@@ -74,6 +79,12 @@ public class KubernetesClientFactory {
     this.httpClient = builder.eventListener(eventListener).build();
     httpClient.dispatcher().setMaxRequests(maxConcurrentRequests);
     httpClient.dispatcher().setMaxRequestsPerHost(maxConcurrentRequestsPerHost);
+
+    this.clientInvocationCounter =
+        Counter.builder("k8s_client")
+            .baseUnit("invocation")
+            .description("number of invocations of k8s client")
+            .register(meterRegistry);
   }
 
   /**
@@ -88,7 +99,7 @@ public class KubernetesClientFactory {
   public KubernetesClient create(String workspaceId) throws InfrastructureException {
     Config configForWorkspace = buildConfig(getDefaultConfig(), workspaceId);
 
-    return create(configForWorkspace);
+    return new CountedKubernetesClient(create(configForWorkspace), clientInvocationCounter);
   }
 
   /**
@@ -100,7 +111,8 @@ public class KubernetesClientFactory {
    * @throws InfrastructureException if any error occurs on client instance creation.
    */
   public KubernetesClient create() throws InfrastructureException {
-    return create(buildConfig(getDefaultConfig(), null));
+    return new CountedKubernetesClient(
+        create(buildConfig(getDefaultConfig(), null)), clientInvocationCounter);
   }
 
   /**

@@ -25,6 +25,7 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftConfig;
 import io.fabric8.openshift.client.OpenShiftConfigBuilder;
 import io.fabric8.openshift.client.internal.OpenShiftOAuthInterceptor;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.net.URL;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -68,7 +69,8 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
       @Named("che.infra.kubernetes.client.http.connection_pool.max_idle") int maxIdleConnections,
       @Named("che.infra.kubernetes.client.http.connection_pool.keep_alive_min")
           int connectionPoolKeepAlive,
-      EventListener eventListener) {
+      EventListener eventListener,
+      MeterRegistry meterRegistry) {
     super(
         masterUrl,
         doTrustCerts,
@@ -76,7 +78,8 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
         maxConcurrentRequestsPerHost,
         maxIdleConnections,
         connectionPoolKeepAlive,
-        eventListener);
+        eventListener,
+        meterRegistry);
     this.configBuilder = configBuilder;
   }
 
@@ -94,7 +97,7 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
    */
   public OpenShiftClient createOC(String workspaceId) throws InfrastructureException {
     Config configForWorkspace = buildConfig(getDefaultConfig(), workspaceId);
-    return createOC(configForWorkspace);
+    return new CountedOpenShiftClient(createOC(configForWorkspace), clientInvocationCounter);
   }
 
   /**
@@ -112,7 +115,8 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
    * @throws InfrastructureException if any error occurs on client instance creation.
    */
   public OpenShiftClient createOC() throws InfrastructureException {
-    return createOC(buildConfig(getDefaultConfig(), null));
+    return new CountedOpenShiftClient(
+        createOC(buildConfig(getDefaultConfig(), null)), clientInvocationCounter);
   }
 
   @Override
