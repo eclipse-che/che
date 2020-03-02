@@ -60,7 +60,10 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
   @Traced
   @Beta
   public void provision(
-      RuntimeIdentity identity, StartSynchronizer startSynchronizer, E environment)
+      RuntimeIdentity identity,
+      StartSynchronizer startSynchronizer,
+      E environment,
+      Map<String, String> startOptions)
       throws InfrastructureException {
 
     Collection<PluginFQN> pluginFQNs = pluginFQNParser.parsePlugins(environment.getAttributes());
@@ -77,7 +80,8 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
 
     boolean isEphemeral = EphemeralWorkspaceUtility.isEphemeral(environment.getAttributes());
     List<ChePlugin> chePlugins =
-        pluginBrokerManager.getTooling(identity, startSynchronizer, pluginFQNs, isEphemeral);
+        pluginBrokerManager.getTooling(
+            identity, startSynchronizer, pluginFQNs, isEphemeral, startOptions);
 
     pluginsApplier.apply(identity, environment, chePlugins);
     artifactsBrokerApplier.apply(environment, identity, pluginFQNs);

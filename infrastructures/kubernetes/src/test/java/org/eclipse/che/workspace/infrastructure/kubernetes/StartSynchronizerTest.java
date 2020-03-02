@@ -20,9 +20,14 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -203,6 +208,67 @@ public class StartSynchronizerTest {
   }
 
   @Test
+  public void shouldUnsubscribeEventsWhenItIsCompleted() throws Exception {
+    // given
+    runtimeId = new RuntimeIdentityImpl("workspace123", "envName", "ownerId", "infraNamespace");
+    EventService eventService = new EventService();
+    startSynchronizer = new StartSynchronizer(eventService, 5, runtimeId);
+    startSynchronizer.start();
+
+    // when
+    startSynchronizer.complete();
+
+    // then
+    assertSubscribersNumber(eventService, KubernetesRuntimeStoppingEvent.class, 0);
+    assertSubscribersNumber(eventService, KubernetesRuntimeStoppedEvent.class, 0);
+  }
+
+  @Test
+  public void shouldUnsubscribeEventsWhenItIscCompleteExceptionally() throws Exception {
+    // given
+    runtimeId = new RuntimeIdentityImpl("workspace123", "envName", "ownerId", "infraNamespace");
+    EventService eventService = new EventService();
+    startSynchronizer = new StartSynchronizer(eventService, 5, runtimeId);
+    startSynchronizer.start();
+
+    // when
+    startSynchronizer.completeExceptionally(new Exception());
+
+    // then
+    assertSubscribersNumber(eventService, KubernetesRuntimeStoppingEvent.class, 0);
+    assertSubscribersNumber(eventService, KubernetesRuntimeStoppedEvent.class, 0);
+  }
+
+  @Test
+  public void shouldNotHaveAnyEventSubscribersBeforeStart() throws Exception {
+    // given
+    runtimeId = new RuntimeIdentityImpl("workspace123", "envName", "ownerId", "infraNamespace");
+    EventService eventService = new EventService();
+
+    // when
+    startSynchronizer = new StartSynchronizer(eventService, 5, runtimeId);
+
+    // then
+    assertSubscriberTypesNumber(eventService, 0);
+  }
+
+  @Test
+  public void shouldAddSubscribersAfterStart() throws Exception {
+    // given
+    runtimeId = new RuntimeIdentityImpl("workspace123", "envName", "ownerId", "infraNamespace");
+    EventService eventService = new EventService();
+    startSynchronizer = new StartSynchronizer(eventService, 5, runtimeId);
+
+    // when
+    startSynchronizer.start();
+
+    // then
+    assertSubscriberTypesNumber(eventService, 2);
+    assertSubscribersNumber(eventService, KubernetesRuntimeStoppingEvent.class, 1);
+    assertSubscribersNumber(eventService, KubernetesRuntimeStoppedEvent.class, 1);
+  }
+
+  @Test
   public void shouldAwaitTerminationWhenItIsCompleted() throws Exception {
     // given
     startSynchronizer.complete();
@@ -295,5 +361,29 @@ public class StartSynchronizerTest {
 
     // then
     assertNull(startFailure);
+  }
+
+  private static void assertSubscribersNumber(
+      EventService service, Class<?> eventType, int expectNumberOfSubscribers) throws Exception {
+    Field privateStringField = EventService.class.getDeclaredField("subscribersByEventType");
+
+    privateStringField.setAccessible(true);
+
+    ConcurrentMap<Class<?>, Set<EventSubscriber>> subscribersByEventType =
+        (ConcurrentMap<Class<?>, Set<EventSubscriber>>) privateStringField.get(service);
+    Set<EventSubscriber> subscribers =
+        subscribersByEventType.getOrDefault(eventType, Collections.emptySet());
+    assertEquals(subscribers.size(), expectNumberOfSubscribers);
+  }
+
+  private static void assertSubscriberTypesNumber(
+      EventService service, int expectNumberOfSubscribers) throws Exception {
+    Field privateStringField = EventService.class.getDeclaredField("subscribersByEventType");
+
+    privateStringField.setAccessible(true);
+
+    ConcurrentMap<Class<?>, Set<EventSubscriber>> subscribersByEventType =
+        (ConcurrentMap<Class<?>, Set<EventSubscriber>>) privateStringField.get(service);
+    assertEquals(subscribersByEventType.size(), expectNumberOfSubscribers);
   }
 }

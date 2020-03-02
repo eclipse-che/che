@@ -22,6 +22,7 @@ import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.api.model.ProjectRequestFluent;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
+import java.util.concurrent.Executor;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
@@ -74,8 +75,9 @@ public class OpenShiftProject extends KubernetesNamespace {
     this.routes = routes;
   }
 
-  public OpenShiftProject(OpenShiftClientFactory clientFactory, String name, String workspaceId) {
-    super(clientFactory, name, workspaceId);
+  public OpenShiftProject(
+      OpenShiftClientFactory clientFactory, Executor executor, String name, String workspaceId) {
+    super(clientFactory, executor, name, workspaceId);
     this.clientFactory = clientFactory;
     this.routes = new OpenShiftRoutes(name, workspaceId, clientFactory);
   }

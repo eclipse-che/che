@@ -17,6 +17,7 @@ import com.google.common.annotations.Beta;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import java.util.List;
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
@@ -40,18 +41,21 @@ public class PrepareStorage extends BrokerPhase {
   private final WorkspaceVolumesStrategy volumesStrategy;
   private final StartSynchronizer startSynchronizer;
   private final Tracer tracer;
+  private final Map<String, String> startOptions;
 
   public PrepareStorage(
       RuntimeIdentity identity,
       KubernetesEnvironment brokerEnvironment,
       WorkspaceVolumesStrategy volumesStrategy,
       StartSynchronizer startSynchronizer,
-      Tracer tracer) {
+      Tracer tracer,
+      Map<String, String> startOptions) {
     this.identity = identity;
     this.brokerEnvironment = brokerEnvironment;
     this.volumesStrategy = volumesStrategy;
     this.startSynchronizer = startSynchronizer;
     this.tracer = tracer;
+    this.startOptions = startOptions;
   }
 
   @Override
@@ -61,7 +65,7 @@ public class PrepareStorage extends BrokerPhase {
 
     try {
       volumesStrategy.prepare(
-          brokerEnvironment, identity, startSynchronizer.getStartTimeoutMillis());
+          brokerEnvironment, identity, startSynchronizer.getStartTimeoutMillis(), startOptions);
     } catch (InfrastructureException e) {
       TracingTags.setErrorStatus(tracingSpan, e);
       throw e;

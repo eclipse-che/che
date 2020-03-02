@@ -38,5 +38,3 @@ export class CheMultiuserTokenHandler implements ITokenHandler {
 
     }
 }
-
-

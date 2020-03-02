@@ -35,6 +35,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.impls.KubernetesNamespaceMetaImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.openshift.Constants;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
@@ -62,7 +63,8 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
           boolean allowUserDefinedNamespaces,
       OpenShiftClientFactory clientFactory,
       OpenShiftClientConfigFactory clientConfigFactory,
-      UserManager userManager) {
+      UserManager userManager,
+      KubernetesSharedPool sharedPool) {
     super(
         projectName,
         serviceAccountName,
@@ -70,7 +72,8 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
         defaultNamespaceName,
         allowUserDefinedNamespaces,
         clientFactory,
-        userManager);
+        userManager,
+        sharedPool);
     if (allowUserDefinedNamespaces && !clientConfigFactory.isPersonalized()) {
       LOG.warn(
           "Users are allowed to list projects but Che server is configured with a service account. "
@@ -128,7 +131,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
 
   @VisibleForTesting
   OpenShiftProject doCreateProjectAccess(String workspaceId, String name) {
-    return new OpenShiftProject(clientFactory, name, workspaceId);
+    return new OpenShiftProject(clientFactory, sharedPool.getExecutor(), name, workspaceId);
   }
 
   @VisibleForTesting

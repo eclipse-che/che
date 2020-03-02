@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
@@ -152,7 +153,7 @@ public class UniqueWorkspacePVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().putAll(singletonMap(uniqueName, pvc));
     doReturn(pvc).when(pvcs).create(any());
 
-    strategy.prepare(k8sEnv, IDENTITY, 100);
+    strategy.prepare(k8sEnv, IDENTITY, 100, emptyMap());
 
     verify(pvcs).createIfNotExist(any());
     verify(pvcs).waitBound(uniqueName, 100);
@@ -174,7 +175,7 @@ public class UniqueWorkspacePVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().putAll(singletonMap(uniqueName, pvc));
     doReturn(pvc).when(pvcs).create(any());
 
-    strategy.prepare(k8sEnv, IDENTITY, 100);
+    strategy.prepare(k8sEnv, IDENTITY, 100, emptyMap());
 
     verify(pvcs).createIfNotExist(any());
     verify(pvcs, never()).waitBound(anyString(), anyLong());
@@ -188,7 +189,7 @@ public class UniqueWorkspacePVCStrategyTest {
     k8sEnv.getPersistentVolumeClaims().put(PVC_NAME_PREFIX, pvc);
     doThrow(InfrastructureException.class).when(pvcs).createIfNotExist(any());
 
-    strategy.prepare(k8sEnv, IDENTITY, 100);
+    strategy.prepare(k8sEnv, IDENTITY, 100, emptyMap());
   }
 
   @Test

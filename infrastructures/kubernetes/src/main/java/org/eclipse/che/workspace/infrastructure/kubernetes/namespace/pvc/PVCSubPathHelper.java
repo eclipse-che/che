@@ -25,6 +25,8 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.PodStatus;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,14 +35,19 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.commons.observability.ExecutorServiceWrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatchTimeouts;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatcher;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogToEventPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,6 +85,7 @@ public class PVCSubPathHelper {
   private final String jobMemoryLimit;
   private final KubernetesNamespaceFactory factory;
   private final ExecutorService executor;
+  private final RuntimeEventsPublisher eventsPublisher;
 
   private final SecurityContextProvisioner securityContextProvisioner;
 
@@ -87,11 +95,13 @@ public class PVCSubPathHelper {
       @Named("che.infra.kubernetes.pvc.jobs.image") String jobImage,
       KubernetesNamespaceFactory factory,
       SecurityContextProvisioner securityContextProvisioner,
-      ExecutorServiceWrapper executorServiceWrapper) {
+      ExecutorServiceWrapper executorServiceWrapper,
+      RuntimeEventsPublisher eventPublisher) {
     this.jobMemoryLimit = jobMemoryLimit;
     this.jobImage = jobImage;
     this.factory = factory;
     this.securityContextProvisioner = securityContextProvisioner;
+    this.eventsPublisher = eventPublisher;
     this.executor =
         executorServiceWrapper.wrap(
             Executors.newFixedThreadPool(
@@ -108,16 +118,20 @@ public class PVCSubPathHelper {
    * Performs create workspace directories job by given paths and waits until it finished.
    *
    * @param workspaceId workspace identifier
-   * @param namespace
    * @param dirs workspace directories to create
    */
-  void createDirs(String workspaceId, String namespace, String pvcName, String... dirs) {
+  void createDirs(
+      RuntimeIdentity identity,
+      String workspaceId,
+      String pvcName,
+      Map<String, String> startOptions,
+      String... dirs) {
     LOG.debug(
         "Preparing PVC `{}` for workspace `{}`. Directories to create: {}",
         pvcName,
         workspaceId,
         Arrays.toString(dirs));
-    execute(workspaceId, namespace, pvcName, MKDIR_COMMAND_BASE, dirs);
+    execute(identity, workspaceId, pvcName, MKDIR_COMMAND_BASE, startOptions, dirs);
   }
 
   /**
@@ -140,6 +154,24 @@ public class PVCSubPathHelper {
         executor);
   }
 
+  @VisibleForTesting
+  void execute(
+      RuntimeIdentity identity,
+      String workspaceId,
+      String pvcName,
+      String[] commandBase,
+      Map<String, String> startOptions,
+      String... arguments) {
+    execute(
+        identity,
+        workspaceId,
+        identity.getInfrastructureNamespace(),
+        pvcName,
+        commandBase,
+        startOptions,
+        arguments);
+  }
+
   /**
    * Executes the job with the specified arguments.
    *
@@ -154,6 +186,17 @@ public class PVCSubPathHelper {
       String pvcName,
       String[] commandBase,
       String... arguments) {
+    execute(null, workspaceId, namespace, pvcName, commandBase, Collections.emptyMap(), arguments);
+  }
+
+  private void execute(
+      RuntimeIdentity identity,
+      String workspaceId,
+      String namespace,
+      String pvcName,
+      String[] commandBase,
+      Map<String, String> startOptions,
+      String... arguments) {
     final String jobName = commandBase[0];
     final String podName = jobName + '-' + workspaceId;
     final String[] command = buildCommand(commandBase, arguments);
@@ -164,6 +207,7 @@ public class PVCSubPathHelper {
     try {
       deployments = factory.access(workspaceId, namespace).deployments();
       deployments.create(pod);
+      watchLogsIfDebugEnabled(deployments, pod, identity, startOptions);
       final Pod finished = deployments.wait(podName, WAIT_POD_TIMEOUT_MIN, POD_PREDICATE::apply);
       PodStatus finishedStatus = finished.getStatus();
       if (POD_PHASE_FAILED.equals(finishedStatus.getPhase())) {
@@ -179,13 +223,30 @@ public class PVCSubPathHelper {
           Arrays.toString(command),
           workspaceId,
           ex.getMessage());
+      deployments.stopWatch(true);
     } finally {
       if (deployments != null) {
+        deployments.stopWatch();
         try {
           deployments.delete(podName);
         } catch (InfrastructureException ignored) {
         }
       }
+    }
+  }
+
+  private void watchLogsIfDebugEnabled(
+      KubernetesDeployments deployment,
+      Pod pod,
+      RuntimeIdentity identity,
+      Map<String, String> startOptions)
+      throws InfrastructureException {
+    if (LogWatcher.shouldWatchLogs(startOptions)) {
+      deployment.watchLogs(
+          new PodLogToEventPublisher(eventsPublisher, identity),
+          LogWatchTimeouts.AGGRESSIVE,
+          Collections.singleton(pod.getMetadata().getName()),
+          LogWatcher.getLogLimitBytes(startOptions));
     }
   }
 

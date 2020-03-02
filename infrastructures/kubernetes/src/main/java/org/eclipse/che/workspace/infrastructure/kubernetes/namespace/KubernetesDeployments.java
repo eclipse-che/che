@@ -54,9 +54,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
@@ -72,6 +74,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastruct
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEventHandler;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatchTimeouts;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatcher;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,17 +116,23 @@ public class KubernetesDeployments {
   private final KubernetesClientFactory clientFactory;
   private final ConcurrentLinkedQueue<PodActionHandler> podActionHandlers;
   private final ConcurrentLinkedQueue<PodEventHandler> containerEventsHandlers;
+  private final Executor executor;
   private Watch podWatch;
   private Watch containerWatch;
   private Date watcherInitializationDate;
+  private LogWatcher logWatcher;
 
   protected KubernetesDeployments(
-      String namespace, String workspaceId, KubernetesClientFactory clientFactory) {
+      String namespace,
+      String workspaceId,
+      KubernetesClientFactory clientFactory,
+      Executor executor) {
     this.namespace = namespace;
     this.workspaceId = workspaceId;
     this.clientFactory = clientFactory;
     this.containerEventsHandlers = new ConcurrentLinkedQueue<>();
     this.podActionHandlers = new ConcurrentLinkedQueue<>();
+    this.executor = executor;
   }
 
   /**
@@ -582,8 +593,47 @@ public class KubernetesDeployments {
     containerEventsHandlers.add(handler);
   }
 
-  /** Stops watching the pods inside Kubernetes namespace. */
+  /**
+   * Start watching the logs of this deployment.
+   *
+   * @param handler is processing log messages
+   * @param podNames pods of interest for watching the logs
+   */
+  public synchronized void watchLogs(
+      PodLogHandler handler,
+      LogWatchTimeouts timeouts,
+      Set<String> podNames,
+      long limitInputStreamBytes)
+      throws InfrastructureException {
+    if (logWatcher == null) {
+      LOG.debug("start watching logs of pods '{}' of  workspace '{}'", podNames, workspaceId);
+      logWatcher =
+          new LogWatcher(
+              clientFactory,
+              workspaceId,
+              namespace,
+              podNames,
+              executor,
+              timeouts,
+              limitInputStreamBytes);
+      logWatcher.addLogHandler(handler);
+      watchEvents(logWatcher);
+    } else {
+      LOG.debug("Already watching logs of workspace [{}], just adding log handler", workspaceId);
+      logWatcher.addLogHandler(handler);
+    }
+  }
+
   public void stopWatch() {
+    stopWatch(false);
+  }
+
+  /**
+   * Stops watching the pods inside Kubernetes namespace.
+   *
+   * @param failed true if workspace startup ended in failure.
+   */
+  public void stopWatch(boolean failed) {
     try {
       if (podWatch != null) {
         podWatch.close();
@@ -605,6 +655,11 @@ public class KubernetesDeployments {
           ex.getMessage());
     }
     containerEventsHandlers.clear();
+
+    if (logWatcher != null) {
+      logWatcher.close(failed);
+      logWatcher = null;
+    }
   }
 
   /**

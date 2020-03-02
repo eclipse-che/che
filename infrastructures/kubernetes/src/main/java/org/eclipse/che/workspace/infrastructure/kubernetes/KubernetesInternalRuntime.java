@@ -87,6 +87,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachi
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatchTimeouts;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatcher;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogToEventPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
@@ -186,7 +189,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // Tooling side car provisioner should be applied before other provisioners
       // because new machines may be provisioned there
       toolingProvisioner.provision(
-          context.getIdentity(), startSynchronizer, context.getEnvironment());
+          context.getIdentity(), startSynchronizer, context.getEnvironment(), startOptions);
 
       startSynchronizer.checkFailure();
 
@@ -209,11 +212,13 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       volumesStrategy.prepare(
           context.getEnvironment(),
           context.getIdentity(),
-          startSynchronizer.getStartTimeoutMillis());
+          startSynchronizer.getStartTimeoutMillis(),
+          startOptions);
 
       startSynchronizer.checkFailure();
 
       startMachines();
+      watchLogsIfDebugEnabled(startOptions);
 
       previewUrlCommandProvisioner.provision(context.getEnvironment(), namespace);
       runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
@@ -264,7 +269,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // Cancels workspace servers probes if any
       probeScheduler.cancel(workspaceId);
       // stop watching before namespace cleaning up
-      namespace.deployments().stopWatch();
+      namespace.deployments().stopWatch(true);
       try {
         namespace.cleanUp();
       } catch (InfrastructureException cleanUppingEx) {
@@ -623,6 +628,37 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           .watchEvents(
               unrecoverableEventListenerFactory.create(
                   getContext().getEnvironment(), this::handleUnrecoverableEvent));
+    }
+  }
+
+  private void watchLogsIfDebugEnabled(Map<String, String> startOptions)
+      throws InfrastructureException {
+    if (LogWatcher.shouldWatchLogs(startOptions)) {
+      LOG.info(
+          "Debug workspace startup. Will watch the logs of '{}'",
+          getContext().getIdentity().getWorkspaceId());
+      // get all the pods we care about
+      Set<String> podNames =
+          machines
+              .getMachines(getContext().getIdentity())
+              .values()
+              .stream()
+              .filter(Objects::nonNull)
+              .map(KubernetesMachineImpl::getPodName)
+              .filter(Objects::nonNull)
+              .collect(Collectors.toSet());
+      LOG.debug(
+          "Watch '{}' pods in workspace '{}'",
+          podNames,
+          getContext().getIdentity().getWorkspaceId());
+
+      namespace
+          .deployments()
+          .watchLogs(
+              new PodLogToEventPublisher(this.eventPublisher, this.getContext().getIdentity()),
+              LogWatchTimeouts.DEFAULT,
+              podNames,
+              LogWatcher.getLogLimitBytes(startOptions));
     }
   }
 

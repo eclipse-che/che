@@ -41,7 +41,7 @@ assignees: ''
 <!-- A clear and concise description of what you expected to happen. -->
 
 ### Runtime
-   - [ ] kubernetes (include output of `kubectl version`) 
+   - [ ] kubernetes (include output of `kubectl version`)
    - [ ] Openshift (include output of `oc version`)
    - [ ] minikube (include output of `minikube version` and `kubectl version`)
    - [ ] minishift (include output of `minishift version` and `oc version`)
@@ -58,7 +58,7 @@ assignees: ''
    - [ ] I don't know
 
 ### Environment
-   - [ ] my computer 
+   - [ ] my computer
        - [ ] Windows
        - [ ] Linux
        - [ ] macOS
@@ -66,8 +66,11 @@ assignees: ''
        - [ ] Amazon
        - [ ] Azure
        - [ ] GCE
-       - [ ] other (please specify) 
+       - [ ] other (please specify)
    - [ ] other: please specify
+
+### Eclipse Che Logs
+<!-- https://www.eclipse.org/che/docs/che-7/collecting-logs-using-chectl -->
 
 ### Additional context
 <!-- Add any other context about the problem here. -->

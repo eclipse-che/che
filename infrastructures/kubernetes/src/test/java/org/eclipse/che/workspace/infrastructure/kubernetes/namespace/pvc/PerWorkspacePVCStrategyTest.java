@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.SUBPATHS_PROPERTY_FMT;
@@ -110,14 +111,14 @@ public class PerWorkspacePVCStrategyTest {
     pvc.getAdditionalProperties().put(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID), subPaths);
 
     // when
-    strategy.prepare(k8sEnv, IDENTITY, 100);
+    strategy.prepare(k8sEnv, IDENTITY, 100, emptyMap());
 
     // then
     verify(pvcs).get();
     verify(pvcs).create(pvc);
     verify(pvcs).waitBound(perWorkspacePVCName, 100);
     verify(pvcSubPathHelper)
-        .createDirs(WORKSPACE_ID, INFRA_NAMESPACE, perWorkspacePVCName, subPaths);
+        .createDirs(IDENTITY, WORKSPACE_ID, perWorkspacePVCName, emptyMap(), subPaths);
   }
 
   @Test
@@ -147,14 +148,14 @@ public class PerWorkspacePVCStrategyTest {
     pvc.getAdditionalProperties().put(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID), subPaths);
 
     // when
-    strategy.prepare(k8sEnv, IDENTITY, 100);
+    strategy.prepare(k8sEnv, IDENTITY, 100, emptyMap());
 
     // then
     verify(pvcs).get();
     verify(pvcs).create(pvc);
     verify(pvcs, never()).waitBound(anyString(), anyLong());
     verify(pvcSubPathHelper)
-        .createDirs(WORKSPACE_ID, INFRA_NAMESPACE, perWorkspacePVCName, subPaths);
+        .createDirs(IDENTITY, WORKSPACE_ID, perWorkspacePVCName, emptyMap(), subPaths);
   }
 
   @Test

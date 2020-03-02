@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
+import static java.util.Collections.emptyMap;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -91,7 +92,7 @@ public class SidecarToolingProvisionerTest {
 
   @Test
   public void shouldIncludexArtifactsBrokerWhenWorkspaceIsNotEphemeral() throws Exception {
-    provisioner.provision(runtimeId, startSynchronizer, nonEphemeralEnvironment);
+    provisioner.provision(runtimeId, startSynchronizer, nonEphemeralEnvironment, emptyMap());
 
     verify(chePluginsApplier, times(1)).apply(any(), any(), any());
     verify(artifactsBrokerApplier, times(1)).apply(any(), any(), any());
@@ -99,7 +100,7 @@ public class SidecarToolingProvisionerTest {
 
   @Test
   public void shouldIncludeArtifactsBrokerWhenWorkspaceIsEphemeral() throws Exception {
-    provisioner.provision(runtimeId, startSynchronizer, ephemeralEnvironment);
+    provisioner.provision(runtimeId, startSynchronizer, ephemeralEnvironment, emptyMap());
 
     verify(chePluginsApplier, times(1)).apply(any(), any(), any());
     verify(artifactsBrokerApplier, times(1)).apply(any(), any(), any());
