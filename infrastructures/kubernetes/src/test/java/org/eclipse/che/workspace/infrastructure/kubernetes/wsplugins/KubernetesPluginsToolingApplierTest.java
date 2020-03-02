@@ -102,6 +102,9 @@ public class KubernetesPluginsToolingApplierTest {
   private static final String VOLUME_MOUNT_PATH = "/path/test";
   private static final String USER_MACHINE_NAME = POD_NAME + "/userContainer";
   private static final int MEMORY_LIMIT_MB = 200;
+  private static final int MEMORY_REQUEST_MB = 100;
+  private static final String CPU_LIMIT = "200m";
+  private static final String CPU_REQUEST = "100m";
   private static final String CHE_PLUGIN_ENDPOINT_NAME = "test-endpoint-1";
 
   @Mock private Pod pod;
@@ -125,6 +128,9 @@ public class KubernetesPluginsToolingApplierTest {
         new KubernetesPluginsToolingApplier(
             TEST_IMAGE_POLICY,
             MEMORY_LIMIT_MB,
+            MEMORY_REQUEST_MB,
+            CPU_LIMIT,
+            CPU_REQUEST,
             false,
             projectsRootEnvVariableProvider,
             chePluginsVolumeApplier,
@@ -789,6 +795,9 @@ public class KubernetesPluginsToolingApplierTest {
         new KubernetesPluginsToolingApplier(
             TEST_IMAGE_POLICY,
             MEMORY_LIMIT_MB,
+            MEMORY_REQUEST_MB,
+            CPU_LIMIT,
+            CPU_REQUEST,
             true,
             projectsRootEnvVariableProvider,
             chePluginsVolumeApplier,
@@ -806,6 +815,9 @@ public class KubernetesPluginsToolingApplierTest {
         new KubernetesPluginsToolingApplier(
             TEST_IMAGE_POLICY,
             MEMORY_LIMIT_MB,
+            MEMORY_REQUEST_MB,
+            CPU_LIMIT,
+            CPU_REQUEST,
             true,
             projectsRootEnvVariableProvider,
             chePluginsVolumeApplier,
@@ -824,6 +836,9 @@ public class KubernetesPluginsToolingApplierTest {
         new KubernetesPluginsToolingApplier(
             TEST_IMAGE_POLICY,
             MEMORY_LIMIT_MB,
+            MEMORY_REQUEST_MB,
+            CPU_LIMIT,
+            CPU_REQUEST,
             true,
             projectsRootEnvVariableProvider,
             chePluginsVolumeApplier,
@@ -850,6 +865,9 @@ public class KubernetesPluginsToolingApplierTest {
         new KubernetesPluginsToolingApplier(
             "None",
             MEMORY_LIMIT_MB,
+            MEMORY_REQUEST_MB,
+            CPU_LIMIT,
+            CPU_REQUEST,
             true,
             projectsRootEnvVariableProvider,
             chePluginsVolumeApplier,

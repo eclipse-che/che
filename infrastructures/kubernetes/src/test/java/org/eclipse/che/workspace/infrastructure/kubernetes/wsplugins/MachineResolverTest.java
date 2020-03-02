@@ -13,7 +13,10 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Arrays.asList;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CPU_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CPU_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
@@ -45,6 +48,9 @@ import org.testng.annotations.Test;
 public class MachineResolverTest {
 
   private static final String DEFAULT_MEM_LIMIT = "100001";
+  private static final String DEFAULT_MEM_REQUEST = "5001";
+  private static final String DEFAULT_CPU_LIMIT = "2";
+  private static final String DEFAULT_CPU_REQUEST = "1";
   private static final String PLUGIN_NAME = "testplugin";
   private static final String PLUGIN_PUBLISHER = "testpublisher";
   private static final String PLUGIN_PUBLISHER_NAME = PLUGIN_PUBLISHER + "/" + PLUGIN_NAME;
@@ -70,6 +76,9 @@ public class MachineResolverTest {
             container,
             cheContainer,
             DEFAULT_MEM_LIMIT,
+            DEFAULT_MEM_REQUEST,
+            DEFAULT_CPU_LIMIT,
+            DEFAULT_CPU_REQUEST,
             endpoints,
             component);
   }
@@ -123,14 +132,25 @@ public class MachineResolverTest {
   }
 
   @Test
-  public void shouldSetDefaultMemLimitIfSidecarDoesNotHaveOne() throws InfrastructureException {
+  public void shouldSetDefaultMemLimitAndRequestIfSidecarDoesNotHaveOne()
+      throws InfrastructureException {
     InternalMachineConfig machineConfig = resolver.resolve();
 
     assertEquals(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), DEFAULT_MEM_LIMIT);
+    assertEquals(machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE), DEFAULT_MEM_REQUEST);
+  }
+
+  @Test
+  public void shouldSetDefaultCPULimitAndRequestIfSidecarDoesNotHaveOne()
+      throws InfrastructureException {
+    InternalMachineConfig machineConfig = resolver.resolve();
+
+    assertEquals(machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), DEFAULT_CPU_LIMIT);
+    assertEquals(machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE), DEFAULT_CPU_REQUEST);
   }
 
   @Test(dataProvider = "memoryAttributeProvider")
-  public void shouldSetMemoryLimitOfASidecarIfCorrespondingWSConfigAttributeIsSet(
+  public void shouldSetMemoryLimitAndRequestOfASidecarIfCorrespondingComponentFieldIsSet(
       String memoryLimit, String expectedMemLimit) throws InfrastructureException {
     component.setMemoryLimit(memoryLimit);
 
@@ -149,6 +169,38 @@ public class MachineResolverTest {
       {"10Gi", toBytesString("10Gi")},
     };
   }
+
+  //   TODO: uncomment when CPU limit added into devfile
+  //  @Test(dataProvider = "cpuAttributeProvider")
+  //  public void shouldSetCPULimitAndRequestOfASidecarIfCorrespondingComponentFieldIsSet(
+  //      String cpuLimit, String expectedCpuLimit) throws InfrastructureException {
+  //    component.setCpuLimit(memoryLimit);
+  //
+  //    InternalMachineConfig machineConfig = resolver.resolve();
+  //
+  //    assertEquals(machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), expectedCpuLimit);
+  //  }
+
+  //  @Test(dataProvider = "cpuAttributeProvider")
+  //  public void shouldSetCPULimitOfASidecarIfCorrespondingComponentFieldIsSet(
+  //      String cpuLimit, String expectedCpuLimit) throws InfrastructureException {
+  //    component.setC(cpuLimit);
+  //
+  //    InternalMachineConfig machineConfig = resolver.resolve();
+  //
+  //    assertEquals(machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), expectedCpuLimit);
+  //  }
+  //
+  //  @DataProvider
+  //  public static Object[][] cpuAttributeProvider() {
+  //    return new Object[][] {
+  //        {"", DEFAULT_MEM_LIMIT},
+  //        {null, DEFAULT_MEM_LIMIT},
+  //        {"100Ki", toBytesString("100Ki")},
+  //        {"1M", toBytesString("1M")},
+  //        {"10Gi", toBytesString("10Gi")},
+  //    };
+  //  }
 
   @Test
   public void shouldOverrideMemoryLimitOfASidecarIfCorrespondingWSConfigAttributeIsSet()
