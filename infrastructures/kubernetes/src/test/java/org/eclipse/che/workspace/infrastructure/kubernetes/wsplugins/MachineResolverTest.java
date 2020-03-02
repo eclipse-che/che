@@ -169,7 +169,6 @@ public class MachineResolverTest {
     assertEquals(machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE), expectedMemRequest);
   }
 
-
   @DataProvider
   public static Object[][] memoryAttributeProvider() {
     return new Object[][] {
@@ -181,36 +180,36 @@ public class MachineResolverTest {
     };
   }
 
-    @Test(dataProvider = "cpuAttributeProvider")
-    public void shouldSetCPULimitOfASidecarIfCorrespondingComponentFieldIsSet(
-        String cpuLimit, String expectedCpuLimit) throws InfrastructureException {
-      component.setCpuLimit(cpuLimit);
+  @Test(dataProvider = "cpuAttributeProvider")
+  public void shouldSetCPULimitOfASidecarIfCorrespondingComponentFieldIsSet(
+      String cpuLimit, String expectedCpuLimit) throws InfrastructureException {
+    component.setCpuLimit(cpuLimit);
 
-      InternalMachineConfig machineConfig = resolver.resolve();
+    InternalMachineConfig machineConfig = resolver.resolve();
 
-      assertEquals(machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), expectedCpuLimit);
-    }
+    assertEquals(machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), expectedCpuLimit);
+  }
 
-    @Test(dataProvider = "cpuAttributeProvider")
-    public void shouldSetCPURequestOfASidecarIfCorrespondingComponentFieldIsSet(
-        String cpuRequest, String expectedCpuRequest) throws InfrastructureException {
-      component.setCpuRequest(cpuRequest);
+  @Test(dataProvider = "cpuAttributeProvider")
+  public void shouldSetCPURequestOfASidecarIfCorrespondingComponentFieldIsSet(
+      String cpuRequest, String expectedCpuRequest) throws InfrastructureException {
+    component.setCpuRequest(cpuRequest);
 
-      InternalMachineConfig machineConfig = resolver.resolve();
+    InternalMachineConfig machineConfig = resolver.resolve();
 
-      assertEquals(machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE), expectedCpuRequest);
-    }
+    assertEquals(machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE), expectedCpuRequest);
+  }
 
-    @DataProvider
-    public static Object[][] cpuAttributeProvider() {
-      return new Object[][] {
-          {"", DEFAULT_MEM_LIMIT},
-          {null, DEFAULT_MEM_LIMIT},
-          {"100Ki", toBytesString("100Ki")},
-          {"1M", toBytesString("1M")},
-          {"10Gi", toBytesString("10Gi")},
-      };
-    }
+  @DataProvider
+  public static Object[][] cpuAttributeProvider() {
+    return new Object[][] {
+      {"", DEFAULT_MEM_LIMIT},
+      {null, DEFAULT_MEM_LIMIT},
+      {"100Ki", toBytesString("100Ki")},
+      {"1M", toBytesString("1M")},
+      {"10Gi", toBytesString("10Gi")},
+    };
+  }
 
   @Test
   public void shouldOverrideMemoryLimitOfASidecarIfCorrespondingWSConfigAttributeIsSet()
