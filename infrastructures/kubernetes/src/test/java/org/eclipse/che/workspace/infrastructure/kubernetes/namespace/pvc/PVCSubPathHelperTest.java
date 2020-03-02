@@ -12,7 +12,11 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
 import static com.google.common.collect.ImmutableMap.of;
+import static java.lang.Boolean.TRUE;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.PVCSubPathHelper.JOB_MOUNT_PATH;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.PVCSubPathHelper.MKDIR_COMMAND_BASE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.PVCSubPathHelper.POD_PHASE_FAILED;
@@ -20,6 +24,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -28,6 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.api.model.Quantity;
@@ -36,12 +42,14 @@ import io.fabric8.kubernetes.api.model.ResourceRequirementsBuilder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.observability.NoopExecutorServiceWrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -72,6 +80,8 @@ public class PVCSubPathHelperTest {
   @Mock private KubernetesDeployments osDeployments;
   @Mock private Pod pod;
   @Mock private PodStatus podStatus;
+  @Mock private RuntimeEventsPublisher eventsPublisher;
+  @Mock private RuntimeIdentity identity;
 
   @Captor private ArgumentCaptor<Pod> podCaptor;
 
@@ -85,7 +95,9 @@ public class PVCSubPathHelperTest {
             jobImage,
             k8sNamespaceFactory,
             securityContextProvisioner,
-            new NoopExecutorServiceWrapper());
+            new NoopExecutorServiceWrapper(),
+            eventsPublisher);
+    lenient().when(identity.getInfrastructureNamespace()).thenReturn(NAMESPACE);
     lenient().when(k8sNamespaceFactory.access(WORKSPACE_ID, NAMESPACE)).thenReturn(k8sNamespace);
     lenient().when(k8sNamespace.deployments()).thenReturn(osDeployments);
     lenient().when(pod.getStatus()).thenReturn(podStatus);
@@ -111,7 +123,8 @@ public class PVCSubPathHelperTest {
   public void testSuccessfullyCreatesWorkspaceDirs() throws Exception {
     when(podStatus.getPhase()).thenReturn(POD_PHASE_SUCCEEDED);
 
-    pvcSubPathHelper.createDirs(WORKSPACE_ID, NAMESPACE, PVC_NAME, WORKSPACE_ID + PROJECTS_PATH);
+    pvcSubPathHelper.createDirs(
+        identity, WORKSPACE_ID, PVC_NAME, emptyMap(), WORKSPACE_ID + PROJECTS_PATH);
 
     verify(osDeployments).create(podCaptor.capture());
     final List<String> actual = podCaptor.getValue().getSpec().getContainers().get(0).getCommand();
@@ -128,10 +141,26 @@ public class PVCSubPathHelperTest {
   }
 
   @Test
+  public void testWatchLogsWhenCreatingWorkspaceDirs() throws InfrastructureException {
+    when(podStatus.getPhase()).thenReturn(POD_PHASE_SUCCEEDED);
+
+    pvcSubPathHelper.createDirs(
+        identity,
+        WORKSPACE_ID,
+        PVC_NAME,
+        ImmutableMap.of(
+            DEBUG_WORKSPACE_START, TRUE.toString(), DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES, "123"),
+        WORKSPACE_ID + PROJECTS_PATH);
+
+    verify(osDeployments).watchLogs(any(), any(), any(), eq(123L));
+  }
+
+  @Test
   public void testSetMemoryLimitAndRequest() throws Exception {
     when(podStatus.getPhase()).thenReturn(POD_PHASE_SUCCEEDED);
 
-    pvcSubPathHelper.createDirs(WORKSPACE_ID, NAMESPACE, PVC_NAME, WORKSPACE_ID + PROJECTS_PATH);
+    pvcSubPathHelper.createDirs(
+        identity, WORKSPACE_ID, PVC_NAME, emptyMap(), WORKSPACE_ID + PROJECTS_PATH);
 
     verify(osDeployments).create(podCaptor.capture());
     ResourceRequirements actual =

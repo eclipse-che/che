@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -45,7 +46,11 @@ public interface WorkspaceVolumesStrategy extends ConfigurationProvisioner {
    * @param timeoutMillis timeout in milliseconds
    * @throws InfrastructureException when any error while preparation occurs
    */
-  void prepare(KubernetesEnvironment k8sEnv, RuntimeIdentity identity, long timeoutMillis)
+  void prepare(
+      KubernetesEnvironment k8sEnv,
+      RuntimeIdentity identity,
+      long timeoutMillis,
+      Map<String, String> startOptions)
       throws InfrastructureException;
 
   /**

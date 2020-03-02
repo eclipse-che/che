@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -197,5 +198,21 @@ public class LogWatcher implements PodEventHandler, Closeable {
         return DEFAULT_LOG_LIMIT_BYTES;
       }
     }
+  }
+
+  /**
+   * Takes `startOptions` map and tells whether it's set so we should watch the logs. To return
+   * true, flag must be stored under {@link
+   * org.eclipse.che.api.workspace.shared.Constants#DEBUG_WORKSPACE_START} key.
+   *
+   * @param startOptions options where we'll try to find log watch flag
+   * @return true if we should watch the logs, false otherwise
+   */
+  public static boolean shouldWatchLogs(Map<String, String> startOptions) {
+    if (startOptions == null || startOptions.isEmpty()) {
+      return false;
+    }
+    return Boolean.parseBoolean(
+        startOptions.getOrDefault(DEBUG_WORKSPACE_START, Boolean.FALSE.toString()));
   }
 }
