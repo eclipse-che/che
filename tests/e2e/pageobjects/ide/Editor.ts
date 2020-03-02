@@ -20,6 +20,7 @@ import { Logger } from '../../utils/Logger';
 @injectable()
 export class Editor {
     private static readonly SUGGESTION_WIDGET_BODY_CSS: string = 'div.visible[widgetId=\'editor.widget.suggestWidget\']';
+    private static readonly SUGGESTION_LOADING_XPATH: string = '//div[@widgetid=\'editor.widget.suggestWidget\']//div[@class=\'message\' and contains(.,\'Loading...\')]'
     private static readonly ADDITIONAL_SHIFTING_TO_Y: number = 19;
     private static readonly ADDITIONAL_SHIFTING_TO_X: number = 1;
 
@@ -434,8 +435,7 @@ export class Editor {
 
     private async scrollAndSearchSuggestion(editorTabTitle: string, suggestionLocator: By, timeout: number = 10000) {
         await this.driverHelper.getDriver().wait(async () => {
-            const loadingLocator: By = this.getSuggestionLineXpathLocator('Loading');
-
+            const loadingLocator: By = By.xpath(Editor.SUGGESTION_LOADING_XPATH);
             await this.waitSuggestionContainer();
             await this.driverHelper.waitDisappearance(loadingLocator);
             await this.driverHelper.wait(1000);
