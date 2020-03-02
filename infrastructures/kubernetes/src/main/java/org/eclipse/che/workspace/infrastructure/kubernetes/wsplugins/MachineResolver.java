@@ -137,7 +137,7 @@ public class MachineResolver {
           .getAttributes()
           .put(
               CPU_LIMIT_ATTRIBUTE,
-              Long.toString(KubernetesSize.toBytes(overriddenSidecarCpuLimit)));
+              Float.toString(KubernetesSize.toCores(overriddenSidecarCpuLimit)));
     }
 
     float cpuRequest = Containers.getCpuRequest(container);
@@ -150,7 +150,7 @@ public class MachineResolver {
           .getAttributes()
           .put(
               CPU_REQUEST_ATTRIBUTE,
-              Long.toString(KubernetesSize.toBytes(overriddenSidecarCpuRequest)));
+              Float.toString(KubernetesSize.toCores(overriddenSidecarCpuRequest)));
     }
   }
 

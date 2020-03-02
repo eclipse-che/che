@@ -149,7 +149,7 @@ public class MachineResolverTest {
     assertEquals(machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE), DEFAULT_CPU_REQUEST);
   }
 
-  @Test(dataProvider = "memoryAttributeProvider")
+  @Test(dataProvider = "memoryLimitAttributeProvider")
   public void shouldSetMemoryLimitOfASidecarIfCorrespondingComponentFieldIsSet(
       String memoryLimit, String expectedMemLimit) throws InfrastructureException {
     component.setMemoryLimit(memoryLimit);
@@ -159,7 +159,7 @@ public class MachineResolverTest {
     assertEquals(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), expectedMemLimit);
   }
 
-  @Test(dataProvider = "memoryAttributeProvider")
+  @Test(dataProvider = "memoryRequestAttributeProvider")
   public void shouldSetMemoryRequestOfASidecarIfCorrespondingComponentFieldIsSet(
       String memoryRequest, String expectedMemRequest) throws InfrastructureException {
     component.setMemoryRequest(memoryRequest);
@@ -170,7 +170,7 @@ public class MachineResolverTest {
   }
 
   @DataProvider
-  public static Object[][] memoryAttributeProvider() {
+  public static Object[][] memoryLimitAttributeProvider() {
     return new Object[][] {
       {"", DEFAULT_MEM_LIMIT},
       {null, DEFAULT_MEM_LIMIT},
@@ -180,7 +180,18 @@ public class MachineResolverTest {
     };
   }
 
-  @Test(dataProvider = "cpuAttributeProvider")
+  @DataProvider
+  public static Object[][] memoryRequestAttributeProvider() {
+    return new Object[][] {
+      {"", DEFAULT_MEM_REQUEST},
+      {null, DEFAULT_MEM_REQUEST},
+      {"100Ki", toBytesString("100Ki")},
+      {"1M", toBytesString("1M")},
+      {"10Gi", toBytesString("10Gi")},
+    };
+  }
+
+  @Test(dataProvider = "cpuAttributeLimitProvider")
   public void shouldSetCPULimitOfASidecarIfCorrespondingComponentFieldIsSet(
       String cpuLimit, String expectedCpuLimit) throws InfrastructureException {
     component.setCpuLimit(cpuLimit);
@@ -190,7 +201,7 @@ public class MachineResolverTest {
     assertEquals(machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), expectedCpuLimit);
   }
 
-  @Test(dataProvider = "cpuAttributeProvider")
+  @Test(dataProvider = "cpuAttributeRequestProvider")
   public void shouldSetCPURequestOfASidecarIfCorrespondingComponentFieldIsSet(
       String cpuRequest, String expectedCpuRequest) throws InfrastructureException {
     component.setCpuRequest(cpuRequest);
@@ -201,13 +212,24 @@ public class MachineResolverTest {
   }
 
   @DataProvider
-  public static Object[][] cpuAttributeProvider() {
+  public static Object[][] cpuAttributeLimitProvider() {
     return new Object[][] {
-      {"", DEFAULT_MEM_LIMIT},
-      {null, DEFAULT_MEM_LIMIT},
-      {"100Ki", toBytesString("100Ki")},
-      {"1M", toBytesString("1M")},
-      {"10Gi", toBytesString("10Gi")},
+      {"", DEFAULT_CPU_LIMIT},
+      {null, DEFAULT_CPU_LIMIT},
+      {"100m", "0.1"},
+      {"1", "1.0"},
+      {"1578m", "1.578"},
+    };
+  }
+
+  @DataProvider
+  public static Object[][] cpuAttributeRequestProvider() {
+    return new Object[][] {
+      {"", DEFAULT_CPU_REQUEST},
+      {null, DEFAULT_CPU_REQUEST},
+      {"100m", "0.1"},
+      {"1", "1.0"},
+      {"1578m", "1.578"},
     };
   }
 
