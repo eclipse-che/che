@@ -18,8 +18,8 @@ export class CheMultiuserTokenHandler implements ITokenHandler {
     async get(): Promise<string> {
         let params = {};
 
-        let keycloakUrl = TestConstants.TS_SELENIUM_BASE_URL;
-        const keycloakAuthSuffix = '/auth/realms/che/protocol/openid-connect/token';
+        let keycloakUrl = this.handleTrailingSlash(TestConstants.TS_SELENIUM_BASE_URL);
+        const keycloakAuthSuffix = 'auth/realms/che/protocol/openid-connect/token';
         keycloakUrl = keycloakUrl.replace('che', 'keycloak') + keycloakAuthSuffix;
         params = {
             client_id: 'che-public',
@@ -36,5 +36,17 @@ export class CheMultiuserTokenHandler implements ITokenHandler {
             throw err;
         }
 
+    }
+
+    /**
+     * Append `/` if it's not in the URL yet. Keycloak doesn't handle double `//` in URL well.
+     * 
+     * @param keycloakUrl 
+     */
+    private handleTrailingSlash(keycloakUrl: string) {
+        if (!(new RegExp('/$').test(keycloakUrl))) {
+            keycloakUrl += '/';
+        }
+        return keycloakUrl;
     }
 }
