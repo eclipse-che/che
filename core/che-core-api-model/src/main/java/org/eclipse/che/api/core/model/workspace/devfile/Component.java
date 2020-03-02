@@ -97,7 +97,7 @@ public interface Component {
   /**
    * Returns CPU limit for the component.
    *
-   * <p>You can express CPU request as a float-point cores or as a fixed-point integer millicores
+   * <p>You can express CPU request as a floating-point cores or as a fixed-point integer millicores
    * using 'm' suffix. Examples: 1.5, 1500m.
    */
   String getCpuLimit();
@@ -105,7 +105,7 @@ public interface Component {
   /**
    * Returns CPU request for the component.
    *
-   * <p>You can express CPU request as a float-point cores or as a fixed-point integer millicores
+   * <p>You can express CPU request as a floating-point cores or as a fixed-point integer millicores
    * using 'm' suffix. Examples: 1.5, 1500m.
    */
   String getCpuRequest();
