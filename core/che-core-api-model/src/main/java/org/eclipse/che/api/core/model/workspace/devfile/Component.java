@@ -77,14 +77,38 @@ public interface Component {
   String getImage();
 
   /**
-   * Returns memory limit for the component. It is mandatory and applicable only for 'dockerimage'
-   * component type.
+   * Returns memory limit for the component.
    *
    * <p>You can express memory as a plain integer or as a fixed-point integer using one of these
    * suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi,
    * Ki
    */
   String getMemoryLimit();
+
+  /**
+   * Returns memory request for the component.
+   *
+   * <p>You can express memory as a plain integer or as a fixed-point integer using one of these
+   * suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi,
+   * Ki
+   */
+  String getMemoryRequest();
+
+  /**
+   * Returns CPU limit for the component.
+   *
+   * <p>You can express CPU request as a float-point cores or as a fixed-point integer millicores
+   * using 'm' suffix. Examples: 1.5, 1500m.
+   */
+  String getCpuLimit();
+
+  /**
+   * Returns CPU request for the component.
+   *
+   * <p>You can express CPU request as a float-point cores or as a fixed-point integer millicores
+   * using 'm' suffix. Examples: 1.5, 1500m.
+   */
+  String getCpuRequest();
 
   /**
    * Returns true if projects sources should be mount to the component or false otherwise. It is

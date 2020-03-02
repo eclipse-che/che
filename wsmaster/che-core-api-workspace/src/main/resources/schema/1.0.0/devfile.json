@@ -61,10 +61,14 @@
       "additionalProperties": false,
       "anyOf": [
         {
-          "required": ["name"]
+          "required": [
+            "name"
+          ]
         },
         {
-          "required": ["generateName"]
+          "required": [
+            "generateName"
+          ]
         }
       ]
     },
@@ -178,7 +182,9 @@
               "type": "string"
             }
           },
-          "required": ["type"]
+          "required": [
+            "type"
+          ]
         },
         "then": {
           "allOf": [
@@ -243,7 +249,15 @@
                     ]
                   },
                   "memoryLimit": {
-                    "type": "string",
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer",
+                        "exclusiveMinimum": 0
+                      }
+                    ],
                     "description": "Describes memory limit for the component. You can express memory as a plain integer or as a fixed-point integer using one of these suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi, Ki",
                     "examples": [
                       "128974848",
@@ -251,10 +265,64 @@
                       "129M",
                       "123Mi"
                     ]
+                  },
+                  "memoryRequest": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "integer",
+                          "exclusiveMinimum": 0
+                        }
+                      ],
+                      "description": "Describes memory request for the component. You can express memory as a plain integer or as a fixed-point integer using one of these suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi, Ki",
+                      "examples": [
+                        "128974848",
+                        "129e6",
+                        "129M",
+                        "123Mi"
+                      ]
+                    },
+                    "cpuLimit": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        }
+                      ],
+                      "description": "Describes CPU limit for the component. You can express CPU limit as a float-point cores or as a  fixed-point integer millicores using 'm' suffix",
+                      "examples": [
+                        "2",
+                        "0.235",
+                        "100m",
+                        "1230m"
+                      ]
+                    },
+                    "cpuRequest": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        }
+                      ],
+                      "description": "Describes CPU request for the component. You can express CPU request as a float-point cores or as a  fixed-point integer millicores using 'm' suffix",
+                      "examples": [
+                        "2",
+                        "0.235",
+                        "100m",
+                        "1230m"
+                      ]
+                    }
                   }
                 }
-              }
-            },
+              },
             {
               "if": {
                 "properties": {
@@ -274,7 +342,10 @@
                   "env": {},
                   "reference": {},
                   "registryUrl": {},
-                  "memoryLimit": {}
+                  "memoryLimit": {},
+                  "memoryRequest": {},
+                  "cpuLimit": {},
+                  "cpuRequest": {}
                 }
               }
             },
@@ -296,6 +367,9 @@
                   "id": {},
                   "env": {},
                   "memoryLimit": {},
+                  "memoryRequest": {},
+                  "cpuLimit": {},
+                  "cpuRequest": {},
                   "reference": {},
                   "registryUrl": {},
                   "preferences": {
@@ -434,21 +508,29 @@
                   "alias": {},
                   "mountSources": {},
                   "env": {},
-                  "image": {
-                    "type": "string",
-                    "description": "Specifies the docker image that should be used for component",
-                    "examples": [
-                      "eclipse/maven-jdk8:1.0.0"
-                    ]
-                  },
                   "memoryLimit": {
-                    "type": "string",
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer",
+                        "exclusiveMinimum": 0
+                      }
+                    ],
                     "description": "Describes memory limit for the component. You can express memory as a plain integer or as a fixed-point integer using one of these suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi, Ki",
                     "examples": [
                       "128974848",
                       "129e6",
                       "129M",
                       "123Mi"
+                    ]
+                  },
+                  "image": {
+                    "type": "string",
+                    "description": "Specifies the docker image that should be used for component",
+                    "examples": [
+                      "eclipse/maven-jdk8:1.0.0"
                     ]
                   },
                   "command": {
@@ -734,14 +816,16 @@
           },
           "previewUrl": {
             "type": "object",
-            "required": ["port"],
+            "required": [
+              "port"
+            ],
             "properties": {
               "port": {
                 "type": "number",
                 "minimum": 0,
                 "maximum": 65535
               },
-              "path":  {
+              "path": {
                 "type": "string"
               }
             }
