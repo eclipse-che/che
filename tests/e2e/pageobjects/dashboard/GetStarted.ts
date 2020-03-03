@@ -13,13 +13,9 @@ import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../TestConstants';
 import { By } from 'selenium-webdriver';
-import { Logger } from '../../utils/Logger';
-import { runTaskWithDialogShellAndClose } from '../../testsLibrary/CodeExecutionTests';
 
 @injectable()
 export class GetStarted {
-    private static readonly CREATE_AND_OPEN_BUTTON_XPATH: string = '(//che-button-save-flat[@che-button-title=\'Create & Open\'][@aria-disabled=\'false\']/button)[1]';
-
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitTitleContains(expectedText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
