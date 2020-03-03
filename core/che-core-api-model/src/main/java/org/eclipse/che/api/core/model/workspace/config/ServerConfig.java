@@ -162,9 +162,9 @@ public interface ServerConfig {
    * @param attributes the attributes with additional server configuration
    * @see #SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE
    */
-  static boolean isCookiesAuthEnabled(Map<String, String> attributes) {
-    return AttributesEvaluator.booleanAttr(
-        attributes, SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE, false);
+  static Boolean isCookiesAuthEnabled(Map<String, String> attributes) {
+    String val = attributes.get(SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE);
+    return val == null ? null : Boolean.parseBoolean(val);
   }
 
   /**
@@ -211,7 +211,7 @@ public interface ServerConfig {
     return isUnique(getAttributes());
   }
 
-  default boolean isCookiesAuthEnabled() {
+  default Boolean isCookiesAuthEnabled() {
     return isCookiesAuthEnabled(getAttributes());
   }
 
