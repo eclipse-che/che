@@ -54,7 +54,7 @@ import { ITokenHandler } from './utils/requestHandlers/tokens/ITokenHandler';
 import { CheApiRequestHandler } from './utils/requestHandlers/CheApiRequestHandler';
 import { CheGitApi } from './utils/VCS/CheGitApi';
 import { GitHubUtil } from './utils/VCS/github/GitHubUtil';
-import { GetStarted } from './pageobjects/ide/GetStarted';
+import { GetStarted } from './pageobjects/dashboard/GetStarted';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
