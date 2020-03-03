@@ -503,6 +503,22 @@ public class KubernetesInternalRuntimeTest {
             eq(LogWatcher.DEFAULT_LOG_LIMIT_BYTES));
   }
 
+  //  @Test
+  //  public void shouldCountWorkspaceDebugStartInLogWatchMetricsIfDebug()
+  //      throws InfrastructureException {
+  //    internalRuntime.start(singletonMap(DEBUG_WORKSPACE_START, "true"));
+  //
+  //    verify(logWatcherMetrics, times(1)).workspaceStartedInStartDebugMode();
+  //  }
+  //
+  //  @Test
+  //  public void shouldNotCountWorkspaceDebugStartInLogWatchMetricsIfNotDebug()
+  //      throws InfrastructureException {
+  //    internalRuntime.start(singletonMap(DEBUG_WORKSPACE_START, "false"));
+  //
+  //    verify(logWatcherMetrics, times(0)).workspaceStartedInStartDebugMode();
+  //  }
+
   @Test
   public void shouldNotWatchLogsWhenSetFalseInOptions() throws InfrastructureException {
     internalRuntime.start(singletonMap(DEBUG_WORKSPACE_START, "false"));
