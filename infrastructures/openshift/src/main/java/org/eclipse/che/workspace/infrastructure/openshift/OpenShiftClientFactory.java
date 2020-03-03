@@ -25,7 +25,6 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftConfig;
 import io.fabric8.openshift.client.OpenShiftConfigBuilder;
 import io.fabric8.openshift.client.internal.OpenShiftOAuthInterceptor;
-import io.micrometer.core.instrument.MeterRegistry;
 import java.net.URL;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -69,8 +68,7 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
       @Named("che.infra.kubernetes.client.http.connection_pool.max_idle") int maxIdleConnections,
       @Named("che.infra.kubernetes.client.http.connection_pool.keep_alive_min")
           int connectionPoolKeepAlive,
-      EventListener eventListener,
-      MeterRegistry meterRegistry) {
+      EventListener eventListener) {
     super(
         masterUrl,
         doTrustCerts,
@@ -78,8 +76,7 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
         maxConcurrentRequestsPerHost,
         maxIdleConnections,
         connectionPoolKeepAlive,
-        eventListener,
-        meterRegistry);
+        eventListener);
     this.configBuilder = configBuilder;
   }
 

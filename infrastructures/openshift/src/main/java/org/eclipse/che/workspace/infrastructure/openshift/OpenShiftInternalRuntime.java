@@ -16,7 +16,6 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
-import io.micrometer.core.instrument.MeterRegistry;
 import io.opentracing.Tracer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,7 +75,6 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       RuntimeHangingDetector runtimeHangingDetector,
       OpenShiftPreviewUrlCommandProvisioner previewUrlCommandProvisioner,
       Tracer tracer,
-      MeterRegistry meterRegistry,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project) {
     super(
@@ -100,7 +98,6 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         runtimeHangingDetector,
         previewUrlCommandProvisioner,
         tracer,
-        meterRegistry,
         context,
         project);
     this.project = project;

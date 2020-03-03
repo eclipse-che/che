@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
 import io.fabric8.kubernetes.api.model.KubernetesList;
@@ -83,18 +94,15 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
 
   private final OpenShiftClient client;
 
-  /**
-   * @param client to wrap
-   * @param invocationCounter every method call will be recorder by this counter
-   */
-  public CountedOpenShiftClient(OpenShiftClient client, Counter invocationCounter) {
-    super(client, invocationCounter);
+  /** @param client to wrap */
+  public CountedOpenShiftClient(OpenShiftClient client, Runnable invoked) {
+    super(client, invoked);
     this.client = client;
   }
 
   @Override
   public URL getOpenshiftUrl() {
-    invocationCounter.increment();
+    invoked.run();
     return client.getOpenshiftUrl();
   }
 
@@ -102,7 +110,7 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
   public MixedOperation<
           Build, BuildList, DoneableBuild, BuildResource<Build, DoneableBuild, String, LogWatch>>
       builds() {
-    invocationCounter.increment();
+    invoked.run();
     return client.builds();
   }
 
@@ -113,7 +121,7 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
           DoneableBuildConfig,
           BuildConfigResource<BuildConfig, DoneableBuildConfig, Void, Build>>
       buildConfigs() {
-    invocationCounter.increment();
+    invoked.run();
     return client.buildConfigs();
   }
 
@@ -124,14 +132,14 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
           DoneableDeploymentConfig,
           DeployableScalableResource<DeploymentConfig, DoneableDeploymentConfig>>
       deploymentConfigs() {
-    invocationCounter.increment();
+    invoked.run();
     return client.deploymentConfigs();
   }
 
   @Override
   public NonNamespaceOperation<Group, GroupList, DoneableGroup, Resource<Group, DoneableGroup>>
       groups() {
-    invocationCounter.increment();
+    invoked.run();
     return client.groups();
   }
 
@@ -142,7 +150,7 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
           DoneableImageStream,
           Resource<ImageStream, DoneableImageStream>>
       imageStreams() {
-    invocationCounter.increment();
+    invoked.run();
     return client.imageStreams();
   }
 
@@ -153,7 +161,7 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
           DoneableImageStreamTag,
           Resource<ImageStreamTag, DoneableImageStreamTag>>
       imageStreamTags() {
-    invocationCounter.increment();
+    invoked.run();
     return client.imageStreamTags();
   }
 
@@ -164,7 +172,7 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
           DoneableOAuthAccessToken,
           Resource<OAuthAccessToken, DoneableOAuthAccessToken>>
       oAuthAccessTokens() {
-    invocationCounter.increment();
+    invoked.run();
     return client.oAuthAccessTokens();
   }
 
@@ -175,7 +183,7 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
           DoneableOAuthAuthorizeToken,
           Resource<OAuthAuthorizeToken, DoneableOAuthAuthorizeToken>>
       oAuthAuthorizeTokens() {
-    invocationCounter.increment();
+    invoked.run();
     return client.oAuthAuthorizeTokens();
   }
 
@@ -186,14 +194,14 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
           DoneableOAuthClient,
           Resource<OAuthClient, DoneableOAuthClient>>
       oAuthClients() {
-    invocationCounter.increment();
+    invoked.run();
     return client.oAuthClients();
   }
 
   @Override
   public MixedOperation<Policy, PolicyList, DoneablePolicy, Resource<Policy, DoneablePolicy>>
       policies() {
-    invocationCounter.increment();
+    invoked.run();
     return client.policies();
   }
 
@@ -204,7 +212,7 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
           DoneablePolicyBinding,
           Resource<PolicyBinding, DoneablePolicyBinding>>
       policyBindings() {
-    invocationCounter.increment();
+    invoked.run();
     return client.policyBindings();
   }
 
@@ -212,19 +220,19 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
   public NonNamespaceOperation<
           Project, ProjectList, DoneableProject, Resource<Project, DoneableProject>>
       projects() {
-    invocationCounter.increment();
+    invoked.run();
     return client.projects();
   }
 
   @Override
   public ProjectRequestOperation projectrequests() {
-    invocationCounter.increment();
+    invoked.run();
     return client.projectrequests();
   }
 
   @Override
   public MixedOperation<Role, RoleList, DoneableRole, Resource<Role, DoneableRole>> roles() {
-    invocationCounter.increment();
+    invoked.run();
     return client.roles();
   }
 
@@ -235,13 +243,13 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
           DoneableRoleBinding,
           Resource<RoleBinding, DoneableRoleBinding>>
       roleBindings() {
-    invocationCounter.increment();
+    invoked.run();
     return client.roleBindings();
   }
 
   @Override
   public MixedOperation<Route, RouteList, DoneableRoute, Resource<Route, DoneableRoute>> routes() {
-    invocationCounter.increment();
+    invoked.run();
     return client.routes();
   }
 
@@ -252,13 +260,13 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
           DoneableTemplate,
           TemplateResource<Template, KubernetesList, DoneableTemplate>>
       templates() {
-    invocationCounter.increment();
+    invoked.run();
     return client.templates();
   }
 
   @Override
   public NonNamespaceOperation<User, UserList, DoneableUser, Resource<User, DoneableUser>> users() {
-    invocationCounter.increment();
+    invoked.run();
     return client.users();
   }
 
@@ -269,7 +277,7 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
           DoneableSecurityContextConstraints,
           Resource<SecurityContextConstraints, DoneableSecurityContextConstraints>>
       securityContextConstraints() {
-    invocationCounter.increment();
+    invoked.run();
     return client.securityContextConstraints();
   }
 
@@ -277,7 +285,7 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
   public SubjectAccessReviewOperation<
           CreateableSubjectAccessReview, CreateableLocalSubjectAccessReview>
       subjectAccessReviews() {
-    invocationCounter.increment();
+    invoked.run();
     return client.subjectAccessReviews();
   }
 
@@ -288,19 +296,19 @@ public class CountedOpenShiftClient extends CountedKubernetesClient implements O
           DoneableClusterRoleBinding,
           Resource<ClusterRoleBinding, DoneableClusterRoleBinding>>
       clusterRoleBindings() {
-    invocationCounter.increment();
+    invoked.run();
     return client.clusterRoleBindings();
   }
 
   @Override
   public User currentUser() {
-    invocationCounter.increment();
+    invoked.run();
     return client.currentUser();
   }
 
   @Override
   public boolean supportsOpenShiftAPIGroup(String s) {
-    invocationCounter.increment();
+    invoked.run();
     return client.supportsOpenShiftAPIGroup(s);
   }
 }

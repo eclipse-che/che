@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import io.fabric8.kubernetes.api.model.ComponentStatus;
@@ -72,26 +83,20 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import io.fabric8.kubernetes.client.dsl.ServiceResource;
 import io.fabric8.kubernetes.client.dsl.StorageAPIGroupDSL;
-import io.micrometer.core.instrument.Counter;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 
-/**
- * Wrapper over {@link KubernetesClient} that counts all client invocations to the {@link Counter}.
- */
+/** Wrapper over {@link KubernetesClient} that counts all client invocations. */
 public class CountedKubernetesClient implements KubernetesClient {
 
   private final KubernetesClient client;
-  protected final Counter invocationCounter;
+  protected final Runnable invoked;
 
-  /**
-   * @param client to wrap
-   * @param invocationCounter every method call will be recorder by this counter
-   */
-  public CountedKubernetesClient(KubernetesClient client, Counter invocationCounter) {
+  /** @param client to wrap */
+  public CountedKubernetesClient(KubernetesClient client, Runnable invoked) {
     this.client = client;
-    this.invocationCounter = invocationCounter;
+    this.invoked = invoked;
   }
 
   @Override
@@ -101,7 +106,7 @@ public class CountedKubernetesClient implements KubernetesClient {
           DoneableCustomResourceDefinition,
           Resource<CustomResourceDefinition, DoneableCustomResourceDefinition>>
       customResourceDefinitions() {
-    invocationCounter.increment();
+    invoked.run();
     return client.customResourceDefinitions();
   }
 
@@ -112,7 +117,7 @@ public class CountedKubernetesClient implements KubernetesClient {
           Class<T> resourceType,
           Class<L> listClass,
           Class<D> doneClass) {
-    invocationCounter.increment();
+    invoked.run();
     return client.customResources(crd, resourceType, listClass, doneClass);
   }
 
@@ -123,55 +128,55 @@ public class CountedKubernetesClient implements KubernetesClient {
           Class<T> resourceType,
           Class<L> listClass,
           Class<D> doneClass) {
-    invocationCounter.increment();
+    invoked.run();
     return client.customResource(crd, resourceType, listClass, doneClass);
   }
 
   @Override
   public ExtensionsAPIGroupDSL extensions() {
-    invocationCounter.increment();
+    invoked.run();
     return client.extensions();
   }
 
   @Override
   public VersionInfo getVersion() {
-    invocationCounter.increment();
+    invoked.run();
     return client.getVersion();
   }
 
   @Override
   public AppsAPIGroupDSL apps() {
-    invocationCounter.increment();
+    invoked.run();
     return client.apps();
   }
 
   @Override
   public AutoscalingAPIGroupDSL autoscaling() {
-    invocationCounter.increment();
+    invoked.run();
     return client.autoscaling();
   }
 
   @Override
   public NetworkAPIGroupDSL network() {
-    invocationCounter.increment();
+    invoked.run();
     return client.network();
   }
 
   @Override
   public StorageAPIGroupDSL storage() {
-    invocationCounter.increment();
+    invoked.run();
     return client.storage();
   }
 
   @Override
   public BatchAPIGroupDSL batch() {
-    invocationCounter.increment();
+    invoked.run();
     return client.batch();
   }
 
   @Override
   public RbacAPIGroupDSL rbac() {
-    invocationCounter.increment();
+    invoked.run();
     return client.rbac();
   }
 
@@ -182,56 +187,56 @@ public class CountedKubernetesClient implements KubernetesClient {
           DoneableComponentStatus,
           Resource<ComponentStatus, DoneableComponentStatus>>
       componentstatuses() {
-    invocationCounter.increment();
+    invoked.run();
     return client.componentstatuses();
   }
 
   @Override
   public ParameterNamespaceListVisitFromServerGetDeleteRecreateWaitApplicable<HasMetadata, Boolean>
       load(InputStream is) {
-    invocationCounter.increment();
+    invoked.run();
     return client.load(is);
   }
 
   @Override
   public ParameterNamespaceListVisitFromServerGetDeleteRecreateWaitApplicable<HasMetadata, Boolean>
       resourceList(String s) {
-    invocationCounter.increment();
+    invoked.run();
     return client.resourceList(s);
   }
 
   @Override
   public NamespaceListVisitFromServerGetDeleteRecreateWaitApplicable<HasMetadata, Boolean>
       resourceList(KubernetesResourceList list) {
-    invocationCounter.increment();
+    invoked.run();
     return client.resourceList(list);
   }
 
   @Override
   public NamespaceListVisitFromServerGetDeleteRecreateWaitApplicable<HasMetadata, Boolean>
       resourceList(HasMetadata... items) {
-    invocationCounter.increment();
+    invoked.run();
     return client.resourceList(items);
   }
 
   @Override
   public NamespaceListVisitFromServerGetDeleteRecreateWaitApplicable<HasMetadata, Boolean>
       resourceList(Collection<HasMetadata> items) {
-    invocationCounter.increment();
+    invoked.run();
     return client.resourceList(items);
   }
 
   @Override
   public <T extends HasMetadata>
       NamespaceVisitFromServerGetWatchDeleteRecreateWaitApplicable<T, Boolean> resource(T is) {
-    invocationCounter.increment();
+    invoked.run();
     return client.resource(is);
   }
 
   @Override
   public NamespaceVisitFromServerGetWatchDeleteRecreateWaitApplicable<HasMetadata, Boolean>
       resource(String s) {
-    invocationCounter.increment();
+    invoked.run();
     return client.resource(s);
   }
 
@@ -239,13 +244,13 @@ public class CountedKubernetesClient implements KubernetesClient {
   public MixedOperation<
           Endpoints, EndpointsList, DoneableEndpoints, Resource<Endpoints, DoneableEndpoints>>
       endpoints() {
-    invocationCounter.increment();
+    invoked.run();
     return client.endpoints();
   }
 
   @Override
   public MixedOperation<Event, EventList, DoneableEvent, Resource<Event, DoneableEvent>> events() {
-    invocationCounter.increment();
+    invoked.run();
     return client.events();
   }
 
@@ -253,13 +258,13 @@ public class CountedKubernetesClient implements KubernetesClient {
   public NonNamespaceOperation<
           Namespace, NamespaceList, DoneableNamespace, Resource<Namespace, DoneableNamespace>>
       namespaces() {
-    invocationCounter.increment();
+    invoked.run();
     return client.namespaces();
   }
 
   @Override
   public NonNamespaceOperation<Node, NodeList, DoneableNode, Resource<Node, DoneableNode>> nodes() {
-    invocationCounter.increment();
+    invoked.run();
     return client.nodes();
   }
 
@@ -270,7 +275,7 @@ public class CountedKubernetesClient implements KubernetesClient {
           DoneablePersistentVolume,
           Resource<PersistentVolume, DoneablePersistentVolume>>
       persistentVolumes() {
-    invocationCounter.increment();
+    invoked.run();
     return client.persistentVolumes();
   }
 
@@ -281,13 +286,13 @@ public class CountedKubernetesClient implements KubernetesClient {
           DoneablePersistentVolumeClaim,
           Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim>>
       persistentVolumeClaims() {
-    invocationCounter.increment();
+    invoked.run();
     return client.persistentVolumeClaims();
   }
 
   @Override
   public MixedOperation<Pod, PodList, DoneablePod, PodResource<Pod, DoneablePod>> pods() {
-    invocationCounter.increment();
+    invoked.run();
     return client.pods();
   }
 
@@ -298,7 +303,7 @@ public class CountedKubernetesClient implements KubernetesClient {
           DoneableReplicationController,
           RollableScalableResource<ReplicationController, DoneableReplicationController>>
       replicationControllers() {
-    invocationCounter.increment();
+    invoked.run();
     return client.replicationControllers();
   }
 
@@ -309,14 +314,14 @@ public class CountedKubernetesClient implements KubernetesClient {
           DoneableResourceQuota,
           Resource<ResourceQuota, DoneableResourceQuota>>
       resourceQuotas() {
-    invocationCounter.increment();
+    invoked.run();
     return client.resourceQuotas();
   }
 
   @Override
   public MixedOperation<Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>>
       secrets() {
-    invocationCounter.increment();
+    invoked.run();
     return client.secrets();
   }
 
@@ -324,7 +329,7 @@ public class CountedKubernetesClient implements KubernetesClient {
   public MixedOperation<
           Service, ServiceList, DoneableService, ServiceResource<Service, DoneableService>>
       services() {
-    invocationCounter.increment();
+    invoked.run();
     return client.services();
   }
 
@@ -335,13 +340,13 @@ public class CountedKubernetesClient implements KubernetesClient {
           DoneableServiceAccount,
           Resource<ServiceAccount, DoneableServiceAccount>>
       serviceAccounts() {
-    invocationCounter.increment();
+    invoked.run();
     return client.serviceAccounts();
   }
 
   @Override
   public KubernetesListMixedOperation lists() {
-    invocationCounter.increment();
+    invoked.run();
     return client.lists();
   }
 
@@ -349,7 +354,7 @@ public class CountedKubernetesClient implements KubernetesClient {
   public MixedOperation<
           ConfigMap, ConfigMapList, DoneableConfigMap, Resource<ConfigMap, DoneableConfigMap>>
       configMaps() {
-    invocationCounter.increment();
+    invoked.run();
     return client.configMaps();
   }
 
@@ -357,49 +362,49 @@ public class CountedKubernetesClient implements KubernetesClient {
   public MixedOperation<
           LimitRange, LimitRangeList, DoneableLimitRange, Resource<LimitRange, DoneableLimitRange>>
       limitRanges() {
-    invocationCounter.increment();
+    invoked.run();
     return client.limitRanges();
   }
 
   @Override
   public <C> Boolean isAdaptable(Class<C> type) {
-    invocationCounter.increment();
+    invoked.run();
     return client.isAdaptable(type);
   }
 
   @Override
   public <C> C adapt(Class<C> type) {
-    invocationCounter.increment();
+    invoked.run();
     return client.adapt(type);
   }
 
   @Override
   public URL getMasterUrl() {
-    invocationCounter.increment();
+    invoked.run();
     return client.getMasterUrl();
   }
 
   @Override
   public String getApiVersion() {
-    invocationCounter.increment();
+    invoked.run();
     return client.getApiVersion();
   }
 
   @Override
   public String getNamespace() {
-    invocationCounter.increment();
+    invoked.run();
     return client.getNamespace();
   }
 
   @Override
   public RootPaths rootPaths() {
-    invocationCounter.increment();
+    invoked.run();
     return client.rootPaths();
   }
 
   @Override
   public boolean supportsApiPath(String path) {
-    invocationCounter.increment();
+    invoked.run();
     return client.supportsApiPath(path);
   }
 
@@ -410,7 +415,7 @@ public class CountedKubernetesClient implements KubernetesClient {
 
   @Override
   public Config getConfiguration() {
-    invocationCounter.increment();
+    invoked.run();
     return client.getConfiguration();
   }
 }

@@ -21,10 +21,9 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.utils.HttpClientUtils;
 import io.fabric8.kubernetes.client.utils.ImpersonatorInterceptor;
 import io.fabric8.kubernetes.client.utils.Utils;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -46,7 +45,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 @Singleton
 public class KubernetesClientFactory {
 
-  protected final Counter clientInvocationCounter;
+  protected final ClientInvocationCounter clientInvocationCounter;
 
   /** {@link OkHttpClient} instance shared by all Kubernetes clients. */
   private OkHttpClient httpClient;
@@ -67,8 +66,7 @@ public class KubernetesClientFactory {
       @Named("che.infra.kubernetes.client.http.connection_pool.max_idle") int maxIdleConnections,
       @Named("che.infra.kubernetes.client.http.connection_pool.keep_alive_min")
           int connectionPoolKeepAlive,
-      EventListener eventListener,
-      MeterRegistry meterRegistry) {
+      EventListener eventListener) {
     this.defaultConfig = buildDefaultConfig(masterUrl, doTrustCerts);
     OkHttpClient temporary = HttpClientUtils.createHttpClient(defaultConfig);
     OkHttpClient.Builder builder = temporary.newBuilder();
@@ -81,10 +79,16 @@ public class KubernetesClientFactory {
     httpClient.dispatcher().setMaxRequestsPerHost(maxConcurrentRequestsPerHost);
 
     this.clientInvocationCounter =
-        Counter.builder("k8s_client")
-            .baseUnit("invocation")
-            .description("number of invocations of k8s client")
-            .register(meterRegistry);
+        new ClientInvocationCounter(Boolean.parseBoolean(System.getenv("CHE_METRICS_ENABLED")));
+  }
+
+  /**
+   * Gets current state of all invocations of clients that were created by this factory.
+   *
+   * @return count of clients invocations or 0 if metrics are disabled
+   */
+  public int getClientInvocationsCount() {
+    return clientInvocationCounter.getCount();
   }
 
   /**
@@ -231,5 +235,45 @@ public class KubernetesClientFactory {
 
     @Override
     public void close() {}
+  }
+
+  /**
+   * Counts client invocations. Holds the value in it's own {@link AtomicInteger} counter.
+   *
+   * <p>In case that metrics are disabled, this class can be constructed in Noop mode with
+   * `ClientInvocationCounter(false)`.
+   */
+  private static class ClientInvocationCounter implements Runnable {
+
+    private final AtomicInteger counter;
+
+    /**
+     * When given `metricsEnabled` is true, the constructed class will count every {@link
+     * ClientInvocationCounter#run()} invocation. Otherwise it will do nothing.
+     *
+     * @param metricsEnabled true if should count, false otherwise
+     */
+    public ClientInvocationCounter(boolean metricsEnabled) {
+      if (metricsEnabled) {
+        counter = new AtomicInteger();
+      } else {
+        counter = null;
+      }
+    }
+
+    private int getCount() {
+      if (counter != null) {
+        return counter.get();
+      } else {
+        return 0;
+      }
+    }
+
+    @Override
+    public void run() {
+      if (counter != null) {
+        counter.incrementAndGet();
+      }
+    }
   }
 }
