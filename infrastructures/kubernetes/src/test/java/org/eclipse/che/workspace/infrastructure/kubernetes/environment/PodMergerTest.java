@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
@@ -271,28 +270,6 @@ public class PodMergerTest {
       {Arrays.asList(27L, 27L), 27L},
       {Arrays.asList(27L, null), 27L}
     };
-  }
-
-  @Test
-  public void shouldLeftUnsetIfTerminationGracePeriodIsNotSet() throws Exception {
-    // given
-    List<PodData> podData =
-        Arrays.asList(
-            new PodData(
-                new PodSpecBuilder().withTerminationGracePeriodSeconds(null).build(),
-                new ObjectMetaBuilder().build()),
-            new PodData(
-                new PodSpecBuilder().withTerminationGracePeriodSeconds(null).build(),
-                new ObjectMetaBuilder().build()),
-            new PodData(
-                new PodSpecBuilder().withTerminationGracePeriodSeconds(null).build(),
-                new ObjectMetaBuilder().build()));
-    // when
-    Deployment merged = podMerger.merge(podData);
-
-    // then
-    PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
-    assertNull(podTemplate.getSpec().getTerminationGracePeriodSeconds());
   }
 
   @Test
