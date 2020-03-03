@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
@@ -240,52 +241,85 @@ public class PodMergerTest {
   @Test
   public void shouldMergeTerminationGracePeriodSharedByPods() throws Exception {
     // given
-    PodSpec podSpec1 = new PodSpecBuilder().withTerminationGracePeriodSeconds(24L).build();
-    PodData podData1 = new PodData(podSpec1, new ObjectMetaBuilder().build());
-    PodSpec podSpec2 = new PodSpecBuilder().withTerminationGracePeriodSeconds(24L).build();
-    PodData podData2 = new PodData(podSpec2, new ObjectMetaBuilder().build());
+    List<PodData> podData =
+        Arrays.asList(
+            new PodData(
+                new PodSpecBuilder().withTerminationGracePeriodSeconds(27L).build(),
+                new ObjectMetaBuilder().build()),
+            new PodData(
+                new PodSpecBuilder().withTerminationGracePeriodSeconds(27L).build(),
+                new ObjectMetaBuilder().build()));
 
     // when
-    Deployment merged = podMerger.merge(Arrays.asList(podData1, podData2));
+    Deployment merged = podMerger.merge(podData);
 
     // then
     PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
-    assertEquals(podTemplate.getSpec().getTerminationGracePeriodSeconds(), (Long) 24L);
+    assertEquals(podTemplate.getSpec().getTerminationGracePeriodSeconds(), (Long) 27L);
   }
 
   @Test
   public void shouldMergeTerminationGracePeriodSharedByPodsIfOneIsNull() throws Exception {
     // given
-    PodSpec podSpec1 = new PodSpecBuilder().withTerminationGracePeriodSeconds(null).build();
-    PodData podData1 = new PodData(podSpec1, new ObjectMetaBuilder().build());
-    PodSpec podSpec2 = new PodSpecBuilder().withTerminationGracePeriodSeconds(24L).build();
-    PodData podData2 = new PodData(podSpec2, new ObjectMetaBuilder().build());
+    List<PodData> podData =
+        Arrays.asList(
+            new PodData(
+                new PodSpecBuilder().withTerminationGracePeriodSeconds(27L).build(),
+                new ObjectMetaBuilder().build()),
+            new PodData(
+                new PodSpecBuilder().withTerminationGracePeriodSeconds(null).build(),
+                new ObjectMetaBuilder().build()));
 
     // when
-    Deployment merged = podMerger.merge(Arrays.asList(podData1, podData2));
+    Deployment merged = podMerger.merge(podData);
 
     // then
     PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
-    assertEquals(podTemplate.getSpec().getTerminationGracePeriodSeconds(), (Long) 24L);
+    assertEquals(podTemplate.getSpec().getTerminationGracePeriodSeconds(), (Long) 27L);
   }
 
-  @Test(
-      expectedExceptions = ValidationException.class,
-      expectedExceptionsMessageRegExp =
-          "Cannot merge pods with a different configuration of the termination grace period: 24, 25")
-  public void shouldFailIfTerminationGracePeriodSharedBDiffersInPods() throws Exception {
+  @Test
+  public void shouldSetMaximumExplicitlyDefinedTerminationGracePeriodS() throws Exception {
     // given
-    PodSpec podSpec1 = new PodSpecBuilder().withTerminationGracePeriodSeconds(24L).build();
-    PodData podData1 = new PodData(podSpec1, new ObjectMetaBuilder().build());
-    PodSpec podSpec2 = new PodSpecBuilder().withTerminationGracePeriodSeconds(25L).build();
-    PodData podData2 = new PodData(podSpec2, new ObjectMetaBuilder().build());
-
+    List<PodData> podData =
+        Arrays.asList(
+            new PodData(
+                new PodSpecBuilder().withTerminationGracePeriodSeconds(32L).build(),
+                new ObjectMetaBuilder().build()),
+            new PodData(
+                new PodSpecBuilder().withTerminationGracePeriodSeconds(null).build(),
+                new ObjectMetaBuilder().build()),
+            new PodData(
+                new PodSpecBuilder().withTerminationGracePeriodSeconds(27L).build(),
+                new ObjectMetaBuilder().build()));
     // when
-    Deployment merged = podMerger.merge(Arrays.asList(podData1, podData2));
+    Deployment merged = podMerger.merge(podData);
 
     // then
     PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
-    assertEquals(podTemplate.getSpec().getTerminationGracePeriodSeconds(), (Long) 42L);
+    assertEquals(podTemplate.getSpec().getTerminationGracePeriodSeconds(), (Long) 32L);
+  }
+
+  @Test
+  public void shouldLeftUnsetIfTerminationGracePeriodIsNotSet() throws Exception {
+    // given
+    List<PodData> podData =
+        Arrays.asList(
+            new PodData(
+                new PodSpecBuilder().withTerminationGracePeriodSeconds(null).build(),
+                new ObjectMetaBuilder().build()),
+            new PodData(
+                new PodSpecBuilder().withTerminationGracePeriodSeconds(null).build(),
+                new ObjectMetaBuilder().build()),
+            new PodData(
+                new PodSpecBuilder().withTerminationGracePeriodSeconds(null).build(),
+                new ObjectMetaBuilder().build()));
+    // when
+    Deployment merged = podMerger.merge(podData);
+
+    // then
+    PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
+    assertNull(podTemplate.getSpec().getTerminationGracePeriodSeconds());
   }
 
   @Test

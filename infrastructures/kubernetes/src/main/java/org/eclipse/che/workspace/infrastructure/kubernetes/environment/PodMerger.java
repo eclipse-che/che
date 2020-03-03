@@ -115,11 +115,17 @@ public class PodMerger {
           baseSpec.getImagePullSecrets().add(pullSecret);
         }
       }
-
-      baseSpec.setTerminationGracePeriodSeconds(
-          mergeTerminationGracePeriodSeconds(
-              baseSpec.getTerminationGracePeriodSeconds(),
-              podData.getSpec().getTerminationGracePeriodSeconds()));
+      if (podData.getSpec().getTerminationGracePeriodSeconds() != null) {
+        if (baseSpec.getTerminationGracePeriodSeconds() != null) {
+          baseSpec.setTerminationGracePeriodSeconds(
+              Long.max(
+                  baseSpec.getTerminationGracePeriodSeconds(),
+                  podData.getSpec().getTerminationGracePeriodSeconds()));
+        } else {
+          baseSpec.setTerminationGracePeriodSeconds(
+              podData.getSpec().getTerminationGracePeriodSeconds());
+        }
+      }
 
       baseSpec.setSecurityContext(
           mergeSecurityContexts(
@@ -173,14 +179,6 @@ public class PodMerger {
   private String mergeServiceAccountName(@Nullable String a, @Nullable String b)
       throws ValidationException {
     return nonNullOrEqual(a, b, "Cannot merge pods with different service account names: %s, %s");
-  }
-
-  private Long mergeTerminationGracePeriodSeconds(@Nullable Long a, @Nullable Long b)
-      throws ValidationException {
-    return nonNullOrEqual(
-        a,
-        b,
-        "Cannot merge pods with a different configuration of the termination grace period: %d, %d");
   }
 
   @Nullable
