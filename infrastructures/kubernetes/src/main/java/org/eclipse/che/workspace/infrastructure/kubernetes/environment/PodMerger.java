@@ -116,6 +116,11 @@ public class PodMerger {
         }
       }
 
+      baseSpec.setTerminationGracePeriodSeconds(
+          mergeTerminationGracePeriodSeconds(
+              baseSpec.getTerminationGracePeriodSeconds(),
+              podData.getSpec().getTerminationGracePeriodSeconds()));
+
       baseSpec.setSecurityContext(
           mergeSecurityContexts(
               baseSpec.getSecurityContext(), podData.getSpec().getSecurityContext()));
@@ -168,6 +173,14 @@ public class PodMerger {
   private String mergeServiceAccountName(@Nullable String a, @Nullable String b)
       throws ValidationException {
     return nonNullOrEqual(a, b, "Cannot merge pods with different service account names: %s, %s");
+  }
+
+  private Long mergeTerminationGracePeriodSeconds(@Nullable Long a, @Nullable Long b)
+      throws ValidationException {
+    return nonNullOrEqual(
+        a,
+        b,
+        "Cannot merge pods with a different configuration of the termination grace period: %d, %d");
   }
 
   @Nullable

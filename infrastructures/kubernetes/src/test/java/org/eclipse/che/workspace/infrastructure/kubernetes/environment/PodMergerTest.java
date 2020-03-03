@@ -238,6 +238,57 @@ public class PodMergerTest {
   }
 
   @Test
+  public void shouldMergeTerminationGracePeriodSharedByPods() throws Exception {
+    // given
+    PodSpec podSpec1 = new PodSpecBuilder().withTerminationGracePeriodSeconds(24L).build();
+    PodData podData1 = new PodData(podSpec1, new ObjectMetaBuilder().build());
+    PodSpec podSpec2 = new PodSpecBuilder().withTerminationGracePeriodSeconds(24L).build();
+    PodData podData2 = new PodData(podSpec2, new ObjectMetaBuilder().build());
+
+    // when
+    Deployment merged = podMerger.merge(Arrays.asList(podData1, podData2));
+
+    // then
+    PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
+    assertEquals(podTemplate.getSpec().getTerminationGracePeriodSeconds(), (Long) 24L);
+  }
+
+  @Test
+  public void shouldMergeTerminationGracePeriodSharedByPodsIfOneIsNull() throws Exception {
+    // given
+    PodSpec podSpec1 = new PodSpecBuilder().withTerminationGracePeriodSeconds(null).build();
+    PodData podData1 = new PodData(podSpec1, new ObjectMetaBuilder().build());
+    PodSpec podSpec2 = new PodSpecBuilder().withTerminationGracePeriodSeconds(24L).build();
+    PodData podData2 = new PodData(podSpec2, new ObjectMetaBuilder().build());
+
+    // when
+    Deployment merged = podMerger.merge(Arrays.asList(podData1, podData2));
+
+    // then
+    PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
+    assertEquals(podTemplate.getSpec().getTerminationGracePeriodSeconds(), (Long) 24L);
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Cannot merge pods with a different configuration of the termination grace period: 24, 25")
+  public void shouldFailIfTerminationGracePeriodSharedBDiffersInPods() throws Exception {
+    // given
+    PodSpec podSpec1 = new PodSpecBuilder().withTerminationGracePeriodSeconds(24L).build();
+    PodData podData1 = new PodData(podSpec1, new ObjectMetaBuilder().build());
+    PodSpec podSpec2 = new PodSpecBuilder().withTerminationGracePeriodSeconds(25L).build();
+    PodData podData2 = new PodData(podSpec2, new ObjectMetaBuilder().build());
+
+    // when
+    Deployment merged = podMerger.merge(Arrays.asList(podData1, podData2));
+
+    // then
+    PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
+    assertEquals(podTemplate.getSpec().getTerminationGracePeriodSeconds(), (Long) 42L);
+  }
+
+  @Test
   public void shouldAssignSecurityContextSharedByPods() throws Exception {
     // given
     PodSpec podSpec1 =
