@@ -12,7 +12,6 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases;
 
 import static java.lang.String.format;
-import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.DEPLOY_BROKER_PHASE;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -157,17 +156,9 @@ public class DeployBroker extends BrokerPhase {
 
   private void watchLogsIfDebugEnabled(Map<String, String> startOptions, Pod pluginBrokerPod)
       throws InfrastructureException {
-    if (startOptions == null || startOptions.isEmpty()) {
+    if (LogWatcher.shouldWatchLogs(startOptions)) {
       LOG.debug(
-          "'startOptions' is null or empty so we won't watch the plugin broker pod logs for workspace '{}'",
-          runtimeId.getWorkspaceId());
-      return;
-    }
-    boolean shouldWatchContainerStartupLogs =
-        Boolean.parseBoolean(
-            startOptions.getOrDefault(DEBUG_WORKSPACE_START, Boolean.FALSE.toString()));
-
-    if (shouldWatchContainerStartupLogs) {
+          "Will watch the logs of plugin broker of workspace '{}'", runtimeId.getWorkspaceId());
       namespace
           .deployments()
           .watchLogs(

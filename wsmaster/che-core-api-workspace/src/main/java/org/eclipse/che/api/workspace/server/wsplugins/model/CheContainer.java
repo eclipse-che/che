@@ -34,6 +34,15 @@ public class CheContainer {
   @JsonProperty("memoryLimit")
   private String memoryLimit = null;
 
+  @JsonProperty("memoryRequest")
+  private String memoryRequest = null;
+
+  @JsonProperty("cpuLimit")
+  private String cpuLimit = null;
+
+  @JsonProperty("cpuRequest")
+  private String cpuRequest = null;
+
   @JsonProperty("mountSources")
   private boolean mountSources = false;
 
@@ -149,6 +158,45 @@ public class CheContainer {
     this.memoryLimit = memoryLimit;
   }
 
+  public CheContainer memoryRequest(String memoryRequest) {
+    this.memoryRequest = memoryRequest;
+    return this;
+  }
+
+  public String getMemoryRequest() {
+    return memoryRequest;
+  }
+
+  public void setMemoryRequest(String memoryRequest) {
+    this.memoryRequest = memoryRequest;
+  }
+
+  public CheContainer cpuLimit(String cpuLimit) {
+    this.cpuLimit = cpuLimit;
+    return this;
+  }
+
+  public String getCpuLimit() {
+    return cpuLimit;
+  }
+
+  public void setCpuLimit(String cpuLimit) {
+    this.cpuLimit = cpuLimit;
+  }
+
+  public CheContainer cpuRequest(String cpuRequest) {
+    this.cpuRequest = cpuRequest;
+    return this;
+  }
+
+  public String getCpuRequest() {
+    return cpuRequest;
+  }
+
+  public void setCpuRequest(String cpuRequest) {
+    this.cpuRequest = cpuRequest;
+  }
+
   public CheContainer mountSources(boolean mountSources) {
     this.mountSources = mountSources;
     return this;
@@ -209,6 +257,9 @@ public class CheContainer {
         && Objects.equals(getVolumes(), that.getVolumes())
         && Objects.equals(getPorts(), that.getPorts())
         && Objects.equals(getMemoryLimit(), that.getMemoryLimit())
+        && Objects.equals(getMemoryRequest(), that.getMemoryRequest())
+        && Objects.equals(getCpuLimit(), that.getCpuLimit())
+        && Objects.equals(getCpuRequest(), that.getCpuRequest())
         && Objects.equals(getName(), that.getName())
         && isMountSources() == that.isMountSources()
         && Objects.equals(getCommand(), that.getCommand())
@@ -224,6 +275,9 @@ public class CheContainer {
         getVolumes(),
         getPorts(),
         getMemoryLimit(),
+        getMemoryRequest(),
+        getCpuLimit(),
+        getCpuRequest(),
         getName(),
         isMountSources(),
         getCommand(),
@@ -246,6 +300,12 @@ public class CheContainer {
         + ports
         + ", memoryLimit="
         + memoryLimit
+        + ", memoryRequest="
+        + memoryRequest
+        + ", cpuLimit="
+        + cpuLimit
+        + ", cpuRequest="
+        + cpuRequest
         + ", name="
         + name
         + ", mountSources="

@@ -117,7 +117,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
 
     ListenBrokerEvents listenBrokerEvents = getListenEventPhase(workspaceId, brokersResult);
     PrepareStorage prepareStorage =
-        getPrepareStoragePhase(identity, startSynchronizer, brokerEnvironment);
+        getPrepareStoragePhase(identity, startSynchronizer, brokerEnvironment, startOptions);
     WaitBrokerResult waitBrokerResult = getWaitBrokerPhase(workspaceId, brokersResult);
     DeployBroker deployBroker =
         getDeployBrokerPhase(
@@ -134,9 +134,10 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   private PrepareStorage getPrepareStoragePhase(
       RuntimeIdentity identity,
       StartSynchronizer startSynchronizer,
-      KubernetesEnvironment brokerEnvironment) {
+      KubernetesEnvironment brokerEnvironment,
+      Map<String, String> startOptions) {
     return new PrepareStorage(
-        identity, brokerEnvironment, volumesStrategy, startSynchronizer, tracer);
+        identity, brokerEnvironment, volumesStrategy, startSynchronizer, tracer, startOptions);
   }
 
   private DeployBroker getDeployBrokerPhase(

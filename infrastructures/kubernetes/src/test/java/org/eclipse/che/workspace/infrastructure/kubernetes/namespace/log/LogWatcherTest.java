@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatcher.DEFAULT_LOG_LIMIT_BYTES;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -184,5 +185,25 @@ public class LogWatcherTest {
   @Test(dataProvider = "logLimitData")
   public void testGettingLogLimitBytes(Map<String, String> startOptions, long expectedLimit) {
     assertEquals(LogWatcher.getLogLimitBytes(startOptions), expectedLimit);
+  }
+
+  @DataProvider
+  public Object[][] shouldWatchLogsData() {
+    return new Object[][] {
+      {null, false},
+      {emptyMap(), false},
+      {singletonMap("bla", "bol"), false},
+      {singletonMap(DEBUG_WORKSPACE_START, "blbost"), false},
+      {singletonMap(DEBUG_WORKSPACE_START, "false"), false},
+      {singletonMap(DEBUG_WORKSPACE_START, "true"), true},
+      {ImmutableMap.of(DEBUG_WORKSPACE_START, "true", "bla", "bol"), true},
+      {ImmutableMap.of(DEBUG_WORKSPACE_START, "tttt", "bla", "bol"), false},
+    };
+  }
+
+  @Test(dataProvider = "shouldWatchLogsData")
+  public void testShouldWatchLogsFromStartOptions(
+      Map<String, String> startOptions, boolean expected) {
+    assertEquals(LogWatcher.shouldWatchLogs(startOptions), expected);
   }
 }

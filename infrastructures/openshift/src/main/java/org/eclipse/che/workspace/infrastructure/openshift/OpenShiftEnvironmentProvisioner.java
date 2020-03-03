@@ -31,7 +31,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNames
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSshKeysProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.ContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
@@ -62,7 +62,7 @@ public class OpenShiftEnvironmentProvisioner
   private final ServersConverter<OpenShiftEnvironment> serversConverter;
   private final EnvVarsConverter envVarsConverter;
   private final RestartPolicyRewriter restartPolicyRewriter;
-  private final RamLimitRequestProvisioner ramLimitProvisioner;
+  private final ContainerResourceProvisioner resourceLimitRequestProvisioner;
   private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
   private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
   private final ImagePullSecretProvisioner imagePullSecretProvisioner;
@@ -83,7 +83,7 @@ public class OpenShiftEnvironmentProvisioner
       EnvVarsConverter envVarsConverter,
       RestartPolicyRewriter restartPolicyRewriter,
       WorkspaceVolumesStrategy volumesStrategy,
-      RamLimitRequestProvisioner ramLimitProvisioner,
+      ContainerResourceProvisioner resourceLimitRequestProvisioner,
       LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
       PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
       ImagePullSecretProvisioner imagePullSecretProvisioner,
@@ -101,7 +101,7 @@ public class OpenShiftEnvironmentProvisioner
     this.serversConverter = serversConverter;
     this.envVarsConverter = envVarsConverter;
     this.restartPolicyRewriter = restartPolicyRewriter;
-    this.ramLimitProvisioner = ramLimitProvisioner;
+    this.resourceLimitRequestProvisioner = resourceLimitRequestProvisioner;
     this.logsVolumeMachineProvisioner = logsVolumeMachineProvisioner;
     this.podTerminationGracePeriodProvisioner = podTerminationGracePeriodProvisioner;
     this.imagePullSecretProvisioner = imagePullSecretProvisioner;
@@ -139,7 +139,7 @@ public class OpenShiftEnvironmentProvisioner
     restartPolicyRewriter.provision(osEnv, identity);
     uniqueNamesProvisioner.provision(osEnv, identity);
     routeTlsProvisioner.provision(osEnv, identity);
-    ramLimitProvisioner.provision(osEnv, identity);
+    resourceLimitRequestProvisioner.provision(osEnv, identity);
     podTerminationGracePeriodProvisioner.provision(osEnv, identity);
     imagePullSecretProvisioner.provision(osEnv, identity);
     proxySettingsProvisioner.provision(osEnv, identity);

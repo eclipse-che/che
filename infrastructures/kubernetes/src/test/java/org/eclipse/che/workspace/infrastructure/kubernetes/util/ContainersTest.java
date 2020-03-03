@@ -15,8 +15,6 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
@@ -42,7 +40,10 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class ContainersTest {
 
-  public static final long RAM_LIMIT = 2147483648L;
+  private static final long RAM_LIMIT = 2147483648L;
+  private static final long RAM_REQUEST = 1474836480L;
+  private static final float CPU_LIMIT = 1.782f;
+  private static final float CPU_REQUEST = 0.223f;
 
   @Mock private Container container;
   @Mock private ResourceRequirements resource;
@@ -59,59 +60,73 @@ public class ContainersTest {
     limits.put("cpu", new Quantity("1.5"));
     lenient()
         .when(resource.getLimits())
-        .thenReturn(ImmutableMap.of("memory", new Quantity(String.valueOf(RAM_LIMIT))));
+        .thenReturn(
+            ImmutableMap.of(
+                "memory", new Quantity(String.valueOf(RAM_LIMIT)),
+                "cpu", new Quantity(String.valueOf(CPU_LIMIT))));
+    lenient()
+        .when(resource.getRequests())
+        .thenReturn(
+            ImmutableMap.of(
+                "memory", new Quantity(String.valueOf(RAM_REQUEST)),
+                "cpu", new Quantity(String.valueOf(CPU_REQUEST))));
   }
 
   @Test
-  public void testReturnContainerRamLimit() {
-    long actual = Containers.getRamLimit(container);
+  public void testReturnContainerRamLimitAndRequest() {
+    long limit = Containers.getRamLimit(container);
+    long request = Containers.getRamRequest(container);
 
-    assertEquals(actual, RAM_LIMIT);
+    assertEquals(limit, RAM_LIMIT);
+    assertEquals(request, RAM_REQUEST);
   }
 
   @Test
-  public void testReturnsZeroContainerRamLimitWhenResourceIsNull() {
+  public void testReturnContainerCPULimitAndRequest() {
+    float limit = Containers.getCpuLimit(container);
+    float request = Containers.getCpuRequest(container);
+
+    assertEquals(limit, CPU_LIMIT);
+    assertEquals(request, CPU_REQUEST);
+  }
+
+  @Test
+  public void testReturnsZeroWhenContainerResourcesIsNull() {
     when(container.getResources()).thenReturn(null);
 
-    final long actual = Containers.getRamLimit(container);
-
-    assertEquals(actual, 0);
+    assertEquals(Containers.getRamLimit(container), 0);
+    assertEquals(Containers.getRamRequest(container), 0);
+    assertEquals(Containers.getCpuLimit(container), 0, 0.0);
+    assertEquals(Containers.getCpuRequest(container), 0, 0.0);
   }
 
   @Test
-  public void testReturnsZeroContainerRamLimitWhenResourceDoesNotContainIt() {
+  public void testReturnsZeroResourceWhenResourcesDoesNotContainIt() {
     when(resource.getLimits()).thenReturn(Collections.emptyMap());
+    when(resource.getRequests()).thenReturn(Collections.emptyMap());
 
-    final long actual = Containers.getRamLimit(container);
-
-    assertEquals(actual, 0);
+    assertEquals(Containers.getRamLimit(container), 0);
+    assertEquals(Containers.getRamRequest(container), 0);
+    assertEquals(Containers.getCpuLimit(container), 0, 0.0);
+    assertEquals(Containers.getCpuRequest(container), 0, 0.0);
   }
 
   @Test
-  public void testReturnsZeroContainerRamLimitWhenActualValueIsNull() {
-    when(resource.getLimits()).thenReturn(ImmutableMap.of("memory", new Quantity()));
+  public void testReturnsZeroContainerLimitWhenActualValueIsNull() {
+    when(resource.getLimits())
+        .thenReturn(ImmutableMap.of("memory", new Quantity(), "cpu", new Quantity()));
 
-    final long actual = Containers.getRamLimit(container);
-
-    assertEquals(actual, 0);
+    assertEquals(Containers.getRamLimit(container), 0);
+    assertEquals(Containers.getCpuLimit(container), 0, 0.0);
   }
 
   @Test
-  public void testOverridesContainerRamLimit() {
-    Containers.addRamLimit(container, 3221225472L);
+  public void testReturnsZeroContainerRequestWhenActualValueIsNull() {
+    when(resource.getRequests())
+        .thenReturn(ImmutableMap.of("memory", new Quantity(), "cpu", new Quantity()));
 
-    assertTrue(limits.containsKey("cpu"));
-    assertNotEquals(limits.get("memory"), "3221225472");
-  }
-
-  @Test
-  public void testAddContainerRamLimitWhenItNotPresent() {
-    final Map<String, Quantity> limits = new HashMap<>();
-    when(resource.getLimits()).thenReturn(limits);
-
-    Containers.addRamLimit(container, RAM_LIMIT);
-
-    assertNotEquals(limits.get("memory"), String.valueOf(RAM_LIMIT));
+    assertEquals(Containers.getRamRequest(container), 0);
+    assertEquals(Containers.getCpuRequest(container), 0, 0.0);
   }
 
   @Test
@@ -126,6 +141,39 @@ public class ContainersTest {
   }
 
   @Test
+  public void testAddContainerCPULimitWhenResourceIsNull() {
+    when(container.getResources()).thenReturn(null);
+
+    Containers.addCpuLimit(container, CPU_LIMIT);
+
+    verify(container).setResources(resourceCaptor.capture());
+    final ResourceRequirements captured = resourceCaptor.getValue();
+    assertEquals(captured.getLimits().get("cpu").getAmount(), String.valueOf(CPU_LIMIT));
+  }
+
+  @Test
+  public void testAddContainerRamRequestWhenResourceIsNull() {
+    when(container.getResources()).thenReturn(null);
+
+    Containers.addRamRequest(container, RAM_REQUEST);
+
+    verify(container).setResources(resourceCaptor.capture());
+    final ResourceRequirements captured = resourceCaptor.getValue();
+    assertEquals(captured.getRequests().get("memory").getAmount(), String.valueOf(RAM_REQUEST));
+  }
+
+  @Test
+  public void testAddContainerCPURequestWhenResourceIsNull() {
+    when(container.getResources()).thenReturn(null);
+
+    Containers.addCpuRequest(container, CPU_REQUEST);
+
+    verify(container).setResources(resourceCaptor.capture());
+    final ResourceRequirements captured = resourceCaptor.getValue();
+    assertEquals(captured.getRequests().get("cpu").getAmount(), String.valueOf(CPU_REQUEST));
+  }
+
+  @Test
   public void testAddContainerRamLimitWhenResourceDoesNotContainAnyLimits() {
     when(resource.getLimits()).thenReturn(null);
 
@@ -134,6 +182,39 @@ public class ContainersTest {
     verify(container).setResources(resourceCaptor.capture());
     final ResourceRequirements captured = resourceCaptor.getValue();
     assertEquals(captured.getLimits().get("memory").getAmount(), String.valueOf(RAM_LIMIT));
+  }
+
+  @Test
+  public void testAddContainerCPULimitWhenResourceDoesNotContainAnyLimits() {
+    when(resource.getLimits()).thenReturn(null);
+
+    Containers.addCpuLimit(container, CPU_LIMIT);
+
+    verify(container).setResources(resourceCaptor.capture());
+    final ResourceRequirements captured = resourceCaptor.getValue();
+    assertEquals(captured.getLimits().get("cpu").getAmount(), String.valueOf(CPU_LIMIT));
+  }
+
+  @Test
+  public void testAddContainerRamRequestWhenResourceDoesNotContainAnyLimits() {
+    when(resource.getLimits()).thenReturn(null);
+
+    Containers.addRamRequest(container, RAM_REQUEST);
+
+    verify(container).setResources(resourceCaptor.capture());
+    final ResourceRequirements captured = resourceCaptor.getValue();
+    assertEquals(captured.getRequests().get("memory").getAmount(), String.valueOf(RAM_REQUEST));
+  }
+
+  @Test
+  public void testAddContainerCPURequestWhenResourceDoesNotContainAnyLimits() {
+    when(resource.getLimits()).thenReturn(null);
+
+    Containers.addCpuRequest(container, CPU_REQUEST);
+
+    verify(container).setResources(resourceCaptor.capture());
+    final ResourceRequirements captured = resourceCaptor.getValue();
+    assertEquals(captured.getRequests().get("cpu").getAmount(), String.valueOf(CPU_REQUEST));
   }
 
   @Test(dataProvider = "k8sNotionRamLimitProvider")
@@ -147,16 +228,6 @@ public class ContainersTest {
     assertEquals(captured.getLimits().get("memory").getAmount(), ramLimit);
   }
 
-  @DataProvider
-  public static Object[][] k8sNotionRamLimitProvider() {
-    return new Object[][] {
-      {"123456789", new ResourceRequirements()},
-      {"1M", new ResourceRequirements()},
-      {"10Ki", null},
-      {"10G", null},
-    };
-  }
-
   @Test(dataProvider = "k8sNotionRamLimitProvider")
   public void testAddContainerRamRequestInK8sNotion(
       String ramRequest, ResourceRequirements resources) {
@@ -167,5 +238,48 @@ public class ContainersTest {
     verify(container).setResources(resourceCaptor.capture());
     ResourceRequirements captured = resourceCaptor.getValue();
     assertEquals(captured.getRequests().get("memory").getAmount(), ramRequest);
+  }
+
+  @DataProvider
+  public static Object[][] k8sNotionRamLimitProvider() {
+    return new Object[][] {
+      {"123456789", new ResourceRequirements()},
+      {"1M", new ResourceRequirements()},
+      {"10Ki", null},
+      {"10G", null},
+    };
+  }
+
+  @Test(dataProvider = "k8sNotionCpuLimitProvider")
+  public void testAddContainerCPULimitInK8sNotion(String cpuLimit, ResourceRequirements resources) {
+    when(container.getResources()).thenReturn(resources);
+
+    Containers.addCpuLimit(container, cpuLimit);
+
+    verify(container).setResources(resourceCaptor.capture());
+    ResourceRequirements captured = resourceCaptor.getValue();
+    assertEquals(captured.getLimits().get("cpu").getAmount(), cpuLimit);
+  }
+
+  @Test(dataProvider = "k8sNotionCpuLimitProvider")
+  public void testAddContainerCpuRequestInK8sNotion(
+      String cpuRequest, ResourceRequirements resources) {
+    when(container.getResources()).thenReturn(resources);
+
+    Containers.addCpuRequest(container, cpuRequest);
+
+    verify(container).setResources(resourceCaptor.capture());
+    ResourceRequirements captured = resourceCaptor.getValue();
+    assertEquals(captured.getRequests().get("cpu").getAmount(), cpuRequest);
+  }
+
+  @DataProvider
+  public static Object[][] k8sNotionCpuLimitProvider() {
+    return new Object[][] {
+      {"100m", new ResourceRequirements()},
+      {"1000m", new ResourceRequirements()},
+      {"112m", null},
+      {"155m", null},
+    };
   }
 }
