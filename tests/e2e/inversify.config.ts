@@ -54,6 +54,7 @@ import { ITokenHandler } from './utils/requestHandlers/tokens/ITokenHandler';
 import { CheApiRequestHandler } from './utils/requestHandlers/CheApiRequestHandler';
 import { CheGitApi } from './utils/VCS/CheGitApi';
 import { GitHubUtil } from './utils/VCS/github/GitHubUtil';
+import { GetStarted } from './pageobjects/dashboard/GetStarted';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -105,5 +106,6 @@ e2eContainer.bind<PreferencesHandler>(CLASSES.PreferencesHandler).to(Preferences
 e2eContainer.bind<CheApiRequestHandler>(CLASSES.CheApiRequestHandler).to(CheApiRequestHandler);
 e2eContainer.bind<CheGitApi>(CLASSES.CheGitApi).to(CheGitApi);
 e2eContainer.bind<GitHubUtil>(CLASSES.GitHubUtil).to(GitHubUtil);
+e2eContainer.bind<GetStarted>(CLASSES.GetStarted).to(GetStarted);
 
 export { e2eContainer };
