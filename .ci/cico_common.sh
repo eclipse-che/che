@@ -166,15 +166,15 @@ buildImages() {
      done
 }
 
-tagImages() {
+tagLatestImages() {
     for image in ${IMAGES_LIST[@]}
      do
-         echo y | docker tag "${REGISTRY}/${image}:$1"
+         echo y | docker tag "${image}:$1" "${image}:latest"
          if [[ ${image} == "${ORGANIZATION}/che-server" ]]; then
-           docker tag "${REGISTRY}/${image}:$1" "${REGISTRY}/${image}:$1-centos"
+           docker tag "${image}:$1-centos" "${image}:latest-centos"
          fi
          if [[ $? -ne 0 ]]; then
-           die_with  "docker push of '${image}' image is failed!"
+           die_with  "docker tag of '${image}' image is failed!"
          fi
      done
 }
@@ -188,19 +188,21 @@ pushImagesOnQuay() {
          return
     fi
     for image in ${IMAGES_LIST[@]}
-     do
-         echo y | docker push "${image}:$1"
-         if [[ $2 == "pushLatest" ]]; then
-            echo y | docker push "${REGISTRY}/${image}:latest"
-         fi
-
-         if [[ ${image} == "${REGISTRY}/${ORGANIZATION}/che-server" ]]; then
-           echo y | docker push "${REGISTRY}/${ORGANIZATION}/che-server:$1-centos"
-         fi
-         if [[ $? -ne 0 ]]; then
-           die_with  "docker push of '${image}' image is failed!"
-         fi
-     done
+        do
+            echo y | docker push "${image}:$1"
+            if [[ $2 == "pushLatest" ]]; then
+                echo y | docker push "${REGISTRY}/${image}:latest"
+            fi
+            if [[ ${image} == "${REGISTRY}/${ORGANIZATION}/che-server" ]]; then
+                if [[ $2 == "pushLatest" ]]; then
+                echo y | docker push "${REGISTRY}/${ORGANIZATION}/che-server:latest-centos"
+                fi
+            echo y | docker push "${REGISTRY}/${ORGANIZATION}/che-server:$1-centos"
+            fi
+            if [[ $? -ne 0 ]]; then
+            die_with  "docker push of '${image}' image is failed!"
+            fi
+        done
 }
 
 
@@ -225,7 +227,6 @@ releaseProject() {
     git push --tags ||  die_with "Failed to push tags. Please do this manually"
     git checkout ${tag}
     buildImages  ${tag}
-    pushImagesOnQuay ${tag}
-    tagImages "latest"
-    pushImagesOnQuay "latest"
+    tagLatestImages ${tag}
+    pushImagesOnQuay ${tag} pushLatest
 }
