@@ -52,12 +52,7 @@ export class FactoryConfig {
           title: 'Load Factory',
           templateUrl: 'app/factories/load-factory/load-factory.html',
           controller: 'LoadFactoryController',
-          controllerAs: 'loadFactoryController',
-          resolve: {
-            initData: ['factoryConfigService', (svc: FactoryConfigService) => {
-              return svc.allowFactoriesRoutes();
-            }]
-          }
+          controllerAs: 'loadFactoryController'
         })
         .accessWhen('/load-factory/:id', {
           title: 'Load Factory',
