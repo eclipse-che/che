@@ -28,6 +28,7 @@
         <module>che-core-api-auth-shared</module>
         <module>che-core-api-auth</module>
         <module>che-core-api-auth-github</module>
+        <module>che-core-api-auth-openshift</module>
         <module>che-core-api-workspace-shared</module>
         <module>che-core-api-workspace</module>
         <module>che-core-api-workspace-activity</module>

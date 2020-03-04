@@ -88,6 +88,7 @@ import org.eclipse.che.security.PBKDF2PasswordEncryptor;
 import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.security.oauth.EmbeddedOAuthAPI;
 import org.eclipse.che.security.oauth.OAuthAPI;
+import org.eclipse.che.security.oauth.OpenShiftOAuthModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructure;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -264,6 +265,8 @@ public class WsMasterModule extends AbstractModule {
       install(new TracingMetricsModule());
     }
     install(new ExecutorWrapperModule());
+
+    install(new OpenShiftOAuthModule());
   }
 
   private void configureSingleUserMode(Map<String, String> persistenceProperties) {
