@@ -30,7 +30,7 @@ public class KubernetesClientMeter implements MeterBinder {
 
   @Override
   public void bindTo(MeterRegistry registry) {
-    Gauge.builder("k8s_client_invocation_total", countedClientFactory::getClientInvocationsCount)
+    Gauge.builder("k8s.client.invocation.total", countedClientFactory::getClientInvocationsCount)
         .register(registry);
   }
 }
