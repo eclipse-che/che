@@ -49,6 +49,9 @@ global:
     ## then CA certificate from `tls.secretName` will be propagated to Che components' trust stores
     useSelfSignedCerts: false
 
+    ## Name of the config-map with public certificates to add to Java trust store of the Che server.
+    serverTrustStoreConfigMapName: ""
+
 
   ## If using git self-signed certificate is enabled
   ## then certificate from `cheGitSelfSignedCertConfigMapName` will be propagated to Che components'
