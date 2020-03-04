@@ -40,8 +40,8 @@ export class CheMultiuserTokenHandler implements ITokenHandler {
 
     /**
      * Append `/` if it's not in the URL yet. Keycloak doesn't handle double `//` in URL well.
-     * 
-     * @param keycloakUrl 
+     *
+     * @param keycloakUrl
      */
     private handleTrailingSlash(keycloakUrl: string) {
         if (!(new RegExp('/$').test(keycloakUrl))) {

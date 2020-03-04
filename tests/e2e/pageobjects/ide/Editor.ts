@@ -20,7 +20,7 @@ import { Logger } from '../../utils/Logger';
 @injectable()
 export class Editor {
     private static readonly SUGGESTION_WIDGET_BODY_CSS: string = 'div.visible[widgetId=\'editor.widget.suggestWidget\']';
-    private static readonly SUGGESTION_LOADING_XPATH: string = '//div[@widgetid=\'editor.widget.suggestWidget\']//div[@class=\'message\' and contains(.,\'Loading...\')]'
+    private static readonly SUGGESTION_LOADING_XPATH: string = '//div[@widgetid=\'editor.widget.suggestWidget\']//div[@class=\'message\' and contains(.,\'Loading...\')]';
     private static readonly ADDITIONAL_SHIFTING_TO_Y: number = 19;
     private static readonly ADDITIONAL_SHIFTING_TO_X: number = 1;
 

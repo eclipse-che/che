@@ -69,6 +69,7 @@ export class Dashboard {
         await this.driverHelper.waitVisibility(By.css(Dashboard.WORKSPACES_BUTTON_CSS), timeout);
         await this.driverHelper.waitVisibility(By.css(Dashboard.STACKS_BUTTON_CSS), timeout);
         await this.driverHelper.waitVisibility(By.css(Dashboard.FACTORIES_BUTTON_CSS), timeout);
+        await this.driverHelper.waitVisibility(By.xpath(Dashboard.GET_STARTED_BUTTON_XPATH), timeout);
     }
 
     async clickDashboardButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
