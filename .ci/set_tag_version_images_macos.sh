@@ -21,4 +21,7 @@ sed -i '' "s/che-postgres:nightly/che-postgres:$1/g" ../deploy/kubernetes/helm/c
 sed -i '' "s/che-keycloak:nightly/che-keycloak:$1/g" ../deploy/kubernetes/helm/che/custom-charts/che-keycloak/values.yaml
 sed -i '' "s/eclipse\/che-server:nightly/eclipse\/che-server:$1/g" ../deploy/kubernetes/helm/che/values.yaml
 
+sed -i '' "s/che-endpoint-watcher:nightly/che-endpoint-watcher:$1/g" ../deploy/kubernetes/helm/che/custom-charts/che-keycloak/templates/deployment.yaml
+sed -i '' "s/che-endpoint-watcher:nightly/che-endpoint-watcher:$1/g" ../deploy/kubernetes/helm/che/templates/deployment.yaml
+
 
