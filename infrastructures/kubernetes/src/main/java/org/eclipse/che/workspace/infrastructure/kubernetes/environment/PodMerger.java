@@ -115,6 +115,17 @@ public class PodMerger {
           baseSpec.getImagePullSecrets().add(pullSecret);
         }
       }
+      if (podData.getSpec().getTerminationGracePeriodSeconds() != null) {
+        if (baseSpec.getTerminationGracePeriodSeconds() != null) {
+          baseSpec.setTerminationGracePeriodSeconds(
+              Long.max(
+                  baseSpec.getTerminationGracePeriodSeconds(),
+                  podData.getSpec().getTerminationGracePeriodSeconds()));
+        } else {
+          baseSpec.setTerminationGracePeriodSeconds(
+              podData.getSpec().getTerminationGracePeriodSeconds());
+        }
+      }
 
       baseSpec.setSecurityContext(
           mergeSecurityContexts(
