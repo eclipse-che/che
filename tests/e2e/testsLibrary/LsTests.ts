@@ -10,7 +10,8 @@
 
 import { e2eContainer } from '../inversify.config';
 import { Editor, CLASSES, Ide } from '..';
-import { Key } from 'selenium-webdriver';
+import { Key, error } from 'selenium-webdriver';
+import { Logger } from '../utils/Logger';
 
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -18,7 +19,16 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
  export function errorHighlighting(openedTab: string, textToWrite: string, line: number) {
     test('Error highlighting', async () => {
         await editor.type(openedTab, textToWrite, line);
-        await editor.waitErrorInLine(line);
+        try {
+            await editor.waitErrorInLine(line);
+        } catch (err) {
+            if (!(err instanceof error.TimeoutError)) {
+                throw err;
+            }
+            // try again
+            Logger.debug(`Waiting for squiggly-error failed for the first time (issue #16166)`);
+            await editor.waitErrorInLine(line);
+        }
         for (let i = 0; i < textToWrite.length; i++) {
             await editor.performKeyCombination(openedTab, Key.BACK_SPACE);
         }

@@ -68,6 +68,10 @@ data:
   CHE_MULTIUSER: {{ .Values.global.multiuser | quote }}
   CHE_OAUTH_GITHUB_CLIENTID: {{ .Values.global.gitHubClientID | quote}}
   CHE_OAUTH_GITHUB_CLIENTSECRET: {{ .Values.global.gitHubClientSecret | quote}}
+  CHE_OAUTH_OPENSHIFT_CLIENTID: {{ .Values.global.openShiftClientID | quote}}
+  CHE_OAUTH_OPENSHIFT_CLIENTSECRET: {{ .Values.global.openShiftClientSecret | quote}}
+  CHE_OAUTH_OPENSHIFT_OAUTH__ENDPOINT: {{ .Values.global.openShiftOAuthEndpoint | quote}}
+  CHE_OAUTH_OPENSHIFT_VERIFY__TOKEN__URL: {{ .Values.global.openShiftVerifyTokenUrl | quote}}
   JAVA_OPTS: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true -Xms20m "
   CHE_WORKSPACE_AUTO_START: "false"
 {{- if .Values.global.tls.enabled }}

@@ -50,7 +50,8 @@ const CLASSES = {
     TestWorkspaceUtil: 'TestWorkspaceUtil',
     NotificationCenter: 'NotificationCenter',
     PreferencesHandler: 'PreferencesHandler',
-    CheApiRequestHandler: 'CheApiRequestHandler'
+    CheApiRequestHandler: 'CheApiRequestHandler',
+    GetStarted: 'GetStarted'
 };
 
 export { TYPES, CLASSES };
