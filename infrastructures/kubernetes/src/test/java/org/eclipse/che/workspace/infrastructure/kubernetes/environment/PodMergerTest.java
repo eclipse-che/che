@@ -33,9 +33,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -235,6 +237,39 @@ public class PodMergerTest {
     List<LocalObjectReference> imagePullSecrets = podTemplate.getSpec().getImagePullSecrets();
     assertEquals(imagePullSecrets.size(), 1);
     assertEquals(imagePullSecrets.get(0).getName(), "secret");
+  }
+
+  @Test(dataProvider = "terminationGracePeriodProvider")
+  public void shouldBeAbleToMergeTerminationGracePeriodS(
+      List<Long> terminationGracePeriods, Long expectedResultLong) throws ValidationException {
+    List<PodData> podData =
+        terminationGracePeriods
+            .stream()
+            .map(
+                p ->
+                    new PodData(
+                        new PodSpecBuilder().withTerminationGracePeriodSeconds(p).build(),
+                        new ObjectMetaBuilder().build()))
+            .collect(Collectors.toList());
+
+    // when
+    Deployment merged = podMerger.merge(podData);
+    // then
+    PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
+    assertEquals(podTemplate.getSpec().getTerminationGracePeriodSeconds(), expectedResultLong);
+  }
+
+  @DataProvider(name = "terminationGracePeriodProvider")
+  public Object[][] terminationGracePeriodProvider() {
+    return new Object[][] {
+      {Arrays.asList(32L, 30L, 27L), 32L},
+      {Arrays.asList(null, null, null), null},
+      {Arrays.asList(null, 30L, 27L), 30L},
+      {Arrays.asList(32L, null, 27L), 32L},
+      {Arrays.asList(null, 27L), 27L},
+      {Arrays.asList(27L, 27L), 27L},
+      {Arrays.asList(27L, null), 27L}
+    };
   }
 
   @Test
