@@ -19,8 +19,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtprox
 /**
  * Helps to create {@link PassThroughProxySecureServerExposer} with fields injected from DI
  * container.
- *
- * @author Sergii Leshchenko
  */
 public interface PassThroughProxySecureServerExposerFactory<T extends KubernetesEnvironment>
     extends SecureServerExposerFactory<T> {

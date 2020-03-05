@@ -19,9 +19,29 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
+/**
+ * A proxy provisioner is a class responsible for provisioning and exposing a reverse proxy that
+ * should proxy the access to a backend service.
+ */
 public interface ProxyProvisioner {
   int FIRST_AVAILABLE_PROXY_PORT = 4400;
 
+  /**
+   * Modifies the provided environment with Kubernetes objects needed for the proxy and creates a
+   * service that is pointing to the proxy that can then be used to expose the proxy.
+   *
+   * <p>Note that this method is called multiple times (once for each backend service) and so has to
+   * build the kubernetes objects and configuration iteratively, if required.
+   *
+   * @param k8sEnv Kubernetes environment to modify
+   * @param pod the pod that runs the server being exposed
+   * @param backendServiceName service name that will be exposed
+   * @param backendServicePort service port that will be exposed
+   * @param protocol protocol that will be used for exposed port
+   * @param secureServers secure servers to expose
+   * @return JWTProxy service port that expose the specified one
+   * @throws InfrastructureException if any exception occurs during port exposing
+   */
   ServicePort expose(
       KubernetesEnvironment k8sEnv,
       PodData pod,
@@ -32,5 +52,6 @@ public interface ProxyProvisioner {
       Map<String, ServerConfig> secureServers)
       throws InfrastructureException;
 
+  /** The name of the service handling the traffic to the proxy. */
   String getServiceName();
 }
