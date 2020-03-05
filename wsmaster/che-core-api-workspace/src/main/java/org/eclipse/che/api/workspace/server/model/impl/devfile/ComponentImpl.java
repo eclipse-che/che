@@ -93,6 +93,15 @@ public class ComponentImpl implements Component {
   @Column(name = "memory_limit")
   private String memoryLimit;
 
+  @Column(name = "memory_request")
+  private String memoryRequest;
+
+  @Column(name = "cpu_limit")
+  private String cpuLimit;
+
+  @Column(name = "cpu_request")
+  private String cpuRequest;
+
   @Column(name = "mount_sources")
   private Boolean mountSources;
 
@@ -163,38 +172,6 @@ public class ComponentImpl implements Component {
 
   public ComponentImpl(
       String type,
-      String id,
-      String alias,
-      String image,
-      String memoryLimit,
-      Boolean mountSources,
-      List<String> command,
-      List<String> args,
-      List<? extends Volume> volumes,
-      List<? extends Env> env,
-      List<? extends Endpoint> endpoints) {
-    this.alias = alias;
-    this.type = type;
-    this.componentId = id;
-    this.image = image;
-    this.memoryLimit = memoryLimit;
-    this.mountSources = mountSources;
-    this.command = command;
-    this.args = args;
-    if (volumes != null) {
-      this.volumes = volumes.stream().map(VolumeImpl::new).collect(toCollection(ArrayList::new));
-    }
-    if (env != null) {
-      this.env = env.stream().map(EnvImpl::new).collect(toCollection(ArrayList::new));
-    }
-    if (endpoints != null) {
-      this.endpoints =
-          endpoints.stream().map(EndpointImpl::new).collect(toCollection(ArrayList::new));
-    }
-  }
-
-  public ComponentImpl(
-      String type,
       String alias,
       String id,
       Map<String, Serializable> preferences,
@@ -205,6 +182,9 @@ public class ComponentImpl implements Component {
       List<? extends Entrypoint> entrypoints,
       String image,
       String memoryLimit,
+      String memoryRequest,
+      String cpuLimit,
+      String cpuRequest,
       Boolean mountSources,
       List<String> command,
       List<String> args,
@@ -229,6 +209,9 @@ public class ComponentImpl implements Component {
     }
     this.image = image;
     this.memoryLimit = memoryLimit;
+    this.memoryRequest = memoryRequest;
+    this.cpuLimit = cpuLimit;
+    this.cpuRequest = cpuRequest;
     this.mountSources = mountSources;
     this.command = command;
     this.args = args;
@@ -257,6 +240,9 @@ public class ComponentImpl implements Component {
         component.getEntrypoints(),
         component.getImage(),
         component.getMemoryLimit(),
+        component.getMemoryRequest(),
+        component.getCpuLimit(),
+        component.getCpuRequest(),
         component.getMountSources(),
         component.getCommand(),
         component.getArgs(),
@@ -370,6 +356,33 @@ public class ComponentImpl implements Component {
 
   public void setMemoryLimit(String memoryLimit) {
     this.memoryLimit = memoryLimit;
+  }
+
+  @Override
+  public String getMemoryRequest() {
+    return memoryRequest;
+  }
+
+  public void setMemoryRequest(String memoryRequest) {
+    this.memoryRequest = memoryRequest;
+  }
+
+  @Override
+  public String getCpuLimit() {
+    return cpuLimit;
+  }
+
+  public void setCpuLimit(String cpuLimit) {
+    this.cpuLimit = cpuLimit;
+  }
+
+  @Override
+  public String getCpuRequest() {
+    return cpuRequest;
+  }
+
+  public void setCpuRequest(String cpuRequest) {
+    this.cpuRequest = cpuRequest;
   }
 
   @Override

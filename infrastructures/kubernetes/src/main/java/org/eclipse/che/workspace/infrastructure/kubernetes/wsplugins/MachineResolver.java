@@ -116,6 +116,14 @@ public class MachineResolver {
     if (ramRequest == 0) {
       machineConfig.getAttributes().put(MEMORY_REQUEST_ATTRIBUTE, defaultSidecarMemoryRequestBytes);
     }
+    String overriddenSidecarMemRequest = component.getMemoryRequest();
+    if (!isNullOrEmpty(overriddenSidecarMemRequest)) {
+      machineConfig
+          .getAttributes()
+          .put(
+              MEMORY_REQUEST_ATTRIBUTE,
+              Long.toString(KubernetesSize.toBytes(overriddenSidecarMemRequest)));
+    }
   }
 
   private void normalizeCpu(Container container, InternalMachineConfig machineConfig) {
@@ -123,10 +131,26 @@ public class MachineResolver {
     if (cpuLimit == 0) {
       machineConfig.getAttributes().put(CPU_LIMIT_ATTRIBUTE, defaultSidecarCpuLimitCores);
     }
+    String overriddenSidecarCpuLimit = component.getCpuLimit();
+    if (!isNullOrEmpty(overriddenSidecarCpuLimit)) {
+      machineConfig
+          .getAttributes()
+          .put(
+              CPU_LIMIT_ATTRIBUTE,
+              Float.toString(KubernetesSize.toCores(overriddenSidecarCpuLimit)));
+    }
 
     float cpuRequest = Containers.getCpuRequest(container);
     if (cpuRequest == 0) {
       machineConfig.getAttributes().put(CPU_REQUEST_ATTRIBUTE, defaultSidecarCpuRequestCores);
+    }
+    String overriddenSidecarCpuRequest = component.getCpuRequest();
+    if (!isNullOrEmpty(overriddenSidecarCpuRequest)) {
+      machineConfig
+          .getAttributes()
+          .put(
+              CPU_REQUEST_ATTRIBUTE,
+              Float.toString(KubernetesSize.toCores(overriddenSidecarCpuRequest)));
     }
   }
 
