@@ -310,8 +310,13 @@ CHE_ROUTE=$(oc get route che --template='{{ .spec.host }}')
 
 createTestWorkspaceAndRunTest() {
   defineCheRoute
-   ### Create workspace
-  chectl workspace:start --access-token "$USER_ACCESS_TOKEN" -f https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
+  ### Create workspace
+  DEV_FILE_URL=$1
+  if [[ ${DEV_FILE_URL} = "" ]]; then # by default it is used 'happy-path-devfile' yaml from CHE 'master' branch
+    chectl workspace:start --access-token "$USER_ACCESS_TOKEN" --devfile=https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
+  else
+    chectl workspace:start --access-token "$USER_ACCESS_TOKEN" $1 # it can be directly indicated other URL to 'devfile' yaml
+  fi
 
   ### Create directory for report
   mkdir report
@@ -323,7 +328,7 @@ createTestWorkspaceAndRunTest() {
   -e TS_SELENIUM_USERNAME="${TEST_USERNAME}" \
   -e TS_SELENIUM_PASSWORD="${TEST_USERNAME}" \
   -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=420000 \
-  quay.io/eclipse/che-e2e:nightly ||IS_TESTS_FAILED=true
+  quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
 }
 
 function createTestUserAndObtainUserToken() {
@@ -372,7 +377,7 @@ function setupEnvs() {
 }
 
 function configureGithubTestUser() {
-  echo "Configure GitHub test users"
+  echo "======== Configure GitHub test users ========"
   cd /root/payload
   mkdir -p che_local_conf_dir
   export CHE_LOCAL_CONF_DIR=/root/payload/che_local_conf_dir/
@@ -390,7 +395,7 @@ function installDockerCompose() {
 }
 
 function seleniumTestsSetup() {
-  echo "Start selenium tests"
+  echo "======== Start selenium tests ========"
   cd /root/payload
   export CHE_INFRASTRUCTURE=openshift
   defineCheRoute
@@ -429,4 +434,17 @@ function runDevfileTestSuite() {
   -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \
   -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
   quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
+}
+
+function getReleaseVersion() {
+  echo $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | cut -d'-' -f1) #cut SNAPSHOT from the version name
+}
+
+function setupReleaseVersionAndTag() {
+  echo "======== Starting Che RC test job $(date) ========"
+  RELEASE_VERSION=$(getReleaseVersion)
+  RELEASE_TAG="rc"
+
+  echo "======== Release version:" ${RELEASE_VERSION}
+  echo "======== Release tag:" ${RELEASE_TAG}
 }
