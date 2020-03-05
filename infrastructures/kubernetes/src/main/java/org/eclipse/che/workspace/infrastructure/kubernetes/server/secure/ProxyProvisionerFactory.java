@@ -13,9 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 
-/**
- * Interface to help create instance of {@link ProxyProvisioner} using Guice.
- */
+/** Interface to help create instance of {@link ProxyProvisioner} using Guice. */
 public interface ProxyProvisionerFactory {
   ProxyProvisioner create(RuntimeIdentity identity);
 }

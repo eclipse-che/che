@@ -57,9 +57,10 @@ public class PassThroughProxyProvisioner extends AbstractJwtProxyProvisioner {
   /**
    * Constructs a key pair to satisfy JWT proxy which needs a key pair in its configuration. In case
    * of pass-through proxy, this key pair is unused so we just generate a random one.
+   *
    * @return a random key pair
    * @throws InternalInfrastructureException if RSA is not available as a key pair generator. This
-   * should not happen.
+   *     should not happen.
    */
   private static KeyPair constructSignatureKeyPair() throws InternalInfrastructureException {
     try {

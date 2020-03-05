@@ -90,7 +90,7 @@ abstract class AbstractJwtProxyProvisioner implements ProxyProvisioner {
    * @param imagePullPolicy the image pull policy for the JWT proxy container
    * @param workspaceId the workspace ID being started
    * @param detectCookieAuth whether to look for cookie auth requirements in the proxied servers or
-   * whether to ignore such requirements
+   *     whether to ignore such requirements
    */
   AbstractJwtProxyProvisioner(
       KeyPair signatureKeyPair,
