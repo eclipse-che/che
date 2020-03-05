@@ -259,7 +259,7 @@ In the case of disabling the `"factories"`, `load factory` routing won't be disa
 For example,
 
 ```
-http://che.openshift.io/f?url=https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml 
+https://che.openshift.io/f?url=https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml 
 ```
 
 The `"configuration.prefetch"` section allows to define resources that UD should pre-fetch. This section consists of following optional fields:
