@@ -53,6 +53,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Exter
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.ProxyProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 
+/**
+ * A base class for both {@link JwtProxyProvisioner} and {@link PassThroughProxyProvisioner} that
+ * contains the bulk of the provisioning logic.
+ */
 abstract class AbstractJwtProxyProvisioner implements ProxyProvisioner {
 
   static final String JWT_PROXY_MACHINE_NAME = "che-jwtproxy";
@@ -74,7 +78,21 @@ abstract class AbstractJwtProxyProvisioner implements ProxyProvisioner {
   private final KeyPair keyPair;
   private final boolean detectCookieAuth;
 
-  public AbstractJwtProxyProvisioner(
+  /**
+   * Constructor!
+   *
+   * @param signatureKeyPair the key pair for JWT proxy SSH comms
+   * @param jwtProxyConfigBuilderFactory factory to create a JWT proxy config builder
+   * @param externalServiceExposureStrategy the strategy to expose external servers
+   * @param cookiePathStrategy the strategy for the cookie path of the JWT auth cookies, if used
+   * @param jwtProxyImage the image of JWT proxy to use
+   * @param memoryLimitBytes the memory limit of the JWT proxy container
+   * @param imagePullPolicy the image pull policy for the JWT proxy container
+   * @param workspaceId the workspace ID being started
+   * @param detectCookieAuth whether to look for cookie auth requirements in the proxied servers or
+   * whether to ignore such requirements
+   */
+  AbstractJwtProxyProvisioner(
       KeyPair signatureKeyPair,
       JwtProxyConfigBuilderFactory jwtProxyConfigBuilderFactory,
       ExternalServiceExposureStrategy externalServiceExposureStrategy,
