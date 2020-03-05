@@ -14,20 +14,6 @@
 
 <che-pf-page-main-area>
 
-  <!-- backdrop on creating -->
-  <div class="pf-c-backdrop" ng-show="getStartedController.isCreating">
-    <div class="pf-l-bullseye">
-      <div class="pf-l-bullseye__item">
-        <span class="pf-c-spinner pf-m-xl" role="progressbar" aria-valuetext="Loading...">
-          <span class="pf-c-spinner__clipper"></span>
-          <span class="pf-c-spinner__lead-ball"></span>
-          <span class="pf-c-spinner__tail-ball"></span>
-        </span>
-      </div>
-    </div>
-  </div>
-  <!-- backdrop on creating end -->
-
   <che-pf-page-main-section class="get-started-header-section pf-u-box-shadow-sm-bottom" light="true">
     <che-pf-masthead title="Getting Started with {{branding.name}}">
       <che-pf-secondary-button title="{{getStartedController.createButton.title}}"
@@ -38,7 +24,7 @@
     <div class="pf-c-content pf-u-pl-md">
 
       <h4>Select a Sample</h4>
-      <small>Select a sample template to create your first workspace.</small>
+      <small>Select a sample to create your first workspace.</small>
 
       <!-- toolbar -->
       <get-started-toolbar
@@ -51,7 +37,9 @@
       </div>
     </div>
   </che-pf-page-main-section>
-
+  <div class="progress-line">
+    <md-progress-linear ng-show="getStartedController.isCreating" md-mode="indeterminate"></md-progress-linear>
+  </div>
   <che-pf-page-main-section>
     <!-- samples gallery -->
     <div class="pf-l-gallery pf-m-gutter"
@@ -83,7 +71,7 @@
       <div class="pf-l-bullseye__item">
         <div class="pf-c-empty-state">
           <i class="fas fa-cubes pf-c-empty-state__icon" aria-hidden="true"></i>
-          <h1 class="pf-c-title pf-m-lg">There are no templates</h1>
+          <h1 class="pf-c-title pf-m-lg">There are no samples</h1>
         </div>
       </div>
     </div>

@@ -13,7 +13,11 @@
         <!-- temporary storage toggle -->
         <che-pf-switch value="getStartedToolbarController.ephemeralMode"
           config="getStartedToolbarController.tmpStorage.config"
-          on-change="getStartedToolbarController.tmpStorage.onChange($value)"></che-pf-switch>
+          on-change="getStartedToolbarController.tmpStorage.onChange($value)">
+        </che-pf-switch>
+        <span class="temporary-storage-label" ng-class="{'disabled-state': !getStartedToolbarController.ephemeralMode}">
+          Temporary Storage
+        </span>
         <span class="temporary-storage-tooltip"
           uib-tooltip-html="'Temporary Storage allows for faster I/O but may have limited storage and is not persistent.'"
           tooltip-trigger="mouseenter" tabindex="-1" tooltip-append-to-body="true">

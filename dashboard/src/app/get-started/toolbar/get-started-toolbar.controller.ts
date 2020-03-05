@@ -56,9 +56,7 @@ export class GetStartedToolbarController implements IGetStartedToolbarComponentB
 
     this.tmpStorage = {
       config: {
-        name: 'temporary-storage-switch',
-        messageOn: 'Temporary Storage',
-        messageOff: 'Temporary Storage',
+        name: 'temporary-storage-switch'
       },
       onChange: mode => this.changeEphemeralMode(mode)
 

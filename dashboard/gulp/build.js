@@ -104,13 +104,19 @@ gulp.task('brandingassets', function () {
 
 gulp.task('fonts', function () {
   return gulp.src([
-    conf.paths.modules + '/@patternfly/patternfly/assets/fonts/webfonts/*',
     conf.paths.modules + '/font-awesome/fonts/*',
-    conf.paths.src + '/assets/fonts/*',
+    conf.paths.src + '/assets/fonts/*'
   ])
     .pipe($.filter('**/*.{eot,svg,ttf,otf,woff,woff2}'))
     .pipe($.flatten())
     .pipe(gulp.dest(conf.paths.dist + '/fonts/'));
+});
+
+gulp.task('patternflyWebfonts', function () {
+  return gulp.src(conf.paths.modules + '/@patternfly/patternfly/assets/fonts/webfonts/*')
+    .pipe($.filter('**/*.{eot,svg,ttf,otf,woff,woff2}'))
+    .pipe($.flatten())
+    .pipe(gulp.dest(conf.paths.dist + '/styles/assets/fonts/webfonts'));
 });
 
 var fs = require('fs');
@@ -171,4 +177,4 @@ gulp.task('clean', function () {
 });
 
 
-gulp.task('build', ['html', 'images', 'htmlassets', 'brandingassets', 'fonts', 'other']);
+gulp.task('build', ['html', 'images', 'htmlassets', 'brandingassets', 'patternflyWebfonts', 'fonts', 'other']);
