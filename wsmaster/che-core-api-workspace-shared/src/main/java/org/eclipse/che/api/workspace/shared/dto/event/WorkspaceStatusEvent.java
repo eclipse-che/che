@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.shared.dto.event;
 
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventOrigin;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -56,4 +57,11 @@ public interface WorkspaceStatusEvent {
   void setError(String error);
 
   WorkspaceStatusEvent withError(String error);
+
+  void setOptions(Map<String, String> options);
+
+  @Nullable
+  Map<String, String> getOptions();
+
+  WorkspaceStatusEvent withOptions(Map<String, String> options);
 }

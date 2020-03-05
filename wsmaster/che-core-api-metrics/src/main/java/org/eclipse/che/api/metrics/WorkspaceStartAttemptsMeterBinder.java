@@ -11,7 +11,9 @@
  */
 package org.eclipse.che.api.metrics;
 
+import static org.eclipse.che.api.metrics.WorkspaceBinders.withStandardTags;
 import static org.eclipse.che.api.metrics.WorkspaceBinders.workspaceMetric;
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 
 import com.google.inject.Inject;
 import io.micrometer.core.instrument.Counter;
@@ -28,6 +30,7 @@ public class WorkspaceStartAttemptsMeterBinder implements MeterBinder {
   private final EventService eventService;
 
   private Counter startingCounter;
+  private Counter startingDebugCounter;
 
   @Inject
   public WorkspaceStartAttemptsMeterBinder(EventService eventService) {
@@ -40,6 +43,11 @@ public class WorkspaceStartAttemptsMeterBinder implements MeterBinder {
         Counter.builder(workspaceMetric("starting_attempts.total"))
             .description("The count of workspaces start attempts")
             .register(registry);
+    startingDebugCounter =
+        Counter.builder(workspaceMetric("starting_attempts.total"))
+            .tags(withStandardTags("debug"))
+            .description("The count of workspaces start attempts in debug mode")
+            .register(registry);
 
     // only subscribe to the event once we have the counters ready
     eventService.subscribe(
@@ -47,6 +55,10 @@ public class WorkspaceStartAttemptsMeterBinder implements MeterBinder {
           if (event.getPrevStatus() == WorkspaceStatus.STOPPED
               && event.getStatus() == WorkspaceStatus.STARTING) {
             startingCounter.increment();
+            if (event.getOptions() != null && event.getOptions()
+                .containsKey(DEBUG_WORKSPACE_START)) {
+              startingDebugCounter.increment();
+            }
           }
         },
         WorkspaceStatusEvent.class);
