@@ -11,77 +11,72 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy;
 
+import static java.util.Collections.singletonList;
+
 import com.google.inject.assistedinject.Assisted;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
-import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManagerException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 
 /**
- * Modifies Kubernetes environment to expose the specified service port via JWTProxy.
- *
- * <p>Exposing includes the following operation:
- *
- * <ul>
- *   <li>Putting Machine configuration into Kubernetes environment if absent;
- *   <li>Putting JwtProxy pod with one container if absent;
- *   <li>Putting JwtProxy service that will expose added JWTProxy pod if absent;
- *   <li>Putting JwtProxy ConfigMap that contains public key and JwtProxy config in yaml format if
- *       absent;
- *   <li>Updating JwtProxy Service to expose port for secure server;
- *   <li>Updating JwtProxy configuration in config map by adding the corresponding verifier proxy
- *       there;
- * </ul>
- *
- * @see JwtProxyConfigBuilder
- * @see SignatureKeyManager
- * @author Sergii Leshchenko
+ * A Jwt Proxy provisioner that configures JWT proxy to just pass through all the traffic without
+ * any authentication. Should be used in the single user mode only for "securing" the secure
+ * servers.
  */
-public class JwtProxyProvisioner extends AbstractJwtProxyProvisioner {
+public class PassThroughProxyProvisioner extends AbstractJwtProxyProvisioner {
 
   @Inject
-  public JwtProxyProvisioner(
-      SignatureKeyManager signatureKeyManager,
+  public PassThroughProxyProvisioner(
       JwtProxyConfigBuilderFactory jwtProxyConfigBuilderFactory,
       ExternalServiceExposureStrategy externalServiceExposureStrategy,
       CookiePathStrategy cookiePathStrategy,
-      @Named("che.server.secure_exposer.jwtproxy.image") String jwtProxyImage,
+      @Named("che.server.secure_exposer.jwtproxy.image") String jwtImage,
       @Named("che.server.secure_exposer.jwtproxy.memory_limit") String memoryLimitBytes,
       @Named("che.workspace.sidecar.image_pull_policy") String imagePullPolicy,
       @Assisted RuntimeIdentity identity)
       throws InternalInfrastructureException {
     super(
-        constructKeyPair(signatureKeyManager, identity),
+        constructSignatureKeyPair(),
         jwtProxyConfigBuilderFactory,
         externalServiceExposureStrategy,
         cookiePathStrategy,
-        jwtProxyImage,
+        jwtImage,
         memoryLimitBytes,
         imagePullPolicy,
         identity.getWorkspaceId(),
-        true);
+        false);
   }
 
-  private static KeyPair constructKeyPair(
-      SignatureKeyManager signatureKeyManager, RuntimeIdentity identity)
-      throws InternalInfrastructureException {
+  /**
+   * Constructs a key pair to satisfy JWT proxy which needs a key pair in its configuration. In case
+   * of pass-through proxy, this key pair is unused so we just generate a random one.
+   *
+   * @return a random key pair
+   * @throws InternalInfrastructureException if RSA is not available as a key pair generator. This
+   *     should not happen.
+   */
+  private static KeyPair constructSignatureKeyPair() throws InternalInfrastructureException {
     try {
-      return signatureKeyManager.getOrCreateKeyPair(identity.getWorkspaceId());
-    } catch (SignatureKeyManagerException e) {
+      KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+      kpg.initialize(512);
+      return kpg.generateKeyPair();
+    } catch (NoSuchAlgorithmException e) {
       throw new InternalInfrastructureException(
-          "Signature key pair for machine authentication cannot be retrieved. Reason: "
-              + e.getMessage());
+          "Could not generate a fake key pair to support JWT proxy in single-user mode.");
     }
   }
 
   @Override
   protected ExposureConfiguration getExposureConfiguration(ServerConfig serverConfig) {
-    return new ExposureConfiguration(serverConfig);
+    // exclude everything on each server from JWT proxy auth, making it effectively a passthrough
+    // proxy
+    return new ExposureConfiguration(singletonList("/"), false);
   }
 }

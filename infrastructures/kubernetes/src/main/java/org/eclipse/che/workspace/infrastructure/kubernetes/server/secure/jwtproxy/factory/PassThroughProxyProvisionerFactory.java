@@ -13,13 +13,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.ProxyProvisionerFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.PassThroughProxyProvisioner;
 
-/**
- * Helps to create {@link JwtProxyProvisioner} with fields injected from DI container.
- *
- * @author Sergii Leshchenko
- */
-public interface JwtProxyProvisionerFactory extends ProxyProvisionerFactory {
-  JwtProxyProvisioner create(RuntimeIdentity runtimeId);
+/** Helps to create {@link PassThroughProxyProvisioner} with fields injected from DI container. */
+public interface PassThroughProxyProvisionerFactory extends ProxyProvisionerFactory {
+  PassThroughProxyProvisioner create(RuntimeIdentity runtimeId);
 }
