@@ -45,7 +45,7 @@ public class WorkspaceStartAttemptsMeterBinder implements MeterBinder {
             .description("The count of workspaces start attempts")
             .register(registry);
     startingDebugCounter =
-        Counter.builder(workspaceMetric("starting_attempts.debug.total"))
+        Counter.builder(workspaceMetric("starting_attempts.total"))
             .tags(withStandardTags("debug", "true"))
             .description("The count of workspaces start attempts in debug mode")
             .register(registry);
