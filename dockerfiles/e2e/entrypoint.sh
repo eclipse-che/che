@@ -69,6 +69,7 @@ fi
 mkdir -p /tmp/e2e/report
 nohup ffmpeg -y -video_size 1920x1080 -framerate 24 -f x11grab -i :20.0 /tmp/e2e/report/output.mp4 2> /tmp/e2e/report/ffmpeg_err.txt > /tmp/e2e/report/ffmpeg_std.txt & 
 ffmpeg_pid=$!
+echo "test" > /tmp/e2e/report/testOutput.txt
 trap kill_ffmpeg 2 15
 
 # Launch tests
