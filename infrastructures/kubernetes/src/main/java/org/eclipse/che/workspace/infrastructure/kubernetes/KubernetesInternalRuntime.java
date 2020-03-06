@@ -637,7 +637,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       LOG.info(
           "Debug workspace startup. Will watch the logs of '{}'",
           getContext().getIdentity().getWorkspaceId());
-      eventPublisher.sendStartInDebugEvent();
       // get all the pods we care about
       Set<String> podNames =
           machines
