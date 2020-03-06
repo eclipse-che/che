@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.metrics;
 
+import static java.lang.Boolean.FALSE;
 import static org.eclipse.che.api.metrics.WorkspaceBinders.withStandardTags;
 import static org.eclipse.che.api.metrics.WorkspaceBinders.workspaceMetric;
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
@@ -56,7 +57,8 @@ public class WorkspaceStartAttemptsMeterBinder implements MeterBinder {
           if (event.getPrevStatus() == WorkspaceStatus.STOPPED
               && event.getStatus() == WorkspaceStatus.STARTING) {
             if (event.getOptions() != null
-                && event.getOptions().containsKey(DEBUG_WORKSPACE_START)) {
+                && Boolean.parseBoolean(
+                    event.getOptions().getOrDefault(DEBUG_WORKSPACE_START, FALSE.toString()))) {
               startingDebugCounter.increment();
             } else {
               startingCounter.increment();
