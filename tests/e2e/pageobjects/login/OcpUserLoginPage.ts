@@ -32,7 +32,7 @@ export class OcpUserLoginPage implements IOcpLoginPage {
         await this.ocpLogin.enterUserNameOpenShift(TestConstants.TS_SELENIUM_OCP_USERNAME);
         await this.ocpLogin.enterPasswordOpenShift(TestConstants.TS_SELENIUM_OCP_PASSWORD);
         await this.ocpLogin.clickOnLoginButton();
-        await this.ocpLogin.waitDisappearanceOpenShiftLoginWelocmePage();
+        await this.ocpLogin.waitDisappearanceOpenShiftLoginWelcomePage();
     }
 
 }
