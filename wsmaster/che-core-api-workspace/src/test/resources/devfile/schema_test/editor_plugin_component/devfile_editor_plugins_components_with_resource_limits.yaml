@@ -16,11 +16,20 @@ metadata:
 components:
   - type: chePlugin
     id: check/terminal-sample/0.0.1
-    memoryLimit: 256G
+    memoryLimit: 256
+    memoryRequest: 123Mi
+    cpuLimit: 2
+    cpuRequest: 127m
   - type: chePlugin
     id: eclipse/chemaven-jdk8/1.0.0
     memoryLimit: 108M
+    memoryRequest: 26Mi
+    cpuLimit: 1500m
+    cpuRequest: 100m
   - alias: theia
     type: cheEditor
     id: eclipse/theia/0.0.3
     memoryLimit: 1048M
+    memoryRequest: 256M
+    cpuLimit: 1500m
+    cpuRequest: 100m

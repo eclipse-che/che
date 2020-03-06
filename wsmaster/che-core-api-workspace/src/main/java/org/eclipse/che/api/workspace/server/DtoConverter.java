@@ -145,6 +145,9 @@ public final class DtoConverter {
         // dockerimage
         .withImage(component.getImage())
         .withMemoryLimit(component.getMemoryLimit())
+        .withMemoryRequest(component.getMemoryRequest())
+        .withCpuLimit(component.getCpuLimit())
+        .withCpuRequest(component.getCpuRequest())
         .withCommand(component.getCommand())
         .withArgs(component.getArgs())
         .withEndpoints(component.getEndpoints().stream().map(DtoConverter::asDto).collect(toList()))

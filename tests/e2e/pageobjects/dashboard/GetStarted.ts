@@ -76,9 +76,11 @@ export class GetStarted {
 
     async clickCreateAndOpenButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('GetStarted.clickCreateAndOpenButton');
-        const createAndOpenButtonXpath: string = '(//che-button-save-flat[@che-button-title=\'Create & Open\'][@aria-disabled=\'false\']/button)[1]';
 
-        await this.driverHelper.waitAndClick(createAndOpenButtonXpath, timeout);
+        const createAndOpenButtonLocator: By =
+            By.xpath('(//che-button-save-flat[@che-button-title=\'Create & Open\'][@aria-disabled=\'false\']/button)[1]');
+
+        await this.driverHelper.waitAndClick(createAndOpenButtonLocator, timeout);
     }
 
     private getSampleLocator(sampleName: string): By {

@@ -99,6 +99,27 @@ public interface ComponentDto extends Component {
   ComponentDto withMemoryLimit(String memoryLimit);
 
   @Override
+  String getMemoryRequest();
+
+  void setMemoryRequest(String memoryRequest);
+
+  ComponentDto withMemoryRequest(String memoryRequest);
+
+  @Override
+  String getCpuLimit();
+
+  void setCpuLimit(String cpuLimit);
+
+  ComponentDto withCpuLimit(String cpuLimit);
+
+  @Override
+  String getCpuRequest();
+
+  void setCpuRequest(String cpuRequest);
+
+  ComponentDto withCpuRequest(String cpuRequest);
+
+  @Override
   Boolean getMountSources();
 
   void setMountSources(Boolean mountSources);
