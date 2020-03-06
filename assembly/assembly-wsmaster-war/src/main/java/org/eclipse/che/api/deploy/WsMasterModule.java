@@ -93,7 +93,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructure;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyProvisionerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxySecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
@@ -380,7 +379,6 @@ public class WsMasterModule extends AbstractModule {
   }
 
   private void configureJwtProxySecureProvisioner(String infrastructure) {
-    install(new FactoryModuleBuilder().build(JwtProxyConfigBuilderFactory.class));
     install(new FactoryModuleBuilder().build(JwtProxyProvisionerFactory.class));
     if (KubernetesInfrastructure.NAME.equals(infrastructure)) {
       install(

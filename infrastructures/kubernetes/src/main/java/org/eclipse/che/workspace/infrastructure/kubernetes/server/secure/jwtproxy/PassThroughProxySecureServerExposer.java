@@ -18,35 +18,33 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.DefaultSecureServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyProvisionerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxyProvisionerFactory;
 
 /**
  * Exposes secure servers with JWTProxy.
  *
  * <p>To expose secure servers it provisions JwtProxy objects into environment with {@link
- * JwtProxyProvisioner}. Then JwtProxy service port is made public accessible by {@link
+ * PassThroughProxyProvisioner}. Then JwtProxy service port is made public accessible by {@link
  * ExternalServerExposer<T>}.
  *
  * <p>In this way, requests to exposed secure servers will be routed via JwtProxy pod that is added
- * one per workspace. And it will be impossible to requests secure servers if there is no machine
- * token in request.
+ * one per workspace.
  *
- * @see JwtProxyProvisioner
- * @author Sergii Leshchenko
+ * @see PassThroughProxyProvisioner
  */
-public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
+public class PassThroughProxySecureServerExposer<T extends KubernetesEnvironment>
     extends DefaultSecureServerExposer<T> {
 
   @VisibleForTesting
-  JwtProxySecureServerExposer(
-      JwtProxyProvisioner jwtProxyProvisioner, ExternalServerExposer<T> exposer) {
-    super(jwtProxyProvisioner, exposer);
+  PassThroughProxySecureServerExposer(
+      PassThroughProxyProvisioner passThroughProxyProvisioner, ExternalServerExposer<T> exposer) {
+    super(passThroughProxyProvisioner, exposer);
   }
 
   @Inject
-  public JwtProxySecureServerExposer(
+  public PassThroughProxySecureServerExposer(
       @Assisted RuntimeIdentity identity,
-      JwtProxyProvisionerFactory jwtProxyProvisionerFactory,
+      PassThroughProxyProvisionerFactory jwtProxyProvisionerFactory,
       ExternalServerExposer<T> exposer) {
     super(identity, jwtProxyProvisionerFactory, exposer);
   }
