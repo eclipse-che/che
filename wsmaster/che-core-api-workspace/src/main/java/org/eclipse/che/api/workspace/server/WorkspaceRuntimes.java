@@ -794,9 +794,11 @@ public class WorkspaceRuntimes {
     publishWorkspaceStatusEvent(workspaceId, status, previous, errorMsg, emptyMap());
   }
 
-
   private void publishWorkspaceStatusEvent(
-      String workspaceId, WorkspaceStatus status, WorkspaceStatus previous, String errorMsg,
+      String workspaceId,
+      WorkspaceStatus status,
+      WorkspaceStatus previous,
+      String errorMsg,
       Map<String, String> options) {
     eventService.publish(
         DtoFactory.newDto(WorkspaceStatusEvent.class)

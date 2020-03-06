@@ -41,11 +41,12 @@ public class WorkspaceStartAttemptsMeterBinder implements MeterBinder {
   public void bindTo(MeterRegistry registry) {
     startingCounter =
         Counter.builder(workspaceMetric("starting_attempts.total"))
+            .tags(withStandardTags("debug", "false"))
             .description("The count of workspaces start attempts")
             .register(registry);
     startingDebugCounter =
-        Counter.builder(workspaceMetric("starting_attempts.total"))
-            .tags(withStandardTags("debug"))
+        Counter.builder(workspaceMetric("starting_attempts.debug.total"))
+            .tags(withStandardTags("debug", "true"))
             .description("The count of workspaces start attempts in debug mode")
             .register(registry);
 
@@ -54,10 +55,11 @@ public class WorkspaceStartAttemptsMeterBinder implements MeterBinder {
         event -> {
           if (event.getPrevStatus() == WorkspaceStatus.STOPPED
               && event.getStatus() == WorkspaceStatus.STARTING) {
-            startingCounter.increment();
-            if (event.getOptions() != null && event.getOptions()
-                .containsKey(DEBUG_WORKSPACE_START)) {
+            if (event.getOptions() != null
+                && event.getOptions().containsKey(DEBUG_WORKSPACE_START)) {
               startingDebugCounter.increment();
+            } else {
+              startingCounter.increment();
             }
           }
         },
