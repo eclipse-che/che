@@ -103,6 +103,7 @@ export class Terminal {
     async waitText(terminalTab: string, expectedText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Terminal.waitText tab: ${terminalTab} text: ${expectedText}`);
 
+        await this.selectTerminalTab(terminalTab, timeout);
         await this.driverHelper.waitUntilTrue(async () => {
             const terminalText: string = await this.getText(terminalTab, timeout);
             return terminalText.includes(expectedText);
@@ -132,6 +133,7 @@ export class Terminal {
             const currentTerminalTitle: string = await this.driverHelper.waitAndGetText(terminalTabLocator);
 
             if (currentTerminalTitle.search(terminalTitle) > -1) {
+                Logger.debug(`Terminal index: ${i}`);
                 return i;
             }
 
