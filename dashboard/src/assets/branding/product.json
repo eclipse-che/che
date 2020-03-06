@@ -24,7 +24,7 @@
     "name": "CHE"
   },
   "docs": {
-    "devfile": "/docs/che-7/using-developer-environments-workspaces.html#making-a-workspace-portable-using-a-devfile_using-developer-environments-workspaces",
+    "devfile": "/docs/che-7/making-a-workspace-portable-using-a-devfile/",
     "workspace": "/docs/che-7/workspaces-overview/",
     "factory": "/docs/factories-getting-started.html",
     "organization": "/docs/organizations.html",
