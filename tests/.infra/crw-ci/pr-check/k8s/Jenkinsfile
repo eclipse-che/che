@@ -301,7 +301,7 @@ pipeline {
 
         stage("Run E2E Happy path tests") {
             steps {
-                sh """                     
+                sh """
                      CHE_URL=http://${cheHost}
                      docker run --shm-size=1g --net=host --ipc=host \\
                        -p 5920:5920 \\
@@ -316,7 +316,7 @@ pipeline {
                        -e TEST_SUITE="${e2eTestToRun}" ${e2eTestParameters} \\
                        -e NODE_TLS_REJECT_UNAUTHORIZED=0 \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
-                       quay.io/eclipse/che-e2e:nightly
+                       quay.io/rhopp/che-e2e:latest
                 """
             }
         }
