@@ -75,8 +75,8 @@ export class OcpLoginPage {
         await this.driverHelper.waitAndClick(loginButtonlocator);
     }
 
-    async waitDisappearanceOpenShiftLoginWelocmePage() {
-        Logger.debug('OcpLoginPage.waitDisappearanceOpenShiftLoginWelocmePage');
+    async waitDisappearanceOpenShiftLoginWelcomePage() {
+        Logger.debug('OcpLoginPage.waitDisappearanceOpenShiftLoginWelcomePage');
 
         await this.driverHelper.waitDisappearance(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH));
     }
