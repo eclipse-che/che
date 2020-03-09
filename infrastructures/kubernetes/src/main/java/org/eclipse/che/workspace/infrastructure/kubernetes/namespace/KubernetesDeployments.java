@@ -78,6 +78,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatc
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatcher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -601,6 +602,7 @@ public class KubernetesDeployments {
    */
   public synchronized void watchLogs(
       PodLogHandler handler,
+      RuntimeEventsPublisher eventsPublisher,
       LogWatchTimeouts timeouts,
       Set<String> podNames,
       long limitInputStreamBytes)
@@ -610,6 +612,7 @@ public class KubernetesDeployments {
       logWatcher =
           new LogWatcher(
               clientFactory,
+              eventsPublisher,
               workspaceId,
               namespace,
               podNames,

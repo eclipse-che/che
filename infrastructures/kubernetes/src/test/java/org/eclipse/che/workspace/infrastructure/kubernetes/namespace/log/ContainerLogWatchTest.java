@@ -27,6 +27,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -44,6 +45,7 @@ public class ContainerLogWatchTest {
   private final long LOG_LIMIT_BYTES = 1024;
 
   @Mock KubernetesClient client;
+  @Mock RuntimeEventsPublisher eventsPublisher;
 
   @Mock PodLogHandler podLogHandler;
 
@@ -73,7 +75,14 @@ public class ContainerLogWatchTest {
 
     ContainerLogWatch clw =
         new ContainerLogWatch(
-            client, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
+            client,
+            eventsPublisher,
+            namespace,
+            podname,
+            container,
+            podLogHandler,
+            TIMEOUTS,
+            LOG_LIMIT_BYTES);
     clw.run();
 
     verify(podLogHandler).handle("first", container);
@@ -91,7 +100,8 @@ public class ContainerLogWatchTest {
     logWatch.setInputStream(inputStream);
 
     ContainerLogWatch clw =
-        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, TIMEOUTS, 4);
+        new ContainerLogWatch(
+            client, eventsPublisher, namespace, podname, container, podLogHandler, TIMEOUTS, 4);
     clw.run();
 
     ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
@@ -120,7 +130,14 @@ public class ContainerLogWatchTest {
 
     ContainerLogWatch clw =
         new ContainerLogWatch(
-            client, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
+            client,
+            eventsPublisher,
+            namespace,
+            podname,
+            container,
+            podLogHandler,
+            TIMEOUTS,
+            LOG_LIMIT_BYTES);
     new Thread(clw).start();
 
     latch.await(1, TimeUnit.SECONDS);
@@ -147,7 +164,14 @@ public class ContainerLogWatchTest {
 
     ContainerLogWatch clw =
         new ContainerLogWatch(
-            client, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
+            client,
+            eventsPublisher,
+            namespace,
+            podname,
+            container,
+            podLogHandler,
+            TIMEOUTS,
+            LOG_LIMIT_BYTES);
     new Thread(clw).start();
 
     messageHandleLatch.await(1, TimeUnit.SECONDS);
@@ -202,7 +226,14 @@ public class ContainerLogWatchTest {
 
     ContainerLogWatch clw =
         new ContainerLogWatch(
-            client, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
+            client,
+            eventsPublisher,
+            namespace,
+            podname,
+            container,
+            podLogHandler,
+            TIMEOUTS,
+            LOG_LIMIT_BYTES);
     new Thread(clw).start();
 
     // wait for logwatch close, it means that error message was processed
@@ -245,7 +276,14 @@ public class ContainerLogWatchTest {
 
     ContainerLogWatch clw =
         new ContainerLogWatch(
-            client, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
+            client,
+            eventsPublisher,
+            namespace,
+            podname,
+            container,
+            podLogHandler,
+            TIMEOUTS,
+            LOG_LIMIT_BYTES);
     new Thread(clw).start();
 
     // wait for logwatch close, it means that error message was processed
