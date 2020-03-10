@@ -483,7 +483,7 @@ public class WorkspaceRuntimes {
           workspace.getId(),
           sessionUserNameOr("undefined"));
 
-      publishWorkspaceStatusEvent(workspaceId, STARTING, STOPPED, null);
+      publishWorkspaceStatusEvent(workspaceId, STARTING, STOPPED, null, options);
       return CompletableFuture.runAsync(
           ThreadLocalPropagateContext.wrap(new StartRuntimeTask(workspace, options, runtime)),
           sharedPool.getExecutor());
@@ -791,12 +791,22 @@ public class WorkspaceRuntimes {
 
   private void publishWorkspaceStatusEvent(
       String workspaceId, WorkspaceStatus status, WorkspaceStatus previous, String errorMsg) {
+    publishWorkspaceStatusEvent(workspaceId, status, previous, errorMsg, emptyMap());
+  }
+
+  private void publishWorkspaceStatusEvent(
+      String workspaceId,
+      WorkspaceStatus status,
+      WorkspaceStatus previous,
+      String errorMsg,
+      Map<String, String> options) {
     eventService.publish(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withWorkspaceId(workspaceId)
             .withPrevStatus(previous)
             .withError(errorMsg)
-            .withStatus(status));
+            .withStatus(status)
+            .withOptions(options));
   }
 
   private void setRuntimesId(String workspaceId) {

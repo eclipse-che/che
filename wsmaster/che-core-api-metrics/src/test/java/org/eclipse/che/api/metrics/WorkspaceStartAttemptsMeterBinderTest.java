@@ -12,6 +12,7 @@
 package org.eclipse.che.api.metrics;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonMap;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.testng.Assert;
@@ -72,8 +74,113 @@ public class WorkspaceStartAttemptsMeterBinderTest {
             .withStatus(WorkspaceStatus.STARTING)
             .withWorkspaceId("id1"));
     // then
-    Counter successful = registry.find("che.workspace.starting_attempts.total").counter();
+    Counter successful =
+        registry.find("che.workspace.starting_attempts.total").tag("debug", "false").counter();
     Assert.assertEquals(successful.count(), 1.0);
+
+    Counter debug =
+        registry.find("che.workspace.starting_attempts.total").tag("debug", "true").counter();
+    Assert.assertEquals(debug.count(), 0.0);
+  }
+
+  @Test
+  public void shouldCollectOnlyDebugStart() {
+    // given
+    WorkspaceStartAttemptsMeterBinder meterBinder =
+        new WorkspaceStartAttemptsMeterBinder(eventService);
+    meterBinder.bindTo(registry);
+
+    // when
+    eventService.publish(
+        DtoFactory.newDto(WorkspaceStatusEvent.class)
+            .withPrevStatus(WorkspaceStatus.STOPPED)
+            .withStatus(WorkspaceStatus.STARTING)
+            .withWorkspaceId("id1")
+            .withOptions(singletonMap(Constants.DEBUG_WORKSPACE_START, Boolean.TRUE.toString())));
+
+    // then
+    Counter successful =
+        registry.find("che.workspace.starting_attempts.total").tag("debug", "false").counter();
+    Assert.assertEquals(successful.count(), 0.0);
+
+    Counter debug =
+        registry.find("che.workspace.starting_attempts.total").tag("debug", "true").counter();
+    Assert.assertEquals(debug.count(), 1.0);
+  }
+
+  @Test
+  public void shouldNotCollectDebugStartWhenSetToFalse() {
+    // given
+    WorkspaceStartAttemptsMeterBinder meterBinder =
+        new WorkspaceStartAttemptsMeterBinder(eventService);
+    meterBinder.bindTo(registry);
+
+    // when
+    eventService.publish(
+        DtoFactory.newDto(WorkspaceStatusEvent.class)
+            .withPrevStatus(WorkspaceStatus.STOPPED)
+            .withStatus(WorkspaceStatus.STARTING)
+            .withWorkspaceId("id1")
+            .withOptions(singletonMap(Constants.DEBUG_WORKSPACE_START, Boolean.FALSE.toString())));
+
+    // then
+    Counter successful =
+        registry.find("che.workspace.starting_attempts.total").tag("debug", "false").counter();
+    Assert.assertEquals(successful.count(), 1.0);
+
+    Counter debug =
+        registry.find("che.workspace.starting_attempts.total").tag("debug", "true").counter();
+    Assert.assertEquals(debug.count(), 0.0);
+  }
+
+  @Test
+  public void shouldNotCollectDebugStartWhenSetToStrangeString() {
+    // given
+    WorkspaceStartAttemptsMeterBinder meterBinder =
+        new WorkspaceStartAttemptsMeterBinder(eventService);
+    meterBinder.bindTo(registry);
+
+    // when
+    eventService.publish(
+        DtoFactory.newDto(WorkspaceStatusEvent.class)
+            .withPrevStatus(WorkspaceStatus.STOPPED)
+            .withStatus(WorkspaceStatus.STARTING)
+            .withWorkspaceId("id1")
+            .withOptions(singletonMap(Constants.DEBUG_WORKSPACE_START, "strange")));
+
+    // then
+    Counter successful =
+        registry.find("che.workspace.starting_attempts.total").tag("debug", "false").counter();
+    Assert.assertEquals(successful.count(), 1.0);
+
+    Counter debug =
+        registry.find("che.workspace.starting_attempts.total").tag("debug", "true").counter();
+    Assert.assertEquals(debug.count(), 0.0);
+  }
+
+  @Test
+  public void shouldNotCollectDebugStartWhenNotSetInOptions() {
+    // given
+    WorkspaceStartAttemptsMeterBinder meterBinder =
+        new WorkspaceStartAttemptsMeterBinder(eventService);
+    meterBinder.bindTo(registry);
+
+    // when
+    eventService.publish(
+        DtoFactory.newDto(WorkspaceStatusEvent.class)
+            .withPrevStatus(WorkspaceStatus.STOPPED)
+            .withStatus(WorkspaceStatus.STARTING)
+            .withWorkspaceId("id1")
+            .withOptions(singletonMap("bla", "bol")));
+
+    // then
+    Counter successful =
+        registry.find("che.workspace.starting_attempts.total").tag("debug", "false").counter();
+    Assert.assertEquals(successful.count(), 1.0);
+
+    Counter debug =
+        registry.find("che.workspace.starting_attempts.total").tag("debug", "true").counter();
+    Assert.assertEquals(debug.count(), 0.0);
   }
 
   @DataProvider
