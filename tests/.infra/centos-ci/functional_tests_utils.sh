@@ -265,7 +265,11 @@ function getOpenshiftLogs() {
 
 function deployCheIntoCluster() {
   echo "======== Start to install CHE ========"
-  if chectl server:start -a operator -p openshift --k8spodreadytimeout=360000 $1 $2; then
+  if chectl server:start \
+      -a operator \
+      -p openshift \
+      --self-signed-cert \
+      --k8spodreadytimeout=360000 $1 $2; then
     echo "Started succesfully"
     oc get checluster -o yaml
   else
@@ -278,7 +282,7 @@ function deployCheIntoCluster() {
     # echo "==== docker ps -q | xargs -L 1 docker logs ===="
     # docker ps -q | xargs -L 1 docker logs | true
     getOpenshiftLogs
-    curl -vL http://keycloak-che.${LOCAL_IP_ADDRESS}.nip.io/auth/realms/che/.well-known/openid-configuration || true
+    curl -kvL https://keycloak-che.${LOCAL_IP_ADDRESS}.nip.io/auth/realms/che/.well-known/openid-configuration || true
     oc get checluster -o yaml || true
     exit 1337
   fi
@@ -323,11 +327,12 @@ createTestWorkspaceAndRunTest() {
   REPORT_FOLDER=$(pwd)/report
   ### Run tests
   docker run --shm-size=256m --network host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
-  -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" \
+  -e TS_SELENIUM_BASE_URL="https://$CHE_ROUTE" \
   -e TS_SELENIUM_MULTIUSER="true" \
   -e TS_SELENIUM_USERNAME="${TEST_USERNAME}" \
   -e TS_SELENIUM_PASSWORD="${TEST_USERNAME}" \
   -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=420000 \
+  -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
   quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
 }
 
@@ -335,14 +340,14 @@ function createTestUserAndObtainUserToken() {
 
   ### Create user and obtain token
   KEYCLOAK_URL=$(oc get route/keycloak -o jsonpath='{.spec.host}')
-  KEYCLOAK_BASE_URL="http://${KEYCLOAK_URL}/auth"
+  KEYCLOAK_BASE_URL="https://${KEYCLOAK_URL}/auth"
 
   ADMIN_USERNAME=admin
   ADMIN_PASS=admin
   TEST_USERNAME=testUser1
 
   echo "======== Getting admin token ========"
-  ADMIN_ACCESS_TOKEN=$(curl -X POST $KEYCLOAK_BASE_URL/realms/master/protocol/openid-connect/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=admin" -d "password=admin" -d "grant_type=password" -d "client_id=admin-cli" | jq -r .access_token)
+  ADMIN_ACCESS_TOKEN=$(curl -k -X POST $KEYCLOAK_BASE_URL/realms/master/protocol/openid-connect/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=admin" -d "password=admin" -d "grant_type=password" -d "client_id=admin-cli" | jq -r .access_token)
   echo $ADMIN_ACCESS_TOKEN
 
   echo "========Creating user========"
@@ -358,7 +363,7 @@ function createTestUserAndObtainUserToken() {
   echo $CREDENTIALS_JSON
 
   curl -X PUT $KEYCLOAK_BASE_URL/admin/realms/che/users/${USER_ID}/reset-password -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" -H "Content-Type: application/json" -d "${CREDENTIALS_JSON}" -v
-  export USER_ACCESS_TOKEN=$(curl -X POST $KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=${TEST_USERNAME}" -d "password=${TEST_USERNAME}" -d "grant_type=password" -d "client_id=che-public" | jq -r .access_token)
+  export USER_ACCESS_TOKEN=$(curl -k -X POST $KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=${TEST_USERNAME}" -d "password=${TEST_USERNAME}" -d "grant_type=password" -d "client_id=che-public" | jq -r .access_token)
   echo "========User Access Token: $USER_ACCESS_TOKEN "
 }
 
@@ -425,7 +430,7 @@ function runDevfileTestSuite() {
   REPORT_FOLDER=$(pwd)/report
   ### Run tests
   docker run --shm-size=1g --net=host  --ipc=host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
-  -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" \
+  -e TS_SELENIUM_BASE_URL="https://$CHE_ROUTE" \
   -e TS_SELENIUM_LOG_LEVEL=DEBUG \
   -e TS_SELENIUM_MULTIUSER=true \
   -e TS_SELENIUM_USERNAME="${TEST_USERNAME}" \
@@ -433,6 +438,7 @@ function runDevfileTestSuite() {
   -e TEST_SUITE=test-all-devfiles -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \
   -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \
   -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
+  -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
   quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
 }
 

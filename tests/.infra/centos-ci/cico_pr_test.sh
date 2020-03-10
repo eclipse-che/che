@@ -53,7 +53,8 @@ createIndentityProvider
 bash /root/payload/tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
   --threads=3 \
   --host=${CHE_ROUTE} \
-  --port=80 \
+  --https \
+  --port=443 \
   --multiuser \
   --fail-script-on-failed-tests \
   || IS_TESTS_FAILED=true

@@ -21,8 +21,9 @@ deployCheIntoCluster
 seleniumTestsSetup
 
 bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
---host=${CHE_ROUTE} \
- --port=80 \
+ --host=${CHE_ROUTE} \
+ --https \
+ --port=443 \
  --multiuser \
  --threads=1 \
  --fail-script-on-failed-tests \

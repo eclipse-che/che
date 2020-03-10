@@ -29,7 +29,8 @@ seleniumTestsSetup
 bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
   --threads=1 \
   --host=${CHE_ROUTE} \
-  --port=80 \
+  --https \
+  --port=443 \
   --multiuser \
   --fail-script-on-failed-tests \
   --test=org.eclipse.che.selenium.site.ocpoauth.** \
