@@ -74,6 +74,9 @@ pipeline {
                         sh """
                             wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
                             -O $CUSTOM_RESOURCE_FILE_PATH
+
+                            # "selfSignedCert: true" so as TLS support is enebled by default 
+                            sed -i "s/selfSignedCert: false/selfSignedCert: true/" $CUSTOM_RESOURCE_FILE_PATH                            
                         """
 
                     } else {
@@ -248,7 +251,7 @@ pipeline {
                               ((COUNTER+=1))
                               
                               
-                              STATUS_CODE=\$(curl -sL -w "%{http_code}" -I ${cheHost} -o /dev/null; true) || true
+                              STATUS_CODE=\$(curl -k -sL -w "%{http_code}" -I https://${cheHost} -o /dev/null; true) || true
                               
                               echo "Try \${COUNTER}. Status code: \${STATUS_CODE}"
                               if [ "\$STATUS_CODE" == "200" ]; then 
@@ -282,8 +285,7 @@ pipeline {
                     }
 
                     sh """   
-                        KEYCLOAK_URL=\$(kubectl get ingress/keycloak -n che -o jsonpath='{.spec.rules[0].host}')
-                        KEYCLOAK_BASE_URL="http://\${KEYCLOAK_URL}/auth"
+                        KEYCLOAK_BASE_URL="https://\$(kubectl get ingress/keycloak -n che -o jsonpath='{.spec.rules[0].host}')/auth"
     
                         USER_ACCESS_TOKEN=\$(curl -X POST \$KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token \\
                            -H "Content-Type: application/x-www-form-urlencoded" \\
@@ -303,7 +305,7 @@ pipeline {
         stage("Run E2E Happy path tests") {
             steps {
                 sh """                     
-                     CHE_URL=http://${cheHost}
+                     CHE_URL=https://${cheHost}
                      docker run --shm-size=1g --net=host --ipc=host \\
                        -p 5920:5920 \\
                        -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \\
@@ -315,6 +317,7 @@ pipeline {
                        -e TS_SELENIUM_USERNAME="admin" \\
                        -e TS_SELENIUM_PASSWORD="admin" \\
                        -e TEST_SUITE="${e2eTestToRun}" ${e2eTestParameters} \\
+                       -e NODE_TLS_REJECT_UNAUTHORIZED=0 \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
                        quay.io/eclipse/che-e2e:nightly
                 """

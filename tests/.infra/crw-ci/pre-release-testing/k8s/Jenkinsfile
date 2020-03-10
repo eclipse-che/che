@@ -72,6 +72,8 @@ pipeline {
                     sh """
                         wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
                           -O $customResourceFilePath
+
+                        sed -i "s/selfSignedCert: false/selfSignedCert: true/" $CUSTOM_RESOURCE_FILE_PATH   
                     """
 
                     customResourceFileContent = readFile customResourceFilePath
