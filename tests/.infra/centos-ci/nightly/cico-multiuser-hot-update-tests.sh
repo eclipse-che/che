@@ -17,7 +17,7 @@ installDockerCompose
 installAndStartMinishift
 loginToOpenshiftAndSetDevRole
 installCheCtl
-deployCheIntoCluster
+deployCheIntoCluster --self-signed-cert
 seleniumTestsSetup
 
 bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh \

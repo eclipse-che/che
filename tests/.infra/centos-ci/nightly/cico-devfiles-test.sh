@@ -10,7 +10,7 @@ installCheCtl
 installJQ
 installAndStartMinishift
 loginToOpenshiftAndSetDevRole
-deployCheIntoCluster
+deployCheIntoCluster --self-signed-cert
 createTestUserAndObtainUserToken
 runDevfileTestSuite 
 echo "=========================== THIS IS POST TEST ACTIONS =============================="

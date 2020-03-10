@@ -22,6 +22,7 @@ function prepareCustomResourceFile() {
   sed -i "s/customCheProperties:/customCheProperties:\n      CHE_WORKSPACE_AGENT_DEV_INACTIVE__STOP__TIMEOUT__MS: '300000'/" /tmp/custom-resource.yaml
   sed -i "s@cheImage: ''@cheImage: 'quay.io/eclipse/che-server'@g" /tmp/custom-resource.yaml
   sed -i "s@cheImageTag: 'nightly'@cheImageTag: '${TAG}'@g" /tmp/custom-resource.yaml
+  sed -i "s@selfSignedCert: false@selfSignedCert: true@" /tmp/custom-resource.yaml
   cat /tmp/custom-resource.yaml
 }
 

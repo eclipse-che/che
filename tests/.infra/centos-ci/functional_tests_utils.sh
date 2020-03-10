@@ -268,7 +268,6 @@ function deployCheIntoCluster() {
   if chectl server:start \
       -a operator \
       -p openshift \
-      --self-signed-cert \
       --k8spodreadytimeout=360000 $1 $2; then
     echo "Started succesfully"
     oc get checluster -o yaml

@@ -17,7 +17,7 @@ installDependencies
 installCheCtl
 installAndStartMinishift
 loginToOpenshiftAndSetDevRole
-deployCheIntoCluster
+deployCheIntoCluster --self-signed-cert
 createTestUserAndObtainUserToken
 createTestWorkspaceAndRunTest
 echo "=========================== THIS IS POST TEST ACTIONS =============================="
