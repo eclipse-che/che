@@ -73,7 +73,7 @@ pipeline {
                     if (customResourceFileContent == null || customResourceFileContent == '') {
                         sh """
                             wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
-                            -O $CUSTOM_RESOURCE_FILE_PATH
+                            -O $CUSTOM_RESOURCE_FILE_PATH                                                  
                         """
 
                     } else {
@@ -210,13 +210,15 @@ pipeline {
                     echo "Patch Che custom-resource.yaml"
                     sh """
                         sed -i "s|cheImage: ''|cheImage: '${cheImageRepo}'|" $CUSTOM_RESOURCE_FILE_PATH
-                        sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${
-                        mutableCheImageTag
-                    }'|" $CUSTOM_RESOURCE_FILE_PATH
-    
+                        sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${mutableCheImageTag}'|" $CUSTOM_RESOURCE_FILE_PATH
                         sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" $CUSTOM_RESOURCE_FILE_PATH
-    
                         sed -i "s|ingressDomain: '192.168.99.101.nip.io'|ingressDomain: '\$(minikube ip).nip.io'|" $CUSTOM_RESOURCE_FILE_PATH
+
+                        # temporary workaround to https://github.com/eclipse/che/issues/16292
+                        sed -i "s/tlsSupport: true/tlsSupport: false/" $CUSTOM_RESOURCE_FILE_PATH  
+
+                        # TODO: "selfSignedCert: true" so as TLS support is enebled by default 
+                        # sed -i "s/selfSignedCert: false/selfSignedCert: true/" $CUSTOM_RESOURCE_FILE_PATH    
                     """
 
                     retry(2) {
@@ -248,7 +250,7 @@ pipeline {
                               ((COUNTER+=1))
                               
                               
-                              STATUS_CODE=\$(curl -sL -w "%{http_code}" -I ${cheHost} -o /dev/null; true) || true
+                              STATUS_CODE=\$(curl -k -sL -w "%{http_code}" -I http://${cheHost} -o /dev/null; true) || true
                               
                               echo "Try \${COUNTER}. Status code: \${STATUS_CODE}"
                               if [ "\$STATUS_CODE" == "200" ]; then 
@@ -282,8 +284,7 @@ pipeline {
                     }
 
                     sh """   
-                        KEYCLOAK_URL=\$(kubectl get ingress/keycloak -n che -o jsonpath='{.spec.rules[0].host}')
-                        KEYCLOAK_BASE_URL="http://\${KEYCLOAK_URL}/auth"
+                        KEYCLOAK_BASE_URL="http://\$(kubectl get ingress/keycloak -n che -o jsonpath='{.spec.rules[0].host}')/auth"
     
                         USER_ACCESS_TOKEN=\$(curl -X POST \$KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token \\
                            -H "Content-Type: application/x-www-form-urlencoded" \\
@@ -315,6 +316,7 @@ pipeline {
                        -e TS_SELENIUM_USERNAME="admin" \\
                        -e TS_SELENIUM_PASSWORD="admin" \\
                        -e TEST_SUITE="${e2eTestToRun}" ${e2eTestParameters} \\
+                       -e NODE_TLS_REJECT_UNAUTHORIZED=0 \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
                        quay.io/eclipse/che-e2e:nightly
                 """
