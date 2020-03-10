@@ -22,6 +22,7 @@ export * from './utils/workspace/ITestWorkspaceUtil';
 export * from './utils/workspace/TestWorkspaceUtil';
 export * from './utils/workspace/WorkspaceStatus';
 export * from './pageobjects/dashboard/Dashboard';
+export * from './pageobjects/dashboard/GetStarted';
 export * from './pageobjects/dashboard/NewWorkspace';
 export * from './pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins';
 export * from './pageobjects/dashboard/workspace-details/WorkspaceDetails';

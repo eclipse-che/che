@@ -157,23 +157,29 @@ public interface ServerConfig {
   }
 
   /**
-   * Determines whether the attributes configure the server to be authenticated using JWT cookies.
+   * Determines whether the attributes configure the server to be authenticated using JWT cookies. A
+   * null value means that the attributes don't require any particular authentication.
    *
    * @param attributes the attributes with additional server configuration
    * @see #SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE
    */
-  static boolean isCookiesAuthEnabled(Map<String, String> attributes) {
-    return AttributesEvaluator.booleanAttr(
-        attributes, SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE, false);
+  static @Nullable Boolean isCookiesAuthEnabled(Map<String, String> attributes) {
+    String val = attributes.get(SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE);
+    return val == null ? null : Boolean.parseBoolean(val);
   }
 
   /**
-   * Sets the "cookiesAuthEnabled" flag in the provided attributes to the provided value.
+   * Sets the "cookiesAuthEnabled" flag in the provided attributes to the provided value. A null
+   * value means that the attributes don't require any particular authentication.
    *
    * @param attributes the attributes with the additional server configuration
    */
-  static void setCookiesAuthEnabled(Map<String, String> attributes, boolean value) {
-    attributes.put(SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE, Boolean.toString(value));
+  static void setCookiesAuthEnabled(Map<String, String> attributes, @Nullable Boolean value) {
+    if (value == null) {
+      attributes.remove(SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE);
+    } else {
+      attributes.put(SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE, Boolean.toString(value));
+    }
   }
 
   /**
@@ -199,22 +205,27 @@ public interface ServerConfig {
     attributes.put(UNSECURED_PATHS_ATTRIBUTE, join(",", value));
   }
 
+  /** @see #isInternal(Map) */
   default boolean isInternal() {
     return isInternal(getAttributes());
   }
 
+  /** @see #isSecure(Map) */
   default boolean isSecure() {
     return isSecure(getAttributes());
   }
 
+  /** @see #isUnique(Map) */
   default boolean isUnique() {
     return isUnique(getAttributes());
   }
 
-  default boolean isCookiesAuthEnabled() {
+  /** @see #isCookiesAuthEnabled(Map) */
+  default @Nullable Boolean isCookiesAuthEnabled() {
     return isCookiesAuthEnabled(getAttributes());
   }
 
+  /** @see #getUnsecuredPaths(Map) */
   default List<String> getUnsecuredPaths() {
     return getUnsecuredPaths(getAttributes());
   }
