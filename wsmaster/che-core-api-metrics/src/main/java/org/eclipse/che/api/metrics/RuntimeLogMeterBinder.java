@@ -14,6 +14,7 @@ package org.eclipse.che.api.metrics;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
+import java.nio.charset.StandardCharsets;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.notification.EventService;
@@ -49,7 +50,7 @@ public class RuntimeLogMeterBinder implements MeterBinder {
     eventService.subscribe(
         (e) -> {
           messages.increment();
-          bytes.increment(e.getText().getBytes().length);
+          bytes.increment(e.getText().getBytes(StandardCharsets.UTF_8).length);
         },
         RuntimeLogEvent.class);
   }
