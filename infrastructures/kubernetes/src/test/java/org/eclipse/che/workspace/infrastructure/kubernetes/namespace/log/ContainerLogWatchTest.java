@@ -11,7 +11,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -89,6 +91,10 @@ public class ContainerLogWatchTest {
     verify(podLogHandler).handle("second", container);
     verify(podLogHandler).handle("third", container);
     assertTrue(logWatch.isClosed);
+
+    // verify events were properly fired
+    verify(eventsPublisher, times(1)).sendWatchLogStartedEvent(any(String.class));
+    verify(eventsPublisher, times(1)).sendWatchLogStoppedEvent(any(String.class));
   }
 
   @Test
@@ -110,13 +116,17 @@ public class ContainerLogWatchTest {
     assertEquals(messageCaptor.getValue(), "This");
     assertEquals(containerCaptor.getValue(), container);
     assertTrue(logWatch.isClosed);
+
+    // verify events were properly fired
+    verify(eventsPublisher, times(1)).sendWatchLogStartedEvent(any(String.class));
+    verify(eventsPublisher, times(1)).sendWatchLogStoppedEvent(any(String.class));
   }
 
   @Test
   public void testCloseFromOutside() throws IOException, InterruptedException {
     PipedInputStream inputStream = new PipedInputStream();
     PipedOutputStream outputStream = new PipedOutputStream(inputStream);
-    outputStream.write("message\n".getBytes());
+    outputStream.write("message\na\na\na\na\na".getBytes());
     logWatch.setInputStream(inputStream);
 
     CountDownLatch latch = new CountDownLatch(1);
@@ -144,6 +154,10 @@ public class ContainerLogWatchTest {
     clw.close();
 
     assertTrue(logWatch.isClosed);
+
+    // verify events were properly fired
+    verify(eventsPublisher, times(1)).sendWatchLogStartedEvent(any(String.class));
+    verify(eventsPublisher, timeout(1000).times(1)).sendWatchLogStoppedEvent(any(String.class));
   }
 
   @Test
@@ -181,6 +195,10 @@ public class ContainerLogWatchTest {
     logWatch.setLatch(closeLatch);
     closeLatch.await(1, TimeUnit.SECONDS);
     assertTrue(logWatch.isClosed);
+
+    // verify events were properly fired
+    verify(eventsPublisher, times(1)).sendWatchLogStartedEvent(any(String.class));
+    verify(eventsPublisher, times(1)).sendWatchLogStoppedEvent(any(String.class));
   }
 
   @Test
@@ -248,6 +266,10 @@ public class ContainerLogWatchTest {
     // message was processed
     verify(podLogHandler).handle("message", container);
     assertTrue(logWatchRegularMessage.isClosed);
+
+    // verify events were properly fired
+    verify(eventsPublisher, times(2)).sendWatchLogStartedEvent(any(String.class));
+    verify(eventsPublisher, times(2)).sendWatchLogStoppedEvent(any(String.class));
   }
 
   @Test
@@ -298,6 +320,10 @@ public class ContainerLogWatchTest {
     // message was processed
     verify(podLogHandler).handle("message", container);
     assertTrue(logWatchRegularMessage.isClosed);
+
+    // verify events were properly fired
+    verify(eventsPublisher, times(2)).sendWatchLogStartedEvent(any(String.class));
+    verify(eventsPublisher, times(2)).sendWatchLogStoppedEvent(any(String.class));
   }
 
   private class LogWatchMock implements LogWatch {
