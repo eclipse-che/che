@@ -24,9 +24,7 @@ import org.eclipse.che.workspace.infrastructure.metrics.event.WatchLogStoppedEve
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Counts sent messages and bytes to runtime log by listening to {@link RuntimeLogEvent}s.
- */
+/** Counts sent messages and bytes to runtime log by listening to {@link RuntimeLogEvent}s. */
 @Singleton
 public class CurrentLogwatchersMeterBinder implements MeterBinder {
 
@@ -52,10 +50,11 @@ public class CurrentLogwatchersMeterBinder implements MeterBinder {
           long counter = currentWatchersCounter.decrementAndGet();
           if (counter < 0) {
             LOG.warn(
-                "WatchLog current instances counter decremented under 0. Counter set explicitly to 0. This should not happen. Please report a bug if you see this message in the log.");
+                "WatchLog current instances counter decremented below 0. Counter set explicitly to 0. This should not happen. Please report a bug if you see this message in the log.");
             currentWatchersCounter.set(0);
           }
-        }, WatchLogStoppedEvent.class);
+        },
+        WatchLogStoppedEvent.class);
   }
 
   private long current() {

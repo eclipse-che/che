@@ -496,7 +496,7 @@
             <dependency>
                 <groupId>org.eclipse.che.infrastructure</groupId>
                 <artifactId>infrastructure-metrics</artifactId>
-                <version>7.10.0-SNAPSHOT</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.infrastructure</groupId>
