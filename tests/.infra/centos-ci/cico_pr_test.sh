@@ -5,8 +5,7 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-set -e
-set +x
+set -ex
 
 source tests/.infra/centos-ci/functional_tests_utils.sh
 
