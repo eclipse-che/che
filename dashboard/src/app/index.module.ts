@@ -82,12 +82,12 @@ function keycloakLoad(keycloakSettings: any) {
     script.addEventListener('load', resolve);
     script.addEventListener('error', () => {
       return cheBranding.ready.then(() => {
-        reject(`<div  class="error-header"><span>Certificate Error</span><a href="/"><i class="fa fa-times"></i></a></div>
- <div class="error-body"><p>Your Che host may be signed with a self-signed certificate. To resolve this issue, try these possible solutions:</p>
- <p>1.) Import CA certificate info into your browser. You can find instructions on how to do this in you 
- <a href="${cheBranding.getDocs().certificate}" target="_blank">Che documentation</a>.</p>
- <p>2.) Open <a href="${script.src}" target="_blank">the link for your Che host</a> in a new tab and add an exclusion.</p>
- <br/>After trying each of these solutions, <a href="/">refresh your Dashboard</a> to see if the problem has been resolved.</div>`);
+        reject(`<div class="header"><i class="fa fa-warning"></i><p>Certificate Error</p></div>
+   <div class="body"><p>Your ${cheBranding.getProductName()} server may be using a self-signed certificate.
+     To resolve this issue, try to import the servers CA certificate into your browser, as described
+   <a href="${cheBranding.getDocs().certificate}" target="_blank">here</a>.</p>
+   <p>After importing the certificate, refresh your browser.</p>
+   <p><a href="/">Refresh Now</a></p></div>`);
       });
     });
     script.addEventListener('abort', () => reject('Script loading aborted.'));
@@ -147,11 +147,22 @@ function getApis(keycloak: any): Promise<void> {
     });
   });
 }
-function showErrorMessage(errorMessage: string) {
-  const div = document.createElement('div');
-  div.className = 'keycloak-error';
-  div.innerHTML = errorMessage;
-  document.querySelector('.main-page-loader').appendChild(div);
+function showErrorMessage(message: string) {
+  cheBranding.ready.then(() => {
+    const backdrop = document.createElement('div');
+    backdrop.className = 'keycloak-error-backdrop';
+    const messageArea = document.createElement('div');
+    messageArea.className = 'keycloak-error';
+    const footerLogo = document.createElement('img');
+    footerLogo.src = cheBranding.getProductLogo();
+    footerLogo.className="footer-logo";
+    backdrop.appendChild(messageArea);
+    backdrop.appendChild(footerLogo);
+    const errorMessage = document.createElement('div');
+    messageArea.appendChild(errorMessage);
+    errorMessage.innerHTML = message;
+    document.querySelector('.main-page-loader').appendChild(backdrop);
+  });
 }
 
 const keycloakAuth = {
@@ -210,7 +221,7 @@ angular.element(document).ready(() => {
   }).catch((error: string) => {
     console.error(`Can't GET "/api". ${error ? 'Error: ' : ''}`, error);
     if (!hasCertificateError) {
-      error = `${error}<div class="error-body">Click <a href="/">here</a> to reload page.</div>`
+      error = `${error}<div>Click <a href="/">here</a> to reload page.</div>`
     }
     showErrorMessage(error);
   });
