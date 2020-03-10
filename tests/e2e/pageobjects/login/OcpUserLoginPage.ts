@@ -26,13 +26,13 @@ export class OcpUserLoginPage implements IOcpLoginPage {
 
         if (TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE !== '') {
             await this.ocpLogin.clickOnLoginProviderTitle();
-            await this.ocpLogin.waitOpenShiftLoginPage();
         }
 
+        await this.ocpLogin.waitOpenShiftLoginWelcomePage();
         await this.ocpLogin.enterUserNameOpenShift(TestConstants.TS_SELENIUM_OCP_USERNAME);
         await this.ocpLogin.enterPasswordOpenShift(TestConstants.TS_SELENIUM_OCP_PASSWORD);
         await this.ocpLogin.clickOnLoginButton();
-        await this.ocpLogin.waitDisappearanceOpenShiftLoginPage();
+        await this.ocpLogin.waitDisappearanceOpenShiftLoginWelcomePage();
     }
 
 }

@@ -90,7 +90,7 @@ public class JwtProxyConfigBuilder {
       Integer listenPort,
       String upstream,
       Set<String> excludes,
-      Boolean cookiesAuthEnabled,
+      boolean cookiesAuthEnabled,
       String cookiePath,
       String publicBasePath) {
     verifierProxies.add(

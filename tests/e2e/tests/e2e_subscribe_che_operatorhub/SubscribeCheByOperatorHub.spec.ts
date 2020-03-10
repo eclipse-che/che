@@ -24,8 +24,8 @@ suite('E2E', async () => {
     suite('Go to OCP and wait console OpenShift', async () => {
         test('Open login page', async () => {
             await ocpLoginPage.openLoginPageOpenShift(TestConstants.TS_SELENIUM_WEB_CONSOLE_OCP_URL);
-            await ocpLoginPage.waitOpenShiftLoginPage();
         });
+
         test('Log into OCP', async () => {
             ocpLogin.login();
         });
