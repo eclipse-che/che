@@ -14,7 +14,12 @@ package org.eclipse.che.workspace.infrastructure.metrics.event;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+/**
+ * This event should be fired when WatchLog instance started and there is active connection to k8s
+ * API watching logs of particular container.
+ */
 public class WatchLogStartedEvent {
+
   private final String container;
 
   public WatchLogStartedEvent(String container) {

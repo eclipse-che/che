@@ -14,7 +14,12 @@ package org.eclipse.che.workspace.infrastructure.metrics.event;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+/**
+ * This event should be fired when WatchLog instance stopped and particular container's logs are no
+ * longer watched.
+ */
 public class WatchLogStoppedEvent {
+
   private final String container;
 
   public WatchLogStoppedEvent(String container) {
