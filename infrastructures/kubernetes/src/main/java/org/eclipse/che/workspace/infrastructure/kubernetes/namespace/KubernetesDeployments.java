@@ -22,6 +22,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.setSelector;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import io.fabric8.kubernetes.api.model.ContainerStateTerminated;
 import io.fabric8.kubernetes.api.model.ContainerStatus;
@@ -535,7 +536,8 @@ public class KubernetesDeployments {
                         event.getReason(),
                         event.getMessage(),
                         event.getMetadata().getCreationTimestamp(),
-                        event.getLastTimestamp());
+                        MoreObjects.firstNonNull(
+                            event.getLastTimestamp(), event.getFirstTimestamp()));
 
                 try {
                   if (happenedAfterWatcherInitialization(podEvent)) {
