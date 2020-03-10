@@ -167,10 +167,6 @@
             <artifactId>che-core-db</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.infrastructure</groupId>
-            <artifactId>infrastructure-metrics</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-machine-authentication</artifactId>
         </dependency>

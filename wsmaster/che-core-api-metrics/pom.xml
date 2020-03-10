@@ -61,7 +61,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.infrastructure</groupId>
-            <artifactId>infrastructure-metrics</artifactId>
+            <artifactId>infrastructure-kubernetes</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

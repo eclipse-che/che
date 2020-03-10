@@ -9,20 +9,20 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.metrics.event;
+package org.eclipse.che.workspace.infrastructure.kubernetes.event;
 
 import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * This event should be fired when WatchLog instance stopped and particular container's logs are no
- * longer watched.
+ * This event should be fired when WatchLog instance started and there is active connection to k8s
+ * API watching logs of particular container.
  */
-public class WatchLogStoppedEvent {
+public class WatchLogStartedEvent {
 
   private final String container;
 
-  public WatchLogStoppedEvent(String container) {
+  public WatchLogStartedEvent(String container) {
     this.container = container;
   }
 
@@ -32,7 +32,7 @@ public class WatchLogStoppedEvent {
 
   @Override
   public String toString() {
-    return new StringJoiner(", ", WatchLogStoppedEvent.class.getSimpleName() + "[", "]")
+    return new StringJoiner(", ", WatchLogStartedEvent.class.getSimpleName() + "[", "]")
         .add("container='" + container + "'")
         .toString();
   }
@@ -45,7 +45,7 @@ public class WatchLogStoppedEvent {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    WatchLogStoppedEvent that = (WatchLogStoppedEvent) o;
+    WatchLogStartedEvent that = (WatchLogStartedEvent) o;
     return Objects.equals(container, that.container);
   }
 

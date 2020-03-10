@@ -19,8 +19,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
-import org.eclipse.che.workspace.infrastructure.metrics.event.WatchLogStartedEvent;
-import org.eclipse.che.workspace.infrastructure.metrics.event.WatchLogStoppedEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.event.WatchLogStartedEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.event.WatchLogStoppedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

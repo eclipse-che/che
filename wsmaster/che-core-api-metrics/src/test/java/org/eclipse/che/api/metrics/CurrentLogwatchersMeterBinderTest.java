@@ -16,8 +16,8 @@ import static org.testng.Assert.*;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.workspace.infrastructure.metrics.event.WatchLogStartedEvent;
-import org.eclipse.che.workspace.infrastructure.metrics.event.WatchLogStoppedEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.event.WatchLogStartedEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.event.WatchLogStoppedEvent;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
