@@ -273,46 +273,60 @@ md-tabs-wrapper
   font-size 12px
   border-radius 2px
 
+.keycloak-error-backdrop
+  background-color $black-color
+  position absolute
+  top 0
+  left 0
+  right 0
+  bottom 0
+  text-align center
+
+  .footer-logo
+    position absolute
+    bottom 15px
+    width 100px
+    margin-left -50px
+
 .keycloak-error
-  font-weight: 600
-  border-radius: 2px
-  font-size: 16px
-  color: $black-color
-  background-color: $white-color
-  position: absolute
-  top: 50%
-  left: 25%;
-  width: 50%;
-  transform: translate(0, -50%)
-  .error-header
+  background-color $white-color
+  color $error-color
+  padding 50px 0
+  text-align center
+  font-weight 600
+  font-size 16px
+  position absolute
+  top 50%
+  left 0
+  right 0
+  transform translate(0, -50%)
+
+  & > *
+    position relative
     display inline-block
-    margin 0
-    padding 0
-    width 100%
-    height 40px
-    line-height 40px
-    text-align center
-    vertical-align middle
-    border-radius 2px 2px 0 0
-    color $white-color
-    background $error-color
-    span
-      font-size 22px
-      font-weight 600
-      color inherit
-    a
-      float right
-      width 40px
-      color inherit
-      font-size 20px
-      text-align center
-  .error-body
-    border-radius 0 0 2px 2px
-    text-align center
-    color $black-color
-    background-color $white-color
-    margin 15px
+    width 370px
+
     p
-      text-align left
+      display inline-block
+      margin 0 0 25px
+
     a
       color $link-color
+
+  .header,
+  .body,
+  display inline-block
+    color $black-color
+    text-align left
+    width 100%
+
+  .header
+    font-size 20px
+    font-weight 600
+
+  i
+    color #e7ad3b
+    margin 0 12px 0 4px
+
+  .body
+    font-size 16px
