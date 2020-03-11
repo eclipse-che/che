@@ -11,13 +11,21 @@ echo "========Starting nigtly test job $(date)========"
 source tests/.infra/centos-ci/functional_tests_utils.sh
 source .ci/cico_common.sh
 
+function prepareCustomResourceFile() {
+  cd /tmp
+  wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml -O custom-resource.yaml
+  sed -i "s@tlsSupport: true@tlsSupport: false@g" /tmp/custom-resource.yaml
+  cat /tmp/custom-resource.yaml
+}
+
 setupEnvs
 installKVM
 installDependencies
 installCheCtl
 installAndStartMinishift
 loginToOpenshiftAndSetDevRole
-deployCheIntoCluster
+prepareCustomResourceFile
+deployCheIntoCluster --chenamespace=eclipse-che --che-operator-cr-yaml=/tmp/custom-resource.yaml
 createTestUserAndObtainUserToken
 createTestWorkspaceAndRunTest
 echo "=========================== THIS IS POST TEST ACTIONS =============================="
