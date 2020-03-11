@@ -25,8 +25,8 @@ import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.event.WatchLogStartedEvent;
-import org.eclipse.che.workspace.infrastructure.kubernetes.event.WatchLogStoppedEvent;
+import org.eclipse.che.workspace.infrastructure.metrics.event.WatchLogStartedEvent;
+import org.eclipse.che.workspace.infrastructure.metrics.event.WatchLogStoppedEvent;
 
 /** @author Anton Korneta */
 @Singleton
