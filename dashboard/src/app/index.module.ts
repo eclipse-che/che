@@ -132,7 +132,7 @@ function setAuthorizationHeader(xhr: XMLHttpRequest, keycloak: any): Promise<any
 }
 function getApis(keycloak: any): Promise<void> {
   const request = new XMLHttpRequest();
-  request.open('GET', '/api');
+  request.open('GET', '/api/');
   return setAuthorizationHeader(request, keycloak).then((xhr: XMLHttpRequest) => {
     return new Promise<void>((resolve: IResolveFn<void>, reject: IRejectFn<void>) => {
       xhr.send();
