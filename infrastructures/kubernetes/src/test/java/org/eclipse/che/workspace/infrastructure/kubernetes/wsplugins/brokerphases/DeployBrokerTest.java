@@ -188,6 +188,7 @@ public class DeployBrokerTest {
     verify(k8sDeployments)
         .watchLogs(
             any(PodLogHandler.class),
+            any(RuntimeEventsPublisher.class),
             any(LogWatchTimeouts.class),
             any(),
             eq(LogWatcher.DEFAULT_LOG_LIMIT_BYTES));
@@ -219,7 +220,12 @@ public class DeployBrokerTest {
 
     // then
     verify(k8sDeployments)
-        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any(), eq(123L));
+        .watchLogs(
+            any(PodLogHandler.class),
+            any(RuntimeEventsPublisher.class),
+            any(LogWatchTimeouts.class),
+            any(),
+            eq(123L));
     verify(k8sDeployments).stopWatch();
   }
 
@@ -246,6 +252,7 @@ public class DeployBrokerTest {
     verify(k8sDeployments, never())
         .watchLogs(
             any(PodLogHandler.class),
+            any(RuntimeEventsPublisher.class),
             any(LogWatchTimeouts.class),
             any(),
             eq(LogWatcher.DEFAULT_LOG_LIMIT_BYTES));
@@ -262,6 +269,7 @@ public class DeployBrokerTest {
     verify(k8sDeployments, never())
         .watchLogs(
             any(PodLogHandler.class),
+            any(RuntimeEventsPublisher.class),
             any(LogWatchTimeouts.class),
             any(),
             eq(LogWatcher.DEFAULT_LOG_LIMIT_BYTES));
@@ -291,6 +299,7 @@ public class DeployBrokerTest {
     verify(k8sDeployments, never())
         .watchLogs(
             any(PodLogHandler.class),
+            any(RuntimeEventsPublisher.class),
             any(LogWatchTimeouts.class),
             any(),
             eq(LogWatcher.DEFAULT_LOG_LIMIT_BYTES));

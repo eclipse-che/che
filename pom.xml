@@ -495,6 +495,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.infrastructure</groupId>
+                <artifactId>infrastructure-metrics</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.infrastructure</groupId>
                 <artifactId>infrastructure-openshift</artifactId>
                 <version>${che.version}</version>
             </dependency>

@@ -233,6 +233,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.infrastructure</groupId>
+            <artifactId>infrastructure-metrics</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.infrastructure</groupId>
             <artifactId>infrastructure-openshift</artifactId>
         </dependency>
         <dependency>
