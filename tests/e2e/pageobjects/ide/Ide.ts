@@ -209,12 +209,6 @@ export class Ide {
         }
     }
 
-    async waitIdeFrameAndSwitchOnIt(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
-        Logger.debug('Ide.waitIdeFrameAndSwitchOnIt');
-
-        await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
-    }
-
     async checkLsInitializationStart(expectedTextInStatusBar: string) {
         Logger.debug('Ide.checkLsInitializationStart');
 
