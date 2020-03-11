@@ -13,8 +13,10 @@ function prepareCustomResourceFile() {
   wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml -O custom-resource.yaml
   sed -i "s@openShiftoAuth: false@openShiftoAuth: true@g" /tmp/custom-resource.yaml
   sed -i "s@server:@server:\n    customCheProperties:\n      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'@g" /tmp/custom-resource.yaml
+  sed -i "s@tlsSupport: true@tlsSupport: false@g" /tmp/custom-resource.yaml
   cat /tmp/custom-resource.yaml
 }
+
 setupEnvs
 installKVM
 installDependencies
