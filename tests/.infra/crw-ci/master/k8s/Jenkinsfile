@@ -100,13 +100,13 @@ pipeline {
                             build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                     parameters: [
                                             string(name: 'cheImageRepo',
-                                                    value: 'quay.io/eclipse/che-server'),
+                                                    value: 'maxura/che-server'),
 
                                             string(name: 'cheImageTag',
                                                     value: 'master'),
 
                                             booleanParam(name: 'buildChe',
-                                                    value: false),
+                                                    value: true),
 
                                             string(name: 'ghprbSourceBranch',
                                                     value: 'master'),
