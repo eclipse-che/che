@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.metrics.event;
+package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.event;
 
 import java.util.Objects;
 import java.util.StringJoiner;

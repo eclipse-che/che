@@ -9,15 +9,14 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.metrics;
-
-import static org.testng.Assert.*;
+package org.eclipse.che.workspace.infrastructure.metrics;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.workspace.infrastructure.metrics.event.WatchLogStartedEvent;
-import org.eclipse.che.workspace.infrastructure.metrics.event.WatchLogStoppedEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.event.WatchLogStartedEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.event.WatchLogStoppedEvent;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -39,35 +38,35 @@ public class CurrentLogwatchersMeterBinderTest {
 
   @Test
   public void testCurrentLogwatcherGaugeReactsOnEvents() {
-    assertEquals(registry.get(metricsKey).gauge().value(), 0.0);
+    Assert.assertEquals(registry.get(metricsKey).gauge().value(), 0.0);
 
     eventService.publish(new WatchLogStartedEvent("container"));
-    assertEquals(registry.get(metricsKey).gauge().value(), 1.0);
+    Assert.assertEquals(registry.get(metricsKey).gauge().value(), 1.0);
 
     eventService.publish(new WatchLogStartedEvent("container"));
-    assertEquals(registry.get(metricsKey).gauge().value(), 2.0);
+    Assert.assertEquals(registry.get(metricsKey).gauge().value(), 2.0);
 
     eventService.publish(new WatchLogStoppedEvent("container"));
-    assertEquals(registry.get(metricsKey).gauge().value(), 1.0);
+    Assert.assertEquals(registry.get(metricsKey).gauge().value(), 1.0);
 
     eventService.publish(new WatchLogStartedEvent("container"));
-    assertEquals(registry.get(metricsKey).gauge().value(), 2.0);
+    Assert.assertEquals(registry.get(metricsKey).gauge().value(), 2.0);
 
     eventService.publish(new WatchLogStoppedEvent("container"));
     eventService.publish(new WatchLogStoppedEvent("container"));
-    assertEquals(registry.get(metricsKey).gauge().value(), 0.0);
+    Assert.assertEquals(registry.get(metricsKey).gauge().value(), 0.0);
   }
 
   @Test
   public void testLogwatcherGaugeCantGoBelowZero() {
-    assertEquals(registry.get(metricsKey).gauge().value(), 0.0);
+    Assert.assertEquals(registry.get(metricsKey).gauge().value(), 0.0);
 
     eventService.publish(new WatchLogStoppedEvent("container"));
-    assertEquals(registry.get(metricsKey).gauge().value(), 0.0);
+    Assert.assertEquals(registry.get(metricsKey).gauge().value(), 0.0);
 
     eventService.publish(new WatchLogStartedEvent("container"));
     eventService.publish(new WatchLogStoppedEvent("container"));
     eventService.publish(new WatchLogStoppedEvent("container"));
-    assertEquals(registry.get(metricsKey).gauge().value(), 0.0);
+    Assert.assertEquals(registry.get(metricsKey).gauge().value(), 0.0);
   }
 }

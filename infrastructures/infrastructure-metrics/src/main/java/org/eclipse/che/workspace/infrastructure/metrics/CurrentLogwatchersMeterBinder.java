@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.metrics;
+package org.eclipse.che.workspace.infrastructure.metrics;
 
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -19,8 +19,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
-import org.eclipse.che.workspace.infrastructure.metrics.event.WatchLogStartedEvent;
-import org.eclipse.che.workspace.infrastructure.metrics.event.WatchLogStoppedEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.event.WatchLogStartedEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.event.WatchLogStoppedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
