@@ -383,6 +383,16 @@ public class PluginFQNParserTest {
             "publisher",
             "plugin123",
             "0.0.5")
+      },
+      {
+        "https://pastebin.com/raw/EBmz0YMS",
+        "apiVersion: v2\n"
+            + "publisher: publisher\n"
+            + "name: numericVersion\n"
+            + "version: 1.1\n"
+            + "type: Che Plugin",
+        new ExtendedPluginFQN(
+            "https://pastebin.com/raw/EBmz0YMS", "publisher", "numericVersion", "1.1")
       }
     };
   }
