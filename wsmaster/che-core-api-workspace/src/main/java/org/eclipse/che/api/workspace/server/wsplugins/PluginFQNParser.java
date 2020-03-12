@@ -197,8 +197,14 @@ public class PluginFQNParser {
     if (version.isMissingNode()) {
       throw new InfrastructureException(formatMessage(reference, "version"));
     }
+    if (!version.isValueNode()) {
+      throw new InfrastructureException(
+          format(
+              "Plugin specified by reference URL '%s' has version field that cannot be parsed to string",
+              reference));
+    }
     return new ExtendedPluginFQN(
-        reference, publisher.textValue(), name.textValue(), version.textValue());
+        reference, publisher.textValue(), name.textValue(), version.asText());
   }
 
   private String formatMessage(String reference, String field) {
