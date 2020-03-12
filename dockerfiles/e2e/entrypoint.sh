@@ -4,6 +4,8 @@ kill_ffmpeg(){
   echo "Killing ffmpeg with PID=$ffmpeg_pid"
   kill -2 "$ffmpeg_pid"
   wait "$ffmpeg_pid"
+  mkdir -p /tmp/e2e/report/
+  cp /tmp/ffmpeg_report/* /tmp/e2e/report/
 }
 
 set -x
@@ -66,10 +68,9 @@ else
 	cd /tmp/e2e || exit
 fi
 
-mkdir -p /tmp/e2e/report
-nohup ffmpeg -y -video_size 1920x1080 -framerate 24 -f x11grab -i :20.0 /tmp/e2e/report/output.mp4 2> /tmp/e2e/report/ffmpeg_err.txt > /tmp/e2e/report/ffmpeg_std.txt & 
+mkdir -p /tmp/ffmpeg_report
+nohup ffmpeg -y -video_size 1920x1080 -framerate 24 -f x11grab -i :20.0 /tmp/ffmpeg_report/output.mp4 2> /tmp/ffmpeg_report/ffmpeg_err.txt > /tmp/ffmpeg_report/ffmpeg_std.txt & 
 ffmpeg_pid=$!
-echo "test" > /tmp/e2e/report/testOutput.txt
 trap kill_ffmpeg 2 15
 
 # Launch tests
