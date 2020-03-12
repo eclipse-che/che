@@ -72,6 +72,13 @@ pipeline {
                     sh """
                         wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
                           -O $customResourceFilePath
+
+                        # TODO: "selfSignedCert: true" so as TLS support is enebled by default 
+                        # sed -i "s/selfSignedCert: false/selfSignedCert: true/" $customResourceFilePath
+
+
+                        # temporary workaround to https://github.com/eclipse/che/issues/16292
+                        sed -i "s/tlsSupport: true/tlsSupport: false/" $customResourceFilePath      
                     """
 
                     customResourceFileContent = readFile customResourceFilePath

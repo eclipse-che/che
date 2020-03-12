@@ -29,6 +29,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -48,6 +49,7 @@ public class LogWatcherTest {
 
   @Mock private PodLogHandler handler;
   @Mock private KubernetesClientFactory clientFactory;
+  @Mock private RuntimeEventsPublisher eventsPublisher;
   @Mock private Executor executor;
 
   @BeforeMethod
@@ -58,7 +60,14 @@ public class LogWatcherTest {
     // given
     LogWatcher logWatcher =
         new LogWatcher(
-            clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS, LIMIT_BYTES);
+            clientFactory,
+            eventsPublisher,
+            WORKSPACE_ID,
+            NAMESPACE,
+            PODNAMES,
+            executor,
+            TIMEOUTS,
+            LIMIT_BYTES);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
@@ -76,7 +85,14 @@ public class LogWatcherTest {
     // given
     LogWatcher logWatcher =
         new LogWatcher(
-            clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS, LIMIT_BYTES);
+            clientFactory,
+            eventsPublisher,
+            WORKSPACE_ID,
+            NAMESPACE,
+            PODNAMES,
+            executor,
+            TIMEOUTS,
+            LIMIT_BYTES);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
@@ -99,7 +115,14 @@ public class LogWatcherTest {
     // given
     LogWatcher logWatcher =
         new LogWatcher(
-            clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS, LIMIT_BYTES);
+            clientFactory,
+            eventsPublisher,
+            WORKSPACE_ID,
+            NAMESPACE,
+            PODNAMES,
+            executor,
+            TIMEOUTS,
+            LIMIT_BYTES);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
@@ -117,7 +140,14 @@ public class LogWatcherTest {
     // given
     LogWatcher logWatcher =
         new LogWatcher(
-            clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS, LIMIT_BYTES);
+            clientFactory,
+            eventsPublisher,
+            WORKSPACE_ID,
+            NAMESPACE,
+            PODNAMES,
+            executor,
+            TIMEOUTS,
+            LIMIT_BYTES);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
@@ -135,7 +165,14 @@ public class LogWatcherTest {
     // given
     LogWatcher logWatcher =
         new LogWatcher(
-            clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS, LIMIT_BYTES);
+            clientFactory,
+            eventsPublisher,
+            WORKSPACE_ID,
+            NAMESPACE,
+            PODNAMES,
+            executor,
+            TIMEOUTS,
+            LIMIT_BYTES);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(
@@ -154,7 +191,14 @@ public class LogWatcherTest {
     // given
     LogWatcher logWatcher =
         new LogWatcher(
-            clientFactory, WORKSPACE_ID, NAMESPACE, PODNAMES, executor, TIMEOUTS, LIMIT_BYTES);
+            clientFactory,
+            eventsPublisher,
+            WORKSPACE_ID,
+            NAMESPACE,
+            PODNAMES,
+            executor,
+            TIMEOUTS,
+            LIMIT_BYTES);
     logWatcher.addLogHandler(handler);
     PodEvent podEvent =
         new PodEvent(

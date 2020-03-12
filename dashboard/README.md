@@ -244,14 +244,22 @@ For example,
 ```json
 // product.json
 {
-  // disables the `Organizations` menu item and prevents opening views 
+  // disables `Organizations` and `Factories` menu items and prevents opening views 
   // with list of available organizations or an organization details
   "configuration": {
     "menu": {
-      "disabled": ["organizations"]
+      "disabled": ["organizations", "factories"]
     }
   }
 }
+```
+
+In the case of disabling the `"factories"`, `load factory` routing won't be disabled because it is using for creating a new workspace from the devfile URL.
+
+For example,
+
+```
+https://che.openshift.io/f?url=https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml 
 ```
 
 The `"configuration.prefetch"` section allows to define resources that UD should pre-fetch. This section consists of following optional fields:

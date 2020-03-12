@@ -25,6 +25,8 @@ import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.event.WatchLogStartedEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.event.WatchLogStoppedEvent;
 
 /** @author Anton Korneta */
 @Singleton
@@ -108,5 +110,13 @@ public class RuntimeEventsPublisher {
 
   public void sendAbnormalStoppingEvent(RuntimeIdentity runtimeId, String reason) {
     eventService.publish(new RuntimeAbnormalStoppingEvent(runtimeId, reason));
+  }
+
+  public void sendWatchLogStartedEvent(String container) {
+    eventService.publish(new WatchLogStartedEvent(container));
+  }
+
+  public void sendWatchLogStoppedEvent(String container) {
+    eventService.publish(new WatchLogStoppedEvent(container));
   }
 }

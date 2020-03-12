@@ -244,6 +244,7 @@ public class PVCSubPathHelper {
     if (LogWatcher.shouldWatchLogs(startOptions)) {
       deployment.watchLogs(
           new PodLogToEventPublisher(eventsPublisher, identity),
+          eventsPublisher,
           LogWatchTimeouts.AGGRESSIVE,
           Collections.singleton(pod.getMetadata().getName()),
           LogWatcher.getLogLimitBytes(startOptions));

@@ -25,6 +25,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEventHandler;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +47,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
   private static final String STARTED_EVENT_REASON = "Started";
 
   private final KubernetesClient client;
+  private final RuntimeEventsPublisher eventsPublisher;
   private final Set<PodLogHandler> logHandlers = ConcurrentHashMap.newKeySet();
   private final Executor containerWatchersThreadPool;
   private final LogWatchTimeouts timeouts;
@@ -65,6 +67,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
 
   public LogWatcher(
       KubernetesClientFactory clientFactory,
+      RuntimeEventsPublisher eventsPublisher,
       String workspaceId,
       String namespace,
       Set<String> podsOfInterest,
@@ -73,6 +76,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
       long inputStreamLimit)
       throws InfrastructureException {
     this.client = clientFactory.create(workspaceId);
+    this.eventsPublisher = eventsPublisher;
     this.workspaceId = workspaceId;
     this.namespace = namespace;
     this.containerWatchersThreadPool = executor;
@@ -102,6 +106,7 @@ public class LogWatcher implements PodEventHandler, Closeable {
             ContainerLogWatch logWatch =
                 new ContainerLogWatch(
                     client,
+                    eventsPublisher,
                     namespace,
                     podName,
                     containerName,

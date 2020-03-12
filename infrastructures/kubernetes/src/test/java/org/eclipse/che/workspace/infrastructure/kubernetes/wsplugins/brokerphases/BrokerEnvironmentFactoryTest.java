@@ -315,7 +315,7 @@ public class BrokerEnvironmentFactoryTest {
     assertEquals(
         actual,
         expected,
-        String.format("Should remove registry and organization from image '%s'.", image));
+        String.format("Should generate name '%s' from image '%s'.", expected, image));
   }
 
   @DataProvider(name = "imageRefs")
@@ -325,7 +325,17 @@ public class BrokerEnvironmentFactoryTest {
       {"very-long-registry-hostname-url.service/eclipse/image:tag", "image-tag"},
       {"eclipse/che-unified-plugin-broker:v0.20", "che-unified-plugin-broker-v0-20"},
       {"very-long-organization.name-eclipse-che/image:tag", "image-tag"},
-      {"very-long-registry-hostname-url.service/very-long-organization/image:tag", "image-tag"}
+      {"very-long-registry-hostname-url.service/very-long-organization/image:tag", "image-tag"},
+      {
+        "image-with-digest@sha256:7b868470f7b63d9da10a788d26abf4c076f90dc4c7de24d1298a8160c9a3dcc9",
+        "image-with-digest-7b868470f7"
+      },
+      {"image-with-short-digest@sha256:abcd", "image-with-short-digest-abcd"},
+      {"no-exception-when-no-colon@sha256abcd", "no-exception-when-no-colon-sha256abcd"},
+      {
+        "image-and-tag-longer-than-63-chars:really-long-tag-for-some-reason",
+        "image-and-tag-longer-than-63-chars-really-long-tag-for-some-rea"
+      }
     };
   }
 }

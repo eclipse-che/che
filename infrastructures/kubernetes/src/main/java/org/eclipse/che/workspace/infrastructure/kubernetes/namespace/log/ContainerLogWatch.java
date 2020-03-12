@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,7 @@ class ContainerLogWatch implements Runnable, Closeable {
   private static final Logger LOG = LoggerFactory.getLogger(ContainerLogWatch.class);
 
   private final KubernetesClient client;
+  private final RuntimeEventsPublisher eventPublisher;
   private final PodLogHandler logHandler;
   private final LogWatchTimeouts timeouts;
   private final long inputStreamLimit;
@@ -59,6 +61,7 @@ class ContainerLogWatch implements Runnable, Closeable {
 
   ContainerLogWatch(
       KubernetesClient client,
+      RuntimeEventsPublisher eventPublisher,
       String namespace,
       String podName,
       String containerName,
@@ -66,6 +69,7 @@ class ContainerLogWatch implements Runnable, Closeable {
       LogWatchTimeouts timeouts,
       long inputStreamLimit) {
     this.client = client;
+    this.eventPublisher = eventPublisher;
     this.namespace = namespace;
     this.podName = podName;
     this.containerName = containerName;
@@ -94,6 +98,7 @@ class ContainerLogWatch implements Runnable, Closeable {
               .withName(podName)
               .inContainer(containerName)
               .watchLog()) {
+        eventPublisher.sendWatchLogStartedEvent(containerKey());
 
         // we need to synchroinze here to avoid adding new `currentLogWatch` after we close it
         synchronized (this) {
@@ -129,6 +134,8 @@ class ContainerLogWatch implements Runnable, Closeable {
             containerName,
             e);
         return;
+      } finally {
+        eventPublisher.sendWatchLogStoppedEvent(containerKey());
       }
     }
   }
@@ -220,6 +227,10 @@ class ContainerLogWatch implements Runnable, Closeable {
         currentLogWatch.close();
       }
     }
+  }
+
+  private String containerKey() {
+    return namespace + ":" + podName + ":" + containerName;
   }
 
   @Override

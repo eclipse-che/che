@@ -18,6 +18,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.server.Kuberne
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_UNIQUE_PART_SIZE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.JWT_PROXY_CONFIG_FILE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.JWT_PROXY_CONFIG_FOLDER;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.JWT_PROXY_PUBLIC_KEY_FILE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.PUBLIC_KEY_FOOTER;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.PUBLIC_KEY_HEADER;
@@ -34,6 +35,8 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -101,6 +104,7 @@ public class JwtProxyProvisionerTest {
             cookiePathStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
+            "Always",
             runtimeId);
     k8sEnv = KubernetesEnvironment.builder().build();
   }
@@ -149,6 +153,19 @@ public class JwtProxyProvisionerTest {
     Pod jwtProxyPod =
         k8sEnv.getInjectablePodsCopy().getOrDefault("machine", emptyMap()).get("che-jwtproxy");
     assertNotNull(jwtProxyPod);
+
+    assertEquals(1, jwtProxyPod.getSpec().getContainers().size());
+    Container jwtProxyContainer = jwtProxyPod.getSpec().getContainers().get(0);
+
+    assertEquals(jwtProxyContainer.getArgs().size(), 2);
+    assertEquals(jwtProxyContainer.getArgs().get(0), "-config");
+    assertEquals(
+        jwtProxyContainer.getArgs().get(1), JWT_PROXY_CONFIG_FOLDER + "/" + JWT_PROXY_CONFIG_FILE);
+
+    assertEquals(jwtProxyContainer.getEnv().size(), 1);
+    EnvVar xdgHome = jwtProxyContainer.getEnv().get(0);
+    assertEquals(xdgHome.getName(), "XDG_CONFIG_HOME");
+    assertEquals(xdgHome.getValue(), JWT_PROXY_CONFIG_FOLDER);
 
     Service jwtProxyService = k8sEnv.getServices().get(jwtProxyProvisioner.getServiceName());
     assertNotNull(jwtProxyService);
@@ -204,6 +221,7 @@ public class JwtProxyProvisionerTest {
             cookiePathStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
+            "Always",
             runtimeId);
 
     ServerConfigImpl server1 =
@@ -250,6 +268,7 @@ public class JwtProxyProvisionerTest {
             cookiePathStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
+            "Always",
             runtimeId);
 
     ServerConfigImpl server1 = new ServerConfigImpl("4401/tcp", "http", "/", emptyMap());
@@ -287,6 +306,7 @@ public class JwtProxyProvisionerTest {
             cookiePathStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
+            "Always",
             runtimeId);
 
     ServerConfigImpl server1 = new ServerConfigImpl("4401/tcp", "http", "/", emptyMap());

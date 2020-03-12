@@ -22,6 +22,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.setSelector;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import io.fabric8.kubernetes.api.model.ContainerStateTerminated;
 import io.fabric8.kubernetes.api.model.ContainerStatus;
@@ -78,6 +79,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatc
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatcher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -535,7 +537,8 @@ public class KubernetesDeployments {
                         event.getReason(),
                         event.getMessage(),
                         event.getMetadata().getCreationTimestamp(),
-                        event.getLastTimestamp());
+                        MoreObjects.firstNonNull(
+                            event.getLastTimestamp(), event.getFirstTimestamp()));
 
                 try {
                   if (happenedAfterWatcherInitialization(podEvent)) {
@@ -601,6 +604,7 @@ public class KubernetesDeployments {
    */
   public synchronized void watchLogs(
       PodLogHandler handler,
+      RuntimeEventsPublisher eventsPublisher,
       LogWatchTimeouts timeouts,
       Set<String> podNames,
       long limitInputStreamBytes)
@@ -610,6 +614,7 @@ public class KubernetesDeployments {
       logWatcher =
           new LogWatcher(
               clientFactory,
+              eventsPublisher,
               workspaceId,
               namespace,
               podNames,

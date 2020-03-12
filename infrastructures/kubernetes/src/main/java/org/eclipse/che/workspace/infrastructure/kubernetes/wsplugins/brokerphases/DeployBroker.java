@@ -163,6 +163,7 @@ public class DeployBroker extends BrokerPhase {
           .deployments()
           .watchLogs(
               new PodLogToEventPublisher(runtimeEventsPublisher, runtimeId),
+              runtimeEventsPublisher,
               LogWatchTimeouts.AGGRESSIVE,
               ImmutableSet.of(pluginBrokerPod.getMetadata().getName()),
               LogWatcher.getLogLimitBytes(startOptions));

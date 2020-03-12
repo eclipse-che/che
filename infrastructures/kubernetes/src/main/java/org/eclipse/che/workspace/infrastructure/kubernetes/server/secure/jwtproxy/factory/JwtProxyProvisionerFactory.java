@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.ProxyProvisionerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner;
 
 /**
@@ -19,6 +20,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtprox
  *
  * @author Sergii Leshchenko
  */
-public interface JwtProxyProvisionerFactory {
+public interface JwtProxyProvisionerFactory extends ProxyProvisionerFactory {
   JwtProxyProvisioner create(RuntimeIdentity runtimeId);
 }

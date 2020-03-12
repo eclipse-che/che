@@ -27,5 +27,6 @@
     <modules>
         <module>openshift</module>
         <module>kubernetes</module>
+        <module>infrastructure-metrics</module>
     </modules>
 </project>

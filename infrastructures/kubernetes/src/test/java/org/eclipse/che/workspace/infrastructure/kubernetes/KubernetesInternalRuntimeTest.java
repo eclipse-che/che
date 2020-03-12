@@ -488,7 +488,12 @@ public class KubernetesInternalRuntimeTest {
             DEBUG_WORKSPACE_START, "true", DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES, "123"));
 
     verify(namespace.deployments(), times(1))
-        .watchLogs(any(PodLogHandler.class), any(LogWatchTimeouts.class), any(), eq(123L));
+        .watchLogs(
+            any(PodLogHandler.class),
+            any(RuntimeEventsPublisher.class),
+            any(LogWatchTimeouts.class),
+            any(),
+            eq(123L));
   }
 
   @Test
@@ -498,6 +503,7 @@ public class KubernetesInternalRuntimeTest {
     verify(namespace.deployments(), times(1))
         .watchLogs(
             any(PodLogHandler.class),
+            any(RuntimeEventsPublisher.class),
             any(LogWatchTimeouts.class),
             any(),
             eq(LogWatcher.DEFAULT_LOG_LIMIT_BYTES));
@@ -510,6 +516,7 @@ public class KubernetesInternalRuntimeTest {
     verify(namespace.deployments(), times(0))
         .watchLogs(
             any(PodLogHandler.class),
+            any(RuntimeEventsPublisher.class),
             any(LogWatchTimeouts.class),
             any(),
             eq(LogWatcher.DEFAULT_LOG_LIMIT_BYTES));
@@ -522,6 +529,7 @@ public class KubernetesInternalRuntimeTest {
     verify(namespace.deployments(), times(0))
         .watchLogs(
             any(PodLogHandler.class),
+            any(RuntimeEventsPublisher.class),
             any(LogWatchTimeouts.class),
             any(),
             eq(LogWatcher.DEFAULT_LOG_LIMIT_BYTES));

@@ -656,6 +656,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           .deployments()
           .watchLogs(
               new PodLogToEventPublisher(this.eventPublisher, this.getContext().getIdentity()),
+              this.eventPublisher,
               LogWatchTimeouts.DEFAULT,
               podNames,
               LogWatcher.getLogLimitBytes(startOptions));

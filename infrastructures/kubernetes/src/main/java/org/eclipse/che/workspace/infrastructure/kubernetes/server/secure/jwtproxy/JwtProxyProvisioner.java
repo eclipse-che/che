@@ -11,54 +11,15 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy;
 
-import static java.lang.Boolean.parseBoolean;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
-import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE;
-import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.UNSECURED_PATHS_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_SOURCE_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.shared.Constants.TOOL_CONTAINER_SOURCE;
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_UNIQUE_PART_SIZE;
-
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
-import io.fabric8.kubernetes.api.model.ContainerBuilder;
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodBuilder;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServicePort;
-import io.fabric8.kubernetes.api.model.ServicePortBuilder;
-import io.fabric8.kubernetes.api.model.VolumeBuilder;
-import io.fabric8.kubernetes.api.model.VolumeMount;
 import java.security.KeyPair;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
-import org.eclipse.che.commons.lang.Size;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManagerException;
-import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.ServerServiceBuilder;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 
@@ -82,37 +43,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtprox
  * @see SignatureKeyManager
  * @author Sergii Leshchenko
  */
-public class JwtProxyProvisioner {
-
-  static final int FIRST_AVAILABLE_PORT = 4400;
-
-  static final int MEGABYTES_TO_BYTES_DIVIDER = 1024 * 1024;
-
-  static final String PUBLIC_KEY_HEADER = "-----BEGIN PUBLIC KEY-----\n";
-  static final String PUBLIC_KEY_FOOTER = "\n-----END PUBLIC KEY-----";
-
-  static final String JWT_PROXY_CONFIG_FILE = "config.yaml";
-  static final String JWT_PROXY_MACHINE_NAME = "che-jwtproxy";
-
-  static final String JWT_PROXY_CONFIG_FOLDER = "/che-jwtproxy-config";
-  static final String JWT_PROXY_PUBLIC_KEY_FILE = "mykey.pub";
-
-  public static final String JWT_PROXY_POD_NAME = JWT_PROXY_MACHINE_NAME;
-
-  private final SignatureKeyManager signatureKeyManager;
-
-  private final RuntimeIdentity identity;
-
-  private final JwtProxyConfigBuilder proxyConfigBuilder;
-
-  private final String jwtProxyImage;
-  private final Map<String, String> attributes;
-
-  private final String serviceName;
-  private int availablePort;
-
-  private final ExternalServiceExposureStrategy externalServiceExposureStrategy;
-  private final CookiePathStrategy cookiePathStrategy;
+public class JwtProxyProvisioner extends AbstractJwtProxyProvisioner {
 
   @Inject
   public JwtProxyProvisioner(
@@ -122,207 +53,35 @@ public class JwtProxyProvisioner {
       CookiePathStrategy cookiePathStrategy,
       @Named("che.server.secure_exposer.jwtproxy.image") String jwtProxyImage,
       @Named("che.server.secure_exposer.jwtproxy.memory_limit") String memoryLimitBytes,
-      @Assisted RuntimeIdentity identity) {
-    this.signatureKeyManager = signatureKeyManager;
-
-    this.jwtProxyImage = jwtProxyImage;
-
-    this.proxyConfigBuilder = jwtProxyConfigBuilderFactory.create(identity.getWorkspaceId());
-
-    this.externalServiceExposureStrategy = externalServiceExposureStrategy;
-    this.cookiePathStrategy = cookiePathStrategy;
-
-    this.identity = identity;
-    this.serviceName = generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + "-jwtproxy";
-
-    this.availablePort = FIRST_AVAILABLE_PORT;
-    long memoryLimitLong = Size.parseSizeToMegabytes(memoryLimitBytes) * MEGABYTES_TO_BYTES_DIVIDER;
-    this.attributes =
-        ImmutableMap.of(
-            MEMORY_LIMIT_ATTRIBUTE,
-            Long.toString(memoryLimitLong),
-            MEMORY_REQUEST_ATTRIBUTE,
-            Long.toString(memoryLimitLong),
-            CONTAINER_SOURCE_ATTRIBUTE,
-            TOOL_CONTAINER_SOURCE);
+      @Named("che.workspace.sidecar.image_pull_policy") String imagePullPolicy,
+      @Assisted RuntimeIdentity identity)
+      throws InternalInfrastructureException {
+    super(
+        constructKeyPair(signatureKeyManager, identity),
+        jwtProxyConfigBuilderFactory,
+        externalServiceExposureStrategy,
+        cookiePathStrategy,
+        jwtProxyImage,
+        memoryLimitBytes,
+        imagePullPolicy,
+        identity.getWorkspaceId(),
+        true);
   }
 
-  /**
-   * Modifies Kubernetes environment to expose the specified service port via JWTProxy.
-   *
-   * @param k8sEnv Kubernetes environment to modify
-   * @param pod the pod that runs the server being exposed
-   * @param backendServiceName service name that will be exposed
-   * @param backendServicePort service port that will be exposed
-   * @param protocol protocol that will be used for exposed port
-   * @param secureServers secure servers to expose
-   * @return JWTProxy service port that expose the specified one
-   * @throws InfrastructureException if any exception occurs during port exposing
-   */
-  public ServicePort expose(
-      KubernetesEnvironment k8sEnv,
-      PodData pod,
-      String machineName,
-      String backendServiceName,
-      ServicePort backendServicePort,
-      String protocol,
-      Map<String, ServerConfig> secureServers)
-      throws InfrastructureException {
-    Preconditions.checkArgument(
-        secureServers != null && !secureServers.isEmpty(), "Secure servers are missing");
-    ensureJwtProxyInjected(k8sEnv, machineName, pod);
-
-    Set<String> excludes = new HashSet<>();
-    Boolean cookiesAuthEnabled = null;
-    for (ServerConfig config : secureServers.values()) {
-      // accumulate unsecured paths
-      if (config.getAttributes().containsKey(UNSECURED_PATHS_ATTRIBUTE)) {
-        Collections.addAll(
-            excludes, config.getAttributes().get(UNSECURED_PATHS_ATTRIBUTE).split(","));
-      }
-
-      // calculate `cookiesAuthEnabled` attributes
-      Boolean serverCookiesAuthEnabled =
-          parseBoolean(config.getAttributes().get(SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE));
-      if (cookiesAuthEnabled == null) {
-        cookiesAuthEnabled = serverCookiesAuthEnabled;
-      } else {
-        if (!cookiesAuthEnabled.equals(serverCookiesAuthEnabled)) {
-          throw new InfrastructureException(
-              "Secure servers which expose the same port should have the same `cookiesAuthEnabled` value.");
-        }
-      }
-    }
-
-    int listenPort = availablePort++;
-
-    ServicePort exposedPort =
-        new ServicePortBuilder()
-            .withName("server-" + listenPort)
-            .withPort(listenPort)
-            .withProtocol(protocol)
-            .withNewTargetPort(listenPort)
-            .build();
-
-    k8sEnv.getServices().get(serviceName).getSpec().getPorts().add(exposedPort);
-
-    // JwtProxySecureServerExposer creates no service for the exposed secure servers and
-    // assumes everything will be proxied from localhost, because JWT proxy is collocated
-    // with the workspace pod (because it is added to the environment as an injectable pod).
-    // This method historically supported proxying secure servers exposed through a service
-    // (which is not secure in absence of a appropriate network policy). The support for
-    // accessing the backend server through a service was kept here because it doesn't add
-    // any additional complexity to this method and keeps the door open for the
-    // JwtProxySecureServerExposer to be enhanced in the future with support for service-handled
-    // secure servers.
-    backendServiceName = backendServiceName == null ? "127.0.0.1" : backendServiceName;
-    proxyConfigBuilder.addVerifierProxy(
-        listenPort,
-        "http://" + backendServiceName + ":" + backendServicePort.getTargetPort().getIntVal(),
-        excludes,
-        cookiesAuthEnabled,
-        cookiePathStrategy.get(serviceName, exposedPort),
-        externalServiceExposureStrategy.getExternalPath(serviceName, exposedPort.getName()));
-    k8sEnv
-        .getConfigMaps()
-        .get(getConfigMapName())
-        .getData()
-        .put(JWT_PROXY_CONFIG_FILE, proxyConfigBuilder.build());
-
-    return exposedPort;
-  }
-
-  /** Returns service name that exposed JWTProxy Pod. */
-  public String getServiceName() {
-    return serviceName;
-  }
-
-  /** Returns config map name that will be mounted into JWTProxy Pod. */
-  @VisibleForTesting
-  String getConfigMapName() {
-    return "jwtproxy-config";
-  }
-
-  private void ensureJwtProxyInjected(KubernetesEnvironment k8sEnv, String machineName, PodData pod)
-      throws InfrastructureException {
-    if (!k8sEnv.getMachines().containsKey(JWT_PROXY_MACHINE_NAME)) {
-      k8sEnv.getMachines().put(JWT_PROXY_MACHINE_NAME, createJwtProxyMachine());
-      Pod jwtProxyPod = createJwtProxyPod();
-      k8sEnv.addInjectablePod(machineName, JWT_PROXY_MACHINE_NAME, jwtProxyPod);
-
-      KeyPair keyPair;
-      try {
-        keyPair = signatureKeyManager.getOrCreateKeyPair(identity.getWorkspaceId());
-      } catch (SignatureKeyManagerException e) {
-        throw new InternalInfrastructureException(
-            "Signature key pair for machine authentication cannot be retrieved. Reason: "
-                + e.getMessage());
-      }
-      Map<String, String> initConfigMapData = new HashMap<>();
-      initConfigMapData.put(
-          JWT_PROXY_PUBLIC_KEY_FILE,
-          PUBLIC_KEY_HEADER
-              + java.util.Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded())
-              + PUBLIC_KEY_FOOTER);
-
-      initConfigMapData.put(JWT_PROXY_CONFIG_FILE, proxyConfigBuilder.build());
-
-      ConfigMap jwtProxyConfigMap =
-          new ConfigMapBuilder()
-              .withNewMetadata()
-              .withName(getConfigMapName())
-              .endMetadata()
-              .withData(initConfigMapData)
-              .build();
-      k8sEnv.getConfigMaps().put(jwtProxyConfigMap.getMetadata().getName(), jwtProxyConfigMap);
-
-      Service jwtProxyService =
-          new ServerServiceBuilder()
-              .withName(serviceName)
-              // we're merely injecting the pod, so we need a selector that is going to hit the
-              // pod that runs the server that we're exposing
-              .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
-              .withMachineName(JWT_PROXY_MACHINE_NAME)
-              .withPorts(emptyList())
-              .build();
-      k8sEnv.getServices().put(jwtProxyService.getMetadata().getName(), jwtProxyService);
+  private static KeyPair constructKeyPair(
+      SignatureKeyManager signatureKeyManager, RuntimeIdentity identity)
+      throws InternalInfrastructureException {
+    try {
+      return signatureKeyManager.getOrCreateKeyPair(identity.getWorkspaceId());
+    } catch (SignatureKeyManagerException e) {
+      throw new InternalInfrastructureException(
+          "Signature key pair for machine authentication cannot be retrieved. Reason: "
+              + e.getMessage());
     }
   }
 
-  private InternalMachineConfig createJwtProxyMachine() {
-    return new InternalMachineConfig(emptyMap(), emptyMap(), attributes, null);
-  }
-
-  private Pod createJwtProxyPod() {
-    String containerName = Names.generateName("che-jwtproxy");
-    return new PodBuilder()
-        .withNewMetadata()
-        .withName(JWT_PROXY_POD_NAME)
-        .withAnnotations(Names.createMachineNameAnnotations(containerName, JWT_PROXY_MACHINE_NAME))
-        .endMetadata()
-        .withNewSpec()
-        .withContainers(
-            new ContainerBuilder()
-                .withImagePullPolicy("Always")
-                .withName(containerName)
-                .withImage(jwtProxyImage)
-                .withVolumeMounts(
-                    new VolumeMount(
-                        JWT_PROXY_CONFIG_FOLDER + "/",
-                        null,
-                        "che-jwtproxy-config-volume",
-                        false,
-                        null))
-                .withArgs("-config", JWT_PROXY_CONFIG_FOLDER + "/" + JWT_PROXY_CONFIG_FILE)
-                .build())
-        .withVolumes(
-            new VolumeBuilder()
-                .withName("che-jwtproxy-config-volume")
-                .withNewConfigMap()
-                .withName(getConfigMapName())
-                .endConfigMap()
-                .build())
-        .endSpec()
-        .build();
+  @Override
+  protected ExposureConfiguration getExposureConfiguration(ServerConfig serverConfig) {
+    return new ExposureConfiguration(serverConfig);
   }
 }

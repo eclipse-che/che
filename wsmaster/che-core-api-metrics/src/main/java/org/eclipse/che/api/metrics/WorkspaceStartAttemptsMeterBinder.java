@@ -11,7 +11,10 @@
  */
 package org.eclipse.che.api.metrics;
 
+import static java.lang.Boolean.FALSE;
+import static org.eclipse.che.api.metrics.WorkspaceBinders.withStandardTags;
 import static org.eclipse.che.api.metrics.WorkspaceBinders.workspaceMetric;
+import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 
 import com.google.inject.Inject;
 import io.micrometer.core.instrument.Counter;
@@ -28,6 +31,7 @@ public class WorkspaceStartAttemptsMeterBinder implements MeterBinder {
   private final EventService eventService;
 
   private Counter startingCounter;
+  private Counter startingDebugCounter;
 
   @Inject
   public WorkspaceStartAttemptsMeterBinder(EventService eventService) {
@@ -38,7 +42,13 @@ public class WorkspaceStartAttemptsMeterBinder implements MeterBinder {
   public void bindTo(MeterRegistry registry) {
     startingCounter =
         Counter.builder(workspaceMetric("starting_attempts.total"))
+            .tags(withStandardTags("debug", "false"))
             .description("The count of workspaces start attempts")
+            .register(registry);
+    startingDebugCounter =
+        Counter.builder(workspaceMetric("starting_attempts.total"))
+            .tags(withStandardTags("debug", "true"))
+            .description("The count of workspaces start attempts in debug mode")
             .register(registry);
 
     // only subscribe to the event once we have the counters ready
@@ -46,7 +56,13 @@ public class WorkspaceStartAttemptsMeterBinder implements MeterBinder {
         event -> {
           if (event.getPrevStatus() == WorkspaceStatus.STOPPED
               && event.getStatus() == WorkspaceStatus.STARTING) {
-            startingCounter.increment();
+            if (event.getOptions() != null
+                && Boolean.parseBoolean(
+                    event.getOptions().getOrDefault(DEBUG_WORKSPACE_START, FALSE.toString()))) {
+              startingDebugCounter.increment();
+            } else {
+              startingCounter.increment();
+            }
           }
         },
         WorkspaceStatusEvent.class);

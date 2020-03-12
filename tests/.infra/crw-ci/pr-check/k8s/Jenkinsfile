@@ -73,7 +73,7 @@ pipeline {
                     if (customResourceFileContent == null || customResourceFileContent == '') {
                         sh """
                             wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
-                            -O $CUSTOM_RESOURCE_FILE_PATH
+                            -O $CUSTOM_RESOURCE_FILE_PATH                                                  
                         """
 
                     } else {
@@ -210,59 +210,59 @@ pipeline {
                     echo "Patch Che custom-resource.yaml"
                     sh """
                         sed -i "s|cheImage: ''|cheImage: '${cheImageRepo}'|" $CUSTOM_RESOURCE_FILE_PATH
-                        sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${
-                        mutableCheImageTag
-                    }'|" $CUSTOM_RESOURCE_FILE_PATH
-    
+                        sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${mutableCheImageTag}'|" $CUSTOM_RESOURCE_FILE_PATH
                         sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" $CUSTOM_RESOURCE_FILE_PATH
-    
                         sed -i "s|ingressDomain: '192.168.99.101.nip.io'|ingressDomain: '\$(minikube ip).nip.io'|" $CUSTOM_RESOURCE_FILE_PATH
+
+                        # temporary workaround to https://github.com/eclipse/che/issues/16292
+                        sed -i "s/tlsSupport: true/tlsSupport: false/" $CUSTOM_RESOURCE_FILE_PATH  
+
+                        # TODO: "selfSignedCert: true" so as TLS support is enebled by default 
+                        # sed -i "s/selfSignedCert: false/selfSignedCert: true/" $CUSTOM_RESOURCE_FILE_PATH    
                     """
 
-                    retry(2) {
-                        echo "Install Che"
-                        sh """
-                            ${WORKSPACE}/chectl server:start \\
-                            --k8spodreadytimeout=180000 \\
-                            --installer=operator \\
-                            --listr-renderer=verbose \\
-                            --platform=minikube \\
-                            --che-operator-cr-yaml=$CUSTOM_RESOURCE_FILE_PATH
-                        """
+                    echo "Install Che"
+                    sh """
+                        ${WORKSPACE}/chectl server:start \\
+                        --k8spodreadytimeout=180000 \\
+                        --installer=operator \\
+                        --listr-renderer=verbose \\
+                        --platform=minikube \\
+                        --che-operator-cr-yaml=$CUSTOM_RESOURCE_FILE_PATH
+                    """
 
-                        cheHost = sh(
-                                script: "kubectl get ingress che -n=che -o=jsonpath={'.spec.rules[0].host'}",
-                                returnStdout: true
-                        ).trim()
+                    cheHost = sh(
+                            script: "kubectl get ingress che -n=che -o=jsonpath={'.spec.rules[0].host'}",
+                            returnStdout: true
+                    ).trim()
 
-                        echo "Wait che-server to be available"
-                        sh """
-                             COUNTER=0;
-                             SUCCESS_RATE_COUNTER=0;
-                             while true; do
-                              if [ \$COUNTER -gt 180 ]; then
-                              echo "Unable to get stable route. Exiting"
-                                exit 1
-                              fi
-                              
-                              ((COUNTER+=1))
-                              
-                              
-                              STATUS_CODE=\$(curl -sL -w "%{http_code}" -I ${cheHost} -o /dev/null; true) || true
-                              
-                              echo "Try \${COUNTER}. Status code: \${STATUS_CODE}"
-                              if [ "\$STATUS_CODE" == "200" ]; then 
-                                ((SUCCESS_RATE_COUNTER+=1))
-                              fi
-                              sleep 1;
+                    echo "Wait che-server to be available"
+                    sh """
+                            COUNTER=0;
+                            SUCCESS_RATE_COUNTER=0;
+                            while true; do
+                            if [ \$COUNTER -gt 180 ]; then
+                            echo "Unable to get stable route. Exiting"
+                            exit 1
+                            fi
                             
-                              if [ \$SUCCESS_RATE_COUNTER == \$SUCCESS_THRESHOLD ]; then 
-                                echo "Route is stable enough. Continuing running tests"
-                                break
-                              fi
-                             done
-                        """
-                    }
+                            ((COUNTER+=1))
+                            
+                            
+                            STATUS_CODE=\$(curl -k -sL -w "%{http_code}" -I http://${cheHost} -o /dev/null; true) || true
+                            
+                            echo "Try \${COUNTER}. Status code: \${STATUS_CODE}"
+                            if [ "\$STATUS_CODE" == "200" ]; then 
+                            ((SUCCESS_RATE_COUNTER+=1))
+                            fi
+                            sleep 1;
+                        
+                            if [ \$SUCCESS_RATE_COUNTER == \$SUCCESS_THRESHOLD ]; then 
+                            echo "Route is stable enough. Continuing running tests"
+                            break
+                            fi
+                            done
+                    """
                 }
             }
         }
@@ -282,8 +282,7 @@ pipeline {
                     }
 
                     sh """   
-                        KEYCLOAK_URL=\$(kubectl get ingress/keycloak -n che -o jsonpath='{.spec.rules[0].host}')
-                        KEYCLOAK_BASE_URL="http://\${KEYCLOAK_URL}/auth"
+                        KEYCLOAK_BASE_URL="http://\$(kubectl get ingress/keycloak -n che -o jsonpath='{.spec.rules[0].host}')/auth"
     
                         USER_ACCESS_TOKEN=\$(curl -X POST \$KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token \\
                            -H "Content-Type: application/x-www-form-urlencoded" \\
@@ -315,6 +314,7 @@ pipeline {
                        -e TS_SELENIUM_USERNAME="admin" \\
                        -e TS_SELENIUM_PASSWORD="admin" \\
                        -e TEST_SUITE="${e2eTestToRun}" ${e2eTestParameters} \\
+                       -e NODE_TLS_REJECT_UNAUTHORIZED=0 \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
                        quay.io/eclipse/che-e2e:nightly
                 """
@@ -376,6 +376,8 @@ pipeline {
 
                 env > $LOGS_AND_CONFIGS/env.output.txt || true
                 ${WORKSPACE}/chectl --help > $LOGS_AND_CONFIGS/chectl.version.txt || true
+
+                cp -r /tmp/chectl-logs $LOGS_AND_CONFIGS || true
             """
 
             archiveArtifacts allowEmptyArchive: true, artifacts: "tests/e2e/report/**, logs-and-configs/**"

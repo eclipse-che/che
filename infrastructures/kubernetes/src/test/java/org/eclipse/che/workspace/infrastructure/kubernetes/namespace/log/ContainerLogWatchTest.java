@@ -11,7 +11,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +29,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -44,6 +47,7 @@ public class ContainerLogWatchTest {
   private final long LOG_LIMIT_BYTES = 1024;
 
   @Mock KubernetesClient client;
+  @Mock RuntimeEventsPublisher eventsPublisher;
 
   @Mock PodLogHandler podLogHandler;
 
@@ -73,13 +77,24 @@ public class ContainerLogWatchTest {
 
     ContainerLogWatch clw =
         new ContainerLogWatch(
-            client, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
+            client,
+            eventsPublisher,
+            namespace,
+            podname,
+            container,
+            podLogHandler,
+            TIMEOUTS,
+            LOG_LIMIT_BYTES);
     clw.run();
 
     verify(podLogHandler).handle("first", container);
     verify(podLogHandler).handle("second", container);
     verify(podLogHandler).handle("third", container);
     assertTrue(logWatch.isClosed);
+
+    // verify events were properly fired
+    verify(eventsPublisher, times(1)).sendWatchLogStartedEvent(any(String.class));
+    verify(eventsPublisher, times(1)).sendWatchLogStoppedEvent(any(String.class));
   }
 
   @Test
@@ -91,7 +106,8 @@ public class ContainerLogWatchTest {
     logWatch.setInputStream(inputStream);
 
     ContainerLogWatch clw =
-        new ContainerLogWatch(client, namespace, podname, container, podLogHandler, TIMEOUTS, 4);
+        new ContainerLogWatch(
+            client, eventsPublisher, namespace, podname, container, podLogHandler, TIMEOUTS, 4);
     clw.run();
 
     ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
@@ -100,13 +116,17 @@ public class ContainerLogWatchTest {
     assertEquals(messageCaptor.getValue(), "This");
     assertEquals(containerCaptor.getValue(), container);
     assertTrue(logWatch.isClosed);
+
+    // verify events were properly fired
+    verify(eventsPublisher, times(1)).sendWatchLogStartedEvent(any(String.class));
+    verify(eventsPublisher, times(1)).sendWatchLogStoppedEvent(any(String.class));
   }
 
   @Test
   public void testCloseFromOutside() throws IOException, InterruptedException {
     PipedInputStream inputStream = new PipedInputStream();
     PipedOutputStream outputStream = new PipedOutputStream(inputStream);
-    outputStream.write("message\n".getBytes());
+    outputStream.write("message\na\na\na\na\na".getBytes());
     logWatch.setInputStream(inputStream);
 
     CountDownLatch latch = new CountDownLatch(1);
@@ -120,13 +140,24 @@ public class ContainerLogWatchTest {
 
     ContainerLogWatch clw =
         new ContainerLogWatch(
-            client, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
+            client,
+            eventsPublisher,
+            namespace,
+            podname,
+            container,
+            podLogHandler,
+            TIMEOUTS,
+            LOG_LIMIT_BYTES);
     new Thread(clw).start();
 
     latch.await(1, TimeUnit.SECONDS);
     clw.close();
 
     assertTrue(logWatch.isClosed);
+
+    // verify events were properly fired
+    verify(eventsPublisher, times(1)).sendWatchLogStartedEvent(any(String.class));
+    verify(eventsPublisher, timeout(1000).times(1)).sendWatchLogStoppedEvent(any(String.class));
   }
 
   @Test
@@ -147,7 +178,14 @@ public class ContainerLogWatchTest {
 
     ContainerLogWatch clw =
         new ContainerLogWatch(
-            client, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
+            client,
+            eventsPublisher,
+            namespace,
+            podname,
+            container,
+            podLogHandler,
+            TIMEOUTS,
+            LOG_LIMIT_BYTES);
     new Thread(clw).start();
 
     messageHandleLatch.await(1, TimeUnit.SECONDS);
@@ -157,6 +195,10 @@ public class ContainerLogWatchTest {
     logWatch.setLatch(closeLatch);
     closeLatch.await(1, TimeUnit.SECONDS);
     assertTrue(logWatch.isClosed);
+
+    // verify events were properly fired
+    verify(eventsPublisher, times(1)).sendWatchLogStartedEvent(any(String.class));
+    verify(eventsPublisher, times(1)).sendWatchLogStoppedEvent(any(String.class));
   }
 
   @Test
@@ -202,7 +244,14 @@ public class ContainerLogWatchTest {
 
     ContainerLogWatch clw =
         new ContainerLogWatch(
-            client, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
+            client,
+            eventsPublisher,
+            namespace,
+            podname,
+            container,
+            podLogHandler,
+            TIMEOUTS,
+            LOG_LIMIT_BYTES);
     new Thread(clw).start();
 
     // wait for logwatch close, it means that error message was processed
@@ -217,6 +266,10 @@ public class ContainerLogWatchTest {
     // message was processed
     verify(podLogHandler).handle("message", container);
     assertTrue(logWatchRegularMessage.isClosed);
+
+    // verify events were properly fired
+    verify(eventsPublisher, times(2)).sendWatchLogStartedEvent(any(String.class));
+    verify(eventsPublisher, times(2)).sendWatchLogStoppedEvent(any(String.class));
   }
 
   @Test
@@ -245,7 +298,14 @@ public class ContainerLogWatchTest {
 
     ContainerLogWatch clw =
         new ContainerLogWatch(
-            client, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
+            client,
+            eventsPublisher,
+            namespace,
+            podname,
+            container,
+            podLogHandler,
+            TIMEOUTS,
+            LOG_LIMIT_BYTES);
     new Thread(clw).start();
 
     // wait for logwatch close, it means that error message was processed
@@ -260,6 +320,10 @@ public class ContainerLogWatchTest {
     // message was processed
     verify(podLogHandler).handle("message", container);
     assertTrue(logWatchRegularMessage.isClosed);
+
+    // verify events were properly fired
+    verify(eventsPublisher, times(2)).sendWatchLogStartedEvent(any(String.class));
+    verify(eventsPublisher, times(2)).sendWatchLogStoppedEvent(any(String.class));
   }
 
   private class LogWatchMock implements LogWatch {

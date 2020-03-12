@@ -152,7 +152,7 @@ public class PVCSubPathHelperTest {
             DEBUG_WORKSPACE_START, TRUE.toString(), DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES, "123"),
         WORKSPACE_ID + PROJECTS_PATH);
 
-    verify(osDeployments).watchLogs(any(), any(), any(), eq(123L));
+    verify(osDeployments).watchLogs(any(), any(), any(), any(), eq(123L));
   }
 
   @Test
