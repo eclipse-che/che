@@ -126,17 +126,18 @@ public class ContainerLogWatchTest {
   public void testCloseFromOutside() throws IOException, InterruptedException {
     PipedInputStream inputStream = new PipedInputStream();
     PipedOutputStream outputStream = new PipedOutputStream(inputStream);
-    outputStream.write("message\na\na\na\na\na".getBytes());
+    outputStream.write("message\n".getBytes());
     logWatch.setInputStream(inputStream);
 
     CountDownLatch latch = new CountDownLatch(1);
     doAnswer(
             (a) -> {
+              outputStream.write("nextMessage\n".getBytes());
               latch.countDown();
               return null;
             })
         .when(podLogHandler)
-        .handle("message", container);
+        .handle(any(), any());
 
     ContainerLogWatch clw =
         new ContainerLogWatch(
