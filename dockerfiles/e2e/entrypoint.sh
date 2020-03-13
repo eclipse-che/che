@@ -101,5 +101,3 @@ else
   npm run $TEST_SUITE
 fi
 kill_ffmpeg
-
-ls -la /tmp/e2e/report/

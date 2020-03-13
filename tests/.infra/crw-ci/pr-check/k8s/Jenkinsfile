@@ -302,8 +302,6 @@ pipeline {
         stage("Run E2E Happy path tests") {
             steps {
                 sh """
-                    set -x
-                    ls -la ${WORKSPACE}/tests/e2e/report || true
                      CHE_URL=http://${cheHost}
                      docker run --shm-size=1g --net=host --ipc=host \\
                        -p 5920:5920 \\
@@ -315,34 +313,16 @@ pipeline {
                        -e TS_SELENIUM_MULTIUSER="true" \\
                        -e TS_SELENIUM_USERNAME="admin" \\
                        -e TS_SELENIUM_PASSWORD="admin" \\
-                       -e DELETE_SCREENCAST_IF_TEST_PASS="false" \\
                        -e TEST_SUITE="${e2eTestToRun}" ${e2eTestParameters} \\
                        -e NODE_TLS_REJECT_UNAUTHORIZED=0 \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
                        quay.io/rhopp/che-e2e:latest
-                    ls -la ${WORKSPACE}/tests/e2e/report || true
                 """
             }
         }
     }
 
     post {
-        failure {
-            echo "Create screencast from $WORKSPACE/tests/e2e/report/executionScreencast files."
-            sh """
-                command -v ffmpeg >/dev/null 2>&1 && if ls $WORKSPACE/tests/e2e/report/executionScreencast/*.png 1> /dev/null 2>&1; then
-                  cd $WORKSPACE/tests/e2e/report/executionScreencast
-
-                  # remove first screenshot which has lower resolution 800x600 and breaks screencast video
-                  sudo rm -f 00100001* || true
-                  
-                  sudo ffmpeg -framerate 1 -pattern_type glob -i '*.png' -c:v libx264 -r 30  -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -pix_fmt yuv420p $WORKSPACE/tests/e2e/report/screencast.mp4
-                  cd $WORKSPACE/tests/e2e/report/
-                  sudo rm -rf $WORKSPACE/tests/e2e/report/executionScreencast
-                fi
-            """
-        }
-
         cleanup {
             sh """                   
                 mkdir -p $LOGS_AND_CONFIGS/kubectl
