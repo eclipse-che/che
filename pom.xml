@@ -30,7 +30,6 @@
         <module>multiuser</module>
         <module>infrastructures</module>
         <module>dashboard</module>
-        <module>workspace-loader</module>
         <module>assembly</module>
         <module>tests/legacy-e2e</module>
     </modules>
