@@ -96,7 +96,7 @@ suite('Openshift connector user story', async () => {
   test('Create new component with application', async () => {
     await openshiftPlugin.invokeContextMenuCommandOnItem('myproject', OpenshiftContextMenuItems.NewComponent);
     await quickOpenContainer.clickOnContainerItem('$(plus) Create new Application...');
-    await quickOpenContainer.typeAndSelectSuggestion('node-js-app', 'Provide Application name ');
+    await quickOpenContainer.typeAndSelectSuggestion('node-js-app', `Provide Application name ${selectSugestionSuffix}` );
     await quickOpenContainer.clickOnContainerItem('Workspace Directory');
     await quickOpenContainer.clickOnContainerItem('$(plus) Add new context folder.');
     await openDialogWidget.selectLocationAndAddContextFolder(Locations.Root, `projects/${projectName}`, Buttons.AddContext);
