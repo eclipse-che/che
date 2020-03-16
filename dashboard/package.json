@@ -76,7 +76,7 @@
     "karma-webpack": "^2.0.9",
     "lodash": "4.17.15",
     "merge-stream": "^1.0.1",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.2",
     "ng-annotate-loader": "^0.6.1",
     "ngtemplate-loader": "^2.0.1",
     "phantomjs-prebuilt": "2.1.14",
