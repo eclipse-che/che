@@ -67,7 +67,7 @@ suite('Openshift connector user story', async () => {
     await testWorkspaceUtils.createWsFromDevFile(wsConfig);
   });
 
-  test('Login into waorkspace and open plugin', async () => {
+  test('Login into workspace and open plugin', async () => {
     await driverHelper.navigateToUrl(workspacePrefixUrl + wsName);
     await loginPage.login();
     await ide.waitWorkspaceAndIde(namespace, wsName);
@@ -76,9 +76,7 @@ suite('Openshift connector user story', async () => {
     await dashboard.waitDisappearanceNavigationMenu();
     await openshiftPlugin.clickOnOpenshiftToollBarIcon();
     await openshiftPlugin.waitOpenshiftConnectorTree();
-
   });
-
 
   test('Login into current cluster', async () => {
     const provideAuthenticationSuffix: string = `for basic authentication to the API server ${selectSugestionSuffix}`;
@@ -114,7 +112,3 @@ suite('Openshift connector user story', async () => {
   });
 
 });
-
-
-
-

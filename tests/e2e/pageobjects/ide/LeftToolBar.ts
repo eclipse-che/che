@@ -34,6 +34,4 @@ export class LeftToolbar {
         await this.driverHelper.waitAndClick(toolIconLocator, timeout);
     }
 
-
-
 }

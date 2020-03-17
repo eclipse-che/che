@@ -78,10 +78,5 @@ export class OpenshiftPlugin {
         await this.contextMenu.invokeContextMenuOnTheElementWithMouse(By.xpath(`//div[contains(@id, ':${treeItem}')]`), timeout);
         await this.contextMenu.waitContextMenuAndClickOnItem(menuItem);
     }
-
-
-
-
-
 }
 

@@ -63,14 +63,10 @@ export class OpenDialogWidget {
     }
 
     async selectLocationAndAddContextFolder(location: Locations, path: string, button: Buttons, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-    await this.selectLocation(location, timeout);
-    await this.expandItemInTreeToPath(path, timeout);
-    await this.clickOnButton(button, timeout);
-    await this.dialogWindow.waitDialogDissappearance();
+        await this.selectLocation(location, timeout);
+        await this.expandItemInTreeToPath(path, timeout);
+        await this.clickOnButton(button, timeout);
+        await this.dialogWindow.waitDialogDissappearance();
     }
-
-
-
-
 
 }
