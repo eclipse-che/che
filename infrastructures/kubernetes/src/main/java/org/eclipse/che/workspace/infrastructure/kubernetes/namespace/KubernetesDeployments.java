@@ -526,7 +526,6 @@ public class KubernetesDeployments {
               if (POD_OBJECT_KIND.equals(involvedObject.getKind())
                   || REPLICASET_OBJECT_KIND.equals(involvedObject.getKind())
                   || DEPLOYMENT_OBJECT_KIND.equals(involvedObject.getKind())) {
-                LOG.debug("Event {}", event);
                 String podName = involvedObject.getName();
                 String lastTimestamp = event.getLastTimestamp();
                 if (lastTimestamp == null) {
