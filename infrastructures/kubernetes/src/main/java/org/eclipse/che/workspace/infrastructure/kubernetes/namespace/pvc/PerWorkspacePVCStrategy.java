@@ -84,12 +84,12 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
 
   @Override
   protected PersistentVolumeClaim createCommonPVC(String workspaceId) {
-    String pvcName = pvcNamePrefix + '-' + workspaceId;
-
-    PersistentVolumeClaim perWorkspacePVC =
-        newPVC(pvcName, pvcAccessMode, pvcQuantity, pvcStorageClassName);
-    perWorkspacePVC.getMetadata().getLabels().put(CHE_WORKSPACE_ID_LABEL, workspaceId);
-    return perWorkspacePVC;
+    return newPVC(
+        pvcNamePrefix + '-' + workspaceId,
+        pvcAccessMode,
+        pvcQuantity,
+        pvcStorageClassName,
+        ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, workspaceId));
   }
 
   @Override

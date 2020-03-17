@@ -44,7 +44,9 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentList;
 import io.fabric8.kubernetes.api.model.apps.DeploymentSpec;
+import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
@@ -55,7 +57,7 @@ import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import io.fabric8.kubernetes.client.dsl.ScalableResource;
+import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
@@ -91,9 +93,24 @@ public class KubernetesDeploymentsTest {
 
   // Deployments Mocks
   @Mock private AppsAPIGroupDSL apps;
-  @Mock private MixedOperation deploymentsMixedOperation;
-  @Mock private NonNamespaceOperation deploymentsNamespaceOperation;
-  @Mock private ScalableResource deploymentResource;
+
+  @Mock
+  private MixedOperation<
+          Deployment,
+          DeploymentList,
+          DoneableDeployment,
+          RollableScalableResource<Deployment, DoneableDeployment>>
+      deploymentsMixedOperation;
+
+  @Mock
+  private NonNamespaceOperation<
+          Deployment,
+          DeploymentList,
+          DoneableDeployment,
+          RollableScalableResource<Deployment, DoneableDeployment>>
+      deploymentsNamespaceOperation;
+
+  @Mock private RollableScalableResource<Deployment, DoneableDeployment> deploymentResource;
   @Mock private Deployment deployment;
   @Mock private ObjectMeta deploymentMetadata;
   @Mock private DeploymentSpec deploymentSpec;

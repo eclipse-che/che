@@ -25,6 +25,7 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,8 +73,12 @@ public class PodMerger {
     for (PodData podData : podsData) {
       // if there are entries with such keys then values will be overridden
       ObjectMeta podMeta = podData.getMetadata();
-      basePodMeta.getLabels().putAll(podMeta.getLabels());
-      basePodMeta.getAnnotations().putAll(podMeta.getAnnotations());
+      if (podMeta.getLabels() != null) {
+        basePodMeta.getLabels().putAll(podMeta.getLabels());
+      }
+      if (podMeta.getAnnotations() != null) {
+        basePodMeta.getAnnotations().putAll(podMeta.getAnnotations());
+      }
       basePodMeta.getAdditionalProperties().putAll(podMeta.getAdditionalProperties());
 
       for (Container container : podData.getSpec().getContainers()) {
@@ -159,6 +164,8 @@ public class PodMerger {
         .withReplicas(1)
         .withNewTemplate()
         .withNewMetadata()
+        .withLabels(new LinkedHashMap<>())
+        .withAnnotations(new LinkedHashMap<>())
         .endMetadata()
         .withSpec(new PodSpec())
         .endTemplate()
