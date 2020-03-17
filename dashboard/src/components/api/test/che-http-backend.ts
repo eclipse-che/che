@@ -49,6 +49,7 @@ export class CheHttpBackend {
 
   private plugins: Array<IPlugin>;
   private pluginRegistryUrl: string;
+  private devfilesRegistryUrl: string;
 
   /**
    * Constructor to use
@@ -90,15 +91,16 @@ export class CheHttpBackend {
 
     this.plugins = [];
     this.pluginRegistryUrl = 'http://plugin-registry-che/v3';
+    this.devfilesRegistryUrl = 'http://devfiles-registry';
   }
-
 
   /**
    * Setup all data that should be retrieved on calls
    */
   setup(): void {
     this.$httpBackend.when('GET', '/api/workspace/settings').respond(200, {
-      cheWorkspacePluginRegistryUrl: this.pluginRegistryUrl
+      cheWorkspacePluginRegistryUrl: this.pluginRegistryUrl,
+      cheWorkspaceDevfileRegistryUrl: this.devfilesRegistryUrl,
     });
     this.$httpBackend.when('GET', this.pluginRegistryUrl + '/plugins/').respond(200, this.plugins);
 
@@ -183,6 +185,10 @@ export class CheHttpBackend {
       this.$httpBackend.when('GET', '/api/user/find?email=' + key).respond(this.userEmailMap.get(key));
     }
     this.$httpBackend.when('GET', /\/_app\/compilation-mappings(\?.*$)?/).respond(200, '');
+
+    // mock requests from registry-checking.service
+    this.$httpBackend.when('HEAD', /\/plugins\/$/).respond(200, undefined, { 'content-type': 'application/json' });
+    this.$httpBackend.when('HEAD', /\/devfiles\/index\.json$/).respond(200, undefined, { 'content-type': 'application/json' });
   }
 
   /**
@@ -198,7 +204,7 @@ export class CheHttpBackend {
    * @param pluginRegistryUrl
    */
   setPluginRegistryUrl(pluginRegistryUrl: string) {
-     this.pluginRegistryUrl = pluginRegistryUrl;
+    this.pluginRegistryUrl = pluginRegistryUrl;
   }
 
   /**

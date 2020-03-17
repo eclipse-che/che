@@ -26,6 +26,8 @@ declare namespace che {
     currentPage: string;
     productVersion: string;
     branding: any;
+    globalWarningBannerHtml: string;
+    showGlobalWarningBanner: boolean;
   }
 
   export namespace api {

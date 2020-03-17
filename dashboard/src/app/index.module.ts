@@ -36,6 +36,7 @@ import {TeamsConfig} from './teams/teams-config';
 import {ProfileConfig} from './profile/profile-config';
 import {ResourceFetcherService} from '../components/service/resource-fetcher/resource-fetcher.service';
 import {CheBranding} from '../components/branding/che-branding';
+import { RegistryCheckingService } from '../components/service/registry-checking.service';
 
 // init module
 const initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'ngResource', 'ngRoute',
@@ -307,6 +308,7 @@ initModule.run([
   '$routeParams',
   '$timeout',
   'cheUIElementsInjectorService',
+  'registryCheckingService',
   'resourceFetcherService',
   'routeHistory',
   'routingRedirect',
@@ -318,6 +320,7 @@ initModule.run([
     $routeParams: ng.route.IRouteParamsService,
     $timeout: ng.ITimeoutService,
     cheUIElementsInjectorService: CheUIElementsInjectorService,
+    registryCheckingService: RegistryCheckingService,
     resourceFetcherService: ResourceFetcherService,
     routeHistory: RouteHistory,
     routingRedirect: RoutingRedirect,
@@ -330,6 +333,7 @@ initModule.run([
 
     // here only to create instances of these components
     /* tslint:disable */
+    registryCheckingService;
     resourceFetcherService;
     routeHistory;
     /* tslint:enable */
