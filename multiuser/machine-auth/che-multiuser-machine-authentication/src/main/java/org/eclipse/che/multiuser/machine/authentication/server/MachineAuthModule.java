@@ -81,10 +81,15 @@ public class MachineAuthModule extends AbstractModule {
                 "/preferences", "find", "save", "update", "removePreferences"));
     machineAuthenticatedResources
         .addBinding()
+        .toInstance(new MachineAuthenticatedResource("/user", "getCurrent"));
+    machineAuthenticatedResources
+        .addBinding()
         .toInstance(new MachineAuthenticatedResource("/activity", "active"));
     machineAuthenticatedResources
         .addBinding()
-        .toInstance(new MachineAuthenticatedResource("oauth", "token"));
+        .toInstance(
+            new MachineAuthenticatedResource(
+                "oauth", "token", "authenticate", "callback", "getRegisteredAuthenticators"));
 
     machineAuthenticatedResources
         .addBinding()
