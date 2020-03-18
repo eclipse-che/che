@@ -192,7 +192,12 @@ public class KubernetesNamespace {
         return true;
       }
 
-      throw new KubernetesInfrastructureException(e);
+      throw new InternalInfrastructureException(
+          format(
+              "Failed to determine whether the namespace"
+                  + " %s is managed. Kubernetes client said: %s",
+              getName(), e.getMessage()),
+          e);
     }
   }
 
