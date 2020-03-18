@@ -340,6 +340,7 @@
                   "alias": {},
                   "id": {},
                   "env": {},
+                  "volumes": {},
                   "reference": {},
                   "registryUrl": {},
                   "memoryLimit": {},
@@ -366,6 +367,7 @@
                   "alias": {},
                   "id": {},
                   "env": {},
+                  "volumes": {},
                   "memoryLimit": {},
                   "memoryRequest": {},
                   "cpuLimit": {},
@@ -508,6 +510,7 @@
                   "alias": {},
                   "mountSources": {},
                   "env": {},
+                  "volumes": {},
                   "memoryLimit": {
                     "anyOf": [
                       {
@@ -554,35 +557,6 @@
                     "examples": [
                       "['-R', '-f']"
                     ]
-                  },
-                  "volumes": {
-                    "type": "array",
-                    "description": "Describes volumes which should be mount to component",
-                    "items": {
-                      "type": "object",
-                      "description": "Describe volume that should be mount to component",
-                      "required": [
-                        "name",
-                        "containerPath"
-                      ],
-                      "properties": {
-                        "name": {
-                          "type": "string",
-                          "title": "The Volume Name",
-                          "description": "The volume name. If several components mount the same volume then they will reuse the volume and will be able to access to the same files",
-                          "examples": [
-                            "my-data"
-                          ]
-                        },
-                        "containerPath": {
-                          "type": "string",
-                          "title": "The path where volume should be mount to container",
-                          "examples": [
-                            "/home/user/data"
-                          ]
-                        }
-                      }
-                    }
                   },
                   "endpoints": {
                     "type": "array",
@@ -668,6 +642,35 @@
             "type": "boolean",
             "description": "Describes whether projects sources should be mount to the component. `CHE_PROJECTS_ROOT` environment variable should contains a path where projects sources are mount",
             "default": "false"
+          },
+          "volumes": {
+            "type": "array",
+            "description": "Describes volumes which should be mount to component",
+            "items": {
+              "type": "object",
+              "description": "Describe volume that should be mount to component",
+              "required": [
+                "name",
+                "containerPath"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "The Volume Name",
+                  "description": "The volume name. If several components mount the same volume then they will reuse the volume and will be able to access to the same files",
+                  "examples": [
+                    "my-data"
+                  ]
+                },
+                "containerPath": {
+                  "type": "string",
+                  "title": "The path where volume should be mount to container",
+                  "examples": [
+                    "/home/user/data"
+                  ]
+                }
+              }
+            }
           },
           "env": {
             "type": "array",
