@@ -131,8 +131,7 @@ class IdeSvc {
   }
 
   startWorkspace(data: any): ng.IPromise<any> {
-    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(data.id, data.config ? data.config.defaultEnv: null);
-    return startWorkspacePromise;
+    return this.cheAPI.getWorkspace().startWorkspace(data.id);
   }
 
   setLoadingParameter(paramName: string, paramValue: string): void {
@@ -143,14 +142,14 @@ class IdeSvc {
     this.ideAction = ideAction;
   }
 
-  openIde(workspaceId: string): void {
+  openIde(workspaceId: string, isDebugMode?: boolean): void {
     (this.$rootScope as any).hideNavbar = false;
 
     this.updateRecentWorkspace(workspaceId);
 
     let inDevMode = this.userDashboardConfig.developmentMode;
     let randVal = Math.floor((Math.random() * 1000000) + 1);
-    let appendUrl = '?uid=' + randVal;
+    let appendUrl = `?uid=${randVal}${isDebugMode ? '&debug=true' : ''}`;
     let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
     this.openedWorkspace = workspace;
 

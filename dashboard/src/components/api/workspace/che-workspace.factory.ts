@@ -141,9 +141,7 @@ export class CheWorkspace {
       addProject: { method: 'POST', url: '/api/workspace/:workspaceId/project' },
       deleteProject: { method: 'DELETE', url: '/api/workspace/:workspaceId/project/:path' },
       stopWorkspace: { method: 'DELETE', url: '/api/workspace/:workspaceId/runtime' },
-      startWorkspace: { method: 'POST', url: '/api/workspace/:workspaceId/runtime?environment=:envName' },
-      startWorkspaceWithNoEnvironment: { method: 'POST', url: '/api/workspace/:workspaceId/runtime' },
-      startTemporaryWorkspace: { method: 'POST', url: '/api/workspace/runtime?temporary=true' },
+      startWorkspace: { method: 'POST', url: '/api/workspace/:workspaceId/runtime' },
       getSettings: { method: 'GET', url: '/api/workspace/settings' }
     }
     );
@@ -401,21 +399,22 @@ export class CheWorkspace {
   /**
    * Starts the given workspace by specifying the ID and the environment name
    * @param workspaceId the workspace ID
-   * @param envName the name of the environment (optional)
-   * @returns {ng.IPromise<any>} promise
+   * @param isDebugMode
    */
-  startWorkspace(workspaceId: string, envName?: string): ng.IPromise<any> {
+  startWorkspace(workspaceId: string, isDebugMode: boolean = false): ng.IPromise<any> {
+    const params: {[param: string]: string|boolean} = {workspaceId};
+    if (isDebugMode) {
+      params['debug-workspace-start'] = isDebugMode;
+    }
+
     this.notifyIfEphemeral(workspaceId);
     const workspacePromisesKey = 'startWorkspace' + workspaceId;
     if (this.workspacePromises.has(workspacePromisesKey)) {
       return this.workspacePromises.get(workspacePromisesKey);
     }
 
-    const promise = envName ? this.remoteWorkspaceAPI.startWorkspace({
-      workspaceId: workspaceId,
-      envName: envName
-    }, {}).$promise : this.remoteWorkspaceAPI.startWorkspaceWithNoEnvironment({ workspaceId: workspaceId }, {}).$promise;
-    this.workspacePromises.set(workspacePromisesKey, promise);
+    const promise = this.remoteWorkspaceAPI.startWorkspace(params, {}).$promise;
+      this.workspacePromises.set(workspacePromisesKey, promise);
     promise.finally(() => {
       this.workspacePromises.delete(workspacePromisesKey);
     });
@@ -442,7 +441,7 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>} promise
    */
   startTemporaryWorkspace(workspaceConfig: che.IWorkspaceDevfile): ng.IPromise<any> {
-    return this.remoteWorkspaceAPI.startTemporaryWorkspace({}, workspaceConfig).$promise;
+    return this.remoteWorkspaceAPI.startWorkspace({temporary: true}, workspaceConfig).$promise;
   }
 
   /**
