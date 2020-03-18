@@ -9,7 +9,7 @@ set -e
 echo "========Starting nigtly test job $(date)========"
 
 source tests/.infra/centos-ci/functional_tests_utils.sh
-source .ci/cico_common.sh
+eval "$(./env-toolkit load -f jenkins-env.json -r ^ghprbPullId)"
 
 function prepareCustomResourceFile() {
   cd /tmp
