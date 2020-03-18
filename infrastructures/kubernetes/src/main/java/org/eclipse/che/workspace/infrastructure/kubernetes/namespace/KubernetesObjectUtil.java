@@ -71,6 +71,14 @@ public class KubernetesObjectUtil {
   }
 
   /** Adds label to target Kubernetes object. */
+  public static void putLabels(ObjectMeta metadata, Map<String, String> labels) {
+    if (labels == null || labels.isEmpty()) {
+      return;
+    }
+    labels.forEach((k, v) -> putLabel(metadata, k, v));
+  }
+
+  /** Adds label to target Kubernetes object. */
   public static void putLabel(ObjectMeta metadata, String key, String value) {
     Map<String, String> labels = metadata.getLabels();
     if (labels == null) {
@@ -99,6 +107,14 @@ public class KubernetesObjectUtil {
     }
 
     annotations.put(key, value);
+  }
+
+  /** Adds annotations to target ObjectMeta object. */
+  public static void putAnnotations(ObjectMeta metadata, Map<String, String> annotations) {
+    if (annotations == null || annotations.isEmpty()) {
+      return;
+    }
+    annotations.forEach((k, v) -> putAnnotation(metadata, k, v));
   }
 
   /** Adds selector into target Kubernetes service. */
