@@ -179,24 +179,10 @@ public class KubernetesObjectUtil {
    */
   public static PersistentVolumeClaim newPVC(
       String name, String accessMode, String quantity, String storageClassName) {
-    return newPVC(name, accessMode, quantity, storageClassName, null);
-  }
-
-  /**
-   * Returns new instance of {@link PersistentVolumeClaim} with specified name, accessMode,
-   * quantity, storageClassName and labels.
-   */
-  public static PersistentVolumeClaim newPVC(
-      String name,
-      String accessMode,
-      String quantity,
-      String storageClassName,
-      Map<String, String> labels) {
     SpecNested<PersistentVolumeClaimBuilder> specs =
         new PersistentVolumeClaimBuilder()
             .withNewMetadata()
             .withName(name)
-            .withLabels(labels)
             .endMetadata()
             .withNewSpec()
             .withAccessModes(accessMode);

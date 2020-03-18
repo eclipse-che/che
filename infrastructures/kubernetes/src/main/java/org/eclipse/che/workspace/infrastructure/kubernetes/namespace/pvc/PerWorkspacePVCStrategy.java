@@ -21,6 +21,7 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil;
 
 /**
  * Provides common PVC per each workspace.
@@ -84,12 +85,14 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
 
   @Override
   protected PersistentVolumeClaim createCommonPVC(String workspaceId) {
-    return newPVC(
-        pvcNamePrefix + '-' + workspaceId,
-        pvcAccessMode,
-        pvcQuantity,
-        pvcStorageClassName,
-        ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, workspaceId));
+    String pvcName = pvcNamePrefix + '-' + workspaceId;
+
+    PersistentVolumeClaim perWorkspacePVC =
+        newPVC(pvcName, pvcAccessMode, pvcQuantity, pvcStorageClassName);
+
+    KubernetesObjectUtil.putLabel(
+        perWorkspacePVC.getMetadata(), CHE_WORKSPACE_ID_LABEL, workspaceId);
+    return perWorkspacePVC;
   }
 
   @Override
