@@ -118,22 +118,34 @@ export class TemplateListController {
       this.$log.error(message);
       return;
     }
+
+    const urls = this.devfileRegistryUrl.split(" ");
+    let promises = [];
+   
     this.isLoading = true;
-    this.devfileRegistry.fetchDevfiles(this.devfileRegistryUrl).then((devfiles: Array<IDevfileMetaData>) => {
-      this.devfiles = devfiles.map(devfile => {
-        if (!devfile.icon.startsWith('http')) {
-          devfile.icon = this.devfileRegistryUrl + devfile.icon;
+      
+    for (const url of urls) {
+      promises.push(this.devfileRegistry.fetchDevfiles(url).then((devfiles: Array<IDevfileMetaData>) => {
+        if (devfiles && devfiles.length > 0) {
+          devfiles.forEach((devfile)=> {
+            //add registry value to devfile
+            devfile.location = url;
+            if (!devfile.icon.startsWith('http')) {
+              devfile.icon = url + devfile.icon;
+            } 
+            this.devfiles.push(devfile);
+          }
+        );
         }
-        return devfile;
-      });
-      this.applyFilter();
-    }, (error: any) => {
-      const message = 'Failed to load devfiles meta list.';
-      this.cheNotification.showError(message);
-      this.$log.error(message, error);
-    }).finally(() => {
-      this.isLoading = false;
-    });
+        this.applyFilter();
+      }, (error: any) => {
+        const message = 'Failed to load devfiles meta list.';
+        this.cheNotification.showError(message);
+        this.$log.error(message, error);
+      }).finally(() => {
+        this.isLoading = false;
+      }));
+    }
   }
 
   private createWorkspace(): ng.IPromise<che.IWorkspace> {
@@ -141,8 +153,8 @@ export class TemplateListController {
       return this.$q.reject({data: {message: 'There is no selected Template.'}});
     }
     const selfLink = this.selectedDevfile.links.self;
-    return this.devfileRegistry.fetchDevfile(this.devfileRegistryUrl, selfLink).then(() => {
-      const devfile = this.devfileRegistry.getDevfile(this.devfileRegistryUrl, selfLink);
+    return this.devfileRegistry.fetchDevfile(this.selectedDevfile.location, selfLink).then(() => {
+      const devfile = this.devfileRegistry.getDevfile(this.selectedDevfile.location, selfLink);
       if (this.ephemeralMode) {
         if (!devfile.attributes) {
           devfile.attributes = {};

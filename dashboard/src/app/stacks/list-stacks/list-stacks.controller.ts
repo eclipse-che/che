@@ -81,21 +81,39 @@ export class ListStacksController {
   }
 
   loadDevfiles(): void {
-    this.isLoading = true;
-    this.devfileRegistry.fetchDevfiles(this.devfileRegistryUrl).then((data: Array<IDevfileMetaData>) => {
-      this.cheListHelper.setList(data.map(devfileMetaData => {
-        if (!devfileMetaData.icon.startsWith('http')) {
-          devfileMetaData.icon = this.devfileRegistryUrl + devfileMetaData.icon;
-        }
-        return devfileMetaData;
-      }), 'displayName');
-    }, (error: any) => {
-      const message = 'Failed to load devfiles meta list.';
+    if (!this.devfileRegistryUrl) {
+      const message = 'Failed to load the devfile registry URL.';
       this.cheNotification.showError(message);
-      this.$log.error(message, error);
-    }).finally(() => {
-      this.isLoading = false;
-    });
+      this.$log.error(message);
+      return;
+    }
+
+    const urls = this.devfileRegistryUrl.split(" ");
+    let promises = [];
+    this.isLoading = true;
+ 
+    for (const url of urls) {
+      promises.push(this.devfileRegistry.fetchDevfiles(url).then((devfiles: Array<IDevfileMetaData>) => {
+        this.cheListHelper.setList(devfiles.map(devfileMetaData => {
+        if (devfiles && devfiles.length > 0) {
+          devfiles.forEach((devfile)=> {
+            // Set the origin url as the location
+            devfile.location = url;
+            if (!devfile.icon.startsWith('http')) {
+              devfile.icon = url + devfile.icon;
+            } 
+          }
+        );
+        }
+      }), 'displayName');
+      }, (error: any) => {
+        const message = 'Failed to load devfiles meta list.';
+        this.cheNotification.showError(message);
+        this.$log.error(message, error);
+      }).finally(() => {
+        this.isLoading = false;
+      }));
+    }
   }
 
   onSearchChanged(searchStr: string): void {
