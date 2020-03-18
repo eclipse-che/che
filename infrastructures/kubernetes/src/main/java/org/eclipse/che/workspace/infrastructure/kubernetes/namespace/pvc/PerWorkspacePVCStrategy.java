@@ -89,7 +89,6 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
 
     PersistentVolumeClaim perWorkspacePVC =
         newPVC(pvcName, pvcAccessMode, pvcQuantity, pvcStorageClassName);
-
     putLabel(perWorkspacePVC.getMetadata(), CHE_WORKSPACE_ID_LABEL, workspaceId);
     return perWorkspacePVC;
   }
