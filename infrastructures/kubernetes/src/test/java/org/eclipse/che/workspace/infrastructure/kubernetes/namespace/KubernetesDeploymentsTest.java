@@ -22,11 +22,13 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -56,6 +58,7 @@ import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.ScalableResource;
+import java.lang.reflect.Field;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
@@ -73,7 +76,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -570,8 +572,7 @@ public class KubernetesDeploymentsTest {
     ArgumentCaptor<PodEvent> captor = ArgumentCaptor.forClass(PodEvent.class);
     verify(podEventHandler).handle(captor.capture());
     PodEvent podEvent = captor.getValue();
-    Assert.assertEquals(
-        podEvent.getLastTimestamp(), PodEvents.convertDateToEventTimestamp(nextYear));
+    assertEquals(podEvent.getLastTimestamp(), PodEvents.convertDateToEventTimestamp(nextYear));
   }
 
   @Test
@@ -595,11 +596,43 @@ public class KubernetesDeploymentsTest {
 
     // Then
     verify(event, times(1)).getLastTimestamp();
+    verify(event, never()).getFirstTimestamp();
+    ArgumentCaptor<PodEvent> captor = ArgumentCaptor.forClass(PodEvent.class);
+    verify(podEventHandler).handle(captor.capture());
+    PodEvent podEvent = captor.getValue();
+    assertEquals(podEvent.getLastTimestamp(), PodEvents.convertDateToEventTimestamp(nextYear));
+  }
+
+  @Test
+  public void shouldHandleEventWithEmptyLastTimestampAndFirstTimestamp() throws Exception {
+    // Given
+    when(objectReference.getKind()).thenReturn(POD_OBJECT_KIND);
+    kubernetesDeployments.watchEvents(podEventHandler);
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.MINUTE, -1);
+    Date minuteAgo = cal.getTime();
+
+    Field f = KubernetesDeployments.class.getDeclaredField("watcherInitializationDate");
+    f.setAccessible(true);
+    f.set(kubernetesDeployments, minuteAgo);
+
+    verify(eventNamespaceMixedOperation).watch(eventWatcherCaptor.capture());
+    Watcher<Event> watcher = eventWatcherCaptor.getValue();
+    Event event = mock(Event.class);
+    when(event.getInvolvedObject()).thenReturn(objectReference);
+    when(event.getMetadata()).thenReturn(new ObjectMeta());
+    when(event.getLastTimestamp()).thenReturn(null);
+    when(event.getFirstTimestamp()).thenReturn(null);
+
+    // When
+    watcher.eventReceived(Watcher.Action.ADDED, event);
+
+    // Then
+    verify(event, times(1)).getLastTimestamp();
     verify(event, times(1)).getFirstTimestamp();
     ArgumentCaptor<PodEvent> captor = ArgumentCaptor.forClass(PodEvent.class);
     verify(podEventHandler).handle(captor.capture());
     PodEvent podEvent = captor.getValue();
-    Assert.assertEquals(
-        podEvent.getLastTimestamp(), PodEvents.convertDateToEventTimestamp(nextYear));
+    assertNotNull(podEvent.getLastTimestamp());
   }
 }
