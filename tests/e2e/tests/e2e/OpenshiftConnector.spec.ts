@@ -108,7 +108,7 @@ suite('Openshift connector user story', async () => {
 
   test('Push new component', async () => {
     await openshiftPlugin.invokeContextMenuCommandOnItem('component-node-js', OpenshiftContextMenuItems.Push);
-    await terminal.waitText('OpenShift', 'Changes successfully pushed to component', TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT);
+    await terminal.waitText('OpenShift', 'Changes successfully pushed to component', TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
   });
 
 });
