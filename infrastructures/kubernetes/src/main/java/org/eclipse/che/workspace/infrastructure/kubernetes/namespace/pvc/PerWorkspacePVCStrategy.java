@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newPVC;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
@@ -21,7 +22,6 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil;
 
 /**
  * Provides common PVC per each workspace.
@@ -90,8 +90,7 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
     PersistentVolumeClaim perWorkspacePVC =
         newPVC(pvcName, pvcAccessMode, pvcQuantity, pvcStorageClassName);
 
-    KubernetesObjectUtil.putLabel(
-        perWorkspacePVC.getMetadata(), CHE_WORKSPACE_ID_LABEL, workspaceId);
+    putLabel(perWorkspacePVC.getMetadata(), CHE_WORKSPACE_ID_LABEL, workspaceId);
     return perWorkspacePVC;
   }
 
