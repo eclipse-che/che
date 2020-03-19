@@ -92,6 +92,7 @@ import {PagingButtons} from './paging-button/paging-button.directive';
 import {CheRowToolbar} from './toolbar/che-row-toolbar.directive';
 import {CheEditModeOverlay} from './edit-mode-overlay/che-edit-mode-overlay.directive';
 import { CheEditModeOverlayController } from './edit-mode-overlay/che-edit-mode-overlay.controller';
+import { GlobalWarningBannerDirective } from './global-warning-banner/global-warning-banner.directive';
 
 export class WidgetConfig {
 
@@ -207,5 +208,7 @@ export class WidgetConfig {
     // edit overlay
     register.controller('CheEditModeOverlayController', CheEditModeOverlayController);
     register.directive('cheEditModeOverlay', CheEditModeOverlay);
+
+    register.directive('globalWarningBanner', GlobalWarningBannerDirective);
   }
 }

@@ -51,15 +51,20 @@
   <md-sidenav id="chenavmenu" class="ide-show not-visible" ng-class="waitingLoaded ? 'md-sidenav-left md-whiteframe-z2 dark-menu-bg sidebar-entry' : 'not-visible'" md-component-id="left" md-is-locked-open="!hideNavbar" layout="row">
     <che-nav-bar id="chenavbar" layout="row" flex></che-nav-bar>
   </md-sidenav>
-  <div class="main-page ide-show" layout="column" flex>
-    <div id="main-content" role="main" ng-view layout="column" flex ng-show="waitingLoaded && !showIDE"></div>
-    <ide-iframe id="ide-iframe-window" ng-show="showIDE && ideIframeLink" flex style="height: 100%"></ide-iframe>
-    <che-footer che-logo="{{branding.logoURL}}"
-                che-version="{{productVersion}}"
-                che-product-name="{{branding.name}}"
-                ng-show="waitingLoaded && !showIDE">
-      {{branding.footer.content}}
-    </che-footer>
+  <div layout="column" flex>
+    <!-- global warning banner -->
+    <global-warning-banner messages="globalWarningBannerHtml" ng-show="showGlobalWarningBanner"></global-warning-banner>
+    <!-- main page -->
+    <div class="main-page ide-show" layout="column" flex>
+      <div id="main-content" role="main" ng-view layout="column" flex ng-show="waitingLoaded && !showIDE"></div>
+      <ide-iframe id="ide-iframe-window" ng-show="showIDE && ideIframeLink" flex style="height: 100%"></ide-iframe>
+      <che-footer che-logo="{{branding.logoURL}}"
+                  che-version="{{productVersion}}"
+                  che-product-name="{{branding.productName}}"
+                  ng-show="waitingLoaded && !showIDE">
+        {{branding.footer.content}}
+      </che-footer>
+    </div>
   </div>
     <!-- Addons are not automatically injected -->
 
