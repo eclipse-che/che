@@ -11,14 +11,14 @@
       Red Hat, Inc. - initial API and implementation
 
 -->
-<div class="get-started-template">
-  <div ng-if="devfile.icon" class="devfile-item-icon">
-    <img src="{{devfile.icon}}">
+<div class="pf-c-card pf-m-hoverable pf-m-compact pf-m-selectable get-started-template" tabindex="-1">
+  <div class="pf-c-card__head">
+    <img ng-if="devfile.icon" src="{{devfile.icon}}"/>
   </div>
-  <p>
-    <span class="display-name">{{devfile.displayName}}</span>
-  </p>
-  <p>
-    <span class="description">{{devfile.description}}</span>
-  </p>
+  <div class="pf-c-card__header pf-c-title pf-m-md">
+    <b>{{devfile.displayName}}</b>
+  </div>
+  <div class="pf-c-card__body">
+    {{devfile.description}}
+  </div>
 </div>

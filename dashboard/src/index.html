@@ -26,6 +26,11 @@
     <link rel="stylesheet" type="text/css" href="assets/styles/material-design.css">
     <link rel="stylesheet" type="text/css" href="assets/styles/che-font.css">
     <link rel="stylesheet" type="text/css" href="assets/styles/font.css">
+
+    <!-- PatternFly Styles -->
+    <link rel="stylesheet" href="../node_modules/@patternfly/patternfly/patternfly.css">
+    <link rel="stylesheet" href="../node_modules/@patternfly/patternfly/patternfly-addons.css">
+
     <!-- inject:css -->
     <!-- css files will be automatically insert here -->
     <!-- endinject -->
@@ -51,7 +56,7 @@
     <ide-iframe id="ide-iframe-window" ng-show="showIDE && ideIframeLink" flex style="height: 100%"></ide-iframe>
     <che-footer che-logo="{{branding.logoURL}}"
                 che-version="{{productVersion}}"
-                che-product-name="Eclipse Che"
+                che-product-name="{{branding.name}}"
                 ng-show="waitingLoaded && !showIDE">
       {{branding.footer.content}}
     </che-footer>
@@ -60,7 +65,6 @@
 
     <!-- DO NOT ADD DIRECTLY JS THERE, THIS IS AUTOMATICALLY ADDED -->
     <!-- build:js(src) scripts/vendor.js -->
-  <script src="../node_modules/jsonlint/lib/jsonlint.js"></script>
     <!-- build:js({.tmp/serve,.tmp/partials}) scripts/app.js -->
     <!-- inject:js -->
     <!-- js files will be automatically insert here -->

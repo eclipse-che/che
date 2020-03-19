@@ -23,6 +23,11 @@ export class Register implements che.IRegisterService {
     this.app = moduleApp;
   }
 
+  component(name: string, constructorFn: che.IComponentOptionsConstructor): che.IRegisterService {
+    this.app.component(name, new constructorFn());
+    return this;
+  }
+
   directive(name: string, constructorFn: Function): che.IRegisterService {
 
     constructorFn = this._normalizeConstructor(constructorFn);
@@ -55,17 +60,17 @@ export class Register implements che.IRegisterService {
   }
 
 
-  filter(name: string, constructorFn: any): che.IRegisterService {
+  filter(name: string, constructorFn: ng.Injectable<ng.FilterFactory>): che.IRegisterService {
     this.app.filter(name, constructorFn);
     return this;
   }
 
-  controller(name: string, constructorFn: any): che.IRegisterService {
+  controller(name: string, constructorFn: ng.Injectable<ng.IControllerConstructor>): che.IRegisterService {
     this.app.controller(name, constructorFn);
     return this;
   }
 
-  service(name: string, constructorFn: any): che.IRegisterService {
+  service(name: string, constructorFn: ng.Injectable<Function>): che.IRegisterService {
     this.app.service(name, constructorFn);
     return this;
   }
@@ -75,7 +80,7 @@ export class Register implements che.IRegisterService {
     return this;
   }
 
-   factory(name: string, constructorFn: Function): che.IRegisterService {
+  factory(name: string, constructorFn: ng.Injectable<Function>): che.IRegisterService {
     constructorFn = this._normalizeConstructor(constructorFn);
     var factoryArray = this._createFactoryArray(constructorFn);
     this.app.factory(name, factoryArray);

@@ -1,0 +1,81 @@
+<!--
+
+    Copyright (c) 2015-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+
+<che-pf-page-main-area>
+
+  <che-pf-page-main-section class="get-started-header-section pf-u-box-shadow-sm-bottom" light="true">
+    <che-pf-masthead title="Getting Started with {{branding.name}}">
+      <che-pf-secondary-button title="{{getStartedController.createButton.title}}"
+        on-click="getStartedController.createButton.onClick()"
+        ng-disabled="getStartedController.isCreateButtonDisabled()"></che-pf-secondary-button>
+    </che-pf-masthead>
+
+    <div class="pf-c-content pf-u-pl-md">
+
+      <h4>Select a Sample</h4>
+      <small>Select a sample to create your first workspace.</small>
+
+      <!-- toolbar -->
+      <get-started-toolbar
+        devfiles="getStartedController.toolbarProps.devfiles"
+        ephemeral-mode="getStartedController.toolbarProps.ephemeralMode"
+        on-filter-change="getStartedController.toolbarProps.onFilterChange($filtered)"
+        on-ephemeral-mode-change="getStartedController.toolbarProps.onEphemeralModeChange($ephemeralMode)"></get-started-toolbar>
+      <!-- toolbar end -->
+
+      </div>
+    </div>
+  </che-pf-page-main-section>
+  <div class="progress-line">
+    <md-progress-linear ng-show="getStartedController.isCreating" md-mode="indeterminate"></md-progress-linear>
+  </div>
+  <che-pf-page-main-section>
+    <!-- samples gallery -->
+    <div class="pf-l-gallery pf-m-gutter"
+      ng-hide="getStartedController.isLoading">
+      <sample-card
+        ng-repeat="devfile in getStartedController.filteredDevfiles"
+        devfile="devfile"
+        ng-click="getStartedController.createWorkspace(devfile)">
+      </sample-card>
+    </div>
+    <!-- samples gallery end -->
+
+    <!-- spinner -->
+    <div class="pf-l-bullseye"
+      ng-show="getStartedController.isLoading">
+      <div class="pf-l-bullseye__item">
+        <span class="pf-c-spinner pf-m-xl" role="progressbar" aria-valuetext="Loading...">
+          <span class="pf-c-spinner__clipper"></span>
+          <span class="pf-c-spinner__lead-ball"></span>
+          <span class="pf-c-spinner__tail-ball"></span>
+        </span>
+      </div>
+    </div>
+    <!-- spinner end -->
+
+    <!-- empty state -->
+    <div class="pf-l-bullseye"
+      ng-hide="getStartedController.isLoading || getStartedController.filteredDevfiles.length">
+      <div class="pf-l-bullseye__item">
+        <div class="pf-c-empty-state">
+          <i class="fas fa-cubes pf-c-empty-state__icon" aria-hidden="true"></i>
+          <h1 class="pf-c-title pf-m-lg">There are no samples</h1>
+        </div>
+      </div>
+    </div>
+    <!-- empty state end -->
+  </che-pf-page-main-section>
+
+</che-pf-page-main-area>

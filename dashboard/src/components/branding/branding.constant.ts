@@ -75,9 +75,9 @@ export enum TogglableFeature {
 }
 
 export const BRANDING_DEFAULT: IBranding = {
-  title: 'Eclipse Che 456456',
+  title: 'Eclipse Che',
   name: 'Eclipse Che',
-  logoFile: 'che-logo456456.svg',
+  logoFile: 'che-logo.svg',
   logoTextFile: 'che-logo-text.svg',
   favicon: 'favicon.ico',
   loader: 'loader.svg',

@@ -24,16 +24,16 @@ var minimist = require('minimist');
 
 var serverOptions = {
   string: 'server',
-  default: {server: 'http://localhost:8080'}
+  default: { server: 'http://localhost:8080' }
 };
 
 var options = minimist(process.argv.slice(2), serverOptions);
 
 gulp.task('partials', function () {
   return gulp.src([
-      path.join(conf.paths.src, '/{app,components}/**/*.html'),
-      path.join(conf.paths.tmp, '/serve/{app,components}/**/*.html')
-    ])
+    path.join(conf.paths.src, '/{app,components}/**/*.html'),
+    path.join(conf.paths.tmp, '/serve/{app,components}/**/*.html')
+  ])
     .pipe($.minifyHtml({
       empty: true,
       spare: true,
@@ -102,21 +102,21 @@ gulp.task('brandingassets', function () {
     .pipe(gulp.dest(conf.paths.dist + '/assets/branding/'));
 });
 
-gulp.task('existingfonts', function () {
-  return gulp.src(conf.paths.src + '/assets/fonts/*')
+gulp.task('fonts', function () {
+  return gulp.src([
+    conf.paths.modules + '/font-awesome/fonts/*',
+    conf.paths.src + '/assets/fonts/*'
+  ])
     .pipe($.filter('**/*.{eot,svg,ttf,otf,woff,woff2}'))
     .pipe($.flatten())
     .pipe(gulp.dest(conf.paths.dist + '/fonts/'));
 });
 
-gulp.task('fonts', ['colors', 'outputcolors', 'proxySettings', 'existingfonts'], function () {
-  return gulp.src([
-    'node_modules/material-design-iconfont/iconfont/*',
-    'node_modules/font-awesome/fonts/*'
-  ])
-    .pipe($.filter('**/*.{eot,svg,ttf,woff,woff2}'))
+gulp.task('patternflyWebfonts', function () {
+  return gulp.src(conf.paths.modules + '/@patternfly/patternfly/assets/fonts/webfonts/*')
+    .pipe($.filter('**/*.{eot,svg,ttf,otf,woff,woff2}'))
     .pipe($.flatten())
-    .pipe(gulp.dest(path.join(conf.paths.dist, '/fonts/')));
+    .pipe(gulp.dest(conf.paths.dist + '/styles/assets/fonts/webfonts'));
 });
 
 var fs = require('fs');
@@ -128,9 +128,9 @@ gulp.task('colorstemplate', function () {
 });
 
 gulp.task('colors', ['colorstemplate'], function () {
-  return gulp.src("src/app/colors/template/che-color.constant.ts.template")
-    .pipe($.rename("che-color.constant.ts"))
-    .pipe(gulp.dest("src/app/colors"));
+  return gulp.src('src/app/colors/template/che-color.constant.ts.template')
+    .pipe($.rename('che-color.constant.ts'))
+    .pipe(gulp.dest('src/app/colors'));
 });
 
 gulp.task('outputcolorstemplate', function () {
@@ -141,21 +141,21 @@ gulp.task('outputcolorstemplate', function () {
 });
 
 gulp.task('outputcolors', ['outputcolorstemplate'], function () {
-  return gulp.src("src/app/colors/template/che-output-colors.constant.ts.template")
-    .pipe($.rename("che-output-colors.constant.ts"))
-    .pipe(gulp.dest("src/app/colors"));
+  return gulp.src('src/app/colors/template/che-output-colors.constant.ts.template')
+    .pipe($.rename('che-output-colors.constant.ts'))
+    .pipe(gulp.dest('src/app/colors'));
 });
 
 gulp.task('proxySettingsTemplate', function () {
-  return gulp.src("src/app/proxy/proxy-settings.constant.ts.template")
+  return gulp.src('src/app/proxy/proxy-settings.constant.ts.template')
     .pipe($.replace('%CONTENT%', options.server))
     .pipe(gulp.dest('src/app/proxy/template'));
 });
 
 gulp.task('proxySettings', ['proxySettingsTemplate'], function () {
-  return gulp.src("src/app/proxy/template/proxy-settings.constant.ts.template")
-    .pipe($.rename("proxy-settings.constant.ts"))
-    .pipe(gulp.dest("src/app/proxy"));
+  return gulp.src('src/app/proxy/template/proxy-settings.constant.ts.template')
+    .pipe($.rename('proxy-settings.constant.ts'))
+    .pipe(gulp.dest('src/app/proxy'));
 });
 
 
@@ -165,9 +165,9 @@ gulp.task('other', function () {
   });
 
   return gulp.src([
-      path.join(conf.paths.src, '/**/*'),
-      path.join('!' + conf.paths.src, '/**/*.{html,css,js,styl}')
-    ])
+    path.join(conf.paths.src, '/**/*'),
+    path.join('!' + conf.paths.src, '/**/*.{html,css,js,styl}')
+  ])
     .pipe(fileFilter)
     .pipe(gulp.dest(path.join(conf.paths.dist, '/')));
 });
@@ -177,4 +177,4 @@ gulp.task('clean', function () {
 });
 
 
-gulp.task('build', ['html', 'images', 'htmlassets', 'brandingassets', 'fonts', 'other']);
+gulp.task('build', ['html', 'images', 'htmlassets', 'brandingassets', 'patternflyWebfonts', 'fonts', 'other']);
