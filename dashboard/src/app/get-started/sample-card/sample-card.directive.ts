@@ -13,13 +13,13 @@
 
 /**
  * @ngDoc directive
- * @name template.directive:Template
+ * @name sample-card.directive:SampleCardDirective
  * @description This class is handling the directive to handle the container with get-started template
  * @author Oleksii Orel
  */
-export class Template implements ng.IDirective {
+export class SampleCardDirective implements ng.IDirective {
   restrict = 'E';
-  templateUrl = 'app/get-started/template/template.html';
+  templateUrl = 'app/get-started/sample-card/sample-card.html';
   replace = true;
 
   scope = {

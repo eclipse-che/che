@@ -19,7 +19,6 @@
     "@types/js-yaml": "^3.12.1",
     "@types/karma-jasmine": "^0.0.31",
     "@types/moment": "^2.13.0",
-    "angular-bootstrap": "^0.12.2",
     "angular-mocks": "1.7.9",
     "awesome-typescript-loader": "^3.5.0",
     "babel-core": "^6.4.5",
@@ -106,9 +105,11 @@
     "test": "gulp test"
   },
   "dependencies": {
+    "@patternfly/patternfly": "2.65.3",
     "angular": "1.7.9",
     "angular-animate": "1.7.9",
     "angular-aria": "1.7.9",
+    "angular-bootstrap": "^0.12.2",
     "angular-cookies": "1.7.9",
     "angular-file-upload": "2.0.0",
     "angular-filter": "0.5.4",

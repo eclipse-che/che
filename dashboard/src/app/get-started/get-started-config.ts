@@ -11,10 +11,11 @@
  */
 'use strict';
 
-import {TemplateListController} from './template-list/template-list.controller';
-import {Template} from './template/template.directive';
-import { CheDashboardConfigurationService } from '../../components/branding/che-dashboard-configuration.service';
+import { GetStartedController } from './get-started.controller';
 import { GetStartedConfigService } from './get-started-config.service';
+import { GetStartedToolbarComponent } from './toolbar/get-started-toolbar.component';
+import { GetStartedToolbarController } from './toolbar/get-started-toolbar.controller';
+import { SampleCardDirective } from './sample-card/sample-card.directive';
 
 /**
  * @name getStarted:GetStartedConfig
@@ -24,9 +25,10 @@ import { GetStartedConfigService } from './get-started-config.service';
 export class GetStartedConfig {
 
   constructor(register: che.IRegisterService) {
-    register.directive('cheTemplate', Template);
-
-    register.controller('TemplateListController', TemplateListController);
+    register.directive('sampleCard', SampleCardDirective);
+    register.controller('GetStartedController', GetStartedController);
+    register.controller('GetStartedToolbarController', GetStartedToolbarController);
+    register.component('getStartedToolbar', GetStartedToolbarComponent);
 
     register.service('getStartedConfigService', GetStartedConfigService);
 
@@ -34,9 +36,9 @@ export class GetStartedConfig {
     register.app.config(['$routeProvider', ($routeProvider: any) => {
       $routeProvider.accessWhen('/getstarted', {
         title: 'Get Started',
-        templateUrl: 'app/get-started/template-list/template-list.html',
-        controller: 'TemplateListController',
-        controllerAs: 'templateListController',
+        templateUrl: 'app/get-started/get-started.html',
+        controller: 'GetStartedController',
+        controllerAs: 'getStartedController',
         resolve: {
           initData: ['getStartedConfigService', (svc: GetStartedConfigService) => {
             return svc.allowGetStartedRoutes();
