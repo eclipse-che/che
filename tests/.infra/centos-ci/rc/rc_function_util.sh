@@ -9,7 +9,7 @@
 function prepareCustomResourceFile() {
   echo "======== Patch custom-resource.yaml ========"
   cd /tmp
-  wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml -O custom-resource.yaml
+  wget https://raw.githubusercontent.com/eclipse/che-operator/7.9.x/deploy/crds/org_v1_che_cr.yaml -O custom-resource.yaml
   setOpenShiftoAuth=$1 # sets the value of 'openShiftoAuth' parameter
   sed -i "s@openShiftoAuth: false@openShiftoAuth: $1@g" /tmp/custom-resource.yaml
   sed -i "s@server:@server:\n    customCheProperties:\n      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'@g" /tmp/custom-resource.yaml

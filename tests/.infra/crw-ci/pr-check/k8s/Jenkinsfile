@@ -90,11 +90,11 @@ pipeline {
                             retry(2) {
                                 // TO-DO use option "--install-path" https://github.com/eclipse/che/pull/14182
                                 sh """
-                                curl -sL https://www.eclipse.org/che/chectl/ > install_chectl.sh
-                                chmod +x install_chectl.sh
-                                sudo PATH=$PATH ./install_chectl.sh --channel=next
-                                sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
-                                sudo chmod +x ${WORKSPACE}/chectl
+                                    wget https://github.com/che-incubator/chectl/releases/download/20200309102927/chectl-linux-x64.tar.gz \
+                                        --no-check-certificate \
+                                        -O ${WORKSPACE}/chectl-linux-x64.tar.gz
+                                        
+                                    tar -xzf ${WORKSPACE}/chectl-linux-x64.tar.gz
                                 """
                             }
                         }
@@ -207,9 +207,7 @@ pipeline {
                     echo "Patch Che custom-resource.yaml"
                     sh """
                         sed -i "s|cheImage: ''|cheImage: '${cheImageRepo}'|" $CUSTOM_RESOURCE_FILE_PATH
-                        sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${
-                        mutableCheImageTag
-                    }'|" $CUSTOM_RESOURCE_FILE_PATH
+                        sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${mutableCheImageTag}'|" $CUSTOM_RESOURCE_FILE_PATH
     
                         sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" $CUSTOM_RESOURCE_FILE_PATH
     
@@ -218,12 +216,13 @@ pipeline {
 
                     echo "Install Che"
                     sh """
-                        ${WORKSPACE}/chectl server:start \\
+                        ${WORKSPACE}/chectl/bin/chectl server:start \\
                         --k8spodreadytimeout=180000 \\
                         --installer=operator \\
                         --listr-renderer=verbose \\
                         --platform=minikube \\
-                        --che-operator-cr-yaml=$CUSTOM_RESOURCE_FILE_PATH
+                        --che-operator-cr-yaml=$CUSTOM_RESOURCE_FILE_PATH \\
+                        --che-operator-image=quay.io/dfestal/che-operator:fix-devfile-registry-public-url
                     """
 
                     cheHost = sh(
@@ -287,7 +286,7 @@ pipeline {
                            -d "grant_type=password" \\
                            -d "client_id=che-public" | jq -r .access_token)
     
-                        ${WORKSPACE}/chectl workspace:start \\
+                        ${WORKSPACE}/chectl/bin/chectl workspace:start \\
                            --devfile=${DEVFILE_PATH} \\
                            --access-token "\$USER_ACCESS_TOKEN"
                     """

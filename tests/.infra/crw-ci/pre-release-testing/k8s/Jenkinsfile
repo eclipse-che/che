@@ -70,7 +70,7 @@ pipeline {
                     String customResourceFilePath = "${WORKSPACE}/custom-resource.yaml"
 
                     sh """
-                        wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
+                        wget https://raw.githubusercontent.com/eclipse/che-operator/$RELEASE_BRANCH/deploy/crds/org_v1_che_cr.yaml \\
                           -O $customResourceFilePath
 
                         # TODO: "selfSignedCert: true" so as TLS support is enebled by default 

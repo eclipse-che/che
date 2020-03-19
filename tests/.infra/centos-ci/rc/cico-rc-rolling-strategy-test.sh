@@ -19,7 +19,7 @@ installAndStartMinishift
 loginToOpenshiftAndSetDevRole
 prepareCustomResourceFile false
 installCheCtl
-deployCheIntoCluster  --chenamespace=eclipse-che --che-operator-cr-yaml=/tmp/custom-resource.yaml
+deployCheIntoCluster  --chenamespace=eclipse-che --che-operator-cr-yaml=/tmp/custom-resource.yaml --che-operator-image=quay.io/dfestal/che-operator:fix-devfile-registry-public-url
 seleniumTestsSetup
 
 bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh \

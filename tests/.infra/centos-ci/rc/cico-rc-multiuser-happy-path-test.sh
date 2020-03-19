@@ -20,7 +20,7 @@ installAndStartMinishift
 loginToOpenshiftAndSetDevRole
 prepareCustomResourceFile false
 installCheCtl
-deployCheIntoCluster  --che-operator-cr-yaml=/tmp/custom-resource.yaml
+deployCheIntoCluster  --che-operator-cr-yaml=/tmp/custom-resource.yaml --che-operator-image=quay.io/dfestal/che-operator:fix-devfile-registry-public-url
 createTestUserAndObtainUserToken
 createTestWorkspaceAndRunTest  --devfile=https://raw.githubusercontent.com/eclipse/che/cico-rc-test/tests/e2e/files/happy-path/happy-path-workspace.yaml
 getOpenshiftLogs

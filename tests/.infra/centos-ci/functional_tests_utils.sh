@@ -254,7 +254,11 @@ function installAndStartMinishift() {
 
 function installCheCtl() {
   echo "======== Start to install chectl ========"
-  bash <(curl -sL https://www.eclipse.org/che/chectl/) --channel=next
+  wget https://github.com/che-incubator/chectl/releases/download/20200309102927/chectl-linux-x64.tar.gz \
+    --no-check-certificate \
+    -O chectl-linux-x64.tar.gz
+    
+  tar -xzf chectl-linux-x64.tar.gz
   echo "======== chectl has been installed successfully ========"
 }
 
@@ -265,7 +269,7 @@ function getOpenshiftLogs() {
 
 function deployCheIntoCluster() {
   echo "======== Start to install CHE ========"
-  if chectl server:start -a operator -p openshift --k8spodreadytimeout=360000 $1 $2; then
+  if chectl/bin/chectl server:start -a operator -p openshift --k8spodreadytimeout=360000 $1 $2; then
     echo "Started succesfully"
     oc get checluster -o yaml
   else
@@ -313,9 +317,9 @@ createTestWorkspaceAndRunTest() {
   ### Create workspace
   DEV_FILE_URL=$1
   if [[ ${DEV_FILE_URL} = "" ]]; then # by default it is used 'happy-path-devfile' yaml from CHE 'master' branch
-    chectl workspace:start --access-token "$USER_ACCESS_TOKEN" --devfile=https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
+    chectl/bin/chectl workspace:start --access-token "$USER_ACCESS_TOKEN" --devfile=https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
   else
-    chectl workspace:start --access-token "$USER_ACCESS_TOKEN" $1 # it can be directly indicated other URL to 'devfile' yaml
+    chectl/bin/chectl workspace:start --access-token "$USER_ACCESS_TOKEN" $1 # it can be directly indicated other URL to 'devfile' yaml
   fi
 
   ### Create directory for report
