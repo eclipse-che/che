@@ -63,6 +63,7 @@ export class CheBranding {
     return {
       title: this.getProductName(),
       name: this.getName(),
+      productVersion: this.getProductVersion(),
       logoURL: this.getProductLogo(),
       logoText: this.getProductLogoText(),
       favicon: this.getProductFavicon(),
@@ -92,6 +93,13 @@ export class CheBranding {
    */
   getProductName(): string {
     return this.branding.title;
+  }
+
+  /**
+   * Gets product name.
+   */
+  getProductVersion(): string | undefined {
+    return this.branding.productVersion;
   }
 
   /**

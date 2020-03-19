@@ -59,7 +59,7 @@
       <div id="main-content" role="main" ng-view layout="column" flex ng-show="waitingLoaded && !showIDE"></div>
       <ide-iframe id="ide-iframe-window" ng-show="showIDE && ideIframeLink" flex style="height: 100%"></ide-iframe>
       <che-footer che-logo="{{branding.logoURL}}"
-                  che-version="{{productVersion}}"
+                  che-version="{{branding.productVersion ? branding.productVersion : productVersion}}"
                   che-product-name="{{branding.productName}}"
                   ng-show="waitingLoaded && !showIDE">
         {{branding.footer.content}}

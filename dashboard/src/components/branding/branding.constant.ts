@@ -14,6 +14,7 @@
 export type IBranding = {
   title: string,
   name: string,
+  productVersion?: string;
   logoFile: string,
   logoTextFile: string,
   favicon: string,
