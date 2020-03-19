@@ -165,6 +165,14 @@ export class NavbarRecentWorkspacesController {
           this.runRecentWorkspace(workspaceId);
         }
       },
+      {
+        name: 'Run in debug mode',
+        scope: 'STOPPED',
+        icon: 'fa fa-play',
+        _onclick: (workspaceId: string) => {
+          this.runRecentWorkspace(workspaceId, true);
+        }
+      },
       // not supported
       {
         name: 'Not supported',
@@ -359,9 +367,10 @@ export class NavbarRecentWorkspacesController {
 
   /**
    * Starts specified workspace
-   * @param workspaceId {String} workspace id
+   * @param workspaceId workspace id
+   * @param isDebugMode debug mode
    */
-  runRecentWorkspace(workspaceId: string): void {
+  runRecentWorkspace(workspaceId: string, isDebugMode?: boolean): void {
     if (this.checkUnsavedChanges(workspaceId)) {
       this.workspaceDetailsService.notifyUnsavedChangesDialog();
       return;
@@ -371,7 +380,7 @@ export class NavbarRecentWorkspacesController {
 
     this.updateRecentWorkspace(workspaceId);
 
-    this.cheWorkspace.startWorkspace(workspace.id).catch((error: any) => {
+    this.cheWorkspace.startWorkspace(workspace.id, isDebugMode).catch((error: any) => {
       this.$log.error(error);
       this.cheNotification.showError('Run workspace error.', error);
     });

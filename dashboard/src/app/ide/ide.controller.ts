@@ -35,6 +35,8 @@ class IdeCtrl {
   selectedWorkspaceExists: boolean = true;
   selectedWorkspaceName: string = null;
 
+  isDebugMode: boolean;
+
   /**
    * Default constructor that is using resource
    */
@@ -51,6 +53,8 @@ class IdeCtrl {
     this.$rootScope.wantTokeepLoader = true;
 
     this.selectedWorkspaceExists = true;
+
+    this.isDebugMode = $location.search().debug;
 
     // search the selected workspace
     let namespace = this.$routeParams.namespace;
@@ -158,7 +162,7 @@ class IdeCtrl {
       return;
     }
 
-    this.ideSvc.openIde(this.selectedWorkspace.id);
+    this.ideSvc.openIde(this.selectedWorkspace.id, this.isDebugMode);
   }
 }
 
