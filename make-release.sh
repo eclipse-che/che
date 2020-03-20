@@ -51,7 +51,6 @@ while [[ "$#" -gt 0 ]]; do
     '-r'|'--repo') REPO="$2"; shift 1;;
     '-v'|'--version') VERSION="$2"; shift 1;;
     '-p'|'--prerelease-testing') PRERELEASE_TESTING=1; TRIGGER_RELEASE=0; shift 0;;
-    ''
   esac
   shift 1
 done
@@ -100,7 +99,7 @@ if [[ "${BASEBRANCH}" != "${BRANCH}" ]]; then
   git commit -a -s -m "Update image tags to ${VERSION} version"
 fi
 
-if [[ $PRERELEASE_TESTING]]; then
+if [[ $PRERELEASE_TESTING -eq 1 ]]; then
   # create pre-release branch and update image tags
   git checkout release-candidate
   cd .ci 
@@ -109,6 +108,7 @@ if [[ $PRERELEASE_TESTING]]; then
   git commit -a -s -m "Update image tags to ${VERSION} version"
   git push origin release-candidate -f
 fi
+
 if [[ $TRIGGER_RELEASE -eq 1 ]]; then
   # push new branch to release branch to trigger CI build
   git fetch origin "release-candidate:release-candidate"
