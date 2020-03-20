@@ -23,9 +23,11 @@ import static org.testng.Assert.assertTrue;
 import com.google.common.collect.ImmutableList;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Secret;
 import java.util.ArrayList;
@@ -148,5 +150,58 @@ public class VcsSshKeySecretProvisionerTest {
 
     assertTrue(sshConfig.contains("host github.com"));
     assertTrue(sshConfig.contains("IdentityFile /etc/ssh/private/github.com"));
+  }
+
+  @Test
+  public void shouldNotProvisionVolumeButShouldMountInInjectablePods() throws Exception {
+    // given
+    String keyName1 = UUID.randomUUID().toString();
+    String keyName2 = "default-" + UUID.randomUUID().toString();
+    String keyName3 = "github.com";
+    when(sshManager.getPairs(someUser, "vcs"))
+        .thenReturn(
+            ImmutableList.of(
+                new SshPairImpl(someUser, "vcs", keyName1, "public", "private"),
+                new SshPairImpl(someUser, "vcs", keyName2, "public", "private"),
+                new SshPairImpl(someUser, "vcs", keyName3, "public", "private")));
+
+    Pod pod =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName("wkspc")
+            .and()
+            .withNewSpec()
+            .withContainers(new ContainerBuilder().withImage("image").build())
+            .and()
+            .build();
+
+    // we want to replace everything in the env that the setup() put there, so let's just re-init.
+    k8sEnv = KubernetesEnvironment.builder().build();
+    k8sEnv.addPod(pod);
+
+    Pod injectedPod =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName("injected")
+            .and()
+            .withNewSpec()
+            .withContainers(new ContainerBuilder().withImage("image").build())
+            .and()
+            .build();
+
+    k8sEnv.addInjectablePod("r", "i", injectedPod);
+
+    // when
+    vcsSshKeysProvisioner.provision(k8sEnv, runtimeIdentity);
+
+    // then
+    assertEquals(pod.getSpec().getVolumes().size(), 2);
+    assertEquals(injectedPod.getSpec().getVolumes().size(), 0);
+
+    Container podContainer = pod.getSpec().getContainers().get(0);
+    Container injectedPodContainer = injectedPod.getSpec().getContainers().get(0);
+
+    assertEquals(podContainer.getVolumeMounts().size(), 2);
+    assertEquals(injectedPodContainer.getVolumeMounts().size(), 2);
   }
 }

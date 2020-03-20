@@ -127,7 +127,11 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
 
   @Traced
   @Override
-  public void prepare(KubernetesEnvironment k8sEnv, RuntimeIdentity identity, long timeoutMillis)
+  public void prepare(
+      KubernetesEnvironment k8sEnv,
+      RuntimeIdentity identity,
+      long timeoutMillis,
+      Map<String, String> startOptions)
       throws InfrastructureException {
     String workspaceId = identity.getWorkspaceId();
 

@@ -33,7 +33,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNames
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSshKeysProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.ContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
@@ -64,7 +64,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final ServersConverter<KubernetesEnvironment> serversConverter;
     private final EnvVarsConverter envVarsConverter;
     private final RestartPolicyRewriter restartPolicyRewriter;
-    private final RamLimitRequestProvisioner ramLimitProvisioner;
+    private final ContainerResourceProvisioner resourceLimitRequestProvisioner;
     private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
     private final SecurityContextProvisioner securityContextProvisioner;
     private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
@@ -86,7 +86,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         EnvVarsConverter envVarsConverter,
         RestartPolicyRewriter restartPolicyRewriter,
         WorkspaceVolumesStrategy volumesStrategy,
-        RamLimitRequestProvisioner ramLimitProvisioner,
+        ContainerResourceProvisioner resourceLimitRequestProvisioner,
         LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
         SecurityContextProvisioner securityContextProvisioner,
         PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
@@ -105,7 +105,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.serversConverter = serversConverter;
       this.envVarsConverter = envVarsConverter;
       this.restartPolicyRewriter = restartPolicyRewriter;
-      this.ramLimitProvisioner = ramLimitProvisioner;
+      this.resourceLimitRequestProvisioner = resourceLimitRequestProvisioner;
       this.logsVolumeMachineProvisioner = logsVolumeMachineProvisioner;
       this.securityContextProvisioner = securityContextProvisioner;
       this.podTerminationGracePeriodProvisioner = podTerminationGracePeriodProvisioner;
@@ -146,7 +146,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       LOG.debug("Provisioning environment items for workspace '{}'", workspaceId);
       restartPolicyRewriter.provision(k8sEnv, identity);
       uniqueNamesProvisioner.provision(k8sEnv, identity);
-      ramLimitProvisioner.provision(k8sEnv, identity);
+      resourceLimitRequestProvisioner.provision(k8sEnv, identity);
       externalServerIngressTlsProvisioner.provision(k8sEnv, identity);
       securityContextProvisioner.provision(k8sEnv, identity);
       podTerminationGracePeriodProvisioner.provision(k8sEnv, identity);

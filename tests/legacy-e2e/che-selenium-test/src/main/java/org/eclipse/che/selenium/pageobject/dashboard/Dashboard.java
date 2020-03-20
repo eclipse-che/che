@@ -28,6 +28,7 @@ import com.google.inject.name.Named;
 import java.util.List;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.client.keycloak.TestKeycloakSettingsServiceClient;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
@@ -56,6 +57,7 @@ public class Dashboard {
   private final LoginPage loginPage;
   private final TestWebElementRenderChecker testWebElementRenderChecker;
   private final TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient;
+  private final TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final WebDriverWaitFactory webDriverWaitFactory;
   private final boolean isMultiuser;
@@ -71,6 +73,7 @@ public class Dashboard {
       TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient,
       SeleniumWebDriverHelper seleniumWebDriverHelper,
       WebDriverWaitFactory webDriverWaitFactory,
+      TestUserPreferencesServiceClient testUserPreferencesServiceClient,
       @Named("che.multiuser") boolean isMultiuser) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.defaultUser = defaultUser;
@@ -82,6 +85,7 @@ public class Dashboard {
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.webDriverWaitFactory = webDriverWaitFactory;
     this.isMultiuser = isMultiuser;
+    this.testUserPreferencesServiceClient = testUserPreferencesServiceClient;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 

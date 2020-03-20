@@ -107,7 +107,6 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
-
                 throw err;
             }
         }

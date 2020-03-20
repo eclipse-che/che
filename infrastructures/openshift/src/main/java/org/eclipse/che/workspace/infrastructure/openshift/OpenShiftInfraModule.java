@@ -63,10 +63,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.Serv
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.DefaultSecureServersFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.CookiePathStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.PassThroughProxySecureServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxyProvisionerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxySecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
@@ -154,9 +158,20 @@ public class OpenShiftInfraModule extends AbstractModule {
                 new TypeLiteral<String>() {},
                 new TypeLiteral<SecureServerExposerFactory<OpenShiftEnvironment>>() {});
 
+    install(new FactoryModuleBuilder().build(JwtProxyConfigBuilderFactory.class));
+    install(new FactoryModuleBuilder().build(PassThroughProxyProvisionerFactory.class));
+    install(
+        new FactoryModuleBuilder()
+            .implement(
+                new TypeLiteral<SecureServerExposer<OpenShiftEnvironment>>() {},
+                new TypeLiteral<PassThroughProxySecureServerExposer<OpenShiftEnvironment>>() {})
+            .build(
+                new TypeLiteral<
+                    PassThroughProxySecureServerExposerFactory<OpenShiftEnvironment>>() {}));
+
     secureServerExposerFactories
         .addBinding("default")
-        .to(new TypeLiteral<DefaultSecureServersFactory<OpenShiftEnvironment>>() {});
+        .to(new TypeLiteral<PassThroughProxySecureServerExposerFactory<OpenShiftEnvironment>>() {});
 
     bind(BrokerService.class);
 

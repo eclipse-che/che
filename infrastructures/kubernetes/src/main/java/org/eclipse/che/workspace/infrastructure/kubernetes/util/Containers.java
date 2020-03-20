@@ -116,4 +116,96 @@ public class Containers {
     container.setResources(
         resourceBuilder.addToRequests("memory", new Quantity(limitInK8sNotion)).build());
   }
+
+  /**
+   * Returns the CPU limit in cores, if it is present in given container otherwise 0 will be
+   * returned.
+   */
+  public static float getCpuLimit(Container container) {
+    final ResourceRequirements resources = container.getResources();
+    final Quantity quantity;
+    if (resources != null
+        && resources.getLimits() != null
+        && (quantity = resources.getLimits().get("cpu")) != null
+        && quantity.getAmount() != null) {
+      return KubernetesSize.toCores(quantity.getAmount());
+    }
+    return 0;
+  }
+
+  /**
+   * Sets given CPU limit in cores to specified container. Note if the container already contains a
+   * CPU limit, it will be overridden, other resources won't be affected.
+   */
+  public static void addCpuLimit(Container container, float cpuLimit) {
+    final ResourceRequirementsBuilder resourceBuilder;
+    if (container.getResources() != null) {
+      resourceBuilder = new ResourceRequirementsBuilder(container.getResources());
+    } else {
+      resourceBuilder = new ResourceRequirementsBuilder();
+    }
+    container.setResources(
+        resourceBuilder.addToLimits("cpu", new Quantity(Float.toString(cpuLimit))).build());
+  }
+
+  /**
+   * Sets given CPU limit in kubernetes notion to specified container. Note if the container already
+   * contains a CPU limit, it will be overridden, other resources won't be affected.
+   */
+  public static void addCpuLimit(Container container, String limitInK8sNotion) {
+    final ResourceRequirementsBuilder resourceBuilder;
+    if (container.getResources() != null) {
+      resourceBuilder = new ResourceRequirementsBuilder(container.getResources());
+    } else {
+      resourceBuilder = new ResourceRequirementsBuilder();
+    }
+    container.setResources(
+        resourceBuilder.addToLimits("cpu", new Quantity(limitInK8sNotion)).build());
+  }
+
+  /**
+   * Returns the CPU request in bytes, if it is present in given container otherwise 0 will be
+   * returned.
+   */
+  public static float getCpuRequest(Container container) {
+    final ResourceRequirements resources = container.getResources();
+    final Quantity quantity;
+    if (resources != null
+        && resources.getRequests() != null
+        && (quantity = resources.getRequests().get("cpu")) != null
+        && quantity.getAmount() != null) {
+      return KubernetesSize.toCores(quantity.getAmount());
+    }
+    return 0;
+  }
+
+  /**
+   * Sets given CPU request in bytes to specified container. Note if the container already contains
+   * a CPU limit, it will be overridden, other resources won't be affected.
+   */
+  public static void addCpuRequest(Container container, float cpuRequest) {
+    final ResourceRequirementsBuilder resourceBuilder;
+    if (container.getResources() != null) {
+      resourceBuilder = new ResourceRequirementsBuilder(container.getResources());
+    } else {
+      resourceBuilder = new ResourceRequirementsBuilder();
+    }
+    container.setResources(
+        resourceBuilder.addToRequests("cpu", new Quantity(Float.toString(cpuRequest))).build());
+  }
+
+  /**
+   * Sets given CPU request in kubernetes notion to specified container. Note if the container
+   * already contains a CPU request, it will be overridden, other resources won't be affected.
+   */
+  public static void addCpuRequest(Container container, String limitInK8sNotion) {
+    final ResourceRequirementsBuilder resourceBuilder;
+    if (container.getResources() != null) {
+      resourceBuilder = new ResourceRequirementsBuilder(container.getResources());
+    } else {
+      resourceBuilder = new ResourceRequirementsBuilder();
+    }
+    container.setResources(
+        resourceBuilder.addToRequests("cpu", new Quantity(limitInK8sNotion)).build());
+  }
 }

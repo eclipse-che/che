@@ -47,6 +47,7 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
 
 @Singleton
 public class GitConfigProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
@@ -226,18 +227,24 @@ public class GitConfigProvisioner implements ConfigurationProvisioner<Kubernetes
             .build();
 
     k8sEnv.getConfigMaps().put(configMap.getMetadata().getName(), configMap);
-    k8sEnv.getPodsData().values().forEach(p -> mountConfigFile(p.getSpec(), gitConfigMapName));
+    k8sEnv
+        .getPodsData()
+        .values()
+        .forEach(
+            p -> mountConfigFile(p.getSpec(), gitConfigMapName, p.getRole() != PodRole.INJECTABLE));
   }
 
-  private void mountConfigFile(PodSpec podSpec, String gitConfigMapName) {
-    podSpec
-        .getVolumes()
-        .add(
-            new VolumeBuilder()
-                .withName(CONFIG_MAP_VOLUME_NAME)
-                .withConfigMap(
-                    new ConfigMapVolumeSourceBuilder().withName(gitConfigMapName).build())
-                .build());
+  private void mountConfigFile(PodSpec podSpec, String gitConfigMapName, boolean addVolume) {
+    if (addVolume) {
+      podSpec
+          .getVolumes()
+          .add(
+              new VolumeBuilder()
+                  .withName(CONFIG_MAP_VOLUME_NAME)
+                  .withConfigMap(
+                      new ConfigMapVolumeSourceBuilder().withName(gitConfigMapName).build())
+                  .build());
+    }
 
     List<Container> containers = podSpec.getContainers();
     containers.forEach(

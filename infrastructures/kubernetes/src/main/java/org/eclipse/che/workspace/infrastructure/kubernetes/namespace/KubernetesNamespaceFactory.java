@@ -48,6 +48,7 @@ import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.impls.KubernetesNamespaceMetaImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,6 +84,7 @@ public class KubernetesNamespaceFactory {
   private final String clusterRoleName;
   private final KubernetesClientFactory clientFactory;
   private final UserManager userManager;
+  protected final KubernetesSharedPool sharedPool;
 
   @Inject
   public KubernetesNamespaceFactory(
@@ -93,7 +95,8 @@ public class KubernetesNamespaceFactory {
       @Named("che.infra.kubernetes.namespace.allow_user_defined")
           boolean allowUserDefinedNamespaces,
       KubernetesClientFactory clientFactory,
-      UserManager userManager)
+      UserManager userManager,
+      KubernetesSharedPool sharedPool)
       throws ConfigurationException {
     this.userManager = userManager;
     this.legacyNamespaceName = legacyNamespaceName;
@@ -102,6 +105,7 @@ public class KubernetesNamespaceFactory {
     this.clientFactory = clientFactory;
     this.defaultNamespaceName = defaultNamespaceName;
     this.allowUserDefinedNamespaces = allowUserDefinedNamespaces;
+    this.sharedPool = sharedPool;
 
     if (isNullOrEmpty(defaultNamespaceName)) {
       throw new ConfigurationException("che.infra.kubernetes.namespace.default must be configured");
@@ -127,7 +131,7 @@ public class KubernetesNamespaceFactory {
 
   @VisibleForTesting
   KubernetesNamespace doCreateNamespaceAccess(String workspaceId, String name) {
-    return new KubernetesNamespace(clientFactory, name, workspaceId);
+    return new KubernetesNamespace(clientFactory, sharedPool.getExecutor(), name, workspaceId);
   }
 
   /**

@@ -13,11 +13,12 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
+import { TestConstants } from '../../TestConstants';
 
 @injectable()
 export class OcpLoginPage {
 
-    private static readonly LOGIN_PAGE_OPENSHIFT: string = 'div[class=container]';
+    private static readonly LOGIN_PAGE_OPENSHIFT_XPATH: string = '//*[contains(text(), \'Welcome\')]';
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
@@ -28,24 +29,17 @@ export class OcpLoginPage {
         await this.driverHelper.navigateToUrl(url);
     }
 
-    async waitOpenShiftLoginPage() {
-        Logger.debug('OcpLoginPage.waitOpenShiftLoginPage');
+    async waitOpenShiftLoginWelcomePage() {
+        Logger.debug('OcpLoginPage.waitOpenShiftLoginWelcomePage');
 
-        await this.driverHelper.waitVisibility(By.css(OcpLoginPage.LOGIN_PAGE_OPENSHIFT));
+        await this.driverHelper.waitVisibility(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH));
     }
 
-    async clickOnLoginWitnKubeAdmin() {
-        Logger.debug('OcpLoginPage.clickOnLoginWitnKubeAdmin');
+    async clickOnLoginProviderTitle() {
+        Logger.debug('OcpLoginPage.clickOnLoginProviderTitle');
 
-        const loginWithKubeAdminLocator: By = By.css('a[title=\'Log in with kube:admin\']');
-        await this.driverHelper.waitAndClick(loginWithKubeAdminLocator);
-    }
-
-    async clickOnLoginWitnHtpasswd() {
-        Logger.debug('OcpLoginPage.clickOnLoginWitnHtpasswd');
-
-        const loginWithHtpaswdLocator: By = By.css('a[title=\'Log in with htpasswd\']');
-        await this.driverHelper.waitAndClick(loginWithHtpaswdLocator);
+        const loginProviderTitleLocator: By = By.css(`a[title=\'Log in with ${TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
+        await this.driverHelper.waitAndClick(loginProviderTitleLocator);
     }
 
     async waitAuthorizeOpenShiftIdentityProviderPage() {
@@ -81,10 +75,10 @@ export class OcpLoginPage {
         await this.driverHelper.waitAndClick(loginButtonlocator);
     }
 
-    async waitDisappearanceOpenShiftLoginPage() {
-        Logger.debug('OcpLoginPage.waitDisappearanceOpenShiftLoginPage');
+    async waitDisappearanceOpenShiftLoginWelcomePage() {
+        Logger.debug('OcpLoginPage.waitDisappearanceOpenShiftLoginWelcomePage');
 
-        await this.driverHelper.waitDisappearance(By.css(OcpLoginPage.LOGIN_PAGE_OPENSHIFT));
+        await this.driverHelper.waitDisappearance(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH));
     }
 
 }

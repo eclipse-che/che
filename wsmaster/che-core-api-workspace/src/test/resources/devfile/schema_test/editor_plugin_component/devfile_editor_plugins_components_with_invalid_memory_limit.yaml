@@ -14,6 +14,9 @@ apiVersion: 1.0.0
 metadata:
   name: terminal-sample
 components:
+  - type: cheEditor
+    id: publisher/terminal-sample/0.0.1
+    memoryLimit: 0
   - type: chePlugin
     id: publisher/terminal-sample/0.0.1
     memoryLimit: 0

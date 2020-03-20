@@ -67,6 +67,9 @@ public class K8sContainerResolver {
             .build();
 
     provisionMemoryLimit(container, cheContainer);
+    provisionMemoryRequest(container, cheContainer);
+    provisionCpuLimit(container, cheContainer);
+    provisionCpuRequest(container, cheContainer);
 
     return container;
   }
@@ -86,7 +89,57 @@ public class K8sContainerResolver {
               memoryLimit, e.getMessage()));
     }
     Containers.addRamLimit(container, memoryLimit);
-    Containers.addRamRequest(container, memoryLimit);
+  }
+
+  private void provisionMemoryRequest(Container container, CheContainer cheContainer)
+      throws InfrastructureException {
+    String memoryRequest = cheContainer.getMemoryRequest();
+    if (isNullOrEmpty(memoryRequest)) {
+      return;
+    }
+    try {
+      KubernetesSize.toBytes(memoryRequest);
+    } catch (IllegalArgumentException e) {
+      throw new InfrastructureException(
+          format(
+              "Sidecar memory request field contains illegal value '%s'. Error: '%s'",
+              memoryRequest, e.getMessage()));
+    }
+    Containers.addRamRequest(container, memoryRequest);
+  }
+
+  private void provisionCpuLimit(Container container, CheContainer cheContainer)
+      throws InfrastructureException {
+    String cpuLimit = cheContainer.getCpuLimit();
+    if (isNullOrEmpty(cpuLimit)) {
+      return;
+    }
+    try {
+      KubernetesSize.toCores(cpuLimit);
+    } catch (IllegalArgumentException e) {
+      throw new InfrastructureException(
+          format(
+              "Sidecar CPU limit field contains illegal value '%s'. Error: '%s'",
+              cpuLimit, e.getMessage()));
+    }
+    Containers.addCpuLimit(container, cpuLimit);
+  }
+
+  private void provisionCpuRequest(Container container, CheContainer cheContainer)
+      throws InfrastructureException {
+    String cpuRequest = cheContainer.getCpuRequest();
+    if (isNullOrEmpty(cpuRequest)) {
+      return;
+    }
+    try {
+      KubernetesSize.toCores(cpuRequest);
+    } catch (IllegalArgumentException e) {
+      throw new InfrastructureException(
+          format(
+              "Sidecar CPU request field contains illegal value '%s'. Error: '%s'",
+              cpuRequest, e.getMessage()));
+    }
+    Containers.addCpuRequest(container, cpuRequest);
   }
 
   private List<ContainerPort> getContainerPorts() {

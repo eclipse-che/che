@@ -22,6 +22,7 @@ export class Dashboard {
     private static readonly WORKSPACES_BUTTON_CSS: string = '#workspaces-item';
     private static readonly STACKS_BUTTON_CSS: string = '#stacks-item';
     private static readonly FACTORIES_BUTTON_CSS: string = '#factories-item';
+    private static readonly GET_STARTED_BUTTON_XPATH: string = '//md-list-item//span[text()=\'Get Started\']';
     private static readonly LOADER_PAGE_CSS: string = '.main-page-loader';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
@@ -68,6 +69,7 @@ export class Dashboard {
         await this.driverHelper.waitVisibility(By.css(Dashboard.WORKSPACES_BUTTON_CSS), timeout);
         await this.driverHelper.waitVisibility(By.css(Dashboard.STACKS_BUTTON_CSS), timeout);
         await this.driverHelper.waitVisibility(By.css(Dashboard.FACTORIES_BUTTON_CSS), timeout);
+        await this.driverHelper.waitVisibility(By.xpath(Dashboard.GET_STARTED_BUTTON_XPATH), timeout);
     }
 
     async clickDashboardButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -86,6 +88,12 @@ export class Dashboard {
         Logger.debug('Dashboard.clickStacksdButton');
 
         await this.driverHelper.waitAndClick(By.css(Dashboard.STACKS_BUTTON_CSS), timeout);
+    }
+
+    async clickGetStartedButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Dashboard.clickGetStartedButton');
+
+        await this.driverHelper.waitAndClick(By.xpath(Dashboard.GET_STARTED_BUTTON_XPATH), timeout);
     }
 
     async clickFactoriesButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {

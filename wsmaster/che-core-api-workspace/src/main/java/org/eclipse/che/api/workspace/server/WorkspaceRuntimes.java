@@ -483,7 +483,7 @@ public class WorkspaceRuntimes {
           workspace.getId(),
           sessionUserNameOr("undefined"));
 
-      publishWorkspaceStatusEvent(workspaceId, STARTING, STOPPED, null);
+      publishWorkspaceStatusEvent(workspaceId, STARTING, STOPPED, null, options);
       return CompletableFuture.runAsync(
           ThreadLocalPropagateContext.wrap(new StartRuntimeTask(workspace, options, runtime)),
           sharedPool.getExecutor());
@@ -731,7 +731,26 @@ public class WorkspaceRuntimes {
           identity.getWorkspaceId(),
           runtimeStatus);
       return runtime;
-    } catch (InfrastructureException | ValidationException | NotFoundException x) {
+    } catch (NotFoundException x) {
+      LOG.warn(
+          "Not able to create internal environment for  '{}'. Reason: '{}'",
+          identity.getWorkspaceId(),
+          x.getMessage());
+      try (Unlocker ignored = lockService.writeLock(identity.getWorkspaceId())) {
+        runtimes.remove(identity.getWorkspaceId());
+        statuses.remove(identity.getWorkspaceId());
+      }
+      publishWorkspaceStatusEvent(
+          identity.getWorkspaceId(),
+          STOPPED,
+          STOPPING,
+          "Workspace is stopped. Reason: " + x.getMessage());
+      throw new ServerException(
+          format(
+              "Couldn't recover runtime '%s:%s'. Error: %s",
+              identity.getWorkspaceId(), identity.getEnvName(), x.getMessage()));
+
+    } catch (InfrastructureException | ValidationException x) {
       throw new ServerException(
           format(
               "Couldn't recover runtime '%s:%s'. Error: %s",
@@ -772,12 +791,22 @@ public class WorkspaceRuntimes {
 
   private void publishWorkspaceStatusEvent(
       String workspaceId, WorkspaceStatus status, WorkspaceStatus previous, String errorMsg) {
+    publishWorkspaceStatusEvent(workspaceId, status, previous, errorMsg, emptyMap());
+  }
+
+  private void publishWorkspaceStatusEvent(
+      String workspaceId,
+      WorkspaceStatus status,
+      WorkspaceStatus previous,
+      String errorMsg,
+      Map<String, String> options) {
     eventService.publish(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withWorkspaceId(workspaceId)
             .withPrevStatus(previous)
             .withError(errorMsg)
-            .withStatus(status));
+            .withStatus(status)
+            .withOptions(options));
   }
 
   private void setRuntimesId(String workspaceId) {

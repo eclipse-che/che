@@ -39,6 +39,18 @@ public interface MachineConfig {
   String MEMORY_REQUEST_ATTRIBUTE = "memoryRequestBytes";
 
   /**
+   * Name of the attribute from {@link #getAttributes()} which if present defines CPU limit of the
+   * machine in cores.
+   */
+  String CPU_LIMIT_ATTRIBUTE = "cpuLimitCores";
+
+  /**
+   * Name of the attribute from {@link #getAttributes()} which if present defines requested CPU
+   * allocation of the machine in cores.
+   */
+  String CPU_REQUEST_ATTRIBUTE = "cpuRequestCores";
+
+  /**
    * Name of the attribute from {@link #getAttributes()} which, if present, defines the entrypoint
    * command to be executed in the machine/container.
    *

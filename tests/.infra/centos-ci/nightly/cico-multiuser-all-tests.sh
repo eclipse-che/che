@@ -16,6 +16,7 @@ function prepareCustomResourceFile() {
   wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml -O custom-resource.yaml
   sed -i "s@server:@server:\n    customCheProperties:\n      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'@g" /tmp/custom-resource.yaml
   sed -i "s/customCheProperties:/customCheProperties:\n      CHE_WORKSPACE_AGENT_DEV_INACTIVE__STOP__TIMEOUT__MS: '300000'/" /tmp/custom-resource.yaml
+  sed -i "s@tlsSupport: true@tlsSupport: false@g" /tmp/custom-resource.yaml
   cat /tmp/custom-resource.yaml
 }
 
@@ -31,7 +32,21 @@ createTestUserAndObtainUserToken
 installDockerCompose
 seleniumTestsSetup
 createIndentityProvider
-bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh --threads=3 --host=${CHE_ROUTE} --port=80 --multiuser --include-tests-under-repair --include-flaky-tests
+
+bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
+  --threads=3 \
+  --host=${CHE_ROUTE} \
+  --port=80 \
+  --multiuser \
+  --fail-script-on-failed-tests \
+  --include-tests-under-repair \
+  --include-flaky-tests \
+  --fail-script-on-failed-tests \
+  || IS_TESTS_FAILED=true
+
+echo "=========================== THIS IS POST TEST ACTIONS =============================="
 saveSeleniumTestResult
 getOpenshiftLogs
 archiveArtifacts "che-nigthly-multiuser-all-test"
+
+if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi
