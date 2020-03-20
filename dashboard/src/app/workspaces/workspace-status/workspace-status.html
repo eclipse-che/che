@@ -1,9 +1,0 @@
-<div class="workspace-status" flex layout="row" layout-align="start center">
-  <span ng-if="isSupported">
-    <workspace-status-indicator che-status="status"></workspace-status-indicator>
-    <span class="workspace-status-text" id="workspace-status">{{status | lowercase}}</span>
-  </span>
-  <span ng-if="isSupported===false">
-    <span class="workspace-status-text">Not supported</span>
-  </span>
-</div>
