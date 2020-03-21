@@ -191,7 +191,7 @@ pushImagesOnQuay() {
         do
             echo y | docker push "${image}:$1"
             if [[ $2 == "pushLatest" ]]; then
-                echo y | docker push "${REGISTRY}/${image}:latest"
+                echo y | docker push "${image}:latest"
             fi
             if [[ ${image} == "${REGISTRY}/${ORGANIZATION}/che-server" ]]; then
                 if [[ $2 == "pushLatest" ]]; then
