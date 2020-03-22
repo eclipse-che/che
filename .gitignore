@@ -65,6 +65,7 @@ Thumbs.db
 */overlays
 *~
 .directory
+assembly/assembly-dashboard-war/overlays/
 
 # Che files #
 #############
