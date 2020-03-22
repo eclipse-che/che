@@ -35,10 +35,6 @@ public final class Constants {
   public static final String WORKSPACE_STOPPED_BY = "stopped_by";
   public static final String WORKSPACE_STOP_REASON = "stop_reason";
 
-  public static final String LINK_REL_GET_ICON = "get icon link";
-  public static final String LINK_REL_UPLOAD_ICON = "upload icon link";
-  public static final String LINK_REL_DELETE_ICON = "delete icon link";
-
   public static final String CHE_WORKSPACE_AUTO_START = "che.workspace.auto_start";
 
   /**
@@ -140,9 +136,6 @@ public final class Constants {
    */
   public static final String WORKSPACE_RUNTIMES_ID_ATTRIBUTE = "org.eclipse.che.runtimes_id";
 
-  public static final String COMMAND_PREVIEW_URL_ATTRIBUTE_NAME = "previewUrl";
-  public static final String COMMAND_GOAL_ATTRIBUTE_NAME = "goal";
-
   public static final String WORKSPACE_STATUS_CHANGED_METHOD = "workspace/statusChanged";
   public static final String MACHINE_STATUS_CHANGED_METHOD = "machine/statusChanged";
   public static final String SERVER_STATUS_CHANGED_METHOD = "server/statusChanged";
@@ -161,13 +154,8 @@ public final class Constants {
   public static final String BOOTSTRAPPER_STATUS_CHANGED_METHOD = "bootstrapper/statusChanged";
 
   public static final String SERVER_WS_AGENT_HTTP_REFERENCE = "wsagent/http";
-  public static final String SERVER_WS_AGENT_WEBSOCKET_REFERENCE = "wsagent/ws";
   public static final String SERVER_TERMINAL_REFERENCE = "terminal";
-  public static final String SERVER_SSH_REFERENCE = "ssh";
   public static final String SERVER_EXEC_AGENT_HTTP_REFERENCE = "exec-agent/http";
-  public static final String SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE = "exec-agent/ws";
-
-  public static final String WS_AGENT_PORT = "4401/tcp";
 
   public static final String SUPPORTED_RECIPE_TYPES = "supportedRecipeTypes";
 
