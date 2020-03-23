@@ -45,6 +45,19 @@ bump_version() {
   git checkout ${CURRENT_BRANCH}
 }
 
+ask() {
+  while true; do
+    echo -e -n " (Y)es or (N)o "
+    read -r yn
+    case $yn in
+      [Yy]* ) return 0;;
+      [Nn]* ) return 1;;
+      * ) echo "Please answer (Y)es or (N)o. ";;
+    esac
+  done
+}
+
+
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     '-t'|'--trigger-release') TRIGGER_RELEASE=1; PRERELEASE_TESTING=0; shift 0;;
@@ -57,13 +70,25 @@ done
 
 usage ()
 {
-  echo "Usage: $0 --repo [GIT REPO TO EDIT] --version [VERSION TO RELEASE] [--trigger-release]"
+  echo "Provide the necessary parameters and make sure to choose either prerelease testing or trigger release option"
+  echo "Usage: $0 --repo [GIT REPO TO EDIT] --version [VERSION TO RELEASE] [--trigger-release] [--prerelease-testing]"
   echo "Example: $0 --repo git@github.com:eclipse/che-subproject --version 7.7.0 --trigger-release"; echo
 }
 
 if [[ ! ${VERSION} ]] || [[ ! ${REPO} ]]; then
   usage
   exit 1
+fi
+
+
+set +e
+  ask "Remove the tag if it already exists?"
+  result=$?
+set -e
+
+if [[ $result == 0 ]]; then
+  git add -A
+  git push origin :${VERSION}
 fi
 
 # derive branch from version
