@@ -81,10 +81,18 @@ public class MachineResolver {
             emptyMap(),
             resolveMachineAttributes(),
             toWorkspaceVolumes(cheContainer));
-
+    applyDevfileVolumes(machineConfig);
     normalizeMemory(container, machineConfig);
     normalizeCpu(container, machineConfig);
     return machineConfig;
+  }
+
+  private void applyDevfileVolumes(InternalMachineConfig machineConfig) {
+    for (org.eclipse.che.api.core.model.workspace.devfile.Volume volume : component.getVolumes()) {
+      machineConfig
+          .getVolumes()
+          .put(volume.getName(), new VolumeImpl().withPath(volume.getContainerPath()));
+    }
   }
 
   private Map<String, String> resolveMachineAttributes() {

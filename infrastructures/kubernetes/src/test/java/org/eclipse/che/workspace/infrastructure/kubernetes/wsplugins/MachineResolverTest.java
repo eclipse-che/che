@@ -277,6 +277,22 @@ public class MachineResolverTest {
         PROJECTS_MOUNT_PATH, config.getVolumes().get(Constants.PROJECTS_VOLUME_NAME).getPath());
   }
 
+  @Test
+  public void shouldAddVolumesFromDevfileComponent() throws InfrastructureException {
+
+    component.setVolumes(
+        asList(
+            new org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl("foo", "/bar"),
+            new org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl(
+                "test", "/foo/test")));
+
+    InternalMachineConfig config = resolver.resolve();
+
+    assertEquals(2, config.getVolumes().size());
+    assertEquals("/bar", config.getVolumes().get("foo").getPath());
+    assertEquals("/foo/test", config.getVolumes().get("test").getPath());
+  }
+
   private static String toBytesString(String k8sMemorySize) {
     return Long.toString(KubernetesSize.toBytes(k8sMemorySize));
   }
