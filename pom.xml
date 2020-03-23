@@ -29,7 +29,6 @@
         <module>wsmaster</module>
         <module>multiuser</module>
         <module>infrastructures</module>
-        <module>dashboard</module>
         <module>assembly</module>
         <module>tests/legacy-e2e</module>
     </modules>
@@ -81,6 +80,12 @@
                 <artifactId>assembly-che-tomcat8</artifactId>
                 <version>${che.version}</version>
                 <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>assembly-dashboard-war</artifactId>
+                <version>${che.version}</version>
+                <type>war</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>

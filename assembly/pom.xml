@@ -28,6 +28,7 @@
         <module>assembly-wsmaster-war</module>
         <module>assembly-root-war</module>
         <module>assembly-workspace-loader-war</module>
+        <module>assembly-dashboard-war</module>
         <module>assembly-che-tomcat8</module>
         <module>assembly-main</module>
     </modules>
