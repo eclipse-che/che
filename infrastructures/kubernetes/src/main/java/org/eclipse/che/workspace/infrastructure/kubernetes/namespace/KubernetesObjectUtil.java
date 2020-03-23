@@ -70,12 +70,18 @@ public class KubernetesObjectUtil {
     putLabel(target.getMetadata(), key, value);
   }
 
-  /** Adds label to target Kubernetes object. */
+  /** Adds labels to target Kubernetes object. */
   public static void putLabels(ObjectMeta metadata, Map<String, String> labels) {
     if (labels == null || labels.isEmpty()) {
       return;
     }
-    labels.forEach((k, v) -> putLabel(metadata, k, v));
+
+    Map<String, String> metaLabels = metadata.getLabels();
+    if (metaLabels == null) {
+      metadata.setLabels(new HashMap<>(labels));
+    } else {
+      metaLabels.putAll(labels);
+    }
   }
 
   /** Adds label to target Kubernetes object. */
@@ -114,7 +120,13 @@ public class KubernetesObjectUtil {
     if (annotations == null || annotations.isEmpty()) {
       return;
     }
-    annotations.forEach((k, v) -> putAnnotation(metadata, k, v));
+
+    Map<String, String> metaAnnotations = metadata.getAnnotations();
+    if (metaAnnotations == null) {
+      metadata.setAnnotations(new HashMap<>(annotations));
+    } else {
+      metaAnnotations.putAll(annotations);
+    }
   }
 
   /** Adds selector into target Kubernetes service. */
