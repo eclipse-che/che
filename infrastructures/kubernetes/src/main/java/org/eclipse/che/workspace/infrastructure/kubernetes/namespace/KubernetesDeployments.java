@@ -22,7 +22,6 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.setSelector;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import io.fabric8.kubernetes.api.model.ContainerStateTerminated;
 import io.fabric8.kubernetes.api.model.ContainerStatus;
@@ -527,8 +526,21 @@ public class KubernetesDeployments {
               if (POD_OBJECT_KIND.equals(involvedObject.getKind())
                   || REPLICASET_OBJECT_KIND.equals(involvedObject.getKind())
                   || DEPLOYMENT_OBJECT_KIND.equals(involvedObject.getKind())) {
-
                 String podName = involvedObject.getName();
+                String lastTimestamp = event.getLastTimestamp();
+                if (lastTimestamp == null) {
+                  String firstTimestamp = event.getFirstTimestamp();
+                  if (firstTimestamp != null) {
+                    // Done in the same way like it made in
+                    // https://github.com/kubernetes/kubernetes/pull/86557
+                    lastTimestamp = firstTimestamp;
+                  } else {
+                    LOG.warn(
+                        "lastTimestamp and firstTimestamp are undefined. Event: {}.  Fallback to the current time.",
+                        event);
+                    lastTimestamp = PodEvents.convertDateToEventTimestamp(new Date());
+                  }
+                }
 
                 PodEvent podEvent =
                     new PodEvent(
@@ -537,8 +549,7 @@ public class KubernetesDeployments {
                         event.getReason(),
                         event.getMessage(),
                         event.getMetadata().getCreationTimestamp(),
-                        MoreObjects.firstNonNull(
-                            event.getLastTimestamp(), event.getFirstTimestamp()));
+                        lastTimestamp);
 
                 try {
                   if (happenedAfterWatcherInitialization(podEvent)) {

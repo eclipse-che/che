@@ -30,6 +30,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
+            <artifactId>assembly-dashboard-war</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-root-war</artifactId>
             <type>war</type>
         </dependency>
@@ -46,11 +51,6 @@
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-wsmaster-war</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.dashboard</groupId>
-            <artifactId>che-dashboard-war</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
