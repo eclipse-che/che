@@ -65,6 +65,7 @@ Thumbs.db
 */overlays
 *~
 .directory
+assembly/**/overlays/
 
 # Che files #
 #############
