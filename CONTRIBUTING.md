@@ -151,8 +151,6 @@ $ chectl workspace:start --devfile=https://raw.githubusercontent.com/eclipse/che
 
 or as a factory `https://<CheInstance>/f?url=https://raw.githubusercontent.com/eclipse/che-workspace-loader/master/devfile.yaml
 
-At workspace start, Che will clone Che source code (including the workspace-loader)
-
 #### Step 2: Install workspace-loader dependencies
 
 Use the command `[workspace loader] install dependencies`
