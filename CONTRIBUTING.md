@@ -88,8 +88,6 @@ The devfile could be started using `chectl`:
 $ chectl workspace:start -f https://raw.githubusercontent.com/eclipse/che-dashboard/master/devfile.yaml
 ```
 
-At workspace start, Che will clone Che source code (including the dashboard)
-
 #### Step 2: Build
 
 In this section we are going to build the dashboard project.
@@ -129,7 +127,7 @@ $ node_modules/.bin/gulp serve --server=<che_api_url>
 
 ### Workspace Loader
 
-Workspace loader source code is located in [https://github.com/eclipse/che-workspace-loader](https://github.com/eclipse/che-workspace-loader) folder.
+Workspace loader source code is located in [https://github.com/eclipse/che-workspace-loader](https://github.com/eclipse/che-workspace-loader) repository.
 Here is the developer workflow if you want to contribute to it:
 
 #### Devfile for workspace loader development
