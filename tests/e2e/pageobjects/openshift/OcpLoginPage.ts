@@ -32,7 +32,7 @@ export class OcpLoginPage {
     async waitOpenShiftLoginWelcomePage() {
         Logger.debug('OcpLoginPage.waitOpenShiftLoginWelcomePage');
 
-        await this.driverHelper.waitVisibility(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH));
+        await this.driverHelper.waitVisibility(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH), 30000);
     }
 
     async clickOnLoginProviderTitle() {
@@ -40,6 +40,27 @@ export class OcpLoginPage {
 
         const loginProviderTitleLocator: By = By.css(`a[title=\'Log in with ${TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
         await this.driverHelper.waitAndClick(loginProviderTitleLocator);
+    }
+
+    async isIdentityProviderLinkVisible(): Promise<boolean> {
+        Logger.debug('OcpLoginPage.isIdentityProviderLinkVisible');
+
+        const loginWithHtpaswdLocator: By = By.css('a[title=\'Log in with htpasswd\']');
+        return await this.driverHelper.isVisible(loginWithHtpaswdLocator);
+    }
+
+    async clickOnLoginWitnHtpasswd() {
+        Logger.debug('OcpLoginPage.clickOnLoginWitnHtpasswd');
+
+        const loginWithHtpaswdLocator: By = By.css('a[title=\'Log in with htpasswd\']');
+        await this.driverHelper.waitAndClick(loginWithHtpaswdLocator);
+    }
+
+    async isAuthorizeOpenShiftIdentityProviderPageVisible(): Promise<boolean> {
+        Logger.debug('OcpLoginPage.isAuthorizeOpenShiftIdentityProviderPageVisible');
+
+        const authorizeOpenshiftIdentityProviderPageLocator: By = By.xpath('//h1[text()=\'Authorize Access\']');
+        return await this.driverHelper.isVisible(authorizeOpenshiftIdentityProviderPageLocator);
     }
 
     async waitAuthorizeOpenShiftIdentityProviderPage() {

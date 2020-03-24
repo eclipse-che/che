@@ -44,6 +44,12 @@ export class CheLoginPage {
         await this.driverHelper.waitAndClick(By.id('kc-login'));
     }
 
+    async isFirstBrokerLoginPageVisible(): Promise<boolean> {
+        Logger.debug('CheLoginPage.waitFirstBrokerLoginPage');
+
+        return await this.driverHelper.isVisible(By.id('kc-update-profile-form'));
+    }
+
     async waitFirstBrokerLoginPage() {
         Logger.debug('CheLoginPage.waitFirstBrokerLoginPage');
 
