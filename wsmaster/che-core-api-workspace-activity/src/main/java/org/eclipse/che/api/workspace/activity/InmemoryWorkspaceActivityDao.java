@@ -58,6 +58,7 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
     activity.setCreated(createdTimestamp);
     if (activity.getStatus() == null) {
       activity.setStatus(WorkspaceStatus.STOPPED);
+      activity.setLastStopped(createdTimestamp);
     }
   }
 
