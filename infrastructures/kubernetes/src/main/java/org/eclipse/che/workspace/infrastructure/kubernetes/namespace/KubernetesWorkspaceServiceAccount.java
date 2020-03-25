@@ -13,12 +13,12 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
-import io.fabric8.kubernetes.api.model.rbac.KubernetesPolicyRuleBuilder;
-import io.fabric8.kubernetes.api.model.rbac.KubernetesRole;
-import io.fabric8.kubernetes.api.model.rbac.KubernetesRoleBinding;
-import io.fabric8.kubernetes.api.model.rbac.KubernetesRoleBindingBuilder;
-import io.fabric8.kubernetes.api.model.rbac.KubernetesRoleBuilder;
-import io.fabric8.kubernetes.api.model.rbac.KubernetesSubjectBuilder;
+import io.fabric8.kubernetes.api.model.rbac.PolicyRuleBuilder;
+import io.fabric8.kubernetes.api.model.rbac.Role;
+import io.fabric8.kubernetes.api.model.rbac.RoleBinding;
+import io.fabric8.kubernetes.api.model.rbac.RoleBindingBuilder;
+import io.fabric8.kubernetes.api.model.rbac.RoleBuilder;
+import io.fabric8.kubernetes.api.model.rbac.SubjectBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -76,35 +76,27 @@ public class KubernetesWorkspaceServiceAccount {
     }
 
     String execRoleName = "exec";
-    if (k8sClient.rbac().kubernetesRoles().inNamespace(namespace).withName(execRoleName).get()
+    if (k8sClient.rbac().clusterRoles().inNamespace(namespace).withName(execRoleName).get()
         == null) {
       createExecRole(k8sClient, execRoleName);
     }
 
     String viewRoleName = "workspace-view";
-    if (k8sClient.rbac().kubernetesRoles().inNamespace(namespace).withName(viewRoleName).get()
+    if (k8sClient.rbac().clusterRoles().inNamespace(namespace).withName(viewRoleName).get()
         == null) {
       createViewRole(k8sClient, viewRoleName);
     }
 
-    k8sClient
-        .rbac()
-        .kubernetesRoleBindings()
-        .inNamespace(namespace)
-        .createOrReplace(createExecRoleBinding());
-    k8sClient
-        .rbac()
-        .kubernetesRoleBindings()
-        .inNamespace(namespace)
-        .createOrReplace(createViewRoleBinding());
+    k8sClient.rbac().roleBindings().inNamespace(namespace).createOrReplace(createExecRoleBinding());
+    k8sClient.rbac().roleBindings().inNamespace(namespace).createOrReplace(createViewRoleBinding());
 
     // If the user specified an additional cluster role for the workspace,
     // create a role binding for it too
     if (!isNullOrEmpty(this.clusterRoleName)) {
-      if (k8sClient.rbac().kubernetesClusterRoles().withName(this.clusterRoleName).get() != null) {
+      if (k8sClient.rbac().clusterRoles().withName(this.clusterRoleName).get() != null) {
         k8sClient
             .rbac()
-            .kubernetesRoleBindings()
+            .roleBindings()
             .inNamespace(namespace)
             .createOrReplace(createCustomRoleBinding(this.clusterRoleName));
       } else {
@@ -128,39 +120,39 @@ public class KubernetesWorkspaceServiceAccount {
   }
 
   private void createExecRole(KubernetesClient k8sClient, String name) {
-    KubernetesRole execRole =
-        new KubernetesRoleBuilder()
+    Role execRole =
+        new RoleBuilder()
             .withNewMetadata()
             .withName(name)
             .endMetadata()
             .withRules(
-                new KubernetesPolicyRuleBuilder()
+                new PolicyRuleBuilder()
                     .withResources("pods/exec")
                     .withApiGroups("")
                     .withVerbs("create")
                     .build())
             .build();
-    k8sClient.rbac().kubernetesRoles().inNamespace(namespace).create(execRole);
+    k8sClient.rbac().roles().inNamespace(namespace).create(execRole);
   }
 
   private void createViewRole(KubernetesClient k8sClient, String name) {
-    KubernetesRole viewRole =
-        new KubernetesRoleBuilder()
+    Role viewRole =
+        new RoleBuilder()
             .withNewMetadata()
             .withName(name)
             .endMetadata()
             .withRules(
-                new KubernetesPolicyRuleBuilder()
+                new PolicyRuleBuilder()
                     .withResources("pods", "services")
                     .withApiGroups("")
                     .withVerbs("list")
                     .build())
             .build();
-    k8sClient.rbac().kubernetesRoles().inNamespace(namespace).create(viewRole);
+    k8sClient.rbac().roles().inNamespace(namespace).create(viewRole);
   }
 
-  private KubernetesRoleBinding createViewRoleBinding() {
-    return new KubernetesRoleBindingBuilder()
+  private RoleBinding createViewRoleBinding() {
+    return new RoleBindingBuilder()
         .withNewMetadata()
         .withName(serviceAccountName + "-view")
         .withNamespace(namespace)
@@ -170,7 +162,7 @@ public class KubernetesWorkspaceServiceAccount {
         .withName("workspace-view")
         .endRoleRef()
         .withSubjects(
-            new KubernetesSubjectBuilder()
+            new SubjectBuilder()
                 .withKind("ServiceAccount")
                 .withName(serviceAccountName)
                 .withNamespace(namespace)
@@ -178,8 +170,8 @@ public class KubernetesWorkspaceServiceAccount {
         .build();
   }
 
-  private KubernetesRoleBinding createExecRoleBinding() {
-    return new KubernetesRoleBindingBuilder()
+  private RoleBinding createExecRoleBinding() {
+    return new RoleBindingBuilder()
         .withNewMetadata()
         .withName(serviceAccountName + "-exec")
         .withNamespace(namespace)
@@ -189,7 +181,7 @@ public class KubernetesWorkspaceServiceAccount {
         .withName("exec")
         .endRoleRef()
         .withSubjects(
-            new KubernetesSubjectBuilder()
+            new SubjectBuilder()
                 .withKind("ServiceAccount")
                 .withName(serviceAccountName)
                 .withNamespace(namespace)
@@ -197,8 +189,8 @@ public class KubernetesWorkspaceServiceAccount {
         .build();
   }
 
-  private KubernetesRoleBinding createCustomRoleBinding(String clusterRoleName) {
-    return new KubernetesRoleBindingBuilder()
+  private RoleBinding createCustomRoleBinding(String clusterRoleName) {
+    return new RoleBindingBuilder()
         .withNewMetadata()
         .withName(serviceAccountName + "-custom")
         .withNamespace(namespace)
@@ -208,7 +200,7 @@ public class KubernetesWorkspaceServiceAccount {
         .withName(clusterRoleName)
         .endRoleRef()
         .withSubjects(
-            new KubernetesSubjectBuilder()
+            new SubjectBuilder()
                 .withKind("ServiceAccount")
                 .withName(serviceAccountName)
                 .withNamespace(namespace)
