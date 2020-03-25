@@ -36,7 +36,7 @@ public class Containers {
         && resources.getLimits() != null
         && (quantity = resources.getLimits().get("memory")) != null
         && quantity.getAmount() != null) {
-      return KubernetesSize.toBytes(quantity.getAmount());
+      return Quantity.getAmountInBytes(quantity).longValue();
     }
     return 0;
   }
@@ -82,7 +82,7 @@ public class Containers {
         && resources.getRequests() != null
         && (quantity = resources.getRequests().get("memory")) != null
         && quantity.getAmount() != null) {
-      return KubernetesSize.toBytes(quantity.getAmount());
+      return Quantity.getAmountInBytes(quantity).longValue();
     }
     return 0;
   }

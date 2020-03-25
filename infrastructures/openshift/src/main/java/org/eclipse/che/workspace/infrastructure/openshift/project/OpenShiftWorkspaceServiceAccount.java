@@ -14,11 +14,11 @@ package org.eclipse.che.workspace.infrastructure.openshift.project;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
+import io.fabric8.openshift.api.model.OpenshiftRole;
+import io.fabric8.openshift.api.model.OpenshiftRoleBinding;
+import io.fabric8.openshift.api.model.OpenshiftRoleBindingBuilder;
+import io.fabric8.openshift.api.model.OpenshiftRoleBuilder;
 import io.fabric8.openshift.api.model.PolicyRuleBuilder;
-import io.fabric8.openshift.api.model.Role;
-import io.fabric8.openshift.api.model.RoleBinding;
-import io.fabric8.openshift.api.model.RoleBindingBuilder;
-import io.fabric8.openshift.api.model.RoleBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
@@ -92,7 +92,7 @@ class OpenShiftWorkspaceServiceAccount {
     // If the user specified an additional cluster role for the workspace,
     // create a role binding for it too
     if (!isNullOrEmpty(this.clusterRoleName)) {
-      if (osClient.rbac().kubernetesClusterRoles().withName(this.clusterRoleName).get() != null) {
+      if (osClient.rbac().clusterRoles().withName(this.clusterRoleName).get() != null) {
         osClient
             .roleBindings()
             .inNamespace(projectName)
@@ -118,8 +118,9 @@ class OpenShiftWorkspaceServiceAccount {
   }
 
   private void createExecRole(OpenShiftClient osClient, String name) {
-    Role execRole =
-        new RoleBuilder()
+
+    OpenshiftRole execRole =
+        new OpenshiftRoleBuilder()
             .withNewMetadata()
             .withName(name)
             .endMetadata()
@@ -130,8 +131,8 @@ class OpenShiftWorkspaceServiceAccount {
   }
 
   private void createViewRole(OpenShiftClient osClient, String name) {
-    Role viewRole =
-        new RoleBuilder()
+    OpenshiftRole viewRole =
+        new OpenshiftRoleBuilder()
             .withNewMetadata()
             .withName(name)
             .endMetadata()
@@ -141,15 +142,14 @@ class OpenShiftWorkspaceServiceAccount {
     osClient.roles().inNamespace(projectName).create(viewRole);
   }
 
-  private RoleBinding createViewRoleBinding() {
-    return new RoleBindingBuilder()
+  private OpenshiftRoleBinding createViewRoleBinding() {
+    return new OpenshiftRoleBindingBuilder()
         .withNewMetadata()
         .withName(serviceAccountName + "-view")
         .withNamespace(projectName)
         .endMetadata()
         .withNewRoleRef()
         .withName("workspace-view")
-        .withNamespace(projectName)
         .endRoleRef()
         .withSubjects(
             new ObjectReferenceBuilder()
@@ -159,15 +159,14 @@ class OpenShiftWorkspaceServiceAccount {
         .build();
   }
 
-  private RoleBinding createExecRoleBinding() {
-    return new RoleBindingBuilder()
+  private OpenshiftRoleBinding createExecRoleBinding() {
+    return new OpenshiftRoleBindingBuilder()
         .withNewMetadata()
         .withName(serviceAccountName + "-exec")
         .withNamespace(projectName)
         .endMetadata()
         .withNewRoleRef()
         .withName("exec")
-        .withNamespace(projectName)
         .endRoleRef()
         .withSubjects(
             new ObjectReferenceBuilder()
@@ -177,8 +176,8 @@ class OpenShiftWorkspaceServiceAccount {
         .build();
   }
 
-  private RoleBinding createCustomRoleBinding(String clusterRoleName) {
-    return new RoleBindingBuilder()
+  private OpenshiftRoleBinding createCustomRoleBinding(String clusterRoleName) {
+    return new OpenshiftRoleBindingBuilder()
         .withNewMetadata()
         .withName(serviceAccountName + "-custom")
         .withNamespace(projectName)

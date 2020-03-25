@@ -232,7 +232,8 @@ public class DockerimageComponentToWorkspaceApplierTest {
     assertEquals(podTemplate.getSpec().getContainers().size(), 1);
     Container container = podTemplate.getSpec().getContainers().get(0);
     Quantity memoryLimit = container.getResources().getLimits().get("memory");
-    assertEquals(memoryLimit.getAmount(), "1G");
+    assertEquals(memoryLimit.getAmount(), "1");
+    assertEquals(memoryLimit.getFormat(), "G");
   }
 
   @Test
