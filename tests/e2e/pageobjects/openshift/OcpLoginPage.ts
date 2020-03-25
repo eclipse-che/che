@@ -32,7 +32,7 @@ export class OcpLoginPage {
     async waitOpenShiftLoginWelcomePage() {
         Logger.debug('OcpLoginPage.waitOpenShiftLoginWelcomePage');
 
-        await this.driverHelper.waitVisibility(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH), 30000);
+        await this.driverHelper.waitVisibility(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH));
     }
 
     async clickOnLoginProviderTitle() {
@@ -46,7 +46,7 @@ export class OcpLoginPage {
         Logger.debug('OcpLoginPage.isIdentityProviderLinkVisible');
 
         const loginWithHtpaswdLocator: By = By.css('a[title=\'Log in with htpasswd\']');
-        return await this.driverHelper.isVisible(loginWithHtpaswdLocator);
+        return await this.driverHelper.waitVisibilityBoolean(loginWithHtpaswdLocator, 3, 5000);
     }
 
     async clickOnLoginWitnHtpasswd() {
