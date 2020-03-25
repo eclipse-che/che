@@ -30,7 +30,7 @@
     "axios": "0.18.1",
     "chai": "4.2.0",
     "chromedriver": "80.0.1",
-    "mocha": "6.1.4",
+    "mocha": "7.1.1",
     "rimraf": "2.6.2",
     "selenium-webdriver": "3.6.0",
     "ts-node": "8.0.3",
@@ -42,5 +42,8 @@
     "@eclipse-che/api": "7.5.0-SNAPSHOT",
     "inversify": "5.0.1",
     "reflect-metadata": "0.1.13"
+  },
+  "resolutions": {
+    "minimist": "^1.2.5"
   }
 }
