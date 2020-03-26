@@ -13,3 +13,5 @@
 UPDATE che_workspace_activity
     SET last_stopped = 0
     WHERE status = 'STOPPED' AND last_stopped IS NULL;
+
+ALTER TABLE che_workspace_activity ALTER COLUMN last_stopped SET NOT NULL;
