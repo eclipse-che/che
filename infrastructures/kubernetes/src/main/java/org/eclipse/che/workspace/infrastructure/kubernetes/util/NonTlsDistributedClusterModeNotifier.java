@@ -19,6 +19,9 @@ import org.eclipse.che.api.core.util.ApiInfoLogInformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Prints warning into logs on startup when Che is running in non-TLS mode.
+ */
 @Singleton
 public class NonTlsDistributedClusterModeNotifier {
 
