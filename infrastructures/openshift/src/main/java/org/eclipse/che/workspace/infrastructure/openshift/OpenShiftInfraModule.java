@@ -71,6 +71,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtprox
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxyProvisionerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxySecureServerExposerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.NonTlsDistributedClusterModeNotifier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
@@ -220,5 +221,6 @@ public class OpenShiftInfraModule extends AbstractModule {
 
     bind(ExternalServiceExposureStrategy.class).to(OpenShiftServerExposureStrategy.class);
     bind(CookiePathStrategy.class).to(OpenShiftCookiePathStrategy.class);
+    bind(NonTlsDistributedClusterModeNotifier.class);
   }
 }
