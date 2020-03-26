@@ -140,6 +140,7 @@ public final class DtoConverter {
         .withAlias(component.getAlias())
         // chePlugin/cheEditor
         .withId(component.getId())
+        .withRegistryUrl(component.getRegistryUrl())
         // chePlugin
         .withPreferences(component.getPreferences())
         // dockerimage
