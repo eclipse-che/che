@@ -101,7 +101,6 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
           // accordingly already.
           if (a.getStatus() == null) {
             a.setStatus(WorkspaceStatus.STOPPED);
-            a.setLastStopped(createdTimestamp);
           }
         });
   }
