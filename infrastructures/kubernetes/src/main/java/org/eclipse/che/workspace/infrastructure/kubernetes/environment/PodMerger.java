@@ -12,6 +12,8 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
 import static java.lang.String.format;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putAnnotations;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabels;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
@@ -72,8 +74,9 @@ public class PodMerger {
     for (PodData podData : podsData) {
       // if there are entries with such keys then values will be overridden
       ObjectMeta podMeta = podData.getMetadata();
-      basePodMeta.getLabels().putAll(podMeta.getLabels());
-      basePodMeta.getAnnotations().putAll(podMeta.getAnnotations());
+      putLabels(basePodMeta, podMeta.getLabels());
+      putAnnotations(basePodMeta, podMeta.getAnnotations());
+
       basePodMeta.getAdditionalProperties().putAll(podMeta.getAdditionalProperties());
 
       for (Container container : podData.getSpec().getContainers()) {
@@ -144,7 +147,7 @@ public class PodMerger {
 
     Map<String, String> matchLabels = new HashMap<>();
     matchLabels.put(DEPLOYMENT_NAME_LABEL, baseDeployment.getMetadata().getName());
-    basePodMeta.getLabels().putAll(matchLabels);
+    putLabels(basePodMeta, matchLabels);
     baseDeployment.getSpec().getSelector().setMatchLabels(matchLabels);
 
     return baseDeployment;

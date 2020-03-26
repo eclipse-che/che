@@ -189,7 +189,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
             .withImagePullPolicy(brokerPullPolicy)
             .withEnv(envVars);
     if (brokerVolumeName != null) {
-      cb.withVolumeMounts(new VolumeMount(CONF_FOLDER + "/", null, brokerVolumeName, true, null));
+      cb.withVolumeMounts(
+          new VolumeMount(CONF_FOLDER + "/", null, brokerVolumeName, true, null, null));
       cb.addToArgs("-metas", CONF_FOLDER + "/" + CONFIG_FILE);
     }
     Container container = cb.build();

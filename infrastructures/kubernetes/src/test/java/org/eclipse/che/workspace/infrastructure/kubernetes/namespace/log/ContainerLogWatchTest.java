@@ -230,7 +230,7 @@ public class ContainerLogWatchTest {
     outputStream.write("message\n".getBytes());
     outputStream.close();
     logWatchRegularMessage.setInputStream(inputStream);
-    CountDownLatch messageHandleLatch = new CountDownLatch(1);
+    CountDownLatch messageHandleLatch = new CountDownLatch(2);
     logWatchRegularMessage.setLatch(messageHandleLatch);
     doAnswer(
             (a) -> {
@@ -270,7 +270,7 @@ public class ContainerLogWatchTest {
 
     // verify events were properly fired
     verify(eventsPublisher, times(2)).sendWatchLogStartedEvent(any(String.class));
-    verify(eventsPublisher, times(2)).sendWatchLogStoppedEvent(any(String.class));
+    verify(eventsPublisher, timeout(1000).times(2)).sendWatchLogStoppedEvent(any(String.class));
   }
 
   @Test
@@ -284,7 +284,7 @@ public class ContainerLogWatchTest {
     outputStream.write("message\n".getBytes());
     outputStream.close();
     logWatchRegularMessage.setInputStream(inputStream);
-    CountDownLatch messageHandleLatch = new CountDownLatch(1);
+    CountDownLatch messageHandleLatch = new CountDownLatch(2);
     logWatchRegularMessage.setLatch(messageHandleLatch);
     doAnswer(
             (a) -> {
@@ -324,7 +324,7 @@ public class ContainerLogWatchTest {
 
     // verify events were properly fired
     verify(eventsPublisher, times(2)).sendWatchLogStartedEvent(any(String.class));
-    verify(eventsPublisher, times(2)).sendWatchLogStoppedEvent(any(String.class));
+    verify(eventsPublisher, timeout(1000).times(2)).sendWatchLogStoppedEvent(any(String.class));
   }
 
   private class LogWatchMock implements LogWatch {
@@ -351,15 +351,15 @@ public class ContainerLogWatchTest {
     @Override
     public void close() {
       isClosed = true;
-      if (latch != null) {
-        latch.countDown();
-      }
       if (inputStream != null) {
         try {
           inputStream.close();
         } catch (IOException e) {
           e.printStackTrace();
         }
+      }
+      if (latch != null) {
+        latch.countDown();
       }
     }
   }
