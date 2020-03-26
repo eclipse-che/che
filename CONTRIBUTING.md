@@ -15,10 +15,10 @@ Repository | Component | Description | Devfile | Contributing.md
 --- | --- | ---  | --- | ---
 [che](https://github.com/eclipse/che) | | (this repository) the main project repository | |
 ---| [wsmaster](https://github.com/eclipse/che/tree/master/wsmaster) | orchestrates the Che workspaces with devfiles on Kubernetes | [devfile ](https://github.com/eclipse/che/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#che-server-aka-ws-master)
---- | [dashboard](https://github.com/eclipse/che/tree/master/dashboard) | UI to manage workspaces, devfiles, etc. | [devfile](https://github.com/eclipse/che/blob/master/dashboard/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard)
 --- | [dockerfiles](https://github.com/eclipse/che/tree/master/dockerfiles) | source code, dockerfiles to build our main docker images. Note that Che-theia related dockerfiles are located in che-theia repo. | | 
 --- | [e2e](https://github.com/eclipse/che/tree/master/e2e) | source code of our integration tests. | | 
---- | [workspace-loader](https://github.com/eclipse/che/tree/master/workspace-loader) |  | [devfile](https://github.com/eclipse/che/blob/master/workspace-loader/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#workspace-loader)
+[workspace-loader](https://github.com/eclipse/che-workspace-loader) |  |  | [devfile](https://github.com/eclipse/che-workspace-loader/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#workspace-loader)
+[dashboard](https://github.com/eclipse/che-dashboard) | | UI to manage workspaces, devfiles, etc. | [devfile](https://github.com/eclipse/che-dashboard/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard)
 [chectl](https://github.com/che-incubator/chectl) | | The CLI to install Che, create and start workspaces and devfiles | [devfile](https://github.com/che-incubator/chectl/blob/master/devfile.yaml) | [doc](https://github.com/che-incubator/chectl/blob/master/CONTRIBUTING.md)
 [che-theia](https://github.com/eclipse/che-theia) | | Theia IDE integrated in Che. | [devfile](https://github.com/eclipse/che-theia/blob/master/devfiles/che-theia-all.devfile.yaml) | [doc](https://github.com/eclipse/che-theia/blob/master/CONTRIBUTING.md)
 --- | [generator](https://github.com/eclipse/che-theia/tree/master/generator) | `che:theia init` CLI to prepare and build che-theia | | [doc](https://github.com/eclipse/che-theia/blob/master/generator/CONTRIBUTING.md)
@@ -56,12 +56,12 @@ Let's cover the developer flow for theses projects:
 
 ### Dashboard
 
-Dashboard source code is located in [<this.repo>/dashboard](./dashboard/) folder.
+Dashboard source code is located in [https://github.com/eclipse/che-dashboard](https://github.com/eclipse/che-dashboard) repository.
 It is an AngularJS application. Here is the developer workflow if you want to contribute to it:
 
 #### Devfile for dashboard development
 
-The devfile: [<this.repo>/dashboard/devfile.yaml](./dashboard/devfile.yaml)
+The devfile: [https://github.com/eclipse/che-dashboard/blob/master/devfile.yaml](https://github.com/eclipse/che-dashboard/blob/master/devfile.yaml)
 
 In this section, we show how to setup a Che environment to work on the Che dashboard, and how to use it.
 For the whole workflows, we will need a workspace with such containers:
@@ -85,10 +85,8 @@ In this section we are going to start a new workspace to work on che-theia. The 
 The devfile could be started using `chectl`:
 
 ```bash
-$ chectl workspace:start -f https://raw.githubusercontent.com/eclipse/che/master/dashboard/devfile.yaml
+$ chectl workspace:start -f https://raw.githubusercontent.com/eclipse/che-dashboard/master/devfile.yaml
 ```
-
-At workspace start, Che will clone Che source code (including the dashboard)
 
 #### Step 2: Build
 
@@ -129,12 +127,12 @@ $ node_modules/.bin/gulp serve --server=<che_api_url>
 
 ### Workspace Loader
 
-Workspace loader source code is located in [<this.repo>/workspace-loader](./workspace-loader/) folder.
+Workspace loader source code is located in [https://github.com/eclipse/che-workspace-loader](https://github.com/eclipse/che-workspace-loader) repository.
 Here is the developer workflow if you want to contribute to it:
 
 #### Devfile for workspace loader development
 
-The devfile: [<this.repo>/workspace-loader/devfile.yaml](./workspace-loader/devfile.yaml)
+The devfile: [https://github.com/eclipse/che-workspace-loader/blob/master/devfile.yaml](https://github.com/eclipse/che-workspace-loader/blob/master/devfile.yaml)
 
 This section shows you how to setup a Che environment to work on the Che Workspace Loader, and how to use it.
 For the whole workflows, we will need a workspace with Workspace Loader Dev container (a.k.a ws-loader-dev). Dev container is all in one container for running commands such as build, test or start the workspace loader server.
@@ -148,12 +146,10 @@ In this section we are going to start a new workspace to work on workspace loade
 The workspace could be created and started from a devfile using `chectl`:
 
 ```bash
-$ chectl workspace:start --devfile=https://raw.githubusercontent.com/eclipse/che/master/workspace-loader/devfile.yaml
+$ chectl workspace:start --devfile=https://raw.githubusercontent.com/eclipse/che-workspace-loader/master/devfile.yaml
 ```
 
-or as a factory `https://<CheInstance>/f?url=https://raw.githubusercontent.com/eclipse/che/master/workspace-loader/devfile.yaml`
-
-At workspace start, Che will clone Che source code (including the workspace-loader)
+or as a factory `https://<CheInstance>/f?url=https://raw.githubusercontent.com/eclipse/che-workspace-loader/master/devfile.yaml
 
 #### Step 2: Install workspace-loader dependencies
 

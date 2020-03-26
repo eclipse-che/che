@@ -74,6 +74,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtprox
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxyProvisionerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxySecureServerExposerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.NonTlsDistributedClusterModeNotifier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
@@ -228,5 +229,7 @@ public class KubernetesInfraModule extends AbstractModule {
     // to kubernetes, we just call this in a way that initializes the binding with an empty map.
     KubernetesDevfileBindings.addAllowedEnvironmentTypeUpgradeBindings(
         binder(), KubernetesEnvironment.TYPE);
+
+    bind(NonTlsDistributedClusterModeNotifier.class);
   }
 }

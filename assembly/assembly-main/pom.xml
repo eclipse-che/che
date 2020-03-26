@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>7.10.0-SNAPSHOT</version>
+        <version>7.11.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-main</artifactId>
     <packaging>pom</packaging>
@@ -27,6 +27,11 @@
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-che-tomcat8</artifactId>
             <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>assembly-dashboard-war</artifactId>
+            <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
@@ -46,11 +51,6 @@
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-wsmaster-war</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.dashboard</groupId>
-            <artifactId>che-dashboard-war</artifactId>
             <type>war</type>
         </dependency>
         <dependency>

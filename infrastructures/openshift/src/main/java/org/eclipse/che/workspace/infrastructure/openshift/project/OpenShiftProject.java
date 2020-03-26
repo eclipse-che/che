@@ -24,6 +24,7 @@ import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.util.concurrent.Executor;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
@@ -245,7 +246,12 @@ public class OpenShiftProject extends KubernetesNamespace {
         return true;
       }
 
-      throw new KubernetesInfrastructureException(e);
+      throw new InternalInfrastructureException(
+          format(
+              "Failed to determine whether the project"
+                  + " %s is managed. OpenShift client said: %s",
+              getName(), e.getMessage()),
+          e);
     }
   }
 }

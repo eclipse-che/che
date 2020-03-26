@@ -67,11 +67,4 @@ suite('E2E', async () => {
         });
     });
 
-    suite('Logout from web console OpenShift', async () => {
-        test('Logout from temp admin user', async () => {
-            await ocpWebConsole.logoutFromWebConsole();
-            await ocpWebConsole.waitDisappearanceNavpanelOpenShift();
-        });
-    });
-
 });

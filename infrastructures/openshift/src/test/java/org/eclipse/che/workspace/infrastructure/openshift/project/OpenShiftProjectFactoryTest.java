@@ -169,7 +169,9 @@ public class OpenShiftProjectFactoryTest {
                     PROJECT_DESCRIPTION_ANNOTATION,
                     "some description"))
             .endMetadata()
-            .withNewStatus("Active")
+            .withNewStatus()
+            .withPhase("Active")
+            .endStatus()
             .build());
 
     projectFactory =
@@ -498,7 +500,9 @@ public class OpenShiftProjectFactoryTest {
         .withName(name)
         .withAnnotations(annotations)
         .endMetadata()
-        .withNewStatus(phase)
+        .withNewStatus()
+        .withNewPhase(phase)
+        .endStatus()
         .build();
   }
 }
