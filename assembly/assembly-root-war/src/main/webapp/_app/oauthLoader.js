@@ -9,190 +9,141 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-class KeycloakLoader {
-    /**
-     * Load keycloak settings
-     */
-    loadKeycloakSettings() {
-        const msg = "Cannot load keycloak settings. This is normal for single-user mode.";
 
-        return new Promise((resolve, reject) => {
-            try {
-                if (window.parent && window.parent['_keycloak']) {
-                    window['_keycloak'] = window.parent['_keycloak'];
-                    resolve(window['_keycloak']);
-                    return;
-                }
-            } catch (e) {
-                // parent frame has different origin, so access to parent frame is forbidden
-                console.error(msg, e);
-            }
+import { KeycloakLoader } from './keycloackLoader.js';
 
-            try {
-                const request = new XMLHttpRequest();
-
-                request.onerror = request.onabort = function () {
-                    reject(new Error(msg));
-                };
-
-                request.onload = () => {
-                    if (request.status === 200) {
-                        resolve(this.injectKeycloakScript(JSON.parse(request.responseText)));
-                    } else {
-                        reject(new Error(msg));
-                    }
-                };
-
-                const url = "/api/keycloak/settings";
-                request.open("GET", url, true);
-                request.send();
-            } catch (e) {
-                reject(new Error(msg + e.message));
-            }
-        });
-    }
-
-    /**
-     * Injects keycloak javascript
-     */
-    injectKeycloakScript(keycloakSettings) {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.language = 'javascript';
-            script.async = true;
-            script.src = keycloakSettings['che.keycloak.js_adapter_url'];
-
-            script.onload = () => {
-                resolve(this.initKeycloak(keycloakSettings));
-            };
-
-            script.onerror = script.onabort = () => {
-                reject(new Error('cannot load ' + script.src));
-            };
-
-            document.head.appendChild(script);
-        });
-    }
-
-    /**
-     * Initialize keycloak
-     */
-    initKeycloak(keycloakSettings) {
-        return new Promise((resolve, reject) => {
-
-            function keycloakConfig() {
-                const theOidcProvider = keycloakSettings['che.keycloak.oidc_provider'];
-                if (!theOidcProvider) {
-                    return {
-                        url: keycloakSettings['che.keycloak.auth_server_url'],
-                        realm: keycloakSettings['che.keycloak.realm'],
-                        clientId: keycloakSettings['che.keycloak.client_id']
-                    };
-                } else {
-                    return {
-                        oidcProvider: theOidcProvider,
-                        clientId: keycloakSettings['che.keycloak.client_id']
-                    };
-                }
-            }
-
-            const keycloak = Keycloak(keycloakConfig());
-
-            window['_keycloak'] = keycloak;
-
-            var useNonce;
-            if (typeof keycloakSettings['che.keycloak.use_nonce'] === 'string') {
-                useNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() === 'true';
-            }
-            window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
-            keycloak
-                .init({
-                    onLoad: 'login-required',
-                    checkLoginIframe: false,
-                    useNonce: useNonce,
-                    scope: 'email profile',
-                    redirectUri: keycloakSettings['che.keycloak.redirect_url.ide']
-                })
-                .success(() => {
-                    resolve(keycloak);
-                })
-                .error(() => {
-                    reject(new Error('[Keycloak] Failed to initialize Keycloak'));
-                });
-        });
-    }
-
+/**
+ * Returns an array of query parameter values if it is present
+ * @param {string} name of the query parameter
+ */
+function getQueryParams(name) {
+    const queryString = window.location.search;
+    return new URLSearchParams(queryString).getAll(name);
 }
 
 /**
- * Returns query parameter value if it is present
- * @param {string} name a query parameter name
+ * Fetches userId
  */
-function getQueryParam(name) {
-    const params = window.location.search.substr(1),
-        paramEntries = params.split('&');
-    const entry = paramEntries.find(_entry => {
-        return _entry.startsWith(name + '=');
+function asyncGeUserId() {
+    return new Promise((resolve, reject) => {
+        const request = new XMLHttpRequest();
+        request.open("GET", '/api/user');
+        setAuthorizationHeader(request).then((xhr) => {
+            xhr.send();
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState !== 4) {
+                    return;
+                }
+                if (xhr.status !== 200) {
+                    const errorMessage = 'Failed to get the workspace: "' + this.getRequestErrorMessage(xhr) + '"';
+                    reject(new Error(errorMessage));
+                    return;
+                }
+                resolve(JSON.parse(xhr.responseText).id);
+            };
+        });
     });
-    if (!entry) {
-        return;
-    }
-    const [_, value] = entry.split('=');
-    return decodeURIComponent(value);
 }
 
-(async function () {
+/**
+ * Fetches userId
+ */
+function asyncGeToken(provider) {
+    return new Promise((resolve, reject) => {
+        const request = new XMLHttpRequest();
+        request.open("GET", '/api/oauth/token?oauth_provider=' + provider);
+        setAuthorizationHeader(request).then((xhr) => {
+            xhr.send();
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState !== 4) {
+                    return;
+                }
+                if (xhr.status !== 200) {
+                    const errorMessage = 'Failed to get the workspace: "' + this.getRequestErrorMessage(xhr) + '"';
+                    reject(new Error(errorMessage));
+                    return;
+                }
+                resolve(JSON.parse(xhr.responseText).id);
+            };
+        });
+    });
+}
 
-    // const machineToken = this.getQueryParam('token');
-    // const parcedToken = window.atob(machineToken);
-    // const tokenObject = JSON.parse(parcedToken);
+/**
+ * Sets authorization header for a request
+ * @param {XMLHttpRequest} xhr
+ */
+function setAuthorizationHeader(xhr) {
+    return new Promise((resolve, reject) => {
+        if (window._keycloak && window._keycloak.token) {
+            window._keycloak.updateToken(5).success(() => {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + window._keycloak.token);
+                resolve(xhr);
+            }).error(() => {
+                window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
+                window._keycloak.login();
+                reject(new Error('Failed to refresh token'));
+            });
+        }
 
-    const apiUrl = 'http://che-che.192.168.99.254.nip.io/api';
-    const oauthProvider = 'github';
-    const userId = this.getQueryParam('userId');
+        resolve(xhr);
+    });
+}
 
+/**
+ * Displays error message
+ * @param {string} message an error message to show
+ */
+function error(message) {
+
+    const element = document.createElement("pre");
+    element.innerHTML = message;
+    window.appendChild(element);
+    if (element.scrollIntoView) {
+        element.scrollIntoView();
+    }
+    element.style.color = "error";
+    return element;
+}
+
+(async () => {
     try {
-        await new KeycloakLoader().loadKeycloakSettings();
-        const token = window._keycloak.token;
-
-        const redirectUrl = window.location.href;
-        let url = `${apiUrl}/oauth/authenticate?oauth_provider=${oauthProvider}&userId=${userId}`;
-        // if (scope) {
-        //     for (const s of scope) {
-        //         url += `&scope=${s}`;
-        //     }
-        // }
-        if (token) {
-            url += `&token=${token}`;
+        const status = getQueryParams('status')[0]; {
+            if (status && status === 'ready') {
+                window.opener.postMessage('authentication:ready','*');
+                return;
+            }
+        }
+        const oauthProvider = getQueryParams('providerName')[0];
+        if (!oauthProvider) {
+            throw new Error('Provider name isn\'t found in query parameters.')
+        }
+        const method = getQueryParams('method')[0]; {
+            if (method && method === 'getToken') {
+                const token = await asyncGeToken(oauthProvider);
+                window.opener.postMessage('token:' + token,'*');
+                return;
+            }
+        }
+        const currentUrl = window.location.href;
+        const cheUrl = currentUrl.substring(0, currentUrl.indexOf('/_app'));
+        const apiUrl = cheUrl + '/api';
+        const redirectUrl = currentUrl.substring(0, currentUrl.indexOf('?')) + '?status=ready';
+        let url = `${apiUrl}/oauth/authenticate?oauth_provider=${oauthProvider}&userId=${await asyncGeUserId()}`;
+        const scope = this.getQueryParams('scope'); {
+            for (const s of scope) {
+                url += `&scope=${s}`;
+            }
         }
         url += `&redirect_after_login=${redirectUrl}`;
-        const popupWindow = window.open(url, 'popup');
-        const popup_close_handler = async () => {
-            if (!popupWindow || popupWindow.closed) {
-                if (popupCloseHandlerIntervalId) {
-                    window.clearInterval(popupCloseHandlerIntervalId);
-                }
-                window.close();
-            } else {
-                try {
-                    if (redirectUrl === popupWindow.location.href) {
-                        if (popupCloseHandlerIntervalId) {
-                            window.clearInterval(popupCloseHandlerIntervalId);
-                        }
-                        popupWindow.close();
-                        window.close();
-                    }
-                } catch (error) {
-                }
-            }
-        };
-
-        const popupCloseHandlerIntervalId = window.setInterval(popup_close_handler, 80);
+        const keycloak = await new KeycloakLoader().loadKeycloakSettings();
+        if (keycloak && keycloak.token) {
+            url += `&token=${keycloak.token}`;
+        }
+        window.location.replace(url);
     } catch (errorMessage) {
+        error(errorMessage);
         console.error(errorMessage);
-        loader.hideLoader();
-        loader.error(errorMessage);
     }
 })
 ();
