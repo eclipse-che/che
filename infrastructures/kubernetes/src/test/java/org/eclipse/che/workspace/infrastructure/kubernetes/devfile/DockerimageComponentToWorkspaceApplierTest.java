@@ -83,7 +83,8 @@ public class DockerimageComponentToWorkspaceApplierTest {
   @BeforeMethod
   public void setUp() throws Exception {
     dockerimageComponentApplier =
-        new DockerimageComponentToWorkspaceApplier(PROJECTS_MOUNT_PATH, k8sEnvProvisioner);
+        new DockerimageComponentToWorkspaceApplier(
+            PROJECTS_MOUNT_PATH, "Always", k8sEnvProvisioner);
     workspaceConfig = new WorkspaceConfigImpl();
   }
 

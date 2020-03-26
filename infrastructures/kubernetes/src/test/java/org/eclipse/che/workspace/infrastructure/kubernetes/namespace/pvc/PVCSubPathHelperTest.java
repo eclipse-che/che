@@ -93,6 +93,7 @@ public class PVCSubPathHelperTest {
         new PVCSubPathHelper(
             jobMemoryLimit,
             jobImage,
+            "IfNotPresent",
             k8sNamespaceFactory,
             securityContextProvisioner,
             new NoopExecutorServiceWrapper(),

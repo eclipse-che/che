@@ -71,13 +71,16 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
   static final String CHE_COMPONENT_NAME_LABEL = "che.component.name";
 
   private final String projectFolderPath;
+  private final String imagePullPolicy;
   private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
 
   @Inject
   public DockerimageComponentToWorkspaceApplier(
       @Named("che.workspace.projects.storage") String projectFolderPath,
+      @Named("che.workspace.sidecar.image_pull_policy") String imagePullPolicy,
       KubernetesEnvironmentProvisioner k8sEnvProvisioner) {
     this.projectFolderPath = projectFolderPath;
+    this.imagePullPolicy = imagePullPolicy;
     this.k8sEnvProvisioner = k8sEnvProvisioner;
   }
 
@@ -187,6 +190,7 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
     Container container =
         new ContainerBuilder()
             .withImage(image)
+            .withImagePullPolicy(imagePullPolicy)
             .withName(name)
             .withEnv(env)
             .withCommand(command)

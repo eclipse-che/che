@@ -75,7 +75,6 @@ public class PVCSubPathHelper {
   static final String[] RM_COMMAND_BASE = new String[] {"rm", "-rf"};
   static final String[] MKDIR_COMMAND_BASE = new String[] {"mkdir", "-m", "777", "-p"};
 
-  static final String IMAGE_PULL_POLICY = "IfNotPresent";
   static final String POD_RESTART_POLICY = "Never";
   static final String POD_PHASE_SUCCEEDED = "Succeeded";
   static final String POD_PHASE_FAILED = "Failed";
@@ -83,6 +82,7 @@ public class PVCSubPathHelper {
 
   private final String jobImage;
   private final String jobMemoryLimit;
+  private final String imagePullPolicy;
   private final KubernetesNamespaceFactory factory;
   private final ExecutorService executor;
   private final RuntimeEventsPublisher eventsPublisher;
@@ -93,12 +93,14 @@ public class PVCSubPathHelper {
   PVCSubPathHelper(
       @Named("che.infra.kubernetes.pvc.jobs.memorylimit") String jobMemoryLimit,
       @Named("che.infra.kubernetes.pvc.jobs.image") String jobImage,
+      @Named("che.infra.kubernetes.pvc.jobs.image.pull_policy") String imagePullPolicy,
       KubernetesNamespaceFactory factory,
       SecurityContextProvisioner securityContextProvisioner,
       ExecutorServiceWrapper executorServiceWrapper,
       RuntimeEventsPublisher eventPublisher) {
     this.jobMemoryLimit = jobMemoryLimit;
     this.jobImage = jobImage;
+    this.imagePullPolicy = imagePullPolicy;
     this.factory = factory;
     this.securityContextProvisioner = securityContextProvisioner;
     this.eventsPublisher = eventPublisher;
@@ -294,7 +296,7 @@ public class PVCSubPathHelper {
         new ContainerBuilder()
             .withName(podName)
             .withImage(jobImage)
-            .withImagePullPolicy(IMAGE_PULL_POLICY)
+            .withImagePullPolicy(imagePullPolicy)
             .withCommand(command)
             .withVolumeMounts(newVolumeMount(pvcName, JOB_MOUNT_PATH, null))
             .withNewResources()
