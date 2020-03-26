@@ -39,7 +39,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
       query =
           "SELECT COUNT(a) FROM WorkspaceActivity a"
               + " WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED"
-              + " AND a.lastStopped <= :time"),
+              + " AND (a.lastStopped <= :time OR a.lastStopped IS NULL)"),
   @NamedQuery(
       name = "WorkspaceActivity.getStoppingSince",
       query =
