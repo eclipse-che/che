@@ -29,6 +29,7 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -65,6 +66,8 @@ public class KubernetesNamespace {
 
   private final String workspaceId;
   private final String name;
+  private final Map<String, String> annotations;
+  private final Map<String, String> labels;
 
   private final KubernetesDeployments deployments;
   private final KubernetesServices services;
@@ -94,13 +97,23 @@ public class KubernetesNamespace {
     this.ingresses = kubernetesIngresses;
     this.secrets = secrets;
     this.configMaps = configMaps;
+
+    this.annotations = null;
+    this.labels = null;
   }
 
   public KubernetesNamespace(
-      KubernetesClientFactory clientFactory, Executor executor, String name, String workspaceId) {
+      KubernetesClientFactory clientFactory,
+      Executor executor,
+      String name,
+      String workspaceId,
+      Map<String, String> annotations,
+      Map<String, String> labels) {
     this.clientFactory = clientFactory;
     this.workspaceId = workspaceId;
     this.name = name;
+    this.annotations = annotations;
+    this.labels = labels;
     this.deployments = new KubernetesDeployments(name, workspaceId, clientFactory, executor);
     this.services = new KubernetesServices(name, workspaceId, clientFactory);
     this.pvcs = new KubernetesPersistentVolumeClaims(name, workspaceId, clientFactory);
@@ -131,6 +144,16 @@ public class KubernetesNamespace {
             format("Creating the namespace '%s' is not allowed, yet it was not found.", name));
       }
       namespace = create(name, client);
+    }
+
+    if (annotations != null) {
+      KubernetesObjectUtil.putAnnotations(namespace.getMetadata(), annotations);
+    }
+    if (labels != null) {
+      KubernetesObjectUtil.putLabels(namespace.getMetadata(), labels);
+    }
+    if (annotations != null || labels != null) {
+      update(namespace, client);
     }
 
     if (markManaged && !isLabeled(namespace, MANAGED_NAMESPACE_LABEL, "true")) {

@@ -20,10 +20,14 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.Kub
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +89,10 @@ public class KubernetesNamespaceFactory {
   private final KubernetesClientFactory clientFactory;
   private final UserManager userManager;
   protected final KubernetesSharedPool sharedPool;
+  private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+  private static final Type type = new TypeToken<Map<String, String>>() {}.getType();
+  private Map<String, String> annotations = null;
+  private Map<String, String> labels = null;
 
   @Inject
   public KubernetesNamespaceFactory(
@@ -92,6 +100,8 @@ public class KubernetesNamespaceFactory {
       @Nullable @Named("che.infra.kubernetes.service_account_name") String serviceAccountName,
       @Nullable @Named("che.infra.kubernetes.cluster_role_name") String clusterRoleName,
       @Nullable @Named("che.infra.kubernetes.namespace.default") String defaultNamespaceName,
+      @Nullable @Named("che.infra.kubernetes.namespace.annotations_json") String annotationsString,
+      @Nullable @Named("che.infra.kubernetes.namespace.labels_json") String labelsString,
       @Named("che.infra.kubernetes.namespace.allow_user_defined")
           boolean allowUserDefinedNamespaces,
       KubernetesClientFactory clientFactory,
@@ -106,6 +116,13 @@ public class KubernetesNamespaceFactory {
     this.defaultNamespaceName = defaultNamespaceName;
     this.allowUserDefinedNamespaces = allowUserDefinedNamespaces;
     this.sharedPool = sharedPool;
+
+    if (annotationsString != null) {
+      annotations = GSON.fromJson(annotationsString, type);
+    }
+    if (labelsString != null) {
+      labels = GSON.fromJson(labelsString, type);
+    }
 
     if (isNullOrEmpty(defaultNamespaceName)) {
       throw new ConfigurationException("che.infra.kubernetes.namespace.default must be configured");
@@ -131,7 +148,8 @@ public class KubernetesNamespaceFactory {
 
   @VisibleForTesting
   KubernetesNamespace doCreateNamespaceAccess(String workspaceId, String name) {
-    return new KubernetesNamespace(clientFactory, sharedPool.getExecutor(), name, workspaceId);
+    return new KubernetesNamespace(
+        clientFactory, sharedPool.getExecutor(), name, workspaceId, annotations, labels);
   }
 
   /**

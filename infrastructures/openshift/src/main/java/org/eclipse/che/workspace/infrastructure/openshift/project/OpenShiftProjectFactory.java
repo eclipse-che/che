@@ -70,6 +70,8 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
         serviceAccountName,
         clusterRoleName,
         defaultNamespaceName,
+        null,
+        null,
         allowUserDefinedNamespaces,
         clientFactory,
         userManager,
