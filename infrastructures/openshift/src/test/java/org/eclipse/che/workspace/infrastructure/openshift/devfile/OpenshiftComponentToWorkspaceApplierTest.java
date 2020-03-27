@@ -58,6 +58,7 @@ public class OpenshiftComponentToWorkspaceApplierTest {
             "1Gi",
             "ReadWriteOnce",
             "",
+            "Always",
             k8sBasedComponents);
 
     workspaceConfig = new WorkspaceConfigImpl();
