@@ -66,6 +66,7 @@ items:
   spec:
       containers:
       - name: server
+        imagePullPolicy: Always
         image: test/petclinic
         ports:
         - containerPort: 8080
