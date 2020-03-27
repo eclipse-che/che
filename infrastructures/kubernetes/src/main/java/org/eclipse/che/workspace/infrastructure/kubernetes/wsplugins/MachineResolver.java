@@ -23,6 +23,7 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.Quantity;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +118,9 @@ public class MachineResolver {
           .getAttributes()
           .put(
               MEMORY_LIMIT_ATTRIBUTE,
-              Long.toString(KubernetesSize.toBytes(overriddenSidecarMemLimit)));
+              Long.toString(
+                  Quantity.getAmountInBytes(Quantity.parse(overriddenSidecarMemLimit))
+                      .longValue()));
     }
 
     long ramRequest = Containers.getRamRequest(container);
@@ -130,7 +133,9 @@ public class MachineResolver {
           .getAttributes()
           .put(
               MEMORY_REQUEST_ATTRIBUTE,
-              Long.toString(KubernetesSize.toBytes(overriddenSidecarMemRequest)));
+              Long.toString(
+                  Quantity.getAmountInBytes(Quantity.parse(overriddenSidecarMemRequest))
+                      .longValue()));
     }
   }
 

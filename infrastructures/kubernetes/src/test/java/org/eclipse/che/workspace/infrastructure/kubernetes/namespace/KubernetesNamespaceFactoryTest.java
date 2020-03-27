@@ -156,7 +156,9 @@ public class KubernetesNamespaceFactoryTest {
             .withNewMetadata()
             .withName("che-default")
             .endMetadata()
-            .withNewStatus("Active")
+            .withNewStatus()
+            .withNewPhase("Active")
+            .endStatus()
             .build());
     namespaceFactory =
         new KubernetesNamespaceFactory(
@@ -513,7 +515,9 @@ public class KubernetesNamespaceFactoryTest {
         .withNewMetadata()
         .withName(name)
         .endMetadata()
-        .withNewStatus(phase)
+        .withNewStatus()
+        .withNewPhase(phase)
+        .endStatus()
         .build();
   }
 }

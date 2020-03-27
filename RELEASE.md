@@ -90,3 +90,6 @@ RELEASE-TEMPLATE-END
  https://oss.sonatype.org/#stagingRepositories
 
  > **Note:** For bugfix release procedure will be similar except creating new branch on first step and update version in master branch. 
+
+# Script
+`make-release.sh` is a script that performs these actions, use --prerelease-testing flag to prepare "RC" release for QE testing, and --trigger-release to perform a release after that
