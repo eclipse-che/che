@@ -17,10 +17,13 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -251,6 +254,29 @@ public class WorkspaceActivityDaoTest {
     // then
     assertEquals(countIgnoringNewer, 1);
     assertEquals(countIncludingLatest, 2);
+  }
+
+  @Test
+  public void createdTimeMustSetLastStopped() throws TckRepositoryException, ServerException {
+    // given new workspace with created activity
+    AccountImpl newAccount = new AccountImpl("new_account", "new_account", "test");
+    WorkspaceImpl workspace = createWorkspace("new_ws", newAccount, "new_ws");
+    accountTckRepository.createAll(singletonList(newAccount));
+    wsTckRepository.createAll(singletonList(workspace));
+
+    Page<String> stopped =
+        workspaceActivityDao.findInStatusSince(Instant.now().toEpochMilli(), STOPPED, 100, 0);
+    assertTrue(stopped.isEmpty());
+
+    // when created workspace activity
+    workspaceActivityDao.setCreatedTime("new_ws", Instant.now().toEpochMilli());
+
+    // then find STOPPED must return it and activity must have set last_stopped timestamp
+    stopped = workspaceActivityDao.findInStatusSince(Instant.now().toEpochMilli(), STOPPED, 100, 0);
+    assertFalse(stopped.isEmpty());
+    assertEquals(stopped.getItemsCount(), 1);
+    WorkspaceActivity activity = workspaceActivityDao.findActivity("new_ws");
+    assertNotNull(activity.getLastStopped());
   }
 
   @DataProvider(name = "allWorkspaceStatuses")
