@@ -776,7 +776,9 @@
                   "description": "Describes action type",
                   "type": "string",
                   "examples": [
-                    "exec"
+                    "exec",
+                    "vscode-task",
+                    "vscode-launch"
                   ]
                 },
                 "component": {
