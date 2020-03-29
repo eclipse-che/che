@@ -15,20 +15,14 @@ import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.isLabeled;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
-import io.fabric8.kubernetes.api.model.Namespace;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServiceAccount;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.Watch;
-import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.*;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -68,6 +62,11 @@ public class KubernetesNamespace {
   private final String name;
   private final Map<String, String> annotations;
   private final Map<String, String> labels;
+  private final Map<String, Quantity> resourceQuota;
+  private final Map<String, Quantity> limitRangeLimit;
+  private final Map<String, Quantity> limitRangeRequest;
+  private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+  private static final Type type = new TypeToken<Map<String, String>>() {}.getType();
 
   private final KubernetesDeployments deployments;
   private final KubernetesServices services;
@@ -100,6 +99,9 @@ public class KubernetesNamespace {
 
     this.annotations = null;
     this.labels = null;
+    this.resourceQuota = null;
+    this.limitRangeLimit = null;
+    this.limitRangeRequest = null;
   }
 
   public KubernetesNamespace(
@@ -108,12 +110,18 @@ public class KubernetesNamespace {
       String name,
       String workspaceId,
       Map<String, String> annotations,
-      Map<String, String> labels) {
+      Map<String, String> labels,
+      Map<String, Quantity> resourceQuota,
+      Map<String, Quantity> limitRangeLimit,
+      Map<String, Quantity> limitRangeRequest) {
     this.clientFactory = clientFactory;
     this.workspaceId = workspaceId;
     this.name = name;
     this.annotations = annotations;
     this.labels = labels;
+    this.resourceQuota = resourceQuota;
+    this.limitRangeLimit = limitRangeLimit;
+    this.limitRangeRequest = limitRangeRequest;
     this.deployments = new KubernetesDeployments(name, workspaceId, clientFactory, executor);
     this.services = new KubernetesServices(name, workspaceId, clientFactory);
     this.pvcs = new KubernetesPersistentVolumeClaims(name, workspaceId, clientFactory);
@@ -154,6 +162,38 @@ public class KubernetesNamespace {
     }
     if (annotations != null || labels != null) {
       update(namespace, client);
+    }
+
+    if (resourceQuota != null) {
+      client
+          .resourceQuotas()
+          .inNamespace(name)
+          .createOrReplaceWithNew()
+          .withNewMetadata()
+          .withName("limits")
+          .withNamespace(name)
+          .endMetadata()
+          .withNewSpec()
+          .addToHard(resourceQuota)
+          .endSpec()
+          .done();
+
+      client
+          .limitRanges()
+          .inNamespace(name)
+          .createOrReplaceWithNew()
+          .withNewMetadata()
+          .withName("defaults")
+          .withNamespace(name)
+          .endMetadata()
+          .withNewSpec()
+          .addNewLimit()
+          .withType("Container")
+          .addToDefault(limitRangeLimit)
+          .addToDefaultRequest(limitRangeRequest)
+          .endLimit()
+          .endSpec()
+          .done();
     }
 
     if (markManaged && !isLabeled(namespace, MANAGED_NAMESPACE_LABEL, "true")) {

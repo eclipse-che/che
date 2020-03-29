@@ -26,6 +26,7 @@ import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -93,6 +94,9 @@ public class KubernetesNamespaceFactory {
   private static final Type type = new TypeToken<Map<String, String>>() {}.getType();
   private Map<String, String> annotations = null;
   private Map<String, String> labels = null;
+  private Map<String, Quantity> resourceQuota = null;
+  private Map<String, Quantity> limitRangeLimit = null;
+  private Map<String, Quantity> limitRangeRequest = null;
 
   @Inject
   public KubernetesNamespaceFactory(
@@ -102,6 +106,12 @@ public class KubernetesNamespaceFactory {
       @Nullable @Named("che.infra.kubernetes.namespace.default") String defaultNamespaceName,
       @Nullable @Named("che.infra.kubernetes.namespace.annotations_json") String annotationsString,
       @Nullable @Named("che.infra.kubernetes.namespace.labels_json") String labelsString,
+      @Nullable @Named("che.infra.kubernetes.namespace.resource_quota_json")
+          String resourceQuotaString,
+      @Nullable @Named("che.infra.kubernetes.namespace.limit_range_limit_json")
+          String limitRangeLimitString,
+      @Nullable @Named("che.infra.kubernetes.namespace.limit_range_request_json")
+          String limitRangeRequestString,
       @Named("che.infra.kubernetes.namespace.allow_user_defined")
           boolean allowUserDefinedNamespaces,
       KubernetesClientFactory clientFactory,
@@ -122,6 +132,18 @@ public class KubernetesNamespaceFactory {
     }
     if (labelsString != null) {
       labels = GSON.fromJson(labelsString, type);
+    }
+
+    if (resourceQuotaString != null) {
+      resourceQuota = GSON.fromJson(resourceQuotaString, type);
+    }
+
+    if (limitRangeLimitString != null) {
+      limitRangeLimit = GSON.fromJson(limitRangeLimitString, type);
+    }
+
+    if (limitRangeRequestString != null) {
+      limitRangeRequest = GSON.fromJson(limitRangeRequestString, type);
     }
 
     if (isNullOrEmpty(defaultNamespaceName)) {
@@ -149,7 +171,15 @@ public class KubernetesNamespaceFactory {
   @VisibleForTesting
   KubernetesNamespace doCreateNamespaceAccess(String workspaceId, String name) {
     return new KubernetesNamespace(
-        clientFactory, sharedPool.getExecutor(), name, workspaceId, annotations, labels);
+        clientFactory,
+        sharedPool.getExecutor(),
+        name,
+        workspaceId,
+        annotations,
+        labels,
+        resourceQuota,
+        limitRangeLimit,
+        limitRangeRequest);
   }
 
   /**

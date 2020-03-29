@@ -78,7 +78,7 @@ public class OpenShiftProject extends KubernetesNamespace {
 
   public OpenShiftProject(
       OpenShiftClientFactory clientFactory, Executor executor, String name, String workspaceId) {
-    super(clientFactory, executor, name, workspaceId, null, null);
+    super(clientFactory, executor, name, workspaceId, null, null, null, null, null);
     this.clientFactory = clientFactory;
     this.routes = new OpenShiftRoutes(name, workspaceId, clientFactory);
   }
