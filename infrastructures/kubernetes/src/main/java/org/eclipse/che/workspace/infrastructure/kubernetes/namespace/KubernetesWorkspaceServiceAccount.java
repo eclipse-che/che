@@ -71,8 +71,6 @@ public class KubernetesWorkspaceServiceAccount {
     if (k8sClient.serviceAccounts().inNamespace(namespace).withName(serviceAccountName).get()
         == null) {
       createWorkspaceServiceAccount(k8sClient);
-    } else {
-      return;
     }
 
     String execRoleName = "exec";
@@ -132,7 +130,7 @@ public class KubernetesWorkspaceServiceAccount {
                     .withVerbs("create")
                     .build())
             .build();
-    k8sClient.rbac().roles().inNamespace(namespace).create(execRole);
+    k8sClient.rbac().roles().inNamespace(namespace).createOrReplace(execRole);
   }
 
   private void createViewRole(KubernetesClient k8sClient, String name) {
@@ -148,7 +146,7 @@ public class KubernetesWorkspaceServiceAccount {
                     .withVerbs("list")
                     .build())
             .build();
-    k8sClient.rbac().roles().inNamespace(namespace).create(viewRole);
+    k8sClient.rbac().roles().inNamespace(namespace).createOrReplace(viewRole);
   }
 
   private RoleBinding createViewRoleBinding() {
