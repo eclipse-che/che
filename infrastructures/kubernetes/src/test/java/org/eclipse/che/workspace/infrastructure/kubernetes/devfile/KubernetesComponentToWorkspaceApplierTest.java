@@ -83,9 +83,11 @@ public class KubernetesComponentToWorkspaceApplierTest {
 
   @Captor private ArgumentCaptor<List<HasMetadata>> objectsCaptor;
 
+  private Set<String> k8sBasedComponents;
+
   @BeforeMethod
   public void setUp() {
-    Set<String> k8sBasedComponents = new HashSet<>();
+    k8sBasedComponents = new HashSet<>();
     k8sBasedComponents.add(KUBERNETES_COMPONENT_TYPE);
     k8sBasedComponents.add("openshift"); // so that we can work with the petclinic.yaml
     applier =
@@ -97,6 +99,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
             "1Gi",
             "ReadWriteOnce",
             "",
+            "Always",
             k8sBasedComponents);
 
     workspaceConfig = new WorkspaceConfigImpl();
@@ -180,12 +183,11 @@ public class KubernetesComponentToWorkspaceApplierTest {
     applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
 
     // then
+    KubernetesList list = toK8SList(yamlRecipeContent);
+    replaceImagePullPolicy(list, "Always");
     verify(k8sEnvProvisioner)
         .provision(
-            eq(workspaceConfig),
-            eq(KubernetesEnvironment.TYPE),
-            eq(toK8SList(yamlRecipeContent).getItems()),
-            anyMap());
+            eq(workspaceConfig), eq(KubernetesEnvironment.TYPE), eq(list.getItems()), anyMap());
   }
 
   @Test
@@ -200,12 +202,12 @@ public class KubernetesComponentToWorkspaceApplierTest {
 
     applier.apply(workspaceConfig, component, new URLFileContentProvider(null, null));
 
+    KubernetesList list = toK8SList(yamlRecipeContent);
+    replaceImagePullPolicy(list, "Always");
+
     verify(k8sEnvProvisioner)
         .provision(
-            eq(workspaceConfig),
-            eq(KubernetesEnvironment.TYPE),
-            eq(toK8SList(yamlRecipeContent).getItems()),
-            anyMap());
+            eq(workspaceConfig), eq(KubernetesEnvironment.TYPE), eq(list.getItems()), anyMap());
   }
 
   @Test
@@ -254,6 +256,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
                                 .getClaimName()
                                 .equals(PROJECTS_VOLUME_NAME)));
         for (Container c : p.getSpec().getContainers()) {
+          assertEquals(c.getImagePullPolicy(), "Always");
           assertTrue(
               c.getVolumeMounts()
                   .stream()
@@ -455,8 +458,61 @@ public class KubernetesComponentToWorkspaceApplierTest {
     }
   }
 
+  @Test
+  public void shouldBeAbleToOverrideImagePullPolicy() throws Exception {
+    // given
+    applier =
+        new KubernetesComponentToWorkspaceApplier(
+            k8sRecipeParser,
+            k8sEnvProvisioner,
+            envVars,
+            PROJECT_MOUNT_PATH,
+            "1Gi",
+            "ReadWriteOnce",
+            "",
+            "Never",
+            k8sBasedComponents);
+    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
+    doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
+    List<String> command = asList("teh", "command");
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setAlias(COMPONENT_NAME);
+
+    // when
+    applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
+
+    // then
+    verify(k8sEnvProvisioner).provision(any(), any(), objectsCaptor.capture(), any());
+    List<HasMetadata> list = objectsCaptor.getValue();
+    for (HasMetadata o : list) {
+      if (o instanceof Pod) {
+        Pod p = (Pod) o;
+
+        // ignore pods that don't have containers
+        if (p.getSpec() == null) {
+          continue;
+        }
+        for (Container con : p.getSpec().getContainers()) {
+          assertEquals(con.getImagePullPolicy(), "Never");
+        }
+      }
+    }
+  }
+
   private KubernetesList toK8SList(String content) {
     return unmarshal(content, KubernetesList.class);
+  }
+
+  private void replaceImagePullPolicy(KubernetesList list, String imagePullPolicy) {
+    list.getItems()
+        .stream()
+        .filter(item -> item instanceof Pod)
+        .map(item -> (Pod) item)
+        .filter(pod -> pod.getSpec() != null)
+        .flatMap(pod -> pod.getSpec().getContainers().stream())
+        .forEach(c -> c.setImagePullPolicy(imagePullPolicy));
   }
 
   private String getResource(String resourceName) throws IOException {

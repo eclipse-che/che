@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
+import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.api.model.Quantity;
@@ -93,6 +94,7 @@ public class PVCSubPathHelperTest {
         new PVCSubPathHelper(
             jobMemoryLimit,
             jobImage,
+            "IfNotPresent",
             k8sNamespaceFactory,
             securityContextProvisioner,
             new NoopExecutorServiceWrapper(),
@@ -128,6 +130,10 @@ public class PVCSubPathHelperTest {
 
     verify(osDeployments).create(podCaptor.capture());
     final List<String> actual = podCaptor.getValue().getSpec().getContainers().get(0).getCommand();
+
+    for (Container container : podCaptor.getValue().getSpec().getContainers()) {
+      assertEquals(container.getImagePullPolicy(), "IfNotPresent");
+    }
     final List<String> expected =
         Stream.concat(
                 Arrays.stream(MKDIR_COMMAND_BASE),
@@ -230,5 +236,28 @@ public class PVCSubPathHelperTest {
     verify(osDeployments).wait(anyString(), anyInt(), any());
     verify(podStatus).getPhase();
     verify(osDeployments).delete(anyString());
+  }
+
+  @Test
+  public void shouldBeAbleToConfigureImagePullPolicy() throws InfrastructureException {
+    // given
+    pvcSubPathHelper =
+        new PVCSubPathHelper(
+            jobMemoryLimit,
+            jobImage,
+            "ToBeOrNotIfPresent",
+            k8sNamespaceFactory,
+            securityContextProvisioner,
+            new NoopExecutorServiceWrapper(),
+            eventsPublisher);
+    // when
+    pvcSubPathHelper.execute(
+        WORKSPACE_ID, NAMESPACE, PVC_NAME, MKDIR_COMMAND_BASE, WORKSPACE_ID + PROJECTS_PATH);
+
+    // then
+    verify(osDeployments).create(podCaptor.capture());
+    for (Container container : podCaptor.getValue().getSpec().getContainers()) {
+      assertEquals(container.getImagePullPolicy(), "ToBeOrNotIfPresent");
+    }
   }
 }

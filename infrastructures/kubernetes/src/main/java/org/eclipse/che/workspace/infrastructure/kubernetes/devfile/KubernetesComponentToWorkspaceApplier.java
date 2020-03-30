@@ -70,6 +70,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   private final String environmentType;
   private final String projectFolderPath;
   private final String defaultProjectPVCSize;
+  private final String imagePullPolicy;
   private final Set<String> kubernetesBasedComponentTypes;
   private final String defaultPVCAccessMode;
   private final String pvcStorageClassName;
@@ -84,6 +85,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       @Named("che.workspace.projects.storage.default.size") String defaultProjectPVCSize,
       @Named("che.infra.kubernetes.pvc.access_mode") String defaultPVCAccessMode,
       @Named("che.infra.kubernetes.pvc.storage_class_name") String pvcStorageClassName,
+      @Named("che.workspace.sidecar.image_pull_policy") String imagePullPolicy,
       @Named(KUBERNETES_BASED_COMPONENTS_KEY_NAME) Set<String> kubernetesBasedComponentTypes) {
     this(
         objectsParser,
@@ -94,6 +96,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
         defaultProjectPVCSize,
         defaultPVCAccessMode,
         pvcStorageClassName,
+        imagePullPolicy,
         kubernetesBasedComponentTypes);
   }
 
@@ -106,6 +109,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       String defaultProjectPVCSize,
       String defaultPVCAccessMode,
       String pvcStorageClassName,
+      String imagePullPolicy,
       Set<String> kubernetesBasedComponentTypes) {
     this.objectsParser = objectsParser;
     this.k8sEnvProvisioner = k8sEnvProvisioner;
@@ -114,6 +118,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     this.defaultProjectPVCSize = defaultProjectPVCSize;
     this.defaultPVCAccessMode = defaultPVCAccessMode;
     this.pvcStorageClassName = pvcStorageClassName;
+    this.imagePullPolicy = imagePullPolicy;
     this.kubernetesBasedComponentTypes = kubernetesBasedComponentTypes;
     this.envVars = envVars;
   }
@@ -154,6 +159,11 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     }
 
     List<PodData> podsData = getPodDatas(componentObjects);
+
+    podsData
+        .stream()
+        .flatMap(e -> e.getSpec().getContainers().stream())
+        .forEach(c -> c.setImagePullPolicy(imagePullPolicy));
 
     if (Boolean.TRUE.equals(k8sComponent.getMountSources())) {
       applyProjectsVolumes(podsData, componentObjects);
