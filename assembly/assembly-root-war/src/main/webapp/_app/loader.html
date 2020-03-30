@@ -18,14 +18,25 @@
     <meta charset="UTF-8">
     <title>Workspace token loader</title>
 
-    <link rel="stylesheet" href="./loader.css"></link>
+    <link rel="stylesheet" href="./loader.css"/>
     <script type="module" src="loader.js" defer></script>
 </head>
 
 <body style="background-color: #21252b; transition: background-color 0.5s ease;">
+
+    <div id="workspace-loader">
+        <div id="workspace-loader-label">Loading a runtime token...</div>
+        <div id="workspace-loader-progress">
+            <div>
+                <div id="workspace-loader-progress-bar"></div>
+            </div>
+        </div>
+        <div id="workspace-loader-reload">Press F5 or click <a href="#">here</a> to try again.</div>
+    </div>
     <div id="workspace-console">
         <div id="workspace-console-container"></div>
     </div>
+
 </body>
 
 </html>

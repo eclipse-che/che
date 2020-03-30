@@ -13,6 +13,20 @@
 import { KeycloakLoader } from './keycloackLoader.js';
 
 /**
+ * Displays error message
+ * @param {string} message an error message to show
+ */
+function error(message) {
+    const container = document.getElementById("error-console");
+
+    const element = document.createElement("pre");
+    element.innerHTML = message;
+    element.style.color = 'red';
+    container.appendChild(element);
+    return element;
+}
+
+/**
  * Returns an array of query parameter values if it is present
  * @param {string} name of the query parameter
  */
@@ -90,38 +104,26 @@ function setAuthorizationHeader(xhr) {
     });
 }
 
-/**
- * Displays error message
- * @param {string} message an error message to show
- */
-function error(message) {
-
-    const element = document.createElement("pre");
-    element.innerHTML = message;
-    window.appendChild(element);
-    if (element.scrollIntoView) {
-        element.scrollIntoView();
+function sendToken(token) {
+    if (window.opener) {
+        window.opener.postMessage('token:' + (token ? token : ''),'*');
     }
-    element.style.color = "error";
-    return element;
 }
 
 (async () => {
     try {
+        const keycloak = await new KeycloakLoader().loadKeycloakSettings();
+        const oauthProvider = getQueryParams('providerName')[0];
+        const token = keycloak ? keycloak.token : undefined;
         const status = getQueryParams('status')[0]; {
             if (status && status === 'ready') {
-                window.opener.postMessage('authentication:ready','*');
+                sendToken(token);
                 return;
             }
         }
-        const oauthProvider = getQueryParams('providerName')[0];
         if (!oauthProvider) {
-            throw new Error('Provider name isn\'t found in query parameters.')
-        }
-        const method = getQueryParams('method')[0]; {
-            if (method && method === 'getToken') {
-                const token = await asyncGeToken(oauthProvider);
-                window.opener.postMessage('token:' + token,'*');
+            if (window.opener) {
+                sendToken(token);
                 return;
             }
         }
@@ -130,15 +132,14 @@ function error(message) {
         const apiUrl = cheUrl + '/api';
         const redirectUrl = currentUrl.substring(0, currentUrl.indexOf('?')) + '?status=ready';
         let url = `${apiUrl}/oauth/authenticate?oauth_provider=${oauthProvider}&userId=${await asyncGeUserId()}`;
-        const scope = this.getQueryParams('scope'); {
+        const scope = getQueryParams('scope'); {
             for (const s of scope) {
                 url += `&scope=${s}`;
             }
         }
         url += `&redirect_after_login=${redirectUrl}`;
-        const keycloak = await new KeycloakLoader().loadKeycloakSettings();
-        if (keycloak && keycloak.token) {
-            url += `&token=${keycloak.token}`;
+        if (token) {
+            url += `&token=${token}`;
         }
         window.location.replace(url);
     } catch (errorMessage) {
