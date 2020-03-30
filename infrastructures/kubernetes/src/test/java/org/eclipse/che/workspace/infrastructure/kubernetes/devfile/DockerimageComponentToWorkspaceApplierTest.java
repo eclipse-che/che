@@ -83,7 +83,8 @@ public class DockerimageComponentToWorkspaceApplierTest {
   @BeforeMethod
   public void setUp() throws Exception {
     dockerimageComponentApplier =
-        new DockerimageComponentToWorkspaceApplier(PROJECTS_MOUNT_PATH, k8sEnvProvisioner);
+        new DockerimageComponentToWorkspaceApplier(
+            PROJECTS_MOUNT_PATH, "Always", k8sEnvProvisioner);
     workspaceConfig = new WorkspaceConfigImpl();
   }
 
@@ -126,8 +127,48 @@ public class DockerimageComponentToWorkspaceApplierTest {
     Container container = podTemplate.getSpec().getContainers().get(0);
     assertEquals(container.getName(), "jdk");
     assertEquals(container.getImage(), "eclipse/ubuntu_jdk8:latest");
+    assertEquals(container.getImagePullPolicy(), "Always");
 
     assertEquals(Names.machineName(podMeta, container), "jdk");
+  }
+
+  @Test
+  public void shouldBeAbleToSetupSpecificImagePullPolicy() throws DevfileException {
+    ComponentImpl dockerimageComponent = new ComponentImpl();
+    dockerimageComponent.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
+    dockerimageComponent.setMemoryLimit("1G");
+    dockerimageComponentApplier =
+        new DockerimageComponentToWorkspaceApplier(PROJECTS_MOUNT_PATH, "Never", k8sEnvProvisioner);
+
+    // when
+    dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
+
+    // then
+    verify(k8sEnvProvisioner)
+        .provision(
+            any(),
+            eq(KubernetesEnvironment.TYPE),
+            objectsCaptor.capture(),
+            machinesCaptor.capture());
+    MachineConfigImpl machineConfig = machinesCaptor.getValue().get("eclipse-ubuntu_jdk8-latest");
+    assertNotNull(machineConfig);
+
+    List<HasMetadata> objects = objectsCaptor.getValue();
+    assertEquals(objects.size(), 1);
+    assertTrue(objects.get(0) instanceof Deployment);
+    Deployment deployment = (Deployment) objects.get(0);
+    PodTemplateSpec podTemplate = deployment.getSpec().getTemplate();
+    ObjectMeta podMeta = podTemplate.getMetadata();
+    assertEquals(podMeta.getName(), "eclipse-ubuntu_jdk8-latest");
+
+    Map<String, String> deploymentSelector = deployment.getSpec().getSelector().getMatchLabels();
+    assertFalse(deploymentSelector.isEmpty());
+    assertTrue(podMeta.getLabels().entrySet().containsAll(deploymentSelector.entrySet()));
+
+    Container container = podTemplate.getSpec().getContainers().get(0);
+    assertEquals(container.getName(), "eclipse-ubuntu_jdk8-latest");
+    assertEquals(container.getImagePullPolicy(), "Never");
   }
 
   @Test
