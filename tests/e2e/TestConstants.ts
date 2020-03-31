@@ -148,7 +148,7 @@ export const TestConstants = {
     /**
      * Log into OCP by using appropriate provider title.
      */
-    TS_OCP_LOGIN_PAGE_PROVIDER_TITLE: process.env.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE || 'htpasswd',
+    TS_OCP_LOGIN_PAGE_PROVIDER_TITLE: process.env.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE || '',
 
     /**
      * Log into CHE in MultiUser mode, "false" by default.
