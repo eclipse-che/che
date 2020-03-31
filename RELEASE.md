@@ -34,7 +34,7 @@ Then in series:
     - [ ] che-docs _(depends on parent)_
     - [ ] che-dashboard _(depends on parent)_
     - [ ] che-workspace-loader _(depends on parent)_
-        - [ ] che + quay images _(depends on docs and parent)_
+        - [ ] che + quay images _(depends on docs, dashboard, workspace-loader and parent)_
 - [ ] che-operator
   - [ ] Kubernetes community operator PR
   - [ ] OpenShift community operator PR
