@@ -96,7 +96,7 @@ function sendToken(token) {
                 return;
             }
         }
-        const oauthProvider = getQueryParams('providerName')[0];
+        const oauthProvider = getQueryParams('oauth_provider')[0];
         if (!oauthProvider) {
             sendToken(token);
             return;
