@@ -410,6 +410,7 @@ public class KubernetesInternalRuntimeTest {
     verify(services).create(any());
     verify(secrets).create(any());
     verify(configMaps).create(any());
+    verify(namespace).cleanUp();
     verify(namespace.deployments(), times(1)).watchEvents(any());
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
@@ -617,7 +618,7 @@ public class KubernetesInternalRuntimeTest {
     try {
       internalRuntime.start(emptyMap());
     } catch (Exception rethrow) {
-      verify(namespace).cleanUp();
+      verify(namespace, times(2)).cleanUp();
       verify(namespace, never()).services();
       verify(namespace, never()).ingresses();
       throw rethrow;
@@ -663,7 +664,7 @@ public class KubernetesInternalRuntimeTest {
     try {
       internalRuntime.start(emptyMap());
     } catch (Exception rethrow) {
-      verify(namespace).cleanUp();
+      verify(namespace, times(2)).cleanUp();
       verify(namespace).services();
       verify(namespace, never()).ingresses();
       throw rethrow;
