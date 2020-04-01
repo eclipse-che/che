@@ -136,6 +136,24 @@ public class UnrecoverablePodEventListenerTest {
     verify(unrecoverableEventConsumer, never()).accept(any());
   }
 
+  @Test
+  public void testFailedContainersInWorkspacePodAlwaysHandled() {
+    // given
+    PodEvent ev =
+        mockContainerEvent(
+            WORKSPACE_POD_NAME,
+            "Failed",
+            "bah",
+            EVENT_CREATION_TIMESTAMP,
+            getCurrentTimestampWithOneHourShiftAhead());
+
+    // when
+    unrecoverableEventListener.handle(ev);
+
+    // then
+    verify(unrecoverableEventConsumer).accept(any());
+  }
+
   /**
    * Mock a container event, as though it was triggered by the OpenShift API. As workspace Pods are
    * created indirectly through deployments, they are given generated names with the provided name

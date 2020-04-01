@@ -23,16 +23,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.Kube
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.setSelector;
 
 import com.google.common.base.Strings;
-import io.fabric8.kubernetes.api.model.ContainerStateTerminated;
-import io.fabric8.kubernetes.api.model.ContainerStatus;
-import io.fabric8.kubernetes.api.model.DoneablePod;
-import io.fabric8.kubernetes.api.model.Event;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.ObjectReference;
-import io.fabric8.kubernetes.api.model.OwnerReference;
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodSpec;
-import io.fabric8.kubernetes.api.model.PodStatus;
+import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
@@ -413,6 +404,15 @@ public class KubernetesDeployments {
 
       for (ContainerStatus cs : status.getContainerStatuses()) {
         ContainerStateTerminated terminated = cs.getState().getTerminated();
+
+        if (terminated == null) {
+          ContainerStateWaiting waiting = cs.getState().getWaiting();
+          // we've caught the container waiting for a restart after a failure
+          if (waiting != null) {
+            terminated = cs.getLastState().getTerminated();
+          }
+        }
+
         if (terminated != null) {
           terminatedContainers.put(
               cs.getName(),
