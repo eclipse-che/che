@@ -249,7 +249,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       } else if (sameNameMount.isPresent()) {
         throw new DevfileException(
             format(
-                "Conflicting volume with same name ('%s') but different path ('%s') found for component %s and its container %s.",
+                "Conflicting volume with same name ('%s') but different path ('%s') found for component '%s' and its container '%s'.",
                 v.getName(),
                 v.getContainerPath(),
                 getIdentifiableComponentName(component),
@@ -261,9 +261,9 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
           .anyMatch(volume -> volume.getMountPath().equals(v.getContainerPath()))) {
         throw new DevfileException(
             format(
-                "Conflicting volume with same path ('%s') but different name ('%s') found for component %s and its container %s.",
+                "Conflicting volume with same path ('%s') but different name ('%s') found for component '%s' and its container '%s'.",
                 v.getContainerPath(),
-                v.getContainerPath(),
+                v.getName(),
                 getIdentifiableComponentName(component),
                 container.getName()));
       }
