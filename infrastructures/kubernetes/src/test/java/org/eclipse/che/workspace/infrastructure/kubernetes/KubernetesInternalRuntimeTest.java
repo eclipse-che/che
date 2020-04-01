@@ -142,7 +142,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarTool
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeMethod;
@@ -420,6 +422,19 @@ public class KubernetesInternalRuntimeTest {
     verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
     verify(serversChecker, times(2)).startAsync(any());
     verify(namespace.deployments(), times(1)).stopWatch();
+  }
+
+  @Test
+  public void testCleanupHappensFirst() throws InfrastructureException {
+    internalRuntime.start(emptyMap());
+
+    InOrder cleanupInOrderExecutionVerification =
+        Mockito.inOrder(namespace, deployments, toolingProvisioner);
+    cleanupInOrderExecutionVerification.verify(namespace).cleanUp();
+    cleanupInOrderExecutionVerification
+        .verify(toolingProvisioner)
+        .provision(any(), any(), any(), any());
+    cleanupInOrderExecutionVerification.verify(deployments).deploy(any(Pod.class));
   }
 
   @Test
