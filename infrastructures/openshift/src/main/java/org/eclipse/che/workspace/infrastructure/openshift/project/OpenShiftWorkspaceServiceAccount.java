@@ -69,6 +69,15 @@ class OpenShiftWorkspaceServiceAccount {
   void prepare() throws InfrastructureException {
     OpenShiftClient osClient = clientFactory.createOC(workspaceId);
 
+    String stopWorkspacesRoleName = "workspace-stop";
+    if (osClient.roles().inNamespace(projectName).withName(stopWorkspacesRoleName).get() == null) {
+      createStopWorkspacesRole(osClient, stopWorkspacesRoleName);
+    }
+    osClient
+        .roleBindings()
+        .inNamespace(projectName)
+        .createOrReplace(createStopWorkspacesRoleBinding());
+
     if (osClient.serviceAccounts().inNamespace(projectName).withName(serviceAccountName).get()
         == null) {
       createWorkspaceServiceAccount(osClient);
@@ -142,6 +151,37 @@ class OpenShiftWorkspaceServiceAccount {
     osClient.roles().inNamespace(projectName).create(viewRole);
   }
 
+  private void createStopWorkspacesRole(OpenShiftClient osClient, String name) {
+    OpenshiftRole stopRole =
+        new OpenshiftRoleBuilder()
+            .withNewMetadata()
+            .withName(name)
+            .endMetadata()
+            .withRules(
+                new PolicyRuleBuilder()
+                    .withApiGroups("")
+                    .withResources("pods")
+                    .withVerbs("get", "list", "watch", "delete")
+                    .build(),
+                new PolicyRuleBuilder()
+                    .withApiGroups("")
+                    .withResources("configmaps", "services", "secrets")
+                    .withVerbs("delete", "list", "get")
+                    .build(),
+                new PolicyRuleBuilder()
+                    .withApiGroups("route.openshift.io")
+                    .withResources("routes")
+                    .withVerbs("delete", "list")
+                    .build(),
+                new PolicyRuleBuilder()
+                    .withApiGroups("apps")
+                    .withResources("deployments", "replicasets")
+                    .withVerbs("delete", "list", "get", "patch")
+                    .build())
+            .build();
+    osClient.roles().inNamespace(projectName).create(stopRole);
+  }
+
   private OpenshiftRoleBinding createViewRoleBinding() {
     return new OpenshiftRoleBindingBuilder()
         .withNewMetadata()
@@ -174,6 +214,25 @@ class OpenShiftWorkspaceServiceAccount {
             new ObjectReferenceBuilder()
                 .withKind("ServiceAccount")
                 .withName(serviceAccountName)
+                .build())
+        .build();
+  }
+
+  private OpenshiftRoleBinding createStopWorkspacesRoleBinding() {
+    return new OpenshiftRoleBindingBuilder()
+        .withNewMetadata()
+        .withName(serviceAccountName + "-stop")
+        .withNamespace(projectName)
+        .endMetadata()
+        .withNewRoleRef()
+        .withName("workspace-stop")
+        .withNamespace(projectName)
+        .endRoleRef()
+        .withSubjects(
+            new ObjectReferenceBuilder()
+                .withKind("ServiceAccount")
+                .withName("che")
+                .withNamespace("che")
                 .build())
         .build();
   }
