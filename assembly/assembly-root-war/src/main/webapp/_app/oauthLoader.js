@@ -80,25 +80,76 @@ function setAuthorizationHeader(xhr) {
     });
 }
 
-function sendToken(token) {
+function postMessage(message) {
     if (window.opener) {
-        window.opener.postMessage('token:' + (token ? token : ''),'*');
+        window.opener.postMessage(message, '*');
     }
+}
+
+/**
+ * Fetches workspace details by ID
+ * @param {string} workspaceId a workspace id
+ */
+function getWorkspace(workspaceId) {
+    return new Promise((resolve, reject) => {
+        const request = new XMLHttpRequest();
+        request.open("GET", '/api/workspace/' + workspaceId);
+        setAuthorizationHeader(request).then((xhr) => {
+            xhr.send();
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState !== 4) {
+                    return;
+                }
+                if (xhr.status !== 200) {
+                    const errorMessage = 'Failed to get the workspace: "' + this.getRequestErrorMessage(xhr) + '"';
+                    reject(new Error(errorMessage));
+                    return;
+                }
+                resolve(undefined);
+            };
+        });
+    });
+}
+
+
+function parseToken (token) {
+    return JSON.parse(atob(token.split('.')[1]));
 }
 
 (async () => {
     try {
         const keycloak = await new KeycloakLoader().loadKeycloakSettings();
         const token = keycloak ? keycloak.token : undefined;
+        if (token) {
+            await new Promise((resolve, reject) => {
+                window.addEventListener('message', async data => {
+                    if (data.data.startsWith('token:')) {
+                        const machineToken = parseToken(data.data.substring(7, data.data.length));
+                        const userToken = parseToken(token);
+                        if (machineToken.uid === userToken.sub) {
+                            try {
+                                await getWorkspace(machineToken.wsid);
+                            } catch (e) {
+                                reject(e);
+                            }
+                        } else {
+                            reject(new Error('Machine and user token mismatch'));
+                        }
+                        resolve(undefined);
+                    }
+                });
+                postMessage('status:ready-to-receive-messages');
+            });
+        }
         const status = getQueryParams('status')[0]; {
             if (status && status === 'ready') {
-                sendToken(token);
+                postMessage('token:' + (token ? token : ''));
                 return;
             }
         }
         const oauthProvider = getQueryParams('oauth_provider')[0];
         if (!oauthProvider) {
-            sendToken(token);
+            postMessage('token:' + (token ? token : ''));
             return;
         }
         const currentUrl = window.location.href;
