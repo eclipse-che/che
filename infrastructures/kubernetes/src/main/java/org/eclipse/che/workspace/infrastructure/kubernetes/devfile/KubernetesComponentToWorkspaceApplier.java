@@ -18,8 +18,11 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Components.getIdentifiableComponentName;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.DISCOVERABLE_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Names.machineName;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.ComponentToWorkspaceApplierUtils.createService;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.ComponentToWorkspaceApplierUtils.toServerConfig;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesDevfileBindings.KUBERNETES_BASED_COMPONENTS_KEY_NAME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newPVC;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolume;
@@ -51,6 +54,7 @@ import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
@@ -152,12 +156,22 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
 
     String componentContent = retrieveContent(k8sComponent, contentProvider);
 
-    List<HasMetadata> componentObjects =
-        new ArrayList<>(unmarshalComponentObjects(k8sComponent, componentContent));
+    final List<HasMetadata> componentObjects;
 
     if (!k8sComponent.getSelector().isEmpty()) {
-      componentObjects = SelectorFilter.filter(componentObjects, k8sComponent.getSelector());
+      componentObjects =
+          SelectorFilter.filter(
+              new ArrayList<>(unmarshalComponentObjects(k8sComponent, componentContent)),
+              k8sComponent.getSelector());
+    } else {
+      componentObjects = new ArrayList<>(unmarshalComponentObjects(k8sComponent, componentContent));
     }
+
+    k8sComponent
+        .getEndpoints()
+        .stream()
+        .filter(e -> "true".equals(e.getAttributes().get(DISCOVERABLE_ENDPOINT_ATTRIBUTE)))
+        .forEach(e -> componentObjects.add(createService(k8sComponent.getAlias(), e)));
 
     List<PodData> podsData = getPodDatas(componentObjects);
 
@@ -177,6 +191,14 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     applyEntrypoints(k8sComponent.getEntrypoints(), componentObjects);
 
     Map<String, MachineConfigImpl> machineConfigs = prepareMachineConfigs(podsData, k8sComponent);
+
+    k8sComponent
+        .getEndpoints()
+        .forEach(
+            e ->
+                machineConfigs.forEach(
+                    (machinaName, machineConfig) ->
+                        machineConfig.getServers().put(e.getName(), toServerConfig(e))));
 
     linkCommandsToMachineName(workspaceConfig, k8sComponent, machineConfigs.keySet());
 

@@ -21,6 +21,11 @@ components:
     endpoints:
       - name: test-endpoint-os
         port: 1234
+        attributes:
+          protocol: http
+          secure: 'true'
+          public: 'true'
+          discoverable: 'false'
   - alias: web-app
     type: kubernetes
     reference: petclinic.yaml
