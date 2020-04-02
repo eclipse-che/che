@@ -124,7 +124,7 @@ function parseToken (token) {
             await new Promise((resolve, reject) => {
                 window.addEventListener('message', async data => {
                     if (data.data.startsWith('token:')) {
-                        const machineToken = parseToken(data.data.substring(7, data.data.length));
+                        const machineToken = parseToken(data.data.substring(6, data.data.length));
                         const userToken = parseToken(token);
                         if (machineToken.uid === userToken.sub) {
                             try {
