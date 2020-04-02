@@ -28,7 +28,10 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.wsplugins.model.Exec;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
+import org.eclipse.che.api.workspace.server.wsplugins.model.Handler;
+import org.eclipse.che.api.workspace.server.wsplugins.model.Lifecycle;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.mockito.Mock;
@@ -48,6 +51,16 @@ public class PluginFQNParserTest {
   @BeforeClass
   public void setUp() throws Exception {
     parser = new PluginFQNParser();
+  }
+
+  @Test
+  public void test() {
+    Lifecycle lifecycle = new Lifecycle();
+    lifecycle
+        .postStart(new Handler().exec(new Exec().command(Collections.singletonList("test"))))
+        .preStop(new Handler().exec(new Exec().command(Collections.singletonList("test"))));
+
+    System.out.println(lifecycle.toString());
   }
 
   @Test
