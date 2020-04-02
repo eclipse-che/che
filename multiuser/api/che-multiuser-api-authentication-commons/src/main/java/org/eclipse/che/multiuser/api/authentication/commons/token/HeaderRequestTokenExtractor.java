@@ -24,7 +24,7 @@ public class HeaderRequestTokenExtractor implements RequestTokenExtractor {
       return null;
     }
     if (req.getHeader(HttpHeaders.AUTHORIZATION).toLowerCase().startsWith("bearer")) {
-      String[] parts = req.getHeader(HttpHeaders.AUTHORIZATION).split(" ");
+      String[] parts = req.getHeader(HttpHeaders.AUTHORIZATION).split("\\s+");
       if (parts.length != 2) {
         throw new BadRequestException("Invalid authorization header format.");
       }
