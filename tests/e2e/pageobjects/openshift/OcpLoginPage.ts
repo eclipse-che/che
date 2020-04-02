@@ -45,15 +45,8 @@ export class OcpLoginPage {
     async isIdentityProviderLinkVisible(): Promise<boolean> {
         Logger.debug('OcpLoginPage.isIdentityProviderLinkVisible');
 
-        const loginWithHtpaswdLocator: By = By.css('a[title=\'Log in with htpasswd\']');
+        const loginWithHtpaswdLocator: By = By.css(`a[title=\'Log in with ${TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
         return await this.driverHelper.waitVisibilityBoolean(loginWithHtpaswdLocator, 3, 5000);
-    }
-
-    async clickOnLoginWitnHtpasswd() {
-        Logger.debug('OcpLoginPage.clickOnLoginWitnHtpasswd');
-
-        const loginWithHtpaswdLocator: By = By.css('a[title=\'Log in with htpasswd\']');
-        await this.driverHelper.waitAndClick(loginWithHtpaswdLocator);
     }
 
     async isAuthorizeOpenShiftIdentityProviderPageVisible(): Promise<boolean> {

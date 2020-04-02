@@ -27,7 +27,7 @@ export class RegularUserOcpCheLoginPage implements ICheLoginPage {
         Logger.debug('RegularUserOcpCheLoginPage.login');
 
         if (await this.ocpLogin.isIdentityProviderLinkVisible()) {
-            await this.ocpLogin.clickOnLoginWitnHtpasswd();
+            await this.ocpLogin.clickOnLoginProviderTitle();
         }
 
         await this.ocpLogin.waitOpenShiftLoginWelcomePage();

@@ -186,6 +186,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       startSynchronizer.setStartThread();
       startSynchronizer.start();
 
+      namespace.cleanUp();
+
       // Tooling side car provisioner should be applied before other provisioners
       // because new machines may be provisioned there
       toolingProvisioner.provision(

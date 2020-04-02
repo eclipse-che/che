@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install && \
     apt-get install -y nodejs && \
     apt-get install -y npm && \
     npm install -g typescript && \
-    apt-get install x11vnc -y
+    apt-get install x11vnc ffmpeg -y
 
 RUN mkdir /tmp/e2e && \
     chmod -R 777 /tmp/e2e
