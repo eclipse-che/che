@@ -44,11 +44,12 @@ public class HeaderRequestTokenExtractorTest {
   }
 
   @Test(
+      dataProvider = "invalidHeadersProvider",
       expectedExceptions = BadRequestException.class,
       expectedExceptionsMessageRegExp = "Invalid authorization header format.")
-  public void shouldThrowExceptionOnInvalidToken() {
+  public void shouldThrowExceptionOnInvalidToken(String headerValue) {
 
-    when(servletRequest.getHeader(eq(AUTHORIZATION))).thenReturn("bearertoken123");
+    when(servletRequest.getHeader(eq(AUTHORIZATION))).thenReturn(headerValue);
 
     // when
     tokenExtractor.getToken(servletRequest);
@@ -61,5 +62,10 @@ public class HeaderRequestTokenExtractorTest {
       {"bearer token123", "token123"},
       {"Bearer token123", "token123"},
     };
+  }
+
+  @DataProvider
+  private Object[][] invalidHeadersProvider() {
+    return new Object[][] {{"bearertoken123"}, {"bearer   token123"}, {"bearer token 123"}};
   }
 }
