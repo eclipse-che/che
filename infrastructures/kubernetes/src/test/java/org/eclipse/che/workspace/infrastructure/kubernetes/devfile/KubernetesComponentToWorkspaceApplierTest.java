@@ -314,7 +314,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
       expectedExceptions = DevfileException.class,
       expectedExceptionsMessageRegExp =
           "Conflicting volume with same name \\('foo_volume'\\) but different path \\('/foo1'\\) found for component 'foo' and its container 'server'.")
-  public void shouldThrowExceptionWhenDevfileVolumeNameIsExists() throws Exception {
+  public void shouldThrowExceptionWhenDevfileVolumeNameExists() throws Exception {
     // given
     String yamlRecipeContent = getResource("devfile/petclinic.yaml");
     List<HasMetadata> k8sList = toK8SList(yamlRecipeContent).getItems();
@@ -333,7 +333,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
       expectedExceptions = DevfileException.class,
       expectedExceptionsMessageRegExp =
           "Conflicting volume with same path \\('/foo/bar'\\) but different name \\('foo'\\) found for component 'foo' and its container 'server'.")
-  public void shouldThrowExceptionWhenDevfileVolumePathIsExists() throws Exception {
+  public void shouldThrowExceptionWhenDevfileVolumePathExists() throws Exception {
     // given
     String yamlRecipeContent = getResource("devfile/petclinic.yaml");
     List<HasMetadata> k8sList = toK8SList(yamlRecipeContent).getItems();

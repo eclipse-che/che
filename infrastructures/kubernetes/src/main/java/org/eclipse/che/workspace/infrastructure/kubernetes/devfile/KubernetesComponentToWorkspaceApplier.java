@@ -235,39 +235,43 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   private void provisionVolumes(
       ComponentImpl component, Container container, MachineConfigImpl config)
       throws DevfileException {
-    for (org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl v :
+    for (org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl componentVolume :
         component.getVolumes()) {
       Optional<VolumeMount> sameNameMount =
           container
               .getVolumeMounts()
               .stream()
-              .filter(volume -> volume.getName().equals(v.getName()))
+              .filter(vm -> vm.getName().equals(componentVolume.getName()))
               .findFirst();
       if (sameNameMount.isPresent()
-          && sameNameMount.get().getMountPath().equals(v.getContainerPath())) {
+          && sameNameMount.get().getMountPath().equals(componentVolume.getContainerPath())) {
         continue;
       } else if (sameNameMount.isPresent()) {
         throw new DevfileException(
             format(
                 "Conflicting volume with same name ('%s') but different path ('%s') found for component '%s' and its container '%s'.",
-                v.getName(),
-                v.getContainerPath(),
+                componentVolume.getName(),
+                componentVolume.getContainerPath(),
                 getIdentifiableComponentName(component),
                 container.getName()));
       }
       if (container
           .getVolumeMounts()
           .stream()
-          .anyMatch(volume -> volume.getMountPath().equals(v.getContainerPath()))) {
+          .anyMatch(vm -> vm.getMountPath().equals(componentVolume.getContainerPath()))) {
         throw new DevfileException(
             format(
                 "Conflicting volume with same path ('%s') but different name ('%s') found for component '%s' and its container '%s'.",
-                v.getContainerPath(),
-                v.getName(),
+                componentVolume.getContainerPath(),
+                componentVolume.getName(),
                 getIdentifiableComponentName(component),
                 container.getName()));
       }
-      config.getVolumes().put(v.getName(), new VolumeImpl().withPath(v.getContainerPath()));
+      config
+          .getVolumes()
+          .put(
+              componentVolume.getName(),
+              new VolumeImpl().withPath(componentVolume.getContainerPath()));
     }
   }
 
