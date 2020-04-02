@@ -59,7 +59,7 @@ public class HeaderRequestTokenExtractorTest {
     return new Object[][] {
       {"token123", "token123"},
       {"bearer token123", "token123"},
-      {"bearer       token123", "token123"},
+      {"Bearer token123", "token123"},
     };
   }
 }
