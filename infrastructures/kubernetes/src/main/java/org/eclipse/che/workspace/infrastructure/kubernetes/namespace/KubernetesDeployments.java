@@ -535,7 +535,7 @@ public class KubernetesDeployments {
                     // https://github.com/kubernetes/kubernetes/pull/86557
                     lastTimestamp = firstTimestamp;
                   } else {
-                    LOG.warn(
+                    LOG.debug(
                         "lastTimestamp and firstTimestamp are undefined. Event: {}.  Fallback to the current time.",
                         event);
                     lastTimestamp = PodEvents.convertDateToEventTimestamp(new Date());
