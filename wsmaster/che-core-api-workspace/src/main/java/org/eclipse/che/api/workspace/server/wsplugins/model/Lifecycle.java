@@ -88,11 +88,6 @@ public class Lifecycle {
 
   @Override
   public String toString() {
-    return "Lifecycle{"
-        + "postStart="
-        + postStart
-        + ", preStop="
-        + preStop
-        + '}';
+    return "Lifecycle{" + "postStart=" + postStart + ", preStop=" + preStop + '}';
   }
 }

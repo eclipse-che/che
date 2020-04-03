@@ -52,9 +52,6 @@ public class Handler {
 
   @Override
   public String toString() {
-    return "Handler{"
-     + "exec="
-     + exec
-     + '}';
+    return "Handler{" + "exec=" + exec + '}';
   }
 }

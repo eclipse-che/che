@@ -63,9 +63,6 @@ public class Exec {
 
   @Override
   public String toString() {
-    return "Exec{"
-    + "command="
-    + command
-    + '}';
+    return "Exec{" + "command=" + command + '}';
   }
 }
