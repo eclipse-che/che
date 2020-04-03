@@ -117,9 +117,14 @@ function parseToken (token) {
 }
 
 (async () => {
+    let token;
     try {
         const keycloak = await new KeycloakLoader().loadKeycloakSettings();
-        const token = keycloak ? keycloak.token : undefined;
+        token = keycloak ? keycloak.token : undefined;
+    } catch (e) {
+        console.log(e.message);
+    }
+    try {
         if (token) {
             await new Promise((resolve, reject) => {
                 window.addEventListener('message', async data => {
