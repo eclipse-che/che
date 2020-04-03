@@ -19,6 +19,8 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Defines an internal API for managing {@link Secret} instances in {@link
@@ -64,6 +66,7 @@ public class KubernetesSecrets {
           .secrets()
           .inNamespace(namespace)
           .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
+          .withPropagationPolicy("Foreground")
           .delete();
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
