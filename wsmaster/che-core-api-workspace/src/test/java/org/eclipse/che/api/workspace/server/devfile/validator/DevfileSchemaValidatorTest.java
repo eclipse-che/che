@@ -50,7 +50,7 @@ public class DevfileSchemaValidatorTest {
       {"editor_plugin_component/devfile_editor_component_with_custom_registry.yaml"},
       {"editor_plugin_component/devfile_editor_plugins_components_with_resource_limits.yaml"},
       {"editor_plugin_component/devfile_plugin_components_with_preferences.yaml"},
-      {"kubernetes_openshift_component/devfile_kubernetes_component_reference.yaml"},
+      {"kubernetes_openshift_component/devfile_kubernetes_component.yaml"},
       {"kubernetes_openshift_component/devfile_kubernetes_component_absolute_reference.yaml"},
       {"component/devfile_without_any_component.yaml"},
       {

@@ -40,11 +40,13 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
@@ -53,6 +55,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
@@ -267,6 +270,85 @@ public class KubernetesComponentToWorkspaceApplierTest {
         }
       }
     }
+  }
+
+  @Test
+  public void shouldProvisionDevfileVolumesIfSpecifiedIntoMachineConfig() throws Exception {
+    // given
+    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
+    List<HasMetadata> k8sList = toK8SList(yamlRecipeContent).getItems();
+    doReturn(k8sList).when(k8sRecipeParser).parse(anyString());
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setAlias(COMPONENT_NAME);
+    component.setVolumes(asList(new VolumeImpl("foo", "/foo1"), new VolumeImpl("bar", "/bar1")));
+    ArgumentCaptor<Map<String, MachineConfigImpl>> mapCaptor = ArgumentCaptor.forClass(Map.class);
+
+    // when
+    applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
+
+    // then
+    verify(k8sEnvProvisioner).provision(any(), any(), any(), mapCaptor.capture());
+    Map<String, MachineConfigImpl> configMaps = mapCaptor.getValue();
+
+    for (MachineConfig config : configMaps.values()) {
+      assertEquals(config.getVolumes().size(), 2);
+      assertTrue(
+          config
+              .getVolumes()
+              .entrySet()
+              .stream()
+              .anyMatch(
+                  entry ->
+                      entry.getKey().equals("foo") && entry.getValue().getPath().equals("/foo1")));
+      assertTrue(
+          config
+              .getVolumes()
+              .entrySet()
+              .stream()
+              .anyMatch(
+                  entry ->
+                      entry.getKey().equals("bar") && entry.getValue().getPath().equals("/bar1")));
+    }
+  }
+
+  @Test(
+      expectedExceptions = DevfileException.class,
+      expectedExceptionsMessageRegExp =
+          "Conflicting volume with same name \\('foo_volume'\\) but different path \\('/foo1'\\) found for component 'foo' and its container 'server'.")
+  public void shouldThrowExceptionWhenDevfileVolumeNameExists() throws Exception {
+    // given
+    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
+    List<HasMetadata> k8sList = toK8SList(yamlRecipeContent).getItems();
+    doReturn(k8sList).when(k8sRecipeParser).parse(anyString());
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setAlias(COMPONENT_NAME);
+    component.setVolumes(Collections.singletonList(new VolumeImpl("foo_volume", "/foo1")));
+
+    // when
+    applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
+  }
+
+  @Test(
+      expectedExceptions = DevfileException.class,
+      expectedExceptionsMessageRegExp =
+          "Conflicting volume with same path \\('/foo/bar'\\) but different name \\('foo'\\) found for component 'foo' and its container 'server'.")
+  public void shouldThrowExceptionWhenDevfileVolumePathExists() throws Exception {
+    // given
+    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
+    List<HasMetadata> k8sList = toK8SList(yamlRecipeContent).getItems();
+    doReturn(k8sList).when(k8sRecipeParser).parse(anyString());
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setAlias(COMPONENT_NAME);
+    component.setVolumes(Collections.singletonList(new VolumeImpl("foo", "/foo/bar")));
+
+    // when
+    applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
   }
 
   @Test
