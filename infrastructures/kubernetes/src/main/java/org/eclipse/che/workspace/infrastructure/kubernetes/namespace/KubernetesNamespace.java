@@ -317,12 +317,8 @@ public class KubernetesNamespace {
   private void delete(String namespaceName, KubernetesClient client)
       throws InfrastructureException {
     try {
-      client
-          .namespaces()
-          .withName(namespaceName)
-          .cascading(true)
-          .withPropagationPolicy("Foreground")
-          .delete();
+      System.out.println(client.namespaces().withName(namespaceName));
+      client.namespaces().withName(namespaceName).withPropagationPolicy("Foreground").delete();
     } catch (KubernetesClientException e) {
       if (e.getCode() == 404) {
         LOG.warn(
