@@ -7,7 +7,6 @@
 TRIGGER_RELEASE=0 
 PRERELEASE_TESTING=0
 
-
 bump_version() {
   CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
