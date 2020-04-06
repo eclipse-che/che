@@ -1,4 +1,18 @@
 #!/bin/bash
+#
+# Copyright (c) 2020 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+# See: https://sipb.mit.edu/doc/safe-shell/
+
+# This script goes through results of load tests and sums up well known issues. Also reports non recognized failures for manual investigation.
+# To run this script, set:
+#   TIMESTAMP to the name of a folder, where load tests results are stored.
+#   filedFolderNames to the array of a users, where test failed. You can easily copy that from the load test sum up.
 
 TIMESTAMP=
 failedFolderNames=(  )

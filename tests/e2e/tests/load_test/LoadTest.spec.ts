@@ -22,7 +22,7 @@ const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const cheLoginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
 const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
 const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
-const workspacePrefixUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/TestConstants.TS_SELENIUM_USERNAME/`;
+const workspacePrefixUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/`;
 const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
 
 suite('Load test suite', async () => {
