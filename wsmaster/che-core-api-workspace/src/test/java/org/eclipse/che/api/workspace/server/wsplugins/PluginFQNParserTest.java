@@ -54,16 +54,6 @@ public class PluginFQNParserTest {
   }
 
   @Test
-  public void test() {
-    Lifecycle lifecycle = new Lifecycle();
-    lifecycle
-        .postStart(new Handler().exec(new Exec().command(Collections.singletonList("test"))))
-        .preStop(new Handler().exec(new Exec().command(Collections.singletonList("test"))));
-
-    System.out.println(lifecycle.toString());
-  }
-
-  @Test
   public void shouldReturnEmptyListWhenNoPluginsOrEditors() throws Exception {
     Map<String, String> attributes = ImmutableMap.of("testProperty", "testValue");
 
