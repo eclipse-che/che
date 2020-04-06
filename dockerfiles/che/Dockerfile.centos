@@ -27,7 +27,7 @@ ENV LANG=C.UTF-8 \
     PATH=${PATH}:${JAVA_HOME}/bin
 
 RUN yum -y update && \
-    yum -y install java-1.8.0-openjdk-1.8.0.232.b09-0.el7_7.x86_64 sudo && \
+    yum -y install java-1.8.0-openjdk-1.8.0.242.b08-0.el7_7.x86_64 sudo && \
     yum clean all && \
     echo "%root ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     sed -i 's/Defaults    requiretty/#Defaults    requiretty/g' /etc/sudoers && \

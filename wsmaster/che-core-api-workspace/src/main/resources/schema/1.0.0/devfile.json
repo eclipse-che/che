@@ -422,6 +422,7 @@
                   "type": {},
                   "alias": {},
                   "mountSources": {},
+                  "volumes": {},
                   "env": {},
                   "reference": {
                     "description": "Describes absolute or devfile-relative location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type components",
@@ -776,7 +777,9 @@
                   "description": "Describes action type",
                   "type": "string",
                   "examples": [
-                    "exec"
+                    "exec",
+                    "vscode-task",
+                    "vscode-launch"
                   ]
                 },
                 "component": {

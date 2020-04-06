@@ -1,5 +1,17 @@
 #!/bin/bash
 
+EXIT_CODE=0
+
+kill_ffmpeg(){
+  echo "Killing ffmpeg with PID=$ffmpeg_pid"
+  kill -2 "$ffmpeg_pid"
+  wait "$ffmpeg_pid"
+  mkdir -p /tmp/e2e/report/
+  cp /tmp/ffmpeg_report/* /tmp/e2e/report/
+  exit $EXIT_CODE
+}
+
+set -x
 # Validate selenium base URL
 if [ -z "$TS_SELENIUM_BASE_URL" ]; then
     echo "The \"TS_SELENIUM_BASE_URL\" is not set!";
@@ -59,6 +71,10 @@ else
 	cd /tmp/e2e || exit
 fi
 
+mkdir -p /tmp/ffmpeg_report
+nohup ffmpeg -y -video_size 1920x1080 -framerate 24 -f x11grab -i :20.0 /tmp/ffmpeg_report/output.mp4 2> /tmp/ffmpeg_report/ffmpeg_err.txt > /tmp/ffmpeg_report/ffmpeg_std.txt & 
+ffmpeg_pid=$!
+trap kill_ffmpeg 2 15
 
 # Launch tests
 if [ $TEST_SUITE == "load-test" ]; then
@@ -86,4 +102,6 @@ End_script
 else
   echo "Running TEST_SUITE: $TEST_SUITE with user: $TS_SELENIUM_USERNAME"
   npm run $TEST_SUITE
+  EXIT_CODE=$?
 fi
+kill_ffmpeg

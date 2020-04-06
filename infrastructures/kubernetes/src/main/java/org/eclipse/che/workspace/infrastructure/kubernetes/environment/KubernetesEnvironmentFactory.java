@@ -138,7 +138,6 @@ public class KubernetesEnvironmentFactory
             .setServices(services)
             .setPersistentVolumeClaims(pvcs)
             .setIngresses(new HashMap<>())
-            .setPersistentVolumeClaims(new HashMap<>())
             .setSecrets(secrets)
             .setConfigMaps(configMaps)
             .build();
