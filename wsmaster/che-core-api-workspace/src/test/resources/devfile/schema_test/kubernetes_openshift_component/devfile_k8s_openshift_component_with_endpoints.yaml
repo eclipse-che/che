@@ -32,3 +32,8 @@ components:
     endpoints:
       - name: test-endpoint-k8s
         port: 4321
+        attributes:
+          protocol: http
+          secure: 'true'
+          public: 'true'
+          discoverable: 'false'
