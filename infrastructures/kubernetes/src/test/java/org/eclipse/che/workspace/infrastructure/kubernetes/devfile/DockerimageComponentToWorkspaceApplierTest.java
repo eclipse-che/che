@@ -84,7 +84,7 @@ public class DockerimageComponentToWorkspaceApplierTest {
   public void setUp() throws Exception {
     dockerimageComponentApplier =
         new DockerimageComponentToWorkspaceApplier(
-            PROJECTS_MOUNT_PATH, "Always", k8sEnvProvisioner);
+            PROJECTS_MOUNT_PATH, "Always", k8sEnvProvisioner, new ComponentEndpointExtractor());
     workspaceConfig = new WorkspaceConfigImpl();
   }
 
@@ -139,7 +139,8 @@ public class DockerimageComponentToWorkspaceApplierTest {
     dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
     dockerimageComponent.setMemoryLimit("1G");
     dockerimageComponentApplier =
-        new DockerimageComponentToWorkspaceApplier(PROJECTS_MOUNT_PATH, "Never", k8sEnvProvisioner);
+        new DockerimageComponentToWorkspaceApplier(PROJECTS_MOUNT_PATH, "Never", k8sEnvProvisioner,
+            new ComponentEndpointExtractor());
 
     // when
     dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
