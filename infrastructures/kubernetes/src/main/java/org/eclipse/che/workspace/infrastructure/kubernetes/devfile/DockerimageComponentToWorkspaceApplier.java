@@ -32,11 +32,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.workspace.server.devfile.Constants;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
@@ -63,18 +65,14 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
   private final String imagePullPolicy;
   private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
 
-  private final ComponentEndpointExtractor componentEndpointExtractor;
-
   @Inject
   public DockerimageComponentToWorkspaceApplier(
       @Named("che.workspace.projects.storage") String projectFolderPath,
       @Named("che.workspace.sidecar.image_pull_policy") String imagePullPolicy,
-      KubernetesEnvironmentProvisioner k8sEnvProvisioner,
-      ComponentEndpointExtractor componentEndpointExtractor) {
+      KubernetesEnvironmentProvisioner k8sEnvProvisioner) {
     this.projectFolderPath = projectFolderPath;
     this.imagePullPolicy = imagePullPolicy;
     this.k8sEnvProvisioner = k8sEnvProvisioner;
-    this.componentEndpointExtractor = componentEndpointExtractor;
   }
 
   /**
@@ -128,16 +126,21 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
             c ->
                 componentAlias != null
                     && componentAlias.equals(
-                    c.getAttributes().get(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE)))
+                        c.getAttributes().get(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE)))
         .forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
   }
 
   private MachineConfigImpl createMachineConfig(
       ComponentImpl dockerimageComponent, String componentAlias) {
     MachineConfigImpl machineConfig = new MachineConfigImpl();
-    machineConfig.getServers()
-        .putAll(componentEndpointExtractor
-            .extractServerConfigsFromComponentEndpoints(dockerimageComponent));
+    machineConfig
+        .getServers()
+        .putAll(
+            dockerimageComponent
+                .getEndpoints()
+                .stream()
+                .collect(
+                    Collectors.toMap(Endpoint::getName, ServerConfigImpl::createFromEndpoint)));
 
     dockerimageComponent
         .getVolumes()
@@ -177,8 +180,7 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
             dockerimageComponent.getArgs());
     componentObjects.add(deployment);
 
-    componentObjects.addAll(componentEndpointExtractor
-        .extractServicesFromComponentEndpoints(dockerimageComponent));
+    componentObjects.addAll(new KubernetesServiceExtractor(dockerimageComponent).extract());
     return componentObjects;
   }
 
