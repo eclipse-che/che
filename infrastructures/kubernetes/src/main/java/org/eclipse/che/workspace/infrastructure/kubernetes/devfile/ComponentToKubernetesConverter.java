@@ -25,15 +25,15 @@ import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 
-class KubernetesServiceExtractor {
+class ComponentToKubernetesConverter {
 
   private final Component component;
 
-  KubernetesServiceExtractor(Component component) {
+  ComponentToKubernetesConverter(Component component) {
     this.component = component;
   }
 
-  List<Service> extract() {
+  List<Service> toServices() {
     return component
         .getEndpoints()
         .stream()
