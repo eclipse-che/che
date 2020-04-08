@@ -76,13 +76,11 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   private final String defaultPVCAccessMode;
   private final String pvcStorageClassName;
   private final EnvVars envVars;
-  private final ComponentEndpointExtractor componentEndpointExtractor;
 
   @Inject
   public KubernetesComponentToWorkspaceApplier(
       KubernetesRecipeParser objectsParser,
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
-      ComponentEndpointExtractor componentEndpointExtractor,
       EnvVars envVars,
       @Named("che.workspace.projects.storage") String projectFolderPath,
       @Named("che.workspace.projects.storage.default.size") String defaultProjectPVCSize,
@@ -93,7 +91,6 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     this(
         objectsParser,
         k8sEnvProvisioner,
-        componentEndpointExtractor,
         envVars,
         KubernetesEnvironment.TYPE,
         projectFolderPath,
@@ -107,7 +104,6 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   protected KubernetesComponentToWorkspaceApplier(
       KubernetesRecipeParser objectsParser,
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
-      ComponentEndpointExtractor componentEndpointExtractor,
       EnvVars envVars,
       String environmentType,
       String projectFolderPath,
@@ -126,7 +122,6 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     this.imagePullPolicy = imagePullPolicy;
     this.kubernetesBasedComponentTypes = kubernetesBasedComponentTypes;
     this.envVars = envVars;
-    this.componentEndpointExtractor = componentEndpointExtractor;
   }
 
   /**
@@ -155,10 +150,11 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
         kubernetesBasedComponentTypes.contains(k8sComponent.getType()),
         format("Plugin must have %s type", String.join(" or ", kubernetesBasedComponentTypes)));
 
-    String componentContent = retrieveContent(k8sComponent, contentProvider);
+    KubernetesComponent component = new KubernetesComponent(k8sComponent);
+    String componentContent = retrieveContent(component, contentProvider);
 
-    final List<HasMetadata> componentObjects = prepareComponentObjects(k8sComponent,
-        componentContent);
+    final List<HasMetadata> componentObjects =
+        prepareComponentObjects(new KubernetesComponent(component), componentContent);
 
     List<PodData> podsData = getPodDatas(componentObjects);
     podsData
@@ -166,40 +162,38 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
         .flatMap(e -> e.getSpec().getContainers().stream())
         .forEach(c -> c.setImagePullPolicy(imagePullPolicy));
 
-    if (Boolean.TRUE.equals(k8sComponent.getMountSources())) {
+    if (Boolean.TRUE.equals(component.getMountSources())) {
       applyProjectsVolumes(podsData, componentObjects);
     }
 
-    if (!k8sComponent.getEnv().isEmpty()) {
-      podsData.forEach(p -> envVars.apply(p, k8sComponent.getEnv()));
+    if (!component.getEnv().isEmpty()) {
+      podsData.forEach(p -> envVars.apply(p, component.getEnv()));
     }
 
-    Map<String, MachineConfigImpl> machineConfigs = prepareMachineConfigs(podsData, k8sComponent);
-    linkCommandsToMachineName(workspaceConfig, k8sComponent, machineConfigs.keySet());
+    Map<String, MachineConfigImpl> machineConfigs = prepareMachineConfigs(podsData, component);
+    linkCommandsToMachineName(workspaceConfig, component, machineConfigs.keySet());
 
-    k8sEnvProvisioner
-        .provision(workspaceConfig, environmentType, componentObjects, machineConfigs);
+    k8sEnvProvisioner.provision(workspaceConfig, environmentType, componentObjects, machineConfigs);
   }
 
-  private List<HasMetadata> prepareComponentObjects(Component k8sComponent,
-      String componentContent) throws DevfileRecipeFormatException {
+  private List<HasMetadata> prepareComponentObjects(
+      KubernetesComponent component, String componentContent) throws DevfileRecipeFormatException {
     final List<HasMetadata> componentObjects;
 
-    if (!k8sComponent.getSelector().isEmpty()) {
+    if (!component.getSelector().isEmpty()) {
       componentObjects =
           SelectorFilter.filter(
-              new ArrayList<>(unmarshalComponentObjects(k8sComponent, componentContent)),
-              k8sComponent.getSelector());
+              new ArrayList<>(unmarshalComponentObjects(component, componentContent)),
+              component.getSelector());
     } else {
-      componentObjects = new ArrayList<>(unmarshalComponentObjects(k8sComponent, componentContent));
+      componentObjects = new ArrayList<>(unmarshalComponentObjects(component, componentContent));
     }
 
-    componentObjects.addAll(componentEndpointExtractor.extractServicesFromComponentEndpoints(k8sComponent));
+    componentObjects.addAll(component.getServices());
 
-    applyEntrypoints(k8sComponent.getEntrypoints(), componentObjects);
+    applyEntrypoints(component.getEntrypoints(), componentObjects);
     return componentObjects;
   }
-
 
   private void applyProjectsVolumes(List<PodData> podsData, List<HasMetadata> componentObjects) {
     if (componentObjects
@@ -262,9 +256,8 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     return machineConfigs;
   }
 
-  private void provisionEndpoints(Component component, MachineConfigImpl config) {
-    config.getServers().putAll(componentEndpointExtractor
-        .extractServerConfigsFromComponentEndpoints(component));
+  private void provisionEndpoints(ComponentImpl component, MachineConfigImpl config) {
+    config.getServers().putAll(component.getServerConfigs());
   }
 
   private void provisionVolumes(

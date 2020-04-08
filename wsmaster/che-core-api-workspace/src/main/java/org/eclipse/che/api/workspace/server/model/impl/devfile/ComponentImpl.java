@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -40,6 +41,7 @@ import org.eclipse.che.api.core.model.workspace.devfile.Env;
 import org.eclipse.che.api.core.model.workspace.devfile.Volume;
 import org.eclipse.che.api.workspace.server.devfile.PreferencesDeserializer;
 import org.eclipse.che.api.workspace.server.devfile.SerializableConverter;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 
 /** @author Sergii Leshchenko */
 @Entity(name = "DevfileComponent")
@@ -452,6 +454,12 @@ public class ComponentImpl implements Component {
 
   public void setEndpoints(List<EndpointImpl> endpoints) {
     this.endpoints = endpoints;
+  }
+
+  public Map<String, ServerConfigImpl> getServerConfigs() {
+    return getEndpoints()
+        .stream()
+        .collect(Collectors.toMap(Endpoint::getName, EndpointImpl::asServerConfig));
   }
 
   @Override

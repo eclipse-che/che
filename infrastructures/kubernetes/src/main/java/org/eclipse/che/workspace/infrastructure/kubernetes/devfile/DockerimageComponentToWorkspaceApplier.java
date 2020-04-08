@@ -63,18 +63,14 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
   private final String imagePullPolicy;
   private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
 
-  private final ComponentEndpointExtractor componentEndpointExtractor;
-
   @Inject
   public DockerimageComponentToWorkspaceApplier(
       @Named("che.workspace.projects.storage") String projectFolderPath,
       @Named("che.workspace.sidecar.image_pull_policy") String imagePullPolicy,
-      KubernetesEnvironmentProvisioner k8sEnvProvisioner,
-      ComponentEndpointExtractor componentEndpointExtractor) {
+      KubernetesEnvironmentProvisioner k8sEnvProvisioner) {
     this.projectFolderPath = projectFolderPath;
     this.imagePullPolicy = imagePullPolicy;
     this.k8sEnvProvisioner = k8sEnvProvisioner;
-    this.componentEndpointExtractor = componentEndpointExtractor;
   }
 
   /**
@@ -108,12 +104,13 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
         DOCKERIMAGE_COMPONENT_TYPE.equals(dockerimageComponent.getType()),
         format("Plugin must have `%s` type", DOCKERIMAGE_COMPONENT_TYPE));
 
-    String componentAlias = dockerimageComponent.getAlias();
+    KubernetesComponent component = new KubernetesComponent(dockerimageComponent);
+    String componentAlias = component.getAlias();
     String machineName =
-        componentAlias == null ? toMachineName(dockerimageComponent.getImage()) : componentAlias;
+        componentAlias == null ? toMachineName(component.getImage()) : componentAlias;
 
-    MachineConfigImpl machineConfig = createMachineConfig(dockerimageComponent, componentAlias);
-    List<HasMetadata> componentObjects = createComponentObjects(dockerimageComponent, machineName);
+    MachineConfigImpl machineConfig = createMachineConfig(component, componentAlias);
+    List<HasMetadata> componentObjects = createComponentObjects(component, machineName);
 
     k8sEnvProvisioner.provision(
         workspaceConfig,
@@ -128,16 +125,14 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
             c ->
                 componentAlias != null
                     && componentAlias.equals(
-                    c.getAttributes().get(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE)))
+                        c.getAttributes().get(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE)))
         .forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
   }
 
   private MachineConfigImpl createMachineConfig(
       ComponentImpl dockerimageComponent, String componentAlias) {
     MachineConfigImpl machineConfig = new MachineConfigImpl();
-    machineConfig.getServers()
-        .putAll(componentEndpointExtractor
-            .extractServerConfigsFromComponentEndpoints(dockerimageComponent));
+    machineConfig.getServers().putAll(dockerimageComponent.getServerConfigs());
 
     dockerimageComponent
         .getVolumes()
@@ -161,24 +156,23 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
   }
 
   private List<HasMetadata> createComponentObjects(
-      ComponentImpl dockerimageComponent, String machineName) {
+      KubernetesComponent component, String machineName) {
     List<HasMetadata> componentObjects = new ArrayList<>();
     Deployment deployment =
         buildDeployment(
             machineName,
-            dockerimageComponent.getImage(),
-            dockerimageComponent.getMemoryLimit(),
-            dockerimageComponent
+            component.getImage(),
+            component.getMemoryLimit(),
+            component
                 .getEnv()
                 .stream()
                 .map(e -> new EnvVar(e.getName(), e.getValue(), null))
                 .collect(Collectors.toCollection(ArrayList::new)),
-            dockerimageComponent.getCommand(),
-            dockerimageComponent.getArgs());
+            component.getCommand(),
+            component.getArgs());
     componentObjects.add(deployment);
 
-    componentObjects.addAll(componentEndpointExtractor
-        .extractServicesFromComponentEndpoints(dockerimageComponent));
+    componentObjects.addAll(component.getServices());
     return componentObjects;
   }
 
