@@ -535,7 +535,7 @@ public class KubernetesDeployments {
                     // https://github.com/kubernetes/kubernetes/pull/86557
                     lastTimestamp = firstTimestamp;
                   } else {
-                    LOG.warn(
+                    LOG.debug(
                         "lastTimestamp and firstTimestamp are undefined. Event: {}.  Fallback to the current time.",
                         event);
                     lastTimestamp = PodEvents.convertDateToEventTimestamp(new Date());
@@ -925,7 +925,7 @@ public class KubernetesDeployments {
         toCloseOnException = watch;
       }
 
-      Boolean deleteSucceeded = deploymentResource.delete();
+      Boolean deleteSucceeded = deploymentResource.withPropagationPolicy("Foreground").delete();
 
       if (deleteSucceeded == null || !deleteSucceeded) {
         deleteFuture.complete(null);
@@ -963,7 +963,7 @@ public class KubernetesDeployments {
       final Watch watch = podResource.watch(new DeleteWatcher<Pod>(deleteFuture));
       toCloseOnException = watch;
 
-      Boolean deleteSucceeded = podResource.delete();
+      Boolean deleteSucceeded = podResource.withPropagationPolicy("Foreground").delete();
       if (deleteSucceeded == null || !deleteSucceeded) {
         deleteFuture.complete(null);
       }

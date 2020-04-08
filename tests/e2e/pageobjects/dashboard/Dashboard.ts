@@ -49,7 +49,7 @@ export class Dashboard {
         await this.workspaces.waitWorkspaceListItem(workspaceName);
         await this.workspaces.clickWorkspaceListItem(workspaceName);
         await this.workspaces.clickDeleteButtonOnWorkspaceDetails();
-        await this.workspaces.clickConfirmDeletionButton();
+        await this.workspaces.confirmWorkspaceDeletion();
         await this.workspaces.waitPage();
         await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
     }

@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -365,6 +366,7 @@ public class KubernetesNamespaceTest {
   private Resource prepareNamespaceResource(String namespaceName) {
     Resource namespaceResource = mock(Resource.class);
     doReturn(namespaceResource).when(namespaceOperation).withName(namespaceName);
+    doReturn(namespaceResource).when(namespaceResource).withPropagationPolicy(eq("Foreground"));
     when(namespaceResource.get())
         .thenReturn(
             new NamespaceBuilder().withNewMetadata().withName(namespaceName).endMetadata().build());
@@ -375,6 +377,7 @@ public class KubernetesNamespaceTest {
   private Resource prepareManagedNamespaceResource(String namespaceName) {
     Resource namespaceResource = mock(Resource.class);
     doReturn(namespaceResource).when(namespaceOperation).withName(namespaceName);
+    doReturn(namespaceResource).when(namespaceResource).withPropagationPolicy(eq("Foreground"));
     when(namespaceResource.get())
         .thenReturn(
             new NamespaceBuilder()

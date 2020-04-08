@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,6 +74,7 @@ public class KubernetesSecretsTest {
     when(client.secrets()).thenReturn(secretsMixedOperation);
     lenient().when(secretsMixedOperation.inNamespace(any())).thenReturn(nonNamespaceOperation);
     lenient().when(nonNamespaceOperation.withLabel(any(), any())).thenReturn(deletableList);
+    lenient().doReturn(deletableList).when(deletableList).withPropagationPolicy(eq("Foreground"));
   }
 
   @Test

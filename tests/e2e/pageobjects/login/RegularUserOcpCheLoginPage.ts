@@ -49,6 +49,13 @@ export class RegularUserOcpCheLoginPage implements ICheLoginPage {
             await this.cheLogin.clickOnSubmitButton();
             await this.cheLogin.waitDisappearanceBrokerLoginPage();
         }
+
+        if (await this.ocpLogin.isLinkAccountPageVisible()) {
+            await this.ocpLogin.clickOnLinkAccountButton();
+            await this.cheLogin.waitEclipseCheLoginFormPage();
+            await this.cheLogin.inputPaswordEclipseCheLoginPage(TestConstants.TS_SELENIUM_PASSWORD);
+            await this.cheLogin.clickEclipseCheLoginButton();
+        }
     }
 
 }
