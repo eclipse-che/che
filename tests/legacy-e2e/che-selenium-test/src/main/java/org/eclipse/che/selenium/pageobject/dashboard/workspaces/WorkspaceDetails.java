@@ -65,6 +65,7 @@ public class WorkspaceDetails {
         "//div[contains(@class,'che-toolbar')]//span[contains(text(),'%s')]";
     String ORGANIZATION_NAME_ID = "namespace-name";
     String OPEN_ORGANIZATION_BUTTON_ID = "open-namespace-button";
+    String CONFIRM_WORKSPACE_DELETION_ID = "enable-button";
   }
 
   public enum WorkspaceDetailsTab {
@@ -161,6 +162,9 @@ public class WorkspaceDetails {
 
   @FindBy(name = Locators.CLOSE_DIALOG_BUTTON_NAME)
   WebElement closeBtn;
+
+  @FindBy(id = Locators.CONFIRM_WORKSPACE_DELETION_ID)
+  WebElement confirmWorkspaceDeletion;
 
   public WebElement wait(ActionButton actionButton) {
     return seleniumWebDriverHelper.waitVisibility(actionButton.getLocator());
@@ -326,5 +330,10 @@ public class WorkspaceDetails {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.id(Locators.OPEN_ORGANIZATION_BUTTON_ID)))
         .click();
+  }
+
+  public void setConfirmWorkspaceDeletionCheckbox() {
+    seleniumWebDriverHelper.waitAndClick(confirmWorkspaceDeletion);
+    seleniumWebDriverHelper.waitElementIsSelected(confirmWorkspaceDeletion);
   }
 }

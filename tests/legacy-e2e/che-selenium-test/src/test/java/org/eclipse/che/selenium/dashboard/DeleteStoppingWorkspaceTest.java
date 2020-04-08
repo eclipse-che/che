@@ -71,6 +71,7 @@ public class DeleteStoppingWorkspaceTest {
     workspaceDetails.clickOnStopWorkspace();
     workspaceDetails.checkStateOfWorkspace(STOPPED);
     workspaceOverview.clickOnDeleteWorkspace();
+    workspaceDetails.setConfirmWorkspaceDeletionCheckbox();
     workspaceDetails.clickOnDeleteButtonInDialogWindow();
     workspaces.waitWorkspaceIsNotPresent(WORKSPACE_NAME);
     dashboard.waitToolbarTitleName("Workspaces");
