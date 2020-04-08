@@ -16,11 +16,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.server.devfile.Constants.DISCOVERABLE_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.DOCKERIMAGE_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.ComponentToWorkspaceApplierUtils.createService;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.ComponentToWorkspaceApplierUtils.toServerConfig;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -66,14 +63,18 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
   private final String imagePullPolicy;
   private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
 
+  private final ComponentEndpointExtractor componentEndpointExtractor;
+
   @Inject
   public DockerimageComponentToWorkspaceApplier(
       @Named("che.workspace.projects.storage") String projectFolderPath,
       @Named("che.workspace.sidecar.image_pull_policy") String imagePullPolicy,
-      KubernetesEnvironmentProvisioner k8sEnvProvisioner) {
+      KubernetesEnvironmentProvisioner k8sEnvProvisioner,
+      ComponentEndpointExtractor componentEndpointExtractor) {
     this.projectFolderPath = projectFolderPath;
     this.imagePullPolicy = imagePullPolicy;
     this.k8sEnvProvisioner = k8sEnvProvisioner;
+    this.componentEndpointExtractor = componentEndpointExtractor;
   }
 
   /**
@@ -111,10 +112,32 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
     String machineName =
         componentAlias == null ? toMachineName(dockerimageComponent.getImage()) : componentAlias;
 
+    MachineConfigImpl machineConfig = createMachineConfig(dockerimageComponent, componentAlias);
+    List<HasMetadata> componentObjects = createComponentObjects(dockerimageComponent, machineName);
+
+    k8sEnvProvisioner.provision(
+        workspaceConfig,
+        KubernetesEnvironment.TYPE,
+        componentObjects,
+        ImmutableMap.of(machineName, machineConfig));
+
+    workspaceConfig
+        .getCommands()
+        .stream()
+        .filter(
+            c ->
+                componentAlias != null
+                    && componentAlias.equals(
+                    c.getAttributes().get(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE)))
+        .forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
+  }
+
+  private MachineConfigImpl createMachineConfig(
+      ComponentImpl dockerimageComponent, String componentAlias) {
     MachineConfigImpl machineConfig = new MachineConfigImpl();
-    dockerimageComponent
-        .getEndpoints()
-        .forEach(e -> machineConfig.getServers().put(e.getName(), toServerConfig(e)));
+    machineConfig.getServers()
+        .putAll(componentEndpointExtractor
+            .extractServerConfigsFromComponentEndpoints(dockerimageComponent));
 
     dockerimageComponent
         .getVolumes()
@@ -134,6 +157,11 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
       machineConfig.getAttributes().put(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE, componentAlias);
     }
 
+    return machineConfig;
+  }
+
+  private List<HasMetadata> createComponentObjects(
+      ComponentImpl dockerimageComponent, String machineName) {
     List<HasMetadata> componentObjects = new ArrayList<>();
     Deployment deployment =
         buildDeployment(
@@ -149,30 +177,9 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
             dockerimageComponent.getArgs());
     componentObjects.add(deployment);
 
-    dockerimageComponent
-        .getEndpoints()
-        .stream()
-        .filter(e -> "true".equals(e.getAttributes().get(DISCOVERABLE_ENDPOINT_ATTRIBUTE)))
-        .forEach(
-            e ->
-                componentObjects.add(
-                    createService(deployment.getSpec().getTemplate().getMetadata().getName(), e)));
-
-    k8sEnvProvisioner.provision(
-        workspaceConfig,
-        KubernetesEnvironment.TYPE,
-        componentObjects,
-        ImmutableMap.of(machineName, machineConfig));
-
-    workspaceConfig
-        .getCommands()
-        .stream()
-        .filter(
-            c ->
-                componentAlias != null
-                    && componentAlias.equals(
-                        c.getAttributes().get(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE)))
-        .forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
+    componentObjects.addAll(componentEndpointExtractor
+        .extractServicesFromComponentEndpoints(dockerimageComponent));
+    return componentObjects;
   }
 
   private Deployment buildDeployment(
