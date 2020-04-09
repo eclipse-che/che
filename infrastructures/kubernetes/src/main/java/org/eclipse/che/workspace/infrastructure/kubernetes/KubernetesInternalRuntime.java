@@ -814,6 +814,17 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       String machineName = Names.machineName(toCreateMeta, container);
 
       LOG.debug("Creating machine '{}' in workspace '{}'", machineName, workspaceId);
+      // Sometimes we facing NPE trying to retrieve machine config. Possible names mismatch. Need to get more info on that cases.
+      Optional<InternalMachineConfig> machineConfigOpt = Optional
+          .ofNullable(machineConfigs.get(machineName));
+      if (!machineConfigOpt.isPresent()) {
+        LOG.error(
+            "Workspace '{}' start failed. Machine with name '{}' requested but not found in configs map. Present machines are: {}.",
+            workspaceId, machineName, String.join(",", machineConfigs.keySet()));
+        throw new InfrastructureException(format(
+            "Unable to start workspace '%s' due to internal error. Case will be investigated.",
+            workspaceId)):
+      }
       machines.put(
           getContext().getIdentity(),
           new KubernetesMachineImpl(
@@ -822,7 +833,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
               createdPod.getMetadata().getName(),
               container.getName(),
               MachineStatus.STARTING,
-              machineConfigs.get(machineName).getAttributes(),
+              machineConfigOpt.get().getAttributes(),
               serverResolver.resolve(machineName)));
       eventPublisher.sendStartingEvent(machineName, getContext().getIdentity());
     }
