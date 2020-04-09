@@ -925,7 +925,7 @@ public class KubernetesDeployments {
         toCloseOnException = watch;
       }
 
-      Boolean deleteSucceeded = deploymentResource.delete();
+      Boolean deleteSucceeded = deploymentResource.withPropagationPolicy("Foreground").delete();
 
       if (deleteSucceeded == null || !deleteSucceeded) {
         deleteFuture.complete(null);
@@ -963,7 +963,7 @@ public class KubernetesDeployments {
       final Watch watch = podResource.watch(new DeleteWatcher<Pod>(deleteFuture));
       toCloseOnException = watch;
 
-      Boolean deleteSucceeded = podResource.delete();
+      Boolean deleteSucceeded = podResource.withPropagationPolicy("Foreground").delete();
       if (deleteSucceeded == null || !deleteSucceeded) {
         deleteFuture.complete(null);
       }

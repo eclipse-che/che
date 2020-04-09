@@ -92,10 +92,14 @@ export class Workspaces {
         await this.driverHelper.waitDisappearance(workspaceListItemLocator, timeout);
     }
 
-    async clickConfirmDeletionButton(timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
-        Logger.debug('Workspaces.clickConfirmDeletionButton');
+    async confirmWorkspaceDeletion(timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
+        Logger.debug('Workspaces.confirmWorkspaceDeletion');
 
-        await this.driverHelper.waitAndClick(By.css('#ok-dialog-button'), timeout);
+        const checkbox: By = By.xpath(`//che-popup//input[contains(@type, 'checkbox')]`);
+        await this.driverHelper.waitAndClick(checkbox, 10000);
+
+        const deleteButton: By = By.xpath('//che-popup//che-button-danger');
+        await this.driverHelper.waitAndClick(deleteButton, 10000);
     }
 
     private getWorkspaceListItemLocator(workspaceName: string): string {

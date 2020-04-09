@@ -144,6 +144,7 @@ public class KubernetesIngresses {
           .ingresses()
           .inNamespace(namespace)
           .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
+          .withPropagationPolicy("Foreground")
           .delete();
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);

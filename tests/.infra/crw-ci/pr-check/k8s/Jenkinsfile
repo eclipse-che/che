@@ -291,7 +291,7 @@ pipeline {
                            -d "grant_type=password" \\
                            -d "client_id=che-public" | jq -r .access_token)
     
-                        ${WORKSPACE}/chectl workspace:start \\
+                        ${WORKSPACE}/chectl workspace:create --start \\
                            --devfile=${DEVFILE_PATH} \\
                            --access-token "\$USER_ACCESS_TOKEN"
                     """
