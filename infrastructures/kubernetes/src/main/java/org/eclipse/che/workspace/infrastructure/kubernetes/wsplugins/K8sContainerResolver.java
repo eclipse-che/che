@@ -20,12 +20,16 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
+import io.fabric8.kubernetes.api.model.ExecAction;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar;
+import org.eclipse.che.api.workspace.server.wsplugins.model.Exec;
+import org.eclipse.che.api.workspace.server.wsplugins.model.Handler;
+import org.eclipse.che.api.workspace.server.wsplugins.model.Lifecycle;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
@@ -64,6 +68,7 @@ public class K8sContainerResolver {
             .withPorts(getContainerPorts())
             .withCommand(cheContainer.getCommand())
             .withArgs(cheContainer.getArgs())
+            .withLifecycle(toK8sLifecycle(cheContainer.getLifecycle()))
             .build();
 
     provisionMemoryLimit(container, cheContainer);
@@ -72,6 +77,38 @@ public class K8sContainerResolver {
     provisionCpuRequest(container, cheContainer);
 
     return container;
+  }
+
+  private io.fabric8.kubernetes.api.model.Lifecycle toK8sLifecycle(Lifecycle lifecycle) {
+    if (lifecycle == null) {
+      return null;
+    }
+    io.fabric8.kubernetes.api.model.Handler postStart = toK8sHandler(lifecycle.getPostStart());
+    io.fabric8.kubernetes.api.model.Handler preStop = toK8sHandler(lifecycle.getPreStop());
+    io.fabric8.kubernetes.api.model.Lifecycle k8sLifecycle =
+        new io.fabric8.kubernetes.api.model.Lifecycle(postStart, preStop);
+    return k8sLifecycle;
+  }
+
+  private io.fabric8.kubernetes.api.model.Handler toK8sHandler(Handler handler) {
+    if (handler == null || handler.getExec() == null) {
+      return null;
+    }
+    ExecAction exec = toExecAction(handler.getExec());
+    if (exec == null) {
+      return null;
+    }
+    // TODO: add 'httpGetAction' and 'tcpSocketAction' support
+    io.fabric8.kubernetes.api.model.Handler k8SHandler =
+        new io.fabric8.kubernetes.api.model.Handler(exec, null, null);
+    return k8SHandler;
+  }
+
+  private ExecAction toExecAction(Exec exec) {
+    if (exec == null || exec.getCommand().isEmpty()) {
+      return null;
+    }
+    return new ExecAction(exec.getCommand());
   }
 
   private void provisionMemoryLimit(Container container, CheContainer cheContainer)
