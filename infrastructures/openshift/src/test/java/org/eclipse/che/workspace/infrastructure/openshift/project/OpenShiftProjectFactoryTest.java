@@ -54,9 +54,11 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftStopWorkspaceRoleProvisioner;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -76,6 +78,7 @@ public class OpenShiftProjectFactoryTest {
 
   @Mock private OpenShiftClientConfigFactory configFactory;
   @Mock private OpenShiftClientFactory clientFactory;
+  @Mock private OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner;
   @Mock private WorkspaceManager workspaceManager;
   @Mock private UserManager userManager;
   @Mock private KubernetesSharedPool pool;
@@ -113,7 +116,16 @@ public class OpenShiftProjectFactoryTest {
       throws Exception {
     projectFactory =
         new OpenShiftProjectFactory(
-            "legacy", "", "", "defaultNs", false, clientFactory, configFactory, userManager, pool);
+            "legacy",
+            "",
+            "",
+            "defaultNs",
+            false,
+            clientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            pool);
 
     projectFactory.checkIfNamespaceIsAllowed("defaultNs");
   }
@@ -124,7 +136,16 @@ public class OpenShiftProjectFactoryTest {
           throws Exception {
     projectFactory =
         new OpenShiftProjectFactory(
-            "legacy", "", "", "defaultNs", true, clientFactory, configFactory, userManager, pool);
+            "legacy",
+            "",
+            "",
+            "defaultNs",
+            true,
+            clientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            pool);
 
     projectFactory.checkIfNamespaceIsAllowed("any-namespace");
   }
@@ -138,7 +159,16 @@ public class OpenShiftProjectFactoryTest {
           throws Exception {
     projectFactory =
         new OpenShiftProjectFactory(
-            "legacy", "", "", "defaultNs", false, clientFactory, configFactory, userManager, pool);
+            "legacy",
+            "",
+            "",
+            "defaultNs",
+            false,
+            clientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            pool);
 
     projectFactory.checkIfNamespaceIsAllowed("any-namespace");
   }
@@ -151,7 +181,16 @@ public class OpenShiftProjectFactoryTest {
           throws Exception {
     projectFactory =
         new OpenShiftProjectFactory(
-            "projectName", "", "", null, false, clientFactory, configFactory, userManager, pool);
+            "projectName",
+            "",
+            "",
+            null,
+            false,
+            clientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            pool);
   }
 
   @Test
@@ -182,6 +221,7 @@ public class OpenShiftProjectFactoryTest {
             false,
             clientFactory,
             configFactory,
+            stopWorkspaceRoleProvisioner,
             userManager,
             pool);
 
@@ -213,6 +253,7 @@ public class OpenShiftProjectFactoryTest {
             false,
             clientFactory,
             configFactory,
+            stopWorkspaceRoleProvisioner,
             userManager,
             pool);
 
@@ -244,6 +285,7 @@ public class OpenShiftProjectFactoryTest {
             false,
             clientFactory,
             configFactory,
+            stopWorkspaceRoleProvisioner,
             userManager,
             pool);
 
@@ -260,7 +302,16 @@ public class OpenShiftProjectFactoryTest {
 
     projectFactory =
         new OpenShiftProjectFactory(
-            "predefined", "", "", "default", true, clientFactory, configFactory, userManager, pool);
+            "predefined",
+            "",
+            "",
+            "default",
+            true,
+            clientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            pool);
 
     List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
 
@@ -291,7 +342,16 @@ public class OpenShiftProjectFactoryTest {
 
     projectFactory =
         new OpenShiftProjectFactory(
-            "predefined", "", "", "default", true, clientFactory, configFactory, userManager, pool);
+            "predefined",
+            "",
+            "",
+            "default",
+            true,
+            clientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            pool);
 
     List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
     assertEquals(availableNamespaces.size(), 2);
@@ -324,6 +384,7 @@ public class OpenShiftProjectFactoryTest {
             true,
             clientFactory,
             configFactory,
+            stopWorkspaceRoleProvisioner,
             userManager,
             pool);
 
@@ -350,6 +411,7 @@ public class OpenShiftProjectFactoryTest {
                 false,
                 clientFactory,
                 configFactory,
+                stopWorkspaceRoleProvisioner,
                 userManager,
                 pool));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
@@ -380,6 +442,7 @@ public class OpenShiftProjectFactoryTest {
                 false,
                 clientFactory,
                 configFactory,
+                stopWorkspaceRoleProvisioner,
                 userManager,
                 pool));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
