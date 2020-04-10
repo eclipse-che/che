@@ -828,7 +828,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
                     return new InfrastructureException(
                         format(
                             "Unable to start the workspace '%s' due to an internal inconsistency while composing the workspace runtime."
-                                + "Please report a bug. If possible, include the details from Che devfile and erver log in bug report (your admin can help with that)",
+                                + "Please report a bug. If possible, include the details from Che devfile and server log in bug report (your admin can help with that)",
                             workspaceId));
                   });
       machines.put(
