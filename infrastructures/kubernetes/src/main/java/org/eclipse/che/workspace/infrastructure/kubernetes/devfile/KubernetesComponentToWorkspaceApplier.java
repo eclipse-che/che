@@ -71,6 +71,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
 
   private final KubernetesRecipeParser objectsParser;
   private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
+  private final ComponentToKubernetesConverter componentToK8sConverter;
   private final String environmentType;
   private final String projectFolderPath;
   private final String defaultProjectPVCSize;
@@ -84,6 +85,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   public KubernetesComponentToWorkspaceApplier(
       KubernetesRecipeParser objectsParser,
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
+      ComponentToKubernetesConverter componentToKubernetesConverter,
       EnvVars envVars,
       @Named("che.workspace.projects.storage") String projectFolderPath,
       @Named("che.workspace.projects.storage.default.size") String defaultProjectPVCSize,
@@ -94,6 +96,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     this(
         objectsParser,
         k8sEnvProvisioner,
+        componentToKubernetesConverter,
         envVars,
         KubernetesEnvironment.TYPE,
         projectFolderPath,
@@ -107,6 +110,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   protected KubernetesComponentToWorkspaceApplier(
       KubernetesRecipeParser objectsParser,
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
+      ComponentToKubernetesConverter componentToKubernetesConverter,
       EnvVars envVars,
       String environmentType,
       String projectFolderPath,
@@ -117,6 +121,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       Set<String> kubernetesBasedComponentTypes) {
     this.objectsParser = objectsParser;
     this.k8sEnvProvisioner = k8sEnvProvisioner;
+    this.componentToK8sConverter = componentToKubernetesConverter;
     this.environmentType = environmentType;
     this.projectFolderPath = projectFolderPath;
     this.defaultProjectPVCSize = defaultProjectPVCSize;
@@ -191,7 +196,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       componentObjects = new ArrayList<>(unmarshalComponentObjects(k8sComponent, componentContent));
     }
 
-    componentObjects.addAll(new ComponentToKubernetesConverter(k8sComponent).toServices());
+    componentObjects.addAll(componentToK8sConverter.toServices(k8sComponent));
 
     applyEntrypoints(k8sComponent.getEntrypoints(), componentObjects);
     return componentObjects;

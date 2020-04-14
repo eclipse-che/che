@@ -22,24 +22,32 @@ import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 
+/**
+ * Converts devfile entities into kubernetes entities.
+ */
+@Singleton
 class ComponentToKubernetesConverter {
 
-  private final Component component;
-
-  ComponentToKubernetesConverter(Component component) {
-    this.component = component;
-  }
-
-  List<Service> toServices() {
+  /**
+   * Converts given {@link Component}'s {@link Endpoint}s into k8s {@link Service}`.
+   *
+   * @param component to convert
+   * @return created services
+   */
+  List<Service> toServices(Component component) {
     return component
         .getEndpoints()
         .stream()
         .filter(e -> "true".equals(e.getAttributes().get(DISCOVERABLE_ENDPOINT_ATTRIBUTE)))
         .map(e -> createService(component.getAlias(), e))
         .collect(Collectors.toList());
+  }
+
+  private String selectorName(Component component) {
   }
 
   private Service createService(String componentName, Endpoint endpoint) {
