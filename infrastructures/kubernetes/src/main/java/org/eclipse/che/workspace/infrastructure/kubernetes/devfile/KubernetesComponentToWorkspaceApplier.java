@@ -196,8 +196,8 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       componentObjects = new ArrayList<>(unmarshalComponentObjects(k8sComponent, componentContent));
     }
 
-    componentObjects
-        .addAll(componentToK8sConverter.publicEndpointsToServices(k8sComponent, k8sComponent.getAlias()));
+    componentObjects.addAll(
+        componentToK8sConverter.publicEndpointsToServices(k8sComponent, k8sComponent.getAlias()));
 
     applyEntrypoints(k8sComponent.getEntrypoints(), componentObjects);
     return componentObjects;

@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 
 import static java.util.Collections.emptyMap;
@@ -29,12 +40,16 @@ public class ComponentToKubernetesConverterTest {
   public void testConvertComponentWithSingleEndpointToService() {
     // given
     ComponentImpl component = new ComponentImpl("kubernetes", "123");
-    component.setEndpoints(singletonList(new EndpointImpl("test-endpoint", 1234,
-        singletonMap(DISCOVERABLE_ENDPOINT_ATTRIBUTE, Boolean.TRUE.toString()))));
+    component.setEndpoints(
+        singletonList(
+            new EndpointImpl(
+                "test-endpoint",
+                1234,
+                singletonMap(DISCOVERABLE_ENDPOINT_ATTRIBUTE, Boolean.TRUE.toString()))));
 
     // when
-    List<Service> services = componentToKubernetesConverter
-        .publicEndpointsToServices(component, "hello");
+    List<Service> services =
+        componentToKubernetesConverter.publicEndpointsToServices(component, "hello");
 
     // then
     assertEquals(services.size(), 1);
@@ -48,12 +63,12 @@ public class ComponentToKubernetesConverterTest {
     assertEquals(ports.get(0).getProtocol(), "TCP");
   }
 
-
   @Test
   public void testComponentWithNoEndpointsConvertsToEmptyList() {
     // given-when
-    List<Service> services = componentToKubernetesConverter
-        .publicEndpointsToServices(new ComponentImpl("kubernetes", "123"), "c1");
+    List<Service> services =
+        componentToKubernetesConverter.publicEndpointsToServices(
+            new ComponentImpl("kubernetes", "123"), "c1");
 
     // then
     assertTrue(services.isEmpty());
@@ -63,13 +78,20 @@ public class ComponentToKubernetesConverterTest {
   public void testComponentWithMoreEndpointsConvertsToMultipleServices() {
     // given
     ComponentImpl component = new ComponentImpl("kubernetes", "123");
-    component.setEndpoints(Arrays.asList(
-        new EndpointImpl("test-endpoint", 1234, singletonMap(DISCOVERABLE_ENDPOINT_ATTRIBUTE, Boolean.TRUE.toString())),
-        new EndpointImpl("test-endpoint2", 1234, singletonMap(DISCOVERABLE_ENDPOINT_ATTRIBUTE, Boolean.TRUE.toString()))));
+    component.setEndpoints(
+        Arrays.asList(
+            new EndpointImpl(
+                "test-endpoint",
+                1234,
+                singletonMap(DISCOVERABLE_ENDPOINT_ATTRIBUTE, Boolean.TRUE.toString())),
+            new EndpointImpl(
+                "test-endpoint2",
+                1234,
+                singletonMap(DISCOVERABLE_ENDPOINT_ATTRIBUTE, Boolean.TRUE.toString()))));
 
     // when
-    List<Service> services = componentToKubernetesConverter
-        .publicEndpointsToServices(component, "hello");
+    List<Service> services =
+        componentToKubernetesConverter.publicEndpointsToServices(component, "hello");
 
     // then
     assertFalse(services.isEmpty());
@@ -82,12 +104,11 @@ public class ComponentToKubernetesConverterTest {
   public void testNoDiscoverableEndpointConvertsToEmpty() {
     // given
     ComponentImpl component = new ComponentImpl("kubernetes", "123");
-    component.setEndpoints(singletonList(
-        new EndpointImpl("test-endpoint", 1234, emptyMap())));
+    component.setEndpoints(singletonList(new EndpointImpl("test-endpoint", 1234, emptyMap())));
 
     // when
-    List<Service> services = componentToKubernetesConverter
-        .publicEndpointsToServices(component, "hello");
+    List<Service> services =
+        componentToKubernetesConverter.publicEndpointsToServices(component, "hello");
 
     // then
     assertTrue(services.isEmpty());

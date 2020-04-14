@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.workspace.server.model.impl;
 
 import static java.util.Collections.emptyMap;
@@ -15,21 +26,24 @@ public class ServerConfigImplTest {
 
   @Test
   public void testCreateFromEndpointMinimalEndpointShouldTranslateToHttpProtocol() {
-    ServerConfig serverConfig = ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, emptyMap()));
+    ServerConfig serverConfig =
+        ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, emptyMap()));
 
     assertEquals(serverConfig.getProtocol(), "http");
   }
 
   @Test
   public void testCreateFromEndpointMinimalEndpointShouldTranslateToNullPath() {
-    ServerConfig serverConfig = ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, emptyMap()));
+    ServerConfig serverConfig =
+        ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, emptyMap()));
 
     assertNull(serverConfig.getPath());
   }
 
   @Test
   public void testCreateFromEndpointMinimalEndpointShouldHaveEmptyAttributes() {
-    ServerConfig serverConfig = ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, emptyMap()));
+    ServerConfig serverConfig =
+        ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, emptyMap()));
 
     assertTrue(serverConfig.getAttributes().isEmpty());
   }
@@ -37,7 +51,8 @@ public class ServerConfigImplTest {
   @Test
   public void testCreateFromEndpointCustomAttributesShouldPreserveInAttributes() {
     Map<String, String> customAttributes = ImmutableMap.of("k1", "v1", "k2", "v2");
-    ServerConfig serverConfig = ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, customAttributes));
+    ServerConfig serverConfig =
+        ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, customAttributes));
 
     assertEquals(serverConfig.getAttributes().get("k1"), "v1");
     assertEquals(serverConfig.getAttributes().get("k2"), "v2");
@@ -47,7 +62,8 @@ public class ServerConfigImplTest {
   @Test
   public void testCreateFromEndpointTranslatePath() {
     ServerConfig serverConfig =
-        ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, singletonMap("path", "hello")));
+        ServerConfigImpl.createFromEndpoint(
+            new EndpointImpl("name", 123, singletonMap("path", "hello")));
 
     assertTrue(serverConfig.getAttributes().isEmpty());
     assertEquals(serverConfig.getPath(), "hello");
@@ -56,7 +72,8 @@ public class ServerConfigImplTest {
   @Test
   public void testCreateFromEndpointTranslateProtocol() {
     ServerConfig serverConfig =
-        ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, singletonMap("protocol", "hello")));
+        ServerConfigImpl.createFromEndpoint(
+            new EndpointImpl("name", 123, singletonMap("protocol", "hello")));
 
     assertTrue(serverConfig.getAttributes().isEmpty());
     assertEquals(serverConfig.getProtocol(), "hello");
@@ -65,7 +82,8 @@ public class ServerConfigImplTest {
   @Test
   public void testCreateFromEndpointTranslatePublicTrue() {
     ServerConfig serverConfig =
-        ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, singletonMap("public", "true")));
+        ServerConfigImpl.createFromEndpoint(
+            new EndpointImpl("name", 123, singletonMap("public", "true")));
 
     assertTrue(serverConfig.getAttributes().isEmpty());
   }
@@ -73,7 +91,8 @@ public class ServerConfigImplTest {
   @Test
   public void testCreateFromEndpointTranslatePublicWhatever() {
     ServerConfig serverConfig =
-        ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, singletonMap("public", "whatever")));
+        ServerConfigImpl.createFromEndpoint(
+            new EndpointImpl("name", 123, singletonMap("public", "whatever")));
 
     assertTrue(serverConfig.getAttributes().isEmpty());
   }
@@ -81,7 +100,8 @@ public class ServerConfigImplTest {
   @Test
   public void testCreateFromEndpointTranslatePublicFalse() {
     ServerConfig serverConfig =
-        ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, singletonMap("public", "false")));
+        ServerConfigImpl.createFromEndpoint(
+            new EndpointImpl("name", 123, singletonMap("public", "false")));
 
     assertFalse(serverConfig.getAttributes().isEmpty());
     assertEquals(

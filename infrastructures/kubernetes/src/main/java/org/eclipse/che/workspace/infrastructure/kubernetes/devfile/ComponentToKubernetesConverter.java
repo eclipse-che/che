@@ -26,11 +26,9 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 
-/**
- * Converts devfile entities into kubernetes entities.
- */
+/** Converts devfile entities into kubernetes entities. */
 @Singleton
-class ComponentToKubernetesConverter {
+public class ComponentToKubernetesConverter {
 
   /**
    * Converts given {@link Component}'s {@link Endpoint}s into k8s {@link Service}`.

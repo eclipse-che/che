@@ -139,7 +139,8 @@ public class DockerimageComponentToWorkspaceApplierTest {
     dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
     dockerimageComponent.setMemoryLimit("1G");
     dockerimageComponentApplier =
-        new DockerimageComponentToWorkspaceApplier(PROJECTS_MOUNT_PATH, "Never", k8sEnvProvisioner, new ComponentToKubernetesConverter());
+        new DockerimageComponentToWorkspaceApplier(
+            PROJECTS_MOUNT_PATH, "Never", k8sEnvProvisioner, new ComponentToKubernetesConverter());
 
     // when
     dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
