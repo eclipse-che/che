@@ -34,8 +34,11 @@ import okhttp3.EventListener;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.logging.HttpLoggingInterceptor;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Sergii Leshchenko
@@ -43,6 +46,8 @@ import org.eclipse.che.commons.annotation.Nullable;
  */
 @Singleton
 public class KubernetesClientFactory {
+
+  protected static final Logger REQUEST_LOG = LoggerFactory.getLogger("che.infra.request-logging");
 
   /** {@link OkHttpClient} instance shared by all Kubernetes clients. */
   private final OkHttpClient httpClient;
@@ -216,13 +221,24 @@ public class KubernetesClientFactory {
         httpClient.newBuilder().authenticator(Authenticator.NONE).build();
     OkHttpClient.Builder builder = clientHttpClient.newBuilder();
     builder.interceptors().clear();
-    clientHttpClient =
-        builder
-            .addInterceptor(buildKubernetesInterceptor(config))
-            .addInterceptor(new ImpersonatorInterceptor(config))
-            .build();
+
+    builder
+        .addInterceptor(buildKubernetesInterceptor(config))
+        .addInterceptor(new ImpersonatorInterceptor(config));
+
+    initializeRequestTracing(builder);
+
+    clientHttpClient = builder.build();
 
     return new UnclosableKubernetesClient(clientHttpClient, config);
+  }
+
+  protected void initializeRequestTracing(OkHttpClient.Builder builder) {
+    if (REQUEST_LOG.isTraceEnabled()) {
+      HttpLoggingInterceptor logging = new HttpLoggingInterceptor(REQUEST_LOG::trace);
+      logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+      builder.addInterceptor(logging);
+    }
   }
 
   /**
