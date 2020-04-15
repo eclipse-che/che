@@ -235,6 +235,19 @@ public class MultiuserJpaWorkspaceDao implements WorkspaceDao {
     }
   }
 
+  @Override
+  @Transactional
+  public long getTotalCount() throws ServerException {
+    try {
+      return managerProvider
+          .get()
+          .createNamedQuery("Workspace.getTotalCount", Long.class)
+          .getSingleResult();
+    } catch (RuntimeException x) {
+      throw new ServerException(x.getLocalizedMessage(), x);
+    }
+  }
+
   @Transactional
   protected void doCreate(WorkspaceImpl workspace) {
     if (workspace.getConfig() != null) {
