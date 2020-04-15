@@ -69,7 +69,7 @@ public class DeleteRunningWorkspaceTest {
     workspaceDetails.selectTabInWorkspaceMenu(OVERVIEW);
     workspaceDetails.checkStateOfWorkspace(RUNNING);
     workspaceOverview.clickOnDeleteWorkspace();
-    workspaceDetails.setConfirmWorkspaceDeletionCheckbox();
+    workspaceDetails.confirmWorkspaceDeletion();
     workspaceDetails.clickOnDeleteButtonInDialogWindow();
     dashboard.waitToolbarTitleName("Workspaces");
     workspaces.waitWorkspaceIsNotPresent(WORKSPACE_NAME);
