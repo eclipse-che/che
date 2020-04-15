@@ -184,8 +184,8 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
     componentObjects.add(deployment);
 
     componentObjects.addAll(
-        componentToK8sConverter.publicEndpointsToServices(
-            dockerimageComponent, deployment.getSpec().getTemplate().getMetadata().getName()));
+        componentToK8sConverter.discoverableEndpointsToServices(
+            dockerimageComponent, machineName));
     return componentObjects;
   }
 

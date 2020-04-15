@@ -36,16 +36,16 @@ public class ComponentToKubernetesConverter {
    * @param component to convert
    * @return created services
    */
-  List<Service> publicEndpointsToServices(Component component, String serviceLabel) {
+  List<Service> discoverableEndpointsToServices(Component component, String selectorLabel) {
     return component
         .getEndpoints()
         .stream()
         .filter(e -> "true".equals(e.getAttributes().get(DISCOVERABLE_ENDPOINT_ATTRIBUTE)))
-        .map(e -> createService(e, serviceLabel))
+        .map(e -> createService(e, selectorLabel))
         .collect(Collectors.toList());
   }
 
-  private Service createService(Endpoint endpoint, String label) {
+  private Service createService(Endpoint endpoint, String selectorLabel) {
     ServicePort servicePort =
         new ServicePortBuilder()
             .withPort(endpoint.getPort())
@@ -57,7 +57,7 @@ public class ComponentToKubernetesConverter {
         .withName(endpoint.getName())
         .endMetadata()
         .withNewSpec()
-        .withSelector(ImmutableMap.of(CHE_COMPONENT_NAME_LABEL, label))
+        .withSelector(ImmutableMap.of(CHE_COMPONENT_NAME_LABEL, selectorLabel))
         .withPorts(singletonList(servicePort))
         .endSpec()
         .build();

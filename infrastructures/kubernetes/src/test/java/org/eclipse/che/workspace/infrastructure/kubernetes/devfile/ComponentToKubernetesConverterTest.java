@@ -49,7 +49,7 @@ public class ComponentToKubernetesConverterTest {
 
     // when
     List<Service> services =
-        componentToKubernetesConverter.publicEndpointsToServices(component, "hello");
+        componentToKubernetesConverter.discoverableEndpointsToServices(component, "hello");
 
     // then
     assertEquals(services.size(), 1);
@@ -67,7 +67,7 @@ public class ComponentToKubernetesConverterTest {
   public void testComponentWithNoEndpointsConvertsToEmptyList() {
     // given-when
     List<Service> services =
-        componentToKubernetesConverter.publicEndpointsToServices(
+        componentToKubernetesConverter.discoverableEndpointsToServices(
             new ComponentImpl("kubernetes", "123"), "c1");
 
     // then
@@ -91,7 +91,7 @@ public class ComponentToKubernetesConverterTest {
 
     // when
     List<Service> services =
-        componentToKubernetesConverter.publicEndpointsToServices(component, "hello");
+        componentToKubernetesConverter.discoverableEndpointsToServices(component, "hello");
 
     // then
     assertFalse(services.isEmpty());
@@ -108,7 +108,7 @@ public class ComponentToKubernetesConverterTest {
 
     // when
     List<Service> services =
-        componentToKubernetesConverter.publicEndpointsToServices(component, "hello");
+        componentToKubernetesConverter.discoverableEndpointsToServices(component, "hello");
 
     // then
     assertTrue(services.isEmpty());
