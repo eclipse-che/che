@@ -54,6 +54,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
 
 /**
  * Applies changes on workspace config according to the specified dockerimage component.
@@ -148,6 +149,8 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
             machineName,
             dockerimageComponent.getImage(),
             dockerimageComponent.getMemoryLimit(),
+            dockerimageComponent.getCpuRequest(),
+            dockerimageComponent.getCpuLimit(),
             dockerimageComponent
                 .getEnv()
                 .stream()
@@ -184,6 +187,8 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
       String name,
       String image,
       String memoryLimit,
+      String cpuRequest,
+      String cpuLimit,
       List<EnvVar> env,
       List<String> command,
       List<String> args) {
@@ -198,6 +203,12 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
             .build();
 
     Containers.addRamLimit(container, memoryLimit);
+    if (!isNullOrEmpty(cpuRequest)) {
+      Containers.addCpuRequest(container, KubernetesSize.toCores(cpuRequest));
+    }
+    if (!isNullOrEmpty(cpuLimit)) {
+      Containers.addCpuLimit(container, KubernetesSize.toCores(cpuLimit));
+    }
     return new DeploymentBuilder()
         .withNewMetadata()
         .addToLabels(CHE_COMPONENT_NAME_LABEL, name)
