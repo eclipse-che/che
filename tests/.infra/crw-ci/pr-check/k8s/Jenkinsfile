@@ -211,10 +211,14 @@ pipeline {
                     sh """
                         sed -i "s|cheImage: ''|cheImage: '${cheImageRepo}'|" $CUSTOM_RESOURCE_FILE_PATH
                         sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${mutableCheImageTag}'|" $CUSTOM_RESOURCE_FILE_PATH
+                        sed -i "s|:nightly|:7.9.2|" $CUSTOM_RESOURCE_FILE_PATH
     
                         sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" $CUSTOM_RESOURCE_FILE_PATH
     
                         sed -i "s|ingressDomain: '192.168.99.101.nip.io'|ingressDomain: '\$(minikube ip).nip.io'|" $CUSTOM_RESOURCE_FILE_PATH
+
+                        # temporary workaround to https://github.com/eclipse/che/issues/16292
+                        sed -i "s/tlsSupport: true/tlsSupport: false/" $CUSTOM_RESOURCE_FILE_PATH  
                     """
 
                     echo "Install Che"
@@ -225,7 +229,7 @@ pipeline {
                         --listr-renderer=verbose \\
                         --platform=minikube \\
                         --che-operator-cr-yaml=$CUSTOM_RESOURCE_FILE_PATH \\
-                        --che-operator-image=quay.io/dfestal/che-operator:fix-devfile-registry-public-url
+                        --che-operator-image=quay.io/eclipse/che-operator:7.9.2
                     """
 
                     cheHost = sh(
