@@ -72,7 +72,7 @@ pipeline {
 
                     if (customResourceFileContent == null || customResourceFileContent == '') {
                         sh """
-                            wget https://raw.githubusercontent.com/eclipse/che-operator/7.9.2/deploy/crds/org_v1_che_cr.yaml \\
+                            wget https://raw.githubusercontent.com/eclipse/che-operator/7.9.x/deploy/crds/org_v1_che_cr.yaml \\
                             -O $CUSTOM_RESOURCE_FILE_PATH
                         """
 

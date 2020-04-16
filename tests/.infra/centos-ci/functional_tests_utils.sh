@@ -254,7 +254,7 @@ function installAndStartMinishift() {
 
 function installCheCtl() {
   echo "======== Start to install chectl ========"
-  wget https://github.com/che-incubator/chectl/releases/download/20200309102927/chectl-linux-x64.tar.gz \
+  wget https://github.com/che-incubator/chectl/releases/download/20200322122143/chectl-linux-x64.tar.gz \
     --no-check-certificate \
     -O chectl-linux-x64.tar.gz
     
