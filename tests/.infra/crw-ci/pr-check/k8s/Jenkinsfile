@@ -72,7 +72,7 @@ pipeline {
 
                     if (customResourceFileContent == null || customResourceFileContent == '') {
                         sh """
-                            wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
+                            wget https://raw.githubusercontent.com/eclipse/che-operator/7.9.2/deploy/crds/org_v1_che_cr.yaml \\
                             -O $CUSTOM_RESOURCE_FILE_PATH
                         """
 
@@ -93,7 +93,7 @@ pipeline {
                             retry(2) {
                                 // TO-DO use option "--install-path" https://github.com/eclipse/che/pull/14182
                                 sh """
-                                    wget https://github.com/che-incubator/chectl/releases/download/20200309102927/chectl-linux-x64.tar.gz \
+                                    wget https://github.com/che-incubator/chectl/releases/download/20200322122143/chectl-linux-x64.tar.gz \
                                         --no-check-certificate \
                                         -O ${WORKSPACE}/chectl-linux-x64.tar.gz
                                         
