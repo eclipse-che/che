@@ -33,7 +33,7 @@ public class WorkspaceMeterBinder implements MeterBinder {
 
   @Override
   public void bindTo(MeterRegistry registry) {
-    Gauge.builder(workspaceMetric(".total"), this::count)
+    Gauge.builder(workspaceMetric("total"), this::count)
         .description("Total number of workspaces")
         .register(registry);
   }

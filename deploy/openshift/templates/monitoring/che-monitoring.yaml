@@ -74,7 +74,7 @@ objects:
           deploymentconfig: grafana
       spec:
         containers:
-        - image: grafana/grafana
+        - image: grafana/grafana:6.6.2
           imagePullPolicy: Always
           name: grafana
           ports:
