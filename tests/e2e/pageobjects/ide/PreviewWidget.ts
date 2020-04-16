@@ -10,7 +10,7 @@
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { By, error } from 'selenium-webdriver';
+import { By, error, Key } from 'selenium-webdriver';
 import { TestConstants } from '../../TestConstants';
 import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
@@ -31,14 +31,21 @@ export class PreviewWidget {
     async typeUrl(url: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`PreviewWidget.typeUrl ${url}`);
 
-        await this.driverHelper.enterValue(PreviewWidget.WIDGET_URL_LOCATOR, url, timeout);
+        await this.driverHelper.type(PreviewWidget.WIDGET_URL_LOCATOR, url, timeout);
+    }
+
+    async clearUrl(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('PreviewWidget.clearUrl');
+
+        await this.typeUrl(Key.chord(Key.CONTROL, 'a', Key.DELETE));
+        await this.waitUrl('', timeout);
     }
 
     async typeAndApplyUrl(url: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`PreviewWidget.typeAndApplyUrl ${url}`);
 
-        await this.typeUrl(url, timeout);
-        await this.refreshPage();
+        await this.clearUrl(timeout);
+        await this.typeUrl(Key.chord(url, Key.ENTER), timeout);
     }
 
     async waitApplicationOpened(expectedUrl: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {

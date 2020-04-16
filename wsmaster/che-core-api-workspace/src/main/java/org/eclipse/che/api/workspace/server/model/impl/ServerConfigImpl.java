@@ -182,6 +182,7 @@ public class ServerConfigImpl implements ServerConfig {
 
   public static ServerConfigImpl createFromEndpoint(Endpoint endpoint) {
     HashMap<String, String> attributes = new HashMap<>(endpoint.getAttributes());
+    attributes.put(SERVER_NAME_ATTRIBUTE, endpoint.getName());
 
     String protocol = attributes.remove("protocol");
     if (isNullOrEmpty(protocol)) {
@@ -194,6 +195,7 @@ public class ServerConfigImpl implements ServerConfig {
     if ("false".equals(isPublic)) {
       ServerConfig.setInternal(attributes, true);
     }
+
 
     return new ServerConfigImpl(Integer.toString(endpoint.getPort()), protocol, path, attributes);
   }

@@ -180,7 +180,6 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
             dockerimageComponent.getArgs());
     componentObjects.add(deployment);
 
-    componentObjects.addAll(new ComponentToKubernetesConverter(dockerimageComponent).toServices());
     return componentObjects;
   }
 

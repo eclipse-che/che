@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 
 import static java.lang.Integer.parseInt;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVER_NAME_ATTRIBUTE;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 
@@ -25,6 +26,7 @@ import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -178,9 +180,36 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
     splitServersAndPortsByExposureType(
         servers, internalServers, externalServers, secureServers, unsecuredPorts, securedPorts);
 
+    provisionServicesForDiscoverableServers(servers);
+
     exposeNonSecureServers(internalServers, externalServers, unsecuredPorts);
 
     exposeSecureServers(secureServers, securedPorts);
+  }
+
+  /**
+   * Create services with defined names for discoverable {@link ServerConfig}s.
+   * <p>
+   * TODO: this handles discoverable services as an extra services. They are also created later in
+   * {@link #exposeNonSecureServers(Map, Map, Map)} or {@link #exposeSecureServers(Map, Map)}, but
+   * with the random name.
+   */
+  private void provisionServicesForDiscoverableServers(
+      Map<String, ? extends ServerConfig> servers) {
+    servers.forEach((k, server) -> {
+      if (server.isDiscoverable() && server.getAttributes().containsKey(SERVER_NAME_ATTRIBUTE)) {
+        ServicePort servicePort = getServicePort(server);
+        Service service =
+            new ServerServiceBuilder()
+                .withName(server.getAttributes().get(SERVER_NAME_ATTRIBUTE))
+                .withMachineName(machineName)
+                .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
+                .withPorts(Collections.singletonList(servicePort))
+                .withServers(Collections.singletonMap(k, server))
+                .build();
+        k8sEnv.getServices().put(service.getMetadata().getName(), service);
+      }
+    });
   }
 
   private void splitServersAndPortsByExposureType(

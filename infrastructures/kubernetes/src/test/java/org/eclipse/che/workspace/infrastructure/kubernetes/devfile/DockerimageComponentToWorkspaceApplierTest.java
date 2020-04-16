@@ -139,7 +139,8 @@ public class DockerimageComponentToWorkspaceApplierTest {
     dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
     dockerimageComponent.setMemoryLimit("1G");
     dockerimageComponentApplier =
-        new DockerimageComponentToWorkspaceApplier(PROJECTS_MOUNT_PATH, "Never", k8sEnvProvisioner);
+        new DockerimageComponentToWorkspaceApplier(
+            PROJECTS_MOUNT_PATH, "Never", k8sEnvProvisioner);
 
     // when
     dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
@@ -339,7 +340,7 @@ public class DockerimageComponentToWorkspaceApplierTest {
                 "false",
                 "secure",
                 "false",
-                DISCOVERABLE_ENDPOINT_ATTRIBUTE,
+                "discoverable",
                 "true"));
     ComponentImpl dockerimageComponent = new ComponentImpl();
     dockerimageComponent.setAlias("jdk");
