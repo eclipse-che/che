@@ -55,6 +55,9 @@ pipeline {
 
         string(name: 'ghprbSourceBranch',
                 defaultValue: "master")
+
+        string(name: 'e2eTestParameters',
+                defaultValue: "")
     }
 
     stages {

@@ -123,7 +123,10 @@ pipeline {
                                                     value: "$customResourceFileContent"),
 
                                             booleanParam(name: 'createTestWorkspace',
-                                                    value: true)
+                                                    value: true),
+
+                                            string(name: 'e2eTestParameters',
+                                                    value: '')
                                     ]
                         }
                     }
@@ -159,7 +162,10 @@ pipeline {
                                                     value: "$customResourceFileContent"),
 
                                             booleanParam(name: 'createTestWorkspace',
-                                                    value: false)
+                                                    value: false),
+
+                                            string(name: 'e2eTestParameters',
+                                                    value: '')
                                     ]
                         }
                     }
