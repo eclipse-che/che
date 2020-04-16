@@ -15,7 +15,6 @@ import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.isLabeled;
 
 import com.google.common.annotations.VisibleForTesting;
-
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -209,7 +208,8 @@ public class OpenShiftProject extends KubernetesNamespace {
     }
   }
 
-  private Namespace getNamespace(String projectName, OpenShiftClient client) throws InfrastructureException {
+  private Namespace getNamespace(String projectName, OpenShiftClient client)
+      throws InfrastructureException {
     try {
       return client.namespaces().withName(projectName).get();
     } catch (KubernetesClientException e) {
