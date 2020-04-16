@@ -41,6 +41,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.Configurati
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helps to modify {@link KubernetesEnvironment} to make servers that are configured by {@link
@@ -99,6 +101,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureS
  * @see Annotations
  */
 public class KubernetesServerExposer<T extends KubernetesEnvironment> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(KubernetesServerExposer.class);
 
   public static final int SERVER_UNIQUE_PART_SIZE = 8;
   public static final String SERVER_PREFIX = "server";
@@ -187,12 +191,15 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
     exposeSecureServers(secureServers, securedPorts);
   }
 
+  // TODO: this creates discoverable services as an extra services. Service for same {@link
+  //  ServerConfig} is also created later in in {@link #exposeNonSecureServers(Map, Map, Map)} or
+  //  {@link #exposeSecureServers(Map, Map)} as a non-discoverable one. This was added during
+  //  working on adding endpoints for kubernetes/openshift components, to keep behavior consistent.
+  //  However, this logic is probably broken and should be changed.
   /**
-   * Create services with defined names for discoverable {@link ServerConfig}s.
-   *
-   * <p>TODO: this handles discoverable services as an extra services. They are also created later
-   * in {@link #exposeNonSecureServers(Map, Map, Map)} or {@link #exposeSecureServers(Map, Map)},
-   * but with the random name.
+   * Creates services with defined names for discoverable {@link ServerConfig}s. The name is taken
+   * from {@link ServerConfig}'s attributes under {@link ServerConfig#SERVER_NAME_ATTRIBUTE} and
+   * must be set, otherwise service won't be created.
    */
   private void provisionServicesForDiscoverableServers(
       Map<String, ? extends ServerConfig> servers) {
