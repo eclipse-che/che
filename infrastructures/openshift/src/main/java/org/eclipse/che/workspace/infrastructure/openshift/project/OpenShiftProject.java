@@ -117,7 +117,12 @@ public class OpenShiftProject extends KubernetesNamespace {
     if (markManaged && !isLabeled(project, MANAGED_NAMESPACE_LABEL, "true")) {
       // provision managed label is marking is requested but label is missing
       KubernetesObjectUtil.putLabel(project, MANAGED_NAMESPACE_LABEL, "true");
-      update(project, osClient);
+      try {
+        update(project, osClient);
+      } catch (KubernetesInfrastructureException e) {
+        LOG.error(
+            "Unable to mark the workspace project as managed. So it will not be removed automatically when workspace is deleted.");
+      }
     }
   }
 
