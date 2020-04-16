@@ -15,6 +15,8 @@ import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.isLabeled;
 
 import com.google.common.annotations.VisibleForTesting;
+
+import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.api.model.DoneableProjectRequest;
@@ -114,10 +116,11 @@ public class OpenShiftProject extends KubernetesNamespace {
       return;
     }
 
-    if (markManaged && !isLabeled(project, MANAGED_NAMESPACE_LABEL, "true")) {
+    Namespace namespace = getNamespace(projectName, osClient);
+    if (markManaged && !isLabeled(namespace, MANAGED_NAMESPACE_LABEL, "true")) {
       // provision managed label is marking is requested but label is missing
-      KubernetesObjectUtil.putLabel(project, MANAGED_NAMESPACE_LABEL, "true");
-      update(project, osClient);
+      KubernetesObjectUtil.putLabel(namespace, MANAGED_NAMESPACE_LABEL, "true");
+      update(namespace, osClient);
     }
   }
 
@@ -165,11 +168,6 @@ public class OpenShiftProject extends KubernetesNamespace {
     try {
       ProjectRequestFluent.MetadataNested<DoneableProjectRequest> metadata =
           osClient.projectrequests().createNew().withNewMetadata().withName(projectName);
-
-      if (markManaged) {
-        metadata.addToLabels(MANAGED_NAMESPACE_LABEL, "true");
-      }
-
       metadata.endMetadata().done();
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {
@@ -181,9 +179,9 @@ public class OpenShiftProject extends KubernetesNamespace {
     }
   }
 
-  private void update(Project project, OpenShiftClient client) throws InfrastructureException {
+  private void update(Namespace namespace, OpenShiftClient client) throws InfrastructureException {
     try {
-      client.projects().createOrReplace(project);
+      client.namespaces().createOrReplace(namespace);
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {
         LOG.error(
@@ -211,6 +209,19 @@ public class OpenShiftProject extends KubernetesNamespace {
     }
   }
 
+  private Namespace getNamespace(String projectName, OpenShiftClient client) throws InfrastructureException {
+    try {
+      return client.namespaces().withName(projectName).get();
+    } catch (KubernetesClientException e) {
+      if (e.getCode() == 403) {
+        // project is foreign or doesn't exist
+        return null;
+      } else {
+        throw new KubernetesInfrastructureException(e);
+      }
+    }
+  }
+
   private Project get(String projectName, OpenShiftClient client) throws InfrastructureException {
     try {
       return client.projects().withName(projectName).get();
@@ -226,14 +237,14 @@ public class OpenShiftProject extends KubernetesNamespace {
 
   private boolean isProjectManaged(OpenShiftClient client) throws InfrastructureException {
     try {
-      Project namespace = client.projects().withName(getName()).get();
+      Namespace namespace = client.namespaces().withName(getName()).get();
       return namespace.getMetadata().getLabels() != null
           && "true".equals(namespace.getMetadata().getLabels().get(MANAGED_NAMESPACE_LABEL));
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {
         throw new InfrastructureException(
             format(
-                "Could not access the project %s when trying to determine if it is managed "
+                "Could not access the namespace %s when trying to determine if it is managed "
                     + "for workspace %s",
                 getName(), getWorkspaceId()),
             e);
