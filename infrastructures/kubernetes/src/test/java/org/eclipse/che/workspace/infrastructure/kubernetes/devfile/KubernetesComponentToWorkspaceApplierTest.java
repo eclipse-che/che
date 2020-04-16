@@ -622,7 +622,6 @@ public class KubernetesComponentToWorkspaceApplierTest {
               assertTrue(serverConfigs.containsKey(endpointName));
               assertEquals(serverConfigs.get(endpointName).getPort(), endpointPort.toString());
               assertNull(serverConfigs.get(endpointName).getPath());
-              assertTrue(serverConfigs.get(endpointName).getAttributes().isEmpty());
             });
   }
 

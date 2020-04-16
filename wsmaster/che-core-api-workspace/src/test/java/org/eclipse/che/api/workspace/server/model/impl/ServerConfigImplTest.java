@@ -14,6 +14,7 @@ package org.eclipse.che.api.workspace.server.model.impl;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.INTERNAL_SERVER_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVER_NAME_ATTRIBUTE;
 import static org.testng.Assert.*;
 
 import com.google.common.collect.ImmutableMap;
@@ -23,6 +24,14 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
 import org.testng.annotations.Test;
 
 public class ServerConfigImplTest {
+
+  @Test
+  public void testStoreEndpointNameIntoAttributes() {
+    ServerConfig serverConfig =
+        ServerConfigImpl.createFromEndpoint(new EndpointImpl("blabol", 123, emptyMap()));
+
+    assertEquals(serverConfig.getAttributes().get(SERVER_NAME_ATTRIBUTE), "blabol");
+  }
 
   @Test
   public void testCreateFromEndpointMinimalEndpointShouldTranslateToHttpProtocol() {
