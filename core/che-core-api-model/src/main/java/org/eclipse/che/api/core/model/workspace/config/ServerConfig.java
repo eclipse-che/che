@@ -177,8 +177,7 @@ public interface ServerConfig {
    * @param attributes the attributes with additional server configuration
    * @see #SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE
    */
-  static @Nullable
-  Boolean isCookiesAuthEnabled(Map<String, String> attributes) {
+  static @Nullable Boolean isCookiesAuthEnabled(Map<String, String> attributes) {
     String val = attributes.get(SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE);
     return val == null ? null : Boolean.parseBoolean(val);
   }
@@ -225,31 +224,22 @@ public interface ServerConfig {
     return isInternal(getAttributes());
   }
 
-  /**
-   * @see #isSecure(Map)
-   */
+  /** @see #isSecure(Map) */
   default boolean isSecure() {
     return isSecure(getAttributes());
   }
 
-  /**
-   * @see #isUnique(Map)
-   */
+  /** @see #isUnique(Map) */
   default boolean isUnique() {
     return isUnique(getAttributes());
   }
 
-  /**
-   * @see #isCookiesAuthEnabled(Map)
-   */
-  default @Nullable
-  Boolean isCookiesAuthEnabled() {
+  /** @see #isCookiesAuthEnabled(Map) */
+  default @Nullable Boolean isCookiesAuthEnabled() {
     return isCookiesAuthEnabled(getAttributes());
   }
 
-  /**
-   * @see #getUnsecuredPaths(Map)
-   */
+  /** @see #getUnsecuredPaths(Map) */
   default List<String> getUnsecuredPaths() {
     return getUnsecuredPaths(getAttributes());
   }

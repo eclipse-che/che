@@ -189,27 +189,29 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
 
   /**
    * Create services with defined names for discoverable {@link ServerConfig}s.
-   * <p>
-   * TODO: this handles discoverable services as an extra services. They are also created later in
-   * {@link #exposeNonSecureServers(Map, Map, Map)} or {@link #exposeSecureServers(Map, Map)}, but
-   * with the random name.
+   *
+   * <p>TODO: this handles discoverable services as an extra services. They are also created later
+   * in {@link #exposeNonSecureServers(Map, Map, Map)} or {@link #exposeSecureServers(Map, Map)},
+   * but with the random name.
    */
   private void provisionServicesForDiscoverableServers(
       Map<String, ? extends ServerConfig> servers) {
-    servers.forEach((k, server) -> {
-      if (server.isDiscoverable() && server.getAttributes().containsKey(SERVER_NAME_ATTRIBUTE)) {
-        ServicePort servicePort = getServicePort(server);
-        Service service =
-            new ServerServiceBuilder()
-                .withName(server.getAttributes().get(SERVER_NAME_ATTRIBUTE))
-                .withMachineName(machineName)
-                .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
-                .withPorts(Collections.singletonList(servicePort))
-                .withServers(Collections.singletonMap(k, server))
-                .build();
-        k8sEnv.getServices().put(service.getMetadata().getName(), service);
-      }
-    });
+    servers.forEach(
+        (k, server) -> {
+          if (server.isDiscoverable()
+              && server.getAttributes().containsKey(SERVER_NAME_ATTRIBUTE)) {
+            ServicePort servicePort = getServicePort(server);
+            Service service =
+                new ServerServiceBuilder()
+                    .withName(server.getAttributes().get(SERVER_NAME_ATTRIBUTE))
+                    .withMachineName(machineName)
+                    .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
+                    .withPorts(Collections.singletonList(servicePort))
+                    .withServers(Collections.singletonMap(k, server))
+                    .build();
+            k8sEnv.getServices().put(service.getMetadata().getName(), service);
+          }
+        });
   }
 
   private void splitServersAndPortsByExposureType(

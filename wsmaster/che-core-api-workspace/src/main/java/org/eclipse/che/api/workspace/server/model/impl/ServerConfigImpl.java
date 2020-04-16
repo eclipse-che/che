@@ -196,7 +196,6 @@ public class ServerConfigImpl implements ServerConfig {
       ServerConfig.setInternal(attributes, true);
     }
 
-
     return new ServerConfigImpl(Integer.toString(endpoint.getPort()), protocol, path, attributes);
   }
 }

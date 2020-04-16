@@ -14,7 +14,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.server.devfile.Constants.DISCOVERABLE_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.DOCKERIMAGE_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
@@ -139,8 +138,7 @@ public class DockerimageComponentToWorkspaceApplierTest {
     dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
     dockerimageComponent.setMemoryLimit("1G");
     dockerimageComponentApplier =
-        new DockerimageComponentToWorkspaceApplier(
-            PROJECTS_MOUNT_PATH, "Never", k8sEnvProvisioner);
+        new DockerimageComponentToWorkspaceApplier(PROJECTS_MOUNT_PATH, "Never", k8sEnvProvisioner);
 
     // when
     dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
