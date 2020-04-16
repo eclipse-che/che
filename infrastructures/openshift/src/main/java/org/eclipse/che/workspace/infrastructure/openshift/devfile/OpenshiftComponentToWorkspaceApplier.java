@@ -16,7 +16,6 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.Kubern
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.ComponentToKubernetesConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentToWorkspaceApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
@@ -28,7 +27,6 @@ public class OpenshiftComponentToWorkspaceApplier extends KubernetesComponentToW
   public OpenshiftComponentToWorkspaceApplier(
       KubernetesRecipeParser objectsParser,
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
-      ComponentToKubernetesConverter componentToKubernetesConverter,
       EnvVars envVars,
       @Named("che.workspace.projects.storage") String projectFolderPath,
       @Named("che.workspace.projects.storage.default.size") String defaultProjectPVCSize,
@@ -39,7 +37,6 @@ public class OpenshiftComponentToWorkspaceApplier extends KubernetesComponentToW
     super(
         objectsParser,
         k8sEnvProvisioner,
-        componentToKubernetesConverter,
         envVars,
         OpenShiftEnvironment.TYPE,
         projectFolderPath,

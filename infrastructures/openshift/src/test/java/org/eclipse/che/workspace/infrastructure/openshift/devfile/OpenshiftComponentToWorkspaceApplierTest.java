@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Set;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
-import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.ComponentToKubernetesConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentToWorkspaceApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
@@ -54,7 +53,6 @@ public class OpenshiftComponentToWorkspaceApplierTest {
         new OpenshiftComponentToWorkspaceApplier(
             k8sRecipeParser,
             k8sEnvProvisioner,
-            new ComponentToKubernetesConverter(),
             envVars,
             "/projects",
             "1Gi",

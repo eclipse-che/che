@@ -84,7 +84,7 @@ public class DockerimageComponentToWorkspaceApplierTest {
   public void setUp() throws Exception {
     dockerimageComponentApplier =
         new DockerimageComponentToWorkspaceApplier(
-            PROJECTS_MOUNT_PATH, "Always", k8sEnvProvisioner, new ComponentToKubernetesConverter());
+            PROJECTS_MOUNT_PATH, "Always", k8sEnvProvisioner);
     workspaceConfig = new WorkspaceConfigImpl();
   }
 
@@ -140,7 +140,7 @@ public class DockerimageComponentToWorkspaceApplierTest {
     dockerimageComponent.setMemoryLimit("1G");
     dockerimageComponentApplier =
         new DockerimageComponentToWorkspaceApplier(
-            PROJECTS_MOUNT_PATH, "Never", k8sEnvProvisioner, new ComponentToKubernetesConverter());
+            PROJECTS_MOUNT_PATH, "Never", k8sEnvProvisioner);
 
     // when
     dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
@@ -340,7 +340,7 @@ public class DockerimageComponentToWorkspaceApplierTest {
                 "false",
                 "secure",
                 "false",
-                DISCOVERABLE_ENDPOINT_ATTRIBUTE,
+                "discoverable",
                 "true"));
     ComponentImpl dockerimageComponent = new ComponentImpl();
     dockerimageComponent.setAlias("jdk");

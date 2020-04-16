@@ -102,7 +102,6 @@ public class KubernetesComponentToWorkspaceApplierTest {
         new KubernetesComponentToWorkspaceApplier(
             k8sRecipeParser,
             k8sEnvProvisioner,
-            new ComponentToKubernetesConverter(),
             envVars,
             PROJECT_MOUNT_PATH,
             "1Gi",
@@ -553,7 +552,6 @@ public class KubernetesComponentToWorkspaceApplierTest {
         new KubernetesComponentToWorkspaceApplier(
             k8sRecipeParser,
             k8sEnvProvisioner,
-            new ComponentToKubernetesConverter(),
             envVars,
             PROJECT_MOUNT_PATH,
             "1Gi",
