@@ -3608,7 +3608,7 @@ data:
       "version": 1
     }
   che-workspaces.json: |-
-    {
+      {
       "annotations": {
         "list": [
           {
@@ -3625,7 +3625,7 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 1,
-      "iteration": 1587034540924,
+      "iteration": 1587125836872,
       "links": [],
       "panels": [
         {
@@ -4717,13 +4717,18 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "che_workspace_total or sum(che_workspace_status)",
+              "expr": "che_workspace_total",
               "format": "time_series",
               "instant": false,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "Number of Workspaces",
+              "legendFormat": "total",
               "refId": "A"
+            },
+            {
+              "expr": "sum(che_workspace_status)",
+              "legendFormat": "status sum",
+              "refId": "B"
             }
           ],
           "thresholds": [],
@@ -5103,6 +5108,7 @@ data:
             "x": 0,
             "y": 37
           },
+          "hiddenSeries": false,
           "id": 105,
           "interval": "",
           "legend": {
@@ -5191,6 +5197,7 @@ data:
             "x": 12,
             "y": 37
           },
+          "hiddenSeries": false,
           "id": 108,
           "interval": "",
           "legend": {
@@ -9691,6 +9698,10 @@ data:
       "templating": {
         "list": [
           {
+            "current": {
+              "text": "che",
+              "value": "che"
+            },
             "hide": 0,
             "includeAll": false,
             "label": null,
