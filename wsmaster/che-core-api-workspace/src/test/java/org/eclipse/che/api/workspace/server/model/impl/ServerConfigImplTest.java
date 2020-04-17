@@ -50,14 +50,6 @@ public class ServerConfigImplTest {
   }
 
   @Test
-  public void testCreateFromEndpointMinimalEndpointShouldHaveEmptyAttributes() {
-    ServerConfig serverConfig =
-        ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, emptyMap()));
-
-    assertTrue(serverConfig.getAttributes().isEmpty());
-  }
-
-  @Test
   public void testCreateFromEndpointCustomAttributesShouldPreserveInAttributes() {
     Map<String, String> customAttributes = ImmutableMap.of("k1", "v1", "k2", "v2");
     ServerConfig serverConfig =
@@ -65,7 +57,7 @@ public class ServerConfigImplTest {
 
     assertEquals(serverConfig.getAttributes().get("k1"), "v1");
     assertEquals(serverConfig.getAttributes().get("k2"), "v2");
-    assertEquals(serverConfig.getAttributes().size(), 2);
+    assertEquals(serverConfig.getAttributes().size(), 3);
   }
 
   @Test
@@ -74,7 +66,6 @@ public class ServerConfigImplTest {
         ServerConfigImpl.createFromEndpoint(
             new EndpointImpl("name", 123, singletonMap("path", "hello")));
 
-    assertTrue(serverConfig.getAttributes().isEmpty());
     assertEquals(serverConfig.getPath(), "hello");
   }
 
@@ -84,7 +75,6 @@ public class ServerConfigImplTest {
         ServerConfigImpl.createFromEndpoint(
             new EndpointImpl("name", 123, singletonMap("protocol", "hello")));
 
-    assertTrue(serverConfig.getAttributes().isEmpty());
     assertEquals(serverConfig.getProtocol(), "hello");
   }
 
@@ -94,7 +84,7 @@ public class ServerConfigImplTest {
         ServerConfigImpl.createFromEndpoint(
             new EndpointImpl("name", 123, singletonMap("public", "true")));
 
-    assertTrue(serverConfig.getAttributes().isEmpty());
+    assertFalse(serverConfig.isInternal());
   }
 
   @Test
@@ -103,7 +93,7 @@ public class ServerConfigImplTest {
         ServerConfigImpl.createFromEndpoint(
             new EndpointImpl("name", 123, singletonMap("public", "whatever")));
 
-    assertTrue(serverConfig.getAttributes().isEmpty());
+    assertFalse(serverConfig.isInternal());
   }
 
   @Test
