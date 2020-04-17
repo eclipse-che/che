@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.server.devfile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.Serializable;
@@ -33,6 +34,7 @@ public class SerializableConverter implements AttributeConverter<Serializable, S
   public SerializableConverter() {
     this.objectMapper = new ObjectMapper();
     objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.OBJECT_AND_NON_CONCRETE);
+    objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
   }
 
   @Override
@@ -47,7 +49,8 @@ public class SerializableConverter implements AttributeConverter<Serializable, S
   @Override
   public Serializable convertToEntityAttribute(String dbData) {
     try {
-      return objectMapper.readValue(dbData, Serializable.class);
+      Serializable[] arr =  objectMapper.readValue(dbData, Serializable[].class);
+      return  (arr.length == 1) ? arr[0] : arr;
     } catch (IOException e) {
       throw new RuntimeException("Unable to deserialize preference value:" + e.getMessage(), e);
     }
