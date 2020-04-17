@@ -203,22 +203,24 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
    */
   private void provisionServicesForDiscoverableServers(
       Map<String, ? extends ServerConfig> servers) {
-    servers.forEach(
-        (k, server) -> {
-          if (server.isDiscoverable()
-              && server.getAttributes().containsKey(SERVER_NAME_ATTRIBUTE)) {
-            ServicePort servicePort = getServicePort(server);
-            Service service =
-                new ServerServiceBuilder()
-                    .withName(server.getAttributes().get(SERVER_NAME_ATTRIBUTE))
-                    .withMachineName(machineName)
-                    .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
-                    .withPorts(Collections.singletonList(servicePort))
-                    .withServers(Collections.singletonMap(k, server))
-                    .build();
-            k8sEnv.getServices().put(service.getMetadata().getName(), service);
-          }
-        });
+    for (String serverName : servers.keySet()) {
+      ServerConfig server = servers.get(serverName);
+      if (server.getAttributes().containsKey(SERVER_NAME_ATTRIBUTE)) {
+        // remove the name from attributes so we don't send it to the client
+        String endpointName = server.getAttributes().remove(SERVER_NAME_ATTRIBUTE);
+        if (server.isDiscoverable()) {
+          Service service =
+              new ServerServiceBuilder()
+                  .withName(endpointName)
+                  .withMachineName(machineName)
+                  .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
+                  .withPorts(Collections.singletonList(getServicePort(server)))
+                  .withServers(Collections.singletonMap(serverName, server))
+                  .build();
+          k8sEnv.getServices().put(service.getMetadata().getName(), service);
+        }
+      }
+    }
   }
 
   private void splitServersAndPortsByExposureType(
