@@ -150,6 +150,7 @@ class OpenShiftWorkspaceServiceAccount {
         .endMetadata()
         .withNewRoleRef()
         .withName("workspace-view")
+        .withNamespace(projectName)
         .endRoleRef()
         .withSubjects(
             new ObjectReferenceBuilder()
@@ -167,6 +168,7 @@ class OpenShiftWorkspaceServiceAccount {
         .endMetadata()
         .withNewRoleRef()
         .withName("exec")
+        .withNamespace(projectName)
         .endRoleRef()
         .withSubjects(
             new ObjectReferenceBuilder()

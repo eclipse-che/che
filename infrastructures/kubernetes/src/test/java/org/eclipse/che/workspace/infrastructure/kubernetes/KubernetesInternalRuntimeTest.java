@@ -142,7 +142,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarTool
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeMethod;
@@ -410,6 +412,7 @@ public class KubernetesInternalRuntimeTest {
     verify(services).create(any());
     verify(secrets).create(any());
     verify(configMaps).create(any());
+    verify(namespace).cleanUp();
     verify(namespace.deployments(), times(1)).watchEvents(any());
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
@@ -419,6 +422,19 @@ public class KubernetesInternalRuntimeTest {
     verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
     verify(serversChecker, times(2)).startAsync(any());
     verify(namespace.deployments(), times(1)).stopWatch();
+  }
+
+  @Test
+  public void testCleanupHappensFirst() throws InfrastructureException {
+    internalRuntime.start(emptyMap());
+
+    InOrder cleanupInOrderExecutionVerification =
+        Mockito.inOrder(namespace, deployments, toolingProvisioner);
+    cleanupInOrderExecutionVerification.verify(namespace).cleanUp();
+    cleanupInOrderExecutionVerification
+        .verify(toolingProvisioner)
+        .provision(any(), any(), any(), any());
+    cleanupInOrderExecutionVerification.verify(deployments).deploy(any(Pod.class));
   }
 
   @Test
@@ -617,7 +633,7 @@ public class KubernetesInternalRuntimeTest {
     try {
       internalRuntime.start(emptyMap());
     } catch (Exception rethrow) {
-      verify(namespace).cleanUp();
+      verify(namespace, times(2)).cleanUp();
       verify(namespace, never()).services();
       verify(namespace, never()).ingresses();
       throw rethrow;
@@ -663,7 +679,7 @@ public class KubernetesInternalRuntimeTest {
     try {
       internalRuntime.start(emptyMap());
     } catch (Exception rethrow) {
-      verify(namespace).cleanUp();
+      verify(namespace, times(2)).cleanUp();
       verify(namespace).services();
       verify(namespace, never()).ingresses();
       throw rethrow;

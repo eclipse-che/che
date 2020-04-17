@@ -45,15 +45,8 @@ export class OcpLoginPage {
     async isIdentityProviderLinkVisible(): Promise<boolean> {
         Logger.debug('OcpLoginPage.isIdentityProviderLinkVisible');
 
-        const loginWithHtpaswdLocator: By = By.css('a[title=\'Log in with htpasswd\']');
+        const loginWithHtpaswdLocator: By = By.css(`a[title=\'Log in with ${TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
         return await this.driverHelper.waitVisibilityBoolean(loginWithHtpaswdLocator, 3, 5000);
-    }
-
-    async clickOnLoginWitnHtpasswd() {
-        Logger.debug('OcpLoginPage.clickOnLoginWitnHtpasswd');
-
-        const loginWithHtpaswdLocator: By = By.css('a[title=\'Log in with htpasswd\']');
-        await this.driverHelper.waitAndClick(loginWithHtpaswdLocator);
     }
 
     async isAuthorizeOpenShiftIdentityProviderPageVisible(): Promise<boolean> {
@@ -100,6 +93,20 @@ export class OcpLoginPage {
         Logger.debug('OcpLoginPage.waitDisappearanceOpenShiftLoginWelcomePage');
 
         await this.driverHelper.waitDisappearance(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH));
+    }
+
+    async isLinkAccountPageVisible(): Promise<boolean> {
+        Logger.debug('OcpLoginPage.isLinkAccountPageVisible');
+
+        const linkAccountLocator: By = By.id(`linkAccount`);
+        return await this.driverHelper.waitVisibilityBoolean(linkAccountLocator, 3, 5000);
+    }
+
+    async clickOnLinkAccountButton() {
+        Logger.debug('OcpLoginPage.clickOnLinkAccountButton');
+
+        const linkAccountLocator: By = By.id(`linkAccount`);
+        this.driverHelper.waitAndClick(linkAccountLocator);
     }
 
 }

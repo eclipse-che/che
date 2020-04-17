@@ -283,42 +283,6 @@
                         "129M",
                         "123Mi"
                       ]
-                    },
-                    "cpuLimit": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "number",
-                          "exclusiveMinimum": 0
-                        }
-                      ],
-                      "description": "Describes CPU limit for the component. You can express CPU limit as a float-point cores or as a  fixed-point integer millicores using 'm' suffix",
-                      "examples": [
-                        "2",
-                        "0.235",
-                        "100m",
-                        "1230m"
-                      ]
-                    },
-                    "cpuRequest": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "number",
-                          "exclusiveMinimum": 0
-                        }
-                      ],
-                      "description": "Describes CPU request for the component. You can express CPU request as a float-point cores or as a  fixed-point integer millicores using 'm' suffix",
-                      "examples": [
-                        "2",
-                        "0.235",
-                        "100m",
-                        "1230m"
-                      ]
                     }
                   }
                 }
@@ -422,6 +386,7 @@
                   "type": {},
                   "alias": {},
                   "mountSources": {},
+                  "volumes": {},
                   "env": {},
                   "reference": {
                     "description": "Describes absolute or devfile-relative location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type components",
@@ -510,6 +475,8 @@
                   "alias": {},
                   "mountSources": {},
                   "env": {},
+                  "cpuLimit": {},
+                  "cpuRequest": {},
                   "volumes": {},
                   "memoryLimit": {
                     "anyOf": [
@@ -642,6 +609,42 @@
             "type": "boolean",
             "description": "Describes whether projects sources should be mount to the component. `CHE_PROJECTS_ROOT` environment variable should contains a path where projects sources are mount",
             "default": "false"
+          },
+          "cpuLimit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            ],
+            "description": "Describes CPU limit for the component. You can express CPU limit as a float-point cores or as a  fixed-point integer millicores using 'm' suffix",
+            "examples": [
+              "2",
+              "0.235",
+              "100m",
+              "1230m"
+            ]
+          },
+          "cpuRequest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            ],
+            "description": "Describes CPU request for the component. You can express CPU request as a float-point cores or as a  fixed-point integer millicores using 'm' suffix",
+            "examples": [
+              "2",
+              "0.235",
+              "100m",
+              "1230m"
+            ]
           },
           "volumes": {
             "type": "array",

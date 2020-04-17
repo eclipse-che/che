@@ -27,7 +27,7 @@ export class RegularUserOcpCheLoginPage implements ICheLoginPage {
         Logger.debug('RegularUserOcpCheLoginPage.login');
 
         if (await this.ocpLogin.isIdentityProviderLinkVisible()) {
-            await this.ocpLogin.clickOnLoginWitnHtpasswd();
+            await this.ocpLogin.clickOnLoginProviderTitle();
         }
 
         await this.ocpLogin.waitOpenShiftLoginWelcomePage();
@@ -48,6 +48,13 @@ export class RegularUserOcpCheLoginPage implements ICheLoginPage {
             await this.cheLogin.enterLastNameBrokerLoginPage(TestConstants.TS_SELENIUM_LAST_NAME);
             await this.cheLogin.clickOnSubmitButton();
             await this.cheLogin.waitDisappearanceBrokerLoginPage();
+        }
+
+        if (await this.ocpLogin.isLinkAccountPageVisible()) {
+            await this.ocpLogin.clickOnLinkAccountButton();
+            await this.cheLogin.waitEclipseCheLoginFormPage();
+            await this.cheLogin.inputPaswordEclipseCheLoginPage(TestConstants.TS_SELENIUM_PASSWORD);
+            await this.cheLogin.clickEclipseCheLoginButton();
         }
     }
 

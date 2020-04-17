@@ -23,6 +23,9 @@ components:
       app.kubernetes.io/component: database
       app.kubernetes.io/part-of: petclinic
     mountSources: true
+    volumes:
+          - name: maven-repo
+            containerPath: /root/.m2
 commands:
   - name: build
     actions:
