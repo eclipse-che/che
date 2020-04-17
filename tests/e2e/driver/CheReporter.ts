@@ -19,6 +19,7 @@ import { DriverHelper } from '../utils/DriverHelper';
 import { ScreenCatcher } from '../utils/ScreenCatcher';
 import { ITestWorkspaceUtil } from '../utils/workspace/ITestWorkspaceUtil';
 import { PreferencesHandler, AskForConfirmationType } from '../utils/PreferencesHandler';
+import { CheApiRequestHandler } from '../utils/requestHandlers/CheApiRequestHandler';
 
 const e2eContainer = inversifyConfig.e2eContainer;
 const driver: IDriver = e2eContainer.get(TYPES.Driver);
@@ -67,6 +68,10 @@ class CheReporter extends mocha.reporters.Spec {
       console.log(launchInformation);
 
       rm.sync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
+      if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'TRACE') {
+        CheApiRequestHandler.enableRequestInteceptor();
+        CheApiRequestHandler.enableResponseInterceptor();
+      }
       preferencesHalder.setConfirmExit(AskForConfirmationType.never);
     });
 
