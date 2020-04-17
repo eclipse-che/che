@@ -23,7 +23,17 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.Kube
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.setSelector;
 
 import com.google.common.base.Strings;
-import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.api.model.ContainerStateTerminated;
+import io.fabric8.kubernetes.api.model.ContainerStateWaiting;
+import io.fabric8.kubernetes.api.model.ContainerStatus;
+import io.fabric8.kubernetes.api.model.DoneablePod;
+import io.fabric8.kubernetes.api.model.Event;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.ObjectReference;
+import io.fabric8.kubernetes.api.model.OwnerReference;
+import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
@@ -401,6 +411,7 @@ public class KubernetesDeployments {
     if (POD_STATUS_PHASE_RUNNING.equals(podPhase)) {
       // check that all the containers are ready...
       Map<String, String> terminatedContainers = new HashMap<>();
+      List<String> restartingContainers = new ArrayList<>();
 
       for (ContainerStatus cs : status.getContainerStatuses()) {
         ContainerStateTerminated terminated = cs.getState().getTerminated();
@@ -420,20 +431,38 @@ public class KubernetesDeployments {
                   "reason = '%s', exit code = %d, message = '%s'",
                   terminated.getReason(), terminated.getExitCode(), terminated.getMessage()));
         }
+
+        if (cs.getRestartCount() != null && cs.getRestartCount() > 0) {
+          restartingContainers.add(cs.getName());
+        }
       }
 
-      if (terminatedContainers.isEmpty()) {
+      if (terminatedContainers.isEmpty() && restartingContainers.isEmpty()) {
         podRunningFuture.complete(null);
       } else {
-        String errorMessage =
-            "The following containers have terminated:\n"
-                + terminatedContainers
-                    .entrySet()
-                    .stream()
-                    .map(e -> e.getKey() + ": " + e.getValue())
-                    .collect(Collectors.joining("" + "\n"));
+        StringBuilder errorMessage = new StringBuilder();
 
-        podRunningFuture.completeExceptionally(new InfrastructureException(errorMessage));
+        if (!restartingContainers.isEmpty()) {
+          errorMessage.append("The following containers have restarted during the startup:\n");
+          errorMessage.append(String.join(", ", restartingContainers));
+        }
+
+        if (!terminatedContainers.isEmpty()) {
+          if (errorMessage.length() > 0) {
+            errorMessage.append("\n");
+          }
+
+          errorMessage.append("The following containers have terminated:\n");
+          errorMessage.append(
+              terminatedContainers
+                  .entrySet()
+                  .stream()
+                  .map(e -> e.getKey() + ": " + e.getValue())
+                  .collect(Collectors.joining("" + "\n")));
+        }
+
+        podRunningFuture.completeExceptionally(
+            new InfrastructureException(errorMessage.toString()));
       }
 
       return;
