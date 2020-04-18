@@ -19,11 +19,8 @@
 JAVA_VERSION=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2 | cut -d'.' -f1 | sed 's/[^0-9]*//g')
 if ([ "$JAVA_VERSION" -ge 11 ])
 then
-   echo "Incompatible JAVA_OPTS configured to use with Java 11. Reset to default"
-   echo $JAVA_OPTS
-   JAVA_OPTS="-XX:MinRAMPercentage=60.0 -XX:MaxRAMPercentage=90.0 -Djava.security.egd=file:/dev/./urandom"
-else
-   echo "Sorry. Not found."
+   echo "Sanitizing JAVA_OPTS"
+   JAVA_OPTS=$(echo "$JAVA_OPTS" | sed "s/-XX:+UseCGroupMemoryLimitForHeap//")
 fi
 
 #Global LOGS DIR
