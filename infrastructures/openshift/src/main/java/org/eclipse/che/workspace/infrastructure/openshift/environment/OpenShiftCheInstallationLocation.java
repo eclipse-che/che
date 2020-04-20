@@ -11,15 +11,16 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.environment;
 
-import javax.annotation.PostConstruct;
+import com.google.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * OpenShiftCheInstallationLocation checks the KUBERNETES_NAMESPACE and POD_NAMESPACE environment variables
- * to determine what namespace Che is installed in.  Users should use this class to retrieve the installation
- * namespace name.
+ * OpenShiftCheInstallationLocation checks the KUBERNETES_NAMESPACE and POD_NAMESPACE environment
+ * variables to determine what namespace Che is installed in. Users should use this class to
+ * retrieve the installation namespace name.
  *
  * @author Tom George
  */
@@ -28,23 +29,20 @@ public class OpenShiftCheInstallationLocation {
 
   private static final Logger LOG = LoggerFactory.getLogger(OpenShiftCheInstallationLocation.class);
 
-  private String installationLocationNamespace;
+  @Inject(optional = true)
+  @Named("env.KUBERNETES_NAMESPACE")
+  private String kubernetesNamespace = null;
+
+  @Inject(optional = true)
+  @Named("env.POD_NAMESPACE")
+  private String podNamespace = null;
 
   /** @return The name of the namespace where Che is installed */
   public String getInstallationLocationNamespace() {
-    return installationLocationNamespace;
-  }
-
-  @PostConstruct
-  public void postConstruct() {
-    String kubernetesNamespace = System.getenv("KUBERNETES_NAMESPACE");
-    String podNamespace = System.getenv("POD_NAMESPACE");
-
     if (kubernetesNamespace == null && podNamespace == null) {
-      LOG.info(
-          "Neither KUBERNETES_NAMESPACE nor POD_NAMESPACE is defined.  Unable to determine Che installation location");
+      LOG.warn(
+          "Neither KUBERNETES_NAMESPACE nor POD_NAMESPACE is defined. Unable to determine Che installation location");
     }
-    installationLocationNamespace =
-        kubernetesNamespace == null ? podNamespace : kubernetesNamespace;
+    return kubernetesNamespace == null ? podNamespace : kubernetesNamespace;
   }
 }

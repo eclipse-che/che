@@ -18,6 +18,8 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftCheInstallationLocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class creates the necessary role and rolebindings to allow the che serviceaccount to stop
@@ -28,28 +30,36 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftC
 public class OpenShiftStopWorkspaceRoleProvisioner {
 
   private final OpenShiftClientFactory clientFactory;
-  private final OpenShiftCheInstallationLocation installationLocation;
+  private final String installationLocation;
+
+  private static final Logger LOG = LoggerFactory.getLogger(OpenShiftCheInstallationLocation.class);
 
   @Inject
   public OpenShiftStopWorkspaceRoleProvisioner(
       OpenShiftClientFactory clientFactory, OpenShiftCheInstallationLocation installationLocation) {
     this.clientFactory = clientFactory;
-    this.installationLocation = installationLocation;
+    this.installationLocation = installationLocation.getInstallationLocationNamespace();
   }
 
   public void provision(String projectName) throws InfrastructureException {
-    OpenShiftClient osClient = clientFactory.createOC();
-    String stopWorkspacesRoleName = "workspace-stop";
-    if (osClient.roles().inNamespace(projectName).withName(stopWorkspacesRoleName).get() == null) {
+    if (installationLocation != null) {
+      OpenShiftClient osClient = clientFactory.createOC();
+      String stopWorkspacesRoleName = "workspace-stop";
+      if (osClient.roles().inNamespace(projectName).withName(stopWorkspacesRoleName).get()
+          == null) {
+        osClient
+            .roles()
+            .inNamespace(projectName)
+            .createOrReplace(createStopWorkspacesRole(stopWorkspacesRoleName));
+      }
       osClient
-          .roles()
+          .roleBindings()
           .inNamespace(projectName)
-          .createOrReplace(createStopWorkspacesRole(stopWorkspacesRoleName));
+          .createOrReplace(createStopWorkspacesRoleBinding(projectName));
+    } else {
+      LOG.warn(
+          "Could not determine Che installation location. Did not provision stop workspace Role and RoleBinding.");
     }
-    osClient
-        .roleBindings()
-        .inNamespace(projectName)
-        .createOrReplace(createStopWorkspacesRoleBinding(projectName));
   }
 
   protected OpenshiftRole createStopWorkspacesRole(String name) {
@@ -95,7 +105,7 @@ public class OpenShiftStopWorkspaceRoleProvisioner {
             new ObjectReferenceBuilder()
                 .withKind("ServiceAccount")
                 .withName("che")
-                .withNamespace(installationLocation.getInstallationLocationNamespace())
+                .withNamespace(installationLocation)
                 .build())
         .build();
   }
