@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -124,6 +125,11 @@ public class MultiuserJpaWorkspaceDaoTest {
         .getResultList()
         .forEach(manager::remove);
     manager.getTransaction().commit();
+  }
+
+  @Test
+  public void shouldGetTotalWorkspaceCount() throws ServerException {
+    assertEquals(dao.getWorkspacesTotalCount(), 3);
   }
 
   @AfterClass

@@ -3608,7 +3608,7 @@ data:
       "version": 1
     }
   che-workspaces.json: |-
-    {
+      {
       "annotations": {
         "list": [
           {
@@ -3625,8 +3625,7 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 1,
-      "id": 2,
-      "iteration": 1574014597638,
+      "iteration": 1587125836872,
       "links": [],
       "panels": [
         {
@@ -3818,98 +3817,6 @@ data:
           "valueName": "current"
         },
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "${datasource}",
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 5,
-            "w": 6,
-            "x": 12,
-            "y": 17
-          },
-          "hiddenSeries": false,
-          "id": 110,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "sum(che_workspace_starting_attempts_total)",
-              "legendFormat": "Workspace start attempts",
-              "refId": "A"
-            },
-            {
-              "expr": "che_workspace_starting_attempts_total{debug='true'}",
-              "legendFormat": "Workspace start attempts in start-debug mode",
-              "refId": "B"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Workspace start attempts",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": 0,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": 0,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
           "collapsed": false,
           "datasource": "$datasource",
           "gridPos": {
@@ -3938,6 +3845,7 @@ data:
             "x": 0,
             "y": 7
           },
+          "hiddenSeries": false,
           "id": 36,
           "interval": "",
           "legend": {
@@ -4037,6 +3945,7 @@ data:
             "x": 6,
             "y": 7
           },
+          "hiddenSeries": false,
           "id": 48,
           "interval": "",
           "legend": {
@@ -4135,6 +4044,7 @@ data:
             "x": 12,
             "y": 7
           },
+          "hiddenSeries": false,
           "id": 6,
           "legend": {
             "avg": true,
@@ -4225,6 +4135,7 @@ data:
             "x": 18,
             "y": 7
           },
+          "hiddenSeries": false,
           "id": 59,
           "legend": {
             "avg": true,
@@ -4316,6 +4227,7 @@ data:
             "x": 0,
             "y": 12
           },
+          "hiddenSeries": false,
           "id": 44,
           "legend": {
             "avg": true,
@@ -4408,6 +4320,7 @@ data:
             "x": 6,
             "y": 12
           },
+          "hiddenSeries": false,
           "id": 49,
           "legend": {
             "avg": true,
@@ -4500,6 +4413,7 @@ data:
             "x": 12,
             "y": 12
           },
+          "hiddenSeries": false,
           "id": 8,
           "legend": {
             "avg": false,
@@ -4590,6 +4504,7 @@ data:
             "x": 18,
             "y": 12
           },
+          "hiddenSeries": false,
           "id": 10,
           "legend": {
             "avg": true,
@@ -4681,6 +4596,7 @@ data:
             "x": 0,
             "y": 17
           },
+          "hiddenSeries": false,
           "id": 62,
           "legend": {
             "avg": true,
@@ -4773,6 +4689,7 @@ data:
             "x": 6,
             "y": 17
           },
+          "hiddenSeries": false,
           "id": 77,
           "legend": {
             "avg": false,
@@ -4800,12 +4717,18 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(che_workspace_status)",
+              "expr": "che_workspace_total",
               "format": "time_series",
               "instant": false,
+              "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "Number of Workspaces",
+              "legendFormat": "total",
               "refId": "A"
+            },
+            {
+              "expr": "sum(che_workspace_status)",
+              "legendFormat": "status sum",
+              "refId": "B"
             }
           ],
           "thresholds": [],
@@ -4852,6 +4775,98 @@ data:
           }
         },
         {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "${datasource}",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 17
+          },
+          "hiddenSeries": false,
+          "id": 110,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(che_workspace_starting_attempts_total)",
+              "legendFormat": "Workspace start attempts",
+              "refId": "A"
+            },
+            {
+              "expr": "che_workspace_starting_attempts_total{debug='true'}",
+              "legendFormat": "Workspace start attempts in start-debug mode",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Workspace start attempts",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": 0,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
           "collapsed": false,
           "datasource": "$datasource",
           "gridPos": {
@@ -4881,6 +4896,7 @@ data:
             "x": 0,
             "y": 23
           },
+          "hiddenSeries": false,
           "id": 78,
           "legend": {
             "avg": false,
@@ -4985,6 +5001,7 @@ data:
             "x": 0,
             "y": 29
           },
+          "hiddenSeries": false,
           "id": 16,
           "legend": {
             "avg": false,
@@ -5091,6 +5108,7 @@ data:
             "x": 0,
             "y": 37
           },
+          "hiddenSeries": false,
           "id": 105,
           "interval": "",
           "legend": {
@@ -5179,6 +5197,7 @@ data:
             "x": 12,
             "y": 37
           },
+          "hiddenSeries": false,
           "id": 108,
           "interval": "",
           "legend": {
@@ -9513,11 +9532,11 @@ data:
               }
             },
             {
-              "datasource": "${datasource}",
               "aliasColors": {},
               "bars": false,
               "dashLength": 10,
               "dashes": false,
+              "datasource": "${datasource}",
               "fill": 1,
               "fillGradient": 0,
               "gridPos": {
@@ -9578,22 +9597,22 @@ data:
               },
               "yaxes": [
                 {
+                  "decimals": 0,
                   "format": "short",
                   "label": null,
                   "logBase": 1,
                   "max": null,
                   "min": 0,
-                  "show": true,
-                  "decimals": 0
+                  "show": true
                 },
                 {
+                  "decimals": 0,
                   "format": "short",
                   "label": null,
                   "logBase": 1,
                   "max": null,
                   "min": 0,
-                  "show": true,
-                  "decimals": 0
+                  "show": true
                 }
               ],
               "yaxis": {
@@ -9673,12 +9692,16 @@ data:
         }
       ],
       "refresh": "15m",
-      "schemaVersion": 19,
+      "schemaVersion": 22,
       "style": "dark",
       "tags": [],
       "templating": {
         "list": [
           {
+            "current": {
+              "text": "che",
+              "value": "che"
+            },
             "hide": 0,
             "includeAll": false,
             "label": null,
