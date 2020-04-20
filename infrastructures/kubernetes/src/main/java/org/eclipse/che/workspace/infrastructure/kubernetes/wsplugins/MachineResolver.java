@@ -110,7 +110,7 @@ public class MachineResolver {
             format(
                 "Devfile overrides the endpoint '%s' of the plugin/editor component '%s'. "
                     + "This is not allowed because it would most probably cause the workspace "
-                    + "malfunction. Please change the name of the endpoint in the devfile and try "
+                    + "to malfunction. Please change the name of the endpoint in the devfile and try "
                     + "to start the workspace again.",
                 component.getId(), endpoint.getName()));
       }
