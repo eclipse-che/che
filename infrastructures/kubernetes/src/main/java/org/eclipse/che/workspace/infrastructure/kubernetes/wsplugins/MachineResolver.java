@@ -83,6 +83,7 @@ public class MachineResolver {
             resolveMachineAttributes(),
             toWorkspaceVolumes(cheContainer));
     applyDevfileVolumes(machineConfig);
+    applyDevfileEndpoints(machineConfig);
     normalizeMemory(container, machineConfig);
     normalizeCpu(container, machineConfig);
     return machineConfig;
@@ -93,6 +94,15 @@ public class MachineResolver {
       machineConfig
           .getVolumes()
           .put(volume.getName(), new VolumeImpl().withPath(volume.getContainerPath()));
+    }
+  }
+
+  private void applyDevfileEndpoints(InternalMachineConfig machineConfig) {
+    for (org.eclipse.che.api.core.model.workspace.devfile.Endpoint endpoint :
+        component.getEndpoints()) {
+      machineConfig
+          .getServers()
+          .put(endpoint.getName(), ServerConfigImpl.createFromEndpoint(endpoint));
     }
   }
 

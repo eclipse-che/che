@@ -20,14 +20,17 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
@@ -291,6 +294,21 @@ public class MachineResolverTest {
     assertEquals(2, config.getVolumes().size());
     assertEquals("/bar", config.getVolumes().get("foo").getPath());
     assertEquals("/foo/test", config.getVolumes().get("test").getPath());
+  }
+
+  @Test
+  public void shouldAddEndpointsFromDevfileComponent() throws InfrastructureException {
+    component.setEndpoints(
+        asList(
+            new EndpointImpl("endpoint8080", 8080, Collections.emptyMap()),
+            new EndpointImpl("endpoint9999", 9999, ImmutableMap.of("secure", "true"))));
+
+    InternalMachineConfig config = resolver.resolve();
+
+    assertEquals(config.getServers().size(), 2);
+    assertEquals(config.getServers().get("endpoint8080").getPort(), "8080");
+    assertEquals(config.getServers().get("endpoint9999").getPort(), "9999");
+    assertEquals(config.getServers().get("endpoint9999").getAttributes().get("secure"), "true");
   }
 
   private static String toBytesString(String k8sMemorySize) {
