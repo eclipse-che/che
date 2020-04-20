@@ -97,12 +97,23 @@ public class MachineResolver {
     }
   }
 
-  private void applyDevfileEndpoints(InternalMachineConfig machineConfig) {
+  private void applyDevfileEndpoints(InternalMachineConfig machineConfig)
+      throws InfrastructureException {
     for (org.eclipse.che.api.core.model.workspace.devfile.Endpoint endpoint :
         component.getEndpoints()) {
-      machineConfig
-          .getServers()
-          .put(endpoint.getName(), ServerConfigImpl.createFromEndpoint(endpoint));
+      if (!machineConfig.getServers().containsKey(endpoint.getName())) {
+        machineConfig
+            .getServers()
+            .put(endpoint.getName(), ServerConfigImpl.createFromEndpoint(endpoint));
+      } else {
+        throw new InfrastructureException(
+            format(
+                "Devfile's component '%s' is trying to override plugin/editor's endpoint '%s'. "
+                    + "This is not allowed, because it will most probably cause the workspace "
+                    + "malfunction. Please change the endpoint name in the devfile's component "
+                    + "and try to start workspace again.",
+                component.getId(), endpoint.getName()));
+      }
     }
   }
 

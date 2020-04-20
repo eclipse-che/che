@@ -296,6 +296,19 @@ public class MachineResolverTest {
     assertEquals("/foo/test", config.getVolumes().get("test").getPath());
   }
 
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void shouldFailWhenEndpointNameAlreadyExist() throws InfrastructureException {
+    // given
+    ChePluginEndpoint pluginEndpoint = new ChePluginEndpoint();
+    pluginEndpoint.setName("test-endpoint");
+    endpoints.add(pluginEndpoint);
+    component.setEndpoints(
+        Collections.singletonList(new EndpointImpl("test-endpoint", 8080, Collections.emptyMap())));
+
+    // when -> then exception
+    resolver.resolve();
+  }
+
   @Test
   public void shouldAddEndpointsFromDevfileComponent() throws InfrastructureException {
     component.setEndpoints(
