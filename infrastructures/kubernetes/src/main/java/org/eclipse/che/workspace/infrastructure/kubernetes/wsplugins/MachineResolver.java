@@ -108,10 +108,10 @@ public class MachineResolver {
       } else {
         throw new InfrastructureException(
             format(
-                "Devfile's component '%s' is trying to override plugin/editor's endpoint '%s'. "
-                    + "This is not allowed, because it will most probably cause the workspace "
-                    + "malfunction. Please change the endpoint name in the devfile's component "
-                    + "and try to start workspace again.",
+                "Devfile overrides the endpoint '%s' of the plugin/editor component '%s'. "
+                    + "This is not allowed because it would most probably cause the workspace "
+                    + "malfunction. Please change the name of the endpoint in the devfile and try "
+                    + "to start the workspace again.",
                 component.getId(), endpoint.getName()));
       }
     }
