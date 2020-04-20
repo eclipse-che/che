@@ -129,7 +129,7 @@ public class MultiuserJpaWorkspaceDaoTest {
 
   @Test
   public void shouldGetTotalWorkspaceCount() throws ServerException {
-    assertEquals(dao.getTotalCount(), 3);
+    assertEquals(dao.getWorkspacesTotalCount(), 3);
   }
 
   @AfterClass

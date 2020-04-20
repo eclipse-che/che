@@ -40,7 +40,7 @@ public class WorkspaceMeterBinder implements MeterBinder {
 
   private double count() {
     try {
-      return workspaceManager.getTotalCount();
+      return workspaceManager.getWorkspacesTotalCount();
     } catch (ServerException e) {
       return Double.NaN;
     }

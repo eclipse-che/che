@@ -264,11 +264,11 @@ public class JpaWorkspaceDao implements WorkspaceDao {
 
   @Override
   @Transactional
-  public long getTotalCount() throws ServerException {
+  public long getWorkspacesTotalCount() throws ServerException {
     try {
       return managerProvider
           .get()
-          .createNamedQuery("Workspace.getTotalCount", Long.class)
+          .createNamedQuery("Workspace.getWorkspacesTotalCount", Long.class)
           .getSingleResult();
     } catch (RuntimeException x) {
       throw new ServerException(x.getLocalizedMessage(), x);

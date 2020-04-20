@@ -136,10 +136,10 @@ public interface WorkspaceDao {
       throws ServerException;
 
   /**
-   * Get count of all workspaces from persistent layer.
+   * Get the count of all workspaces from the persistent layer.
    *
    * @return workspace count
    * @throws ServerException when any error occurs
    */
-  long getTotalCount() throws ServerException;
+  long getWorkspacesTotalCount() throws ServerException;
 }

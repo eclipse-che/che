@@ -67,7 +67,9 @@ import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
   @NamedQuery(
       name = "Workspace.getByNamespaceCount",
       query = "SELECT COUNT(w) " + "FROM Workspace w " + "WHERE w.account.name = :namespace "),
-  @NamedQuery(name = "Workspace.getTotalCount", query = "SELECT COUNT(w) FROM Workspace w"),
+  @NamedQuery(
+      name = "Workspace.getWorkspacesTotalCount",
+      query = "SELECT COUNT(w) FROM Workspace w"),
   @NamedQuery(
       name = "Workspace.getByTemporaryCount",
       query = "SELECT COUNT(w) " + "FROM Workspace w " + "WHERE w.isTemporary = :temporary ")

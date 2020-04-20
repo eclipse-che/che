@@ -591,8 +591,8 @@ public class WorkspaceManager {
    * @return workspaces count
    * @throws ServerException when any error occurs
    */
-  public long getTotalCount() throws ServerException {
-    return workspaceDao.getTotalCount();
+  public long getWorkspacesTotalCount() throws ServerException {
+    return workspaceDao.getWorkspacesTotalCount();
   }
 
   private WorkspaceImpl doCreateWorkspace(

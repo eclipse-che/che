@@ -129,7 +129,7 @@ public class WorkspaceDaoTest {
 
   @Test
   public void shouldBeAbleToCountWorkspaces() throws ServerException {
-    assertEquals(workspaceDao.getTotalCount(), COUNT_OF_WORKSPACES);
+    assertEquals(workspaceDao.getWorkspacesTotalCount(), COUNT_OF_WORKSPACES);
   }
 
   @Test
@@ -139,7 +139,7 @@ public class WorkspaceDaoTest {
     workspaceRepo.createAll(
         ImmutableList.of(createWorkspaceFromDevfile("id222", accounts[0], "name-bbb")));
     // then
-    assertEquals(workspaceDao.getTotalCount(), COUNT_OF_WORKSPACES + 1);
+    assertEquals(workspaceDao.getWorkspacesTotalCount(), COUNT_OF_WORKSPACES + 1);
   }
 
   @Test
@@ -149,7 +149,7 @@ public class WorkspaceDaoTest {
     // when
     workspaceDao.remove(workspaces[1].getId());
     // then
-    assertEquals(workspaceDao.getTotalCount(), COUNT_OF_WORKSPACES - 1);
+    assertEquals(workspaceDao.getWorkspacesTotalCount(), COUNT_OF_WORKSPACES - 1);
   }
 
   @Test
