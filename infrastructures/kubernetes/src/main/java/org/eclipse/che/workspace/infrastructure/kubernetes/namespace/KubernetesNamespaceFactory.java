@@ -317,24 +317,23 @@ public class KubernetesNamespaceFactory {
   }
 
   /**
-   * Tells the caller whether the namespace that is being prepared, should be marked as managed or
-   * not.
+   * A managed namespace of a workspace is a namespace that is fully controlled by Che. Such
+   * namespaces are deleted when the workspace is deleted.
    *
-   * @param identity the runtime identity of the workspace
-   * @return true if the workspace namespace should be marked managed, false otherwise
+   * @param namespaceName the name of the namespace the workspace is stored in
+   * @param workspace the workspace
+   * @throws InfrastructureException in case of legacy workspaces that don't store their namespace
+   *     in the attributes, this method might fail
    */
-  protected boolean shouldMarkNamespaceManaged(RuntimeIdentity identity) {
-    // when infra namespace contains workspaceId that is generated
-    // it mean that Che Server provides unique namespace for each workspace
-    // and nothing else except workspace should be run there
-    // Che Server also removes such namespace after workspace is removed
-    return identity.getInfrastructureNamespace().contains(identity.getWorkspaceId());
+  protected boolean isWorkspaceNamespaceManaged(String namespaceName, Workspace workspace)
+      throws InfrastructureException {
+    return namespaceName != null && namespaceName.contains(workspace.getId());
   }
 
   public KubernetesNamespace getOrCreate(RuntimeIdentity identity) throws InfrastructureException {
     KubernetesNamespace namespace = get(identity);
 
-    namespace.prepare(shouldMarkNamespaceManaged(identity), canCreateNamespace(identity));
+    namespace.prepare(canCreateNamespace(identity));
 
     if (!isNullOrEmpty(serviceAccountName)) {
       KubernetesWorkspaceServiceAccount workspaceServiceAccount =
@@ -454,7 +453,9 @@ public class KubernetesNamespaceFactory {
 
   public void deleteIfManaged(Workspace workspace) throws InfrastructureException {
     KubernetesNamespace namespace = get(workspace);
-    namespace.deleteIfManaged();
+    if (isWorkspaceNamespaceManaged(namespace.getName(), workspace)) {
+      namespace.delete();
+    }
   }
 
   private String resolveLegacyNamespaceName(NamespaceResolutionContext resolutionCtx) {
