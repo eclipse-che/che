@@ -13,6 +13,8 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.DISCOVERABLE_SERVER_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVER_NAME_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_UNIQUE_PART_SIZE;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,6 +22,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -394,6 +397,43 @@ public class KubernetesServerExposerTest {
         ImmutableMap.of(
             "http-server", new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP),
             "ws-server", new ServerConfigImpl(wsServerConfig).withAttributes(ATTRIBUTES_MAP)));
+  }
+
+  @Test
+  public void testCreateExtraServiceForDiscoverableServerConfig() throws InfrastructureException {
+    // given
+    ServerConfigImpl httpServerConfig =
+        new ServerConfigImpl(
+            "8080/tcp",
+            "http",
+            "/api",
+            ImmutableMap.of(SERVER_NAME_ATTRIBUTE, "hello", DISCOVERABLE_SERVER_ATTRIBUTE, "true"));
+    Map<String, ServerConfigImpl> serversToExpose =
+        ImmutableMap.of("http-server", httpServerConfig);
+
+    // when
+    serverExposer.expose(serversToExpose);
+
+    assertEquals(kubernetesEnvironment.getServices().size(), 2);
+    assertTrue(kubernetesEnvironment.getServices().containsKey("hello"));
+    assertEquals(kubernetesEnvironment.getServices().get("hello").getMetadata().getName(), "hello");
+  }
+
+  @Test
+  public void testDiscoverableServerConfigWithoutNameAttributeIsNotProvisioned()
+      throws InfrastructureException {
+    // given
+    ServerConfigImpl httpServerConfig =
+        new ServerConfigImpl(
+            "8080/tcp", "http", "/api", ImmutableMap.of(DISCOVERABLE_SERVER_ATTRIBUTE, "true"));
+    Map<String, ServerConfigImpl> serversToExpose =
+        ImmutableMap.of("http-server", httpServerConfig);
+
+    // when
+    serverExposer.expose(serversToExpose);
+
+    assertEquals(kubernetesEnvironment.getServices().size(), 1);
+    assertFalse(kubernetesEnvironment.getServices().containsKey("hello"));
   }
 
   @SuppressWarnings("SameParameterValue")

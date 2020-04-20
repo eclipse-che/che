@@ -388,6 +388,7 @@
                   "mountSources": {},
                   "volumes": {},
                   "env": {},
+                  "endpoints": {},
                   "reference": {
                     "description": "Describes absolute or devfile-relative location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type components",
                     "type": "string",
@@ -478,6 +479,7 @@
                   "cpuLimit": {},
                   "cpuRequest": {},
                   "volumes": {},
+                  "endpoints": {},
                   "memoryLimit": {
                     "anyOf": [
                       {
@@ -524,56 +526,6 @@
                     "examples": [
                       "['-R', '-f']"
                     ]
-                  },
-                  "endpoints": {
-                    "type": "array",
-                    "description": "Describes dockerimage component endpoints",
-                    "items": {
-                      "name": "object",
-                      "description": "Describes dockerimage component endpoint",
-                      "required": [
-                        "name",
-                        "port"
-                      ],
-                      "properties": {
-                        "name": {
-                          "type": "string",
-                          "title": "The Endpoint Name",
-                          "description": "The Endpoint name"
-                        },
-                        "port": {
-                          "type": "integer",
-                          "title": "The Endpoint Port",
-                          "description": "The container port that should be used as endpoint"
-                        },
-                        "attributes": {
-                          "type": "object",
-                          "public": {
-                            "type": "boolean",
-                            "description": "Identifies endpoint as workspace internally or externally accessible.",
-                            "default": "true"
-                          },
-                          "secure": {
-                            "type": "boolean",
-                            "description": "Identifies server as secure or non-secure. Requests to secure servers will be authenticated and must contain machine token",
-                            "default": "false"
-                          },
-                          "discoverable": {
-                            "type": "boolean",
-                            "description": "Identifies endpoint as accessible by its name.",
-                            "default": "false"
-                          },
-                          "protocol": {
-                            "type": "boolean",
-                            "description": "Defines protocol that should be used for communication with endpoint. Is used for endpoint URL evaluation"
-                          },
-                          "additionalProperties": {
-                            "type": "string"
-                          },
-                          "javaType": "java.util.Map<String, String>"
-                        }
-                      }
-                    }
                   }
                 }
               }
@@ -695,6 +647,56 @@
                   "type": "string",
                   "title": "The Environment Variable Value",
                   "description": "The environment variable value"
+                }
+              }
+            }
+          },
+          "endpoints": {
+            "type": "array",
+            "description": "Describes dockerimage component endpoints",
+            "items": {
+              "name": "object",
+              "description": "Describes dockerimage component endpoint",
+              "required": [
+                "name",
+                "port"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "The Endpoint Name",
+                  "description": "The Endpoint name"
+                },
+                "port": {
+                  "type": "integer",
+                  "title": "The Endpoint Port",
+                  "description": "The container port that should be used as endpoint"
+                },
+                "attributes": {
+                  "type": "object",
+                  "public": {
+                    "type": "boolean",
+                    "description": "Identifies endpoint as workspace internally or externally accessible.",
+                    "default": "true"
+                  },
+                  "secure": {
+                    "type": "boolean",
+                    "description": "Identifies server as secure or non-secure. Requests to secure servers will be authenticated and must contain machine token",
+                    "default": "false"
+                  },
+                  "discoverable": {
+                    "type": "boolean",
+                    "description": "Identifies endpoint as accessible by its name.",
+                    "default": "false"
+                  },
+                  "protocol": {
+                    "type": "boolean",
+                    "description": "Defines protocol that should be used for communication with endpoint. Is used for endpoint URL evaluation"
+                  },
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "javaType": "java.util.Map<String, String>"
                 }
               }
             }
