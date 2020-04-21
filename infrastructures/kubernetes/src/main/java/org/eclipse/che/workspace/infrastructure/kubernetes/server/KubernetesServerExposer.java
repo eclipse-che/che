@@ -325,7 +325,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
                   secureServiceName,
                   serverId,
                   servicePort,
-                  matchedSecureServers);
+                  srvrs);
             });
       }
     }
