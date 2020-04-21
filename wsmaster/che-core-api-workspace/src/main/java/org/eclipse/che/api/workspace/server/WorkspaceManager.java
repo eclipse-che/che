@@ -585,6 +585,16 @@ public class WorkspaceManager {
     }
   }
 
+  /**
+   * Gets total count of all workspaces
+   *
+   * @return workspaces count
+   * @throws ServerException when any error occurs
+   */
+  public long getWorkspacesTotalCount() throws ServerException {
+    return workspaceDao.getWorkspacesTotalCount();
+  }
+
   private WorkspaceImpl doCreateWorkspace(
       WorkspaceConfig config, Account account, Map<String, String> attributes, boolean isTemporary)
       throws ConflictException, ServerException {

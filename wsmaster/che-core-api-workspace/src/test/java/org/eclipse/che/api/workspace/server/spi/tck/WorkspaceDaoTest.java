@@ -128,6 +128,31 @@ public class WorkspaceDaoTest {
   }
 
   @Test
+  public void shouldBeAbleToCountWorkspaces() throws ServerException {
+    assertEquals(workspaceDao.getWorkspacesTotalCount(), COUNT_OF_WORKSPACES);
+  }
+
+  @Test
+  public void shouldBeAbleToCountNewWorkspaces() throws ServerException, TckRepositoryException {
+    // given
+    // when
+    workspaceRepo.createAll(
+        ImmutableList.of(createWorkspaceFromDevfile("id222", accounts[0], "name-bbb")));
+    // then
+    assertEquals(workspaceDao.getWorkspacesTotalCount(), COUNT_OF_WORKSPACES + 1);
+  }
+
+  @Test
+  public void shouldBeAbleToSubtractRemovedWorkspaces()
+      throws ServerException, TckRepositoryException {
+    // given
+    // when
+    workspaceDao.remove(workspaces[1].getId());
+    // then
+    assertEquals(workspaceDao.getWorkspacesTotalCount(), COUNT_OF_WORKSPACES - 1);
+  }
+
+  @Test
   public void shouldGetWorkspaceById() throws Exception {
     final WorkspaceImpl workspace = workspaces[0];
 

@@ -39,11 +39,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
+import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
 import org.eclipse.che.api.workspace.server.devfile.Constants;
 import org.eclipse.che.api.workspace.server.devfile.DevfileRecipeFormatException;
@@ -51,6 +53,7 @@ import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
@@ -152,15 +155,10 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
 
     String componentContent = retrieveContent(k8sComponent, contentProvider);
 
-    List<HasMetadata> componentObjects =
-        new ArrayList<>(unmarshalComponentObjects(k8sComponent, componentContent));
-
-    if (!k8sComponent.getSelector().isEmpty()) {
-      componentObjects = SelectorFilter.filter(componentObjects, k8sComponent.getSelector());
-    }
+    final List<HasMetadata> componentObjects =
+        prepareComponentObjects(k8sComponent, componentContent);
 
     List<PodData> podsData = getPodDatas(componentObjects);
-
     podsData
         .stream()
         .flatMap(e -> e.getSpec().getContainers().stream())
@@ -174,13 +172,27 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       podsData.forEach(p -> envVars.apply(p, k8sComponent.getEnv()));
     }
 
-    applyEntrypoints(k8sComponent.getEntrypoints(), componentObjects);
-
     Map<String, MachineConfigImpl> machineConfigs = prepareMachineConfigs(podsData, k8sComponent);
-
     linkCommandsToMachineName(workspaceConfig, k8sComponent, machineConfigs.keySet());
 
     k8sEnvProvisioner.provision(workspaceConfig, environmentType, componentObjects, machineConfigs);
+  }
+
+  private List<HasMetadata> prepareComponentObjects(Component k8sComponent, String componentContent)
+      throws DevfileRecipeFormatException {
+    final List<HasMetadata> componentObjects;
+
+    if (!k8sComponent.getSelector().isEmpty()) {
+      componentObjects =
+          SelectorFilter.filter(
+              new ArrayList<>(unmarshalComponentObjects(k8sComponent, componentContent)),
+              k8sComponent.getSelector());
+    } else {
+      componentObjects = new ArrayList<>(unmarshalComponentObjects(k8sComponent, componentContent));
+    }
+
+    applyEntrypoints(k8sComponent.getEntrypoints(), componentObjects);
+    return componentObjects;
   }
 
   private void applyProjectsVolumes(List<PodData> podsData, List<HasMetadata> componentObjects) {
@@ -236,10 +248,23 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
           config.getAttributes().put(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE, component.getAlias());
         }
         provisionVolumes(component, container, config);
+        provisionEndpoints(component, config);
+
         machineConfigs.put(machineName, config);
       }
     }
     return machineConfigs;
+  }
+
+  private void provisionEndpoints(Component component, MachineConfigImpl config) {
+    config
+        .getServers()
+        .putAll(
+            component
+                .getEndpoints()
+                .stream()
+                .collect(
+                    Collectors.toMap(Endpoint::getName, ServerConfigImpl::createFromEndpoint)));
   }
 
   private void provisionVolumes(

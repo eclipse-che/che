@@ -310,6 +310,37 @@ public class KubernetesDeploymentsTest {
   }
 
   @Test
+  public void
+      shouldCompleteExceptionallyFutureForWaitingPodIfStatusIsRunningButSomeContainersAreWaitingAndTerminatedBefore() {
+    // given
+    ContainerStatus containerStatus = mock(ContainerStatus.class);
+    when(containerStatus.getName()).thenReturn("FailingContainer");
+    when(containerStatus.getState())
+        .thenReturn(
+            new ContainerStateBuilder().withNewWaiting().withMessage("bah").endWaiting().build());
+    when(containerStatus.getLastState())
+        .thenReturn(
+            new ContainerStateBuilder()
+                .withNewTerminated()
+                .withReason("Completed")
+                .endTerminated()
+                .build());
+
+    when(status.getPhase()).thenReturn(POD_STATUS_PHASE_RUNNING);
+    when(status.getContainerStatuses()).thenReturn(singletonList(containerStatus));
+    CompletableFuture<?> future = kubernetesDeployments.waitRunningAsync(POD_NAME);
+
+    // when
+    verify(podResource).watch(watcherCaptor.capture());
+    Watcher<Pod> watcher = watcherCaptor.getValue();
+    watcher.eventReceived(Watcher.Action.MODIFIED, pod);
+
+    // then
+    assertTrue(future.isDone());
+    assertTrue(future.isCompletedExceptionally());
+  }
+
+  @Test
   public void shouldCompleteExceptionallyFutureForWaitingPodIfStatusIsSucceeded() throws Exception {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_SUCCEEDED);
