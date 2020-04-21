@@ -54,9 +54,9 @@ public class PreferencesDeserializerTest {
     assertEquals(result.get("valid.float"), 3.1415926);
     assertEquals(result.get("valid.boolean"), false);
     assertEquals(result.get("valid.string"), "/usr/bin/value");
-    assertEquals(result.get("valid.string.array"), new String[]{"foo","bar", "baz"});
-    assertEquals(result.get("valid.int.array"), new int[]{12,13,0});
-    assertEquals(result.get("valid.bool.array"), new boolean[]{true,false,false});
+    assertEquals(result.get("valid.string.array"), new String[] {"foo", "bar", "baz"});
+    assertEquals(result.get("valid.int.array"), new int[] {12, 13, 0});
+    assertEquals(result.get("valid.bool.array"), new boolean[] {true, false, false});
   }
 
   @Test(
