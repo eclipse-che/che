@@ -3608,7 +3608,7 @@ data:
       "version": 1
     }
   che-workspaces.json: |-
-      {
+    {
       "annotations": {
         "list": [
           {
