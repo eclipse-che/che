@@ -17,6 +17,7 @@ import static java.util.Collections.emptyList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -61,6 +62,20 @@ public interface ServerConfig {
    * that, if exposed, it has its own endpoint even if it shares the same port with other servers.
    */
   String UNIQUE_SERVER_ATTRIBUTE = "unique";
+
+  /**
+   * {@link ServerConfig} and {@link Server} attribute name which can identify endpoint as
+   * discoverable(i.e. it is accessible by its name from workspace's containers). Attribute value
+   * {@code true} makes a endpoint discoverable, any other value or lack of the attribute makes the
+   * server non-discoverable.
+   */
+  String DISCOVERABLE_SERVER_ATTRIBUTE = "discoverable";
+
+  /**
+   * This attribute is used to remember {@link Endpoint#getName()} inside {@link ServerConfig} for
+   * internal use.
+   */
+  String SERVER_NAME_ATTRIBUTE = "serverName";
 
   /**
    * Port used by server.
@@ -157,6 +172,16 @@ public interface ServerConfig {
   }
 
   /**
+   * Determines whether the attributes configure the server to be discoverable.
+   *
+   * @param attributes the attributes with additional server configuration
+   * @see #DISCOVERABLE_SERVER_ATTRIBUTE
+   */
+  static boolean isDiscoverable(Map<String, String> attributes) {
+    return AttributesEvaluator.booleanAttr(attributes, DISCOVERABLE_SERVER_ATTRIBUTE, false);
+  }
+
+  /**
    * Determines whether the attributes configure the server to be authenticated using JWT cookies. A
    * null value means that the attributes don't require any particular authentication.
    *
@@ -228,6 +253,11 @@ public interface ServerConfig {
   /** @see #getUnsecuredPaths(Map) */
   default List<String> getUnsecuredPaths() {
     return getUnsecuredPaths(getAttributes());
+  }
+
+  /** @see #isDiscoverable(Map) */
+  default boolean isDiscoverable() {
+    return isDiscoverable(getAttributes());
   }
 }
 

@@ -270,27 +270,6 @@ public class KubernetesNamespaceFactoryTest {
   }
 
   @Test
-  public void shouldMarkNamespaceManagedIfWorkspaceIdIsUsedInItsName() throws Exception {
-    // given
-    namespaceFactory =
-        spy(
-            new KubernetesNamespaceFactory(
-                "", "", "", "<workspaceid>", false, clientFactory, userManager, pool));
-    KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
-    doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespaceAccess(any(), any());
-
-    // when
-    RuntimeIdentity identity =
-        new RuntimeIdentityImpl("workspace123", null, USER_ID, "workspace123");
-    KubernetesNamespace namespace = namespaceFactory.getOrCreate(identity);
-
-    // then
-    assertEquals(toReturnNamespace, namespace);
-    verify(namespaceFactory, never()).doCreateServiceAccount(any(), any());
-    verify(toReturnNamespace).prepare(eq(true), eq(true));
-  }
-
-  @Test
   public void shouldRequireNamespacePriorExistenceIfDifferentFromDefaultAndUserDefinedIsNotAllowed()
       throws Exception {
     // There is only one scenario where this can happen. The workspace was created and started in
@@ -315,34 +294,7 @@ public class KubernetesNamespaceFactoryTest {
     // then
     assertEquals(toReturnNamespace, namespace);
     verify(namespaceFactory, never()).doCreateServiceAccount(any(), any());
-    verify(toReturnNamespace).prepare(eq(false), eq(false));
-  }
-
-  @Test
-  public void
-      shouldHandleUpgradeOfManagedFlagAndRequireNamespacePriorExistenceIfDifferentFromDefaultAndUserDefinedIsNotAllowed()
-          throws Exception {
-    // This is a variation of the above test that checks the same scenario, but additionally checks
-    // that we correctly set the managed flag on the namespace if the namespace name contains
-    // the workspace id (and thus will be automatically deleted after workspace stop).
-
-    // given
-    namespaceFactory =
-        spy(
-            new KubernetesNamespaceFactory(
-                "", "", "", "che", false, clientFactory, userManager, pool));
-    KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
-    doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespaceAccess(any(), any());
-
-    // when
-    RuntimeIdentity identity =
-        new RuntimeIdentityImpl("workspace123", null, USER_ID, "che-ws-workspace123");
-    KubernetesNamespace namespace = namespaceFactory.getOrCreate(identity);
-
-    // then
-    assertEquals(toReturnNamespace, namespace);
-    verify(namespaceFactory, never()).doCreateServiceAccount(any(), any());
-    verify(toReturnNamespace).prepare(eq(true), eq(false));
+    verify(toReturnNamespace).prepare(eq(false));
   }
 
   @Test

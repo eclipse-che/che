@@ -86,7 +86,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   public OpenShiftProject getOrCreate(RuntimeIdentity identity) throws InfrastructureException {
     OpenShiftProject osProject = get(identity);
 
-    osProject.prepare(shouldMarkNamespaceManaged(identity), canCreateNamespace(identity));
+    osProject.prepare(canCreateNamespace(identity));
 
     if (!isNullOrEmpty(getServiceAccountName())) {
       OpenShiftWorkspaceServiceAccount osWorkspaceServiceAccount =
@@ -109,7 +109,9 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   @Override
   public void deleteIfManaged(Workspace workspace) throws InfrastructureException {
     OpenShiftProject osProject = get(workspace);
-    osProject.deleteIfManaged();
+    if (isWorkspaceNamespaceManaged(osProject.getName(), workspace)) {
+      osProject.delete();
+    }
   }
 
   @Override

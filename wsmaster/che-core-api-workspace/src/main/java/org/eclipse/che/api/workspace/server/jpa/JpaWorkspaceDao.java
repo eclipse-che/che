@@ -262,6 +262,19 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     return merged;
   }
 
+  @Override
+  @Transactional
+  public long getWorkspacesTotalCount() throws ServerException {
+    try {
+      return managerProvider
+          .get()
+          .createNamedQuery("Workspace.getWorkspacesTotalCount", Long.class)
+          .getSingleResult();
+    } catch (RuntimeException x) {
+      throw new ServerException(x.getLocalizedMessage(), x);
+    }
+  }
+
   @Singleton
   public static class RemoveWorkspaceBeforeAccountRemovedEventSubscriber
       extends CascadeEventSubscriber<BeforeAccountRemovedEvent> {

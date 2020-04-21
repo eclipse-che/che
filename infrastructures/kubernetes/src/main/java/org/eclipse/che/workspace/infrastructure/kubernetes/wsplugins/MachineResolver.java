@@ -83,6 +83,7 @@ public class MachineResolver {
             resolveMachineAttributes(),
             toWorkspaceVolumes(cheContainer));
     applyDevfileVolumes(machineConfig);
+    applyDevfileEndpoints(machineConfig);
     normalizeMemory(container, machineConfig);
     normalizeCpu(container, machineConfig);
     return machineConfig;
@@ -93,6 +94,26 @@ public class MachineResolver {
       machineConfig
           .getVolumes()
           .put(volume.getName(), new VolumeImpl().withPath(volume.getContainerPath()));
+    }
+  }
+
+  private void applyDevfileEndpoints(InternalMachineConfig machineConfig)
+      throws InfrastructureException {
+    for (org.eclipse.che.api.core.model.workspace.devfile.Endpoint endpoint :
+        component.getEndpoints()) {
+      if (!machineConfig.getServers().containsKey(endpoint.getName())) {
+        machineConfig
+            .getServers()
+            .put(endpoint.getName(), ServerConfigImpl.createFromEndpoint(endpoint));
+      } else {
+        throw new InfrastructureException(
+            format(
+                "Devfile overrides the endpoint '%s' of the plugin/editor component '%s'. "
+                    + "This is not allowed because it would most probably cause the workspace "
+                    + "to malfunction. Please change the name of the endpoint in the devfile and try "
+                    + "to start the workspace again.",
+                component.getId(), endpoint.getName()));
+      }
     }
   }
 

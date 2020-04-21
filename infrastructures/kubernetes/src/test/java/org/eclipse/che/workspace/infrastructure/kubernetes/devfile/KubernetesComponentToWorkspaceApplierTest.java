@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 
 import static io.fabric8.kubernetes.client.utils.Serialization.unmarshal;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
@@ -32,6 +33,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
@@ -51,11 +53,14 @@ import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
@@ -556,7 +561,6 @@ public class KubernetesComponentToWorkspaceApplierTest {
             k8sBasedComponents);
     String yamlRecipeContent = getResource("devfile/petclinic.yaml");
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
-    List<String> command = asList("teh", "command");
     ComponentImpl component = new ComponentImpl();
     component.setType(KUBERNETES_COMPONENT_TYPE);
     component.setReference(REFERENCE_FILENAME);
@@ -581,6 +585,105 @@ public class KubernetesComponentToWorkspaceApplierTest {
         }
       }
     }
+  }
+
+  @Test
+  public void shouldProvisionEndpointsToAllMachines()
+      throws IOException, ValidationException, InfrastructureException, DevfileException {
+    // given
+    String endpointName = "petclinic-endpoint";
+    Integer endpointPort = 8081;
+
+    String yamlRecipeContent = getResource("devfile/petclinicPods.yaml");
+    doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
+
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setAlias(COMPONENT_NAME);
+    component.setEndpoints(singletonList(new EndpointImpl(endpointName, endpointPort, emptyMap())));
+
+    // when
+    applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
+
+    // then
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<Map<String, MachineConfigImpl>> objectsCaptor =
+        ArgumentCaptor.forClass(Map.class);
+    verify(k8sEnvProvisioner).provision(any(), any(), any(), objectsCaptor.capture());
+    Map<String, MachineConfigImpl> configs = objectsCaptor.getValue();
+    assertEquals(configs.size(), 3);
+    configs
+        .values()
+        .forEach(
+            machineConfig -> {
+              Map<String, ServerConfigImpl> serverConfigs = machineConfig.getServers();
+              assertEquals(serverConfigs.size(), 1);
+              assertTrue(serverConfigs.containsKey(endpointName));
+              assertEquals(serverConfigs.get(endpointName).getPort(), endpointPort.toString());
+              assertNull(serverConfigs.get(endpointName).getPath());
+            });
+  }
+
+  @Test
+  public void shouldProvisionEndpointWithAttributes()
+      throws IOException, ValidationException, InfrastructureException, DevfileException {
+    // given
+    String endpointName = "petclinic-endpoint";
+    Integer endpointPort = 8081;
+    String endpointProtocol = "tcp";
+    String endpointPath = "path";
+    String endpointPublic = "false";
+    String endpointSecure = "false";
+
+    String yamlRecipeContent = getResource("devfile/petclinicPods.yaml");
+    doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
+
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setAlias(COMPONENT_NAME);
+    component.setEndpoints(
+        singletonList(
+            new EndpointImpl(
+                endpointName,
+                endpointPort,
+                ImmutableMap.of(
+                    "protocol",
+                    endpointProtocol,
+                    "path",
+                    endpointPath,
+                    "public",
+                    endpointPublic,
+                    "secure",
+                    endpointSecure))));
+
+    // when
+    applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
+
+    // then
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<Map<String, MachineConfigImpl>> objectsCaptor =
+        ArgumentCaptor.forClass(Map.class);
+    verify(k8sEnvProvisioner).provision(any(), any(), any(), objectsCaptor.capture());
+    Map<String, MachineConfigImpl> configs = objectsCaptor.getValue();
+    assertEquals(configs.size(), 3);
+    configs
+        .values()
+        .forEach(
+            machineConfig -> {
+              Map<String, ServerConfigImpl> serverConfigs = machineConfig.getServers();
+              assertEquals(serverConfigs.size(), 1);
+              assertTrue(serverConfigs.containsKey(endpointName));
+              assertEquals(serverConfigs.get(endpointName).getPort(), endpointPort.toString());
+              assertEquals(serverConfigs.get(endpointName).getPath(), endpointPath);
+              assertEquals(serverConfigs.get(endpointName).getProtocol(), endpointProtocol);
+              assertEquals(
+                  serverConfigs.get(endpointName).isSecure(), Boolean.parseBoolean(endpointSecure));
+              assertEquals(
+                  serverConfigs.get(endpointName).isInternal(),
+                  !Boolean.parseBoolean(endpointPublic));
+            });
   }
 
   private KubernetesList toK8SList(String content) {

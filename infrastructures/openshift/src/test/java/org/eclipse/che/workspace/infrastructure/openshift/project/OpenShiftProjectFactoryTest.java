@@ -54,7 +54,6 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
@@ -332,35 +331,6 @@ public class OpenShiftProjectFactoryTest {
   }
 
   @Test
-  public void shouldMarkNamespaceManagedIfWorkspaceIdIsUsedInItsName() throws Exception {
-    // given
-    projectFactory =
-        spy(
-            new OpenShiftProjectFactory(
-                "",
-                "",
-                "",
-                "<workspaceid>",
-                false,
-                clientFactory,
-                configFactory,
-                userManager,
-                pool));
-    OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
-    doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
-
-    // when
-    RuntimeIdentity identity =
-        new RuntimeIdentityImpl("workspace123", null, USER_ID, "workspace123");
-    OpenShiftProject project = projectFactory.getOrCreate(identity);
-
-    // then
-    assertEquals(toReturnProject, project);
-    verify(projectFactory, never()).doCreateServiceAccount(any(), any());
-    verify(toReturnProject).prepare(eq(true), eq(true));
-  }
-
-  @Test
   public void shouldRequireNamespacePriorExistenceIfDifferentFromDefaultAndUserDefinedIsNotAllowed()
       throws Exception {
     // There is only one scenario where this can happen. The workspace was created and started in
@@ -393,34 +363,7 @@ public class OpenShiftProjectFactoryTest {
     // then
     assertEquals(toReturnProject, project);
     verify(projectFactory, never()).doCreateServiceAccount(any(), any());
-    verify(toReturnProject).prepare(eq(false), eq(false));
-  }
-
-  @Test
-  public void
-      shouldHandleUpgradeOfManagedFlagAndRequireNamespacePriorExistenceIfDifferentFromDefaultAndUserDefinedIsNotAllowed()
-          throws Exception {
-    // This is a variation of the above test that checks the same scenario, but additionally checks
-    // that we correctly set the managed flag on the namespace if the namespace name contains
-    // the workspace id (and thus will be automatically deleted after workspace stop).
-
-    // given
-    projectFactory =
-        spy(
-            new OpenShiftProjectFactory(
-                "", "", "", "che", false, clientFactory, configFactory, userManager, pool));
-    OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
-    doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
-
-    // when
-    RuntimeIdentity identity =
-        new RuntimeIdentityImpl("workspace123", null, USER_ID, "che-ws-workspace123");
-    KubernetesNamespace namespace = projectFactory.getOrCreate(identity);
-
-    // then
-    assertEquals(toReturnProject, namespace);
-    verify(projectFactory, never()).doCreateServiceAccount(any(), any());
-    verify(toReturnProject).prepare(eq(true), eq(false));
+    verify(toReturnProject).prepare(eq(false));
   }
 
   @Test
