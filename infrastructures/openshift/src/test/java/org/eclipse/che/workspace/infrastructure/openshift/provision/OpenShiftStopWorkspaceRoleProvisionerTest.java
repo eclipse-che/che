@@ -132,7 +132,7 @@ public class OpenShiftStopWorkspaceRoleProvisionerTest {
   public void setUp() throws Exception {
     lenient().when(cheInstallationLocation.getInstallationLocationNamespace()).thenReturn("che");
     stopWorkspaceRoleProvisioner =
-        new OpenShiftStopWorkspaceRoleProvisioner(clientFactory, cheInstallationLocation);
+        new OpenShiftStopWorkspaceRoleProvisioner(clientFactory, cheInstallationLocation, true);
     lenient().when(clientFactory.createOC()).thenReturn(osClient);
     lenient().when(osClient.roles()).thenReturn(mixedRoleOperation);
     lenient().when(osClient.roleBindings()).thenReturn(mixedRoleBindingOperation);
@@ -190,5 +190,29 @@ public class OpenShiftStopWorkspaceRoleProvisionerTest {
     verify(osClient.roleBindings()).inNamespace("developer-che");
     verify(osClient.roleBindings().inNamespace("developer-che"))
         .createOrReplace(expectedRoleBinding);
+  }
+
+  @Test
+  public void shouldNotCreateRoleBindingWhenStopWorkspaceRolePropertyIsDisabled()
+      throws InfrastructureException {
+    OpenShiftStopWorkspaceRoleProvisioner disabledStopWorkspaceRoleProvisioner =
+        new OpenShiftStopWorkspaceRoleProvisioner(clientFactory, cheInstallationLocation, false);
+    disabledStopWorkspaceRoleProvisioner.provision("developer-che");
+    verify(osClient, never()).roles();
+    verify(osClient, never()).roleBindings();
+    verify(osClient.roleBindings(), never()).inNamespace("developer-che");
+  }
+
+  @Test
+  public void shouldNotCreateRoleBindingWhenInstallationLocationIsNull()
+      throws InfrastructureException {
+    lenient().when(cheInstallationLocation.getInstallationLocationNamespace()).thenReturn(null);
+    OpenShiftStopWorkspaceRoleProvisioner
+        stopWorkspaceRoleProvisionerWithoutValidInstallationLocation =
+            new OpenShiftStopWorkspaceRoleProvisioner(clientFactory, cheInstallationLocation, true);
+    stopWorkspaceRoleProvisionerWithoutValidInstallationLocation.provision("developer-che");
+    verify(osClient, never()).roles();
+    verify(osClient, never()).roleBindings();
+    verify(osClient.roleBindings(), never()).inNamespace("developer-che");
   }
 }
