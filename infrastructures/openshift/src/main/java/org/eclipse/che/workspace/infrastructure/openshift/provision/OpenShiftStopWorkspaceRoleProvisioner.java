@@ -11,10 +11,11 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
-import com.google.inject.Inject;
 import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
 import io.fabric8.openshift.api.model.*;
 import io.fabric8.openshift.client.OpenShiftClient;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftCheInstallationLocation;
@@ -31,18 +32,22 @@ public class OpenShiftStopWorkspaceRoleProvisioner {
 
   private final OpenShiftClientFactory clientFactory;
   private final String installationLocation;
+  private final boolean stopWorkspaceRoleEnabled;
 
   private static final Logger LOG = LoggerFactory.getLogger(OpenShiftCheInstallationLocation.class);
 
   @Inject
   public OpenShiftStopWorkspaceRoleProvisioner(
-      OpenShiftClientFactory clientFactory, OpenShiftCheInstallationLocation installationLocation) {
+      OpenShiftClientFactory clientFactory,
+      OpenShiftCheInstallationLocation installationLocation,
+      @Named("che.workspace.stop.role.enabled") boolean stopWorkspaceRoleEnabled) {
     this.clientFactory = clientFactory;
     this.installationLocation = installationLocation.getInstallationLocationNamespace();
+    this.stopWorkspaceRoleEnabled = stopWorkspaceRoleEnabled;
   }
 
   public void provision(String projectName) throws InfrastructureException {
-    if (installationLocation != null) {
+    if (stopWorkspaceRoleEnabled && installationLocation != null) {
       OpenShiftClient osClient = clientFactory.createOC();
       String stopWorkspacesRoleName = "workspace-stop";
       if (osClient.roles().inNamespace(projectName).withName(stopWorkspacesRoleName).get()
@@ -58,7 +63,9 @@ public class OpenShiftStopWorkspaceRoleProvisioner {
           .createOrReplace(createStopWorkspacesRoleBinding(projectName));
     } else {
       LOG.warn(
-          "Could not determine Che installation location. Did not provision stop workspace Role and RoleBinding.");
+          "Stop workspace Role and RoleBinding will not be provisioned to the '{}' namespace. 'che.workspace.stop.role.enabled' property is set to '{}'",
+          installationLocation,
+          stopWorkspaceRoleEnabled);
     }
   }
 
