@@ -309,7 +309,7 @@ CHE_ROUTE=$(oc get route che --template='{{ .spec.host }}')
 }
 
 createTestWorkspaceAndRunTest() {
-  defineCheRoute
+  #defineCheRoute
   ### Create workspace
   DEV_FILE_URL=$1
   if [[ ${DEV_FILE_URL} = "" ]]; then # by default it is used 'happy-path-devfile' yaml from CHE 'master' branch
