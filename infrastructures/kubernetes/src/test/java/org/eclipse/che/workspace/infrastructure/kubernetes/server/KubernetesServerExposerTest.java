@@ -13,13 +13,17 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.DISCOVERABLE_SERVER_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVER_NAME_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_UNIQUE_PART_SIZE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -46,6 +50,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -394,6 +399,87 @@ public class KubernetesServerExposerTest {
         ImmutableMap.of(
             "http-server", new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP),
             "ws-server", new ServerConfigImpl(wsServerConfig).withAttributes(ATTRIBUTES_MAP)));
+  }
+
+  @Test
+  public void testCreateExtraServiceForDiscoverableServerConfig() throws InfrastructureException {
+    // given
+    ServerConfigImpl httpServerConfig =
+        new ServerConfigImpl(
+            "8080/tcp",
+            "http",
+            "/api",
+            ImmutableMap.of(SERVER_NAME_ATTRIBUTE, "hello", DISCOVERABLE_SERVER_ATTRIBUTE, "true"));
+    Map<String, ServerConfigImpl> serversToExpose =
+        ImmutableMap.of("http-server", httpServerConfig);
+
+    // when
+    serverExposer.expose(serversToExpose);
+
+    assertEquals(kubernetesEnvironment.getServices().size(), 2);
+    assertTrue(kubernetesEnvironment.getServices().containsKey("hello"));
+    assertEquals(kubernetesEnvironment.getServices().get("hello").getMetadata().getName(), "hello");
+  }
+
+  @Test
+  public void testDiscoverableServerConfigWithoutNameAttributeIsNotProvisioned()
+      throws InfrastructureException {
+    // given
+    ServerConfigImpl httpServerConfig =
+        new ServerConfigImpl(
+            "8080/tcp", "http", "/api", ImmutableMap.of(DISCOVERABLE_SERVER_ATTRIBUTE, "true"));
+    Map<String, ServerConfigImpl> serversToExpose =
+        ImmutableMap.of("http-server", httpServerConfig);
+
+    // when
+    serverExposer.expose(serversToExpose);
+
+    assertEquals(kubernetesEnvironment.getServices().size(), 1);
+    assertFalse(kubernetesEnvironment.getServices().containsKey("hello"));
+  }
+
+  @Test
+  public void testExposeUniqueSecureServersWithOnlyMatchingServers()
+      throws InfrastructureException {
+    // https://github.com/eclipse/che/issues/16330
+    // given 2 servers which one of them is unique
+    ServerConfigImpl theiaSC =
+        new ServerConfigImpl(
+            "3100/tcp",
+            "https",
+            null,
+            ImmutableMap.of(
+                "internal", "false", "discoverable", "false", "secure", "true", "type", "ide"));
+
+    ServerConfigImpl webviewsSC =
+        new ServerConfigImpl(
+            "3100/tcp",
+            "https",
+            null,
+            ImmutableMap.of(
+                "internal",
+                "false",
+                "discoverable",
+                "false",
+                "unique",
+                "true",
+                "secure",
+                "true",
+                "type",
+                "webview"));
+    Map<String, ServerConfigImpl> serversToExpose =
+        ImmutableMap.of("theia", theiaSC, "webviews", webviewsSC);
+
+    // when
+    serverExposer.expose(serversToExpose);
+
+    // then expose is called twice with only one server each
+    ArgumentCaptor<Map<String, ServerConfig>> serversCaptor = ArgumentCaptor.forClass(Map.class);
+    verify(secureServerExposer, times(2))
+        .expose(any(), any(), any(), any(), any(), any(), serversCaptor.capture());
+    for (Map<String, ServerConfig> captures : serversCaptor.getAllValues()) {
+      assertEquals(captures.size(), 1);
+    }
   }
 
   @SuppressWarnings("SameParameterValue")

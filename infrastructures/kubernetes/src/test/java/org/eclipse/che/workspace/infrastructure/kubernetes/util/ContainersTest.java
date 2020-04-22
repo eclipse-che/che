@@ -218,68 +218,74 @@ public class ContainersTest {
   }
 
   @Test(dataProvider = "k8sNotionRamLimitProvider")
-  public void testAddContainerRamLimitInK8sNotion(String ramLimit, ResourceRequirements resources) {
+  public void testAddContainerRamLimitInK8sNotion(
+      String ramLimit, String amount, String format, ResourceRequirements resources) {
     when(container.getResources()).thenReturn(resources);
 
     Containers.addRamLimit(container, ramLimit);
 
     verify(container).setResources(resourceCaptor.capture());
     ResourceRequirements captured = resourceCaptor.getValue();
-    assertEquals(captured.getLimits().get("memory").getAmount(), ramLimit);
+    assertEquals(captured.getLimits().get("memory").getAmount(), amount);
+    assertEquals(captured.getLimits().get("memory").getFormat(), format);
   }
 
   @Test(dataProvider = "k8sNotionRamLimitProvider")
   public void testAddContainerRamRequestInK8sNotion(
-      String ramRequest, ResourceRequirements resources) {
+      String ramRequest, String amount, String format, ResourceRequirements resources) {
     when(container.getResources()).thenReturn(resources);
 
     Containers.addRamRequest(container, ramRequest);
 
     verify(container).setResources(resourceCaptor.capture());
     ResourceRequirements captured = resourceCaptor.getValue();
-    assertEquals(captured.getRequests().get("memory").getAmount(), ramRequest);
+    assertEquals(captured.getRequests().get("memory").getAmount(), amount);
+    assertEquals(captured.getRequests().get("memory").getFormat(), format);
   }
 
   @DataProvider
   public static Object[][] k8sNotionRamLimitProvider() {
     return new Object[][] {
-      {"123456789", new ResourceRequirements()},
-      {"1M", new ResourceRequirements()},
-      {"10Ki", null},
-      {"10G", null},
+      {"123456789", "123456789", "", new ResourceRequirements()},
+      {"1M", "1", "M", new ResourceRequirements()},
+      {"10Ki", "10", "Ki", null},
+      {"10G", "10", "G", null},
     };
   }
 
   @Test(dataProvider = "k8sNotionCpuLimitProvider")
-  public void testAddContainerCPULimitInK8sNotion(String cpuLimit, ResourceRequirements resources) {
+  public void testAddContainerCPULimitInK8sNotion(
+      String cpuLimit, String amount, String format, ResourceRequirements resources) {
     when(container.getResources()).thenReturn(resources);
 
     Containers.addCpuLimit(container, cpuLimit);
 
     verify(container).setResources(resourceCaptor.capture());
     ResourceRequirements captured = resourceCaptor.getValue();
-    assertEquals(captured.getLimits().get("cpu").getAmount(), cpuLimit);
+    assertEquals(captured.getLimits().get("cpu").getAmount(), amount);
+    assertEquals(captured.getLimits().get("cpu").getFormat(), format);
   }
 
   @Test(dataProvider = "k8sNotionCpuLimitProvider")
   public void testAddContainerCpuRequestInK8sNotion(
-      String cpuRequest, ResourceRequirements resources) {
+      String cpuRequest, String amount, String format, ResourceRequirements resources) {
     when(container.getResources()).thenReturn(resources);
 
     Containers.addCpuRequest(container, cpuRequest);
 
     verify(container).setResources(resourceCaptor.capture());
     ResourceRequirements captured = resourceCaptor.getValue();
-    assertEquals(captured.getRequests().get("cpu").getAmount(), cpuRequest);
+    assertEquals(captured.getRequests().get("cpu").getAmount(), amount);
+    assertEquals(captured.getRequests().get("cpu").getFormat(), format);
   }
 
   @DataProvider
   public static Object[][] k8sNotionCpuLimitProvider() {
     return new Object[][] {
-      {"100m", new ResourceRequirements()},
-      {"1000m", new ResourceRequirements()},
-      {"112m", null},
-      {"155m", null},
+      {"100m", "100", "m", new ResourceRequirements()},
+      {"1000m", "1000", "m", new ResourceRequirements()},
+      {"112m", "112", "m", null},
+      {"155m", "155", "m", null},
     };
   }
 }

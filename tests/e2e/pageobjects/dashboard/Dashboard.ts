@@ -49,7 +49,7 @@ export class Dashboard {
         await this.workspaces.waitWorkspaceListItem(workspaceName);
         await this.workspaces.clickWorkspaceListItem(workspaceName);
         await this.workspaces.clickDeleteButtonOnWorkspaceDetails();
-        await this.workspaces.clickConfirmDeletionButton();
+        await this.workspaces.confirmWorkspaceDeletion();
         await this.workspaces.waitPage();
         await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
     }
@@ -65,10 +65,8 @@ export class Dashboard {
     async waitPage(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         Logger.debug('Dashboard.waitPage');
 
-        await this.driverHelper.waitVisibility(By.css(Dashboard.DASHBOARD_BUTTON_CSS), timeout);
         await this.driverHelper.waitVisibility(By.css(Dashboard.WORKSPACES_BUTTON_CSS), timeout);
         await this.driverHelper.waitVisibility(By.css(Dashboard.STACKS_BUTTON_CSS), timeout);
-        await this.driverHelper.waitVisibility(By.css(Dashboard.FACTORIES_BUTTON_CSS), timeout);
         await this.driverHelper.waitVisibility(By.xpath(Dashboard.GET_STARTED_BUTTON_XPATH), timeout);
     }
 

@@ -170,7 +170,7 @@ tagLatestImages() {
     for image in ${IMAGES_LIST[@]}
      do
          echo y | docker tag "${image}:$1" "${image}:latest"
-         if [[ ${image} == "${ORGANIZATION}/che-server" ]]; then
+         if [[ ${image} == "${REGISTRY}/${ORGANIZATION}/che-server" ]]; then
            docker tag "${image}:$1-centos" "${image}:latest-centos"
          fi
          if [[ $? -ne 0 ]]; then
@@ -191,7 +191,7 @@ pushImagesOnQuay() {
         do
             echo y | docker push "${image}:$1"
             if [[ $2 == "pushLatest" ]]; then
-                echo y | docker push "${REGISTRY}/${image}:latest"
+                echo y | docker push "${image}:latest"
             fi
             if [[ ${image} == "${REGISTRY}/${ORGANIZATION}/che-server" ]]; then
                 if [[ $2 == "pushLatest" ]]; then

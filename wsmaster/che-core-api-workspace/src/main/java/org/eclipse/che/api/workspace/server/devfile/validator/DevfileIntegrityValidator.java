@@ -30,6 +30,7 @@ import org.eclipse.che.api.core.model.workspace.devfile.Action;
 import org.eclipse.che.api.core.model.workspace.devfile.Command;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
+import org.eclipse.che.api.core.model.workspace.devfile.Env;
 import org.eclipse.che.api.core.model.workspace.devfile.Project;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
@@ -108,6 +109,16 @@ public class DevfileIntegrityValidator {
       if (component.getAlias() != null && !definedAliases.add(component.getAlias())) {
         throw new DevfileFormatException(
             format("Duplicate component alias found:'%s'", component.getAlias()));
+      }
+
+      Set<String> tempSet = new HashSet<>();
+      for (Env env : component.getEnv()) {
+        if (!tempSet.add(env.getName())) {
+          throw new DevfileFormatException(
+              format(
+                  "Duplicate environment variable '%s' found in component '%s'",
+                  env.getName(), getIdentifiableComponentName(component)));
+        }
       }
 
       if (!idsPerComponentType

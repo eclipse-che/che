@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
 import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.PodMerger.DEPLOYMENT_NAME_LABEL;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.setSelector;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -137,7 +138,6 @@ public class KubernetesEnvironmentFactory
             .setServices(services)
             .setPersistentVolumeClaims(pvcs)
             .setIngresses(new HashMap<>())
-            .setPersistentVolumeClaims(new HashMap<>())
             .setSecrets(secrets)
             .setConfigMaps(configMaps)
             .build();
@@ -177,12 +177,8 @@ public class KubernetesEnvironmentFactory
     // multiple pods/deployments are merged to one deployment
     // to avoid issues because of overriding labels
     // provision const label and selector to match all services to merged Deployment
-    deployment
-        .getSpec()
-        .getTemplate()
-        .getMetadata()
-        .getLabels()
-        .put(DEPLOYMENT_NAME_LABEL, deploymentName);
+    putLabel(
+        deployment.getSpec().getTemplate().getMetadata(), DEPLOYMENT_NAME_LABEL, deploymentName);
     services.values().forEach(s -> setSelector(s, DEPLOYMENT_NAME_LABEL, deploymentName));
   }
 

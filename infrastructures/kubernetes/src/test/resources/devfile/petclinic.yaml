@@ -66,6 +66,7 @@ items:
   spec:
       containers:
       - name: server
+        imagePullPolicy: Always
         image: test/petclinic
         ports:
         - containerPort: 8080
@@ -73,6 +74,9 @@ items:
         resources:
           limits:
             memory: 512Mi
+        volumeMounts:
+          - name: foo_volume
+            mountPath: /foo/bar
 - kind: Service
   apiVersion: v1
   metadata:

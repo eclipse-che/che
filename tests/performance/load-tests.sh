@@ -129,6 +129,7 @@ if [ ! -z $CRED_FILE ]; then
 fi
 
 # wait for ftp-server to be running
+echo "wait for ftp server to be running"
 if [[ $clean_pvc == true ]]; then
   while [ true ] 
   do
@@ -141,6 +142,7 @@ if [[ $clean_pvc == true ]]; then
 fi
 
 # set common variables to template.yaml
+echo "set common variables to template.yaml"
 cp pod.yaml template.yaml
 parsed_url=$(echo $URL | sed 's/\//\\\//g')
 parsed_image=$(echo $TEST_IMAGE | sed 's/\//\\\//g')
@@ -223,27 +225,13 @@ echo "-- Gathering logs."
 echo "Syncing files from PVC to local folder."
 mkdir $FOLDER/$TIMESTAMP
 cd $FOLDER/$TIMESTAMP
-oc rsync --no-perms --include "*.tar" ftp-server:/home/vsftpd/user/ $FOLDER/$TIMESTAMP
+oc rsync --no-perms ftp-server:/home/vsftpd/user/ $FOLDER/$TIMESTAMP
 echo "Tar files rsynced, untarring..."
 for filename in *.tar; do 
   tar xf $filename; 
 done
 rm *.tar
 cd ..
-
-# gather logs from pods
-echo "Gathering logs from pods."
-for p in $(oc get pods -l group=load-tests -o name)
-do
-  IFS='-'
-  read -a strarr <<< "$p"
-  unset IFS
-  number=${strarr[2]}
-  path_to_logs="$FOLDER/$TIMESTAMP"
-  file="$path_to_logs/pod-$number-console-logs.txt"
-  touch $file
-  oc logs $p > $file
-done
 
 # ----------- CLEANING ENVIRONMENT ----------- #
 echo "-- Cleaning environment."

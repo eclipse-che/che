@@ -196,9 +196,9 @@ export const TestConstants = {
     TS_SELENIUM_REPORT_FOLDER: process.env.TS_SELENIUM_REPORT_FOLDER || './report',
 
     /**
-     * Enable or disable storing of execution screencast, "true" by default.
+     * Enable or disable storing of execution screencast, "false" by default.
      */
-    TS_SELENIUM_EXECUTION_SCREENCAST: process.env.TS_SELENIUM_EXECUTION_SCREENCAST !== 'false',
+    TS_SELENIUM_EXECUTION_SCREENCAST: process.env.TS_SELENIUM_EXECUTION_SCREENCAST === 'true',
 
     /**
      * Delete screencast after execution if all tests passed, "true" by default.

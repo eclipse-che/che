@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 import { TestConstants } from '../../TestConstants';
 import { TYPES } from '../../inversify.types';
 import { inject, injectable } from 'inversify';
@@ -16,6 +16,46 @@ import { IAuthorizationHeaderHandler } from './headers/IAuthorizationHeaderHandl
 
 @injectable()
 export class CheApiRequestHandler {
+
+    /**
+     * This method adds a request interceptor into axios request interceptors list and returns an ID of the interceptor
+     */
+    public static enableRequestInteceptor(): number {
+        console.log(`CheApiRequestHandler.enableRequestInterceptor`);
+        return axios.interceptors.request.use( request => {
+                try {
+                    let request_censored: AxiosRequestConfig = JSON.parse(JSON.stringify(request));
+                    request_censored.headers['Authorization'] = 'CENSORED';
+                    console.log(`RequestHandler request:\n`, request_censored);
+                } catch (err) {
+                    console.log(`RequestHandler request: Failed to deep clone AxiosRequestConfig:`, err);
+                }
+            return request;
+        });
+    }
+
+    /**
+     * This method adds a response interceptor into axios response interceptors list and returns an ID of the interceptor
+     */
+    public static enableResponseInterceptor(): number {
+        console.log(`CheApiRequestHandler.enableResponseRedirects`);
+        return axios.interceptors.response.use( response => {
+                try {
+                    let response_censored: AxiosResponse = JSON.parse(JSON.stringify(response, (key, value) => {
+                        switch (key) {
+                            case 'request': return 'CENSORED';
+                            default: return value;
+                        }
+                    }));
+                    response_censored.config.headers['Authorization'] = 'CENSORED';
+                    console.log(`RequestHandler response:\n`, response_censored);
+                } catch (err) {
+                    console.log(`RequestHandler response: Failed to deep clone AxiosResponse:`, err);
+                }
+            return response;
+        });
+    }
+
     constructor(@inject(TYPES.IAuthorizationHeaderHandler) private readonly headerHandler: IAuthorizationHeaderHandler) { }
 
     async get(relativeUrl: string): Promise<AxiosResponse> {

@@ -39,6 +39,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesShared
 import org.eclipse.che.workspace.infrastructure.openshift.Constants;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftStopWorkspaceRoleProvisioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +53,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   private static final Logger LOG = LoggerFactory.getLogger(OpenShiftProjectFactory.class);
 
   private final OpenShiftClientFactory clientFactory;
+  private final OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner;
 
   @Inject
   public OpenShiftProjectFactory(
@@ -63,6 +65,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
           boolean allowUserDefinedNamespaces,
       OpenShiftClientFactory clientFactory,
       OpenShiftClientConfigFactory clientConfigFactory,
+      OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner,
       UserManager userManager,
       KubernetesSharedPool sharedPool) {
     super(
@@ -81,19 +84,20 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
               + "OAuth to personalize credentials that will be used for cluster access.");
     }
     this.clientFactory = clientFactory;
+    this.stopWorkspaceRoleProvisioner = stopWorkspaceRoleProvisioner;
   }
 
   public OpenShiftProject getOrCreate(RuntimeIdentity identity) throws InfrastructureException {
     OpenShiftProject osProject = get(identity);
 
-    osProject.prepare(shouldMarkNamespaceManaged(identity), canCreateNamespace(identity));
+    osProject.prepare(canCreateNamespace(identity));
 
     if (!isNullOrEmpty(getServiceAccountName())) {
       OpenShiftWorkspaceServiceAccount osWorkspaceServiceAccount =
           doCreateServiceAccount(osProject.getWorkspaceId(), osProject.getName());
       osWorkspaceServiceAccount.prepare();
     }
-
+    stopWorkspaceRoleProvisioner.provision(osProject.getName());
     return osProject;
   }
 
@@ -109,7 +113,9 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   @Override
   public void deleteIfManaged(Workspace workspace) throws InfrastructureException {
     OpenShiftProject osProject = get(workspace);
-    osProject.deleteIfManaged();
+    if (isWorkspaceNamespaceManaged(osProject.getName(), workspace)) {
+      osProject.delete();
+    }
   }
 
   @Override

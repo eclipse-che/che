@@ -18,15 +18,18 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_SUCCEEDED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -44,7 +47,9 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentList;
 import io.fabric8.kubernetes.api.model.apps.DeploymentSpec;
+import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
@@ -55,7 +60,8 @@ import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import io.fabric8.kubernetes.client.dsl.ScalableResource;
+import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
+import java.lang.reflect.Field;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
@@ -73,7 +79,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -91,9 +96,24 @@ public class KubernetesDeploymentsTest {
 
   // Deployments Mocks
   @Mock private AppsAPIGroupDSL apps;
-  @Mock private MixedOperation deploymentsMixedOperation;
-  @Mock private NonNamespaceOperation deploymentsNamespaceOperation;
-  @Mock private ScalableResource deploymentResource;
+
+  @Mock
+  private MixedOperation<
+          Deployment,
+          DeploymentList,
+          DoneableDeployment,
+          RollableScalableResource<Deployment, DoneableDeployment>>
+      deploymentsMixedOperation;
+
+  @Mock
+  private NonNamespaceOperation<
+          Deployment,
+          DeploymentList,
+          DoneableDeployment,
+          RollableScalableResource<Deployment, DoneableDeployment>>
+      deploymentsNamespaceOperation;
+
+  @Mock private RollableScalableResource<Deployment, DoneableDeployment> deploymentResource;
   @Mock private Deployment deployment;
   @Mock private ObjectMeta deploymentMetadata;
   @Mock private DeploymentSpec deploymentSpec;
@@ -290,6 +310,37 @@ public class KubernetesDeploymentsTest {
   }
 
   @Test
+  public void
+      shouldCompleteExceptionallyFutureForWaitingPodIfStatusIsRunningButSomeContainersAreWaitingAndTerminatedBefore() {
+    // given
+    ContainerStatus containerStatus = mock(ContainerStatus.class);
+    when(containerStatus.getName()).thenReturn("FailingContainer");
+    when(containerStatus.getState())
+        .thenReturn(
+            new ContainerStateBuilder().withNewWaiting().withMessage("bah").endWaiting().build());
+    when(containerStatus.getLastState())
+        .thenReturn(
+            new ContainerStateBuilder()
+                .withNewTerminated()
+                .withReason("Completed")
+                .endTerminated()
+                .build());
+
+    when(status.getPhase()).thenReturn(POD_STATUS_PHASE_RUNNING);
+    when(status.getContainerStatuses()).thenReturn(singletonList(containerStatus));
+    CompletableFuture<?> future = kubernetesDeployments.waitRunningAsync(POD_NAME);
+
+    // when
+    verify(podResource).watch(watcherCaptor.capture());
+    Watcher<Pod> watcher = watcherCaptor.getValue();
+    watcher.eventReceived(Watcher.Action.MODIFIED, pod);
+
+    // then
+    assertTrue(future.isDone());
+    assertTrue(future.isCompletedExceptionally());
+  }
+
+  @Test
   public void shouldCompleteExceptionallyFutureForWaitingPodIfStatusIsSucceeded() throws Exception {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_SUCCEEDED);
@@ -437,6 +488,7 @@ public class KubernetesDeploymentsTest {
     doReturn(POD_NAME).when(metadata).getName();
 
     doReturn(Boolean.FALSE).when(podResource).delete();
+    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Foreground"));
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 
@@ -451,7 +503,7 @@ public class KubernetesDeploymentsTest {
   public void testDeletePodThrowingKubernetesClientExceptionShouldCloseWatch() throws Exception {
     final String POD_NAME = "nonExistingPod";
     doReturn(POD_NAME).when(metadata).getName();
-
+    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Foreground"));
     doThrow(KubernetesClientException.class).when(podResource).delete();
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
@@ -472,7 +524,8 @@ public class KubernetesDeploymentsTest {
   public void testDeleteNonExistingDeploymentBeforeWatch() throws Exception {
     final String DEPLOYMENT_NAME = "nonExistingPod";
     doReturn(DEPLOYMENT_NAME).when(deploymentMetadata).getName();
-
+    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Foreground"));
+    doReturn(deploymentResource).when(deploymentResource).withPropagationPolicy(eq("Foreground"));
     doReturn(Boolean.FALSE).when(deploymentResource).delete();
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
@@ -491,6 +544,7 @@ public class KubernetesDeploymentsTest {
     doReturn(DEPLOYMENT_NAME).when(deploymentMetadata).getName();
 
     doThrow(KubernetesClientException.class).when(deploymentResource).delete();
+    doReturn(deploymentResource).when(deploymentResource).withPropagationPolicy(eq("Foreground"));
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 
@@ -570,8 +624,7 @@ public class KubernetesDeploymentsTest {
     ArgumentCaptor<PodEvent> captor = ArgumentCaptor.forClass(PodEvent.class);
     verify(podEventHandler).handle(captor.capture());
     PodEvent podEvent = captor.getValue();
-    Assert.assertEquals(
-        podEvent.getLastTimestamp(), PodEvents.convertDateToEventTimestamp(nextYear));
+    assertEquals(podEvent.getLastTimestamp(), PodEvents.convertDateToEventTimestamp(nextYear));
   }
 
   @Test
@@ -595,11 +648,43 @@ public class KubernetesDeploymentsTest {
 
     // Then
     verify(event, times(1)).getLastTimestamp();
+    verify(event, never()).getFirstTimestamp();
+    ArgumentCaptor<PodEvent> captor = ArgumentCaptor.forClass(PodEvent.class);
+    verify(podEventHandler).handle(captor.capture());
+    PodEvent podEvent = captor.getValue();
+    assertEquals(podEvent.getLastTimestamp(), PodEvents.convertDateToEventTimestamp(nextYear));
+  }
+
+  @Test
+  public void shouldHandleEventWithEmptyLastTimestampAndFirstTimestamp() throws Exception {
+    // Given
+    when(objectReference.getKind()).thenReturn(POD_OBJECT_KIND);
+    kubernetesDeployments.watchEvents(podEventHandler);
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.MINUTE, -1);
+    Date minuteAgo = cal.getTime();
+
+    Field f = KubernetesDeployments.class.getDeclaredField("watcherInitializationDate");
+    f.setAccessible(true);
+    f.set(kubernetesDeployments, minuteAgo);
+
+    verify(eventNamespaceMixedOperation).watch(eventWatcherCaptor.capture());
+    Watcher<Event> watcher = eventWatcherCaptor.getValue();
+    Event event = mock(Event.class);
+    when(event.getInvolvedObject()).thenReturn(objectReference);
+    when(event.getMetadata()).thenReturn(new ObjectMeta());
+    when(event.getLastTimestamp()).thenReturn(null);
+    when(event.getFirstTimestamp()).thenReturn(null);
+
+    // When
+    watcher.eventReceived(Watcher.Action.ADDED, event);
+
+    // Then
+    verify(event, times(1)).getLastTimestamp();
     verify(event, times(1)).getFirstTimestamp();
     ArgumentCaptor<PodEvent> captor = ArgumentCaptor.forClass(PodEvent.class);
     verify(podEventHandler).handle(captor.capture());
     PodEvent podEvent = captor.getValue();
-    Assert.assertEquals(
-        podEvent.getLastTimestamp(), PodEvents.convertDateToEventTimestamp(nextYear));
+    assertNotNull(podEvent.getLastTimestamp());
   }
 }

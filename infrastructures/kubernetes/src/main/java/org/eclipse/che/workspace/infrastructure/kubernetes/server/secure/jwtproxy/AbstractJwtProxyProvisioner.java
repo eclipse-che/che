@@ -291,6 +291,7 @@ abstract class AbstractJwtProxyProvisioner implements ProxyProvisioner {
                         null,
                         "che-jwtproxy-config-volume",
                         false,
+                        null,
                         null))
                 .withArgs("-config", JWT_PROXY_CONFIG_FOLDER + "/" + JWT_PROXY_CONFIG_FILE)
                 .addNewEnv()
