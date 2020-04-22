@@ -6,7 +6,7 @@ metadata:
   name: REPLACE_NAME
 spec:
   completions: REPLACE_COMPLETITIONS
-  backoffLimit: 1
+  backoffLimit: 0
   template:
     metadata:
       name: load-tests-template
