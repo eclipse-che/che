@@ -309,13 +309,14 @@ CHE_ROUTE=$(oc get route che --template='{{ .spec.host }}')
 }
 
 createTestWorkspaceAndRunTest() {
-  #defineCheRoute
+  defineCheRoute
   ### Create workspace
   DEV_FILE_URL=$1
+  echo "====== Create test workspace ======"
   if [[ ${DEV_FILE_URL} = "" ]]; then # by default it is used 'happy-path-devfile' yaml from CHE 'master' branch
-    chectl workspace:start --access-token "$USER_ACCESS_TOKEN" --devfile=https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
+    chectl workspace:create --start --access-token "$USER_ACCESS_TOKEN" --devfile=https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
   else
-    chectl workspace:start --access-token "$USER_ACCESS_TOKEN" $1 # it can be directly indicated other URL to 'devfile' yaml
+    chectl workspace:create --start --access-token "$USER_ACCESS_TOKEN" $1 # it can be directly indicated other URL to 'devfile' yaml
   fi
 
   ### Create directory for report
