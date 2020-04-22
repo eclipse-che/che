@@ -25,7 +25,7 @@ installCheCtl
 installAndStartMinishift
 loginToOpenshiftAndSetDevRole
 prepareCustomResourceFile
-deployCheIntoCluster --chenamespace=eclipse-che --che-operator-cr-yaml=/tmp/custom-resource.yaml
+deployCheIntoCluster --chenamespace=che --che-operator-cr-yaml=/tmp/custom-resource.yaml
 createTestUserAndObtainUserToken
 createTestWorkspaceAndRunTest
 echo "=========================== THIS IS POST TEST ACTIONS =============================="
