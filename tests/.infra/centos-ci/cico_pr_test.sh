@@ -29,5 +29,6 @@ deployCheIntoCluster --chenamespace=che --che-operator-cr-yaml=/tmp/custom-resou
 createTestUserAndObtainUserToken
 createTestWorkspaceAndRunTest
 echo "=========================== THIS IS POST TEST ACTIONS =============================="
+getOpenshiftLogs
 archiveArtifacts "che-nightly-happy-path"
 if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi
