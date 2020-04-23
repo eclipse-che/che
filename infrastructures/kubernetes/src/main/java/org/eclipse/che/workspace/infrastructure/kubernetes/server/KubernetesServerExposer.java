@@ -319,13 +319,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
             matchedSecureServers,
             (serverId, srvrs) -> {
               secureServerExposer.expose(
-                  k8sEnv,
-                  pod,
-                  machineName,
-                  secureServiceName,
-                  serverId,
-                  servicePort,
-                  matchedSecureServers);
+                  k8sEnv, pod, machineName, secureServiceName, serverId, servicePort, srvrs);
             });
       }
     }
