@@ -12,10 +12,12 @@
 package org.eclipse.che.api.workspace.server.devfile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
@@ -34,7 +36,7 @@ public class SerializableConverter implements AttributeConverter<Serializable, S
   public SerializableConverter() {
     this.objectMapper = new ObjectMapper();
     objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.OBJECT_AND_NON_CONCRETE);
-    objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+    // objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
   }
 
   @Override
@@ -49,10 +51,32 @@ public class SerializableConverter implements AttributeConverter<Serializable, S
   @Override
   public Serializable convertToEntityAttribute(String dbData) {
     try {
-      Serializable[] arr = objectMapper.readValue(dbData, Serializable[].class);
-      return (arr.length == 1) ? arr[0] : arr;
+      JsonNode node = objectMapper.readTree(dbData);
+      if (node.isValueNode()) {
+        return serializableNodeValue(node);
+      } else if (node.isArray()) {
+        List<Serializable> values = new ArrayList<>();
+        node.elements().forEachRemaining(n -> values.add(serializableNodeValue(n)));
+        return values.toArray();
+      } else {
+        throw new RuntimeException("Unable to deserialize preference value:" + dbData);
+      }
     } catch (IOException e) {
       throw new RuntimeException("Unable to deserialize preference value:" + e.getMessage(), e);
+    }
+  }
+
+  private Serializable serializableNodeValue(JsonNode node) {
+    if (node.isInt()) {
+      return node.intValue();
+    } else if (node.isFloat()) {
+      return node.floatValue();
+    } else if (node.isBoolean()) {
+      return node.booleanValue();
+    } else if (node.isTextual()) {
+      return node.textValue();
+    } else {
+      throw new RuntimeException("Unable to deserialize preference value:" + node.asText());
     }
   }
 }

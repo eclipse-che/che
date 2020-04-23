@@ -32,6 +32,7 @@ public class SerializableConverterTest {
       {0},
       {Integer.MIN_VALUE},
       {"{\"java.home\": \"/home/user/jdk11\", \"java.jdt.ls.vmargs\": \"-Xmx1G\"}"},
+      {new String[] {"single"}},
       {new String[] {"--enable-all", "--new"}},
       {new int[] {213, 456, 459}},
       {new boolean[] {true, false, false}}
