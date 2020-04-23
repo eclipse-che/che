@@ -19,10 +19,8 @@ function prepareCustomResourceFile() {
 
 setupEnvs
 installKVM
-installStartDocker
-installOC
+installDependencies
 installCheCtl
-installJQ
 installAndStartMinishift
 loginToOpenshiftAndSetDevRole
 prepareCustomResourceFile
