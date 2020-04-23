@@ -36,7 +36,6 @@ public class SerializableConverter implements AttributeConverter<Serializable, S
   public SerializableConverter() {
     this.objectMapper = new ObjectMapper();
     objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.OBJECT_AND_NON_CONCRETE);
-    // objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
   }
 
   @Override
