@@ -26,6 +26,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -74,6 +75,8 @@ public class OpenShiftProjectFactoryTest {
 
   private static final String USER_ID = "userid";
   private static final String USER_NAME = "username";
+  private static final String NO_OAUTH_IDENTITY_PROVIDER = null;
+  private static final String OAUTH_IDENTITY_PROVIDER = "openshift-v4";
 
   @Mock private OpenShiftClientConfigFactory configFactory;
   @Mock private OpenShiftClientFactory clientFactory;
@@ -124,7 +127,8 @@ public class OpenShiftProjectFactoryTest {
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
-            pool);
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
 
     projectFactory.checkIfNamespaceIsAllowed("defaultNs");
   }
@@ -144,7 +148,8 @@ public class OpenShiftProjectFactoryTest {
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
-            pool);
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
 
     projectFactory.checkIfNamespaceIsAllowed("any-namespace");
   }
@@ -167,7 +172,8 @@ public class OpenShiftProjectFactoryTest {
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
-            pool);
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
 
     projectFactory.checkIfNamespaceIsAllowed("any-namespace");
   }
@@ -189,7 +195,8 @@ public class OpenShiftProjectFactoryTest {
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
-            pool);
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
   }
 
   @Test
@@ -222,7 +229,8 @@ public class OpenShiftProjectFactoryTest {
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
-            pool);
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
 
     List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
     assertEquals(availableNamespaces.size(), 1);
@@ -254,7 +262,8 @@ public class OpenShiftProjectFactoryTest {
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
-            pool);
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
 
     List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
     assertEquals(availableNamespaces.size(), 1);
@@ -286,7 +295,8 @@ public class OpenShiftProjectFactoryTest {
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
-            pool);
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
 
     projectFactory.list();
   }
@@ -310,7 +320,8 @@ public class OpenShiftProjectFactoryTest {
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
-            pool);
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
 
     List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
 
@@ -350,7 +361,8 @@ public class OpenShiftProjectFactoryTest {
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
-            pool);
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
 
     List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
     assertEquals(availableNamespaces.size(), 2);
@@ -385,7 +397,8 @@ public class OpenShiftProjectFactoryTest {
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
-            pool);
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
 
     projectFactory.list();
   }
@@ -412,7 +425,8 @@ public class OpenShiftProjectFactoryTest {
                 configFactory,
                 stopWorkspaceRoleProvisioner,
                 userManager,
-                pool));
+                pool,
+                NO_OAUTH_IDENTITY_PROVIDER));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
 
@@ -443,7 +457,8 @@ public class OpenShiftProjectFactoryTest {
                 configFactory,
                 stopWorkspaceRoleProvisioner,
                 userManager,
-                pool));
+                pool,
+                NO_OAUTH_IDENTITY_PROVIDER));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     when(toReturnProject.getWorkspaceId()).thenReturn("workspace123");
     when(toReturnProject.getName()).thenReturn("workspace123");
@@ -460,6 +475,77 @@ public class OpenShiftProjectFactoryTest {
     // then
     verify(projectFactory).doCreateServiceAccount("workspace123", "workspace123");
     verify(serviceAccount).prepare();
+  }
+
+  @Test
+  public void shouldCallStopWorkspaceRoleProvisionWhenIdentityProviderIsDefined() throws Exception {
+    projectFactory =
+        spy(
+            new OpenShiftProjectFactory(
+                "",
+                "serviceAccount",
+                "",
+                "<workspaceid>",
+                false,
+                clientFactory,
+                configFactory,
+                stopWorkspaceRoleProvisioner,
+                userManager,
+                pool,
+                OAUTH_IDENTITY_PROVIDER));
+    OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
+    when(toReturnProject.getWorkspaceId()).thenReturn("workspace123");
+    when(toReturnProject.getName()).thenReturn("workspace123");
+    doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
+
+    OpenShiftWorkspaceServiceAccount serviceAccount = mock(OpenShiftWorkspaceServiceAccount.class);
+    doReturn(serviceAccount).when(projectFactory).doCreateServiceAccount(any(), any());
+
+    // when
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", null, USER_ID, "workspace123");
+    projectFactory.getOrCreate(identity);
+
+    // then
+    verify(projectFactory).doCreateServiceAccount("workspace123", "workspace123");
+    verify(serviceAccount).prepare();
+    verify(stopWorkspaceRoleProvisioner, times(1)).provision("workspace123");
+  }
+
+  @Test
+  public void shouldNotCallStopWorkspaceRoleProvisionWhenIdentityProviderIsDefined()
+      throws Exception {
+    projectFactory =
+        spy(
+            new OpenShiftProjectFactory(
+                "",
+                "serviceAccount",
+                "",
+                "<workspaceid>",
+                false,
+                clientFactory,
+                configFactory,
+                stopWorkspaceRoleProvisioner,
+                userManager,
+                pool,
+                NO_OAUTH_IDENTITY_PROVIDER));
+    OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
+    when(toReturnProject.getWorkspaceId()).thenReturn("workspace123");
+    when(toReturnProject.getName()).thenReturn("workspace123");
+    doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
+
+    OpenShiftWorkspaceServiceAccount serviceAccount = mock(OpenShiftWorkspaceServiceAccount.class);
+    doReturn(serviceAccount).when(projectFactory).doCreateServiceAccount(any(), any());
+
+    // when
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", null, USER_ID, "workspace123");
+    projectFactory.getOrCreate(identity);
+
+    // then
+    verify(projectFactory).doCreateServiceAccount("workspace123", "workspace123");
+    verify(serviceAccount).prepare();
+    verify(stopWorkspaceRoleProvisioner, times(0)).provision("workspace123");
   }
 
   private void prepareNamespaceToBeFoundByName(String name, Project project) throws Exception {
