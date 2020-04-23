@@ -67,10 +67,8 @@ public class SerializableConverter implements AttributeConverter<Serializable, S
   }
 
   private Serializable serializableNodeValue(JsonNode node) {
-    if (node.isInt()) {
-      return node.intValue();
-    } else if (node.isFloat()) {
-      return node.floatValue();
+    if (node.isNumber()) {
+      return node.numberValue();
     } else if (node.isBoolean()) {
       return node.booleanValue();
     } else if (node.isTextual()) {
