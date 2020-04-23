@@ -30,5 +30,6 @@ deployCheIntoCluster --chenamespace=che --che-operator-cr-yaml=/tmp/custom-resou
 createTestUserAndObtainUserToken
 runDevfileTestSuite 
 echo "=========================== THIS IS POST TEST ACTIONS =============================="
+getOpenshiftLogs
 archiveArtifacts "che-devfile-test"
 if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi
