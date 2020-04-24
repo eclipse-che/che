@@ -20,3 +20,4 @@ components:
       java.home: '/home/user/jdk11'
       java.jdt.ls.vmargs: '-noverify -Xmx1G -XX:+UseG1GC -XX:+UseStringDeduplication'
       java.jtg.memory: 12345
+      go.lintFlags: ["--enable-all", "--new"]
