@@ -52,8 +52,10 @@ import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -69,6 +71,7 @@ public class KubernetesNamespaceFactoryTest {
   private static final String USER_ID = "userid";
   private static final String USER_NAME = "username";
 
+  @Mock private KubernetesSharedPool pool;
   @Mock private KubernetesClientFactory clientFactory;
 
   @Mock private KubernetesClient k8sClient;
@@ -95,12 +98,17 @@ public class KubernetesNamespaceFactoryTest {
         .thenReturn(new UserImpl(USER_ID, "test@mail.com", USER_NAME));
   }
 
+  @AfterMethod
+  public void tearDown() {
+    EnvironmentContext.reset();
+  }
+
   @Test
   public void shouldNotThrowExceptionIfDefaultNamespaceIsSpecifiedOnCheckingIfNamespaceIsAllowed()
       throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "legacy", "", "", "defaultNs", false, clientFactory, userManager);
+            "legacy", "", "", "defaultNs", false, clientFactory, userManager, pool);
 
     namespaceFactory.checkIfNamespaceIsAllowed("defaultNs");
   }
@@ -111,7 +119,7 @@ public class KubernetesNamespaceFactoryTest {
           throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "legacy", "", "", "defaultNs", true, clientFactory, userManager);
+            "legacy", "", "", "defaultNs", true, clientFactory, userManager, pool);
 
     namespaceFactory.checkIfNamespaceIsAllowed("any-namespace");
   }
@@ -125,7 +133,7 @@ public class KubernetesNamespaceFactoryTest {
           throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "legacy", "", "", "defaultNs", false, clientFactory, userManager);
+            "legacy", "", "", "defaultNs", false, clientFactory, userManager, pool);
 
     namespaceFactory.checkIfNamespaceIsAllowed("any-namespace");
   }
@@ -136,7 +144,7 @@ public class KubernetesNamespaceFactoryTest {
   public void shouldThrowExceptionIfNoDefaultNamespaceIsConfigured() throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined", "", "", null, false, clientFactory, userManager);
+            "predefined", "", "", null, false, clientFactory, userManager, pool);
   }
 
   @Test
@@ -148,11 +156,13 @@ public class KubernetesNamespaceFactoryTest {
             .withNewMetadata()
             .withName("che-default")
             .endMetadata()
-            .withNewStatus("Active")
+            .withNewStatus()
+            .withNewPhase("Active")
+            .endStatus()
             .build());
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined", "", "", "che-default", false, clientFactory, userManager);
+            "predefined", "", "", "che-default", false, clientFactory, userManager, pool);
 
     List<KubernetesNamespaceMeta> availableNamespaces = namespaceFactory.list();
     assertEquals(availableNamespaces.size(), 1);
@@ -169,7 +179,7 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined", "", "", "che-default", false, clientFactory, userManager);
+            "predefined", "", "", "che-default", false, clientFactory, userManager, pool);
 
     List<KubernetesNamespaceMeta> availableNamespaces = namespaceFactory.list();
     assertEquals(availableNamespaces.size(), 1);
@@ -189,7 +199,7 @@ public class KubernetesNamespaceFactoryTest {
   public void shouldThrowExceptionWhenFailedToGetInfoAboutDefaultNamespace() throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined", "", "", "che", false, clientFactory, userManager);
+            "predefined", "", "", "che", false, clientFactory, userManager, pool);
     throwOnTryToGetNamespaceByName("che", new KubernetesClientException("connection refused"));
 
     namespaceFactory.list();
@@ -204,7 +214,7 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined", "", "", "default", true, clientFactory, userManager);
+            "predefined", "", "", "default", true, clientFactory, userManager, pool);
 
     List<KubernetesNamespaceMeta> availableNamespaces = namespaceFactory.list();
 
@@ -228,7 +238,7 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined", "", "", "default", true, clientFactory, userManager);
+            "predefined", "", "", "default", true, clientFactory, userManager, pool);
 
     List<KubernetesNamespaceMeta> availableNamespaces = namespaceFactory.list();
     assertEquals(availableNamespaces.size(), 2);
@@ -253,31 +263,10 @@ public class KubernetesNamespaceFactoryTest {
   public void shouldThrowExceptionWhenFailedToGetNamespaces() throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined", "", "", "default_ns", true, clientFactory, userManager);
+            "predefined", "", "", "default_ns", true, clientFactory, userManager, pool);
     throwOnTryToGetNamespacesList(new KubernetesClientException("connection refused"));
 
     namespaceFactory.list();
-  }
-
-  @Test
-  public void shouldMarkNamespaceManagedIfWorkspaceIdIsUsedInItsName() throws Exception {
-    // given
-    namespaceFactory =
-        spy(
-            new KubernetesNamespaceFactory(
-                "", "", "", "<workspaceid>", false, clientFactory, userManager));
-    KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
-    doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespaceAccess(any(), any());
-
-    // when
-    RuntimeIdentity identity =
-        new RuntimeIdentityImpl("workspace123", null, USER_ID, "workspace123");
-    KubernetesNamespace namespace = namespaceFactory.getOrCreate(identity);
-
-    // then
-    assertEquals(toReturnNamespace, namespace);
-    verify(namespaceFactory, never()).doCreateServiceAccount(any(), any());
-    verify(toReturnNamespace).prepare(eq(true), eq(true));
   }
 
   @Test
@@ -293,7 +282,7 @@ public class KubernetesNamespaceFactoryTest {
     namespaceFactory =
         spy(
             new KubernetesNamespaceFactory(
-                "predefined", "", "", "new-default", false, clientFactory, userManager));
+                "predefined", "", "", "new-default", false, clientFactory, userManager, pool));
     KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
     doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespaceAccess(any(), any());
 
@@ -305,32 +294,7 @@ public class KubernetesNamespaceFactoryTest {
     // then
     assertEquals(toReturnNamespace, namespace);
     verify(namespaceFactory, never()).doCreateServiceAccount(any(), any());
-    verify(toReturnNamespace).prepare(eq(false), eq(false));
-  }
-
-  @Test
-  public void
-      shouldHandleUpgradeOfManagedFlagAndRequireNamespacePriorExistenceIfDifferentFromDefaultAndUserDefinedIsNotAllowed()
-          throws Exception {
-    // This is a variation of the above test that checks the same scenario, but additionally checks
-    // that we correctly set the managed flag on the namespace if the namespace name contains
-    // the workspace id (and thus will be automatically deleted after workspace stop).
-
-    // given
-    namespaceFactory =
-        spy(new KubernetesNamespaceFactory("", "", "", "che", false, clientFactory, userManager));
-    KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
-    doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespaceAccess(any(), any());
-
-    // when
-    RuntimeIdentity identity =
-        new RuntimeIdentityImpl("workspace123", null, USER_ID, "che-ws-workspace123");
-    KubernetesNamespace namespace = namespaceFactory.getOrCreate(identity);
-
-    // then
-    assertEquals(toReturnNamespace, namespace);
-    verify(namespaceFactory, never()).doCreateServiceAccount(any(), any());
-    verify(toReturnNamespace).prepare(eq(true), eq(false));
+    verify(toReturnNamespace).prepare(eq(false));
   }
 
   @Test
@@ -340,7 +304,14 @@ public class KubernetesNamespaceFactoryTest {
     namespaceFactory =
         spy(
             new KubernetesNamespaceFactory(
-                "", "serviceAccount", "", "<workspaceid>", false, clientFactory, userManager));
+                "",
+                "serviceAccount",
+                "",
+                "<workspaceid>",
+                false,
+                clientFactory,
+                userManager,
+                pool));
     KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
     when(toReturnNamespace.getWorkspaceId()).thenReturn("workspace123");
     when(toReturnNamespace.getName()).thenReturn("workspace123");
@@ -372,7 +343,8 @@ public class KubernetesNamespaceFactoryTest {
             "che-<userid>",
             false,
             clientFactory,
-            userManager);
+            userManager,
+            pool);
 
     when(namespaceResource.get()).thenReturn(null);
 
@@ -397,7 +369,8 @@ public class KubernetesNamespaceFactoryTest {
             "che-<userid>",
             false,
             clientFactory,
-            userManager);
+            userManager,
+            pool);
 
     WorkspaceImpl workspace = new WorkspaceImplBuilder().build();
 
@@ -420,7 +393,8 @@ public class KubernetesNamespaceFactoryTest {
             "che-<userid>",
             false,
             clientFactory,
-            userManager);
+            userManager,
+            pool);
 
     WorkspaceImpl workspace =
         new WorkspaceImplBuilder()
@@ -445,7 +419,8 @@ public class KubernetesNamespaceFactoryTest {
             "che-<userid>",
             false,
             clientFactory,
-            userManager);
+            userManager,
+            pool);
 
     WorkspaceImpl workspace =
         new WorkspaceImplBuilder()
@@ -492,7 +467,9 @@ public class KubernetesNamespaceFactoryTest {
         .withNewMetadata()
         .withName(name)
         .endMetadata()
-        .withNewStatus(phase)
+        .withNewStatus()
+        .withNewPhase(phase)
+        .endStatus()
         .build();
   }
 }

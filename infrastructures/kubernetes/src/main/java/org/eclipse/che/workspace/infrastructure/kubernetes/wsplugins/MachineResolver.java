@@ -13,20 +13,23 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CPU_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CPU_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.Quantity;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
-import org.eclipse.che.api.core.model.workspace.devfile.Env;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -44,6 +47,9 @@ public class MachineResolver {
   private final Container container;
   private final CheContainer cheContainer;
   private final String defaultSidecarMemoryLimitBytes;
+  private final String defaultSidecarMemoryRequestBytes;
+  private final String defaultSidecarCpuLimitCores;
+  private final String defaultSidecarCpuRequestCores;
   private final List<ChePluginEndpoint> containerEndpoints;
   private final Pair<String, String> projectsRootPathEnvVar;
   private final Component component;
@@ -53,11 +59,17 @@ public class MachineResolver {
       Container container,
       CheContainer cheContainer,
       String defaultSidecarMemoryLimitBytes,
+      String defaultSidecarMemoryRequestBytes,
+      String defaultSidecarCpuLimitCores,
+      String defaultSidecarCpuRequestCores,
       List<ChePluginEndpoint> containerEndpoints,
       Component component) {
     this.container = container;
     this.cheContainer = cheContainer;
     this.defaultSidecarMemoryLimitBytes = defaultSidecarMemoryLimitBytes;
+    this.defaultSidecarMemoryRequestBytes = defaultSidecarMemoryRequestBytes;
+    this.defaultSidecarCpuLimitCores = defaultSidecarCpuLimitCores;
+    this.defaultSidecarCpuRequestCores = defaultSidecarCpuRequestCores;
     this.containerEndpoints = containerEndpoints;
     this.projectsRootPathEnvVar = projectsRootPathEnvVar;
     this.component = component;
@@ -67,12 +79,42 @@ public class MachineResolver {
     InternalMachineConfig machineConfig =
         new InternalMachineConfig(
             toServers(containerEndpoints),
-            component.getEnv().stream().collect(Collectors.toMap(Env::getName, Env::getValue)),
+            emptyMap(),
             resolveMachineAttributes(),
             toWorkspaceVolumes(cheContainer));
-
+    applyDevfileVolumes(machineConfig);
+    applyDevfileEndpoints(machineConfig);
     normalizeMemory(container, machineConfig);
+    normalizeCpu(container, machineConfig);
     return machineConfig;
+  }
+
+  private void applyDevfileVolumes(InternalMachineConfig machineConfig) {
+    for (org.eclipse.che.api.core.model.workspace.devfile.Volume volume : component.getVolumes()) {
+      machineConfig
+          .getVolumes()
+          .put(volume.getName(), new VolumeImpl().withPath(volume.getContainerPath()));
+    }
+  }
+
+  private void applyDevfileEndpoints(InternalMachineConfig machineConfig)
+      throws InfrastructureException {
+    for (org.eclipse.che.api.core.model.workspace.devfile.Endpoint endpoint :
+        component.getEndpoints()) {
+      if (!machineConfig.getServers().containsKey(endpoint.getName())) {
+        machineConfig
+            .getServers()
+            .put(endpoint.getName(), ServerConfigImpl.createFromEndpoint(endpoint));
+      } else {
+        throw new InfrastructureException(
+            format(
+                "Devfile overrides the endpoint '%s' of the plugin/editor component '%s'. "
+                    + "This is not allowed because it would most probably cause the workspace "
+                    + "to malfunction. Please change the name of the endpoint in the devfile and try "
+                    + "to start the workspace again.",
+                component.getId(), endpoint.getName()));
+      }
+    }
   }
 
   private Map<String, String> resolveMachineAttributes() {
@@ -97,7 +139,52 @@ public class MachineResolver {
           .getAttributes()
           .put(
               MEMORY_LIMIT_ATTRIBUTE,
-              Long.toString(KubernetesSize.toBytes(overriddenSidecarMemLimit)));
+              Long.toString(
+                  Quantity.getAmountInBytes(Quantity.parse(overriddenSidecarMemLimit))
+                      .longValue()));
+    }
+
+    long ramRequest = Containers.getRamRequest(container);
+    if (ramRequest == 0) {
+      machineConfig.getAttributes().put(MEMORY_REQUEST_ATTRIBUTE, defaultSidecarMemoryRequestBytes);
+    }
+    String overriddenSidecarMemRequest = component.getMemoryRequest();
+    if (!isNullOrEmpty(overriddenSidecarMemRequest)) {
+      machineConfig
+          .getAttributes()
+          .put(
+              MEMORY_REQUEST_ATTRIBUTE,
+              Long.toString(
+                  Quantity.getAmountInBytes(Quantity.parse(overriddenSidecarMemRequest))
+                      .longValue()));
+    }
+  }
+
+  private void normalizeCpu(Container container, InternalMachineConfig machineConfig) {
+    float cpuLimit = Containers.getCpuLimit(container);
+    if (cpuLimit == 0) {
+      machineConfig.getAttributes().put(CPU_LIMIT_ATTRIBUTE, defaultSidecarCpuLimitCores);
+    }
+    String overriddenSidecarCpuLimit = component.getCpuLimit();
+    if (!isNullOrEmpty(overriddenSidecarCpuLimit)) {
+      machineConfig
+          .getAttributes()
+          .put(
+              CPU_LIMIT_ATTRIBUTE,
+              Float.toString(KubernetesSize.toCores(overriddenSidecarCpuLimit)));
+    }
+
+    float cpuRequest = Containers.getCpuRequest(container);
+    if (cpuRequest == 0) {
+      machineConfig.getAttributes().put(CPU_REQUEST_ATTRIBUTE, defaultSidecarCpuRequestCores);
+    }
+    String overriddenSidecarCpuRequest = component.getCpuRequest();
+    if (!isNullOrEmpty(overriddenSidecarCpuRequest)) {
+      machineConfig
+          .getAttributes()
+          .put(
+              CPU_REQUEST_ATTRIBUTE,
+              Float.toString(KubernetesSize.toCores(overriddenSidecarCpuRequest)));
     }
   }
 

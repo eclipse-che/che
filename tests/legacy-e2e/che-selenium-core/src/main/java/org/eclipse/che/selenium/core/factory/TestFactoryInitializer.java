@@ -37,6 +37,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
+import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.Infrastructure;
 import org.eclipse.che.selenium.core.entrance.Entrance;
@@ -60,6 +61,7 @@ public class TestFactoryInitializer {
   @Inject private Entrance entrance;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
+  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
   @Inject
   @Named("che.infrastructure")

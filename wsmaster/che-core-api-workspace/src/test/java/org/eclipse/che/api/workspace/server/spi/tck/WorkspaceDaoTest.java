@@ -128,6 +128,31 @@ public class WorkspaceDaoTest {
   }
 
   @Test
+  public void shouldBeAbleToCountWorkspaces() throws ServerException {
+    assertEquals(workspaceDao.getWorkspacesTotalCount(), COUNT_OF_WORKSPACES);
+  }
+
+  @Test
+  public void shouldBeAbleToCountNewWorkspaces() throws ServerException, TckRepositoryException {
+    // given
+    // when
+    workspaceRepo.createAll(
+        ImmutableList.of(createWorkspaceFromDevfile("id222", accounts[0], "name-bbb")));
+    // then
+    assertEquals(workspaceDao.getWorkspacesTotalCount(), COUNT_OF_WORKSPACES + 1);
+  }
+
+  @Test
+  public void shouldBeAbleToSubtractRemovedWorkspaces()
+      throws ServerException, TckRepositoryException {
+    // given
+    // when
+    workspaceDao.remove(workspaces[1].getId());
+    // then
+    assertEquals(workspaceDao.getWorkspacesTotalCount(), COUNT_OF_WORKSPACES - 1);
+  }
+
+  @Test
   public void shouldGetWorkspaceById() throws Exception {
     final WorkspaceImpl workspace = workspaces[0];
 
@@ -605,6 +630,9 @@ public class WorkspaceDaoTest {
         singletonList(entrypoint3),
         "image",
         "1256G",
+        "123G",
+        "2",
+        "1",
         false,
         singletonList("command"),
         singletonList("arg"),
@@ -936,6 +964,9 @@ public class WorkspaceDaoTest {
             asList(entrypoint1, entrypoint2),
             "image",
             "256G",
+            "128M",
+            "2",
+            "130m",
             false,
             singletonList("command"),
             singletonList("arg"),
@@ -963,6 +994,9 @@ public class WorkspaceDaoTest {
             asList(entrypoint1, entrypoint2),
             "image",
             "256G",
+            "256M",
+            "3",
+            "180m",
             false,
             singletonList("command"),
             singletonList("arg"),

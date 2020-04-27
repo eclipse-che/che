@@ -45,10 +45,12 @@ global:
     ## it MUST be pre-created in the configured Che namespace
     secretName: che-tls
 
-    ## If self-signed certificate is enabled
-    ## then certificate from `tls.selfSignedCertSecretName` will be propagated to Che components' trust stores
+    ## If self-signed certificate flag is enabled
+    ## then CA certificate from `tls.secretName` will be propagated to Che components' trust stores
     useSelfSignedCerts: false
-    selfSignedCertSecretName: self-signed-cert
+
+    ## Name of the config-map with public certificates to add to Java trust store of the Che server.
+    serverTrustStoreConfigMapName: ""
 
 
   ## If using git self-signed certificate is enabled
@@ -59,6 +61,10 @@ global:
 
   gitHubClientID: ""
   gitHubClientSecret: ""
+  openShiftClientID: ""
+  openShiftClientSecret: ""
+  openShiftOAuthEndpoint: ""
+  openShiftVerifyTokenUrl: ""
   # Possible values: common, per-workspace, unique
   cheWorkspacesPVCStrategy: "common"
   pvcClaim: "1Gi"

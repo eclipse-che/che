@@ -46,7 +46,7 @@ done
 
 
 # check that all variables are set
-if [ -z $USERNAME ] || [ -z $STARTING_INDEX ] || [ -z $USER_COUNT ] || [ -z $PASSWORD ] || [ -z $TESTED_ENV]; then
+if [ -z $USERNAME ] || [ -z $STARTING_INDEX ] || [ -z $USER_COUNT ] || [ -z $PASSWORD ] || [ -z $TESTED_ENV ]; then
   echo "ERROR: All variables must be set. See the text below to learn how to use this script:"
   printHelp
   exit 1
@@ -66,11 +66,11 @@ else
 fi
 
 KEYCLOAK_URL=$(oc get route/keycloak -o jsonpath='{.spec.host}')
-KEYCLOAK_BASE_URL="http://${KEYCLOAK_URL}/auth"
+KEYCLOAK_BASE_URL="https://${KEYCLOAK_URL}/auth"
 
 # get admin token
 echo "Getting admin token"
-ADMIN_ACCESS_TOKEN=$(curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "username=${ADMIN_USERNAME}" -d "password=${ADMIN_PASS}" -d "grant_type=password" -d "client_id=admin-cli" $KEYCLOAK_BASE_URL/realms/master/protocol/openid-connect/token | jq -r .access_token)
+ADMIN_ACCESS_TOKEN=$(curl -X POST -k -H "Content-Type: application/x-www-form-urlencoded" -d "username=${ADMIN_USERNAME}" -d "password=${ADMIN_PASS}" -d "grant_type=password" -d "client_id=admin-cli" $KEYCLOAK_BASE_URL/realms/master/protocol/openid-connect/token | jq -r .access_token)
 
 if [ -z $ADMIN_ACCESS_TOKEN ]; then
   echo "ERROR: Could not obtain admin access token."
@@ -86,12 +86,12 @@ do
   USER_JSON={\"username\":\"${TEST_USERNAME}\",\"enabled\":true,\"emailVerified\":true,\"email\":\"test${user_number}@user.aa\"}
 
   echo "Creating user"
-  curl -X POST $KEYCLOAK_BASE_URL/admin/realms/$REALM/users -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" -H "Content-Type: application/json" -d "${USER_JSON}"
-  USER_ID=$(curl -X GET $KEYCLOAK_BASE_URL/admin/realms/$REALM/users?username=${TEST_USERNAME} -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" | jq -r .[0].id)
+  curl -X POST -k $KEYCLOAK_BASE_URL/admin/realms/$REALM/users -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" -H "Content-Type: application/json" -d "${USER_JSON}"
+  USER_ID=$(curl -X GET -k $KEYCLOAK_BASE_URL/admin/realms/$REALM/users?username=${TEST_USERNAME} -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" | jq -r .[0].id)
   echo "User id: $USER_ID"
   
   echo "Updating password"
   CREDENTIALS_JSON="{\"type\":\"password\",\"value\":\"${PASSWORD}\",\"temporary\":false}"
-  curl -X PUT $KEYCLOAK_BASE_URL/admin/realms/$REALM/users/${USER_ID}/reset-password -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" -H "Content-Type: application/json" -d "${CREDENTIALS_JSON}"
+  curl -X PUT -k $KEYCLOAK_BASE_URL/admin/realms/$REALM/users/${USER_ID}/reset-password -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" -H "Content-Type: application/json" -d "${CREDENTIALS_JSON}"
 done
  

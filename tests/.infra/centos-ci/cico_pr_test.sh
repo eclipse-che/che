@@ -5,8 +5,7 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-set -e
-set +x
+set -ex
 
 source tests/.infra/centos-ci/functional_tests_utils.sh
 
@@ -22,6 +21,7 @@ function prepareCustomResourceFile() {
   sed -i "s/customCheProperties:/customCheProperties:\n      CHE_WORKSPACE_AGENT_DEV_INACTIVE__STOP__TIMEOUT__MS: '300000'/" /tmp/custom-resource.yaml
   sed -i "s@cheImage: ''@cheImage: 'quay.io/eclipse/che-server'@g" /tmp/custom-resource.yaml
   sed -i "s@cheImageTag: 'nightly'@cheImageTag: '${TAG}'@g" /tmp/custom-resource.yaml
+  sed -i "s@tlsSupport: true@tlsSupport: false@g" /tmp/custom-resource.yaml
   cat /tmp/custom-resource.yaml
 }
 
@@ -48,9 +48,20 @@ installCheCtl
 
 deployCheIntoCluster  --chenamespace=eclipse-che --che-operator-cr-yaml=/tmp/custom-resource.yaml
 seleniumTestsSetup
+createIndentityProvider
 
-bash /root/payload/tests/legacy-e2e/che-selenium-test/selenium-tests.sh --threads=4 --host=${CHE_ROUTE} --port=80 --multiuser
+bash /root/payload/tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
+  --threads=3 \
+  --host=${CHE_ROUTE} \
+  --port=80 \
+  --multiuser \
+  --fail-script-on-failed-tests \
+  || IS_TESTS_FAILED=true
 
+
+echo "=========================== THIS IS POST TEST ACTIONS =============================="
 saveSeleniumTestResult
 getOpenshiftLogs
-archiveArtifacts "che-pullrequests-test-temporary"
+archiveArtifacts "che-pullrequests-java-selenium-tests"
+
+if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi

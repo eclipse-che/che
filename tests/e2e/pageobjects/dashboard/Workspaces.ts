@@ -92,10 +92,29 @@ export class Workspaces {
         await this.driverHelper.waitDisappearance(workspaceListItemLocator, timeout);
     }
 
-    async clickConfirmDeletionButton(timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
-        Logger.debug('Workspaces.clickConfirmDeletionButton');
+    async confirmWorkspaceDeletion(timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
+        Logger.debug('Workspaces.confirmWorkspaceDeletion');
 
-        await this.driverHelper.waitAndClick(By.css('#ok-dialog-button'), timeout);
+        const checkbox: By = By.xpath(`//che-popup//input[@id='enable-button' and contains(@class, 'ng-empty')]`);
+        const checkbox_checked: By = By.xpath(`//che-popup//input[@id='enable-button' and contains(@class, 'ng-not-empty')]`);
+        const deleteButton: By = By.xpath('//che-popup//che-button-danger');
+
+        await this.driverHelper.waitAndClick(checkbox, 5000);
+        try {
+            await this.driverHelper.waitVisibility(checkbox_checked, 3000);
+        } catch (err) {
+            Logger.info('The checkbox is not checked. Trying again.');
+            await this.driverHelper.waitAndClick(checkbox, 5000);
+
+            try {
+                await this.driverHelper.waitVisibility(checkbox_checked, 3000);
+            } catch (err) {
+                Logger.error('Test was not able to select the checkbox during a workspace deletion.');
+                throw err;
+            }
+        }
+
+        await this.driverHelper.waitAndClick(deleteButton, 10000);
     }
 
     private getWorkspaceListItemLocator(workspaceName: string): string {

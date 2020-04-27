@@ -12,7 +12,7 @@ import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
-import { By, Key, error, ActionSequence, Button, WebElement } from 'selenium-webdriver';
+import { By, Key, error, ActionSequence, Button } from 'selenium-webdriver';
 import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
 
@@ -20,6 +20,7 @@ import { Logger } from '../../utils/Logger';
 @injectable()
 export class Editor {
     private static readonly SUGGESTION_WIDGET_BODY_CSS: string = 'div.visible[widgetId=\'editor.widget.suggestWidget\']';
+    private static readonly SUGGESTION_LOADING_XPATH: string = '//div[@widgetid=\'editor.widget.suggestWidget\']//div[@class=\'message\' and contains(.,\'Loading...\')]';
     private static readonly ADDITIONAL_SHIFTING_TO_Y: number = 19;
     private static readonly ADDITIONAL_SHIFTING_TO_X: number = 1;
 
@@ -337,18 +338,18 @@ export class Editor {
     async waitStoppedDebugBreakpoint(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.waitStoppedDebugBreakpoint title: "${tabTitle}" line: "${lineNumber}"`);
 
-        await this.driverHelper.waitUntilTrue(() => this.isBreakpointPresent(lineNumber, true), timeout);
+        await this.driverHelper.waitUntilTrue(() => this.isBreakpointPresent(tabTitle, lineNumber, true), timeout);
     }
 
     async waitBreakpoint(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.waitBreakpoint title: "${tabTitle}" line: "${lineNumber}"`);
 
-        await this.driverHelper.waitUntilTrue(() => this.isBreakpointPresent(lineNumber), timeout);
+        await this.driverHelper.waitUntilTrue(() => this.isBreakpointPresent(tabTitle, lineNumber), timeout);
     }
 
     async waitBreakpointAbsence(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.waitBreakpointAbsence title: "${tabTitle}" line: "${lineNumber}"`);
-        await this.driverHelper.waitUntilTrue(() => !this.isBreakpointPresent(lineNumber), timeout);
+        await this.driverHelper.waitUntilTrue(() => !this.isBreakpointPresent(tabTitle, lineNumber), timeout);
     }
 
     async activateBreakpoint(tabTitle: string, lineNumber: number) {
@@ -434,8 +435,7 @@ export class Editor {
 
     private async scrollAndSearchSuggestion(editorTabTitle: string, suggestionLocator: By, timeout: number = 10000) {
         await this.driverHelper.getDriver().wait(async () => {
-            const loadingLocator: By = this.getSuggestionLineXpathLocator('Loading');
-
+            const loadingLocator: By = By.xpath(Editor.SUGGESTION_LOADING_XPATH);
             await this.waitSuggestionContainer();
             await this.driverHelper.waitDisappearance(loadingLocator);
             await this.driverHelper.wait(1000);
@@ -547,33 +547,18 @@ export class Editor {
      * @param triggered Whether this breakpoint is triggered or not. Default false.
      */
 
-    private async isBreakpointPresent(lineNumber: number, triggered: boolean = false): Promise<boolean> {
+    private async isBreakpointPresent(tabTitle: string, lineNumber: number, triggered: boolean = false): Promise<boolean> {
+        Logger.debug('Editor.isBreakpointPresent');
 
-        // get current editor element
-        const currentEditorLocator: By = By.xpath(`//div[contains(@id, 'code-editor-opener') and not(contains(@class, 'p-mod-hidden'))]`);
-        const currentEditor: WebElement = await this.driverHelper.waitVisibility(currentEditorLocator);
+        const linesBarXpathLocator: string = `//div[contains(@id, '${tabTitle}')]//div[@class='margin']`;
+        const triggeredBreakpointXpathLocator: string = `//div[contains(@class, 'theia-debug-breakpoint') and contains(@class, 'theia-debug-top-stack-frame')]`;
+        const regularBreakpointXpathLocator: string = `//div[contains(@class, 'theia-debug-breakpoint')]`;
+        const lineNumberRelativeXpathLocator: string = `/parent::div/div[contains(@class, 'line-numbers') and text()=${lineNumber}]`;
 
-        // get line number element
-        const lineNumberLocator: By = By.xpath(`.//div[contains(@class, 'line-numbers') and text()='${lineNumber}']` +
-            `//parent::div[contains(@style, 'position')]`);
-        const lineElement: WebElement = await currentEditor.findElement(lineNumberLocator);
+        const breakpointLocator: string = (triggered ? triggeredBreakpointXpathLocator : regularBreakpointXpathLocator);
+        const breakpointLineNumberXpathLocator = linesBarXpathLocator + breakpointLocator + lineNumberRelativeXpathLocator;
 
-        // get breakpoint locator
-        let breakpointLocator: By;
-        if (triggered) {
-            breakpointLocator = By.xpath(`.//div[contains(@class, 'theia-debug-breakpoint') and contains(@class, 'theia-debug-top-stack-frame')]`);
-        } else {
-            breakpointLocator = By.xpath(`.//div[contains(@class, 'theia-debug-breakpoint')]`);
-        }
-
-        // look for breakpoint
-        const elements: WebElement[] = await lineElement.findElements(breakpointLocator);
-        if (elements.length < 1) {
-            Logger.debug('Editor.isBreakpointPresent - Breakpoint is NOT present.');
-            return false;
-        } else {
-            Logger.debug('Editor.isBreakpointPresent - Breakpoint is present.');
-            return true;
-        }
+        return await this.driverHelper.isVisible(By.xpath(breakpointLineNumberXpathLocator));
     }
+
 }

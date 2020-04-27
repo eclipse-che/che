@@ -22,6 +22,8 @@ import io.fabric8.kubernetes.api.model.LocalObjectReference;
 import io.fabric8.kubernetes.api.model.LocalObjectReferenceBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.fabric8.kubernetes.api.model.PodSecurityContext;
+import io.fabric8.kubernetes.api.model.PodSecurityContextBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.PodSpecBuilder;
 import io.fabric8.kubernetes.api.model.PodTemplateSpec;
@@ -31,9 +33,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -233,6 +237,165 @@ public class PodMergerTest {
     List<LocalObjectReference> imagePullSecrets = podTemplate.getSpec().getImagePullSecrets();
     assertEquals(imagePullSecrets.size(), 1);
     assertEquals(imagePullSecrets.get(0).getName(), "secret");
+  }
+
+  @Test(dataProvider = "terminationGracePeriodProvider")
+  public void shouldBeAbleToMergeTerminationGracePeriodS(
+      List<Long> terminationGracePeriods, Long expectedResultLong) throws ValidationException {
+    List<PodData> podData =
+        terminationGracePeriods
+            .stream()
+            .map(
+                p ->
+                    new PodData(
+                        new PodSpecBuilder().withTerminationGracePeriodSeconds(p).build(),
+                        new ObjectMetaBuilder().build()))
+            .collect(Collectors.toList());
+
+    // when
+    Deployment merged = podMerger.merge(podData);
+    // then
+    PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
+    assertEquals(podTemplate.getSpec().getTerminationGracePeriodSeconds(), expectedResultLong);
+  }
+
+  @DataProvider(name = "terminationGracePeriodProvider")
+  public Object[][] terminationGracePeriodProvider() {
+    return new Object[][] {
+      {Arrays.asList(32L, 30L, 27L), 32L},
+      {Arrays.asList(null, null, null), null},
+      {Arrays.asList(null, 30L, 27L), 30L},
+      {Arrays.asList(32L, null, 27L), 32L},
+      {Arrays.asList(null, 27L), 27L},
+      {Arrays.asList(27L, 27L), 27L},
+      {Arrays.asList(27L, null), 27L}
+    };
+  }
+
+  @Test
+  public void shouldAssignSecurityContextSharedByPods() throws Exception {
+    // given
+    PodSpec podSpec1 =
+        new PodSpecBuilder()
+            .withSecurityContext(new PodSecurityContextBuilder().withRunAsUser(42L).build())
+            .build();
+    podSpec1.setAdditionalProperty("add1", 1L);
+    PodData podData1 = new PodData(podSpec1, new ObjectMetaBuilder().build());
+
+    PodSpec podSpec2 =
+        new PodSpecBuilder()
+            .withSecurityContext(new PodSecurityContextBuilder().withRunAsUser(42L).build())
+            .build();
+    podSpec2.setAdditionalProperty("add2", 2L);
+    PodData podData2 = new PodData(podSpec2, new ObjectMetaBuilder().build());
+
+    // when
+    Deployment merged = podMerger.merge(Arrays.asList(podData1, podData2));
+
+    // then
+    PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
+    PodSecurityContext sc = podTemplate.getSpec().getSecurityContext();
+    assertEquals(sc.getRunAsUser(), (Long) 42L);
+  }
+
+  @Test(expectedExceptions = ValidationException.class)
+  public void shouldFailIfSecurityContextDiffersInPods() throws Exception {
+    // given
+    PodSpec podSpec1 =
+        new PodSpecBuilder()
+            .withSecurityContext(new PodSecurityContextBuilder().withRunAsUser(42L).build())
+            .build();
+    podSpec1.setAdditionalProperty("add1", 1L);
+    PodData podData1 = new PodData(podSpec1, new ObjectMetaBuilder().build());
+
+    PodSpec podSpec2 =
+        new PodSpecBuilder()
+            .withSecurityContext(new PodSecurityContextBuilder().withRunAsUser(43L).build())
+            .build();
+    podSpec2.setAdditionalProperty("add2", 2L);
+    PodData podData2 = new PodData(podSpec2, new ObjectMetaBuilder().build());
+
+    // when
+    Deployment merged = podMerger.merge(Arrays.asList(podData1, podData2));
+
+    // then
+    // exception is thrown
+  }
+
+  @Test
+  public void shouldAssignServiceAccountSharedByPods() throws Exception {
+    // given
+    PodSpec podSpec1 = new PodSpecBuilder().withServiceAccount("sa").build();
+    podSpec1.setAdditionalProperty("add1", 1L);
+    PodData podData1 = new PodData(podSpec1, new ObjectMetaBuilder().build());
+
+    PodSpec podSpec2 = new PodSpecBuilder().withServiceAccount("sa").build();
+    podSpec2.setAdditionalProperty("add2", 2L);
+    PodData podData2 = new PodData(podSpec2, new ObjectMetaBuilder().build());
+
+    // when
+    Deployment merged = podMerger.merge(Arrays.asList(podData1, podData2));
+
+    // then
+    PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
+    String sa = podTemplate.getSpec().getServiceAccount();
+    assertEquals(sa, "sa");
+  }
+
+  @Test(expectedExceptions = ValidationException.class)
+  public void shouldFailServiceAccountDiffersInPods() throws Exception {
+    // given
+    PodSpec podSpec1 = new PodSpecBuilder().withServiceAccount("sa").build();
+    podSpec1.setAdditionalProperty("add1", 1L);
+    PodData podData1 = new PodData(podSpec1, new ObjectMetaBuilder().build());
+
+    PodSpec podSpec2 = new PodSpecBuilder().withServiceAccount("sb").build();
+    podSpec2.setAdditionalProperty("add2", 2L);
+    PodData podData2 = new PodData(podSpec2, new ObjectMetaBuilder().build());
+
+    // when
+    Deployment merged = podMerger.merge(Arrays.asList(podData1, podData2));
+
+    // then
+    // exception is thrown
+  }
+
+  @Test
+  public void shouldAssignServiceAccountNameSharedByPods() throws Exception {
+    // given
+    PodSpec podSpec1 = new PodSpecBuilder().withServiceAccountName("sa").build();
+    podSpec1.setAdditionalProperty("add1", 1L);
+    PodData podData1 = new PodData(podSpec1, new ObjectMetaBuilder().build());
+
+    PodSpec podSpec2 = new PodSpecBuilder().withServiceAccountName("sa").build();
+    podSpec2.setAdditionalProperty("add2", 2L);
+    PodData podData2 = new PodData(podSpec2, new ObjectMetaBuilder().build());
+
+    // when
+    Deployment merged = podMerger.merge(Arrays.asList(podData1, podData2));
+
+    // then
+    PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
+    String sa = podTemplate.getSpec().getServiceAccountName();
+    assertEquals(sa, "sa");
+  }
+
+  @Test(expectedExceptions = ValidationException.class)
+  public void shouldFailServiceAccountNameDiffersInPods() throws Exception {
+    // given
+    PodSpec podSpec1 = new PodSpecBuilder().withServiceAccountName("sa").build();
+    podSpec1.setAdditionalProperty("add1", 1L);
+    PodData podData1 = new PodData(podSpec1, new ObjectMetaBuilder().build());
+
+    PodSpec podSpec2 = new PodSpecBuilder().withServiceAccountName("sb").build();
+    podSpec2.setAdditionalProperty("add2", 2L);
+    PodData podData2 = new PodData(podSpec2, new ObjectMetaBuilder().build());
+
+    // when
+    Deployment merged = podMerger.merge(Arrays.asList(podData1, podData2));
+
+    // then
+    // exception is thrown
   }
 
   private void verifyContainsAllFrom(ObjectMeta source, ObjectMeta toCheck) {

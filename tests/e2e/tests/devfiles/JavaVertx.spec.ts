@@ -20,10 +20,10 @@ const fileFolderPath: string = `${sampleName}/src/main/java/io/openshift/example
 const tabTitle: string = 'HttpApplication.java';
 const codeNavigationClassName: string = 'RouterImpl.class';
 const buildTaskName: string = 'maven build';
-const LSstarting: string = 'Starting Java Language Server';
+const LSstarting: string = 'Activating Language Support for Java';
 const stack: string = 'Java Vert.x';
 
-suite('Java Vert.x test', async () => {
+suite(`${stack} test`, async () => {
 
     suite (`Create ${stack} workspace ${workspaceName}`, async () => {
         workspaceHandling.createAndOpenWorkspace(workspaceName, stack);
@@ -32,7 +32,7 @@ suite('Java Vert.x test', async () => {
 
     suite('Language server validation', async () => {
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
-        commonLsTests.waitLSInitialization(LSstarting, 1800000, 360000);
+        commonLsTests.waitLSInitialization(LSstarting, 1_800_000, 360_000);
         commonLsTests.suggestionInvoking(tabTitle, 19, 31, 'router(Vertx vertx) : Router');
         commonLsTests.errorHighlighting(tabTitle, 'error', 20);
         commonLsTests.autocomplete(tabTitle, 19, 7, 'Router - io.vertx.ext.web');
@@ -40,7 +40,7 @@ suite('Java Vert.x test', async () => {
     });
 
     suite('Validation of project build', async () => {
-        codeExecutionTests.runTask(buildTaskName, 120000);
+        codeExecutionTests.runTask(buildTaskName, 120_000);
         codeExecutionTests.closeTerminal(buildTaskName);
     });
 

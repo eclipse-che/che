@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -29,7 +30,6 @@ import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.NamespaceFluent.MetadataNested;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -39,7 +39,7 @@ import io.fabric8.kubernetes.client.Watcher.Action;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import java.util.Map;
+import java.util.concurrent.Executor;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.mockito.Mock;
@@ -67,6 +67,7 @@ public class KubernetesNamespaceTest {
   @Mock private KubernetesSecrets secrets;
   @Mock private KubernetesConfigsMaps configMaps;
   @Mock private KubernetesClientFactory clientFactory;
+  @Mock private Executor executor;
   @Mock private KubernetesClient kubernetesClient;
   @Mock private NonNamespaceOperation namespaceOperation;
   @Mock private Resource<ServiceAccount, DoneableServiceAccount> serviceAccountResource;
@@ -105,10 +106,11 @@ public class KubernetesNamespaceTest {
     MetadataNested namespaceMeta = prepareCreateNamespaceRequest();
 
     prepareNamespace(NAMESPACE);
-    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
+    KubernetesNamespace namespace =
+        new KubernetesNamespace(clientFactory, executor, NAMESPACE, WORKSPACE_ID);
 
     // when
-    namespace.prepare(false, true);
+    namespace.prepare(true);
 
     // then
     verify(namespaceMeta, never()).withName(NAMESPACE);
@@ -121,10 +123,11 @@ public class KubernetesNamespaceTest {
 
     Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
-    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
+    KubernetesNamespace namespace =
+        new KubernetesNamespace(clientFactory, executor, NAMESPACE, WORKSPACE_ID);
 
     // when
-    namespace.prepare(false, true);
+    namespace.prepare(true);
 
     // then
     verify(namespaceMeta).withName(NAMESPACE);
@@ -135,57 +138,14 @@ public class KubernetesNamespaceTest {
     // given
     Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
-    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
+    KubernetesNamespace namespace =
+        new KubernetesNamespace(clientFactory, executor, NAMESPACE, WORKSPACE_ID);
 
     // when
-    namespace.prepare(false, false);
+    namespace.prepare(false);
 
     // then
     // exception is thrown
-  }
-
-  @Test
-  public void testMarksNamespaceManaged() throws Exception {
-    // given
-    MetadataNested namespaceMeta = prepareCreateNamespaceRequest();
-
-    Namespace nsResource = prepareNamespace(NAMESPACE);
-    ObjectMeta metadata = mock(ObjectMeta.class);
-    @SuppressWarnings("unchecked")
-    Map<String, String> labels = mock(Map.class);
-    when(nsResource.getMetadata()).thenReturn(metadata);
-    when(metadata.getLabels()).thenReturn(labels);
-
-    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
-
-    // when
-    namespace.prepare(true, false);
-
-    // then
-    verify(namespaceMeta, never()).withName(NAMESPACE);
-    verify(labels).put("che-managed", "true");
-  }
-
-  @Test
-  public void testDoesntMarkNamespaceManaged() throws Exception {
-    // given
-    MetadataNested namespaceMeta = prepareCreateNamespaceRequest();
-
-    Namespace nsResource = prepareNamespace(NAMESPACE);
-    ObjectMeta metadata = mock(ObjectMeta.class);
-    @SuppressWarnings("unchecked")
-    Map<String, String> labels = mock(Map.class);
-    when(nsResource.getMetadata()).thenReturn(metadata);
-    when(metadata.getLabels()).thenReturn(labels);
-
-    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
-
-    // when
-    namespace.prepare(false, false);
-
-    // then
-    verify(namespaceMeta, never()).withName(NAMESPACE);
-    verify(labels, never()).put(anyString(), anyString());
   }
 
   @Test
@@ -229,7 +189,7 @@ public class KubernetesNamespaceTest {
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     doThrow(KubernetesClientException.class).when(kubernetesClient).serviceAccounts();
 
-    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare(false, false);
+    new KubernetesNamespace(clientFactory, executor, NAMESPACE, WORKSPACE_ID).prepare(false);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -240,7 +200,7 @@ public class KubernetesNamespaceTest {
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     when(serviceAccountResource.get()).thenReturn(null);
 
-    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare(false, false);
+    new KubernetesNamespace(clientFactory, executor, NAMESPACE, WORKSPACE_ID).prepare(false);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -259,7 +219,7 @@ public class KubernetesNamespaceTest {
         .when(serviceAccountResource)
         .watch(any());
 
-    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare(false, false);
+    new KubernetesNamespace(clientFactory, executor, NAMESPACE, WORKSPACE_ID).prepare(false);
   }
 
   @Test
@@ -277,48 +237,37 @@ public class KubernetesNamespaceTest {
         .when(serviceAccountResource)
         .watch(any());
 
-    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare(false, true);
+    new KubernetesNamespace(clientFactory, executor, NAMESPACE, WORKSPACE_ID).prepare(true);
 
     verify(serviceAccountResource).get();
     verify(serviceAccountResource).watch(any());
   }
 
   @Test
-  public void testDeletesExistingManagedNamespace() throws Exception {
+  public void testDeletesExistingNamespace() throws Exception {
     // given
-    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
-    Resource resource = prepareManagedNamespaceResource(NAMESPACE);
+    KubernetesNamespace namespace =
+        new KubernetesNamespace(clientFactory, executor, NAMESPACE, WORKSPACE_ID);
+    Resource resource = prepareNamespaceResource(NAMESPACE);
 
     // when
-    namespace.deleteIfManaged();
+    namespace.delete();
 
     // then
     verify(resource).delete();
   }
 
   @Test
-  public void testDoesntDeleteExistingNonManagedNamespace() throws Exception {
-    // given
-    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
-    Resource resource = prepareNamespaceResource(NAMESPACE);
-
-    // when
-    namespace.deleteIfManaged();
-
-    // then
-    verify(resource, never()).delete();
-  }
-
-  @Test
   public void testDoesntFailIfDeletedNamespaceDoesntExist() throws Exception {
     // given
-    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
+    KubernetesNamespace namespace =
+        new KubernetesNamespace(clientFactory, executor, NAMESPACE, WORKSPACE_ID);
     Resource resource = prepareNamespaceResource(NAMESPACE);
     when(resource.get()).thenThrow(new KubernetesClientException("err", 404, null));
     when(resource.delete()).thenThrow(new KubernetesClientException("err", 404, null));
 
     // when
-    namespace.deleteIfManaged();
+    namespace.delete();
 
     // then
     verify(resource).delete();
@@ -328,12 +277,13 @@ public class KubernetesNamespaceTest {
   @Test
   public void testDoesntFailIfDeletedNamespaceIsBeingDeleted() throws Exception {
     // given
-    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
-    Resource resource = prepareManagedNamespaceResource(NAMESPACE);
+    KubernetesNamespace namespace =
+        new KubernetesNamespace(clientFactory, executor, NAMESPACE, WORKSPACE_ID);
+    Resource resource = prepareNamespaceResource(NAMESPACE);
     when(resource.delete()).thenThrow(new KubernetesClientException("err", 409, null));
 
     // when
-    namespace.deleteIfManaged();
+    namespace.delete();
 
     // then
     verify(resource).delete();
@@ -354,24 +304,10 @@ public class KubernetesNamespaceTest {
   private Resource prepareNamespaceResource(String namespaceName) {
     Resource namespaceResource = mock(Resource.class);
     doReturn(namespaceResource).when(namespaceOperation).withName(namespaceName);
+    doReturn(namespaceResource).when(namespaceResource).withPropagationPolicy(eq("Background"));
     when(namespaceResource.get())
         .thenReturn(
             new NamespaceBuilder().withNewMetadata().withName(namespaceName).endMetadata().build());
-    kubernetesClient.namespaces().withName(namespaceName).get();
-    return namespaceResource;
-  }
-
-  private Resource prepareManagedNamespaceResource(String namespaceName) {
-    Resource namespaceResource = mock(Resource.class);
-    doReturn(namespaceResource).when(namespaceOperation).withName(namespaceName);
-    when(namespaceResource.get())
-        .thenReturn(
-            new NamespaceBuilder()
-                .withNewMetadata()
-                .withName(namespaceName)
-                .addToLabels("che-managed", "true")
-                .endMetadata()
-                .build());
     kubernetesClient.namespaces().withName(namespaceName).get();
     return namespaceResource;
   }

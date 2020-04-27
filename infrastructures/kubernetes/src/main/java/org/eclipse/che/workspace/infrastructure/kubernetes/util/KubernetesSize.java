@@ -37,8 +37,10 @@ public class KubernetesSize {
   private static final long PI = TI * KI;
   private static final long EI = PI * KI;
 
-  private static final Pattern HUMAN_SIZE_PATTERN =
+  private static final Pattern HUMAN_SIZE_MEMORY_PATTERN =
       Pattern.compile("^([-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?)\\s*(\\S+)?$");
+
+  private static final Pattern HUMAN_SIZE_CPU_PATTERN = Pattern.compile("^([0-9]*\\.?[0-9]+)(m)?$");
 
   /**
    * Converts memory in Kubernetes format to bytes.
@@ -68,7 +70,7 @@ public class KubernetesSize {
    */
   public static long toBytes(String sizeString) {
     final Matcher matcher;
-    if ((matcher = HUMAN_SIZE_PATTERN.matcher(sizeString)).matches()) {
+    if ((matcher = HUMAN_SIZE_MEMORY_PATTERN.matcher(sizeString)).matches()) {
       final float size = Float.parseFloat(matcher.group(1));
       final String suffix = matcher.group(3);
       if (suffix == null) {
@@ -123,5 +125,32 @@ public class KubernetesSize {
     final String unit = (si ? "kMGTPE" : "KMGTPE").charAt(e - 1) + (si ? "" : "i");
     final float size = bytes / (float) Math.pow(multiplier, e);
     return String.format((size % 1.0f == 0) ? "%.0f%s" : "%.1f%s", size, unit);
+  }
+
+  /**
+   * Converts CPU resource in Kubernetes format to cores.
+   *
+   * <p>Format: "< number >< m>" <br>
+   *
+   * <ul>
+   *   Conversion rules:
+   *   <li>m divided by 1000
+   * </ul>
+   *
+   * @throws IllegalArgumentException if specified string can not be parsed
+   */
+  public static float toCores(String cpuString) {
+    final Matcher matcher;
+    if ((matcher = HUMAN_SIZE_CPU_PATTERN.matcher(cpuString)).matches()) {
+      final float size = Float.parseFloat(matcher.group(1));
+      final String suffix = matcher.group(2);
+      if (suffix == null) {
+        return size;
+      }
+      if (suffix.toLowerCase().equals("m")) {
+        return size / K;
+      }
+    }
+    throw new IllegalArgumentException("Invalid Kubernetes CPU size format provided: " + cpuString);
   }
 }

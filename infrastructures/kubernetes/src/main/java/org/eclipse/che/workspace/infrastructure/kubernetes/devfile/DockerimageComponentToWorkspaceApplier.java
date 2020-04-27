@@ -14,12 +14,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.server.devfile.Constants.DISCOVERABLE_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.DOCKERIMAGE_COMPONENT_TYPE;
-import static org.eclipse.che.api.workspace.server.devfile.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -28,19 +25,13 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServiceBuilder;
-import io.fabric8.kubernetes.api.model.ServicePort;
-import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.workspace.server.devfile.Constants;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
@@ -54,6 +45,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
 
 /**
  * Applies changes on workspace config according to the specified dockerimage component.
@@ -71,13 +63,16 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
   static final String CHE_COMPONENT_NAME_LABEL = "che.component.name";
 
   private final String projectFolderPath;
+  private final String imagePullPolicy;
   private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
 
   @Inject
   public DockerimageComponentToWorkspaceApplier(
       @Named("che.workspace.projects.storage") String projectFolderPath,
+      @Named("che.workspace.sidecar.image_pull_policy") String imagePullPolicy,
       KubernetesEnvironmentProvisioner k8sEnvProvisioner) {
     this.projectFolderPath = projectFolderPath;
+    this.imagePullPolicy = imagePullPolicy;
     this.k8sEnvProvisioner = k8sEnvProvisioner;
   }
 
@@ -116,10 +111,37 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
     String machineName =
         componentAlias == null ? toMachineName(dockerimageComponent.getImage()) : componentAlias;
 
+    MachineConfigImpl machineConfig = createMachineConfig(dockerimageComponent, componentAlias);
+    List<HasMetadata> componentObjects = createComponentObjects(dockerimageComponent, machineName);
+
+    k8sEnvProvisioner.provision(
+        workspaceConfig,
+        KubernetesEnvironment.TYPE,
+        componentObjects,
+        ImmutableMap.of(machineName, machineConfig));
+
+    workspaceConfig
+        .getCommands()
+        .stream()
+        .filter(
+            c ->
+                componentAlias != null
+                    && componentAlias.equals(
+                        c.getAttributes().get(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE)))
+        .forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
+  }
+
+  private MachineConfigImpl createMachineConfig(
+      ComponentImpl dockerimageComponent, String componentAlias) {
     MachineConfigImpl machineConfig = new MachineConfigImpl();
-    dockerimageComponent
-        .getEndpoints()
-        .forEach(e -> machineConfig.getServers().put(e.getName(), toServerConfig(e)));
+    machineConfig
+        .getServers()
+        .putAll(
+            dockerimageComponent
+                .getEndpoints()
+                .stream()
+                .collect(
+                    Collectors.toMap(Endpoint::getName, ServerConfigImpl::createFromEndpoint)));
 
     dockerimageComponent
         .getVolumes()
@@ -139,12 +161,19 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
       machineConfig.getAttributes().put(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE, componentAlias);
     }
 
+    return machineConfig;
+  }
+
+  private List<HasMetadata> createComponentObjects(
+      ComponentImpl dockerimageComponent, String machineName) {
     List<HasMetadata> componentObjects = new ArrayList<>();
     Deployment deployment =
         buildDeployment(
             machineName,
             dockerimageComponent.getImage(),
             dockerimageComponent.getMemoryLimit(),
+            dockerimageComponent.getCpuRequest(),
+            dockerimageComponent.getCpuLimit(),
             dockerimageComponent
                 .getEnv()
                 .stream()
@@ -154,39 +183,22 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
             dockerimageComponent.getArgs());
     componentObjects.add(deployment);
 
-    dockerimageComponent
-        .getEndpoints()
-        .stream()
-        .filter(e -> "true".equals(e.getAttributes().get(DISCOVERABLE_ENDPOINT_ATTRIBUTE)))
-        .forEach(e -> componentObjects.add(createService(deployment, e)));
-
-    k8sEnvProvisioner.provision(
-        workspaceConfig,
-        KubernetesEnvironment.TYPE,
-        componentObjects,
-        ImmutableMap.of(machineName, machineConfig));
-
-    workspaceConfig
-        .getCommands()
-        .stream()
-        .filter(
-            c ->
-                componentAlias != null
-                    && componentAlias.equals(
-                        c.getAttributes().get(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE)))
-        .forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
+    return componentObjects;
   }
 
   private Deployment buildDeployment(
       String name,
       String image,
       String memoryLimit,
+      String cpuRequest,
+      String cpuLimit,
       List<EnvVar> env,
       List<String> command,
       List<String> args) {
     Container container =
         new ContainerBuilder()
             .withImage(image)
+            .withImagePullPolicy(imagePullPolicy)
             .withName(name)
             .withEnv(env)
             .withCommand(command)
@@ -194,6 +206,12 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
             .build();
 
     Containers.addRamLimit(container, memoryLimit);
+    if (!isNullOrEmpty(cpuRequest)) {
+      Containers.addCpuRequest(container, KubernetesSize.toCores(cpuRequest));
+    }
+    if (!isNullOrEmpty(cpuLimit)) {
+      Containers.addCpuLimit(container, KubernetesSize.toCores(cpuLimit));
+    }
     return new DeploymentBuilder()
         .withNewMetadata()
         .addToLabels(CHE_COMPONENT_NAME_LABEL, name)
@@ -213,45 +231,6 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
         .withContainers(container)
         .endSpec()
         .endTemplate()
-        .endSpec()
-        .build();
-  }
-
-  private ServerConfigImpl toServerConfig(Endpoint endpoint) {
-    HashMap<String, String> attributes = new HashMap<>(endpoint.getAttributes());
-
-    String protocol = attributes.remove("protocol");
-    if (isNullOrEmpty(protocol)) {
-      protocol = "http";
-    }
-
-    String path = attributes.remove("path");
-
-    String isPublic = attributes.remove(PUBLIC_ENDPOINT_ATTRIBUTE);
-    if ("false".equals(isPublic)) {
-      ServerConfig.setInternal(attributes, true);
-    }
-
-    return new ServerConfigImpl(Integer.toString(endpoint.getPort()), protocol, path, attributes);
-  }
-
-  private Service createService(Deployment deployment, Endpoint endpoint) {
-    ServicePort servicePort =
-        new ServicePortBuilder()
-            .withPort(endpoint.getPort())
-            .withProtocol("TCP")
-            .withNewTargetPort(endpoint.getPort())
-            .build();
-    return new ServiceBuilder()
-        .withNewMetadata()
-        .withName(endpoint.getName())
-        .endMetadata()
-        .withNewSpec()
-        .withSelector(
-            ImmutableMap.of(
-                CHE_COMPONENT_NAME_LABEL,
-                deployment.getSpec().getTemplate().getMetadata().getName()))
-        .withPorts(singletonList(servicePort))
         .endSpec()
         .build();
   }

@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -63,6 +64,7 @@ import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
@@ -79,6 +81,8 @@ import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.EnvVars;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -98,6 +102,9 @@ public class KubernetesPluginsToolingApplierTest {
   private static final String VOLUME_MOUNT_PATH = "/path/test";
   private static final String USER_MACHINE_NAME = POD_NAME + "/userContainer";
   private static final int MEMORY_LIMIT_MB = 200;
+  private static final int MEMORY_REQUEST_MB = 100;
+  private static final String CPU_LIMIT = "200m";
+  private static final String CPU_REQUEST = "100m";
   private static final String CHE_PLUGIN_ENDPOINT_NAME = "test-endpoint-1";
 
   @Mock private Pod pod;
@@ -108,6 +115,7 @@ public class KubernetesPluginsToolingApplierTest {
   @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider;
   @Mock private ChePluginsVolumeApplier chePluginsVolumeApplier;
+  @Mock private EnvVars envVars;
 
   private KubernetesEnvironment internalEnvironment;
   private KubernetesPluginsToolingApplier applier;
@@ -120,9 +128,13 @@ public class KubernetesPluginsToolingApplierTest {
         new KubernetesPluginsToolingApplier(
             TEST_IMAGE_POLICY,
             MEMORY_LIMIT_MB,
+            MEMORY_REQUEST_MB,
+            CPU_LIMIT,
+            CPU_REQUEST,
             false,
             projectsRootEnvVariableProvider,
-            chePluginsVolumeApplier);
+            chePluginsVolumeApplier,
+            envVars);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     List<Container> containers = new ArrayList<>();
@@ -166,6 +178,33 @@ public class KubernetesPluginsToolingApplierTest {
     assertEquals(
         envCommand.getAttributes().get(WORKING_DIRECTORY_ATTRIBUTE), pluginCommand.getWorkingDir());
     validateContainerNameName(envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "container");
+  }
+
+  @Test
+  public void shouldProvisionApplyEnvironmentVariableToContainersAndInitContainersOfPlugin()
+      throws Exception {
+    // given
+    CheContainer container = new CheContainer();
+    container.setName("container");
+    CheContainer initContainer = new CheContainer();
+    initContainer.setName("initContainer");
+
+    ChePlugin chePlugin =
+        createChePlugin(
+            "publisher/id/1.0.0", singletonList(container), singletonList(initContainer));
+    ComponentImpl component = internalEnvironment.getDevfile().getComponents().get(0);
+    component.getEnv().add(new EnvImpl("TEST", "VALUE"));
+    ArgumentCaptor<Container> containerArgumentCaptor = ArgumentCaptor.forClass(Container.class);
+
+    // when
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
+
+    // then
+    verify(envVars, times(2)).apply(containerArgumentCaptor.capture(), eq(component.getEnv()));
+    List<Container> containers = containerArgumentCaptor.getAllValues();
+    // containers names are suffixed to provide uniqueness and converted to be k8s API compatible
+    assertTrue(containers.get(0).getName().startsWith("initcontainer"));
+    assertTrue(containers.get(1).getName().startsWith("container"));
   }
 
   @Test(
@@ -756,9 +795,13 @@ public class KubernetesPluginsToolingApplierTest {
         new KubernetesPluginsToolingApplier(
             TEST_IMAGE_POLICY,
             MEMORY_LIMIT_MB,
+            MEMORY_REQUEST_MB,
+            CPU_LIMIT,
+            CPU_REQUEST,
             true,
             projectsRootEnvVariableProvider,
-            chePluginsVolumeApplier);
+            chePluginsVolumeApplier,
+            envVars);
 
     applier.apply(runtimeIdentity, internalEnvironment, singletonList(createChePlugin()));
 
@@ -772,9 +815,13 @@ public class KubernetesPluginsToolingApplierTest {
         new KubernetesPluginsToolingApplier(
             TEST_IMAGE_POLICY,
             MEMORY_LIMIT_MB,
+            MEMORY_REQUEST_MB,
+            CPU_LIMIT,
+            CPU_REQUEST,
             true,
             projectsRootEnvVariableProvider,
-            chePluginsVolumeApplier);
+            chePluginsVolumeApplier,
+            envVars);
     internalEnvironment.getAttributes().put(SECURE_EXPOSER_IMPL_PROPERTY, "somethingElse");
 
     applier.apply(runtimeIdentity, internalEnvironment, singletonList(createChePlugin()));
@@ -789,9 +836,13 @@ public class KubernetesPluginsToolingApplierTest {
         new KubernetesPluginsToolingApplier(
             TEST_IMAGE_POLICY,
             MEMORY_LIMIT_MB,
+            MEMORY_REQUEST_MB,
+            CPU_LIMIT,
+            CPU_REQUEST,
             true,
             projectsRootEnvVariableProvider,
-            chePluginsVolumeApplier);
+            chePluginsVolumeApplier,
+            envVars);
 
     applier.apply(runtimeIdentity, internalEnvironment, singletonList(createChePlugin()));
 
@@ -814,9 +865,13 @@ public class KubernetesPluginsToolingApplierTest {
         new KubernetesPluginsToolingApplier(
             "None",
             MEMORY_LIMIT_MB,
+            MEMORY_REQUEST_MB,
+            CPU_LIMIT,
+            CPU_REQUEST,
             true,
             projectsRootEnvVariableProvider,
-            chePluginsVolumeApplier);
+            chePluginsVolumeApplier,
+            envVars);
 
     applier.apply(runtimeIdentity, internalEnvironment, singletonList(createChePlugin()));
 
@@ -844,17 +899,26 @@ public class KubernetesPluginsToolingApplierTest {
   }
 
   private ChePlugin createChePlugin(CheContainer... containers) {
-    return createChePlugin("publisher/" + NameGenerator.generate("name", 3) + "/0.0.1", containers);
+    return createChePlugin(
+        "publisher/" + NameGenerator.generate("name", 3) + "/0.0.1",
+        Arrays.asList(containers),
+        emptyList());
   }
 
   private ChePlugin createChePlugin(String id, CheContainer... containers) {
+    return createChePlugin(id, Arrays.asList(containers), emptyList());
+  }
+
+  private ChePlugin createChePlugin(
+      String id, List<CheContainer> containers, List<CheContainer> initContainers) {
     String[] splittedId = id.split("/");
     ChePlugin plugin = new ChePlugin();
     plugin.setPublisher(splittedId[0]);
     plugin.setName(splittedId[1]);
     plugin.setVersion(splittedId[2]);
     plugin.setId(id);
-    plugin.setContainers(Arrays.asList(containers));
+    plugin.setContainers(containers);
+    plugin.setInitContainers(initContainers);
 
     internalEnvironment.getDevfile().getComponents().add(new ComponentImpl("chePlugin", id));
     return plugin;

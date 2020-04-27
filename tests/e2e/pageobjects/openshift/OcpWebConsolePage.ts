@@ -34,7 +34,7 @@ export class OcpWebConsolePage {
     async waitDisappearanceNavpanelOpenShift() {
         Logger.debug('OcpWebConsolePage.waitDisappearanceNavpanelOpenShift');
 
-        await this.driverHelper.waitDisappearance(By.css(OcpWebConsolePage.NAV_PANEL_OPENSHIFT_CSS));
+        await this.driverHelper.waitDisappearanceWithTimeout(By.css(OcpWebConsolePage.NAV_PANEL_OPENSHIFT_CSS));
     }
 
     async openOperatorHubMainPageByUrl(url: string) {

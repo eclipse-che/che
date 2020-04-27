@@ -100,24 +100,24 @@ spec:
           valueFrom:
             secretKeyRef:
               key: ca.crt
-              name: {{ .Values.global.tls.selfSignedCertSecretName }}
+              name: {{ .Values.global.tls.secretName }}
               optional: false
         {{- end }}
 
-        # If workspaces are created in a separate precreated namespace
+        # If workspaces are created in a separate namespace(s)
         # then configure Che Server to propagate TLS secret to workspaces' namespaces
-        {{- if not (contains "<" .Values.global.cheWorkspacesNamespace) }}
+        {{- if ne .Release.Namespace .Values.global.cheWorkspacesNamespace }}
         - name: "CHE_INFRA_KUBERNETES_TLS__CERT"
           valueFrom:
             secretKeyRef:
               key: tls.crt
-              name: {{ .Values.global.tls.secretName  }}
+              name: {{ .Values.global.tls.secretName }}
               optional: false
         - name: "CHE_INFRA_KUBERNETES_TLS__KEY"
           valueFrom:
             secretKeyRef:
               key: tls.key
-              name: {{ .Values.global.tls.secretName  }}
+              name: {{ .Values.global.tls.secretName }}
               optional: false
         {{- end }}
         {{- end }}
@@ -156,14 +156,30 @@ spec:
             memory: 600Mi
           requests:
             memory: 256Mi
-{{- if not .Values.global.multiuser }}
+{{- if or (not .Values.global.multiuser) (not (eq .Values.global.tls.serverTrustStoreConfigMapName "")) }}
         volumeMounts:
+{{- if not .Values.global.multiuser }}
         - mountPath: /data
           name: che-data-volume
+{{- end }}
+# If serverTrustStoreConfigMapName is defined, then add the che-public-certs volume mount with certificate contents
+# to propagate them to trust store.
+{{- if not (eq .Values.global.tls.serverTrustStoreConfigMapName "") }}
+        - mountPath: /public-certs
+          name: che-public-certs
+{{- end }}
       volumes:
+{{- if not .Values.global.multiuser }}
       - name: che-data-volume
         persistentVolumeClaim:
           claimName: che-data-volume
+{{- end }}
+# If serverTrustStoreConfigMapName is defined, then add config-map volume.
+{{- if not (eq .Values.global.tls.serverTrustStoreConfigMapName "") }}
+      - name: che-public-certs
+        configMap:
+          name: {{ .Values.global.tls.serverTrustStoreConfigMapName }}
+{{- end }}
 {{- end }}
 {{- if .Values.registry }}
 {{- if and .Values.registry.password .Values.registry.username }}

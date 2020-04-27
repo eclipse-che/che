@@ -25,6 +25,16 @@ components:
     env:
       - name: ENV_VAR
         value: value
+    volumes:
+      - name: maven-repo
+        containerPath: /root/.m2
+    endpoints:
+      - name: editor-endpoint
+        port: 8088
+        attributes:
+          discoverable: 'true'
+          public: 'false'
+          secure: 'true'
   - alias: mvn-stack
     type: chePlugin
     id: eclipse/chemaven-jdk8/1.0.0
@@ -33,6 +43,16 @@ components:
     env:
       - name: ENV_VAR
         value: value
+    volumes:
+      - name: maven-repo
+        containerPath: /root/.m2
+    endpoints:
+      - name: plugin-endpoint
+        port: 8080
+        attributes:
+          discoverable: 'true'
+          public: 'false'
+          secure: 'true'
 commands:
   - name: build
     actions:

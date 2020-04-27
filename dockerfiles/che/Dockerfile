@@ -5,7 +5,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-FROM openjdk:8u232-jre-slim
+FROM openjdk:8u242-jre-slim
 ENV LANG=C.UTF-8
 RUN echo "%root ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && rm -rf /tmp/*
 EXPOSE 8000 8080

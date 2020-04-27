@@ -11,6 +11,9 @@
  */
 package org.eclipse.che.api.workspace.server.model.impl;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -25,6 +28,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 
 /** @author Alexander Garagatyi */
 @Entity(name = "ServerConf")
@@ -174,5 +178,24 @@ public class ServerConfigImpl implements ServerConfig {
         + ", attributes="
         + attributes
         + '}';
+  }
+
+  public static ServerConfigImpl createFromEndpoint(Endpoint endpoint) {
+    HashMap<String, String> attributes = new HashMap<>(endpoint.getAttributes());
+    attributes.put(SERVER_NAME_ATTRIBUTE, endpoint.getName());
+
+    String protocol = attributes.remove("protocol");
+    if (isNullOrEmpty(protocol)) {
+      protocol = "http";
+    }
+
+    String path = attributes.remove("path");
+
+    String isPublic = attributes.remove(PUBLIC_ENDPOINT_ATTRIBUTE);
+    if ("false".equals(isPublic)) {
+      ServerConfig.setInternal(attributes, true);
+    }
+
+    return new ServerConfigImpl(Integer.toString(endpoint.getPort()), protocol, path, attributes);
   }
 }

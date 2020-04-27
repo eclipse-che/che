@@ -103,6 +103,18 @@ public class K8sContainerResolverTest {
   public void shouldProvisionSidecarMemoryLimitAndRequest(
       String sidecarMemLimit, ResourceRequirements resources) throws Exception {
     cheContainer.setMemoryLimit(sidecarMemLimit);
+    cheContainer.setMemoryRequest(sidecarMemLimit);
+
+    Container container = resolver.resolve();
+
+    assertEquals(container.getResources(), resources);
+  }
+
+  @Test(dataProvider = "cpuLimitResourcesProvider")
+  public void shouldProvisionSidecarCPULimitAndRequest(
+      String sidecarCpuLimit, ResourceRequirements resources) throws Exception {
+    cheContainer.setCpuLimit(sidecarCpuLimit);
+    cheContainer.setCpuRequest(sidecarCpuLimit);
 
     Container container = resolver.resolve();
 
@@ -114,9 +126,20 @@ public class K8sContainerResolverTest {
     return new Object[][] {
       {"", null},
       {null, null},
-      {"123456789", toK8sLimitRequestResources("123456789")},
-      {"1Ki", toK8sLimitRequestResources("1Ki")},
-      {"100M", toK8sLimitRequestResources("100M")},
+      {"123456789", toK8sMemoryLimitRequestResources("123456789")},
+      {"1Ki", toK8sMemoryLimitRequestResources("1Ki")},
+      {"100M", toK8sMemoryLimitRequestResources("100M")},
+    };
+  }
+
+  @DataProvider
+  public static Object[][] cpuLimitResourcesProvider() {
+    return new Object[][] {
+      {"", null},
+      {null, null},
+      {"0.156", toK8sCPULimitRequestResources("0.156")},
+      {"1", toK8sCPULimitRequestResources("1")},
+      {"100m", toK8sCPULimitRequestResources("100m")},
     };
   }
 
@@ -129,10 +152,17 @@ public class K8sContainerResolverTest {
     resolver.resolve();
   }
 
-  private static ResourceRequirements toK8sLimitRequestResources(String memLimit) {
+  private static ResourceRequirements toK8sMemoryLimitRequestResources(String memLimit) {
     return new ResourceRequirementsBuilder()
         .addToLimits("memory", new Quantity(memLimit))
         .addToRequests("memory", new Quantity(memLimit))
+        .build();
+  }
+
+  private static ResourceRequirements toK8sCPULimitRequestResources(String cpuLimit) {
+    return new ResourceRequirementsBuilder()
+        .addToLimits("cpu", new Quantity(cpuLimit))
+        .addToRequests("cpu", new Quantity(cpuLimit))
         .build();
   }
 

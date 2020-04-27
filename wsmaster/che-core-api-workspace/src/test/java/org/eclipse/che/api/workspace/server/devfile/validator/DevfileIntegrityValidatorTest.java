@@ -27,6 +27,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -151,6 +152,22 @@ public class DevfileIntegrityValidatorTest {
     ProjectImpl project = new ProjectImpl();
     project.setName(initialDevfile.getProjects().get(0).getName());
     broken.getProjects().add(project);
+    // when
+    integrityValidator.validateDevfile(broken);
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "Duplicate environment variable 'foo' found in component 'test1'")
+  public void shouldThrowExceptionOnDuplicateEnvironmentVariable() throws Exception {
+    DevfileImpl broken = new DevfileImpl(initialDevfile);
+    ComponentImpl k8s1 = new ComponentImpl();
+    k8s1.setType(OPENSHIFT_COMPONENT_TYPE);
+    k8s1.setAlias("test1");
+    k8s1.getEnv().add(new EnvImpl("foo", "bar"));
+    k8s1.getEnv().add(new EnvImpl("foo", "baz"));
+    broken.getComponents().add(k8s1);
     // when
     integrityValidator.validateDevfile(broken);
   }

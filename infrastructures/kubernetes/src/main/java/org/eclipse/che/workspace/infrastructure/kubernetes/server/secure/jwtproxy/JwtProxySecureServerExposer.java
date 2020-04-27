@@ -13,15 +13,11 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.assistedinject.Assisted;
-import io.fabric8.kubernetes.api.model.ServicePort;
-import java.util.Map;
 import javax.inject.Inject;
-import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.DefaultSecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyProvisionerFactory;
 
 /**
@@ -39,16 +35,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtprox
  * @author Sergii Leshchenko
  */
 public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
-    implements SecureServerExposer<T> {
-
-  private final ExternalServerExposer<T> exposer;
-  private final JwtProxyProvisioner proxyProvisioner;
+    extends DefaultSecureServerExposer<T> {
 
   @VisibleForTesting
   JwtProxySecureServerExposer(
       JwtProxyProvisioner jwtProxyProvisioner, ExternalServerExposer<T> exposer) {
-    this.exposer = exposer;
-    this.proxyProvisioner = jwtProxyProvisioner;
+    super(jwtProxyProvisioner, exposer);
   }
 
   @Inject
@@ -56,30 +48,6 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
       @Assisted RuntimeIdentity identity,
       JwtProxyProvisionerFactory jwtProxyProvisionerFactory,
       ExternalServerExposer<T> exposer) {
-    this.exposer = exposer;
-    this.proxyProvisioner = jwtProxyProvisionerFactory.create(identity);
-  }
-
-  @Override
-  public void expose(
-      T k8sEnv,
-      String machineName,
-      String serviceName,
-      String serverId,
-      ServicePort servicePort,
-      Map<String, ServerConfig> secureServers)
-      throws InfrastructureException {
-
-    ServicePort exposedServicePort =
-        proxyProvisioner.expose(
-            k8sEnv, serviceName, servicePort, servicePort.getProtocol(), secureServers);
-
-    exposer.expose(
-        k8sEnv,
-        machineName,
-        proxyProvisioner.getServiceName(),
-        serverId,
-        exposedServicePort,
-        secureServers);
+    super(identity, jwtProxyProvisionerFactory, exposer);
   }
 }

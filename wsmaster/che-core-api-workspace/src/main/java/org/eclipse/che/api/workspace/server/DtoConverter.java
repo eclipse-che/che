@@ -140,11 +140,15 @@ public final class DtoConverter {
         .withAlias(component.getAlias())
         // chePlugin/cheEditor
         .withId(component.getId())
+        .withRegistryUrl(component.getRegistryUrl())
         // chePlugin
         .withPreferences(component.getPreferences())
         // dockerimage
         .withImage(component.getImage())
         .withMemoryLimit(component.getMemoryLimit())
+        .withMemoryRequest(component.getMemoryRequest())
+        .withCpuLimit(component.getCpuLimit())
+        .withCpuRequest(component.getCpuRequest())
         .withCommand(component.getCommand())
         .withArgs(component.getArgs())
         .withEndpoints(component.getEndpoints().stream().map(DtoConverter::asDto).collect(toList()))

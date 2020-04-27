@@ -17,7 +17,6 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.PodMerger.DEPLOYMENT_NAME_LABEL;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,7 +26,6 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Container;
@@ -51,13 +49,10 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteBuilder;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
-import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
@@ -77,7 +72,6 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class OpenShiftEnvironmentFactoryTest {
 
-  private static final long BYTES_IN_MB = 1024 * 1024;
   private static final String MACHINE_NAME_1 = "machine1";
   private static final String MACHINE_NAME_2 = "machine2";
 
@@ -87,7 +81,6 @@ public class OpenShiftEnvironmentFactoryTest {
   @Mock private InternalRecipe internalRecipe;
   @Mock private InternalMachineConfig machineConfig1;
   @Mock private InternalMachineConfig machineConfig2;
-  @Mock private MemoryAttributeProvisioner memoryProvisioner;
   @Mock private KubernetesRecipeParser k8sRecipeParser;
   @Mock private PodMerger podMerger;
 
@@ -97,7 +90,7 @@ public class OpenShiftEnvironmentFactoryTest {
   public void setup() throws Exception {
     osEnvFactory =
         new OpenShiftEnvironmentFactory(
-            null, null, openShiftEnvValidator, k8sRecipeParser, memoryProvisioner, podMerger);
+            null, null, openShiftEnvValidator, k8sRecipeParser, podMerger);
     machines = ImmutableMap.of(MACHINE_NAME_1, machineConfig1, MACHINE_NAME_2, machineConfig2);
   }
 
@@ -433,27 +426,6 @@ public class OpenShiftEnvironmentFactoryTest {
     when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(object));
 
     osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
-  }
-
-  @Test
-  public void testProvisionRamAttributesIsInvoked() {
-    final long firstMachineRamLimit = 3072 * BYTES_IN_MB;
-    final long secondMachineRamLimit = 1024 * BYTES_IN_MB;
-    final long firstMachineRamRequest = 1536 * BYTES_IN_MB;
-    final long secondMachineRamRequest = 512 * BYTES_IN_MB;
-    when(machineConfig1.getAttributes()).thenReturn(new HashMap<>());
-    when(machineConfig2.getAttributes()).thenReturn(new HashMap<>());
-    final Set<PodData> pods =
-        ImmutableSet.of(
-            createPodData(MACHINE_NAME_1, firstMachineRamLimit, firstMachineRamRequest),
-            createPodData(MACHINE_NAME_2, secondMachineRamLimit, secondMachineRamRequest));
-
-    osEnvFactory.addRamAttributes(machines, pods);
-
-    verify(memoryProvisioner)
-        .provision(eq(machineConfig1), eq(firstMachineRamLimit), eq(firstMachineRamRequest));
-    verify(memoryProvisioner)
-        .provision(eq(machineConfig2), eq(secondMachineRamLimit), eq(secondMachineRamRequest));
   }
 
   /** If provided {@code ramLimit} is {@code null} ram limit won't be set in POD */

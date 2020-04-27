@@ -23,7 +23,10 @@ public class MachineResolverBuilder {
 
   private Container container;
   private CheContainer cheContainer;
-  private String defaultSidecarMemorySizeAttribute;
+  private String defaultSidecarMemoryLimitAttribute;
+  private String defaultSidecarMemoryRequestAttribute;
+  private String defaultSidecarCpuLimitAttribute;
+  private String defaultSidecarCpuRequestAttribute;
   private List<ChePluginEndpoint> containerEndpoints;
   private Pair<String, String> projectsRootPathEnvVar;
   private Component component;
@@ -31,17 +34,24 @@ public class MachineResolverBuilder {
   public MachineResolver build() {
     if (container == null
         || cheContainer == null
-        || defaultSidecarMemorySizeAttribute == null
+        || defaultSidecarMemoryLimitAttribute == null
+        || defaultSidecarMemoryRequestAttribute == null
+        || defaultSidecarCpuLimitAttribute == null
+        || defaultSidecarCpuRequestAttribute == null
         || containerEndpoints == null
         || projectsRootPathEnvVar == null) {
-      throw new IllegalStateException();
+      throw new IllegalStateException(
+          "Unable to build MachineResolver because some fields are null");
     }
 
     return new MachineResolver(
         projectsRootPathEnvVar,
         container,
         cheContainer,
-        defaultSidecarMemorySizeAttribute,
+        defaultSidecarMemoryLimitAttribute,
+        defaultSidecarMemoryRequestAttribute,
+        defaultSidecarCpuLimitAttribute,
+        defaultSidecarCpuRequestAttribute,
         containerEndpoints,
         component);
   }
@@ -56,9 +66,27 @@ public class MachineResolverBuilder {
     return this;
   }
 
-  public MachineResolverBuilder setDefaultSidecarMemorySizeAttribute(
-      String defaultSidecarMemorySizeAttribute) {
-    this.defaultSidecarMemorySizeAttribute = defaultSidecarMemorySizeAttribute;
+  public MachineResolverBuilder setDefaultSidecarMemoryLimitAttribute(
+      String defaultSidecarMemoryLimitAttribute) {
+    this.defaultSidecarMemoryLimitAttribute = defaultSidecarMemoryLimitAttribute;
+    return this;
+  }
+
+  public MachineResolverBuilder setDefaultSidecarMemoryRequestAttribute(
+      String defaultSidecarMemoryRequestAttribute) {
+    this.defaultSidecarMemoryRequestAttribute = defaultSidecarMemoryRequestAttribute;
+    return this;
+  }
+
+  public MachineResolverBuilder setDefaultSidecarCpuLimitAttribute(
+      String defaultSidecarCpuLimitAttribute) {
+    this.defaultSidecarCpuLimitAttribute = defaultSidecarCpuLimitAttribute;
+    return this;
+  }
+
+  public MachineResolverBuilder setDefaultSidecarCpuRequestAttribute(
+      String defaultSidecarCpuRequestAttribute) {
+    this.defaultSidecarCpuRequestAttribute = defaultSidecarCpuRequestAttribute;
     return this;
   }
 

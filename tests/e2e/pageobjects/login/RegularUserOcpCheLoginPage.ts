@@ -26,22 +26,36 @@ export class RegularUserOcpCheLoginPage implements ICheLoginPage {
     async login() {
         Logger.debug('RegularUserOcpCheLoginPage.login');
 
-        await this.ocpLogin.waitOpenShiftLoginPage();
-        await this.ocpLogin.clickOnLoginWitnHtpasswd();
-        await this.ocpLogin.waitOpenShiftLoginPage();
+        if (await this.ocpLogin.isIdentityProviderLinkVisible()) {
+            await this.ocpLogin.clickOnLoginProviderTitle();
+        }
+
+        await this.ocpLogin.waitOpenShiftLoginWelcomePage();
         await this.ocpLogin.enterUserNameOpenShift(TestConstants.TS_SELENIUM_OCP_USERNAME);
         await this.ocpLogin.enterPasswordOpenShift(TestConstants.TS_SELENIUM_OCP_PASSWORD);
         await this.ocpLogin.clickOnLoginButton();
-        await this.ocpLogin.waitDisappearanceOpenShiftLoginPage();
-        await this.ocpLogin.waitAuthorizeOpenShiftIdentityProviderPage();
-        await this.ocpLogin.clickOnApproveAuthorizeAccessButton();
+        await this.ocpLogin.waitDisappearanceOpenShiftLoginWelcomePage();
 
-        await this.cheLogin.waitFirstBrokerLoginPage();
-        await this.cheLogin.enterEmailFirstBrokerLoginPage(TestConstants.TS_SELENIUM_EMAIL_USER);
-        await this.cheLogin.enterFirstNameBrokerLoginPage(TestConstants.TS_SELENIUM_FIRST_NAME);
-        await this.cheLogin.enterLastNameBrokerLoginPage(TestConstants.TS_SELENIUM_LAST_NAME);
-        await this.cheLogin.clickOnSubmitButton();
-        await this.cheLogin.waitDisappearanceBrokerLoginPage();
+        if (await this.ocpLogin.isAuthorizeOpenShiftIdentityProviderPageVisible()) {
+            await this.ocpLogin.waitAuthorizeOpenShiftIdentityProviderPage();
+            await this.ocpLogin.clickOnApproveAuthorizeAccessButton();
+        }
+
+        if (await this.cheLogin.isFirstBrokerLoginPageVisible()) {
+            await this.cheLogin.waitFirstBrokerLoginPage();
+            await this.cheLogin.enterEmailFirstBrokerLoginPage(TestConstants.TS_SELENIUM_EMAIL_USER);
+            await this.cheLogin.enterFirstNameBrokerLoginPage(TestConstants.TS_SELENIUM_FIRST_NAME);
+            await this.cheLogin.enterLastNameBrokerLoginPage(TestConstants.TS_SELENIUM_LAST_NAME);
+            await this.cheLogin.clickOnSubmitButton();
+            await this.cheLogin.waitDisappearanceBrokerLoginPage();
+        }
+
+        if (await this.ocpLogin.isLinkAccountPageVisible()) {
+            await this.ocpLogin.clickOnLinkAccountButton();
+            await this.cheLogin.waitEclipseCheLoginFormPage();
+            await this.cheLogin.inputPaswordEclipseCheLoginPage(TestConstants.TS_SELENIUM_PASSWORD);
+            await this.cheLogin.clickEclipseCheLoginButton();
+        }
     }
 
 }

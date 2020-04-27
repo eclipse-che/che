@@ -48,9 +48,9 @@ public class DevfileSchemaValidatorTest {
     return new Object[][] {
       {"editor_plugin_component/devfile_editor_plugins.yaml"},
       {"editor_plugin_component/devfile_editor_component_with_custom_registry.yaml"},
-      {"editor_plugin_component/devfile_editor_plugins_components_with_memory_limit.yaml"},
+      {"editor_plugin_component/devfile_editor_plugins_components_with_resource_limits.yaml"},
       {"editor_plugin_component/devfile_plugin_components_with_preferences.yaml"},
-      {"kubernetes_openshift_component/devfile_kubernetes_component_reference.yaml"},
+      {"kubernetes_openshift_component/devfile_kubernetes_component.yaml"},
       {"kubernetes_openshift_component/devfile_kubernetes_component_absolute_reference.yaml"},
       {"component/devfile_without_any_component.yaml"},
       {
@@ -62,6 +62,7 @@ public class DevfileSchemaValidatorTest {
         "kubernetes_openshift_component/devfile_openshift_component_reference_and_content_as_block.yaml"
       },
       {"kubernetes_openshift_component/devfile_k8s_openshift_component_with_env.yaml"},
+      {"kubernetes_openshift_component/devfile_k8s_openshift_component_with_endpoints.yaml"},
       {"kubernetes_openshift_component/devfile_openshift_component_content_without_reference.yaml"},
       {
         "kubernetes_openshift_component/devfile_kubernetes_component_content_without_reference.yaml"
@@ -69,7 +70,6 @@ public class DevfileSchemaValidatorTest {
       {"dockerimage_component/devfile_dockerimage_component.yaml"},
       {"dockerimage_component/devfile_dockerimage_component_without_entry_point.yaml"},
       {"editor_plugin_component/devfile_editor_component_with_custom_registry.yaml"},
-      {"editor_plugin_component/devfile_editor_plugins_components_with_memory_limit.yaml"},
       {"editor_plugin_component/devfile_plugin_component_with_reference.yaml"},
       {"devfile/devfile_just_generatename.yaml"},
       {"devfile/devfile_name_and_generatename.yaml"},
@@ -192,7 +192,7 @@ public class DevfileSchemaValidatorTest {
       },
       {
         "editor_plugin_component/devfile_editor_plugins_components_with_invalid_memory_limit.yaml",
-        "(/components/0/memoryLimit):The value must be of string type, but actual type is integer."
+        "At least one of the following sets of problems must be resolved.: [(/components/0/memoryLimit):The value must be of string type, but actual type is integer.(/components/0/memoryLimit):The numeric value must be greater than 0.]At least one of the following sets of problems must be resolved.: [(/components/1/memoryLimit):The value must be of string type, but actual type is integer.(/components/1/memoryLimit):The numeric value must be greater than 0.]"
       },
       {
         "editor_plugin_component/devfile_editor_component_with_multiple_colons_in_id.yaml",
@@ -223,6 +223,10 @@ public class DevfileSchemaValidatorTest {
       {
         "dockerimage_component/devfile_dockerimage_component_with_missing_memory_limit.yaml",
         "(/components/0):The object must have a property whose name is \"memoryLimit\"."
+      },
+      {
+        "dockerimage_component/devfile_dockerimage_component_with_invalid_memory_limit.yaml",
+        "At least one of the following sets of problems must be resolved.: [(/components/0/memoryLimit):The value must be of string type, but actual type is integer.(/components/0/memoryLimit):The numeric value must be greater than 0.]"
       },
       {
         "dockerimage_component/devfile_dockerimage_component_with_indistinctive_field_selector.yaml",

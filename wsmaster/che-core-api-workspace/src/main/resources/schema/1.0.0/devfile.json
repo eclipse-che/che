@@ -61,10 +61,14 @@
       "additionalProperties": false,
       "anyOf": [
         {
-          "required": ["name"]
+          "required": [
+            "name"
+          ]
         },
         {
-          "required": ["generateName"]
+          "required": [
+            "generateName"
+          ]
         }
       ]
     },
@@ -178,7 +182,9 @@
               "type": "string"
             }
           },
-          "required": ["type"]
+          "required": [
+            "type"
+          ]
         },
         "then": {
           "allOf": [
@@ -243,7 +249,15 @@
                     ]
                   },
                   "memoryLimit": {
-                    "type": "string",
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer",
+                        "exclusiveMinimum": 0
+                      }
+                    ],
                     "description": "Describes memory limit for the component. You can express memory as a plain integer or as a fixed-point integer using one of these suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi, Ki",
                     "examples": [
                       "128974848",
@@ -251,10 +265,28 @@
                       "129M",
                       "123Mi"
                     ]
+                  },
+                  "memoryRequest": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "integer",
+                          "exclusiveMinimum": 0
+                        }
+                      ],
+                      "description": "Describes memory request for the component. You can express memory as a plain integer or as a fixed-point integer using one of these suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi, Ki",
+                      "examples": [
+                        "128974848",
+                        "129e6",
+                        "129M",
+                        "123Mi"
+                      ]
+                    }
                   }
                 }
-              }
-            },
+              },
             {
               "if": {
                 "properties": {
@@ -272,9 +304,14 @@
                   "alias": {},
                   "id": {},
                   "env": {},
+                  "endpoints": {},
+                  "volumes": {},
                   "reference": {},
                   "registryUrl": {},
-                  "memoryLimit": {}
+                  "memoryLimit": {},
+                  "memoryRequest": {},
+                  "cpuLimit": {},
+                  "cpuRequest": {}
                 }
               }
             },
@@ -295,7 +332,12 @@
                   "alias": {},
                   "id": {},
                   "env": {},
+                  "endpoints": {},
+                  "volumes": {},
                   "memoryLimit": {},
+                  "memoryRequest": {},
+                  "cpuLimit": {},
+                  "cpuRequest": {},
                   "reference": {},
                   "registryUrl": {},
                   "preferences": {
@@ -305,10 +347,24 @@
                       "{\"java.home\": \"/home/user/jdk11\", \"java.jdt.ls.vmargs\": \"-Xmx1G\"}"
                     ],
                     "additionalProperties": {
-                      "type": [
-                        "boolean",
-                        "string",
-                        "number"
+                      "anyOf" : [
+                        {
+                          "type": [
+                            "boolean",
+                            "string",
+                            "number"
+                          ]
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": [
+                              "boolean",
+                              "string",
+                              "number"
+                            ]
+                          }
+                        }
                       ]
                     }
                   }
@@ -346,7 +402,9 @@
                   "type": {},
                   "alias": {},
                   "mountSources": {},
+                  "volumes": {},
                   "env": {},
+                  "endpoints": {},
                   "reference": {
                     "description": "Describes absolute or devfile-relative location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type components",
                     "type": "string",
@@ -434,21 +492,33 @@
                   "alias": {},
                   "mountSources": {},
                   "env": {},
-                  "image": {
-                    "type": "string",
-                    "description": "Specifies the docker image that should be used for component",
-                    "examples": [
-                      "eclipse/maven-jdk8:1.0.0"
-                    ]
-                  },
+                  "cpuLimit": {},
+                  "cpuRequest": {},
+                  "volumes": {},
+                  "endpoints": {},
                   "memoryLimit": {
-                    "type": "string",
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer",
+                        "exclusiveMinimum": 0
+                      }
+                    ],
                     "description": "Describes memory limit for the component. You can express memory as a plain integer or as a fixed-point integer using one of these suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi, Ki",
                     "examples": [
                       "128974848",
                       "129e6",
                       "129M",
                       "123Mi"
+                    ]
+                  },
+                  "image": {
+                    "type": "string",
+                    "description": "Specifies the docker image that should be used for component",
+                    "examples": [
+                      "eclipse/maven-jdk8:1.0.0"
                     ]
                   },
                   "command": {
@@ -472,85 +542,6 @@
                     "examples": [
                       "['-R', '-f']"
                     ]
-                  },
-                  "volumes": {
-                    "type": "array",
-                    "description": "Describes volumes which should be mount to component",
-                    "items": {
-                      "type": "object",
-                      "description": "Describe volume that should be mount to component",
-                      "required": [
-                        "name",
-                        "containerPath"
-                      ],
-                      "properties": {
-                        "name": {
-                          "type": "string",
-                          "title": "The Volume Name",
-                          "description": "The volume name. If several components mount the same volume then they will reuse the volume and will be able to access to the same files",
-                          "examples": [
-                            "my-data"
-                          ]
-                        },
-                        "containerPath": {
-                          "type": "string",
-                          "title": "The path where volume should be mount to container",
-                          "examples": [
-                            "/home/user/data"
-                          ]
-                        }
-                      }
-                    }
-                  },
-                  "endpoints": {
-                    "type": "array",
-                    "description": "Describes dockerimage component endpoints",
-                    "items": {
-                      "name": "object",
-                      "description": "Describes dockerimage component endpoint",
-                      "required": [
-                        "name",
-                        "port"
-                      ],
-                      "properties": {
-                        "name": {
-                          "type": "string",
-                          "title": "The Endpoint Name",
-                          "description": "The Endpoint name"
-                        },
-                        "port": {
-                          "type": "integer",
-                          "title": "The Endpoint Port",
-                          "description": "The container port that should be used as endpoint"
-                        },
-                        "attributes": {
-                          "type": "object",
-                          "public": {
-                            "type": "boolean",
-                            "description": "Identifies endpoint as workspace internally or externally accessible.",
-                            "default": "true"
-                          },
-                          "secure": {
-                            "type": "boolean",
-                            "description": "Identifies server as secure or non-secure. Requests to secure servers will be authenticated and must contain machine token",
-                            "default": "false"
-                          },
-                          "discoverable": {
-                            "type": "boolean",
-                            "description": "Identifies endpoint as accessible by its name.",
-                            "default": "false"
-                          },
-                          "protocol": {
-                            "type": "boolean",
-                            "description": "Defines protocol that should be used for communication with endpoint. Is used for endpoint URL evaluation"
-                          },
-                          "additionalProperties": {
-                            "type": "string"
-                          },
-                          "javaType": "java.util.Map<String, String>"
-                        }
-                      }
-                    }
                   }
                 }
               }
@@ -587,6 +578,71 @@
             "description": "Describes whether projects sources should be mount to the component. `CHE_PROJECTS_ROOT` environment variable should contains a path where projects sources are mount",
             "default": "false"
           },
+          "cpuLimit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            ],
+            "description": "Describes CPU limit for the component. You can express CPU limit as a float-point cores or as a  fixed-point integer millicores using 'm' suffix",
+            "examples": [
+              "2",
+              "0.235",
+              "100m",
+              "1230m"
+            ]
+          },
+          "cpuRequest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            ],
+            "description": "Describes CPU request for the component. You can express CPU request as a float-point cores or as a  fixed-point integer millicores using 'm' suffix",
+            "examples": [
+              "2",
+              "0.235",
+              "100m",
+              "1230m"
+            ]
+          },
+          "volumes": {
+            "type": "array",
+            "description": "Describes volumes which should be mount to component",
+            "items": {
+              "type": "object",
+              "description": "Describe volume that should be mount to component",
+              "required": [
+                "name",
+                "containerPath"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "The Volume Name",
+                  "description": "The volume name. If several components mount the same volume then they will reuse the volume and will be able to access to the same files",
+                  "examples": [
+                    "my-data"
+                  ]
+                },
+                "containerPath": {
+                  "type": "string",
+                  "title": "The path where volume should be mount to container",
+                  "examples": [
+                    "/home/user/data"
+                  ]
+                }
+              }
+            }
+          },
           "env": {
             "type": "array",
             "description": "The environment variables list that should be set to docker container",
@@ -607,6 +663,56 @@
                   "type": "string",
                   "title": "The Environment Variable Value",
                   "description": "The environment variable value"
+                }
+              }
+            }
+          },
+          "endpoints": {
+            "type": "array",
+            "description": "Describes dockerimage component endpoints",
+            "items": {
+              "name": "object",
+              "description": "Describes dockerimage component endpoint",
+              "required": [
+                "name",
+                "port"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "The Endpoint Name",
+                  "description": "The Endpoint name"
+                },
+                "port": {
+                  "type": "integer",
+                  "title": "The Endpoint Port",
+                  "description": "The container port that should be used as endpoint"
+                },
+                "attributes": {
+                  "type": "object",
+                  "public": {
+                    "type": "boolean",
+                    "description": "Identifies endpoint as workspace internally or externally accessible.",
+                    "default": "true"
+                  },
+                  "secure": {
+                    "type": "boolean",
+                    "description": "Identifies server as secure or non-secure. Requests to secure servers will be authenticated and must contain machine token",
+                    "default": "false"
+                  },
+                  "discoverable": {
+                    "type": "boolean",
+                    "description": "Identifies endpoint as accessible by its name.",
+                    "default": "false"
+                  },
+                  "protocol": {
+                    "type": "boolean",
+                    "description": "Defines protocol that should be used for communication with endpoint. Is used for endpoint URL evaluation"
+                  },
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "javaType": "java.util.Map<String, String>"
                 }
               }
             }
@@ -691,7 +797,9 @@
                   "description": "Describes action type",
                   "type": "string",
                   "examples": [
-                    "exec"
+                    "exec",
+                    "vscode-task",
+                    "vscode-launch"
                   ]
                 },
                 "component": {
@@ -734,14 +842,16 @@
           },
           "previewUrl": {
             "type": "object",
-            "required": ["port"],
+            "required": [
+              "port"
+            ],
             "properties": {
               "port": {
                 "type": "number",
                 "minimum": 0,
                 "maximum": 65535
               },
-              "path":  {
+              "path": {
                 "type": "string"
               }
             }

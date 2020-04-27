@@ -35,9 +35,11 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.impls.KubernetesNamespaceMetaImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.openshift.Constants;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftStopWorkspaceRoleProvisioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +53,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   private static final Logger LOG = LoggerFactory.getLogger(OpenShiftProjectFactory.class);
 
   private final OpenShiftClientFactory clientFactory;
+  private final OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner;
 
   @Inject
   public OpenShiftProjectFactory(
@@ -62,7 +65,9 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
           boolean allowUserDefinedNamespaces,
       OpenShiftClientFactory clientFactory,
       OpenShiftClientConfigFactory clientConfigFactory,
-      UserManager userManager) {
+      OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner,
+      UserManager userManager,
+      KubernetesSharedPool sharedPool) {
     super(
         projectName,
         serviceAccountName,
@@ -70,7 +75,8 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
         defaultNamespaceName,
         allowUserDefinedNamespaces,
         clientFactory,
-        userManager);
+        userManager,
+        sharedPool);
     if (allowUserDefinedNamespaces && !clientConfigFactory.isPersonalized()) {
       LOG.warn(
           "Users are allowed to list projects but Che server is configured with a service account. "
@@ -78,19 +84,20 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
               + "OAuth to personalize credentials that will be used for cluster access.");
     }
     this.clientFactory = clientFactory;
+    this.stopWorkspaceRoleProvisioner = stopWorkspaceRoleProvisioner;
   }
 
   public OpenShiftProject getOrCreate(RuntimeIdentity identity) throws InfrastructureException {
     OpenShiftProject osProject = get(identity);
 
-    osProject.prepare(shouldMarkNamespaceManaged(identity), canCreateNamespace(identity));
+    osProject.prepare(canCreateNamespace(identity));
 
     if (!isNullOrEmpty(getServiceAccountName())) {
       OpenShiftWorkspaceServiceAccount osWorkspaceServiceAccount =
           doCreateServiceAccount(osProject.getWorkspaceId(), osProject.getName());
       osWorkspaceServiceAccount.prepare();
     }
-
+    stopWorkspaceRoleProvisioner.provision(osProject.getName());
     return osProject;
   }
 
@@ -106,7 +113,9 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   @Override
   public void deleteIfManaged(Workspace workspace) throws InfrastructureException {
     OpenShiftProject osProject = get(workspace);
-    osProject.deleteIfManaged();
+    if (isWorkspaceNamespaceManaged(osProject.getName(), workspace)) {
+      osProject.delete();
+    }
   }
 
   @Override
@@ -128,7 +137,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
 
   @VisibleForTesting
   OpenShiftProject doCreateProjectAccess(String workspaceId, String name) {
-    return new OpenShiftProject(clientFactory, name, workspaceId);
+    return new OpenShiftProject(clientFactory, sharedPool.getExecutor(), name, workspaceId);
   }
 
   @VisibleForTesting

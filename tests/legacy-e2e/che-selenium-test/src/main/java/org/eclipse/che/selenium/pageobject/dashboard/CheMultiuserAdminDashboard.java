@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.client.keycloak.TestKeycloakSettingsServiceClient;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
@@ -54,6 +55,7 @@ public class CheMultiuserAdminDashboard extends Dashboard {
       TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient,
       SeleniumWebDriverHelper seleniumWebDriverHelper,
       WebDriverWaitFactory webDriverWaitFactory,
+      TestUserPreferencesServiceClient testUserPreferencesServiceClient,
       @Named("che.multiuser") boolean isMultiuser) {
     super(
         seleniumWebDriver,
@@ -65,6 +67,7 @@ public class CheMultiuserAdminDashboard extends Dashboard {
         testKeycloakSettingsServiceClient,
         seleniumWebDriverHelper,
         webDriverWaitFactory,
+        testUserPreferencesServiceClient,
         isMultiuser);
     PageFactory.initElements(seleniumWebDriver, this);
   }

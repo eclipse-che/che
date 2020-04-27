@@ -30,11 +30,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/**
- * @author Andrey chizhikov TODO turn on the test after https://github.com/eclipse/che/issues/15317
- *     resolved
- */
-@Test(groups = UNDER_REPAIR)
+/** @author Andrey chizhikov */
+@Test(groups = {UNDER_REPAIR})
 public class ProjectStateAfterRefreshTest {
   private static final String WORKSPACE_NAME =
       generate(ProjectStateAfterRefreshTest.class.getSimpleName(), 5);

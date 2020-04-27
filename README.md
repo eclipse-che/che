@@ -6,7 +6,7 @@ https://www.eclipse.org/che/)
 **Next-generation container development platform, developer workspace server and cloud IDE**
 
 [![Eclipse License](https://img.shields.io/badge/license-Eclipse-brightgreen.svg)](https://github.com/codenvy/che/blob/master/LICENSE)
-[![Build Status](https://ci.codenvycorp.com/buildStatus/icon?job=che-master-ci)](https://ci.codenvycorp.com/job/che-master-ci)
+[![Build Status](https://ci.centos.org/buildStatus/icon?job=devtools-che-che-build-master)](https://ci.centos.org/view/Devtools/job/devtools-che-che-build-master/)
 <a href="https://sonarcloud.io/dashboard?id=org.eclipse.che%3Ache-parent%3Amaster">
 <img src="https://sonarcloud.io/images/project_badges/sonarcloud-black.svg" width="94" height="20" href="" />
 </a>

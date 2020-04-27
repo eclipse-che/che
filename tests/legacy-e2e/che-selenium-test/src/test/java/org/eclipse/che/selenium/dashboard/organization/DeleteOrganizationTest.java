@@ -76,6 +76,7 @@ public class DeleteOrganizationTest {
     deleteOrganization(childOrg.getName());
 
     // Test that the organization deleted
+    organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
     organizationListPage.waitForOrganizationIsRemoved(childOrg.getQualifiedName());
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), initialOrgNumber - 1);

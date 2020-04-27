@@ -15,27 +15,34 @@ import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
-import { TestConstants } from '../..';
+import { TestConstants, NameGenerator } from '../..';
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
-const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=https://gist.githubusercontent.com/Katka92/fe747fa93b8275abb2fb9f3803de1f0f/raw`;
 const cheLoginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
 const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
+const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
+const workspacePrefixUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/`;
+const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
 
 suite('Load test suite', async () => {
 
     suiteTeardown (async function () { await testWorkspaceUtils.cleanUpAllWorkspaces(); });
 
-    test('Login and navigate to factory url', async () => {
-        await driverHelper.navigateToUrl(factoryUrl);
+    suiteSetup(async function () {
+        const wsConfig = await testWorkspaceUtils.getBaseDevfile();
+        wsConfig.metadata!.name = workspaceName;
+        await testWorkspaceUtils.createWsFromDevFile(wsConfig);
+    });
+
+    test('Login into workspace and open tree container', async () => {
+        await driverHelper.navigateToUrl(workspacePrefixUrl + workspaceName);
         await cheLoginPage.login();
     });
 
+
     test('Wait loading workspace and get time', async () => {
-        console.log('Waiting for workspace to start.');
-        await ide.waitAndSwitchToIdeFrame();
-        console.log('Waiting for project to be imported and opened.');
+        await ide.waitWorkspaceAndIde(namespace, workspaceName);
         await projectTree.openProjectTreeContainer();
     });
 

@@ -89,6 +89,28 @@ export class Terminal {
         await this.type(tabTitle, Key.chord(Key.CONTROL, 'c'));
     }
 
+    async getText(terminalTab: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
+        Logger.debug(`Terminal.getText tab: ${terminalTab}`);
+
+        const terminalIndex: number = await this.getTerminalIndex(terminalTab);
+        const terminalRowsXpathLocator: string = `(//div[contains(@class, 'terminal-container')]` +
+            `//div[contains(@class, 'terminal')]//div[contains(@class, 'xterm-rows')])[${terminalIndex}]`;
+
+        await this.selectTerminalTab(terminalTab, timeout);
+        return await this.driverHelper.waitAndGetText(By.xpath(terminalRowsXpathLocator), timeout);
+    }
+
+    async waitText(terminalTab: string, expectedText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Terminal.waitText tab: ${terminalTab} text: ${expectedText}`);
+
+        await this.selectTerminalTab(terminalTab, timeout);
+        await this.driverHelper.waitUntilTrue(async () => {
+            const terminalText: string = await this.getText(terminalTab, timeout);
+            return terminalText.includes(expectedText);
+
+        }, timeout);
+    }
+
     private getTerminalTabCssLocator(tabTitle: string): string {
         return `li[title='${tabTitle}']`;
     }
@@ -111,6 +133,7 @@ export class Terminal {
             const currentTerminalTitle: string = await this.driverHelper.waitAndGetText(terminalTabLocator);
 
             if (currentTerminalTitle.search(terminalTitle) > -1) {
+                Logger.debug(`Terminal index: ${i}`);
                 return i;
             }
 

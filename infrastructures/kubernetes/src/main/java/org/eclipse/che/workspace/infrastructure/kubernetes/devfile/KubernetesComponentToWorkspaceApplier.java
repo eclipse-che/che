@@ -37,12 +37,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
+import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
 import org.eclipse.che.api.workspace.server.devfile.Constants;
 import org.eclipse.che.api.workspace.server.devfile.DevfileRecipeFormatException;
@@ -50,9 +53,10 @@ import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
@@ -70,6 +74,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   private final String environmentType;
   private final String projectFolderPath;
   private final String defaultProjectPVCSize;
+  private final String imagePullPolicy;
   private final Set<String> kubernetesBasedComponentTypes;
   private final String defaultPVCAccessMode;
   private final String pvcStorageClassName;
@@ -84,6 +89,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       @Named("che.workspace.projects.storage.default.size") String defaultProjectPVCSize,
       @Named("che.infra.kubernetes.pvc.access_mode") String defaultPVCAccessMode,
       @Named("che.infra.kubernetes.pvc.storage_class_name") String pvcStorageClassName,
+      @Named("che.workspace.sidecar.image_pull_policy") String imagePullPolicy,
       @Named(KUBERNETES_BASED_COMPONENTS_KEY_NAME) Set<String> kubernetesBasedComponentTypes) {
     this(
         objectsParser,
@@ -94,6 +100,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
         defaultProjectPVCSize,
         defaultPVCAccessMode,
         pvcStorageClassName,
+        imagePullPolicy,
         kubernetesBasedComponentTypes);
   }
 
@@ -106,6 +113,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       String defaultProjectPVCSize,
       String defaultPVCAccessMode,
       String pvcStorageClassName,
+      String imagePullPolicy,
       Set<String> kubernetesBasedComponentTypes) {
     this.objectsParser = objectsParser;
     this.k8sEnvProvisioner = k8sEnvProvisioner;
@@ -114,6 +122,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     this.defaultProjectPVCSize = defaultProjectPVCSize;
     this.defaultPVCAccessMode = defaultPVCAccessMode;
     this.pvcStorageClassName = pvcStorageClassName;
+    this.imagePullPolicy = imagePullPolicy;
     this.kubernetesBasedComponentTypes = kubernetesBasedComponentTypes;
     this.envVars = envVars;
   }
@@ -146,14 +155,14 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
 
     String componentContent = retrieveContent(k8sComponent, contentProvider);
 
-    List<HasMetadata> componentObjects =
-        new ArrayList<>(unmarshalComponentObjects(k8sComponent, componentContent));
-
-    if (!k8sComponent.getSelector().isEmpty()) {
-      componentObjects = SelectorFilter.filter(componentObjects, k8sComponent.getSelector());
-    }
+    final List<HasMetadata> componentObjects =
+        prepareComponentObjects(k8sComponent, componentContent);
 
     List<PodData> podsData = getPodDatas(componentObjects);
+    podsData
+        .stream()
+        .flatMap(e -> e.getSpec().getContainers().stream())
+        .forEach(c -> c.setImagePullPolicy(imagePullPolicy));
 
     if (Boolean.TRUE.equals(k8sComponent.getMountSources())) {
       applyProjectsVolumes(podsData, componentObjects);
@@ -163,14 +172,27 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       podsData.forEach(p -> envVars.apply(p, k8sComponent.getEnv()));
     }
 
-    applyEntrypoints(k8sComponent.getEntrypoints(), componentObjects);
-
-    Map<String, MachineConfigImpl> machineConfigs =
-        prepareMachineConfigs(podsData, k8sComponent.getAlias());
-
+    Map<String, MachineConfigImpl> machineConfigs = prepareMachineConfigs(podsData, k8sComponent);
     linkCommandsToMachineName(workspaceConfig, k8sComponent, machineConfigs.keySet());
 
     k8sEnvProvisioner.provision(workspaceConfig, environmentType, componentObjects, machineConfigs);
+  }
+
+  private List<HasMetadata> prepareComponentObjects(Component k8sComponent, String componentContent)
+      throws DevfileRecipeFormatException {
+    final List<HasMetadata> componentObjects;
+
+    if (!k8sComponent.getSelector().isEmpty()) {
+      componentObjects =
+          SelectorFilter.filter(
+              new ArrayList<>(unmarshalComponentObjects(k8sComponent, componentContent)),
+              k8sComponent.getSelector());
+    } else {
+      componentObjects = new ArrayList<>(unmarshalComponentObjects(k8sComponent, componentContent));
+    }
+
+    applyEntrypoints(k8sComponent.getEntrypoints(), componentObjects);
+    return componentObjects;
   }
 
   private void applyProjectsVolumes(List<PodData> podsData, List<HasMetadata> componentObjects) {
@@ -215,21 +237,77 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
    * attribute set.
    */
   private Map<String, MachineConfigImpl> prepareMachineConfigs(
-      List<PodData> podsData, @Nullable String componentAlias) {
+      List<PodData> podsData, ComponentImpl component) throws DevfileException {
     Map<String, MachineConfigImpl> machineConfigs = new HashMap<>();
     for (PodData podData : podsData) {
       for (Container container : podData.getSpec().getContainers()) {
         String machineName = machineName(podData, container);
 
         MachineConfigImpl config = new MachineConfigImpl();
-        if (!isNullOrEmpty(componentAlias)) {
-          config.getAttributes().put(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE, componentAlias);
+        if (!isNullOrEmpty(component.getAlias())) {
+          config.getAttributes().put(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE, component.getAlias());
         }
+        provisionVolumes(component, container, config);
+        provisionEndpoints(component, config);
 
         machineConfigs.put(machineName, config);
       }
     }
     return machineConfigs;
+  }
+
+  private void provisionEndpoints(Component component, MachineConfigImpl config) {
+    config
+        .getServers()
+        .putAll(
+            component
+                .getEndpoints()
+                .stream()
+                .collect(
+                    Collectors.toMap(Endpoint::getName, ServerConfigImpl::createFromEndpoint)));
+  }
+
+  private void provisionVolumes(
+      ComponentImpl component, Container container, MachineConfigImpl config)
+      throws DevfileException {
+    for (org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl componentVolume :
+        component.getVolumes()) {
+      Optional<VolumeMount> sameNameMount =
+          container
+              .getVolumeMounts()
+              .stream()
+              .filter(vm -> vm.getName().equals(componentVolume.getName()))
+              .findFirst();
+      if (sameNameMount.isPresent()
+          && sameNameMount.get().getMountPath().equals(componentVolume.getContainerPath())) {
+        continue;
+      } else if (sameNameMount.isPresent()) {
+        throw new DevfileException(
+            format(
+                "Conflicting volume with same name ('%s') but different path ('%s') found for component '%s' and its container '%s'.",
+                componentVolume.getName(),
+                componentVolume.getContainerPath(),
+                getIdentifiableComponentName(component),
+                container.getName()));
+      }
+      if (container
+          .getVolumeMounts()
+          .stream()
+          .anyMatch(vm -> vm.getMountPath().equals(componentVolume.getContainerPath()))) {
+        throw new DevfileException(
+            format(
+                "Conflicting volume with same path ('%s') but different name ('%s') found for component '%s' and its container '%s'.",
+                componentVolume.getContainerPath(),
+                componentVolume.getName(),
+                getIdentifiableComponentName(component),
+                container.getName()));
+      }
+      config
+          .getVolumes()
+          .put(
+              componentVolume.getName(),
+              new VolumeImpl().withPath(componentVolume.getContainerPath()));
+    }
   }
 
   private String retrieveContent(Component recipeComponent, FileContentProvider fileContentProvider)

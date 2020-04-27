@@ -227,6 +227,23 @@ function installAndStartMinishift() {
   chmod +x ./minishift
   mv ./minishift /usr/local/bin/minishift
 
+  #Setup GitHub token for minishift
+  if [ -z "$CHE_BOT_GITHUB_TOKEN" ]
+  then
+    echo "\$CHE_BOT_GITHUB_TOKEN is empty. Minishift start might fail with GitGub API rate limit reached."
+  else
+    echo "\$CHE_BOT_GITHUB_TOKEN is set, checking limits."
+    GITHUB_RATE_REMAINING=$(curl -slL "https://api.github.com/rate_limit?access_token=$CHE_BOT_GITHUB_TOKEN" | jq .rate.remaining)
+    if [ "$GITHUB_RATE_REMAINING" -gt 1000 ]
+    then
+      echo "Github rate greater than 1000. Using che-bot token for minishift startup."
+      export MINISHIFT_GITHUB_API_TOKEN=$CHE_BOT_GITHUB_TOKEN
+    else
+      echo "Github rate is lower than 1000. *Not* using che-bot for minishift startup."
+      echo "If minishift startup fails, please try again later."
+    fi
+  fi
+
   minishift version
   minishift config set memory 14GB
   minishift config set cpus 4
@@ -268,15 +285,16 @@ function deployCheIntoCluster() {
 }
 
 function loginToOpenshiftAndSetDevRole() {
-  oc login -u system:admin
+  oc login -u system:admin --insecure-skip-tls-verify
   oc adm policy add-cluster-role-to-user cluster-admin developer
-  oc login -u developer -p pass
+  oc login -u developer -p pass --insecure-skip-tls-verify
 }
 
 function archiveArtifacts() {
   JOB_NAME=$1
   DATE=$(date +"%m-%d-%Y-%H-%M")
   echo "Archiving artifacts from ${DATE} for ${JOB_NAME}/${BUILD_NUMBER}"
+  cd /root/payload
   ls -la ./artifacts.key
   chmod 600 ./artifacts.key
   chown $(whoami) ./artifacts.key
@@ -285,22 +303,35 @@ function archiveArtifacts() {
   rsync --password-file=./artifacts.key -Hva --partial --relative ./che/${JOB_NAME}/${BUILD_NUMBER} devtools@artifacts.ci.centos.org::devtools/
 }
 
-function defindCheRoute(){
+function defineCheRoute(){
 CHE_ROUTE=$(oc get route che --template='{{ .spec.host }}')
   echo "====== Check CHE ROUTE ======"
   curl -vL $CHE_ROUTE
 }
 
 createTestWorkspaceAndRunTest() {
-  defindCheRoute
-   ### Create workspace
-  chectl workspace:start --access-token "$USER_ACCESS_TOKEN" -f https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
+  defineCheRoute
+  ### Create workspace
+  DEV_FILE_URL=$1
+  echo "====== Create test workspace ======"
+  if [[ ${DEV_FILE_URL} = "" ]]; then # by default it is used 'happy-path-devfile' yaml from CHE 'master' branch
+    chectl workspace:create --start --access-token "$USER_ACCESS_TOKEN" --devfile=https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
+  else
+    chectl workspace:create --start --access-token "$USER_ACCESS_TOKEN" $1 # it can be directly indicated other URL to 'devfile' yaml
+  fi
 
   ### Create directory for report
+  cd /root/payload
   mkdir report
   REPORT_FOLDER=$(pwd)/report
   ### Run tests
-  docker run --shm-size=256m --network host -v $REPORT_FOLDER:/tmp/e2e/report:Z -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" -e TS_SELENIUM_MULTIUSER="true" -e TS_SELENIUM_USERNAME="${TEST_USERNAME}" -e TS_SELENIUM_PASSWORD="${TEST_USERNAME}" -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=420000 quay.io/eclipse/che-e2e:nightly
+  docker run --shm-size=256m --network host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
+  -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" \
+  -e TS_SELENIUM_MULTIUSER="true" \
+  -e TS_SELENIUM_USERNAME="${TEST_USERNAME}" \
+  -e TS_SELENIUM_PASSWORD="${TEST_USERNAME}" \
+  -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=420000 \
+  quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
 }
 
 function createTestUserAndObtainUserToken() {
@@ -349,7 +380,7 @@ function setupEnvs() {
 }
 
 function configureGithubTestUser() {
-  echo "Configure GitHub test users"
+  echo "======== Configure GitHub test users ========"
   cd /root/payload
   mkdir -p che_local_conf_dir
   export CHE_LOCAL_CONF_DIR=/root/payload/che_local_conf_dir/
@@ -367,10 +398,10 @@ function installDockerCompose() {
 }
 
 function seleniumTestsSetup() {
-  echo "Start selenium tests"
+  echo "======== Start selenium tests ========"
   cd /root/payload
   export CHE_INFRASTRUCTURE=openshift
-  defindCheRoute
+  defineCheRoute
 
   mvn clean install -pl :che-selenium-test -am -DskipTests=true -U
   configureGithubTestUser
@@ -383,9 +414,40 @@ function saveSeleniumTestResult() {
 }
 
 function createIndentityProvider() {
-  CHE_MULTI_USER_GITHUB_CLIENTID_OCP=04cbc0f8172109d5e2e5
-  CHE_MULTI_USER_GITHUB_SECRET_OCP=a0a9b8602bb0916d8b4a62e71b7ed92036563b7a
+  CHE_MULTI_USER_GITHUB_CLIENTID_OCP=04cbc0f8172109322223
+  CHE_MULTI_USER_GITHUB_SECRET_OCP=a0a9b8602bb0916d322223e71b7ed92036563b7a
   CHE_OPENSHIFT_PROJECT=eclipse-che
   keycloakPodName=$(oc get pod --namespace=$CHE_OPENSHIFT_PROJECT | grep keycloak | awk '{print $1}')
   /tmp/oc exec $keycloakPodName --namespace=$CHE_OPENSHIFT_PROJECT -- /opt/jboss/keycloak/bin/kcadm.sh create identity-provider/instances -r che -s alias=github -s providerId=github -s enabled=true -s storeToken=true -s addReadTokenRoleOnCreate=true -s 'config.useJwksUrl="true"' -s config.clientId=$CHE_MULTI_USER_GITHUB_CLIENTID_OCP -s config.clientSecret=$CHE_MULTI_USER_GITHUB_SECRET_OCP -s 'config.defaultScope="repo,user,write:public_key"' --no-config --server http://localhost:8080/auth --user admin --password admin --realm master
+}
+
+function runDevfileTestSuite() {
+  defineCheRoute
+  ### Create directory for report
+  mkdir report
+  REPORT_FOLDER=$(pwd)/report
+  ### Run tests
+  docker run --shm-size=1g --net=host  --ipc=host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
+  -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" \
+  -e TS_SELENIUM_LOG_LEVEL=DEBUG \
+  -e TS_SELENIUM_MULTIUSER=true \
+  -e TS_SELENIUM_USERNAME="${TEST_USERNAME}" \
+  -e TS_SELENIUM_PASSWORD="${TEST_USERNAME}" \
+  -e TEST_SUITE=test-all-devfiles -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \
+  -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \
+  -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
+  quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
+}
+
+function getReleaseVersion() {
+  echo $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | cut -d'-' -f1) #cut SNAPSHOT from the version name
+}
+
+function setupReleaseVersionAndTag() {
+  echo "======== Starting Che RC test job $(date) ========"
+  RELEASE_VERSION=$(getReleaseVersion)
+  RELEASE_TAG="rc"
+
+  echo "======== Release version:" ${RELEASE_VERSION}
+  echo "======== Release tag:" ${RELEASE_TAG}
 }

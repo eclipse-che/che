@@ -134,4 +134,12 @@ public interface WorkspaceDao {
    */
   Page<WorkspaceImpl> getWorkspaces(boolean isTemporary, int maxItems, long skipCount)
       throws ServerException;
+
+  /**
+   * Get the count of all workspaces from the persistent layer.
+   *
+   * @return workspace count
+   * @throws ServerException when any error occurs
+   */
+  long getWorkspacesTotalCount() throws ServerException;
 }

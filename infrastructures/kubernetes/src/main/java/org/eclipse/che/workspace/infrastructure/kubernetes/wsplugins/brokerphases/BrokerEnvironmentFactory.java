@@ -189,7 +189,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
             .withImagePullPolicy(brokerPullPolicy)
             .withEnv(envVars);
     if (brokerVolumeName != null) {
-      cb.withVolumeMounts(new VolumeMount(CONF_FOLDER + "/", null, brokerVolumeName, true, null));
+      cb.withVolumeMounts(
+          new VolumeMount(CONF_FOLDER + "/", null, brokerVolumeName, true, null, null));
       cb.addToArgs("-metas", CONF_FOLDER + "/" + CONFIG_FILE);
     }
     Container container = cb.build();
@@ -247,7 +248,25 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
    */
   @VisibleForTesting
   protected String generateContainerNameFromImageRef(String image) {
-    return image.toLowerCase().replaceAll("[^/]*/", "").replaceAll("[^\\d\\w-]", "-");
+    String containerName;
+    if (image.contains("@")) {
+      // Image is tagged with digest; we trim digest to 10 chars and remove "sha256"
+      String[] parts = image.split("@");
+      String imagePart = parts[0];
+      String digest = parts[1];
+      if (digest.contains(":")) {
+        digest = digest.split(":")[1];
+      }
+      if (digest.length() > 10) {
+        digest = digest.substring(0, 10);
+      }
+      image = String.format("%s-%s", imagePart, digest);
+    }
+    containerName = image.toLowerCase().replaceAll("[^/]*/", "").replaceAll("[^\\d\\w-]", "-");
+    if (containerName.length() > 63) {
+      containerName = containerName.substring(0, 63);
+    }
+    return containerName;
   }
 
   public static class BrokersConfigs {

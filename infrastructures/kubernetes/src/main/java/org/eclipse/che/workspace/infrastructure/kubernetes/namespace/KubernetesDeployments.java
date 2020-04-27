@@ -24,6 +24,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.Kube
 
 import com.google.common.base.Strings;
 import io.fabric8.kubernetes.api.model.ContainerStateTerminated;
+import io.fabric8.kubernetes.api.model.ContainerStateWaiting;
 import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.Event;
@@ -54,9 +55,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
@@ -72,7 +75,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastruct
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEventHandler;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatchTimeouts;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatcher;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,17 +118,23 @@ public class KubernetesDeployments {
   private final KubernetesClientFactory clientFactory;
   private final ConcurrentLinkedQueue<PodActionHandler> podActionHandlers;
   private final ConcurrentLinkedQueue<PodEventHandler> containerEventsHandlers;
+  private final Executor executor;
   private Watch podWatch;
   private Watch containerWatch;
   private Date watcherInitializationDate;
+  private LogWatcher logWatcher;
 
   protected KubernetesDeployments(
-      String namespace, String workspaceId, KubernetesClientFactory clientFactory) {
+      String namespace,
+      String workspaceId,
+      KubernetesClientFactory clientFactory,
+      Executor executor) {
     this.namespace = namespace;
     this.workspaceId = workspaceId;
     this.clientFactory = clientFactory;
     this.containerEventsHandlers = new ConcurrentLinkedQueue<>();
     this.podActionHandlers = new ConcurrentLinkedQueue<>();
+    this.executor = executor;
   }
 
   /**
@@ -398,9 +411,19 @@ public class KubernetesDeployments {
     if (POD_STATUS_PHASE_RUNNING.equals(podPhase)) {
       // check that all the containers are ready...
       Map<String, String> terminatedContainers = new HashMap<>();
+      List<String> restartingContainers = new ArrayList<>();
 
       for (ContainerStatus cs : status.getContainerStatuses()) {
         ContainerStateTerminated terminated = cs.getState().getTerminated();
+
+        if (terminated == null) {
+          ContainerStateWaiting waiting = cs.getState().getWaiting();
+          // we've caught the container waiting for a restart after a failure
+          if (waiting != null) {
+            terminated = cs.getLastState().getTerminated();
+          }
+        }
+
         if (terminated != null) {
           terminatedContainers.put(
               cs.getName(),
@@ -408,20 +431,38 @@ public class KubernetesDeployments {
                   "reason = '%s', exit code = %d, message = '%s'",
                   terminated.getReason(), terminated.getExitCode(), terminated.getMessage()));
         }
+
+        if (cs.getRestartCount() != null && cs.getRestartCount() > 0) {
+          restartingContainers.add(cs.getName());
+        }
       }
 
-      if (terminatedContainers.isEmpty()) {
+      if (terminatedContainers.isEmpty() && restartingContainers.isEmpty()) {
         podRunningFuture.complete(null);
       } else {
-        String errorMessage =
-            "The following containers have terminated:\n"
-                + terminatedContainers
-                    .entrySet()
-                    .stream()
-                    .map(e -> e.getKey() + ": " + e.getValue())
-                    .collect(Collectors.joining("" + "\n"));
+        StringBuilder errorMessage = new StringBuilder();
 
-        podRunningFuture.completeExceptionally(new InfrastructureException(errorMessage));
+        if (!restartingContainers.isEmpty()) {
+          errorMessage.append("The following containers have restarted during the startup:\n");
+          errorMessage.append(String.join(", ", restartingContainers));
+        }
+
+        if (!terminatedContainers.isEmpty()) {
+          if (errorMessage.length() > 0) {
+            errorMessage.append("\n");
+          }
+
+          errorMessage.append("The following containers have terminated:\n");
+          errorMessage.append(
+              terminatedContainers
+                  .entrySet()
+                  .stream()
+                  .map(e -> e.getKey() + ": " + e.getValue())
+                  .collect(Collectors.joining("" + "\n")));
+        }
+
+        podRunningFuture.completeExceptionally(
+            new InfrastructureException(errorMessage.toString()));
       }
 
       return;
@@ -514,8 +555,21 @@ public class KubernetesDeployments {
               if (POD_OBJECT_KIND.equals(involvedObject.getKind())
                   || REPLICASET_OBJECT_KIND.equals(involvedObject.getKind())
                   || DEPLOYMENT_OBJECT_KIND.equals(involvedObject.getKind())) {
-
                 String podName = involvedObject.getName();
+                String lastTimestamp = event.getLastTimestamp();
+                if (lastTimestamp == null) {
+                  String firstTimestamp = event.getFirstTimestamp();
+                  if (firstTimestamp != null) {
+                    // Done in the same way like it made in
+                    // https://github.com/kubernetes/kubernetes/pull/86557
+                    lastTimestamp = firstTimestamp;
+                  } else {
+                    LOG.debug(
+                        "lastTimestamp and firstTimestamp are undefined. Event: {}.  Fallback to the current time.",
+                        event);
+                    lastTimestamp = PodEvents.convertDateToEventTimestamp(new Date());
+                  }
+                }
 
                 PodEvent podEvent =
                     new PodEvent(
@@ -524,7 +578,7 @@ public class KubernetesDeployments {
                         event.getReason(),
                         event.getMessage(),
                         event.getMetadata().getCreationTimestamp(),
-                        event.getLastTimestamp());
+                        lastTimestamp);
 
                 try {
                   if (happenedAfterWatcherInitialization(podEvent)) {
@@ -582,8 +636,49 @@ public class KubernetesDeployments {
     containerEventsHandlers.add(handler);
   }
 
-  /** Stops watching the pods inside Kubernetes namespace. */
+  /**
+   * Start watching the logs of this deployment.
+   *
+   * @param handler is processing log messages
+   * @param podNames pods of interest for watching the logs
+   */
+  public synchronized void watchLogs(
+      PodLogHandler handler,
+      RuntimeEventsPublisher eventsPublisher,
+      LogWatchTimeouts timeouts,
+      Set<String> podNames,
+      long limitInputStreamBytes)
+      throws InfrastructureException {
+    if (logWatcher == null) {
+      LOG.debug("start watching logs of pods '{}' of  workspace '{}'", podNames, workspaceId);
+      logWatcher =
+          new LogWatcher(
+              clientFactory,
+              eventsPublisher,
+              workspaceId,
+              namespace,
+              podNames,
+              executor,
+              timeouts,
+              limitInputStreamBytes);
+      logWatcher.addLogHandler(handler);
+      watchEvents(logWatcher);
+    } else {
+      LOG.debug("Already watching logs of workspace [{}], just adding log handler", workspaceId);
+      logWatcher.addLogHandler(handler);
+    }
+  }
+
   public void stopWatch() {
+    stopWatch(false);
+  }
+
+  /**
+   * Stops watching the pods inside Kubernetes namespace.
+   *
+   * @param failed true if workspace startup ended in failure.
+   */
+  public void stopWatch(boolean failed) {
     try {
       if (podWatch != null) {
         podWatch.close();
@@ -605,6 +700,11 @@ public class KubernetesDeployments {
           ex.getMessage());
     }
     containerEventsHandlers.clear();
+
+    if (logWatcher != null) {
+      logWatcher.close(failed);
+      logWatcher = null;
+    }
   }
 
   /**
@@ -854,7 +954,7 @@ public class KubernetesDeployments {
         toCloseOnException = watch;
       }
 
-      Boolean deleteSucceeded = deploymentResource.delete();
+      Boolean deleteSucceeded = deploymentResource.withPropagationPolicy("Background").delete();
 
       if (deleteSucceeded == null || !deleteSucceeded) {
         deleteFuture.complete(null);
@@ -892,7 +992,7 @@ public class KubernetesDeployments {
       final Watch watch = podResource.watch(new DeleteWatcher<Pod>(deleteFuture));
       toCloseOnException = watch;
 
-      Boolean deleteSucceeded = podResource.delete();
+      Boolean deleteSucceeded = podResource.withPropagationPolicy("Background").delete();
       if (deleteSucceeded == null || !deleteSucceeded) {
         deleteFuture.complete(null);
       }
