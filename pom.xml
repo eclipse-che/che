@@ -481,12 +481,6 @@
                 <type>war</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.docs</groupId>
-                <artifactId>che-docs</artifactId>
-                <version>${che.docs.version}</version>
-                <type>war</type>
-            </dependency>
-            <dependency>
                 <groupId>org.eclipse.che.infrastructure</groupId>
                 <artifactId>infrastructure-kubernetes</artifactId>
                 <version>${che.version}</version>

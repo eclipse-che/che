@@ -54,11 +54,6 @@
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.docs</groupId>
-            <artifactId>che-docs</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
