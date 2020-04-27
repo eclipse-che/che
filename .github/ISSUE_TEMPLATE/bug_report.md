@@ -52,9 +52,9 @@ assignees: ''
 <!-- If applicable, add screenshots to help explain your problem. -->
 
 ### Installation method
-   - [ ] chectl <!--(please specify the options of chectl tool) -->
-   - [ ] che-operator <!--(version of che-operator) -->
-   - [ ] minishift-addon
+   - [ ] chectl
+     * provide a full command that was used to deploy Eclipse Che (including the output)
+     * provide an output of `chectl version` command
    - [ ] I don't know
 
 ### Environment
