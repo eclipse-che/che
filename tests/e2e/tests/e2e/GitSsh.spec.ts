@@ -9,7 +9,6 @@
  **********************************************************************/
 
 import { assert } from 'chai';
-import { test } from 'mocha';
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES, TYPES } from '../../inversify.types';
 import { Editor } from '../../pageobjects/ide/Editor';
