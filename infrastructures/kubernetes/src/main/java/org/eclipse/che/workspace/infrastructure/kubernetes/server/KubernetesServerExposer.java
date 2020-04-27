@@ -186,7 +186,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
 
     provisionServicesForDiscoverableServers(servers);
 
-    exposeNonSecureServers(internalServers, externalServers, unsecuredPorts);
+    exposeNonSecureServers(internalServers, externalServers, unsecuredPorts, securedPorts);
 
     exposeSecureServers(secureServers, securedPorts);
   }
@@ -256,22 +256,26 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
   private void exposeNonSecureServers(
       Map<String, ServerConfig> internalServers,
       Map<String, ServerConfig> externalServers,
-      Map<String, ServicePort> unsecuredPorts)
+      Map<String, ServicePort> unsecuredPorts,
+      Map<String, ServicePort> securedPorts)
       throws InfrastructureException {
 
     if (unsecuredPorts.isEmpty()) {
       return;
     }
 
-    Map<String, ServerConfig> allNonSecureServers = new HashMap<>(internalServers);
-    allNonSecureServers.putAll(externalServers);
+    Map<String, ServerConfig> allNonExternalServers = new HashMap<>(internalServers);
+    for (ServicePort servicePort : securedPorts.values()) {
+      Map<String, ServerConfig> securedExternalServers = match(externalServers, servicePort);
+      allNonExternalServers.putAll(securedExternalServers);
+    }
     Service service =
         new ServerServiceBuilder()
             .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
             .withMachineName(machineName)
             .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
             .withPorts(new ArrayList<>(unsecuredPorts.values()))
-            .withServers(allNonSecureServers)
+            .withServers(allNonExternalServers)
             .build();
 
     String serviceName = service.getMetadata().getName();
