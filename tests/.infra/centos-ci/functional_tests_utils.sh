@@ -433,7 +433,7 @@ function runDevfileTestSuite() {
   -e TS_SELENIUM_MULTIUSER=true \
   -e TS_SELENIUM_USERNAME="admin" \
   -e TS_SELENIUM_PASSWORD="admin" \
-  -e TEST_SUITE=test-all-devfiles
+  -e TEST_SUITE=test-all-devfiles \
   -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \
   -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \
   -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
