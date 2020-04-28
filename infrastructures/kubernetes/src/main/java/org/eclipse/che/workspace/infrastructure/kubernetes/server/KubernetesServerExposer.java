@@ -188,7 +188,10 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
 
     Service service = createService(internalServers, externalServers, unsecuredPorts, securedPorts);
 
-    exposeNonSecureServers(service.getMetadata().getName(), externalServers, unsecuredPorts);
+    String serviceName = service.getMetadata().getName();
+    k8sEnv.getServices().put(serviceName, service);
+
+    exposeNonSecureServers(serviceName, externalServers, unsecuredPorts);
 
     exposeSecureServers(secureServers, securedPorts);
   }
@@ -298,8 +301,6 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
             .withServers(allInternalServers)
             .build();
 
-    String serviceName = service.getMetadata().getName();
-    k8sEnv.getServices().put(serviceName, service);
     return service;
   }
 
