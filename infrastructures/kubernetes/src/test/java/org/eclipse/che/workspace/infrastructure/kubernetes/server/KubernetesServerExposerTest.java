@@ -513,8 +513,12 @@ public class KubernetesServerExposerTest {
         Annotations.newDeserializer(service.getMetadata().getAnnotations());
     assertEquals(serviceAnnotations.machineName(), machineName);
     // check that we did not create servers for public endpoints
-    assertFalse(serviceAnnotations.servers().keySet().stream()
-        .anyMatch(key -> expectedServers.containsKey(key)));
+    assertFalse(
+        serviceAnnotations
+            .servers()
+            .keySet()
+            .stream()
+            .anyMatch(key -> expectedServers.containsKey(key)));
 
     verify(externalServerExposer)
         .expose(
