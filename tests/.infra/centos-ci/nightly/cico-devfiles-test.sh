@@ -25,8 +25,7 @@ installAndStartMinishift
 loginToOpenshiftAndSetDevRole
 prepareCustomResourceFile
 deployCheIntoCluster --chenamespace=che --che-operator-cr-yaml=/tmp/custom-resource.yaml
-createTestUserAndObtainUserToken
-runDevfileTestSuite 
+runDevfileTestSuite
 echo "=========================== THIS IS POST TEST ACTIONS =============================="
 getOpenshiftLogs
 archiveArtifacts "che-devfile-test"
