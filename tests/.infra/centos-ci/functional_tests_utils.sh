@@ -346,7 +346,7 @@ function createTestUserAndObtainUserToken() {
 
   ADMIN_USERNAME=admin
   ADMIN_PASS=admin
-  TEST_USERNAME=testUser1
+  TEST_USERNAME=admin
 
   echo "======== Getting admin token ========"
   ADMIN_ACCESS_TOKEN=$(curl -X POST $KEYCLOAK_BASE_URL/realms/master/protocol/openid-connect/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=admin" -d "password=admin" -d "grant_type=password" -d "client_id=admin-cli" | jq -r .access_token)
