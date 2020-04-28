@@ -4,11 +4,12 @@
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
-set -x
+set -e
 
 echo "========Starting nigtly test job $(date)========"
 
 source tests/.infra/centos-ci/functional_tests_utils.sh
+source .ci/cico_common.sh
 
 function prepareCustomResourceFile() {
   cd /tmp
@@ -25,8 +26,9 @@ installAndStartMinishift
 loginToOpenshiftAndSetDevRole
 prepareCustomResourceFile
 deployCheIntoCluster --chenamespace=che --che-operator-cr-yaml=/tmp/custom-resource.yaml
-runDevfileTestSuite
+createTestUserAndObtainUserToken
+createTestWorkspaceAndRunTest
 echo "=========================== THIS IS POST TEST ACTIONS =============================="
 getOpenshiftLogs
-archiveArtifacts "che-devfile-test"
+archiveArtifacts "che-nightly-happy-path"
 if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi
