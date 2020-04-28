@@ -55,7 +55,7 @@ assignees: ''
    - [ ] chectl
      * provide a full command that was used to deploy Eclipse Che (including the output)
      * provide an output of `chectl version` command
-   - [ ] olm
+   - [ ] OperatorHub
    - [ ] I don't know
 
 ### Environment
