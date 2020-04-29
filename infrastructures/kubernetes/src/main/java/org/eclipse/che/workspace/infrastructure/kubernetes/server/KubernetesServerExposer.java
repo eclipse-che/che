@@ -186,12 +186,14 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
 
     provisionServicesForDiscoverableServers(servers);
 
-    Service service = createService(internalServers, externalServers, unsecuredPorts, securedPorts);
+    Optional<Service> serviceOpt = createService(internalServers, unsecuredPorts);
 
-    String serviceName = service.getMetadata().getName();
-    k8sEnv.getServices().put(serviceName, service);
-
-    exposeNonSecureServers(serviceName, externalServers, unsecuredPorts);
+    if (serviceOpt.isPresent()) {
+      Service service = serviceOpt.get();
+      String serviceName = service.getMetadata().getName();
+      k8sEnv.getServices().put(serviceName, service);
+      exposeNonSecureServers(serviceName, externalServers, unsecuredPorts);
+    }
 
     exposeSecureServers(secureServers, securedPorts);
   }
@@ -264,10 +266,6 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
       Map<String, ServicePort> unsecuredPorts)
       throws InfrastructureException {
 
-    if (unsecuredPorts.isEmpty()) {
-      return;
-    }
-
     for (ServicePort servicePort : unsecuredPorts.values()) {
       // expose service port related external servers if exist
       Map<String, ServerConfig> matchedExternalServers = match(externalServers, servicePort);
@@ -281,17 +279,13 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
     }
   }
 
-  private Service createService(
-      Map<String, ServerConfig> internalServers,
-      Map<String, ServerConfig> externalServers,
-      Map<String, ServicePort> unsecuredPorts,
-      Map<String, ServicePort> securedPorts) {
+  private Optional<Service> createService(
+      Map<String, ServerConfig> internalServers, Map<String, ServicePort> unsecuredPorts) {
     Map<String, ServerConfig> allInternalServers = new HashMap<>(internalServers);
-    // Adding external secure services, as they, in fact, internal also.
-    for (ServicePort servicePort : securedPorts.values()) {
-      Map<String, ServerConfig> securedExternalServers = match(externalServers, servicePort);
-      allInternalServers.putAll(securedExternalServers);
+    if (unsecuredPorts.isEmpty()) {
+      return Optional.empty();
     }
+
     Service service =
         new ServerServiceBuilder()
             .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
@@ -301,7 +295,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
             .withServers(allInternalServers)
             .build();
 
-    return service;
+    return Optional.of(service);
   }
 
   private void exposeSecureServers(
