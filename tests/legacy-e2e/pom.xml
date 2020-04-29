@@ -31,6 +31,7 @@
     <properties>
         <!-- fix of conflict of seleniumhq 3.0.1 with guava 27.0.1-jre (https://github.com/eclipse/che/issues/12184) -->
         <com.google.guava.version>20.0</com.google.guava.version>
+        <log4j.version>1.2.17</log4j.version>
         <org.testng.version>6.8.21</org.testng.version>
     </properties>
     <dependencyManagement>
@@ -39,6 +40,11 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${com.google.guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>${log4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.testng</groupId>
