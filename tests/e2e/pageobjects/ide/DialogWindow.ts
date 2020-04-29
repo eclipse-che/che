@@ -65,7 +65,7 @@ export class DialogWindow {
 
         // if dialog text is provided uses xpath with this text
         // if not uses window body xpath
-        const dialogWithTextXpathLocator: string = `${DialogWindow.DIALOG_BODY_XPATH_LOCATOR}//span[contains(text(), '${dialogTest}')]`;
+        const dialogWithTextXpathLocator: string = `${DialogWindow.DIALOG_BODY_XPATH_LOCATOR}//pre[contains(text(), '${dialogTest}')]`;
         const dialogXpathLocator: string = (dialogTest ? dialogWithTextXpathLocator : DialogWindow.DIALOG_BODY_XPATH_LOCATOR);
 
         await this.driverHelper.waitVisibility(By.xpath(dialogXpathLocator), timeout);
@@ -87,7 +87,7 @@ export class DialogWindow {
     }
 
     async getApplicationUrlFromDialog(dialogWindowText: string) {
-        const notificationTextLocator: By = By.xpath(`${DialogWindow.DIALOG_BODY_XPATH_LOCATOR}//span[contains(text(), '${dialogWindowText}')]`);
+        const notificationTextLocator: By = By.xpath(`${DialogWindow.DIALOG_BODY_XPATH_LOCATOR}//pre[contains(text(), '${dialogWindowText}')]`);
 
         let dialogWindow = await this.driverHelper.waitAndGetText(notificationTextLocator);
         let regexp: RegExp = new RegExp('^.*(https?://.*)$');
