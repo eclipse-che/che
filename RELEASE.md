@@ -94,4 +94,4 @@ RELEASE-TEMPLATE-END
  > **Note:** For bugfix release procedure will be similar except creating new branch on first step and update version in master branch. 
 
 # Script
-`make-release.sh` is a script that performs these actions, use --prerelease-testing flag to prepare "RC" release for QE testing, and --trigger-release to perform a release after that
+Automated release scripts are located at https://github.com/eclipse/che-release project
