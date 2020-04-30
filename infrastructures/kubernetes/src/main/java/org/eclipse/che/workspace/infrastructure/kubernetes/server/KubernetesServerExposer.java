@@ -186,7 +186,14 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
 
     provisionServicesForDiscoverableServers(servers);
 
-    exposeNonSecureServers(internalServers, externalServers, unsecuredPorts);
+    Optional<Service> serviceOpt = createService(internalServers, unsecuredPorts);
+
+    if (serviceOpt.isPresent()) {
+      Service service = serviceOpt.get();
+      String serviceName = service.getMetadata().getName();
+      k8sEnv.getServices().put(serviceName, service);
+      exposeNonSecureServers(serviceName, externalServers, unsecuredPorts);
+    }
 
     exposeSecureServers(secureServers, securedPorts);
   }
@@ -254,28 +261,10 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
   }
 
   private void exposeNonSecureServers(
-      Map<String, ServerConfig> internalServers,
+      String serviceName,
       Map<String, ServerConfig> externalServers,
       Map<String, ServicePort> unsecuredPorts)
       throws InfrastructureException {
-
-    if (unsecuredPorts.isEmpty()) {
-      return;
-    }
-
-    Map<String, ServerConfig> allNonSecureServers = new HashMap<>(internalServers);
-    allNonSecureServers.putAll(externalServers);
-    Service service =
-        new ServerServiceBuilder()
-            .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
-            .withMachineName(machineName)
-            .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
-            .withPorts(new ArrayList<>(unsecuredPorts.values()))
-            .withServers(allNonSecureServers)
-            .build();
-
-    String serviceName = service.getMetadata().getName();
-    k8sEnv.getServices().put(serviceName, service);
 
     for (ServicePort servicePort : unsecuredPorts.values()) {
       // expose service port related external servers if exist
@@ -288,6 +277,25 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
                     k8sEnv, machineName, serviceName, serverId, servicePort, srvrs));
       }
     }
+  }
+
+  private Optional<Service> createService(
+      Map<String, ServerConfig> internalServers, Map<String, ServicePort> unsecuredPorts) {
+    Map<String, ServerConfig> allInternalServers = new HashMap<>(internalServers);
+    if (unsecuredPorts.isEmpty()) {
+      return Optional.empty();
+    }
+
+    Service service =
+        new ServerServiceBuilder()
+            .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
+            .withMachineName(machineName)
+            .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
+            .withPorts(new ArrayList<>(unsecuredPorts.values()))
+            .withServers(allInternalServers)
+            .build();
+
+    return Optional.of(service);
   }
 
   private void exposeSecureServers(
