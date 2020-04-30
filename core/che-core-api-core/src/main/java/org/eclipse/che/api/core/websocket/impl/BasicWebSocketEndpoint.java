@@ -99,9 +99,9 @@ public abstract class BasicWebSocketEndpoint {
     if (endpointIdOptional.isPresent()) {
       combinedEndpointId = endpointIdOptional.get();
 
-      LOG.debug("Receiving a web socket message.");
-      LOG.debug("Endpoint: {}", combinedEndpointId);
-      LOG.debug("Message: {}", message);
+      LOG.trace("Receiving a web socket message.");
+      LOG.trace("Endpoint: {}", combinedEndpointId);
+      LOG.trace("Message: {}", message);
 
     } else {
       combinedEndpointId = getOrGenerateCombinedEndpointId(session);
@@ -134,18 +134,14 @@ public abstract class BasicWebSocketEndpoint {
   public void onError(Throwable t, Session session) {
     Optional<String> endpointIdOptional = registry.get(session);
 
-    String combinedEndpointId;
     if (endpointIdOptional.isPresent()) {
-      combinedEndpointId = endpointIdOptional.get();
-
       LOG.debug("Web socket session error");
-      LOG.debug("Endpoint: {}", combinedEndpointId);
-      LOG.debug("Error: {}", t);
+      LOG.debug("Endpoint: {}", endpointIdOptional.get());
     } else {
       LOG.warn("Web socket session error");
       LOG.debug("Unidentified session");
-      LOG.debug("Error: {}", t);
     }
+    LOG.debug("Error: ", t);
   }
 
   protected abstract String getEndpointId();

@@ -62,7 +62,7 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
     checkNotNull(message, "Message must not be null");
     checkArgument(!message.isEmpty(), "Message must not be empty");
 
-    LOGGER.debug("Receiving message: {}, from endpoint: {}", message, combinedEndpointId);
+    LOGGER.trace("Receiving message: {}, from endpoint: {}", message, combinedEndpointId);
     if (!jsonRpcQualifier.isValidJson(message)) {
       String error = "An error occurred on the server while parsing the JSON text";
       errorTransmitter.transmit(combinedEndpointId, new JsonRpcException(-32700, error));

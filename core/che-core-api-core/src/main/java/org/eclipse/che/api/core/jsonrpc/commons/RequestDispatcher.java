@@ -39,19 +39,19 @@ public class RequestDispatcher {
     checkArgument(!endpointId.isEmpty(), "Endpoint ID must not be empty");
     checkNotNull(request, "Request must not be null");
 
-    LOGGER.debug("Dispatching request: " + request + ", endpoint: " + endpointId);
+    LOGGER.trace("Dispatching request: " + request + ", endpoint: " + endpointId);
 
     String method = request.getMethod();
 
     JsonRpcParams params = request.getParams();
 
     if (request.hasId()) {
-      LOGGER.debug("Request has ID");
+      LOGGER.trace("Request has ID");
       String requestId = request.getId();
       checkRequestHandlerRegistration(method, requestId);
       requestHandlerManager.handle(endpointId, requestId, method, params);
     } else {
-      LOGGER.debug("Request has no ID -> it is a notification");
+      LOGGER.trace("Request has no ID -> it is a notification");
       checkNotificationHandlerRegistration(method);
       requestHandlerManager.handle(endpointId, method, params);
     }
