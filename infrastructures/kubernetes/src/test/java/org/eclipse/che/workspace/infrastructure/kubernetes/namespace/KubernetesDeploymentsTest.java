@@ -488,7 +488,7 @@ public class KubernetesDeploymentsTest {
     doReturn(POD_NAME).when(metadata).getName();
 
     doReturn(Boolean.FALSE).when(podResource).delete();
-    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Foreground"));
+    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Background"));
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 
@@ -503,7 +503,7 @@ public class KubernetesDeploymentsTest {
   public void testDeletePodThrowingKubernetesClientExceptionShouldCloseWatch() throws Exception {
     final String POD_NAME = "nonExistingPod";
     doReturn(POD_NAME).when(metadata).getName();
-    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Foreground"));
+    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Background"));
     doThrow(KubernetesClientException.class).when(podResource).delete();
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
@@ -524,8 +524,8 @@ public class KubernetesDeploymentsTest {
   public void testDeleteNonExistingDeploymentBeforeWatch() throws Exception {
     final String DEPLOYMENT_NAME = "nonExistingPod";
     doReturn(DEPLOYMENT_NAME).when(deploymentMetadata).getName();
-    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Foreground"));
-    doReturn(deploymentResource).when(deploymentResource).withPropagationPolicy(eq("Foreground"));
+    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Background"));
+    doReturn(deploymentResource).when(deploymentResource).withPropagationPolicy(eq("Background"));
     doReturn(Boolean.FALSE).when(deploymentResource).delete();
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
@@ -544,7 +544,7 @@ public class KubernetesDeploymentsTest {
     doReturn(DEPLOYMENT_NAME).when(deploymentMetadata).getName();
 
     doThrow(KubernetesClientException.class).when(deploymentResource).delete();
-    doReturn(deploymentResource).when(deploymentResource).withPropagationPolicy(eq("Foreground"));
+    doReturn(deploymentResource).when(deploymentResource).withPropagationPolicy(eq("Background"));
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 

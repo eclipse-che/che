@@ -74,7 +74,7 @@ public class KubernetesSecretsTest {
     when(client.secrets()).thenReturn(secretsMixedOperation);
     lenient().when(secretsMixedOperation.inNamespace(any())).thenReturn(nonNamespaceOperation);
     lenient().when(nonNamespaceOperation.withLabel(any(), any())).thenReturn(deletableList);
-    lenient().doReturn(deletableList).when(deletableList).withPropagationPolicy(eq("Foreground"));
+    lenient().doReturn(deletableList).when(deletableList).withPropagationPolicy(eq("Background"));
   }
 
   @Test

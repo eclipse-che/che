@@ -304,7 +304,7 @@ public class KubernetesNamespaceTest {
   private Resource prepareNamespaceResource(String namespaceName) {
     Resource namespaceResource = mock(Resource.class);
     doReturn(namespaceResource).when(namespaceOperation).withName(namespaceName);
-    doReturn(namespaceResource).when(namespaceResource).withPropagationPolicy(eq("Foreground"));
+    doReturn(namespaceResource).when(namespaceResource).withPropagationPolicy(eq("Background"));
     when(namespaceResource.get())
         .thenReturn(
             new NamespaceBuilder().withNewMetadata().withName(namespaceName).endMetadata().build());
