@@ -23,7 +23,7 @@ import org.openqa.selenium.support.PageFactory;
 /** @author Andrey Chizhikov */
 @Singleton
 public class GitReset {
-  @Inject SeleniumWebDriverHelper seleniumWebDriverHelper;
+  SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   interface Locators {
     String RESET_TO_COMMIT_FORM = "gwt-debug-git-reset-window";
