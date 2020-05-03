@@ -14,14 +14,7 @@
 [ -z "${CHE_LOCAL_CONF_DIR}" ]  && CHE_LOCAL_CONF_DIR="${CATALINA_HOME}/conf/"
 
 #Global JAVA options
-[ -z "${JAVA_OPTS}" ]  && JAVA_OPTS="-XX:MinRAMPercentage=60.0 -XX:MaxRAMPercentage=90.0 -Djava.security.egd=file:/dev/./urandom"
-# Check compatible JAVA_OPTS
-JAVA_VERSION=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2 | cut -d'.' -f1 | sed 's/[^0-9]*//g')
-if ([ "$JAVA_VERSION" -ge 11 ])
-then
-   echo "Sanitizing JAVA_OPTS"
-   JAVA_OPTS=$(echo "$JAVA_OPTS" | sed "s/-XX:+UseCGroupMemoryLimitForHeap//")
-fi
+[ -z "${JAVA_OPTS}" ]  && JAVA_OPTS="-XX:MaxRAMPercentage=85.0 -Djava.security.egd=file:/dev/./urandom"
 
 #Global LOGS DIR
 [ -z "${CHE_LOGS_DIR}" ]  && CHE_LOGS_DIR="$CATALINA_HOME/logs"
