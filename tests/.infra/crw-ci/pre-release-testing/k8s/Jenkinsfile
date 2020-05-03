@@ -11,9 +11,6 @@ pipeline {
     environment {
         YQ_TOOL_URL='https://github.com/mikefarah/yq/releases/download/2.4.0/yq_linux_amd64'
 
-        CHE_THEIA_META_YAML_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/eclipse/che-theia/next/meta.yaml'
-        VSCODE_YAML_META_YAML_DIR_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/redhat/vscode-yaml/'
-        JAVA8_META_YAML_DIR_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/redhat/java8/'
         DEVFILE_URL="${WORKSPACE}/happy-path-workspace.yaml"
 
         String customResourceFileContent = ""
@@ -21,12 +18,16 @@ pipeline {
 
     parameters {
         string(name: 'RELEASE_BRANCH',
-                defaultValue: "7.5.x",
+                defaultValue: "7.12.x",
                 description: 'Branch with pre-release version to take E2E Happy path test.')
 
         string(name: 'RELEASE_VERSION',
-                defaultValue: "7.5.0",
+                defaultValue: "7.12.1",
                 description: 'Version of Che-theia')
+
+        string(name: 'CHECTL_PACKAGE_URL',
+                defaultValue: "https://github.com/che-incubator/chectl/releases/download/20200501092240/chectl-linux-x64.tar.gz",
+                description: 'URL address of chectl package tar ball')
     }
 
     stages {
@@ -34,6 +35,8 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'e45af3e6-8061-4d02-b187-b1c3bb133d3a', variable: 'GITHUB_TOKEN')]) {
                     sh """
+                      CHE_THEIA_META_YAML_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/$RELEASE_BRANCH/v3/plugins/eclipse/che-theia/next/meta.yaml'
+
                       wget https://raw.githubusercontent.com/eclipse/che/$RELEASE_BRANCH/tests/e2e/files/happy-path/happy-path-workspace.yaml --no-check-certificate -O $DEVFILE_URL
                     
                       PR_CHECK_FILES_DIR=${WORKSPACE}/pr-check-files/che/$RELEASE_VERSION
@@ -45,7 +48,7 @@ pipeline {
                       wget $YQ_TOOL_URL
                       sudo chmod +x yq_linux_amd64
                     
-                      wget $CHE_THEIA_META_YAML_URL -O \$PR_CHECK_FILES_DIR/che_theia_meta.yaml
+                      wget \$CHE_THEIA_META_YAML_URL -O \$PR_CHECK_FILES_DIR/che_theia_meta.yaml
                       ./yq_linux_amd64 w -i \$PR_CHECK_FILES_DIR/che_theia_meta.yaml spec.containers[0].image quay.io/eclipse/che-theia:$RELEASE_VERSION
                       ./yq_linux_amd64 w -i \$PR_CHECK_FILES_DIR/che_theia_meta.yaml spec.initContainers[0].image quay.io/eclipse/che-theia-endpoint-runtime-binary:$RELEASE_VERSION
                     
@@ -70,7 +73,7 @@ pipeline {
                     String customResourceFilePath = "${WORKSPACE}/custom-resource.yaml"
 
                     sh """
-                        wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
+                        wget https://raw.githubusercontent.com/eclipse/che-operator/$RELEASE_VERSION/deploy/crds/org_v1_che_cr.yaml \\
                           -O $customResourceFilePath
 
                         # TODO: "selfSignedCert: true" so as TLS support is enebled by default 
@@ -82,7 +85,7 @@ pipeline {
                     """
 
                     customResourceFileContent = readFile customResourceFilePath
-                    customResourceFileContent = customResourceFileContent.replace("eclipse/che-keycloak:nightly", "eclipse/che-keycloak:rc")
+                    customResourceFileContent = customResourceFileContent.replace("eclipse/che-keycloak:nightly", "eclipse/che-keycloak:$RELEASE_VERSION")
                     customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-devfile-registry:nightly", "quay.io/eclipse/che-devfile-registry:$RELEASE_VERSION")
                     customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-plugin-registry:nightly", "quay.io/eclipse/che-plugin-registry:$RELEASE_VERSION")
                 }
@@ -102,13 +105,13 @@ pipeline {
                                                     value: 'quay.io/eclipse/che-server'),
 
                                             string(name: 'cheImageTag',
-                                                    value: 'rc'),
+                                                    value: RELEASE_VERSION),
 
                                             booleanParam(name: 'buildChe',
                                                     value: false),
 
                                             string(name: 'ghprbSourceBranch',
-                                                    value: "$RELEASE_BRANCH"),
+                                                    value: RELEASE_BRANCH),
 
                                             string(name: 'ghprbPullId',
                                                     value: ''),
@@ -126,7 +129,13 @@ pipeline {
                                                     value: true),
 
                                             string(name: 'e2eTestParameters',
-                                                    value: '')
+                                                    value: ''),
+
+                                            string(name: 'chectlPackageUrl',
+                                                    value: CHECTL_PACKAGE_URL),
+
+                                            string(name: 'cheE2eImageTag',
+                                                    value: RELEASE_VERSION)
                                     ]
                         }
                     }
@@ -141,13 +150,13 @@ pipeline {
                                                     value: 'quay.io/eclipse/che-server'),
 
                                             string(name: 'cheImageTag',
-                                                    value: 'rc'),
+                                                    value: RELEASE_VERSION),
 
                                             booleanParam(name: 'buildChe',
                                                     value: false),
 
                                             string(name: 'ghprbSourceBranch',
-                                                    value: "$RELEASE_BRANCH"),
+                                                    value: RELEASE_BRANCH),
 
                                             string(name: 'ghprbPullId',
                                                     value: ''),
@@ -159,13 +168,19 @@ pipeline {
                                                     value: ""),
 
                                             text(name: 'customResourceFileContent',
-                                                    value: "$customResourceFileContent"),
+                                                    value: customResourceFileContent),
 
                                             booleanParam(name: 'createTestWorkspace',
                                                     value: false),
 
                                             string(name: 'e2eTestParameters',
-                                                    value: '')
+                                                    value: ''),
+
+                                            string(name: 'chectlPackageUrl',
+                                                    value: CHECTL_PACKAGE_URL),
+
+                                            string(name: 'cheE2eImageTag',
+                                                    value: RELEASE_VERSION)
                                     ]
                         }
                     }
@@ -180,13 +195,13 @@ pipeline {
                                                         value: 'quay.io/eclipse/che-server'),
 
                                                 string(name: 'cheImageTag',
-                                                        value: 'nightly'),
+                                                        value: RELEASE_VERSION),
 
                                                 booleanParam(name: 'buildChe',
                                                         value: false),
 
                                                 string(name: 'ghprbSourceBranch',
-                                                        value: "$RELEASE_BRANCH"),
+                                                        value: RELEASE_BRANCH),
 
                                                 string(name: 'ghprbPullId',
                                                         value: ''),
@@ -198,13 +213,19 @@ pipeline {
                                                         value: ''),
 
                                                 text(name: 'customResourceFileContent',
-                                                        value: ''),
+                                                        value: customResourceFileContent),
 
                                                 booleanParam(name: 'createTestWorkspace',
                                                         value: false),
 
                                                 string(name: 'e2eTestParameters',
-                                                        value: "-e TS_GITHUB_TEST_REPO_ACCESS_TOKEN=$github_oauth_token  -e TS_GITHUB_TEST_REPO=chepullreq4/Spoon-Knife -e NODE_TLS_REJECT_UNAUTHORIZED=0")
+                                                        value: "-e TS_GITHUB_TEST_REPO_ACCESS_TOKEN=$github_oauth_token  -e TS_GITHUB_TEST_REPO=chepullreq4/Spoon-Knife -e NODE_TLS_REJECT_UNAUTHORIZED=0"),
+
+                                                string(name: 'chectlPackageUrl',
+                                                        value: CHECTL_PACKAGE_URL),
+
+                                                string(name: 'cheE2eImageTag',
+                                                        value: RELEASE_VERSION)
                                         ]
                         }
                     }    
