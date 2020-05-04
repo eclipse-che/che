@@ -22,6 +22,7 @@ pipeline {
         LOGS_AND_CONFIGS ="${WORKSPACE}/logs-and-configs"
 
         mutableCheImageTag = ""
+        pathToChectl = ""
     }
 
     parameters {
@@ -58,6 +59,18 @@ pipeline {
 
         string(name: 'e2eTestParameters',
                 defaultValue: "")
+
+        string(
+                name: "chectlPackageUrl",
+                defaultValue: "https://github.com/che-incubator/chectl/releases/download/20200424063811/chectl-linux-x64.tar.gz",
+                description: "URL address of chectl package"
+        )
+
+        string(
+                name: "cheE2eImageTag",
+                defaultValue: "nightly",
+                description: "Tag of quay.io/eclipse/che-e2e image"
+        )
     }
 
     stages {
@@ -91,14 +104,24 @@ pipeline {
                     steps {
                         script {
                             retry(2) {
-                                // TO-DO use option "--install-path" https://github.com/eclipse/che/pull/14182
-                                sh """
-                                curl -sL https://www.eclipse.org/che/chectl/ > install_chectl.sh
-                                chmod +x install_chectl.sh
-                                sudo PATH=$PATH ./install_chectl.sh --channel=next
-                                sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
-                                sudo chmod +x ${WORKSPACE}/chectl
-                                """
+                                if (chectlPackageUrl != "") {
+                                    sh """
+                                        wget ${chectlPackageUrl} -O chectl-linux-x64.tar.gz
+                                        tar -xzf chectl-linux-x64.tar.gz
+                                    """
+                                    pathToChectl = "${WORKSPACE}/chectl/bin/chectl"
+
+                                } else {
+                                    echo "Install chectl using https://www.eclipse.org/che/chectl/ --channel=next"
+                                    sh """
+                                        curl -sL https://www.eclipse.org/che/chectl/ > install_chectl.sh
+                                        chmod +x install_chectl.sh
+                                        sudo PATH=$PATH ./install_chectl.sh --channel=next
+                                        sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
+                                        sudo chmod +x ${WORKSPACE}/chectl
+                                    """
+                                    pathToChectl = "${WORKSPACE}/chectl"
+                                }
                             }
                         }
                     }
@@ -177,7 +200,7 @@ pipeline {
                         script {
                             retry(2) {
                                 sh """
-                                    docker pull quay.io/eclipse/che-e2e:nightly
+                                    docker pull quay.io/eclipse/che-e2e:$cheE2eImageTag
                                     docker pull quay.io/eclipse/happy-path:nightly
                                 """
                             }
@@ -214,16 +237,13 @@ pipeline {
                         sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" $CUSTOM_RESOURCE_FILE_PATH
                         sed -i "s|ingressDomain: '192.168.99.101.nip.io'|ingressDomain: '\$(minikube ip).nip.io'|" $CUSTOM_RESOURCE_FILE_PATH
 
-                        # temporary workaround to https://github.com/eclipse/che/issues/16292
-                        sed -i "s/tlsSupport: true/tlsSupport: false/" $CUSTOM_RESOURCE_FILE_PATH  
-
                         # TODO: "selfSignedCert: true" so as TLS support is enebled by default 
-                        # sed -i "s/selfSignedCert: false/selfSignedCert: true/" $CUSTOM_RESOURCE_FILE_PATH    
+                        sed -i "s/selfSignedCert: false/selfSignedCert: true/" $CUSTOM_RESOURCE_FILE_PATH    
                     """
 
                     echo "Install Che"
                     sh """
-                        ${WORKSPACE}/chectl server:start \\
+                        ${pathToChectl} server:start \\
                         --k8spodreadytimeout=180000 \\
                         --installer=operator \\
                         --listr-renderer=verbose \\
@@ -291,7 +311,7 @@ pipeline {
                            -d "grant_type=password" \\
                            -d "client_id=che-public" | jq -r .access_token)
     
-                        ${WORKSPACE}/chectl workspace:create --start \\
+                        ${pathToChectl} workspace:create --start \\
                            --devfile=${DEVFILE_PATH} \\
                            --access-token "\$USER_ACCESS_TOKEN"
                     """
@@ -316,7 +336,7 @@ pipeline {
                        -e TEST_SUITE="${e2eTestToRun}" ${e2eTestParameters} \\
                        -e NODE_TLS_REJECT_UNAUTHORIZED=0 \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
-                       quay.io/eclipse/che-e2e:nightly
+                       quay.io/eclipse/che-e2e:${cheE2eImageTag}
                 """
             }
         }
@@ -359,7 +379,7 @@ pipeline {
                 docker ps -a > $LOGS_AND_CONFIGS/docker/containers.txt || true
 
                 env > $LOGS_AND_CONFIGS/env.output.txt || true
-                ${WORKSPACE}/chectl --help > $LOGS_AND_CONFIGS/chectl.version.txt || true
+                ${pathToChectl} --help > $LOGS_AND_CONFIGS/chectl.version.txt || true
 
                 cp -r /tmp/chectl-logs $LOGS_AND_CONFIGS || true
             """

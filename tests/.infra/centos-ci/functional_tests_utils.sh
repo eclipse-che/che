@@ -438,16 +438,3 @@ function runDevfileTestSuite() {
   -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
   quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
 }
-
-function getReleaseVersion() {
-  echo $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | cut -d'-' -f1) #cut SNAPSHOT from the version name
-}
-
-function setupReleaseVersionAndTag() {
-  echo "======== Starting Che RC test job $(date) ========"
-  RELEASE_VERSION=$(getReleaseVersion)
-  RELEASE_TAG="rc"
-
-  echo "======== Release version:" ${RELEASE_VERSION}
-  echo "======== Release tag:" ${RELEASE_TAG}
-}
