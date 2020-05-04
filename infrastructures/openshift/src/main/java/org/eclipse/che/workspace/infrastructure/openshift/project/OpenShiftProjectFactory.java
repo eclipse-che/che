@@ -55,6 +55,8 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   private final OpenShiftClientFactory clientFactory;
   private final OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner;
 
+  private final String oAuthIdentityProvider;
+
   @Inject
   public OpenShiftProjectFactory(
       @Nullable @Named("che.infra.openshift.project") String projectName,
@@ -67,7 +69,9 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
       OpenShiftClientConfigFactory clientConfigFactory,
       OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner,
       UserManager userManager,
-      KubernetesSharedPool sharedPool) {
+      KubernetesSharedPool sharedPool,
+      @Nullable @Named("che.infra.openshift.oauth_identity_provider")
+          String oAuthIdentityProvider) {
     super(
         projectName,
         serviceAccountName,
@@ -85,6 +89,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
     }
     this.clientFactory = clientFactory;
     this.stopWorkspaceRoleProvisioner = stopWorkspaceRoleProvisioner;
+    this.oAuthIdentityProvider = oAuthIdentityProvider;
   }
 
   public OpenShiftProject getOrCreate(RuntimeIdentity identity) throws InfrastructureException {
@@ -97,7 +102,10 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
           doCreateServiceAccount(osProject.getWorkspaceId(), osProject.getName());
       osWorkspaceServiceAccount.prepare();
     }
-    stopWorkspaceRoleProvisioner.provision(osProject.getName());
+
+    if (!isNullOrEmpty(oAuthIdentityProvider)) {
+      stopWorkspaceRoleProvisioner.provision(osProject.getName());
+    }
     return osProject;
   }
 

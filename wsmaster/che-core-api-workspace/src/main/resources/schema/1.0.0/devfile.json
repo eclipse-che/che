@@ -347,10 +347,24 @@
                       "{\"java.home\": \"/home/user/jdk11\", \"java.jdt.ls.vmargs\": \"-Xmx1G\"}"
                     ],
                     "additionalProperties": {
-                      "type": [
-                        "boolean",
-                        "string",
-                        "number"
+                      "anyOf" : [
+                        {
+                          "type": [
+                            "boolean",
+                            "string",
+                            "number"
+                          ]
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": [
+                              "boolean",
+                              "string",
+                              "number"
+                            ]
+                          }
+                        }
                       ]
                     }
                   }

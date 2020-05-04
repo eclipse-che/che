@@ -12,7 +12,6 @@
 package org.eclipse.che.api.workspace.server.devfile;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -42,16 +41,22 @@ public class PreferencesDeserializerTest {
             + "\"valid.string\": \"/usr/bin/value\","
             + "\"valid.boolean\": false,"
             + "\"valid.integer\": 777555888,"
-            + "\"valid.float\": 3.1415926"
+            + "\"valid.float\": 3.1415926,"
+            + "\"valid.string.array\": [\"foo\",\"bar\",\"baz\"],"
+            + "\"valid.int.array\": [12,13,0],"
+            + "\"valid.bool.array\": [true,false,false]"
             + "}";
 
     final JsonParser parser = factory.createParser(json);
     Map<String, Serializable> result = preferencesDeserializer.deserialize(parser, ctxt);
-    assertEquals(4, result.size());
-    assertTrue(result.containsValue(777555888));
-    assertTrue(result.containsValue(3.1415926));
-    assertTrue(result.containsValue(false));
-    assertTrue(result.containsValue("/usr/bin/value"));
+    assertEquals(7, result.size());
+    assertEquals(result.get("valid.integer"), 777555888);
+    assertEquals(result.get("valid.float"), 3.1415926);
+    assertEquals(result.get("valid.boolean"), false);
+    assertEquals(result.get("valid.string"), "/usr/bin/value");
+    assertEquals(result.get("valid.string.array"), new String[] {"foo", "bar", "baz"});
+    assertEquals(result.get("valid.int.array"), new int[] {12, 13, 0});
+    assertEquals(result.get("valid.bool.array"), new boolean[] {true, false, false});
   }
 
   @Test(

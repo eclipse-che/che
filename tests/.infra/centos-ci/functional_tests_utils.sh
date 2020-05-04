@@ -294,6 +294,7 @@ function archiveArtifacts() {
   JOB_NAME=$1
   DATE=$(date +"%m-%d-%Y-%H-%M")
   echo "Archiving artifacts from ${DATE} for ${JOB_NAME}/${BUILD_NUMBER}"
+  cd /root/payload
   ls -la ./artifacts.key
   chmod 600 ./artifacts.key
   chown $(whoami) ./artifacts.key
@@ -312,22 +313,28 @@ createTestWorkspaceAndRunTest() {
   defineCheRoute
   ### Create workspace
   DEV_FILE_URL=$1
+  echo "====== Create test workspace ======"
   if [[ ${DEV_FILE_URL} = "" ]]; then # by default it is used 'happy-path-devfile' yaml from CHE 'master' branch
-    chectl workspace:start --access-token "$USER_ACCESS_TOKEN" --devfile=https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
+    chectl workspace:create --start --access-token "$USER_ACCESS_TOKEN" --devfile=https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
   else
-    chectl workspace:start --access-token "$USER_ACCESS_TOKEN" $1 # it can be directly indicated other URL to 'devfile' yaml
+    chectl workspace:create --start --access-token "$USER_ACCESS_TOKEN" $1 # it can be directly indicated other URL to 'devfile' yaml
   fi
 
   ### Create directory for report
+  cd /root/payload
   mkdir report
   REPORT_FOLDER=$(pwd)/report
   ### Run tests
-  docker run --shm-size=256m --network host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
+  docker run --shm-size=1g --net=host  --ipc=host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
   -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" \
-  -e TS_SELENIUM_MULTIUSER="true" \
-  -e TS_SELENIUM_USERNAME="${TEST_USERNAME}" \
-  -e TS_SELENIUM_PASSWORD="${TEST_USERNAME}" \
+  -e TS_SELENIUM_LOG_LEVEL=DEBUG \
+  -e TS_SELENIUM_MULTIUSER=true \
+  -e TS_SELENIUM_USERNAME="admin" \
+  -e TS_SELENIUM_PASSWORD="admin" \
+  -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \
+  -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
   -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=420000 \
+  -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
   quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
 }
 
@@ -339,7 +346,7 @@ function createTestUserAndObtainUserToken() {
 
   ADMIN_USERNAME=admin
   ADMIN_PASS=admin
-  TEST_USERNAME=testUser1
+  TEST_USERNAME=admin
 
   echo "======== Getting admin token ========"
   ADMIN_ACCESS_TOKEN=$(curl -X POST $KEYCLOAK_BASE_URL/realms/master/protocol/openid-connect/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=admin" -d "password=admin" -d "grant_type=password" -d "client_id=admin-cli" | jq -r .access_token)
@@ -428,11 +435,13 @@ function runDevfileTestSuite() {
   -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" \
   -e TS_SELENIUM_LOG_LEVEL=DEBUG \
   -e TS_SELENIUM_MULTIUSER=true \
-  -e TS_SELENIUM_USERNAME="${TEST_USERNAME}" \
-  -e TS_SELENIUM_PASSWORD="${TEST_USERNAME}" \
-  -e TEST_SUITE=test-all-devfiles -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \
+  -e TS_SELENIUM_USERNAME="admin" \
+  -e TS_SELENIUM_PASSWORD="admin" \
+  -e TEST_SUITE=test-all-devfiles \
+  -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \
   -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \
   -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
+  -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
   quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
 }
 
