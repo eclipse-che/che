@@ -60,13 +60,13 @@ export class DialogWindow {
         await this.clickToButton('Open Link');
     }
 
-    async waitDialog(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT, dialogTest: string = '') {
+    async waitDialog(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT, dialogText: string = '') {
         Logger.debug('DialogWindow.waitDialog');
 
         // if dialog text is provided uses xpath with this text
         // if not uses window body xpath
-        const dialogWithTextXpathLocator: string = `${DialogWindow.DIALOG_BODY_XPATH_LOCATOR}//pre[contains(text(), '${dialogTest}')]`;
-        const dialogXpathLocator: string = (dialogTest ? dialogWithTextXpathLocator : DialogWindow.DIALOG_BODY_XPATH_LOCATOR);
+        const dialogWithTextXpathLocator: string = `${DialogWindow.DIALOG_BODY_XPATH_LOCATOR}//*[contains(text(), '${dialogText}')]`;
+        const dialogXpathLocator: string = (dialogText ? dialogWithTextXpathLocator : DialogWindow.DIALOG_BODY_XPATH_LOCATOR);
 
         await this.driverHelper.waitVisibility(By.xpath(dialogXpathLocator), timeout);
     }
