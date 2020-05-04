@@ -12,7 +12,6 @@ source tests/.infra/centos-ci/rc/rc_function_util.sh
 
 setupEnvs
 installDependencies
-setupReleaseVersionAndTag
 installDockerCompose
 installKVM
 installAndStartMinishift
