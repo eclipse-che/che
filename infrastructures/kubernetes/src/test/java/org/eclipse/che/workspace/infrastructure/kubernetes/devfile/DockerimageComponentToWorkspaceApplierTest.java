@@ -14,7 +14,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.server.devfile.Constants.DISCOVERABLE_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.DOCKERIMAGE_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
@@ -31,12 +30,9 @@ import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PodTemplateSpec;
 import io.fabric8.kubernetes.api.model.Quantity;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -278,6 +274,40 @@ public class DockerimageComponentToWorkspaceApplierTest {
   }
 
   @Test
+  public void shouldProvisionContainerWithCpuLimitsSpecified() throws Exception {
+    // given
+    ComponentImpl dockerimageComponent = new ComponentImpl();
+    dockerimageComponent.setAlias("jdk");
+    dockerimageComponent.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
+    dockerimageComponent.setMemoryLimit("1G");
+    dockerimageComponent.setCpuRequest("1576m");
+    dockerimageComponent.setCpuLimit("2.22");
+
+    // when
+    dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
+
+    // then
+    verify(k8sEnvProvisioner)
+        .provision(
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            objectsCaptor.capture(),
+            machinesCaptor.capture());
+    List<HasMetadata> objects = objectsCaptor.getValue();
+    assertEquals(objects.size(), 1);
+    assertTrue(objects.get(0) instanceof Deployment);
+    Deployment deployment = (Deployment) objects.get(0);
+    PodTemplateSpec podTemplate = deployment.getSpec().getTemplate();
+    assertEquals(podTemplate.getSpec().getContainers().size(), 1);
+    Container container = podTemplate.getSpec().getContainers().get(0);
+    Quantity cpuLimit = container.getResources().getLimits().get("cpu");
+    Quantity cpuRequest = container.getResources().getRequests().get("cpu");
+    assertEquals(cpuRequest.getAmount(), "1.576");
+    assertEquals(cpuLimit.getAmount(), "2.22");
+  }
+
+  @Test
   public void shouldProvisionMachineConfigWithConfiguredServers() throws Exception {
     // given
     EndpointImpl endpoint =
@@ -318,7 +348,6 @@ public class DockerimageComponentToWorkspaceApplierTest {
     assertEquals(serverConfig.getPath(), "/ls");
     assertEquals(serverConfig.getPort(), "4923");
     Map<String, String> attributes = serverConfig.getAttributes();
-    assertEquals(attributes.size(), 2);
     assertEquals(attributes.get(ServerConfig.INTERNAL_SERVER_ATTRIBUTE), "true");
     assertEquals(attributes.get("secure"), "false");
   }
@@ -339,7 +368,7 @@ public class DockerimageComponentToWorkspaceApplierTest {
                 "false",
                 "secure",
                 "false",
-                DISCOVERABLE_ENDPOINT_ATTRIBUTE,
+                "discoverable",
                 "true"));
     ComponentImpl dockerimageComponent = new ComponentImpl();
     dockerimageComponent.setAlias("jdk");
@@ -360,22 +389,12 @@ public class DockerimageComponentToWorkspaceApplierTest {
             machinesCaptor.capture());
 
     List<HasMetadata> objects = objectsCaptor.getValue();
-    assertEquals(objects.size(), 2);
+    assertEquals(objects.size(), 1);
     assertTrue(objects.get(0) instanceof Deployment);
     Deployment deployment = (Deployment) objects.get(0);
     assertEquals(
         deployment.getSpec().getTemplate().getMetadata().getLabels().get(CHE_COMPONENT_NAME_LABEL),
         "jdk");
-
-    assertTrue(objects.get(1) instanceof Service);
-    Service service = (Service) objects.get(1);
-    assertEquals(service.getMetadata().getName(), "jdk-ls");
-    assertEquals(service.getSpec().getSelector(), ImmutableMap.of(CHE_COMPONENT_NAME_LABEL, "jdk"));
-    List<ServicePort> ports = service.getSpec().getPorts();
-    assertEquals(ports.size(), 1);
-    ServicePort port = ports.get(0);
-    assertEquals(port.getPort(), Integer.valueOf(4923));
-    assertEquals(port.getTargetPort(), new IntOrString(4923));
   }
 
   @Test

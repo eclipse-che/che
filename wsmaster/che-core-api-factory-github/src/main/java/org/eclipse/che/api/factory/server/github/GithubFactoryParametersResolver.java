@@ -46,7 +46,7 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
   private GithubSourceStorageBuilder githubSourceStorageBuilder;
 
   /** ProjectDtoMerger */
-  @Inject private ProjectConfigDtoMerger projectConfigDtoMerger;
+  private ProjectConfigDtoMerger projectConfigDtoMerger;
 
   @Inject
   public GithubFactoryParametersResolver(

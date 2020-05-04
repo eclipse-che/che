@@ -40,7 +40,7 @@ public class UnrecoverablePodEventListener implements PodEventHandler {
 
   @Override
   public void handle(PodEvent event) {
-    if (isWorkspaceEvent(event) && isUnrecoverable(event)) {
+    if (isWorkspaceEvent(event) && (isFailedContainer(event) || isUnrecoverable(event))) {
       unrecoverableEventHandler.accept(event);
     }
   }
@@ -81,5 +81,17 @@ public class UnrecoverablePodEventListener implements PodEventHandler {
       }
     }
     return isUnrecoverable;
+  }
+
+  /**
+   * This method detects whether the pod event corresponds to a container that failed to start. Note
+   * that this is handled differently from the the {@link #isUnrecoverable(PodEvent)} because we are
+   * specifically looking at failed containers and don't consider the event message in the logic.
+   *
+   * @param event an event on the pod
+   * @return true if the event is about a failed container, false otherwise
+   */
+  private boolean isFailedContainer(PodEvent event) {
+    return "Failed".equals(event.getReason()) && event.getContainerName() != null;
   }
 }

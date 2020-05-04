@@ -52,6 +52,9 @@ public class CheContainer {
   @JsonProperty("args")
   private List<String> args;
 
+  @JsonProperty("lifecycle")
+  private Lifecycle lifecycle;
+
   public CheContainer image(String image) {
     this.image = image;
     return this;
@@ -236,6 +239,19 @@ public class CheContainer {
       return new ArrayList<>();
     }
     return args;
+  }
+
+  public void setLifecycle(Lifecycle lifecycle) {
+    this.lifecycle = lifecycle;
+  }
+
+  public CheContainer lifecycle(Lifecycle lifecycle) {
+    this.lifecycle = lifecycle;
+    return this;
+  }
+
+  public Lifecycle getLifecycle() {
+    return lifecycle;
   }
 
   public void setArgs(List<String> args) {

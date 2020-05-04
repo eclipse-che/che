@@ -310,6 +310,37 @@ public class KubernetesDeploymentsTest {
   }
 
   @Test
+  public void
+      shouldCompleteExceptionallyFutureForWaitingPodIfStatusIsRunningButSomeContainersAreWaitingAndTerminatedBefore() {
+    // given
+    ContainerStatus containerStatus = mock(ContainerStatus.class);
+    when(containerStatus.getName()).thenReturn("FailingContainer");
+    when(containerStatus.getState())
+        .thenReturn(
+            new ContainerStateBuilder().withNewWaiting().withMessage("bah").endWaiting().build());
+    when(containerStatus.getLastState())
+        .thenReturn(
+            new ContainerStateBuilder()
+                .withNewTerminated()
+                .withReason("Completed")
+                .endTerminated()
+                .build());
+
+    when(status.getPhase()).thenReturn(POD_STATUS_PHASE_RUNNING);
+    when(status.getContainerStatuses()).thenReturn(singletonList(containerStatus));
+    CompletableFuture<?> future = kubernetesDeployments.waitRunningAsync(POD_NAME);
+
+    // when
+    verify(podResource).watch(watcherCaptor.capture());
+    Watcher<Pod> watcher = watcherCaptor.getValue();
+    watcher.eventReceived(Watcher.Action.MODIFIED, pod);
+
+    // then
+    assertTrue(future.isDone());
+    assertTrue(future.isCompletedExceptionally());
+  }
+
+  @Test
   public void shouldCompleteExceptionallyFutureForWaitingPodIfStatusIsSucceeded() throws Exception {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_SUCCEEDED);
@@ -457,7 +488,7 @@ public class KubernetesDeploymentsTest {
     doReturn(POD_NAME).when(metadata).getName();
 
     doReturn(Boolean.FALSE).when(podResource).delete();
-    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Foreground"));
+    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Background"));
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 
@@ -472,7 +503,7 @@ public class KubernetesDeploymentsTest {
   public void testDeletePodThrowingKubernetesClientExceptionShouldCloseWatch() throws Exception {
     final String POD_NAME = "nonExistingPod";
     doReturn(POD_NAME).when(metadata).getName();
-    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Foreground"));
+    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Background"));
     doThrow(KubernetesClientException.class).when(podResource).delete();
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
@@ -493,8 +524,8 @@ public class KubernetesDeploymentsTest {
   public void testDeleteNonExistingDeploymentBeforeWatch() throws Exception {
     final String DEPLOYMENT_NAME = "nonExistingPod";
     doReturn(DEPLOYMENT_NAME).when(deploymentMetadata).getName();
-    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Foreground"));
-    doReturn(deploymentResource).when(deploymentResource).withPropagationPolicy(eq("Foreground"));
+    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Background"));
+    doReturn(deploymentResource).when(deploymentResource).withPropagationPolicy(eq("Background"));
     doReturn(Boolean.FALSE).when(deploymentResource).delete();
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
@@ -513,7 +544,7 @@ public class KubernetesDeploymentsTest {
     doReturn(DEPLOYMENT_NAME).when(deploymentMetadata).getName();
 
     doThrow(KubernetesClientException.class).when(deploymentResource).delete();
-    doReturn(deploymentResource).when(deploymentResource).withPropagationPolicy(eq("Foreground"));
+    doReturn(deploymentResource).when(deploymentResource).withPropagationPolicy(eq("Background"));
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 

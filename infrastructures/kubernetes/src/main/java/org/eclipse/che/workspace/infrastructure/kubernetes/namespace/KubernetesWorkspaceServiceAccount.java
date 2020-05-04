@@ -76,14 +76,12 @@ public class KubernetesWorkspaceServiceAccount {
     }
 
     String execRoleName = "exec";
-    if (k8sClient.rbac().clusterRoles().inNamespace(namespace).withName(execRoleName).get()
-        == null) {
+    if (k8sClient.rbac().roles().inNamespace(namespace).withName(execRoleName).get() == null) {
       createExecRole(k8sClient, execRoleName);
     }
 
     String viewRoleName = "workspace-view";
-    if (k8sClient.rbac().clusterRoles().inNamespace(namespace).withName(viewRoleName).get()
-        == null) {
+    if (k8sClient.rbac().roles().inNamespace(namespace).withName(viewRoleName).get() == null) {
       createViewRole(k8sClient, viewRoleName);
     }
 
