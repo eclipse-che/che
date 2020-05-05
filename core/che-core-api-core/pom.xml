@@ -21,7 +21,7 @@
     </parent>
     <artifactId>che-core-api-core</artifactId>
     <packaging>jar</packaging>
-    <name>Che Core :: API :: Core</name>
+    <name>Che Core :: Commons :: API :: Core</name>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
         <findbugs.failonerror>false</findbugs.failonerror>
@@ -317,7 +317,6 @@
                     </plugin>
                 </plugins>
             </build>
-
         </profile>
     </profiles>
 </project>

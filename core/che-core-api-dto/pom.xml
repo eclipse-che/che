@@ -21,7 +21,7 @@
     </parent>
     <artifactId>che-core-api-dto</artifactId>
     <packaging>jar</packaging>
-    <name>Che Core :: API :: DTO</name>
+    <name>Che Core :: Commons :: API :: DTO</name>
     <properties>
         <findbugs.failonerror>false</findbugs.failonerror>
         <generated.test.sources.directory>${project.build.directory}/generated-test-sources/gen</generated.test.sources.directory>

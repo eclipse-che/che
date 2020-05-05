@@ -21,7 +21,7 @@
     </parent>
     <artifactId>assembly-main</artifactId>
     <packaging>pom</packaging>
-    <name>Che IDE :: Assemblies Tomcat</name>
+    <name>Che Assembly :: Assemblies Che Server Tomcat</name>
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che</groupId>

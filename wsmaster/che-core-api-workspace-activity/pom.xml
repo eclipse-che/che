@@ -21,7 +21,7 @@
     </parent>
     <artifactId>che-core-api-workspace-activity</artifactId>
     <packaging>jar</packaging>
-    <name>Che Core :: Workspace Activity</name>
+    <name>Che Core :: API :: Workspace Activity tracking</name>
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -86,16 +86,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.multiuser</groupId>
-            <artifactId>che-multiuser-api-permission</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.multiuser</groupId>
-            <artifactId>che-multiuser-permission-workspace</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>

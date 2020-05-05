@@ -35,6 +35,7 @@
         <module>che-core-db-vendor-h2</module>
         <module>che-core-db-vendor-mysql</module>
         <module>che-core-db-vendor-postgresql</module>
+        <module>che-core-logback</module>
         <module>che-core-tracing-core</module>
         <module>che-core-tracing-web</module>
         <module>che-core-metrics-core</module>
