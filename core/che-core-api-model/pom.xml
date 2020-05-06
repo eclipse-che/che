@@ -21,7 +21,7 @@
     </parent>
     <artifactId>che-core-api-model</artifactId>
     <packaging>jar</packaging>
-    <name>Che Core :: API :: Model</name>
+    <name>Che Core :: Commons :: API :: Model</name>
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>

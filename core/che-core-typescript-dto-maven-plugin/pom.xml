@@ -21,7 +21,7 @@
     </parent>
     <artifactId>che-core-typescript-dto-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <name>Che Core :: API :: TypeScript DTO maven plugin</name>
+    <name>Che Core :: Commons :: API :: TypeScript DTO maven plugin</name>
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>

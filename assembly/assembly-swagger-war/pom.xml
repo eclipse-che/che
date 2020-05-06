@@ -21,7 +21,7 @@
     </parent>
     <artifactId>assembly-swagger-war</artifactId>
     <packaging>war</packaging>
-    <name>Che IDE :: Assemblies Swagger WAR</name>
+    <name>Che Assembly :: Swagger war</name>
     <build>
         <finalName>che-swagger-ui</finalName>
         <plugins>

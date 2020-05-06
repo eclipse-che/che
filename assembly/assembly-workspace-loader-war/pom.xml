@@ -21,7 +21,7 @@
     </parent>
     <artifactId>assembly-workspace-loader-war</artifactId>
     <packaging>war</packaging>
-    <name>Che Workspace Loader :: War Packaging</name>
+    <name>Che Assembly :: Workspace Loader war</name>
     <description>Packages Che Workspace Loader application as a Java web app</description>
     <inceptionYear>2018</inceptionYear>
     <dependencies>
