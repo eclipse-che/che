@@ -7,22 +7,23 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-
-import { test } from 'mocha';
+import { Key } from 'selenium-webdriver';
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES, TYPES } from '../../inversify.types';
-import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
-import { Ide } from '../../pageobjects/ide/Ide';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { Ide } from '../../pageobjects/ide/Ide';
+import { Buttons, Locations, OpenDialogWidget } from '../../pageobjects/ide/OpenDialogWidget';
+import { OpenshiftAppExplorerToolbar, OpenshiftContextMenuItems, OpenshiftPlugin } from '../../pageobjects/ide/OpenshiftPlugin';
+import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
+import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
+import { Terminal } from '../../pageobjects/ide/Terminal';
+import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { TestConstants } from '../../TestConstants';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
-import { OpenshiftPlugin, OpenshiftAppExplorerToolbar, OpenshiftContextMenuItems } from '../../pageobjects/ide/OpenshiftPlugin';
-import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
-import { OpenDialogWidget, Locations, Buttons } from '../../pageobjects/ide/OpenDialogWidget';
-import { Terminal } from '../../pageobjects/ide/Terminal';
 import { PreferencesHandler, TerminalRendererType } from '../../utils/PreferencesHandler';
+import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
+
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -36,6 +37,7 @@ const openDialogWidget: OpenDialogWidget = e2eContainer.get(CLASSES.OpenDialogWi
 const preferencesHalder: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
+const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const projectName: string = 'node-js';
 const selectSugestionSuffix: string = '(Press \'Enter\' to confirm your input or \'Escape\' to cancel)';
 
@@ -87,27 +89,34 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.clickOnContainerItem('Credentials');
     await quickOpenContainer.clickOnContainerItem(`https://${openshiftIP}`);
     await quickOpenContainer.clickOnContainerItem('$(plus) Add new user...');
-    await quickOpenContainer.typeAndSelectSuggestion('developer', `Provide Username ${provideAuthenticationSuffix}`);
-    await quickOpenContainer.typeAndSelectSuggestion('123', `Provide Password ${provideAuthenticationSuffix}`);
+    await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_LOGIN_NAME_OF_OPENSHIFT_REGULAR_USER, `Provide Username ${provideAuthenticationSuffix}`);
+    await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_PASSWORD_OF_OPENSHIFT_REGULAR_USER, `Provide Password ${provideAuthenticationSuffix}`);
   });
 
   test('Create new component with application', async () => {
-    await openshiftPlugin.invokeContextMenuCommandOnItem('myproject', OpenshiftContextMenuItems.NewComponent);
+    await topMenu.selectOption('View', 'Find Command...');
+    await quickOpenContainer.typeAndSelectSuggestion('OpenShift: New Component', 'OpenShift: New Component from local folder');
+    await quickOpenContainer.clickOnContainerItem(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
     await quickOpenContainer.clickOnContainerItem('$(plus) Create new Application...');
     await quickOpenContainer.typeAndSelectSuggestion('node-js-app', `Provide Application name ${selectSugestionSuffix}` );
-    await quickOpenContainer.clickOnContainerItem('Workspace Directory');
     await quickOpenContainer.clickOnContainerItem('$(plus) Add new context folder.');
     await openDialogWidget.selectLocationAndAddContextFolder(Locations.Root, `projects/${projectName}`, Buttons.AddContext);
     await quickOpenContainer.typeAndSelectSuggestion('component-node-js', `Provide Component name ${selectSugestionSuffix}`);
+
     await quickOpenContainer.clickOnContainerItem('nodejs');
     await quickOpenContainer.clickOnContainerItem('latest');
-    await openshiftPlugin.clickOnItemInTree('myproject');
+
+    await openshiftPlugin.clickOnItemInTree(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
     await openshiftPlugin.clickOnItemInTree('node-js-app');
     await openshiftPlugin.clickOnItemInTree('component-node-js');
   });
 
   test('Push new component', async () => {
-    await openshiftPlugin.invokeContextMenuCommandOnItem('component-node-js', OpenshiftContextMenuItems.Push);
+    driverHelper.getDriver().switchTo().activeElement().sendKeys(Key.F1);
+    await quickOpenContainer.typeAndSelectSuggestion(OpenshiftContextMenuItems.Push, 'OpenShift: Push Component');
+    await quickOpenContainer.clickOnContainerItem(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
+    await quickOpenContainer.clickOnContainerItem('node-js-app');
+    await quickOpenContainer.clickOnContainerItem('component-node-js');
     await terminal.waitText('OpenShift', 'Changes successfully pushed to component', TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
   });
 
