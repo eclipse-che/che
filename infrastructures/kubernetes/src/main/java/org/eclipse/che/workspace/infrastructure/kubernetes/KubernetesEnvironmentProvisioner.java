@@ -29,8 +29,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminat
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SshKeysProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSshKeysProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.ContainerResourceProvisioner;
@@ -73,7 +73,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final ProxySettingsProvisioner proxySettingsProvisioner;
     private final ServiceAccountProvisioner serviceAccountProvisioner;
     private final CertificateProvisioner certificateProvisioner;
-    private final VcsSshKeysProvisioner vcsSshKeysProvisioner;
+    private final SshKeysProvisioner sshKeysProvisioner;
     private final GitConfigProvisioner gitConfigProvisioner;
     private final PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer;
     private final VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
@@ -95,7 +95,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         ProxySettingsProvisioner proxySettingsProvisioner,
         ServiceAccountProvisioner serviceAccountProvisioner,
         CertificateProvisioner certificateProvisioner,
-        VcsSshKeysProvisioner vcsSshKeysProvisioner,
+        SshKeysProvisioner sshKeysProvisioner,
         GitConfigProvisioner gitConfigProvisioner,
         PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer,
         VcsSslCertificateProvisioner vcsSslCertificateProvisioner) {
@@ -114,7 +114,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.proxySettingsProvisioner = proxySettingsProvisioner;
       this.serviceAccountProvisioner = serviceAccountProvisioner;
       this.certificateProvisioner = certificateProvisioner;
-      this.vcsSshKeysProvisioner = vcsSshKeysProvisioner;
+      this.sshKeysProvisioner = sshKeysProvisioner;
       this.vcsSslCertificateProvisioner = vcsSslCertificateProvisioner;
       this.gitConfigProvisioner = gitConfigProvisioner;
       this.previewUrlExposer = previewUrlExposer;
@@ -154,7 +154,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       proxySettingsProvisioner.provision(k8sEnv, identity);
       serviceAccountProvisioner.provision(k8sEnv, identity);
       certificateProvisioner.provision(k8sEnv, identity);
-      vcsSshKeysProvisioner.provision(k8sEnv, identity);
+      sshKeysProvisioner.provision(k8sEnv, identity);
       vcsSslCertificateProvisioner.provision(k8sEnv, identity);
       gitConfigProvisioner.provision(k8sEnv, identity);
       LOG.debug("Provisioning Kubernetes environment done for workspace '{}'", workspaceId);

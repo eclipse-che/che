@@ -27,8 +27,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminat
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SshKeysProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSshKeysProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.ContainerResourceProvisioner;
@@ -66,7 +66,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private ProxySettingsProvisioner proxySettingsProvisioner;
   @Mock private ServiceAccountProvisioner serviceAccountProvisioner;
   @Mock private CertificateProvisioner certificateProvisioner;
-  @Mock private VcsSshKeysProvisioner vcsSshKeysProvisioner;
+  @Mock private SshKeysProvisioner sshKeysProvisioner;
   @Mock private GitConfigProvisioner gitConfigProvisioner;
   @Mock private PreviewUrlExposer previewUrlExposer;
   @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
@@ -94,7 +94,7 @@ public class KubernetesEnvironmentProvisionerTest {
             proxySettingsProvisioner,
             serviceAccountProvisioner,
             certificateProvisioner,
-            vcsSshKeysProvisioner,
+            sshKeysProvisioner,
             gitConfigProvisioner,
             previewUrlExposer,
             vcsSslCertificateProvisioner);
