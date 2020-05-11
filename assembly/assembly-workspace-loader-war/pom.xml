@@ -30,44 +30,5 @@
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.workspace.loader</groupId>
-            <artifactId>che-workspace-loader</artifactId>
-            <type>zip</type>
-            <scope>runtime</scope>
-        </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <overlays>
-                        <overlay>
-                            <groupId>org.eclipse.che.workspace.loader</groupId>
-                            <artifactId>che-workspace-loader</artifactId>
-                            <type>zip</type>
-                        </overlay>
-                    </overlays>
-                    <packagingExcludes>/webapp/</packagingExcludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>analyze</id>
-                        <configuration>
-                            <ignoredUnusedDeclaredDependencies>
-                                <!-- dependency is required just to overlay it's content -->
-                                <dep>org.eclipse.che.workspace.loader:che-workspace-loader</dep>
-                            </ignoredUnusedDeclaredDependencies>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>
