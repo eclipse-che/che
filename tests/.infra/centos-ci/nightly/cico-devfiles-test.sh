@@ -14,6 +14,7 @@ function prepareCustomResourceFile() {
   cd /tmp
   wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml -O custom-resource.yaml
   sed -i "s@tlsSupport: true@tlsSupport: false@g" /tmp/custom-resource.yaml
+  sed -i "s@identityProviderPassword: ''@identityProviderPassword: 'admin'@g" /tmp/custom-resource.yaml
   cat /tmp/custom-resource.yaml
 }
 

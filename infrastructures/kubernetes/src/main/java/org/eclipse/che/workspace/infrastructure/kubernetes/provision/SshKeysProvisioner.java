@@ -12,8 +12,11 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_SSH_KEYS;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_SSH_KEYS_MESSAGE;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
@@ -26,6 +29,7 @@ import io.fabric8.kubernetes.api.model.SecretVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,6 +43,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.ssh.server.SshManager;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.shared.model.SshPair;
+import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
@@ -55,21 +60,21 @@ import org.slf4j.LoggerFactory;
  * <p><strong>How it works:</strong>
  *
  * <ul>
- *   <li>all SSH Keys registered for VCS are fetched;
+ *   <li>all registered SSH Keys are fetched;
  *   <li>create single K8s Secret with opaque type for storing SSH keys;
  *   <li>in following secret key represents host name and value contains private SSH key;
  *   <li>each key and value in secret is represented on file system by the following structure:
  *       '/etc/ssh/private/{hostName}/ssh-privatekey', where <code>hostName</code> is a key taken
  *       from secret and <code>ssh-privatekey</code> is a file that contains SSH private key taking
  *       by the following key name;
- *   <li>ConfigMap with SSH settings is created and mounted to container by path
+ *   <li>for VCS keys, ConfigMap with SSH settings is created and mounted to container by path
  *       '/etc/ssh/ssh_config'.
  * </ul>
  *
  * @author Vitalii Parfonov
  * @author Vlad Zhukovskyi
  */
-public class VcsSshKeysProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
+public class SshKeysProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
 
   private static String SSH_BASE_CONFIG_PATH = "/etc/ssh/";
 
@@ -84,12 +89,12 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
 
   private static final String SSH_SECRET_TYPE = "opaque";
 
-  private static final Logger LOG = LoggerFactory.getLogger(VcsSshKeysProvisioner.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SshKeysProvisioner.class);
 
   private final SshManager sshManager;
 
   @Inject
-  public VcsSshKeysProvisioner(SshManager sshManager) {
+  public SshKeysProvisioner(SshManager sshManager) {
     this.sshManager = sshManager;
   }
 
@@ -97,14 +102,39 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
   @Traced
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
+    String workspaceId = identity.getWorkspaceId();
+    TracingTags.WORKSPACE_ID.set(workspaceId);
 
+    List<SshPairImpl> vcsSshPairs = getVcsSshPairs(k8sEnv, identity);
+    List<SshPairImpl> systemSshPairs = getSystemSshPairs(k8sEnv, identity);
+
+    List<SshPairImpl> all = new ArrayList<>(vcsSshPairs);
+    all.addAll(systemSshPairs);
+
+    doProvisionSshKeys(all, k8sEnv, workspaceId);
+    doProvisionVcsSshConfig(vcsSshPairs, k8sEnv, workspaceId);
+  }
+
+  /**
+   * Return list of keys related to the VCS (Version Control Systems), Git, SVN and etc. Usually
+   * managed by user
+   *
+   * @param identity
+   * @return list of ssh pairs
+   */
+  private List<SshPairImpl> getVcsSshPairs(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
+      throws InfrastructureException {
     List<SshPairImpl> sshPairs;
     try {
       sshPairs = sshManager.getPairs(identity.getOwnerId(), "vcs");
     } catch (ServerException e) {
-      LOG.warn("Unable to get SSH Keys. Cause: {}", e.getMessage());
-      return;
+      String message = format("Unable to get SSH Keys. Cause: %s", e.getMessage());
+      LOG.warn(message);
+      k8sEnv.addWarning(
+          new WarningImpl(
+              NOT_ABLE_TO_PROVISION_SSH_KEYS,
+              format(NOT_ABLE_TO_PROVISION_SSH_KEYS_MESSAGE, message)));
+      throw new InfrastructureException(e);
     }
     if (sshPairs.isEmpty()) {
       try {
@@ -113,20 +143,41 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
                 sshManager.generatePair(
                     identity.getOwnerId(), "vcs", "default-" + new Date().getTime()));
       } catch (ServerException | ConflictException e) {
-        LOG.warn("Unable to generate the initial SSH key. Cause: {}", e.getMessage());
-        return;
+        String message =
+            format("Unable to generate the initial SSH key. Cause: %s", e.getMessage());
+        LOG.warn(message);
+        k8sEnv.addWarning(
+            new WarningImpl(
+                NOT_ABLE_TO_PROVISION_SSH_KEYS,
+                format(NOT_ABLE_TO_PROVISION_SSH_KEYS_MESSAGE, message)));
+        throw new InfrastructureException(e);
       }
     }
+    return sshPairs;
+  }
 
-    doProvisionSshKeys(sshPairs, k8sEnv, identity.getWorkspaceId());
-
-    StringBuilder sshConfigData = new StringBuilder();
-    for (SshPair sshPair : sshPairs) {
-      sshConfigData.append(buildConfig(sshPair.getName()));
+  /**
+   * Return system (aka 'internal') ssh keys, this key used for internal services like rsync via ssh
+   * and etc. Not generated or managed by a user
+   *
+   * @param identity
+   * @return list of keys pair
+   */
+  private List<SshPairImpl> getSystemSshPairs(KubernetesEnvironment k8sEn, RuntimeIdentity identity)
+      throws InfrastructureException {
+    List<SshPairImpl> sshPairs;
+    try {
+      sshPairs = sshManager.getPairs(identity.getOwnerId(), "internal");
+    } catch (ServerException e) {
+      String message = format("Unable to get SSH Keys. Cause: %s", e.getMessage());
+      LOG.warn(message);
+      k8sEn.addWarning(
+          new WarningImpl(
+              NOT_ABLE_TO_PROVISION_SSH_KEYS,
+              format(NOT_ABLE_TO_PROVISION_SSH_KEYS_MESSAGE, message)));
+      throw new InfrastructureException(e);
     }
-
-    String sshConfigMapName = identity.getWorkspaceId() + SSH_CONFIG_MAP_NAME_SUFFIX;
-    doProvisionSshConfig(sshConfigMapName, sshConfigData.toString(), k8sEnv);
+    return sshPairs;
   }
 
   private void doProvisionSshKeys(
@@ -192,16 +243,23 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
         });
   }
 
-  private void doProvisionSshConfig(
-      String sshConfigMapName, String sshConfig, KubernetesEnvironment k8sEnv) {
-    Map<String, String> sshConfigData = new HashMap<>();
-    sshConfigData.put(SSH_CONFIG, sshConfig);
+  private void doProvisionVcsSshConfig(
+      List<SshPairImpl> vcsSshPairs, KubernetesEnvironment k8sEnv, String wsId) {
+    StringBuilder sshConfigData = new StringBuilder();
+    for (SshPair sshPair : vcsSshPairs) {
+      sshConfigData.append(buildConfig(sshPair.getName()));
+    }
+
+    String sshConfigMapName = wsId + SSH_CONFIG_MAP_NAME_SUFFIX;
+
+    Map<String, String> sshConfig = new HashMap<>();
+    sshConfig.put(SSH_CONFIG, sshConfigData.toString());
     ConfigMap configMap =
         new ConfigMapBuilder()
             .withNewMetadata()
             .withName(sshConfigMapName)
             .endMetadata()
-            .withData(sshConfigData)
+            .withData(sshConfig)
             .build();
 
     k8sEnv.getConfigMaps().put(configMap.getMetadata().getName(), configMap);

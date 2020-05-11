@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,13 +47,13 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link VcsSshKeysProvisioner}.
+ * Tests {@link SshKeysProvisioner}.
  *
  * @author Vitalii Parfonov
  * @author Vlad Zhukovskyi
  */
 @Listeners(MockitoTestNGListener.class)
-public class VcsSshKeySecretProvisionerTest {
+public class SshKeySecretProvisionerTest {
 
   private KubernetesEnvironment k8sEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
@@ -67,7 +68,7 @@ public class VcsSshKeySecretProvisionerTest {
 
   private final String someUser = "someuser";
 
-  private VcsSshKeysProvisioner vcsSshKeysProvisioner;
+  private SshKeysProvisioner sshKeysProvisioner;
 
   @BeforeMethod
   public void setup() {
@@ -81,7 +82,7 @@ public class VcsSshKeySecretProvisionerTest {
     when(podSpec.getContainers()).thenReturn(Collections.singletonList(container));
     when(container.getVolumeMounts()).thenReturn(new ArrayList<>());
     k8sEnv.addPod(pod);
-    vcsSshKeysProvisioner = new VcsSshKeysProvisioner(sshManager);
+    sshKeysProvisioner = new SshKeysProvisioner(sshManager);
   }
 
   @Test
@@ -92,7 +93,7 @@ public class VcsSshKeySecretProvisionerTest {
             new SshPairImpl(
                 someUser, "vcs", "default-" + UUID.randomUUID().toString(), "public", "private"));
 
-    vcsSshKeysProvisioner.provision(k8sEnv, runtimeIdentity);
+    sshKeysProvisioner.provision(k8sEnv, runtimeIdentity);
 
     assertEquals(k8sEnv.getSecrets().size(), 1);
   }
@@ -102,14 +103,21 @@ public class VcsSshKeySecretProvisionerTest {
     String keyName1 = UUID.randomUUID().toString();
     String keyName2 = "default-" + UUID.randomUUID().toString();
     String keyName3 = "github.com";
-    when(sshManager.getPairs(someUser, "vcs"))
+    String keyName4 = UUID.randomUUID().toString();
+    lenient()
+        .when(sshManager.getPairs(someUser, "vcs"))
         .thenReturn(
             ImmutableList.of(
                 new SshPairImpl(someUser, "vcs", keyName1, "public", "private"),
                 new SshPairImpl(someUser, "vcs", keyName2, "public", "private"),
                 new SshPairImpl(someUser, "vcs", keyName3, "public", "private")));
 
-    vcsSshKeysProvisioner.provision(k8sEnv, runtimeIdentity);
+    lenient()
+        .when(sshManager.getPairs(someUser, "internal"))
+        .thenReturn(
+            ImmutableList.of(new SshPairImpl(someUser, "internal", keyName4, "public", "private")));
+
+    sshKeysProvisioner.provision(k8sEnv, runtimeIdentity);
 
     verify(podSpec, times(2)).getVolumes();
     verify(podSpec, times(2)).getContainers();
@@ -129,6 +137,10 @@ public class VcsSshKeySecretProvisionerTest {
     String key3 = secret.getData().get(keyName3);
     assertNotNull(key3);
     assertEquals("private", new String(Base64.getDecoder().decode(key3)));
+
+    String key4 = secret.getData().get(keyName3);
+    assertNotNull(key3);
+    assertEquals("private", new String(Base64.getDecoder().decode(key4)));
 
     Map<String, ConfigMap> configMaps = k8sEnv.getConfigMaps();
     assertNotNull(configMaps);
@@ -192,7 +204,7 @@ public class VcsSshKeySecretProvisionerTest {
     k8sEnv.addInjectablePod("r", "i", injectedPod);
 
     // when
-    vcsSshKeysProvisioner.provision(k8sEnv, runtimeIdentity);
+    sshKeysProvisioner.provision(k8sEnv, runtimeIdentity);
 
     // then
     assertEquals(pod.getSpec().getVolumes().size(), 2);
@@ -203,5 +215,32 @@ public class VcsSshKeySecretProvisionerTest {
 
     assertEquals(podContainer.getVolumeMounts().size(), 2);
     assertEquals(injectedPodContainer.getVolumeMounts().size(), 2);
+  }
+
+  @Test
+  public void addInternalSshKeysConfigInPod() throws Exception {
+    String keyName = UUID.randomUUID().toString();
+    lenient()
+        .when(sshManager.getPairs(someUser, "internal"))
+        .thenReturn(
+            ImmutableList.of(new SshPairImpl(someUser, "internal", keyName, "public", "private")));
+
+    // should exist at least one 'vcs' key by design
+    when(sshManager.generatePair(eq(someUser), eq("vcs"), anyString()))
+        .thenReturn(
+            new SshPairImpl(
+                someUser, "vcs", "default-" + UUID.randomUUID().toString(), "public", "private"));
+
+    sshKeysProvisioner.provision(k8sEnv, runtimeIdentity);
+
+    verify(podSpec, times(2)).getVolumes();
+    verify(podSpec, times(2)).getContainers();
+
+    Secret secret = k8sEnv.getSecrets().get("wksp-sshprivatekeys");
+    assertNotNull(secret);
+    assertEquals(secret.getType(), "opaque");
+    String key = secret.getData().get(keyName);
+    assertNotNull(key);
+    assertEquals("private", new String(Base64.getDecoder().decode(key)));
   }
 }

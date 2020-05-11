@@ -21,7 +21,7 @@
     </parent>
     <artifactId>assembly-dashboard-war</artifactId>
     <packaging>war</packaging>
-    <name>Che IDE :: Dashboard Packaging</name>
+    <name>Che Assembly :: Dashboard war</name>
     <description>Packages Dashboard application as a Java web app</description>
     <inceptionYear>2018</inceptionYear>
     <dependencies>

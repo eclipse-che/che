@@ -23,10 +23,12 @@
     <groupId>org.eclipse.che.infrastructure</groupId>
     <artifactId>che-infrastructures-parent</artifactId>
     <packaging>pom</packaging>
-    <name>Che Infrastructures Parent</name>
+    <name>Infrastructure :: Infrastructures Parent</name>
     <modules>
         <module>openshift</module>
         <module>kubernetes</module>
         <module>infrastructure-metrics</module>
+        <module>infrastructure-distributed</module>
+        <module>infrastructure-permission</module>
     </modules>
 </project>
