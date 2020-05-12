@@ -42,10 +42,10 @@ public class SecretAsMavenVolumeProvisioner<E extends KubernetesEnvironment> {
         parseBoolean(secret.getMetadata().getAnnotations().getOrDefault("useSecretAsEnv", "false"));
     final String targetContainerName = secret.getMetadata().getLabels().get("targetContainer");
 
-    if (!mountAsEnv) {
-      mountAsFile(env, secret, targetContainerName);
-    } else {
+    if (mountAsEnv) {
       mountAsEnv(env, secret, targetContainerName);
+    } else {
+      mountAsFile(env, secret, targetContainerName);
     }
   }
 
