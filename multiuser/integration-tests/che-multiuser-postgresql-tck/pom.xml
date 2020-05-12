@@ -219,7 +219,6 @@
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
-                        <version>0.15.16</version>
                         <!-- Connect start/stop to pre- and
                  post-integration-test phase, respectively if you want to start
                  your docker containers during integration tests -->
