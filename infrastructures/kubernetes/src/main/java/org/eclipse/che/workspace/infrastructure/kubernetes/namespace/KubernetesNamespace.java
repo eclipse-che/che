@@ -201,7 +201,7 @@ public class KubernetesNamespace {
         ingresses::delete,
         services::delete,
         deployments::delete,
-        secrets::delete,
+        //        secrets::delete,
         configMaps::delete);
   }
 

@@ -14,8 +14,10 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 
+import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import java.util.List;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
@@ -47,6 +49,27 @@ public class KubernetesSecrets {
     putLabel(secret, CHE_WORKSPACE_ID_LABEL, workspaceId);
     try {
       clientFactory.create(workspaceId).secrets().inNamespace(namespace).create(secret);
+    } catch (KubernetesClientException e) {
+      throw new KubernetesInfrastructureException(e);
+    }
+  }
+
+  /**
+   * Finds secrets matching specified label selector.
+   *
+   * @param labelSelector selector to filter secrets
+   * @return matched secrets list
+   * @throws InfrastructureException when any exception occurs
+   */
+  public List<Secret> get(LabelSelector labelSelector) throws InfrastructureException {
+    try {
+      return clientFactory
+          .create(workspaceId)
+          .secrets()
+          .inNamespace(namespace)
+          .withLabelSelector(labelSelector)
+          .list()
+          .getItems();
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
     }
