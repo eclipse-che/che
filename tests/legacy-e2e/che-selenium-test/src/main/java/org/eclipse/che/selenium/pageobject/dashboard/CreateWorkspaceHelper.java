@@ -55,8 +55,7 @@ public class CreateWorkspaceHelper {
 
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.clickOnAddWorkspaceBtn();
-
-    newWorkspace.selectDevfileFromCustomWorkspacesPage(devfile);
     newWorkspace.typeWorkspaceName(workspaceName);
+    newWorkspace.selectDevfileFromCustomWorkspacesPage(devfile);
   }
 }

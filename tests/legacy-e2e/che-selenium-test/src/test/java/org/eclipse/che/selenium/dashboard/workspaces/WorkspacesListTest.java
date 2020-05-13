@@ -33,6 +33,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOvervie
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status;
+import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.openqa.selenium.TimeoutException;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -63,16 +64,17 @@ public class WorkspacesListTest {
   @Inject private WorkspaceOverview workspaceOverview;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
+  @Inject private TheiaIde theiaIde;
 
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
-
     createWorkspaceHelper.createAndStartWorkspaceFromStack(Devfile.JAVA_MAVEN, WORKSPACE_NAME);
-    workspaceOverview.checkNameWorkspace(WORKSPACE_NAME);
-
+    theiaIde.waitOpenedWorkspaceIsReadyToUse();
+    dashboard.open();
     createWorkspaceHelper.createAndStartWorkspaceFromStack(Devfile.JAVA_MAVEN, WORKSPACE_NAME2);
-    workspaceOverview.checkNameWorkspace(WORKSPACE_NAME2);
+    theiaIde.waitOpenedWorkspaceIsReadyToUse();
+    dashboard.open();
   }
 
   @BeforeMethod
@@ -208,7 +210,7 @@ public class WorkspacesListTest {
 
     // go to workspace details by clicking on item in workspaces list
     workspaces.clickOnAddWorkspaceBtn();
-    newWorkspace.waitPageLoad();
+    newWorkspace.waitCustomWorkspacesTab();
 
     seleniumWebDriver.navigate().back();
 
@@ -243,17 +245,6 @@ public class WorkspacesListTest {
         WORKSPACE_NAME2, WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON);
     workspaces.waitWorkspaceStatus(WORKSPACE_NAME2, Status.STOPPED);
 
-    // check adding the workspace to list
-    workspaces.clickOnAddWorkspaceBtn();
-    newWorkspace.waitToolbar();
-    newWorkspace.typeWorkspaceName(NEWEST_CREATED_WORKSPACE_NAME);
-    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
-    newWorkspace.clickOnCreateButtonAndEditWorkspace();
-    workspaceOverview.checkNameWorkspace(NEWEST_CREATED_WORKSPACE_NAME);
-
-    dashboard.selectWorkspacesItemOnDashboard();
-
-    workspaces.waitPageLoading();
     workspaces.waitVisibleWorkspacesCount(testWorkspaceServiceClient.getWorkspacesCount());
   }
 

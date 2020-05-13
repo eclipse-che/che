@@ -40,6 +40,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.testng.Assert;
 
 /**
  * @author Ann Shumilova
@@ -103,10 +104,12 @@ public class NewWorkspace {
   public void typeWorkspaceName(String name) {
     seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.WORKSPACE_NAME_INPUT_XPATH));
     seleniumWebDriverHelper.setValue(By.xpath(Locators.WORKSPACE_NAME_INPUT_XPATH), name);
+    Assert.assertEquals(getWorkspaceNameValue(), name);
   }
 
   public String getWorkspaceNameValue() {
-    return seleniumWebDriverHelper.waitVisibilityAndGetValue(workspaceNameInput);
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(
+        By.xpath(Locators.WORKSPACE_NAME_INPUT_XPATH));
   }
 
   public void openDevfilesList() {
