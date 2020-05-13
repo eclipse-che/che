@@ -12,11 +12,10 @@
 package org.eclipse.che.selenium.hotupdate.rolling;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import java.util.Collections;
 import org.eclipse.che.selenium.core.client.CheTestSystemClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.hotupdate.HotUpdateUtil;
@@ -53,11 +52,13 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
-    createWorkspaceHelper.createAndEditWorkspaceFromStack(
-        Devfile.JAVA_MAVEN, STARTED_WORKSPACE_NAME, Collections.emptyList(), null);
+    createWorkspaceHelper.createAndStartWorkspaceFromStack(
+        Devfile.JAVA_MAVEN, STARTED_WORKSPACE_NAME);
+    theiaIde.waitOpenedWorkspaceIsReadyToUse();
     dashboard.open();
     createWorkspaceHelper.createAndStartWorkspaceFromStack(
-        Devfile.JAVA_MAVEN, STOPPED_WORKSPACE_NAME, Collections.emptyList(), null);
+        Devfile.JAVA_MAVEN, STOPPED_WORKSPACE_NAME);
+    theiaIde.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @AfterClass
@@ -68,14 +69,6 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
 
   @Test
   public void startStopWorkspaceFunctionsShouldBeAvailableDuringRollingUpdate() throws Exception {
-    theiaIde.waitOpenedWorkspaceIsReadyToUse();
-
-    theiaProjectTree.waitFilesTab();
-    theiaProjectTree.clickOnFilesTab();
-    theiaProjectTree.waitProjectAreaOpened();
-    theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
-    theiaIde.waitAllNotificationsClosed();
-
     dashboard.open();
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
@@ -84,6 +77,9 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
     workspaces.waitPageLoading();
     workspaces.waitWorkspaceIsPresent(STOPPED_WORKSPACE_NAME);
     workspaces.waitWorkspaceIsPresent(STARTED_WORKSPACE_NAME);
+
+    workspaces.clickOnWorkspaceActionsButton(
+        STARTED_WORKSPACE_NAME, WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON);
     workspaces.waitWorkspaceStatus(STOPPED_WORKSPACE_NAME, Workspaces.Status.RUNNING);
     workspaces.waitWorkspaceStatus(STARTED_WORKSPACE_NAME, Workspaces.Status.STOPPED);
 

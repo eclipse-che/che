@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.dashboard.organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.OVERVIEW;
@@ -20,8 +21,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
-import java.util.Collections;
-import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
@@ -43,7 +42,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S, TestGroup.UNDER_REPAIR})
+@Test(groups = {UNDER_REPAIR})
 public class ShareWorkspaceMemberTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
@@ -171,8 +170,7 @@ public class ShareWorkspaceMemberTest {
   }
 
   private void createWorkspace(String workspaceName) {
-    createWorkspaceHelper.createAndStartWorkspaceFromStack(
-        Devfile.JAVA_MAVEN, workspaceName, Collections.emptyList(), null);
+    createWorkspaceHelper.createAndStartWorkspaceFromStack(Devfile.JAVA_MAVEN, workspaceName);
 
     theiaIde.waitOpenedWorkspaceIsReadyToUse();
 

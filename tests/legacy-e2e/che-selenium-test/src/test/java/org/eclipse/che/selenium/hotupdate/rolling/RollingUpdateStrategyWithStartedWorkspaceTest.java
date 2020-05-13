@@ -16,7 +16,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Te
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import java.util.Collections;
 import org.eclipse.che.selenium.core.client.CheTestSystemClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.hotupdate.HotUpdateUtil;
@@ -61,8 +60,7 @@ public class RollingUpdateStrategyWithStartedWorkspaceTest {
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
-    createWorkspaceHelper.createAndStartWorkspaceFromStack(
-        Devfile.JAVA_MAVEN, WORKSPACE_NAME, Collections.emptyList(), null);
+    createWorkspaceHelper.createAndStartWorkspaceFromStack(Devfile.JAVA_MAVEN, WORKSPACE_NAME);
   }
 
   @AfterClass

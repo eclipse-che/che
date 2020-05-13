@@ -24,6 +24,7 @@ import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
@@ -82,6 +83,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestDashboardUrlProvider testDashboardUrlProvider;
   @Inject private TheiaIde theiaIde;
+  @Inject private CreateWorkspaceHelper createWorkspaceHelper;
 
   // it is used to read workspace logs on test failure
   private TestWorkspace testWorkspace;
@@ -114,12 +116,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     firstBrokerProfilePage.submit(NEW_TEST_USER);
 
     // create and open workspace of java type
-    dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.clickOnAddWorkspaceBtn();
-    newWorkspace.waitToolbar();
-    newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
-    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
-    newWorkspace.clickOnCreateButtonAndOpenInIDE();
+    createWorkspaceHelper.createAndStartWorkspaceFromStack(Devfile.JAVA_MAVEN, WORKSPACE_NAME);
 
     // switch to the IDE and wait for workspace is ready to use
     theiaIde.switchToIdeFrame();

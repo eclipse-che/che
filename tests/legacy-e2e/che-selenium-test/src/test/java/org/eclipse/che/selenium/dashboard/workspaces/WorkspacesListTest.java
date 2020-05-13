@@ -20,7 +20,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
-import java.util.Collections;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -69,12 +68,10 @@ public class WorkspacesListTest {
   public void setUp() throws Exception {
     dashboard.open();
 
-    createWorkspaceHelper.createAndEditWorkspaceFromStack(
-        Devfile.JAVA_MAVEN, WORKSPACE_NAME, Collections.emptyList(), null);
+    createWorkspaceHelper.createAndStartWorkspaceFromStack(Devfile.JAVA_MAVEN, WORKSPACE_NAME);
     workspaceOverview.checkNameWorkspace(WORKSPACE_NAME);
 
-    createWorkspaceHelper.createAndEditWorkspaceFromStack(
-        Devfile.JAVA_MAVEN, WORKSPACE_NAME2, Collections.emptyList(), null);
+    createWorkspaceHelper.createAndStartWorkspaceFromStack(Devfile.JAVA_MAVEN, WORKSPACE_NAME2);
     workspaceOverview.checkNameWorkspace(WORKSPACE_NAME2);
   }
 
