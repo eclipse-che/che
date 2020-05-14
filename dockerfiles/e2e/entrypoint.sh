@@ -88,7 +88,15 @@ if [ $TEST_SUITE == "load-test" ]; then
 
   npm run $TEST_SUITE 2>&1 | tee $CONSOLE_LOGS
 
+
+  echo "Killing ffmpeg with PID=$ffmpeg_pid"
+  kill -2 "$ffmpeg_pid"
+  wait "$ffmpeg_pid"
+  mkdir -p /tmp/e2e/report/
+  cp /tmp/ffmpeg_report/* /tmp/e2e/report/
+
   echo "Tarring files and sending them via FTP..."
+  cp /tmp/ffmpeg_report/* $user_folder
   tar -cf $user_folder.tar ./$user_folder
 
   ftp -n load-tests-ftp-service << End_script 

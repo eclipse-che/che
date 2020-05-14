@@ -69,7 +69,7 @@ suite('Validation of workspace start', async () => {
     });
 
     test('Wait workspace running state', async () => {
-        await ide.waitWorkspaceAndIde(namespace, workspaceName);
+        await ide.waitWorkspaceAndIde();
     });
 
     test('Wait until project is imported', async () => {

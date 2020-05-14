@@ -19,7 +19,7 @@ import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { TestConstants } from '../../TestConstants';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { NameGenerator } from '../../utils/NameGenerator';
+import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import { CheGitApi } from '../../utils/VCS/CheGitApi';
 import { GitHubUtil } from '../../utils/VCS/github/GitHubUtil';
 import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
@@ -31,8 +31,6 @@ const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
-const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
-const workspaceName: string = TestConstants.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME;
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
 const gitHubUtils: GitHubUtil = e2eContainer.get<GitHubUtil>(CLASSES.GitHubUtil);
@@ -57,7 +55,7 @@ suite('Git with ssh workflow', async () => {
     test('Login into workspace and open tree container', async () => {
         await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckGeneratingKeys);
         await loginPage.login();
-        await ide.waitWorkspaceAndIde(namespace, workspaceName);
+        await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
     });
 
@@ -71,7 +69,7 @@ suite('Git with ssh workflow', async () => {
 
 
     test('Add a SSH key to GitHub side and clone by ssh link', async () => {
-        const sshName: string = NameGenerator.generate('test-SSH-', 5);
+        const sshName: string = WorkspaceNameHandler.generateWorkspaceName('test-SSH-', 5);
         const publicSshKey = await cheGitAPI.getPublicSSHKey();
         await gitHubUtils.addPublicSshKeyToUserAccount(TestConstants.TS_GITHUB_TEST_REPO_ACCESS_TOKEN, sshName, publicSshKey);
         await cloneTestRepo();
@@ -101,7 +99,7 @@ suite('Git with ssh workflow', async () => {
         data.metadata!.name = wsNameCheckPropagatingKeys;
         await testWorkspaceUtils.createWsFromDevFile(data);
         await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckPropagatingKeys);
-        await ide.waitWorkspaceAndIde(namespace, workspaceName);
+        await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
         await cloneTestRepo();
         await projectTree.waitItem('Spoon-Knife');

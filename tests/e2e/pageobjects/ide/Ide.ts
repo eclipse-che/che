@@ -115,9 +115,7 @@ export class Ide {
         await this.driverHelper.waitAndClick(By.xpath(yesButtonLocator));
     }
 
-    async waitWorkspaceAndIde(workspaceNamespace: string,
-        workspaceName: string,
-        timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+    async waitWorkspaceAndIde(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
 
         Logger.debug('Ide.waitWorkspaceAndIde');
 
