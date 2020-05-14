@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { NameGenerator } from '../../utils/NameGenerator';
+import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import 'reflect-metadata';
 import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as workspaceHandler from '../../testsLibrary/WorksapceHandlingTests';
@@ -22,8 +22,6 @@ const taskMigrate: string = 'migrate';
 const taskRunServer: string = 'run server';
 const taskExpectedDialogText: string = 'A process is now listening on port 7000';
 const taskCustomUrlSubpath: string = '/api/';
-
-let workspaceName = 'not defined';
 
 suite(`${workspaceStack} test`, async () => {
 
@@ -47,8 +45,9 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite ('Stopping and deleting the workspace', async () => {
+        let workspaceName = 'not defined';
         suiteSetup( async () => {
-            workspaceName = await NameGenerator.getNameFromUrl();
+            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
         test (`Stop worksapce`, async () => {
             await workspaceHandler.stopWorkspace(workspaceName);

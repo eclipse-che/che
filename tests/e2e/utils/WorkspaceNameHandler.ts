@@ -13,9 +13,9 @@ import { e2eContainer } from '../inversify.config';
 import { CLASSES } from '../inversify.types';
 let driverHelper : DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
-export class NameGenerator {
+export class WorkspaceNameHandler {
 
-    public static generate(prefix: string, randomLength: number): string {
+    public static generateWorkspaceName(prefix: string, randomLength: number): string {
         const possibleCharacters: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
         const possibleCharactersLength: number = possibleCharacters.length;
         let randomPart: string = '';

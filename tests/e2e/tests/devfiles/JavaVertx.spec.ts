@@ -12,7 +12,7 @@ import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
-import { NameGenerator } from '../..';
+import { WorkspaceNameHandler } from '../..';
 
 const sampleName: string = 'vertx-http-example';
 const fileFolderPath: string = `${sampleName}/src/main/java/io/openshift/example`;
@@ -21,8 +21,6 @@ const codeNavigationClassName: string = 'RouterImpl.class';
 const buildTaskName: string = 'maven build';
 const LSstarting: string = 'Activating Language Support for Java';
 const stack: string = 'Java Vert.x';
-
-let workspaceName = 'not defined';
 
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
@@ -45,8 +43,9 @@ suite(`${stack} test`, async () => {
     });
 
     suite ('Stopping and deleting the workspace', async () => {
+        let workspaceName = 'not defined';
         suiteSetup( async () => {
-            workspaceName = await NameGenerator.getNameFromUrl();
+            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
         test (`Stop worksapce`, async () => {
             await workspaceHandling.stopWorkspace(workspaceName);

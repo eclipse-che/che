@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { NameGenerator} from '../..';
+import { WorkspaceNameHandler} from '../..';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
@@ -20,8 +20,6 @@ const tabTitle: string = 'HelloWorld.java';
 const codeNavigationClassName: string = 'String.class';
 const stack : string = 'Java Maven';
 const taskName: string = 'maven build';
-
-let workspaceName = 'not defined';
 
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
@@ -44,8 +42,9 @@ suite(`${stack} test`, async () => {
     });
 
     suite ('Stopping and deleting the workspace', async () => {
+        let workspaceName = 'not defined';
         suiteSetup( async () => {
-            workspaceName = await NameGenerator.getNameFromUrl();
+            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
         test (`Stop worksapce`, async () => {
             await workspaceHandling.stopWorkspace(workspaceName);

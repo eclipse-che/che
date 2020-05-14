@@ -19,7 +19,7 @@ import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { TestConstants } from '../../TestConstants';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { NameGenerator } from '../../utils/NameGenerator';
+import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import { CheGitApi } from '../../utils/VCS/CheGitApi';
 import { GitHubUtil } from '../../utils/VCS/github/GitHubUtil';
 import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
@@ -69,7 +69,7 @@ suite('Git with ssh workflow', async () => {
 
 
     test('Add a SSH key to GitHub side and clone by ssh link', async () => {
-        const sshName: string = NameGenerator.generate('test-SSH-', 5);
+        const sshName: string = WorkspaceNameHandler.generateWorkspaceName('test-SSH-', 5);
         const publicSshKey = await cheGitAPI.getPublicSSHKey();
         await gitHubUtils.addPublicSshKeyToUserAccount(TestConstants.TS_GITHUB_TEST_REPO_ACCESS_TOKEN, sshName, publicSshKey);
         await cloneTestRepo();
