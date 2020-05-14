@@ -22,6 +22,7 @@ function prepareCustomResourceFile() {
   sed -i "s@cheImage: ''@cheImage: 'quay.io/eclipse/che-server'@g" /tmp/custom-resource.yaml
   sed -i "s@cheImageTag: 'nightly'@cheImageTag: '${TAG}'@g" /tmp/custom-resource.yaml
   sed -i "s@tlsSupport: true@tlsSupport: false@g" /tmp/custom-resource.yaml
+  sed -i "s@identityProviderPassword: ''@identityProviderPassword: 'admin'@g" /tmp/custom-resource.yaml
   cat /tmp/custom-resource.yaml
 }
 

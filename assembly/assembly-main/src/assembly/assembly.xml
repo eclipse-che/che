@@ -42,24 +42,6 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>tomcat/webapps</outputDirectory>
-            <outputFileNameMapping>dashboard.war</outputFileNameMapping>
-            <includes>
-                <include>org.eclipse.che:assembly-dashboard-war</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>tomcat/webapps</outputDirectory>
-            <outputFileNameMapping>workspace-loader.war</outputFileNameMapping>
-            <includes>
-                <include>org.eclipse.che:assembly-workspace-loader-war</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>swagger.war</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che:assembly-swagger-war</include>
@@ -76,12 +58,20 @@
     </dependencySets>
     <fileSets>
         <fileSet>
-            <directory>${project.build.directory}/dependency/</directory>
+            <directory>${project.build.directory}/dependency/assembly-che-tomcat8</directory>
             <outputDirectory>tomcat/</outputDirectory>
             <excludes>
                 <exclude>bin/*.bat</exclude>
             </excludes>
        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/dependency/assembly-dashboard-war</directory>
+            <outputDirectory>tomcat/webapps/dashboard</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/dependency/assembly-workspace-loader-war</directory>
+            <outputDirectory>tomcat/webapps/workspace-loader</outputDirectory>
+        </fileSet>
        <fileSet>
             <directory>${project.basedir}/src/assembly</directory>
             <outputDirectory></outputDirectory>
