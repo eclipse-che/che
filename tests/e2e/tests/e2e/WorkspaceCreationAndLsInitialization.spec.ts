@@ -19,7 +19,6 @@ import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { Editor } from '../../pageobjects/ide/Editor';
 
 const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
-const namespace: string = 'che';
 const sampleName: string = 'console-java-simple';
 const fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
 const tabTitle: string = 'HelloWorld.java';
@@ -51,7 +50,7 @@ suite('E2E', async () => {
 
     suite('Work with IDE', async () => {
         test('Wait IDE availability', async () => {
-            await ide.waitWorkspaceAndIde(namespace, workspaceName);
+            await ide.waitWorkspaceAndIde();
         });
 
         test('Open project tree container', async () => {

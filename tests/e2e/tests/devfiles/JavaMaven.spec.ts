@@ -14,7 +14,6 @@ import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 
-const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
 const sampleName: string = 'console-java-simple';
 const fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
 const tabTitle: string = 'HelloWorld.java';
@@ -22,10 +21,12 @@ const codeNavigationClassName: string = 'String.class';
 const stack : string = 'Java Maven';
 const taskName: string = 'maven build';
 
+let workspaceName = 'not defined';
+
 suite(`${stack} test`, async () => {
-    suite (`Create ${stack} workspace ${workspaceName}`, async () => {
-        workspaceHandling.createAndOpenWorkspace(workspaceName, stack);
-        projectAndFileTests.waitWorkspaceReadiness(workspaceName, sampleName, 'src');
+    suite (`Create ${stack} workspace`, async () => {
+        workspaceHandling.createAndOpenWorkspace(stack);
+        projectAndFileTests.waitWorkspaceReadiness(sampleName, 'src');
     });
 
     suite('Validation of workspace build and run', async () => {
@@ -42,8 +43,15 @@ suite(`${stack} test`, async () => {
         commonLsTests.codeNavigation(tabTitle, 9, 10, codeNavigationClassName);
     });
 
-    suite ('Stop and remove workspace', async() => {
-        workspaceHandling.stopWorkspace(workspaceName);
-        workspaceHandling.removeWorkspace(workspaceName);
+    suite ('Stopping and deleting the workspace', async () => {
+        suiteSetup( async () => {
+            workspaceName = await NameGenerator.getNameFromUrl();
+        });
+        test (`Stop worksapce`, async () => {
+            await workspaceHandling.stopWorkspace(workspaceName);
+        });
+        test (`Remove workspace`, async () => {
+            await workspaceHandling.removeWorkspace(workspaceName);
+        });
     });
 });

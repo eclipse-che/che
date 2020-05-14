@@ -8,7 +8,13 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
+import { DriverHelper } from './DriverHelper';
+import { e2eContainer } from '../inversify.config';
+import { CLASSES } from '../inversify.types';
+let driverHelper : DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+
 export class NameGenerator {
+
     public static generate(prefix: string, randomLength: number): string {
         const possibleCharacters: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
         const possibleCharactersLength: number = possibleCharacters.length;
@@ -21,6 +27,14 @@ export class NameGenerator {
         }
 
         return prefix + randomPart;
+    }
+
+    public static async getNameFromUrl() : Promise<string> {
+        let url : string = await driverHelper.getCurrentUrl();
+        url = url.split('?')[0];
+        let splittedUrl = url.split(`/`);
+        let wsname : string = splittedUrl[splittedUrl.length - 1];
+        return wsname;
     }
 
 }

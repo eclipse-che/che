@@ -13,7 +13,6 @@ import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as workspaceHandler from '../../testsLibrary/WorksapceHandlingTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 
-const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
 const workspaceStack: string = 'Python Django';
 const workspaceSampleName: string = 'django-realworld-example-app';
 const workspaceRootFolderName: string = 'conduit';
@@ -24,11 +23,13 @@ const taskRunServer: string = 'run server';
 const taskExpectedDialogText: string = 'A process is now listening on port 7000';
 const taskCustomUrlSubpath: string = '/api/';
 
+let workspaceName = 'not defined';
+
 suite(`${workspaceStack} test`, async () => {
 
-    suite(`Create ${workspaceStack} workspace ${workspaceName}`, async () => {
-        workspaceHandler.createAndOpenWorkspace(workspaceName, workspaceStack);
-        projectManager.waitWorkspaceReadiness(workspaceName, workspaceSampleName, workspaceRootFolderName);
+    suite(`Create ${workspaceStack} workspace`, async () => {
+        workspaceHandler.createAndOpenWorkspace(workspaceStack);
+        projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
     suite('Install dependencies', async () => {
@@ -45,9 +46,15 @@ suite(`${workspaceStack} test`, async () => {
         codeExecutionHelper.runTaskWithDialogShellDjangoWorkaround(taskRunServer, taskExpectedDialogText, taskCustomUrlSubpath, 30_000);
     });
 
-    suite('Stop and remove workspace', async() => {
-        workspaceHandler.stopWorkspace(workspaceName);
-        workspaceHandler.removeWorkspace(workspaceName);
+    suite ('Stopping and deleting the workspace', async () => {
+        suiteSetup( async () => {
+            workspaceName = await NameGenerator.getNameFromUrl();
+        });
+        test (`Stop worksapce`, async () => {
+            await workspaceHandler.stopWorkspace(workspaceName);
+        });
+        test (`Remove workspace`, async () => {
+            await workspaceHandler.removeWorkspace(workspaceName);
+        });
     });
-
 });
