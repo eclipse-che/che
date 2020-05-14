@@ -15,15 +15,14 @@ import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
-import { TestConstants, NameGenerator } from '../..';
+import { TestConstants, WorkspaceNameHandler } from '../..';
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const cheLoginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
 const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
-const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
+const workspaceName: string = WorkspaceNameHandler.generateWorkspaceName('wksp-test-', 5);
 const workspacePrefixUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/`;
-const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
 
 suite('Load test suite', async () => {
 
@@ -42,7 +41,7 @@ suite('Load test suite', async () => {
 
 
     test('Wait loading workspace and get time', async () => {
-        await ide.waitWorkspaceAndIde(namespace, workspaceName);
+        await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
     });
 
