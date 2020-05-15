@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.testng.Assert.fail;
@@ -37,8 +36,6 @@ import org.testng.annotations.Test;
 @Test(groups = {UNDER_REPAIR})
 public class ProjectStateAfterWorkspaceRestartTest {
 
-  private static final String WORKSPACE_NAME =
-      generate(ProjectStateAfterWorkspaceRestartTest.class.getSimpleName(), 5);
   private static final String PATH_TO_POM_FILE = CONSOLE_JAVA_SIMPLE + "/" + "pom.xml";
   private static final String PATH_TO_README_FILE = CONSOLE_JAVA_SIMPLE + "/" + "README.md";
 
@@ -52,21 +49,21 @@ public class ProjectStateAfterWorkspaceRestartTest {
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private Workspaces workspaces;
 
+  private String workspaceName;
+
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
-    createWorkspaceHelper.createAndStartWorkspaceFromStack(Devfile.JAVA_MAVEN, WORKSPACE_NAME);
+    workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
+    workspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
   }
 
   @Test
   public void checkProjectAfterStopStartWs() {
-    theiaIde.waitOpenedWorkspaceIsReadyToUse();
-
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectAreaOpened();
@@ -81,12 +78,12 @@ public class ProjectStateAfterWorkspaceRestartTest {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.clickOnWorkspaceStopStartButton(WORKSPACE_NAME);
-    workspaces.waitWorkspaceStatus(WORKSPACE_NAME, Status.STOPPED);
-    workspaces.clickOnWorkspaceStopStartButton(WORKSPACE_NAME);
-    workspaces.waitWorkspaceStatus(WORKSPACE_NAME, Status.RUNNING);
-    workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
-    workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
+    workspaces.clickOnWorkspaceStopStartButton(workspaceName);
+    workspaces.waitWorkspaceStatus(workspaceName, Status.STOPPED);
+    workspaces.clickOnWorkspaceStopStartButton(workspaceName);
+    workspaces.waitWorkspaceStatus(workspaceName, Status.RUNNING);
+    workspaces.selectWorkspaceItemName(workspaceName);
+    workspaceDetails.waitToolbarTitleName(workspaceName);
     workspaceDetails.clickOpenInIdeWsBtn();
 
     theiaIde.waitOpenedWorkspaceIsReadyToUse();

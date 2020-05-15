@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.hotupdate.rolling;
 
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.testng.Assert.assertTrue;
 
@@ -44,9 +43,6 @@ import org.testng.annotations.Test;
 
 /** @author Katerina Kanova */
 public class RollingUpdateStrategyWithStartedWorkspaceTest {
-  private static final String WORKSPACE_NAME =
-      generate(RollingUpdateStrategyWithStartedWorkspaceTest.class.getSimpleName(), 5);
-
   @Inject private CheTestSystemClient cheTestSystemClient;
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
@@ -57,15 +53,17 @@ public class RollingUpdateStrategyWithStartedWorkspaceTest {
   @Inject private TheiaIde theiaIde;
   @Inject private TheiaProjectTree theiaProjectTree;
 
+  private String workspaceName;
+
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
-    createWorkspaceHelper.createAndStartWorkspaceFromStack(Devfile.JAVA_MAVEN, WORKSPACE_NAME);
+    workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
+    workspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
   }
 
   @Test
@@ -85,8 +83,8 @@ public class RollingUpdateStrategyWithStartedWorkspaceTest {
 
     // check existing of expected workspace and its status
     workspaces.waitPageLoading();
-    workspaces.waitWorkspaceIsPresent(WORKSPACE_NAME);
-    workspaces.waitWorkspaceStatus(WORKSPACE_NAME, Workspaces.Status.RUNNING);
+    workspaces.waitWorkspaceIsPresent(workspaceName);
+    workspaces.waitWorkspaceStatus(workspaceName, Workspaces.Status.RUNNING);
 
     hotUpdateUtil.executeMasterPodUpdateCommand();
 
@@ -95,7 +93,7 @@ public class RollingUpdateStrategyWithStartedWorkspaceTest {
         hotUpdateUtil.getRolloutStatus().contains("deployment \"che\" successfully rolled out"));
     WaitUtils.sleepQuietly(60);
 
-    workspaces.waitWorkspaceIsPresent(WORKSPACE_NAME);
-    workspaces.waitWorkspaceStatus(WORKSPACE_NAME, Workspaces.Status.RUNNING);
+    workspaces.waitWorkspaceIsPresent(workspaceName);
+    workspaces.waitWorkspaceStatus(workspaceName, Workspaces.Status.RUNNING);
   }
 }

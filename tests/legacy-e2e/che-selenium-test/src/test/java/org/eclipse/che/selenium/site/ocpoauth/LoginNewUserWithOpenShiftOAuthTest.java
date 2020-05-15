@@ -17,13 +17,11 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -68,7 +66,6 @@ import org.testng.annotations.Test;
 public class LoginNewUserWithOpenShiftOAuthTest {
 
   private static final TestUser NEW_TEST_USER = getTestUser();
-  private static final String WORKSPACE_NAME = NameGenerator.generate("workspace", 4);
   private static final String USER_PROJECT_NAME = NEW_TEST_USER.getName() + "-che";
 
   @Inject private CheLoginPage cheLoginPage;
@@ -85,8 +82,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
   @Inject private TheiaIde theiaIde;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
 
-  // it is used to read workspace logs on test failure
-  private TestWorkspace testWorkspace;
+  private String workspaceName;
 
   @AfterClass
   private void removeTestUser() throws ServerException, ConflictException, BadRequestException {
@@ -116,11 +112,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     firstBrokerProfilePage.submit(NEW_TEST_USER);
 
     // create and open workspace of java type
-    createWorkspaceHelper.createAndStartWorkspaceFromStack(Devfile.JAVA_MAVEN, WORKSPACE_NAME);
-
-    // switch to the IDE and wait for workspace is ready to use
-    theiaIde.switchToIdeFrame();
-    theiaIde.waitTheiaIde();
+    workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
 
     // go to OCP and check if there a user project has expected resources
     openShiftProjectCatalogPage.open();
@@ -135,7 +127,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     workspaces.selectAllWorkspacesByBulk();
     workspaces.clickOnDeleteWorkspacesBtn();
     workspaces.clickOnDeleteButtonInDialogWindow();
-    workspaces.waitWorkspaceIsNotPresent(WORKSPACE_NAME);
+    workspaces.waitWorkspaceIsNotPresent(workspaceName);
 
     // go to OCP and check that workspace resources deleted
     openShiftProjectCatalogPage.open();

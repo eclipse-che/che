@@ -33,8 +33,6 @@ import org.testng.annotations.Test;
 /** @author Aleksandr Shmaraev */
 @Test()
 public class ProjectStateAfterRenameWorkspaceTest {
-  private static final String WORKSPACE_NAME =
-      generate(ProjectStateAfterRenameWorkspaceTest.class.getSimpleName(), 5);
   private static final String WORKSPACE_NEW_NAME = generate("rename_ws", 4);
   private static final String PATH_TO_POM_FILE = CONSOLE_JAVA_SIMPLE + "/" + "pom.xml";
   private static final String PATH_TO_README_FILE = CONSOLE_JAVA_SIMPLE + "/" + "README.md";
@@ -50,22 +48,22 @@ public class ProjectStateAfterRenameWorkspaceTest {
   @Inject private Workspaces workspaces;
   @Inject private WorkspaceOverview workspaceOverview;
 
+  private String workspaceName;
+
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
-    createWorkspaceHelper.createAndStartWorkspaceFromStack(Devfile.JAVA_MAVEN, WORKSPACE_NAME);
+    workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
+    workspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
     workspaceServiceClient.delete(WORKSPACE_NEW_NAME, defaultTestUser.getName());
   }
 
   @Test
   public void checkProjectAfterRenameWs() {
-    theiaIde.waitOpenedWorkspaceIsReadyToUse();
-
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectAreaOpened();
@@ -80,7 +78,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
+    workspaces.selectWorkspaceItemName(workspaceName);
     workspaceOverview.enterNameWorkspace(WORKSPACE_NEW_NAME);
     workspaceDetails.clickOnSaveChangesBtn();
     dashboard.waitNotificationMessage("Workspace updated");

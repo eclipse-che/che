@@ -22,7 +22,6 @@
           <class name="org.eclipse.che.selenium.dashboard.DeleteRunningWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.DeleteStoppingWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.workspaces.details.WorkspaceDetailsOverviewTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.organization.UserEmptyOrganizationTest"/>
           <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolderTest"/>
           <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithSpecificBranchTest"/>
           <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithKeepDirectoryTest"/>

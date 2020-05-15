@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
@@ -90,47 +91,13 @@ public class NewWorkspace {
     String WORKSPACE_NAME_INPUT_XPATH = "//input[@name='workspaceName']";
     String OPEN_DIVFILES_LIST_XPATH = "//button[contains(@id,'select-single-typeahead-expanded')]";
     String DEVFILE_ITEM_IN_LIST_XPATH = "//button/span[text()='%s']";
+    String SELECTED_DEVFILE_ITEM_XPATH =
+        "//div/input[contains(@id,'select-single-typeahead-expanded')]";
     String CREATE_AND_START_BUTTON_XPATH = "//button[@title='Create & Open']";
-  }
 
-  public void clickOnCustomWorkspacesTab() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.CUSTOM_WORKSPACE_TAB_XPATH));
-  }
-
-  public void waitCustomWorkspacesTab() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.CUSTOM_WORKSPACE_TITLE_XPATH));
-  }
-
-  public void typeWorkspaceName(String name) {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.WORKSPACE_NAME_INPUT_XPATH));
-    seleniumWebDriverHelper.setValue(By.xpath(Locators.WORKSPACE_NAME_INPUT_XPATH), name);
-    Assert.assertEquals(getWorkspaceNameValue(), name);
-  }
-
-  public String getWorkspaceNameValue() {
-    return seleniumWebDriverHelper.waitVisibilityAndGetValue(
-        By.xpath(Locators.WORKSPACE_NAME_INPUT_XPATH));
-  }
-
-  public void openDevfilesList() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.OPEN_DIVFILES_LIST_XPATH));
-  }
-
-  public void selectDevfileFromList(Devfile devfile) {
-    seleniumWebDriverHelper.waitAndClick(
-        By.xpath(format(Locators.DEVFILE_ITEM_IN_LIST_XPATH, devfile.getId())));
-  }
-
-  public void clickOnCreateAndOpenButton() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.CREATE_AND_START_BUTTON_XPATH));
-  }
-
-  public void selectDevfileFromCustomWorkspacesPage(Devfile devfile) {
-    clickOnCustomWorkspacesTab();
-    waitCustomWorkspacesTab();
-
-    openDevfilesList();
-    selectDevfileFromList(devfile);
+    String DEFVILE_ITEM_XPATH2 = "//div[@devfile='devfile']//b[text()='%s']";
+    String GET_STARTED_TAB_XPATH = "//md-tab-item//span[text()='Get Started']";
+    String GET_STARTED_TITLE_XPATH = "//div[@title='Getting Started with Eclipse Che']";
   }
 
   public enum Devfile {
@@ -178,6 +145,57 @@ public class NewWorkspace {
 
   @FindBy(xpath = TOP_EDIT_BUTTON_XPATH)
   WebElement topEditWorkspaceButton;
+
+  public void clickOnGetStartedTab() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.GET_STARTED_TAB_XPATH));
+  }
+
+  public void waitGetStartedTabActive() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.GET_STARTED_TAB_XPATH));
+  }
+
+  public void selectDevfileFromGetStartedList(Devfile devfile) {
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format(Locators.DEFVILE_ITEM_XPATH2, devfile.getId())));
+  }
+
+  public void clickOnCustomWorkspacesTab() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.CUSTOM_WORKSPACE_TAB_XPATH));
+  }
+
+  public void waitCustomWorkspacesTab() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.CUSTOM_WORKSPACE_TITLE_XPATH));
+  }
+
+  public void typeWorkspaceName(String name) {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.WORKSPACE_NAME_INPUT_XPATH));
+    seleniumWebDriverHelper.setValue(By.xpath(Locators.WORKSPACE_NAME_INPUT_XPATH), name);
+    Assert.assertEquals(getWorkspaceNameValue(), name);
+  }
+
+  public String getWorkspaceNameValue() {
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(
+        By.xpath(Locators.WORKSPACE_NAME_INPUT_XPATH));
+  }
+
+  public void openDevfilesList() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.OPEN_DIVFILES_LIST_XPATH));
+  }
+
+  public void selectDevfileFromList(Devfile devfile) {
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format(Locators.DEVFILE_ITEM_IN_LIST_XPATH, devfile.getId())));
+    WaitUtils.sleepQuietly(5);
+  }
+
+  public String getSelectedDevfileName() {
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(
+        By.xpath(Locators.SELECTED_DEVFILE_ITEM_XPATH));
+  }
+
+  public void clickOnCreateAndOpenButton() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.CREATE_AND_START_BUTTON_XPATH));
+  }
 
   private void waitButtonDisableState(WebElement button, boolean state) {
     seleniumWebDriverHelper.waitAttributeEqualsTo(button, "aria-disabled", Boolean.toString(state));

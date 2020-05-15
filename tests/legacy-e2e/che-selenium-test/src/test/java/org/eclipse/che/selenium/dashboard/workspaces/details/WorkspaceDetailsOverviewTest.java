@@ -17,6 +17,8 @@ import static org.openqa.selenium.Keys.ESCAPE;
 
 import com.google.inject.Inject;
 import java.util.List;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -26,12 +28,11 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 public class WorkspaceDetailsOverviewTest {
-
-  private static final String WORKSPACE_NAME = generate("test-workspace", 4);
-  private static final String CHANGED_WORKSPACE_NAME = generate(WORKSPACE_NAME, 4);
+  private static final String CHANGED_WORKSPACE_NAME = generate("wksp-name-", 4);
   private static final String TOO_SHORT_NAME = "wk";
   private static final String MAX_LONG_NAME = generate("wksp-", 95);
   private static final String TOO_LONG_NAME = generate(MAX_LONG_NAME, 1);
@@ -55,19 +56,27 @@ public class WorkspaceDetailsOverviewTest {
   @Inject private TheiaIde theiaIde;
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
+  @Inject private DefaultTestUser defaultTestUser;
+  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+
+  private String workspaceName;
+
+  @AfterClass
+  public void tearDown() throws Exception {
+    workspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
+  }
 
   @Test()
   public void shouldCheckExportAsFile() {
     dashboard.open();
-    createWorkspaceHelper.createAndStartWorkspaceFromStack(Devfile.JAVA_MAVEN, WORKSPACE_NAME);
-    theiaIde.waitOpenedWorkspaceIsReadyToUse();
+    workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
 
     dashboard.open();
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
-    workspaceOverview.checkNameWorkspace(WORKSPACE_NAME);
+    workspaces.selectWorkspaceItemName(workspaceName);
+    workspaceOverview.checkNameWorkspace(workspaceName);
 
     // check of closing by "Esc"
     openExportWorkspaceForm();
@@ -94,7 +103,7 @@ public class WorkspaceDetailsOverviewTest {
 
   @Test(priority = 1)
   public void shouldCheckNameField() {
-    workspaceOverview.waitNameFieldValue(WORKSPACE_NAME);
+    workspaceOverview.waitNameFieldValue(workspaceName);
 
     // check of empty name
     workspaceOverview.enterNameWorkspace("");

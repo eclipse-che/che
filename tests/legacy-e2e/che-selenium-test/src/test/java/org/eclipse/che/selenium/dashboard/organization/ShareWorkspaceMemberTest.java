@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.dashboard.organization;
 
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
@@ -45,13 +44,13 @@ import org.testng.annotations.Test;
 @Test(groups = {UNDER_REPAIR})
 public class ShareWorkspaceMemberTest {
 
-  private static final String WORKSPACE_NAME = generate("workspace", 4);
   private static final String ADMIN_PERMISSIONS =
       "read, use, run, configure, setPermissions, delete";
   private static final String MEMBER_PERMISSIONS = "read, use, run, configure";
 
   private String systemAdminName;
   private String memberName;
+  private String workspaceName;
 
   @InjectTestOrganization private TestOrganization org;
 
@@ -81,19 +80,19 @@ public class ShareWorkspaceMemberTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(WORKSPACE_NAME, adminTestUser.getName());
+    workspaceServiceClient.delete(workspaceName, adminTestUser.getName());
     org.delete();
   }
 
   @Test
   public void checkSharingByWorkspaceOwner() {
-    createWorkspace(WORKSPACE_NAME);
+    createWorkspace();
 
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
-    workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
+    workspaces.selectWorkspaceItemName(workspaceName);
+    workspaceDetails.waitToolbarTitleName(workspaceName);
     workspaceDetails.selectTabInWorkspaceMenu(SHARE);
 
     // invite a member to workspace and check permission
@@ -114,9 +113,9 @@ public class ShareWorkspaceMemberTest {
     // login as developer and check that the shared workspace exists in Workspaces list
     dashboard.open(testUser.getName(), testUser.getPassword());
     dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.waitWorkspaceIsPresent(WORKSPACE_NAME);
-    workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
-    workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
+    workspaces.waitWorkspaceIsPresent(workspaceName);
+    workspaces.selectWorkspaceItemName(workspaceName);
+    workspaceDetails.waitToolbarTitleName(workspaceName);
 
     // check all members permission
     workspaceDetails.selectTabInWorkspaceMenu(SHARE);
@@ -145,8 +144,8 @@ public class ShareWorkspaceMemberTest {
     dashboard.open();
     navigationBar.waitNavigationBar();
     dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
-    workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
+    workspaces.selectWorkspaceItemName(workspaceName);
+    workspaceDetails.waitToolbarTitleName(workspaceName);
     workspaceDetails.selectTabInWorkspaceMenu(OVERVIEW);
 
     workspaceOverview.clickOnDeleteWorkspace();
@@ -160,17 +159,17 @@ public class ShareWorkspaceMemberTest {
 
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
     dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.waitWorkspaceIsPresent(WORKSPACE_NAME);
-    workspaces.waitWorkspaceStatus(WORKSPACE_NAME, STOPPED);
+    workspaces.waitWorkspaceIsPresent(workspaceName);
+    workspaces.waitWorkspaceStatus(workspaceName, STOPPED);
 
-    workspaces.selectWorkspaceByCheckbox(WORKSPACE_NAME);
+    workspaces.selectWorkspaceByCheckbox(workspaceName);
     workspaces.clickOnDeleteWorkspacesBtn();
     workspaces.clickOnDeleteButtonInDialogWindow();
-    workspaces.waitWorkspaceIsNotPresent(WORKSPACE_NAME);
+    workspaces.waitWorkspaceIsNotPresent(workspaceName);
   }
 
-  private void createWorkspace(String workspaceName) {
-    createWorkspaceHelper.createAndStartWorkspaceFromStack(Devfile.JAVA_MAVEN, workspaceName);
+  private void createWorkspace() {
+    workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
 
     theiaIde.waitOpenedWorkspaceIsReadyToUse();
 
