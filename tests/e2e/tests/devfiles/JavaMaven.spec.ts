@@ -34,7 +34,6 @@ suite(`${stack} test`, async () => {
 
     suite('Language server validation', async () => {
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
-        commonLsTests.waitLSInitialization('Activating Language Support for Java', 1_800_000, 360_000);
         commonLsTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
         commonLsTests.errorHighlighting(tabTitle, 'error', 11);
         commonLsTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');
