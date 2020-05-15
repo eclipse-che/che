@@ -146,33 +146,21 @@ buildImages() {
 
     # BUILD IMAGES
     for image_dir in ${DOCKER_FILES_LOCATIONS[@]}
-     do
+      do
          bash $(pwd)/${image_dir}/build.sh --tag:${TAG} 
-         if [[ ${image_dir} == "dockerfiles/che" ]]; then
-           #CENTOS SINGLE USER
-           BUILD_ASSEMBLY_DIR=$(echo assembly/assembly-main/target/eclipse-che-*/eclipse-che-*/)
-           LOCAL_ASSEMBLY_DIR="${image_dir}/eclipse-che"
-           if [[ -d "${LOCAL_ASSEMBLY_DIR}" ]]; then
-               rm -r "${LOCAL_ASSEMBLY_DIR}"
-           fi
-           cp -r "${BUILD_ASSEMBLY_DIR}" "${LOCAL_ASSEMBLY_DIR}"
-           docker build -t ${REGISTRY}/${ORGANIZATION}/che-server:${TAG}-centos -f $(pwd)/${image_dir}/Dockerfile.centos $(pwd)/${image_dir}/
-         fi
+         
          if [[ $? -ne 0 ]]; then
            echo "ERROR:"
            echo "build of '${image_dir}' image is failed!"
            exit 1
          fi
-     done
+      done
 }
 
 tagLatestImages() {
     for image in ${IMAGES_LIST[@]}
      do
          echo y | docker tag "${image}:$1" "${image}:latest"
-         if [[ ${image} == "${REGISTRY}/${ORGANIZATION}/che-server" ]]; then
-           docker tag "${image}:$1-centos" "${image}:latest-centos"
-         fi
          if [[ $? -ne 0 ]]; then
            die_with  "docker tag of '${image}' image is failed!"
          fi
@@ -192,12 +180,6 @@ pushImagesOnQuay() {
             echo y | docker push "${image}:$1"
             if [[ $2 == "pushLatest" ]]; then
                 echo y | docker push "${image}:latest"
-            fi
-            if [[ ${image} == "${REGISTRY}/${ORGANIZATION}/che-server" ]]; then
-                if [[ $2 == "pushLatest" ]]; then
-                echo y | docker push "${REGISTRY}/${ORGANIZATION}/che-server:latest-centos"
-                fi
-            echo y | docker push "${REGISTRY}/${ORGANIZATION}/che-server:$1-centos"
             fi
             if [[ $? -ne 0 ]]; then
             die_with  "docker push of '${image}' image is failed!"

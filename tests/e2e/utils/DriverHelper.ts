@@ -520,6 +520,10 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum mouse move attempts, for the '${elementLocator}' element`);
     }
 
+    public async getCurrentUrl() : Promise<string> {
+        return await this.driver.getCurrentUrl();
+    }
+
     getDriver(): ThenableWebDriver {
         Logger.trace('DriverHelper.getDriver');
 
