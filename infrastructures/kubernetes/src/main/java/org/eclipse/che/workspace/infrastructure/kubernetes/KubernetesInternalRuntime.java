@@ -92,7 +92,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatc
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogToEventPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsVolumeOrEnvProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -130,7 +130,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final IngressPathTransformInverter ingressPathTransformInverter;
   private final RuntimeHangingDetector runtimeHangingDetector;
   private final PreviewUrlCommandProvisioner previewUrlCommandProvisioner;
-  private final SecretAsVolumeOrEnvProvisioner secretAsVolumeOrEnvProvisioner;
+  private final SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
   protected final Tracer tracer;
 
   @Inject
@@ -154,7 +154,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       IngressPathTransformInverter ingressPathTransformInverter,
       RuntimeHangingDetector runtimeHangingDetector,
       PreviewUrlCommandProvisioner previewUrlCommandProvisioner,
-      SecretAsVolumeOrEnvProvisioner secretAsVolumeOrEnvProvisioner,
+      SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner,
       Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace) {
@@ -178,7 +178,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.runtimeHangingDetector = runtimeHangingDetector;
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
     this.previewUrlCommandProvisioner = previewUrlCommandProvisioner;
-    this.secretAsVolumeOrEnvProvisioner = secretAsVolumeOrEnvProvisioner;
+    this.secretAsContainerResourceProvisioner = secretAsContainerResourceProvisioner;
     this.tracer = tracer;
   }
 
@@ -213,7 +213,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // from previous provisioners into infrastructure specific objects
       kubernetesEnvironmentProvisioner.provision(context.getEnvironment(), context.getIdentity());
 
-      secretAsVolumeOrEnvProvisioner.provision(context.getEnvironment(), namespace);
+      secretAsContainerResourceProvisioner.provision(context.getEnvironment(), namespace);
       LOG.debug("Provisioning of workspace '{}' completed.", workspaceId);
 
       volumesStrategy.prepare(
