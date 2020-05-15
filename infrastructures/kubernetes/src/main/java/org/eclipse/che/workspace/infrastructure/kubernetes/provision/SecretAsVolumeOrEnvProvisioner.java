@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 
@@ -100,6 +101,16 @@ public class SecretAsVolumeOrEnvProvisioner<E extends KubernetesEnvironment> {
 
   private void mountAsFile(E env, Secret secret, String targetContainerName)
       throws InfrastructureException {
+
+    final String mountPath = secret.getMetadata().getAnnotations().get("mountPath");
+    if (mountPath == null) {
+      throw new InfrastructureException(
+          format(
+              "Unable to mount secret '%s': it has to be mounted as file, but mountPath is not specified."
+                  + "Please make sure you specified 'mountPath' annotation of secret.'",
+              secret.getMetadata().getName()));
+    }
+
     Volume volumeFromSecret =
         new VolumeBuilder()
             .withName(secret.getMetadata().getName())
@@ -108,6 +119,7 @@ public class SecretAsVolumeOrEnvProvisioner<E extends KubernetesEnvironment> {
                     .withNewSecretName(secret.getMetadata().getName())
                     .build())
             .build();
+
     for (PodData pd : env.getPodsData().values()) {
       if (!pd.getRole().equals(PodRole.DEPLOYMENT)) {
         continue;
@@ -117,40 +129,41 @@ public class SecretAsVolumeOrEnvProvisioner<E extends KubernetesEnvironment> {
         if (targetContainerName != null && !c.getName().equals(targetContainerName)) {
           continue;
         }
-        for (Entry<String, String> entry : secret.getData().entrySet()) {
-          final String mountPath = mountPath(secret, entry.getKey());
-          c.getVolumeMounts()
-              .add(
-                  new VolumeMountBuilder()
-                      .withName(volumeFromSecret.getName())
-                      .withMountPath(mountPath)
-                      .withReadOnly(true)
-                      .build());
-        }
+        c.getVolumeMounts()
+            .add(
+                new VolumeMountBuilder()
+                    .withName(volumeFromSecret.getName())
+                    .withMountPath(mountPath)
+                    .withReadOnly(true)
+                    .build());
       }
     }
   }
 
-  private String mountPath(Secret secret, String key) throws InfrastructureException {
-    final String mountPath = secret.getMetadata().getAnnotations().get(key + ".path");
-    if (mountPath == null) {
-      throw new InfrastructureException(
-          format(
-              "Unable to mount key '%s' of secret '%s': it has to be mounted as file, but path is not specified."
-                  + "Please make sure you specified '%s.path' annotation of secret.'",
-              key, secret.getMetadata().getName(), key));
-    }
-    return mountPath;
-  }
-
   private String envName(Secret secret, String key) throws InfrastructureException {
-    final String mountEnvName = secret.getMetadata().getAnnotations().get(key + ".envName");
-    if (mountEnvName == null) {
-      throw new InfrastructureException(
-          format(
-              "Unable to mount key '%s' of secret '%s': it has to be mounted as Env, but env name is not specified."
-                  + "Please make sure you specified '%s.envName' annotation of secret.'",
-              key, secret.getMetadata().getName(), key));
+    String mountEnvName;
+    if (secret.getData().size() == 1) {
+      try {
+        mountEnvName =
+            firstNonNull(
+                secret.getMetadata().getAnnotations().get("envName"),
+                secret.getMetadata().getAnnotations().get(key + ".envName"));
+      } catch (NullPointerException e) {
+        throw new InfrastructureException(
+            format(
+                "Unable to mount secret '%s': it has to be mounted as Env, but env name is not specified."
+                    + "Please make sure you specified 'envName' annotation of secret.'",
+                secret.getMetadata().getName()));
+      }
+    } else {
+      mountEnvName = secret.getMetadata().getAnnotations().get(key + ".envName");
+      if (mountEnvName == null) {
+        throw new InfrastructureException(
+            format(
+                "Unable to mount key '%s' of secret '%s': it has to be mounted as Env, but env name is not specified."
+                    + "Please make sure you specified '%s.envName' annotation of secret.'",
+                key, secret.getMetadata().getName(), key));
+      }
     }
     return mountEnvName;
   }
