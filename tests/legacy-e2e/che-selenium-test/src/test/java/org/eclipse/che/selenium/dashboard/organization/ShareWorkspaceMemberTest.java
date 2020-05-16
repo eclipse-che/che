@@ -171,8 +171,6 @@ public class ShareWorkspaceMemberTest {
   private void createWorkspace() {
     workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
 
-    theiaIde.waitOpenedWorkspaceIsReadyToUse();
-
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);

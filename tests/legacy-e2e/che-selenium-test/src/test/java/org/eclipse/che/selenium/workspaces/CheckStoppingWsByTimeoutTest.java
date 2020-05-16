@@ -63,7 +63,6 @@ public class CheckStoppingWsByTimeoutTest {
 
   @Test
   public void checkStoppingByApi() throws Exception {
-    theiaIde.waitOpenedWorkspaceIsReadyToUse();
     sleepQuietly(getCommonTimeoutInMilliSec(), MILLISECONDS);
 
     Workspace workspace =
