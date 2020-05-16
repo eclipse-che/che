@@ -23,7 +23,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -38,7 +37,6 @@ public class DeleteRunningWorkspaceTest {
   @Inject private WorkspaceOverview workspaceOverview;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
-  @Inject private TheiaIde theiaIde;
 
   private String workspaceName;
 

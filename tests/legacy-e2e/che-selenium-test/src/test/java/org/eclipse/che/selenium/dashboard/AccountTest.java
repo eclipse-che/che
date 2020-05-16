@@ -28,7 +28,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPasswordPag
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S})
+@Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.UNDER_REPAIR})
 public class AccountTest {
 
   private Account changedTestUserAccount;
@@ -36,9 +36,7 @@ public class AccountTest {
 
   @Inject private Dashboard dashboard;
   @Inject private DashboardAccount dashboardAccount;
-
   @Inject private TestUser testUser;
-
   @Inject private KeycloakAccountPage keycloakAccount;
   @Inject private KeycloakPasswordPage keycloakPasswordPage;
   @Inject private SeleniumWebDriver seleniumWebDriver;

@@ -16,7 +16,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.OVERVIEW;
 
 import com.google.inject.Inject;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
@@ -25,7 +24,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -40,8 +38,6 @@ public class DeleteStoppingWorkspaceTest {
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
-  @Inject private TheiaIde theiaIde;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   private String workspaceName;
 

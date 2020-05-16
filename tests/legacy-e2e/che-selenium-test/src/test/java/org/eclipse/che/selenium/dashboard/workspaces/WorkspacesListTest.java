@@ -32,7 +32,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOvervie
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status;
-import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.openqa.selenium.TimeoutException;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -61,7 +60,6 @@ public class WorkspacesListTest {
   @Inject private WorkspaceOverview workspaceOverview;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
-  @Inject private TheiaIde theiaIde;
 
   private String workspaceName;
   private String workspaceName1;

@@ -22,12 +22,9 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
@@ -49,12 +46,9 @@ public class WorkspaceDetailsOverviewTest {
       asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
 
   @Inject private Dashboard dashboard;
-  @Inject private NewWorkspace newWorkspace;
   @Inject private Workspaces workspaces;
   @Inject private WorkspaceOverview workspaceOverview;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
-  @Inject private TheiaIde theiaIde;
-  @Inject private WorkspaceDetails workspaceDetails;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
