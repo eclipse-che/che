@@ -11,22 +11,21 @@ pipeline {
     environment {
         YQ_TOOL_URL='https://github.com/mikefarah/yq/releases/download/2.4.0/yq_linux_amd64'
 
-        CHE_THEIA_META_YAML_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/eclipse/che-theia/next/meta.yaml'
-        VSCODE_YAML_META_YAML_DIR_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/redhat/vscode-yaml/'
-        JAVA8_META_YAML_DIR_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/v3/plugins/redhat/java8/'
         DEVFILE_URL="${WORKSPACE}/happy-path-workspace.yaml"
-
-        String customResourceFileContent = ""
     }
 
     parameters {
         string(name: 'RELEASE_BRANCH',
-                defaultValue: "7.5.x",
+                defaultValue: "7.12.x",
                 description: 'Branch with pre-release version to take E2E Happy path test.')
 
         string(name: 'RELEASE_VERSION',
-                defaultValue: "7.5.0",
+                defaultValue: "7.12.1",
                 description: 'Version of Che-theia')
+
+        string(name: 'CHECTL_PACKAGE_URL',
+                defaultValue: "https://github.com/che-incubator/chectl/releases/download/20200501092240/chectl-linux-x64.tar.gz",
+                description: 'URL address of chectl package tar ball')
     }
 
     stages {
@@ -34,6 +33,8 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'e45af3e6-8061-4d02-b187-b1c3bb133d3a', variable: 'GITHUB_TOKEN')]) {
                     sh """
+                      CHE_THEIA_META_YAML_URL='https://raw.githubusercontent.com/eclipse/che-plugin-registry/$RELEASE_BRANCH/v3/plugins/eclipse/che-theia/next/meta.yaml'
+
                       wget https://raw.githubusercontent.com/eclipse/che/$RELEASE_BRANCH/tests/e2e/files/happy-path/happy-path-workspace.yaml --no-check-certificate -O $DEVFILE_URL
                     
                       PR_CHECK_FILES_DIR=${WORKSPACE}/pr-check-files/che/$RELEASE_VERSION
@@ -45,7 +46,7 @@ pipeline {
                       wget $YQ_TOOL_URL
                       sudo chmod +x yq_linux_amd64
                     
-                      wget $CHE_THEIA_META_YAML_URL -O \$PR_CHECK_FILES_DIR/che_theia_meta.yaml
+                      wget \$CHE_THEIA_META_YAML_URL -O \$PR_CHECK_FILES_DIR/che_theia_meta.yaml
                       ./yq_linux_amd64 w -i \$PR_CHECK_FILES_DIR/che_theia_meta.yaml spec.containers[0].image quay.io/eclipse/che-theia:$RELEASE_VERSION
                       ./yq_linux_amd64 w -i \$PR_CHECK_FILES_DIR/che_theia_meta.yaml spec.initContainers[0].image quay.io/eclipse/che-theia-endpoint-runtime-binary:$RELEASE_VERSION
                     
@@ -64,110 +65,85 @@ pipeline {
             }
         }
 
-        stage('Patch custom-resource.yaml') {
-            steps {
-                script {
-                    String customResourceFilePath = "${WORKSPACE}/custom-resource.yaml"
-
-                    sh """
-                        wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
-                          -O $customResourceFilePath
-
-                        # TODO: "selfSignedCert: true" so as TLS support is enebled by default 
-                        # sed -i "s/selfSignedCert: false/selfSignedCert: true/" $customResourceFilePath
-
-
-                        # temporary workaround to https://github.com/eclipse/che/issues/16292
-                        sed -i "s/tlsSupport: true/tlsSupport: false/" $customResourceFilePath      
-                    """
-
-                    customResourceFileContent = readFile customResourceFilePath
-                    customResourceFileContent = customResourceFileContent.replace("eclipse/che-keycloak:nightly", "eclipse/che-keycloak:rc")
-                    customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-devfile-registry:nightly", "quay.io/eclipse/che-devfile-registry:$RELEASE_VERSION")
-                    customResourceFileContent = customResourceFileContent.replace("quay.io/eclipse/che-plugin-registry:nightly", "quay.io/eclipse/che-plugin-registry:$RELEASE_VERSION")
-                }
-            }
-        }
-
         stage("Run E2E tests") {
             parallel {
                 stage('Run Happy path tests against Eclipse Che release candidate') {
                     steps {
-                        script {
-                            echo "$customResourceFileContent"
+                        build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
+                                parameters: [
+                                        string(name: 'cheImageRepo',
+                                                value: 'quay.io/eclipse/che-server'),
 
-                            build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
-                                    parameters: [
-                                            string(name: 'cheImageRepo',
-                                                    value: 'quay.io/eclipse/che-server'),
+                                        string(name: 'cheImageTag',
+                                                value: RELEASE_VERSION),
 
-                                            string(name: 'cheImageTag',
-                                                    value: 'rc'),
+                                        booleanParam(name: 'buildChe',
+                                                value: false),
 
-                                            booleanParam(name: 'buildChe',
-                                                    value: false),
+                                        string(name: 'ghprbSourceBranch',
+                                                value: RELEASE_BRANCH),
 
-                                            string(name: 'ghprbSourceBranch',
-                                                    value: "$RELEASE_BRANCH"),
+                                        string(name: 'ghprbPullId',
+                                                value: ''),
 
-                                            string(name: 'ghprbPullId',
-                                                    value: ''),
+                                        string(name: 'e2eTestToRun',
+                                                value: 'test-happy-path'),
 
-                                            string(name: 'e2eTestToRun',
-                                                    value: 'test-happy-path'),
+                                        string(name: 'testWorkspaceDevfileUrl',
+                                                value: "https://raw.githubusercontent.com/chepullreq4/pr-check-files/master/che/$RELEASE_VERSION/happy-path-workspace.yaml"),
 
-                                            string(name: 'testWorkspaceDevfileUrl',
-                                                    value: "https://raw.githubusercontent.com/chepullreq4/pr-check-files/master/che/$RELEASE_VERSION/happy-path-workspace.yaml"),
+                                        booleanParam(name: 'createTestWorkspace',
+                                                value: true),
 
-                                            text(name: 'customResourceFileContent',
-                                                    value: "$customResourceFileContent"),
+                                        string(name: 'e2eTestParameters',
+                                                value: ''),
 
-                                            booleanParam(name: 'createTestWorkspace',
-                                                    value: true),
+                                        string(name: 'chectlPackageUrl',
+                                                value: CHECTL_PACKAGE_URL),
 
-                                            string(name: 'e2eTestParameters',
-                                                    value: '')
-                                    ]
-                        }
+                                        string(name: 'cheE2eImageTag',
+                                                value: RELEASE_VERSION)
+                                ]
                     }
                 }
 
                 stage('Run devfile tests against Eclipse Che release candidate') {
                     steps {
-                        script {
-                            build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
-                                    parameters: [
-                                            string(name: 'cheImageRepo',
-                                                    value: 'quay.io/eclipse/che-server'),
+                        build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
+                                parameters: [
+                                        string(name: 'cheImageRepo',
+                                                value: 'quay.io/eclipse/che-server'),
 
-                                            string(name: 'cheImageTag',
-                                                    value: 'rc'),
+                                        string(name: 'cheImageTag',
+                                                value: RELEASE_VERSION),
 
-                                            booleanParam(name: 'buildChe',
-                                                    value: false),
+                                        booleanParam(name: 'buildChe',
+                                                value: false),
 
-                                            string(name: 'ghprbSourceBranch',
-                                                    value: "$RELEASE_BRANCH"),
+                                        string(name: 'ghprbSourceBranch',
+                                                value: RELEASE_BRANCH),
 
-                                            string(name: 'ghprbPullId',
-                                                    value: ''),
+                                        string(name: 'ghprbPullId',
+                                                value: ''),
 
-                                            string(name: 'e2eTestToRun',
-                                                    value: 'test-all-devfiles'),
+                                        string(name: 'e2eTestToRun',
+                                                value: 'test-all-devfiles'),
 
-                                            string(name: 'testWorkspaceDevfileUrl',
-                                                    value: ""),
+                                        string(name: 'testWorkspaceDevfileUrl',
+                                                value: ""),
 
-                                            text(name: 'customResourceFileContent',
-                                                    value: "$customResourceFileContent"),
+                                        booleanParam(name: 'createTestWorkspace',
+                                                value: false),
 
-                                            booleanParam(name: 'createTestWorkspace',
-                                                    value: false),
+                                        string(name: 'e2eTestParameters',
+                                                value: ''),
 
-                                            string(name: 'e2eTestParameters',
-                                                    value: '')
-                                    ]
-                        }
+                                        string(name: 'chectlPackageUrl',
+                                                value: CHECTL_PACKAGE_URL),
+
+                                        string(name: 'cheE2eImageTag',
+                                                value: RELEASE_VERSION)
+                                ]
                     }
                 }
 
@@ -180,13 +156,13 @@ pipeline {
                                                         value: 'quay.io/eclipse/che-server'),
 
                                                 string(name: 'cheImageTag',
-                                                        value: 'nightly'),
+                                                        value: RELEASE_VERSION),
 
                                                 booleanParam(name: 'buildChe',
                                                         value: false),
 
                                                 string(name: 'ghprbSourceBranch',
-                                                        value: "$RELEASE_BRANCH"),
+                                                        value: RELEASE_BRANCH),
 
                                                 string(name: 'ghprbPullId',
                                                         value: ''),
@@ -197,14 +173,17 @@ pipeline {
                                                 string(name: 'testWorkspaceDevfileUrl',
                                                         value: ''),
 
-                                                text(name: 'customResourceFileContent',
-                                                        value: ''),
-
                                                 booleanParam(name: 'createTestWorkspace',
                                                         value: false),
 
                                                 string(name: 'e2eTestParameters',
-                                                        value: "-e TS_GITHUB_TEST_REPO_ACCESS_TOKEN=$github_oauth_token  -e TS_GITHUB_TEST_REPO=chepullreq4/Spoon-Knife -e NODE_TLS_REJECT_UNAUTHORIZED=0")
+                                                        value: "-e TS_GITHUB_TEST_REPO_ACCESS_TOKEN=$github_oauth_token  -e TS_GITHUB_TEST_REPO=chepullreq4/Spoon-Knife -e NODE_TLS_REJECT_UNAUTHORIZED=0"),
+
+                                                string(name: 'chectlPackageUrl',
+                                                        value: CHECTL_PACKAGE_URL),
+
+                                                string(name: 'cheE2eImageTag',
+                                                        value: RELEASE_VERSION)
                                         ]
                         }
                     }    
