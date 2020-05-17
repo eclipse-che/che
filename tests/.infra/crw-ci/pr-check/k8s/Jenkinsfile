@@ -15,7 +15,7 @@ pipeline {
         JENKINS_BUILD = "true"
 
         DEVFILE_PATH = "${WORKSPACE}/test-workspace-devfile.yaml"
-        CUSTOM_RESOURCE_PATCH_FILE_PATH = "${WORKSPACE}/custom-resource-patch.yaml"
+        CUSTOM_RESOURCE_PATCH_FILE = "${WORKSPACE}/custom-resource-patch.yaml"
 
         SUCCESS_THRESHOLD = 5
 
@@ -217,7 +217,7 @@ pipeline {
             steps {
                 script {
                     echo "Create custom-resource patch file"
-                    sh """cat > $CUSTOM_RESOURCE_PATCH_FILE_PATH <<EOL
+                    sh """cat > $CUSTOM_RESOURCE_PATCH_FILE <<EOL
 spec:
   server:
     cheImage: '${cheImageRepo}'
@@ -235,7 +235,7 @@ EOL"""
                         --k8spodreadytimeout=180000 \\
                         --listr-renderer=verbose \\
                         --platform=minikube \\
-                        --che-operator-cr-patch-yaml=$CUSTOM_RESOURCE_PATCH_FILE_PATH
+                        --che-operator-cr-patch-yaml=$CUSTOM_RESOURCE_PATCH_FILE
                     """
 
                     cheHost = sh(
@@ -340,7 +340,7 @@ EOL"""
 
                 cp ${WORKSPACE}/org_v1_che_cr.yaml $LOGS_AND_CONFIGS/che-config || true
                 cp ${DEVFILE_PATH} $LOGS_AND_CONFIGS || true
-                cp ${CUSTOM_RESOURCE_PATCH_FILE_PATH} $LOGS_AND_CONFIGS || true
+                cp ${CUSTOM_RESOURCE_PATCH_FILE} $LOGS_AND_CONFIGS || true
 
                 kubectl get checluster --namespace=che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml || true
                 kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
