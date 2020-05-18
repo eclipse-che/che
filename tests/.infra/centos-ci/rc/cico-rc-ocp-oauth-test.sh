@@ -12,13 +12,12 @@ source tests/.infra/centos-ci/rc/rc_function_util.sh
 
 setupEnvs
 installDependencies
-setupReleaseVersionAndTag
 installDockerCompose
 installKVM
 installAndStartMinishift
 loginToOpenshiftAndSetDevRole
 prepareCustomResourceFile true
-installCheCtl
+installReleaseCheCtl
 deployCheIntoCluster  --chenamespace=eclipse-che --che-operator-cr-yaml=/tmp/custom-resource.yaml
 seleniumTestsSetup
 

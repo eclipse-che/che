@@ -15,13 +15,14 @@ pipeline {
         JENKINS_BUILD = "true"
 
         DEVFILE_PATH = "${WORKSPACE}/test-workspace-devfile.yaml"
-        CUSTOM_RESOURCE_FILE_PATH = "${WORKSPACE}/custom-resource.yaml"
+        CUSTOM_RESOURCE_PATCH_FILE = "${WORKSPACE}/custom-resource-patch.yaml"
 
         SUCCESS_THRESHOLD = 5
 
         LOGS_AND_CONFIGS ="${WORKSPACE}/logs-and-configs"
 
         mutableCheImageTag = ""
+        pathToChectl = ""
     }
 
     parameters {
@@ -45,10 +46,6 @@ pipeline {
                 defaultValue: "",
                 description: 'URL of devfile of test workspace')
 
-        text(name: 'customResourceFileContent',
-                defaultValue: "",
-                description: 'Content of custom-resource.yaml')
-
         booleanParam(name: 'createTestWorkspace',
                 defaultValue: true,
                 description: 'Should create test workspace')
@@ -58,6 +55,18 @@ pipeline {
 
         string(name: 'e2eTestParameters',
                 defaultValue: "")
+
+        string(
+                name: "chectlPackageUrl",
+                defaultValue: "",
+                description: "URL address of chectl package"
+        )
+
+        string(
+                name: "cheE2eImageTag",
+                defaultValue: "nightly",
+                description: "Tag of quay.io/eclipse/che-e2e image"
+        )
     }
 
     stages {
@@ -68,16 +77,6 @@ pipeline {
                         mutableCheImageTag = ghprbPullId
                     } else {
                         mutableCheImageTag = cheImageTag
-                    }
-
-                    if (customResourceFileContent == null || customResourceFileContent == '') {
-                        sh """
-                            wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml \\
-                            -O $CUSTOM_RESOURCE_FILE_PATH                                                  
-                        """
-
-                    } else {
-                        writeFile file: CUSTOM_RESOURCE_FILE_PATH, text: customResourceFileContent
                     }
                 }
             }
@@ -91,14 +90,24 @@ pipeline {
                     steps {
                         script {
                             retry(2) {
-                                // TO-DO use option "--install-path" https://github.com/eclipse/che/pull/14182
-                                sh """
-                                curl -sL https://www.eclipse.org/che/chectl/ > install_chectl.sh
-                                chmod +x install_chectl.sh
-                                sudo PATH=$PATH ./install_chectl.sh --channel=next
-                                sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
-                                sudo chmod +x ${WORKSPACE}/chectl
-                                """
+                                if (chectlPackageUrl != "") {
+                                    sh """
+                                        wget ${chectlPackageUrl} -O chectl-linux-x64.tar.gz
+                                        tar -xzf chectl-linux-x64.tar.gz
+                                    """
+                                    pathToChectl = "${WORKSPACE}/chectl/bin/chectl"
+
+                                } else {
+                                    echo "Install chectl using https://www.eclipse.org/che/chectl/ --channel=next"
+                                    sh """
+                                        curl -sL https://www.eclipse.org/che/chectl/ > install_chectl.sh
+                                        chmod +x install_chectl.sh
+                                        sudo PATH=$PATH ./install_chectl.sh --channel=next
+                                        sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
+                                        sudo chmod +x ${WORKSPACE}/chectl
+                                    """
+                                    pathToChectl = "${WORKSPACE}/chectl"
+                                }
                             }
                         }
                     }
@@ -177,7 +186,7 @@ pipeline {
                         script {
                             retry(2) {
                                 sh """
-                                    docker pull quay.io/eclipse/che-e2e:nightly
+                                    docker pull quay.io/eclipse/che-e2e:$cheE2eImageTag
                                     docker pull quay.io/eclipse/happy-path:nightly
                                 """
                             }
@@ -207,28 +216,26 @@ pipeline {
         stage("Start Che") {
             steps {
                 script {
-                    echo "Patch Che custom-resource.yaml"
-                    sh """
-                        sed -i "s|cheImage: ''|cheImage: '${cheImageRepo}'|" $CUSTOM_RESOURCE_FILE_PATH
-                        sed -i "s|cheImageTag: 'nightly'|cheImageTag: '${mutableCheImageTag}'|" $CUSTOM_RESOURCE_FILE_PATH
-                        sed -i "s|cheLogLevel: INFO|cheLogLevel: DEBUG|" $CUSTOM_RESOURCE_FILE_PATH
-                        sed -i "s|ingressDomain: '192.168.99.101.nip.io'|ingressDomain: '\$(minikube ip).nip.io'|" $CUSTOM_RESOURCE_FILE_PATH
-
-                        # temporary workaround to https://github.com/eclipse/che/issues/16292
-                        sed -i "s/tlsSupport: true/tlsSupport: false/" $CUSTOM_RESOURCE_FILE_PATH  
-
-                        # TODO: "selfSignedCert: true" so as TLS support is enebled by default 
-                        # sed -i "s/selfSignedCert: false/selfSignedCert: true/" $CUSTOM_RESOURCE_FILE_PATH    
-                    """
+                    echo "Create custom-resource patch file"
+                    sh """cat > $CUSTOM_RESOURCE_PATCH_FILE <<EOL
+spec:
+  server:
+    cheImage: '${cheImageRepo}'
+    cheImageTag: '${mutableCheImageTag}'
+    selfSignedCert: true
+  auth:
+    updateAdminPassword: false
+  k8s:
+    ingressDomain: '\$(minikube ip).nip.io'
+EOL"""
 
                     echo "Install Che"
                     sh """
-                        ${WORKSPACE}/chectl server:start \\
+                        ${pathToChectl} server:start \\
                         --k8spodreadytimeout=180000 \\
-                        --installer=operator \\
                         --listr-renderer=verbose \\
                         --platform=minikube \\
-                        --che-operator-cr-yaml=$CUSTOM_RESOURCE_FILE_PATH
+                        --che-operator-cr-patch-yaml=$CUSTOM_RESOURCE_PATCH_FILE
                     """
 
                     cheHost = sh(
@@ -282,16 +289,16 @@ pipeline {
                     }
 
                     sh """   
-                        KEYCLOAK_BASE_URL="http://\$(kubectl get ingress/keycloak -n che -o jsonpath='{.spec.rules[0].host}')/auth"
+                        KEYCLOAK_BASE_URL="https://\$(kubectl get ingress/keycloak -n che -o jsonpath='{.spec.rules[0].host}')/auth"
     
-                        USER_ACCESS_TOKEN=\$(curl -X POST \$KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token \\
+                        USER_ACCESS_TOKEN=\$(curl -k -X POST \$KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token \\
                            -H "Content-Type: application/x-www-form-urlencoded" \\
                            -d "username=admin" \\
                            -d "password=admin" \\
                            -d "grant_type=password" \\
                            -d "client_id=che-public" | jq -r .access_token)
     
-                        ${WORKSPACE}/chectl workspace:create --start \\
+                        ${pathToChectl} workspace:create --start \\
                            --devfile=${DEVFILE_PATH} \\
                            --access-token "\$USER_ACCESS_TOKEN"
                     """
@@ -302,7 +309,7 @@ pipeline {
         stage("Run E2E Happy path tests") {
             steps {
                 sh """
-                     CHE_URL=http://${cheHost}
+                     CHE_URL=https://${cheHost}
                      docker run --shm-size=1g --net=host --ipc=host \\
                        -p 5920:5920 \\
                        -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \\
@@ -316,7 +323,7 @@ pipeline {
                        -e TEST_SUITE="${e2eTestToRun}" ${e2eTestParameters} \\
                        -e NODE_TLS_REJECT_UNAUTHORIZED=0 \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
-                       quay.io/eclipse/che-e2e:nightly
+                       quay.io/eclipse/che-e2e:${cheE2eImageTag}
                 """
             }
         }
@@ -333,7 +340,7 @@ pipeline {
 
                 cp ${WORKSPACE}/org_v1_che_cr.yaml $LOGS_AND_CONFIGS/che-config || true
                 cp ${DEVFILE_PATH} $LOGS_AND_CONFIGS || true
-                cp ${CUSTOM_RESOURCE_FILE_PATH} $LOGS_AND_CONFIGS || true
+                cp ${CUSTOM_RESOURCE_PATCH_FILE} $LOGS_AND_CONFIGS || true
 
                 kubectl get checluster --namespace=che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml || true
                 kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
@@ -359,7 +366,7 @@ pipeline {
                 docker ps -a > $LOGS_AND_CONFIGS/docker/containers.txt || true
 
                 env > $LOGS_AND_CONFIGS/env.output.txt || true
-                ${WORKSPACE}/chectl --help > $LOGS_AND_CONFIGS/chectl.version.txt || true
+                ${pathToChectl} --help > $LOGS_AND_CONFIGS/chectl.version.txt || true
 
                 cp -r /tmp/chectl-logs $LOGS_AND_CONFIGS || true
             """
