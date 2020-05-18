@@ -110,6 +110,13 @@ public class WsMasterModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    // Workaround for https://github.com/fabric8io/kubernetes-client/issues/2212
+    // OkHttp wrongly detects JDK8u251 and higher as JDK9 which enables Http2 unsupported for JDK8.
+    // Can be removed after upgrade to Fabric8 4.10.2 or higher or to Java 11
+    if (System.getProperty("java.version", "").startsWith("1.8")) {
+      System.setProperty("http2.disable", "true");
+    }
+
     // db related components modules
     install(new org.eclipse.che.account.api.AccountModule());
     install(new org.eclipse.che.api.ssh.server.jpa.SshJpaModule());
