@@ -41,10 +41,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 
 /**
  * Finds secrets with specific labels in namespace, and mount their values as file or environment
- * variable into all (or specified by {@code targetContainer} annotation) workspace containers.
- * Secrets with annotation {@code useSecretAsEnv: 'true'} are mount as env variables, env name is
- * set by {@code envName} or {@code <datakey>.envName>} annotation. Secrets which don't have it, are
- * mounted as file in the folder specified by {@code mountPath} annotation. Refer to che-docs for
+ * variable into all (or specified by "targetContainer" annotation) workspace containers.
+ * Secrets with annotation "useSecretAsEnv:true" are mount as env variables, env name is
+ * read from "envName" or "<datakey>.envName>" annotation. Secrets which don't have it, are
+ * mounted as file in the folder specified by "mountPath" annotation. Refer to che-docs for
  * concrete examples.
  */
 @Beta
