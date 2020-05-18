@@ -41,11 +41,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 
 /**
  * Finds secrets with specific labels in namespace, and mount their values as file or environment
- * variable into all (or specified by "targetContainer" annotation) workspace containers.
- * Secrets with annotation "useSecretAsEnv:true" are mount as env variables, env name is
- * read from "envName" or "<datakey>.envName>" annotation. Secrets which don't have it, are
- * mounted as file in the folder specified by "mountPath" annotation. Refer to che-docs for
- * concrete examples.
+ * variable into all (or specified by "targetContainer" annotation) workspace containers. Secrets
+ * with annotation "useSecretAsEnv:true" are mount as env variables, env name is read from "envName"
+ * or "<datakey>.envName>" annotation. Secrets which don't have it, are mounted as file in the
+ * folder specified by "mountPath" annotation. Refer to che-docs for concrete examples.
  */
 @Beta
 @Singleton
@@ -133,10 +132,25 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       if (!pd.getRole().equals(PodRole.DEPLOYMENT)) {
         continue;
       }
-      pd.getSpec().getVolumes().add(volumeFromSecret);
+      if (pd.getSpec()
+          .getVolumes()
+          .stream()
+          .anyMatch(v -> v.getName().equals(volumeFromSecret.getName()))) {
+        throw new InfrastructureException(
+            format(
+                "Volume name '%s' provisioned from secret, clashes with existing volume name.",
+                volumeFromSecret.getName()));
+      }
+
       for (Container c : pd.getSpec().getContainers()) {
         if (targetContainerName != null && !c.getName().equals(targetContainerName)) {
           continue;
+        }
+        if (c.getVolumeMounts().stream().anyMatch(vm -> vm.getMountPath().equals(mountPath))) {
+          throw new InfrastructureException(
+              format(
+                  "Volume Mount path '%s' provisioned from secret, clashes with existing volume mount name.",
+                  mountPath));
         }
         c.getVolumeMounts()
             .add(
