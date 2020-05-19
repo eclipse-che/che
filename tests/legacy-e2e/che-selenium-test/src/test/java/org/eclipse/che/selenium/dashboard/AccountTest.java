@@ -28,7 +28,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPasswordPag
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.UNDER_REPAIR})
+@Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT})
 public class AccountTest {
 
   private Account changedTestUserAccount;
