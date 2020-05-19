@@ -44,14 +44,17 @@ pipeline {
                                         string(name: 'testWorkspaceDevfileUrl',
                                                 value: 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml'),
 
-                                        text(name: 'customResourceFileContent',
-                                                value: ''),
-
                                         booleanParam(name: 'createTestWorkspace',
                                                 value: true),
 
                                         string(name: 'e2eTestParameters',
-                                                value: '')
+                                                value: ''),
+
+                                        string(name: 'chectlPackageUrl',
+                                                value: ''),
+
+                                        string(name: 'cheE2eImageTag',
+                                                value: 'nightly')
                                 ]
                     }
                 }
@@ -81,14 +84,17 @@ pipeline {
                                         string(name: 'testWorkspaceDevfileUrl',
                                                 value: ''),
 
-                                        text(name: 'customResourceFileContent',
-                                                value: ''),
-
                                         booleanParam(name: 'createTestWorkspace',
                                                 value: false),
 
                                         string(name: 'e2eTestParameters',
-                                                value: '')
+                                                value: ''),
+
+                                        string(name: 'chectlPackageUrl',
+                                                value: ''),
+
+                                        string(name: 'cheE2eImageTag',
+                                                value: 'nightly')
                                 ]
                     }
                 }
@@ -119,14 +125,17 @@ pipeline {
                                                 string(name: 'testWorkspaceDevfileUrl',
                                                         value: ''),
 
-                                                text(name: 'customResourceFileContent',
-                                                        value: ''),
-
                                                 booleanParam(name: 'createTestWorkspace',
                                                         value: false),
 
                                                 string(name: 'e2eTestParameters',
-                                                        value: "-e TS_GITHUB_TEST_REPO_ACCESS_TOKEN=$github_oauth_token  -e TS_GITHUB_TEST_REPO=chepullreq4/Spoon-Knife -e NODE_TLS_REJECT_UNAUTHORIZED=0")
+                                                        value: "-e TS_GITHUB_TEST_REPO_ACCESS_TOKEN=$github_oauth_token  -e TS_GITHUB_TEST_REPO=chepullreq4/Spoon-Knife -e NODE_TLS_REJECT_UNAUTHORIZED=0"),
+
+                                                string(name: 'chectlPackageUrl',
+                                                        value: ''),
+
+                                                string(name: 'cheE2eImageTag',
+                                                        value: 'nightly')
                                         ]
                         }
                     }

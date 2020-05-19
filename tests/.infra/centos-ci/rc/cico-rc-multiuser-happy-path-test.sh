@@ -15,11 +15,10 @@ source tests/.infra/centos-ci/rc/rc_function_util.sh
 setupEnvs
 installKVM
 installDependencies
-setupReleaseVersionAndTag
 installAndStartMinishift
 loginToOpenshiftAndSetDevRole
 prepareCustomResourceFile false
-installCheCtl
+installReleaseCheCtl
 deployCheIntoCluster  --che-operator-cr-yaml=/tmp/custom-resource.yaml
 createTestUserAndObtainUserToken
 createTestWorkspaceAndRunTest  --devfile=https://raw.githubusercontent.com/eclipse/che/cico-rc-test/tests/e2e/files/happy-path/happy-path-workspace.yaml
