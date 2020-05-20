@@ -57,7 +57,7 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       @Named("che.workspace.provision.secret.labels") String[] labels) {
     this.secretLabels = new HashMap<>();
     for (String keyValue : labels) {
-      String[] pair = keyValue.split(":", 2);
+      String[] pair = keyValue.split("=", 2);
       secretLabels.put(pair[0], pair.length == 1 ? "" : pair[1]);
     }
   }
