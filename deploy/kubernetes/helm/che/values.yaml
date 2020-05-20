@@ -16,7 +16,7 @@
 cheWorkspaceHttpProxy: ""
 cheWorkspaceHttpsProxy: ""
 cheWorkspaceNoProxy: ""
-cheImage: quay.io/eclipse/che-server:7.13.0
+cheImage: quay.io/eclipse/che-server:7.13.1
 cheImagePullPolicy: Always
 cheKeycloakRealm: "che"
 cheKeycloakClientId: "che-public"
