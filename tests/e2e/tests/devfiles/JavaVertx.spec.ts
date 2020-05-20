@@ -7,16 +7,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { NameGenerator } from '../../utils/NameGenerator';
 import 'reflect-metadata';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
+import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
+import { WorkspaceNameHandler } from '../..';
 
-const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
-const sampleName: string = 'vertx-http-example';
-const fileFolderPath: string = `${sampleName}/src/main/java/io/openshift/example`;
+const workspaceSampleName: string = 'vertx-http-example';
+const workspaceRootFolderName: string = 'src';
+const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/main/java/io/openshift/example`;
 const tabTitle: string = 'HttpApplication.java';
 const codeNavigationClassName: string = 'RouterImpl.class';
 const buildTaskName: string = 'maven build';
@@ -24,10 +24,9 @@ const LSstarting: string = 'Activating Language Support for Java';
 const stack: string = 'Java Vert.x';
 
 suite(`${stack} test`, async () => {
-
-    suite (`Create ${stack} workspace ${workspaceName}`, async () => {
-        workspaceHandling.createAndOpenWorkspace(workspaceName, stack);
-        projectAndFileTests.waitWorkspaceReadiness(workspaceName, sampleName, 'src');
+    suite (`Create ${stack} workspace`, async () => {
+        workspaceHandling.createAndOpenWorkspace(stack);
+        projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
     suite('Language server validation', async () => {
@@ -45,8 +44,16 @@ suite(`${stack} test`, async () => {
     });
 
     suite ('Stopping and deleting the workspace', async () => {
-        workspaceHandling.stopWorkspace(workspaceName);
-        workspaceHandling.removeWorkspace(workspaceName);
+        let workspaceName = 'not defined';
+        suiteSetup( async () => {
+            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
+        });
+        test (`Stop worksapce`, async () => {
+            await workspaceHandling.stopWorkspace(workspaceName);
+        });
+        test (`Remove workspace`, async () => {
+            await workspaceHandling.removeWorkspace(workspaceName);
+        });
     });
 
 });

@@ -17,22 +17,17 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>7.13.0-SNAPSHOT</version>
+        <version>7.14.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-dashboard-war</artifactId>
     <packaging>war</packaging>
-    <name>Che IDE :: Dashboard Packaging</name>
+    <name>Che Assembly :: Dashboard war</name>
     <description>Packages Dashboard application as a Java web app</description>
     <inceptionYear>2018</inceptionYear>
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-j2ee</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.dashboard</groupId>
-            <artifactId>che-dashboard-war</artifactId>
-            <type>war</type>
         </dependency>
     </dependencies>
     <build>
@@ -46,7 +41,6 @@
                         <configuration>
                             <ignoredUnusedDeclaredDependencies>
                                 <dep>org.eclipse.che.core:che-core-commons-j2ee</dep>
-                                <dep>org.eclipse.che.dashboard:che-dashboard-war</dep>
                             </ignoredUnusedDeclaredDependencies>
                         </configuration>
                     </execution>

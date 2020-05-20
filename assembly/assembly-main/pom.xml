@@ -12,16 +12,17 @@
       Red Hat, Inc. - initial API and implementation
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>7.13.0-SNAPSHOT</version>
+        <version>7.14.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-main</artifactId>
     <packaging>pom</packaging>
-    <name>Che IDE :: Assemblies Tomcat</name>
+    <name>Che Assembly :: Assemblies Che Server Tomcat</name>
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che</groupId>
@@ -99,7 +100,21 @@
                                     <artifactId>assembly-che-tomcat8</artifactId>
                                     <type>zip</type>
                                     <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/dependency</outputDirectory>
+                                    <outputDirectory>${project.build.directory}/dependency/assembly-che-tomcat8</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.che</groupId>
+                                    <artifactId>assembly-dashboard-war</artifactId>
+                                    <type>war</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/dependency/assembly-dashboard-war</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.che</groupId>
+                                    <artifactId>assembly-workspace-loader-war</artifactId>
+                                    <type>war</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/dependency/assembly-workspace-loader-war</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

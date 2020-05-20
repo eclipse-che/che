@@ -22,7 +22,7 @@ export class GetStarted {
     async waitTitleContains(expectedText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`GetStarted.waitTitleContains text: "${expectedText}"`);
 
-        const pageTitleLocator: By = By.xpath(`//div[contains(@che-title, '${expectedText}')]`);
+        const pageTitleLocator: By = By.xpath(`//div[contains(@title, '${expectedText}')]`);
 
         await this.driverHelper.waitVisibility(pageTitleLocator, timeout);
     }
@@ -47,13 +47,6 @@ export class GetStarted {
         const sampleLocator: By = this.getSampleLocator(sampleName);
 
         await this.driverHelper.waitAndClick(sampleLocator, timeout);
-    }
-
-    async selectSample(sampleName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug(`GetStarted.selectSample sampleName: "${sampleName}"`);
-
-        await this.clickOnSample(sampleName, timeout);
-        await this.waitSampleSelected(sampleName, timeout);
     }
 
     async waitSampleSelected(sampleName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -86,7 +79,7 @@ export class GetStarted {
     private getSampleLocator(sampleName: string): By {
         Logger.trace(`GetStarted.getSampleLocator sampleName: ${sampleName}`);
 
-        return By.xpath(`//div[contains(@class, 'get-started-template')]//span[text()='${sampleName}']`);
+        return By.xpath(`//div[contains(@devfile, 'devfile')]/div/b[contains(text(), '${sampleName}')]`);
     }
 
 }

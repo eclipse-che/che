@@ -8,27 +8,26 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { NewWorkspace, CLASSES, Dashboard } from '..';
+import { CLASSES, Dashboard } from '..';
 import { e2eContainer } from '../inversify.config';
+import { GetStarted } from '../pageobjects/dashboard/GetStarted';
 
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
-const newWorkspace: NewWorkspace = e2eContainer.get(CLASSES.NewWorkspace);
+const getStarted: GetStarted = e2eContainer.get(CLASSES.GetStarted);
 
-export function createAndOpenWorkspace(workspaceName : string, stack: string) {
+export function createAndOpenWorkspace(stack: string) {
     test(`Open 'New Workspace' page`, async () => {
-        await newWorkspace.openPageByUI();
-        await newWorkspace.createAndOpenWorkspace(workspaceName, stack);
+        await dashboard.waitPage();
+        await dashboard.clickGetStartedButton();
+        await getStarted.waitPage();
+        await getStarted.clickOnSample(stack);
     });
 }
 
-export function stopWorkspace(workspaceName: string) {
-    test('Stop workspace', async () => {
+export async function stopWorkspace(workspaceName: string ) {
         await dashboard.stopWorkspaceByUI(workspaceName);
-    });
 }
 
-export function removeWorkspace(workspaceName: string) {
-    test('Delete workspace', async () => {
+export async function removeWorkspace(workspaceName: string) {
         await dashboard.deleteWorkspaceByUI(workspaceName);
-    });
 }

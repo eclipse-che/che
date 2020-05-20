@@ -55,5 +55,9 @@ public final class Warnings {
   public static final String NOT_ABLE_TO_PROVISION_OBJECTS_FOR_PREVIEW_URL_MESSAGE =
       "Not able to provision objects for PreviewUrl. Message: '%s'";
 
+  public static final int NOT_ABLE_TO_PROVISION_SSH_KEYS = 4111;
+  public static final String NOT_ABLE_TO_PROVISION_SSH_KEYS_MESSAGE =
+      "Not able to provision SSH Keys. Message: '%s'";
+
   private Warnings() {}
 }

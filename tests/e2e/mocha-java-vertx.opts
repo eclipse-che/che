@@ -1,7 +1,6 @@
 --timeout 2200000
 --reporter 'dist/driver/CheReporter.js'
 -u tdd 
---bail
 --full-trace
 --spec dist/tests/login/Login.spec.js
 --spec dist/tests/devfiles/JavaVertx.spec.js

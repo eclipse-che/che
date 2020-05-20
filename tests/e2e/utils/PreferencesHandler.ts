@@ -1,3 +1,12 @@
+/*********************************************************************
+ * Copyright (c) 2019 Red Hat, Inc.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ **********************************************************************/
 
 import { injectable, inject } from 'inversify';
 import { Logger } from './Logger';
@@ -38,8 +47,16 @@ export class PreferencesHandler {
         await this.setPreference(`application.confirmExit`, askForConfirmation);
     }
 
+    /**
+     * Works properly only if set before workspace startup.
+     */
+    public async setUseGoLanaguageServer() {
+        Logger.debug(`PreferencesHandler.setUseGoLanguageServer to true.`);
+        await this.setPreference('go.useLanguageServer', 'true');
+    }
+
     private async setPreference(attribute: string, value: string) {
-        Logger.debug(`PreferencesHandler.setPreferences ${attribute} to ${value}`);
+        Logger.trace(`PreferencesHandler.setPreferences ${attribute} to ${value}`);
         const response = await this.requestHandler.get('api/preferences');
         const userPref = response.data;
         try {

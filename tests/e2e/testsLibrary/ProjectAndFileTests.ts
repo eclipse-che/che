@@ -8,17 +8,19 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { CLASSES, Ide, ProjectTree, TestConstants, Editor } from '..';
+import { CLASSES, Ide, ProjectTree, Editor } from '..';
 import { e2eContainer } from '../inversify.config';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
-const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 
-export function waitWorkspaceReadiness(workspaceName : string, sampleName : string, folder: string) {
+export function waitWorkspaceReadiness(sampleName : string, folder: string) {
     test('Wait for workspace readiness', async () => {
-        await ide.waitWorkspaceAndIde(namespace, workspaceName);
+        await ide.waitAndSwitchToIdeFrame();
+        await ide.waitPreloaderVisible();
+        await ide.waitPreloaderAbsent();
+        await ide.waitIde();
         await projectTree.openProjectTreeContainer();
         await projectTree.waitProjectImported(sampleName, folder);
     });

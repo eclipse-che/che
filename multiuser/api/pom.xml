@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-parent</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>7.13.0-SNAPSHOT</version>
+        <version>7.14.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-multiuser-api</artifactId>
@@ -33,7 +33,6 @@
         <module>che-multiuser-api-resource</module>
         <module>che-multiuser-api-organization-shared</module>
         <module>che-multiuser-api-organization</module>
-        <module>che-multiuser-api-jgroups</module>
         <module>che-multiuser-api-workspace-activity</module>
     </modules>
 </project>

@@ -58,8 +58,7 @@ const SpringAppLocators = {
     springMenuButtonLocator: By.css('button[data-target=\'#main-navbar\']'),
     springErrorButtonLocator: By.xpath('//div[@id=\'main-navbar\']//span[text()=\'Error\']'),
     springHomeButtonLocator: By.className('navbar-brand'),
-    springErrorMessageLocator: By.xpath('//p[text()=\'Expected: controller used to ' +
-        `showcase what happens when an exception is thrown${textForErrorMessageChange}\']`)
+    springErrorMessageLocator: By.xpath(`//h2[text()='Something happened...']`)
 };
 
 
@@ -70,7 +69,7 @@ suite('Validation of workspace start', async () => {
     });
 
     test('Wait workspace running state', async () => {
-        await ide.waitWorkspaceAndIde(namespace, workspaceName);
+        await ide.waitWorkspaceAndIde();
     });
 
     test('Wait until project is imported', async () => {

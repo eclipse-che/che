@@ -17,10 +17,10 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.13.0-SNAPSHOT</version>
+        <version>7.14.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-db-vendor-mysql</artifactId>
-    <name>Che Core :: DB :: Vendor MySQL</name>
+    <name>Che Core :: Commons :: DB :: Vendor MySQL</name>
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

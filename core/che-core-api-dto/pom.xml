@@ -17,11 +17,11 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.13.0-SNAPSHOT</version>
+        <version>7.14.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-dto</artifactId>
     <packaging>jar</packaging>
-    <name>Che Core :: API :: DTO</name>
+    <name>Che Core :: Commons :: API :: DTO</name>
     <properties>
         <findbugs.failonerror>false</findbugs.failonerror>
         <generated.test.sources.directory>${project.build.directory}/generated-test-sources/gen</generated.test.sources.directory>

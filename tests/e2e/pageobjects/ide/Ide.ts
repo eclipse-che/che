@@ -116,9 +116,7 @@ export class Ide {
         await this.driverHelper.waitAndClick(By.xpath(yesButtonLocator));
     }
 
-    async waitWorkspaceAndIde(workspaceNamespace: string,
-        workspaceName: string,
-        timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+    async waitWorkspaceAndIde(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
 
         Logger.debug('Ide.waitWorkspaceAndIde');
 
@@ -162,12 +160,18 @@ export class Ide {
         await this.driverHelper.waitVisibility(By.css(Ide.LEFT_CONTENT_PANEL_CSS));
     }
 
-    async waitPreloaderAbsent(attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
-        polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
-
+    async waitPreloaderAbsent(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = timeout / polling;
         Logger.debug('Ide.waitPreloaderAbsent');
 
         await this.driverHelper.waitDisappearance(By.css(Ide.PRELOADER_CSS), attempts, polling);
+    }
+
+    async waitPreloaderVisible(timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
+        Logger.debug('Ide.waitPreloaderVisible');
+
+        await this.driverHelper.waitVisibility(By.css(Ide.PRELOADER_CSS), timeout);
     }
 
     async waitStatusBarContains(expectedText: string, timeout: number = TestConstants.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT) {
