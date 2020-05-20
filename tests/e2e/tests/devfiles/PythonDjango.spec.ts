@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
+import { WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
 import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as workspaceHandler from '../../testsLibrary/WorksapceHandlingTests';
