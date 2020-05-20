@@ -35,6 +35,7 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
@@ -261,5 +262,78 @@ public class SecretAsContainerResourceProvisionerTest {
             .getVolumeMounts()
             .size(),
         0);
+  }
+
+  @Test(
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Unable to mount secret 'test_secret': it has to be mounted as file, but mountPath is not specified.Please make sure you specified 'mountPath' annotation of secret.")
+  public void shouldThrowExceptionWhenNoMountPathSpecifiedForFiles() throws Exception {
+    Container container_match = new ContainerBuilder().withName("maven").build();
+
+    PodSpec localSpec =
+        new PodSpecBuilder().withContainers(ImmutableList.of(container_match)).build();
+
+    when(podData.getSpec()).thenReturn(localSpec);
+    Secret secret =
+        new SecretBuilder()
+            .withData(ImmutableMap.of("settings.xml", "random", "another.xml", "freedom"))
+            .withMetadata(
+                new ObjectMetaBuilder()
+                    .withName("test_secret")
+                    .withAnnotations(emptyMap())
+                    .withLabels(emptyMap())
+                    .build())
+            .build();
+    when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
+    provisioner.provision(environment, namespace);
+  }
+
+  @Test(
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Unable to mount secret 'test_secret': it has to be mounted as Env, but env name is not specified.Please make sure you specified 'envName' annotation of secret.")
+  public void shouldThrowExceptionWhenNoEnvNameSpecifiedSingleValue() throws Exception {
+    Container container_match = new ContainerBuilder().withName("maven").build();
+
+    when(podSpec.getContainers()).thenReturn(ImmutableList.of(container_match));
+
+    Secret secret =
+        new SecretBuilder()
+            .withData(singletonMap("foo", "random"))
+            .withMetadata(
+                new ObjectMetaBuilder()
+                    .withName("test_secret")
+                    .withAnnotations(ImmutableMap.of("useSecretAsEnv", "true"))
+                    .withLabels(emptyMap())
+                    .build())
+            .build();
+
+    when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
+    provisioner.provision(environment, namespace);
+  }
+
+  @Test(
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Unable to mount key 'foo' of secret 'test_secret': it has to be mounted as Env, but env name is not specified.Please make sure you specified 'foo.envName' annotation of secret.")
+  public void shouldThrowExceptionWhenNoEnvNameSpecifiedMultiValue() throws Exception {
+    Container container_match = new ContainerBuilder().withName("maven").build();
+
+    when(podSpec.getContainers()).thenReturn(ImmutableList.of(container_match));
+
+    Secret secret =
+        new SecretBuilder()
+            .withData(ImmutableMap.of("foo", "random", "bar", "test"))
+            .withMetadata(
+                new ObjectMetaBuilder()
+                    .withName("test_secret")
+                    .withAnnotations(ImmutableMap.of("useSecretAsEnv", "true"))
+                    .withLabels(emptyMap())
+                    .build())
+            .build();
+
+    when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
+    provisioner.provision(environment, namespace);
   }
 }

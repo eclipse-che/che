@@ -115,7 +115,7 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       throw new InfrastructureException(
           format(
               "Unable to mount secret '%s': it has to be mounted as file, but mountPath is not specified."
-                  + "Please make sure you specified 'mountPath' annotation of secret.'",
+                  + "Please make sure you specified 'mountPath' annotation of secret.",
               secret.getMetadata().getName()));
     }
 
@@ -142,6 +142,8 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
                 volumeFromSecret.getName()));
       }
 
+      pd.getSpec().getVolumes().add(volumeFromSecret);
+
       for (Container c : pd.getSpec().getContainers()) {
         if (targetContainerName != null && !c.getName().equals(targetContainerName)) {
           continue;
@@ -149,7 +151,7 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
         if (c.getVolumeMounts().stream().anyMatch(vm -> vm.getMountPath().equals(mountPath))) {
           throw new InfrastructureException(
               format(
-                  "Volume Mount path '%s' provisioned from secret, clashes with existing volume mount name.",
+                  "Volume Mount path '%s' provisioned from secret, clashes with existing volume mount path.",
                   mountPath));
         }
         c.getVolumeMounts()
@@ -175,7 +177,7 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
         throw new InfrastructureException(
             format(
                 "Unable to mount secret '%s': it has to be mounted as Env, but env name is not specified."
-                    + "Please make sure you specified 'envName' annotation of secret.'",
+                    + "Please make sure you specified 'envName' annotation of secret.",
                 secret.getMetadata().getName()));
       }
     } else {
@@ -184,7 +186,7 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
         throw new InfrastructureException(
             format(
                 "Unable to mount key '%s' of secret '%s': it has to be mounted as Env, but env name is not specified."
-                    + "Please make sure you specified '%s.envName' annotation of secret.'",
+                    + "Please make sure you specified '%s.envName' annotation of secret.",
                 key, secret.getMetadata().getName(), key));
       }
     }
