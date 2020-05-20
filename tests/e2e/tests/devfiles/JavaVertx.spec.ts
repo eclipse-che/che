@@ -14,8 +14,9 @@ import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 import { WorkspaceNameHandler } from '../..';
 
-const sampleName: string = 'vertx-http-example';
-const fileFolderPath: string = `${sampleName}/src/main/java/io/openshift/example`;
+const workspaceSampleName: string = 'vertx-http-example';
+const workspaceRootFolderName: string = 'src';
+const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/main/java/io/openshift/example`;
 const tabTitle: string = 'HttpApplication.java';
 const codeNavigationClassName: string = 'RouterImpl.class';
 const buildTaskName: string = 'maven build';
@@ -25,7 +26,7 @@ const stack: string = 'Java Vert.x';
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
         workspaceHandling.createAndOpenWorkspace(stack);
-        projectAndFileTests.waitWorkspaceReadiness(sampleName, 'src');
+        projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
     suite('Language server validation', async () => {
