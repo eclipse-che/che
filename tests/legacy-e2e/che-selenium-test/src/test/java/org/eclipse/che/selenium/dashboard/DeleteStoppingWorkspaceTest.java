@@ -11,13 +11,11 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.RUNNING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPED;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.OVERVIEW;
 
 import com.google.inject.Inject;
-import java.util.Collections;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
@@ -26,16 +24,12 @@ import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class DeleteStoppingWorkspaceTest {
-
-  private static final String WORKSPACE_NAME =
-      generate(DeleteStoppingWorkspaceTest.class.getSimpleName(), 5);
 
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
@@ -45,27 +39,27 @@ public class DeleteStoppingWorkspaceTest {
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
+  private String workspaceName;
+
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
-    createWorkspaceHelper.createAndEditWorkspaceFromStack(
-        Devfile.JAVA_MAVEN, WORKSPACE_NAME, Collections.emptyList(), null);
+    workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
+    workspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
   }
 
   @Test
   public void deleteStoppingWorkspaceTest() {
+    dashboard.open();
+
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.clickOnWorkspaceStopStartButton(WORKSPACE_NAME);
-    workspaces.waitWorkspaceStatus(WORKSPACE_NAME, Status.RUNNING);
-
-    workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
-    workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
+    workspaces.selectWorkspaceItemName(workspaceName);
+    workspaceDetails.waitToolbarTitleName(workspaceName);
     workspaceDetails.selectTabInWorkspaceMenu(OVERVIEW);
     workspaceDetails.checkStateOfWorkspace(RUNNING);
     workspaceDetails.clickOnStopWorkspace();
@@ -73,7 +67,7 @@ public class DeleteStoppingWorkspaceTest {
     workspaceOverview.clickOnDeleteWorkspace();
     workspaceDetails.confirmWorkspaceDeletion();
     workspaceDetails.clickOnDeleteButtonInDialogWindow();
-    workspaces.waitWorkspaceIsNotPresent(WORKSPACE_NAME);
+    workspaces.waitWorkspaceIsNotPresent(workspaceName);
     dashboard.waitToolbarTitleName("Workspaces");
   }
 }
