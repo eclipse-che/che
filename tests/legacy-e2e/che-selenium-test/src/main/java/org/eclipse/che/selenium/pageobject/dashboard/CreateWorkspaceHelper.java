@@ -11,17 +11,11 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.Collections;
-import java.util.List;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 
 /**
  * Class cover creation of workspaces on Dashboard
@@ -34,58 +28,21 @@ public class CreateWorkspaceHelper {
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
   @Inject private NewWorkspace newWorkspace;
-  @Inject private ProjectSourcePage projectSourcePage;
-  @Inject private DefaultTestUser defaultTestUser;
-  @Inject private TestWorkspaceProvider testWorkspaceProvider;
-  @Inject private WorkspaceDetails workspaceDetails;
+  @Inject private TheiaIde theiaIde;
 
-  public TestWorkspace createWorkspaceFromDevfileWithProject(
-      Devfile devfile, String workspaceName, String projectName) {
-    return createAndStartWorkspaceFromStack(
-        devfile, workspaceName, ImmutableList.of(projectName), null);
-  }
+  public String createAndStartWorkspace(Devfile devfile) {
+    String workspaceName;
 
-  public TestWorkspace createWorkspaceFromDevfileWithoutProject(
-      Devfile devfile, String workspaceName) {
-    return createAndStartWorkspaceFromStack(devfile, workspaceName, Collections.emptyList(), null);
-  }
-
-  public TestWorkspace createAndStartWorkspaceFromStack(
-      Devfile devfile, String workspaceName, List<String> projectNames, Double machineRam) {
-    prepareWorkspace(devfile, workspaceName, machineRam);
-
-    projectSourcePage.clickOnAddOrImportProjectButton();
-    projectNames.forEach(projectSourcePage::selectSample);
-
-    projectSourcePage.clickOnAddProjectButton();
-    newWorkspace.clickOnCreateButtonAndOpenInIDE();
-
-    return testWorkspaceProvider.getWorkspace(workspaceName, defaultTestUser);
-  }
-
-  public TestWorkspace createAndEditWorkspaceFromStack(
-      Devfile devfile, String workspaceName, List<String> projectNames, Double machineRam) {
-    prepareWorkspace(devfile, workspaceName, machineRam);
-
-    projectSourcePage.clickOnAddOrImportProjectButton();
-    projectNames.forEach(projectSourcePage::selectSample);
-
-    projectSourcePage.clickOnAddProjectButton();
-    newWorkspace.clickOnCreateButtonAndEditWorkspace();
-
-    workspaceDetails.waitToolbarTitleName(workspaceName);
-
-    return testWorkspaceProvider.getWorkspace(workspaceName, defaultTestUser);
-  }
-
-  private void prepareWorkspace(Devfile devfile, String workspaceName, Double machineRam) {
     dashboard.waitDashboardToolbarTitle();
-
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.clickOnAddWorkspaceBtn();
 
-    newWorkspace.waitToolbar();
-    newWorkspace.selectDevfile(devfile);
-    newWorkspace.typeWorkspaceName(workspaceName);
+    newWorkspace.clickOnGetStartedTab();
+    newWorkspace.waitGetStartedTabActive();
+    newWorkspace.selectDevfileFromGetStartedList(devfile);
+
+    workspaceName = theiaIde.waitOpenedWorkspaceIsReadyToUse();
+
+    return workspaceName.substring(workspaceName.indexOf("java"), workspaceName.lastIndexOf("?"));
   }
 }

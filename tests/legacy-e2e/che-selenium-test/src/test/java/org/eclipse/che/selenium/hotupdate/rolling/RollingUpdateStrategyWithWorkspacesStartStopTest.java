@@ -11,12 +11,10 @@
  */
 package org.eclipse.che.selenium.hotupdate.rolling;
 
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import java.util.Collections;
 import org.eclipse.che.selenium.core.client.CheTestSystemClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.hotupdate.HotUpdateUtil;
@@ -34,12 +32,6 @@ import org.testng.annotations.Test;
 
 /** @author Ihor Okhrimenko */
 public class RollingUpdateStrategyWithWorkspacesStartStopTest {
-
-  private static final String STARTED_WORKSPACE_NAME =
-      generate(RollingUpdateStrategyWithWorkspacesStartStopTest.class.getSimpleName(), 5);
-  private static final String STOPPED_WORKSPACE_NAME =
-      generate(RollingUpdateStrategyWithWorkspacesStartStopTest.class.getSimpleName(), 5);
-
   @Inject private CheTestSystemClient cheTestSystemClient;
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
@@ -50,42 +42,38 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
   @Inject private TheiaProjectTree theiaProjectTree;
   @Inject private DefaultTestUser defaultTestUser;
 
+  private String startedWorkspaceName;
+  private String stoppedWorkspaceName;
+
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
-    createWorkspaceHelper.createAndEditWorkspaceFromStack(
-        Devfile.JAVA_MAVEN, STARTED_WORKSPACE_NAME, Collections.emptyList(), null);
+    startedWorkspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
     dashboard.open();
-    createWorkspaceHelper.createAndStartWorkspaceFromStack(
-        Devfile.JAVA_MAVEN, STOPPED_WORKSPACE_NAME, Collections.emptyList(), null);
+    stoppedWorkspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(STARTED_WORKSPACE_NAME, defaultTestUser.getName());
-    workspaceServiceClient.delete(STOPPED_WORKSPACE_NAME, defaultTestUser.getName());
+    workspaceServiceClient.delete(startedWorkspaceName, defaultTestUser.getName());
+    workspaceServiceClient.delete(stoppedWorkspaceName, defaultTestUser.getName());
   }
 
   @Test
   public void startStopWorkspaceFunctionsShouldBeAvailableDuringRollingUpdate() throws Exception {
-    theiaIde.waitOpenedWorkspaceIsReadyToUse();
-
-    theiaProjectTree.waitFilesTab();
-    theiaProjectTree.clickOnFilesTab();
-    theiaProjectTree.waitProjectAreaOpened();
-    theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
-    theiaIde.waitAllNotificationsClosed();
-
     dashboard.open();
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
 
     // check existing of expected workspaces and their statuses
     workspaces.waitPageLoading();
-    workspaces.waitWorkspaceIsPresent(STOPPED_WORKSPACE_NAME);
-    workspaces.waitWorkspaceIsPresent(STARTED_WORKSPACE_NAME);
-    workspaces.waitWorkspaceStatus(STOPPED_WORKSPACE_NAME, Workspaces.Status.RUNNING);
-    workspaces.waitWorkspaceStatus(STARTED_WORKSPACE_NAME, Workspaces.Status.STOPPED);
+    workspaces.waitWorkspaceIsPresent(stoppedWorkspaceName);
+    workspaces.waitWorkspaceIsPresent(startedWorkspaceName);
+
+    workspaces.clickOnWorkspaceActionsButton(
+        startedWorkspaceName, WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON);
+    workspaces.waitWorkspaceStatus(stoppedWorkspaceName, Workspaces.Status.RUNNING);
+    workspaces.waitWorkspaceStatus(startedWorkspaceName, Workspaces.Status.STOPPED);
 
     hotUpdateUtil.executeMasterPodUpdateCommand();
     // check that che is updated
@@ -94,9 +82,9 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
     WaitUtils.sleepQuietly(60);
 
     // execute stop-start commands for existing workspaces
-    workspaces.clickOnWorkspaceStopStartButton(STOPPED_WORKSPACE_NAME);
-    workspaces.waitWorkspaceStatus(STOPPED_WORKSPACE_NAME, Workspaces.Status.STOPPED);
-    workspaces.clickOnWorkspaceStopStartButton(STARTED_WORKSPACE_NAME);
-    workspaces.waitWorkspaceStatus(STARTED_WORKSPACE_NAME, Workspaces.Status.RUNNING);
+    workspaces.clickOnWorkspaceStopStartButton(stoppedWorkspaceName);
+    workspaces.waitWorkspaceStatus(stoppedWorkspaceName, Workspaces.Status.STOPPED);
+    workspaces.clickOnWorkspaceStopStartButton(startedWorkspaceName);
+    workspaces.waitWorkspaceStatus(startedWorkspaceName, Workspaces.Status.RUNNING);
   }
 }

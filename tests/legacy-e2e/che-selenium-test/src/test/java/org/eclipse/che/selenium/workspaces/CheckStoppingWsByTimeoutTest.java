@@ -13,13 +13,11 @@ package org.eclipse.che.selenium.workspaces;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.util.Collections;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -34,9 +32,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class CheckStoppingWsByTimeoutTest {
-
-  private static final String WORKSPACE_NAME =
-      generate(CheckStoppingWsByTimeoutTest.class.getSimpleName(), 5);
 
   @Inject private Dashboard dashboard;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
@@ -53,25 +48,25 @@ public class CheckStoppingWsByTimeoutTest {
   @Named("che.workspace.activity_check_scheduler_period_s")
   private int cheWorkspaceActivityCheckSchedulerPeriodInSeconds;
 
+  private String workspaceName;
+
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
-    createWorkspaceHelper.createAndStartWorkspaceFromStack(
-        Devfile.JAVA_MAVEN, WORKSPACE_NAME, Collections.emptyList(), null);
+    workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
+    workspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
   }
 
   @Test
   public void checkStoppingByApi() throws Exception {
-    theiaIde.waitOpenedWorkspaceIsReadyToUse();
     sleepQuietly(getCommonTimeoutInMilliSec(), MILLISECONDS);
 
     Workspace workspace =
-        workspaceServiceClient.getByName(WORKSPACE_NAME, defaultTestUser.getName());
+        workspaceServiceClient.getByName(workspaceName, defaultTestUser.getName());
     assertEquals(workspace.getStatus(), STOPPED);
   }
 
