@@ -17,7 +17,7 @@ installKVM
 installAndStartMinishift
 loginToOpenshiftAndSetDevRole
 prepareCustomResourceFile true
-installReleaseCheCtl
+installCheCtl stable
 deployCheIntoCluster  --chenamespace=eclipse-che --che-operator-cr-yaml=/tmp/custom-resource.yaml
 seleniumTestsSetup
 

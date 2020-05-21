@@ -253,8 +253,9 @@ function installAndStartMinishift() {
 }
 
 function installCheCtl() {
-  echo "======== Start to install chectl ========"
-  bash <(curl -sL https://www.eclipse.org/che/chectl/) --channel=next
+  channel=${1:-next}
+  echo "======== Start to install chectl from channel $channel ========"
+  bash <(curl -sL https://www.eclipse.org/che/chectl/) --channel=$channel
   echo "======== chectl has been installed successfully ========"
 }
 

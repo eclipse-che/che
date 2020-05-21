@@ -26,7 +26,7 @@ function prepareCustomResourceFile() {
   cat /tmp/custom-resource.yaml
 }
 
-function buidCheServer() {
+function buildCheServer() {
   mvn clean install -Pintegration
   bash dockerfiles/che/build.sh --organization:quay.io/eclipse --tag:${TAG} --dockerfile:Dockerfile
 }
@@ -39,7 +39,7 @@ function pushImageToRegistry() {
 setupEnvs
 installDependencies
 installDockerCompose
-buidCheServer
+buildCheServer
 pushImageToRegistry
 installKVM
 installAndStartMinishift
