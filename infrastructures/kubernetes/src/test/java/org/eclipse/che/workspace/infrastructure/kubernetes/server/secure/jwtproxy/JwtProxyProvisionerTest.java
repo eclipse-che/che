@@ -104,6 +104,7 @@ public class JwtProxyProvisionerTest {
             cookiePathStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
+            "0.5",
             "Always",
             runtimeId);
     k8sEnv = KubernetesEnvironment.builder().build();
@@ -221,6 +222,7 @@ public class JwtProxyProvisionerTest {
             cookiePathStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
+            "500m",
             "Always",
             runtimeId);
 
@@ -268,6 +270,7 @@ public class JwtProxyProvisionerTest {
             cookiePathStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
+            "0.5",
             "Always",
             runtimeId);
 
@@ -306,6 +309,7 @@ public class JwtProxyProvisionerTest {
             cookiePathStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
+            "0.5",
             "Always",
             runtimeId);
 

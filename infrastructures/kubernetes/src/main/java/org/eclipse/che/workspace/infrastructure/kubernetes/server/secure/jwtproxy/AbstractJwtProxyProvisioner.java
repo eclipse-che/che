@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CPU_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_SOURCE_ATTRIBUTE;
@@ -99,6 +100,7 @@ abstract class AbstractJwtProxyProvisioner implements ProxyProvisioner {
       CookiePathStrategy cookiePathStrategy,
       String jwtProxyImage,
       String memoryLimitBytes,
+      String cpuLimitCores,
       String imagePullPolicy,
       String workspaceId,
       boolean detectCookieAuth) {
@@ -118,6 +120,8 @@ abstract class AbstractJwtProxyProvisioner implements ProxyProvisioner {
             Long.toString(memoryLimitLong),
             MEMORY_REQUEST_ATTRIBUTE,
             Long.toString(memoryLimitLong),
+            CPU_LIMIT_ATTRIBUTE,
+            cpuLimitCores,
             CONTAINER_SOURCE_ATTRIBUTE,
             TOOL_CONTAINER_SOURCE);
 
