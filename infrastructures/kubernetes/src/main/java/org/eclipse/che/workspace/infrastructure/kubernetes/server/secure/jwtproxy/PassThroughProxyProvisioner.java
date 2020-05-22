@@ -39,6 +39,7 @@ public class PassThroughProxyProvisioner extends AbstractJwtProxyProvisioner {
       CookiePathStrategy cookiePathStrategy,
       @Named("che.server.secure_exposer.jwtproxy.image") String jwtImage,
       @Named("che.server.secure_exposer.jwtproxy.memory_limit") String memoryLimitBytes,
+      @Named("che.server.secure_exposer.jwtproxy.cpu_limit") String cpuLimitCores,
       @Named("che.workspace.sidecar.image_pull_policy") String imagePullPolicy,
       @Assisted RuntimeIdentity identity)
       throws InternalInfrastructureException {
@@ -49,6 +50,7 @@ public class PassThroughProxyProvisioner extends AbstractJwtProxyProvisioner {
         cookiePathStrategy,
         jwtImage,
         memoryLimitBytes,
+        cpuLimitCores,
         imagePullPolicy,
         identity.getWorkspaceId(),
         false);
