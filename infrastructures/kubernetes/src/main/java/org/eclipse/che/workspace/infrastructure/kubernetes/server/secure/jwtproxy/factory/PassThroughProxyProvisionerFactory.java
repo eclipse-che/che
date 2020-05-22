@@ -17,5 +17,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtprox
 
 /** Helps to create {@link PassThroughProxyProvisioner} with fields injected from DI container. */
 public interface PassThroughProxyProvisionerFactory extends ProxyProvisionerFactory {
+  @Override
   PassThroughProxyProvisioner create(RuntimeIdentity runtimeId);
 }
