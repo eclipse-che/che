@@ -31,7 +31,6 @@ const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin)
 const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
 const openshiftPlugin: OpenshiftPlugin = e2eContainer.get(CLASSES.OpenshiftPlugin);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
-const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
 const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 const openDialogWidget: OpenDialogWidget = e2eContainer.get(CLASSES.OpenDialogWidget);
 const preferencesHalder: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
@@ -72,7 +71,7 @@ suite('Openshift connector user story', async () => {
   test('Login into workspace and open plugin', async () => {
     await driverHelper.navigateToUrl(workspacePrefixUrl + wsName);
     await loginPage.login();
-    await ide.waitWorkspaceAndIde(namespace, wsName);
+    await ide.waitWorkspaceAndIde();
     await projectTree.openProjectTreeContainer();
     await projectTree.waitProjectImported(projectName, 'index.js');
     await dashboard.waitDisappearanceNavigationMenu();
@@ -89,8 +88,8 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.clickOnContainerItem('Credentials');
     await quickOpenContainer.clickOnContainerItem(`https://${openshiftIP}`);
     await quickOpenContainer.clickOnContainerItem('$(plus) Add new user...');
-    await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_LOGIN_NAME_OF_OPENSHIFT_REGULAR_USER, `Provide Username ${provideAuthenticationSuffix}`);
-    await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_PASSWORD_OF_OPENSHIFT_REGULAR_USER, `Provide Password ${provideAuthenticationSuffix}`);
+    await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_USERNAME, `Provide Username ${provideAuthenticationSuffix}`);
+    await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PASSWORD, `Provide Password ${provideAuthenticationSuffix}`);
   });
 
   test('Create new component with application', async () => {
