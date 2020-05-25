@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2020 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -46,7 +46,7 @@ suite(`${workspaceStack} test`, async () => {
         commonLsTests.suggestionInvoking(fileName, 42, 10, 'Parse');
         commonLsTests.autocomplete(fileName, 42, 10, 'Parse');
         commonLsTests.errorHighlighting(fileName, 'error;\n', 42);
-        // commonLsTests.codeNavigation(fileName, 42, 10, 'flag.go'); // no implementation found for "Parse" - ctrl+F12 doesn't behave the same way as ctrl+click
+        // commonLsTests.codeNavigation(fileName, 42, 10, 'flag.go'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
     });
 
     suite('Test golang example', async () => {
@@ -56,7 +56,7 @@ suite(`${workspaceStack} test`, async () => {
 
     suite('Run golang example server', async () => {
         codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskRunServer, taskExpectedDialogText, 30_000);
-        // codeExecutionHelper.runTask(taskStopServer, 5_000); // stop outyet task causes the server to die with exit code 143 and causing tests to fail. skipping stopping for now
+        // codeExecutionHelper.runTask(taskStopServer, 5_000); // stop outyet task causes the server to die with exit code 143 https://github.com/eclipse/che/issues/17005
     });
 
     suite('Stop and remove workspace', async() => {
