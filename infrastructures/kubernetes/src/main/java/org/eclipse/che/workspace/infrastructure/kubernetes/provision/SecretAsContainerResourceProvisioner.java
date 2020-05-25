@@ -73,11 +73,9 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
   public void provision(E env, KubernetesNamespace namespace) throws InfrastructureException {
     LabelSelector selector = new LabelSelectorBuilder().withMatchLabels(secretLabels).build();
     for (Secret secret : namespace.secrets().get(selector)) {
-      boolean mountAsEnv =
-          "env".equalsIgnoreCase(secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_AS));
       String targetContainerName =
           secret.getMetadata().getAnnotations().get(ANNOTATION_TARGET_CONTAINER);
-      if (mountAsEnv) {
+      if ("env".equalsIgnoreCase(secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_AS))) {
         mountAsEnv(env, secret, targetContainerName);
       } else {
         mountAsFile(env, secret, targetContainerName);
