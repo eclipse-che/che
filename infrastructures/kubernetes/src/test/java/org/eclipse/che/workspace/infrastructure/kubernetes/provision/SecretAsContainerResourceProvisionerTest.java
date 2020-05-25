@@ -11,9 +11,15 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_ENV_NAME;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_ENV_NAME_TEMPLATE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_MOUNT_AS;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_MOUNT_PATH;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_TARGET_CONTAINER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -87,11 +93,11 @@ public class SecretAsContainerResourceProvisionerTest {
                     .withName("test_secret")
                     .withAnnotations(
                         ImmutableMap.of(
-                            "envName",
+                            ANNOTATION_ENV_NAME,
                             "MY_FOO",
-                            "useSecretAsEnv",
-                            "true",
-                            "targetContainer",
+                            ANNOTATION_MOUNT_AS,
+                            "env",
+                            ANNOTATION_TARGET_CONTAINER,
                             "maven"))
                     .withLabels(emptyMap())
                     .build())
@@ -127,13 +133,13 @@ public class SecretAsContainerResourceProvisionerTest {
                     .withName("test_secret")
                     .withAnnotations(
                         ImmutableMap.of(
-                            "foo.envName",
+                            format(ANNOTATION_ENV_NAME_TEMPLATE, "foo"),
                             "MY_FOO",
-                            "bar.envName",
+                            format(ANNOTATION_ENV_NAME_TEMPLATE, "bar"),
                             "MY_BAR",
-                            "useSecretAsEnv",
-                            "true",
-                            "targetContainer",
+                            ANNOTATION_MOUNT_AS,
+                            "env",
+                            ANNOTATION_TARGET_CONTAINER,
                             "maven"))
                     .withLabels(emptyMap())
                     .build())
@@ -172,7 +178,7 @@ public class SecretAsContainerResourceProvisionerTest {
             .withMetadata(
                 new ObjectMetaBuilder()
                     .withName("test_secret")
-                    .withAnnotations(ImmutableMap.of("envName", "MY_FOO", "useSecretAsEnv", "true"))
+                    .withAnnotations(ImmutableMap.of(ANNOTATION_ENV_NAME, "MY_FOO", ANNOTATION_MOUNT_AS, "env"))
                     .withLabels(emptyMap())
                     .build())
             .build();
@@ -213,7 +219,7 @@ public class SecretAsContainerResourceProvisionerTest {
                 new ObjectMetaBuilder()
                     .withName("test_secret")
                     .withAnnotations(
-                        ImmutableMap.of("mountPath", "/home/user/.m2", "targetContainer", "maven"))
+                        ImmutableMap.of(ANNOTATION_MOUNT_PATH, "/home/user/.m2", ANNOTATION_TARGET_CONTAINER, "maven"))
                     .withLabels(emptyMap())
                     .build())
             .build();
@@ -267,7 +273,7 @@ public class SecretAsContainerResourceProvisionerTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to mount secret 'test_secret': it has to be mounted as file, but mountPath is not specified.Please make sure you specified 'mountPath' annotation of secret.")
+          "Unable to mount secret 'test_secret': it has to be mounted as file, but mountPath is not specified.Please make sure you specified 'org.eclipse.che/mount-path' annotation of secret.")
   public void shouldThrowExceptionWhenNoMountPathSpecifiedForFiles() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
 
@@ -292,7 +298,7 @@ public class SecretAsContainerResourceProvisionerTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to mount secret 'test_secret': it has to be mounted as Env, but env name is not specified.Please make sure you specified 'envName' annotation of secret.")
+          "Unable to mount secret 'test_secret': it has to be mounted as Env, but env name is not specified.Please make sure you specified 'org.eclipse.che/env-name' annotation of secret.")
   public void shouldThrowExceptionWhenNoEnvNameSpecifiedSingleValue() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
 
@@ -304,7 +310,7 @@ public class SecretAsContainerResourceProvisionerTest {
             .withMetadata(
                 new ObjectMetaBuilder()
                     .withName("test_secret")
-                    .withAnnotations(ImmutableMap.of("useSecretAsEnv", "true"))
+                    .withAnnotations(ImmutableMap.of(ANNOTATION_MOUNT_AS, "env"))
                     .withLabels(emptyMap())
                     .build())
             .build();
@@ -316,7 +322,7 @@ public class SecretAsContainerResourceProvisionerTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to mount key 'foo' of secret 'test_secret': it has to be mounted as Env, but env name is not specified.Please make sure you specified 'foo.envName' annotation of secret.")
+          "Unable to mount key 'foo' of secret 'test_secret': it has to be mounted as Env, but env name is not specified.Please make sure you specified 'org.eclipse.che/foo_env-name' annotation of secret.")
   public void shouldThrowExceptionWhenNoEnvNameSpecifiedMultiValue() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
 
@@ -328,7 +334,7 @@ public class SecretAsContainerResourceProvisionerTest {
             .withMetadata(
                 new ObjectMetaBuilder()
                     .withName("test_secret")
-                    .withAnnotations(ImmutableMap.of("useSecretAsEnv", "true"))
+                    .withAnnotations(ImmutableMap.of(ANNOTATION_MOUNT_AS, "env"))
                     .withLabels(emptyMap())
                     .build())
             .build();

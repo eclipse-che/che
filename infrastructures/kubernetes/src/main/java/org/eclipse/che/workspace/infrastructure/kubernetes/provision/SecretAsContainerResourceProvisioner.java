@@ -12,7 +12,6 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
-import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 
 import com.google.common.annotations.Beta;
@@ -41,14 +40,21 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 
 /**
  * Finds secrets with specific labels in namespace, and mount their values as file or environment
- * variable into all (or specified by "targetContainer" annotation) workspace containers. Secrets
- * with annotation "useSecretAsEnv:true" are mount as env variables, env name is read from "envName"
- * or "<datakey>.envName>" annotation. Secrets which don't have it, are mounted as file in the
- * folder specified by "mountPath" annotation. Refer to che-docs for concrete examples.
+ * variable into all (or specified by "org.eclipse.che/target-container" annotation) workspace containers.
+ * Secrets with annotation "org.eclipse.che/mount-as=env" are mount as env variables, env name is read from
+ * "org.eclipse.che/env-name" annotation. Secrets which don't have it, are mounted as file in the
+ * folder specified by "org.eclipse.che/mount-path" annotation. Refer to che-docs for concrete examples.
  */
 @Beta
 @Singleton
 public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironment> {
+
+   private static final String ANNOTATION_PREFIX = "org.eclipse.che";
+   static final String ANNOTATION_MOUNT_AS = ANNOTATION_PREFIX + "/" + "mount-as";
+   static final String ANNOTATION_TARGET_CONTAINER = ANNOTATION_PREFIX + "/" + "target-container";
+   static final String ANNOTATION_ENV_NAME = ANNOTATION_PREFIX + "/" + "env-name";
+   static final String ANNOTATION_ENV_NAME_TEMPLATE = ANNOTATION_PREFIX + "/%s_" + "env-name";
+   static final String ANNOTATION_MOUNT_PATH = ANNOTATION_PREFIX + "/" + "mount-path";
 
   private final Map<String, String> secretLabels;
 
@@ -66,9 +72,9 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
     LabelSelector selector = new LabelSelectorBuilder().withMatchLabels(secretLabels).build();
     for (Secret secret : namespace.secrets().get(selector)) {
       boolean mountAsEnv =
-          parseBoolean(
-              secret.getMetadata().getAnnotations().getOrDefault("useSecretAsEnv", "false"));
-      String targetContainerName = secret.getMetadata().getAnnotations().get("targetContainer");
+          secret.getMetadata().getAnnotations().getOrDefault(ANNOTATION_MOUNT_AS, "file")
+              .equals("env");
+      String targetContainerName = secret.getMetadata().getAnnotations().get(ANNOTATION_TARGET_CONTAINER);
       if (mountAsEnv) {
         mountAsEnv(env, secret, targetContainerName);
       } else {
@@ -110,13 +116,13 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
   private void mountAsFile(E env, Secret secret, String targetContainerName)
       throws InfrastructureException {
 
-    final String mountPath = secret.getMetadata().getAnnotations().get("mountPath");
+    final String mountPath = secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_PATH);
     if (mountPath == null) {
       throw new InfrastructureException(
           format(
               "Unable to mount secret '%s': it has to be mounted as file, but mountPath is not specified."
-                  + "Please make sure you specified 'mountPath' annotation of secret.",
-              secret.getMetadata().getName()));
+                  + "Please make sure you specified '%s' annotation of secret.",
+              secret.getMetadata().getName(), ANNOTATION_MOUNT_PATH));
     }
 
     Volume volumeFromSecret =
@@ -171,23 +177,23 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       try {
         mountEnvName =
             firstNonNull(
-                secret.getMetadata().getAnnotations().get("envName"),
-                secret.getMetadata().getAnnotations().get(key + ".envName"));
+                secret.getMetadata().getAnnotations().get(ANNOTATION_ENV_NAME),
+                secret.getMetadata().getAnnotations().get(format(ANNOTATION_ENV_NAME_TEMPLATE, key)));
       } catch (NullPointerException e) {
         throw new InfrastructureException(
             format(
                 "Unable to mount secret '%s': it has to be mounted as Env, but env name is not specified."
-                    + "Please make sure you specified 'envName' annotation of secret.",
-                secret.getMetadata().getName()));
+                    + "Please make sure you specified '%s' annotation of secret.",
+                secret.getMetadata().getName(), ANNOTATION_ENV_NAME));
       }
     } else {
-      mountEnvName = secret.getMetadata().getAnnotations().get(key + ".envName");
+      mountEnvName = secret.getMetadata().getAnnotations().get(format(ANNOTATION_ENV_NAME_TEMPLATE, key));
       if (mountEnvName == null) {
         throw new InfrastructureException(
             format(
                 "Unable to mount key '%s' of secret '%s': it has to be mounted as Env, but env name is not specified."
-                    + "Please make sure you specified '%s.envName' annotation of secret.",
-                key, secret.getMetadata().getName(), key));
+                    + "Please make sure you specified '%s' annotation of secret.",
+                key, secret.getMetadata().getName(), format(ANNOTATION_ENV_NAME_TEMPLATE, key)));
       }
     }
     return mountEnvName;
