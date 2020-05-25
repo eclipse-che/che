@@ -74,11 +74,7 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
     LabelSelector selector = new LabelSelectorBuilder().withMatchLabels(secretLabels).build();
     for (Secret secret : namespace.secrets().get(selector)) {
       boolean mountAsEnv =
-          secret
-              .getMetadata()
-              .getAnnotations()
-              .getOrDefault(ANNOTATION_MOUNT_AS, "file")
-              .equals("env");
+          "env".equalsIgnoreCase(secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_AS));
       String targetContainerName =
           secret.getMetadata().getAnnotations().get(ANNOTATION_TARGET_CONTAINER);
       if (mountAsEnv) {
@@ -91,11 +87,11 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
 
   private void mountAsEnv(E env, Secret secret, String targetContainerName)
       throws InfrastructureException {
-    for (PodData pd : env.getPodsData().values()) {
-      if (!pd.getRole().equals(PodRole.DEPLOYMENT)) {
+    for (PodData podData : env.getPodsData().values()) {
+      if (!podData.getRole().equals(PodRole.DEPLOYMENT)) {
         continue;
       }
-      for (Container c : pd.getSpec().getContainers()) {
+      for (Container c : podData.getSpec().getContainers()) {
         if (targetContainerName != null && !c.getName().equals(targetContainerName)) {
           continue;
         }
@@ -140,11 +136,12 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
                     .build())
             .build();
 
-    for (PodData pd : env.getPodsData().values()) {
-      if (!pd.getRole().equals(PodRole.DEPLOYMENT)) {
+    for (PodData podData : env.getPodsData().values()) {
+      if (!podData.getRole().equals(PodRole.DEPLOYMENT)) {
         continue;
       }
-      if (pd.getSpec()
+      if (podData
+          .getSpec()
           .getVolumes()
           .stream()
           .anyMatch(v -> v.getName().equals(volumeFromSecret.getName()))) {
@@ -154,19 +151,23 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
                 volumeFromSecret.getName()));
       }
 
-      pd.getSpec().getVolumes().add(volumeFromSecret);
+      podData.getSpec().getVolumes().add(volumeFromSecret);
 
-      for (Container c : pd.getSpec().getContainers()) {
-        if (targetContainerName != null && !c.getName().equals(targetContainerName)) {
+      for (Container container : podData.getSpec().getContainers()) {
+        if (targetContainerName != null && !container.getName().equals(targetContainerName)) {
           continue;
         }
-        if (c.getVolumeMounts().stream().anyMatch(vm -> vm.getMountPath().equals(mountPath))) {
+        if (container
+            .getVolumeMounts()
+            .stream()
+            .anyMatch(vm -> vm.getMountPath().equals(mountPath))) {
           throw new InfrastructureException(
               format(
                   "Volume Mount path '%s' provisioned from secret, clashes with existing volume mount path.",
                   mountPath));
         }
-        c.getVolumeMounts()
+        container
+            .getVolumeMounts()
             .add(
                 new VolumeMountBuilder()
                     .withName(volumeFromSecret.getName())
