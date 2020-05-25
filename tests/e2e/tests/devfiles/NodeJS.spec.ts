@@ -37,8 +37,8 @@ suite(`${workspaceStack} test`, async () => {
         projectManager.openFile(fileFolderPath, fileName);
         commonLsTests.suggestionInvoking(fileName, 15, 20, 'require');
         commonLsTests.autocomplete(fileName, 15, 20, 'require');
-        // commonLsTests.errorHighlighting(fileName, 'error_text;\n', 17); // error highlighting doesn't work in nodejs devfile
-        commonLsTests.codeNavigation(fileName, 19, 10, 'index.d.ts');
+        // commonLsTests.errorHighlighting(fileName, 'error_text;\n', 17); // error highlighting doesn't work in nodejs devfile https://github.com/eclipse/che/issues/16993
+        // commonLsTests.codeNavigation(fileName, 19, 10, 'index.d.ts'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
     });
     suite('Run nodejs application', async () => {
         codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskRunWebApp, taskExpectedDialogText, 30_000);
