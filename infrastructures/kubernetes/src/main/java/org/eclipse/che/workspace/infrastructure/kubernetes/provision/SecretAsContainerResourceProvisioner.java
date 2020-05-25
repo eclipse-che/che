@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toMap;
 
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.Container;
@@ -26,7 +27,7 @@ import io.fabric8.kubernetes.api.model.SecretVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.inject.Inject;
@@ -63,11 +64,10 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
   @Inject
   public SecretAsContainerResourceProvisioner(
       @Named("che.workspace.provision.secret.labels") String[] labels) {
-    this.secretLabels = new HashMap<>();
-    for (String keyValue : labels) {
-      String[] pair = keyValue.split("=", 2);
-      secretLabels.put(pair[0], pair.length == 1 ? "" : pair[1]);
-    }
+    this.secretLabels =
+        Arrays.stream(labels)
+            .map(item -> item.split("=", 2))
+            .collect(toMap(p -> p[0], p -> p.length == 1 ? "" : p[1]));
   }
 
   public void provision(E env, KubernetesNamespace namespace) throws InfrastructureException {
