@@ -91,13 +91,14 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       if (!podData.getRole().equals(PodRole.DEPLOYMENT)) {
         continue;
       }
-      for (Container c : podData.getSpec().getContainers()) {
-        if (targetContainerName != null && !c.getName().equals(targetContainerName)) {
+      for (Container container : podData.getSpec().getContainers()) {
+        if (targetContainerName != null && !container.getName().equals(targetContainerName)) {
           continue;
         }
         for (Entry<String, String> entry : secret.getData().entrySet()) {
           final String mountEnvName = envName(secret, entry.getKey());
-          c.getEnv()
+          container
+              .getEnv()
               .add(
                   new EnvVarBuilder()
                       .withName(mountEnvName)
