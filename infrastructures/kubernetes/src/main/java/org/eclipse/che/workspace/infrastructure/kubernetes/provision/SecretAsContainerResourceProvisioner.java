@@ -40,21 +40,23 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 
 /**
  * Finds secrets with specific labels in namespace, and mount their values as file or environment
- * variable into all (or specified by "org.eclipse.che/target-container" annotation) workspace containers.
- * Secrets with annotation "org.eclipse.che/mount-as=env" are mount as env variables, env name is read from
- * "org.eclipse.che/env-name" annotation. Secrets which don't have it, are mounted as file in the
- * folder specified by "org.eclipse.che/mount-path" annotation. Refer to che-docs for concrete examples.
+ * variable into all (or specified by "org.eclipse.che/target-container" annotation) workspace
+ * containers. Secrets with annotation "org.eclipse.che/mount-as=env" are mount as env variables,
+ * env name is read from "org.eclipse.che/env-name" annotation. Secrets which don't have
+ * "org.eclipse.che/mount-as=env" or having "org.eclipse.che/mount-as=file" are mounted as file in
+ * the folder specified by "org.eclipse.che/mount-path" annotation. Refer to che-docs for concrete
+ * examples.
  */
 @Beta
 @Singleton
 public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironment> {
 
-   private static final String ANNOTATION_PREFIX = "org.eclipse.che";
-   static final String ANNOTATION_MOUNT_AS = ANNOTATION_PREFIX + "/" + "mount-as";
-   static final String ANNOTATION_TARGET_CONTAINER = ANNOTATION_PREFIX + "/" + "target-container";
-   static final String ANNOTATION_ENV_NAME = ANNOTATION_PREFIX + "/" + "env-name";
-   static final String ANNOTATION_ENV_NAME_TEMPLATE = ANNOTATION_PREFIX + "/%s_" + "env-name";
-   static final String ANNOTATION_MOUNT_PATH = ANNOTATION_PREFIX + "/" + "mount-path";
+  private static final String ANNOTATION_PREFIX = "org.eclipse.che";
+  static final String ANNOTATION_MOUNT_AS = ANNOTATION_PREFIX + "/" + "mount-as";
+  static final String ANNOTATION_TARGET_CONTAINER = ANNOTATION_PREFIX + "/" + "target-container";
+  static final String ANNOTATION_ENV_NAME = ANNOTATION_PREFIX + "/" + "env-name";
+  static final String ANNOTATION_ENV_NAME_TEMPLATE = ANNOTATION_PREFIX + "/%s_" + "env-name";
+  static final String ANNOTATION_MOUNT_PATH = ANNOTATION_PREFIX + "/" + "mount-path";
 
   private final Map<String, String> secretLabels;
 
@@ -72,9 +74,13 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
     LabelSelector selector = new LabelSelectorBuilder().withMatchLabels(secretLabels).build();
     for (Secret secret : namespace.secrets().get(selector)) {
       boolean mountAsEnv =
-          secret.getMetadata().getAnnotations().getOrDefault(ANNOTATION_MOUNT_AS, "file")
+          secret
+              .getMetadata()
+              .getAnnotations()
+              .getOrDefault(ANNOTATION_MOUNT_AS, "file")
               .equals("env");
-      String targetContainerName = secret.getMetadata().getAnnotations().get(ANNOTATION_TARGET_CONTAINER);
+      String targetContainerName =
+          secret.getMetadata().getAnnotations().get(ANNOTATION_TARGET_CONTAINER);
       if (mountAsEnv) {
         mountAsEnv(env, secret, targetContainerName);
       } else {
@@ -178,7 +184,10 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
         mountEnvName =
             firstNonNull(
                 secret.getMetadata().getAnnotations().get(ANNOTATION_ENV_NAME),
-                secret.getMetadata().getAnnotations().get(format(ANNOTATION_ENV_NAME_TEMPLATE, key)));
+                secret
+                    .getMetadata()
+                    .getAnnotations()
+                    .get(format(ANNOTATION_ENV_NAME_TEMPLATE, key)));
       } catch (NullPointerException e) {
         throw new InfrastructureException(
             format(
@@ -187,7 +196,8 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
                 secret.getMetadata().getName(), ANNOTATION_ENV_NAME));
       }
     } else {
-      mountEnvName = secret.getMetadata().getAnnotations().get(format(ANNOTATION_ENV_NAME_TEMPLATE, key));
+      mountEnvName =
+          secret.getMetadata().getAnnotations().get(format(ANNOTATION_ENV_NAME_TEMPLATE, key));
       if (mountEnvName == null) {
         throw new InfrastructureException(
             format(

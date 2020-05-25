@@ -178,7 +178,8 @@ public class SecretAsContainerResourceProvisionerTest {
             .withMetadata(
                 new ObjectMetaBuilder()
                     .withName("test_secret")
-                    .withAnnotations(ImmutableMap.of(ANNOTATION_ENV_NAME, "MY_FOO", ANNOTATION_MOUNT_AS, "env"))
+                    .withAnnotations(
+                        ImmutableMap.of(ANNOTATION_ENV_NAME, "MY_FOO", ANNOTATION_MOUNT_AS, "env"))
                     .withLabels(emptyMap())
                     .build())
             .build();
@@ -219,7 +220,11 @@ public class SecretAsContainerResourceProvisionerTest {
                 new ObjectMetaBuilder()
                     .withName("test_secret")
                     .withAnnotations(
-                        ImmutableMap.of(ANNOTATION_MOUNT_PATH, "/home/user/.m2", ANNOTATION_TARGET_CONTAINER, "maven"))
+                        ImmutableMap.of(
+                            ANNOTATION_MOUNT_PATH,
+                            "/home/user/.m2",
+                            ANNOTATION_TARGET_CONTAINER,
+                            "maven"))
                     .withLabels(emptyMap())
                     .build())
             .build();
