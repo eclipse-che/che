@@ -9,10 +9,6 @@ pipeline {
     }
 
     parameters {
-        string(name: 'emails',
-                defaultValue: 'kfoniok@redhat.com',
-                description: 'Comma-separated list of emails to send results')
-
         string(name: 'cheClusterUrl',
                 defaultValue: '',
                 description: 'URL to the cluster where CHE is running.')
@@ -84,29 +80,30 @@ pipeline {
     stages {
         stage('Preset environment') {
             steps {
-                sh """
-                    set +x
-                    echo "Installing oc..."
-                    wget -q https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.3.1/openshift-client-linux-4.3.1.tar.gz -O - | tar -xz
-                    mv oc $OC_PATH
-                    echo "Setting CHE context..."
-                    oc login $cheClusterUrl -u $cheClusterUsername -p $cheClusterPassword --insecure-skip-tls-verify
-                    oc project $cheClusterNamespace
-                """
                 script {
+                    sh """
+                        set +x
+                        echo "Installing oc..."
+                        wget -q https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.3.1/openshift-client-linux-4.3.1.tar.gz -O - | tar -xz
+                        mv oc $OC_PATH
+                        echo "Setting CHE context..."
+                        oc login $cheClusterUrl -u $cheClusterUsername -p $cheClusterPassword --insecure-skip-tls-verify
+                        oc project $cheClusterNamespace
+                    """
+                    
                     env.CHE_CONTEXT = sh (script: "oc whoami -c", returnStdout: true)
-                }
-                sh """
-                    set +x
-                    echo "Setting test context..."
-                    oc login $testClusterUrl -u $testClusterUsername -p $testClusterPassword --insecure-skip-tls-verify
-                    set +e
-                    project=`oc get projects | grep $testClusterNamespace`
-                    if [[ -z \$project ]]; then oc new-project $testClusterNamespace; fi
-                    set -e
-                    oc project $testClusterNamespace;
-                """
-                script {
+                    
+                    sh """
+                        set +x
+                        echo "Setting test context..."
+                        oc login $testClusterUrl -u $testClusterUsername -p $testClusterPassword --insecure-skip-tls-verify
+                        set +e
+                        project=`oc get projects | grep $testClusterNamespace`
+                        if [[ -z \$project ]]; then oc new-project $testClusterNamespace; fi
+                        set -e
+                        oc project $testClusterNamespace;
+                    """
+                    
                     env.TEST_CONTEXT = sh (script: "oc whoami -c", returnStdout: true)
                 }
             }
@@ -124,9 +121,11 @@ pipeline {
                 sh """
                   ROOT=`pwd`
                   cd $pathToScripts
+
                   oc config use-context ${env.CHE_CONTEXT}
                   checlusterName=`oc get checluster -o jsonpath='{.items[].metadata.name}'`
                   CHE_URL=`oc get checluster \$checlusterName -o jsonpath='{.status.cheURL}'`
+                  
                   oc config use-context ${env.TEST_CONTEXT}
                   mkdir \$ROOT/report
                   ./load-tests.sh -u user -p load-user -n $numberOfUsers -i $testingImage -r \$CHE_URL -f \$ROOT/report -t $numberOfRepetitions -l TRACE
