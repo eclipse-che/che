@@ -278,7 +278,7 @@ public class SecretAsContainerResourceProvisionerTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to mount secret 'test_secret': it has to be mounted as file, but mountPath is not specified.Please make sure you specified 'org.eclipse.che/mount-path' annotation of secret.")
+          "Unable to mount secret 'test_secret': it has to be mounted as file, but mountPath is not specified.Please make sure you specified 'che.eclipse.org/mount-path' annotation of secret.")
   public void shouldThrowExceptionWhenNoMountPathSpecifiedForFiles() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
 
@@ -303,7 +303,7 @@ public class SecretAsContainerResourceProvisionerTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to mount secret 'test_secret': it has to be mounted as Env, but env name is not specified.Please make sure you specified 'org.eclipse.che/env-name' annotation of secret.")
+          "Unable to mount secret 'test_secret': it has to be mounted as Env, but env name is not specified.Please make sure you specified 'che.eclipse.org/env-name' annotation of secret.")
   public void shouldThrowExceptionWhenNoEnvNameSpecifiedSingleValue() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
 
@@ -327,7 +327,7 @@ public class SecretAsContainerResourceProvisionerTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to mount key 'foo' of secret 'test_secret': it has to be mounted as Env, but env name is not specified.Please make sure you specified 'org.eclipse.che/foo_env-name' annotation of secret.")
+          "Unable to mount key 'foo' of secret 'test_secret': it has to be mounted as Env, but env name is not specified.Please make sure you specified 'che.eclipse.org/foo_env-name' annotation of secret.")
   public void shouldThrowExceptionWhenNoEnvNameSpecifiedMultiValue() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
 

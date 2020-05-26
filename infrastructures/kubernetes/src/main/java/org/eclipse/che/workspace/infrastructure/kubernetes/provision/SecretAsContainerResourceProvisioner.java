@@ -52,7 +52,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 @Singleton
 public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironment> {
 
-  private static final String ANNOTATION_PREFIX = "org.eclipse.che";
+  private static final String ANNOTATION_PREFIX = "che.eclipse.org";
   static final String ANNOTATION_MOUNT_AS = ANNOTATION_PREFIX + "/" + "mount-as";
   static final String ANNOTATION_TARGET_CONTAINER = ANNOTATION_PREFIX + "/" + "target-container";
   static final String ANNOTATION_ENV_NAME = ANNOTATION_PREFIX + "/" + "env-name";
