@@ -128,7 +128,7 @@ pipeline {
                   
                   oc config use-context ${env.TEST_CONTEXT}
                   mkdir \$ROOT/report
-                  ./load-tests.sh -u user -p load-user -n $numberOfUsers -i $testingImage -r \$CHE_URL -f \$ROOT/report -t $numberOfRepetitions -l TRACE
+                  ./load-tests.sh -u user -p load-user -n $numberOfUsers -i $testingImage -r \$CHE_URL -f \$ROOT/report -t $numberOfRepetitions -l $logLevel
                 """
             }
             post {
