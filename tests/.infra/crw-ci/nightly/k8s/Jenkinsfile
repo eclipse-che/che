@@ -21,7 +21,7 @@ pipeline {
             parallel {
                 stage('Run Happy path tests') {
                     steps {
-                        build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
+                        build job: 'che16904-basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                 parameters: [
                                         string(name: 'cheImageRepo',
                                                 value: 'quay.io/eclipse/che-server'),
