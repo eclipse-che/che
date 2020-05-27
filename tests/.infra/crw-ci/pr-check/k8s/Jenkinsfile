@@ -243,6 +243,11 @@ EOL"""
                             returnStdout: true
                     ).trim()
 
+                    echo "Update CheCluster to implement single-host strategy"
+                    sh """
+                        kubectl patch checluster eclipse-che -n che --type=json -p '[{"op": "replace", "path": "/spec/k8s/ingressStrategy", "value": "single-host"}]'
+                    """
+
                     echo "Wait che-server to be available"
                     sh """
                             COUNTER=0;
@@ -270,6 +275,11 @@ EOL"""
                             fi
                             done
                     """
+
+                    echo "CheCluster yaml content"
+                    sh """
+                        kubectl get checluster -n che -o yaml 
+                    ""'
                 }
             }
         }
