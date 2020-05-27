@@ -14,7 +14,7 @@ function prepareCustomResourcePatchFile() {
   cat > /tmp/custom-resource-patch.yaml <<EOL
 spec:
   auth:
-    identityProviderPassword: admin
+    updateAdminPassword: false
 EOL
 
   cat /tmp/custom-resource-patch.yaml

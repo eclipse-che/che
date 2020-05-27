@@ -223,7 +223,7 @@ spec:
     cheImage: '${cheImageRepo}'
     cheImageTag: '${mutableCheImageTag}'
   auth:
-    identityProviderPassword: admin
+    updateAdminPassword: false
 EOL"""
 
                     echo "Install Che"
