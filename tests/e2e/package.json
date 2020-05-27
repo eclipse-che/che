@@ -16,6 +16,7 @@
     "test-java-vertx": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-java-vertx.opts",
     "test-git-ssh": "./generateIndex.sh &&  npm run lint && npm run tsc && mocha --opts mocha-git-ssh.opts",
     "test-all-devfiles": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-all-devfiles.opts",
+    "test-factory": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-factory.opts",
     "lint": "tslint --fix -p .",
     "tsc": "tsc -p ."
   },
