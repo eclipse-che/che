@@ -16,9 +16,9 @@ installDockerCompose
 installKVM
 installAndStartMinishift
 loginToOpenshiftAndSetDevRole
-prepareCustomResourceFile true
+prepareCustomResourcePatchFile true
 installCheCtl stable
-deployCheIntoCluster  --chenamespace=eclipse-che --che-operator-cr-yaml=/tmp/custom-resource.yaml
+deployCheIntoCluster --che-operator-cr-patch-yaml=/tmp/custom-resource-patch.yaml
 seleniumTestsSetup
 
 bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh \

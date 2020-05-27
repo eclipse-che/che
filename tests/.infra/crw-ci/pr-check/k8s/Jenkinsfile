@@ -222,11 +222,6 @@ spec:
   server:
     cheImage: '${cheImageRepo}'
     cheImageTag: '${mutableCheImageTag}'
-    selfSignedCert: true
-  auth:
-    updateAdminPassword: false
-  k8s:
-    ingressDomain: '\$(minikube ip).nip.io'
 EOL"""
 
                     echo "Install Che"

@@ -17,9 +17,9 @@ installKVM
 installDependencies
 installAndStartMinishift
 loginToOpenshiftAndSetDevRole
-prepareCustomResourceFile false
+prepareCustomResourcePatchFile false
 installCheCtl stable
-deployCheIntoCluster  --che-operator-cr-yaml=/tmp/custom-resource.yaml
+deployCheIntoCluster  --che-operator-cr-patch-yaml=/tmp/custom-resource-patch.yaml
 createTestUserAndObtainUserToken
 createTestWorkspaceAndRunTest  --devfile=https://raw.githubusercontent.com/eclipse/che/cico-rc-test/tests/e2e/files/happy-path/happy-path-workspace.yaml
 getOpenshiftLogs
