@@ -51,7 +51,7 @@ pipeline {
                 description: 'Should create test workspace')
 
         string(name: 'ghprbSourceBranch',
-                defaultValue: "master")
+                defaultValue: "che#16904")
 
         string(name: 'e2eTestParameters',
                 defaultValue: "")

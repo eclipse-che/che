@@ -61,7 +61,7 @@ pipeline {
 
                 stage('Run devfile tests') {
                     steps {
-                        build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
+                        build job: 'che16904-basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                 parameters: [
                                         string(name: 'cheImageRepo',
                                                 value: 'quay.io/eclipse/che-server'),
@@ -73,7 +73,7 @@ pipeline {
                                                 value: false),
 
                                         string(name: 'ghprbSourceBranch',
-                                                value: 'master'),
+                                                value: 'che#16904'),
 
                                         string(name: 'ghprbPullId',
                                                 value: ''),
@@ -102,7 +102,7 @@ pipeline {
                 stage('Run Git SSH flow tests') {
                     steps {
                         withCredentials([string(credentialsId: 'e45af3e6-8061-4d02-b187-b1c3bb133d3a', variable: 'github_oauth_token')]) {
-                                build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
+                                build job: 'che16904-basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                         parameters: [
                                                 string(name: 'cheImageRepo',
                                                         value: 'quay.io/eclipse/che-server'),
@@ -114,7 +114,7 @@ pipeline {
                                                         value: false),
 
                                                 string(name: 'ghprbSourceBranch',
-                                                        value: 'master'),
+                                                        value: 'che#16904'),
 
                                                 string(name: 'ghprbPullId',
                                                         value: ''),
