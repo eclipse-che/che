@@ -46,7 +46,6 @@ installDockerCompose
 #pushImageToRegistry
 installKVM
 installAndStartMinishift
-loginToOpenshiftAndSetDevRole
 prepareCustomResourcePatchFile
 installCheCtl
 deployCheIntoCluster  --che-operator-cr-patch-yaml=/tmp/custom-resource-patch.yaml

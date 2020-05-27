@@ -26,7 +26,6 @@ installDependencies
 prepareCustomResourcePatchFile
 installCheCtl
 installAndStartMinishift
-loginToOpenshiftAndSetDevRole
 deployCheIntoCluster --che-operator-cr-patch-yaml=/tmp/custom-resource-patch.yaml
 createTestUserAndObtainUserToken
 createTestWorkspaceAndRunTest

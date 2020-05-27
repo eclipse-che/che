@@ -6,10 +6,7 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-set -x
-
 buildAndDeployArtifacts() {
-  set -x
   scl enable rh-maven33 'mvn clean install -U -Pintegration'
   if [[ $? -eq 0 ]]; then
     echo 'Build Success!'
@@ -252,7 +249,9 @@ function installAndStartMinishift() {
 
   echo "======== Lunch minishift ========"
   minishift start
-  
+
+  loginToOpenshiftAndSetDevRole
+
   setupSelfSignedCertificate
 }
 
@@ -270,8 +269,8 @@ function getOpenshiftLogs() {
 
 function deployCheIntoCluster() {
   echo "======== Start to install CHE ========"
-  if chectl server:start -a operator -p openshift --k8spodreadytimeout=360000 $1; then
-    echo "Started succesfully"
+  if chectl server:start --listr-renderer=verbose -a operator -p openshift --k8spodreadytimeout=360000 $1; then
+    echo "Started successfully"
     oc get checluster -o yaml
   else
     echo "======== oc get events ========"
@@ -450,9 +449,9 @@ function runDevfileTestSuite() {
 
 function setupSelfSignedCertificate() {
   # Docs: https://www.eclipse.org/che/docs/che-7/installing-che-in-tls-mode-with-self-signed-certificates/#deploying-che-with-self-signed-tls-on-openshift3-using-operator_installing-che-in-tls-mode-with-self-signed-certificates
-  #
+
   # 1. Generate self-signed certificate
-  #
+
   ## Declare CN
   export CA_CN=eclipse-che-signer
   
@@ -480,24 +479,21 @@ function setupSelfSignedCertificate() {
   openssl x509 -in domain.crt -text -noout
 
   # 2. Configure che namespace to use self-signed certificate
-  #
-  ## Log in to the default OpenShift project
-  /tmp/oc login -u system:admin --insecure-skip-tls-verify
-  /tmp/oc project default
 
   ## Re-configure the router with the generated certificate
-  /tmp/oc delete secret router-certs
+  oc project default
+  oc delete secret router-certs
   cat domain.crt domain.key > minishift.crt
-  /tmp/oc create secret tls router-certs --key=domain.key --cert=minishift.crt
-  /tmp/oc rollout status dc router
-  /tmp/oc rollout latest router
-  /tmp/oc rollout status dc router
+  oc create secret tls router-certs --key=domain.key --cert=minishift.crt
+  oc rollout status dc router
+  oc rollout latest router
+  oc rollout status dc router
 
   ## Pre-create a namespace for Che
-  /tmp/oc create namespace che
+  oc create namespace che
 
   ## Create a secret from the CA certificate
   cp rootCA.crt ca.crt
-  /tmp/oc create secret generic self-signed-certificate --from-file=ca.crt -n=che
-  /tmp/oc project che
+  oc create secret generic self-signed-certificate --from-file=ca.crt -n=che
+  oc project che
 }

@@ -29,7 +29,6 @@ installKVM
 installDependencies
 installCheCtl
 installAndStartMinishift
-loginToOpenshiftAndSetDevRole
 prepareCustomResourcePatchFile
 deployCheIntoCluster --che-operator-cr-patch-yaml=/tmp/custom-resource-patch.yaml
 createTestUserAndObtainUserToken

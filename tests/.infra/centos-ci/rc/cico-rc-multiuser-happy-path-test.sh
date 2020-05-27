@@ -16,7 +16,6 @@ setupEnvs
 installKVM
 installDependencies
 installAndStartMinishift
-loginToOpenshiftAndSetDevRole
 prepareCustomResourcePatchFile false
 installCheCtl stable
 deployCheIntoCluster  --che-operator-cr-patch-yaml=/tmp/custom-resource-patch.yaml
