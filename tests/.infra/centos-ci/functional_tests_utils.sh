@@ -279,7 +279,7 @@ function deployCheIntoCluster() {
     # echo "==== docker ps -q | xargs -L 1 docker logs ===="
     # docker ps -q | xargs -L 1 docker logs | true
     getOpenshiftLogs
-    curl -vL http://keycloak-che.${LOCAL_IP_ADDRESS}.nip.io/auth/realms/che/.well-known/openid-configuration || true
+    curl -kvL https://keycloak-che.${LOCAL_IP_ADDRESS}.nip.io/auth/realms/che/.well-known/openid-configuration || true
     oc get checluster -o yaml || true
     exit 1337
   fi
@@ -327,7 +327,7 @@ createTestWorkspaceAndRunTest() {
   REPORT_FOLDER=$(pwd)/report
   ### Run tests
   docker run --shm-size=1g --net=host  --ipc=host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
-  -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" \
+  -e TS_SELENIUM_BASE_URL="https://$CHE_ROUTE" \
   -e TS_SELENIUM_LOG_LEVEL=DEBUG \
   -e TS_SELENIUM_MULTIUSER=true \
   -e TS_SELENIUM_USERNAME="admin" \
@@ -340,17 +340,16 @@ createTestWorkspaceAndRunTest() {
 }
 
 function createTestUserAndObtainUserToken() {
-
   ### Create user and obtain token
   KEYCLOAK_URL=$(oc get route/keycloak -o jsonpath='{.spec.host}')
-  KEYCLOAK_BASE_URL="http://${KEYCLOAK_URL}/auth"
+  KEYCLOAK_BASE_URL="https://${KEYCLOAK_URL}/auth"
 
   ADMIN_USERNAME=admin
   ADMIN_PASS=admin
   TEST_USERNAME=admin
 
   echo "======== Getting admin token ========"
-  ADMIN_ACCESS_TOKEN=$(curl -X POST $KEYCLOAK_BASE_URL/realms/master/protocol/openid-connect/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=admin" -d "password=admin" -d "grant_type=password" -d "client_id=admin-cli" | jq -r .access_token)
+  ADMIN_ACCESS_TOKEN=$(curl -kX POST $KEYCLOAK_BASE_URL/realms/master/protocol/openid-connect/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=admin" -d "password=admin" -d "grant_type=password" -d "client_id=admin-cli" | jq -r .access_token)
   echo $ADMIN_ACCESS_TOKEN
 
   echo "========Creating user========"
@@ -358,7 +357,7 @@ function createTestUserAndObtainUserToken() {
   echo $USER_JSON
 
   curl -X POST $KEYCLOAK_BASE_URL/admin/realms/che/users -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" -H "Content-Type: application/json" -d "${USER_JSON}" -v
-  USER_ID=$(curl -X GET $KEYCLOAK_BASE_URL/admin/realms/che/users?username=${TEST_USERNAME} -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" | jq -r .[0].id)
+  USER_ID=$(curl -kX GET $KEYCLOAK_BASE_URL/admin/realms/che/users?username=${TEST_USERNAME} -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" | jq -r .[0].id)
   echo "========User id: $USER_ID========"
 
   echo "========Updating password========"
@@ -366,7 +365,7 @@ function createTestUserAndObtainUserToken() {
   echo $CREDENTIALS_JSON
 
   curl -X PUT $KEYCLOAK_BASE_URL/admin/realms/che/users/${USER_ID}/reset-password -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" -H "Content-Type: application/json" -d "${CREDENTIALS_JSON}" -v
-  export USER_ACCESS_TOKEN=$(curl -X POST $KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=${TEST_USERNAME}" -d "password=${TEST_USERNAME}" -d "grant_type=password" -d "client_id=che-public" | jq -r .access_token)
+  export USER_ACCESS_TOKEN=$(curl -kX POST $KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=${TEST_USERNAME}" -d "password=${TEST_USERNAME}" -d "grant_type=password" -d "client_id=che-public" | jq -r .access_token)
   echo "========User Access Token: $USER_ACCESS_TOKEN "
 }
 
@@ -422,7 +421,7 @@ function createIndentityProvider() {
   CHE_MULTI_USER_GITHUB_CLIENTID_OCP=04cbc0f8172109322223
   CHE_MULTI_USER_GITHUB_SECRET_OCP=a0a9b8602bb0916d322223e71b7ed92036563b7a
   keycloakPodName=$(oc get pod --namespace=che | grep keycloak | awk '{print $1}')
-  /tmp/oc exec $keycloakPodName --namespace=che -- /opt/jboss/keycloak/bin/kcadm.sh create identity-provider/instances -r che -s alias=github -s providerId=github -s enabled=true -s storeToken=true -s addReadTokenRoleOnCreate=true -s 'config.useJwksUrl="true"' -s config.clientId=$CHE_MULTI_USER_GITHUB_CLIENTID_OCP -s config.clientSecret=$CHE_MULTI_USER_GITHUB_SECRET_OCP -s 'config.defaultScope="repo,user,write:public_key"' --no-config --server http://localhost:8080/auth --user admin --password admin --realm master
+  /tmp/oc exec $keycloakPodName --namespace=che -- /opt/jboss/keycloak/bin/kcadm.sh create identity-provider/instances -r che -s alias=github -s providerId=github -s enabled=true -s storeToken=true -s addReadTokenRoleOnCreate=true -s 'config.useJwksUrl="true"' -s config.clientId=$CHE_MULTI_USER_GITHUB_CLIENTID_OCP -s config.clientSecret=$CHE_MULTI_USER_GITHUB_SECRET_OCP -s 'config.defaultScope="repo,user,write:public_key"' --no-config --server https://localhost:8080/auth --user admin --password admin --realm master
 }
 
 function runDevfileTestSuite() {
@@ -432,7 +431,7 @@ function runDevfileTestSuite() {
   REPORT_FOLDER=$(pwd)/report
   ### Run tests
   docker run --shm-size=1g --net=host  --ipc=host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
-  -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" \
+  -e TS_SELENIUM_BASE_URL="https://$CHE_ROUTE" \
   -e TS_SELENIUM_LOG_LEVEL=DEBUG \
   -e TS_SELENIUM_MULTIUSER=true \
   -e TS_SELENIUM_USERNAME="admin" \
