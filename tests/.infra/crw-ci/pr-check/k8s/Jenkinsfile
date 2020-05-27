@@ -222,6 +222,8 @@ spec:
   server:
     cheImage: '${cheImageRepo}'
     cheImageTag: '${mutableCheImageTag}'
+  auth:
+    identityProviderPassword: admin
 EOL"""
 
                     echo "Install Che"
