@@ -282,16 +282,16 @@ function deployCheIntoCluster() {
     # echo "==== docker ps -q | xargs -L 1 docker logs ===="
     # docker ps -q | xargs -L 1 docker logs | true
     getOpenshiftLogs
-    curl -kvL https://keycloak-che.${LOCAL_IP_ADDRESS}.nip.io/auth/realms/che/.well-known/openid-configuration || true
+    curl -kvL https://keycloak-che.$(minishift ip).nip.io/auth/realms/che/.well-known/openid-configuration || true
     oc get checluster -o yaml || true
     exit 1337
   fi
 }
 
 function loginToOpenshiftAndSetDevRole() {
-  oc login -u system:admin --insecure-skip-tls-verify
+  oc login -u system:admin
   oc adm policy add-cluster-role-to-user cluster-admin developer
-  oc login -u developer -p pass --insecure-skip-tls-verify
+  oc login -u developer -p pass
 }
 
 function archiveArtifacts() {
