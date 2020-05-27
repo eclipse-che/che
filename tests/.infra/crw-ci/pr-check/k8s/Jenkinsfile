@@ -279,7 +279,7 @@ EOL"""
                     echo "CheCluster yaml content"
                     sh """
                         kubectl get checluster -n che -o yaml 
-                    ""'
+                    """
                 }
             }
         }
