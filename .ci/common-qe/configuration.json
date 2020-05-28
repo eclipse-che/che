@@ -1,0 +1,22 @@
+{
+    "setupEnvironment":{
+        "workspaceDevfileUrl": "https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml"
+    
+    },
+
+    "runTest": {
+        "testUsername": "admin",
+        "testPassword": "admin",
+        "testSuite": "test-all-devfiles",
+        "multiuser": "true"
+    },
+
+    "timeouts": {
+        "default": "20000",
+        "workspaceStatusPolling": "20000",
+        "loadPage": "420000"
+    }
+
+
+
+}
