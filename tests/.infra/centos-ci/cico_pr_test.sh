@@ -43,8 +43,8 @@ function pushImageToRegistry() {
 setupEnvs
 installDependencies
 installDockerCompose
-#buildCheServer
-#pushImageToRegistry
+buildCheServer
+pushImageToRegistry
 installKVM
 installAndStartMinishift
 prepareCustomResourcePatchFile
