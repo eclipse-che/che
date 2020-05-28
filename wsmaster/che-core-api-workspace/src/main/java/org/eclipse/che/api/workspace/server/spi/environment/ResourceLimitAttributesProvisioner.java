@@ -58,10 +58,10 @@ public class ResourceLimitAttributesProvisioner {
           "Requested default container resource limit is less than default request. Request parameter will be ignored.");
     }
 
-    if (memoryLimit <= 0 && defaultMemoryLimit > 0) { // if limit only is undefined
+    if (memoryLimit <= 0 && defaultMemoryLimit > 0) {
       memoryLimit = defaultMemoryLimit;
     }
-    if (memoryRequest <= 0 && defaultMemoryRequest > 0) { // if request only is undefined
+    if (memoryRequest <= 0 && defaultMemoryRequest > 0) {
       memoryRequest = defaultMemoryRequest;
     }
     if (memoryRequest > memoryLimit) { // if both properties are defined, but not consistent
@@ -103,10 +103,10 @@ public class ResourceLimitAttributesProvisioner {
           "Requested default container resource limit is less than default request. Request parameter will be ignored.");
     }
 
-    if (cpuLimit <= 0 && defaultCPULimit > 0) { // if limit only is undefined
+    if (cpuLimit <= 0 && defaultCPULimit > 0) {
       cpuLimit = defaultCPULimit;
     }
-    if (cpuRequest <= 0 && defaultCPURequest > 0) { // if request only is undefined
+    if (cpuRequest <= 0 && defaultCPURequest > 0) {
       cpuRequest = defaultCPURequest;
     }
     if (cpuRequest > cpuLimit) { // if both properties are defined, but not consistent
