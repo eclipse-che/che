@@ -310,7 +310,7 @@ function archiveArtifacts() {
 function defineCheRoute(){
 CHE_ROUTE=$(oc get route che --template='{{ .spec.host }}')
   echo "====== Check CHE ROUTE ======"
-  curl -vL $CHE_ROUTE
+  curl -kvL $CHE_ROUTE
 }
 
 createTestWorkspaceAndRunTest() {
