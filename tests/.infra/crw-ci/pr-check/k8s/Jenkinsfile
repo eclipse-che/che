@@ -222,8 +222,12 @@ spec:
   server:
     cheImage: '${cheImageRepo}'
     cheImageTag: '${mutableCheImageTag}'
+    selfSignedCert: true
   auth:
     updateAdminPassword: false
+  k8s:
+    ingressDomain: '\$(minikube ip).nip.io'
+    ingressStrategy: 'single-host'
 EOL"""
 
                     echo "Install Che"
@@ -233,6 +237,11 @@ EOL"""
                         --listr-renderer=verbose \\
                         --platform=minikube \\
                         --che-operator-cr-patch-yaml=$CUSTOM_RESOURCE_PATCH_FILE
+                    """
+
+                    echo "CheCluster yaml content"
+                    sh """
+                        kubectl get checluster -n che -o yaml 
                     """
 
                     cheHost = sh(
@@ -266,11 +275,6 @@ EOL"""
                             break
                             fi
                             done
-                    """
-
-                    echo "Update CheCluster to implement single-host strategy"
-                    sh """
-                        kubectl patch checluster eclipse-che -n che --type=json -p '[{"op": "replace", "path": "/spec/k8s/ingressStrategy", "value": "single-host"}]'
                     """
 
                     echo "CheCluster yaml content"
