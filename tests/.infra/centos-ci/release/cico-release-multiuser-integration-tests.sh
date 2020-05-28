@@ -8,7 +8,7 @@ set -e
 set +x
 
 source tests/.infra/centos-ci/functional_tests_utils.sh
-source tests/.infra/centos-ci/rc/rc_function_util.sh
+source tests/.infra/centos-ci/release/release_function_util.sh
 
 setupEnvs
 installDependencies
@@ -34,5 +34,5 @@ bash /root/payload/tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
 echo "=========================== THIS IS POST TEST ACTIONS =============================="
 saveSeleniumTestResult
 getOpenshiftLogs
-archiveArtifacts "rc-multiuser-integration-tests"
+archiveArtifacts "release-multiuser-integration-tests"
 if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi
