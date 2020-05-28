@@ -70,7 +70,7 @@ where `OPENSHIFT_TOKEN` is optional and is aimed to replace username/password wh
 Default values:
 - OPENSHIFT_USERNAME: "developer"
 - OPENSHIFT_PASSWORD: "any"
-- OPENSHIFT_CHE_NAMESPACE: "eclipse-che"
+- OPENSHIFT_CHE_NAMESPACE: "che"
 - OPENSHIFT_URL: https://<che_host_ip>:8443
 
 

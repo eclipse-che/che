@@ -7,7 +7,6 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 buildAndDeployArtifacts() {
-  set -x
   scl enable rh-maven33 'mvn clean install -U -Pintegration'
   if [[ $? -eq 0 ]]; then
     echo 'Build Success!'
@@ -250,11 +249,16 @@ function installAndStartMinishift() {
 
   echo "======== Lunch minishift ========"
   minishift start
+
+  loginToOpenshiftAndSetDevRole
+
+  setupSelfSignedCertificate
 }
 
 function installCheCtl() {
-  echo "======== Start to install chectl ========"
-  bash <(curl -sL https://www.eclipse.org/che/chectl/) --channel=next
+  channel=${1:-next}
+  echo "======== Start to install chectl from channel $channel ========"
+  bash <(curl -sL https://www.eclipse.org/che/chectl/) --channel=$channel
   echo "======== chectl has been installed successfully ========"
 }
 
@@ -265,8 +269,8 @@ function getOpenshiftLogs() {
 
 function deployCheIntoCluster() {
   echo "======== Start to install CHE ========"
-  if chectl server:start -a operator -p openshift --k8spodreadytimeout=360000 $1 $2; then
-    echo "Started succesfully"
+  if chectl server:start --listr-renderer=verbose -a operator -p minishift --k8spodreadytimeout=360000 $1; then
+    echo "Started successfully"
     oc get checluster -o yaml
   else
     echo "======== oc get events ========"
@@ -278,16 +282,16 @@ function deployCheIntoCluster() {
     # echo "==== docker ps -q | xargs -L 1 docker logs ===="
     # docker ps -q | xargs -L 1 docker logs | true
     getOpenshiftLogs
-    curl -vL http://keycloak-che.${LOCAL_IP_ADDRESS}.nip.io/auth/realms/che/.well-known/openid-configuration || true
+    curl -kvL https://keycloak-che.$(minishift ip).nip.io/auth/realms/che/.well-known/openid-configuration || true
     oc get checluster -o yaml || true
     exit 1337
   fi
 }
 
 function loginToOpenshiftAndSetDevRole() {
-  oc login -u system:admin --insecure-skip-tls-verify
+  oc login -u system:admin
   oc adm policy add-cluster-role-to-user cluster-admin developer
-  oc login -u developer -p pass --insecure-skip-tls-verify
+  oc login -u developer -p pass
 }
 
 function archiveArtifacts() {
@@ -306,7 +310,7 @@ function archiveArtifacts() {
 function defineCheRoute(){
 CHE_ROUTE=$(oc get route che --template='{{ .spec.host }}')
   echo "====== Check CHE ROUTE ======"
-  curl -vL $CHE_ROUTE
+  curl -kvL $CHE_ROUTE
 }
 
 createTestWorkspaceAndRunTest() {
@@ -326,7 +330,7 @@ createTestWorkspaceAndRunTest() {
   REPORT_FOLDER=$(pwd)/report
   ### Run tests
   docker run --shm-size=1g --net=host  --ipc=host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
-  -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" \
+  -e TS_SELENIUM_BASE_URL="https://$CHE_ROUTE" \
   -e TS_SELENIUM_LOG_LEVEL=DEBUG \
   -e TS_SELENIUM_MULTIUSER=true \
   -e TS_SELENIUM_USERNAME="admin" \
@@ -339,33 +343,32 @@ createTestWorkspaceAndRunTest() {
 }
 
 function createTestUserAndObtainUserToken() {
-
   ### Create user and obtain token
   KEYCLOAK_URL=$(oc get route/keycloak -o jsonpath='{.spec.host}')
-  KEYCLOAK_BASE_URL="http://${KEYCLOAK_URL}/auth"
+  KEYCLOAK_BASE_URL="https://${KEYCLOAK_URL}/auth"
 
   ADMIN_USERNAME=admin
   ADMIN_PASS=admin
   TEST_USERNAME=admin
 
   echo "======== Getting admin token ========"
-  ADMIN_ACCESS_TOKEN=$(curl -X POST $KEYCLOAK_BASE_URL/realms/master/protocol/openid-connect/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=admin" -d "password=admin" -d "grant_type=password" -d "client_id=admin-cli" | jq -r .access_token)
+  ADMIN_ACCESS_TOKEN=$(curl -kX POST $KEYCLOAK_BASE_URL/realms/master/protocol/openid-connect/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=admin" -d "password=admin" -d "grant_type=password" -d "client_id=admin-cli" | jq -r .access_token)
   echo $ADMIN_ACCESS_TOKEN
 
   echo "========Creating user========"
   USER_JSON="{\"username\": \"${TEST_USERNAME}\",\"enabled\": true,\"emailVerified\": true,\"email\":\"test1@user.aa\"}"
   echo $USER_JSON
 
-  curl -X POST $KEYCLOAK_BASE_URL/admin/realms/che/users -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" -H "Content-Type: application/json" -d "${USER_JSON}" -v
-  USER_ID=$(curl -X GET $KEYCLOAK_BASE_URL/admin/realms/che/users?username=${TEST_USERNAME} -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" | jq -r .[0].id)
+  curl -kX POST $KEYCLOAK_BASE_URL/admin/realms/che/users -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" -H "Content-Type: application/json" -d "${USER_JSON}" -v
+  USER_ID=$(curl -kX GET $KEYCLOAK_BASE_URL/admin/realms/che/users?username=${TEST_USERNAME} -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" | jq -r .[0].id)
   echo "========User id: $USER_ID========"
 
   echo "========Updating password========"
   CREDENTIALS_JSON={\"type\":\"password\",\"value\":\"${TEST_USERNAME}\",\"temporary\":false}
   echo $CREDENTIALS_JSON
 
-  curl -X PUT $KEYCLOAK_BASE_URL/admin/realms/che/users/${USER_ID}/reset-password -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" -H "Content-Type: application/json" -d "${CREDENTIALS_JSON}" -v
-  export USER_ACCESS_TOKEN=$(curl -X POST $KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=${TEST_USERNAME}" -d "password=${TEST_USERNAME}" -d "grant_type=password" -d "client_id=che-public" | jq -r .access_token)
+  curl -kX PUT $KEYCLOAK_BASE_URL/admin/realms/che/users/${USER_ID}/reset-password -H "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" -H "Content-Type: application/json" -d "${CREDENTIALS_JSON}" -v
+  export USER_ACCESS_TOKEN=$(curl -kX POST $KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=${TEST_USERNAME}" -d "password=${TEST_USERNAME}" -d "grant_type=password" -d "client_id=che-public" | jq -r .access_token)
   echo "========User Access Token: $USER_ACCESS_TOKEN "
 }
 
@@ -420,19 +423,19 @@ function saveSeleniumTestResult() {
 function createIndentityProvider() {
   CHE_MULTI_USER_GITHUB_CLIENTID_OCP=04cbc0f8172109322223
   CHE_MULTI_USER_GITHUB_SECRET_OCP=a0a9b8602bb0916d322223e71b7ed92036563b7a
-  CHE_OPENSHIFT_PROJECT=eclipse-che
-  keycloakPodName=$(oc get pod --namespace=$CHE_OPENSHIFT_PROJECT | grep keycloak | awk '{print $1}')
-  /tmp/oc exec $keycloakPodName --namespace=$CHE_OPENSHIFT_PROJECT -- /opt/jboss/keycloak/bin/kcadm.sh create identity-provider/instances -r che -s alias=github -s providerId=github -s enabled=true -s storeToken=true -s addReadTokenRoleOnCreate=true -s 'config.useJwksUrl="true"' -s config.clientId=$CHE_MULTI_USER_GITHUB_CLIENTID_OCP -s config.clientSecret=$CHE_MULTI_USER_GITHUB_SECRET_OCP -s 'config.defaultScope="repo,user,write:public_key"' --no-config --server http://localhost:8080/auth --user admin --password admin --realm master
+  keycloakPodName=$(oc get pod --namespace=che | grep keycloak | awk '{print $1}')
+  /tmp/oc exec $keycloakPodName --namespace=che -- /opt/jboss/keycloak/bin/kcadm.sh create identity-provider/instances -r che -s alias=github -s providerId=github -s enabled=true -s storeToken=true -s addReadTokenRoleOnCreate=true -s 'config.useJwksUrl="true"' -s config.clientId=$CHE_MULTI_USER_GITHUB_CLIENTID_OCP -s config.clientSecret=$CHE_MULTI_USER_GITHUB_SECRET_OCP -s 'config.defaultScope="repo,user,write:public_key"' --no-config --server http://localhost:8080/auth --user admin --password admin --realm master
 }
 
 function runDevfileTestSuite() {
   defineCheRoute
   ### Create directory for report
+  cd /root/payload
   mkdir report
   REPORT_FOLDER=$(pwd)/report
   ### Run tests
   docker run --shm-size=1g --net=host  --ipc=host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
-  -e TS_SELENIUM_BASE_URL="http://$CHE_ROUTE" \
+  -e TS_SELENIUM_BASE_URL="https://$CHE_ROUTE" \
   -e TS_SELENIUM_LOG_LEVEL=DEBUG \
   -e TS_SELENIUM_MULTIUSER=true \
   -e TS_SELENIUM_USERNAME="admin" \
@@ -443,4 +446,55 @@ function runDevfileTestSuite() {
   -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
   -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
   quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
+}
+
+function setupSelfSignedCertificate() {
+  # Docs: https://www.eclipse.org/che/docs/che-7/installing-che-in-tls-mode-with-self-signed-certificates/#deploying-che-with-self-signed-tls-on-openshift3-using-operator_installing-che-in-tls-mode-with-self-signed-certificates
+
+  # 1. Generate self-signed certificate
+
+  ## Declare CN
+  export CA_CN=eclipse-che-signer
+  
+  export DOMAIN=*.$(minishift ip).nip.io
+  
+  ## Create Root Key
+  openssl genrsa -out rootCA.key 4096
+  
+  ## Create and self sign the Root Certificate
+  openssl req -x509 -new -nodes -key rootCA.key -subj /CN=${CA_CN} -sha256 -days 1024 -out rootCA.crt
+  
+  ## Create the certificate key
+  openssl genrsa -out domain.key 2048
+  
+  ## Create the signing (csr)
+  openssl req -new -sha256 -key domain.key -subj "/C=US/ST=CK/O=RedHat/CN=${DOMAIN}" -out domain.csr
+  
+  ## Verify Csr
+  openssl req -in domain.csr -noout -text
+  
+  ## Generate the certificate using the domain csr and key along with the CA Root key
+  openssl x509 -req -in domain.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out domain.crt -days 500 -sha256
+  
+  ## Verify the certificate's content
+  openssl x509 -in domain.crt -text -noout
+
+  # 2. Configure che namespace to use self-signed certificate
+
+  ## Re-configure the router with the generated certificate
+  oc project default
+  oc delete secret router-certs
+  cat domain.crt domain.key > minishift.crt
+  oc create secret tls router-certs --key=domain.key --cert=minishift.crt
+  oc rollout status dc router
+  oc rollout latest router
+  oc rollout status dc router
+
+  ## Pre-create a namespace for Che
+  oc create namespace che
+
+  ## Create a secret from the CA certificate
+  cp rootCA.crt ca.crt
+  oc create secret generic self-signed-certificate --from-file=ca.crt -n=che
+  oc project che
 }

@@ -8,7 +8,7 @@ set -e
 set +x
 
 source tests/.infra/centos-ci/functional_tests_utils.sh
-source tests/.infra/centos-ci/rc/rc_function_util.sh
+source tests/.infra/centos-ci/release/release_function_util.sh
 
  # It needs to implement the patch of 'devfile' yaml to appropriate release tags images
 
@@ -16,12 +16,11 @@ setupEnvs
 installKVM
 installDependencies
 installAndStartMinishift
-loginToOpenshiftAndSetDevRole
-prepareCustomResourceFile false
-installReleaseCheCtl
-deployCheIntoCluster  --che-operator-cr-yaml=/tmp/custom-resource.yaml
+prepareCustomResourcePatchFile false
+installCheCtl stable
+deployCheIntoCluster  --che-operator-cr-patch-yaml=/tmp/custom-resource-patch.yaml
 createTestUserAndObtainUserToken
-createTestWorkspaceAndRunTest  --devfile=https://raw.githubusercontent.com/eclipse/che/cico-rc-test/tests/e2e/files/happy-path/happy-path-workspace.yaml
+createTestWorkspaceAndRunTest  --devfile=https://raw.githubusercontent.com/eclipse/che/cico-release-test/tests/e2e/files/happy-path/happy-path-workspace.yaml
 getOpenshiftLogs
-archiveArtifacts "rc-multiuser-happy-path-test"
+archiveArtifacts "release-multiuser-happy-path-test"
 if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi

@@ -21,9 +21,9 @@ metadata:
     app: che
     template: che
   name: che
-  namespace: eclipse-che
+  namespace: che
   resourceVersion: '9713'
-  selfLink: /apis/apps.openshift.io/v1/namespaces/eclipse-che/deploymentconfigs/che
+  selfLink: /apis/apps.openshift.io/v1/namespaces/che/deploymentconfigs/che
   uid: 33bda3fd-89b2-11e8-be77-8c1645547d72
 spec:
   replicas: 1
@@ -61,7 +61,7 @@ spec:
             - name: CHE_MULTIUSER
               value: 'false'
             - name: CHE_OPENSHIFT_PROJECT
-              value: eclipse-che
+              value: che
             - name: OPENSHIFT_KUBE_PING_NAMESPACE
               valueFrom:
                 fieldRef:
@@ -91,7 +91,7 @@ spec:
             - name: CHE_INFRA_KUBERNETES_USERNAME
             - name: CHE_INFRA_KUBERNETES_PASSWORD
             - name: CHE_INFRA_OPENSHIFT_PROJECT
-              value: eclipse-che
+              value: che
             - name: CHE_INFRA_KUBERNETES_PVC_STRATEGY
               value: unique
             - name: CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS
