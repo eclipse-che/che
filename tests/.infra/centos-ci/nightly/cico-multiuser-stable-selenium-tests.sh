@@ -14,7 +14,6 @@ function prepareCustomResourcePatchFile() {
   cat > /tmp/custom-resource-patch.yaml <<EOL
 spec:
   server:
-    selfSignedCert: true
     customCheProperties:
       CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
       CHE_WORKSPACE_AGENT_DEV_INACTIVE__STOP__TIMEOUT__MS: '300000'

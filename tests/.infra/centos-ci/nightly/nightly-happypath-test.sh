@@ -13,8 +13,6 @@ source tests/.infra/centos-ci/functional_tests_utils.sh
 function prepareCustomResourcePatchFile() {
   cat > /tmp/custom-resource-patch.yaml <<EOL
 spec:
-  server:
-    selfSignedCert: true
   auth:
     updateAdminPassword: false
 EOL

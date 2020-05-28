@@ -269,7 +269,7 @@ function getOpenshiftLogs() {
 
 function deployCheIntoCluster() {
   echo "======== Start to install CHE ========"
-  if chectl server:start --listr-renderer=verbose -a operator -p openshift --k8spodreadytimeout=360000 $1; then
+  if chectl server:start --listr-renderer=verbose -a operator -p minishift --k8spodreadytimeout=360000 $1; then
     echo "Started successfully"
     oc get checluster -o yaml
   else
