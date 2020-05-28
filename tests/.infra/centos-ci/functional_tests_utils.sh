@@ -430,6 +430,7 @@ function createIndentityProvider() {
 function runDevfileTestSuite() {
   defineCheRoute
   ### Create directory for report
+  cd /root/payload
   mkdir report
   REPORT_FOLDER=$(pwd)/report
   ### Run tests
