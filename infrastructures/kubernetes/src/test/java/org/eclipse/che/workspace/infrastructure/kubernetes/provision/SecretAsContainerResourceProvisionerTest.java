@@ -221,6 +221,8 @@ public class SecretAsContainerResourceProvisionerTest {
                     .withName("test_secret")
                     .withAnnotations(
                         ImmutableMap.of(
+                            ANNOTATION_MOUNT_AS,
+                            "file",
                             ANNOTATION_MOUNT_PATH,
                             "/home/user/.m2",
                             ANNOTATION_TARGET_CONTAINER,
@@ -278,7 +280,7 @@ public class SecretAsContainerResourceProvisionerTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to mount secret 'test_secret': it has to be mounted as file, but mountPath is not specified.Please make sure you specified 'che.eclipse.org/mount-path' annotation of secret.")
+          "Unable to mount secret 'test_secret': It is configured to be mounted as a file but the mount path was not specified. Please define the 'che.eclipse.org/mount-path' annotation on the secret to specify it.")
   public void shouldThrowExceptionWhenNoMountPathSpecifiedForFiles() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
 
@@ -292,7 +294,7 @@ public class SecretAsContainerResourceProvisionerTest {
             .withMetadata(
                 new ObjectMetaBuilder()
                     .withName("test_secret")
-                    .withAnnotations(emptyMap())
+                    .withAnnotations(singletonMap(ANNOTATION_MOUNT_AS, "file"))
                     .withLabels(emptyMap())
                     .build())
             .build();
@@ -303,7 +305,7 @@ public class SecretAsContainerResourceProvisionerTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to mount secret 'test_secret': it has to be mounted as Env, but env name is not specified.Please make sure you specified 'che.eclipse.org/env-name' annotation of secret.")
+          "Unable to mount secret 'test_secret': It is configured to be mount as a environment variable, but its was not specified. Please define the 'che.eclipse.org/env-name' annotation on the secret to specify it.")
   public void shouldThrowExceptionWhenNoEnvNameSpecifiedSingleValue() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
 
@@ -327,7 +329,7 @@ public class SecretAsContainerResourceProvisionerTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to mount key 'foo' of secret 'test_secret': it has to be mounted as Env, but env name is not specified.Please make sure you specified 'che.eclipse.org/foo_env-name' annotation of secret.")
+          "Unable to mount key 'foo'  of secret 'test_secret': It is configured to be mount as a environment variable, but its was not specified. Please define the 'che.eclipse.org/foo_env-name' annotation on the secret to specify it.")
   public void shouldThrowExceptionWhenNoEnvNameSpecifiedMultiValue() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
 

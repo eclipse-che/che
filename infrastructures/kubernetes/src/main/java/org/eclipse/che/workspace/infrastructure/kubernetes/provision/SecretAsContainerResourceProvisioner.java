@@ -34,6 +34,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
@@ -75,10 +76,16 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
     for (Secret secret : namespace.secrets().get(selector)) {
       String targetContainerName =
           secret.getMetadata().getAnnotations().get(ANNOTATION_TARGET_CONTAINER);
-      if ("env".equalsIgnoreCase(secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_AS))) {
+      String mountType = secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_AS);
+      if ("env".equalsIgnoreCase(mountType)) {
         mountAsEnv(env, secret, targetContainerName);
-      } else {
+      } else if ("file".equalsIgnoreCase(mountType)) {
         mountAsFile(env, secret, targetContainerName);
+      } else {
+        throw new InfrastructureException(
+            format(
+                "Unable to mount secret '%s': it has missing or unknown type of the mount. Please make sure that '%s' annotation has value either 'env' or 'file'.",
+                secret.getMetadata().getName(), ANNOTATION_MOUNT_AS));
       }
     }
   }
@@ -93,8 +100,8 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
         if (targetContainerName != null && !container.getName().equals(targetContainerName)) {
           continue;
         }
-        for (Entry<String, String> entry : secret.getData().entrySet()) {
-          final String mountEnvName = envName(secret, entry.getKey());
+        for (Entry<String, String> secretDataEntry : secret.getData().entrySet()) {
+          final String mountEnvName = envName(secret, secretDataEntry.getKey());
           container
               .getEnv()
               .add(
@@ -105,7 +112,7 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
                               .withSecretKeyRef(
                                   new SecretKeySelectorBuilder()
                                       .withName(secret.getMetadata().getName())
-                                      .withKey(entry.getKey())
+                                      .withKey(secretDataEntry.getKey())
                                       .build())
                               .build())
                       .build());
@@ -116,13 +123,11 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
 
   private void mountAsFile(E env, Secret secret, String targetContainerName)
       throws InfrastructureException {
-
     final String mountPath = secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_PATH);
     if (mountPath == null) {
       throw new InfrastructureException(
           format(
-              "Unable to mount secret '%s': it has to be mounted as file, but mountPath is not specified."
-                  + "Please make sure you specified '%s' annotation of secret.",
+              "Unable to mount secret '%s': It is configured to be mounted as a file but the mount path was not specified. Please define the '%s' annotation on the secret to specify it.",
               secret.getMetadata().getName(), ANNOTATION_MOUNT_PATH));
     }
 
@@ -144,10 +149,7 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
           .getVolumes()
           .stream()
           .anyMatch(v -> v.getName().equals(volumeFromSecret.getName()))) {
-        throw new InfrastructureException(
-            format(
-                "Volume name '%s' provisioned from secret, clashes with existing volume name.",
-                volumeFromSecret.getName()));
+        volumeFromSecret.setName(volumeFromSecret.getName() + "_" + NameGenerator.generate("", 6));
       }
 
       podData.getSpec().getVolumes().add(volumeFromSecret);
@@ -162,8 +164,8 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
             .anyMatch(vm -> vm.getMountPath().equals(mountPath))) {
           throw new InfrastructureException(
               format(
-                  "Volume Mount path '%s' provisioned from secret, clashes with existing volume mount path.",
-                  mountPath));
+                  "The secret '%s' defines a mount path '%s' that clashes with another volume mount path already present on the workspace pod.",
+                  secret.getMetadata().getName(), mountPath));
         }
         container
             .getVolumeMounts()
@@ -191,8 +193,7 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       } catch (NullPointerException e) {
         throw new InfrastructureException(
             format(
-                "Unable to mount secret '%s': it has to be mounted as Env, but env name is not specified."
-                    + "Please make sure you specified '%s' annotation of secret.",
+                "Unable to mount secret '%s': It is configured to be mount as a environment variable, but its was not specified. Please define the '%s' annotation on the secret to specify it.",
                 secret.getMetadata().getName(), ANNOTATION_ENV_NAME));
       }
     } else {
@@ -201,8 +202,7 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       if (mountEnvName == null) {
         throw new InfrastructureException(
             format(
-                "Unable to mount key '%s' of secret '%s': it has to be mounted as Env, but env name is not specified."
-                    + "Please make sure you specified '%s' annotation of secret.",
+                "Unable to mount key '%s'  of secret '%s': It is configured to be mount as a environment variable, but its was not specified. Please define the '%s' annotation on the secret to specify it.",
                 key, secret.getMetadata().getName(), format(ANNOTATION_ENV_NAME_TEMPLATE, key)));
       }
     }
