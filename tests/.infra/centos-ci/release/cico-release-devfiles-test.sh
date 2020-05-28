@@ -6,30 +6,18 @@
 # http://www.eclipse.org/legal/epl-v10.html
 set -x
 
-echo "========Starting nigtly test job $(date)========"
-
 source tests/.infra/centos-ci/functional_tests_utils.sh
-
-function prepareCustomResourcePatchFile() {
-  cat > /tmp/custom-resource-patch.yaml <<EOL
-spec:
-  auth:
-    updateAdminPassword: false
-EOL
-
-  cat /tmp/custom-resource-patch.yaml
-}
+source tests/.infra/centos-ci/release/release_function_util.sh
 
 setupEnvs
 installKVM
 installDependencies
-prepareCustomResourcePatchFile
-installCheCtl
 installAndStartMinishift
+prepareCustomResourcePatchFile false
+installCheCtl stable
 deployCheIntoCluster --che-operator-cr-patch-yaml=/tmp/custom-resource-patch.yaml
-createTestUserAndObtainUserToken
-createTestWorkspaceAndRunTest
+runDevfileTestSuite
 echo "=========================== THIS IS POST TEST ACTIONS =============================="
 getOpenshiftLogs
-archiveArtifacts "che-nightly-happy-path"
+archiveArtifacts "release-devfile-test"
 if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi
