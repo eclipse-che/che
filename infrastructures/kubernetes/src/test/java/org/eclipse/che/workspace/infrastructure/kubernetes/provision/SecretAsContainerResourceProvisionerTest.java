@@ -305,6 +305,25 @@ public class SecretAsContainerResourceProvisionerTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
+          "Unable to mount secret 'test_secret': it has missing or unknown type of the mount. Please make sure that 'che.eclipse.org/mount-as' annotation has value either 'env' or 'file'.")
+  public void shouldThrowExceptionWhenNoMountTypeSpecified() throws Exception {
+    Secret secret =
+        new SecretBuilder()
+            .withData(ImmutableMap.of("settings.xml", "random", "another.xml", "freedom"))
+            .withMetadata(
+                new ObjectMetaBuilder()
+                    .withName("test_secret")
+                    .withAnnotations(emptyMap())
+                    .withLabels(emptyMap())
+                    .build())
+            .build();
+    when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
+    provisioner.provision(environment, namespace);
+  }
+
+  @Test(
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
           "Unable to mount secret 'test_secret': It is configured to be mount as a environment variable, but its was not specified. Please define the 'che.eclipse.org/env-name' annotation on the secret to specify it.")
   public void shouldThrowExceptionWhenNoEnvNameSpecifiedSingleValue() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
