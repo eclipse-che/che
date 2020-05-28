@@ -16,6 +16,7 @@ spec:
       CHE_WORKSPACE_AGENT_DEV_INACTIVE__STOP__TIMEOUT__MS: '300000'
   auth:
     openShiftoAuth: $1
+    updateAdminPassword: false
     identityProviderPassword: admin
 EOL
 
