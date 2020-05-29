@@ -26,9 +26,7 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/**
- * Tests {@link ResourceLimitAttributesProvisioner}
- */
+/** Tests {@link ResourceLimitAttributesProvisioner} */
 @Listeners(MockitoTestNGListener.class)
 public class ResourceLimitAttributesProvisionerTest {
 
@@ -97,7 +95,7 @@ public class ResourceLimitAttributesProvisionerTest {
 
   @Test
   public void
-  testWhenRamAttributesTakenFromRecipeAreInconsistentAndNotPresentInConfigRequestIsIgnored() {
+      testWhenRamAttributesTakenFromRecipeAreInconsistentAndNotPresentInConfigRequestIsIgnored() {
     long defaultMemoryLimit = 1024L;
     long defaultMemoryRequest = 2048L;
     InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
@@ -131,7 +129,6 @@ public class ResourceLimitAttributesProvisionerTest {
     assertEquals(machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE), String.valueOf(512L));
   }
 
-
   @Test
   public void testWhenRamAttributesArePresentInMachineAreNegativeDefaultsShouldBeApplied() {
     long defaultMemoryLimit = 2048L;
@@ -144,9 +141,11 @@ public class ResourceLimitAttributesProvisionerTest {
     ResourceLimitAttributesProvisioner.provisionMemory(
         machineConfig, 0L, 0L, defaultMemoryLimit, defaultMemoryRequest);
 
-    assertEquals(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE),
+    assertEquals(
+        machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE),
         String.valueOf(defaultMemoryLimit));
-    assertEquals(machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE),
+    assertEquals(
+        machineConfig.getAttributes().get(MEMORY_REQUEST_ATTRIBUTE),
         String.valueOf(defaultMemoryRequest));
   }
 
@@ -285,7 +284,7 @@ public class ResourceLimitAttributesProvisionerTest {
 
   @Test
   public void
-  testWhenCPUAttributesTakenFromRecipeAreInconsistentAndNotPresentInConfigRequestIsIgnored() {
+      testWhenCPUAttributesTakenFromRecipeAreInconsistentAndNotPresentInConfigRequestIsIgnored() {
     float defaultCPULimit = 0.2f;
     float defaultCPURequest = 0.5f;
     InternalMachineConfig machineConfig = mockInternalMachineConfig(new HashMap<>());
@@ -367,13 +366,12 @@ public class ResourceLimitAttributesProvisionerTest {
     ResourceLimitAttributesProvisioner.provisionCPU(
         machineConfig, 0, 0, defaultCPULimit, defaultCPURequest);
 
-    assertEquals(machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE),
-        String.valueOf(defaultCPULimit));
+    assertEquals(
+        machineConfig.getAttributes().get(CPU_LIMIT_ATTRIBUTE), String.valueOf(defaultCPULimit));
     assertEquals(
         machineConfig.getAttributes().get(CPU_REQUEST_ATTRIBUTE),
         String.valueOf(defaultCPURequest));
   }
-
 
   @Test
   public void testWhenCPUAttributesAreNotPresentInMachineConfigAndOnlyRequestIsProvidedInRecipe() {
