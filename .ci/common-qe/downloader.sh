@@ -24,7 +24,7 @@ function downloadAndSetPermissions(){
 
     curl "$fileUrl" -o "$COMMON_FOLDER_NAME/$filename"
 
-    chmod u+x $filename
+    chmod u+x "$COMMON_FOLDER_NAME/$filename"
 }
 
 
