@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2020 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
+import { WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
 import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as workspaceHandler from '../../testsLibrary/WorksapceHandlingTests';

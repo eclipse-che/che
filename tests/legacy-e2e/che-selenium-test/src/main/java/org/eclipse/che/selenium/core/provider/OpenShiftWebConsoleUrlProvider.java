@@ -30,7 +30,7 @@ public class OpenShiftWebConsoleUrlProvider implements Provider<URL> {
   private static final int PORT = 8443;
   private static final String PROTOCOL = "https";
 
-  // extract openshift host from the url like 'che-eclipse-che.172.19.20.137.nip.io'
+  // extract openshift host from the url like 'che-che.172.19.20.137.nip.io'
   private static final Pattern OPENSHIFT_HOST_REGEXP =
       Pattern.compile(".*[\\.]([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})[.].*");
 

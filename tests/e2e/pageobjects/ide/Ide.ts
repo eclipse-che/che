@@ -40,8 +40,15 @@ export class Ide {
 
     async waitAndSwitchToIdeFrame(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         Logger.debug('Ide.waitAndSwitchToIdeFrame');
-
-        await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
+        try {
+            await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
+        } catch (err) {
+            if (err instanceof error.StaleElementReferenceError) {
+                Logger.warn('StaleElementException occured during waiting for IDE. Sleeping for 2 secs and retrying.');
+                this.driverHelper.wait(2000);
+                await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
+            }
+        }
     }
 
     async waitNotification(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
