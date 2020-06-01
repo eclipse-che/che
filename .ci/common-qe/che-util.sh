@@ -11,8 +11,6 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 
-. ./common-util.sh
-
 USERNAME=$(readConfigProperty .runTest.testUsername)
 PASSWORD=$(readConfigProperty .runTest.testPassword)
 SUITE=$(readConfigProperty .runTest.testSuite)
