@@ -32,7 +32,7 @@ function readConfigProperty(){
         exit 1
     fi
     
-    local propertyValue="$(cat $PATH_TO_CONFIGURATION_FILE | jq -r $1)"
+    local propertyValue="$(cat $PATH_TO_CONFIGURATION_FILE | /bin/jq -r $1)"
     
     if [ "$propertyValue" == "null" ]
     then

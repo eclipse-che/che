@@ -10,6 +10,7 @@
 #
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
+set -e
 
 SCRIPT_PATH="${BASH_SOURCE[0]}"
 SCRIPT_DIR="$(dirname $SCRIPT_PATH)"

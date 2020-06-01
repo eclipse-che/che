@@ -75,6 +75,8 @@ function installAndStartMinishift() {
     fi
   fi
 
+  set -e
+
   minishift version
   minishift config set memory 14GB
   minishift config set cpus 4
