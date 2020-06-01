@@ -17,6 +17,7 @@ CERT_GENERATION_SCRIPT_NAME="che-cert-generation.sh"
 CHE_UTIL_SCRIPT_NAME="che-util.sh"
 COMMON_UTIL_SCRIPT_NAME="common-util.sh"
 INSTALLATION_UTIL_SCRIPT_NAME="installation-util.sh"
+CONFIG_FILE_NAME="common-qe-configuration.json"
 
 SCRIPT_PATH="${BASH_SOURCE[0]}"
 SCRIPT_DIR="$(dirname $SCRIPT_PATH)"
@@ -42,6 +43,7 @@ downloadAndSetPermissions $CERT_GENERATION_SCRIPT_NAME
 downloadAndSetPermissions $CHE_UTIL_SCRIPT_NAME
 downloadAndSetPermissions $COMMON_UTIL_SCRIPT_NAME
 downloadAndSetPermissions $INSTALLATION_UTIL_SCRIPT_NAME
+downloadAndSetPermissions $CONFIG_FILE_NAME
 
 # import common methods
 . "$COMMON_FOLDER_NAME/$CERT_GENERATION_SCRIPT_NAME"
