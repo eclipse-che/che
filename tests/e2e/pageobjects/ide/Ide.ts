@@ -16,10 +16,11 @@ import { By, error } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { NotificationCenter } from './NotificationCenter';
 
-export enum RightToolbarButton {
+export enum LeftToolbarButton {
     Explorer = 'Explorer',
     Git = 'Git',
-    Debug = 'Debug'
+    Debug = 'Debug',
+    Openshift = 'OpenShift'
 }
 
 @injectable()
@@ -140,17 +141,17 @@ export class Ide {
         }
     }
 
-    async waitRightToolbarButton(buttonTitle: RightToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug('Ide.waitRightToolbarButton');
+    async waitLeftToolbarButton(buttonTitle: LeftToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Ide.waitLeftToolbarButton');
 
-        const buttonLocator: By = this.getRightToolbarButtonLocator(buttonTitle);
+        const buttonLocator: By = this.getLeftToolbarButtonLocator(buttonTitle);
         await this.driverHelper.waitVisibility(buttonLocator, timeout);
     }
 
-    async waitAndClickRightToolbarButton(buttonTitle: RightToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug('Ide.waitAndClickRightToolbarButton');
+    async waitAndClickLeftToolbarButton(buttonTitle: LeftToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Ide.waitAndClickLeftToolbarButton');
 
-        const buttonLocator: By = this.getRightToolbarButtonLocator(buttonTitle);
+        const buttonLocator: By = this.getLeftToolbarButtonLocator(buttonTitle);
         await this.driverHelper.waitAndClick(buttonLocator, timeout);
     }
 
@@ -284,7 +285,7 @@ export class Ide {
             `//li[@title[contains(.,'${buttonTitle}')] and contains(@id, 'shell-tab')] and contains(@class, 'p-mod-current')`);
     }
 
-    private getRightToolbarButtonLocator(buttonTitle: String): By {
+    private getLeftToolbarButtonLocator(buttonTitle: String): By {
         return By.xpath(`//div[@id='theia-left-content-panel']//ul[@class='p-TabBar-content']` +
             `//li[@title[contains(.,'${buttonTitle}')] and contains(@id, 'shell-tab')]`);
     }

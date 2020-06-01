@@ -15,6 +15,7 @@
     "test-wkspc-creation-and-ls": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-wkspc-creation-and-ls.opts",
     "test-java-vertx": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-java-vertx.opts",
     "test-git-ssh": "./generateIndex.sh &&  npm run lint && npm run tsc && mocha --opts mocha-git-ssh.opts",
+    "test-openshift-connector": "./generateIndex.sh &&  npm run lint && npm run tsc && mocha --opts mocha-connector.opts",
     "test-all-devfiles": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-all-devfiles.opts",
     "test-factory": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-factory.opts",
     "lint": "tslint --fix -p .",

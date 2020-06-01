@@ -34,7 +34,7 @@ import { TopMenu } from './pageobjects/ide/TopMenu';
 import { QuickOpenContainer } from './pageobjects/ide/QuickOpenContainer';
 import { PreviewWidget } from './pageobjects/ide/PreviewWidget';
 import { GitPlugin } from './pageobjects/ide/GitPlugin';
-import { RightToolbar } from './pageobjects/ide/RightToolbar';
+import { LeftToolbar} from './pageobjects/ide/LeftToolBar';
 import { Terminal } from './pageobjects/ide/Terminal';
 import { DebugView } from './pageobjects/ide/DebugView';
 import { DialogWindow } from './pageobjects/ide/DialogWindow';
@@ -52,8 +52,10 @@ import { CheSingleUserAuthorizationHeaderHandler } from './utils/requestHandlers
 import { ITokenHandler } from './utils/requestHandlers/tokens/ITokenHandler';
 import { CheApiRequestHandler } from './utils/requestHandlers/CheApiRequestHandler';
 import { CheGitApi } from './utils/VCS/CheGitApi';
-import { GitHubUtil } from './utils/VCS/github/GitHubUtil';
+import { GitHubUtil} from './utils/VCS/github/GitHubUtil';
 import { GetStarted } from './pageobjects/dashboard/GetStarted';
+import { OpenshiftPlugin } from './pageobjects/ide/OpenshiftPlugin';
+import { OpenDialogWidget } from './pageobjects/ide/OpenDialogWidget';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -90,7 +92,7 @@ e2eContainer.bind<TopMenu>(CLASSES.TopMenu).to(TopMenu);
 e2eContainer.bind<QuickOpenContainer>(CLASSES.QuickOpenContainer).to(QuickOpenContainer);
 e2eContainer.bind<PreviewWidget>(CLASSES.PreviewWidget).to(PreviewWidget);
 e2eContainer.bind<GitPlugin>(CLASSES.GitPlugin).to(GitPlugin);
-e2eContainer.bind<RightToolbar>(CLASSES.RightToolbar).to(RightToolbar);
+e2eContainer.bind<LeftToolbar>(CLASSES.LeftToolbar).to(LeftToolbar);
 e2eContainer.bind<Terminal>(CLASSES.Terminal).to(Terminal);
 e2eContainer.bind<DebugView>(CLASSES.DebugView).to(DebugView);
 e2eContainer.bind<DialogWindow>(CLASSES.DialogWindow).to(DialogWindow);
@@ -104,6 +106,8 @@ e2eContainer.bind<PreferencesHandler>(CLASSES.PreferencesHandler).to(Preferences
 e2eContainer.bind<CheApiRequestHandler>(CLASSES.CheApiRequestHandler).to(CheApiRequestHandler);
 e2eContainer.bind<CheGitApi>(CLASSES.CheGitApi).to(CheGitApi);
 e2eContainer.bind<GitHubUtil>(CLASSES.GitHubUtil).to(GitHubUtil);
+e2eContainer.bind<OpenshiftPlugin>(CLASSES.OpenshiftPlugin).to(OpenshiftPlugin);
 e2eContainer.bind<GetStarted>(CLASSES.GetStarted).to(GetStarted);
+e2eContainer.bind<OpenDialogWidget>(CLASSES.OpenDialogWidget).to(OpenDialogWidget);
 
 export { e2eContainer };

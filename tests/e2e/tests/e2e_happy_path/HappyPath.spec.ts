@@ -11,13 +11,13 @@
 import { e2eContainer } from '../../inversify.config';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TYPES, CLASSES } from '../../inversify.types';
-import { Ide, RightToolbarButton } from '../../pageobjects/ide/Ide';
+import { Ide, LeftToolbarButton } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { PreviewWidget } from '../../pageobjects/ide/PreviewWidget';
 import { TestConstants } from '../../TestConstants';
-import { RightToolbar } from '../../pageobjects/ide/RightToolbar';
+import { LeftToolbar } from '../../pageobjects/ide/LeftToolBar';
 import { By, Key, error } from 'selenium-webdriver';
 import { DebugView } from '../../pageobjects/ide/DebugView';
 import { DialogWindow } from '../../pageobjects/ide/DialogWindow';
@@ -33,7 +33,7 @@ const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const contextMenu: ContextMenu = e2eContainer.get(CLASSES.ContextMenu);
 const previewWidget: PreviewWidget = e2eContainer.get(CLASSES.PreviewWidget);
-const rightToolbar: RightToolbar = e2eContainer.get(CLASSES.RightToolbar);
+const leftToolbar: LeftToolbar = e2eContainer.get(CLASSES.LeftToolbar);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const warningDialog: DialogWindow = e2eContainer.get(CLASSES.DialogWindow);
@@ -171,7 +171,7 @@ suite('Validation of workspace build and run', async () => {
     });
 
     test('Close preview widget', async () => {
-        await rightToolbar.clickOnToolIcon('Preview');
+        await leftToolbar.clickOnToolIcon('Preview');
         await previewWidget.waitPreviewWidgetAbsence();
 
     });
@@ -229,7 +229,7 @@ suite('Display source code changes in the running application', async () => {
     });
 
     test('Close preview widget', async () => {
-        await rightToolbar.clickOnToolIcon('Preview');
+        await leftToolbar.clickOnToolIcon('Preview');
         await previewWidget.waitPreviewWidgetAbsence();
     });
 
@@ -267,7 +267,7 @@ suite('Validation of debug functionality', async () => {
     test('Run debug and check application stop in the breakpoint', async () => {
         await editor.selectTab(weclomeControllerJavaFileName);
         await topMenu.selectOption('View', 'Debug');
-        await ide.waitRightToolbarButton(RightToolbarButton.Debug);
+        await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
         await debugView.clickOnDebugConfigurationDropDown();
         await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote');
         await debugView.clickOnRunDebugButton();
