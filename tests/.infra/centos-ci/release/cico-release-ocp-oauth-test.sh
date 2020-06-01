@@ -8,31 +8,30 @@ set -e
 set +x
 
 source tests/.infra/centos-ci/functional_tests_utils.sh
-source tests/.infra/centos-ci/rc/rc_function_util.sh
+source tests/.infra/centos-ci/release/release_function_util.sh
 
 setupEnvs
 installDependencies
 installDockerCompose
 installKVM
 installAndStartMinishift
-loginToOpenshiftAndSetDevRole
-prepareCustomResourceFile false
-installReleaseCheCtl
-deployCheIntoCluster  --chenamespace=eclipse-che --che-operator-cr-yaml=/tmp/custom-resource.yaml
-createIndentityProvider
+prepareCustomResourcePatchFile true
+installCheCtl stable
+deployCheIntoCluster --che-operator-cr-patch-yaml=/tmp/custom-resource-patch.yaml
 seleniumTestsSetup
 
-bash /root/payload/tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
-   --threads=3 \
-   --host=${CHE_ROUTE} \
-   --port=80 \
-   --multiuser \
-   --fail-script-on-failed-tests \
+bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
+    --threads=1 \
+    --host=${CHE_ROUTE} \
+    --https \
+    --port=443 \
+    --multiuser \
+    --test=org.eclipse.che.selenium.site.ocpoauth.** \
+    --fail-script-on-failed-tests \
    || IS_TESTS_FAILED=true
-
 
 echo "=========================== THIS IS POST TEST ACTIONS =============================="
 saveSeleniumTestResult
 getOpenshiftLogs
-archiveArtifacts "rc-multiuser-integration-tests"
+archiveArtifacts "release-ocp-oauth-test"
 if [[ "$IS_TESTS_FAILED" == "true" ]]; then exit 1; fi

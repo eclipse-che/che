@@ -26,7 +26,7 @@ import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
  */
 @Singleton
 public class OpenShiftKeycloakCliCommandExecutor implements KeycloakCliCommandExecutor {
-  private static final String DEFAULT_CHE_OPENSHIFT_PROJECT = "eclipse-che";
+  private static final String DEFAULT_CHE_OPENSHIFT_PROJECT = "che";
   private static final String DEFAULT_KEYCLOAK_APP = "keycloak";
   private static final String DEFAULT_INTERNAL_PATH_TO_KEYCLOAK_CLI =
       "/opt/jboss/keycloak/bin/kcadm.sh";
