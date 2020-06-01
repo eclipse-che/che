@@ -11,7 +11,9 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 
-. ./common-util.sh
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+SCRIPT_DIR="$(dirname $SCRIPT_PATH)"
+. $SCRIPT_DIR/common-util.sh
 
 USERNAME=$(readConfigProperty .runTest.testUsername)
 PASSWORD=$(readConfigProperty .runTest.testPassword)
