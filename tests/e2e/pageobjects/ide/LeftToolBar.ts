@@ -14,8 +14,10 @@ import { TestConstants } from '../../TestConstants';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 
+
+
 @injectable()
-export class RightToolbar {
+export class LeftToolbar {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitToolbar(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {

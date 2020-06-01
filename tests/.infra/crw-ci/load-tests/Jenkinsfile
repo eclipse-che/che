@@ -1,0 +1,142 @@
+pipeline {
+    agent { label 'rhel7-8gb' }
+
+    options {
+        timestamps()
+        timeout(time: 3, unit: 'HOURS')
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '',
+                artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '30'))
+    }
+
+    parameters {
+        string(name: 'cheClusterUrl',
+                defaultValue: '',
+                description: 'URL to the cluster where CHE is running.')
+        
+        string(name: 'cheClusterUsername',
+                defaultValue: '',
+                description: 'Username for login to the cluster where CHE is runing.')
+
+        password(name: 'cheClusterPassword',
+                defaultValue: '',
+                description: 'Password for login to the cluster where CHE is running.')
+
+        string(name: 'testClusterUrl',
+                defaultValue: '',
+                description: 'URL to the cluster where CHE should run.')
+
+        string(name: 'testClusterUsername',
+                defaultValue: '',
+                description: 'Username for login to the cluster where tests will be runing.')
+
+        password(name: 'testClusterPassword',
+                defaultValue: '',
+                description: 'Password for login to the cluster where tests will be running.')
+
+        string(name: 'cheClusterNamespace',
+                defaultValue: '',
+                description: 'Namespace where CHE is running.')
+
+        string(name: 'testClusterNamespace',
+                defaultValue: '',
+                description: 'Namespace where tests will be running.')
+
+        string(name: 'numberOfUsers',
+                defaultValue: '',
+                description: 'Number of users for load tests.')
+
+        string(name: 'numberOfRepetitions',
+                defaultValue: '',
+                description: 'Number of workspaces that should be run by one user (in serial maneur).')
+
+        string(name: 'testingImage',
+                defaultValue: '',
+                description: 'Image with tests.')
+
+        string(name: 'repoWithScripts',
+                defaultValue: 'https://github.com/eclipse/che.git',
+                description: 'Github repo with load tests scripts.')
+        
+        string(name: 'pathToScripts',
+                defaultValue: 'che/tests/performance',
+                description: 'Path to scripts within the repo.')
+        
+        string(name: 'logLevel',
+                defaultValue: 'TRACE',
+                description: 'Log level for tests running in image.')
+
+    }
+    environment {
+        OC_PATH="/tmp"
+        PATH= "$PATH:$OC_PATH"
+
+        shmSize = "4096m"
+        loadPageTimeout = 240000
+        startWorkspaceTimeout = 900000
+        workspaceStatusPolling = 20000
+
+    }
+
+    stages {
+        stage('Preset environment') {
+            steps {
+                script {
+                    sh """
+                        set +x
+                        echo "Installing oc..."
+                        wget -q https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.3.1/openshift-client-linux-4.3.1.tar.gz -O - | tar -xz
+                        mv oc $OC_PATH
+                        echo "Setting CHE context..."
+                        oc login $cheClusterUrl -u $cheClusterUsername -p $cheClusterPassword --insecure-skip-tls-verify
+                        oc project $cheClusterNamespace
+                    """
+                    
+                    env.CHE_CONTEXT = sh (script: "oc whoami -c", returnStdout: true)
+                    
+                    sh """
+                        set +x
+                        echo "Setting test context..."
+                        oc login $testClusterUrl -u $testClusterUsername -p $testClusterPassword --insecure-skip-tls-verify
+                        set +e
+                        project=`oc get projects | grep $testClusterNamespace`
+                        if [[ -z \$project ]]; then oc new-project $testClusterNamespace; fi
+                        set -e
+                        oc project $testClusterNamespace;
+                    """
+                    
+                    env.TEST_CONTEXT = sh (script: "oc whoami -c", returnStdout: true)
+                }
+            }
+        }
+        stage("Clone upstream che") {
+            steps {
+                sh"""
+                  echo "Clone che"
+                  git clone $repoWithScripts
+                """
+            }
+        }
+        stage('Run load tests') {
+            steps {
+                sh """
+                  ROOT=`pwd`
+                  cd $pathToScripts
+
+                  oc config use-context ${env.CHE_CONTEXT}
+                  checlusterName=`oc get checluster -o jsonpath='{.items[].metadata.name}'`
+                  CHE_URL=`oc get checluster \$checlusterName -o jsonpath='{.status.cheURL}'`
+                  
+                  oc config use-context ${env.TEST_CONTEXT}
+                  mkdir \$ROOT/report
+                  ./load-tests.sh -u user -p load-user -n $numberOfUsers -i $testingImage -r \$CHE_URL -f \$ROOT/report -t $numberOfRepetitions -l $logLevel
+                """
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: "report/**"
+                }
+            }
+        }
+    }
+
+}

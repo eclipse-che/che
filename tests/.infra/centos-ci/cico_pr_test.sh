@@ -14,19 +14,23 @@ eval "$(./env-toolkit load -f jenkins-env.json -r ^ghprbPullId)"
 export PULL_REQUEST_ID="${ghprbPullId}"
 export TAG=PR-${PULL_REQUEST_ID}
 
-function prepareCustomResourceFile() {
-  cd /tmp
-  wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml -O custom-resource.yaml
-  sed -i "s@server:@server:\n    customCheProperties:\n      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'@g" /tmp/custom-resource.yaml
-  sed -i "s/customCheProperties:/customCheProperties:\n      CHE_WORKSPACE_AGENT_DEV_INACTIVE__STOP__TIMEOUT__MS: '300000'/" /tmp/custom-resource.yaml
-  sed -i "s@cheImage: ''@cheImage: 'quay.io/eclipse/che-server'@g" /tmp/custom-resource.yaml
-  sed -i "s@cheImageTag: 'nightly'@cheImageTag: '${TAG}'@g" /tmp/custom-resource.yaml
-  sed -i "s@tlsSupport: true@tlsSupport: false@g" /tmp/custom-resource.yaml
-  sed -i "s@identityProviderPassword: ''@identityProviderPassword: 'admin'@g" /tmp/custom-resource.yaml
-  cat /tmp/custom-resource.yaml
+function prepareCustomResourcePatchFile() {
+  cat > /tmp/custom-resource-patch.yaml <<EOL
+spec:
+  server:
+    cheImageTag: ${TAG}
+    customCheProperties:
+      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
+      CHE_WORKSPACE_AGENT_DEV_INACTIVE__STOP__TIMEOUT__MS: '300000'
+  auth:
+    updateAdminPassword: false
+    identityProviderPassword: admin
+EOL
+
+  cat /tmp/custom-resource-patch.yaml
 }
 
-function buidCheServer() {
+function buildCheServer() {
   mvn clean install -Pintegration
   bash dockerfiles/che/build.sh --organization:quay.io/eclipse --tag:${TAG} --dockerfile:Dockerfile
 }
@@ -39,22 +43,21 @@ function pushImageToRegistry() {
 setupEnvs
 installDependencies
 installDockerCompose
-buidCheServer
+buildCheServer
 pushImageToRegistry
 installKVM
 installAndStartMinishift
-loginToOpenshiftAndSetDevRole
-prepareCustomResourceFile
+prepareCustomResourcePatchFile
 installCheCtl
-
-deployCheIntoCluster  --chenamespace=eclipse-che --che-operator-cr-yaml=/tmp/custom-resource.yaml
+deployCheIntoCluster  --che-operator-cr-patch-yaml=/tmp/custom-resource-patch.yaml
 seleniumTestsSetup
 createIndentityProvider
 
 bash /root/payload/tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
   --threads=3 \
   --host=${CHE_ROUTE} \
-  --port=80 \
+  --https \
+  --port=443 \
   --multiuser \
   --fail-script-on-failed-tests \
   || IS_TESTS_FAILED=true

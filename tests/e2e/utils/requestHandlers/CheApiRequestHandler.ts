@@ -48,6 +48,12 @@ export class CheApiRequestHandler {
                         }
                     }));
                     response_censored.config.headers['Authorization'] = 'CENSORED';
+                    if (response_censored.data['access_token'] != null) {
+                        response_censored.data['access_token'] = 'CENSORED';
+                    }
+                    if (response_censored.data['refresh_token'] != null) {
+                        response_censored.data['refresh_token'] = 'CENSORED';
+                    }
                     console.log(`RequestHandler response:\n`, response_censored);
                 } catch (err) {
                     console.log(`RequestHandler response: Failed to deep clone AxiosResponse:`, err);

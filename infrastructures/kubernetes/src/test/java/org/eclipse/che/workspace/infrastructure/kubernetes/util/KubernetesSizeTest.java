@@ -32,10 +32,21 @@ public class KubernetesSizeTest {
     assertEquals(KubernetesSize.toBytes(kubeSize), expectedBytes);
   }
 
+  @Test(dataProvider = "validCpuLimits")
+  public void testParseKubernetesCpuFormatsToCores(String kubeSize, float expectedCores)
+      throws Exception {
+    assertEquals(KubernetesSize.toCores(kubeSize), expectedCores);
+  }
+
   @DataProvider(name = "validSizes")
   public Object[][] correctKubernetesMemoryFormats() {
     return new Object[][] {
       {"123Mi", 128974848}, {"129M", 129000000}, {"129e6", 129000000}, {"129e+6", 129000000}
     };
+  }
+
+  @DataProvider(name = "validCpuLimits")
+  public Object[][] correctKubernetesCpuLimits() {
+    return new Object[][] {{"0.1", 0.1f}, {"1250m", 1.250f}, {"-1", -1f}, {"60m", 0.06f}};
   }
 }
