@@ -13,7 +13,7 @@
 
 set -e
 
-PATH_TO_CONFIGURATION_FILE=${PATH_TO_CONFIGURATION_FILE:="./configuration.json"}
+PATH_TO_CONFIGURATION_FILE=${PATH_TO_CONFIGURATION_FILE:="common-qe/common-qe-configuration.json"}
 
 function printError(){
     >&2 echo ""
@@ -32,7 +32,7 @@ function readConfigProperty(){
         exit 1
     fi
     
-    local propertyValue="$(cat $PATH_TO_CONFIGURATION_FILE | /bin/jq -r $1)"
+    local propertyValue="$(cat $PATH_TO_CONFIGURATION_FILE | jq -r $1)"
     
     if [ "$propertyValue" == "null" ]
     then
