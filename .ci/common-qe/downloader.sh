@@ -33,30 +33,17 @@ function downloadAndSetPermissions(){
 
 set -e
 
+# clear destination folder
 rm -rf "$COMMON_FOLDER_NAME"
 mkdir "$COMMON_FOLDER_NAME"
 
+# download scripts
 downloadAndSetPermissions $CERT_GENERATION_SCRIPT_NAME
 downloadAndSetPermissions $CHE_UTIL_SCRIPT_NAME
 downloadAndSetPermissions $COMMON_UTIL_SCRIPT_NAME
 downloadAndSetPermissions $INSTALLATION_UTIL_SCRIPT_NAME
 
-echo "===="
-echo "===="
-echo "===="
-echo ""
-echo "===>>>  $SCRIPT_DIR"
-echo ""
-echo "$(pwd)"
-echo ""
-echo "$(ls -al)"
-echo ""
-echo "$(ls -al $COMMON_FOLDER_NAME)"
-echo ""
-echo "===="
-echo "===="
-echo "===="
-
+# import common methods
 . "$COMMON_FOLDER_NAME/$CERT_GENERATION_SCRIPT_NAME"
 . "$COMMON_FOLDER_NAME/$CHE_UTIL_SCRIPT_NAME"
 . "$COMMON_FOLDER_NAME/$COMMON_UTIL_SCRIPT_NAME"
