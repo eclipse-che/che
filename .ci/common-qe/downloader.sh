@@ -41,7 +41,21 @@ downloadAndSetPermissions $CHE_UTIL_SCRIPT_NAME
 downloadAndSetPermissions $COMMON_UTIL_SCRIPT_NAME
 downloadAndSetPermissions $INSTALLATION_UTIL_SCRIPT_NAME
 
-
+echo "===="
+echo "===="
+echo "===="
+echo ""
+echo "$SCRIPT_DIR"
+echo ""
+echo "$(pwd)"
+echo ""
+echo "$(ls -al)"
+echo ""
+echo "ls -al $COMMON_FOLDER_NAME"
+echo ""
+echo "===="
+echo "===="
+echo "===="
 
 . "$SCRIPT_DIR/$CERT_GENERATION_SCRIPT_NAME"
 . "$SCRIPT_DIR/$CHE_UTIL_SCRIPT_NAME"
