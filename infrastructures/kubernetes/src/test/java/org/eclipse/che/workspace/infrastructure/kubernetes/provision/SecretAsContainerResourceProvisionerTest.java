@@ -41,6 +41,7 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
+import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
@@ -361,6 +362,46 @@ public class SecretAsContainerResourceProvisionerTest {
                 new ObjectMetaBuilder()
                     .withName("test_secret")
                     .withAnnotations(ImmutableMap.of(ANNOTATION_MOUNT_AS, "env"))
+                    .withLabels(emptyMap())
+                    .build())
+            .build();
+
+    when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
+    provisioner.provision(environment, namespace);
+  }
+
+  @Test(
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "The secret 'test_secret' defines a mount path '/home/user/.m2' that clashes with another volume mount path already present on the workspace pod.")
+  public void shouldThrowExceptionOnDuplicateVolumePaths() throws Exception {
+    VolumeMount vm =
+        new VolumeMountBuilder().withMountPath("/home/user/.m2").withName("foo").build();
+    Container container_match =
+        new ContainerBuilder().withName("maven").withVolumeMounts(vm).build();
+    Container container_unmatch = new ContainerBuilder().withName("other").build();
+
+    PodSpec localSpec =
+        new PodSpecBuilder()
+            .withContainers(ImmutableList.of(container_match, container_unmatch))
+            .build();
+
+    when(podData.getSpec()).thenReturn(localSpec);
+
+    Secret secret =
+        new SecretBuilder()
+            .withData(ImmutableMap.of("settings.xml", "random", "another.xml", "freedom"))
+            .withMetadata(
+                new ObjectMetaBuilder()
+                    .withName("test_secret")
+                    .withAnnotations(
+                        ImmutableMap.of(
+                            ANNOTATION_MOUNT_AS,
+                            "file",
+                            ANNOTATION_MOUNT_PATH,
+                            "/home/user/.m2/",
+                            ANNOTATION_TARGET_CONTAINER,
+                            "maven"))
                     .withLabels(emptyMap())
                     .build())
             .build();

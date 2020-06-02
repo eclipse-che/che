@@ -123,7 +123,8 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
 
   private void mountAsFile(E env, Secret secret, String targetContainerName)
       throws InfrastructureException {
-    final String mountPath = secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_PATH);
+    final String mountPath =
+        removeTrailingSlash(secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_PATH));
     if (mountPath == null) {
       throw new InfrastructureException(
           format(
@@ -161,7 +162,7 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
         if (container
             .getVolumeMounts()
             .stream()
-            .anyMatch(vm -> vm.getMountPath().equals(mountPath))) {
+            .anyMatch(vm -> removeTrailingSlash(vm.getMountPath()).equals(mountPath))) {
           throw new InfrastructureException(
               format(
                   "The secret '%s' defines a mount path '%s' that clashes with another volume mount path already present on the workspace pod.",
@@ -207,5 +208,9 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       }
     }
     return mountEnvName;
+  }
+
+  private String removeTrailingSlash(String path) {
+    return path != null && path.endsWith("/") ? path.substring(0, path.lastIndexOf("/")) : path;
   }
 }
