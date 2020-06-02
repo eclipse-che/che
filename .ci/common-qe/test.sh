@@ -1,9 +1,17 @@
 #!/bin/bash
-set -x
+# set -x
 
-. che-util.sh
 
-# . common-util.sh
+. common-util.sh
 
-# echo "$(readConfigProperty ttt)" 
+setConfigProperty test.username admin
+
+echo "=========================================="
+echo
+echo
+echo "$(readConfigProperty test.username)" 
+echo
+echo
+echo "=========================================="
+
 

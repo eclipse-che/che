@@ -25,24 +25,6 @@ function printError(){
     >&2 echo ""
 }
 
-# function readConfigProperty(){
-#     if [ -z "$1" ]
-#     then
-#         printError "The 'readConfigProperty' function can't read property with the 'null' value."
-#         exit 1
-#     fi
-    
-#     local propertyValue=$(cat $PATH_TO_CONFIGURATION_FILE | bash -c "jq -r $1")
-    
-#     if [ "$propertyValue" == "null" ]
-#     then
-#         printError "Can't read the '$1' property. Please revise config and correct the property name."
-#         exit 1
-#     fi
-    
-#     echo "$propertyValue"
-# }
-
 function readConfigProperty(){
     if [ -z "$1" ]
     then
@@ -52,13 +34,23 @@ function readConfigProperty(){
     
     local propertyValue=$(cat $PATH_TO_CONFIGURATION_FILE | grep $1 | sed s/$1=/''/)
     
-    if [ "$propertyValue" == "null" ]
+    if [ -z "$propertyValue" ]
     then
         printError "Can't read the '$1' property. Please revise config and correct the property name."
         exit 1
     fi
     
     echo "$propertyValue"
+}
+
+function setConfigProperty(){
+    # Check of the property existing
+    readConfigProperty $1 > /dev/null
+
+    # Set property value
+    sed -i "s/$1=.*/$1=$2/" $PATH_TO_CONFIGURATION_FILE
+
+    echo "Property value has been changed '$1=$2'"
 }
 
 function getOpenshiftLogs() {
