@@ -26,15 +26,13 @@ function printError(){
 }
 
 function readConfigProperty(){
-    echo "$(cat $PATH_TO_CONFIGURATION_FILE)"
-
     if [ -z "$1" ]
     then
         printError "The 'readConfigProperty' function can't read property with the 'null' value."
         exit 1
     fi
     
-    local propertyValue="$(cat $PATH_TO_CONFIGURATION_FILE | jq -r $1)"
+    local propertyValue=$(cat $PATH_TO_CONFIGURATION_FILE | bash -c "jq -r $1")
     
     if [ "$propertyValue" == "null" ]
     then
