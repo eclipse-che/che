@@ -26,6 +26,8 @@ function printError(){
 }
 
 function readConfigProperty(){
+    echo "$(cat $PATH_TO_CONFIGURATION_FILE)"
+
     if [ -z "$1" ]
     then
         printError "The 'readConfigProperty' function can't read property with the 'null' value."
