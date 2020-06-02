@@ -373,7 +373,7 @@ public class SecretAsContainerResourceProvisionerTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "The secret 'test_secret' defines a mount path '/home/user/.m2' that clashes with another volume mount path already present on the workspace pod.")
+          "The secret 'test_secret' defines a mount path '/home/user/.m2/' that clashes with another volume mount path already present on the workspace pod.")
   public void shouldThrowExceptionOnDuplicateVolumePaths() throws Exception {
     VolumeMount vm =
         new VolumeMountBuilder().withMountPath("/home/user/.m2").withName("foo").build();
