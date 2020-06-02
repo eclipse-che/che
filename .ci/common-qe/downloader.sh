@@ -17,7 +17,7 @@ CERT_GENERATION_SCRIPT_NAME="che-cert-generation.sh"
 CHE_UTIL_SCRIPT_NAME="che-util.sh"
 COMMON_UTIL_SCRIPT_NAME="common-util.sh"
 INSTALLATION_UTIL_SCRIPT_NAME="installation-util.sh"
-CONFIG_FILE_NAME="common-qe-configuration.json"
+CONFIG_FILE_NAME="common-qe-configuration.conf"
 
 SCRIPT_PATH="${BASH_SOURCE[0]}"
 SCRIPT_DIR="$(dirname $SCRIPT_PATH)"

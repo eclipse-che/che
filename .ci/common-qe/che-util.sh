@@ -16,14 +16,14 @@ SCRIPT_PATH="${BASH_SOURCE[0]}"
 SCRIPT_DIR="$(dirname $SCRIPT_PATH)"
 . $SCRIPT_DIR/common-util.sh
 
-USERNAME=$(readConfigProperty .runTest.testUsername)
-PASSWORD=$(readConfigProperty .runTest.testPassword)
-SUITE=$(readConfigProperty .runTest.testSuite)
-MULTIUSER=$(readConfigProperty .runTest.multiuser)
-DEFAULT_TIMEOUT=$(readConfigProperty .timeouts.default)
-WORKSPACE_STATUS_POLLING=$(readConfigProperty .timeouts.workspaceStatusPolling)
-LOAD_PAGE_TIMEOUT=$(readConfigProperty .timeouts.loadPage)
-DEVFILE_URL=$(readConfigProperty .setupEnvironment.workspaceDevfileUrl)
+USERNAME=$(readConfigProperty test.username)
+PASSWORD=$(readConfigProperty test.password)
+SUITE=$(readConfigProperty test.suite)
+MULTIUSER=$(readConfigProperty test.multiuser)
+DEFAULT_TIMEOUT=$(readConfigProperty timeout.default)
+WORKSPACE_STATUS_POLLING=$(readConfigProperty timeout.workspace.status.polling)
+LOAD_PAGE_TIMEOUT=$(readConfigProperty timeout.load.page)
+DEVFILE_URL=$(readConfigProperty test.workspace.devfile.url)
 
 
 function obtainUserToken() {

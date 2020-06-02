@@ -13,7 +13,7 @@
 
 set -e
 
-PATH_TO_CONFIGURATION_FILE=${PATH_TO_CONFIGURATION_FILE:="common-qe/common-qe-configuration.json"}
+PATH_TO_CONFIGURATION_FILE=${PATH_TO_CONFIGURATION_FILE:="common-qe/common-qe-configuration.conf"}
 
 function printError(){
     >&2 echo ""
@@ -25,6 +25,24 @@ function printError(){
     >&2 echo ""
 }
 
+# function readConfigProperty(){
+#     if [ -z "$1" ]
+#     then
+#         printError "The 'readConfigProperty' function can't read property with the 'null' value."
+#         exit 1
+#     fi
+    
+#     local propertyValue=$(cat $PATH_TO_CONFIGURATION_FILE | bash -c "jq -r $1")
+    
+#     if [ "$propertyValue" == "null" ]
+#     then
+#         printError "Can't read the '$1' property. Please revise config and correct the property name."
+#         exit 1
+#     fi
+    
+#     echo "$propertyValue"
+# }
+
 function readConfigProperty(){
     if [ -z "$1" ]
     then
@@ -32,7 +50,7 @@ function readConfigProperty(){
         exit 1
     fi
     
-    local propertyValue=$(cat $PATH_TO_CONFIGURATION_FILE | bash -c "jq -r $1")
+    local propertyValue=$(cat $PATH_TO_CONFIGURATION_FILE | grep $1 | sed s/$1=/''/)
     
     if [ "$propertyValue" == "null" ]
     then

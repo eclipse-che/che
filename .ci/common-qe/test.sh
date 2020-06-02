@@ -1,7 +1,9 @@
 #!/bin/bash
+set -x
 
+. che-util.sh
 
-. common-util.sh
+# . common-util.sh
 
-echo "$(readConfigProperty .runTest.testSuite)" 
+# echo "$(readConfigProperty ttt)" 
 
