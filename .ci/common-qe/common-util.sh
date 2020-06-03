@@ -42,7 +42,7 @@ function readConfigProperty(){
         exit 1
     fi
 
-    local propertyValue=$(echo "$propertyRow" | sed s/$1=/''/)
+    local propertyValue=$(echo "$propertyRow" | sed s@$1=@''@)
 
     echo "$propertyValue"
 }
@@ -52,7 +52,7 @@ function setConfigProperty(){
     readConfigProperty $1 > /dev/null
     
     # Set property value
-    sed -i s/$1=.*/$1=$2/ $PATH_TO_CONFIGURATION_FILE
+    sed -i s@$1=.*@$1=$2@ $PATH_TO_CONFIGURATION_FILE
     
     echo "Property value has been changed '$1=$2'"
 }
