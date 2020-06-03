@@ -115,7 +115,7 @@ public final class Element {
    */
   public Element getSingleSibling(String name) {
     checkNotRemoved();
-    requireNonNull(name, "Required not null sibling name");
+    requireNonNull(name, "Non-null sibling name required.");
     Element target = null;
     for (Element sibling : asElements(delegate.getParentNode().getChildNodes())) {
       if (this != sibling && sibling.getName().equals(name)) {
@@ -144,12 +144,12 @@ public final class Element {
    */
   public Element getSingleChild(String name) {
     checkNotRemoved();
-    requireNonNull(name, "Required not null child name");
+    requireNonNull(name, "Non-null child name required.");
     for (Element child : asElements(delegate.getChildNodes())) {
       if (name.equals(child.getName())) {
         if (child.hasSibling(name)) {
           throw new XMLTreeException(
-              "Element " + name + " has more then only child with name " + name + " found");
+              "Element " + name + " has more than one child with the name " + name);
         }
         return child;
       }
@@ -235,7 +235,7 @@ public final class Element {
    */
   public boolean hasSibling(String name) {
     checkNotRemoved();
-    requireNonNull(name, "Required not null sibling name");
+    requireNonNull(name, "Non-null sibling name required.");
     final NodeList nodes = delegate.getParentNode().getChildNodes();
     for (int i = 0; i < nodes.getLength(); i++) {
       if (nodes.item(i) != delegate && name.equals(nodes.item(i).getNodeName())) {
@@ -327,7 +327,7 @@ public final class Element {
    */
   public boolean hasChild(String name) {
     checkNotRemoved();
-    requireNonNull(name, "Required not null child name");
+    requireNonNull(name, "Non-null child name required.");
     final NodeList nodes = delegate.getChildNodes();
     for (int i = 0; i < nodes.getLength(); i++) {
       if (name.equals(nodes.item(i).getNodeName())) {
@@ -363,7 +363,7 @@ public final class Element {
    */
   public Element setText(String newText) {
     checkNotRemoved();
-    requireNonNull(newText, "Required not null new text");
+    requireNonNull(newText, "Non-null new text required.");
     if (!newText.equals(getText())) {
       removeTextNodes();
       delegate.appendChild(document().createTextNode(newText));
@@ -397,7 +397,7 @@ public final class Element {
    */
   public String getChildTextOrDefault(String childName, String defaultValue) {
     checkNotRemoved();
-    requireNonNull(childName, "Required not null child name");
+    requireNonNull(childName, "Non-null child name required.");
     return hasSingleChild(childName) ? getSingleChild(childName).getText() : defaultValue;
   }
 
@@ -412,7 +412,7 @@ public final class Element {
    */
   public boolean hasSingleChild(String childName) {
     checkNotRemoved();
-    requireNonNull(childName, "Required not null child name");
+    requireNonNull(childName, "Non-null child name required.");
     for (Element child : asElements(delegate.getChildNodes())) {
       if (childName.equals(child.getName())) {
         return !child.hasSibling(childName);
@@ -572,7 +572,7 @@ public final class Element {
    */
   public Attribute getAttribute(String name) {
     checkNotRemoved();
-    requireNonNull(name, "Required not null attribute name");
+    requireNonNull(name, "Non-null new attribute name required.");
     if (delegate.hasAttributes()) {
       return asAttribute(getAttributeNode(name));
     }

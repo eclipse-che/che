@@ -156,7 +156,7 @@ public class CustomSqlMigrationResolver extends BaseMigrationResolver {
 
   private List<ResolvedMigration> resolveSqlMigrations() throws IOException, SQLException {
     LOG.info(
-        "Searching for sql scripts in locations {}",
+        "Searching for SQL scripts in locations {}",
         Arrays.toString(flywayConfiguration.getLocations()));
     final Map<Location, List<Resource>> allResources = finder.findResources(flywayConfiguration);
     LOG.debug("Found scripts: {}", allResources);

@@ -91,10 +91,10 @@ public class FileCleaner {
         if (!IoUtil.deleteRecursive(file)) {
           failToDelete.add(Pair.of(file, ++deleteAttempts));
           if (deleteAttempts > logAfterAttempts) {
-            LOG.error("Unable delete file '{}' after {} tries", file, deleteAttempts);
+            LOG.error("Unable to delete file '{}' after {} tries", file, deleteAttempts);
           }
         } else if (LOG.isDebugEnabled()) {
-          LOG.debug("Delete file '{}'", file);
+          LOG.debug("Deleted file '{}'", file);
         }
       }
     }
