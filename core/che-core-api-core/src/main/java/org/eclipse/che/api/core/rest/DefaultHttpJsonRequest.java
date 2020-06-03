@@ -159,7 +159,7 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
       throws IOException, ServerException, UnauthorizedException, ForbiddenException,
           NotFoundException, ConflictException, BadRequestException {
     if (method == null) {
-      throw new IllegalStateException("Could not perform request, request method wasn't set");
+      throw new IllegalStateException("Could not perform request, request method was not set.");
     }
     return doRequest(timeout, url, method, body, queryParams, authorizationHeaderValue, headers);
   }

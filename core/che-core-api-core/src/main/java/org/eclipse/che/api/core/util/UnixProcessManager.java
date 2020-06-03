@@ -90,7 +90,7 @@ class UnixProcessManager extends ProcessManager {
     if (C_LIBRARY != null) {
       killTree(getPid(process));
     } else {
-      throw new IllegalStateException("Can't kill process. Not unix system?");
+      throw new IllegalStateException("Cannot kill process. Not a UNIX system?");
     }
   }
 
@@ -162,7 +162,7 @@ class UnixProcessManager extends ProcessManager {
     }
 
     if (error.length() > 0) {
-      throw new IllegalStateException("can't get child processes: " + error.toString());
+      throw new IllegalStateException("Cannot get child processes: " + error.toString());
     }
     final int size = children.size();
     final int[] result = new int[size];
@@ -182,16 +182,16 @@ class UnixProcessManager extends ProcessManager {
       try {
         return ((Number) PID_FIELD.get(process)).intValue();
       } catch (IllegalAccessException e) {
-        throw new IllegalStateException("Can't get process' pid. Not unix system?", e);
+        throw new IllegalStateException("Cannot get process ID. Not a UNIX system?", e);
       }
     } else if (PID_METHOD != null) {
       try {
         return ((Long) PID_METHOD.invoke(process)).intValue();
       } catch (IllegalAccessException | InvocationTargetException e) {
-        throw new IllegalStateException("Can't get process' pid. Not unix system?", e);
+        throw new IllegalStateException("Cannot get process ID. Not a UNIX system?", e);
       }
     } else {
-      throw new IllegalStateException("Can't get process' pid. Not unix system?");
+      throw new IllegalStateException("Cannot get process ID. Not a UNIX system?");
     }
   }
 

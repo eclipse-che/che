@@ -137,7 +137,7 @@ public class IoUtil {
             ? new FileInputStream(resourceFile)
             : Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
     if (is == null) {
-      throw new IOException(String.format("Not found resource: %s", resource));
+      throw new IOException(String.format("Resource %s is not found", resource));
     }
     return is;
   }

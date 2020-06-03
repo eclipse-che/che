@@ -343,7 +343,7 @@ abstract class DtoImpl {
           Class<?> clazz = (Class<?>) curType;
           if (isList(clazz) || isMap(clazz)) {
             throw new DtoTemplate.MalformedDtoInterfaceException(
-                "JsonArray and JsonStringMap MUST have a generic type specified (and no... ? doesn't cut it!).");
+                "JsonArray and JsonStringMap must have a generic type specified.");
           }
         }
         curType = null;

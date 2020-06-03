@@ -72,7 +72,7 @@ public class ApiInfoProvider implements Provider<ApiInfo> {
       }
 
     } catch (Exception e) {
-      LOG.error("Unable to read API info. Error: " + e.getMessage(), e);
+      LOG.error("Unable to read API information. Error: " + e.getMessage(), e);
       throw new RuntimeException("Unable to read API information", e);
     }
   }
