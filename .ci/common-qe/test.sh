@@ -2,11 +2,18 @@
 # set -x
 
 
-. che-util.sh
+TTT="$(cat <<EOL
+spec:
+  server:
+    devfileRegistryImage: $IMAGE_NAME
+    selfSignedCert: true
+  auth:
+    updateAdminPassword: false
+EOL
+)"
 
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+echo "$TTT" > aa.txt
 
-echo  $SCRIPT_DIR
-
+echo "$(cat aa.txt)"

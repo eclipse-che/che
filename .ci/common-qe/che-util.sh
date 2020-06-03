@@ -36,9 +36,40 @@ function obtainUserToken() {
     echo "========User Access Token: $userAccessToken "
 }
 
+function installChectl(){
+    bash <(curl -sL https://www.eclipse.org/che/chectl/) --channel=next
+}
+
+function createServerPatchFile(){
+    if [ -z "$1" ]
+    then
+        echo "Patch template has not been provided"
+        exit 1
+    fi
+
+    echo "$1" > /tmp/che-cr-patch.yaml
+}
+
+function startCheServer(){
+    createServerPatchFile "$1"
+
+    if chectl server:start --listr-renderer=verbose -a operator -p openshift --k8spodreadytimeout=360000 --che-operator-cr-patch-yaml=/tmp/che-cr-patch.yaml; then
+        echo "Started succesfully"
+        oc get checluster -o yaml
+    else
+        echo "======== oc get events ========"
+        oc get events
+        echo "======== oc get all ========"
+        oc get all
+        getOpenshiftLogs
+        oc get checluster -o yaml || true
+        exit 1337
+    fi
+}
+
 function createTestWorkspace(){
     local userAccessToken=$(obtainUserToken)
-
+    
     chectl workspace:create --start --access-token "$userAccessToken" --devfile="$DEVFILE_URL"
 }
 
@@ -49,7 +80,7 @@ function runTest() {
     cd /root/payload
     mkdir report
     REPORT_FOLDER=$(pwd)/report
-
+    
     ### Run tests
     docker run --shm-size=1g --net=host  --ipc=host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
     -e TS_SELENIUM_BASE_URL="$CHE_URL" \
