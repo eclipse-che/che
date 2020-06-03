@@ -21,6 +21,8 @@ CONFIG_FILE_NAME="common-qe-configuration.conf"
 
 SCRIPT_PATH="${BASH_SOURCE[0]}"
 SCRIPT_DIR="$(dirname $SCRIPT_PATH)"
+ROOT_DIR_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 
 function downloadAndSetPermissions(){
     local filename="$1"
@@ -50,3 +52,6 @@ downloadAndSetPermissions $CONFIG_FILE_NAME
 . "$COMMON_FOLDER_NAME/$CHE_UTIL_SCRIPT_NAME"
 . "$COMMON_FOLDER_NAME/$COMMON_UTIL_SCRIPT_NAME"
 . "$COMMON_FOLDER_NAME/$INSTALLATION_UTIL_SCRIPT_NAME"
+
+
+setConfigProperty "env.root.dir.path" "$ROOT_DIR_PATH"

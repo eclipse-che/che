@@ -11,7 +11,6 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 set -e
-set -x
 
 SCRIPT_PATH="${BASH_SOURCE[0]}"
 SCRIPT_DIR="$(dirname $SCRIPT_PATH)"
@@ -43,36 +42,16 @@ function createTestWorkspace(){
     chectl workspace:create --start --access-token "$userAccessToken" --devfile="$DEVFILE_URL"
 }
 
-# function runTest() {
-#     CHE_URL=$(oc get checluster eclipse-che -o jsonpath='{.status.cheURL}')
-    
-#     ### Create directory for report
-#     cd /root/payload
-#     mkdir report
-#     REPORT_FOLDER=$(pwd)/report
-#     ### Run tests
-#     docker run --shm-size=1g --net=host  --ipc=host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
-#     -e TS_SELENIUM_BASE_URL="$CHE_URL" \
-#     -e TS_SELENIUM_LOG_LEVEL=DEBUG \
-#     -e TS_SELENIUM_MULTIUSER="$MULTIUSER" \
-#     -e TS_SELENIUM_USERNAME="$USERNAME" \
-#     -e TS_SELENIUM_PASSWORD="$PASSWORD" \
-#     -e TS_SELENIUM_DEFAULT_TIMEOUT="$DEFAULT_TIMEOUT" \
-#     -e TS_SELENIUM_WORKSPACE_STATUS_POLLING="$WORKSPACE_STATUS_POLLING" \
-#     -e TS_SELENIUM_LOAD_PAGE_TIMEOUT="$LOAD_PAGE_TIMEOUT" \
-#     -e TEST_SUITE="$SUITE" \
-#     -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
-
-#     quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
-    
-#     export IS_TESTS_FAILED
-# }
-
 function runTest() {
-    CHE_URL="https://test.iokhrime.sample"
+    CHE_URL=$(oc get checluster eclipse-che -o jsonpath='{.status.cheURL}')
     
+    # ### Create directory for report
+    cd /root/payload
+    mkdir report
+    REPORT_FOLDER=$(pwd)/report
+
     ### Run tests
-    docker run -it --shm-size=1g --net=host  --ipc=host \
+    docker run --shm-size=1g --net=host  --ipc=host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
     -e TS_SELENIUM_BASE_URL="$CHE_URL" \
     -e TS_SELENIUM_LOG_LEVEL=DEBUG \
     -e TS_SELENIUM_MULTIUSER="$MULTIUSER" \
@@ -82,8 +61,8 @@ function runTest() {
     -e TS_SELENIUM_WORKSPACE_STATUS_POLLING="$WORKSPACE_STATUS_POLLING" \
     -e TS_SELENIUM_LOAD_PAGE_TIMEOUT="$LOAD_PAGE_TIMEOUT" \
     -e TEST_SUITE="$SUITE" \
-    -e NODE_TLS_REJECT_UNAUTHORIZED=0 \$ADDITIONAL_OPTIONS
-    quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
+    -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
+    $ADDITIONAL_OPTIONS quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
     
     export IS_TESTS_FAILED
 }
