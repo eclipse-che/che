@@ -13,7 +13,9 @@
 
 set -e
 
-PATH_TO_CONFIGURATION_FILE=${PATH_TO_CONFIGURATION_FILE:="common-qe/common-qe-configuration.conf"}
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+SCRIPT_DIR="$(dirname $SCRIPT_PATH)"
+PATH_TO_CONFIGURATION_FILE=${PATH_TO_CONFIGURATION_FILE:="$SCRIPT_DIR/common-qe-configuration.conf"}
 
 function printError(){
     >&2 echo ""
@@ -46,10 +48,10 @@ function readConfigProperty(){
 function setConfigProperty(){
     # Check of the property existing
     readConfigProperty $1 > /dev/null
-
+    
     # Set property value
     sed -i "s/$1=.*/$1=$2/" $PATH_TO_CONFIGURATION_FILE
-
+    
     echo "Property value has been changed '$1=$2'"
 }
 
