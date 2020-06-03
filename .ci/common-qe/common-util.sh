@@ -34,14 +34,16 @@ function readConfigProperty(){
         exit 1
     fi
     
-    local propertyValue=$(cat $PATH_TO_CONFIGURATION_FILE | grep $1 | sed s/$1=/''/)
+    local propertyRow=$(cat $PATH_TO_CONFIGURATION_FILE | grep $1)
     
-    if [ -z "$propertyValue" ]
+    if [ -z "$propertyRow" ]
     then
         printError "Can't read the '$1' property. Please revise config and correct the property name."
         exit 1
     fi
-    
+
+    local propertyValue=$(echo "$propertyRow" | sed s/$1=/''/)
+
     echo "$propertyValue"
 }
 
