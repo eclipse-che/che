@@ -27,7 +27,50 @@ function buildAndPushRepoDockerImage(){
     . $BUILD_SCRIPT_PATH
     
     export TAG="$1"
-    eval $BUILD_AND_PUSH_METHOD_NAME     
+    eval $BUILD_AND_PUSH_METHOD_NAME
+}
+
+function setupTestEnvironment(){
+    ROOT_DIR_PATH=$(readConfigProperty env.root.dir.path)
+    SETUP_ENV_SCRIPT_PATH=$ROOT_DIR_PATH/$(readConfigProperty env.setup.environment.script.path)
+    SETUP_ENV_METHOD_NAME=$(readConfigProperty env.setup.environment.method.name)
+    
+    . $SETUP_ENV_SCRIPT_PATH
+    
+    eval $SETUP_ENV_METHOD_NAME
+}
+
+function load_jenkins_vars() {
+    if [ -e "jenkins-env.json" ]; then
+        eval "$(./env-toolkit load -f jenkins-env.json \
+            DEVSHIFT_TAG_LEN \
+            QUAY_USERNAME \
+            QUAY_PASSWORD \
+            QUAY_ECLIPSE_CHE_USERNAME \
+            QUAY_ECLIPSE_CHE_PASSWORD \
+            JENKINS_URL \
+            GIT_BRANCH \
+            GIT_COMMIT \
+            BUILD_NUMBER \
+            ghprbSourceBranch \
+            ghprbActualCommit \
+            BUILD_URL \
+        ghprbPullId)"
+    fi
+}
+
+function install_tools() {
+    # We need to disable selinux for now, XXX
+    /usr/sbin/setenforce 0  || true
+    
+    # Get all the deps in
+    yum install -d1 -y yum-utils device-mapper-persistent-data lvm2
+    yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    yum install -d1 -y docker-ce \
+    git
+    
+    service docker start
+    echo 'CICO: Dependencies installed'
 }
 
 function installOC() {
@@ -121,4 +164,14 @@ function installAndStartMinishift() {
     cp rootCA.crt ca.crt
     oc create secret generic self-signed-certificate --from-file=ca.crt -n=che
     oc project che
+}
+
+function setup_environment(){
+    load_jenkins_vars
+    install_tools
+    setupTestEnvironment
+    installOC
+    installKVM
+    installAndStartMinishift
+    installJQ
 }
