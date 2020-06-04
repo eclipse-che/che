@@ -63,7 +63,7 @@ function startCheServer(){
         oc get all
         getOpenshiftLogs
         oc get checluster -o yaml || true
-        exit 1337
+        exit 133
     fi
 }
 

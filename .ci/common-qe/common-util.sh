@@ -41,9 +41,9 @@ function readConfigProperty(){
         printError "Can't read the '$1' property. Please revise config and correct the property name."
         exit 1
     fi
-
+    
     local propertyValue=$(echo "$propertyRow" | sed s@$1=@''@)
-
+    
     echo "$propertyValue"
 }
 
@@ -75,6 +75,6 @@ function archiveArtifacts() {
     chmod 600 ./artifacts.key
     chown $(whoami) ./artifacts.key
     mkdir -p ./che/${JOB_NAME}/${BUILD_NUMBER}
-    cp -R ./report ./che/${JOB_NAME}/${BUILD_NUMBER}/ | true
+    cp -R ./report ./che/${JOB_NAME}/${BUILD_NUMBER}/ || true
     rsync --password-file=./artifacts.key -Hva --partial --relative ./che/${JOB_NAME}/${BUILD_NUMBER} devtools@artifacts.ci.centos.org::devtools/
 }
