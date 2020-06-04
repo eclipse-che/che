@@ -33,7 +33,7 @@ function obtainUserToken() {
     
     local userAccessToken=$(curl -k -v -X POST $KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token -H "Content-Type: application/x-www-form-urlencoded" -d "username=${USERNAME}" -d "password=${PASSWORD}" -d "grant_type=password" -d "client_id=che-public" | jq -r .access_token)
     
-    echo "========User Access Token: $userAccessToken "
+    echo "$userAccessToken"
 }
 
 function installChectl(){
