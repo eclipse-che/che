@@ -31,8 +31,16 @@ function buildAndPushRepoDockerImage(){
 }
 
 function setupTestEnvironment(){
+    SCRIPT_PATH=$(readConfigProperty env.setup.environment.script.path)
+    
+    if [ -z "$SCRIPT_PATH" ]
+    then
+        echo "The 'env.setup.environment.script.path' property is not set, the 'setupTestEnvironment' method is ignored"
+        return 0
+    fi
+    
     ROOT_DIR_PATH=$(readConfigProperty env.root.dir.path)
-    SETUP_ENV_SCRIPT_PATH=$ROOT_DIR_PATH/$(readConfigProperty env.setup.environment.script.path)
+    SETUP_ENV_SCRIPT_PATH=$ROOT_DIR_PATH/$SCRIPT_PATH
     SETUP_ENV_METHOD_NAME=$(readConfigProperty env.setup.environment.method.name)
     
     . $SETUP_ENV_SCRIPT_PATH

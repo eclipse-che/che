@@ -1,19 +1,18 @@
 #!/bin/bash
 # set -x
+set -e
+
+function aaa(){
+  return 0
+
+  echo "11111"
+}
+
+function bbb(){
+  echo "It has been launched"
+}
 
 
-TTT="$(cat <<EOL
-spec:
-  server:
-    devfileRegistryImage: $IMAGE_NAME
-    selfSignedCert: true
-  auth:
-    updateAdminPassword: false
-EOL
-)"
+aaa
+bbb
 
-
-
-echo "$TTT" > aa.txt
-
-echo "$(cat aa.txt)"
