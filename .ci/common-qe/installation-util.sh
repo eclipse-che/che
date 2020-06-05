@@ -19,17 +19,6 @@ SCRIPT_DIR="$(dirname $SCRIPT_PATH)"
 
 . $SCRIPT_DIR/common-util.sh
 
-function buildAndPushRepoDockerImage(){
-    ROOT_DIR_PATH=$(readConfigProperty env.root.dir.path)
-    BUILD_SCRIPT_PATH=$ROOT_DIR_PATH/$(readConfigProperty build.script.path)
-    BUILD_AND_PUSH_METHOD_NAME=$(readConfigProperty build.and.push.method.name)
-    
-    . $BUILD_SCRIPT_PATH
-    
-    export TAG="$1"
-    eval $BUILD_AND_PUSH_METHOD_NAME
-}
-
 function setupTestEnvironment(){
     SCRIPT_PATH=$(readConfigProperty env.setup.environment.script.path)
     
