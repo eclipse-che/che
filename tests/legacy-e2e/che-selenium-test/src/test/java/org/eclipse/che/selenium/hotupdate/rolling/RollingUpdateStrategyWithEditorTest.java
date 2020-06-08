@@ -11,13 +11,11 @@
  */
 package org.eclipse.che.selenium.hotupdate.rolling;
 
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import java.util.Collections;
 import org.eclipse.che.api.system.shared.SystemStatus;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.CheTestSystemClient;
@@ -37,9 +35,6 @@ import org.testng.annotations.Test;
 
 /** @author Ihor Okhrimenko */
 public class RollingUpdateStrategyWithEditorTest {
-  private static final String WORKSPACE_NAME =
-      generate(RollingUpdateStrategyWithEditorTest.class.getSimpleName(), 5);
-
   @Inject private CheTestSystemClient cheTestSystemClient;
   @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private SeleniumWebDriver seleniumWebDriver;
@@ -51,22 +46,21 @@ public class RollingUpdateStrategyWithEditorTest {
   @Inject private TheiaIde theiaIde;
   @Inject private TheiaProjectTree theiaProjectTree;
 
+  private String workspaceName;
+
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
-    createWorkspaceHelper.createAndStartWorkspaceFromStack(
-        Devfile.JAVA_MAVEN, WORKSPACE_NAME, Collections.emptyList(), null);
+    workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
+    workspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
   }
 
   @Test
   public void shouldUpdateMasterByRollingStrategyWithAccessibleEditorInProcess() throws Exception {
-    theiaIde.waitOpenedWorkspaceIsReadyToUse();
-
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectAreaOpened();
@@ -86,7 +80,7 @@ public class RollingUpdateStrategyWithEditorTest {
     WaitUtils.sleepQuietly(60);
 
     // check that workspace is successfully migrated to the new master
-    assertTrue(testWorkspaceServiceClient.exists(WORKSPACE_NAME, defaultTestUser.getName()));
+    assertTrue(testWorkspaceServiceClient.exists(workspaceName, defaultTestUser.getName()));
 
     checkIdeAvailability();
   }

@@ -112,4 +112,10 @@ export class Dashboard {
         await this.driverHelper.waitDisappearance(By.css(Dashboard.LOADER_PAGE_CSS), timeout);
     }
 
+    async waitDisappearanceNavigationMenu(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Dashboard.waitDisappearanceNavigationMenu');
+
+        await this.driverHelper.waitDisappearance(By.id('chenavmenu'), timeout);
+    }
+
 }

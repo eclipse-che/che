@@ -7,15 +7,21 @@
 set -e
 set +x
 source tests/.infra/centos-ci/functional_tests_utils.sh
-function prepareCustomResourceFile() {
-  echo "Patch custom-resource.yaml"
-  cd /tmp
-  wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml -O custom-resource.yaml
-  sed -i "s@openShiftoAuth: false@openShiftoAuth: true@g" /tmp/custom-resource.yaml
-  sed -i "s@server:@server:\n    customCheProperties:\n      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'@g" /tmp/custom-resource.yaml
-  sed -i "s@tlsSupport: true@tlsSupport: false@g" /tmp/custom-resource.yaml
-  sed -i "s@identityProviderPassword: ''@identityProviderPassword: 'admin'@g" /tmp/custom-resource.yaml
-  cat /tmp/custom-resource.yaml
+
+function prepareCustomResourcePatchFile() {
+  cat > /tmp/custom-resource-patch.yaml <<EOL
+spec:
+  server:
+    customCheProperties:
+      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
+      CHE_WORKSPACE_AGENT_DEV_INACTIVE__STOP__TIMEOUT__MS: '300000'
+  auth:
+    openShiftoAuth: true
+    updateAdminPassword: false
+    identityProviderPassword: admin
+EOL
+
+  cat /tmp/custom-resource-patch.yaml
 }
 
 setupEnvs
@@ -23,16 +29,16 @@ installKVM
 installDependencies
 installDockerCompose
 installAndStartMinishift
-loginToOpenshiftAndSetDevRole
-prepareCustomResourceFile
+prepareCustomResourcePatchFile
 installCheCtl
-deployCheIntoCluster  --chenamespace=eclipse-che --che-operator-cr-yaml=/tmp/custom-resource.yaml
+deployCheIntoCluster  --che-operator-cr-patch-yaml=/tmp/custom-resource-patch.yaml
 seleniumTestsSetup
 
 bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
   --threads=1 \
   --host=${CHE_ROUTE} \
-  --port=80 \
+  --https \
+  --port=443 \
   --multiuser \
   --fail-script-on-failed-tests \
   --test=org.eclipse.che.selenium.site.ocpoauth.** \

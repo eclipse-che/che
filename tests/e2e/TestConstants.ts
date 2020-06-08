@@ -233,6 +233,21 @@ export const TestConstants = {
     /**
      * Token for a github repository with permissions which allow add the ssh keys
      */
-    TS_GITHUB_TEST_REPO_ACCESS_TOKEN: process.env.TS_GITHUB_TEST_REPO_ACCESS_TOKEN || ''
+    TS_GITHUB_TEST_REPO_ACCESS_TOKEN: process.env.TS_GITHUB_TEST_REPO_ACCESS_TOKEN || '',
+
+    /**
+     * Login for a user whom has been created in the test Openshift cluster. Need for Openshift connector test
+     */
+    TS_TEST_OPENSHIFT_PLUGIN_USERNAME: process.env.TS_LOGIN_NAME_OF_OPENSHIFT_REGULAR_USER || '',
+
+    /**
+     * Password for a user whom has been created in the test Openshift cluster. Need for Openshift connector test
+     */
+    TS_TEST_OPENSHIFT_PLUGIN_PASSWORD: process.env.TS_PASSWORD_OF_OPENSHIFT_REGULAR_USER || '',
+
+    /**
+     * The name of project in the Openshidt plugin tree
+     */
+    TS_TEST_OPENSHIFT_PLUGIN_PROJECT: process.env.TS_TEST_OPENSHIFT_PLUGIN_PROJECT || ''
 
 };

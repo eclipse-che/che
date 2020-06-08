@@ -16,10 +16,11 @@ import { By, error } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { NotificationCenter } from './NotificationCenter';
 
-export enum RightToolbarButton {
+export enum LeftToolbarButton {
     Explorer = 'Explorer',
     Git = 'Git',
-    Debug = 'Debug'
+    Debug = 'Debug',
+    Openshift = 'OpenShift'
 }
 
 @injectable()
@@ -40,8 +41,15 @@ export class Ide {
 
     async waitAndSwitchToIdeFrame(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         Logger.debug('Ide.waitAndSwitchToIdeFrame');
-
-        await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
+        try {
+            await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
+        } catch (err) {
+            if (err instanceof error.StaleElementReferenceError) {
+                Logger.warn('StaleElementException occured during waiting for IDE. Sleeping for 2 secs and retrying.');
+                this.driverHelper.wait(2000);
+                await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
+            }
+        }
     }
 
     async waitNotification(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -115,9 +123,7 @@ export class Ide {
         await this.driverHelper.waitAndClick(By.xpath(yesButtonLocator));
     }
 
-    async waitWorkspaceAndIde(workspaceNamespace: string,
-        workspaceName: string,
-        timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+    async waitWorkspaceAndIde(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
 
         Logger.debug('Ide.waitWorkspaceAndIde');
 
@@ -135,17 +141,17 @@ export class Ide {
         }
     }
 
-    async waitRightToolbarButton(buttonTitle: RightToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug('Ide.waitRightToolbarButton');
+    async waitLeftToolbarButton(buttonTitle: LeftToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Ide.waitLeftToolbarButton');
 
-        const buttonLocator: By = this.getRightToolbarButtonLocator(buttonTitle);
+        const buttonLocator: By = this.getLeftToolbarButtonLocator(buttonTitle);
         await this.driverHelper.waitVisibility(buttonLocator, timeout);
     }
 
-    async waitAndClickRightToolbarButton(buttonTitle: RightToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug('Ide.waitAndClickRightToolbarButton');
+    async waitAndClickLeftToolbarButton(buttonTitle: LeftToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Ide.waitAndClickLeftToolbarButton');
 
-        const buttonLocator: By = this.getRightToolbarButtonLocator(buttonTitle);
+        const buttonLocator: By = this.getLeftToolbarButtonLocator(buttonTitle);
         await this.driverHelper.waitAndClick(buttonLocator, timeout);
     }
 
@@ -161,12 +167,18 @@ export class Ide {
         await this.driverHelper.waitVisibility(By.css(Ide.LEFT_CONTENT_PANEL_CSS));
     }
 
-    async waitPreloaderAbsent(attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
-        polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
-
+    async waitPreloaderAbsent(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = timeout / polling;
         Logger.debug('Ide.waitPreloaderAbsent');
 
         await this.driverHelper.waitDisappearance(By.css(Ide.PRELOADER_CSS), attempts, polling);
+    }
+
+    async waitPreloaderVisible(timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
+        Logger.debug('Ide.waitPreloaderVisible');
+
+        await this.driverHelper.waitVisibility(By.css(Ide.PRELOADER_CSS), timeout);
     }
 
     async waitStatusBarContains(expectedText: string, timeout: number = TestConstants.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT) {
@@ -273,7 +285,7 @@ export class Ide {
             `//li[@title[contains(.,'${buttonTitle}')] and contains(@id, 'shell-tab')] and contains(@class, 'p-mod-current')`);
     }
 
-    private getRightToolbarButtonLocator(buttonTitle: String): By {
+    private getLeftToolbarButtonLocator(buttonTitle: String): By {
         return By.xpath(`//div[@id='theia-left-content-panel']//ul[@class='p-TabBar-content']` +
             `//li[@title[contains(.,'${buttonTitle}')] and contains(@id, 'shell-tab')]`);
     }

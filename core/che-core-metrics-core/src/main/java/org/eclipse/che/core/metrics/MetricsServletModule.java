@@ -57,7 +57,7 @@ public class MetricsServletModule extends ServletModule {
 
     } catch (Exception e) {
       // maybe not in Tomcat?
-      LOG.error("Unable to get catalina manager. Cause: {}", e.getMessage(), e);
+      LOG.error("Unable to get Catalina Manager. Cause: {}", e.getMessage(), e);
       throw new RuntimeException(e.getMessage(), e);
     }
   }

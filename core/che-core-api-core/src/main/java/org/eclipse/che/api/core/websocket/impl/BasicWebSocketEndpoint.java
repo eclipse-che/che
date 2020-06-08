@@ -106,7 +106,7 @@ public abstract class BasicWebSocketEndpoint {
     } else {
       combinedEndpointId = getOrGenerateCombinedEndpointId(session);
 
-      LOG.warn("Processing messing within unidentified session");
+      LOG.warn("Process interferes with an unidentified session");
     }
     receiver.receive(combinedEndpointId, message);
   }

@@ -214,7 +214,7 @@ class ContainerLogWatch implements Runnable, Closeable {
           || !json.has("code")
           || !json.get("code").getAsString().contains("40"));
     } catch (JsonParseException jpe) {
-      LOG.debug("Can't parse the message as a json.", jpe);
+      LOG.debug("Cannot parse the message as JSON.", jpe);
       return false;
     }
   }

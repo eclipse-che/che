@@ -213,7 +213,7 @@ public interface HttpJsonRequest {
    * @return this request instance
    */
   default HttpJsonRequest addQueryParams(@NotNull Map<String, ?> params) {
-    Objects.requireNonNull(params, "Required non-null query parameters");
+    Objects.requireNonNull(params, "Non-null query parameters required");
     params.forEach(this::addQueryParam);
     return this;
   }

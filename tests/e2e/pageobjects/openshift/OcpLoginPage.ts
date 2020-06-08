@@ -38,14 +38,14 @@ export class OcpLoginPage {
     async clickOnLoginProviderTitle() {
         Logger.debug('OcpLoginPage.clickOnLoginProviderTitle');
 
-        const loginProviderTitleLocator: By = By.css(`a[title=\'Log in with ${TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
+        const loginProviderTitleLocator: By = By.xpath(`//a[text()=\'${TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
         await this.driverHelper.waitAndClick(loginProviderTitleLocator);
     }
 
     async isIdentityProviderLinkVisible(): Promise<boolean> {
         Logger.debug('OcpLoginPage.isIdentityProviderLinkVisible');
 
-        const loginWithHtpaswdLocator: By = By.css(`a[title=\'Log in with ${TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
+        const loginWithHtpaswdLocator: By = By.xpath(`//a[text()=\'${TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
         return await this.driverHelper.waitVisibilityBoolean(loginWithHtpaswdLocator, 3, 5000);
     }
 

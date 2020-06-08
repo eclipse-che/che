@@ -74,7 +74,7 @@ public class MailSessionProvider implements Provider<Session> {
         this.session = Session.getInstance(props);
       }
     } else {
-      LOG.warn("Mail server is not configured. Sending of emails won't work.");
+      LOG.warn("Mail server is not configured. Cannot send emails.");
       this.session = null;
     }
   }

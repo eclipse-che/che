@@ -54,12 +54,16 @@ export class OpenWorkspaceWidget {
         await this.waitWidgetIsClosed();
     }
 
-    async expandTreeToPath(path: string) {
+    async expandTreeToPath(path: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<any> {
         Logger.debug(`OpenWorkspaceWidget.expandTreeToPath "${path}"`);
-
         const pathNodes: string[] = path.split('/');
-        for (let currentPath of pathNodes) {
-            await this.driverHelper.waitAndClick(By.id(`/${currentPath}`));
-        }
+        let buildPath: string = '';
+
+        const promises = pathNodes.map(async currentPath => {
+            buildPath += `/${currentPath}`;
+            await  this.driverHelper.waitAndClick(By.id(buildPath), timeout);
+        });
+
+        return Promise.all(promises);
     }
 }
