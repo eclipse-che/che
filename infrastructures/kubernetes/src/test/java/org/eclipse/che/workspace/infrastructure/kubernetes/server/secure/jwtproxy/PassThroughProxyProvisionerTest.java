@@ -64,6 +64,7 @@ public class PassThroughProxyProvisionerTest {
             new CookiePathStrategy(MULTI_HOST_STRATEGY),
             "eclipse/che-jwtproxy",
             "128mb",
+            "0.5",
             "Always",
             runtimeId);
 

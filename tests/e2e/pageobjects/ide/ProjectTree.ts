@@ -11,7 +11,7 @@ import 'reflect-metadata';
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
-import { Ide, RightToolbarButton } from './Ide';
+import { Ide, LeftToolbarButton } from './Ide';
 import { TestConstants } from '../../TestConstants';
 import { By, error } from 'selenium-webdriver';
 import { Editor } from './Editor';
@@ -66,12 +66,12 @@ export class ProjectTree {
 
         const selectedExplorerButtonLocator: By = By.css(Ide.SELECTED_EXPLORER_BUTTON_CSS);
 
-        await this.ide.waitRightToolbarButton(RightToolbarButton.Explorer, timeout);
+        await this.ide.waitLeftToolbarButton(LeftToolbarButton.Explorer, timeout);
 
         const isButtonEnabled: boolean = await this.driverHelper.waitVisibilityBoolean(selectedExplorerButtonLocator);
 
         if (!isButtonEnabled) {
-            await this.ide.waitAndClickRightToolbarButton(RightToolbarButton.Explorer, timeout);
+            await this.ide.waitAndClickLeftToolbarButton(LeftToolbarButton.Explorer, timeout);
         }
 
         await this.waitProjectTreeContainer();

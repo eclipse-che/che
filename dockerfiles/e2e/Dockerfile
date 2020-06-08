@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install && \
     npm install -g typescript && \
     apt-get install x11vnc ffmpeg -y
 
+COPY --chown=0:0 entrypoint.sh /tmp/
+
 RUN mkdir /tmp/e2e && \
     chmod -R 777 /tmp/e2e
 
@@ -20,10 +22,12 @@ RUN cd /tmp/e2e && \
     npm --silent i
 
 COPY e2e /tmp/e2e
-COPY entrypoint.sh /tmp/
 
 WORKDIR /tmp/e2e
 
 EXPOSE 5920
+
+RUN chgrp -R 0 /tmp && \
+    chmod -R g+rwX /tmp
 
 ENTRYPOINT [ "/tmp/entrypoint.sh" ]

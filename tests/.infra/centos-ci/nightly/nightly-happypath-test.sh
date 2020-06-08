@@ -4,29 +4,29 @@
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
-set -e
+set -x
 
 echo "========Starting nigtly test job $(date)========"
 
 source tests/.infra/centos-ci/functional_tests_utils.sh
-source .ci/cico_common.sh
 
-function prepareCustomResourceFile() {
-  cd /tmp
-  wget https://raw.githubusercontent.com/eclipse/che-operator/master/deploy/crds/org_v1_che_cr.yaml -O custom-resource.yaml
-  sed -i "s@tlsSupport: true@tlsSupport: false@g" /tmp/custom-resource.yaml
-  sed -i "s@identityProviderPassword: ''@identityProviderPassword: 'admin'@g" /tmp/custom-resource.yaml
-  cat /tmp/custom-resource.yaml
+function prepareCustomResourcePatchFile() {
+  cat > /tmp/custom-resource-patch.yaml <<EOL
+spec:
+  auth:
+    updateAdminPassword: false
+EOL
+
+  cat /tmp/custom-resource-patch.yaml
 }
 
 setupEnvs
 installKVM
 installDependencies
+prepareCustomResourcePatchFile
 installCheCtl
 installAndStartMinishift
-loginToOpenshiftAndSetDevRole
-prepareCustomResourceFile
-deployCheIntoCluster --chenamespace=che --che-operator-cr-yaml=/tmp/custom-resource.yaml
+deployCheIntoCluster --che-operator-cr-patch-yaml=/tmp/custom-resource-patch.yaml
 createTestUserAndObtainUserToken
 createTestWorkspaceAndRunTest
 echo "=========================== THIS IS POST TEST ACTIONS =============================="

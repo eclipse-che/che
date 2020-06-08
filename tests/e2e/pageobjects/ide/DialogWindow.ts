@@ -25,39 +25,37 @@ export class DialogWindow {
 
     async dialogDisplayes(): Promise<boolean> {
         Logger.debug('DialogWindow.dialogDisplayes');
-
         return await this.driverHelper.isVisible(By.xpath(DialogWindow.DIALOG_BODY_XPATH_LOCATOR));
     }
 
-    async waitAndCloseIfAppear() {
+    async waitAndCloseIfAppear(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('DialogWindow.waitAndCloseIfAppear');
 
         const dialogDisplayes: boolean = await this.driverHelper.waitVisibilityBoolean(By.xpath(DialogWindow.DIALOG_BODY_XPATH_LOCATOR));
 
         if (dialogDisplayes) {
-            await this.closeDialog();
-            await this.waitDialogDissappearance();
+            await this.closeDialog(timeout);
+            await this.waitDialogDissappearance(timeout);
         }
 
     }
 
-    async clickToButton(buttonText: string) {
+    async clickToButton(buttonText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('DialogWindow.clickToButton');
-
         const buttonLocator: By = By.xpath(`${DialogWindow.DIALOG_BODY_XPATH_LOCATOR}//button[text()='${buttonText}']`);
-        await this.driverHelper.waitAndClick(buttonLocator);
+        await this.driverHelper.waitAndClick(buttonLocator, timeout);
     }
 
-    async closeDialog() {
+    async closeDialog(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('DialogWindow.closeDialog');
 
-        await this.clickToButton('close');
+        await this.clickToButton('close', timeout);
     }
 
-    async clickToOpenLinkButton() {
+    async clickToOpenLinkButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('DialogWindow.clickToOpenLinkButton');
 
-        await this.clickToButton('Open Link');
+        await this.clickToButton('Open Link', timeout);
     }
 
     async waitDialog(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT, dialogText: string = '') {
@@ -76,11 +74,11 @@ export class DialogWindow {
 
         await this.waitDialog(timeout, dialogText);
         await this.ide.waitApllicationIsReady(await this.getApplicationUrlFromDialog(dialogText), timeout);
-        await this.clickToOpenLinkButton();
-        await this.waitDialogDissappearance();
+        await this.clickToOpenLinkButton(timeout);
+        await this.waitDialogDissappearance(timeout);
     }
 
-    async waitDialogDissappearance() {
+    async waitDialogDissappearance(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('DialogWindow.waitDialogDissappearance');
 
         await this.driverHelper.waitDisappearanceWithTimeout(By.xpath(DialogWindow.CLOSE_BUTTON_XPATH_LOCATOR));

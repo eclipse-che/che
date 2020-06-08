@@ -17,15 +17,13 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.ocp.AuthorizeOpenShiftAccessPage;
@@ -33,7 +31,6 @@ import org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage;
 import org.eclipse.che.selenium.pageobject.ocp.OpenShiftProjectCatalogPage;
 import org.eclipse.che.selenium.pageobject.site.CheLoginPage;
 import org.eclipse.che.selenium.pageobject.site.FirstBrokerProfilePage;
-import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
@@ -67,7 +64,6 @@ import org.testng.annotations.Test;
 public class LoginNewUserWithOpenShiftOAuthTest {
 
   private static final TestUser NEW_TEST_USER = getTestUser();
-  private static final String WORKSPACE_NAME = NameGenerator.generate("workspace", 4);
   private static final String USER_PROJECT_NAME = NEW_TEST_USER.getName() + "-che";
 
   @Inject private CheLoginPage cheLoginPage;
@@ -76,15 +72,13 @@ public class LoginNewUserWithOpenShiftOAuthTest {
   @Inject private AuthorizeOpenShiftAccessPage authorizeOpenShiftAccessPage;
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
-  @Inject private NewWorkspace newWorkspace;
   @Inject private TestUserServiceClient testUserServiceClient;
   @Inject private OpenShiftProjectCatalogPage openShiftProjectCatalogPage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestDashboardUrlProvider testDashboardUrlProvider;
-  @Inject private TheiaIde theiaIde;
+  @Inject private CreateWorkspaceHelper createWorkspaceHelper;
 
-  // it is used to read workspace logs on test failure
-  private TestWorkspace testWorkspace;
+  private String workspaceName;
 
   @AfterClass
   private void removeTestUser() throws ServerException, ConflictException, BadRequestException {
@@ -114,16 +108,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     firstBrokerProfilePage.submit(NEW_TEST_USER);
 
     // create and open workspace of java type
-    dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.clickOnAddWorkspaceBtn();
-    newWorkspace.waitToolbar();
-    newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
-    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
-    newWorkspace.clickOnCreateButtonAndOpenInIDE();
-
-    // switch to the IDE and wait for workspace is ready to use
-    theiaIde.switchToIdeFrame();
-    theiaIde.waitTheiaIde();
+    workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
 
     // go to OCP and check if there a user project has expected resources
     openShiftProjectCatalogPage.open();
@@ -138,7 +123,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     workspaces.selectAllWorkspacesByBulk();
     workspaces.clickOnDeleteWorkspacesBtn();
     workspaces.clickOnDeleteButtonInDialogWindow();
-    workspaces.waitWorkspaceIsNotPresent(WORKSPACE_NAME);
+    workspaces.waitWorkspaceIsNotPresent(workspaceName);
 
     // go to OCP and check that workspace resources deleted
     openShiftProjectCatalogPage.open();

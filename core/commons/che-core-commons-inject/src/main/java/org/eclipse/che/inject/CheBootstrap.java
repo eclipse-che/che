@@ -414,14 +414,13 @@ public class CheBootstrap extends EverrestGuiceContextListener {
               } else if (skipUnresolved) {
                 buf.append(placeholder);
                 LOG.warn(
-                    "Placeholder {} cannot be resolved neither from environment variable nor from system property,"
+                    "Placeholder {} cannot be resolved neither from environment variable nor from system property, "
                         + "leaving as is.",
                     placeholderName);
               } else {
                 throw new ConfigurationException(
                     format(
-                        "Property %s is not found as system property or " + "environment variable.",
-                        placeholderName));
+                        "%s is not a system property or environment variable.", placeholderName));
               }
 
               start = matcher.end();

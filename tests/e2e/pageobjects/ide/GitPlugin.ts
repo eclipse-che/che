@@ -66,13 +66,13 @@ export class GitPlugin {
     async waitChangedFileInChagesList(expectedItem: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('GitPlugin.waitChangedFileInChagesList');
 
-        await this.driverHelper.waitPresence(By.xpath(`//div[@class='changesContainer']//span[text()=\'${expectedItem}\']`), timeout);
+        await this.driverHelper.waitPresence(By.xpath(`//span[@class='name' and text()=\'${expectedItem}\']`), timeout);
     }
 
     async waitStagedFileInStagedChanges(expectedStagedItem: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('GitPlugin.waitStagedFileInStagedChanges');
 
-        await this.driverHelper.waitPresence(By.xpath(`//div[text()='Staged Changes']/parent::div/following-sibling::div//span[text()=\'${expectedStagedItem}\']`), timeout);
+        await this.driverHelper.waitPresence(By.xpath(`//div[text()='Staged Changes']/parent::div/parent::div/parent::div/following-sibling::div//span[text()=\'${expectedStagedItem}\']`), timeout);
     }
 
     async commitFromScmView(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -84,7 +84,7 @@ export class GitPlugin {
     async stageAllChanges(expectedStagedItem: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('GitPlugin.stageAllChanges');
 
-        await this.driverHelper.scrollTo(By.xpath('//div[@class=\'changesContainer\']//div[text()=\'Changes\']'), timeout);
+        await this.driverHelper.scrollTo(By.xpath('//div[@class=\'noWrapInfo theia-TreeNodeSegmentGrow\' and text()=\'Changes\']'), timeout);
         await this.driverHelper.waitAndClick(By.xpath('//a[@title=\'Stage All Changes\']'), timeout);
         await this.waitStagedFileInStagedChanges(expectedStagedItem);
     }

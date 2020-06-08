@@ -54,12 +54,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
  * </ul>
  *
  * @author Anton Korneta
- * @auhtor Max Shaposhnyk
+ * @author Max Shaposhnyk
  */
 @Singleton
 public class ContainerResourceProvisioner implements ConfigurationProvisioner {
-
-  private final ResourceLimitAttributesProvisioner resourceLimitAttributesProvisioner;
 
   private final long defaultMachineMaxMemorySizeAttribute;
   private final long defaultMachineRequestMemorySizeAttribute;
@@ -72,9 +70,7 @@ public class ContainerResourceProvisioner implements ConfigurationProvisioner {
       @Named("che.workspace.default_memory_request_mb")
           long defaultMachineRequestMemorySizeAttribute,
       @Named("che.workspace.default_cpu_limit_cores") String defaultMachineCpuLimitAttribute,
-      @Named("che.workspace.default_cpu_request_cores") String defaultMachineCpuRequestAttribute,
-      ResourceLimitAttributesProvisioner resourceLimitAttributesProvisioner) {
-    this.resourceLimitAttributesProvisioner = resourceLimitAttributesProvisioner;
+      @Named("che.workspace.default_cpu_request_cores") String defaultMachineCpuRequestAttribute) {
     this.defaultMachineMaxMemorySizeAttribute = defaultMachineMaxMemorySizeAttribute * 1024 * 1024;
     this.defaultMachineRequestMemorySizeAttribute =
         defaultMachineRequestMemorySizeAttribute * 1024 * 1024;
@@ -96,7 +92,7 @@ public class ContainerResourceProvisioner implements ConfigurationProvisioner {
 
         // make sure that machine configs have settings for RAM limit and request
         InternalMachineConfig machineConfig = machines.get(machineName(pod, container));
-        resourceLimitAttributesProvisioner.provisionMemory(
+        ResourceLimitAttributesProvisioner.provisionMemory(
             machineConfig,
             Containers.getRamLimit(container),
             Containers.getRamRequest(container),
@@ -104,22 +100,31 @@ public class ContainerResourceProvisioner implements ConfigurationProvisioner {
             defaultMachineRequestMemorySizeAttribute);
 
         // make sure that machine configs have settings for CPU limit and request
-        resourceLimitAttributesProvisioner.provisionCPU(
+        ResourceLimitAttributesProvisioner.provisionCPU(
             machineConfig,
             Containers.getCpuLimit(container),
             Containers.getCpuRequest(container),
             defaultMachineCpuLimitAttribute,
             defaultMachineCpuRequestAttribute);
 
-        // reapply memory  and CPU settings to k8s container to make sure that provisioned
-        // values above are set
+        // reapply memory and CPU settings to k8s container to make sure that provisioned
+        // values above are set. Non-positive value means that limit is disabled, so just
+        // ignoring them.
         final Map<String, String> attributes = machineConfig.getAttributes();
-        Containers.addRamLimit(container, Long.parseLong(attributes.get(MEMORY_LIMIT_ATTRIBUTE)));
-        Containers.addRamRequest(
-            container, Long.parseLong(attributes.get(MEMORY_REQUEST_ATTRIBUTE)));
-        Containers.addCpuLimit(container, Float.parseFloat(attributes.get(CPU_LIMIT_ATTRIBUTE)));
-        Containers.addCpuRequest(
-            container, Float.parseFloat(attributes.get(CPU_REQUEST_ATTRIBUTE)));
+        long memLimit = Long.parseLong(attributes.get(MEMORY_LIMIT_ATTRIBUTE));
+        if (memLimit > 0) {
+          Containers.addRamLimit(container, memLimit);
+        }
+        long memRequest = Long.parseLong(attributes.get(MEMORY_REQUEST_ATTRIBUTE));
+        if (memRequest > 0) {
+          Containers.addRamRequest(container, memRequest);
+        }
+        float cpuLimit = Float.parseFloat(attributes.get(CPU_LIMIT_ATTRIBUTE));
+        if (cpuLimit > 0) {
+          Containers.addCpuLimit(container, cpuLimit);
+        }
+        float cpuRequest = Float.parseFloat(attributes.get(CPU_REQUEST_ATTRIBUTE));
+        if (cpuRequest > 0) Containers.addCpuRequest(container, cpuRequest);
       }
     }
   }

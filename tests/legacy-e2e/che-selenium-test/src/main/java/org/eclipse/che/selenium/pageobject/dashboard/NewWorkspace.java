@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
@@ -40,6 +41,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.testng.Assert;
 
 /**
  * @author Ann Shumilova
@@ -84,6 +86,18 @@ public class NewWorkspace {
     String TOP_DROPDOWN_BUTTON_XPATH = "//button[@name='dropdown-toggle']";
     String TOP_EDIT_BUTTON_XPATH = "//span[text()='Create & Proceed Editing']";
     String BOTTOM_CREATE_BUTTON_XPATH = "//*[@id='create-workspace-ready-to-go-button']";
+    String CUSTOM_WORKSPACE_TAB_XPATH = "//md-tab-item//span[text()='Custom Workspace']";
+    String CUSTOM_WORKSPACE_TITLE_XPATH = "//div[@title='Create Custom Workspace']";
+    String WORKSPACE_NAME_INPUT_XPATH = "//input[@name='workspaceName']";
+    String OPEN_DIVFILES_LIST_XPATH = "//button[contains(@id,'select-single-typeahead-expanded')]";
+    String DEVFILE_ITEM_IN_LIST_XPATH = "//button/span[text()='%s']";
+    String SELECTED_DEVFILE_ITEM_XPATH =
+        "//div/input[contains(@id,'select-single-typeahead-expanded')]";
+    String CREATE_AND_START_BUTTON_XPATH = "//button[@title='Create & Open']";
+
+    String DEFVILE_ITEM_XPATH2 = "//div[@devfile='devfile']//b[text()='%s']";
+    String GET_STARTED_TAB_XPATH = "//md-tab-item//span[text()='Get Started']";
+    String GET_STARTED_TITLE_XPATH = "//div[@title='Getting Started with Eclipse Che']";
   }
 
   public enum Devfile {
@@ -117,7 +131,7 @@ public class NewWorkspace {
   @FindBy(id = TOOLBAR_TITLE_ID)
   WebElement toolbarTitle;
 
-  @FindBy(id = Locators.WORKSPACE_NAME_INPUT)
+  @FindBy(id = Locators.WORKSPACE_NAME_INPUT_XPATH)
   WebElement workspaceNameInput;
 
   @FindBy(xpath = BOTTOM_CREATE_BUTTON_XPATH)
@@ -132,6 +146,57 @@ public class NewWorkspace {
   @FindBy(xpath = TOP_EDIT_BUTTON_XPATH)
   WebElement topEditWorkspaceButton;
 
+  public void clickOnGetStartedTab() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.GET_STARTED_TAB_XPATH));
+  }
+
+  public void waitGetStartedTabActive() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.GET_STARTED_TAB_XPATH));
+  }
+
+  public void selectDevfileFromGetStartedList(Devfile devfile) {
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format(Locators.DEFVILE_ITEM_XPATH2, devfile.getId())));
+  }
+
+  public void clickOnCustomWorkspacesTab() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.CUSTOM_WORKSPACE_TAB_XPATH));
+  }
+
+  public void waitCustomWorkspacesTab() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.CUSTOM_WORKSPACE_TITLE_XPATH));
+  }
+
+  public void typeWorkspaceName(String name) {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.WORKSPACE_NAME_INPUT_XPATH));
+    seleniumWebDriverHelper.setValue(By.xpath(Locators.WORKSPACE_NAME_INPUT_XPATH), name);
+    Assert.assertEquals(getWorkspaceNameValue(), name);
+  }
+
+  public String getWorkspaceNameValue() {
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(
+        By.xpath(Locators.WORKSPACE_NAME_INPUT_XPATH));
+  }
+
+  public void openDevfilesList() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.OPEN_DIVFILES_LIST_XPATH));
+  }
+
+  public void selectDevfileFromList(Devfile devfile) {
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format(Locators.DEVFILE_ITEM_IN_LIST_XPATH, devfile.getId())));
+    WaitUtils.sleepQuietly(5);
+  }
+
+  public String getSelectedDevfileName() {
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(
+        By.xpath(Locators.SELECTED_DEVFILE_ITEM_XPATH));
+  }
+
+  public void clickOnCreateAndOpenButton() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.CREATE_AND_START_BUTTON_XPATH));
+  }
+
   private void waitButtonDisableState(WebElement button, boolean state) {
     seleniumWebDriverHelper.waitAttributeEqualsTo(button, "aria-disabled", Boolean.toString(state));
   }
@@ -139,14 +204,6 @@ public class NewWorkspace {
   private WebElement waitElementByNameAttribute(String nameAttribute) {
     return seleniumWebDriverHelper.waitVisibility(
         By.xpath(format("//input[@name='%s']", nameAttribute)));
-  }
-
-  public void typeWorkspaceName(String name) {
-    seleniumWebDriverHelper.setValue(workspaceNameInput, name);
-  }
-
-  public String getWorkspaceNameValue() {
-    return seleniumWebDriverHelper.waitVisibilityAndGetValue(workspaceNameInput);
   }
 
   public void waitWorkspaceNameFieldValue(String expectedName) {

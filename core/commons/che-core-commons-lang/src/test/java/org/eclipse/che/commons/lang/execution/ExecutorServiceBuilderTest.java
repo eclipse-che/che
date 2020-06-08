@@ -49,7 +49,7 @@ public class ExecutorServiceBuilderTest {
 
   @Test(
       expectedExceptions = IllegalArgumentException.class,
-      expectedExceptionsMessageRegExp = "maxPoolSize has to be grater then corePoolSize")
+      expectedExceptionsMessageRegExp = "maxPoolSize must be greater than corePoolSize")
   public void testSetMaxLowerThenCore() {
     new ExecutorServiceBuilder().corePoolSize(6).maxPoolSize(1).build();
   }

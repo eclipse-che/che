@@ -40,7 +40,8 @@ public class KubernetesSize {
   private static final Pattern HUMAN_SIZE_MEMORY_PATTERN =
       Pattern.compile("^([-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?)\\s*(\\S+)?$");
 
-  private static final Pattern HUMAN_SIZE_CPU_PATTERN = Pattern.compile("^([0-9]*\\.?[0-9]+)(m)?$");
+  private static final Pattern HUMAN_SIZE_CPU_PATTERN =
+      Pattern.compile("^([-+]?[0-9]*\\.?[0-9]+)(m)?$");
 
   /**
    * Converts memory in Kubernetes format to bytes.

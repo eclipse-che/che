@@ -18,22 +18,6 @@
        thread-count="1">
     <test name="all">
         <classes>
-            <class name="org.eclipse.che.selenium.dashboard.organization.AddWorkspaceToOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfParentOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfSubOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.CreateRootOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.DeleteOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.DeleteOrganizationByBulkTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.DeleteOrganizationInListTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.FilterOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.MemberOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.OrganizationMembersTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.RenameOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.ShareWorkspaceOwnerTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.ShareWorkspaceMemberTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.SystemAdminOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromDashboardTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.ImportProjectFromGitHubTest"/>
             <class name="org.eclipse.che.selenium.dashboard.workspaces.WorkspacesListTest"/>
         </classes>
     </test>

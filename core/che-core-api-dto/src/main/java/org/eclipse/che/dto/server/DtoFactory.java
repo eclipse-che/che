@@ -360,12 +360,12 @@ public final class DtoFactory {
     if (dtoProvider == null) {
       if (!dtoInterface.isInterface()) {
         throw new IllegalArgumentException(
-            format("Only interfaces can be DTO, but %s is not", dtoInterface));
+            format("Only interfaces can be DTO, but %s is not an interface.", dtoInterface));
       }
 
       if (hasDtoAnnotation(dtoInterface)) {
         throw new IllegalArgumentException(
-            format("Provider of implementation for DTO type %s isn't found", dtoInterface));
+            format("Provider of implementation for DTO type %s is not found", dtoInterface));
       } else {
         throw new IllegalArgumentException(dtoInterface + " is not a DTO type");
       }

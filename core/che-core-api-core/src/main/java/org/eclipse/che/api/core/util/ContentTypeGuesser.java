@@ -52,7 +52,7 @@ public class ContentTypeGuesser {
     if (resource != null) {
       try (InputStream stream = resource.openStream()) {
         properties.load(stream);
-        LOG.info("Successfully load content types from {}", resource);
+        LOG.info("Successfully loaded content types from {}", resource);
       } catch (IOException e) {
         LOG.error(e.getMessage(), e);
       }

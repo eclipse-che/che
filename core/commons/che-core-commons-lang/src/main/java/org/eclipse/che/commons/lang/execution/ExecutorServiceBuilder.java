@@ -59,7 +59,7 @@ public class ExecutorServiceBuilder {
   /** @param maxPoolSize - configure the maximum number of threads to allow in the pool. */
   public ExecutorServiceBuilder maxPoolSize(int maxPoolSize) {
     if (maxPoolSize < corePoolSize) {
-      throw new IllegalArgumentException("maxPoolSize has to be grater then corePoolSize");
+      throw new IllegalArgumentException("maxPoolSize must be greater than corePoolSize");
     }
     this.maxPoolSize = maxPoolSize;
     return this;

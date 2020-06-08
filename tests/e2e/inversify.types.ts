@@ -34,11 +34,12 @@ const CLASSES = {
     QuickOpenContainer: 'QuickOpenContainer',
     PreviewWidget: 'PreviewWidget',
     GitHubPlugin: 'GitHubPlugin',
-    RightToolbar: 'RightToolbar',
+    LeftToolbar: 'LeftToolbar',
     Terminal: 'Terminal',
     DebugView: 'DebugView',
     DialogWindow: 'DialogWindow',
     ScreenCatcher: 'ScreenCatcher',
+    OpenshiftPlugin: 'OpenshiftPlugin',
     OcpLoginPage: 'OcpLoginPage',
     OcpWebConsolePage: 'OcpWebConsolePage',
     OpenWorkspaceWidget: 'OpenWorkspaceWidget',
@@ -51,7 +52,8 @@ const CLASSES = {
     NotificationCenter: 'NotificationCenter',
     PreferencesHandler: 'PreferencesHandler',
     CheApiRequestHandler: 'CheApiRequestHandler',
-    GetStarted: 'GetStarted'
+    GetStarted: 'GetStarted',
+    OpenDialogWidget: 'OpenDialogWidget'
 };
 
 export { TYPES, CLASSES };

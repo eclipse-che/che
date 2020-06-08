@@ -29,6 +29,6 @@ public class AssertRetry {
         Thread.sleep(pause_millis);
       }
     }
-    Assert.fail("Not able to get expected value " + expected + " with " + times + " retries");
+    Assert.fail("Unable to obtain the expected value " + expected + " after " + times + " retries");
   }
 }

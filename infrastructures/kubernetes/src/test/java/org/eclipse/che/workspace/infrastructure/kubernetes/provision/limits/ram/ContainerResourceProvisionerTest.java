@@ -19,6 +19,7 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -27,9 +28,10 @@ import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.ResourceRequirementsBuilder;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
-import org.eclipse.che.api.workspace.server.spi.environment.ResourceLimitAttributesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.mockito.Mock;
@@ -57,16 +59,13 @@ public class ContainerResourceProvisionerTest {
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private RuntimeIdentity identity;
   @Mock private InternalMachineConfig internalMachineConfig;
-  @Mock private ResourceLimitAttributesProvisioner resourceLimitAttributesProvisioner;
 
   private Container container;
   private ContainerResourceProvisioner resourceProvisioner;
 
   @BeforeMethod
   public void setup() {
-    resourceProvisioner =
-        new ContainerResourceProvisioner(
-            1024, 512, "500m", "100m", resourceLimitAttributesProvisioner);
+    resourceProvisioner = new ContainerResourceProvisioner(1024, 512, "500m", "100m");
     container = new Container();
     container.setName(CONTAINER_NAME);
     when(k8sEnv.getMachines()).thenReturn(of(MACHINE_NAME, internalMachineConfig));
@@ -96,6 +95,47 @@ public class ContainerResourceProvisionerTest {
     assertEquals(
         container.getResources().getRequests().get("memory").getAmount(), RAM_REQUEST_VALUE);
     assertEquals(container.getResources().getRequests().get("cpu").getAmount(), CPU_REQUEST_VALUE);
+  }
+
+  @Test
+  public void testIgnoreNegativeRAMResourcesLimitAndRequestAttributeToContainer() throws Exception {
+
+    ContainerResourceProvisioner localResourceProvisioner =
+        new ContainerResourceProvisioner(-1, -1, "-1", "-1");
+    Map<String, String> attributes = new HashMap<>();
+    attributes.put(MEMORY_LIMIT_ATTRIBUTE, "-1");
+    attributes.put(MEMORY_REQUEST_ATTRIBUTE, "-1");
+    attributes.put(CPU_LIMIT_ATTRIBUTE, CPU_LIMIT_VALUE);
+    attributes.put(CPU_REQUEST_ATTRIBUTE, CPU_REQUEST_VALUE);
+
+    when(internalMachineConfig.getAttributes()).thenReturn(attributes);
+
+    localResourceProvisioner.provision(k8sEnv, identity);
+    assertNull(container.getResources().getLimits().get("memory"));
+    assertEquals(container.getResources().getLimits().get("cpu").getAmount(), CPU_LIMIT_VALUE);
+    assertNull(container.getResources().getRequests().get("memory"));
+    assertEquals(container.getResources().getRequests().get("cpu").getAmount(), CPU_REQUEST_VALUE);
+  }
+
+  @Test
+  public void testIgnoreNegativeCPUResourcesLimitAndRequestAttributeToContainer() throws Exception {
+
+    ContainerResourceProvisioner localResourceProvisioner =
+        new ContainerResourceProvisioner(-1, -1, "-1", "-1");
+    Map<String, String> attributes = new HashMap<>();
+    attributes.put(MEMORY_LIMIT_ATTRIBUTE, RAM_LIMIT_VALUE);
+    attributes.put(MEMORY_REQUEST_ATTRIBUTE, RAM_REQUEST_VALUE);
+    attributes.put(CPU_LIMIT_ATTRIBUTE, "-1");
+    attributes.put(CPU_REQUEST_ATTRIBUTE, "-1");
+
+    when(internalMachineConfig.getAttributes()).thenReturn(attributes);
+
+    localResourceProvisioner.provision(k8sEnv, identity);
+    assertEquals(container.getResources().getLimits().get("memory").getAmount(), RAM_LIMIT_VALUE);
+    assertNull(container.getResources().getLimits().get("cpu"));
+    assertEquals(
+        container.getResources().getRequests().get("memory").getAmount(), RAM_REQUEST_VALUE);
+    assertNull(container.getResources().getRequests().get("cpu"));
   }
 
   @Test

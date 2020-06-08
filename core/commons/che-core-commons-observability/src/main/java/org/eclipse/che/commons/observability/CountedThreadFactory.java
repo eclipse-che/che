@@ -45,19 +45,20 @@ public class CountedThreadFactory implements ThreadFactory {
     this.created =
         Counter.builder("thread.factory.created")
             .tags(Tags.concat(tags, "name", name))
-            .description("The approximate number of threads that create with thread factory")
+            .description(
+                "The approximate number of threads which were created with a thread factory")
             .baseUnit(BaseUnits.THREADS)
             .register(registry);
     this.terminated =
         Counter.builder("thread.factory.terminated")
             .tags(Tags.concat(tags, "name", name))
-            .description("The approximate number of threads that is finished execution")
+            .description("The approximate number of threads which have finished execution")
             .baseUnit(BaseUnits.THREADS)
             .register(registry);
     Gauge.builder("thread.factory.running", running, AtomicInteger::get)
         .tags(Tags.concat(tags, "name", name))
         .description(
-            "The approximate number of threads that are started executing, but not terminated")
+            "The approximate number of threads which have started to execute, but have not terminated")
         .baseUnit(BaseUnits.THREADS)
         .register(registry);
   }

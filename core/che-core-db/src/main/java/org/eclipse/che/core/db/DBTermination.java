@@ -76,8 +76,8 @@ public class DBTermination {
       isLocal.set(conn, false);
     } catch (IllegalAccessException | NoSuchFieldException ex) {
       LOG.error(
-          "Failed to change JGroupsRemoteConnection#isLocal this may prevent the graceful stop of "
-              + "the system because EclipseLinkCommandChannel won't be closed. Cause: "
+          "Failed to change JGroupsRemoteConnection#isLocal. This may prevent the graceful stop of "
+              + "the system because EclipseLinkCommandChannel will not be closed. Cause: "
               + ex.getMessage());
     }
   }
