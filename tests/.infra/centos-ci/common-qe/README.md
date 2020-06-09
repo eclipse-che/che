@@ -4,11 +4,13 @@
  and all functions from the "common-qe" scripts may be invoked directly by function name without any additional actions.
 
  ```
+#Download and import the "common-qe" functions
 export IS_TESTS_FAILED="false"
-DOWNLOADER_URL=https://raw.githubusercontent.com/eclipse/che/iokhrime-common-centos/.ci/common-qe/downloader.sh
+DOWNLOADER_URL=https://raw.githubusercontent.com/eclipse/che/master/tests/.infra/centos-ci/common-qe/downloader.sh
 curl $DOWNLOADER_URL -o downloader.sh
 chmod u+x downloader.sh
 . ./downloader.sh
+
 ```
 
  - For correct displaying of the tests result add next block of code to the end of your script.
@@ -38,8 +40,9 @@ export PATH_TO_CONFIGURATION_FILE=<path_to_file>
 ```
 export PATH_TO_CONFIGURATION_FILE=/full/path/to/conf/file/qe-config.conf
 
+#Download and import the "common-qe" functions
 export IS_TESTS_FAILED="false"
-DOWNLOADER_URL=https://raw.githubusercontent.com/eclipse/che/iokhrime-common-centos/.ci/common-qe/downloader.sh
+DOWNLOADER_URL=https://raw.githubusercontent.com/eclipse/che/master/tests/.infra/centos-ci/common-qe/downloader.sh
 curl $DOWNLOADER_URL -o downloader.sh
 chmod u+x downloader.sh
 . ./downloader.sh
