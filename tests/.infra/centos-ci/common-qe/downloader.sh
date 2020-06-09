@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#
 # Copyright (c) 2012-2020 Red Hat, Inc.
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -23,7 +23,6 @@ SCRIPT_PATH="${BASH_SOURCE[0]}"
 SCRIPT_DIR="$(dirname $SCRIPT_PATH)"
 ROOT_DIR_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-
 function downloadAndSetPermissions(){
     local filename="$1"
     local fileUrl="$COMMON_FOLDER_URL/$filename"
@@ -32,7 +31,6 @@ function downloadAndSetPermissions(){
     
     chmod u+x "$COMMON_FOLDER_NAME/$filename"
 }
-
 
 set -e
 
@@ -52,6 +50,5 @@ downloadAndSetPermissions $CONFIG_FILE_NAME
 . "$COMMON_FOLDER_NAME/$CHE_UTIL_SCRIPT_NAME"
 . "$COMMON_FOLDER_NAME/$COMMON_UTIL_SCRIPT_NAME"
 . "$COMMON_FOLDER_NAME/$INSTALLATION_UTIL_SCRIPT_NAME"
-
 
 setConfigProperty "env.root.dir.path" "$ROOT_DIR_PATH"
