@@ -37,6 +37,8 @@ spec:
           value: "REPLACE_LOG_LEVEL"
         - name: NODE_TLS_REJECT_UNAUTHORIZED
           value: "0"
+        - name: VIDEO_RECORDING
+          value: "false"
         image: REPLACE_IMAGE 
         imagePullPolicy: Always
         name: load-testing-container
