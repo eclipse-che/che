@@ -14,6 +14,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
@@ -25,10 +28,12 @@ import com.google.inject.Singleton;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Named;
@@ -81,7 +86,7 @@ public class KubernetesNamespaceFactory {
 
   private final String legacyNamespaceName;
   private final String serviceAccountName;
-  private final String clusterRoleName;
+  private final Set<String> clusterRoleNames;
   private final KubernetesClientFactory clientFactory;
   private final UserManager userManager;
   protected final KubernetesSharedPool sharedPool;
@@ -90,7 +95,8 @@ public class KubernetesNamespaceFactory {
   public KubernetesNamespaceFactory(
       @Nullable @Named("che.infra.kubernetes.namespace") String legacyNamespaceName,
       @Nullable @Named("che.infra.kubernetes.service_account_name") String serviceAccountName,
-      @Nullable @Named("che.infra.kubernetes.cluster_role_name") String clusterRoleName,
+      @Deprecated @Nullable @Named("che.infra.kubernetes.cluster_role_name") String clusterRoleName,
+      @Nullable @Named("che.infra.kubernetes.workspace_sa_cluster_roles") String clusterRoleNames,
       @Nullable @Named("che.infra.kubernetes.namespace.default") String defaultNamespaceName,
       @Named("che.infra.kubernetes.namespace.allow_user_defined")
           boolean allowUserDefinedNamespaces,
@@ -101,7 +107,6 @@ public class KubernetesNamespaceFactory {
     this.userManager = userManager;
     this.legacyNamespaceName = legacyNamespaceName;
     this.serviceAccountName = serviceAccountName;
-    this.clusterRoleName = clusterRoleName;
     this.clientFactory = clientFactory;
     this.defaultNamespaceName = defaultNamespaceName;
     this.allowUserDefinedNamespaces = allowUserDefinedNamespaces;
@@ -109,6 +114,19 @@ public class KubernetesNamespaceFactory {
 
     if (isNullOrEmpty(defaultNamespaceName)) {
       throw new ConfigurationException("che.infra.kubernetes.namespace.default must be configured");
+    }
+
+    if (isNullOrEmpty(clusterRoleNames)) {
+      if (isNullOrEmpty(clusterRoleName)) {
+        this.clusterRoleNames = emptySet();
+      } else {
+        this.clusterRoleNames = singleton(clusterRoleName);
+      }
+    } else {
+      this.clusterRoleNames = new HashSet<>(asList(clusterRoleNames.split("\\s*,\\s*")));
+      if (!isNullOrEmpty(clusterRoleName)) {
+        this.clusterRoleNames.add(clusterRoleName);
+      }
     }
   }
 
@@ -510,14 +528,14 @@ public class KubernetesNamespaceFactory {
   KubernetesWorkspaceServiceAccount doCreateServiceAccount(
       String workspaceId, String namespaceName) {
     return new KubernetesWorkspaceServiceAccount(
-        workspaceId, namespaceName, serviceAccountName, clusterRoleName, clientFactory);
+        workspaceId, namespaceName, serviceAccountName, getClusterRoleNames(), clientFactory);
   }
 
   protected String getServiceAccountName() {
     return serviceAccountName;
   }
 
-  protected String getClusterRoleName() {
-    return clusterRoleName;
+  protected Set<String> getClusterRoleNames() {
+    return clusterRoleNames;
   }
 }
