@@ -26,7 +26,7 @@ const taskPackageNative: string = 'Package Native';
 const taskStartNative: string = 'Start Native';
 const taskExpectedDialogText: string = 'A process is now listening on port 8080';
 
-suite(`${workspaceStack} test`, async () => {
+suite.skip(`${workspaceStack} test`, async () => {
     suite(`Create ${workspaceStack}`, async () => {
         workspaceHandler.createAndOpenWorkspace(workspaceStack);
         projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
