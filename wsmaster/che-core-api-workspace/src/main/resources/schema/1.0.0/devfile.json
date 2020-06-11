@@ -310,6 +310,7 @@
                   "registryUrl": {},
                   "memoryLimit": {},
                   "memoryRequest": {},
+                  "automountWorkspaceSecrets": {},
                   "cpuLimit": {},
                   "cpuRequest": {}
                 }
@@ -336,6 +337,7 @@
                   "volumes": {},
                   "memoryLimit": {},
                   "memoryRequest": {},
+                  "automountWorkspaceSecrets": {},
                   "cpuLimit": {},
                   "cpuRequest": {},
                   "reference": {},
@@ -402,6 +404,7 @@
                   "type": {},
                   "alias": {},
                   "mountSources": {},
+                  "automountWorkspaceSecrets": {},
                   "volumes": {},
                   "env": {},
                   "endpoints": {},
@@ -494,6 +497,7 @@
                   "env": {},
                   "cpuLimit": {},
                   "cpuRequest": {},
+                  "automountWorkspaceSecrets": {},
                   "volumes": {},
                   "endpoints": {},
                   "memoryLimit": {
@@ -613,6 +617,10 @@
               "100m",
               "1230m"
             ]
+          },
+          "automountWorkspaceSecrets": {
+            "type": "boolean",
+            "description": "Describes whether namespace secrets should be mount to the component."
           },
           "volumes": {
             "type": "array",

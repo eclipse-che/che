@@ -149,4 +149,7 @@ public interface Component {
    * type.
    */
   List<? extends Endpoint> getEndpoints();
+
+  /** Indicates whether namespace secrets should be mount into containers of this component. */
+  Boolean getAutomountWorkspaceSecrets();
 }

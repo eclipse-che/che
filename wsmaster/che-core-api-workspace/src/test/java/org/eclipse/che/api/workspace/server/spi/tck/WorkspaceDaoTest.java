@@ -634,6 +634,7 @@ public class WorkspaceDaoTest {
         "2",
         "1",
         false,
+        false,
         singletonList("command"),
         singletonList("arg"),
         singletonList(volume3),
@@ -968,6 +969,7 @@ public class WorkspaceDaoTest {
             "2",
             "130m",
             false,
+            false,
             singletonList("command"),
             singletonList("arg"),
             asList(volume1, volume2),
@@ -998,6 +1000,7 @@ public class WorkspaceDaoTest {
             "3",
             "180m",
             false,
+            false,
             singletonList("command"),
             singletonList("arg"),
             asList(volume1, volume2),
@@ -1005,16 +1008,13 @@ public class WorkspaceDaoTest {
             asList(endpoint1, endpoint2));
     component2.setSelector(singletonMap("key2", "value2"));
 
-    DevfileImpl devfile =
-        new DevfileImpl(
-            "0.0.1",
-            asList(project1, project2),
-            asList(component1, component2),
-            asList(command1, command2),
-            singletonMap("attribute1", "value1"),
-            new MetadataImpl(name));
-
-    return devfile;
+    return new DevfileImpl(
+        "0.0.1",
+        asList(project1, project2),
+        asList(component1, component2),
+        asList(command1, command2),
+        singletonMap("attribute1", "value1"),
+        new MetadataImpl(name));
   }
 
   private <T extends CascadeEvent> CascadeEventSubscriber<T> mockCascadeEventSubscriber() {

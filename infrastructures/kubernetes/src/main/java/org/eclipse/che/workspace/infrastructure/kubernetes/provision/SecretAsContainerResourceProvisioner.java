@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
 
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.Container;
@@ -31,10 +32,13 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
@@ -56,7 +60,7 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
 
   private static final String ANNOTATION_PREFIX = "che.eclipse.org";
   static final String ANNOTATION_MOUNT_AS = ANNOTATION_PREFIX + "/" + "mount-as";
-  static final String ANNOTATION_TARGET_CONTAINER = ANNOTATION_PREFIX + "/" + "target-container";
+  static final String ANNOTATION_AUTOMOUNT = ANNOTATION_PREFIX + "/" + "automount-workspace-secret";
   static final String ANNOTATION_ENV_NAME = ANNOTATION_PREFIX + "/" + "env-name";
   static final String ANNOTATION_ENV_NAME_TEMPLATE = ANNOTATION_PREFIX + "/%s_" + "env-name";
   static final String ANNOTATION_MOUNT_PATH = ANNOTATION_PREFIX + "/" + "mount-path";
@@ -75,13 +79,11 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
   public void provision(E env, KubernetesNamespace namespace) throws InfrastructureException {
     LabelSelector selector = new LabelSelectorBuilder().withMatchLabels(secretLabels).build();
     for (Secret secret : namespace.secrets().get(selector)) {
-      String targetContainerName =
-          secret.getMetadata().getAnnotations().get(ANNOTATION_TARGET_CONTAINER);
       String mountType = secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_AS);
       if ("env".equalsIgnoreCase(mountType)) {
-        mountAsEnv(env, secret, targetContainerName);
+        mountAsEnv(env, secret);
       } else if ("file".equalsIgnoreCase(mountType)) {
-        mountAsFile(env, secret, targetContainerName);
+        mountAsFile(env, secret);
       } else {
         throw new InfrastructureException(
             format(
@@ -91,14 +93,16 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
     }
   }
 
-  private void mountAsEnv(E env, Secret secret, String targetContainerName)
-      throws InfrastructureException {
+  private void mountAsEnv(E env, Secret secret) throws InfrastructureException {
+    boolean secretAutomount =
+        Boolean.parseBoolean(secret.getMetadata().getAnnotations().get(ANNOTATION_AUTOMOUNT));
     for (PodData podData : env.getPodsData().values()) {
       if (!podData.getRole().equals(PodRole.DEPLOYMENT)) {
         continue;
       }
       for (Container container : podData.getSpec().getContainers()) {
-        if (targetContainerName != null && !container.getName().equals(targetContainerName)) {
+        Optional<Boolean> componentAutomount = getComponentAutomount(container.getName(), env);
+        if ((componentAutomount.isPresent() && !componentAutomount.get()) || !secretAutomount) {
           continue;
         }
         for (Entry<String, String> secretDataEntry : secret.getData().entrySet()) {
@@ -122,9 +126,10 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
     }
   }
 
-  private void mountAsFile(E env, Secret secret, String targetContainerName)
-      throws InfrastructureException {
+  private void mountAsFile(E env, Secret secret) throws InfrastructureException {
     final String mountPath = secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_PATH);
+    boolean secretAutomount =
+        Boolean.parseBoolean(secret.getMetadata().getAnnotations().get(ANNOTATION_AUTOMOUNT));
     if (mountPath == null) {
       throw new InfrastructureException(
           format(
@@ -156,7 +161,8 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       podData.getSpec().getVolumes().add(volumeFromSecret);
 
       for (Container container : podData.getSpec().getContainers()) {
-        if (targetContainerName != null && !container.getName().equals(targetContainerName)) {
+        Optional<Boolean> componentAutomount = getComponentAutomount(container.getName(), env);
+        if ((componentAutomount.isPresent() && !componentAutomount.get()) || !secretAutomount) {
           continue;
         }
         if (container
@@ -208,5 +214,26 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       }
     }
     return mountEnvName;
+  }
+
+  private Optional<Boolean> getComponentAutomount(String name, E env) {
+    InternalMachineConfig internalMachineConfig = env.getMachines().get(name);
+    if (internalMachineConfig != null) {
+      String componentName =
+          internalMachineConfig.getAttributes().get(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE);
+      if (componentName != null) {
+        Optional<ComponentImpl> matchedComponent =
+            env.getDevfile()
+                .getComponents()
+                .stream()
+                .filter(c -> c.getAlias().equals(componentName))
+                .findFirst();
+        if (matchedComponent.isPresent()
+            && matchedComponent.get().getAutomountWorkspaceSecrets() != null) {
+          return Optional.of(matchedComponent.get().getAutomountWorkspaceSecrets());
+        }
+      }
+    }
+    return Optional.empty();
   }
 }

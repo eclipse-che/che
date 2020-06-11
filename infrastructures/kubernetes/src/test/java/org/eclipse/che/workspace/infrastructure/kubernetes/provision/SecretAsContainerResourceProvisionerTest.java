@@ -15,11 +15,11 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_AUTOMOUNT;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_ENV_NAME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_ENV_NAME_TEMPLATE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_MOUNT_AS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_MOUNT_PATH;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_TARGET_CONTAINER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -98,8 +98,8 @@ public class SecretAsContainerResourceProvisionerTest {
                             "MY_FOO",
                             ANNOTATION_MOUNT_AS,
                             "env",
-                            ANNOTATION_TARGET_CONTAINER,
-                            "maven"))
+                            ANNOTATION_AUTOMOUNT,
+                            "true"))
                     .withLabels(emptyMap())
                     .build())
             .build();
@@ -140,8 +140,8 @@ public class SecretAsContainerResourceProvisionerTest {
                             "MY_BAR",
                             ANNOTATION_MOUNT_AS,
                             "env",
-                            ANNOTATION_TARGET_CONTAINER,
-                            "maven"))
+                            ANNOTATION_AUTOMOUNT,
+                            "true"))
                     .withLabels(emptyMap())
                     .build())
             .build();
@@ -226,8 +226,8 @@ public class SecretAsContainerResourceProvisionerTest {
                             "file",
                             ANNOTATION_MOUNT_PATH,
                             "/home/user/.m2",
-                            ANNOTATION_TARGET_CONTAINER,
-                            "maven"))
+                            ANNOTATION_AUTOMOUNT,
+                            "true"))
                     .withLabels(emptyMap())
                     .build())
             .build();
@@ -400,8 +400,8 @@ public class SecretAsContainerResourceProvisionerTest {
                             "file",
                             ANNOTATION_MOUNT_PATH,
                             "/home/user/.m2/",
-                            ANNOTATION_TARGET_CONTAINER,
-                            "maven"))
+                            ANNOTATION_AUTOMOUNT,
+                            "true"))
                     .withLabels(emptyMap())
                     .build())
             .build();
