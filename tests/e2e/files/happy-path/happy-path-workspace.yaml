@@ -53,19 +53,19 @@ commands:
     actions:
       - type: exec
         component: maven-container
-        command: java -jar spring-petclinic-2.3.0.BUILD-SNAPSHOT.jar --spring.profiles.active=mysql
+        command: java -jar spring-petclinic-2.3.1.BUILD-SNAPSHOT.jar --spring.profiles.active=mysql
         workdir: /projects/petclinic/target
   - name: run-with-changes
     actions:
       - type: exec
         component: maven-container
-        command: java -jar spring-petclinic-2.3.0.BUILD-SNAPSHOT.jar --spring.profiles.active=mysql
+        command: java -jar spring-petclinic-2.3.1.BUILD-SNAPSHOT.jar --spring.profiles.active=mysql
         workdir: /projects/petclinic/target
   - name: run-debug
     actions:
       - type: exec
         component: maven-container
-        command: java -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 spring-petclinic-2.3.0.BUILD-SNAPSHOT.jar --spring.profiles.active=mysql
+        command: java -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 spring-petclinic-2.3.1.BUILD-SNAPSHOT.jar --spring.profiles.active=mysql
         workdir: /projects/petclinic/target
   - name: Debug remote java application
     actions:
