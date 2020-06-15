@@ -23,7 +23,7 @@
         <filter-class>org.eclipse.che.filter.CheCacheForcingFilter</filter-class>
         <init-param>
             <param-name>pattern_appname</param-name>
-            <param-value>^\/[\w]*\/(?!assets\/).*$</param-value>
+            <param-value>^\/[\w]*\/(?!fonts\/).*$</param-value>
         </init-param>
     </filter>
     <filter-mapping>
