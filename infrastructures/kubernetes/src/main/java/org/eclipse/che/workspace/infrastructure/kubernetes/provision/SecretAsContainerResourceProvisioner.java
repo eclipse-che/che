@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
@@ -37,6 +38,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -101,8 +103,11 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
         continue;
       }
       for (Container container : podData.getSpec().getContainers()) {
-        Optional<Boolean> componentAutomount = getComponentAutomount(container.getName(), env);
-        if ((componentAutomount.isPresent() && !componentAutomount.get()) || !secretAutomount) {
+        Optional<ComponentImpl> component = getComponent(container.getName(), env);
+        if ((component.isPresent()
+                && component.get().getAutomountWorkspaceSecrets() != null
+                && !component.get().getAutomountWorkspaceSecrets())
+            || !secretAutomount) {
           continue;
         }
         for (Entry<String, String> secretDataEntry : secret.getData().entrySet()) {
@@ -127,7 +132,7 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
   }
 
   private void mountAsFile(E env, Secret secret) throws InfrastructureException {
-    final String mountPath = secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_PATH);
+    String mountPath = secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_PATH);
     boolean secretAutomount =
         Boolean.parseBoolean(secret.getMetadata().getAnnotations().get(ANNOTATION_AUTOMOUNT));
     if (mountPath == null) {
@@ -161,19 +166,33 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       podData.getSpec().getVolumes().add(volumeFromSecret);
 
       for (Container container : podData.getSpec().getContainers()) {
-        Optional<Boolean> componentAutomount = getComponentAutomount(container.getName(), env);
-        if ((componentAutomount.isPresent() && !componentAutomount.get()) || !secretAutomount) {
+        Optional<ComponentImpl> component = getComponent(container.getName(), env);
+        if ((component.isPresent()
+                && component.get().getAutomountWorkspaceSecrets() != null
+                && !component.get().getAutomountWorkspaceSecrets())
+            || !secretAutomount) {
           continue;
         }
-        if (container
-            .getVolumeMounts()
-            .stream()
-            .anyMatch(vm -> Paths.get(vm.getMountPath()).equals(Paths.get(mountPath)))) {
-          throw new InfrastructureException(
-              format(
-                  "The secret '%s' defines a mount path '%s' that clashes with another volume mount path already present on the workspace pod.",
-                  secret.getMetadata().getName(), mountPath));
+        // find path override if any
+        if (component.isPresent()) {
+          Optional<VolumeImpl> matchedVolume =
+              component
+                  .get()
+                  .getVolumes()
+                  .stream()
+                  .filter(v -> v.getName().equals(secret.getMetadata().getName()))
+                  .findFirst();
+
+          if (matchedVolume.isPresent() && !isNullOrEmpty(matchedVolume.get().getContainerPath())) {
+            mountPath = matchedVolume.get().getContainerPath();
+          }
         }
+
+        String finalMountPath = mountPath;
+        container
+            .getVolumeMounts()
+            .removeIf(vm -> Paths.get(vm.getMountPath()).equals(Paths.get(finalMountPath)));
+
         container
             .getVolumeMounts()
             .add(
@@ -216,22 +235,17 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
     return mountEnvName;
   }
 
-  private Optional<Boolean> getComponentAutomount(String name, E env) {
+  private Optional<ComponentImpl> getComponent(String name, E env) {
     InternalMachineConfig internalMachineConfig = env.getMachines().get(name);
     if (internalMachineConfig != null) {
       String componentName =
           internalMachineConfig.getAttributes().get(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE);
       if (componentName != null) {
-        Optional<ComponentImpl> matchedComponent =
-            env.getDevfile()
-                .getComponents()
-                .stream()
-                .filter(c -> c.getAlias().equals(componentName))
-                .findFirst();
-        if (matchedComponent.isPresent()
-            && matchedComponent.get().getAutomountWorkspaceSecrets() != null) {
-          return Optional.of(matchedComponent.get().getAutomountWorkspaceSecrets());
-        }
+        return env.getDevfile()
+            .getComponents()
+            .stream()
+            .filter(c -> c.getAlias().equals(componentName))
+            .findFirst();
       }
     }
     return Optional.empty();
