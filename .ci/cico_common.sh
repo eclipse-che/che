@@ -18,7 +18,7 @@ function die_with() {
 }
 
 function getCurrentVersion() {
-    echo $(scl enable rh-maven33 "mvn help:evaluate -Dexpression=project.version -q -DforceStdout")
+    echo $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 }
 
 function getReleaseVersion() {
@@ -26,7 +26,7 @@ function getReleaseVersion() {
 }
 
 function setReleaseVersionInMavenProject(){
-    scl enable rh-maven33 "mvn versions:set -DgenerateBackupPoms=false -DnewVersion=$1"
+    mvn versions:set -DgenerateBackupPoms=false -DnewVersion=$1
 }
 
 load_jenkins_vars() {
@@ -90,7 +90,7 @@ mvn_build() {
 mvn_deploy() {
     set -x
     echo 'Going to deploy artifacts'
-    scl enable rh-maven33 "mvn clean deploy -DcreateChecksum=true  -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE"
+    mvn clean deploy -DcreateChecksum=true  -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE
     if [[ $? -eq 0 ]]; then
         echo 'Deploy Success!'
     else
@@ -200,11 +200,11 @@ releaseProject() {
     echo "Release version ${tag}"
     setReleaseVersionInMavenProject ${tag}
     git commit -asm "Release version ${tag}"
-    scl enable rh-maven33 'mvn clean install -U -DskipTests=true -Dskip-validate-sources'
+    mvn clean install -U -DskipTests=true -Dskip-validate-sources
     if [[ $? -eq 0 ]]; then
         echo 'Build Success!'
         echo 'Going to deploy artifacts'
-        scl enable rh-maven33 "mvn clean deploy -Pcodenvy-release -DcreateChecksum=true -DskipTests=true -Dskip-validate-sources -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE -Darchetype.test.skip=true -Dversion.animal-sniffer.enforcer-rule=1.16"
+        mvn clean deploy -Pcodenvy-release -DcreateChecksum=true -DskipTests=true -Dskip-validate-sources -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE -Darchetype.test.skip=true -Dversion.animal-sniffer.enforcer-rule=1.16
     else
         die_with 'Build Failed!'
     fi
