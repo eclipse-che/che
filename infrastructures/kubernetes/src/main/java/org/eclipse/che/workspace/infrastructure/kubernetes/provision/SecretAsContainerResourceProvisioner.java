@@ -107,7 +107,10 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
         if ((component.isPresent()
                 && component.get().getAutomountWorkspaceSecrets() != null
                 && !component.get().getAutomountWorkspaceSecrets())
-            || !secretAutomount) {
+            || !secretAutomount
+                && !(component.isPresent()
+                    && component.get().getAutomountWorkspaceSecrets() != null
+                    && component.get().getAutomountWorkspaceSecrets())) {
           continue;
         }
         for (Entry<String, String> secretDataEntry : secret.getData().entrySet()) {
@@ -170,7 +173,10 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
         if ((component.isPresent()
                 && component.get().getAutomountWorkspaceSecrets() != null
                 && !component.get().getAutomountWorkspaceSecrets())
-            || !secretAutomount) {
+            || !secretAutomount
+                && !(component.isPresent()
+                    && component.get().getAutomountWorkspaceSecrets() != null
+                    && component.get().getAutomountWorkspaceSecrets())) {
           continue;
         }
         // find path override if any
