@@ -20,13 +20,13 @@ const workspaceRootFolderName: string = 'getting-started';
 const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/src/main/java/org/acme/getting/started`;
 const fileName: string = `GreetingService.java`;
 
-const lsStarting: string = 'Activating Language Support for Java';
+const lsStarting: string = 'Activating Quarkus';
 const taskPackage: string = 'Package';
 const taskPackageNative: string = 'Package Native';
 const taskStartNative: string = 'Start Native';
 const taskExpectedDialogText: string = 'A process is now listening on port 8080';
 
-suite.skip(`${workspaceStack} test`, async () => {
+suite(`${workspaceStack} test`, async () => {
     suite(`Create ${workspaceStack}`, async () => {
         workspaceHandler.createAndOpenWorkspace(workspaceStack);
         projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
@@ -44,7 +44,7 @@ suite.skip(`${workspaceStack} test`, async () => {
         codeExecutionHelper.closeTerminal(taskPackage);
     });
     suite('Package Quarkus Native bundle', async () => {
-        codeExecutionHelper.runTask(taskPackageNative, 360_000);
+        codeExecutionHelper.runTask(taskPackageNative, 600_000);
         codeExecutionHelper.closeTerminal(taskPackageNative);
     });
     suite('Start Quarkus Native application', async () => {
