@@ -739,7 +739,7 @@ public class KubernetesDeployments {
             .inContainer(containerName)
             .writingError(errStream)
             .usingListener(watchdog)
-            .exec(encode(command))) {
+            .exec(command)) {
       try {
         watchdog.wait(timeoutMin, TimeUnit.MINUTES);
         final byte[] error = errStream.toByteArray();

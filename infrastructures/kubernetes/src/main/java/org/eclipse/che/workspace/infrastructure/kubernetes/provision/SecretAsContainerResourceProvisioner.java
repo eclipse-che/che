@@ -27,8 +27,10 @@ import io.fabric8.kubernetes.api.model.SecretVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
-import java.nio.file.Paths;
+import io.jsonwebtoken.lang.Strings;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.inject.Inject;
@@ -36,6 +38,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.workspace.infrastructure.kubernetes.ContainerCommandQueue;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
@@ -72,7 +75,8 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
             .collect(toMap(p -> p[0], p -> p.length == 1 ? "" : p[1]));
   }
 
-  public void provision(E env, KubernetesNamespace namespace) throws InfrastructureException {
+  public void provision(E env, KubernetesNamespace namespace,
+      ContainerCommandQueue postStartCommands) throws InfrastructureException {
     LabelSelector selector = new LabelSelectorBuilder().withMatchLabels(secretLabels).build();
     for (Secret secret : namespace.secrets().get(selector)) {
       String targetContainerName =
@@ -81,7 +85,7 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       if ("env".equalsIgnoreCase(mountType)) {
         mountAsEnv(env, secret, targetContainerName);
       } else if ("file".equalsIgnoreCase(mountType)) {
-        mountAsFile(env, secret, targetContainerName);
+        mountAsFile(env, secret, targetContainerName, postStartCommands);
       } else {
         throw new InfrastructureException(
             format(
@@ -122,7 +126,8 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
     }
   }
 
-  private void mountAsFile(E env, Secret secret, String targetContainerName)
+  private void mountAsFile(E env, Secret secret, String targetContainerName,
+      ContainerCommandQueue postStartCommands)
       throws InfrastructureException {
     final String mountPath = secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_PATH);
     if (mountPath == null) {
@@ -159,25 +164,26 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
         if (targetContainerName != null && !container.getName().equals(targetContainerName)) {
           continue;
         }
-        if (container
-            .getVolumeMounts()
-            .stream()
-            .anyMatch(vm -> Paths.get(vm.getMountPath()).equals(Paths.get(mountPath)))) {
-          throw new InfrastructureException(
-              format(
-                  "The secret '%s' defines a mount path '%s' that clashes with another volume mount path already present on the workspace pod.",
-                  secret.getMetadata().getName(), mountPath));
-        }
+        String tmpMountPath = composeTmpMountPath(podData.getMetadata().getName(),
+            container.getName(),
+            mountPath);
         container
             .getVolumeMounts()
             .add(
                 new VolumeMountBuilder()
                     .withName(volumeFromSecret.getName())
-                    .withMountPath(mountPath)
+                    .withMountPath(tmpMountPath)
                     .withReadOnly(true)
                     .build());
+        secret.getData().keySet().forEach(secretFile ->
+            postStartCommands.add(podData.getMetadata().getName(), container.getName(),
+                String.format("ln -sf %s/%s %s/%s", tmpMountPath, secretFile, mountPath, secretFile)));
       }
     }
+  }
+
+  private String composeTmpMountPath(String pod, String container, String mountPath) {
+    return String.format("/tmp/secrets-as-files/%s/%s/%s", pod, container, mountPath).replace("//", "/");
   }
 
   private String envName(Secret secret, String key) throws InfrastructureException {

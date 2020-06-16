@@ -42,7 +42,12 @@ import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.ContainerCommandQueue;
+import org.eclipse.che.workspace.infrastructure.kubernetes.ContainerCommandQueueImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
@@ -69,6 +74,7 @@ public class SecretAsContainerResourceProvisionerTest {
   @Mock private PodData podData;
 
   @Mock private PodSpec podSpec;
+  private ContainerCommandQueue postStartCommands = new ContainerCommandQueueImpl(namespace);
 
   @BeforeMethod
   public void setUp() throws Exception {
@@ -105,7 +111,7 @@ public class SecretAsContainerResourceProvisionerTest {
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    provisioner.provision(environment, namespace, postStartCommands);
 
     // nothing to do with unmatched container
     verify(container_unmatch).getName();
@@ -147,7 +153,7 @@ public class SecretAsContainerResourceProvisionerTest {
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    provisioner.provision(environment, namespace, postStartCommands);
 
     // nothing to do with unmatched container
     verify(container_unmatch).getName();
@@ -186,7 +192,7 @@ public class SecretAsContainerResourceProvisionerTest {
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    provisioner.provision(environment, namespace, postStartCommands);
 
     // both containers has env set
     assertEquals(container_match1.getEnv().size(), 1);
@@ -233,7 +239,7 @@ public class SecretAsContainerResourceProvisionerTest {
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    provisioner.provision(environment, namespace, postStartCommands);
 
     // pod has volume created
     assertEquals(environment.getPodsData().get("pod1").getSpec().getVolumes().size(), 1);
@@ -300,7 +306,7 @@ public class SecretAsContainerResourceProvisionerTest {
                     .build())
             .build();
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    provisioner.provision(environment, namespace, postStartCommands);
   }
 
   @Test(
@@ -319,7 +325,7 @@ public class SecretAsContainerResourceProvisionerTest {
                     .build())
             .build();
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    provisioner.provision(environment, namespace, postStartCommands);
   }
 
   @Test(
@@ -343,7 +349,7 @@ public class SecretAsContainerResourceProvisionerTest {
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    provisioner.provision(environment, namespace, postStartCommands);
   }
 
   @Test(
@@ -367,7 +373,7 @@ public class SecretAsContainerResourceProvisionerTest {
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    provisioner.provision(environment, namespace, postStartCommands);
   }
 
   @Test(
@@ -407,6 +413,6 @@ public class SecretAsContainerResourceProvisionerTest {
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    provisioner.provision(environment, namespace, postStartCommands);
   }
 }

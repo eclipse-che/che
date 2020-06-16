@@ -34,6 +34,8 @@ import io.opentracing.Span;
 import io.opentracing.Tracer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -186,6 +188,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
     KubernetesRuntimeContext<E> context = getContext();
     String workspaceId = context.getIdentity().getWorkspaceId();
+    ContainerCommandQueue postStartCommandQue = new ContainerCommandQueueImpl(namespace);
     try {
       startSynchronizer.setStartThread();
       startSynchronizer.start();
@@ -213,7 +216,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // from previous provisioners into infrastructure specific objects
       kubernetesEnvironmentProvisioner.provision(context.getEnvironment(), context.getIdentity());
 
-      secretAsContainerResourceProvisioner.provision(context.getEnvironment(), namespace);
+      secretAsContainerResourceProvisioner.provision(context.getEnvironment(), namespace, postStartCommandQue);
       LOG.debug("Provisioning of workspace '{}' completed.", workspaceId);
 
       volumesStrategy.prepare(
@@ -255,6 +258,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           machinesFutures.put(machineName, machineBootChain);
         }
         waitMachines(machinesFutures, toCancelFutures, startFailure);
+        postStartCommandQue.execute();
       } finally {
         waitRunningAsyncSpan.finish();
       }
