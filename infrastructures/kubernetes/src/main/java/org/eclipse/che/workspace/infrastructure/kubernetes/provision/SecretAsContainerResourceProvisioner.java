@@ -104,13 +104,8 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       }
       for (Container container : podData.getSpec().getContainers()) {
         Optional<ComponentImpl> component = getComponent(container.getName(), env);
-        if ((component.isPresent()
-                && component.get().getAutomountWorkspaceSecrets() != null
-                && !component.get().getAutomountWorkspaceSecrets())
-            || !secretAutomount
-                && !(component.isPresent()
-                    && component.get().getAutomountWorkspaceSecrets() != null
-                    && component.get().getAutomountWorkspaceSecrets())) {
+        if ((component.isPresent() && isOverridenByFalse(component.get()))
+            || !secretAutomount && !(component.isPresent() && isOverridenByTrue(component.get()))) {
           continue;
         }
         for (Entry<String, String> secretDataEntry : secret.getData().entrySet()) {
@@ -170,13 +165,8 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
 
       for (Container container : podData.getSpec().getContainers()) {
         Optional<ComponentImpl> component = getComponent(container.getName(), env);
-        if ((component.isPresent()
-                && component.get().getAutomountWorkspaceSecrets() != null
-                && !component.get().getAutomountWorkspaceSecrets())
-            || !secretAutomount
-                && !(component.isPresent()
-                    && component.get().getAutomountWorkspaceSecrets() != null
-                    && component.get().getAutomountWorkspaceSecrets())) {
+        if ((component.isPresent() && isOverridenByFalse(component.get()))
+            || !secretAutomount && !(component.isPresent() && isOverridenByTrue(component.get()))) {
           continue;
         }
         // find path override if any
@@ -255,5 +245,15 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       }
     }
     return Optional.empty();
+  }
+
+  private boolean isOverridenByFalse(ComponentImpl component) {
+    return component.getAutomountWorkspaceSecrets() != null
+        && !component.getAutomountWorkspaceSecrets();
+  }
+
+  private boolean isOverridenByTrue(ComponentImpl component) {
+    return component.getAutomountWorkspaceSecrets() != null
+        && component.getAutomountWorkspaceSecrets();
   }
 }

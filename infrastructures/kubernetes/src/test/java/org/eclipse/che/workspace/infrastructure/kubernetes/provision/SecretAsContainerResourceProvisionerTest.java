@@ -45,6 +45,7 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -122,9 +123,8 @@ public class SecretAsContainerResourceProvisionerTest {
   @Test
   public void shouldProvisionMultiEnvVariable() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
-    Container container_unmatch = spy(new ContainerBuilder().withName("other").build());
 
-    when(podSpec.getContainers()).thenReturn(ImmutableList.of(container_match, container_unmatch));
+    when(podSpec.getContainers()).thenReturn(ImmutableList.of(container_match));
 
     Secret secret =
         new SecretBuilder()
@@ -163,7 +163,7 @@ public class SecretAsContainerResourceProvisionerTest {
   }
 
   @Test
-  public void shouldProvisionAllContainersAutomountEnabled() throws Exception {
+  public void shouldProvisionAllContainersIfAutomountEnabled() throws Exception {
     Container container_match1 = new ContainerBuilder().withName("maven").build();
     Container container_match2 = new ContainerBuilder().withName("other").build();
 
@@ -202,7 +202,7 @@ public class SecretAsContainerResourceProvisionerTest {
   }
 
   @Test
-  public void shouldProvisionContainersWithAutomountOverride() throws Exception {
+  public void shouldProvisionContainersWithAutomountOverrideTrue() throws Exception {
     Container container_match1 = new ContainerBuilder().withName("maven").build();
     Container container_match2 = new ContainerBuilder().withName("other").build();
     DevfileImpl mock_defvile = mock(DevfileImpl.class);
@@ -246,7 +246,7 @@ public class SecretAsContainerResourceProvisionerTest {
   }
 
   @Test
-  public void shouldNotProvisionContainersWithAutomountOverride() throws Exception {
+  public void shouldNotProvisionContainersWithAutomountOverrideFalse() throws Exception {
     Container container_match1 = new ContainerBuilder().withName("maven").build();
     Container container_match2 = new ContainerBuilder().withName("other").build();
     DevfileImpl mock_defvile = mock(DevfileImpl.class);
@@ -322,12 +322,12 @@ public class SecretAsContainerResourceProvisionerTest {
 
   @Test
   public void shouldProvisionAsFiles() throws Exception {
-    Container container_match = new ContainerBuilder().withName("maven").build();
-    Container container_unmatch = new ContainerBuilder().withName("other").build();
+    Container container_match1 = new ContainerBuilder().withName("maven").build();
+    Container container_match2 = new ContainerBuilder().withName("other").build();
 
     PodSpec localSpec =
         new PodSpecBuilder()
-            .withContainers(ImmutableList.of(container_match, container_unmatch))
+            .withContainers(ImmutableList.of(container_match1, container_match2))
             .build();
 
     when(podData.getSpec()).thenReturn(localSpec);
@@ -359,7 +359,7 @@ public class SecretAsContainerResourceProvisionerTest {
     assertEquals(volume.getName(), "test_secret");
     assertEquals(volume.getSecret().getSecretName(), "test_secret");
 
-    // matched container has mounts set
+    // both containers has mounts set
     assertEquals(
         environment
             .getPodsData()
@@ -381,6 +381,100 @@ public class SecretAsContainerResourceProvisionerTest {
             .get(0);
     assertEquals(mount1.getName(), "test_secret");
     assertEquals(mount1.getMountPath(), "/home/user/.m2");
+    assertTrue(mount1.getReadOnly());
+
+    assertEquals(
+        environment
+            .getPodsData()
+            .get("pod1")
+            .getSpec()
+            .getContainers()
+            .get(1)
+            .getVolumeMounts()
+            .size(),
+        1);
+    VolumeMount mount2 =
+        environment
+            .getPodsData()
+            .get("pod1")
+            .getSpec()
+            .getContainers()
+            .get(1)
+            .getVolumeMounts()
+            .get(0);
+    assertEquals(mount2.getName(), "test_secret");
+    assertEquals(mount2.getMountPath(), "/home/user/.m2");
+    assertTrue(mount2.getReadOnly());
+  }
+
+  @Test
+  public void shouldProvisionAsFilesWithPathOverride() throws Exception {
+    Container container = new ContainerBuilder().withName("maven").build();
+
+    DevfileImpl mock_defvile = mock(DevfileImpl.class);
+    ComponentImpl component = new ComponentImpl();
+    component.setAlias("maven");
+    component.getVolumes().add(new VolumeImpl("test_secret", "/path/to/override"));
+
+    InternalMachineConfig internalMachineConfig = new InternalMachineConfig();
+    internalMachineConfig.getAttributes().put(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE, "maven");
+    when(environment.getMachines()).thenReturn(ImmutableMap.of("maven", internalMachineConfig));
+    when(environment.getDevfile()).thenReturn(mock_defvile);
+    when(mock_defvile.getComponents()).thenReturn(singletonList(component));
+
+    PodSpec localSpec = new PodSpecBuilder().withContainers(ImmutableList.of(container)).build();
+
+    when(podData.getSpec()).thenReturn(localSpec);
+
+    Secret secret =
+        new SecretBuilder()
+            .withData(ImmutableMap.of("settings.xml", "random", "another.xml", "freedom"))
+            .withMetadata(
+                new ObjectMetaBuilder()
+                    .withName("test_secret")
+                    .withAnnotations(
+                        ImmutableMap.of(
+                            ANNOTATION_MOUNT_AS,
+                            "file",
+                            ANNOTATION_MOUNT_PATH,
+                            "/home/user/.m2",
+                            ANNOTATION_AUTOMOUNT,
+                            "true"))
+                    .withLabels(emptyMap())
+                    .build())
+            .build();
+
+    when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
+    provisioner.provision(environment, namespace);
+
+    // pod has volume created
+    assertEquals(environment.getPodsData().get("pod1").getSpec().getVolumes().size(), 1);
+    Volume volume = environment.getPodsData().get("pod1").getSpec().getVolumes().get(0);
+    assertEquals(volume.getName(), "test_secret");
+    assertEquals(volume.getSecret().getSecretName(), "test_secret");
+
+    // both containers has mounts set
+    assertEquals(
+        environment
+            .getPodsData()
+            .get("pod1")
+            .getSpec()
+            .getContainers()
+            .get(0)
+            .getVolumeMounts()
+            .size(),
+        1);
+    VolumeMount mount1 =
+        environment
+            .getPodsData()
+            .get("pod1")
+            .getSpec()
+            .getContainers()
+            .get(0)
+            .getVolumeMounts()
+            .get(0);
+    assertEquals(mount1.getName(), "test_secret");
+    assertEquals(mount1.getMountPath(), "/path/to/override");
     assertTrue(mount1.getReadOnly());
   }
 
