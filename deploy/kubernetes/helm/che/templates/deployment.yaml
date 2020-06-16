@@ -100,7 +100,7 @@ spec:
           valueFrom:
             secretKeyRef:
               key: ca.crt
-              name: {{ .Values.global.tls.secretName }}
+              name: {{ .Values.global.tls.selfSignedCertSecretName }}
               optional: false
         {{- end }}
 
