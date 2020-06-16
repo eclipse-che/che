@@ -11,7 +11,8 @@ pipeline {
     }
 
     environment {
-        PATH = "/tmp:/qa/tools/opt/apache-maven-3.6.1/bin:$PATH"
+        PATH = "/tmp:/qa/tools/opt/apache-maven-3.6.1/bin:/qa/tools/opt/openjdk-11.0.6.10/bin:$PATH"
+        JAVA_HOME="/qa/tools/opt/openjdk-11.0.6.10"
         JENKINS_BUILD = "true"
 
         DEVFILE_PATH = "${WORKSPACE}/test-workspace-devfile.yaml"
