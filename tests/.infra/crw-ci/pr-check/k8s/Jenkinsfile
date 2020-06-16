@@ -11,7 +11,8 @@ pipeline {
     }
 
     environment {
-        PATH = "/tmp:/qa/tools/opt/apache-maven-3.5.4/bin:$PATH"
+        PATH = "/tmp:/qa/tools/opt/apache-maven-3.6.1/bin:/qa/tools/opt/openjdk-11.0.6.10/bin:$PATH"
+        JAVA_HOME="/qa/tools/opt/openjdk-11.0.6.10"
         JENKINS_BUILD = "true"
 
         DEVFILE_PATH = "${WORKSPACE}/test-workspace-devfile.yaml"
@@ -78,6 +79,7 @@ pipeline {
                     } else {
                         mutableCheImageTag = cheImageTag
                     }
+                    sh "sudo yum install -y glibc.i686 libfreetype.so.6 libfontconfig.so.1 libstdc++.so.6"
                 }
             }
         }

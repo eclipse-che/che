@@ -103,7 +103,7 @@
         <org.eclipse.persistence.eclipselink.version>2.7.5</org.eclipse.persistence.eclipselink.version>
         <org.eclipse.persistence.version>2.2.0</org.eclipse.persistence.version>
         <org.eclipse.sisu.version>0.3.0</org.eclipse.sisu.version>
-        <org.everrest.version>1.13.5</org.everrest.version>
+        <org.everrest.version>1.14.4</org.everrest.version>
         <org.flyway.version>4.2.0</org.flyway.version>
         <org.hamcrest.version>1.3</org.hamcrest.version>
         <org.jgroups.kubernetes.version>1.0.13.Final</org.jgroups.kubernetes.version>
