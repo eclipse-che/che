@@ -15,6 +15,7 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner.ANNOTATION_PREFIX;
 
+import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.EnvVarSourceBuilder;
@@ -22,12 +23,19 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretKeySelectorBuilder;
 import java.util.Map.Entry;
 import java.util.Optional;
+import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
 
+/**
+ * Mounts Kubernetes secret with specific annotations as an environment variable(s)
+ * in workspace containers. Allows per-component control of secret applying in devfile.
+ */
+@Beta
+@Singleton
 public class EnvironmentVariableSecretApplier
     extends KubernetesSecretApplier<KubernetesEnvironment> {
 
