@@ -27,7 +27,6 @@ import io.fabric8.kubernetes.api.model.SecretVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -159,23 +158,20 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
         if (targetContainerName != null && !container.getName().equals(targetContainerName)) {
           continue;
         }
-        if (container
-            .getVolumeMounts()
-            .stream()
-            .anyMatch(vm -> Paths.get(vm.getMountPath()).equals(Paths.get(mountPath)))) {
-          throw new InfrastructureException(
-              format(
-                  "The secret '%s' defines a mount path '%s' that clashes with another volume mount path already present on the workspace pod.",
-                  secret.getMetadata().getName(), mountPath));
-        }
-        container
-            .getVolumeMounts()
-            .add(
-                new VolumeMountBuilder()
-                    .withName(volumeFromSecret.getName())
-                    .withMountPath(mountPath)
-                    .withReadOnly(true)
-                    .build());
+        secret
+            .getData()
+            .keySet()
+            .forEach(
+                secretFile ->
+                    container
+                        .getVolumeMounts()
+                        .add(
+                            new VolumeMountBuilder()
+                                .withName(volumeFromSecret.getName())
+                                .withMountPath(mountPath + "/" + secretFile)
+                                .withSubPath(secretFile)
+                                .withReadOnly(true)
+                                .build()));
       }
     }
   }
