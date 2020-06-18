@@ -12,7 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret;
 
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.ANNOTATION_PREFIX;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner.ANNOTATION_PREFIX;
 
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.Secret;

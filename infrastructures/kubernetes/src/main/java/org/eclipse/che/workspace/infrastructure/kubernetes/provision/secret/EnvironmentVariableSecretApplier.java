@@ -31,8 +31,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
 
 /**
- * Mounts Kubernetes secret with specific annotations as an environment variable(s)
- * in workspace containers. Allows per-component control of secret applying in devfile.
+ * Mounts Kubernetes secret with specific annotations as an environment variable(s) in workspace
+ * containers. Allows per-component control of secret applying in devfile.
  */
 @Beta
 @Singleton
@@ -53,7 +53,8 @@ public class EnvironmentVariableSecretApplier
       for (Container container : podData.getSpec().getContainers()) {
         Optional<ComponentImpl> component = getComponent(env, container.getName());
         if ((component.isPresent() && isOverridenByFalse(component.get()))
-            || !secretAutomount && !(component.isPresent() && isOverridenByTrue(component.get()))) {
+            || (!secretAutomount
+                && !(component.isPresent() && isOverridenByTrue(component.get())))) {
           continue;
         }
         for (Entry<String, String> secretDataEntry : secret.getData().entrySet()) {

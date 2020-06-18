@@ -33,9 +33,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
 
-
 /**
- * Mounts Kubernetes secret with specific annotations as an file  in workspace containers. Via
+ * Mounts Kubernetes secret with specific annotations as an file in workspace containers. Via
  * devfile, allows per-component control of secret applying and path overrides using specific
  * property.
  */
@@ -83,7 +82,8 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
       for (Container container : podData.getSpec().getContainers()) {
         Optional<ComponentImpl> component = getComponent(env, container.getName());
         if ((component.isPresent() && isOverridenByFalse(component.get()))
-            || !secretAutomount && !(component.isPresent() && isOverridenByTrue(component.get()))) {
+            || (!secretAutomount
+                && !(component.isPresent() && isOverridenByTrue(component.get())))) {
           continue;
         }
         // find path override if any
