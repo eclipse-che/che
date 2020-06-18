@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
@@ -41,7 +42,6 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
-import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
@@ -251,7 +251,7 @@ public class SecretAsContainerResourceProvisionerTest {
             .get(0)
             .getVolumeMounts()
             .size(),
-        1);
+        2);
     VolumeMount mount1 =
         environment
             .getPodsData()
@@ -262,8 +262,23 @@ public class SecretAsContainerResourceProvisionerTest {
             .getVolumeMounts()
             .get(0);
     assertEquals(mount1.getName(), "test_secret");
-    assertEquals(mount1.getMountPath(), "/home/user/.m2");
+    assertEquals(mount1.getMountPath(), "/home/user/.m2/" + mount1.getSubPath());
+    assertFalse(mount1.getSubPath().isEmpty());
     assertTrue(mount1.getReadOnly());
+
+    VolumeMount mount2 =
+        environment
+            .getPodsData()
+            .get("pod1")
+            .getSpec()
+            .getContainers()
+            .get(0)
+            .getVolumeMounts()
+            .get(1);
+    assertEquals(mount2.getName(), "test_secret");
+    assertEquals(mount2.getMountPath(), "/home/user/.m2/" + mount2.getSubPath());
+    assertFalse(mount2.getSubPath().isEmpty());
+    assertTrue(mount2.getReadOnly());
 
     // unmatched container has no mounts
     assertEquals(
@@ -276,6 +291,14 @@ public class SecretAsContainerResourceProvisionerTest {
             .getVolumeMounts()
             .size(),
         0);
+
+    if ("settings.xml".equals(mount1.getSubPath())) {
+      assertEquals(mount1.getSubPath(), "settings.xml");
+      assertEquals(mount2.getSubPath(), "another.xml");
+    } else {
+      assertEquals(mount1.getSubPath(), "another.xml");
+      assertEquals(mount2.getSubPath(), "settings.xml");
+    }
   }
 
   @Test(
@@ -362,46 +385,6 @@ public class SecretAsContainerResourceProvisionerTest {
                 new ObjectMetaBuilder()
                     .withName("test_secret")
                     .withAnnotations(ImmutableMap.of(ANNOTATION_MOUNT_AS, "env"))
-                    .withLabels(emptyMap())
-                    .build())
-            .build();
-
-    when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
-  }
-
-  @Test(
-      expectedExceptions = InfrastructureException.class,
-      expectedExceptionsMessageRegExp =
-          "The secret 'test_secret' defines a mount path '/home/user/.m2/' that clashes with another volume mount path already present on the workspace pod.")
-  public void shouldThrowExceptionOnDuplicateVolumePaths() throws Exception {
-    VolumeMount vm =
-        new VolumeMountBuilder().withMountPath("/home/user/.m2").withName("foo").build();
-    Container container_match =
-        new ContainerBuilder().withName("maven").withVolumeMounts(vm).build();
-    Container container_unmatch = new ContainerBuilder().withName("other").build();
-
-    PodSpec localSpec =
-        new PodSpecBuilder()
-            .withContainers(ImmutableList.of(container_match, container_unmatch))
-            .build();
-
-    when(podData.getSpec()).thenReturn(localSpec);
-
-    Secret secret =
-        new SecretBuilder()
-            .withData(ImmutableMap.of("settings.xml", "random", "another.xml", "freedom"))
-            .withMetadata(
-                new ObjectMetaBuilder()
-                    .withName("test_secret")
-                    .withAnnotations(
-                        ImmutableMap.of(
-                            ANNOTATION_MOUNT_AS,
-                            "file",
-                            ANNOTATION_MOUNT_PATH,
-                            "/home/user/.m2/",
-                            ANNOTATION_TARGET_CONTAINER,
-                            "maven"))
                     .withLabels(emptyMap())
                     .build())
             .build();
