@@ -16,7 +16,7 @@ ARG CHE_WORKSPACE_LOADER_VERSION=next
 FROM ${CHE_DASHBOARD_ORGANIZATION}/che-dashboard:${CHE_DASHBOARD_VERSION} as che_dashboard_base
 FROM ${CHE_WORKSPACE_LOADER_ORGANIZATION}/che-workspace-loader:${CHE_WORKSPACE_LOADER_VERSION} as che_workspace_loader_base
 
-FROM openjdk:8u252-jre-slim
+FROM openjdk:11-jre-slim
 ENV LANG=C.UTF-8
 RUN echo "%root ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && rm -rf /tmp/*
 EXPOSE 8000 8080
