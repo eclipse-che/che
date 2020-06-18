@@ -1,0 +1,87 @@
+pipeline {
+    agent { label 'rhel7-8gb' }
+
+    options {
+        timestamps()
+        timeout(time: 1, unit: 'HOURS')
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '',
+                artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '30'))
+    }
+
+    parameters {
+        string(name: 'cheClusterUrl',
+                defaultValue: '',
+                description: 'URL to the cluster where CHE is running.')
+        
+        string(name: 'cheClusterUsername',
+                defaultValue: '',
+                description: 'Username for login to the cluster where CHE is runing.')
+
+        password(name: 'cheClusterPassword',
+                defaultValue: '',
+                description: 'Password for login to the cluster where CHE is running.')
+
+        string(name: 'cheClusterNamespace',
+                defaultValue: '',
+                description: 'Namespace where CHE is running.')
+
+        string(name: 'numberOfUsers',
+                defaultValue: '',
+                description: 'Number of users that should be created.')
+
+        string(name: 'startingIndex',
+                defaultValue: '1',
+                description: 'Startnig index for user creation. If you don\'t have any user created yet, set 1.')
+        
+        choice(name: 'environment', 
+                choices: ['Che', 'CRW'], 
+                description: 'Environment, where users should be created. Can be Che or CRW.')
+
+    }
+    environment {
+        OC_PATH="/tmp"
+        PATH= "$PATH:$OC_PATH"
+
+        USERNAME_BASE="user"
+        USERNAME_PASS="load-user"
+        PATH_TO_SCRIPTS="che/tests/performance"
+    }
+
+    stages {
+        stage('Preset environment') {
+            steps {
+                script {
+                    sh """
+                        set +x
+                        echo "Installing oc..."
+                        wget -q https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.3.1/openshift-client-linux-4.3.1.tar.gz -O - | tar -xz
+                        mv oc $OC_PATH
+                        echo "Setting CHE context..."
+                        oc login $cheClusterUrl -u $cheClusterUsername -p $cheClusterPassword --insecure-skip-tls-verify
+                        oc project $cheClusterNamespace
+                    """
+                    
+                    env.CHE_CONTEXT = sh (script: "oc whoami -c", returnStdout: true)
+                }
+            }
+        }
+        stage("Clone upstream che") {
+            steps {
+                sh"""
+                  echo "Clone che"
+                  git clone https://github.com/eclipse/che.git
+                """
+            }
+        }
+        stage('Create users') {
+            steps {
+                sh """
+                  cd $PATH_TO_SCRIPTS
+                  oc config use-context ${env.CHE_CONTEXT}
+                  ./create_users.sh -n $USERNAME_BASE -m $USERNAME_PASS -s $startingIndex -c $numberOfUsers -e $environment
+                """
+            }
+        }
+    }
+
+}
