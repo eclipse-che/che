@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
@@ -122,7 +123,7 @@ public class FileSecretApplierTest {
             .get(0)
             .getVolumeMounts()
             .size(),
-        1);
+        2);
     VolumeMount mount1 =
         environment
             .getPodsData()
@@ -133,8 +134,23 @@ public class FileSecretApplierTest {
             .getVolumeMounts()
             .get(0);
     assertEquals(mount1.getName(), "test_secret");
-    assertEquals(mount1.getMountPath(), "/home/user/.m2");
+    assertEquals(mount1.getMountPath(), "/home/user/.m2/" + mount1.getSubPath());
+    assertFalse(mount1.getSubPath().isEmpty());
     assertTrue(mount1.getReadOnly());
+
+    VolumeMount mount2 =
+        environment
+            .getPodsData()
+            .get("pod1")
+            .getSpec()
+            .getContainers()
+            .get(0)
+            .getVolumeMounts()
+            .get(1);
+    assertEquals(mount2.getName(), "test_secret");
+    assertEquals(mount2.getMountPath(), "/home/user/.m2/" + mount2.getSubPath());
+    assertFalse(mount2.getSubPath().isEmpty());
+    assertTrue(mount2.getReadOnly());
 
     assertEquals(
         environment
@@ -145,19 +161,15 @@ public class FileSecretApplierTest {
             .get(1)
             .getVolumeMounts()
             .size(),
-        1);
-    VolumeMount mount2 =
-        environment
-            .getPodsData()
-            .get("pod1")
-            .getSpec()
-            .getContainers()
-            .get(1)
-            .getVolumeMounts()
-            .get(0);
-    assertEquals(mount2.getName(), "test_secret");
-    assertEquals(mount2.getMountPath(), "/home/user/.m2");
-    assertTrue(mount2.getReadOnly());
+        2);
+
+    if ("settings.xml".equals(mount1.getSubPath())) {
+      assertEquals(mount1.getSubPath(), "settings.xml");
+      assertEquals(mount2.getSubPath(), "another.xml");
+    } else {
+      assertEquals(mount1.getSubPath(), "another.xml");
+      assertEquals(mount2.getSubPath(), "settings.xml");
+    }
   }
 
   @Test
@@ -215,7 +227,7 @@ public class FileSecretApplierTest {
             .get(0)
             .getVolumeMounts()
             .size(),
-        1);
+        2);
     VolumeMount mount1 =
         environment
             .getPodsData()
@@ -226,7 +238,7 @@ public class FileSecretApplierTest {
             .getVolumeMounts()
             .get(0);
     assertEquals(mount1.getName(), "test_secret");
-    assertEquals(mount1.getMountPath(), "/path/to/override");
+    assertEquals(mount1.getMountPath(), "/path/to/override/settings.xml");
     assertTrue(mount1.getReadOnly());
   }
 
@@ -299,7 +311,7 @@ public class FileSecretApplierTest {
             .getVolumeMounts()
             .get(0);
     assertEquals(mount1.getName(), "test_secret");
-    assertEquals(mount1.getMountPath(), "/home/user/.m2");
+    assertEquals(mount1.getMountPath(), "/home/user/.m2/foo");
     assertTrue(mount1.getReadOnly());
 
     // second container has no mounts
@@ -394,7 +406,7 @@ public class FileSecretApplierTest {
             .getVolumeMounts()
             .get(0);
     assertEquals(mount2.getName(), "test_secret");
-    assertEquals(mount2.getMountPath(), "/home/user/.m2");
+    assertEquals(mount2.getMountPath(), "/home/user/.m2/foo");
     assertTrue(mount2.getReadOnly());
   }
 

@@ -106,14 +106,20 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
             .getVolumeMounts()
             .removeIf(vm -> Paths.get(vm.getMountPath()).equals(Paths.get(finalMountPath)));
 
-        container
-            .getVolumeMounts()
-            .add(
-                new VolumeMountBuilder()
-                    .withName(volumeFromSecret.getName())
-                    .withMountPath(mountPath)
-                    .withReadOnly(true)
-                    .build());
+        secret
+            .getData()
+            .keySet()
+            .forEach(
+                secretFile ->
+                    container
+                        .getVolumeMounts()
+                        .add(
+                            new VolumeMountBuilder()
+                                .withName(volumeFromSecret.getName())
+                                .withMountPath(finalMountPath + "/" + secretFile)
+                                .withSubPath(secretFile)
+                                .withReadOnly(true)
+                                .build()));
       }
     }
   }
