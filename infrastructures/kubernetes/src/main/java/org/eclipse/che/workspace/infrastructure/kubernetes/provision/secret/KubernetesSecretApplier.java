@@ -22,6 +22,10 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
+/**
+ * Base class for secret appliers. Contains common functionality to find devfile components by name
+ * and check override automount properties.
+ */
 @Beta
 public abstract class KubernetesSecretApplier<E extends KubernetesEnvironment> {
 
@@ -45,12 +49,12 @@ public abstract class KubernetesSecretApplier<E extends KubernetesEnvironment> {
     return Optional.empty();
   }
 
-  boolean isOverridenByFalse(ComponentImpl component) {
+  boolean isComponentAutomountFalse(ComponentImpl component) {
     return component.getAutomountWorkspaceSecrets() != null
         && !component.getAutomountWorkspaceSecrets();
   }
 
-  boolean isOverridenByTrue(ComponentImpl component) {
+  boolean isComponentAutomountTrue(ComponentImpl component) {
     return component.getAutomountWorkspaceSecrets() != null
         && component.getAutomountWorkspaceSecrets();
   }

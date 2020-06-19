@@ -81,9 +81,9 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
 
       for (Container container : podData.getSpec().getContainers()) {
         Optional<ComponentImpl> component = getComponent(env, container.getName());
-        if ((component.isPresent() && isOverridenByFalse(component.get()))
+        if ((component.isPresent() && isComponentAutomountFalse(component.get()))
             || (!secretAutomount
-                && !(component.isPresent() && isOverridenByTrue(component.get())))) {
+                && !(component.isPresent() && isComponentAutomountTrue(component.get())))) {
           continue;
         }
         // find path override if any
