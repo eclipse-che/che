@@ -178,7 +178,6 @@ public class URLFetcherTest {
 
   /** Limit to only one Byte. */
   static class OneByteURLFetcher extends URLFetcher {
-
     /** Override the limit */
     @Override
     protected long getLimit() {
@@ -187,7 +186,6 @@ public class URLFetcherTest {
   }
 
   private static class TimeoutCheckURLFetcher extends URLFetcher {
-
     private final Consumer<Integer> assertion;
 
     public TimeoutCheckURLFetcher(Consumer<Integer> assertion) {
