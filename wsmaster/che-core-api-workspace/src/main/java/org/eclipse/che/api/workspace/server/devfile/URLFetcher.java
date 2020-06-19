@@ -44,6 +44,9 @@ public class URLFetcher {
   /** Maximum size of allowed data. (80KB) */
   protected static final long MAXIMUM_READ_BYTES = 80 * 1024;
 
+  /** timeout when reading */
+  private static final int CONNECTION_READ_TIMEOUT = 10 * 1000; // 10s
+
   /** The Compiled REGEX PATTERN that can be used for http|https git urls */
   final Pattern GIT_HTTP_URL_PATTERN = Pattern.compile("(?<sanitized>^http[s]?://.*)\\.git$");
 
@@ -85,6 +88,7 @@ public class URLFetcher {
    */
   public String fetch(@NotNull URLConnection urlConnection) throws IOException {
     requireNonNull(urlConnection, "urlConnection parameter can't be null");
+    urlConnection.setReadTimeout(CONNECTION_READ_TIMEOUT);
     final String value;
     try (InputStream inputStream = urlConnection.getInputStream();
         BufferedReader reader =
