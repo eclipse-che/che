@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner.ANNOTATION_PREFIX;
 
@@ -22,7 +21,9 @@ import io.fabric8.kubernetes.api.model.EnvVarSourceBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretKeySelectorBuilder;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -81,20 +82,21 @@ public class EnvironmentVariableSecretApplier
   private String envName(Secret secret, String key) throws InfrastructureException {
     String mountEnvName;
     if (secret.getData().size() == 1) {
-      try {
-        mountEnvName =
-            firstNonNull(
-                secret.getMetadata().getAnnotations().get(ANNOTATION_ENV_NAME),
-                secret
-                    .getMetadata()
-                    .getAnnotations()
-                    .get(format(ANNOTATION_ENV_NAME_TEMPLATE, key)));
-      } catch (NullPointerException e) {
-        throw new InfrastructureException(
-            format(
-                "Unable to mount secret '%s': It is configured to be mount as a environment variable, but its was not specified. Please define the '%s' annotation on the secret to specify it.",
-                secret.getMetadata().getName(), ANNOTATION_ENV_NAME));
-      }
+      mountEnvName =
+          Stream.of(
+                  secret.getMetadata().getAnnotations().get(ANNOTATION_ENV_NAME),
+                  secret
+                      .getMetadata()
+                      .getAnnotations()
+                      .get(format(ANNOTATION_ENV_NAME_TEMPLATE, key)))
+              .filter(Objects::nonNull)
+              .findFirst()
+              .orElseThrow(
+                  () ->
+                      new InfrastructureException(
+                          format(
+                              "Unable to mount secret '%s': It is configured to be mount as a environment variable, but its was not specified. Please define the '%s' annotation on the secret to specify it.",
+                              secret.getMetadata().getName(), ANNOTATION_ENV_NAME)));
     } else {
       mountEnvName =
           secret.getMetadata().getAnnotations().get(format(ANNOTATION_ENV_NAME_TEMPLATE, key));
