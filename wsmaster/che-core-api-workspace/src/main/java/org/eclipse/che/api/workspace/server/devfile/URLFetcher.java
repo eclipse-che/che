@@ -45,7 +45,7 @@ public class URLFetcher {
   protected static final long MAXIMUM_READ_BYTES = 80 * 1024;
 
   /** timeout when reading */
-  private static final int CONNECTION_READ_TIMEOUT = 10 * 1000; // 10s
+  @VisibleForTesting static final int CONNECTION_READ_TIMEOUT = 10 * 1000; // 10s
 
   /** The Compiled REGEX PATTERN that can be used for http|https git urls */
   final Pattern GIT_HTTP_URL_PATTERN = Pattern.compile("(?<sanitized>^http[s]?://.*)\\.git$");
@@ -67,15 +67,30 @@ public class URLFetcher {
   }
 
   /**
-   * Fetches the url provided and return its content.
+   * Fetches the url provided and return its content. Uses default read connection timeout {@link
+   * URLFetcher#CONNECTION_READ_TIMEOUT}
    *
    * @param url the URL to fetch
    * @return content of the requested URL
    * @throws IOException if fetch error occurs
    */
   public String fetch(@NotNull final String url) throws IOException {
+    return fetch(url, CONNECTION_READ_TIMEOUT);
+  }
+
+  /**
+   * Fetches the url provided and return its content.
+   *
+   * @param url the URL to fetch
+   * @param timeout read connection timeout
+   * @return content of the requested URL
+   * @throws IOException if fetch error occurs
+   */
+  String fetch(@NotNull final String url, int timeout) throws IOException {
     requireNonNull(url, "url parameter can't be null");
-    return fetch(new URL(sanitized(url)).openConnection());
+    URLConnection connection = new URL(sanitized(url)).openConnection();
+    connection.setReadTimeout(timeout);
+    return fetch(connection);
   }
 
   /**
@@ -86,9 +101,9 @@ public class URLFetcher {
    * @return the content of the file
    * @throws IOException if fetch error occurs
    */
-  public String fetch(@NotNull URLConnection urlConnection) throws IOException {
+  @VisibleForTesting
+  String fetch(@NotNull URLConnection urlConnection) throws IOException {
     requireNonNull(urlConnection, "urlConnection parameter can't be null");
-    urlConnection.setReadTimeout(CONNECTION_READ_TIMEOUT);
     final String value;
     try (InputStream inputStream = urlConnection.getInputStream();
         BufferedReader reader =
