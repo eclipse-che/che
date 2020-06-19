@@ -42,12 +42,12 @@ import org.testng.annotations.Test;
 public class URLFetcherTest {
 
   /** Instance to test. */
-  @InjectMocks private URLFetcher URLFetcher;
+  @InjectMocks private URLFetcher urlFetcher;
 
   /** Check that when url is null, NPE is thrown */
   @Test(expectedExceptions = NullPointerException.class)
   public void checkNullURL() {
-    URLFetcher.fetchSafely(null);
+    urlFetcher.fetchSafely(null);
   }
 
   /** Check that when url exists the content is retrieved */
@@ -58,14 +58,14 @@ public class URLFetcherTest {
     URL urlJson = getClass().getClassLoader().getResource("devfile/url_fetcher_test_resource.json");
     Assert.assertNotNull(urlJson);
 
-    String content = URLFetcher.fetchSafely(urlJson.toString());
+    String content = urlFetcher.fetchSafely(urlJson.toString());
     assertEquals(content, "Hello");
   }
 
   /** Check when url is invalid */
   @Test
   public void checkUrlFileIsInvalid() {
-    String result = URLFetcher.fetchSafely("hello world");
+    String result = urlFetcher.fetchSafely("hello world");
     assertNull(result);
   }
 
@@ -74,17 +74,17 @@ public class URLFetcherTest {
       expectedExceptions = IOException.class,
       expectedExceptionsMessageRegExp = "no protocol: hello_world")
   public void checkUnsafeGetUrlFileIsInvalid() throws Exception {
-    String result = URLFetcher.fetch("hello_world");
+    String result = urlFetcher.fetch("hello_world");
     assertNull(result);
   }
 
   /** Check Sanitizing of Git URL works */
   @Test
   public void checkDotGitRemovedFromURL() {
-    String result = URLFetcher.sanitized("https://github.com/acme/demo.git");
+    String result = urlFetcher.sanitized("https://github.com/acme/demo.git");
     assertEquals("https://github.com/acme/demo", result);
 
-    result = URLFetcher.sanitized("http://github.com/acme/demo.git");
+    result = urlFetcher.sanitized("http://github.com/acme/demo.git");
     assertEquals("http://github.com/acme/demo", result);
   }
 
@@ -97,7 +97,7 @@ public class URLFetcherTest {
     Assert.assertNotNull(urlJson);
 
     // add extra path to make url not found
-    String content = URLFetcher.fetchSafely(urlJson.toString() + "-invalid");
+    String content = urlFetcher.fetchSafely(urlJson.toString() + "-invalid");
     assertNull(content);
   }
 
@@ -113,7 +113,7 @@ public class URLFetcherTest {
     Assert.assertNotNull(urlJson);
 
     // add extra path to make url not found
-    String content = URLFetcher.fetch(urlJson.toString() + "-invalid");
+    String content = urlFetcher.fetch(urlJson.toString() + "-invalid");
     assertNull(content);
   }
 
@@ -135,14 +135,14 @@ public class URLFetcherTest {
     String extraContent = originalContent + "----";
     when(urlConnection.getInputStream())
         .thenReturn(new ByteArrayInputStream(extraContent.getBytes(UTF_8)));
-    String readcontent = URLFetcher.fetch(urlConnection);
+    String readcontent = urlFetcher.fetch(urlConnection);
     // check extra content has been removed as we keep only first values
     assertEquals(readcontent, originalContent);
   }
 
   @Test
   public void testDefaultFetchTimeoutIsSet() throws IOException {
-    org.eclipse.che.api.workspace.server.devfile.URLFetcher fetcher =
+    URLFetcher fetcher =
         new TimeoutCheckURLFetcher(
             timeout -> assertEquals(timeout.intValue(), CONNECTION_READ_TIMEOUT));
 
@@ -151,7 +151,7 @@ public class URLFetcherTest {
 
   @Test
   public void testFetchTimeoutIsSet() throws IOException {
-    org.eclipse.che.api.workspace.server.devfile.URLFetcher fetcher =
+    URLFetcher fetcher =
         new TimeoutCheckURLFetcher(timeout -> assertEquals(timeout.intValue(), 123));
 
     fetcher.fetch("http://eclipse.org/che", 123);
@@ -159,7 +159,7 @@ public class URLFetcherTest {
 
   @Test(expectedExceptions = IOException.class)
   public void testExceptionIsThrownOnTimeout() throws IOException {
-    org.eclipse.che.api.workspace.server.devfile.URLFetcher fetcher = new URLFetcher();
+    URLFetcher fetcher = new URLFetcher();
     URLConnection connection =
         new URLConnection(new URL("http://eclipse.org/che")) {
           @Override
