@@ -3,7 +3,7 @@ metadata:
   name: che-server-in-che
 components:
   - type: dockerimage
-    image: quay.io/eclipse/che-java8-maven:nightly
+    image: quay.io/eclipse/che-java11-maven:nightly
     alias: maven
     mountSources: true
     memoryLimit: 2Gi
