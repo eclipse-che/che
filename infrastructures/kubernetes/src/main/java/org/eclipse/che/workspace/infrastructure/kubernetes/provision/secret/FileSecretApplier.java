@@ -44,6 +44,14 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
 
   static final String ANNOTATION_MOUNT_PATH = ANNOTATION_PREFIX + "/" + "mount-path";
 
+  /**
+   * Applies secret as file into workspace containers, respecting automount attribute and optional
+   * devfile automount property and/or mount path override.
+   *
+   * @param env kubernetes environment with workspace containers configuration
+   * @param secret source secret to apply
+   * @throws InfrastructureException on misconfigured secrets or other apply error
+   */
   @Override
   public void applySecret(KubernetesEnvironment env, Secret secret) throws InfrastructureException {
     String mountPath = secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_PATH);

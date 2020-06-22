@@ -43,6 +43,14 @@ public class EnvironmentVariableSecretApplier
   static final String ANNOTATION_ENV_NAME = ANNOTATION_PREFIX + "/" + "env-name";
   static final String ANNOTATION_ENV_NAME_TEMPLATE = ANNOTATION_PREFIX + "/%s_" + "env-name";
 
+  /**
+   * Applies secret as environment variable into workspace containers, respecting automount
+   * attribute and optional devfile automount property override.
+   *
+   * @param env kubernetes environment with workspace containers configuration
+   * @param secret source secret to apply
+   * @throws InfrastructureException on misconfigured secrets or other apply error
+   */
   @Override
   public void applySecret(KubernetesEnvironment env, Secret secret) throws InfrastructureException {
     boolean secretAutomount =
@@ -95,7 +103,7 @@ public class EnvironmentVariableSecretApplier
                   () ->
                       new InfrastructureException(
                           format(
-                              "Unable to mount secret '%s': It is configured to be mount as a environment variable, but its was not specified. Please define the '%s' annotation on the secret to specify it.",
+                              "Unable to mount secret '%s': It is configured to be mount as a environment variable, but its name was not specified. Please define the '%s' annotation on the secret to specify it.",
                               secret.getMetadata().getName(), ANNOTATION_ENV_NAME)));
     } else {
       mountEnvName =
@@ -103,7 +111,7 @@ public class EnvironmentVariableSecretApplier
       if (mountEnvName == null) {
         throw new InfrastructureException(
             format(
-                "Unable to mount key '%s'  of secret '%s': It is configured to be mount as a environment variable, but its was not specified. Please define the '%s' annotation on the secret to specify it.",
+                "Unable to mount key '%s'  of secret '%s': It is configured to be mount as a environment variable, but its was name not specified. Please define the '%s' annotation on the secret to specify it.",
                 key, secret.getMetadata().getName(), format(ANNOTATION_ENV_NAME_TEMPLATE, key)));
       }
     }
