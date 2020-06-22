@@ -111,7 +111,7 @@ public class EnvironmentVariableSecretApplier
       if (mountEnvName == null) {
         throw new InfrastructureException(
             format(
-                "Unable to mount key '%s'  of secret '%s': It is configured to be mount as a environment variable, but its was name not specified. Please define the '%s' annotation on the secret to specify it.",
+                "Unable to mount key '%s'  of secret '%s': It is configured to be mount as a environment variable, but its name was not specified. Please define the '%s' annotation on the secret to specify it.",
                 key, secret.getMetadata().getName(), format(ANNOTATION_ENV_NAME_TEMPLATE, key)));
       }
     }

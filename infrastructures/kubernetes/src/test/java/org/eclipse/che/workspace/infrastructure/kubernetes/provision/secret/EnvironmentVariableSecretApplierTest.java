@@ -308,7 +308,7 @@ public class EnvironmentVariableSecretApplierTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to mount secret 'test_secret': It is configured to be mount as a environment variable, but its was not specified. Please define the 'che.eclipse.org/env-name' annotation on the secret to specify it.")
+          "Unable to mount secret 'test_secret': It is configured to be mount as a environment variable, but its name was not specified. Please define the 'che.eclipse.org/env-name' annotation on the secret to specify it.")
   public void shouldThrowExceptionWhenNoEnvNameSpecifiedSingleValue() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
 
@@ -333,7 +333,7 @@ public class EnvironmentVariableSecretApplierTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to mount key 'foo'  of secret 'test_secret': It is configured to be mount as a environment variable, but its was not specified. Please define the 'che.eclipse.org/foo_env-name' annotation on the secret to specify it.")
+          "Unable to mount key 'foo'  of secret 'test_secret': It is configured to be mount as a environment variable, but its name was not specified. Please define the 'che.eclipse.org/foo_env-name' annotation on the secret to specify it.")
   public void shouldThrowExceptionWhenNoEnvNameSpecifiedMultiValue() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
 

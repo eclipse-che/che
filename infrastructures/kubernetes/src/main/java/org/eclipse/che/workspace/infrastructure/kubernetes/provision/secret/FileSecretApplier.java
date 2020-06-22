@@ -94,6 +94,7 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
                 && !(component.isPresent() && isComponentAutomountTrue(component.get())))) {
           continue;
         }
+        String containerMountPath = mountPath;
         // find path override if any
         if (component.isPresent()) {
           Optional<VolumeImpl> matchedVolume =
@@ -105,11 +106,11 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
                   .findFirst();
 
           if (matchedVolume.isPresent() && !isNullOrEmpty(matchedVolume.get().getContainerPath())) {
-            mountPath = matchedVolume.get().getContainerPath();
+            containerMountPath = matchedVolume.get().getContainerPath();
           }
         }
 
-        String finalMountPath = mountPath;
+        String finalMountPath = containerMountPath;
         container
             .getVolumeMounts()
             .removeIf(vm -> Paths.get(vm.getMountPath()).equals(Paths.get(finalMountPath)));
