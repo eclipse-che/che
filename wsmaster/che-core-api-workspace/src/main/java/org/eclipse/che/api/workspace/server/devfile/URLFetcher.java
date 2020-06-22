@@ -82,13 +82,15 @@ public class URLFetcher {
    * Fetches the url provided and return its content.
    *
    * @param url the URL to fetch
-   * @param timeout read connection timeout
+   * @param timeout read and connection timeout (see {@link URLConnection#setConnectTimeout(int)}
+   *     and {@link URLConnection#setReadTimeout(int)}
    * @return content of the requested URL
    * @throws IOException if fetch error occurs
    */
   String fetch(@NotNull final String url, int timeout) throws IOException {
     requireNonNull(url, "url parameter can't be null");
     URLConnection connection = new URL(sanitized(url)).openConnection();
+    connection.setConnectTimeout(timeout);
     connection.setReadTimeout(timeout);
     return fetch(connection);
   }

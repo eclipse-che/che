@@ -195,6 +195,7 @@ public class URLFetcherTest {
     @Override
     String fetch(URLConnection urlConnection) {
       assertion.accept(urlConnection.getReadTimeout());
+      assertion.accept(urlConnection.getConnectTimeout());
       return "NOOP";
     }
   }
