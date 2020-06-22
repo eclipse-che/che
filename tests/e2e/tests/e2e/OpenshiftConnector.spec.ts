@@ -88,8 +88,8 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.clickOnContainerItem('Credentials');
     await quickOpenContainer.clickOnContainerItem(`https://${openshiftIP}`);
     await quickOpenContainer.clickOnContainerItem('$(plus) Add new user...');
-    await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_LOGIN_NAME_OF_OPENSHIFT_REGULAR_USER, `Provide Username ${provideAuthenticationSuffix}`);
-    await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_PASSWORD_OF_OPENSHIFT_REGULAR_USER, `Provide Password ${provideAuthenticationSuffix}`);
+    await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_USERNAME, `Provide Username ${provideAuthenticationSuffix}`);
+    await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PASSWORD, `Provide Password ${provideAuthenticationSuffix}`);
     await openshiftPlugin.waitItemInTree(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
   });
 
