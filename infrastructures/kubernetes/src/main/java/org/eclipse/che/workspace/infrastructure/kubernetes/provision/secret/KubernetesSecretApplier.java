@@ -31,10 +31,24 @@ public abstract class KubernetesSecretApplier<E extends KubernetesEnvironment> {
 
   static final String ANNOTATION_AUTOMOUNT = ANNOTATION_PREFIX + "/" + "automount-workspace-secret";
 
+  /**
+   * Applies particular secret to workspace containers.
+   *
+   * @param env environment to retrieve components from
+   * @param secret secret to apply
+   * @throws InfrastructureException when secret applying error
+   */
   public abstract void applySecret(E env, Secret secret) throws InfrastructureException;
 
-  Optional<ComponentImpl> getComponent(E env, String name) {
-    InternalMachineConfig internalMachineConfig = env.getMachines().get(name);
+  /**
+   * Tries to retrieve devfile component by given container name.
+   *
+   * @param env kubernetes environment of the workspace
+   * @param containerName name of container to find it's parent component
+   * @return matched component
+   */
+  Optional<ComponentImpl> getComponent(E env, String containerName) {
+    InternalMachineConfig internalMachineConfig = env.getMachines().get(containerName);
     if (internalMachineConfig != null) {
       String componentName =
           internalMachineConfig.getAttributes().get(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE);
