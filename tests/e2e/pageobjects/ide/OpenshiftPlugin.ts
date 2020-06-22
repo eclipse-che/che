@@ -20,7 +20,7 @@ export enum OpenshiftAppExplorerToolbar {
     ReportExtensionIssueOnGitHub = 'Report Extension Issue on GitHub',
     RefreshView = 'Refresh View',
     SwitchContexts = 'Switch Contexts',
-    LogIntoCluster = 'Log in to cluster'
+    LogIntoCluster = 'Login into Cluster'
 }
 
 export enum OpenshiftContextMenuItems {
