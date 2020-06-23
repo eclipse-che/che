@@ -446,7 +446,7 @@ function runDevfileTestSuite() {
   -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \
   -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
   -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
-  quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
+  maxura/e2e-tests:CHE-16927 || IS_TESTS_FAILED=true
 }
 
 function setupSelfSignedCertificate() {

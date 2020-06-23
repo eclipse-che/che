@@ -90,6 +90,7 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.clickOnContainerItem('$(plus) Add new user...');
     await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_USERNAME, `Provide Username ${provideAuthenticationSuffix}`);
     await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PASSWORD, `Provide Password ${provideAuthenticationSuffix}`);
+    await openshiftPlugin.waitItemInTree(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
   });
 
   test('Create new component with application', async () => {
@@ -116,7 +117,7 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.clickOnContainerItem(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
     await quickOpenContainer.clickOnContainerItem('node-js-app');
     await quickOpenContainer.clickOnContainerItem('component-node-js');
-    await terminal.waitText('OpenShift', 'Changes successfully pushed to component', TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+    await terminal.selectTabByPrefixAndWaitText('OpenShift: Push', 'Changes successfully pushed to component', TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
   });
 
 });
