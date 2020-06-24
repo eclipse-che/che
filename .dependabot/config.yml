@@ -9,11 +9,17 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - area/dependencies
+    allowed_updates:
+      - match:
+          update_type: "security"
   - package-ecosystem: docker
     directory: "/dockerfiles/keycloak"
     schedule:
       interval: daily
       time: "03:00"
+    allowed_updates:
+      - match:
+          update_type: "security"
     open-pull-requests-limit: 10
     labels:
       - area/dependencies
@@ -22,6 +28,9 @@ updates:
     schedule:
       interval: daily
       time: "03:00"
+    allowed_updates:
+      - match:
+          update_type: "security"
     open-pull-requests-limit: 10
     labels:
       - area/dependencies
@@ -30,6 +39,9 @@ updates:
     schedule:
       interval: daily
       time: "03:00"
+    allowed_updates:
+      - match:
+          update_type: "security"
     open-pull-requests-limit: 10
     labels:
       - area/dependencies
