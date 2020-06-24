@@ -47,7 +47,7 @@ public abstract class KubernetesSecretApplier<E extends KubernetesEnvironment> {
    * @param containerName name of container to find it's parent component
    * @return matched component
    */
-  Optional<ComponentImpl> getComponent(E env, String containerName) {
+  final Optional<ComponentImpl> getComponent(E env, String containerName) {
     InternalMachineConfig internalMachineConfig = env.getMachines().get(containerName);
     if (internalMachineConfig != null) {
       String componentName =
@@ -63,12 +63,22 @@ public abstract class KubernetesSecretApplier<E extends KubernetesEnvironment> {
     return Optional.empty();
   }
 
-  boolean isComponentAutomountFalse(ComponentImpl component) {
+  /**
+   * @param component source component
+   * @return {@code true} when {@code automountWorkspaceSecret} property explicitly set to {@code
+   *     false},or {@code false} otherwise.
+   */
+  final boolean isComponentAutomountFalse(ComponentImpl component) {
     return component.getAutomountWorkspaceSecrets() != null
         && !component.getAutomountWorkspaceSecrets();
   }
 
-  boolean isComponentAutomountTrue(ComponentImpl component) {
+  /**
+   * @param component source component
+   * @return {@code true} when {@code automountWorkspaceSecret} property explicitly set to {@code
+   *     true},or {@code false} otherwise.
+   */
+  final boolean isComponentAutomountTrue(ComponentImpl component) {
     return component.getAutomountWorkspaceSecrets() != null
         && component.getAutomountWorkspaceSecrets();
   }

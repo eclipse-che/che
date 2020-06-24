@@ -54,10 +54,10 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
    */
   @Override
   public void applySecret(KubernetesEnvironment env, Secret secret) throws InfrastructureException {
-    String mountPath = secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_PATH);
+    final String secretMountPath = secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_PATH);
     boolean secretAutomount =
         Boolean.parseBoolean(secret.getMetadata().getAnnotations().get(ANNOTATION_AUTOMOUNT));
-    if (mountPath == null) {
+    if (secretMountPath == null) {
       throw new InfrastructureException(
           format(
               "Unable to mount secret '%s': It is configured to be mounted as a file but the mount path was not specified. Please define the '%s' annotation on the secret to specify it.",
@@ -98,26 +98,16 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
             && (component.isEmpty() || !isComponentAutomountTrue(component.get()))) {
           continue;
         }
-        String containerMountPath = mountPath;
         // find path override if any
+        Optional<String> overridePathOptional = Optional.empty();
         if (component.isPresent()) {
-          Optional<VolumeImpl> matchedVolume =
-              component
-                  .get()
-                  .getVolumes()
-                  .stream()
-                  .filter(v -> v.getName().equals(secret.getMetadata().getName()))
-                  .findFirst();
-
-          if (matchedVolume.isPresent() && !isNullOrEmpty(matchedVolume.get().getContainerPath())) {
-            containerMountPath = matchedVolume.get().getContainerPath();
-          }
+          overridePathOptional =
+              getOverridenComponentPath(component.get(), secret.getMetadata().getName());
         }
-
-        String finalMountPath = containerMountPath;
+        final String componentMountPath = overridePathOptional.orElse(secretMountPath);
         container
             .getVolumeMounts()
-            .removeIf(vm -> Paths.get(vm.getMountPath()).equals(Paths.get(finalMountPath)));
+            .removeIf(vm -> Paths.get(vm.getMountPath()).equals(Paths.get(componentMountPath)));
 
         secret
             .getData()
@@ -129,11 +119,20 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
                         .add(
                             new VolumeMountBuilder()
                                 .withName(volumeFromSecret.getName())
-                                .withMountPath(finalMountPath + "/" + secretFile)
+                                .withMountPath(componentMountPath + "/" + secretFile)
                                 .withSubPath(secretFile)
                                 .withReadOnly(true)
                                 .build()));
       }
     }
+  }
+
+  private Optional<String> getOverridenComponentPath(ComponentImpl component, String secretName) {
+    Optional<VolumeImpl> matchedVolume =
+        component.getVolumes().stream().filter(v -> v.getName().equals(secretName)).findFirst();
+    if (matchedVolume.isPresent() && !isNullOrEmpty(matchedVolume.get().getContainerPath())) {
+      return Optional.of(matchedVolume.get().getContainerPath());
+    }
+    return Optional.empty();
   }
 }
