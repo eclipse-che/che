@@ -7,7 +7,7 @@ update_configs:
     default_labels:
       - "area/dependencies"
   - package_manager: "docker"
-    directory: "/dockerfiles"
+    directory: "/dockerfiles/che"
     update_schedule: "daily"
     default_labels:
       - "area/dependencies"
