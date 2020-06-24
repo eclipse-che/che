@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractWorkspaceServiceAccount<
     Client extends KubernetesClient, R extends HasMetadata, B extends HasMetadata> {
   private static final Logger LOG =
-      LoggerFactory.getLogger(KubernetesWorkspaceServiceAccount.class);
+      LoggerFactory.getLogger(AbstractWorkspaceServiceAccount.class);
   public static final String EXEC_ROLE_NAME = "exec";
   public static final String VIEW_ROLE_NAME = "workspace-view";
 
