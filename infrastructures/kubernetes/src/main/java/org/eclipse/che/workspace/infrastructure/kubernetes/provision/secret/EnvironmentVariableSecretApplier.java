@@ -61,9 +61,13 @@ public class EnvironmentVariableSecretApplier
       }
       for (Container container : podData.getSpec().getContainers()) {
         Optional<ComponentImpl> component = getComponent(env, container.getName());
-        if ((component.isPresent() && isComponentAutomountFalse(component.get()))
-            || (!secretAutomount
-                && !(component.isPresent() && isComponentAutomountTrue(component.get())))) {
+        // skip components that explicitly disable automount
+        if (component.isPresent() && isComponentAutomountFalse(component.get())) {
+          continue;
+        }
+        // if automount disabled globally and not overridden in component
+        if (!secretAutomount
+            && (component.isEmpty() || !isComponentAutomountTrue(component.get()))) {
           continue;
         }
         for (Entry<String, String> secretDataEntry : secret.getData().entrySet()) {
