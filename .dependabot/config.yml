@@ -11,3 +11,13 @@ update_configs:
     update_schedule: "daily"
     default_labels:
       - "area/dependencies"
+  - package_manager: "docker"
+    directory: "/dockerfiles/keycloak"
+    update_schedule: "daily"
+    default_labels:
+      - "area/dependencies"
+  - package_manager: "docker"
+    directory: "/dockerfiles/postgres"
+    update_schedule: "daily"
+    default_labels:
+      - "area/dependencies"
