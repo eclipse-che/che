@@ -18,4 +18,4 @@ commands:
       - type: exec
         component: maven
         command: mvn clean install -DskipTests
-        workdir: /projects/che
+        workdir: ${CHE_PROJECTS_ROOT}/che
