@@ -1,23 +1,35 @@
 # Documentation in https://dependabot.com/docs/config-file/
-version: 1
-update_configs:
-  - package_manager: "java:maven"
-    directory: "/"
-    update_schedule: "daily"
-    default_labels:
-      - "area/dependencies"
-  - package_manager: "docker"
-    directory: "/dockerfiles/che"
-    update_schedule: "daily"
-    default_labels:
-      - "area/dependencies"
-  - package_manager: "docker"
-    directory: "/dockerfiles/keycloak"
-    update_schedule: "daily"
-    default_labels:
-      - "area/dependencies"
-  - package_manager: "docker"
+version: 2
+updates:
+  - package-ecosystem: docker
     directory: "/dockerfiles/postgres"
-    update_schedule: "daily"
-    default_labels:
-      - "area/dependencies"
+    schedule:
+      interval: daily
+      time: "03:00"
+    open-pull-requests-limit: 10
+    labels:
+      - area/dependencies
+  - package-ecosystem: docker
+    directory: "/dockerfiles/keycloak"
+    schedule:
+      interval: daily
+      time: "03:00"
+    open-pull-requests-limit: 10
+    labels:
+      - area/dependencies
+  - package-ecosystem: docker
+    directory: "/dockerfiles/che"
+    schedule:
+      interval: daily
+      time: "03:00"
+    open-pull-requests-limit: 10
+    labels:
+      - area/dependencies
+  - package-ecosystem: maven
+    directory: "/"
+    schedule:
+      interval: daily
+      time: "03:00"
+    open-pull-requests-limit: 10
+    labels:
+      - area/dependencies
