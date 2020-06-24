@@ -13,15 +13,9 @@ components:
   - type: chePlugin
     id: redhat/java11/latest
 commands:
-  - name: build
-    actions:
-      - type: exec
-        component: maven
-        command: mvn clean install -Pnative -DskipIntegrationTests
-        workdir: /projects/che
   - name: build without tests
     actions:
       - type: exec
         component: maven
-        command: mvn clean install -Pnative -DskipTests=true
+        command: mvn clean install -DskipTests
         workdir: /projects/che
