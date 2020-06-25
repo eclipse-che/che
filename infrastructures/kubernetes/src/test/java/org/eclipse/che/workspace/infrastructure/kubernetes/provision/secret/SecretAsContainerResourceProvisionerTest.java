@@ -21,6 +21,7 @@ import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -44,6 +45,8 @@ public class SecretAsContainerResourceProvisionerTest {
   @Mock private KubernetesNamespace namespace;
 
   @Mock private KubernetesSecrets secrets;
+
+  @Mock private RuntimeIdentity runtimeIdentity;
 
   @BeforeMethod
   public void setUp() throws Exception {
@@ -69,6 +72,6 @@ public class SecretAsContainerResourceProvisionerTest {
                     .build())
             .build();
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    provisioner.provision(environment, runtimeIdentity, namespace);
   }
 }

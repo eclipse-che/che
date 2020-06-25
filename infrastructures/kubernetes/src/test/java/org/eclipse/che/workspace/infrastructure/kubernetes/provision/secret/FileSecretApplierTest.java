@@ -40,6 +40,7 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl;
@@ -65,6 +66,8 @@ public class FileSecretApplierTest {
   @Mock private PodData podData;
 
   @Mock private PodSpec podSpec;
+
+  @Mock private RuntimeIdentity runtimeIdentity;
 
   FileSecretApplier secretApplier = new FileSecretApplier();
 
@@ -105,7 +108,7 @@ public class FileSecretApplierTest {
                     .build())
             .build();
 
-    secretApplier.applySecret(environment, secret);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
 
     // pod has volume created
     assertEquals(environment.getPodsData().get("pod1").getSpec().getVolumes().size(), 1);
@@ -209,7 +212,7 @@ public class FileSecretApplierTest {
                     .build())
             .build();
 
-    secretApplier.applySecret(environment, secret);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
 
     // pod has volume created
     assertEquals(environment.getPodsData().get("pod1").getSpec().getVolumes().size(), 1);
@@ -282,7 +285,7 @@ public class FileSecretApplierTest {
                     .build())
             .build();
 
-    secretApplier.applySecret(environment, secret);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
 
     // pod has volume created
     assertEquals(environment.getPodsData().get("pod1").getSpec().getVolumes().size(), 1);
@@ -367,7 +370,7 @@ public class FileSecretApplierTest {
                     .build())
             .build();
 
-    secretApplier.applySecret(environment, secret);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
 
     // only second container has mounts
     assertEquals(environment.getPodsData().get("pod1").getSpec().getVolumes().size(), 1);
@@ -435,7 +438,7 @@ public class FileSecretApplierTest {
                     .build())
             .build();
 
-    secretApplier.applySecret(environment, secret);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
 
     verify(container_match1).getName();
     verify(container_match2).getName();
@@ -465,6 +468,6 @@ public class FileSecretApplierTest {
                     .build())
             .build();
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    secretApplier.applySecret(environment, secret);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
   }
 }

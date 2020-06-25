@@ -20,18 +20,24 @@ import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.EnvVarSourceBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretKeySelectorBuilder;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Mounts Kubernetes secret with specific annotations as an environment variable(s) in workspace
@@ -42,6 +48,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 public class EnvironmentVariableSecretApplier
     extends KubernetesSecretApplier<KubernetesEnvironment> {
 
+  @Inject private RuntimeEventsPublisher runtimeEventsPublisher;
+
+  private static final Logger LOG = LoggerFactory.getLogger(EnvironmentVariableSecretApplier.class);
+
   static final String ANNOTATION_ENV_NAME = ANNOTATION_PREFIX + "/" + "env-name";
   static final String ANNOTATION_ENV_NAME_TEMPLATE = ANNOTATION_PREFIX + "/%s_" + "env-name";
 
@@ -50,11 +60,13 @@ public class EnvironmentVariableSecretApplier
    * attribute and optional devfile automount property override.
    *
    * @param env kubernetes environment with workspace containers configuration
+   * @param runtimeIdentity identity of current runtime
    * @param secret source secret to apply
    * @throws InfrastructureException on misconfigured secrets or other apply error
    */
   @Override
-  public void applySecret(KubernetesEnvironment env, Secret secret) throws InfrastructureException {
+  public void applySecret(KubernetesEnvironment env, RuntimeIdentity runtimeIdentity, Secret secret)
+      throws InfrastructureException {
     boolean secretAutomount =
         Boolean.parseBoolean(secret.getMetadata().getAnnotations().get(ANNOTATION_AUTOMOUNT));
     for (PodData podData : env.getPodsData().values()) {
@@ -73,7 +85,7 @@ public class EnvironmentVariableSecretApplier
           continue;
         }
         for (Entry<String, String> secretDataEntry : secret.getData().entrySet()) {
-          final String mountEnvName = envName(secret, secretDataEntry.getKey());
+          final String mountEnvName = envName(secret, secretDataEntry.getKey(), runtimeIdentity);
           container
               .getEnv()
               .add(
@@ -93,7 +105,8 @@ public class EnvironmentVariableSecretApplier
     }
   }
 
-  private String envName(Secret secret, String key) throws InfrastructureException {
+  private String envName(Secret secret, String key, RuntimeIdentity runtimeIdentity)
+      throws InfrastructureException {
     String mountEnvName;
     if (secret.getData().size() == 1) {
       List<String> providedNames =
@@ -111,8 +124,15 @@ public class EnvironmentVariableSecretApplier
                 "Unable to mount secret '%s': It is configured to be mount as a environment variable, but its name was not specified. Please define the '%s' annotation on the secret to specify it.",
                 secret.getMetadata().getName(), ANNOTATION_ENV_NAME));
       }
+
       if (providedNames.size() > 1) {
-        // log.warn();
+        String msg =
+            String.format(
+                "Secret '%s' defines multiple environment variable name annotations, but contains only one data entry. That may cause inconsistent behavior and needs to be corrected.",
+                secret.getMetadata().getName());
+        LOG.warn(msg);
+        runtimeEventsPublisher.sendRuntimeLogEvent(
+            msg, ZonedDateTime.now().toString(), runtimeIdentity);
       }
       mountEnvName = providedNames.get(0);
     } else {

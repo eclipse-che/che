@@ -17,6 +17,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secr
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.Secret;
 import java.util.Optional;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
@@ -35,10 +36,12 @@ public abstract class KubernetesSecretApplier<E extends KubernetesEnvironment> {
    * Applies particular secret to workspace containers.
    *
    * @param env environment to retrieve components from
+   * @param runtimeIdentity identity of current runtime
    * @param secret secret to apply
    * @throws InfrastructureException when secret applying error
    */
-  public abstract void applySecret(E env, Secret secret) throws InfrastructureException;
+  public abstract void applySecret(E env, RuntimeIdentity runtimeIdentity, Secret secret)
+      throws InfrastructureException;
 
   /**
    * Tries to retrieve devfile component by given container name.

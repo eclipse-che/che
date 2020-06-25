@@ -213,7 +213,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // from previous provisioners into infrastructure specific objects
       kubernetesEnvironmentProvisioner.provision(context.getEnvironment(), context.getIdentity());
 
-      secretAsContainerResourceProvisioner.provision(context.getEnvironment(), namespace);
+      secretAsContainerResourceProvisioner.provision(
+          context.getEnvironment(), context.getIdentity(), namespace);
       LOG.debug("Provisioning of workspace '{}' completed.", workspaceId);
 
       volumesStrategy.prepare(

@@ -25,6 +25,7 @@ import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import java.nio.file.Paths;
 import java.util.Optional;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -49,11 +50,13 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
    * devfile automount property and/or mount path override.
    *
    * @param env kubernetes environment with workspace containers configuration
+   * @param runtimeIdentity identity of current runtime
    * @param secret source secret to apply
    * @throws InfrastructureException on misconfigured secrets or other apply error
    */
   @Override
-  public void applySecret(KubernetesEnvironment env, Secret secret) throws InfrastructureException {
+  public void applySecret(KubernetesEnvironment env, RuntimeIdentity runtimeIdentity, Secret secret)
+      throws InfrastructureException {
     final String secretMountPath = secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_PATH);
     boolean secretAutomount =
         Boolean.parseBoolean(secret.getMetadata().getAnnotations().get(ANNOTATION_AUTOMOUNT));

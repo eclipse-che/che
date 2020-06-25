@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -58,14 +59,15 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
             .collect(toMap(p -> p[0], p -> p.length == 1 ? "" : p[1]));
   }
 
-  public void provision(E env, KubernetesNamespace namespace) throws InfrastructureException {
+  public void provision(E env, RuntimeIdentity runtimeIdentity, KubernetesNamespace namespace)
+      throws InfrastructureException {
     LabelSelector selector = new LabelSelectorBuilder().withMatchLabels(secretLabels).build();
     for (Secret secret : namespace.secrets().get(selector)) {
       String mountType = secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_AS);
       if ("env".equalsIgnoreCase(mountType)) {
-        environmentVariableSecretApplier.applySecret(env, secret);
+        environmentVariableSecretApplier.applySecret(env, runtimeIdentity, secret);
       } else if ("file".equalsIgnoreCase(mountType)) {
-        fileSecretApplier.applySecret(env, secret);
+        fileSecretApplier.applySecret(env, runtimeIdentity, secret);
       } else {
         throw new InfrastructureException(
             format(

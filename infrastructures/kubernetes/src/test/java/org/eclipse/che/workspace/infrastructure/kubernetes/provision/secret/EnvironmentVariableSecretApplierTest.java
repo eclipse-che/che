@@ -37,6 +37,7 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -61,6 +62,8 @@ public class EnvironmentVariableSecretApplierTest {
   @Mock private PodData podData;
 
   @Mock private PodSpec podSpec;
+
+  @Mock private RuntimeIdentity runtimeIdentity;
 
   EnvironmentVariableSecretApplier secretApplier = new EnvironmentVariableSecretApplier();
 
@@ -97,7 +100,7 @@ public class EnvironmentVariableSecretApplierTest {
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    secretApplier.applySecret(environment, secret);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
 
     // container has env set
     assertEquals(container_match.getEnv().size(), 1);
@@ -134,7 +137,7 @@ public class EnvironmentVariableSecretApplierTest {
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    secretApplier.applySecret(environment, secret);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
 
     // container has env set
     assertEquals(container_match.getEnv().size(), 2);
@@ -172,7 +175,7 @@ public class EnvironmentVariableSecretApplierTest {
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    secretApplier.applySecret(environment, secret);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
 
     // both containers has env set
     assertEquals(container_match1.getEnv().size(), 1);
@@ -220,7 +223,7 @@ public class EnvironmentVariableSecretApplierTest {
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    secretApplier.applySecret(environment, secret);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
 
     // only first container has env set
     assertEquals(container_match1.getEnv().size(), 1);
@@ -263,7 +266,7 @@ public class EnvironmentVariableSecretApplierTest {
                     .build())
             .build();
 
-    secretApplier.applySecret(environment, secret);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
 
     // only second container has env set
     assertEquals(container_match1.getEnv().size(), 0);
@@ -297,7 +300,7 @@ public class EnvironmentVariableSecretApplierTest {
                     .build())
             .build();
 
-    secretApplier.applySecret(environment, secret);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
 
     verify(container_match1).getName();
     verify(container_match2).getName();
@@ -327,7 +330,7 @@ public class EnvironmentVariableSecretApplierTest {
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    secretApplier.applySecret(environment, secret);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
   }
 
   @Test(
@@ -352,6 +355,6 @@ public class EnvironmentVariableSecretApplierTest {
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    secretApplier.applySecret(environment, secret);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
   }
 }
