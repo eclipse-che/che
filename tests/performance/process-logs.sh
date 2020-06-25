@@ -8,7 +8,7 @@ function printHelp {
   echo "-u     users count"
 }
 
-while getopts "f:t:c:h" opt; do 
+while getopts "f:t:c:u:h" opt; do 
   case $opt in
     h) printHelp
       ;;
