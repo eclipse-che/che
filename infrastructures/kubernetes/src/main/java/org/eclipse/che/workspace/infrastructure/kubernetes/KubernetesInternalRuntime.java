@@ -92,7 +92,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatc
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogToEventPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -213,7 +213,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // from previous provisioners into infrastructure specific objects
       kubernetesEnvironmentProvisioner.provision(context.getEnvironment(), context.getIdentity());
 
-      secretAsContainerResourceProvisioner.provision(context.getEnvironment(), namespace);
+      secretAsContainerResourceProvisioner.provision(
+          context.getEnvironment(), context.getIdentity(), namespace);
       LOG.debug("Provisioning of workspace '{}' completed.", workspaceId);
 
       volumesStrategy.prepare(

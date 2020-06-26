@@ -138,6 +138,7 @@ public final class DtoConverter {
     return newDto(ComponentDto.class)
         .withType(component.getType())
         .withAlias(component.getAlias())
+        .withAutomountWorkspaceSecrets(component.getAutomountWorkspaceSecrets())
         // chePlugin/cheEditor
         .withId(component.getId())
         .withRegistryUrl(component.getRegistryUrl())

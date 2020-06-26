@@ -152,6 +152,14 @@ public class DevfileIntegrityValidator {
                 getIdentifiableComponentName(component), component.getType()));
       }
 
+      if (component.getAutomountWorkspaceSecrets() != null && component.getAlias() == null) {
+        throw new DevfileFormatException(
+            format(
+                "The 'automountWorkspaceSecrets' property cannot be used in component which doesn't have alias. "
+                    + "Please add alias to component '%s' that would allow to distinguish its containers.",
+                getIdentifiableComponentName(component)));
+      }
+
       switch (component.getType()) {
         case EDITOR_COMPONENT_TYPE:
           if (editorComponent != null) {
