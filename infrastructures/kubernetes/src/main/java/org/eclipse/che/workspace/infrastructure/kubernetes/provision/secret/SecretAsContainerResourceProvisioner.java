@@ -63,6 +63,12 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       throws InfrastructureException {
     LabelSelector selector = new LabelSelectorBuilder().withMatchLabels(secretLabels).build();
     for (Secret secret : namespace.secrets().get(selector)) {
+      if (secret.getMetadata().getAnnotations() == null) {
+        throw new InfrastructureException(
+            format(
+                "Unable to mount secret '%s': it has missing required annotations. Please check documentation for secret format guide.",
+                secret.getMetadata().getName()));
+      }
       String mountType = secret.getMetadata().getAnnotations().get(ANNOTATION_MOUNT_AS);
       if ("env".equalsIgnoreCase(mountType)) {
         environmentVariableSecretApplier.applySecret(env, runtimeIdentity, secret);
