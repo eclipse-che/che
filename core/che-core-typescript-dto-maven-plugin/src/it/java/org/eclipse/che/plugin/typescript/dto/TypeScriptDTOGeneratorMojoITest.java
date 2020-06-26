@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.plugin.typescript.dto;
 
+import java.util.concurrent.TimeUnit;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,13 +115,19 @@ public class TypeScriptDTOGeneratorMojoITest {
     }
 
     /**
-     * Generates a docker exec command used to launch node commands
+     * Generates a docker exec command used to launch node commands. Uses podman if present on the
+     * system.
+     *
      * @return list of command parameters
      */
-    protected List<String> getDockerExec() {
+    protected List<String> getDockerExec() throws IOException, InterruptedException {
         // setup command line
-        List<String> command = new ArrayList();
-        command.add("docker");
+        List<String> command = new ArrayList<>();
+        if (hasPodman()) {
+            command.add("podman");
+        } else {
+            command.add("docker");
+        }
         command.add("run");
         command.add("--rm");
         command.add("-v");
@@ -236,11 +243,19 @@ public class TypeScriptDTOGeneratorMojoITest {
      * @return an updated command with chown applied on it
      */
     protected String wrapLinuxCommand(String command) throws IOException, InterruptedException {
-
-        String setGroup = "export GROUP_NAME=`(getent group " + getGid() + " || (groupadd -g " + getGid() + " user && echo user:x:" + getGid() +")) | cut -d: -f1`";
-        String setUser = "export USER_NAME=`(getent passwd " + getUid() + " || (useradd -u " + getUid() + " -g ${GROUP_NAME} user && echo user:x:" + getGid() +")) | cut -d: -f1`";
-        String chownCommand= "chown --silent -R ${USER_NAME}.${GROUP_NAME} /usr/src/app || true";
-        return setGroup + " && " + setUser + " && " + chownCommand + " && " + command + " && " + chownCommand;
+        if (hasPodman()) {
+            LOG.debug("using podman, don't need to wrap anything");
+            return command;
+        }
+        String setGroup =
+            "export GROUP_NAME=`(getent group " + getGid() + " || (groupadd -g " + getGid()
+                + " user && echo user:x:" + getGid() + ")) | cut -d: -f1`";
+        String setUser =
+            "export USER_NAME=`(getent passwd " + getUid() + " || (useradd -u " + getUid()
+                + " -g ${GROUP_NAME} user && echo user:x:" + getGid() + ")) | cut -d: -f1`";
+        String chownCommand = "chown --silent -R ${USER_NAME}.${GROUP_NAME} /usr/src/app || true";
+        return setGroup + " && " + setUser + " && " + chownCommand + " && " + command + " && "
+            + chownCommand;
     }
 
 
@@ -304,4 +319,17 @@ public class TypeScriptDTOGeneratorMojoITest {
 
     }
 
+    private boolean hasPodman() throws InterruptedException, IOException {
+        if (SystemInfo.isLinux()) {
+            ProcessBuilder podmanProcessBuilder = new ProcessBuilder("which", "podman");
+            Process podmanProcess = podmanProcessBuilder.start();
+            if (podmanProcess.waitFor(1, TimeUnit.SECONDS)) {
+                return podmanProcess.exitValue() == 0;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
 }

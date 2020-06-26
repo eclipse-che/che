@@ -16,6 +16,7 @@ import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class Terminal {
+    private static readonly TERMINAL_ROWS_XPATH_LOCATOR_PREFFIX = '(//div[contains(@class, \'terminal-container\')]//div[contains(@class, \'terminal\')]//div[contains(@class, \'xterm-rows\')])';
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -93,11 +94,22 @@ export class Terminal {
         Logger.debug(`Terminal.getText tab: ${terminalTab}`);
 
         const terminalIndex: number = await this.getTerminalIndex(terminalTab);
-        const terminalRowsXpathLocator: string = `(//div[contains(@class, 'terminal-container')]` +
-            `//div[contains(@class, 'terminal')]//div[contains(@class, 'xterm-rows')])[${terminalIndex}]`;
-
         await this.selectTerminalTab(terminalTab, timeout);
-        return await this.driverHelper.waitAndGetText(By.xpath(terminalRowsXpathLocator), timeout);
+        return await this.driverHelper.waitAndGetText(By.xpath(Terminal.TERMINAL_ROWS_XPATH_LOCATOR_PREFFIX + `[${terminalIndex}]`), timeout);
+    }
+
+    async selectTabByPrefixAndWaitText(terminalTab: string, expectedText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Terminal.selectTabByPrefixAndWaitText tab: ${terminalTab} text: ${expectedText}`);
+
+        const terminalTabLocatorWithPreffix: string = `//li[contains(@title, '${terminalTab}')]`;
+        const terminalIndex: number = await this.getTerminalIndex(terminalTab);
+
+        await this.driverHelper.waitAndClick(By.xpath(terminalTabLocatorWithPreffix), timeout);
+        await this.driverHelper.waitUntilTrue(async () => {
+            const terminalText: string = await this.driverHelper.waitAndGetText(By.xpath(Terminal.TERMINAL_ROWS_XPATH_LOCATOR_PREFFIX + `[${terminalIndex}]`), timeout);
+            return terminalText.includes(expectedText);
+
+        }, timeout);
     }
 
     async waitText(terminalTab: string, expectedText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {

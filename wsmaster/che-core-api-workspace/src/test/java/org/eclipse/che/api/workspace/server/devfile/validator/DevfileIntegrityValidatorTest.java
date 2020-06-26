@@ -19,6 +19,8 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMP
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.common.collect.ImmutableList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -27,6 +29,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 import org.mockito.Mock;
@@ -74,6 +77,24 @@ public class DevfileIntegrityValidatorTest {
     DevfileImpl broken = new DevfileImpl(initialDevfile);
     ComponentImpl component = new ComponentImpl();
     component.setAlias(initialDevfile.getComponents().get(0).getAlias());
+    broken.getComponents().add(component);
+    // when
+    integrityValidator.validateDevfile(broken);
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "Duplicated endpoint name 'e1' found in 'dockerimage:latest' component")
+  public void shouldThrowExceptionOnDuplicateEndpointName() throws Exception {
+    DevfileImpl broken = new DevfileImpl(initialDevfile);
+    ComponentImpl component = new ComponentImpl();
+    component.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    component.setImage("dockerimage:latest");
+    component.setEndpoints(
+        ImmutableList.of(
+            new EndpointImpl("e1", 8080, Collections.emptyMap()),
+            new EndpointImpl("e1", 8082, Collections.emptyMap())));
     broken.getComponents().add(component);
     // when
     integrityValidator.validateDevfile(broken);
