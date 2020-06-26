@@ -98,7 +98,7 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
         }
         // if automount disabled globally and not overridden in component
         if (!secretAutomount
-            && (component.isEmpty() || !isComponentAutomountTrue(component.get()))) {
+            && (!component.isPresent() || !isComponentAutomountTrue(component.get()))) {
           continue;
         }
         // find path override if any
