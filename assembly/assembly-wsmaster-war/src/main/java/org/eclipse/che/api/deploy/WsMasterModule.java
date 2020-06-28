@@ -157,6 +157,7 @@ public class WsMasterModule extends AbstractModule {
     bind(WorkspaceEntityProvider.class);
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
+    bind(org.eclipse.che.api.devfile.server.UserDevfileService.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
 
     Multibinder<InternalEnvironmentProvisioner> internalEnvironmentProvisioners =
@@ -288,6 +289,7 @@ public class WsMasterModule extends AbstractModule {
 
     install(new org.eclipse.che.api.user.server.jpa.UserJpaModule());
     install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
+    install(new org.eclipse.che.api.devfile.server.jpa.UserDevfileJpaModule());
 
     bind(org.eclipse.che.api.user.server.CheUserCreator.class);
 
@@ -343,6 +345,7 @@ public class WsMasterModule extends AbstractModule {
     install(
         new org.eclipse.che.multiuser.permission.workspace.server.jpa
             .MultiuserWorkspaceJpaModule());
+    install(new org.eclipse.che.api.devfile.server.jpa.UserDevfileJpaModule());
     install(new MultiUserWorkspaceActivityModule());
 
     // Permission filters

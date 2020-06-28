@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
-import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
+import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
@@ -72,10 +72,10 @@ public class DefaultFactoryParameterResolverTest {
 
     DevfileIntegrityValidator integrityValidator = new DevfileIntegrityValidator(validators);
 
-    DevfileManager devfileManager = new DevfileManager(validator, integrityValidator);
+    DevfileParser devfileParser = new DevfileParser(validator, integrityValidator);
 
     URLFactoryBuilder factoryBuilder =
-        new URLFactoryBuilder("editor", "plugin", urlFetcher, devfileManager);
+        new URLFactoryBuilder("editor", "plugin", urlFetcher, devfileParser);
 
     DefaultFactoryParameterResolver res =
         new DefaultFactoryParameterResolver(factoryBuilder, urlFetcher);
