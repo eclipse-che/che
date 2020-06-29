@@ -123,7 +123,7 @@ public class KubernetesNamespaceFactoryTest {
       throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "legacy", "", "", "", "defaultNs", false, clientFactory, userManager, pool);
+            "legacy", "", "", "defaultNs", false, clientFactory, userManager, pool);
 
     namespaceFactory.checkIfNamespaceIsAllowed("defaultNs");
   }
@@ -134,7 +134,7 @@ public class KubernetesNamespaceFactoryTest {
           throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "legacy", "", "", "", "defaultNs", true, clientFactory, userManager, pool);
+            "legacy", "", "", "defaultNs", true, clientFactory, userManager, pool);
 
     namespaceFactory.checkIfNamespaceIsAllowed("any-namespace");
   }
@@ -148,7 +148,7 @@ public class KubernetesNamespaceFactoryTest {
           throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "legacy", "", "", "", "defaultNs", false, clientFactory, userManager, pool);
+            "legacy", "", "", "defaultNs", false, clientFactory, userManager, pool);
 
     namespaceFactory.checkIfNamespaceIsAllowed("any-namespace");
   }
@@ -159,7 +159,7 @@ public class KubernetesNamespaceFactoryTest {
   public void shouldThrowExceptionIfNoDefaultNamespaceIsConfigured() throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined", "", "", "", null, false, clientFactory, userManager, pool);
+            "predefined", "", "", null, false, clientFactory, userManager, pool);
   }
 
   @Test
@@ -177,7 +177,7 @@ public class KubernetesNamespaceFactoryTest {
             .build());
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined", "", "", "", "che-default", false, clientFactory, userManager, pool);
+            "predefined", "", "", "che-default", false, clientFactory, userManager, pool);
 
     List<KubernetesNamespaceMeta> availableNamespaces = namespaceFactory.list();
     assertEquals(availableNamespaces.size(), 1);
@@ -194,7 +194,7 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined", "", "", "", "che-default", false, clientFactory, userManager, pool);
+            "predefined", "", "", "che-default", false, clientFactory, userManager, pool);
 
     List<KubernetesNamespaceMeta> availableNamespaces = namespaceFactory.list();
     assertEquals(availableNamespaces.size(), 1);
@@ -214,7 +214,7 @@ public class KubernetesNamespaceFactoryTest {
   public void shouldThrowExceptionWhenFailedToGetInfoAboutDefaultNamespace() throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined", "", "", "", "che", false, clientFactory, userManager, pool);
+            "predefined", "", "", "che", false, clientFactory, userManager, pool);
     throwOnTryToGetNamespaceByName("che", new KubernetesClientException("connection refused"));
 
     namespaceFactory.list();
@@ -229,7 +229,7 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined", "", "", "", "default", true, clientFactory, userManager, pool);
+            "predefined", "", "", "default", true, clientFactory, userManager, pool);
 
     List<KubernetesNamespaceMeta> availableNamespaces = namespaceFactory.list();
 
@@ -253,7 +253,7 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined", "", "", "", "default", true, clientFactory, userManager, pool);
+            "predefined", "", "", "default", true, clientFactory, userManager, pool);
 
     List<KubernetesNamespaceMeta> availableNamespaces = namespaceFactory.list();
     assertEquals(availableNamespaces.size(), 2);
@@ -278,7 +278,7 @@ public class KubernetesNamespaceFactoryTest {
   public void shouldThrowExceptionWhenFailedToGetNamespaces() throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined", "", "", "", "default_ns", true, clientFactory, userManager, pool);
+            "predefined", "", "", "default_ns", true, clientFactory, userManager, pool);
     throwOnTryToGetNamespacesList(new KubernetesClientException("connection refused"));
 
     namespaceFactory.list();
@@ -297,7 +297,7 @@ public class KubernetesNamespaceFactoryTest {
     namespaceFactory =
         spy(
             new KubernetesNamespaceFactory(
-                "predefined", "", "", "", "new-default", false, clientFactory, userManager, pool));
+                "predefined", "", "", "new-default", false, clientFactory, userManager, pool));
     KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
     doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespaceAccess(any(), any());
 
@@ -321,7 +321,6 @@ public class KubernetesNamespaceFactoryTest {
             new KubernetesNamespaceFactory(
                 "",
                 "serviceAccount",
-                "",
                 "",
                 "<workspaceid>",
                 false,
@@ -348,55 +347,6 @@ public class KubernetesNamespaceFactoryTest {
   }
 
   @Test
-  public void shouldBindClusterRolesToWorkspaceServiceAccountIfDefinedUsingDeprecatedProperty()
-      throws Exception {
-    // given
-    namespaceFactory =
-        new KubernetesNamespaceFactory(
-            "",
-            "serviceAccount",
-            "clusterRole",
-            "",
-            "<workspaceid>",
-            false,
-            clientFactory,
-            userManager,
-            pool);
-    // when
-    Set<String> clusterRoles = namespaceFactory.getClusterRoleNames();
-
-    // then
-    assertEquals(clusterRoles.size(), 1);
-    assertEquals(clusterRoles.iterator().next(), "clusterRole");
-  }
-
-  @Test
-  public void
-      shouldBindClusterRolesToWorkspaceServiceAccountIfDefinedUsingDeprecatedAndNewProperty() {
-    // given
-    namespaceFactory =
-        new KubernetesNamespaceFactory(
-            "",
-            "serviceAccount",
-            "clusterRole1",
-            "clusterRole2, clusterRole3,clusterRole4",
-            "<workspaceid>",
-            false,
-            clientFactory,
-            userManager,
-            pool);
-    // when
-    Set<String> clusterRoles = namespaceFactory.getClusterRoleNames();
-
-    // then
-    assertEquals(clusterRoles.size(), 4);
-    assertTrue(clusterRoles.contains("clusterRole1"));
-    assertTrue(clusterRoles.contains("clusterRole2"));
-    assertTrue(clusterRoles.contains("clusterRole3"));
-    assertTrue(clusterRoles.contains("clusterRole4"));
-  }
-
-  @Test
   public void shouldBindToAllConfiguredClusterRoles() throws Exception {
     // given
     namespaceFactory =
@@ -404,8 +354,7 @@ public class KubernetesNamespaceFactoryTest {
             new KubernetesNamespaceFactory(
                 "",
                 "serviceAccount",
-                "cr1",
-                "cr2,cr3",
+                "cr2, cr3",
                 "<workspaceid>",
                 false,
                 clientFactory,
@@ -450,9 +399,8 @@ public class KubernetesNamespaceFactoryTest {
     RoleBindingList bindings = k8sClient.rbac().roleBindings().inNamespace("workspace123").list();
     assertEquals(
         Sets.newHashSet(
-            "serviceAccount-cluster0",
-            "serviceAccount-cluster1",
-            "serviceAccount-cluster2",
+            "serviceAccount-cluster-cr2",
+            "serviceAccount-cluster-cr3",
             "serviceAccount-view",
             "serviceAccount-exec"),
         bindings
@@ -463,13 +411,44 @@ public class KubernetesNamespaceFactoryTest {
   }
 
   @Test
+  public void testNullClusterRolesResultsInEmptySet() {
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "blabol-<userid>-<username>-<userid>-<username>--",
+            "",
+            null,
+            "che-<userid>",
+            false,
+            clientFactory,
+            userManager,
+            pool);
+    assertTrue(namespaceFactory.getClusterRoleNames().isEmpty());
+  }
+
+  @Test
+  public void testClusterRolesResultsInEmptySet() {
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "blabol-<userid>-<username>-<userid>-<username>--",
+            "",
+            "  one,two, three ,,five  ",
+            "che-<userid>",
+            false,
+            clientFactory,
+            userManager,
+            pool);
+    Set<String> expected = Sets.newHashSet("one", "two", "three", "five");
+    assertTrue(namespaceFactory.getClusterRoleNames().containsAll(expected));
+    assertTrue(expected.containsAll(namespaceFactory.getClusterRoleNames()));
+  }
+
+  @Test
   public void
       testEvalNamespaceUsesNamespaceDefaultIfWorkspaceDoesntRecordNamespaceAndLegacyNamespaceDoesntExist()
           throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
             "blabol-<userid>-<username>-<userid>-<username>--",
-            "",
             "",
             "",
             "che-<userid>",
@@ -498,7 +477,6 @@ public class KubernetesNamespaceFactoryTest {
             "blabol-<userid>-<username>-<userid>-<username>",
             "",
             "",
-            "",
             "che-<userid>",
             false,
             clientFactory,
@@ -521,7 +499,6 @@ public class KubernetesNamespaceFactoryTest {
     namespaceFactory =
         new KubernetesNamespaceFactory(
             "blabol-<userid>-<username>-<userid>-<username>",
-            "",
             "",
             "",
             "che-<userid>",
@@ -548,7 +525,6 @@ public class KubernetesNamespaceFactoryTest {
     namespaceFactory =
         new KubernetesNamespaceFactory(
             "blabol-<userid>-<username>-<userid>-<username>",
-            "",
             "",
             "",
             "che-<userid>",

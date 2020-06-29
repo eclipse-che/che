@@ -120,7 +120,6 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "legacy",
             "",
-            "",
             null,
             "defaultNs",
             false,
@@ -141,7 +140,6 @@ public class OpenShiftProjectFactoryTest {
     projectFactory =
         new OpenShiftProjectFactory(
             "legacy",
-            "",
             "",
             null,
             "defaultNs",
@@ -167,7 +165,6 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "legacy",
             "",
-            "",
             null,
             "defaultNs",
             false,
@@ -190,7 +187,6 @@ public class OpenShiftProjectFactoryTest {
     projectFactory =
         new OpenShiftProjectFactory(
             "projectName",
-            "",
             "",
             null,
             null,
@@ -226,7 +222,6 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "predefined",
             "",
-            "",
             null,
             "che-default",
             false,
@@ -259,7 +254,6 @@ public class OpenShiftProjectFactoryTest {
     projectFactory =
         new OpenShiftProjectFactory(
             "predefined",
-            "",
             "",
             null,
             "che-default",
@@ -294,7 +288,6 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "predefined",
             "",
-            "",
             null,
             "che-default",
             false,
@@ -319,7 +312,6 @@ public class OpenShiftProjectFactoryTest {
     projectFactory =
         new OpenShiftProjectFactory(
             "predefined",
-            "",
             "",
             null,
             "default",
@@ -362,7 +354,6 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "predefined",
             "",
-            "",
             null,
             "default",
             true,
@@ -399,7 +390,6 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "predefined",
             "",
-            "",
             null,
             "default-ns",
             true,
@@ -427,7 +417,6 @@ public class OpenShiftProjectFactoryTest {
         spy(
             new OpenShiftProjectFactory(
                 "predefined",
-                "",
                 "",
                 null,
                 "new-default",
@@ -461,7 +450,6 @@ public class OpenShiftProjectFactoryTest {
             new OpenShiftProjectFactory(
                 "",
                 "serviceAccount",
-                "",
                 null,
                 "<workspaceid>",
                 false,
@@ -496,7 +484,6 @@ public class OpenShiftProjectFactoryTest {
             new OpenShiftProjectFactory(
                 "",
                 "serviceAccount",
-                "",
                 null,
                 "<workspaceid>",
                 false,
@@ -533,7 +520,6 @@ public class OpenShiftProjectFactoryTest {
             new OpenShiftProjectFactory(
                 "",
                 "serviceAccount",
-                "",
                 null,
                 "<workspaceid>",
                 false,
