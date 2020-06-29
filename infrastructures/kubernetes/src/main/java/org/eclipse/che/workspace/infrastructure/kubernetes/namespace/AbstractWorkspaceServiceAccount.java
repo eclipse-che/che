@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 import io.fabric8.kubernetes.api.model.Doneable;
@@ -130,7 +129,7 @@ public abstract class AbstractWorkspaceServiceAccount<
         k8sClient,
         EXEC_ROLE_NAME,
         singletonList("pods/exec"),
-        emptyList(),
+        singletonList(""),
         singletonList("create"),
         serviceAccountName + "-exec");
 
@@ -139,7 +138,7 @@ public abstract class AbstractWorkspaceServiceAccount<
         k8sClient,
         VIEW_ROLE_NAME,
         Arrays.asList("pods", "services"),
-        emptyList(),
+        singletonList(""),
         singletonList("list"),
         serviceAccountName + "-view");
   }
