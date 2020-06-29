@@ -25,6 +25,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
@@ -34,6 +35,7 @@ import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.NamespaceList;
 import io.fabric8.kubernetes.api.model.ServiceAccountList;
+import io.fabric8.kubernetes.api.model.rbac.Role;
 import io.fabric8.kubernetes.api.model.rbac.RoleBindingList;
 import io.fabric8.kubernetes.api.model.rbac.RoleList;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -398,11 +400,65 @@ public class KubernetesNamespaceFactoryTest {
 
     RoleBindingList bindings = k8sClient.rbac().roleBindings().inNamespace("workspace123").list();
     assertEquals(
+        bindings
+            .getItems()
+            .stream()
+            .map(r -> r.getMetadata().getName())
+            .collect(Collectors.toSet()),
         Sets.newHashSet(
-            "serviceAccount-cluster-cr2",
-            "serviceAccount-cluster-cr3",
+            "serviceAccount-cluster0",
+            "serviceAccount-cluster1",
             "serviceAccount-view",
-            "serviceAccount-exec"),
+            "serviceAccount-exec"));
+  }
+
+  @Test
+  public void shouldCreateExecAndViewRolesAndBindings() throws Exception {
+    // given
+    namespaceFactory =
+        spy(
+            new KubernetesNamespaceFactory(
+                "",
+                "serviceAccount",
+                "",
+                "<workspaceid>",
+                false,
+                clientFactory,
+                userManager,
+                pool));
+    KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
+    when(toReturnNamespace.getWorkspaceId()).thenReturn("workspace123");
+    when(toReturnNamespace.getName()).thenReturn("workspace123");
+    doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespaceAccess(any(), any());
+    when(clientFactory.create(any())).thenReturn(k8sClient);
+
+    // when
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", null, USER_ID, "workspace123");
+    namespaceFactory.getOrCreate(identity);
+
+    // then
+    verify(namespaceFactory).doCreateServiceAccount("workspace123", "workspace123");
+
+    ServiceAccountList sas = k8sClient.serviceAccounts().inNamespace("workspace123").list();
+    assertEquals(sas.getItems().size(), 1);
+    assertEquals(sas.getItems().get(0).getMetadata().getName(), "serviceAccount");
+
+    RoleList roles = k8sClient.rbac().roles().inNamespace("workspace123").list();
+    assertEquals(
+        Sets.newHashSet("workspace-view", "exec"),
+        roles.getItems().stream().map(r -> r.getMetadata().getName()).collect(Collectors.toSet()));
+    Role role1 = roles.getItems().get(0);
+    Role role2 = roles.getItems().get(1);
+
+    assertFalse(
+        role1.getRules().containsAll(role2.getRules())
+            && role2.getRules().containsAll(role1.getRules()),
+        "exec and view roles should not be the same");
+
+    RoleBindingList bindings = k8sClient.rbac().roleBindings().inNamespace("workspace123").list();
+    assertEquals(
+        Sets.newHashSet("serviceAccount-view", "serviceAccount-exec"),
         bindings
             .getItems()
             .stream()
@@ -426,7 +482,7 @@ public class KubernetesNamespaceFactoryTest {
   }
 
   @Test
-  public void testClusterRolesResultsInEmptySet() {
+  public void testClusterRolesProperlyParsed() {
     namespaceFactory =
         new KubernetesNamespaceFactory(
             "blabol-<userid>-<username>-<userid>-<username>--",

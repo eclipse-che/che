@@ -54,12 +54,18 @@ class OpenShiftWorkspaceServiceAccount
   }
 
   @Override
-  protected OpenshiftRole buildRole(String name, List<String> resources, List<String> verbs) {
+  protected OpenshiftRole buildRole(
+      String name, List<String> resources, List<String> apiGroups, List<String> verbs) {
     return new OpenshiftRoleBuilder()
         .withNewMetadata()
         .withName(name)
         .endMetadata()
-        .withRules(new PolicyRuleBuilder().withResources(resources).withVerbs(verbs).build())
+        .withRules(
+            new PolicyRuleBuilder()
+                .withResources(resources)
+                .withApiGroups(apiGroups)
+                .withVerbs(verbs)
+                .build())
         .build();
   }
 

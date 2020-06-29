@@ -11,21 +11,23 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 import io.fabric8.kubernetes.api.model.Doneable;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesResourceList;
-import io.fabric8.kubernetes.api.model.rbac.RoleBinding;
-import io.fabric8.kubernetes.api.model.rbac.RoleBindingBuilder;
-import io.fabric8.kubernetes.api.model.rbac.SubjectBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,29 +110,63 @@ public abstract class AbstractWorkspaceServiceAccount<
    */
   public void prepare() throws InfrastructureException {
     Client k8sClient = clientFactory.create(workspaceId);
-
     if (k8sClient.serviceAccounts().inNamespace(namespace).withName(serviceAccountName).get()
         == null) {
       createWorkspaceServiceAccount(k8sClient);
-    } else {
-      return;
+      createImplicitRolesWithBindings(k8sClient);
+      createExplicitClusterRoleBindings(k8sClient);
     }
+  }
 
-    createRole(k8sClient, EXEC_ROLE_NAME);
-    createRole(k8sClient, VIEW_ROLE_NAME);
+  /**
+   * Creates implicit Roles and RoleBindings for workspace ServiceAccount that we need to have fully
+   * working workspaces with this SA.
+   *
+   * <p>creates {@code <sa>-exec} and {@code <sa>-view}
+   */
+  private void createImplicitRolesWithBindings(Client k8sClient) {
+    // exec role
+    createRoleWithBinding(
+        k8sClient,
+        EXEC_ROLE_NAME,
+        singletonList("pods/exec"),
+        emptyList(),
+        singletonList("create"),
+        serviceAccountName + "-exec");
 
+    // view role
+    createRoleWithBinding(
+        k8sClient,
+        VIEW_ROLE_NAME,
+        Arrays.asList("pods", "services"),
+        emptyList(),
+        singletonList("list"),
+        serviceAccountName + "-view");
+  }
+
+  private void createRoleWithBinding(
+      Client k8sClient,
+      String roleName,
+      List<String> resources,
+      List<String> apiGroups,
+      List<String> verbs,
+      String bindingName) {
+    createRole(k8sClient, roleName, resources, apiGroups, verbs);
     //noinspection unchecked
     roleBindings
         .apply(k8sClient)
         .inNamespace(namespace)
-        .createOrReplace(createRoleBinding(EXEC_ROLE_NAME, serviceAccountName + "-exec", false));
+        .createOrReplace(createRoleBinding(roleName, bindingName, false));
+  }
 
-    //noinspection unchecked
-    roleBindings
-        .apply(k8sClient)
-        .inNamespace(namespace)
-        .createOrReplace(createRoleBinding(VIEW_ROLE_NAME, serviceAccountName + "-view", false));
-
+  /**
+   * Creates workspace ServiceAccount ClusterRoleBindings that are defined in
+   * 'che.infra.kubernetes.workspace_sa_cluster_roles' property.
+   *
+   * @see KubernetesNamespaceFactory#KubernetesNamespaceFactory(String, String, String, String,
+   *     boolean, KubernetesClientFactory, UserManager, KubernetesSharedPool)
+   */
+  private void createExplicitClusterRoleBindings(Client k8sClient) {
     // If the user specified an additional cluster roles for the workspace,
     // create a role binding for them too
     int idx = 0;
@@ -158,7 +194,8 @@ public abstract class AbstractWorkspaceServiceAccount<
    * @param verbs the verbs the role allows
    * @return the role object for the given type of Client
    */
-  protected abstract R buildRole(String name, List<String> resources, List<String> verbs);
+  protected abstract R buildRole(
+      String name, List<String> resources, List<String> apiGroups, List<String> verbs);
 
   /**
    * Builds a new role binding but does not persist it.
@@ -182,33 +219,20 @@ public abstract class AbstractWorkspaceServiceAccount<
         .done();
   }
 
-  private void createRole(Client k8sClient, String name) {
+  private void createRole(
+      Client k8sClient,
+      String name,
+      List<String> resources,
+      List<String> apiGroups,
+      List<String> verbs) {
     if (roles.apply(k8sClient).inNamespace(namespace).withName(name).get() == null) {
-      R role = buildRole(name, singletonList("pods/exec"), singletonList("create"));
+      R role = buildRole(name, resources, apiGroups, verbs);
       roles.apply(k8sClient).inNamespace(namespace).create(role);
     }
   }
 
-  private RoleBinding createCustomRoleBinding(String clusterRoleName, int order) {
-    return new RoleBindingBuilder()
-        .withNewMetadata()
-        .withName(serviceAccountName + "-cluster" + order)
-        .withNamespace(namespace)
-        .endMetadata()
-        .withNewRoleRef()
-        .withKind("ClusterRole")
-        .withName(clusterRoleName)
-        .endRoleRef()
-        .withSubjects(
-            new SubjectBuilder()
-                .withKind("ServiceAccount")
-                .withName(serviceAccountName)
-                .withNamespace(namespace)
-                .build())
-        .build();
-  }
-
   public interface ClientFactory<C extends KubernetesClient> {
+
     C create(String workspaceId) throws InfrastructureException;
   }
 }

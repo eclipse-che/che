@@ -49,7 +49,8 @@ public class KubernetesWorkspaceServiceAccount
   }
 
   @Override
-  protected Role buildRole(String name, List<String> resources, List<String> verbs) {
+  protected Role buildRole(
+      String name, List<String> resources, List<String> apiGroups, List<String> verbs) {
     return new RoleBuilder()
         .withNewMetadata()
         .withName(name)
@@ -57,7 +58,7 @@ public class KubernetesWorkspaceServiceAccount
         .withRules(
             new PolicyRuleBuilder()
                 .withResources(resources)
-                .withApiGroups("")
+                .withApiGroups(apiGroups)
                 .withVerbs(verbs)
                 .build())
         .build();
