@@ -84,7 +84,6 @@ public class KubernetesNamespaceFactoryTest {
 
   @Mock private KubernetesSharedPool pool;
   @Mock private KubernetesClientFactory clientFactory;
-
   private KubernetesClient k8sClient;
   @Mock private UserManager userManager;
 
