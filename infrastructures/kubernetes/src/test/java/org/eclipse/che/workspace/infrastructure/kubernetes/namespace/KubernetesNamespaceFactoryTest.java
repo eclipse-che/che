@@ -527,7 +527,6 @@ public class KubernetesNamespaceFactoryTest {
   public void
       testEvalNamespaceUsesLegacyNamespaceIfWorkspaceDoesntRecordNamespaceAndLegacyNamespaceExists()
           throws Exception {
-
     namespaceFactory =
         new KubernetesNamespaceFactory(
             "blabol-<userid>-<username>-<userid>-<username>",
@@ -551,7 +550,6 @@ public class KubernetesNamespaceFactoryTest {
   @Test
   public void testEvalNamespaceUsesWorkspaceRecordedNamespaceIfWorkspaceRecordsIt()
       throws Exception {
-
     namespaceFactory =
         new KubernetesNamespaceFactory(
             "blabol-<userid>-<username>-<userid>-<username>",
@@ -577,7 +575,6 @@ public class KubernetesNamespaceFactoryTest {
 
   @Test
   public void testEvalNamespaceTreatsWorkspaceRecordedNamespaceLiterally() throws Exception {
-
     namespaceFactory =
         new KubernetesNamespaceFactory(
             "blabol-<userid>-<username>-<userid>-<username>",
