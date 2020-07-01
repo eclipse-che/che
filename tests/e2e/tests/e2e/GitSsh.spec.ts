@@ -108,17 +108,32 @@ suite('Git with ssh workflow', async () => {
 });
 
 suite('Cleanup', async () => {
-    test('Remove test workspace', async () => {
-        await testWorkspaceUtils.cleanUpAllWorkspaces();
+    test('Remove test workspaces and clean up test account', async () => {
+        removeWorkspaces();
+        cleanUpTestAccount();
     });
 });
 
 async function cloneTestRepo() {
     const sshLinkToRepo: string = 'git@github.com:' + TestConstants.TS_GITHUB_TEST_REPO + '.git';
     const confirmMessage = 'Repository URL (Press \'Enter\' to confirm your input or \'Escape\' to cancel)';
-
     await topMenu.selectOption('View', 'Find Command...');
     await quickOpenContainer.typeAndSelectSuggestion('clone', 'Git: Clone');
     await quickOpenContainer.typeAndSelectSuggestion(sshLinkToRepo, confirmMessage);
 }
 
+async function removeWorkspaces() {
+    try {
+        await testWorkspaceUtils.cleanUpAllWorkspaces();
+    } catch (error) {
+        console.error('Cannot delete the workspace \n' + error);
+    }
+}
+
+async function cleanUpTestAccount() {
+    try {
+        await gitHubUtils.removeAllPublicSshKeys(TestConstants.TS_GITHUB_TEST_REPO_ACCESS_TOKEN);
+    } catch (error) {
+        console.error('Cannot remove SSH key: \n' + error);
+    }
+}
