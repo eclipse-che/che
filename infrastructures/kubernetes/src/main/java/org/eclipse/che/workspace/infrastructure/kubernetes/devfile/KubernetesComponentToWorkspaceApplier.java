@@ -212,12 +212,13 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     }
 
     for (PodData podData : podsData) {
+      final String podVolumeName = PROJECTS_VOLUME_NAME + "-" + podData.getMetadata().getName();
       if (podData
           .getSpec()
           .getVolumes()
           .stream()
           .noneMatch(volume -> volume.getName().equals(PROJECTS_VOLUME_NAME))) {
-        Volume volume = newVolume(PROJECTS_VOLUME_NAME, PROJECTS_VOLUME_NAME);
+        Volume volume = newVolume(podVolumeName, PROJECTS_VOLUME_NAME);
         podData.getSpec().getVolumes().add(volume);
       }
       for (Container container : podData.getSpec().getContainers()) {
@@ -225,7 +226,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
             .getVolumeMounts()
             .stream()
             .noneMatch(mount -> mount.getName().equals(PROJECTS_VOLUME_NAME))) {
-          VolumeMount volumeMount = newVolumeMount(PROJECTS_VOLUME_NAME, projectFolderPath, null);
+          VolumeMount volumeMount = newVolumeMount(podVolumeName, projectFolderPath, null);
           container.getVolumeMounts().add(volumeMount);
         }
       }

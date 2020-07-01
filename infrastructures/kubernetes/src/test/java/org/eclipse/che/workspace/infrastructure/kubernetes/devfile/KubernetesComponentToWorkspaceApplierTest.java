@@ -259,7 +259,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
                 .stream()
                 .anyMatch(
                     v ->
-                        v.getName().equals(PROJECTS_VOLUME_NAME)
+                        v.getName().equals(PROJECTS_VOLUME_NAME + "-" + p.getMetadata().getName())
                             && v.getPersistentVolumeClaim()
                                 .getClaimName()
                                 .equals(PROJECTS_VOLUME_NAME)));
@@ -270,7 +270,8 @@ public class KubernetesComponentToWorkspaceApplierTest {
                   .stream()
                   .anyMatch(
                       vm ->
-                          vm.getName().equals(PROJECTS_VOLUME_NAME)
+                          vm.getName()
+                                  .equals(PROJECTS_VOLUME_NAME + "-" + p.getMetadata().getName())
                               && vm.getMountPath().equals(PROJECT_MOUNT_PATH)));
         }
       }
