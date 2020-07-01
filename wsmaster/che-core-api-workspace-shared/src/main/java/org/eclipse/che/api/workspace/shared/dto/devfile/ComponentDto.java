@@ -127,6 +127,13 @@ public interface ComponentDto extends Component {
   ComponentDto withMountSources(Boolean mountSources);
 
   @Override
+  Boolean getAutomountWorkspaceSecrets();
+
+  void setAutomountWorkspaceSecrets(Boolean automountWorkspaceSecrets);
+
+  ComponentDto withAutomountWorkspaceSecrets(Boolean automountWorkspaceSecrets);
+
+  @Override
   List<String> getCommand();
 
   void setCommand(List<String> command);

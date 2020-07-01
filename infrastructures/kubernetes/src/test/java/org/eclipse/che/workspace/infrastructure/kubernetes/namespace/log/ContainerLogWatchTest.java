@@ -199,7 +199,7 @@ public class ContainerLogWatchTest {
 
     // verify events were properly fired
     verify(eventsPublisher, times(1)).sendWatchLogStartedEvent(any(String.class));
-    verify(eventsPublisher, times(1)).sendWatchLogStoppedEvent(any(String.class));
+    verify(eventsPublisher, timeout(1000).times(1)).sendWatchLogStoppedEvent(any(String.class));
   }
 
   @Test

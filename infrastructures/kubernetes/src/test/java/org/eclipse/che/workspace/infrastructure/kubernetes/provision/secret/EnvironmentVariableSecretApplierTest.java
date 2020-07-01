@@ -9,24 +9,23 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
+package org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_ENV_NAME;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_ENV_NAME_TEMPLATE;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_MOUNT_AS;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_MOUNT_PATH;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner.ANNOTATION_TARGET_CONTAINER;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.EnvironmentVariableSecretApplier.ANNOTATION_ENV_NAME;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.EnvironmentVariableSecretApplier.ANNOTATION_ENV_NAME_TEMPLATE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretApplier.ANNOTATION_AUTOMOUNT;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner.ANNOTATION_MOUNT_AS;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -36,17 +35,16 @@ import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
-import io.fabric8.kubernetes.api.model.PodSpecBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
-import io.fabric8.kubernetes.api.model.Volume;
-import io.fabric8.kubernetes.api.model.VolumeMount;
-import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -55,14 +53,9 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
-public class SecretAsContainerResourceProvisionerTest {
-
-  private SecretAsContainerResourceProvisioner<KubernetesEnvironment> provisioner =
-      new SecretAsContainerResourceProvisioner<>(new String[] {"app:che"});
+public class EnvironmentVariableSecretApplierTest {
 
   @Mock private KubernetesEnvironment environment;
-
-  @Mock private KubernetesNamespace namespace;
 
   @Mock private KubernetesSecrets secrets;
 
@@ -70,11 +63,13 @@ public class SecretAsContainerResourceProvisionerTest {
 
   @Mock private PodSpec podSpec;
 
+  @Mock private RuntimeIdentity runtimeIdentity;
+
+  EnvironmentVariableSecretApplier secretApplier = new EnvironmentVariableSecretApplier();
+
   @BeforeMethod
   public void setUp() throws Exception {
-    when(namespace.secrets()).thenReturn(secrets);
     when(environment.getPodsData()).thenReturn(singletonMap("pod1", podData));
-
     when(podData.getRole()).thenReturn(PodRole.DEPLOYMENT);
     when(podData.getSpec()).thenReturn(podSpec);
   }
@@ -98,20 +93,16 @@ public class SecretAsContainerResourceProvisionerTest {
                             "MY_FOO",
                             ANNOTATION_MOUNT_AS,
                             "env",
-                            ANNOTATION_TARGET_CONTAINER,
-                            "maven"))
+                            ANNOTATION_AUTOMOUNT,
+                            "true"))
                     .withLabels(emptyMap())
                     .build())
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
 
-    // nothing to do with unmatched container
-    verify(container_unmatch).getName();
-    verifyNoMoreInteractions(container_unmatch);
-
-    // matched container has env set
+    // container has env set
     assertEquals(container_match.getEnv().size(), 1);
     EnvVar var = container_match.getEnv().get(0);
     assertEquals(var.getName(), "MY_FOO");
@@ -122,9 +113,8 @@ public class SecretAsContainerResourceProvisionerTest {
   @Test
   public void shouldProvisionMultiEnvVariable() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
-    Container container_unmatch = spy(new ContainerBuilder().withName("other").build());
 
-    when(podSpec.getContainers()).thenReturn(ImmutableList.of(container_match, container_unmatch));
+    when(podSpec.getContainers()).thenReturn(ImmutableList.of(container_match));
 
     Secret secret =
         new SecretBuilder()
@@ -134,26 +124,22 @@ public class SecretAsContainerResourceProvisionerTest {
                     .withName("test_secret")
                     .withAnnotations(
                         ImmutableMap.of(
-                            format(ANNOTATION_ENV_NAME_TEMPLATE, "foo"),
+                            String.format(ANNOTATION_ENV_NAME_TEMPLATE, "foo"),
                             "MY_FOO",
-                            format(ANNOTATION_ENV_NAME_TEMPLATE, "bar"),
+                            String.format(ANNOTATION_ENV_NAME_TEMPLATE, "bar"),
                             "MY_BAR",
                             ANNOTATION_MOUNT_AS,
                             "env",
-                            ANNOTATION_TARGET_CONTAINER,
-                            "maven"))
+                            ANNOTATION_AUTOMOUNT,
+                            "true"))
                     .withLabels(emptyMap())
                     .build())
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
 
-    // nothing to do with unmatched container
-    verify(container_unmatch).getName();
-    verifyNoMoreInteractions(container_unmatch);
-
-    // matched container has env set
+    // container has env set
     assertEquals(container_match.getEnv().size(), 2);
     EnvVar var = container_match.getEnv().get(0);
     assertEquals(var.getName(), "MY_FOO");
@@ -167,7 +153,7 @@ public class SecretAsContainerResourceProvisionerTest {
   }
 
   @Test
-  public void shouldProvisionAllContainersIfNotSpecifyOne() throws Exception {
+  public void shouldProvisionAllContainersIfAutomountEnabled() throws Exception {
     Container container_match1 = new ContainerBuilder().withName("maven").build();
     Container container_match2 = new ContainerBuilder().withName("other").build();
 
@@ -180,13 +166,16 @@ public class SecretAsContainerResourceProvisionerTest {
                 new ObjectMetaBuilder()
                     .withName("test_secret")
                     .withAnnotations(
-                        ImmutableMap.of(ANNOTATION_ENV_NAME, "MY_FOO", ANNOTATION_MOUNT_AS, "env"))
+                        ImmutableMap.of(
+                            ANNOTATION_ENV_NAME, "MY_FOO",
+                            ANNOTATION_MOUNT_AS, "env",
+                            ANNOTATION_AUTOMOUNT, "true"))
                     .withLabels(emptyMap())
                     .build())
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
 
     // both containers has env set
     assertEquals(container_match1.getEnv().size(), 1);
@@ -203,129 +192,126 @@ public class SecretAsContainerResourceProvisionerTest {
   }
 
   @Test
-  public void shouldProvisionAsFiles() throws Exception {
-    Container container_match = new ContainerBuilder().withName("maven").build();
-    Container container_unmatch = new ContainerBuilder().withName("other").build();
+  public void shouldProvisionContainersWithAutomountOverrideTrue() throws Exception {
+    Container container_match1 = new ContainerBuilder().withName("maven").build();
+    Container container_match2 = new ContainerBuilder().withName("other").build();
+    DevfileImpl mock_defvile = mock(DevfileImpl.class);
+    ComponentImpl component = new ComponentImpl();
+    component.setAlias("maven");
+    component.setAutomountWorkspaceSecrets(true);
 
-    PodSpec localSpec =
-        new PodSpecBuilder()
-            .withContainers(ImmutableList.of(container_match, container_unmatch))
-            .build();
-
-    when(podData.getSpec()).thenReturn(localSpec);
+    when(podSpec.getContainers()).thenReturn(ImmutableList.of(container_match1, container_match2));
+    InternalMachineConfig internalMachineConfig = new InternalMachineConfig();
+    internalMachineConfig.getAttributes().put(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE, "maven");
+    when(environment.getMachines()).thenReturn(ImmutableMap.of("maven", internalMachineConfig));
+    when(environment.getDevfile()).thenReturn(mock_defvile);
+    when(mock_defvile.getComponents()).thenReturn(singletonList(component));
 
     Secret secret =
         new SecretBuilder()
-            .withData(ImmutableMap.of("settings.xml", "random", "another.xml", "freedom"))
+            .withData(singletonMap("foo", "random"))
             .withMetadata(
                 new ObjectMetaBuilder()
                     .withName("test_secret")
                     .withAnnotations(
                         ImmutableMap.of(
-                            ANNOTATION_MOUNT_AS,
-                            "file",
-                            ANNOTATION_MOUNT_PATH,
-                            "/home/user/.m2",
-                            ANNOTATION_TARGET_CONTAINER,
-                            "maven"))
+                            ANNOTATION_ENV_NAME, "MY_FOO",
+                            ANNOTATION_MOUNT_AS, "env",
+                            ANNOTATION_AUTOMOUNT, "false"))
                     .withLabels(emptyMap())
                     .build())
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
 
-    // pod has volume created
-    assertEquals(environment.getPodsData().get("pod1").getSpec().getVolumes().size(), 1);
-    Volume volume = environment.getPodsData().get("pod1").getSpec().getVolumes().get(0);
-    assertEquals(volume.getName(), "test_secret");
-    assertEquals(volume.getSecret().getSecretName(), "test_secret");
+    // only first container has env set
+    assertEquals(container_match1.getEnv().size(), 1);
+    EnvVar var = container_match1.getEnv().get(0);
+    assertEquals(var.getName(), "MY_FOO");
+    assertEquals(var.getValueFrom().getSecretKeyRef().getName(), "test_secret");
+    assertEquals(var.getValueFrom().getSecretKeyRef().getKey(), "foo");
 
-    // matched container has mounts set
-    assertEquals(
-        environment
-            .getPodsData()
-            .get("pod1")
-            .getSpec()
-            .getContainers()
-            .get(0)
-            .getVolumeMounts()
-            .size(),
-        1);
-    VolumeMount mount1 =
-        environment
-            .getPodsData()
-            .get("pod1")
-            .getSpec()
-            .getContainers()
-            .get(0)
-            .getVolumeMounts()
-            .get(0);
-    assertEquals(mount1.getName(), "test_secret");
-    assertEquals(mount1.getMountPath(), "/home/user/.m2");
-    assertTrue(mount1.getReadOnly());
-
-    // unmatched container has no mounts
-    assertEquals(
-        environment
-            .getPodsData()
-            .get("pod1")
-            .getSpec()
-            .getContainers()
-            .get(1)
-            .getVolumeMounts()
-            .size(),
-        0);
+    assertEquals(container_match2.getEnv().size(), 0);
   }
 
-  @Test(
-      expectedExceptions = InfrastructureException.class,
-      expectedExceptionsMessageRegExp =
-          "Unable to mount secret 'test_secret': It is configured to be mounted as a file but the mount path was not specified. Please define the 'che.eclipse.org/mount-path' annotation on the secret to specify it.")
-  public void shouldThrowExceptionWhenNoMountPathSpecifiedForFiles() throws Exception {
-    Container container_match = new ContainerBuilder().withName("maven").build();
+  @Test
+  public void shouldNotProvisionContainersWithAutomountOverrideFalse() throws Exception {
+    Container container_match1 = new ContainerBuilder().withName("maven").build();
+    Container container_match2 = new ContainerBuilder().withName("other").build();
+    DevfileImpl mock_defvile = mock(DevfileImpl.class);
+    ComponentImpl component = new ComponentImpl();
+    component.setAlias("maven");
+    component.setAutomountWorkspaceSecrets(false);
 
-    PodSpec localSpec =
-        new PodSpecBuilder().withContainers(ImmutableList.of(container_match)).build();
+    when(podSpec.getContainers()).thenReturn(ImmutableList.of(container_match1, container_match2));
+    InternalMachineConfig internalMachineConfig = new InternalMachineConfig();
+    internalMachineConfig.getAttributes().put(DEVFILE_COMPONENT_ALIAS_ATTRIBUTE, "maven");
+    when(environment.getMachines()).thenReturn(ImmutableMap.of("maven", internalMachineConfig));
+    when(environment.getDevfile()).thenReturn(mock_defvile);
+    when(mock_defvile.getComponents()).thenReturn(singletonList(component));
 
-    when(podData.getSpec()).thenReturn(localSpec);
     Secret secret =
         new SecretBuilder()
-            .withData(ImmutableMap.of("settings.xml", "random", "another.xml", "freedom"))
+            .withData(singletonMap("foo", "random"))
             .withMetadata(
                 new ObjectMetaBuilder()
                     .withName("test_secret")
-                    .withAnnotations(singletonMap(ANNOTATION_MOUNT_AS, "file"))
+                    .withAnnotations(
+                        ImmutableMap.of(
+                            ANNOTATION_ENV_NAME, "MY_FOO",
+                            ANNOTATION_MOUNT_AS, "env",
+                            ANNOTATION_AUTOMOUNT, "true"))
                     .withLabels(emptyMap())
                     .build())
             .build();
-    when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
+
+    // only second container has env set
+    assertEquals(container_match1.getEnv().size(), 0);
+
+    assertEquals(container_match2.getEnv().size(), 1);
+    EnvVar var2 = container_match2.getEnv().get(0);
+    assertEquals(var2.getName(), "MY_FOO");
+    assertEquals(var2.getValueFrom().getSecretKeyRef().getName(), "test_secret");
+    assertEquals(var2.getValueFrom().getSecretKeyRef().getKey(), "foo");
   }
 
-  @Test(
-      expectedExceptions = InfrastructureException.class,
-      expectedExceptionsMessageRegExp =
-          "Unable to mount secret 'test_secret': it has missing or unknown type of the mount. Please make sure that 'che.eclipse.org/mount-as' annotation has value either 'env' or 'file'.")
-  public void shouldThrowExceptionWhenNoMountTypeSpecified() throws Exception {
+  @Test
+  public void shouldNotProvisionAllContainersifAutomountDisabled() throws Exception {
+    Container container_match1 = spy(new ContainerBuilder().withName("maven").build());
+    Container container_match2 = spy(new ContainerBuilder().withName("other").build());
+
+    when(podSpec.getContainers()).thenReturn(ImmutableList.of(container_match1, container_match2));
+
     Secret secret =
         new SecretBuilder()
-            .withData(ImmutableMap.of("settings.xml", "random", "another.xml", "freedom"))
+            .withData(singletonMap("foo", "random"))
             .withMetadata(
                 new ObjectMetaBuilder()
                     .withName("test_secret")
-                    .withAnnotations(emptyMap())
+                    .withAnnotations(
+                        ImmutableMap.of(
+                            ANNOTATION_ENV_NAME, "MY_FOO",
+                            ANNOTATION_MOUNT_AS, "env",
+                            ANNOTATION_AUTOMOUNT, "false"))
                     .withLabels(emptyMap())
                     .build())
             .build();
-    when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
+
+    verify(container_match1).getName();
+    verify(container_match2).getName();
+    // both containers no actions
+    verifyNoMoreInteractions(container_match1, container_match2);
   }
 
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to mount secret 'test_secret': It is configured to be mount as a environment variable, but its was not specified. Please define the 'che.eclipse.org/env-name' annotation on the secret to specify it.")
+          "Unable to mount secret 'test_secret': It is configured to be mount as a environment variable, but its name was not specified. Please define the 'che.eclipse.org/env-name' annotation on the secret to specify it.")
   public void shouldThrowExceptionWhenNoEnvNameSpecifiedSingleValue() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
 
@@ -337,19 +323,20 @@ public class SecretAsContainerResourceProvisionerTest {
             .withMetadata(
                 new ObjectMetaBuilder()
                     .withName("test_secret")
-                    .withAnnotations(ImmutableMap.of(ANNOTATION_MOUNT_AS, "env"))
+                    .withAnnotations(
+                        ImmutableMap.of(ANNOTATION_MOUNT_AS, "env", ANNOTATION_AUTOMOUNT, "true"))
                     .withLabels(emptyMap())
                     .build())
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
   }
 
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to mount key 'foo'  of secret 'test_secret': It is configured to be mount as a environment variable, but its was not specified. Please define the 'che.eclipse.org/foo_env-name' annotation on the secret to specify it.")
+          "Unable to mount key 'foo'  of secret 'test_secret': It is configured to be mount as a environment variable, but its name was not specified. Please define the 'che.eclipse.org/foo_env-name' annotation on the secret to specify it.")
   public void shouldThrowExceptionWhenNoEnvNameSpecifiedMultiValue() throws Exception {
     Container container_match = new ContainerBuilder().withName("maven").build();
 
@@ -361,52 +348,13 @@ public class SecretAsContainerResourceProvisionerTest {
             .withMetadata(
                 new ObjectMetaBuilder()
                     .withName("test_secret")
-                    .withAnnotations(ImmutableMap.of(ANNOTATION_MOUNT_AS, "env"))
-                    .withLabels(emptyMap())
-                    .build())
-            .build();
-
-    when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
-  }
-
-  @Test(
-      expectedExceptions = InfrastructureException.class,
-      expectedExceptionsMessageRegExp =
-          "The secret 'test_secret' defines a mount path '/home/user/.m2/' that clashes with another volume mount path already present on the workspace pod.")
-  public void shouldThrowExceptionOnDuplicateVolumePaths() throws Exception {
-    VolumeMount vm =
-        new VolumeMountBuilder().withMountPath("/home/user/.m2").withName("foo").build();
-    Container container_match =
-        new ContainerBuilder().withName("maven").withVolumeMounts(vm).build();
-    Container container_unmatch = new ContainerBuilder().withName("other").build();
-
-    PodSpec localSpec =
-        new PodSpecBuilder()
-            .withContainers(ImmutableList.of(container_match, container_unmatch))
-            .build();
-
-    when(podData.getSpec()).thenReturn(localSpec);
-
-    Secret secret =
-        new SecretBuilder()
-            .withData(ImmutableMap.of("settings.xml", "random", "another.xml", "freedom"))
-            .withMetadata(
-                new ObjectMetaBuilder()
-                    .withName("test_secret")
                     .withAnnotations(
-                        ImmutableMap.of(
-                            ANNOTATION_MOUNT_AS,
-                            "file",
-                            ANNOTATION_MOUNT_PATH,
-                            "/home/user/.m2/",
-                            ANNOTATION_TARGET_CONTAINER,
-                            "maven"))
+                        ImmutableMap.of(ANNOTATION_MOUNT_AS, "env", ANNOTATION_AUTOMOUNT, "true"))
                     .withLabels(emptyMap())
                     .build())
             .build();
 
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
-    provisioner.provision(environment, namespace);
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
   }
 }
