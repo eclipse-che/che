@@ -15,3 +15,4 @@ image: quay.io/eclipse/che-keycloak:nightly
 requireAdminPasswordChange: true
 keycloakAdminUserName: admin
 keycloakAdminUserPassword: admin
+deploymentStrategy: RollingUpdate
