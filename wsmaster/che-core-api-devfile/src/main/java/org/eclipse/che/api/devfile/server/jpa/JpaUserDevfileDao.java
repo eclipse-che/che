@@ -65,7 +65,7 @@ public class JpaUserDevfileDao implements UserDevfileDao {
       throw new ConflictException(
           "Could not create devfile with creator that refers on non-existent user");
     } catch (RuntimeException ex) {
-      throw new ServerException(ex.getLocalizedMessage(), ex);
+      throw new ServerException(ex.getMessage(), ex);
     }
     return new UserDevfileImpl(devfile);
   }
