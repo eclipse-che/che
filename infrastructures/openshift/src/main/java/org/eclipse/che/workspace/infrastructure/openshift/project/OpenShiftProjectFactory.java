@@ -61,7 +61,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   public OpenShiftProjectFactory(
       @Nullable @Named("che.infra.openshift.project") String projectName,
       @Nullable @Named("che.infra.kubernetes.service_account_name") String serviceAccountName,
-      @Nullable @Named("che.infra.kubernetes.cluster_role_name") String clusterRoleName,
+      @Nullable @Named("che.infra.kubernetes.workspace_sa_cluster_roles") String clusterRoleNames,
       @Nullable @Named("che.infra.kubernetes.namespace.default") String defaultNamespaceName,
       @Named("che.infra.kubernetes.namespace.allow_user_defined")
           boolean allowUserDefinedNamespaces,
@@ -75,7 +75,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
     super(
         projectName,
         serviceAccountName,
-        clusterRoleName,
+        clusterRoleNames,
         defaultNamespaceName,
         allowUserDefinedNamespaces,
         clientFactory,
@@ -151,7 +151,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   @VisibleForTesting
   OpenShiftWorkspaceServiceAccount doCreateServiceAccount(String workspaceId, String projectName) {
     return new OpenShiftWorkspaceServiceAccount(
-        workspaceId, projectName, getServiceAccountName(), getClusterRoleName(), clientFactory);
+        workspaceId, projectName, getServiceAccountName(), getClusterRoleNames(), clientFactory);
   }
 
   @Override
