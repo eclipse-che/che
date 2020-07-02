@@ -39,8 +39,14 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class UserDevfileManager {
   private static final Logger LOG = LoggerFactory.getLogger(UserDevfileManager.class);
-  @Inject UserDevfileDao userDevfileDao;
-  @Inject EventService eventService;
+  private final UserDevfileDao userDevfileDao;
+  private final EventService eventService;
+
+  @Inject
+  public UserDevfileManager(UserDevfileDao userDevfileDao, EventService eventService) {
+    this.userDevfileDao = userDevfileDao;
+    this.eventService = eventService;
+  }
 
   /**
    * Stores {@link Devfile} instance
@@ -56,8 +62,8 @@ public class UserDevfileManager {
     requireNonNull(devfile, "Required non-null devfile");
     UserDevfileImpl result =
         userDevfileDao.create(
-            new UserDevfileImpl(NameGenerator.generate("usrdevfile", 16), devfile));
-    LOG.info(
+            new UserDevfileImpl(NameGenerator.generate("userdevfile", 16), devfile));
+    LOG.debug(
         "UserDevfile '{}' with id '{}' created by user '{}'",
         result.getName(),
         result.getId(),
@@ -97,7 +103,7 @@ public class UserDevfileManager {
       throws ConflictException, NotFoundException, ServerException {
     requireNonNull(update);
     UserDevfileImpl result = userDevfileDao.update(new UserDevfileImpl(update));
-    LOG.info(
+    LOG.debug(
         "UserDevfile '{}' with id '{}' update by user '{}'",
         result.getName(),
         result.getId(),
@@ -116,7 +122,7 @@ public class UserDevfileManager {
   public void removeUserDevfile(String id) throws ServerException {
     requireNonNull(id);
     userDevfileDao.remove(id);
-    LOG.info(
+    LOG.debug(
         "UserDevfile with id '{}' removed by user '{}'",
         id,
         EnvironmentContext.getCurrent().getSubject().getUserName());

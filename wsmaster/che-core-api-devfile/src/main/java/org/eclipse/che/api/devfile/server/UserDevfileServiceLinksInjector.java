@@ -14,13 +14,10 @@ package org.eclipse.che.api.devfile.server;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import com.google.common.annotations.Beta;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.collect.ImmutableList;
 import javax.inject.Singleton;
 import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.rest.ServiceContext;
-import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.util.LinksHelper;
 import org.eclipse.che.api.devfile.shared.Constants;
 import org.eclipse.che.api.devfile.shared.dto.UserDevfileDto;
@@ -30,21 +27,19 @@ import org.eclipse.che.api.devfile.shared.dto.UserDevfileDto;
 @Singleton
 public class UserDevfileServiceLinksInjector {
   public UserDevfileDto injectLinks(UserDevfileDto userDevfileDto, ServiceContext serviceContext) {
-    final UriBuilder uriBuilder = serviceContext.getBaseUriBuilder();
-    final List<Link> links = new ArrayList<>(2);
-    links.add(
-        LinksHelper.createLink(
-            HttpMethod.GET,
-            uriBuilder
-                .clone()
-                .path(UserDevfileService.class)
-                .path(UserDevfileService.class, "getById")
-                .build(userDevfileDto.getId())
-                .toString(),
-            null,
-            APPLICATION_JSON,
-            Constants.LINK_REL_SELF));
-
-    return userDevfileDto.withLinks(links);
+    return userDevfileDto.withLinks(
+        ImmutableList.of(
+            LinksHelper.createLink(
+                HttpMethod.GET,
+                serviceContext
+                    .getBaseUriBuilder()
+                    .clone()
+                    .path(UserDevfileService.class)
+                    .path(UserDevfileService.class, "getById")
+                    .build(userDevfileDto.getId())
+                    .toString(),
+                null,
+                APPLICATION_JSON,
+                Constants.LINK_REL_SELF)));
   }
 }

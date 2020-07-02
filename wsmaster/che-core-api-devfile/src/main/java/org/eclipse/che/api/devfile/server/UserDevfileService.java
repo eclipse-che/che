@@ -61,8 +61,15 @@ import org.eclipse.che.commons.lang.URLEncodedUtils;
 @Path("/userdevfile")
 @Beta
 public class UserDevfileService extends Service {
-  @Inject UserDevfileManager userDevfileManager;
-  @Inject UserDevfileServiceLinksInjector linksInjector;
+  private final UserDevfileManager userDevfileManager;
+  private final UserDevfileServiceLinksInjector linksInjector;
+
+  @Inject
+  public UserDevfileService(
+      UserDevfileManager userDevfileManager, UserDevfileServiceLinksInjector linksInjector) {
+    this.userDevfileManager = userDevfileManager;
+    this.linksInjector = linksInjector;
+  }
 
   @POST
   @Consumes({APPLICATION_JSON, "text/yaml", "text/x-yaml"})
