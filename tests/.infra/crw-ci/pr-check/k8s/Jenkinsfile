@@ -311,9 +311,6 @@ EOL"""
                      CHE_URL=https://${cheHost}
                      docker run --shm-size=1g --net=host --ipc=host \\
                        -p 5920:5920 \\
-                       -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \\
-                       -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=420000 \\
-                       -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \\
                        -e TS_SELENIUM_BASE_URL=\${CHE_URL} \\
                        -e TS_SELENIUM_LOG_LEVEL='DEBUG' \\
                        -e TS_SELENIUM_MULTIUSER="true" \\
