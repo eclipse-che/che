@@ -52,7 +52,7 @@ export const TestConstants = {
     /**
      * Timeout in milliseconds waiting for page load, "120 000" by default.
      */
-    TS_SELENIUM_LOAD_PAGE_TIMEOUT: Number(process.env.TS_SELENIUM_LOAD_PAGE_TIMEOUT) || 120000,
+    TS_SELENIUM_LOAD_PAGE_TIMEOUT: Number(process.env.TS_SELENIUM_LOAD_PAGE_TIMEOUT) || 180000,
 
     /**
      * Timeout in milliseconds waiting for language server initialization, "180 000" by default.
@@ -62,7 +62,7 @@ export const TestConstants = {
     /**
      * Default timeout for most of the waitings, "20 000" by default.
      */
-    TS_SELENIUM_DEFAULT_TIMEOUT: Number(process.env.TS_SELENIUM_DEFAULT_TIMEOUT) || 20000,
+    TS_SELENIUM_DEFAULT_TIMEOUT: Number(process.env.TS_SELENIUM_DEFAULT_TIMEOUT) || 60000,
 
     /**
      * Default ammount of tries, "5" by default.
