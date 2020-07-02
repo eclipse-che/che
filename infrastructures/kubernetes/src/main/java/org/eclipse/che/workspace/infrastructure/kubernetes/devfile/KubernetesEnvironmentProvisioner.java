@@ -131,13 +131,13 @@ public class KubernetesEnvironmentProvisioner {
 
   private void mergeProjectsPVC(List<HasMetadata> envObjects, List<HasMetadata> componentObjects) {
     componentObjects.removeIf(
-        cObj ->
-            cObj instanceof PersistentVolumeClaim
-                && cObj.getMetadata().getName().equals(PROJECTS_VOLUME_NAME)
+        co ->
+            co instanceof PersistentVolumeClaim
+                && co.getMetadata().getName().equals(PROJECTS_VOLUME_NAME)
                 && envObjects
                     .stream()
                     .filter(envObject -> envObject instanceof PersistentVolumeClaim)
-                    .anyMatch(pvc -> pvc.equals(cObj)));
+                    .anyMatch(pvc -> pvc.equals(co)));
   }
 
   private List<HasMetadata> unmarshalObjects(RecipeImpl k8sRecipe) throws DevfileException {
