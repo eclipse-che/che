@@ -12,8 +12,7 @@
 package org.eclipse.che.api.workspace.activity.spi.tck;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
+import static java.util.Collections.*;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.testng.Assert.assertEquals;
@@ -65,6 +64,8 @@ public class WorkspaceActivityDaoTest {
 
   private static final int COUNT = 3;
 
+  private static final long DEFAULT_RUN_TIMEOUT = 0L;
+
   @Inject private WorkspaceActivityDao workspaceActivityDao;
 
   private AccountImpl[] accounts = new AccountImpl[COUNT];
@@ -95,6 +96,7 @@ public class WorkspaceActivityDaoTest {
       a.setExpiration(base * 1_000_000);
 
       activities[i] = a;
+      System.out.println("activity is " + a);
     }
 
     accountTckRepository.createAll(asList(accounts));
@@ -112,7 +114,7 @@ public class WorkspaceActivityDaoTest {
   @Test
   public void shouldFindExpirationsByTimestamp() throws Exception {
     List<String> expected = asList(activities[0].getWorkspaceId(), activities[1].getWorkspaceId());
-    List<String> found = workspaceActivityDao.findExpired(2_500_000);
+    List<String> found = workspaceActivityDao.findExpired(2_500_000, DEFAULT_RUN_TIMEOUT);
 
     assertEquals(found, expected);
   }
@@ -123,7 +125,22 @@ public class WorkspaceActivityDaoTest {
 
     workspaceActivityDao.removeExpiration(activities[0].getWorkspaceId());
 
-    List<String> found = workspaceActivityDao.findExpired(2_500_000);
+    List<String> found = workspaceActivityDao.findExpired(2_500_000, DEFAULT_RUN_TIMEOUT);
+    assertEquals(found, expected);
+  }
+
+  @Test(dependsOnMethods = "shouldFindExpirationsByTimestamp")
+  public void shouldExpireWorkspaceThatExceedsRunTimeout() throws Exception {
+    List<String> expected = singletonList(activities[0].getWorkspaceId());
+
+    // Need more accurate activities for this test
+    workspaceActivityDao.removeActivity("ws0");
+    workspaceActivityDao.removeActivity("ws1");
+    workspaceActivityDao.removeActivity("ws2");
+
+    activityTckRepository.createAll(createWorkspaceActivitiesWithStatuses());
+
+    List<String> found = workspaceActivityDao.findExpired(8_000_000, 1_000_000);
     assertEquals(found, expected);
   }
 
@@ -137,7 +154,7 @@ public class WorkspaceActivityDaoTest {
 
     workspaceActivityDao.setExpirationTime(activities[2].getWorkspaceId(), 1_750_000);
 
-    List<String> found = workspaceActivityDao.findExpired(2_500_000);
+    List<String> found = workspaceActivityDao.findExpired(2_500_000, DEFAULT_RUN_TIMEOUT);
     assertEquals(found, expected);
   }
 
@@ -160,7 +177,7 @@ public class WorkspaceActivityDaoTest {
     // create new again
     workspaceActivityDao.setExpirationTime(activities[1].getWorkspaceId(), 1_250_000);
 
-    List<String> found = workspaceActivityDao.findExpired(1_500_000);
+    List<String> found = workspaceActivityDao.findExpired(1_500_000, DEFAULT_RUN_TIMEOUT);
     assertEquals(found, expected);
   }
 
@@ -284,6 +301,45 @@ public class WorkspaceActivityDaoTest {
     return Stream.of(WorkspaceStatus.values())
         .map(s -> new WorkspaceStatus[] {s})
         .toArray(Object[][]::new);
+  }
+
+  /**
+   * Helper function that creates workspaces that are in the RUNNING and STOPPED state for
+   * shouldExpireWorkspaceThatExceedsRunTimeout
+   *
+   * @return A list of WorkspaceActivity objects
+   */
+  private List<WorkspaceActivity> createWorkspaceActivitiesWithStatuses() {
+    WorkspaceActivity[] a = new WorkspaceActivity[3];
+    a[0] = new WorkspaceActivity();
+    a[0].setWorkspaceId("ws0");
+    a[0].setStatus(WorkspaceStatus.RUNNING);
+    a[0].setCreated(1_000_000);
+    a[0].setLastStarting(1_000_000);
+    a[0].setLastRunning(1_000_100);
+    a[0].setLastStopped(0);
+    a[0].setLastStopping(0);
+    a[0].setExpiration(1_100_000L);
+
+    a[1] = new WorkspaceActivity();
+    a[1].setWorkspaceId("ws1");
+    a[1].setStatus(WorkspaceStatus.RUNNING);
+    a[1].setCreated(7_000_000);
+    a[1].setLastStarting(7_000_000);
+    a[1].setLastRunning(7_100_000);
+    a[1].setLastStopped(0);
+    a[1].setLastStopping(0);
+    a[1].setExpiration(8_000_000L);
+
+    a[2] = new WorkspaceActivity();
+    a[2].setWorkspaceId("ws2");
+    a[2].setStatus(WorkspaceStatus.STOPPED);
+    a[2].setCreated(1_000_200);
+    a[2].setLastStarting(1_000_200);
+    a[2].setLastRunning(1_000_300);
+    a[2].setLastStopped(1_000_400);
+    a[2].setLastStopping(1_000_350);
+    return asList(a);
   }
 
   private static WorkspaceConfigImpl createWorkspaceConfig(String name) {

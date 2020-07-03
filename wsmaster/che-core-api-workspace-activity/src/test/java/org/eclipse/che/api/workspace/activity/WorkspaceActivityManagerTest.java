@@ -49,6 +49,8 @@ import org.testng.annotations.Test;
 public class WorkspaceActivityManagerTest {
 
   private static final long DEFAULT_TIMEOUT = 60_000L; // 1 minute
+  private static final long DEFAULT_RUN_TIMEOUT = 0; // No run timeout
+  private static final long ACTIVE_RUN_TIMEOUT = 60000 * 60 * 3; // 3 hours
 
   @Mock private WorkspaceManager workspaceManager;
 
@@ -68,7 +70,11 @@ public class WorkspaceActivityManagerTest {
   private void setUp() throws Exception {
     activityManager =
         new WorkspaceActivityManager(
-            workspaceManager, workspaceActivityDao, eventService, DEFAULT_TIMEOUT);
+            workspaceManager,
+            workspaceActivityDao,
+            eventService,
+            DEFAULT_TIMEOUT,
+            DEFAULT_RUN_TIMEOUT);
 
     lenient().when(account.getName()).thenReturn("accountName");
     lenient().when(account.getId()).thenReturn("account123");
@@ -100,6 +106,19 @@ public class WorkspaceActivityManagerTest {
     ArgumentCaptor<String> wsIdCaptor = ArgumentCaptor.forClass(String.class);
     verify(workspaceActivityDao, times(1)).setExpirationTime(wsIdCaptor.capture(), any(long.class));
     assertEquals(wsIdCaptor.getValue(), wsId);
+  }
+
+  @Test
+  public void shouldRemoveRunTimeoutWhenWorkspaceStopped() throws Exception {
+    final String wsId = "testWsId";
+    final EventSubscriber<WorkspaceStatusEvent> subscriber = subscribeAndGetStatusEventSubscriber();
+
+    subscriber.onEvent(
+        DtoFactory.newDto(WorkspaceStatusEvent.class)
+            .withStatus(WorkspaceStatus.STOPPED)
+            .withWorkspaceId(wsId));
+    ArgumentCaptor<String> wsIdCaptor = ArgumentCaptor.forClass(String.class);
+    verify(workspaceActivityDao, times(1)).removeExpiration(wsIdCaptor.capture());
   }
 
   @Test

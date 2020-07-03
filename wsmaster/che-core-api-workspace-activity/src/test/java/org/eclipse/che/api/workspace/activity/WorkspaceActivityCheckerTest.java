@@ -55,6 +55,8 @@ import org.testng.annotations.Test;
 @Listeners(value = MockitoTestNGListener.class)
 public class WorkspaceActivityCheckerTest {
   private static final long DEFAULT_TIMEOUT = 60_000L; // 1 minute
+  private static final long DEFAULT_RUN_TIMEOUT = 0; // No default run timeout
+  private static final long ACTIVE_RUN_TIMEOUT = 60000 * 60 * 3; // 3 hours
 
   private ManualClock clock;
   private WorkspaceActivityChecker checker;
@@ -69,7 +71,12 @@ public class WorkspaceActivityCheckerTest {
 
     WorkspaceActivityManager activityManager =
         new WorkspaceActivityManager(
-            workspaceManager, workspaceActivityDao, eventService, DEFAULT_TIMEOUT, clock);
+            workspaceManager,
+            workspaceActivityDao,
+            eventService,
+            DEFAULT_TIMEOUT,
+            DEFAULT_RUN_TIMEOUT,
+            clock);
 
     lenient()
         .when(workspaceActivityDao.getAll(anyInt(), anyLong()))
@@ -88,7 +95,7 @@ public class WorkspaceActivityCheckerTest {
 
   @Test
   public void shouldStopAllExpiredWorkspaces() throws Exception {
-    when(workspaceActivityDao.findExpired(anyLong())).thenReturn(asList("1", "2", "3"));
+    when(workspaceActivityDao.findExpired(anyLong(), anyLong())).thenReturn(asList("1", "2", "3"));
 
     checker.expire();
 

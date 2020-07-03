@@ -101,7 +101,9 @@ public class WorkspaceActivityChecker {
 
   private void stopAllExpired() {
     try {
-      activityDao.findExpired(clock.millis()).forEach(this::stopExpiredQuietly);
+      activityDao
+          .findExpired(clock.millis(), workspaceActivityManager.getRunTimeout())
+          .forEach(this::stopExpiredQuietly);
     } catch (ServerException e) {
       LOG.error("Failed to list all expired to perform stop. Cause: {}", e.getMessage(), e);
     }

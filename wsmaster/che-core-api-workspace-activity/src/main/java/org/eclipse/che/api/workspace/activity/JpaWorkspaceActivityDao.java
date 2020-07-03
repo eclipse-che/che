@@ -52,12 +52,13 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
 
   @Override
   @Transactional(rollbackOn = ServerException.class)
-  public List<String> findExpired(long timestamp) throws ServerException {
+  public List<String> findExpired(long timestamp, long runTimeout) throws ServerException {
     try {
       return managerProvider
           .get()
           .createNamedQuery("WorkspaceActivity.getExpired", WorkspaceActivity.class)
           .setParameter("expiration", timestamp)
+          .setParameter("runTimeout", runTimeout)
           .getResultList()
           .stream()
           .map(WorkspaceActivity::getWorkspaceId)

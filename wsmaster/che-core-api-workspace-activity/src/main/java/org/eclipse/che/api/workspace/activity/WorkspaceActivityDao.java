@@ -46,10 +46,11 @@ public interface WorkspaceActivityDao {
    * Finds workspaces which are passed given expiration time and must be stopped.
    *
    * @param timestamp expiration time
+   * @param runTimeout time after which the workspace will be stopped regardless of activity
    * @return list of workspaces which expiration time is older than given timestamp
    * @throws ServerException when operation failed
    */
-  List<String> findExpired(long timestamp) throws ServerException;
+  List<String> findExpired(long timestamp, long runTimeout) throws ServerException;
 
   /**
    * Removes the activity record of the provided workspace.

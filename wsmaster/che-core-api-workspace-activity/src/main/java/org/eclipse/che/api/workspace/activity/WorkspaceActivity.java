@@ -27,7 +27,11 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 @NamedQueries({
   @NamedQuery(
       name = "WorkspaceActivity.getExpired",
-      query = "SELECT a FROM WorkspaceActivity a WHERE a.expiration < :expiration"),
+      query =
+          "SELECT a FROM WorkspaceActivity a WHERE a.expiration < :expiration OR "
+              + "(a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING AND "
+              + ":runTimeout > 0 AND "
+              + ":expiration - a.lastRunning > :runTimeout)"),
   @NamedQuery(
       name = "WorkspaceActivity.getStoppedSince",
       query =
@@ -165,6 +169,10 @@ public class WorkspaceActivity {
     this.expiration = expiration;
   }
 
+  public Long getRunTimeout() {
+    return this.lastRunning - this.lastStarting;
+  }
+
   public WorkspaceStatus getStatus() {
     return status;
   }
@@ -181,6 +189,7 @@ public class WorkspaceActivity {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
+
     WorkspaceActivity activity = (WorkspaceActivity) o;
     return Objects.equals(workspaceId, activity.workspaceId)
         && Objects.equals(created, activity.created)
