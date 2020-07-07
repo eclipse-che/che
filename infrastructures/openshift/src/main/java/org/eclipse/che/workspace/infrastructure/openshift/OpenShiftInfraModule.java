@@ -82,6 +82,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectOnWorkspaceRemove;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.AsyncStorageProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftPreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftCookiePathStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
@@ -222,5 +223,6 @@ public class OpenShiftInfraModule extends AbstractModule {
     bind(ExternalServiceExposureStrategy.class).to(OpenShiftServerExposureStrategy.class);
     bind(CookiePathStrategy.class).to(OpenShiftCookiePathStrategy.class);
     bind(NonTlsDistributedClusterModeNotifier.class);
+    bind(AsyncStorageProvisioner.class);
   }
 }

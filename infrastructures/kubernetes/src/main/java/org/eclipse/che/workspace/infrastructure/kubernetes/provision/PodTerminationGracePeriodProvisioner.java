@@ -11,6 +11,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
+import static org.eclipse.che.api.workspace.shared.Constants.ASYNC_PERSIST_ATTRIBUTE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility.isEphemeral;
+
 import io.fabric8.kubernetes.api.model.PodSpec;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -31,6 +34,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  */
 public class PodTerminationGracePeriodProvisioner implements ConfigurationProvisioner {
   private final long graceTerminationPeriodSec;
+  private final long graceTerminationPeriodAsyncPvc = 60;
 
   @Inject
   public PodTerminationGracePeriodProvisioner(
@@ -48,7 +52,7 @@ public class PodTerminationGracePeriodProvisioner implements ConfigurationProvis
 
     for (PodData pod : k8sEnv.getPodsData().values()) {
       if (!isTerminationGracePeriodSet(pod.getSpec())) {
-        pod.getSpec().setTerminationGracePeriodSeconds(graceTerminationPeriodSec);
+        pod.getSpec().setTerminationGracePeriodSeconds(getGraceTerminationPeriodSec(k8sEnv));
       }
     }
   }
@@ -59,5 +63,13 @@ public class PodTerminationGracePeriodProvisioner implements ConfigurationProvis
    */
   private boolean isTerminationGracePeriodSet(final PodSpec podSpec) {
     return podSpec.getTerminationGracePeriodSeconds() != null;
+  }
+
+  private long getGraceTerminationPeriodSec(KubernetesEnvironment k8sEnv) {
+    if (isEphemeral(k8sEnv.getAttributes())
+        && "true".equals(k8sEnv.getAttributes().get(ASYNC_PERSIST_ATTRIBUTE))) {
+      return graceTerminationPeriodAsyncPvc;
+    }
+    return graceTerminationPeriodSec;
   }
 }
