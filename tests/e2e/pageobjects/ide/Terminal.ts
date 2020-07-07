@@ -132,6 +132,21 @@ export class Terminal {
     }
 
     private async getTerminalIndex(terminalTitle: string): Promise<number> {
+        for (let i: number = 0; i < 10; i++) {
+            try {
+                return await this.searchTerminalIndex(terminalTitle);
+            } catch (err) {
+                if (!(err instanceof error.NoSuchElementError)) {
+                    throw err;
+                }
+
+            }
+        }
+
+        throw new error.NoSuchElementError(`The terminal with title '${terminalTitle}' has not been found.`);
+    }
+
+    private async searchTerminalIndex(terminalTitle: string): Promise<number> {
         const terminalTabTitleXpathLocator: string = `//div[@id='theia-bottom-content-panel']` +
             `//li[contains(@id, 'shell-tab-terminal') or contains(@id, 'shell-tab-plugin')]` +
             `//div[@class='p-TabBar-tabLabel']`;
@@ -152,8 +167,9 @@ export class Terminal {
             terminalTitles.push(currentTerminalTitle);
         }
 
-        throw new error.WebDriverError(`The terminal with title '${terminalTitle}' has not been found.\n` +
+        throw new error.NoSuchElementError(`The terminal with title '${terminalTitle}' has not been found.\n` +
             `List of the tabs:\n${terminalTitles}`);
+
     }
 
     private getTerminalEditorInteractionEditorLocator(terminalIndex: number): By {
