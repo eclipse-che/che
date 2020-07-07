@@ -44,6 +44,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.proxy.ProxyAuthenticator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,6 +94,7 @@ public class KeycloakSettings {
     URL url;
     Map<String, Object> openIdConfiguration;
     try {
+      ProxyAuthenticator.initAuthenticator(wellKnownEndpoint);
       url = new URL(wellKnownEndpoint);
       final InputStream inputStream = url.openStream();
       final JsonFactory factory = new JsonFactory();
@@ -103,6 +105,8 @@ public class KeycloakSettings {
     } catch (IOException e) {
       throw new RuntimeException(
           "Exception while retrieving OpenId configuration from endpoint: " + wellKnownEndpoint, e);
+    } finally {
+      ProxyAuthenticator.resetAuthenticator();
     }
 
     LOG.info("openid configuration = {}", openIdConfiguration);
