@@ -96,7 +96,6 @@ public class WorkspaceActivityDaoTest {
       a.setExpiration(base * 1_000_000);
 
       activities[i] = a;
-      System.out.println("activity is " + a);
     }
 
     accountTckRepository.createAll(asList(accounts));

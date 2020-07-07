@@ -56,7 +56,6 @@ import org.testng.annotations.Test;
 public class WorkspaceActivityCheckerTest {
   private static final long DEFAULT_TIMEOUT = 60_000L; // 1 minute
   private static final long DEFAULT_RUN_TIMEOUT = 0; // No default run timeout
-  private static final long ACTIVE_RUN_TIMEOUT = 60000 * 60 * 3; // 3 hours
 
   private ManualClock clock;
   private WorkspaceActivityChecker checker;

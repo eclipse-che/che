@@ -50,7 +50,7 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
         .filter(
             a ->
                 (a.getExpiration() != null && a.getExpiration() < timestamp)
-                    || (runTimeout > 0 && a.getLastRunning() - a.getLastStarting() > runTimeout))
+                    || (runTimeout > 0 && timestamp - a.getLastRunning() > runTimeout))
         .map(WorkspaceActivity::getWorkspaceId)
         .collect(toList());
   }

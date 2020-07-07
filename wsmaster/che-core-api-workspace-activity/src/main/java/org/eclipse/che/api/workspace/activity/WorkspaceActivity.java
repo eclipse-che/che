@@ -169,10 +169,6 @@ public class WorkspaceActivity {
     this.expiration = expiration;
   }
 
-  public Long getRunTimeout() {
-    return this.lastRunning - this.lastStarting;
-  }
-
   public WorkspaceStatus getStatus() {
     return status;
   }
@@ -189,7 +185,6 @@ public class WorkspaceActivity {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-
     WorkspaceActivity activity = (WorkspaceActivity) o;
     return Objects.equals(workspaceId, activity.workspaceId)
         && Objects.equals(created, activity.created)
