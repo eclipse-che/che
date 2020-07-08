@@ -91,7 +91,6 @@ public class KeycloakSettings {
 
     LOG.info("Retrieving OpenId configuration from endpoint: {}", wellKnownEndpoint);
 
-    URL url;
     Map<String, Object> openIdConfiguration;
     ProxyAuthenticator.initAuthenticator(wellKnownEndpoint);
     try (InputStream inputStream = new URL(wellKnownEndpoint).openStream()) {
