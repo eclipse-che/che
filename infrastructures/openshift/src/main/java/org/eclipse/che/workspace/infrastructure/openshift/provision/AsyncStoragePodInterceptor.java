@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
-import static java.lang.String.format;
+import static java.util.Objects.isNull;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility.isEphemeral;
 import static org.eclipse.che.workspace.infrastructure.openshift.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
 
@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 public class AsyncStoragePodInterceptor {
 
   private static final Logger LOG = LoggerFactory.getLogger(AsyncStoragePodInterceptor.class);
+  private static final int DELETE_POD_TIMEOUT_IN_MIN = 5;
 
   private final OpenShiftClientFactory clientFactory;
   private final String strategy;
@@ -66,17 +67,18 @@ public class AsyncStoragePodInterceptor {
     }
 
     String namespace = identity.getInfrastructureNamespace();
-    PodResource<Pod, DoneablePod> podResource =
-        clientFactory
-            .create(identity.getWorkspaceId())
-            .pods()
-            .inNamespace(namespace)
-            .withName(ASYNC_STORAGE);
-    if (podResource.get() == null) {
+    String workspaceId = identity.getWorkspaceId();
+
+    PodResource<Pod, DoneablePod> asyncStoragePodResource =
+        getAsyncStoragePodResource(namespace, workspaceId);
+
+    if (isNull(asyncStoragePodResource.get())) { // pod doesn't exist
       return;
     }
+
     try {
-      doDeletePod(identity.getWorkspaceId(), namespace).get(5, TimeUnit.MINUTES);
+      deleteAsyncStoragePod(asyncStoragePodResource)
+          .get(DELETE_POD_TIMEOUT_IN_MIN, TimeUnit.MINUTES);
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
       throw new InfrastructureException(
@@ -89,17 +91,15 @@ public class AsyncStoragePodInterceptor {
     }
   }
 
-  protected CompletableFuture<Void> doDeletePod(String workspaceId, String namespace)
+  private PodResource<Pod, DoneablePod> getAsyncStoragePodResource(
+      String workspaceId, String namespace) throws InfrastructureException {
+    return clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(ASYNC_STORAGE);
+  }
+
+  private CompletableFuture<Void> deleteAsyncStoragePod(PodResource<Pod, DoneablePod> podResource)
       throws InfrastructureException {
     Watch toCloseOnException = null;
     try {
-      PodResource<Pod, DoneablePod> podResource =
-          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(ASYNC_STORAGE);
-      if (podResource.get() == null) {
-        throw new InfrastructureException(
-            format("No pod found to delete for name %s", ASYNC_STORAGE));
-      }
-
       final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
       final Watch watch = podResource.watch(new DeleteWatcher<>(deleteFuture));
       toCloseOnException = watch;
