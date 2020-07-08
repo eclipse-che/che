@@ -15,6 +15,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.ASYNC_PERSIST_ATTRI
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility.isEphemeral;
 
 import io.fabric8.kubernetes.api.model.PodSpec;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -66,8 +67,8 @@ public class PodTerminationGracePeriodProvisioner implements ConfigurationProvis
   }
 
   private long getGraceTerminationPeriodSec(KubernetesEnvironment k8sEnv) {
-    if (isEphemeral(k8sEnv.getAttributes())
-        && "true".equals(k8sEnv.getAttributes().get(ASYNC_PERSIST_ATTRIBUTE))) {
+    Map<String, String> attributes = k8sEnv.getAttributes();
+    if (isEphemeral(attributes) && "true".equals(attributes.get(ASYNC_PERSIST_ATTRIBUTE))) {
       return graceTerminationPeriodAsyncPvc;
     }
     return graceTerminationPeriodSec;
