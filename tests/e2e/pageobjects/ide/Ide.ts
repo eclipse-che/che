@@ -137,7 +137,13 @@ export class Ide {
         const mainIdeParts: Array<By> = [By.css(Ide.TOP_MENU_PANEL_CSS), By.css(Ide.LEFT_CONTENT_PANEL_CSS), By.id(Ide.EXPLORER_BUTTON_ID)];
 
         for (const idePartLocator of mainIdeParts) {
-            await this.driverHelper.waitVisibility(idePartLocator, timeout);
+            try {
+                await this.driverHelper.waitVisibility(idePartLocator, timeout);
+            } catch (err) {
+                if (err instanceof error.NoSuchWindowError) {
+                    await this.driverHelper.waitVisibility(idePartLocator, timeout);
+                }
+            }
         }
     }
 
