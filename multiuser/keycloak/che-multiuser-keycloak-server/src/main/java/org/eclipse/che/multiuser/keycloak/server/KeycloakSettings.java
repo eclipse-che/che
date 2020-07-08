@@ -93,10 +93,8 @@ public class KeycloakSettings {
 
     URL url;
     Map<String, Object> openIdConfiguration;
-    try {
-      ProxyAuthenticator.initAuthenticator(wellKnownEndpoint);
-      url = new URL(wellKnownEndpoint);
-      final InputStream inputStream = url.openStream();
+    ProxyAuthenticator.initAuthenticator(wellKnownEndpoint);
+    try (InputStream inputStream = new URL(wellKnownEndpoint).openStream()) {
       final JsonFactory factory = new JsonFactory();
       final JsonParser parser = factory.createParser(inputStream);
       final TypeReference<Map<String, Object>> typeReference =
