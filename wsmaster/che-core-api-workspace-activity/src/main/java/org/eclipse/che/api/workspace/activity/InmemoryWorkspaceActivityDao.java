@@ -42,6 +42,16 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
     findActivity(workspaceId).setExpiration(null);
   }
 
+  /**
+   * Finds any workspaces that have expired.
+   *
+   * <p>A workspace is expired when the expiration value is less than the current time or when the
+   * difference between the current time and the last running time is greater than the run timeout
+   *
+   * @param timestamp expiration time
+   * @param runTimeout time after which the workspace will be stopped regardless of activity
+   * @return
+   */
   @Override
   public List<String> findExpired(long timestamp, long runTimeout) {
     return workspaceActivities
@@ -50,7 +60,9 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
         .filter(
             a ->
                 (a.getExpiration() != null && a.getExpiration() < timestamp)
-                    || (runTimeout > 0 && timestamp - a.getLastRunning() > runTimeout))
+                    || (runTimeout > 0
+                        && a.getStatus() == WorkspaceStatus.RUNNING
+                        && timestamp - a.getLastRunning() > runTimeout))
         .map(WorkspaceActivity::getWorkspaceId)
         .collect(toList());
   }

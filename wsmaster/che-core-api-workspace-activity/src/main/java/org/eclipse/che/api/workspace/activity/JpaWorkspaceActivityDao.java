@@ -50,6 +50,16 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
     doUpdateOptionally(workspaceId, a -> a.setExpiration(null));
   }
 
+  /**
+   * Finds any workspaces that have expired.
+   *
+   * <p>A workspace is expired when the expiration value is less than the current time or when the
+   * difference between the current time and the last running time is greater than the run timeout
+   *
+   * @param timestamp expiration time
+   * @param runTimeout time after which the workspace will be stopped regardless of activity
+   * @return
+   */
   @Override
   @Transactional(rollbackOn = ServerException.class)
   public List<String> findExpired(long timestamp, long runTimeout) throws ServerException {
