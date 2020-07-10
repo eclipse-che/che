@@ -93,7 +93,7 @@ public class AsyncStoragePodInterceptor {
   }
 
   private PodResource<Pod, DoneablePod> getAsyncStoragePodResource(
-      String workspaceId, String namespace) throws InfrastructureException {
+      String namespace, String workspaceId) throws InfrastructureException {
     return clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(ASYNC_STORAGE);
   }
 
