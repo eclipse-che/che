@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
+import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
@@ -210,6 +211,31 @@ public class PodMergerTest {
 
     // when
     podMerger.merge(Arrays.asList(podData1, podData2));
+  }
+
+  @Test
+  public void shouldMergeProjectVolumesWithoutException() throws Exception {
+    // given
+    PodSpec podSpec1 =
+        new PodSpecBuilder()
+            .withVolumes(new VolumeBuilder().withName(PROJECTS_VOLUME_NAME).build())
+            .build();
+    podSpec1.setAdditionalProperty("add1", 1L);
+    PodData podData1 = new PodData(podSpec1, new ObjectMetaBuilder().build());
+
+    PodSpec podSpec2 =
+        new PodSpecBuilder()
+            .withVolumes(new VolumeBuilder().withName(PROJECTS_VOLUME_NAME).build())
+            .build();
+    podSpec2.setAdditionalProperty("add2", 2L);
+    PodData podData2 = new PodData(podSpec2, new ObjectMetaBuilder().build());
+
+    // when
+    Deployment merged = podMerger.merge(Arrays.asList(podData1, podData2));
+
+    // then
+    PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
+    assertEquals(podTemplate.getSpec().getVolumes().size(), 1);
   }
 
   @Test

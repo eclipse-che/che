@@ -162,7 +162,6 @@ pipeline {
                         sh """
                             project_list=(
                                 eclipse/che-parent
-                                eclipse/che-docs
                             )
                             
                             for project in \${project_list[@]};
