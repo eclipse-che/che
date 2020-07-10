@@ -53,7 +53,7 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
    * @return
    */
   @Override
-  public List<String> findExpired(long timestamp, long runTimeout) {
+  public List<String> findExpiredRunTimeout(long timestamp, long runTimeout) {
     return workspaceActivities
         .values()
         .stream()
@@ -63,6 +63,16 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
                     || (runTimeout > 0
                         && a.getStatus() == WorkspaceStatus.RUNNING
                         && timestamp - a.getLastRunning() > runTimeout))
+        .map(WorkspaceActivity::getWorkspaceId)
+        .collect(toList());
+  }
+
+  @Override
+  public List<String> findExpiredIdle(long timestamp) {
+    return workspaceActivities
+        .values()
+        .stream()
+        .filter(a -> a.getExpiration() != null && a.getExpiration() < timestamp)
         .map(WorkspaceActivity::getWorkspaceId)
         .collect(toList());
   }

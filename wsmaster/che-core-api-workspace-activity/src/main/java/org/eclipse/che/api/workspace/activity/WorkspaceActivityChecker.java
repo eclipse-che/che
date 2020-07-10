@@ -46,6 +46,9 @@ public class WorkspaceActivityChecker {
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceActivityChecker.class);
   private static final String ACTIVITY_CHECKER = "activity-checker";
 
+  private final String WORKSPACE_IDLE_TIMEOUT_EXCEEDED = "Workspace idle timeout exceeded";
+  private final String WORKSPACE_RUN_TIMEOUT_EXCEEDED = "Workspace run timeout exceeded";
+
   private final WorkspaceActivityDao activityDao;
   private final WorkspaceManager workspaceManager;
   private final WorkspaceRuntimes workspaceRuntimes;
@@ -102,20 +105,24 @@ public class WorkspaceActivityChecker {
   private void stopAllExpired() {
     try {
       activityDao
-          .findExpired(clock.millis(), workspaceActivityManager.getRunTimeout())
-          .forEach(this::stopExpiredQuietly);
+          .findExpiredIdle(clock.millis())
+          .forEach(wsId -> stopExpiredQuietly(wsId, WORKSPACE_IDLE_TIMEOUT_EXCEEDED));
+      if (workspaceActivityManager.getRunTimeout() > 0) {
+        activityDao
+            .findExpiredRunTimeout(clock.millis(), workspaceActivityManager.getRunTimeout())
+            .forEach(wsId -> stopExpiredQuietly(wsId, WORKSPACE_RUN_TIMEOUT_EXCEEDED));
+      }
     } catch (ServerException e) {
       LOG.error("Failed to list all expired to perform stop. Cause: {}", e.getMessage(), e);
     }
   }
 
-  private void stopExpiredQuietly(String workspaceId) {
+  private void stopExpiredQuietly(String workspaceId, String reason) {
     try {
       Workspace workspace = workspaceManager.getWorkspace(workspaceId);
       workspace.getAttributes().put(WORKSPACE_STOPPED_BY, ACTIVITY_CHECKER);
       workspaceManager.updateWorkspace(workspaceId, workspace);
-      workspaceManager.stopWorkspace(
-          workspaceId, singletonMap(WORKSPACE_STOP_REASON, "Workspace idle timeout exceeded"));
+      workspaceManager.stopWorkspace(workspaceId, singletonMap(WORKSPACE_STOP_REASON, reason));
     } catch (NotFoundException ignored) {
       // workspace no longer exists, no need to do anything
     } catch (ConflictException e) {

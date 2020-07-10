@@ -113,7 +113,7 @@ public class WorkspaceActivityDaoTest {
   @Test
   public void shouldFindExpirationsByTimestamp() throws Exception {
     List<String> expected = asList(activities[0].getWorkspaceId(), activities[1].getWorkspaceId());
-    List<String> found = workspaceActivityDao.findExpired(2_500_000, DEFAULT_RUN_TIMEOUT);
+    List<String> found = workspaceActivityDao.findExpiredIdle(2_500_000);
 
     assertEquals(found, expected);
   }
@@ -124,7 +124,7 @@ public class WorkspaceActivityDaoTest {
 
     workspaceActivityDao.removeExpiration(activities[0].getWorkspaceId());
 
-    List<String> found = workspaceActivityDao.findExpired(2_500_000, DEFAULT_RUN_TIMEOUT);
+    List<String> found = workspaceActivityDao.findExpiredIdle(2_500_000);
     assertEquals(found, expected);
   }
 
@@ -139,7 +139,7 @@ public class WorkspaceActivityDaoTest {
 
     activityTckRepository.createAll(createWorkspaceActivitiesWithStatuses());
 
-    List<String> found = workspaceActivityDao.findExpired(8_000_000, 1_000_000);
+    List<String> found = workspaceActivityDao.findExpiredIdle(8_000_000);
     assertEquals(found, expected);
   }
 
@@ -153,7 +153,7 @@ public class WorkspaceActivityDaoTest {
 
     workspaceActivityDao.setExpirationTime(activities[2].getWorkspaceId(), 1_750_000);
 
-    List<String> found = workspaceActivityDao.findExpired(2_500_000, DEFAULT_RUN_TIMEOUT);
+    List<String> found = workspaceActivityDao.findExpiredIdle(2_500_000);
     assertEquals(found, expected);
   }
 
@@ -176,7 +176,7 @@ public class WorkspaceActivityDaoTest {
     // create new again
     workspaceActivityDao.setExpirationTime(activities[1].getWorkspaceId(), 1_250_000);
 
-    List<String> found = workspaceActivityDao.findExpired(1_500_000, DEFAULT_RUN_TIMEOUT);
+    List<String> found = workspaceActivityDao.findExpiredIdle(1_500_000);
     assertEquals(found, expected);
   }
 

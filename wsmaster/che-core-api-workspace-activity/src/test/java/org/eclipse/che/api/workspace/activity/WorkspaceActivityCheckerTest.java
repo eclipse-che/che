@@ -94,7 +94,7 @@ public class WorkspaceActivityCheckerTest {
 
   @Test
   public void shouldStopAllExpiredWorkspaces() throws Exception {
-    when(workspaceActivityDao.findExpired(anyLong(), anyLong())).thenReturn(asList("1", "2", "3"));
+    when(workspaceActivityDao.findExpiredIdle(anyLong())).thenReturn(asList("1", "2", "3"));
 
     checker.expire();
 
