@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
+import static java.lang.Boolean.parseBoolean;
 import static org.eclipse.che.api.workspace.shared.Constants.ASYNC_PERSIST_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility.isEphemeral;
 
@@ -35,6 +36,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  */
 public class PodTerminationGracePeriodProvisioner implements ConfigurationProvisioner {
   private final long graceTerminationPeriodSec;
+  /**
+   * This value will activate if workspace configured to use Async Storage. We can't set default
+   * grace termination period because we need to give some time on workspace stop action for backup
+   * changes to the persistent storage. At the moment no way to predict this time because it depends
+   * on amount of files, size of files and network ability. This is some empirical number of seconds
+   * which should be enough for most projects.
+   */
   private final long graceTerminationPeriodAsyncPvc = 60;
 
   @Inject
@@ -68,7 +76,7 @@ public class PodTerminationGracePeriodProvisioner implements ConfigurationProvis
 
   private long getGraceTerminationPeriodSec(KubernetesEnvironment k8sEnv) {
     Map<String, String> attributes = k8sEnv.getAttributes();
-    if (isEphemeral(attributes) && "true".equals(attributes.get(ASYNC_PERSIST_ATTRIBUTE))) {
+    if (isEphemeral(attributes) && parseBoolean(attributes.get(ASYNC_PERSIST_ATTRIBUTE))) {
       return graceTerminationPeriodAsyncPvc;
     }
     return graceTerminationPeriodSec;

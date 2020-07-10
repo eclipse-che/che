@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
 import static java.util.Objects.isNull;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility.isEphemeral;
 import static org.eclipse.che.workspace.infrastructure.openshift.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
 
@@ -58,7 +59,7 @@ public class AsyncStoragePodInterceptor {
 
   public void intercept(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-    if (!"common".equals(strategy)) {
+    if (!COMMON_STRATEGY.equals(strategy)) {
       return;
     }
 

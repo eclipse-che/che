@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
+import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.Collections.singletonList;
@@ -18,9 +19,9 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.workspace.shared.Constants.ASYNC_PERSIST_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_SSH_KEYS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_SSH_KEYS_MESSAGE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility.isEphemeral;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
@@ -28,6 +29,10 @@ import io.fabric8.kubernetes.api.model.ConfigMapVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
+import io.fabric8.kubernetes.api.model.DoneableConfigMap;
+import io.fabric8.kubernetes.api.model.DoneablePersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.DoneablePod;
+import io.fabric8.kubernetes.api.model.DoneableService;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.IntOrStringBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -47,6 +52,9 @@ import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.PodResource;
+import io.fabric8.kubernetes.client.dsl.Resource;
+import io.fabric8.kubernetes.client.dsl.ServiceResource;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
@@ -121,12 +129,12 @@ public class AsyncStorageProvisioner {
 
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-    if (!"true".equals(osEnv.getAttributes().get(ASYNC_PERSIST_ATTRIBUTE))) {
+    if (!parseBoolean(osEnv.getAttributes().get(ASYNC_PERSIST_ATTRIBUTE))) {
       return;
     }
 
-    if ("true".equals(osEnv.getAttributes().get(ASYNC_PERSIST_ATTRIBUTE))
-        && !"common".equals(strategy)) {
+    if (parseBoolean(osEnv.getAttributes().get(ASYNC_PERSIST_ATTRIBUTE))
+        && !COMMON_STRATEGY.equals(strategy)) {
       String message =
           format(
               "Workspace configuration not valid: Asynchronous storage available only for 'common' PVC strategy, but got %s",
@@ -136,7 +144,7 @@ public class AsyncStorageProvisioner {
       throw new InfrastructureException(message);
     }
 
-    if ("true".equals(osEnv.getAttributes().get(ASYNC_PERSIST_ATTRIBUTE))
+    if (parseBoolean(osEnv.getAttributes().get(ASYNC_PERSIST_ATTRIBUTE))
         && !isEphemeral(osEnv.getAttributes())) {
       String message =
           "Workspace configuration not valid: Asynchronous storage available only if attribute 'persistVolumes' set to false";
@@ -147,67 +155,25 @@ public class AsyncStorageProvisioner {
 
     String namespace = identity.getInfrastructureNamespace();
     KubernetesClient oc = clientFactory.create(identity.getWorkspaceId());
-
-    boolean isPvcExist =
-        oc.persistentVolumeClaims()
-            .inNamespace(namespace)
-            .list()
-            .getItems()
-            .stream()
-            .anyMatch(
-                (Predicate<PersistentVolumeClaim>)
-                    pvc -> pvc.getMetadata().getName().equals(configuredPVCName));
-
-    if (!isPvcExist) {
-      PersistentVolumeClaim pvc =
-          KubernetesObjectUtil.newPVC(
-              configuredPVCName, accessMode, pvcQuantity, pvcStorageClassName);
-      oc.persistentVolumeClaims().inNamespace(namespace).create(pvc);
-    }
-
     String configMapName = namespace + ASYNC_STORAGE_CONFIG;
-    boolean isMapExist =
-        oc.configMaps()
-            .inNamespace(namespace)
-            .list()
-            .getItems()
-            .stream()
-            .anyMatch(
-                (Predicate<ConfigMap>)
-                    configMap -> configMap.getMetadata().getName().equals(configMapName));
 
-    if (!isMapExist) {
-      ConfigMap configMap = createConfigMap(namespace, configMapName, identity, osEnv);
-      oc.configMaps().inNamespace(namespace).create(configMap);
+    createPvcIfNotExist(oc, namespace);
+    createConfigMapIfNotExist(oc, namespace, configMapName, identity, osEnv);
+    createAsyncStoragePodIfNotExist(oc, namespace, configMapName);
+    createStorageServiceIfNotExist(oc, namespace);
+  }
+
+  private void createPvcIfNotExist(KubernetesClient oc, String namespace) {
+    Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim> claimResource =
+        oc.persistentVolumeClaims().inNamespace(namespace).withName(configuredPVCName);
+
+    if (claimResource.get() != null) {
+      return; // pvc already exist
     }
-
-    boolean isPodExist =
-        oc.pods()
-            .inNamespace(namespace)
-            .list()
-            .getItems()
-            .stream()
-            .anyMatch((Predicate<Pod>) pod -> pod.getMetadata().getName().equals(ASYNC_STORAGE));
-
-    if (!isPodExist) {
-      Pod pod = createStoragePod(namespace, configMapName);
-      oc.pods().inNamespace(namespace).create(pod);
-    }
-
-    boolean isServiceExist =
-        oc.services()
-            .inNamespace(namespace)
-            .list()
-            .getItems()
-            .stream()
-            .anyMatch(
-                (Predicate<Service>)
-                    service -> service.getMetadata().getName().equals(ASYNC_STORAGE));
-
-    if (!isServiceExist) {
-      Service service = createStorageService(namespace);
-      oc.services().inNamespace(namespace).create(service);
-    }
+    PersistentVolumeClaim pvc =
+        KubernetesObjectUtil.newPVC(
+            configuredPVCName, accessMode, pvcQuantity, pvcStorageClassName);
+    oc.persistentVolumeClaims().inNamespace(namespace).create(pvc);
   }
 
   /** Get or create new pair of SSH keys, this is need for securing rsync connection */
@@ -246,30 +212,49 @@ public class AsyncStorageProvisioner {
   }
 
   /** Create configmap with public part of SSH key */
-  private ConfigMap createConfigMap(
-      String namespace, String configMapName, RuntimeIdentity identity, OpenShiftEnvironment osEnv)
+  private void createConfigMapIfNotExist(
+      KubernetesClient oc,
+      String namespace,
+      String configMapName,
+      RuntimeIdentity identity,
+      OpenShiftEnvironment osEnv)
       throws InfrastructureException {
+    Resource<ConfigMap, DoneableConfigMap> mapResource =
+        oc.configMaps().inNamespace(namespace).withName(configMapName);
+    if (mapResource.get() != null) { // map already exist
+      return;
+    }
+
     List<SshPairImpl> sshPairs = getOrCreateSshPairs(identity, osEnv);
     if (sshPairs == null) {
-      return null;
+      return;
     }
     SshPair sshPair = sshPairs.get(0);
     Map<String, String> sshConfigData =
         ImmutableMap.of(AUTHORIZED_KEYS, sshPair.getPublicKey() + "\n");
-    return new ConfigMapBuilder()
-        .withNewMetadata()
-        .withName(configMapName)
-        .withNamespace(namespace)
-        .endMetadata()
-        .withData(sshConfigData)
-        .build();
+    ConfigMap configMap =
+        new ConfigMapBuilder()
+            .withNewMetadata()
+            .withName(configMapName)
+            .withNamespace(namespace)
+            .endMetadata()
+            .withData(sshConfigData)
+            .build();
+    oc.configMaps().inNamespace(namespace).create(configMap);
   }
 
   /**
    * Create storage Pod with container with mounted volume for storing project source backups, SSH
    * key and exposed port for rsync connection
    */
-  private Pod createStoragePod(String namespace, String configMap) {
+  private void createAsyncStoragePodIfNotExist(
+      KubernetesClient oc, String namespace, String configMap) {
+    PodResource<Pod, DoneablePod> podResource =
+        oc.pods().inNamespace(namespace).withName(ASYNC_STORAGE);
+    if (podResource.get() != null) {
+      return; // pod already exist
+    }
+
     String containerName = Names.generateName(ASYNC_STORAGE);
 
     Volume storageVolume =
@@ -327,20 +312,29 @@ public class AsyncStorageProvisioner {
     PodSpec podSpec =
         podSpecBuilder.withContainers(container).withVolumes(storageVolume, sshKeyVolume).build();
 
-    return new PodBuilder()
-        .withApiVersion("v1")
-        .withKind("Pod")
-        .withNewMetadata()
-        .withName(ASYNC_STORAGE)
-        .withNamespace(namespace)
-        .withLabels(singletonMap("app", ASYNC_STORAGE))
-        .endMetadata()
-        .withSpec(podSpec)
-        .build();
+    Pod pod =
+        new PodBuilder()
+            .withApiVersion("v1")
+            .withKind("Pod")
+            .withNewMetadata()
+            .withName(ASYNC_STORAGE)
+            .withNamespace(namespace)
+            .withLabels(singletonMap("app", ASYNC_STORAGE))
+            .endMetadata()
+            .withSpec(podSpec)
+            .build();
+
+    oc.pods().inNamespace(namespace).create(pod);
   }
 
   /** Create service for serving rsync connection */
-  private Service createStorageService(String namespace) {
+  private void createStorageServiceIfNotExist(KubernetesClient oc, String namespace) {
+    ServiceResource<Service, DoneableService> serviceResource =
+        oc.services().inNamespace(namespace).withName(ASYNC_STORAGE);
+    if (serviceResource.get() != null) {
+      return; // service already exist
+    }
+
     ObjectMeta meta = new ObjectMeta();
     meta.setName(ASYNC_STORAGE);
     meta.setNamespace(namespace);
@@ -365,6 +359,6 @@ public class AsyncStorageProvisioner {
     service.setMetadata(meta);
     service.setSpec(spec);
 
-    return service;
+    oc.services().inNamespace(namespace).create(service);
   }
 }
