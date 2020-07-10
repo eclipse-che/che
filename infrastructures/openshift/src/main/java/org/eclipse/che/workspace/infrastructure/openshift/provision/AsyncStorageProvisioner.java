@@ -139,7 +139,7 @@ public class AsyncStorageProvisioner {
     if ("true".equals(osEnv.getAttributes().get(ASYNC_PERSIST_ATTRIBUTE))
         && !isEphemeral(osEnv.getAttributes())) {
       String message =
-          "Workspace configuration not valid: Asynchronous storage available only if attribute 'persistVolumes' set to false";
+          format("Workspace configuration not valid: Asynchronous storage available only if '%s' attribute set to false", ASYNC_PERSIST_ATTRIBUTE );
       LOG.warn(message);
       osEnv.addWarning(new WarningImpl(4200, message));
       throw new InfrastructureException(message);
