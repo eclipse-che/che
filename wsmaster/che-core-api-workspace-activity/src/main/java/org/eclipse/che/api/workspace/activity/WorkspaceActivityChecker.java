@@ -110,7 +110,11 @@ public class WorkspaceActivityChecker {
       if (workspaceActivityManager.getRunTimeout() > 0) {
         activityDao
             .findExpiredRunTimeout(clock.millis(), workspaceActivityManager.getRunTimeout())
-            .forEach(wsId -> stopExpiredQuietly(wsId, WORKSPACE_RUN_TIMEOUT_EXCEEDED));
+            .forEach(
+                wsId -> {
+                  LOG.info("{} for workspace {}", WORKSPACE_RUN_TIMEOUT_EXCEEDED, wsId);
+                  stopExpiredQuietly(wsId, WORKSPACE_RUN_TIMEOUT_EXCEEDED);
+                });
       }
     } catch (ServerException e) {
       LOG.error("Failed to list all expired to perform stop. Cause: {}", e.getMessage(), e);

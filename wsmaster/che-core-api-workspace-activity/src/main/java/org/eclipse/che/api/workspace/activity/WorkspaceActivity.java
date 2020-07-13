@@ -33,8 +33,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
       query =
           "SELECT a FROM WorkspaceActivity a WHERE "
               + "(a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING AND "
-              + ":runTimeout > 0 AND "
-              + ":timestamp - :runTimeout > a.lastRunning)"),
+              + "a.lastRunning < :timestamp - :runTimeout)"),
   @NamedQuery(
       name = "WorkspaceActivity.getStoppedSince",
       query =
