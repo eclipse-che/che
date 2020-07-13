@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
+import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility.isEphemeral;
@@ -59,11 +60,7 @@ public class AsyncStoragePodInterceptor {
 
   public void intercept(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-    if (!COMMON_STRATEGY.equals(strategy)) {
-      return;
-    }
-
-    if (isEphemeral(osEnv.getAttributes())) {
+    if (!COMMON_STRATEGY.equals(strategy) || isEphemeral(osEnv.getAttributes())) {
       return;
     }
 
@@ -83,12 +80,16 @@ public class AsyncStoragePodInterceptor {
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
       throw new InfrastructureException(
-          "Interrupted while waiting for pod removal. " + ex.getMessage());
+          format(
+              "Interrupted while waiting for pod '%s' removal. " + ex.getMessage(), ASYNC_STORAGE));
     } catch (ExecutionException ex) {
       throw new InfrastructureException(
-          "Error occurred while waiting for pod removal. " + ex.getMessage());
+          format(
+              "Error occurred while waiting for pod '%s' removal. " + ex.getMessage(),
+              ASYNC_STORAGE));
     } catch (TimeoutException ex) {
-      throw new InfrastructureException("Pod removal timeout reached " + ex.getMessage());
+      throw new InfrastructureException(
+          format("Pod '%s' removal timeout reached " + ex.getMessage(), ASYNC_STORAGE));
     }
   }
 
@@ -149,7 +150,7 @@ public class AsyncStoragePodInterceptor {
       // if event about removing is received then this completion has no effect
       future.completeExceptionally(
           new RuntimeException(
-              "Websocket connection is closed. But event about removing is not received.", e));
+              "WebSocket connection is closed. But event about removing is not received.", e));
     }
   }
 }

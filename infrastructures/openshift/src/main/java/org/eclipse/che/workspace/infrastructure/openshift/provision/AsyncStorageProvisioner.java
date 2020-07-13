@@ -11,18 +11,18 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.workspace.shared.Constants.ASYNC_PERSIST_ATTRIBUTE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_USER_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_SSH_KEYS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_SSH_KEYS_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility.isEphemeral;
 
-import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapVolumeSourceBuilder;
@@ -87,13 +87,27 @@ import org.slf4j.LoggerFactory;
 public class AsyncStorageProvisioner {
 
   private static final int SERVICE_PORT = 2222;
+  /**
+   * The authorized_keys file in SSH specifies the SSH keys that can be used for logging into the
+   * user account for which the file is configured.
+   */
   private static final String AUTHORIZED_KEYS = "authorized_keys";
+  /**
+   * Name of the asynchronous storage Pod and Service. Rsync command will use this Service name for
+   * communications: e.g.: rsync ${RSYNC_OPTIONS} --rsh="ssh ${SSH_OPTIONS}" async-storage:/{PATH}
+   */
   static final String ASYNC_STORAGE = "async-storage";
+  /** The name suffix for ConfigMap with SSH configuration */
   static final String ASYNC_STORAGE_CONFIG = "async-storage-config";
+  /** The path of mount storage volume for file persist */
   private static final String ASYNC_STORAGE_DATA_PATH = "/" + ASYNC_STORAGE;
+  /** The path to the authorized_keys */
   private static final String SSH_KEY_PATH = "/.ssh/" + AUTHORIZED_KEYS;
+  /** The name of SSH key pair for rsync */
   static final String SSH_KEY_NAME = "rsync-via-ssh";
+  /** The name of volume for mounting configuration map and authorized_keys */
   private static final String CONFIG_MAP_VOLUME_NAME = "async-storage-configvolume";
+  /** */
   private static final String STORAGE_VOLUME = "async-storage-data";
 
   private static final Logger LOG = LoggerFactory.getLogger(AsyncStorageProvisioner.class);
@@ -156,16 +170,17 @@ public class AsyncStorageProvisioner {
     }
 
     String namespace = identity.getInfrastructureNamespace();
+    String userId = identity.getOwnerId();
     KubernetesClient oc = clientFactory.create(identity.getWorkspaceId());
     String configMapName = namespace + ASYNC_STORAGE_CONFIG;
 
-    createPvcIfNotExist(oc, namespace);
-    createConfigMapIfNotExist(oc, namespace, configMapName, identity, osEnv);
-    createAsyncStoragePodIfNotExist(oc, namespace, configMapName);
-    createStorageServiceIfNotExist(oc, namespace);
+    createPvcIfNotExist(oc, namespace, userId);
+    createConfigMapIfNotExist(oc, namespace, configMapName, userId, osEnv);
+    createAsyncStoragePodIfNotExist(oc, namespace, configMapName, userId);
+    createStorageServiceIfNotExist(oc, namespace, userId);
   }
 
-  private void createPvcIfNotExist(KubernetesClient oc, String namespace) {
+  private void createPvcIfNotExist(KubernetesClient oc, String namespace, String userId) {
     Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim> claimResource =
         oc.persistentVolumeClaims().inNamespace(namespace).withName(configuredPVCName);
 
@@ -175,15 +190,16 @@ public class AsyncStorageProvisioner {
     PersistentVolumeClaim pvc =
         KubernetesObjectUtil.newPVC(
             configuredPVCName, accessMode, pvcQuantity, pvcStorageClassName);
+    KubernetesObjectUtil.putLabel(pvc.getMetadata(), CHE_USER_ID_LABEL, userId);
     oc.persistentVolumeClaims().inNamespace(namespace).create(pvc);
   }
 
   /** Get or create new pair of SSH keys, this is need for securing rsync connection */
-  private List<SshPairImpl> getOrCreateSshPairs(
-      RuntimeIdentity identity, OpenShiftEnvironment osEnv) throws InfrastructureException {
+  private List<SshPairImpl> getOrCreateSshPairs(String userId, OpenShiftEnvironment osEnv)
+      throws InfrastructureException {
     List<SshPairImpl> sshPairs;
     try {
-      sshPairs = sshManager.getPairs(identity.getOwnerId(), "internal");
+      sshPairs = sshManager.getPairs(userId, "internal");
     } catch (ServerException e) {
       String message = format("Unable to get SSH Keys. Cause: %s", e.getMessage());
       LOG.warn(message);
@@ -195,8 +211,7 @@ public class AsyncStorageProvisioner {
     }
     if (sshPairs.isEmpty()) {
       try {
-        sshPairs =
-            singletonList(sshManager.generatePair(identity.getOwnerId(), "internal", SSH_KEY_NAME));
+        sshPairs = singletonList(sshManager.generatePair(userId, "internal", SSH_KEY_NAME));
       } catch (ServerException | ConflictException e) {
         String message =
             format(
@@ -218,7 +233,7 @@ public class AsyncStorageProvisioner {
       KubernetesClient oc,
       String namespace,
       String configMapName,
-      RuntimeIdentity identity,
+      String userId,
       OpenShiftEnvironment osEnv)
       throws InfrastructureException {
     Resource<ConfigMap, DoneableConfigMap> mapResource =
@@ -227,18 +242,18 @@ public class AsyncStorageProvisioner {
       return;
     }
 
-    List<SshPairImpl> sshPairs = getOrCreateSshPairs(identity, osEnv);
+    List<SshPairImpl> sshPairs = getOrCreateSshPairs(userId, osEnv);
     if (sshPairs == null) {
       return;
     }
     SshPair sshPair = sshPairs.get(0);
-    Map<String, String> sshConfigData =
-        ImmutableMap.of(AUTHORIZED_KEYS, sshPair.getPublicKey() + "\n");
+    Map<String, String> sshConfigData = of(AUTHORIZED_KEYS, sshPair.getPublicKey() + "\n");
     ConfigMap configMap =
         new ConfigMapBuilder()
             .withNewMetadata()
             .withName(configMapName)
             .withNamespace(namespace)
+            .withLabels(of(CHE_USER_ID_LABEL, userId))
             .endMetadata()
             .withData(sshConfigData)
             .build();
@@ -250,7 +265,7 @@ public class AsyncStorageProvisioner {
    * key and exposed port for rsync connection
    */
   private void createAsyncStoragePodIfNotExist(
-      KubernetesClient oc, String namespace, String configMap) {
+      KubernetesClient oc, String namespace, String configMap, String userId) {
     PodResource<Pod, DoneablePod> podResource =
         oc.pods().inNamespace(namespace).withName(ASYNC_STORAGE);
     if (podResource.get() != null) {
@@ -321,7 +336,7 @@ public class AsyncStorageProvisioner {
             .withNewMetadata()
             .withName(ASYNC_STORAGE)
             .withNamespace(namespace)
-            .withLabels(singletonMap("app", ASYNC_STORAGE))
+            .withLabels(of("app", ASYNC_STORAGE, CHE_USER_ID_LABEL, userId))
             .endMetadata()
             .withSpec(podSpec)
             .build();
@@ -330,7 +345,8 @@ public class AsyncStorageProvisioner {
   }
 
   /** Create service for serving rsync connection */
-  private void createStorageServiceIfNotExist(KubernetesClient oc, String namespace) {
+  private void createStorageServiceIfNotExist(
+      KubernetesClient oc, String namespace, String userId) {
     ServiceResource<Service, DoneableService> serviceResource =
         oc.services().inNamespace(namespace).withName(ASYNC_STORAGE);
     if (serviceResource.get() != null) {
@@ -340,6 +356,7 @@ public class AsyncStorageProvisioner {
     ObjectMeta meta = new ObjectMeta();
     meta.setName(ASYNC_STORAGE);
     meta.setNamespace(namespace);
+    meta.setLabels(of(CHE_USER_ID_LABEL, userId));
 
     IntOrString targetPort =
         new IntOrStringBuilder().withIntVal(SERVICE_PORT).withStrVal(valueOf(SERVICE_PORT)).build();
@@ -353,7 +370,7 @@ public class AsyncStorageProvisioner {
             .build();
     ServiceSpec spec = new ServiceSpec();
     spec.setPorts(singletonList(port));
-    spec.setSelector(singletonMap("app", ASYNC_STORAGE));
+    spec.setSelector(of("app", ASYNC_STORAGE));
 
     Service service = new Service();
     service.setApiVersion("v1");

@@ -67,6 +67,7 @@ public class AsyncStorageProvisionerTest {
   private static final String NAMESPACE = UUID.randomUUID().toString();
   private static final String CONFIGMAP_NAME = NAMESPACE + ASYNC_STORAGE_CONFIG;
   private static final String VPC_NAME = UUID.randomUUID().toString();
+  private static final String USER = "user";
 
   @Mock private OpenShiftEnvironment openShiftEnvironment;
   @Mock private RuntimeIdentity identity;
@@ -105,7 +106,7 @@ public class AsyncStorageProvisionerTest {
     attributes = new HashMap<>(2);
     attributes.put(ASYNC_PERSIST_ATTRIBUTE, "true");
     attributes.put(PERSIST_VOLUMES_ATTRIBUTE, "false");
-    sshPair = new SshPairImpl("user", "internal", SSH_KEY_NAME, "", "");
+    sshPair = new SshPairImpl(USER, "internal", SSH_KEY_NAME, "", "");
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -164,8 +165,8 @@ public class AsyncStorageProvisionerTest {
     when(clientFactory.create(anyString())).thenReturn(osClient);
     when(identity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
     when(identity.getInfrastructureNamespace()).thenReturn(NAMESPACE);
-    when(identity.getOwnerId()).thenReturn("user");
-    when(sshManager.getPairs("user", "internal")).thenReturn(singletonList(sshPair));
+    when(identity.getOwnerId()).thenReturn(USER);
+    when(sshManager.getPairs(USER, "internal")).thenReturn(singletonList(sshPair));
 
     when(osClient.persistentVolumeClaims()).thenReturn(mixedOperationPvc);
     when(mixedOperationPvc.inNamespace(NAMESPACE)).thenReturn(namespacePvcOperation);
@@ -190,8 +191,8 @@ public class AsyncStorageProvisionerTest {
     asyncStorageProvisioner.provision(openShiftEnvironment, identity);
     verify(identity, times(1)).getInfrastructureNamespace();
     verify(identity, times(1)).getOwnerId();
-    verify(sshManager, times(1)).getPairs("user", "internal");
-    verify(sshManager, never()).generatePair("user", "internal", SSH_KEY_NAME);
+    verify(sshManager, times(1)).getPairs(USER, "internal");
+    verify(sshManager, never()).generatePair(USER, "internal", SSH_KEY_NAME);
     verify(osClient.services().inNamespace(NAMESPACE), times(1)).create(any(Service.class));
     verify(osClient.configMaps().inNamespace(NAMESPACE), times(1)).create(any(ConfigMap.class));
     verify(osClient.pods().inNamespace(NAMESPACE), times(1)).create(any(Pod.class));
@@ -206,6 +207,7 @@ public class AsyncStorageProvisionerTest {
     when(clientFactory.create(anyString())).thenReturn(osClient);
     when(identity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
     when(identity.getInfrastructureNamespace()).thenReturn(NAMESPACE);
+    when(identity.getOwnerId()).thenReturn(USER);
 
     when(osClient.persistentVolumeClaims()).thenReturn(mixedOperationPvc);
     when(mixedOperationPvc.inNamespace(NAMESPACE)).thenReturn(namespacePvcOperation);
@@ -233,10 +235,10 @@ public class AsyncStorageProvisionerTest {
 
     asyncStorageProvisioner.provision(openShiftEnvironment, identity);
     verify(identity, times(1)).getInfrastructureNamespace();
-    verify(identity, never()).getOwnerId();
+    verify(identity, times(1)).getOwnerId();
     verify(identity, times(1)).getWorkspaceId();
-    verify(sshManager, never()).getPairs("user", "internal");
-    verify(sshManager, never()).generatePair("user", "internal", SSH_KEY_NAME);
+    verify(sshManager, never()).getPairs(USER, "internal");
+    verify(sshManager, never()).generatePair(USER, "internal", SSH_KEY_NAME);
     verify(osClient.services().inNamespace(NAMESPACE), times(1)).create(any(Service.class));
     verify(osClient.configMaps().inNamespace(NAMESPACE), never()).create(any(ConfigMap.class));
     verify(osClient.pods().inNamespace(NAMESPACE), times(1)).create(any(Pod.class));
@@ -251,8 +253,8 @@ public class AsyncStorageProvisionerTest {
     when(clientFactory.create(anyString())).thenReturn(osClient);
     when(identity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
     when(identity.getInfrastructureNamespace()).thenReturn(NAMESPACE);
-    when(identity.getOwnerId()).thenReturn("user");
-    when(sshManager.getPairs("user", "internal")).thenReturn(singletonList(sshPair));
+    when(identity.getOwnerId()).thenReturn(USER);
+    when(sshManager.getPairs(USER, "internal")).thenReturn(singletonList(sshPair));
 
     when(osClient.persistentVolumeClaims()).thenReturn(mixedOperationPvc);
     when(mixedOperationPvc.inNamespace(NAMESPACE)).thenReturn(namespacePvcOperation);
@@ -281,8 +283,8 @@ public class AsyncStorageProvisionerTest {
     asyncStorageProvisioner.provision(openShiftEnvironment, identity);
     verify(identity, times(1)).getInfrastructureNamespace();
     verify(identity, times(1)).getOwnerId();
-    verify(sshManager, times(1)).getPairs("user", "internal");
-    verify(sshManager, never()).generatePair("user", "internal", SSH_KEY_NAME);
+    verify(sshManager, times(1)).getPairs(USER, "internal");
+    verify(sshManager, never()).generatePair(USER, "internal", SSH_KEY_NAME);
     verify(osClient.services().inNamespace(NAMESPACE), times(1)).create(any(Service.class));
     verify(osClient.configMaps().inNamespace(NAMESPACE), times(1)).create(any(ConfigMap.class));
     verify(osClient.pods().inNamespace(NAMESPACE), never()).create(any(Pod.class));
@@ -297,8 +299,8 @@ public class AsyncStorageProvisionerTest {
     when(clientFactory.create(anyString())).thenReturn(osClient);
     when(identity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
     when(identity.getInfrastructureNamespace()).thenReturn(NAMESPACE);
-    when(identity.getOwnerId()).thenReturn("user");
-    when(sshManager.getPairs("user", "internal")).thenReturn(singletonList(sshPair));
+    when(identity.getOwnerId()).thenReturn(USER);
+    when(sshManager.getPairs(USER, "internal")).thenReturn(singletonList(sshPair));
 
     when(osClient.persistentVolumeClaims()).thenReturn(mixedOperationPvc);
     when(mixedOperationPvc.inNamespace(NAMESPACE)).thenReturn(namespacePvcOperation);
@@ -327,8 +329,8 @@ public class AsyncStorageProvisionerTest {
     asyncStorageProvisioner.provision(openShiftEnvironment, identity);
     verify(identity, times(1)).getInfrastructureNamespace();
     verify(identity, times(1)).getOwnerId();
-    verify(sshManager, times(1)).getPairs("user", "internal");
-    verify(sshManager, never()).generatePair("user", "internal", SSH_KEY_NAME);
+    verify(sshManager, times(1)).getPairs(USER, "internal");
+    verify(sshManager, never()).generatePair(USER, "internal", SSH_KEY_NAME);
     verify(osClient.services().inNamespace(NAMESPACE), never()).create(any(Service.class));
     verify(osClient.configMaps().inNamespace(NAMESPACE), times(1)).create(any(ConfigMap.class));
     verify(osClient.pods().inNamespace(NAMESPACE), times(1)).create(any(Pod.class));
