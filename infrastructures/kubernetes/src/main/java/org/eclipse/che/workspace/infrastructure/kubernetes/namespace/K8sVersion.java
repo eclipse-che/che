@@ -70,15 +70,15 @@ public class K8sVersion {
   }
 
   /**
-   * Returns 'true' if given {@code major.minor} is newer or equal than k8s cluster version. 'false'
-   * if given {@code major.minor} is older.
+   * Returns 'true' if k8s version is newer or equal than given {@code major.minor}. 'false' if k8s
+   * version is older.
    *
    * <p>In case of any issue like infrastructure or parse failures, assume we're on newer version
    * and return 'true'.
    *
    * @param major major version to compare
    * @param minor minor version to compare
-   * @return true if given {@code major.minor} version is newer or equal version than k8s version
+   * @return true if k8s version is newer or equal than given {@code major.minor}
    */
   public boolean newerOrEqualThan(int major, int minor) {
     try {
@@ -88,18 +88,18 @@ public class K8sVersion {
       return true;
     }
 
-    if (major > this.major) {
+    if (this.major > major) {
       return true;
-    } else if (major == this.major) {
-      return minor >= this.minor;
+    } else if (this.major == major) {
+      return this.minor >= minor;
     } else {
       return false;
     }
   }
 
   /**
-   * Returns 'true' if given {@code major.minor} is older than k8s cluster version. 'false' if given
-   * {@code major.minor} is newer or equal.
+   * Returns 'true' if k8s version is older than given {@code major.minor}. 'false' if k8s version
+   * is newer or equal.
    *
    * <p>In case of any issue like infrastructure or parse failures, assume we're on newer version
    * and return 'false'.
@@ -138,8 +138,8 @@ public class K8sVersion {
           versionInfo.getMajor(),
           versionInfo.getMinor(),
           nfe);
-      this.major = 0;
-      this.minor = 0;
+      this.major = Integer.MAX_VALUE;
+      this.minor = Integer.MAX_VALUE;
     }
   }
 

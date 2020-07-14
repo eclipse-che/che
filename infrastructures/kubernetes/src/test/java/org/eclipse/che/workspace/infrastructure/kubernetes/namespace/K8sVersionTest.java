@@ -63,47 +63,63 @@ public class K8sVersionTest {
   public void testGreaterOrEqualTrueWhenInfrastructureFails() throws InfrastructureException {
     when(kubernetesClientFactory.create()).thenThrow(new InfrastructureException("eh"));
     assertTrue(k8sVersion.newerOrEqualThan(1, 1));
+    assertTrue(k8sVersion.newerOrEqualThan(-1, -1));
     assertTrue(k8sVersion.newerOrEqualThan(0, 1));
     assertTrue(k8sVersion.newerOrEqualThan(0, 0));
+    assertTrue(k8sVersion.newerOrEqualThan(1337, 1337));
+    assertTrue(k8sVersion.newerOrEqualThan(6655321, 6655321));
   }
 
   @Test
   public void testOlderThanWhenInfrastructureFails() throws InfrastructureException {
     when(kubernetesClientFactory.create()).thenThrow(new InfrastructureException("eh"));
     assertFalse(k8sVersion.olderThan(1, 1));
+    assertFalse(k8sVersion.olderThan(-1, -1));
     assertFalse(k8sVersion.olderThan(0, 1));
     assertFalse(k8sVersion.olderThan(0, 0));
+    assertFalse(k8sVersion.olderThan(1337, 1337));
+    assertFalse(k8sVersion.olderThan(6655321, 6655321));
   }
 
   @Test
   public void testGreaterOrEqualWhenParseFailure() throws ParseException {
     when(kubernetesClient.getVersion()).thenReturn(createDummyVersionInfo("abc", "cde"));
     assertTrue(k8sVersion.newerOrEqualThan(1, 1));
+    assertTrue(k8sVersion.newerOrEqualThan(-1, -1));
     assertTrue(k8sVersion.newerOrEqualThan(0, 1));
     assertTrue(k8sVersion.newerOrEqualThan(0, 0));
+    assertTrue(k8sVersion.newerOrEqualThan(1337, 1337));
+    assertTrue(k8sVersion.newerOrEqualThan(6655321, 6655321));
   }
 
   @Test
   public void testOlderThanWhenParseFailure() throws ParseException {
     when(kubernetesClient.getVersion()).thenReturn(createDummyVersionInfo("abc", "cde"));
     assertFalse(k8sVersion.olderThan(1, 1));
+    assertFalse(k8sVersion.olderThan(-1, -1));
     assertFalse(k8sVersion.olderThan(0, 1));
     assertFalse(k8sVersion.olderThan(0, 0));
+    assertFalse(k8sVersion.olderThan(1337, 1337));
+    assertFalse(k8sVersion.olderThan(6655321, 6655321));
   }
 
   @DataProvider
   public Object[][] greaterThanData() throws ParseException {
     VersionInfo versionInfo = createDummyVersionInfo("2", "10");
     return new Object[][] {
-      {versionInfo, 1, 9, false},
-      {versionInfo, 1, 10, false},
-      {versionInfo, 1, 11, false},
-      {versionInfo, 2, 9, false},
+      {versionInfo, 1, 9, true},
+      {versionInfo, 1, 10, true},
+      {versionInfo, 1, 11, true},
+      {versionInfo, 2, 9, true},
       {versionInfo, 2, 10, true},
-      {versionInfo, 2, 11, true},
-      {versionInfo, 3, 9, true},
-      {versionInfo, 3, 10, true},
-      {versionInfo, 3, 11, true},
+      {versionInfo, 2, 11, false},
+      {versionInfo, 3, 9, false},
+      {versionInfo, 3, 10, false},
+      {versionInfo, 3, 11, false},
+      {createDummyVersionInfo("1", "17+"), 1, 17, true},
+      {createDummyVersionInfo("1", "17+"), 1, 18, false},
+      {createDummyVersionInfo("1", "17+"), 1, 16, true},
+      {createDummyVersionInfo("1", "11+"), 1, 17, false},
     };
   }
 
@@ -111,15 +127,18 @@ public class K8sVersionTest {
   public Object[][] olderThanData() throws ParseException {
     VersionInfo versionInfo = createDummyVersionInfo("2", "10");
     return new Object[][] {
-      {versionInfo, 1, 9, true},
-      {versionInfo, 1, 10, true},
-      {versionInfo, 1, 11, true},
-      {versionInfo, 2, 9, true},
+      {versionInfo, 1, 9, false},
+      {versionInfo, 1, 10, false},
+      {versionInfo, 1, 11, false},
+      {versionInfo, 2, 9, false},
       {versionInfo, 2, 10, false},
-      {versionInfo, 2, 11, false},
-      {versionInfo, 3, 9, false},
-      {versionInfo, 3, 10, false},
-      {versionInfo, 3, 11, false},
+      {versionInfo, 2, 11, true},
+      {versionInfo, 3, 9, true},
+      {versionInfo, 3, 10, true},
+      {versionInfo, 3, 11, true},
+      {createDummyVersionInfo("1", "17+"), 1, 17, false},
+      {createDummyVersionInfo("1", "17+"), 1, 11, false},
+      {createDummyVersionInfo("1", "11+"), 1, 17, true},
     };
   }
 

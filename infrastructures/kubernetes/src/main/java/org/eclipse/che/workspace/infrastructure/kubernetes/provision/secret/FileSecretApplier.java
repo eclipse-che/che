@@ -25,6 +25,7 @@ import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -131,11 +132,18 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
               .getVolumeMounts()
               .removeIf(vm -> Paths.get(vm.getMountPath()).equals(Paths.get(componentMountPath)));
         }
-        for (String secretFile : secret.getData().keySet()) {
-          container
-              .getVolumeMounts()
-              .add(buildVolumeMount(volumeFromSecret, componentMountPath, secretFile));
-        }
+
+        container
+            .getVolumeMounts()
+            .addAll(
+                secret
+                    .getData()
+                    .keySet()
+                    .stream()
+                    .map(
+                        secretFile ->
+                            buildVolumeMount(volumeFromSecret, componentMountPath, secretFile))
+                    .collect(Collectors.toList()));
       }
     }
   }
