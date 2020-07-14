@@ -27,13 +27,13 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 @NamedQueries({
   @NamedQuery(
       name = "WorkspaceActivity.getExpiredIdle",
-      query = "SELECT a FROM WorkspaceActivity a WHERE a.expiration < :expiration"),
+      query = "SELECT a.workspaceId FROM WorkspaceActivity a WHERE a.expiration < :expiration"),
   @NamedQuery(
       name = "WorkspaceActivity.getExpiredRunTimeout",
       query =
-          "SELECT a FROM WorkspaceActivity a WHERE "
+          "SELECT a.workspaceId FROM WorkspaceActivity a WHERE "
               + "(a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING AND "
-              + "a.lastRunning < :timestamp - :runTimeout)"),
+              + "a.lastRunning < :timeDifference)"),
   @NamedQuery(
       name = "WorkspaceActivity.getStoppedSince",
       query =

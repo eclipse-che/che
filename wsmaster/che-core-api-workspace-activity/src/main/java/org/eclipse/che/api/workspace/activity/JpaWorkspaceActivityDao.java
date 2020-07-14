@@ -67,12 +67,10 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
     try {
       return managerProvider
           .get()
-          .createNamedQuery("WorkspaceActivity.getExpiredRunTimeout", WorkspaceActivity.class)
-          .setParameter("timestamp", timestamp)
-          .setParameter("runTimeout", runTimeout)
+          .createNamedQuery("WorkspaceActivity.getExpiredRunTimeout", String.class)
+          .setParameter("timeDifference", timestamp - runTimeout)
           .getResultList()
           .stream()
-          .map(WorkspaceActivity::getWorkspaceId)
           .collect(Collectors.toList());
     } catch (RuntimeException x) {
       throw new ServerException(x.getLocalizedMessage(), x);
@@ -85,11 +83,10 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
     try {
       return managerProvider
           .get()
-          .createNamedQuery("WorkspaceActivity.getExpiredIdle", WorkspaceActivity.class)
+          .createNamedQuery("WorkspaceActivity.getExpiredIdle", String.class)
           .setParameter("expiration", timestamp)
           .getResultList()
           .stream()
-          .map(WorkspaceActivity::getWorkspaceId)
           .collect(Collectors.toList());
     } catch (RuntimeException x) {
       throw new ServerException(x.getLocalizedMessage(), x);
