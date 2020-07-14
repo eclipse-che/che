@@ -21,7 +21,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Gets version of k8s cluster from given {@link KubernetesClientFactory#create()} and provides
- * functions over it.
+ * functions over it. It lazy-loads {@link VersionInfo} from k8s and use the stored data after.
+ * Future methods implementations must ensure that {@link VersionInfo} is properly lazy-loaded.
  *
  * <p>In case of issue like infrastructure or parsing failures, this implementation assumes that
  * we're on newer version.
@@ -116,6 +117,7 @@ public class K8sVersion {
       synchronized (this) {
         if (versionInfo == null) {
           versionInfo = clientFactory.create().getVersion();
+          LOG.debug("Obtained k8s version {}", versionInfo.getData());
           parseVersions();
         }
       }
@@ -131,6 +133,11 @@ public class K8sVersion {
       this.major = parseVersionNumber(versionInfo.getMajor());
       this.minor = parseVersionNumber(versionInfo.getMinor());
     } catch (NumberFormatException nfe) {
+      LOG.warn(
+          "Unable to parse k8s version [major: {}, minor: {}].",
+          versionInfo.getMajor(),
+          versionInfo.getMinor(),
+          nfe);
       this.major = 0;
       this.minor = 0;
     }

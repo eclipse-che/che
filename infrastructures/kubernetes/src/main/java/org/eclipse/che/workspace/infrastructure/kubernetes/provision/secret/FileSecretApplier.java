@@ -125,6 +125,8 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
         // it's not possible to mount multiple volumes on same path on k8s older than 1.15, so we
         // remove the existing mount here to replace it with new one.
         if (k8sVersion.olderThan(1, 15)) {
+          LOG.debug(
+              "Unable to mount multiple VolumeMounts on same path on this k8s version. Removing conflicting volumes in favor of secret mounts.");
           container
               .getVolumeMounts()
               .removeIf(vm -> Paths.get(vm.getMountPath()).equals(Paths.get(componentMountPath)));
@@ -149,6 +151,8 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
     // subPaths are supported from k8s v1.15
     if (k8sVersion.newerOrEqualThan(1, 15)) {
       volumeMountBuilder.withSubPath(secretFile);
+    } else {
+      LOG.debug("This version of k8s does not support sutPaths for VolumeMounts.");
     }
 
     return volumeMountBuilder.build();
