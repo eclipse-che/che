@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.factory.server;
 
+import static java.lang.String.format;
 import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
@@ -22,10 +23,12 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
@@ -39,6 +42,7 @@ import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValid
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -82,15 +86,15 @@ public class DefaultFactoryParameterResolverTest {
 
     // set up our factory with the location of our devfile that is referencing our localfile
     Map<String, String> factoryParameters = new HashMap<>();
-    factoryParameters.put(URL_PARAMETER_NAME, "scheme:/myloc/devfile");
-    doReturn(DEVFILE).when(urlFetcher).fetchSafely(eq("scheme:/myloc/devfile"));
-    doReturn("localfile").when(urlFetcher).fetch("scheme:/localfile");
+    factoryParameters.put(URL_PARAMETER_NAME, "http://myloc.com/aa/bb/devfile");
+    doReturn(DEVFILE).when(urlFetcher).fetchSafely(eq("http://myloc.com/aa/bb/devfile"));
+    doReturn("localfile").when(urlFetcher).fetch("http://myloc.com/aa/localfile");
 
     // when
     res.createFactory(factoryParameters);
 
     // then
-    verify(urlFetcher).fetch(eq("scheme:/localfile"));
+    verify(urlFetcher).fetch(eq("http://myloc.com/aa/localfile"));
   }
 
   @Test
@@ -103,7 +107,7 @@ public class DefaultFactoryParameterResolverTest {
         new DefaultFactoryParameterResolver(urlFactoryBuilder, urlFetcher);
 
     Map<String, String> factoryParameters = new HashMap<>();
-    factoryParameters.put(URL_PARAMETER_NAME, "scheme:/myloc/devfile");
+    factoryParameters.put(URL_PARAMETER_NAME, "http://myloc/devfile");
     factoryParameters.put("override.param.foo", "bar");
     factoryParameters.put("override.param.bar", "foo");
     factoryParameters.put("ignored.non-override.property", "baz");
@@ -119,6 +123,42 @@ public class DefaultFactoryParameterResolverTest {
     assertEquals(2, filteredOverrides.size());
     assertEquals("bar", filteredOverrides.get("param.foo"));
     assertEquals("foo", filteredOverrides.get("param.bar"));
-    assertFalse(filteredOverrides.keySet().contains("ignored.non-override.property"));
+    assertFalse(filteredOverrides.containsKey("ignored.non-override.property"));
+  }
+
+  @Test(dataProvider = "invalidURLsProvider")
+  public void shouldThrowExceptionOnInvalidURL(String url, String message) throws Exception {
+    URLFactoryBuilder urlFactoryBuilder = mock(URLFactoryBuilder.class);
+    URLFetcher urlFetcher = mock(URLFetcher.class);
+
+    DefaultFactoryParameterResolver res =
+        new DefaultFactoryParameterResolver(urlFactoryBuilder, urlFetcher);
+
+    Map<String, String> factoryParameters = new HashMap<>();
+    factoryParameters.put(URL_PARAMETER_NAME, url);
+
+    // when
+    try {
+      res.createFactory(factoryParameters);
+      fail("Exception is expected");
+    } catch (BadRequestException e) {
+      assertEquals(
+          e.getMessage(),
+          format(
+              "Unable to process provided factory URL. Please check its validity and try again. Parser message: %s",
+              message));
+    }
+  }
+
+  @DataProvider(name = "invalidURLsProvider")
+  private Object[][] invalidUrlsProvider() {
+    return new Object[][] {
+      {"C:\\Users\\aa\\bb\\XX\\", "unknown protocol: c"},
+      {
+        "https://github.com/ .git",
+        "Illegal character in path at index 19: https://github.com/ .git"
+      },
+      {"unknown:///abc.dce", "unknown protocol: unknown"}
+    };
   }
 }
