@@ -122,6 +122,8 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
               getOverridenComponentPath(component.get(), secret.getMetadata().getName());
         }
         final String componentMountPath = overridePathOptional.orElse(secretMountPath);
+        // it's not possible to mount multiple volumes on same path on k8s older than 1.15, so we
+        // remove the existing mount here to replace it with new one.
         if (k8sVersion.olderThan(1, 15)) {
           container
               .getVolumeMounts()
