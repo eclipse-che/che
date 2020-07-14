@@ -46,6 +46,7 @@ public class MultiUserWorkspaceActivityManager extends WorkspaceActivityManager 
   private final AccountManager accountManager;
   private final ResourceManager resourceManager;
   private final long defaultTimeout;
+  private final long runTimeout;
 
   @Inject
   public MultiUserWorkspaceActivityManager(
@@ -54,11 +55,13 @@ public class MultiUserWorkspaceActivityManager extends WorkspaceActivityManager 
       EventService eventService,
       AccountManager accountManager,
       ResourceManager resourceManager,
-      @Named("che.limits.workspace.idle.timeout") long defaultTimeout) {
-    super(workspaceManager, activityDao, eventService, defaultTimeout);
+      @Named("che.limits.workspace.idle.timeout") long defaultTimeout,
+      @Named("che.limits.workspace.run.timeout") long runTimeout) {
+    super(workspaceManager, activityDao, eventService, defaultTimeout, runTimeout);
     this.accountManager = accountManager;
     this.resourceManager = resourceManager;
     this.defaultTimeout = defaultTimeout;
+    this.runTimeout = runTimeout;
   }
 
   @Override

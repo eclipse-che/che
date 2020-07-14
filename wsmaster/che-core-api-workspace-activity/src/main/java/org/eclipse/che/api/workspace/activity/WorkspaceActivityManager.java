@@ -54,6 +54,7 @@ public class WorkspaceActivityManager {
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceActivityManager.class);
 
   private final long defaultTimeout;
+  private final long runTimeout;
   private final WorkspaceActivityDao activityDao;
   private final EventService eventService;
   private final EventSubscriber<WorkspaceStatusEvent> updateStatusChangedTimestampSubscriber;
@@ -69,9 +70,16 @@ public class WorkspaceActivityManager {
       WorkspaceManager workspaceManager,
       WorkspaceActivityDao activityDao,
       EventService eventService,
-      @Named("che.limits.workspace.idle.timeout") long timeout) {
+      @Named("che.limits.workspace.idle.timeout") long timeout,
+      @Named("che.limits.workspace.run.timeout") long runTimeout) {
 
-    this(workspaceManager, activityDao, eventService, timeout, Clock.systemDefaultZone());
+    this(
+        workspaceManager,
+        activityDao,
+        eventService,
+        timeout,
+        runTimeout,
+        Clock.systemDefaultZone());
   }
 
   @VisibleForTesting
@@ -80,11 +88,13 @@ public class WorkspaceActivityManager {
       WorkspaceActivityDao activityDao,
       EventService eventService,
       long timeout,
+      long runTimeout,
       Clock clock) {
     this.workspaceManager = workspaceManager;
     this.eventService = eventService;
     this.activityDao = activityDao;
     this.defaultTimeout = timeout;
+    this.runTimeout = runTimeout;
     this.clock = clock;
     if (timeout > 0 && timeout < MINIMAL_TIMEOUT) {
       LOG.warn(
@@ -116,7 +126,6 @@ public class WorkspaceActivityManager {
             activityDao.removeActivity(event.getWorkspace().getId());
           }
         };
-
     this.updateStatusChangedTimestampSubscriber = new UpdateStatusChangedTimestampSubscriber();
   }
 
@@ -168,6 +177,10 @@ public class WorkspaceActivityManager {
 
   protected long getIdleTimeout(String wsId) {
     return defaultTimeout;
+  }
+
+  protected long getRunTimeout() {
+    return runTimeout;
   }
 
   private class UpdateStatusChangedTimestampSubscriber
