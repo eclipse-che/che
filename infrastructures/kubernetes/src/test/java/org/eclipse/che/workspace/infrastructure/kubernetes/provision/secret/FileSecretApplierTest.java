@@ -79,8 +79,8 @@ public class FileSecretApplierTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    lenient().when(kubernetesVersion.newerOrEqualThan(1, 15)).thenReturn(true);
-    lenient().when(kubernetesVersion.olderThan(1, 15)).thenReturn(false);
+    lenient().when(kubernetesVersion.newerOrEqualThan(1, 13)).thenReturn(true);
+    lenient().when(kubernetesVersion.olderThan(1, 13)).thenReturn(false);
     secretApplier = new FileSecretApplier(kubernetesVersion);
     when(environment.getPodsData()).thenReturn(singletonMap("pod1", podData));
     when(podData.getRole()).thenReturn(PodRole.DEPLOYMENT);
@@ -482,8 +482,8 @@ public class FileSecretApplierTest {
 
   @Test
   public void shouldNotUseSubpathForOlderK8s() throws InfrastructureException {
-    lenient().when(kubernetesVersion.newerOrEqualThan(1, 15)).thenReturn(false);
-    lenient().when(kubernetesVersion.olderThan(1, 15)).thenReturn(true);
+    lenient().when(kubernetesVersion.newerOrEqualThan(1, 13)).thenReturn(false);
+    lenient().when(kubernetesVersion.olderThan(1, 13)).thenReturn(true);
 
     Container container_match1 = new ContainerBuilder().withName("maven").build();
 
@@ -538,7 +538,7 @@ public class FileSecretApplierTest {
             .getVolumeMounts()
             .get(0);
     assertEquals(mount1.getName(), "test_secret");
-    assertEquals(mount1.getMountPath(), "/home/user/.m2/settings.xml");
+    assertEquals(mount1.getMountPath(), "/home/user/.m2");
     assertNull(mount1.getSubPath());
   }
 
@@ -624,8 +624,8 @@ public class FileSecretApplierTest {
 
   @Test
   public void shouldOverrideExistingVolumeMountsOnOlderK8s() throws InfrastructureException {
-    lenient().when(kubernetesVersion.newerOrEqualThan(1, 15)).thenReturn(false);
-    lenient().when(kubernetesVersion.olderThan(1, 15)).thenReturn(true);
+    lenient().when(kubernetesVersion.newerOrEqualThan(1, 13)).thenReturn(false);
+    lenient().when(kubernetesVersion.olderThan(1, 13)).thenReturn(true);
 
     Container container_match1 =
         new ContainerBuilder()
@@ -688,7 +688,7 @@ public class FileSecretApplierTest {
             .getVolumeMounts()
             .get(0);
     assertEquals(secretMount.getName(), "test_secret");
-    assertEquals(secretMount.getMountPath(), "/home/user/.m2/settings.xml");
+    assertEquals(secretMount.getMountPath(), "/home/user/.m2");
     assertNull(secretMount.getSubPath());
   }
 }

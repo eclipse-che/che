@@ -123,9 +123,9 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
               getOverridenComponentPath(component.get(), secret.getMetadata().getName());
         }
         final String componentMountPath = overridePathOptional.orElse(secretMountPath);
-        // it's not possible to mount multiple volumes on same path on k8s older than 1.15, so we
+        // it's not possible to mount multiple volumes on same path on older k8s, so we
         // remove the existing mount here to replace it with new one.
-        if (k8sVersion.olderThan(1, 15)) {
+        if (k8sVersion.olderThan(1, 13)) {
           LOG.debug(
               "Unable to mount multiple VolumeMounts on same path on this k8s version. Removing conflicting volumes in favor of secret mounts.");
           container
@@ -151,15 +151,15 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
   private VolumeMount buildVolumeMount(
       Volume volumeFromSecret, String componentMountPath, String secretFile) {
     VolumeMountBuilder volumeMountBuilder =
-        new VolumeMountBuilder()
-            .withName(volumeFromSecret.getName())
-            .withMountPath(componentMountPath + "/" + secretFile)
-            .withReadOnly(true);
+        new VolumeMountBuilder().withName(volumeFromSecret.getName()).withReadOnly(true);
 
-    // subPaths are supported from k8s v1.15
-    if (k8sVersion.newerOrEqualThan(1, 15)) {
-      volumeMountBuilder.withSubPath(secretFile);
+    // subPaths are supported from k8s v1.13
+    if (k8sVersion.newerOrEqualThan(1, 13)) {
+      volumeMountBuilder
+          .withMountPath(componentMountPath + "/" + secretFile)
+          .withSubPath(secretFile);
     } else {
+      volumeMountBuilder.withMountPath(componentMountPath);
       LOG.debug("This version of k8s does not support sutPaths for VolumeMounts.");
     }
 
