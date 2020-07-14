@@ -95,6 +95,7 @@ public class AsyncStorageProvisionerTest {
   public void setUp() {
     asyncStorageProvisioner =
         new AsyncStorageProvisioner(
+            "Always",
             "10Gi",
             "org/image:tag",
             "ReadWriteOnce",
@@ -113,6 +114,7 @@ public class AsyncStorageProvisionerTest {
   public void shouldThrowExceptionIfNotCommonStrategy() throws Exception {
     AsyncStorageProvisioner asyncStorageProvisioner =
         new AsyncStorageProvisioner(
+            "Always",
             "10Gi",
             "org/image:tag",
             "ReadWriteOnce",

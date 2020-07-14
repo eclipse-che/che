@@ -12,7 +12,6 @@
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
 import static java.lang.String.format;
-import static java.util.Objects.isNull;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility.isEphemeral;
 import static org.eclipse.che.workspace.infrastructure.openshift.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
@@ -38,9 +37,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Checking if starting workspace configured to persisted storage and async storage pod is running.
- * To prevent 'Multi-Attach error for volume' async storage pod will be shutdown. After deleting
- * asynchronous storage pod procedure of starting workspace will be continued.
+ * This interceptor checks whether the starting workspace is configured with persistent storage and
+ * makes sure to stop the async storage pod (if any is running) to prevent "Multi-Attach error for
+ * volume". After the async storage pod is stopped and deleted, the workspace start is resumed.
  */
 public class AsyncStoragePodInterceptor {
 
@@ -70,7 +69,7 @@ public class AsyncStoragePodInterceptor {
     PodResource<Pod, DoneablePod> asyncStoragePodResource =
         getAsyncStoragePodResource(namespace, workspaceId);
 
-    if (isNull(asyncStoragePodResource.get())) { // pod doesn't exist
+    if (asyncStoragePodResource.get() == null) { // pod doesn't exist
       return;
     }
 

@@ -112,6 +112,7 @@ public class AsyncStorageProvisioner {
 
   private static final Logger LOG = LoggerFactory.getLogger(AsyncStorageProvisioner.class);
 
+  private final String sidecarImagePullPolicy;
   private final String pvcQuantity;
   private final String storageImage;
   private final String accessMode;
@@ -123,6 +124,7 @@ public class AsyncStorageProvisioner {
 
   @Inject
   public AsyncStorageProvisioner(
+      @Named("che.workspace.sidecar.image_pull_policy") String sidecarImagePullPolicy,
       @Named("che.infra.kubernetes.pvc.quantity") String pvcQuantity,
       @Named("che.infra.kubernetes.async.storage.image") String image,
       @Named("che.infra.kubernetes.pvc.access_mode") String accessMode,
@@ -131,6 +133,7 @@ public class AsyncStorageProvisioner {
       @Named("che.infra.kubernetes.pvc.storage_class_name") String pvcStorageClassName,
       SshManager sshManager,
       OpenShiftClientFactory openShiftClientFactory) {
+    this.sidecarImagePullPolicy = sidecarImagePullPolicy;
     this.pvcQuantity = pvcQuantity;
     this.storageImage = image;
     this.accessMode = accessMode;
@@ -147,8 +150,7 @@ public class AsyncStorageProvisioner {
       return;
     }
 
-    if (parseBoolean(osEnv.getAttributes().get(ASYNC_PERSIST_ATTRIBUTE))
-        && !COMMON_STRATEGY.equals(strategy)) {
+    if (!COMMON_STRATEGY.equals(strategy)) {
       String message =
           format(
               "Workspace configuration not valid: Asynchronous storage available only for 'common' PVC strategy, but got %s",
@@ -158,8 +160,7 @@ public class AsyncStorageProvisioner {
       throw new InfrastructureException(message);
     }
 
-    if (parseBoolean(osEnv.getAttributes().get(ASYNC_PERSIST_ATTRIBUTE))
-        && !isEphemeral(osEnv.getAttributes())) {
+    if (!isEphemeral(osEnv.getAttributes())) {
       String message =
           format(
               "Workspace configuration not valid: Asynchronous storage available only if '%s' attribute set to false",
@@ -313,6 +314,7 @@ public class AsyncStorageProvisioner {
         new ContainerBuilder()
             .withName(containerName)
             .withImage(storageImage)
+            .withImagePullPolicy(sidecarImagePullPolicy)
             .withNewResources()
             .addToLimits("memory", new Quantity("512Mi"))
             .addToRequests("memory", new Quantity("256Mi"))

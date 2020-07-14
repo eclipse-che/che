@@ -94,9 +94,10 @@ import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases
 public class OpenShiftInfraModule extends AbstractModule {
   @Override
   protected void configure() {
-    Multibinder.newSetBinder(binder(), WorkspaceAttributeValidator.class)
-        .addBinding()
-        .to(K8sInfraNamespaceWsAttributeValidator.class);
+    Multibinder<WorkspaceAttributeValidator> workspaceAttributeValidators =
+        Multibinder.newSetBinder(binder(), WorkspaceAttributeValidator.class);
+    workspaceAttributeValidators.addBinding().to(K8sInfraNamespaceWsAttributeValidator.class);
+    workspaceAttributeValidators.addBinding().to(AsyncStorageModeValidator.class);
 
     bind(KubernetesNamespaceService.class);
 
