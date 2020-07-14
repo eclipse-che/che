@@ -49,6 +49,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.K8sVersion;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -69,7 +70,9 @@ public class FileSecretApplierTest {
 
   @Mock private RuntimeIdentity runtimeIdentity;
 
-  FileSecretApplier secretApplier = new FileSecretApplier();
+  @Mock private K8sVersion kubernetesVersion;
+
+  FileSecretApplier secretApplier = new FileSecretApplier(kubernetesVersion);
 
   @BeforeMethod
   public void setUp() throws Exception {

@@ -21,9 +21,11 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
+import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import java.nio.file.Paths;
 import java.util.Optional;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
@@ -33,6 +35,9 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.K8sVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Mounts Kubernetes secret with specific annotations as an file in workspace containers. Via
@@ -43,7 +48,16 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 @Singleton
 public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnvironment> {
 
+  private static final Logger LOG = LoggerFactory.getLogger(FileSecretApplier.class);
+
   static final String ANNOTATION_MOUNT_PATH = ANNOTATION_PREFIX + "/" + "mount-path";
+
+  private final K8sVersion k8sVersion;
+
+  @Inject
+  public FileSecretApplier(K8sVersion k8sVersion) {
+    this.k8sVersion = k8sVersion;
+  }
 
   /**
    * Applies secret as file into workspace containers, respecting automount attribute and optional
@@ -108,26 +122,34 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
               getOverridenComponentPath(component.get(), secret.getMetadata().getName());
         }
         final String componentMountPath = overridePathOptional.orElse(secretMountPath);
-        container
-            .getVolumeMounts()
-            .removeIf(vm -> Paths.get(vm.getMountPath()).equals(Paths.get(componentMountPath)));
-
-        secret
-            .getData()
-            .keySet()
-            .forEach(
-                secretFile ->
-                    container
-                        .getVolumeMounts()
-                        .add(
-                            new VolumeMountBuilder()
-                                .withName(volumeFromSecret.getName())
-                                .withMountPath(componentMountPath + "/" + secretFile)
-                                .withSubPath(secretFile)
-                                .withReadOnly(true)
-                                .build()));
+        if (k8sVersion.olderThan(1, 15)) {
+          container
+              .getVolumeMounts()
+              .removeIf(vm -> Paths.get(vm.getMountPath()).equals(Paths.get(componentMountPath)));
+        }
+        for (String secretFile : secret.getData().keySet()) {
+          container
+              .getVolumeMounts()
+              .add(buildVolumeMount(volumeFromSecret, componentMountPath, secretFile));
+        }
       }
     }
+  }
+
+  private VolumeMount buildVolumeMount(
+      Volume volumeFromSecret, String componentMountPath, String secretFile) {
+    VolumeMountBuilder volumeMountBuilder =
+        new VolumeMountBuilder()
+            .withName(volumeFromSecret.getName())
+            .withMountPath(componentMountPath + "/" + secretFile)
+            .withReadOnly(true);
+
+    // subPaths are supported from k8s v1.15
+    if (k8sVersion.newerOrEqualThan(1, 15)) {
+      volumeMountBuilder.withSubPath(secretFile);
+    }
+
+    return volumeMountBuilder.build();
   }
 
   private Optional<String> getOverridenComponentPath(ComponentImpl component, String secretName) {
