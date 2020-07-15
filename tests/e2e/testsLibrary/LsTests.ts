@@ -74,7 +74,7 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
             await editor.waitEditorAvailable(codeNavigationClassName);
         } catch (err) {
             if (err instanceof error.TimeoutError) {
-                Logger.warn('Code navigatino didn\'t work. Trying again.');
+                Logger.warn('Code navigation didn\'t work. Trying again.');
                 await editor.moveCursorToLineAndChar(openedFile, line, char);
                 await editor.performKeyCombination(openedFile, Key.chord(Key.CONTROL, Key.F12));
                 await editor.waitEditorAvailable(codeNavigationClassName);
