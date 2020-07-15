@@ -96,20 +96,12 @@ data:
 {{- if .Values.che.workspace.devfileRegistryUrl }}
   CHE_WORKSPACE_DEVFILE__REGISTRY__URL: {{ .Values.che.workspace.devfileRegistryUrl | quote }}
 {{- else if .Values.cheDevfileRegistry.deploy }}
-  {{- if .Values.global.tls.enabled }}
-  CHE_WORKSPACE_DEVFILE__REGISTRY__URL: https://{{ printf .Values.global.cheDevfileRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}
-  {{- else }}
-  CHE_WORKSPACE_DEVFILE__REGISTRY__URL: http://{{ printf .Values.global.cheDevfileRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}
-  {{- end }}
+  CHE_WORKSPACE_DEVFILE__REGISTRY__URL: {{ template "devfileRegistryUrl" . }}
 {{- end }}
 {{- if .Values.che.workspace.pluginRegistryUrl }}
   CHE_WORKSPACE_PLUGIN__REGISTRY__URL: {{ .Values.che.workspace.pluginRegistryUrl | quote }}
 {{- else if .Values.chePluginRegistry.deploy }}
-  {{- if .Values.global.tls.enabled }}
-  CHE_WORKSPACE_PLUGIN__REGISTRY__URL: https://{{ printf .Values.global.chePluginRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}/v3
-  {{- else }}
-  CHE_WORKSPACE_PLUGIN__REGISTRY__URL: http://{{ printf .Values.global.chePluginRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}/v3
-  {{- end }}
+  CHE_WORKSPACE_PLUGIN__REGISTRY__URL: {{ template "pluginRegistryUrl" . }}
 {{- end }}
 {{- if .Values.che.workspace.pluginBroker }}
   {{- if .Values.che.workspace.pluginBroker.waitTimeoutMin }}

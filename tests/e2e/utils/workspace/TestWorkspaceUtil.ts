@@ -164,9 +164,6 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
                 }
                 await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
             }
-            const wsStatus = await this.processRequestHandler.get(stopWorkspaceApiUrl);
-            let waitTime = TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS * TestConstants.TS_SELENIUM_DEFAULT_POLLING;
-            throw new error.TimeoutError(`The workspace was not stopped in ${waitTime} ms. Currnet status is: ${wsStatus.data.status}`);
         } catch (err) {
             console.log(`Stopping workspace failed. URL used: ${stopWorkspaceApiUrl}`);
             throw err;
