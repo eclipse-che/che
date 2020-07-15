@@ -17,6 +17,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.ASYNC_PERSIST_ATTRI
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility.isEphemeral;
 
+import com.google.common.base.Strings;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -38,10 +39,10 @@ import org.slf4j.LoggerFactory;
  * </ul>
  *
  * <p>If set only {@link org.eclipse.che.api.workspace.shared.Constants#ASYNC_PERSIST_ATTRIBUTE} =
- * 'true' {@link ValidationException} thrown.
+ * 'true', {@link ValidationException} is thrown.
  *
- * <p>If system configure with other value of properties than below {@link ValidationException}
- * thrown.
+ * <p>If system is configured with other value of properties than below {@link ValidationException},
+ * is thrown.
  *
  * <ul>
  *   <li>che.infra.kubernetes.namespace.default=<username>-che
@@ -61,13 +62,13 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
 
   @Inject
   public AsyncStorageModeValidator(
-      @Named("che.infra.kubernetes.pvc.strategy") String strategy,
+      @Named("che.infra.kubernetes.pvc.strategy") String pvcStrategy,
       @Named("che.infra.kubernetes.namespace.allow_user_defined")
           boolean allowUserDefinedNamespaces,
       @Nullable @Named("che.infra.kubernetes.namespace.default") String defaultNamespaceName,
       @Named("che.limits.user.workspaces.run.count") int runtimesPerUser) {
 
-    pvcStrategy = strategy;
+    this.pvcStrategy = pvcStrategy;
     this.allowUserDefinedNamespaces = allowUserDefinedNamespaces;
     this.defaultNamespaceName = defaultNamespaceName;
     this.runtimesPerUser = runtimesPerUser;
@@ -95,8 +96,7 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
         runtimesPerUserValidation();
       } else {
         String message =
-            format(
-                "Workspace configuration not valid: Asynchronous storage available only for NOT persistent storage");
+            "Workspace configuration not valid: Asynchronous storage available only for NOT persistent storage";
         LOG.warn(message);
         throw new ValidationException(message);
       }
@@ -107,8 +107,7 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
       throws ValidationException {
     if (!isEphemeral(attributes)) {
       String message =
-          format(
-              "Workspace configuration not valid: Asynchronous storage available only for NOT persistent storage");
+          "Workspace configuration not valid: Asynchronous storage available only for NOT persistent storage";
       LOG.warn(message);
       throw new ValidationException(message);
     }
@@ -126,10 +125,10 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
   }
 
   private void nameSpaceStrategyValidation() throws ValidationException {
-    if (!"<username>-che".equals(defaultNamespaceName)) {
+    if (Strings.isNullOrEmpty(defaultNamespaceName)
+        || !defaultNamespaceName.contains("<username>")) {
       String message =
-          format(
-              "Workspace configuration not valid: Asynchronous storage available only for 'per-user' namespace strategy");
+          "Workspace configuration not valid: Asynchronous storage available only for 'per-user' namespace strategy";
       LOG.warn(message);
       throw new ValidationException(message);
     }

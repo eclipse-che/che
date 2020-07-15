@@ -47,19 +47,19 @@ public class AsyncStoragePodInterceptor {
   private static final int DELETE_POD_TIMEOUT_IN_MIN = 5;
 
   private final OpenShiftClientFactory clientFactory;
-  private final String strategy;
+  private final String pvcStrategy;
 
   @Inject
   public AsyncStoragePodInterceptor(
-      @Named("che.infra.kubernetes.pvc.strategy") String strategy,
+      @Named("che.infra.kubernetes.pvc.strategy") String pvcStrategy,
       OpenShiftClientFactory openShiftClientFactory) {
-    this.strategy = strategy;
+    this.pvcStrategy = pvcStrategy;
     this.clientFactory = openShiftClientFactory;
   }
 
   public void intercept(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-    if (!COMMON_STRATEGY.equals(strategy) || isEphemeral(osEnv.getAttributes())) {
+    if (!COMMON_STRATEGY.equals(pvcStrategy) || isEphemeral(osEnv.getAttributes())) {
       return;
     }
 
@@ -80,15 +80,17 @@ public class AsyncStoragePodInterceptor {
       Thread.currentThread().interrupt();
       throw new InfrastructureException(
           format(
-              "Interrupted while waiting for pod '%s' removal. " + ex.getMessage(), ASYNC_STORAGE));
+              "Interrupted while waiting for pod '%s' removal. " + ex.getMessage(), ASYNC_STORAGE),
+          ex);
     } catch (ExecutionException ex) {
       throw new InfrastructureException(
           format(
               "Error occurred while waiting for pod '%s' removal. " + ex.getMessage(),
-              ASYNC_STORAGE));
+              ASYNC_STORAGE),
+          ex);
     } catch (TimeoutException ex) {
       throw new InfrastructureException(
-          format("Pod '%s' removal timeout reached " + ex.getMessage(), ASYNC_STORAGE));
+          format("Pod '%s' removal timeout reached " + ex.getMessage(), ASYNC_STORAGE), ex);
     }
   }
 

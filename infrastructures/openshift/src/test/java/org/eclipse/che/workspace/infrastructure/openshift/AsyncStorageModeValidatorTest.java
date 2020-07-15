@@ -44,6 +44,16 @@ public class AsyncStorageModeValidatorTest {
   @Test(
       expectedExceptions = ValidationException.class,
       expectedExceptionsMessageRegExp =
+          "Workspace configuration not valid: Asynchronous storage available only for 'per-user' namespace strategy")
+  public void shouldThrowExceptionWithNullNamespaceStrategy() throws ValidationException {
+    AsyncStorageModeValidator validator = new AsyncStorageModeValidator("common", false, null, 1);
+
+    validator.validate(of(ASYNC_PERSIST_ATTRIBUTE, "true", PERSIST_VOLUMES_ATTRIBUTE, "false"));
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
           "Workspace configuration not valid: Asynchronous storage available only if 'che.infra.kubernetes.namespace.allow_user_defined' set to 'false', but got 'true'")
   public void shouldThrowExceptionIfUserDefineNamespaceAllowed() throws ValidationException {
     AsyncStorageModeValidator validator =

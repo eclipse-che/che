@@ -43,7 +43,7 @@ public class PodTerminationGracePeriodProvisioner implements ConfigurationProvis
    * on amount of files, size of files and network ability. This is some empirical number of seconds
    * which should be enough for most projects.
    */
-  private final long graceTerminationPeriodAsyncPvc = 60;
+  private static final long GRACE_TERMINATION_PERIOD_ASYNC_STORAGE_WS_SEC = 60;
 
   @Inject
   public PodTerminationGracePeriodProvisioner(
@@ -77,7 +77,7 @@ public class PodTerminationGracePeriodProvisioner implements ConfigurationProvis
   private long getGraceTerminationPeriodSec(KubernetesEnvironment k8sEnv) {
     Map<String, String> attributes = k8sEnv.getAttributes();
     if (isEphemeral(attributes) && parseBoolean(attributes.get(ASYNC_PERSIST_ATTRIBUTE))) {
-      return graceTerminationPeriodAsyncPvc;
+      return GRACE_TERMINATION_PERIOD_ASYNC_STORAGE_WS_SEC;
     }
     return graceTerminationPeriodSec;
   }

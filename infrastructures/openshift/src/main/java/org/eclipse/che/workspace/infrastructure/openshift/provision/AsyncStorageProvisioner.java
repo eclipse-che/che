@@ -114,10 +114,10 @@ public class AsyncStorageProvisioner {
 
   private final String sidecarImagePullPolicy;
   private final String pvcQuantity;
-  private final String storageImage;
-  private final String accessMode;
-  private final String strategy;
-  private final String configuredPVCName;
+  private final String asyncStorageImage;
+  private final String pvcAccessMode;
+  private final String pvcStrategy;
+  private final String pvcName;
   private final String pvcStorageClassName;
   private final SshManager sshManager;
   private final OpenShiftClientFactory clientFactory;
@@ -126,19 +126,19 @@ public class AsyncStorageProvisioner {
   public AsyncStorageProvisioner(
       @Named("che.workspace.sidecar.image_pull_policy") String sidecarImagePullPolicy,
       @Named("che.infra.kubernetes.pvc.quantity") String pvcQuantity,
-      @Named("che.infra.kubernetes.async.storage.image") String image,
-      @Named("che.infra.kubernetes.pvc.access_mode") String accessMode,
-      @Named("che.infra.kubernetes.pvc.strategy") String strategy,
-      @Named("che.infra.kubernetes.pvc.name") String configuredPVCName,
+      @Named("che.infra.kubernetes.async.storage.image") String asyncStorageImage,
+      @Named("che.infra.kubernetes.pvc.access_mode") String pvcAccessMode,
+      @Named("che.infra.kubernetes.pvc.strategy") String pvcStrategy,
+      @Named("che.infra.kubernetes.pvc.name") String pvcName,
       @Named("che.infra.kubernetes.pvc.storage_class_name") String pvcStorageClassName,
       SshManager sshManager,
       OpenShiftClientFactory openShiftClientFactory) {
     this.sidecarImagePullPolicy = sidecarImagePullPolicy;
     this.pvcQuantity = pvcQuantity;
-    this.storageImage = image;
-    this.accessMode = accessMode;
-    this.strategy = strategy;
-    this.configuredPVCName = configuredPVCName;
+    this.asyncStorageImage = asyncStorageImage;
+    this.pvcAccessMode = pvcAccessMode;
+    this.pvcStrategy = pvcStrategy;
+    this.pvcName = pvcName;
     this.pvcStorageClassName = pvcStorageClassName;
     this.sshManager = sshManager;
     this.clientFactory = openShiftClientFactory;
@@ -150,11 +150,11 @@ public class AsyncStorageProvisioner {
       return;
     }
 
-    if (!COMMON_STRATEGY.equals(strategy)) {
+    if (!COMMON_STRATEGY.equals(pvcStrategy)) {
       String message =
           format(
               "Workspace configuration not valid: Asynchronous storage available only for 'common' PVC strategy, but got %s",
-              strategy);
+              pvcStrategy);
       LOG.warn(message);
       osEnv.addWarning(new WarningImpl(4200, message));
       throw new InfrastructureException(message);
@@ -183,14 +183,13 @@ public class AsyncStorageProvisioner {
 
   private void createPvcIfNotExist(KubernetesClient oc, String namespace, String userId) {
     Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim> claimResource =
-        oc.persistentVolumeClaims().inNamespace(namespace).withName(configuredPVCName);
+        oc.persistentVolumeClaims().inNamespace(namespace).withName(pvcName);
 
     if (claimResource.get() != null) {
       return; // pvc already exist
     }
     PersistentVolumeClaim pvc =
-        KubernetesObjectUtil.newPVC(
-            configuredPVCName, accessMode, pvcQuantity, pvcStorageClassName);
+        KubernetesObjectUtil.newPVC(pvcName, pvcAccessMode, pvcQuantity, pvcStorageClassName);
     KubernetesObjectUtil.putLabel(pvc.getMetadata(), CHE_USER_ID_LABEL, userId);
     oc.persistentVolumeClaims().inNamespace(namespace).create(pvc);
   }
@@ -280,7 +279,7 @@ public class AsyncStorageProvisioner {
             .withName(STORAGE_VOLUME)
             .withPersistentVolumeClaim(
                 new PersistentVolumeClaimVolumeSourceBuilder()
-                    .withClaimName(configuredPVCName)
+                    .withClaimName(pvcName)
                     .withReadOnly(false)
                     .build())
             .build();
@@ -313,7 +312,7 @@ public class AsyncStorageProvisioner {
     Container container =
         new ContainerBuilder()
             .withName(containerName)
-            .withImage(storageImage)
+            .withImage(asyncStorageImage)
             .withImagePullPolicy(sidecarImagePullPolicy)
             .withNewResources()
             .addToLimits("memory", new Quantity("512Mi"))
