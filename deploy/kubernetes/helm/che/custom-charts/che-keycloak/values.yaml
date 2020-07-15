@@ -11,7 +11,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-image: quay.io/eclipse/che-keycloak:nightly
+image: quay.io/eclipse/che-keycloak:7.16.0
 requireAdminPasswordChange: true
 keycloakAdminUserName: admin
 keycloakAdminUserPassword: admin
