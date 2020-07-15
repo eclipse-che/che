@@ -19,6 +19,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secr
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretApplier.ANNOTATION_AUTOMOUNT;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner.ANNOTATION_MOUNT_AS;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
@@ -40,6 +42,7 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
+import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
@@ -49,6 +52,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.K8sVersion;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -69,10 +73,15 @@ public class FileSecretApplierTest {
 
   @Mock private RuntimeIdentity runtimeIdentity;
 
-  FileSecretApplier secretApplier = new FileSecretApplier();
+  @Mock private K8sVersion kubernetesVersion;
+
+  FileSecretApplier secretApplier;
 
   @BeforeMethod
   public void setUp() throws Exception {
+    lenient().when(kubernetesVersion.newerOrEqualThan(1, 13)).thenReturn(true);
+    lenient().when(kubernetesVersion.olderThan(1, 13)).thenReturn(false);
+    secretApplier = new FileSecretApplier(kubernetesVersion);
     when(environment.getPodsData()).thenReturn(singletonMap("pod1", podData));
     when(podData.getRole()).thenReturn(PodRole.DEPLOYMENT);
     when(podData.getSpec()).thenReturn(podSpec);
@@ -469,5 +478,217 @@ public class FileSecretApplierTest {
             .build();
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
     secretApplier.applySecret(environment, runtimeIdentity, secret);
+  }
+
+  @Test
+  public void shouldNotUseSubpathForOlderK8s() throws InfrastructureException {
+    lenient().when(kubernetesVersion.newerOrEqualThan(1, 13)).thenReturn(false);
+    lenient().when(kubernetesVersion.olderThan(1, 13)).thenReturn(true);
+
+    Container container_match1 = new ContainerBuilder().withName("maven").build();
+
+    PodSpec localSpec =
+        new PodSpecBuilder().withContainers(ImmutableList.of(container_match1)).build();
+
+    when(podData.getSpec()).thenReturn(localSpec);
+
+    Secret secret =
+        new SecretBuilder()
+            .withData(ImmutableMap.of("settings.xml", "random"))
+            .withMetadata(
+                new ObjectMetaBuilder()
+                    .withName("test_secret")
+                    .withAnnotations(
+                        ImmutableMap.of(
+                            ANNOTATION_MOUNT_AS,
+                            "file",
+                            ANNOTATION_MOUNT_PATH,
+                            "/home/user/.m2",
+                            ANNOTATION_AUTOMOUNT,
+                            "true"))
+                    .withLabels(emptyMap())
+                    .build())
+            .build();
+
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
+
+    // pod has volume created
+    assertEquals(environment.getPodsData().get("pod1").getSpec().getVolumes().size(), 1);
+    Volume volume = environment.getPodsData().get("pod1").getSpec().getVolumes().get(0);
+    assertEquals(volume.getName(), "test_secret");
+    assertEquals(volume.getSecret().getSecretName(), "test_secret");
+
+    assertEquals(
+        environment
+            .getPodsData()
+            .get("pod1")
+            .getSpec()
+            .getContainers()
+            .get(0)
+            .getVolumeMounts()
+            .size(),
+        1);
+    VolumeMount mount1 =
+        environment
+            .getPodsData()
+            .get("pod1")
+            .getSpec()
+            .getContainers()
+            .get(0)
+            .getVolumeMounts()
+            .get(0);
+    assertEquals(mount1.getName(), "test_secret");
+    assertEquals(mount1.getMountPath(), "/home/user/.m2");
+    assertNull(mount1.getSubPath());
+  }
+
+  @Test
+  public void shouldNotOverrideExistingVolumeMounts() throws InfrastructureException {
+    Container container_match1 =
+        new ContainerBuilder()
+            .withName("maven")
+            .withVolumeMounts(
+                new VolumeMountBuilder()
+                    .withName("existing-volume")
+                    .withMountPath("/home/user/.m2")
+                    .build())
+            .build();
+
+    PodSpec localSpec =
+        new PodSpecBuilder().withContainers(ImmutableList.of(container_match1)).build();
+
+    when(podData.getSpec()).thenReturn(localSpec);
+
+    Secret secret =
+        new SecretBuilder()
+            .withData(ImmutableMap.of("settings.xml", "random"))
+            .withMetadata(
+                new ObjectMetaBuilder()
+                    .withName("test_secret")
+                    .withAnnotations(
+                        ImmutableMap.of(
+                            ANNOTATION_MOUNT_AS,
+                            "file",
+                            ANNOTATION_MOUNT_PATH,
+                            "/home/user/.m2",
+                            ANNOTATION_AUTOMOUNT,
+                            "true"))
+                    .withLabels(emptyMap())
+                    .build())
+            .build();
+
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
+
+    // pod has volume created
+    assertEquals(environment.getPodsData().get("pod1").getSpec().getVolumes().size(), 1);
+    Volume volume = environment.getPodsData().get("pod1").getSpec().getVolumes().get(0);
+    assertEquals(volume.getName(), "test_secret");
+    assertEquals(volume.getSecret().getSecretName(), "test_secret");
+
+    assertEquals(
+        environment
+            .getPodsData()
+            .get("pod1")
+            .getSpec()
+            .getContainers()
+            .get(0)
+            .getVolumeMounts()
+            .size(),
+        2);
+    VolumeMount mount1 =
+        environment
+            .getPodsData()
+            .get("pod1")
+            .getSpec()
+            .getContainers()
+            .get(0)
+            .getVolumeMounts()
+            .get(0);
+    assertEquals(mount1.getName(), "existing-volume");
+    assertEquals(mount1.getMountPath(), "/home/user/.m2");
+    assertNull(mount1.getSubPath());
+
+    VolumeMount mount2 =
+        environment
+            .getPodsData()
+            .get("pod1")
+            .getSpec()
+            .getContainers()
+            .get(0)
+            .getVolumeMounts()
+            .get(1);
+    assertEquals(mount2.getName(), "test_secret");
+    assertEquals(mount2.getMountPath(), "/home/user/.m2/settings.xml");
+    assertEquals(mount2.getSubPath(), "settings.xml");
+  }
+
+  @Test
+  public void shouldOverrideExistingVolumeMountsOnOlderK8s() throws InfrastructureException {
+    lenient().when(kubernetesVersion.newerOrEqualThan(1, 13)).thenReturn(false);
+    lenient().when(kubernetesVersion.olderThan(1, 13)).thenReturn(true);
+
+    Container container_match1 =
+        new ContainerBuilder()
+            .withName("maven")
+            .withVolumeMounts(
+                new VolumeMountBuilder()
+                    .withName("existing-volume")
+                    .withMountPath("/home/user/.m2")
+                    .build())
+            .build();
+
+    PodSpec localSpec =
+        new PodSpecBuilder().withContainers(ImmutableList.of(container_match1)).build();
+
+    when(podData.getSpec()).thenReturn(localSpec);
+
+    Secret secret =
+        new SecretBuilder()
+            .withData(ImmutableMap.of("settings.xml", "random"))
+            .withMetadata(
+                new ObjectMetaBuilder()
+                    .withName("test_secret")
+                    .withAnnotations(
+                        ImmutableMap.of(
+                            ANNOTATION_MOUNT_AS,
+                            "file",
+                            ANNOTATION_MOUNT_PATH,
+                            "/home/user/.m2",
+                            ANNOTATION_AUTOMOUNT,
+                            "true"))
+                    .withLabels(emptyMap())
+                    .build())
+            .build();
+
+    secretApplier.applySecret(environment, runtimeIdentity, secret);
+
+    // pod has volume created
+    assertEquals(environment.getPodsData().get("pod1").getSpec().getVolumes().size(), 1);
+    Volume volume = environment.getPodsData().get("pod1").getSpec().getVolumes().get(0);
+    assertEquals(volume.getName(), "test_secret");
+    assertEquals(volume.getSecret().getSecretName(), "test_secret");
+
+    assertEquals(
+        environment
+            .getPodsData()
+            .get("pod1")
+            .getSpec()
+            .getContainers()
+            .get(0)
+            .getVolumeMounts()
+            .size(),
+        1);
+    VolumeMount secretMount =
+        environment
+            .getPodsData()
+            .get("pod1")
+            .getSpec()
+            .getContainers()
+            .get(0)
+            .getVolumeMounts()
+            .get(0);
+    assertEquals(secretMount.getName(), "test_secret");
+    assertEquals(secretMount.getMountPath(), "/home/user/.m2");
+    assertNull(secretMount.getSubPath());
   }
 }
