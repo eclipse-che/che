@@ -23,6 +23,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /**
@@ -89,7 +90,8 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
  * @author Alexander Garagatyi
  * @see Annotations
  */
-public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenShiftEnvironment> {
+public class OpenShiftExternalServerExposer extends IngressServerExposer<OpenShiftEnvironment> implements
+    ExternalServerExposer<OpenShiftEnvironment> {
 
   public OpenShiftExternalServerExposer() {
     super(null, Collections.emptyMap(), "%s");

@@ -14,7 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
- * Implementations of this strategy are used by the {@link ExternalServerExposer} to compose an
+ * Implementations of this strategy are used by the {@link IngressServerExposer} to compose an
  * Ingress rule that exposes the services.
  */
 public interface ExternalServiceExposureStrategy {

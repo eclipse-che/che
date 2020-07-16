@@ -51,8 +51,8 @@ public class PreviewUrlExposerTest {
 
   @BeforeMethod
   public void setUp() {
-    ExternalServerExposer<KubernetesEnvironment> externalServerExposer =
-        new ExternalServerExposer<>(externalServiceExposureStrategy, Collections.emptyMap(), null);
+    IngressServerExposer<KubernetesEnvironment> externalServerExposer =
+        new IngressServerExposer<>(externalServiceExposureStrategy, Collections.emptyMap(), null);
     previewUrlExposer = new PreviewUrlExposer<>(externalServerExposer);
   }
 

@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.DefaultHostExternalServiceExposureStrategy.DEFAULT_HOST_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.RouterHostExternalServiceExposureStrategy.ROUTER_HOST_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.SingleHostExternalServiceExposureStrategy.SINGLE_HOST_STRATEGY;
 
 import io.fabric8.kubernetes.api.model.ServicePort;
@@ -48,6 +49,7 @@ public class CookiePathStrategy {
         getCookiePath = (__, ___) -> "/";
         break;
       case SINGLE_HOST_STRATEGY:
+      case ROUTER_HOST_STRATEGY:
       case DEFAULT_HOST_STRATEGY:
         getCookiePath = (serviceName, __) -> serviceName;
         break;
