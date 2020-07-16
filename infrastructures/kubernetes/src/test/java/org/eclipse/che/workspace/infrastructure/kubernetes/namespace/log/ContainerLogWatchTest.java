@@ -69,32 +69,21 @@ public class ContainerLogWatchTest {
   @Test
   public void testSuccessfulFinishedContainerLogWatch() throws IOException {
     PipedInputStream inputStream = new PipedInputStream();
-    PipedOutputStream outputStream = new PipedOutputStream(inputStream);
-    outputStream.write("first\nsecond".getBytes());
-    outputStream.write("\nthird".getBytes());
-    outputStream.close();
-    logWatch.setInputStream(inputStream);
-
-    ContainerLogWatch clw =
-        new ContainerLogWatch(
-            client,
-            eventsPublisher,
-            namespace,
-            podname,
-            container,
-            podLogHandler,
-            TIMEOUTS,
-            LOG_LIMIT_BYTES);
-    clw.run();
-
-    verify(podLogHandler).handle("first", container);
-    verify(podLogHandler).handle("second", container);
-    verify(podLogHandler).handle("third", container);
-    assertTrue(logWatch.isClosed);
-
-    // verify events were properly fired
-    verify(eventsPublisher, times(1)).sendWatchLogStartedEvent(any(String.class));
-    verify(eventsPublisher, times(1)).sendWatchLogStoppedEvent(any(String.class));
+		try (PipedOutputStream outputStream = new PipedOutputStream(inputStream)) {
+			outputStream.write("first\nsecond".getBytes());
+			outputStream.write("\nthird".getBytes());
+			outputStream.close();
+			logWatch.setInputStream(inputStream);
+			ContainerLogWatch clw = new ContainerLogWatch(client, eventsPublisher, namespace, podname, container, podLogHandler, TIMEOUTS, LOG_LIMIT_BYTES);
+			clw.run();
+			verify(podLogHandler).handle("first", container);
+			verify(podLogHandler).handle("second", container);
+			verify(podLogHandler).handle("third", container);
+			assertTrue(logWatch.isClosed);
+			// verify events were properly fired
+			verify(eventsPublisher, times(1)).sendWatchLogStartedEvent(any(java.lang.String.class));
+			verify(eventsPublisher, times(1)).sendWatchLogStoppedEvent(any(java.lang.String.class));
+		}
   }
 
   @Test
