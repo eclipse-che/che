@@ -3,13 +3,13 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-public class RouterHostExternalServiceExposureStrategy extends
+public class GatewayHostExternalServiceExposureStrategy extends
     SingleHostExternalServiceExposureStrategy implements ExternalServiceExposureStrategy {
 
-  public static final String ROUTER_HOST_STRATEGY = "router-host";
+  public static final String GATEWAY_HOST_STRATEGY = "gateway-host";
 
   @Inject
-  public RouterHostExternalServiceExposureStrategy(@Named("che.host") String cheHost) {
+  public GatewayHostExternalServiceExposureStrategy(@Named("che.host") String cheHost) {
     super(cheHost);
   }
 }
