@@ -847,15 +847,8 @@ public class WorkspaceService extends Service {
     if (devfileRegistryUrl != null) {
       settings.put("cheWorkspaceDevfileRegistryUrl", devfileRegistryUrl);
     }
-
-    if (availableStorageTypes != null) {
-      settings.put(CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES, availableStorageTypes);
-    }
-
-    if (defaultStorageType != null) {
-      settings.put(CHE_WORKSPACE_STORAGE_DEFAULT_TYPE, defaultStorageType);
-    }
-
+    settings.put(CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES, availableStorageTypes);
+    settings.put(CHE_WORKSPACE_STORAGE_DEFAULT_TYPE, defaultStorageType);
     return settings.build();
   }
 
