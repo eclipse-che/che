@@ -122,6 +122,20 @@ public final class Constants {
   public static final String PERSIST_VOLUMES_ATTRIBUTE = "persistVolumes";
 
   /**
+   * The attribute allows to configure workspace with async storage support this configuration. Make
+   * sense only in case org.eclipse.che.api.workspace.shared.Constants#PERSIST_VOLUMES_ATTRIBUTE set
+   * to 'false'.
+   *
+   * <p>Should be set/read from {@link WorkspaceConfig#getAttributes}.
+   *
+   * <p>Value is expected to be boolean, and if set to 'true' special plugin will be added to
+   * workspace. It will provide ability to backup/restore project source to the async storage.
+   * Workspace volumes still would be created as `emptyDir`. During stopping workspace project
+   * source will be sent to the storage Pod and restore from it on next restarts.
+   */
+  public static final String ASYNC_PERSIST_ATTRIBUTE = "asyncPersist";
+
+  /**
    * Contains a list of workspace tooling plugins that should be used in a workspace. Should be
    * set/read from {@link WorkspaceConfig#getAttributes}.
    *
