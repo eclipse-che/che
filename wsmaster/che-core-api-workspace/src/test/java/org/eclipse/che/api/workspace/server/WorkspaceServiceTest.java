@@ -25,7 +25,7 @@ import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUN
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES;
-import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_STORAGE_DEFAULT_TYPE;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_STORAGE_PREFERRED_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES;
 import static org.eclipse.che.api.workspace.shared.Constants.SUPPORTED_RECIPE_TYPES;
@@ -137,7 +137,7 @@ public class WorkspaceServiceTest {
   private static final EnvironmentFilter FILTER = new EnvironmentFilter();
 
   private final String availableStorageTypes = "persistent,ephemeral,async";
-  private final String defaultStorageType = "persistent";
+  private final String preferredStorageType = "persistent";
 
   @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private CheJsonProvider jsonProvider = new CheJsonProvider(Collections.emptySet());
@@ -163,7 +163,7 @@ public class WorkspaceServiceTest {
             urlFetcher,
             LOG_LIMIT_BYTES,
             availableStorageTypes,
-            defaultStorageType);
+            preferredStorageType);
   }
 
   @Test
@@ -1375,7 +1375,7 @@ public class WorkspaceServiceTest {
             .put("cheWorkspacePluginRegistryUrl", CHE_WORKSPACE_PLUGIN_REGISTRY_ULR)
             .put("cheWorkspaceDevfileRegistryUrl", CHE_WORKSPACE_DEVFILE_REGISTRY_ULR)
             .put(CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES, availableStorageTypes)
-            .put(CHE_WORKSPACE_STORAGE_DEFAULT_TYPE, defaultStorageType)
+            .put(CHE_WORKSPACE_STORAGE_PREFERRED_TYPE, preferredStorageType)
             .build());
   }
 

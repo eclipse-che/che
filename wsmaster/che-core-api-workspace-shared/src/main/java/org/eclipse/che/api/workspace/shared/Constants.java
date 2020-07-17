@@ -49,11 +49,11 @@ public final class Constants {
       "che.workspace.storage.available_types";
 
   /**
-   * The configuration property that defines a default value for storage type that clients like
+   * The configuration property that defines a preferred value for storage type that clients like
    * Dashboard should propose for users during workspace creation/update.
    */
-  public static final String CHE_WORKSPACE_STORAGE_DEFAULT_TYPE =
-      "che.workspace.storage.default_type";
+  public static final String CHE_WORKSPACE_STORAGE_PREFERRED_TYPE =
+      "che.workspace.storage.preferred_type";
 
   /** Property name for Che plugin registry url. */
   public static final String CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY =
