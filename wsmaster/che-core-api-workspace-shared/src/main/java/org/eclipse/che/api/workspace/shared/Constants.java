@@ -42,21 +42,18 @@ public final class Constants {
   public static final String CHE_WORKSPACE_AUTO_START = "che.workspace.auto_start";
 
   /**
-   * The configuration property that defines a default value for persist volumes that clients like
-   * Dashboard should propose for users during workspace creation.
-   *
-   * <p>Possible values: true or false
-   *
-   * <ul>
-   *   <li>In case of true - PersistentVolumeClaims are used by declared volumes by user and
-   *       plugins. `true` value is supposed not to be set explicitly in Devfile attributes since
-   *       it's default fixed behaviour.
-   *   <li>In case of false - emptyDir is used instead of PVCs. Note that data will be lost after
-   *       workspace restart.
-   * </ul>
+   * The configuration property that defines available values for storage types that clients like
+   * Dashboard should propose for users during workspace creation/update.
    */
-  public static final String CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY =
-      "che.workspace.persist_volumes.default";
+  public static final String CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES =
+      "che.workspace.storage.available_types";
+
+  /**
+   * The configuration property that defines a preferred value for storage type that clients like
+   * Dashboard should propose for users during workspace creation/update.
+   */
+  public static final String CHE_WORKSPACE_STORAGE_PREFERRED_TYPE =
+      "che.workspace.storage.preferred_type";
 
   /** Property name for Che plugin registry url. */
   public static final String CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY =
