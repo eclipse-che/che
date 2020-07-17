@@ -52,10 +52,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 @Singleton
 public class GitConfigProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
 
-  private final String GIT_CONFIG_MAP_NAME_SUFFIX = "-gitconfig";
+  public static final String GIT_CONFIG_MAP_NAME_SUFFIX = "-gitconfig";
 
   private static final String GIT_BASE_CONFIG_PATH = "/etc/";
-  private static final String GIT_CONFIG = "gitconfig";
+  public static final String GIT_CONFIG = "gitconfig";
   private static final String GIT_CONFIG_PATH = GIT_BASE_CONFIG_PATH + GIT_CONFIG;
   private static final String PREFERENCES_KEY_FILTER = "theia-user-preferences";
   private static final String GIT_USER_NAME_PROPERTY = "git.user.name";
