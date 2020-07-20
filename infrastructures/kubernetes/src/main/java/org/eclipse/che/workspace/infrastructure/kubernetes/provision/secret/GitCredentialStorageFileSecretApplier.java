@@ -64,6 +64,11 @@ public class GitCredentialStorageFileSecretApplier extends FileSecretApplier {
       Map<String, String> gitConfigMapData = gitConfigMap.getData();
       String gitConfig = gitConfigMapData.get(GitConfigProvisioner.GIT_CONFIG);
       if (gitConfig != null) {
+        if (gitConfig.contains("helper = store --file ") && gitConfig.contains("[credential]")) {
+          throw new InfrastructureException(
+              "Multiple git credentials secrets found. Please remove duplication.");
+        }
+
         StringBuilder gitConfigBuilder = new StringBuilder(gitConfig);
         gitConfigBuilder
             .append('\n')
