@@ -42,9 +42,25 @@ public class DashboardRedirectionFilterTest {
   @InjectMocks private DashboardRedirectionFilter filter;
 
   @Test(dataProvider = "nonNamespacePathProvider")
-  public void shouldRedirectIfRequestIsNotNamespaceWorkspaceName(String uri) throws Exception {
+  public void shouldRedirectIfGetRequestIsNotNamespaceWorkspaceName(String uri) throws Exception {
     // given
     when(request.getMethod()).thenReturn("GET");
+    when(request.getRequestURI()).thenReturn(uri);
+    EnvironmentContext context = new EnvironmentContext();
+    context.setSubject(new SubjectImpl("id123", "name", "token123", false));
+    EnvironmentContext.setCurrent(context);
+
+    // when
+    filter.doFilter(request, response, chain);
+
+    // then
+    verify(response).sendRedirect(eq("/dashboard/"));
+  }
+
+  @Test(dataProvider = "nonNamespacePathProvider")
+  public void shouldRedirectIfHEADRequestIsNotNamespaceWorkspaceName(String uri) throws Exception {
+    // given
+    when(request.getMethod()).thenReturn("HEAD");
     when(request.getRequestURI()).thenReturn(uri);
     EnvironmentContext context = new EnvironmentContext();
     context.setSubject(new SubjectImpl("id123", "name", "token123", false));
@@ -77,8 +93,8 @@ public class DashboardRedirectionFilterTest {
     verify(chain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
   }
 
-  @Test(dataProvider = "notGETMethodProvider")
-  public void shouldSkipNotGETRequest(String method) throws Exception {
+  @Test(dataProvider = "notGETNorHEADMethodProvider")
+  public void shouldSkipNotGETNorHEADRequest(String method) throws Exception {
     // given
     when(request.getMethod()).thenReturn(method);
     when(request.getRequestURI()).thenReturn("/namespace/workspaceName");
@@ -90,8 +106,8 @@ public class DashboardRedirectionFilterTest {
     verify(chain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
   }
 
-  @DataProvider(name = "notGETMethodProvider")
-  public Object[][] notGETMethodProvider() {
-    return new Object[][] {{"POST"}, {"HEAD"}, {"DELETE"}, {"PUT"}};
+  @DataProvider(name = "notGETNorHEADMethodProvider")
+  public Object[][] notGETNorHEADMethodProvider() {
+    return new Object[][] {{"POST"}, {"DELETE"}, {"PUT"}};
   }
 }
