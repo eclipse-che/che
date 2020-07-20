@@ -45,7 +45,8 @@ public class DashboardRedirectionFilter implements Filter {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse resp = (HttpServletResponse) response;
 
-    if ("GET".equals(req.getMethod()) && !EXCLUDES.matcher(req.getRequestURI()).matches()) {
+    if (("GET".equals(req.getMethod()) || "HEAD".equals(req.getMethod()))
+        && !EXCLUDES.matcher(req.getRequestURI()).matches()) {
       resp.sendRedirect("/dashboard/");
       return;
     }
