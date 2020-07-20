@@ -16,7 +16,6 @@ import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner.ANNOTATION_PREFIX;
 
 import com.google.common.annotations.Beta;
-import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretVolumeSourceBuilder;
@@ -24,12 +23,8 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -42,7 +37,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.K8sVersion;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +52,6 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
   private static final Logger LOG = LoggerFactory.getLogger(FileSecretApplier.class);
 
   static final String ANNOTATION_MOUNT_PATH = ANNOTATION_PREFIX + "/" + "mount-path";
-  static final String ANNOTATION_GIT_CREDENTIALS = ANNOTATION_PREFIX + "/" + "git-credential";
 
   private final K8sVersion k8sVersion;
 
@@ -88,6 +81,7 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
               "Unable to mount secret '%s': It is configured to be mounted as a file but the mount path was not specified. Please define the '%s' annotation on the secret to specify it.",
               secret.getMetadata().getName(), ANNOTATION_MOUNT_PATH));
     }
+
     Volume volumeFromSecret =
         new VolumeBuilder()
             .withName(secret.getMetadata().getName())
@@ -96,7 +90,7 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
                     .withNewSecretName(secret.getMetadata().getName())
                     .build())
             .build();
-    Path gitSecretFilePath = null;
+
     for (PodData podData : env.getPodsData().values()) {
       if (!podData.getRole().equals(PodRole.DEPLOYMENT)) {
         continue;
@@ -150,44 +144,6 @@ public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnviron
                         secretFile ->
                             buildVolumeMount(volumeFromSecret, componentMountPath, secretFile))
                     .collect(Collectors.toList()));
-
-        if (Boolean.parseBoolean(
-            secret.getMetadata().getAnnotations().get(ANNOTATION_GIT_CREDENTIALS))) {
-          Set<String> keys = secret.getData().keySet();
-          if (keys.size() != 1) {
-            throw new InfrastructureException(
-                format(
-                    "Invalid git credential secret data. It should contain only 1 data item but it have %d",
-                    keys.size()));
-          }
-          gitSecretFilePath = Paths.get(secretMountPath, keys.iterator().next());
-        }
-      }
-    }
-
-    if (gitSecretFilePath != null) {
-      ConfigMap gitConfigMap =
-          env.getConfigMaps()
-              .get(
-                  runtimeIdentity.getWorkspaceId()
-                      + GitConfigProvisioner.GIT_CONFIG_MAP_NAME_SUFFIX);
-      if (gitConfigMap != null) {
-        Map<String, String> gitConfigMapData = gitConfigMap.getData();
-        String gitConfig = gitConfigMapData.get(GitConfigProvisioner.GIT_CONFIG);
-        if (gitConfig != null) {
-          StringBuilder gitConfigBuilder = new StringBuilder(gitConfig);
-          gitConfigBuilder
-              .append('\n')
-              .append("[credential]")
-              .append('\n')
-              .append('\t')
-              .append("helper = store --file ")
-              .append(gitSecretFilePath.toString())
-              .append('\n');
-          HashMap<String, String> newGitConfigMapData = new HashMap<>(gitConfigMapData);
-          newGitConfigMapData.put(GitConfigProvisioner.GIT_CONFIG, gitConfigBuilder.toString());
-          gitConfigMap.setData(newGitConfigMapData);
-        }
       }
     }
   }

@@ -36,6 +36,7 @@ import org.testng.annotations.Test;
 public class SecretAsContainerResourceProvisionerTest {
 
   @Mock EnvironmentVariableSecretApplier environmentVariableSecretApplier;
+  @Mock GitCredentialStorageFileSecretApplier gitCredentialStorageFileSecretApplier;
   @Mock FileSecretApplier fileSecretApplier;
 
   private SecretAsContainerResourceProvisioner<KubernetesEnvironment> provisioner;
@@ -53,7 +54,10 @@ public class SecretAsContainerResourceProvisionerTest {
     when(namespace.secrets()).thenReturn(secrets);
     provisioner =
         new SecretAsContainerResourceProvisioner<>(
-            fileSecretApplier, environmentVariableSecretApplier, new String[] {"app:che"});
+            fileSecretApplier,
+            environmentVariableSecretApplier,
+            gitCredentialStorageFileSecretApplier,
+            new String[] {"app:che"});
   }
 
   @Test(
