@@ -30,6 +30,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigPr
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * An instance of {@link FileSecretApplier} that is trying to adjust the content of git-config that
+ * was added by {@link GitConfigProvisioner}. The adjustment is adding configuration of git
+ * credentials store, which is pointing to the file that is going to be mount to the container from
+ * the secret.
+ */
 public class GitCredentialStorageFileSecretApplier extends FileSecretApplier {
 
   private static final Logger LOG =
