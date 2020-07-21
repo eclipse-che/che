@@ -60,7 +60,7 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
   private final int runtimesPerUser;
   private final boolean isNamespaceStrategyNotValid;
   private final boolean isPvcStrategyNotValid;
-  private final boolean runtimesPerUserLimited;
+  private final boolean singleRuntimeAllowed;
 
   @Inject
   public AsyncStorageModeValidator(
@@ -75,7 +75,7 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
     this.runtimesPerUser = runtimesPerUser;
 
     this.isPvcStrategyNotValid = !COMMON_STRATEGY.equals(pvcStrategy);
-    this.runtimesPerUserLimited = runtimesPerUser > 1;
+    this.singleRuntimeAllowed = runtimesPerUser == 1;
     this.isNamespaceStrategyNotValid =
         isNullOrEmpty(defaultNamespaceName) || !defaultNamespaceName.contains("<username>");
   }
@@ -120,7 +120,7 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
   }
 
   private void runtimesPerUserValidation() throws ValidationException {
-    if (runtimesPerUserLimited) {
+    if (!singleRuntimeAllowed) {
       String message =
           format(
               "Workspace configuration not valid: Asynchronous storage available only if 'che.limits.user.workspaces.run.count' set to 1, but got %s",
