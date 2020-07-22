@@ -29,8 +29,6 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.K8sVersion;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An instance of {@link FileSecretApplier} that is trying to adjust the content of git-config that
@@ -42,11 +40,11 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class GitCredentialStorageFileSecretApplier extends FileSecretApplier {
 
-  private static final Logger LOG =
-      LoggerFactory.getLogger(GitCredentialStorageFileSecretApplier.class);
-
   public static final String ANNOTATION_GIT_CREDENTIALS =
       ANNOTATION_PREFIX + "/" + "git-credential";
+
+  private static final String GIT_CREDENTIALS_FILE_STORE_PATTERN =
+      "\n[credential]\n\thelper = store --file %s\n";
 
   @Inject
   public GitCredentialStorageFileSecretApplier(K8sVersion k8sVersion) {
@@ -74,22 +72,15 @@ public class GitCredentialStorageFileSecretApplier extends FileSecretApplier {
       Map<String, String> gitConfigMapData = gitConfigMap.getData();
       String gitConfig = gitConfigMapData.get(GitConfigProvisioner.GIT_CONFIG);
       if (gitConfig != null) {
-        if (gitConfig.contains("helper = store --file ") && gitConfig.contains("[credential]")) {
+        if (gitConfig.contains("helper = store --file") && gitConfig.contains("[credential]")) {
           throw new InfrastructureException(
               "Multiple git credentials secrets found. Please remove duplication.");
         }
 
-        StringBuilder gitConfigBuilder = new StringBuilder(gitConfig);
-        gitConfigBuilder
-            .append('\n')
-            .append("[credential]")
-            .append('\n')
-            .append('\t')
-            .append("helper = store --file ")
-            .append(gitSecretFilePath.toString())
-            .append('\n');
         HashMap<String, String> newGitConfigMapData = new HashMap<>(gitConfigMapData);
-        newGitConfigMapData.put(GitConfigProvisioner.GIT_CONFIG, gitConfigBuilder.toString());
+        newGitConfigMapData.put(
+            GitConfigProvisioner.GIT_CONFIG,
+            String.format(GIT_CREDENTIALS_FILE_STORE_PATTERN, gitSecretFilePath.toString()));
         gitConfigMap.setData(newGitConfigMapData);
       }
     }
