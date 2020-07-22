@@ -39,6 +39,22 @@ public class KubernetesConfigsMaps {
   }
 
   /**
+   * Retrieves config map by name.
+   *
+   * @param configMapName name of config map to get
+   * @return config map or {@code null} if config map not exists
+   * @throws InfrastructureException when any exception occurs
+   */
+  public ConfigMap get(String configMapName) throws InfrastructureException {
+    return clientFactory
+        .create(workspaceId)
+        .configMaps()
+        .inNamespace(namespace)
+        .withName(configMapName)
+        .get();
+  }
+
+  /**
    * Creates specified config map.
    *
    * @param configMap config map to create

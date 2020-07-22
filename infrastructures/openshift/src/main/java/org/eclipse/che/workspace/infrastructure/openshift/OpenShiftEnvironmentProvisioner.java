@@ -19,6 +19,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
@@ -28,6 +29,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminat
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SshKeysProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TrustStoreCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
@@ -73,6 +75,7 @@ public class OpenShiftEnvironmentProvisioner
   private final GitConfigProvisioner gitConfigProvisioner;
   private final PreviewUrlExposer<OpenShiftEnvironment> previewUrlExposer;
   private final VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
+  private final TrustStoreCertificateProvisioner trustStoreCertificateProvisioner;
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
@@ -93,6 +96,7 @@ public class OpenShiftEnvironmentProvisioner
       SshKeysProvisioner sshKeysProvisioner,
       GitConfigProvisioner gitConfigProvisioner,
       OpenShiftPreviewUrlExposer previewUrlEndpointsProvisioner,
+      TrustStoreCertificateProvisioner trustStoreCertificateProvisioner,
       VcsSslCertificateProvisioner vcsSslCertificateProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
@@ -111,12 +115,21 @@ public class OpenShiftEnvironmentProvisioner
     this.sshKeysProvisioner = sshKeysProvisioner;
     this.gitConfigProvisioner = gitConfigProvisioner;
     this.previewUrlExposer = previewUrlEndpointsProvisioner;
+    this.trustStoreCertificateProvisioner = trustStoreCertificateProvisioner;
     this.vcsSslCertificateProvisioner = vcsSslCertificateProvisioner;
   }
 
   @Override
   @Traced
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
+      throws InfrastructureException {
+    provision(osEnv, identity, null);
+  }
+
+  @Override
+  @Traced
+  public void provision(
+      OpenShiftEnvironment osEnv, RuntimeIdentity identity, KubernetesNamespace namespace)
       throws InfrastructureException {
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
@@ -145,6 +158,7 @@ public class OpenShiftEnvironmentProvisioner
     proxySettingsProvisioner.provision(osEnv, identity);
     serviceAccountProvisioner.provision(osEnv, identity);
     certificateProvisioner.provision(osEnv, identity);
+    trustStoreCertificateProvisioner.provision(osEnv, identity, namespace);
     sshKeysProvisioner.provision(osEnv, identity);
     vcsSslCertificateProvisioner.provision(osEnv, identity);
     gitConfigProvisioner.provision(osEnv, identity);

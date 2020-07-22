@@ -17,6 +17,7 @@ import static org.mockito.Mockito.inOrder;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner.KubernetesEnvironmentProvisionerImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
@@ -28,6 +29,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettin
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SshKeysProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TrustStoreCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
@@ -54,6 +56,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private UniqueNamesProvisioner<KubernetesEnvironment> uniqueNamesProvisioner;
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
+  @Mock private KubernetesNamespace kubernetesNamespace;
   @Mock private EnvVarsConverter envVarsProvisioner;
   @Mock private ServersConverter<KubernetesEnvironment> serversProvisioner;
   @Mock private RestartPolicyRewriter restartPolicyRewriter;
@@ -67,6 +70,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private ServiceAccountProvisioner serviceAccountProvisioner;
   @Mock private CertificateProvisioner certificateProvisioner;
   @Mock private SshKeysProvisioner sshKeysProvisioner;
+  @Mock private TrustStoreCertificateProvisioner trustStoreCertificateProvisioner;
   @Mock private GitConfigProvisioner gitConfigProvisioner;
   @Mock private PreviewUrlExposer previewUrlExposer;
   @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
@@ -96,6 +100,7 @@ public class KubernetesEnvironmentProvisionerTest {
             certificateProvisioner,
             sshKeysProvisioner,
             gitConfigProvisioner,
+            trustStoreCertificateProvisioner,
             previewUrlExposer,
             vcsSslCertificateProvisioner);
     provisionOrder =
@@ -114,13 +119,14 @@ public class KubernetesEnvironmentProvisionerTest {
             proxySettingsProvisioner,
             serviceAccountProvisioner,
             certificateProvisioner,
+            trustStoreCertificateProvisioner,
             gitConfigProvisioner,
             previewUrlExposer);
   }
 
   @Test
   public void performsOrderedProvisioning() throws Exception {
-    k8sInfraProvisioner.provision(k8sEnv, runtimeIdentity);
+    k8sInfraProvisioner.provision(k8sEnv, runtimeIdentity, kubernetesNamespace);
 
     provisionOrder.verify(logsVolumeMachineProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(serversProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
@@ -140,6 +146,9 @@ public class KubernetesEnvironmentProvisionerTest {
     provisionOrder.verify(proxySettingsProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(serviceAccountProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(certificateProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder
+        .verify(trustStoreCertificateProvisioner)
+        .provision(eq(k8sEnv), eq(runtimeIdentity), eq(kubernetesNamespace));
     provisionOrder.verify(gitConfigProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }

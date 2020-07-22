@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.openshift.environment;
+package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import com.google.inject.Inject;
 import javax.inject.Named;
@@ -25,9 +25,9 @@ import org.slf4j.LoggerFactory;
  * @author Tom George
  */
 @Singleton
-public class OpenShiftCheInstallationLocation {
+public class CheInstallationLocation {
 
-  private static final Logger LOG = LoggerFactory.getLogger(OpenShiftCheInstallationLocation.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CheInstallationLocation.class);
 
   @Inject(optional = true)
   @Named("env.KUBERNETES_NAMESPACE")

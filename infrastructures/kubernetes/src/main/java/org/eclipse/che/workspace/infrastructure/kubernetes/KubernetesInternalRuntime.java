@@ -211,7 +211,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // Infrastructure specific provisioners should be applied last
       // because it converts all Workspace API model objects that comes
       // from previous provisioners into infrastructure specific objects
-      kubernetesEnvironmentProvisioner.provision(context.getEnvironment(), context.getIdentity());
+      kubernetesEnvironmentProvisioner.provision(
+          context.getEnvironment(), context.getIdentity(), namespace);
 
       secretAsContainerResourceProvisioner.provision(
           context.getEnvironment(), context.getIdentity(), namespace);
