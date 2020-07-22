@@ -41,25 +41,26 @@ public class DashboardRedirectionFilterTest {
 
   @InjectMocks private DashboardRedirectionFilter filter;
 
-  @Test
-  public void shouldSkipRequestToProject() throws Exception {
+  @Test(dataProvider = "nonNamespacePathProvider")
+  public void shouldRedirectIfGetRequestIsNotNamespaceWorkspaceName(String uri) throws Exception {
     // given
     when(request.getMethod()).thenReturn("GET");
-    when(request.getRequestURI()).thenReturn("/namespace/ws-id/project1");
-    when(request.getRequestURL())
-        .thenReturn(new StringBuffer("http://localhost:8080/namespace/ws-id/project1"));
+    when(request.getRequestURI()).thenReturn(uri);
+    EnvironmentContext context = new EnvironmentContext();
+    context.setSubject(new SubjectImpl("id123", "name", "token123", false));
+    EnvironmentContext.setCurrent(context);
 
     // when
     filter.doFilter(request, response, chain);
 
     // then
-    verify(chain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+    verify(response).sendRedirect(eq("/dashboard/"));
   }
 
   @Test(dataProvider = "nonNamespacePathProvider")
-  public void shouldRedirectIfRequestWithoutNamespace(String uri, String url) throws Exception {
+  public void shouldRedirectIfHEADRequestIsNotNamespaceWorkspaceName(String uri) throws Exception {
     // given
-    when(request.getMethod()).thenReturn("GET");
+    when(request.getMethod()).thenReturn("HEAD");
     when(request.getRequestURI()).thenReturn(uri);
     EnvironmentContext context = new EnvironmentContext();
     context.setSubject(new SubjectImpl("id123", "name", "token123", false));
@@ -75,18 +76,15 @@ public class DashboardRedirectionFilterTest {
   @DataProvider(name = "nonNamespacePathProvider")
   public Object[][] nonProjectPathProvider() {
     return new Object[][] {
-      {"/ws-id/", "http://localhost:8080/ws-id123123/"},
-      {"/wsname", "http://localhost:8080/wsname_only"},
+      {"/"}, {"/ws-id/"}, {"/wsname"}, {"/unknown/resource/index.html"},
     };
   }
 
-  @Test(dataProvider = "notGETMethodProvider")
-  public void shouldSkipNotGETRequest(String method) throws Exception {
+  @Test
+  public void shouldSkipRequestToAppResources() throws Exception {
     // given
-    when(request.getMethod()).thenReturn(method);
-    when(request.getRequestURI()).thenReturn("/ws-id/project1");
-    when(request.getRequestURL())
-        .thenReturn(new StringBuffer("http://localhost:8080/ws-id/project1"));
+    when(request.getMethod()).thenReturn("GET");
+    when(request.getRequestURI()).thenReturn("/_app/loader.html");
 
     // when
     filter.doFilter(request, response, chain);
@@ -95,8 +93,21 @@ public class DashboardRedirectionFilterTest {
     verify(chain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
   }
 
-  @DataProvider(name = "notGETMethodProvider")
-  public Object[][] notGETMethodProvider() {
-    return new Object[][] {{"POST"}, {"HEAD"}, {"DELETE"}, {"PUT"}};
+  @Test(dataProvider = "notGETNorHEADMethodProvider")
+  public void shouldSkipNotGETNorHEADRequest(String method) throws Exception {
+    // given
+    when(request.getMethod()).thenReturn(method);
+    when(request.getRequestURI()).thenReturn("/namespace/workspaceName");
+
+    // when
+    filter.doFilter(request, response, chain);
+
+    // then
+    verify(chain).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+  }
+
+  @DataProvider(name = "notGETNorHEADMethodProvider")
+  public Object[][] notGETNorHEADMethodProvider() {
+    return new Object[][] {{"POST"}, {"DELETE"}, {"PUT"}};
   }
 }

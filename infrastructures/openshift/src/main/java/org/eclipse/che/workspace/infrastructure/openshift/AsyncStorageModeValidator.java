@@ -11,13 +11,13 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static org.eclipse.che.api.workspace.shared.Constants.ASYNC_PERSIST_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility.isEphemeral;
 
-import com.google.common.base.Strings;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -57,8 +57,10 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
 
   private final String pvcStrategy;
   private final boolean allowUserDefinedNamespaces;
-  private final String defaultNamespaceName;
   private final int runtimesPerUser;
+  private final boolean isNamespaceStrategyNotValid;
+  private final boolean isPvcStrategyNotValid;
+  private final boolean singleRuntimeAllowed;
 
   @Inject
   public AsyncStorageModeValidator(
@@ -70,8 +72,12 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
 
     this.pvcStrategy = pvcStrategy;
     this.allowUserDefinedNamespaces = allowUserDefinedNamespaces;
-    this.defaultNamespaceName = defaultNamespaceName;
     this.runtimesPerUser = runtimesPerUser;
+
+    this.isPvcStrategyNotValid = !COMMON_STRATEGY.equals(pvcStrategy);
+    this.singleRuntimeAllowed = runtimesPerUser == 1;
+    this.isNamespaceStrategyNotValid =
+        isNullOrEmpty(defaultNamespaceName) || !defaultNamespaceName.contains("<username>");
   }
 
   @Override
@@ -114,7 +120,7 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
   }
 
   private void runtimesPerUserValidation() throws ValidationException {
-    if (runtimesPerUser > 1) {
+    if (!singleRuntimeAllowed) {
       String message =
           format(
               "Workspace configuration not valid: Asynchronous storage available only if 'che.limits.user.workspaces.run.count' set to 1, but got %s",
@@ -125,8 +131,7 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
   }
 
   private void nameSpaceStrategyValidation() throws ValidationException {
-    if (Strings.isNullOrEmpty(defaultNamespaceName)
-        || !defaultNamespaceName.contains("<username>")) {
+    if (isNamespaceStrategyNotValid) {
       String message =
           "Workspace configuration not valid: Asynchronous storage available only for 'per-user' namespace strategy";
       LOG.warn(message);
@@ -146,7 +151,7 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
   }
 
   private void pvcStrategyValidation() throws ValidationException {
-    if (!COMMON_STRATEGY.equals(pvcStrategy)) {
+    if (isPvcStrategyNotValid) {
       String message =
           format(
               "Workspace configuration not valid: Asynchronous storage available only for 'common' PVC strategy, but got %s",
