@@ -21,7 +21,11 @@
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
+<<<<<<< HEAD
     <version>7.17.0-SNAPSHOT</version>
+=======
+    <version>7.16.1-SNAPSHOT</version>
+>>>>>>> da43e739ff7b53f5f2bc35730beecccd2199c86e
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -44,8 +48,13 @@
         <java.target.version>8</java.target.version>
         <jdk.min.version>11</jdk.min.version>
         <build.info>${project.version}</build.info>
-        <che.dashboard.version>7.17.0-SNAPSHOT</che.dashboard.version>
-        <che.version>7.17.0-SNAPSHOT</che.version>
+<<<<<<< HEAD
+        <che.dashboard.version>7.16.0</che.dashboard.version>
+        <che.version>7.16.0</che.version>
+=======
+        <che.dashboard.version>7.16.0</che.dashboard.version>
+        <che.version>7.16.0</che.version>
+>>>>>>> da43e739ff7b53f5f2bc35730beecccd2199c86e
         <specification.version>1.0-beta2</specification.version>
         <?SORTPOM RESUME?>
         <aopalliance.version>1.0</aopalliance.version>

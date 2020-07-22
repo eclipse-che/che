@@ -17,7 +17,11 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
+<<<<<<< HEAD
         <version>7.17.0-SNAPSHOT</version>
+=======
+        <version>7.16.1-SNAPSHOT</version>
+>>>>>>> da43e739ff7b53f5f2bc35730beecccd2199c86e
     </parent>
     <artifactId>che-core-api-model</artifactId>
     <packaging>jar</packaging>
