@@ -30,17 +30,17 @@ suite(`${workspaceStack} test`, async () => {
         workspaceHandler.createAndOpenWorkspace(workspaceStack);
         projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
-    suite(`'Language server validation'`, async () => {
+
+    suite(`Test opening the file`, async () => {
+        // opening file that soon should give time for LS to initialize
         projectManager.openFile(fileFolderPath, fileName);
-        commonLsTests.errorHighlighting(fileName, 'error_text;', 7);
-        commonLsTests.suggestionInvoking(fileName, 8, 33, 'String');
-        commonLsTests.autocomplete(fileName, 8, 33, 'String');
-        commonLsTests.codeNavigation(fileName, 8, 33, 'String.class');
     });
+
     suite('Package Quarkus application', async () => {
         codeExecutionHelper.runTask(taskPackage, 180_000);
         codeExecutionHelper.closeTerminal(taskPackage);
     });
+
     suite.skip('Package Quarkus Native bundle', async () => { // enable again once https://github.com/eclipse/che/issues/17356 is fixed
         codeExecutionHelper.runTask(taskPackageNative, 600_000);
         codeExecutionHelper.closeTerminal(taskPackageNative);
@@ -48,6 +48,14 @@ suite(`${workspaceStack} test`, async () => {
     suite.skip('Start Quarkus Native application', async () => { // enable again once https://github.com/eclipse/che/issues/17356 is fixed
         codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskStartNative, taskExpectedDialogText, 90_000);
     });
+
+    suite(`'Language server validation'`, async () => {
+        commonLsTests.errorHighlighting(fileName, 'error_text;', 7);
+        commonLsTests.suggestionInvoking(fileName, 8, 33, 'String');
+        commonLsTests.autocomplete(fileName, 8, 33, 'String');
+        commonLsTests.codeNavigation(fileName, 8, 33, 'String.class');
+    });
+
     suite('Stop and remove workspace', async() => {
         let workspaceName = 'not defined';
         suiteSetup( async () => {

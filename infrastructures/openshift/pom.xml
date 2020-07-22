@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-infrastructures-parent</artifactId>
         <groupId>org.eclipse.che.infrastructure</groupId>
-        <version>7.16.0-SNAPSHOT</version>
+        <version>7.17.0-SNAPSHOT</version>
     </parent>
     <artifactId>infrastructure-openshift</artifactId>
     <name>Infrastructure :: OpenShift</name>
@@ -69,6 +69,14 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-ssh</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-ssh-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
