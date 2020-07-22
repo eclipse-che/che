@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret;
 import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner.ANNOTATION_PREFIX;
 
+import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Secret;
 import java.nio.file.Path;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -36,6 +38,8 @@ import org.slf4j.LoggerFactory;
  * credentials store, which is pointing to the file that is going to be mount to the container from
  * the secret.
  */
+@Beta
+@Singleton
 public class GitCredentialStorageFileSecretApplier extends FileSecretApplier {
 
   private static final Logger LOG =
@@ -86,7 +90,6 @@ public class GitCredentialStorageFileSecretApplier extends FileSecretApplier {
             .append('\n');
         HashMap<String, String> newGitConfigMapData = new HashMap<>(gitConfigMapData);
         newGitConfigMapData.put(GitConfigProvisioner.GIT_CONFIG, gitConfigBuilder.toString());
-        LOG.info(gitConfigBuilder.toString());
         gitConfigMap.setData(newGitConfigMapData);
       }
     }
