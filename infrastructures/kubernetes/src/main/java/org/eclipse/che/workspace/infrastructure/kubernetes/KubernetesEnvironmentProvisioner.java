@@ -90,7 +90,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
         SecurityContextProvisioner securityContextProvisioner,
         PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
-        TlsProvisioner externalServerTlsProvisioner,
+        TlsProvisioner<KubernetesEnvironment> externalServerTlsProvisioner,
         ImagePullSecretProvisioner imagePullSecretProvisioner,
         ProxySettingsProvisioner proxySettingsProvisioner,
         ServiceAccountProvisioner serviceAccountProvisioner,
