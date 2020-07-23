@@ -25,6 +25,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_STA
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -133,8 +134,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogH
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesPreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.KubernetesServerResolverFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
@@ -209,7 +210,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
   @Mock private KubernetesPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
-  @Mock private ExternalServiceExposureStrategy externalServiceExposureStrategy;
+  private KubernetesServerResolverFactory serverResolverFactory;
 
   @Mock
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> kubernetesEnvironmentProvisioner;
@@ -251,6 +252,8 @@ public class KubernetesInternalRuntimeTest {
     runtimeStatesCache = new MapBasedRuntimeStateCache();
     machinesCache = new MapBasedMachinesCache();
     eventPublisher = new RuntimeEventsPublisher(eventService);
+    serverResolverFactory =
+        new KubernetesServerResolverFactory(pathTransformInverter, "che-host", MULTI_HOST_STRATEGY);
 
     startSynchronizer = spy(new StartSynchronizer(eventService, 5, IDENTITY));
     when(startSynchronizerFactory.create(any())).thenReturn(startSynchronizer);
@@ -277,7 +280,7 @@ public class KubernetesInternalRuntimeTest {
             runtimeHangingDetector,
             previewUrlCommandProvisioner,
             secretAsContainerResourceProvisioner,
-            externalServiceExposureStrategy,
+            serverResolverFactory,
             tracer,
             context,
             namespace);
