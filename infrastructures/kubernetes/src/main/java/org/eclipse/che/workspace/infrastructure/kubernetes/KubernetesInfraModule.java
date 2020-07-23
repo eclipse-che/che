@@ -145,7 +145,7 @@ public class KubernetesInfraModule extends AbstractModule {
         .toProvider(IngressServiceExposureStrategyProvider.class);
 
     bind(new TypeLiteral<ExternalServerExposer<KubernetesEnvironment>>() {})
-        .to(new TypeLiteral<IngressServerExposer<KubernetesEnvironment>>() {});
+        .to(IngressServerExposer.class);
 
     bind(ServersConverter.class).to(new TypeLiteral<ServersConverter<KubernetesEnvironment>>() {});
     bind(PreviewUrlExposer.class)

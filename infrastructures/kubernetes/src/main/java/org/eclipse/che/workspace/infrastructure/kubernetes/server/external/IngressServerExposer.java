@@ -16,14 +16,20 @@ import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.IngressServerResolver;
 
-public class IngressServerExposer<T extends KubernetesEnvironment>
-    implements ExternalServerExposer<T> {
+/**
+ * Uses Kubernetes {@link Ingress}es to expose the services.
+ *
+ * @see ExternalServerExposer
+ */
+@Singleton
+public class IngressServerExposer implements ExternalServerExposer<KubernetesEnvironment> {
+
   /**
    * A string to look for in the value of the "che.infra.kubernetes.ingress.path_transform"
    * configuration property that marks the location where the generated public path of the service
@@ -31,36 +37,30 @@ public class IngressServerExposer<T extends KubernetesEnvironment>
    */
   static final String PATH_TRANSFORM_PATH_CATCH = "%s";
 
-  private final ExternalServiceExposureStrategy strategy;
+  private final ExternalServiceExposureStrategy serviceExposureStrategy;
   private final Map<String, String> ingressAnnotations;
   private final String pathTransformFmt;
 
   @Inject
   public IngressServerExposer(
-      ExternalServiceExposureStrategy strategy,
+      ExternalServiceExposureStrategy serviceExposureStrategy,
       @Named("infra.kubernetes.ingress.annotations") Map<String, String> annotations,
       @Nullable @Named("che.infra.kubernetes.ingress.path_transform") String pathTransformFmt) {
-    this.strategy = strategy;
+    this.serviceExposureStrategy = serviceExposureStrategy;
     this.ingressAnnotations = annotations;
     this.pathTransformFmt = pathTransformFmt == null ? PATH_TRANSFORM_PATH_CATCH : pathTransformFmt;
   }
 
   /**
-   * Exposes service port on given service externally (outside kubernetes cluster). The exposed
-   * service port is associated with a specific Server configuration. Server configuration should be
-   * encoded in the exposing object's annotations, to be used by {@link IngressServerResolver}.
+   * Exposes service port on given service externally (outside kubernetes cluster) using {@link
+   * Ingress}.
    *
-   * @param k8sEnv Kubernetes environment
-   * @param machineName machine containing servers
-   * @param serviceName service associated with machine, mapping all machine server ports
-   * @param serverId non-null for a unique server, null for a compound set of servers that should be
-   *     exposed together.
-   * @param servicePort specific service port to be exposed externally
-   * @param externalServers server configs of servers to be exposed externally
+   * @see ExternalServerExposer#expose(KubernetesEnvironment, String, String, String, ServicePort,
+   *     Map)
    */
   @Override
   public void expose(
-      T k8sEnv,
+      KubernetesEnvironment k8sEnv,
       @Nullable String machineName,
       String serviceName,
       String serverId,
@@ -87,7 +87,7 @@ public class IngressServerExposer<T extends KubernetesEnvironment>
 
     String serverName = KubernetesServerExposer.makeServerNameValidForDns(serverId);
     ExternalServerIngressBuilder ingressBuilder = new ExternalServerIngressBuilder();
-    String host = strategy.getExternalHost(serviceName, serverName);
+    String host = serviceExposureStrategy.getExternalHost(serviceName, serverName);
     if (host != null) {
       ingressBuilder = ingressBuilder.withHost(host);
     }
@@ -96,7 +96,8 @@ public class IngressServerExposer<T extends KubernetesEnvironment>
         .withPath(
             String.format(
                 pathTransformFmt,
-                ensureEndsWithSlash(strategy.getExternalPath(serviceName, serverName))))
+                ensureEndsWithSlash(
+                    serviceExposureStrategy.getExternalPath(serviceName, serverName))))
         .withName(getIngressName(serviceName, serverName))
         .withMachineName(machineName)
         .withServiceName(serviceName)

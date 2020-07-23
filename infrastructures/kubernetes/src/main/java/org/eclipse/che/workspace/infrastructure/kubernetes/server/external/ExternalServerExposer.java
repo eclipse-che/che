@@ -16,8 +16,31 @@ import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
 
+/**
+ * Helps to expose internal Che services to outside the cluster. Implementations should create
+ * objects in given {@link KubernetesEnvironment}. These object must be properly annotated (see
+ * {@link org.eclipse.che.workspace.infrastructure.kubernetes.Annotations}) so {@link
+ * ServerResolver} can later use them.
+ *
+ * @param <T> environment type
+ */
 public interface ExternalServerExposer<T extends KubernetesEnvironment> {
+
+  /**
+   * Exposes service port on given service. The exposed service port is associated with a specific
+   * Server configuration. Server configuration should be encoded in the exposing object's
+   * annotations, to be used by {@link ServerResolver}.
+   *
+   * @param k8sEnv environment
+   * @param machineName machine containing servers
+   * @param serviceName service associated with machine, mapping all machine server ports
+   * @param serverId non-null for a unique server, null for a compound set of servers that should be
+   *     exposed together.
+   * @param servicePort specific service port to be exposed externally
+   * @param externalServers server configs of servers to be exposed externally
+   */
   void expose(
       T k8sEnv,
       @Nullable String machineName,
