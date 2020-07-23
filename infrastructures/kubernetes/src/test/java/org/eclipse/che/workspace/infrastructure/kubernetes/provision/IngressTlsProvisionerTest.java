@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisioner.TLS_SECRET_TYPE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner.TLS_SECRET_TYPE;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -23,8 +23,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.ImmutableMap;
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import java.util.HashMap;
@@ -43,14 +41,14 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link TlsProvisioner}.
+ * Tests {@link IngressTlsProvisioner}.
  *
  * @author Ilya Buziuk
  * @author Sergii Leshchenko
  * @author Guy Daich
  */
 @Listeners(MockitoTestNGListener.class)
-public class TlsProvisionerTest {
+public class IngressTlsProvisionerTest {
 
   public static final String WORKSPACE_ID = "workspace123";
   @Mock private KubernetesEnvironment k8sEnv;
@@ -83,14 +81,6 @@ public class TlsProvisionerTest {
           .withServicePort(servicePort)
           .build();
 
-  private final ConfigMap configMap =
-      new ConfigMapBuilder()
-          .withNewMetadata()
-          .withName("gatewayConfig")
-          .withAnnotations(annotations)
-          .endMetadata()
-          .build();
-
   @BeforeMethod
   public void setUp() {
     lenient().when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
@@ -99,7 +89,7 @@ public class TlsProvisionerTest {
   @Test
   public void doNothingWhenTlsDisabled() throws Exception {
     // given
-    TlsProvisioner ingressTlsProvisioner = new TlsProvisioner(false, "", "", "");
+    IngressTlsProvisioner ingressTlsProvisioner = new IngressTlsProvisioner(false, "", "", "");
 
     // when
     ingressTlsProvisioner.provision(k8sEnv, runtimeIdentity);
@@ -111,7 +101,8 @@ public class TlsProvisionerTest {
   @Test
   public void provisionTlsForIngressesWhenTlsEnabledAndSecretProvided() throws Exception {
     // given
-    TlsProvisioner ingressTlsProvisioner = new TlsProvisioner(true, "secretname", "", "");
+    IngressTlsProvisioner ingressTlsProvisioner =
+        new IngressTlsProvisioner(true, "secretname", "", "");
 
     Map<String, Ingress> ingresses = new HashMap<>();
     ingresses.put("ingress", ingress);
@@ -130,30 +121,9 @@ public class TlsProvisionerTest {
   }
 
   @Test
-  public void provisionTlsForConfigMap() throws Exception {
-    // given
-    TlsProvisioner ingressTlsProvisioner = new TlsProvisioner(true, "secretname", "", "");
-
-    configMap
-        .getMetadata()
-        .getAnnotations()
-        .putAll(Annotations.newSerializer().servers(servers).machineName(machine).annotations());
-
-    Map<String, ConfigMap> configMaps = new HashMap<>();
-    configMaps.put("cm", configMap);
-    when(k8sEnv.getConfigMaps()).thenReturn(configMaps);
-
-    // when
-    ingressTlsProvisioner.provision(k8sEnv, runtimeIdentity);
-
-    // then
-    verifyServersTLS(configMap.getMetadata().getAnnotations());
-  }
-
-  @Test
   public void provisionTlsForIngressesWhenTlsEnabledAndSecretEmpty() throws Exception {
     // given
-    TlsProvisioner ingressTlsProvisioner = new TlsProvisioner(true, "", "", "");
+    IngressTlsProvisioner ingressTlsProvisioner = new IngressTlsProvisioner(true, "", "", "");
 
     Map<String, Ingress> ingresses = new HashMap<>();
     ingresses.put("ingress", ingress);
@@ -174,7 +144,7 @@ public class TlsProvisionerTest {
   @Test
   public void provisionTlsForIngressesWhenTlsEnabledAndSecretNull() throws Exception {
     // given
-    TlsProvisioner ingressTlsProvisioner = new TlsProvisioner(true, null, "", "");
+    IngressTlsProvisioner ingressTlsProvisioner = new IngressTlsProvisioner(true, null, "", "");
 
     Map<String, Ingress> ingresses = new HashMap<>();
     ingresses.put("ingress", ingress);
@@ -195,7 +165,8 @@ public class TlsProvisionerTest {
   @Test
   public void provisionTlsSecretWhenTlsCertAndKeyAreSpecified() throws Exception {
     // given
-    TlsProvisioner ingressTlsProvisioner = new TlsProvisioner(true, "ws-tls-secret", "cert", "key");
+    IngressTlsProvisioner ingressTlsProvisioner =
+        new IngressTlsProvisioner(true, "ws-tls-secret", "cert", "key");
 
     Map<String, Secret> secrets = new HashMap<>();
     when(k8sEnv.getSecrets()).thenReturn(secrets);
@@ -221,7 +192,7 @@ public class TlsProvisionerTest {
               + "`che.infra.kubernetes.tls_key` must be configured with non-null value\\.")
   public void shouldThrowAnExceptionIfOnlyOneIfTlsCertOrKeyIsConfigured() {
     // given
-    new TlsProvisioner(true, "secret", "test", "");
+    new IngressTlsProvisioner(true, "secret", "test", "");
   }
 
   private void verifyServersTLS(Map<String, String> annotations) {

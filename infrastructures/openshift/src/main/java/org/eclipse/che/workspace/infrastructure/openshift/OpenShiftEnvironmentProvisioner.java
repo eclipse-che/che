@@ -28,6 +28,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminat
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SshKeysProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
@@ -58,7 +59,7 @@ public class OpenShiftEnvironmentProvisioner
   private final boolean pvcEnabled;
   private final WorkspaceVolumesStrategy volumesStrategy;
   private final UniqueNamesProvisioner<OpenShiftEnvironment> uniqueNamesProvisioner;
-  private final RouteTlsProvisioner routeTlsProvisioner;
+  private final TlsProvisioner<OpenShiftEnvironment> routeTlsProvisioner;
   private final ServersConverter<OpenShiftEnvironment> serversConverter;
   private final EnvVarsConverter envVarsConverter;
   private final RestartPolicyRewriter restartPolicyRewriter;

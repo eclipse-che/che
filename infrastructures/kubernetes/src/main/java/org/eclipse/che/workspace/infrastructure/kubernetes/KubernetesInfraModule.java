@@ -54,10 +54,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueW
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspacePVCCleaner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumeStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiExternalEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiInternalEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesPreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressAnnotationsProvider;
@@ -103,6 +105,8 @@ public class KubernetesInfraModule extends AbstractModule {
     bind(RuntimeInfrastructure.class).to(KubernetesInfrastructure.class);
     bind(InconsistentRuntimesDetector.class).asEagerSingleton();
 
+    bind(new TypeLiteral<TlsProvisioner<KubernetesEnvironment>>() {})
+        .to(IngressTlsProvisioner.class);
     bind(new TypeLiteral<KubernetesEnvironmentProvisioner<KubernetesEnvironment>>() {})
         .to(KubernetesEnvironmentProvisioner.KubernetesEnvironmentProvisionerImpl.class);
 

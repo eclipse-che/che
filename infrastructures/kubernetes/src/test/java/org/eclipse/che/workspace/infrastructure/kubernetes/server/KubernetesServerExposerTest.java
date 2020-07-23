@@ -65,7 +65,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class KubernetesServerExposerTest {
 
-  @Mock private IngressServerExposer<KubernetesEnvironment> externalServerExposer;
+  @Mock private IngressServerExposer externalServerExposer;
   @Mock private SecureServerExposer<KubernetesEnvironment> secureServerExposer;
 
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");

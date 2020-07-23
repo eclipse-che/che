@@ -68,7 +68,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
     private final SecurityContextProvisioner securityContextProvisioner;
     private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
-    private final TlsProvisioner externalServerTlsProvisioner;
+    private final TlsProvisioner<KubernetesEnvironment> externalServerTlsProvisioner;
     private final ImagePullSecretProvisioner imagePullSecretProvisioner;
     private final ProxySettingsProvisioner proxySettingsProvisioner;
     private final ServiceAccountProvisioner serviceAccountProvisioner;

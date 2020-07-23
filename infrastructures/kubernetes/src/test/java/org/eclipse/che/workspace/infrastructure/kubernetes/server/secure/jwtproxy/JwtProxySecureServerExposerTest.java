@@ -47,7 +47,7 @@ public class JwtProxySecureServerExposerTest {
 
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private JwtProxyProvisioner jwtProxyProvisioner;
-  @Mock private IngressServerExposer<KubernetesEnvironment> externalServerExposer;
+  @Mock private IngressServerExposer externalServerExposer;
 
   private JwtProxySecureServerExposer<KubernetesEnvironment> secureServerExposer;
 
