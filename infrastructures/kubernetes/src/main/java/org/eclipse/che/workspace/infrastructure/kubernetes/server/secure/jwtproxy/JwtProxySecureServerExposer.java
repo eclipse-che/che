@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.DefaultSecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyProvisionerFactory;
 
@@ -26,7 +25,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtprox
  *
  * <p>To expose secure servers it provisions JwtProxy objects into environment with {@link
  * JwtProxyProvisioner}. Then JwtProxy service port is made public accessible by {@link
- * IngressServerExposer <T>}.
+ * ExternalServerExposer <T>}.
  *
  * <p>In this way, requests to exposed secure servers will be routed via JwtProxy pod that is added
  * one per workspace. And it will be impossible to requests secure servers if there is no machine

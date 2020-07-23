@@ -34,7 +34,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtprox
  *
  * <p>To expose secure servers it provisions proxy objects into environment with {@link
  * org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.ProxyProvisioner}. Then proxy
- * service port is made public accessible by {@link IngressServerExposer <T>}.
+ * service port is made public accessible by {@link ExternalServerExposer <T>}.
  *
  * <p>In this way, requests to exposed secure servers will be routed via the proxy that is added one
  * per workspace.
