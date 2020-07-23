@@ -22,9 +22,9 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.RuntimeServerBuilder;
 
+/** Resolves servers from ConfigMaps, used with Gateway based single-host */
 public class ConfigMapServerResolver extends AbstractServerResolver {
 
-  private final Multimap<String, Service> services;
   private final Multimap<String, ConfigMap> configMaps;
   private final String cheHost;
 
@@ -32,13 +32,6 @@ public class ConfigMapServerResolver extends AbstractServerResolver {
       Iterable<Service> services, Iterable<ConfigMap> configMaps, String cheHost) {
     super(services);
     this.cheHost = cheHost;
-
-    this.services = ArrayListMultimap.create();
-    for (Service service : services) {
-      String machineName =
-          Annotations.newDeserializer(service.getMetadata().getAnnotations()).machineName();
-      this.services.put(machineName, service);
-    }
 
     this.configMaps = ArrayListMultimap.create();
     for (ConfigMap configMap : configMaps) {

@@ -20,6 +20,10 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 
+/**
+ * Factory that decides by configuration, which {@link ServerResolver} implementation to use in
+ * Kubernetes environment.
+ */
 @Singleton
 public class KubernetesServerResolverFactory {
 
@@ -37,10 +41,15 @@ public class KubernetesServerResolverFactory {
     this.exposureStrategy = exposureStrategy;
   }
 
+  /**
+   * Create {@link ServerResolver} for configured server strategy.
+   *
+   * <p>TODO: use {@link ConfigMapServerResolver} for gateway based single-host
+   *
+   * @return {@link ServerResolver} instance
+   */
   public ServerResolver create(
       List<Service> services, List<Ingress> ingresses, List<ConfigMap> configMaps) {
-    // TODO: when gateway-based configuration is available, return Server resolver by configured
-    // exposureStrategy
     return new IngressServerResolver(pathTransformInverter, services, ingresses);
   }
 }

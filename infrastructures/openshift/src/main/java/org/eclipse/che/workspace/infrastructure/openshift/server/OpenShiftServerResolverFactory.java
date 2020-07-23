@@ -17,9 +17,15 @@ import io.fabric8.openshift.api.model.Route;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ConfigMapServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
 
+/**
+ * Factory that decides by configuration, which {@link ServerResolver} implementation to use in
+ * OpenShift environment.
+ */
 public class OpenShiftServerResolverFactory {
+
   private final String cheHost;
   private final String exposureStrategy;
 
@@ -31,10 +37,15 @@ public class OpenShiftServerResolverFactory {
     this.exposureStrategy = exposureStrategy;
   }
 
+  /**
+   * Create {@link ServerResolver} for configured server strategy.
+   *
+   * <p>TODO: use {@link ConfigMapServerResolver} for gateway based single-host
+   *
+   * @return {@link ServerResolver} instance
+   */
   public ServerResolver create(
       List<Service> services, List<Route> routes, List<ConfigMap> configMaps) {
-    // TODO: when gateway-based configuration is available, return Server resolver by configured
-    // exposureStrategy
     return new RouteServerResolver(services, routes);
   }
 }
