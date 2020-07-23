@@ -289,8 +289,7 @@ init() {
 }
 
 add_cert_to_truststore() {
-  # JAVA_TRUST_STORE can be set as an ENV in the dockerfile that runs this script if you need to override the default trust store location (eg., for a different OS/arch)
-  DEFAULT_JAVA_TRUST_STORE=${JAVA_TRUST_STORE:-${JAVA_HOME}/lib/security/cacerts}
+  DEFAULT_JAVA_TRUST_STORE=${JAVA_HOME}/lib/security/cacerts
   DEFAULT_JAVA_TRUST_STOREPASS="changeit"
 
   JAVA_TRUST_STORE=/home/user/cacerts
