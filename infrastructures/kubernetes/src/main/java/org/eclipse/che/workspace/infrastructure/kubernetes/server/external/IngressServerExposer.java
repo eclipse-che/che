@@ -20,9 +20,10 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.IngressServerResolver;
 
-public class IngressServerExposer<T extends KubernetesEnvironment> implements ExternalServerExposer<T> {
+public class IngressServerExposer<T extends KubernetesEnvironment>
+    implements ExternalServerExposer<T> {
   /**
    * A string to look for in the value of the "che.infra.kubernetes.ingress.path_transform"
    * configuration property that marks the location where the generated public path of the service
@@ -47,7 +48,7 @@ public class IngressServerExposer<T extends KubernetesEnvironment> implements Ex
   /**
    * Exposes service port on given service externally (outside kubernetes cluster). The exposed
    * service port is associated with a specific Server configuration. Server configuration should be
-   * encoded in the exposing object's annotations, to be used by {@link KubernetesServerResolver}.
+   * encoded in the exposing object's annotations, to be used by {@link IngressServerResolver}.
    *
    * @param k8sEnv Kubernetes environment
    * @param machineName machine containing servers

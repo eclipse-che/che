@@ -133,8 +133,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogH
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesPreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
@@ -202,12 +203,13 @@ public class KubernetesInternalRuntimeTest {
   @Mock private WorkspaceProbesFactory workspaceProbesFactory;
   @Mock private ProbeScheduler probesScheduler;
   @Mock private WorkspaceProbes workspaceProbes;
-  @Mock private KubernetesServerResolver kubernetesServerResolver;
+  @Mock private ServerResolver serverResolver;
   @Mock private InternalEnvironmentProvisioner internalEnvironmentProvisioner;
   @Mock private IngressPathTransformInverter pathTransformInverter;
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
   @Mock private KubernetesPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
+  @Mock private ExternalServiceExposureStrategy externalServiceExposureStrategy;
 
   @Mock
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> kubernetesEnvironmentProvisioner;
@@ -275,6 +277,7 @@ public class KubernetesInternalRuntimeTest {
             runtimeHangingDetector,
             previewUrlCommandProvisioner,
             secretAsContainerResourceProvisioner,
+            externalServiceExposureStrategy,
             tracer,
             context,
             namespace);
@@ -745,7 +748,7 @@ public class KubernetesInternalRuntimeTest {
             getCurrentTimestampWithOneHourShiftAhead());
     final ArgumentCaptor<RuntimeLogEvent> captor = ArgumentCaptor.forClass(RuntimeLogEvent.class);
 
-    internalRuntime.doStartMachine(kubernetesServerResolver);
+    internalRuntime.doStartMachine(serverResolver);
     logsPublisher.handle(out1);
     logsPublisher.handle(out2);
 

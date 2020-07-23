@@ -31,7 +31,6 @@ import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Ingresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Services;
 

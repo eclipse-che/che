@@ -61,8 +61,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlC
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
@@ -84,9 +84,9 @@ import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProje
 import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectOnWorkspaceRemove;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftPreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftCookiePathStrategy;
-import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftPreviewUrlExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.openshift.server.RouteServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases.OpenshiftBrokerEnvironmentFactory;
 
 /** @author Sergii Leshchenko */
@@ -129,7 +129,7 @@ public class OpenShiftInfraModule extends AbstractModule {
     bind(WorkspaceVolumesStrategy.class).toProvider(WorkspaceVolumeStrategyProvider.class);
 
     bind(new TypeLiteral<IngressServerExposer<OpenShiftEnvironment>>() {})
-        .to(OpenShiftExternalServerExposer.class);
+        .to(RouteServerExposer.class);
     bind(ServersConverter.class).to(new TypeLiteral<ServersConverter<OpenShiftEnvironment>>() {});
     bind(PreviewUrlExposer.class).to(new TypeLiteral<OpenShiftPreviewUrlExposer>() {});
     bind(PreviewUrlCommandProvisioner.class)

@@ -18,8 +18,8 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.PerWorkspacePVCStrategy.PER_WORKSPACE_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy.UNIQUE_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.DefaultHostExternalServiceExposureStrategy.DEFAULT_HOST_STRATEGY;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayHostExternalServiceExposureStrategy.GATEWAY_HOST_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.SingleHostExternalServiceExposureStrategy.SINGLE_HOST_STRATEGY;
 
 import com.google.inject.AbstractModule;
@@ -66,10 +66,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExpo
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.DefaultHostExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayHostExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServiceExposureStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayHostExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.SingleHostExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
@@ -138,13 +140,10 @@ public class KubernetesInfraModule extends AbstractModule {
         .to(MultiHostExternalServiceExposureStrategy.class);
     ingressStrategies
         .addBinding(SINGLE_HOST_STRATEGY)
-        .to(GatewayHostExternalServiceExposureStrategy.class); // TODO: back to SingleHost
+        .to(SingleHostExternalServiceExposureStrategy.class);
     ingressStrategies
         .addBinding(DEFAULT_HOST_STRATEGY)
         .to(DefaultHostExternalServiceExposureStrategy.class);
-    ingressStrategies
-        .addBinding(GATEWAY_HOST_STRATEGY)
-        .to(GatewayHostExternalServiceExposureStrategy.class);
     bind(ExternalServiceExposureStrategy.class)
         .toProvider(IngressServiceExposureStrategyProvider.class);
 

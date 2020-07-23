@@ -90,10 +90,10 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
  * @author Alexander Garagatyi
  * @see Annotations
  */
-public class OpenShiftExternalServerExposer extends IngressServerExposer<OpenShiftEnvironment> implements
-    ExternalServerExposer<OpenShiftEnvironment> {
+public class RouteServerExposer extends IngressServerExposer<OpenShiftEnvironment>
+    implements ExternalServerExposer<OpenShiftEnvironment> {
 
-  public OpenShiftExternalServerExposer() {
+  public RouteServerExposer() {
     super(null, Collections.emptyMap(), "%s");
   }
 

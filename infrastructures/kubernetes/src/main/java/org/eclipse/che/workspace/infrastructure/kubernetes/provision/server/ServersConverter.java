@@ -28,7 +28,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
 
