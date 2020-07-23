@@ -260,8 +260,6 @@ init() {
   fi
 
   [ -z "$CHE_DATABASE" ] && export CHE_DATABASE=${CHE_DATA}/storage
-  [ -z "$CHE_TEMPLATE_STORAGE" ] && export CHE_TEMPLATE_STORAGE="${CHE_DATA}/templates"
-  mkdir -p "${CHE_TEMPLATE_STORAGE}"
 
   perform_database_migration
 
@@ -291,6 +289,7 @@ init() {
 }
 
 add_cert_to_truststore() {
+  # JAVA_TRUST_STORE can be set as an ENV in the dockerfile that runs this script if you need to override the default trust store location (eg., for a different OS/arch)
   DEFAULT_JAVA_TRUST_STORE=${JAVA_TRUST_STORE:-${JAVA_HOME}/lib/security/cacerts}
   DEFAULT_JAVA_TRUST_STOREPASS="changeit"
 
