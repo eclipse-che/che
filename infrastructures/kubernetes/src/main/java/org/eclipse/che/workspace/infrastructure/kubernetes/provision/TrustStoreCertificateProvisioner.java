@@ -54,8 +54,8 @@ public class TrustStoreCertificateProvisioner
 
   @Inject
   public TrustStoreCertificateProvisioner(
-      @Named("che.truststore_configmap_name") String configMapName,
-      @Named("che.truststore_mount_path") String certificateMountPath,
+      @Named("che.trusted_ca_bundles_config_map") String configMapName,
+      @Named("che.trusted_ca_bundles_mount_path") String certificateMountPath,
       CheInstallationLocation cheInstallationLocation,
       KubernetesClientFactory clientFactory) {
     this.configMapName = configMapName;
