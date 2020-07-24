@@ -9,12 +9,12 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.openshift.provision;
+package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility.isEphemeral;
-import static org.eclipse.che.workspace.infrastructure.openshift.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
 
 import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -28,11 +28,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,25 +42,26 @@ import org.slf4j.LoggerFactory;
  * makes sure to stop the async storage pod (if any is running) to prevent "Multi-Attach error for
  * volume". After the async storage pod is stopped and deleted, the workspace start is resumed.
  */
+@Singleton
 public class AsyncStoragePodInterceptor {
 
   private static final Logger LOG = LoggerFactory.getLogger(AsyncStoragePodInterceptor.class);
   private static final int DELETE_POD_TIMEOUT_IN_MIN = 5;
 
-  private final OpenShiftClientFactory clientFactory;
+  private final KubernetesClientFactory kubernetesClientFactory;
   private final String pvcStrategy;
 
   @Inject
   public AsyncStoragePodInterceptor(
       @Named("che.infra.kubernetes.pvc.strategy") String pvcStrategy,
-      OpenShiftClientFactory openShiftClientFactory) {
+      KubernetesClientFactory kubernetesClientFactory) {
     this.pvcStrategy = pvcStrategy;
-    this.clientFactory = openShiftClientFactory;
+    this.kubernetesClientFactory = kubernetesClientFactory;
   }
 
-  public void intercept(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
+  public void intercept(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-    if (!COMMON_STRATEGY.equals(pvcStrategy) || isEphemeral(osEnv.getAttributes())) {
+    if (!COMMON_STRATEGY.equals(pvcStrategy) || isEphemeral(k8sEnv.getAttributes())) {
       return;
     }
 
@@ -96,7 +98,11 @@ public class AsyncStoragePodInterceptor {
 
   private PodResource<Pod, DoneablePod> getAsyncStoragePodResource(
       String namespace, String workspaceId) throws InfrastructureException {
-    return clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(ASYNC_STORAGE);
+    return kubernetesClientFactory
+        .create(workspaceId)
+        .pods()
+        .inNamespace(namespace)
+        .withName(ASYNC_STORAGE);
   }
 
   private CompletableFuture<Void> deleteAsyncStoragePod(PodResource<Pod, DoneablePod> podResource)

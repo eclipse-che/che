@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.openshift.provision;
+package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -17,9 +17,9 @@ import static java.util.Collections.singletonMap;
 import static java.util.UUID.randomUUID;
 import static org.eclipse.che.api.workspace.shared.Constants.ASYNC_PERSIST_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
-import static org.eclipse.che.workspace.infrastructure.openshift.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
-import static org.eclipse.che.workspace.infrastructure.openshift.provision.AsyncStorageProvisioner.ASYNC_STORAGE_CONFIG;
-import static org.eclipse.che.workspace.infrastructure.openshift.provision.AsyncStorageProvisioner.SSH_KEY_NAME;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner.ASYNC_STORAGE_CONFIG;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner.SSH_KEY_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
@@ -37,12 +37,12 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.ServiceResource;
-import io.fabric8.openshift.client.OpenShiftClient;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -52,8 +52,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.ssh.server.SshManager;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -69,10 +69,10 @@ public class AsyncStorageProvisionerTest {
   private static final String VPC_NAME = UUID.randomUUID().toString();
   private static final String USER = "user";
 
-  @Mock private OpenShiftEnvironment openShiftEnvironment;
+  @Mock private KubernetesEnvironment kubernetesEnvironment;
   @Mock private RuntimeIdentity identity;
-  @Mock private OpenShiftClientFactory clientFactory;
-  @Mock private OpenShiftClient osClient;
+  @Mock private KubernetesClientFactory clientFactory;
+  @Mock private KubernetesClient kubernetesClient;
   @Mock private SshManager sshManager;
   @Mock private Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim> pvcResource;
   @Mock private Resource<ConfigMap, DoneableConfigMap> mapResource;
@@ -123,8 +123,8 @@ public class AsyncStorageProvisionerTest {
             "storageClass",
             sshManager,
             clientFactory);
-    when(openShiftEnvironment.getAttributes()).thenReturn(attributes);
-    asyncStorageProvisioner.provision(openShiftEnvironment, identity);
+    when(kubernetesEnvironment.getAttributes()).thenReturn(attributes);
+    asyncStorageProvisioner.provision(kubernetesEnvironment, identity);
     verifyNoMoreInteractions(sshManager);
     verifyNoMoreInteractions(clientFactory);
     verifyNoMoreInteractions(identity);
@@ -135,8 +135,8 @@ public class AsyncStorageProvisionerTest {
     Map attributes = new HashMap<>(2);
     attributes.put(ASYNC_PERSIST_ATTRIBUTE, "true");
     attributes.put(PERSIST_VOLUMES_ATTRIBUTE, "true");
-    when(openShiftEnvironment.getAttributes()).thenReturn(attributes);
-    asyncStorageProvisioner.provision(openShiftEnvironment, identity);
+    when(kubernetesEnvironment.getAttributes()).thenReturn(attributes);
+    asyncStorageProvisioner.provision(kubernetesEnvironment, identity);
     verifyNoMoreInteractions(sshManager);
     verifyNoMoreInteractions(clientFactory);
     verifyNoMoreInteractions(identity);
@@ -144,8 +144,8 @@ public class AsyncStorageProvisionerTest {
 
   @Test
   public void shouldDoNothingIfNotSetAttribute() throws InfrastructureException {
-    when(openShiftEnvironment.getAttributes()).thenReturn(emptyMap());
-    asyncStorageProvisioner.provision(openShiftEnvironment, identity);
+    when(kubernetesEnvironment.getAttributes()).thenReturn(emptyMap());
+    asyncStorageProvisioner.provision(kubernetesEnvironment, identity);
     verifyNoMoreInteractions(sshManager);
     verifyNoMoreInteractions(clientFactory);
     verifyNoMoreInteractions(identity);
@@ -153,9 +153,9 @@ public class AsyncStorageProvisionerTest {
 
   @Test
   public void shouldDoNothingIfAttributesAsyncPersistOnly() throws InfrastructureException {
-    when(openShiftEnvironment.getAttributes())
+    when(kubernetesEnvironment.getAttributes())
         .thenReturn(singletonMap(PERSIST_VOLUMES_ATTRIBUTE, "false"));
-    asyncStorageProvisioner.provision(openShiftEnvironment, identity);
+    asyncStorageProvisioner.provision(kubernetesEnvironment, identity);
     verifyNoMoreInteractions(sshManager);
     verifyNoMoreInteractions(clientFactory);
     verifyNoMoreInteractions(identity);
@@ -163,60 +163,61 @@ public class AsyncStorageProvisionerTest {
 
   @Test
   public void shouldCreateAll() throws InfrastructureException, ServerException, ConflictException {
-    when(openShiftEnvironment.getAttributes()).thenReturn(attributes);
-    when(clientFactory.create(anyString())).thenReturn(osClient);
+    when(kubernetesEnvironment.getAttributes()).thenReturn(attributes);
+    when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
     when(identity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
     when(identity.getInfrastructureNamespace()).thenReturn(NAMESPACE);
     when(identity.getOwnerId()).thenReturn(USER);
     when(sshManager.getPairs(USER, "internal")).thenReturn(singletonList(sshPair));
 
-    when(osClient.persistentVolumeClaims()).thenReturn(mixedOperationPvc);
+    when(kubernetesClient.persistentVolumeClaims()).thenReturn(mixedOperationPvc);
     when(mixedOperationPvc.inNamespace(NAMESPACE)).thenReturn(namespacePvcOperation);
     when(namespacePvcOperation.withName(VPC_NAME)).thenReturn(pvcResource);
     when(pvcResource.get()).thenReturn(null);
 
-    when(osClient.configMaps()).thenReturn(mixedOperationConfigMap);
+    when(kubernetesClient.configMaps()).thenReturn(mixedOperationConfigMap);
     when(mixedOperationConfigMap.inNamespace(NAMESPACE)).thenReturn(namespaceConfigMapOperation);
     when(namespaceConfigMapOperation.withName(anyString())).thenReturn(mapResource);
     when(mapResource.get()).thenReturn(null);
 
-    when(osClient.pods()).thenReturn(mixedOperationPod);
+    when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
     when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
     when(podResource.get()).thenReturn(null);
 
-    when(osClient.services()).thenReturn(mixedOperationService);
+    when(kubernetesClient.services()).thenReturn(mixedOperationService);
     when(mixedOperationService.inNamespace(NAMESPACE)).thenReturn(namespaceServiceOperation);
     when(namespaceServiceOperation.withName(ASYNC_STORAGE)).thenReturn(serviceResource);
     when(serviceResource.get()).thenReturn(null);
 
-    asyncStorageProvisioner.provision(openShiftEnvironment, identity);
+    asyncStorageProvisioner.provision(kubernetesEnvironment, identity);
     verify(identity, times(1)).getInfrastructureNamespace();
     verify(identity, times(1)).getOwnerId();
     verify(sshManager, times(1)).getPairs(USER, "internal");
     verify(sshManager, never()).generatePair(USER, "internal", SSH_KEY_NAME);
-    verify(osClient.services().inNamespace(NAMESPACE), times(1)).create(any(Service.class));
-    verify(osClient.configMaps().inNamespace(NAMESPACE), times(1)).create(any(ConfigMap.class));
-    verify(osClient.pods().inNamespace(NAMESPACE), times(1)).create(any(Pod.class));
-    verify(osClient.persistentVolumeClaims().inNamespace(NAMESPACE), times(1))
+    verify(kubernetesClient.services().inNamespace(NAMESPACE), times(1)).create(any(Service.class));
+    verify(kubernetesClient.configMaps().inNamespace(NAMESPACE), times(1))
+        .create(any(ConfigMap.class));
+    verify(kubernetesClient.pods().inNamespace(NAMESPACE), times(1)).create(any(Pod.class));
+    verify(kubernetesClient.persistentVolumeClaims().inNamespace(NAMESPACE), times(1))
         .create(any(PersistentVolumeClaim.class));
   }
 
   @Test
   public void shouldNotCreateConfigMap()
       throws InfrastructureException, ServerException, ConflictException {
-    when(openShiftEnvironment.getAttributes()).thenReturn(attributes);
-    when(clientFactory.create(anyString())).thenReturn(osClient);
+    when(kubernetesEnvironment.getAttributes()).thenReturn(attributes);
+    when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
     when(identity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
     when(identity.getInfrastructureNamespace()).thenReturn(NAMESPACE);
     when(identity.getOwnerId()).thenReturn(USER);
 
-    when(osClient.persistentVolumeClaims()).thenReturn(mixedOperationPvc);
+    when(kubernetesClient.persistentVolumeClaims()).thenReturn(mixedOperationPvc);
     when(mixedOperationPvc.inNamespace(NAMESPACE)).thenReturn(namespacePvcOperation);
     when(namespacePvcOperation.withName(VPC_NAME)).thenReturn(pvcResource);
     when(pvcResource.get()).thenReturn(null);
 
-    when(osClient.configMaps()).thenReturn(mixedOperationConfigMap);
+    when(kubernetesClient.configMaps()).thenReturn(mixedOperationConfigMap);
     when(mixedOperationConfigMap.inNamespace(NAMESPACE)).thenReturn(namespaceConfigMapOperation);
     when(namespaceConfigMapOperation.withName(CONFIGMAP_NAME)).thenReturn(mapResource);
     ObjectMeta meta = new ObjectMeta();
@@ -225,50 +226,51 @@ public class AsyncStorageProvisionerTest {
     configMap.setMetadata(meta);
     when(mapResource.get()).thenReturn(configMap);
 
-    when(osClient.pods()).thenReturn(mixedOperationPod);
+    when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
     when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
     when(podResource.get()).thenReturn(null);
 
-    when(osClient.services()).thenReturn(mixedOperationService);
+    when(kubernetesClient.services()).thenReturn(mixedOperationService);
     when(mixedOperationService.inNamespace(NAMESPACE)).thenReturn(namespaceServiceOperation);
     when(namespaceServiceOperation.withName(ASYNC_STORAGE)).thenReturn(serviceResource);
     when(serviceResource.get()).thenReturn(null);
 
-    asyncStorageProvisioner.provision(openShiftEnvironment, identity);
+    asyncStorageProvisioner.provision(kubernetesEnvironment, identity);
     verify(identity, times(1)).getInfrastructureNamespace();
     verify(identity, times(1)).getOwnerId();
     verify(identity, times(1)).getWorkspaceId();
     verify(sshManager, never()).getPairs(USER, "internal");
     verify(sshManager, never()).generatePair(USER, "internal", SSH_KEY_NAME);
-    verify(osClient.services().inNamespace(NAMESPACE), times(1)).create(any(Service.class));
-    verify(osClient.configMaps().inNamespace(NAMESPACE), never()).create(any(ConfigMap.class));
-    verify(osClient.pods().inNamespace(NAMESPACE), times(1)).create(any(Pod.class));
-    verify(osClient.persistentVolumeClaims().inNamespace(NAMESPACE), times(1))
+    verify(kubernetesClient.services().inNamespace(NAMESPACE), times(1)).create(any(Service.class));
+    verify(kubernetesClient.configMaps().inNamespace(NAMESPACE), never())
+        .create(any(ConfigMap.class));
+    verify(kubernetesClient.pods().inNamespace(NAMESPACE), times(1)).create(any(Pod.class));
+    verify(kubernetesClient.persistentVolumeClaims().inNamespace(NAMESPACE), times(1))
         .create(any(PersistentVolumeClaim.class));
   }
 
   @Test
   public void shouldNotCreatePod()
       throws InfrastructureException, ServerException, ConflictException {
-    when(openShiftEnvironment.getAttributes()).thenReturn(attributes);
-    when(clientFactory.create(anyString())).thenReturn(osClient);
+    when(kubernetesEnvironment.getAttributes()).thenReturn(attributes);
+    when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
     when(identity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
     when(identity.getInfrastructureNamespace()).thenReturn(NAMESPACE);
     when(identity.getOwnerId()).thenReturn(USER);
     when(sshManager.getPairs(USER, "internal")).thenReturn(singletonList(sshPair));
 
-    when(osClient.persistentVolumeClaims()).thenReturn(mixedOperationPvc);
+    when(kubernetesClient.persistentVolumeClaims()).thenReturn(mixedOperationPvc);
     when(mixedOperationPvc.inNamespace(NAMESPACE)).thenReturn(namespacePvcOperation);
     when(namespacePvcOperation.withName(VPC_NAME)).thenReturn(pvcResource);
     when(pvcResource.get()).thenReturn(null);
 
-    when(osClient.configMaps()).thenReturn(mixedOperationConfigMap);
+    when(kubernetesClient.configMaps()).thenReturn(mixedOperationConfigMap);
     when(mixedOperationConfigMap.inNamespace(NAMESPACE)).thenReturn(namespaceConfigMapOperation);
     when(namespaceConfigMapOperation.withName(CONFIGMAP_NAME)).thenReturn(mapResource);
     when(mapResource.get()).thenReturn(null);
 
-    when(osClient.pods()).thenReturn(mixedOperationPod);
+    when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
     when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
     ObjectMeta meta = new ObjectMeta();
@@ -277,49 +279,50 @@ public class AsyncStorageProvisionerTest {
     pod.setMetadata(meta);
     when(podResource.get()).thenReturn(pod);
 
-    when(osClient.services()).thenReturn(mixedOperationService);
+    when(kubernetesClient.services()).thenReturn(mixedOperationService);
     when(mixedOperationService.inNamespace(NAMESPACE)).thenReturn(namespaceServiceOperation);
     when(namespaceServiceOperation.withName(ASYNC_STORAGE)).thenReturn(serviceResource);
     when(serviceResource.get()).thenReturn(null);
 
-    asyncStorageProvisioner.provision(openShiftEnvironment, identity);
+    asyncStorageProvisioner.provision(kubernetesEnvironment, identity);
     verify(identity, times(1)).getInfrastructureNamespace();
     verify(identity, times(1)).getOwnerId();
     verify(sshManager, times(1)).getPairs(USER, "internal");
     verify(sshManager, never()).generatePair(USER, "internal", SSH_KEY_NAME);
-    verify(osClient.services().inNamespace(NAMESPACE), times(1)).create(any(Service.class));
-    verify(osClient.configMaps().inNamespace(NAMESPACE), times(1)).create(any(ConfigMap.class));
-    verify(osClient.pods().inNamespace(NAMESPACE), never()).create(any(Pod.class));
-    verify(osClient.persistentVolumeClaims().inNamespace(NAMESPACE), times(1))
+    verify(kubernetesClient.services().inNamespace(NAMESPACE), times(1)).create(any(Service.class));
+    verify(kubernetesClient.configMaps().inNamespace(NAMESPACE), times(1))
+        .create(any(ConfigMap.class));
+    verify(kubernetesClient.pods().inNamespace(NAMESPACE), never()).create(any(Pod.class));
+    verify(kubernetesClient.persistentVolumeClaims().inNamespace(NAMESPACE), times(1))
         .create(any(PersistentVolumeClaim.class));
   }
 
   @Test
   public void shouldNotCreateService()
       throws InfrastructureException, ServerException, ConflictException {
-    when(openShiftEnvironment.getAttributes()).thenReturn(attributes);
-    when(clientFactory.create(anyString())).thenReturn(osClient);
+    when(kubernetesEnvironment.getAttributes()).thenReturn(attributes);
+    when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
     when(identity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
     when(identity.getInfrastructureNamespace()).thenReturn(NAMESPACE);
     when(identity.getOwnerId()).thenReturn(USER);
     when(sshManager.getPairs(USER, "internal")).thenReturn(singletonList(sshPair));
 
-    when(osClient.persistentVolumeClaims()).thenReturn(mixedOperationPvc);
+    when(kubernetesClient.persistentVolumeClaims()).thenReturn(mixedOperationPvc);
     when(mixedOperationPvc.inNamespace(NAMESPACE)).thenReturn(namespacePvcOperation);
     when(namespacePvcOperation.withName(VPC_NAME)).thenReturn(pvcResource);
     when(pvcResource.get()).thenReturn(null);
 
-    when(osClient.configMaps()).thenReturn(mixedOperationConfigMap);
+    when(kubernetesClient.configMaps()).thenReturn(mixedOperationConfigMap);
     when(mixedOperationConfigMap.inNamespace(NAMESPACE)).thenReturn(namespaceConfigMapOperation);
     when(namespaceConfigMapOperation.withName(CONFIGMAP_NAME)).thenReturn(mapResource);
     when(mapResource.get()).thenReturn(null);
 
-    when(osClient.pods()).thenReturn(mixedOperationPod);
+    when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
     when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
     when(podResource.get()).thenReturn(null);
 
-    when(osClient.services()).thenReturn(mixedOperationService);
+    when(kubernetesClient.services()).thenReturn(mixedOperationService);
     when(mixedOperationService.inNamespace(NAMESPACE)).thenReturn(namespaceServiceOperation);
     when(namespaceServiceOperation.withName(ASYNC_STORAGE)).thenReturn(serviceResource);
     ObjectMeta meta = new ObjectMeta();
@@ -328,15 +331,16 @@ public class AsyncStorageProvisionerTest {
     service.setMetadata(meta);
     when(serviceResource.get()).thenReturn(service);
 
-    asyncStorageProvisioner.provision(openShiftEnvironment, identity);
+    asyncStorageProvisioner.provision(kubernetesEnvironment, identity);
     verify(identity, times(1)).getInfrastructureNamespace();
     verify(identity, times(1)).getOwnerId();
     verify(sshManager, times(1)).getPairs(USER, "internal");
     verify(sshManager, never()).generatePair(USER, "internal", SSH_KEY_NAME);
-    verify(osClient.services().inNamespace(NAMESPACE), never()).create(any(Service.class));
-    verify(osClient.configMaps().inNamespace(NAMESPACE), times(1)).create(any(ConfigMap.class));
-    verify(osClient.pods().inNamespace(NAMESPACE), times(1)).create(any(Pod.class));
-    verify(osClient.persistentVolumeClaims().inNamespace(NAMESPACE), times(1))
+    verify(kubernetesClient.services().inNamespace(NAMESPACE), never()).create(any(Service.class));
+    verify(kubernetesClient.configMaps().inNamespace(NAMESPACE), times(1))
+        .create(any(ConfigMap.class));
+    verify(kubernetesClient.pods().inNamespace(NAMESPACE), times(1)).create(any(Pod.class));
+    verify(kubernetesClient.persistentVolumeClaims().inNamespace(NAMESPACE), times(1))
         .create(any(PersistentVolumeClaim.class));
   }
 }

@@ -9,14 +9,14 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.openshift.provision;
+package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Collections.emptyMap;
 import static java.util.UUID.randomUUID;
 import static org.eclipse.che.api.workspace.shared.Constants.ASYNC_PERSIST_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
-import static org.eclipse.che.workspace.infrastructure.openshift.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -28,18 +28,18 @@ import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.PodResource;
-import io.fabric8.openshift.client.OpenShiftClient;
 import java.util.UUID;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -52,10 +52,10 @@ public class AsyncStoragePodInterceptorTest {
   private static final String WORKSPACE_ID = UUID.randomUUID().toString();
   private static final String NAMESPACE = UUID.randomUUID().toString();
 
-  @Mock private OpenShiftEnvironment openShiftEnvironment;
+  @Mock private KubernetesEnvironment kubernetesEnvironment;
   @Mock private RuntimeIdentity identity;
-  @Mock private OpenShiftClientFactory clientFactory;
-  @Mock private OpenShiftClient osClient;
+  @Mock private KubernetesClientFactory clientFactory;
+  @Mock private KubernetesClient kubernetesClient;
   @Mock private PodResource<Pod, DoneablePod> podResource;
   @Mock private MixedOperation mixedOperationPod;
   @Mock private NonNamespaceOperation namespacePodOperation;
@@ -72,24 +72,24 @@ public class AsyncStoragePodInterceptorTest {
   public void shouldDoNothingIfNotCommonStrategy() throws Exception {
     AsyncStoragePodInterceptor asyncStoragePodInterceptor =
         new AsyncStoragePodInterceptor(randomUUID().toString(), clientFactory);
-    asyncStoragePodInterceptor.intercept(openShiftEnvironment, identity);
+    asyncStoragePodInterceptor.intercept(kubernetesEnvironment, identity);
     verifyNoMoreInteractions(clientFactory);
     verifyNoMoreInteractions(identity);
   }
 
   @Test
   public void shouldDoNothingIfEphemeralWorkspace() throws Exception {
-    when(openShiftEnvironment.getAttributes()).thenReturn(of(PERSIST_VOLUMES_ATTRIBUTE, "false"));
-    asyncStoragePodInterceptor.intercept(openShiftEnvironment, identity);
+    when(kubernetesEnvironment.getAttributes()).thenReturn(of(PERSIST_VOLUMES_ATTRIBUTE, "false"));
+    asyncStoragePodInterceptor.intercept(kubernetesEnvironment, identity);
     verifyNoMoreInteractions(clientFactory);
     verifyNoMoreInteractions(identity);
   }
 
   @Test
   public void shouldDoNothingIfWorkspaceConfiguredWithAsyncStorage() throws Exception {
-    when(openShiftEnvironment.getAttributes())
+    when(kubernetesEnvironment.getAttributes())
         .thenReturn(of(PERSIST_VOLUMES_ATTRIBUTE, "false", ASYNC_PERSIST_ATTRIBUTE, "true"));
-    asyncStoragePodInterceptor.intercept(openShiftEnvironment, identity);
+    asyncStoragePodInterceptor.intercept(kubernetesEnvironment, identity);
     verifyNoMoreInteractions(clientFactory);
     verifyNoMoreInteractions(identity);
   }
@@ -99,18 +99,18 @@ public class AsyncStoragePodInterceptorTest {
     when(identity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
     when(identity.getInfrastructureNamespace()).thenReturn(NAMESPACE);
 
-    when(clientFactory.create(WORKSPACE_ID)).thenReturn(osClient);
-    when(openShiftEnvironment.getAttributes()).thenReturn(emptyMap());
+    when(clientFactory.create(WORKSPACE_ID)).thenReturn(kubernetesClient);
+    when(kubernetesEnvironment.getAttributes()).thenReturn(emptyMap());
 
-    when(osClient.pods()).thenReturn(mixedOperationPod);
+    when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
     when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
     when(podResource.get()).thenReturn(null);
 
-    asyncStoragePodInterceptor.intercept(openShiftEnvironment, identity);
+    asyncStoragePodInterceptor.intercept(kubernetesEnvironment, identity);
     verifyNoMoreInteractions(clientFactory);
     verifyNoMoreInteractions(identity);
-    verifyNoMoreInteractions(osClient);
+    verifyNoMoreInteractions(kubernetesClient);
   }
 
   @Test
@@ -118,10 +118,10 @@ public class AsyncStoragePodInterceptorTest {
     when(identity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
     when(identity.getInfrastructureNamespace()).thenReturn(NAMESPACE);
 
-    when(clientFactory.create(WORKSPACE_ID)).thenReturn(osClient);
-    when(openShiftEnvironment.getAttributes()).thenReturn(emptyMap());
+    when(clientFactory.create(WORKSPACE_ID)).thenReturn(kubernetesClient);
+    when(kubernetesEnvironment.getAttributes()).thenReturn(emptyMap());
 
-    when(osClient.pods()).thenReturn(mixedOperationPod);
+    when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
     when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
 
@@ -136,7 +136,7 @@ public class AsyncStoragePodInterceptorTest {
     Watch watch = mock(Watch.class);
     when(podResource.watch(any())).thenReturn(watch);
 
-    asyncStoragePodInterceptor.intercept(openShiftEnvironment, identity);
+    asyncStoragePodInterceptor.intercept(kubernetesEnvironment, identity);
     verify(deletable).delete();
     verify(watch).close();
   }
@@ -147,11 +147,11 @@ public class AsyncStoragePodInterceptorTest {
     when(identity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
     when(identity.getInfrastructureNamespace()).thenReturn(NAMESPACE);
 
-    when(clientFactory.create(WORKSPACE_ID)).thenReturn(osClient);
-    when(openShiftEnvironment.getAttributes())
+    when(clientFactory.create(WORKSPACE_ID)).thenReturn(kubernetesClient);
+    when(kubernetesEnvironment.getAttributes())
         .thenReturn(ImmutableMap.of(PERSIST_VOLUMES_ATTRIBUTE, "true"));
 
-    when(osClient.pods()).thenReturn(mixedOperationPod);
+    when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
     when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
 
@@ -166,7 +166,7 @@ public class AsyncStoragePodInterceptorTest {
     Watch watch = mock(Watch.class);
     when(podResource.watch(any())).thenReturn(watch);
 
-    asyncStoragePodInterceptor.intercept(openShiftEnvironment, identity);
+    asyncStoragePodInterceptor.intercept(kubernetesEnvironment, identity);
     verify(deletable).delete();
     verify(watch).close();
   }
