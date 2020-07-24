@@ -60,6 +60,7 @@ public class IngressServerResolver extends AbstractServerResolver {
     }
   }
 
+  @Override
   protected Map<String, ServerImpl> resolveExternalServers(String machineName) {
     return ingresses
         .get(machineName)

@@ -11,10 +11,28 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver;
 
+import io.fabric8.kubernetes.api.model.Service;
 import java.util.Map;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 
+/**
+ * Helps to resolve {@link ServerImpl servers} by machine name according to {@link Service services}
+ * and implementation specific k8s objects.
+ *
+ * <p>Objects annotations are used to check if they exposes the specified machine servers.
+ *
+ * @see ExternalServerExposer
+ * @see Annotations
+ */
 public interface ServerResolver {
 
+  /**
+   * Resolves servers by the specified machine name.
+   *
+   * @param machineName machine to resolve servers
+   * @return resolved servers
+   */
   Map<String, ServerImpl> resolve(String machineName);
 }

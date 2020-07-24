@@ -22,7 +22,13 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.RuntimeServerBuilder;
 
+/**
+ * {@link ServerResolver} implementations that uses {@link Service} for internal servers can use
+ * this abstract class. The implementation then must define how to resolve external servers by
+ * implementing {@link AbstractServerResolver#resolveExternalServers(String)}.
+ */
 public abstract class AbstractServerResolver implements ServerResolver {
+
   private final Multimap<String, Service> services;
 
   public AbstractServerResolver(Iterable<Service> services) {
@@ -34,12 +40,6 @@ public abstract class AbstractServerResolver implements ServerResolver {
     }
   }
 
-  /**
-   * Resolves servers by the specified machine name.
-   *
-   * @param machineName machine to resolve servers
-   * @return resolved servers
-   */
   @Override
   public final Map<String, ServerImpl> resolve(String machineName) {
     Map<String, ServerImpl> servers = new HashMap<>();
@@ -53,8 +53,8 @@ public abstract class AbstractServerResolver implements ServerResolver {
         .get(machineName)
         .stream()
         .map(this::resolveServiceServers)
-        .flatMap(m -> m.entrySet().stream())
-        .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (v1, v2) -> v2));
+        .flatMap(s -> s.entrySet().stream())
+        .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (s1, s2) -> s2));
   }
 
   private Map<String, ServerImpl> resolveServiceServers(Service service) {
@@ -77,5 +77,11 @@ public abstract class AbstractServerResolver implements ServerResolver {
                 (s1, s2) -> s2));
   }
 
+  /**
+   * Resolve external servers from implementation specific k8s object and it's annotations.
+   *
+   * @param machineName machine to resolve servers
+   * @return resolved servers
+   */
   protected abstract Map<String, ServerImpl> resolveExternalServers(String machineName);
 }
