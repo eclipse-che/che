@@ -9,10 +9,12 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
+package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
+import com.google.common.base.Splitter;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
+import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.ConfigMapVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
@@ -20,6 +22,7 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -30,31 +33,31 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFacto
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
+import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Checks if config map with self-signed certificates are present in current namespace, and if it
- * is, mounts it's data items as a files into specific folder on all containers of the workspace
- * being provisioned.
+ * is, creates the same in workspace project, allowing .
  */
 @Singleton
-public class TrustStoreCertificateProvisioner
-    implements NamespaceableConfigurationProvisioner<KubernetesEnvironment> {
+public class TrustedCAProvisioner {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TrustStoreCertificateProvisioner.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TrustedCAProvisioner.class);
 
   public static final String CHE_TRUST_STORE_VOLUME = "che-self-signed-certs";
 
   private final String certificateMountPath;
   private final String configMapName;
+  private final Map<String, String> configMapLabelKeyValue;
   private final CheInstallationLocation cheInstallationLocation;
   private final KubernetesClientFactory clientFactory;
 
   @Inject
-  public TrustStoreCertificateProvisioner(
+  public TrustedCAProvisioner(
       @Named("che.trusted_ca_bundles_config_map") String configMapName,
+      @Named("che.trusted_ca_bundles_config_map_labels") String configMapLabel,
       @Named("che.trusted_ca_bundles_mount_path") String certificateMountPath,
       CheInstallationLocation cheInstallationLocation,
       KubernetesClientFactory clientFactory) {
@@ -62,47 +65,36 @@ public class TrustStoreCertificateProvisioner
     this.cheInstallationLocation = cheInstallationLocation;
     this.clientFactory = clientFactory;
     this.certificateMountPath = certificateMountPath;
+    this.configMapLabelKeyValue = Splitter.on(",").withKeyValueSeparator("=").split(configMapLabel);
   }
 
-  @Override
-  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
-      throws InfrastructureException {
-    provision(k8sEnv, identity, null);
-  }
-
-  @Override
   public void provision(
-      KubernetesEnvironment k8sEnv, RuntimeIdentity identity, KubernetesNamespace namespace)
+      KubernetesEnvironment k8sEnv, RuntimeIdentity identity, OpenShiftProject project)
       throws InfrastructureException {
-    if (namespace == null) {
-      return;
-    }
-    ConfigMap configMap =
+    ConfigMapList configMapList =
         clientFactory
             .create()
             .configMaps()
             .inNamespace(cheInstallationLocation.getInstallationLocationNamespace())
-            .withName(configMapName)
-            .get();
+            .withLabels(configMapLabelKeyValue)
+            .list();
 
-    if (configMap == null) {
+    if (configMapList.getItems().isEmpty()) {
       return;
     }
 
-    ConfigMap existing = namespace.configMaps().get(configMapName);
-    if (existing == null || !existing.getData().equals(configMap.getData())) {
-      // create or renew map
-      namespace
+    ConfigMap existing = project.configMaps().get(configMapName);
+    if (existing == null) {
+      // create new map
+      project
           .configMaps()
           .create(
               new ConfigMapBuilder()
                   .withMetadata(
                       new ObjectMetaBuilder()
                           .withName(configMapName)
-                          .withAnnotations(configMap.getMetadata().getAnnotations())
+                          .withLabels(configMapLabelKeyValue)
                           .build())
-                  .withApiVersion(configMap.getApiVersion())
-                  .withData(configMap.getData())
                   .build());
     }
 

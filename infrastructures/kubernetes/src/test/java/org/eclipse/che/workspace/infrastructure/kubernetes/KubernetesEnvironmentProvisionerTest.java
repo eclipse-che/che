@@ -29,7 +29,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettin
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SshKeysProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TrustStoreCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
@@ -70,7 +69,6 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private ServiceAccountProvisioner serviceAccountProvisioner;
   @Mock private CertificateProvisioner certificateProvisioner;
   @Mock private SshKeysProvisioner sshKeysProvisioner;
-  @Mock private TrustStoreCertificateProvisioner trustStoreCertificateProvisioner;
   @Mock private GitConfigProvisioner gitConfigProvisioner;
   @Mock private PreviewUrlExposer previewUrlExposer;
   @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
@@ -100,7 +98,6 @@ public class KubernetesEnvironmentProvisionerTest {
             certificateProvisioner,
             sshKeysProvisioner,
             gitConfigProvisioner,
-            trustStoreCertificateProvisioner,
             previewUrlExposer,
             vcsSslCertificateProvisioner);
     provisionOrder =
@@ -119,14 +116,13 @@ public class KubernetesEnvironmentProvisionerTest {
             proxySettingsProvisioner,
             serviceAccountProvisioner,
             certificateProvisioner,
-            trustStoreCertificateProvisioner,
             gitConfigProvisioner,
             previewUrlExposer);
   }
 
   @Test
   public void performsOrderedProvisioning() throws Exception {
-    k8sInfraProvisioner.provision(k8sEnv, runtimeIdentity, kubernetesNamespace);
+    k8sInfraProvisioner.provision(k8sEnv, runtimeIdentity);
 
     provisionOrder.verify(logsVolumeMachineProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(serversProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
@@ -146,9 +142,6 @@ public class KubernetesEnvironmentProvisionerTest {
     provisionOrder.verify(proxySettingsProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(serviceAccountProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(certificateProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
-    provisionOrder
-        .verify(trustStoreCertificateProvisioner)
-        .provision(eq(k8sEnv), eq(runtimeIdentity), eq(kubernetesNamespace));
     provisionOrder.verify(gitConfigProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }

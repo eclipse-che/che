@@ -25,7 +25,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminat
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SshKeysProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TrustStoreCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.ContainerResourceProvisioner;
@@ -73,7 +72,6 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private SshKeysProvisioner sshKeysProvisioner;
   @Mock private GitConfigProvisioner gitConfigProvisioner;
   @Mock private OpenShiftPreviewUrlExposer previewUrlEndpointsProvisioner;
-  @Mock private TrustStoreCertificateProvisioner trustStoreCertificateProvisioner;
   @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
 
   private OpenShiftEnvironmentProvisioner osInfraProvisioner;
@@ -103,7 +101,6 @@ public class OpenShiftEnvironmentProvisionerTest {
             sshKeysProvisioner,
             gitConfigProvisioner,
             previewUrlEndpointsProvisioner,
-            trustStoreCertificateProvisioner,
             vcsSslCertificateProvisioner);
     provisionOrder =
         inOrder(
@@ -120,7 +117,6 @@ public class OpenShiftEnvironmentProvisionerTest {
             proxySettingsProvisioner,
             serviceAccountProvisioner,
             certificateProvisioner,
-            trustStoreCertificateProvisioner,
             sshKeysProvisioner,
             vcsSslCertificateProvisioner,
             gitConfigProvisioner,
@@ -129,7 +125,7 @@ public class OpenShiftEnvironmentProvisionerTest {
 
   @Test
   public void performsOrderedProvisioning() throws Exception {
-    osInfraProvisioner.provision(osEnv, runtimeIdentity, kubernetesNamespace);
+    osInfraProvisioner.provision(osEnv, runtimeIdentity);
 
     provisionOrder.verify(logsVolumeMachineProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(serversProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
@@ -146,9 +142,6 @@ public class OpenShiftEnvironmentProvisionerTest {
     provisionOrder.verify(proxySettingsProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(serviceAccountProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(certificateProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder
-        .verify(trustStoreCertificateProvisioner)
-        .provision(eq(osEnv), eq(runtimeIdentity), eq(kubernetesNamespace));
     provisionOrder.verify(sshKeysProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(vcsSslCertificateProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(gitConfigProvisioner).provision(eq(osEnv), eq(runtimeIdentity));

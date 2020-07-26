@@ -19,7 +19,6 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
@@ -31,7 +30,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettin
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SshKeysProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TrustStoreCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
@@ -52,9 +50,6 @@ import org.slf4j.LoggerFactory;
 public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironment> {
 
   void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException;
-
-  default void provision(T k8sEnv, RuntimeIdentity identity, KubernetesNamespace namespace)
-      throws InfrastructureException {};
 
   @Singleton
   class KubernetesEnvironmentProvisionerImpl
@@ -82,7 +77,6 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final GitConfigProvisioner gitConfigProvisioner;
     private final PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer;
     private final VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
-    private final TrustStoreCertificateProvisioner trustStoreCertificateProvisioner;
 
     @Inject
     public KubernetesEnvironmentProvisionerImpl(
@@ -103,7 +97,6 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         CertificateProvisioner certificateProvisioner,
         SshKeysProvisioner sshKeysProvisioner,
         GitConfigProvisioner gitConfigProvisioner,
-        TrustStoreCertificateProvisioner trustStoreCertificateProvisioner,
         PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer,
         VcsSslCertificateProvisioner vcsSslCertificateProvisioner) {
       this.pvcEnabled = pvcEnabled;
@@ -122,7 +115,6 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.serviceAccountProvisioner = serviceAccountProvisioner;
       this.certificateProvisioner = certificateProvisioner;
       this.sshKeysProvisioner = sshKeysProvisioner;
-      this.trustStoreCertificateProvisioner = trustStoreCertificateProvisioner;
       this.vcsSslCertificateProvisioner = vcsSslCertificateProvisioner;
       this.gitConfigProvisioner = gitConfigProvisioner;
       this.previewUrlExposer = previewUrlExposer;
@@ -130,13 +122,6 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
 
     @Traced
     public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
-        throws InfrastructureException {
-      provision(k8sEnv, identity, null);
-    }
-
-    @Traced
-    public void provision(
-        KubernetesEnvironment k8sEnv, RuntimeIdentity identity, KubernetesNamespace namespace)
         throws InfrastructureException {
       final String workspaceId = identity.getWorkspaceId();
       TracingTags.WORKSPACE_ID.set(workspaceId);
@@ -169,7 +154,6 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       proxySettingsProvisioner.provision(k8sEnv, identity);
       serviceAccountProvisioner.provision(k8sEnv, identity);
       certificateProvisioner.provision(k8sEnv, identity);
-      trustStoreCertificateProvisioner.provision(k8sEnv, identity, namespace);
       sshKeysProvisioner.provision(k8sEnv, identity);
       vcsSslCertificateProvisioner.provision(k8sEnv, identity);
       gitConfigProvisioner.provision(k8sEnv, identity);
