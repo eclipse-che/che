@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.openshift;
+package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.Boolean.parseBoolean;
