@@ -12,13 +12,17 @@
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
 import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
-import io.fabric8.openshift.api.model.*;
+import io.fabric8.openshift.api.model.OpenshiftRole;
+import io.fabric8.openshift.api.model.OpenshiftRoleBinding;
+import io.fabric8.openshift.api.model.OpenshiftRoleBindingBuilder;
+import io.fabric8.openshift.api.model.OpenshiftRoleBuilder;
+import io.fabric8.openshift.api.model.PolicyRuleBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.workspace.infrastructure.kubernetes.CheInstallationLocation;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftCheInstallationLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,12 +38,13 @@ public class OpenShiftStopWorkspaceRoleProvisioner {
   private final String installationLocation;
   private final boolean stopWorkspaceRoleEnabled;
 
-  private static final Logger LOG = LoggerFactory.getLogger(CheInstallationLocation.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(OpenShiftStopWorkspaceRoleProvisioner.class);
 
   @Inject
   public OpenShiftStopWorkspaceRoleProvisioner(
       OpenShiftClientFactory clientFactory,
-      CheInstallationLocation installationLocation,
+      OpenShiftCheInstallationLocation installationLocation,
       @Named("che.workspace.stop.role.enabled") boolean stopWorkspaceRoleEnabled) {
     this.clientFactory = clientFactory;
     this.installationLocation = installationLocation.getInstallationLocationNamespace();

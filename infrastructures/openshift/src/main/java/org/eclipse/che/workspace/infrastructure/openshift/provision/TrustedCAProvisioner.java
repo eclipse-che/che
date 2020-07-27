@@ -14,28 +14,25 @@ package org.eclipse.che.workspace.infrastructure.openshift.provision;
 import com.google.common.base.Splitter;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
-import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.ConfigMapVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
-import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
-import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
+import io.fabric8.openshift.client.OpenShiftClient;
+import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.workspace.infrastructure.kubernetes.CheInstallationLocation;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
+import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftCheInstallationLocation;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Checks if config map with self-signed certificates are present in current namespace, and if it
@@ -44,51 +41,49 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class TrustedCAProvisioner {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TrustedCAProvisioner.class);
-
   public static final String CHE_TRUST_STORE_VOLUME = "che-self-signed-certs";
 
   private final String certificateMountPath;
   private final String configMapName;
   private final Map<String, String> configMapLabelKeyValue;
-  private final CheInstallationLocation cheInstallationLocation;
-  private final KubernetesClientFactory clientFactory;
+  private final OpenShiftClientFactory clientFactory;
+  private final String installationLocation;
 
   @Inject
   public TrustedCAProvisioner(
       @Named("che.trusted_ca_bundles_config_map") String configMapName,
       @Named("che.trusted_ca_bundles_config_map_labels") String configMapLabel,
       @Named("che.trusted_ca_bundles_mount_path") String certificateMountPath,
-      CheInstallationLocation cheInstallationLocation,
-      KubernetesClientFactory clientFactory) {
+      OpenShiftCheInstallationLocation cheInstallationLocation,
+      OpenShiftClientFactory clientFactory) {
     this.configMapName = configMapName;
-    this.cheInstallationLocation = cheInstallationLocation;
     this.clientFactory = clientFactory;
     this.certificateMountPath = certificateMountPath;
+    this.installationLocation = cheInstallationLocation.getInstallationLocationNamespace();
     this.configMapLabelKeyValue = Splitter.on(",").withKeyValueSeparator("=").split(configMapLabel);
   }
 
   public void provision(
       KubernetesEnvironment k8sEnv, RuntimeIdentity identity, OpenShiftProject project)
       throws InfrastructureException {
-    ConfigMapList configMapList =
-        clientFactory
-            .create()
+    OpenShiftClient client = clientFactory.createOC();
+    List<ConfigMap> configMapList =
+        client
             .configMaps()
-            .inNamespace(cheInstallationLocation.getInstallationLocationNamespace())
+            .inNamespace(installationLocation)
             .withLabels(configMapLabelKeyValue)
-            .list();
-
-    if (configMapList.getItems().isEmpty()) {
+            .list()
+            .getItems();
+    if (configMapList.isEmpty()) {
       return;
     }
-
     ConfigMap existing = project.configMaps().get(configMapName);
     if (existing == null) {
       // create new map
-      project
-          .configMaps()
-          .create(
+      k8sEnv
+          .getConfigMaps()
+          .put(
+              configMapName,
               new ConfigMapBuilder()
                   .withMetadata(
                       new ObjectMetaBuilder()
@@ -97,17 +92,22 @@ public class TrustedCAProvisioner {
                           .build())
                   .build());
     }
-
     for (PodData pod : k8sEnv.getPodsData().values()) {
       if (pod.getRole() == PodRole.DEPLOYMENT) {
         if (pod.getSpec()
             .getVolumes()
             .stream()
             .noneMatch(v -> v.getName().equals(CHE_TRUST_STORE_VOLUME))) {
-          pod.getSpec().getVolumes().add(buildTrustStoreConfigMapVolume());
+          pod.getSpec()
+              .getVolumes()
+              .add(
+                  new VolumeBuilder()
+                      .withName(CHE_TRUST_STORE_VOLUME)
+                      .withConfigMap(
+                          new ConfigMapVolumeSourceBuilder().withName(configMapName).build())
+                      .build());
         }
       }
-
       for (Container container : pod.getSpec().getInitContainers()) {
         provisionTrustStoreVolumeMountIfNeeded(container);
       }
@@ -122,22 +122,14 @@ public class TrustedCAProvisioner {
         .getVolumeMounts()
         .stream()
         .noneMatch(vm -> vm.getName().equals(CHE_TRUST_STORE_VOLUME))) {
-      container.getVolumeMounts().add(buildTrustStoreVolumeMount());
+      container
+          .getVolumeMounts()
+          .add(
+              new VolumeMountBuilder()
+                  .withName(CHE_TRUST_STORE_VOLUME)
+                  .withNewReadOnly(true)
+                  .withMountPath(certificateMountPath)
+                  .build());
     }
-  }
-
-  private VolumeMount buildTrustStoreVolumeMount() {
-    return new VolumeMountBuilder()
-        .withName(CHE_TRUST_STORE_VOLUME)
-        .withNewReadOnly(true)
-        .withMountPath(certificateMountPath)
-        .build();
-  }
-
-  private Volume buildTrustStoreConfigMapVolume() {
-    return new VolumeBuilder()
-        .withName(CHE_TRUST_STORE_VOLUME)
-        .withConfigMap(new ConfigMapVolumeSourceBuilder().withName(configMapName).build())
-        .build();
   }
 }

@@ -191,31 +191,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       startSynchronizer.start();
 
       namespace.cleanUp();
-
-      // Tooling side car provisioner should be applied before other provisioners
-      // because new machines may be provisioned there
-      toolingProvisioner.provision(
-          context.getIdentity(), startSynchronizer, context.getEnvironment(), startOptions);
-
-      startSynchronizer.checkFailure();
-
-      // Workspace API provisioners should be reapplied here to bring needed
-      // changed into new machines that came during tooling provisioning
-      for (InternalEnvironmentProvisioner envProvisioner : internalEnvironmentProvisioners) {
-        envProvisioner.provision(context.getIdentity(), context.getEnvironment());
-      }
-
-      // commands might be updated during provisioning
-      runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
-
-      // Infrastructure specific provisioners should be applied last
-      // because it converts all Workspace API model objects that comes
-      // from previous provisioners into infrastructure specific objects
-      kubernetesEnvironmentProvisioner.provision(context.getEnvironment(), context.getIdentity());
-
-      secretAsContainerResourceProvisioner.provision(
-          context.getEnvironment(), context.getIdentity(), namespace);
-      LOG.debug("Provisioning of workspace '{}' completed.", workspaceId);
+      provisionWorkspace(startOptions, context, workspaceId);
 
       volumesStrategy.prepare(
           context.getEnvironment(),
@@ -294,6 +270,35 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     } finally {
       namespace.deployments().stopWatch();
     }
+  }
+
+  protected void provisionWorkspace(
+      Map<String, String> startOptions, KubernetesRuntimeContext<E> context, String workspaceId)
+      throws InfrastructureException {
+    // Tooling side car provisioner should be applied before other provisioners
+    // because new machines may be provisioned there
+    toolingProvisioner.provision(
+        context.getIdentity(), startSynchronizer, context.getEnvironment(), startOptions);
+
+    startSynchronizer.checkFailure();
+
+    // Workspace API provisioners should be reapplied here to bring needed
+    // changed into new machines that came during tooling provisioning
+    for (InternalEnvironmentProvisioner envProvisioner : internalEnvironmentProvisioners) {
+      envProvisioner.provision(context.getIdentity(), context.getEnvironment());
+    }
+
+    // commands might be updated during provisioning
+    runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
+
+    // Infrastructure specific provisioners should be applied last
+    // because it converts all Workspace API model objects that comes
+    // from previous provisioners into infrastructure specific objects
+    kubernetesEnvironmentProvisioner.provision(context.getEnvironment(), context.getIdentity());
+
+    secretAsContainerResourceProvisioner.provision(
+        context.getEnvironment(), context.getIdentity(), namespace);
+    LOG.debug("Provisioning of workspace '{}' completed.", workspaceId);
   }
 
   /**

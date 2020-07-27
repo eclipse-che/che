@@ -79,7 +79,8 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       SidecarToolingProvisioner<OpenShiftEnvironment> toolingProvisioner,
       RuntimeHangingDetector runtimeHangingDetector,
       OpenShiftPreviewUrlCommandProvisioner previewUrlCommandProvisioner,
-      SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner,
+      SecretAsContainerResourceProvisioner<OpenShiftEnvironment>
+          secretAsContainerResourceProvisioner,
       Tracer tracer,
       TrustedCAProvisioner trustedCAProvisioner,
       @Assisted OpenShiftRuntimeContext context,
@@ -113,9 +114,12 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
   }
 
   @Override
-  protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
-    super.internalStart(startOptions);
-    KubernetesRuntimeContext<OpenShiftEnvironment> context = getContext();
+  protected void provisionWorkspace(
+      Map<String, String> startOptions,
+      KubernetesRuntimeContext<OpenShiftEnvironment> context,
+      String workspaceId)
+      throws InfrastructureException {
+    super.provisionWorkspace(startOptions, context, workspaceId);
     trustedCAProvisioner.provision(context.getEnvironment(), context.getIdentity(), project);
   }
 

@@ -14,10 +14,8 @@ package org.eclipse.che.workspace.infrastructure.openshift.provision;
 import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -30,21 +28,22 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import io.fabric8.openshift.client.OpenShiftClient;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.workspace.infrastructure.kubernetes.CheInstallationLocation;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
+import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftCheInstallationLocation;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -61,8 +60,8 @@ public class TrustedCAProvisionerTest {
   private static final String CONFIGMAP_KEY = "testConfigMapKey";
   private static final String CONFIGMAP_VALUE = "testConfigMapValue";
 
-  @Mock CheInstallationLocation cheInstallationLocation;
-  @Mock KubernetesClientFactory clientFactory;
+  @Mock OpenShiftCheInstallationLocation cheInstallationLocation;
+  @Mock OpenShiftClientFactory clientFactory;
 
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
@@ -70,7 +69,9 @@ public class TrustedCAProvisionerTest {
   @Mock private KubernetesConfigsMaps kubernetesConfigsMaps;
   @Mock private ConfigMapList configMapList;
 
-  @Mock private KubernetesClient k8sClient;
+  @Mock private OpenShiftClient k8sClient;
+
+  Map<String, ConfigMap> envConfigMaps = new HashMap<>();
 
   @Mock
   private MixedOperation<
@@ -98,7 +99,7 @@ public class TrustedCAProvisionerTest {
             cheInstallationLocation,
             clientFactory);
 
-    lenient().when(clientFactory.create()).thenReturn(k8sClient);
+    lenient().when(clientFactory.createOC()).thenReturn(k8sClient);
     lenient().when(k8sClient.configMaps()).thenReturn(configMapOperation);
     lenient().when(configMapOperation.inNamespace(any())).thenReturn(nonNamespaceOperation);
     lenient().when(nonNamespaceOperation.withLabels(any())).thenReturn(configMapResource);
@@ -109,17 +110,16 @@ public class TrustedCAProvisionerTest {
 
   @Test
   public void shouldProvisionTrustStoreMapAndMountIt() throws Exception {
-    ArgumentCaptor<ConfigMap> captor = ArgumentCaptor.forClass(ConfigMap.class);
     Pod pod = newPod();
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     doReturn(of(POD_NAME, podData)).when(k8sEnv).getPodsData();
-    doReturn(null).when(kubernetesConfigsMaps).get(anyString());
+    doReturn(envConfigMaps).when(k8sEnv).getConfigMaps();
 
     trustedCAProvisioner.provision(k8sEnv, runtimeIdentity, openShiftProject);
 
-    verify(kubernetesConfigsMaps).create(captor.capture());
-    assertTrue(captor.getValue().getMetadata().getLabels().containsKey("foo"));
-    assertEquals(captor.getValue().getMetadata().getLabels().get("foo"), "bar");
+    assertEquals(envConfigMaps.size(), 1);
+    assertTrue(envConfigMaps.get(CONFIGMAP_NAME).getMetadata().getLabels().containsKey("foo"));
+    assertEquals(envConfigMaps.get(CONFIGMAP_NAME).getMetadata().getLabels().get("foo"), "bar");
     PodSpec podSpec = pod.getSpec();
     assertEquals(podSpec.getVolumes().size(), 1);
     assertEquals(podSpec.getVolumes().get(0).getConfigMap().getName(), CONFIGMAP_NAME);
