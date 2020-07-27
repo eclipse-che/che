@@ -35,8 +35,9 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftC
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 
 /**
- * Checks if config map with self-signed certificates are present in current namespace, and if it
- * is, creates the same in workspace project, allowing .
+ * Checks if config map with CA bundles are present in current namespace, and if it is, creates the
+ * same in workspace project, allowing openshift to auto-inject values into it. (see
+ * https://docs.openshift.com/container-platform/4.3/networking/configuring-a-custom-pki.html#certificate-injection-using-operators_configuring-a-custom-pki)
  */
 @Singleton
 public class TrustedCAProvisioner {
