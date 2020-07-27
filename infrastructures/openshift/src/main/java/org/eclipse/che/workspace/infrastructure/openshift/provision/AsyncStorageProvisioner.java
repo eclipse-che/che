@@ -69,6 +69,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.ServerServiceBuilder;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.slf4j.Logger;
@@ -369,15 +370,18 @@ public class AsyncStorageProvisioner {
             .withPort(SERVICE_PORT)
             .withTargetPort(targetPort)
             .build();
+
     ServiceSpec spec = new ServiceSpec();
     spec.setPorts(singletonList(port));
     spec.setSelector(of("app", ASYNC_STORAGE));
 
-    Service service = new Service();
-    service.setApiVersion("v1");
-    service.setKind("Service");
-    service.setMetadata(meta);
-    service.setSpec(spec);
+    ServerServiceBuilder serviceBuilder = new ServerServiceBuilder();
+    Service service =
+        serviceBuilder
+            .withPorts(singletonList(port))
+            .withSelectorEntry("app", ASYNC_STORAGE)
+            .withName(ASYNC_STORAGE)
+            .build();
 
     oc.services().inNamespace(namespace).create(service);
   }

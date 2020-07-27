@@ -11,8 +11,10 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret;
 
+import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.GitCredentialStorageFileSecretApplier.ANNOTATION_GIT_CREDENTIALS;
 
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.LabelSelector;
@@ -44,15 +46,18 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
   private final FileSecretApplier fileSecretApplier;
   private final EnvironmentVariableSecretApplier environmentVariableSecretApplier;
 
+  private final GitCredentialStorageFileSecretApplier gitCredentialStorageFileSecretApplier;
   private final Map<String, String> secretLabels;
 
   @Inject
   public SecretAsContainerResourceProvisioner(
       FileSecretApplier fileSecretApplier,
       EnvironmentVariableSecretApplier environmentVariableSecretApplier,
+      GitCredentialStorageFileSecretApplier gitCredentialStorageFileSecretApplier,
       @Named("che.workspace.provision.secret.labels") String[] labels) {
     this.fileSecretApplier = fileSecretApplier;
     this.environmentVariableSecretApplier = environmentVariableSecretApplier;
+    this.gitCredentialStorageFileSecretApplier = gitCredentialStorageFileSecretApplier;
     this.secretLabels =
         Arrays.stream(labels)
             .map(item -> item.split("=", 2))
@@ -73,7 +78,12 @@ public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironmen
       if ("env".equalsIgnoreCase(mountType)) {
         environmentVariableSecretApplier.applySecret(env, runtimeIdentity, secret);
       } else if ("file".equalsIgnoreCase(mountType)) {
-        fileSecretApplier.applySecret(env, runtimeIdentity, secret);
+        if (parseBoolean(secret.getMetadata().getAnnotations().get(ANNOTATION_GIT_CREDENTIALS))) {
+          gitCredentialStorageFileSecretApplier.applySecret(env, runtimeIdentity, secret);
+        } else {
+          fileSecretApplier.applySecret(env, runtimeIdentity, secret);
+        }
+
       } else {
         throw new InfrastructureException(
             format(
