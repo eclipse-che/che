@@ -117,7 +117,7 @@ export const TestConstants = {
     /**
      * Value of TLS Support property in the 'Create Che Cluster' yaml using OperatorHub.
      */
-    TS_SELENIUM_VALUE_TLS_SUPPORT: process.env.TS_SELENIUM_VALUE_TLS_SUPPORT || 'false',
+    TS_SELENIUM_VALUE_TLS_SUPPORT: process.env.TS_SELENIUM_VALUE_TLS_SUPPORT || 'true',
 
     /**
      * Value of Self Sign Cert property in the 'Create Che Cluster' yaml using OperatorHub.
