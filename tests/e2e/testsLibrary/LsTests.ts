@@ -45,7 +45,7 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
         await editor.waitTabFocused(openedTab);
         await editor.moveCursorToLineAndChar(openedTab, line, char);
         await editor.pressControlSpaceCombination(openedTab);
-        await editor.waitSuggestion(openedTab, suggestionText)
+        await editor.waitSuggestion(openedTab, suggestionText);
     });
  }
 

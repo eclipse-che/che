@@ -232,6 +232,11 @@ export const TestConstants = {
     /**
      * The name of project in the Openshidt plugin tree
      */
-    TS_TEST_OPENSHIFT_PLUGIN_PROJECT: process.env.TS_TEST_OPENSHIFT_PLUGIN_PROJECT || ''
+    TS_TEST_OPENSHIFT_PLUGIN_PROJECT: process.env.TS_TEST_OPENSHIFT_PLUGIN_PROJECT || '',
+
+    /**
+     * Print all timeout variables when tests launch, defaulte to false
+     */
+    TS_SELENIUM_PRINT_TIMEOUT_VARIABLES: process.env.TS_SELENIUM_PRINT_TIMEOUT_VARIABLES || false
 
 };
