@@ -47,7 +47,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarTool
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftPreviewUrlCommandProvisioner;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.TrustedCAProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.Openshift4TrustedCAProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerResolver;
 
 /**
@@ -57,7 +57,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServer
 public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShiftEnvironment> {
 
   private final OpenShiftProject project;
-  private final TrustedCAProvisioner trustedCAProvisioner;
+  private final Openshift4TrustedCAProvisioner trustedCAProvisioner;
 
   @Inject
   public OpenShiftInternalRuntime(
@@ -82,7 +82,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       SecretAsContainerResourceProvisioner<OpenShiftEnvironment>
           secretAsContainerResourceProvisioner,
       Tracer tracer,
-      TrustedCAProvisioner trustedCAProvisioner,
+      Openshift4TrustedCAProvisioner trustedCAProvisioner,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project) {
     super(

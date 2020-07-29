@@ -51,7 +51,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
-public class TrustedCAProvisionerTest {
+public class Openshift4TrustedCAProvisionerTest {
 
   private static final String POD_NAME = "testPod";
   private static final String CONFIGMAP_NAME = "ca-certs";
@@ -87,17 +87,10 @@ public class TrustedCAProvisionerTest {
   private FilterWatchListDeletable<ConfigMap, ConfigMapList, Boolean, Watch, Watcher<ConfigMap>>
       configMapResource;
 
-  private TrustedCAProvisioner trustedCAProvisioner;
+  private Openshift4TrustedCAProvisioner trustedCAProvisioner;
 
   @BeforeMethod
   public void setup() throws Exception {
-    this.trustedCAProvisioner =
-        new TrustedCAProvisioner(
-            CONFIGMAP_NAME,
-            CONFIGMAP_LABELS,
-            CERTIFICATE_MOUNT_PATH,
-            cheInstallationLocation,
-            clientFactory);
 
     lenient().when(clientFactory.createOC()).thenReturn(k8sClient);
     lenient().when(k8sClient.configMaps()).thenReturn(configMapOperation);
@@ -106,6 +99,15 @@ public class TrustedCAProvisionerTest {
     lenient().when(configMapResource.list()).thenReturn(configMapList);
     lenient().when(configMapList.getItems()).thenReturn(singletonList(newConfigMap()));
     lenient().when(openShiftProject.configMaps()).thenReturn(kubernetesConfigsMaps);
+    lenient().when(k8sEnv.getConfigMaps()).thenReturn(envConfigMaps);
+
+    this.trustedCAProvisioner =
+        new Openshift4TrustedCAProvisioner(
+            CONFIGMAP_NAME,
+            CONFIGMAP_LABELS,
+            CERTIFICATE_MOUNT_PATH,
+            cheInstallationLocation,
+            clientFactory);
   }
 
   @Test
@@ -113,7 +115,6 @@ public class TrustedCAProvisionerTest {
     Pod pod = newPod();
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     doReturn(of(POD_NAME, podData)).when(k8sEnv).getPodsData();
-    doReturn(envConfigMaps).when(k8sEnv).getConfigMaps();
 
     trustedCAProvisioner.provision(k8sEnv, runtimeIdentity, openShiftProject);
 

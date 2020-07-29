@@ -40,33 +40,28 @@ import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProje
  * https://docs.openshift.com/container-platform/4.3/networking/configuring-a-custom-pki.html#certificate-injection-using-operators_configuring-a-custom-pki)
  */
 @Singleton
-public class TrustedCAProvisioner {
+public class Openshift4TrustedCAProvisioner {
 
   public static final String CHE_TRUST_STORE_VOLUME = "che-self-signed-certs";
 
   private final String certificateMountPath;
+  private final boolean trustedStoreInitialized;
   private final String configMapName;
   private final Map<String, String> configMapLabelKeyValue;
-  private final OpenShiftClientFactory clientFactory;
   private final String installationLocation;
 
   @Inject
-  public TrustedCAProvisioner(
+  public Openshift4TrustedCAProvisioner(
       @Named("che.trusted_ca_bundles_config_map") String configMapName,
       @Named("che.trusted_ca_bundles_config_map_labels") String configMapLabel,
       @Named("che.trusted_ca_bundles_mount_path") String certificateMountPath,
       OpenShiftCheInstallationLocation cheInstallationLocation,
-      OpenShiftClientFactory clientFactory) {
+      OpenShiftClientFactory clientFactory)
+      throws InfrastructureException {
     this.configMapName = configMapName;
-    this.clientFactory = clientFactory;
     this.certificateMountPath = certificateMountPath;
     this.installationLocation = cheInstallationLocation.getInstallationLocationNamespace();
     this.configMapLabelKeyValue = Splitter.on(",").withKeyValueSeparator("=").split(configMapLabel);
-  }
-
-  public void provision(
-      KubernetesEnvironment k8sEnv, RuntimeIdentity identity, OpenShiftProject project)
-      throws InfrastructureException {
     OpenShiftClient client = clientFactory.createOC();
     List<ConfigMap> configMapList =
         client
@@ -75,7 +70,13 @@ public class TrustedCAProvisioner {
             .withLabels(configMapLabelKeyValue)
             .list()
             .getItems();
-    if (configMapList.isEmpty()) {
+    this.trustedStoreInitialized = !configMapList.isEmpty();
+  }
+
+  public void provision(
+      KubernetesEnvironment k8sEnv, RuntimeIdentity identity, OpenShiftProject project)
+      throws InfrastructureException {
+    if (!trustedStoreInitialized) {
       return;
     }
     ConfigMap existing = project.configMaps().get(configMapName);

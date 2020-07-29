@@ -84,7 +84,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftRoutes;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftPreviewUrlCommandProvisioner;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.TrustedCAProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.Openshift4TrustedCAProvisioner;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -144,7 +144,7 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
   @Mock private OpenShiftPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
-  @Mock private TrustedCAProvisioner trustedCAProvisioner;
+  @Mock private Openshift4TrustedCAProvisioner trustedCAProvisioner;
 
   @Mock(answer = Answers.RETURNS_MOCKS)
   private Tracer tracer;
