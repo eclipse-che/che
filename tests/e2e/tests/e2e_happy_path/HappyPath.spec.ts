@@ -25,6 +25,7 @@ import { Terminal } from '../../pageobjects/ide/Terminal';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import * as fs from 'fs';
 import { ContextMenu } from '../../pageobjects/ide/ContextMenu';
+import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -38,11 +39,12 @@ const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const warningDialog: DialogWindow = e2eContainer.get(CLASSES.DialogWindow);
 const projectName: string = 'petclinic';
+const workspaceRootFolderName: string = 'src';
 const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
 const workspaceName: string = TestConstants.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME;
 const workspaceUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${namespace}/${workspaceName}`;
-const pathToJavaFolder: string = `${projectName}/src/main/java/org/springframework/samples/petclinic`;
-const pathToChangedJavaFileFolder: string = `${projectName}/src/main/java/org/springframework/samples/petclinic/system`;
+const pathToJavaFolder: string = `${projectName}/${workspaceRootFolderName}/main/java/org/springframework/samples/petclinic`;
+const pathToChangedJavaFileFolder: string = `${projectName}/${workspaceRootFolderName}/main/java/org/springframework/samples/petclinic/system`;
 const classPathFilename: string = '.classpath';
 const javaFileName: string = 'PetClinicApplication.java';
 const weclomeControllerJavaFileName: string = 'WelcomeController.java';
@@ -68,15 +70,7 @@ suite('Validation of workspace start', async () => {
         await loginPage.login();
     });
 
-    test('Wait workspace running state', async () => {
-        await ide.waitWorkspaceAndIde();
-    });
-
-    test('Wait until project is imported', async () => {
-        await projectTree.openProjectTreeContainer(10_000);
-        await projectTree.waitProjectImported(projectName, 'src');
-    });
-
+    await projectAndFileTests.waitWorkspaceReadiness(projectName, workspaceRootFolderName);
 });
 
 suite('Language server validation', async () => {
