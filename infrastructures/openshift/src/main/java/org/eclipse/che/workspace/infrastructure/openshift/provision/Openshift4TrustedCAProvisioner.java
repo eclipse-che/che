@@ -25,7 +25,6 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
@@ -48,7 +47,6 @@ public class Openshift4TrustedCAProvisioner {
   private final boolean trustedStoreInitialized;
   private final String configMapName;
   private final Map<String, String> configMapLabelKeyValue;
-  private final String installationLocation;
 
   @Inject
   public Openshift4TrustedCAProvisioner(
@@ -60,27 +58,25 @@ public class Openshift4TrustedCAProvisioner {
       throws InfrastructureException {
     this.configMapName = configMapName;
     this.certificateMountPath = certificateMountPath;
-    this.installationLocation = cheInstallationLocation.getInstallationLocationNamespace();
     this.configMapLabelKeyValue = Splitter.on(",").withKeyValueSeparator("=").split(configMapLabel);
     OpenShiftClient client = clientFactory.createOC();
     List<ConfigMap> configMapList =
         client
             .configMaps()
-            .inNamespace(installationLocation)
+            .inNamespace(cheInstallationLocation.getInstallationLocationNamespace())
             .withLabels(configMapLabelKeyValue)
             .list()
             .getItems();
     this.trustedStoreInitialized = !configMapList.isEmpty();
   }
 
-  public void provision(
-      KubernetesEnvironment k8sEnv, RuntimeIdentity identity, OpenShiftProject project)
+  public void provision(KubernetesEnvironment k8sEnv, OpenShiftProject project)
       throws InfrastructureException {
     if (!trustedStoreInitialized) {
       return;
     }
-    ConfigMap existing = project.configMaps().get(configMapName);
-    if (existing == null) {
+
+    if (!project.configMaps().get(configMapName).isPresent()) {
       // create new map
       k8sEnv
           .getConfigMaps()

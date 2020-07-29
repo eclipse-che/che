@@ -37,7 +37,6 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
@@ -64,7 +63,6 @@ public class Openshift4TrustedCAProvisionerTest {
   @Mock OpenShiftClientFactory clientFactory;
 
   @Mock private KubernetesEnvironment k8sEnv;
-  @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private OpenShiftProject openShiftProject;
   @Mock private KubernetesConfigsMaps kubernetesConfigsMaps;
   @Mock private ConfigMapList configMapList;
@@ -116,7 +114,7 @@ public class Openshift4TrustedCAProvisionerTest {
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     doReturn(of(POD_NAME, podData)).when(k8sEnv).getPodsData();
 
-    trustedCAProvisioner.provision(k8sEnv, runtimeIdentity, openShiftProject);
+    trustedCAProvisioner.provision(k8sEnv, openShiftProject);
 
     assertEquals(envConfigMaps.size(), 1);
     assertTrue(envConfigMaps.get(CONFIGMAP_NAME).getMetadata().getLabels().containsKey("foo"));

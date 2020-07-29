@@ -120,7 +120,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       String workspaceId)
       throws InfrastructureException {
     super.provisionWorkspace(startOptions, context, workspaceId);
-    trustedCAProvisioner.provision(context.getEnvironment(), context.getIdentity(), project);
+    trustedCAProvisioner.provision(context.getEnvironment(), project);
   }
 
   @Override
