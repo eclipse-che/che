@@ -17,6 +17,7 @@ import io.fabric8.openshift.api.model.Route;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ConfigMapServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
 
@@ -26,15 +27,15 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.Serve
  */
 public class OpenShiftServerResolverFactory {
 
+  private final ExternalServerExposer.Type type;
   private final String cheHost;
-  private final String exposureStrategy;
 
   @Inject
   public OpenShiftServerResolverFactory(
       @Named("che.host") String cheHost,
-      @Named("che.infra.kubernetes.server_strategy") String exposureStrategy) {
+      @Named("che.infra.kubernetes.single_host.workspace.exposure") String exposureStrategy) {
     this.cheHost = cheHost;
-    this.exposureStrategy = exposureStrategy;
+    type = ExternalServerExposer.Type.fromConfigurationValue(exposureStrategy);
   }
 
   /**
@@ -46,6 +47,14 @@ public class OpenShiftServerResolverFactory {
    */
   public ServerResolver create(
       List<Service> services, List<Route> routes, List<ConfigMap> configMaps) {
-    return new RouteServerResolver(services, routes);
+    switch (type) {
+      case NATIVE:
+        return new RouteServerResolver(services, routes);
+      case GATEWAY:
+        return new ConfigMapServerResolver(services, configMaps, cheHost);
+      default:
+        throw new IllegalStateException(
+            "Unhandled server resolver strategy " + type + ". This is a bug.");
+    }
   }
 }

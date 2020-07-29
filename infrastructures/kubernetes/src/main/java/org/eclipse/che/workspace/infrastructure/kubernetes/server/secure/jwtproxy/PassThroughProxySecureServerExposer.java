@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.DefaultSecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxyProvisionerFactory;
 
@@ -45,7 +46,7 @@ public class PassThroughProxySecureServerExposer<T extends KubernetesEnvironment
   public PassThroughProxySecureServerExposer(
       @Assisted RuntimeIdentity identity,
       PassThroughProxyProvisionerFactory jwtProxyProvisionerFactory,
-      ExternalServerExposer<T> exposer) {
+      ExternalServerExposerProvider<T> exposer) {
     super(identity, jwtProxyProvisionerFactory, exposer);
   }
 }

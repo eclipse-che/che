@@ -67,6 +67,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExpo
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.DefaultHostExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServiceExposureStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy;
@@ -148,8 +149,16 @@ public class KubernetesInfraModule extends AbstractModule {
     bind(ExternalServiceExposureStrategy.class)
         .toProvider(IngressServiceExposureStrategyProvider.class);
 
-    bind(new TypeLiteral<ExternalServerExposer<KubernetesEnvironment>>() {})
-        .to(IngressServerExposer.class);
+    MapBinder<ExternalServerExposer.Type, ExternalServerExposer<KubernetesEnvironment>>
+        exposureStrategies =
+            MapBinder.newMapBinder(
+                binder(),
+                new TypeLiteral<ExternalServerExposer.Type>() {},
+                new TypeLiteral<ExternalServerExposer<KubernetesEnvironment>>() {});
+    exposureStrategies.addBinding(ExternalServerExposer.Type.NATIVE).to(IngressServerExposer.class);
+    exposureStrategies
+        .addBinding(ExternalServerExposer.Type.GATEWAY)
+        .to(new TypeLiteral<GatewayServerExposer<KubernetesEnvironment>>() {});
 
     bind(ServersConverter.class).to(new TypeLiteral<ServersConverter<KubernetesEnvironment>>() {});
     bind(PreviewUrlExposer.class)

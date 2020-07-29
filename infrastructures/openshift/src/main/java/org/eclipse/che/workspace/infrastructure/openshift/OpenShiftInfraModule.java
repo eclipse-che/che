@@ -64,6 +64,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.Serv
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
@@ -130,8 +131,17 @@ public class OpenShiftInfraModule extends AbstractModule {
     volumesStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
     bind(WorkspaceVolumesStrategy.class).toProvider(WorkspaceVolumeStrategyProvider.class);
 
-    bind(new TypeLiteral<ExternalServerExposer<OpenShiftEnvironment>>() {})
-        .to(RouteServerExposer.class);
+    MapBinder<ExternalServerExposer.Type, ExternalServerExposer<OpenShiftEnvironment>>
+        exposureStrategies =
+            MapBinder.newMapBinder(
+                binder(),
+                new TypeLiteral<ExternalServerExposer.Type>() {},
+                new TypeLiteral<ExternalServerExposer<OpenShiftEnvironment>>() {});
+    exposureStrategies.addBinding(ExternalServerExposer.Type.NATIVE).to(RouteServerExposer.class);
+    exposureStrategies
+        .addBinding(ExternalServerExposer.Type.GATEWAY)
+        .to(new TypeLiteral<GatewayServerExposer<OpenShiftEnvironment>>() {});
+
     bind(ServersConverter.class).to(new TypeLiteral<ServersConverter<OpenShiftEnvironment>>() {});
     bind(PreviewUrlExposer.class).to(new TypeLiteral<OpenShiftPreviewUrlExposer>() {});
     bind(PreviewUrlCommandProvisioner.class)

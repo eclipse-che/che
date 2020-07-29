@@ -31,6 +31,10 @@ public interface TlsProvisioner<T extends KubernetesEnvironment> {
    */
   void provision(T k8sEnv, RuntimeIdentity identity) throws KubernetesInfrastructureException;
 
+  /**
+   * Returns the secure version of the provided protocol or the same protocol if the conversion is
+   * not known. Currently only understands "ws" and "http".
+   */
   static String getSecureProtocol(final String protocol) {
     if ("ws".equals(protocol)) {
       return "wss";

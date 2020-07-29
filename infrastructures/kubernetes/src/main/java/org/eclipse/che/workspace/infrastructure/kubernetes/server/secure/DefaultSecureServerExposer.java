@@ -26,6 +26,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.PassThroughProxyProvisioner;
 
 /**
@@ -59,8 +60,8 @@ public class DefaultSecureServerExposer<T extends KubernetesEnvironment>
   public DefaultSecureServerExposer(
       @Assisted RuntimeIdentity identity,
       ProxyProvisionerFactory proxyProvisionerFactory,
-      ExternalServerExposer<T> exposer) {
-    this.exposer = exposer;
+      ExternalServerExposerProvider<T> exposer) {
+    this.exposer = exposer.getExposer();
     this.proxyProvisioner = proxyProvisionerFactory.create(identity);
   }
 
