@@ -13,7 +13,7 @@ import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../TestConstants';
 import { Logger } from '../../utils/Logger';
-import { By } from 'selenium-webdriver';
+import { By, error } from 'selenium-webdriver';
 
 
 
@@ -70,8 +70,23 @@ export class NotificationCenter {
     async closeAll(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('NotificationCenter.closeAll');
 
-        await this.clickCloseAllNotificationsButton(timeout);
-        await this.waitClearNotificationsList(timeout);
+        for (let i: number = 0; i < 5; i++) {
+            await this.clickCloseAllNotificationsButton(timeout);
+            try {
+                await this.waitClearNotificationsList(timeout);
+            } catch (err) {
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err;
+                }
+
+                if (i === 4) {
+                    Logger.debug('The last try to clear of the notification center was unsuccessful');
+
+                    throw err;
+                }
+            }
+        }
+
     }
 
 }
