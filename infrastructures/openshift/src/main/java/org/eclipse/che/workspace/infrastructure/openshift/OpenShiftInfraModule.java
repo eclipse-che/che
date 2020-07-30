@@ -35,8 +35,10 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvV
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.api.workspace.shared.Constants;
+import org.eclipse.che.workspace.infrastructure.kubernetes.AsyncStorageModeValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.InconsistentRuntimesDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.K8sInfraNamespaceWsAttributeValidator;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientTermination;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
@@ -55,6 +57,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueW
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspacePVCCleaner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumeStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStoragePodInterceptor;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiExternalEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiInternalEnvVarProvider;
@@ -98,9 +102,10 @@ import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases
 public class OpenShiftInfraModule extends AbstractModule {
   @Override
   protected void configure() {
-    Multibinder.newSetBinder(binder(), WorkspaceAttributeValidator.class)
-        .addBinding()
-        .to(K8sInfraNamespaceWsAttributeValidator.class);
+    Multibinder<WorkspaceAttributeValidator> workspaceAttributeValidators =
+        Multibinder.newSetBinder(binder(), WorkspaceAttributeValidator.class);
+    workspaceAttributeValidators.addBinding().to(K8sInfraNamespaceWsAttributeValidator.class);
+    workspaceAttributeValidators.addBinding().to(AsyncStorageModeValidator.class);
 
     bind(KubernetesNamespaceService.class);
 
@@ -115,6 +120,7 @@ public class OpenShiftInfraModule extends AbstractModule {
     bind(RuntimeInfrastructure.class).to(OpenShiftInfrastructure.class);
 
     bind(KubernetesNamespaceFactory.class).to(OpenShiftProjectFactory.class);
+    bind(KubernetesClientFactory.class).to(OpenShiftClientFactory.class);
 
     install(new FactoryModuleBuilder().build(OpenShiftRuntimeContextFactory.class));
     install(new FactoryModuleBuilder().build(OpenShiftRuntimeFactory.class));
@@ -246,5 +252,7 @@ public class OpenShiftInfraModule extends AbstractModule {
     bind(ExternalServiceExposureStrategy.class).to(OpenShiftServerExposureStrategy.class);
     bind(CookiePathStrategy.class).to(OpenShiftCookiePathStrategy.class);
     bind(NonTlsDistributedClusterModeNotifier.class);
+    bind(AsyncStorageProvisioner.class);
+    bind(AsyncStoragePodInterceptor.class);
   }
 }

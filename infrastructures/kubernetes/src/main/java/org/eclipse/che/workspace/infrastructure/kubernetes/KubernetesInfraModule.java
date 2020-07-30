@@ -54,6 +54,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueW
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspacePVCCleaner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumeStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiExternalEnvVarProvider;
@@ -93,9 +94,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.Brok
 public class KubernetesInfraModule extends AbstractModule {
   @Override
   protected void configure() {
-    Multibinder.newSetBinder(binder(), WorkspaceAttributeValidator.class)
-        .addBinding()
-        .to(K8sInfraNamespaceWsAttributeValidator.class);
+    Multibinder<WorkspaceAttributeValidator> workspaceAttributeValidators =
+        Multibinder.newSetBinder(binder(), WorkspaceAttributeValidator.class);
+    workspaceAttributeValidators.addBinding().to(K8sInfraNamespaceWsAttributeValidator.class);
+    workspaceAttributeValidators.addBinding().to(AsyncStorageModeValidator.class);
 
     bind(KubernetesNamespaceService.class);
 
@@ -259,5 +261,6 @@ public class KubernetesInfraModule extends AbstractModule {
         binder(), KubernetesEnvironment.TYPE);
 
     bind(NonTlsDistributedClusterModeNotifier.class);
+    bind(AsyncStorageProvisioner.class);
   }
 }

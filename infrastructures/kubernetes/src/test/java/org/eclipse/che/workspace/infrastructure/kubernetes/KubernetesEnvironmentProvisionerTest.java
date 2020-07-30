@@ -19,6 +19,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner.KubernetesEnvironmentProvisionerImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStoragePodInterceptor;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
@@ -71,6 +73,8 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private ImagePullSecretProvisioner imagePullSecretProvisioner;
   @Mock private ProxySettingsProvisioner proxySettingsProvisioner;
   @Mock private ServiceAccountProvisioner serviceAccountProvisioner;
+  @Mock private AsyncStorageProvisioner asyncStorageProvisioner;
+  @Mock private AsyncStoragePodInterceptor asyncStoragePodObserver;
   @Mock private CertificateProvisioner certificateProvisioner;
   @Mock private SshKeysProvisioner sshKeysProvisioner;
   @Mock private GitConfigProvisioner gitConfigProvisioner;
@@ -100,6 +104,8 @@ public class KubernetesEnvironmentProvisionerTest {
             externalServerIngressTlsProvisionerProvider,
             imagePullSecretProvisioner,
             proxySettingsProvisioner,
+            asyncStorageProvisioner,
+            asyncStoragePodObserver,
             serviceAccountProvisioner,
             certificateProvisioner,
             sshKeysProvisioner,

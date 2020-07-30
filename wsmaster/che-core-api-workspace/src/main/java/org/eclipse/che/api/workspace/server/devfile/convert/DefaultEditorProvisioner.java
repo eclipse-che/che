@@ -15,7 +15,10 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_FREE_DEVFILE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.shared.Constants.ASYNC_PERSIST_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +45,7 @@ public class DefaultEditorProvisioner {
   private final String defaultEditorRef;
   private final String defaultEditor;
   private final Map<String, String> defaultPluginsToRefs;
+  private final String asyncStoragePluginRef;
   private final ComponentFQNParser componentFQNParser;
   private final PluginFQNParser pluginFQNParser;
 
@@ -49,10 +53,12 @@ public class DefaultEditorProvisioner {
   public DefaultEditorProvisioner(
       @Named("che.workspace.devfile.default_editor") String defaultEditorRef,
       @Named("che.workspace.devfile.default_editor.plugins") String[] defaultPluginsRefs,
+      @Named("che.workspace.devfile.async.storage.plugin") String asyncStoragePluginRef,
       ComponentFQNParser componentFQNParser,
       PluginFQNParser pluginFQNParser)
       throws DevfileException {
     this.defaultEditorRef = isNullOrEmpty(defaultEditorRef) ? null : defaultEditorRef;
+    this.asyncStoragePluginRef = asyncStoragePluginRef;
     this.componentFQNParser = componentFQNParser;
     this.pluginFQNParser = pluginFQNParser;
     this.defaultEditor =
@@ -102,6 +108,10 @@ public class DefaultEditorProvisioner {
     if (isDefaultEditorUsed) {
       provisionDefaultPlugins(components, contentProvider);
     }
+    if ("false".equals(devfile.getAttributes().get(PERSIST_VOLUMES_ATTRIBUTE))
+        && "true".equals(devfile.getAttributes().get(ASYNC_PERSIST_ATTRIBUTE))) {
+      provisionAsyncStoragePlugin(components, contentProvider);
+    }
   }
 
   /**
@@ -116,6 +126,28 @@ public class DefaultEditorProvisioner {
     Map<String, String> missingPluginsIdToRef = new HashMap<>(defaultPluginsToRefs);
     removeAlreadyAddedPlugins(components, contentProvider, missingPluginsIdToRef);
     try {
+      addMissingPlugins(components, contentProvider, missingPluginsIdToRef);
+    } catch (InfrastructureException e) {
+      throw new DevfileException(e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Provision the for async storage service, it will provide ability backup and restore project
+   * source using special storage. Will torn on only if workspace start in Ephemeral mode and has
+   * attribute 'asyncPersist = true'
+   *
+   * @param components The set of components currently present in the Devfile
+   * @param contentProvider content provider for plugin references retrieval
+   * @throws DevfileException - A DevfileException containing any caught InfrastructureException
+   */
+  private void provisionAsyncStoragePlugin(
+      List<ComponentImpl> components, FileContentProvider contentProvider) throws DevfileException {
+    try {
+      Map<String, String> missingPluginsIdToRef =
+          Collections.singletonMap(
+              componentFQNParser.getPluginPublisherAndName(asyncStoragePluginRef),
+              asyncStoragePluginRef);
       addMissingPlugins(components, contentProvider, missingPluginsIdToRef);
     } catch (InfrastructureException e) {
       throw new DevfileException(e.getMessage(), e);

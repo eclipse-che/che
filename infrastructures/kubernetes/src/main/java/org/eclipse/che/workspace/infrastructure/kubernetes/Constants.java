@@ -31,6 +31,9 @@ public final class Constants {
   /** The label that contains a value with workspace id to which object belongs to. */
   public static final String CHE_WORKSPACE_ID_LABEL = "che.workspace_id";
 
+  /** The label that contains a value with user id to which object belongs to. */
+  public static final String CHE_USER_ID_LABEL = "che.user_id";
+
   /** The label that contains name of deployment responsible for Pod. */
   public static final String CHE_DEPLOYMENT_NAME_LABEL = "che.deployment_name";
 

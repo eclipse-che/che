@@ -156,13 +156,19 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
             if (stopWorkspaceResponse.status !== 204) {
                 throw new Error(`Can not stop workspace. Code: ${stopWorkspaceResponse.status} Data: ${stopWorkspaceResponse.data}`);
             }
-
+            let stopped: boolean = false;
+            let wsStatus = await this.processRequestHandler.get(stopWorkspaceApiUrl);
             for (let i = 0; i < TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS; i++) {
-                const wsStatus = await this.processRequestHandler.get(stopWorkspaceApiUrl);
+                wsStatus = await this.processRequestHandler.get(stopWorkspaceApiUrl);
                 if (wsStatus.data.status === 'STOPPED') {
+                    stopped = true;
                     break;
                 }
                 await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
+            }
+            if (!stopped) {
+                let waitTime = TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS * TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+                throw new error.TimeoutError(`The workspace was not stopped in ${waitTime} ms. Currnet status is: ${wsStatus.data.status}`);
             }
         } catch (err) {
             console.log(`Stopping workspace failed. URL used: ${stopWorkspaceApiUrl}`);

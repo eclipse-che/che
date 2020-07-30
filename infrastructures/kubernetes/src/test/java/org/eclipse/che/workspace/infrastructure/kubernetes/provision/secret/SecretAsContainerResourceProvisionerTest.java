@@ -13,7 +13,15 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.EnvironmentVariableSecretApplier.ANNOTATION_ENV_NAME;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.FileSecretApplier.ANNOTATION_MOUNT_PATH;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretApplier.ANNOTATION_AUTOMOUNT;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner.ANNOTATION_MOUNT_AS;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
@@ -36,6 +44,7 @@ import org.testng.annotations.Test;
 public class SecretAsContainerResourceProvisionerTest {
 
   @Mock EnvironmentVariableSecretApplier environmentVariableSecretApplier;
+  @Mock GitCredentialStorageFileSecretApplier gitCredentialStorageFileSecretApplier;
   @Mock FileSecretApplier fileSecretApplier;
 
   private SecretAsContainerResourceProvisioner<KubernetesEnvironment> provisioner;
@@ -53,7 +62,10 @@ public class SecretAsContainerResourceProvisionerTest {
     when(namespace.secrets()).thenReturn(secrets);
     provisioner =
         new SecretAsContainerResourceProvisioner<>(
-            fileSecretApplier, environmentVariableSecretApplier, new String[] {"app:che"});
+            fileSecretApplier,
+            environmentVariableSecretApplier,
+            gitCredentialStorageFileSecretApplier,
+            new String[] {"app:che"});
   }
 
   @Test(
@@ -61,6 +73,7 @@ public class SecretAsContainerResourceProvisionerTest {
       expectedExceptionsMessageRegExp =
           "Unable to mount secret 'test_secret': it has missing or unknown type of the mount. Please make sure that 'che.eclipse.org/mount-as' annotation has value either 'env' or 'file'.")
   public void shouldThrowExceptionWhenNoMountTypeSpecified() throws Exception {
+    // given
     Secret secret =
         new SecretBuilder()
             .withData(ImmutableMap.of("settings.xml", "random", "another.xml", "freedom"))
@@ -72,6 +85,101 @@ public class SecretAsContainerResourceProvisionerTest {
                     .build())
             .build();
     when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
+    // when
     provisioner.provision(environment, runtimeIdentity, namespace);
+  }
+
+  @Test
+  public void shouldCallEnvironmentVariableSecretApplier() throws InfrastructureException {
+    // given
+    Secret secret =
+        new SecretBuilder()
+            .withData(singletonMap("foo", "random"))
+            .withMetadata(
+                new ObjectMetaBuilder()
+                    .withName("test_secret")
+                    .withAnnotations(
+                        ImmutableMap.of(
+                            ANNOTATION_ENV_NAME,
+                            "MY_FOO",
+                            ANNOTATION_MOUNT_AS,
+                            "env",
+                            ANNOTATION_AUTOMOUNT,
+                            "true"))
+                    .withLabels(emptyMap())
+                    .build())
+            .build();
+
+    when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
+    // when
+    provisioner.provision(environment, runtimeIdentity, namespace);
+    // then
+    verify(environmentVariableSecretApplier)
+        .applySecret(eq(environment), eq(runtimeIdentity), eq(secret));
+    verifyZeroInteractions(fileSecretApplier);
+    verifyZeroInteractions(gitCredentialStorageFileSecretApplier);
+  }
+
+  @Test
+  public void shouldCallFileSecretApplier() throws InfrastructureException {
+    // given
+    Secret secret =
+        new SecretBuilder()
+            .withData(ImmutableMap.of("settings.xml", "random", "another.xml", "freedom"))
+            .withMetadata(
+                new ObjectMetaBuilder()
+                    .withName("test_secret")
+                    .withAnnotations(
+                        ImmutableMap.of(
+                            ANNOTATION_MOUNT_AS,
+                            "file",
+                            ANNOTATION_MOUNT_PATH,
+                            "/home/user/.m2",
+                            ANNOTATION_AUTOMOUNT,
+                            "true"))
+                    .withLabels(emptyMap())
+                    .build())
+            .build();
+
+    when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
+    // when
+    provisioner.provision(environment, runtimeIdentity, namespace);
+    // then
+    verify(fileSecretApplier).applySecret(eq(environment), eq(runtimeIdentity), eq(secret));
+    verifyZeroInteractions(environmentVariableSecretApplier);
+    verifyZeroInteractions(gitCredentialStorageFileSecretApplier);
+  }
+
+  @Test
+  public void shouldCallGitCredentialStorageFileSecretApplier() throws InfrastructureException {
+    // given
+    Secret secret =
+        new SecretBuilder()
+            .withData(ImmutableMap.of("credentials", "random"))
+            .withMetadata(
+                new ObjectMetaBuilder()
+                    .withName("test_secret")
+                    .withAnnotations(
+                        ImmutableMap.of(
+                            ANNOTATION_MOUNT_AS,
+                            "file",
+                            ANNOTATION_MOUNT_PATH,
+                            "/home/user/.git",
+                            GitCredentialStorageFileSecretApplier.ANNOTATION_GIT_CREDENTIALS,
+                            "true",
+                            ANNOTATION_AUTOMOUNT,
+                            "true"))
+                    .withLabels(emptyMap())
+                    .build())
+            .build();
+
+    when(secrets.get(any(LabelSelector.class))).thenReturn(singletonList(secret));
+    // when
+    provisioner.provision(environment, runtimeIdentity, namespace);
+    // then
+    verify(gitCredentialStorageFileSecretApplier)
+        .applySecret(eq(environment), eq(runtimeIdentity), eq(secret));
+    verifyZeroInteractions(environmentVariableSecretApplier);
+    verifyZeroInteractions(fileSecretApplier);
   }
 }

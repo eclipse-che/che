@@ -264,8 +264,23 @@ export class Ide {
     async closeAllNotifications(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Ide.closeAllNotifications`);
 
-        await this.notificationCenter.open(timeout);
-        await this.notificationCenter.closeAll(timeout);
+        for (let i: number = 0; i < 5; i++) {
+            await this.notificationCenter.open(timeout);
+            try {
+                await this.notificationCenter.closeAll(timeout);
+                break;
+            } catch (err) {
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err;
+                }
+
+                if (i === 4) {
+                    Logger.debug('The last try to clear of the notification center was unsuccessful');
+
+                    throw err;
+                }
+            }
+        }
     }
 
     async waitApllicationIsReady(url: string,

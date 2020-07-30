@@ -21,8 +21,9 @@ import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.server.WorkspaceKeyValidator.validateKey;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY;
-import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_STORAGE_PREFERRED_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
@@ -110,8 +111,9 @@ public class WorkspaceService extends Service {
   private final String apiEndpoint;
   private final boolean cheWorkspaceAutoStart;
   private final FileContentProvider devfileContentProvider;
-  private final boolean defaultPersistVolumes;
   private final Long logLimitBytes;
+  private final String availableStorageTypes;
+  private final String preferredStorageType;
 
   @Inject
   public WorkspaceService(
@@ -122,9 +124,10 @@ public class WorkspaceService extends Service {
       WorkspaceLinksGenerator linksGenerator,
       @Named(CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY) @Nullable String pluginRegistryUrl,
       @Named(CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY) @Nullable String devfileRegistryUrl,
-      @Named(CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY) boolean defaultPersistVolumes,
       URLFetcher urlFetcher,
-      @Named(DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES) Long logLimitBytes) {
+      @Named(DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES) Long logLimitBytes,
+      @Named(CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES) String availableStorageTypes,
+      @Named(CHE_WORKSPACE_STORAGE_PREFERRED_TYPE) String preferredStorageType) {
     this.apiEndpoint = apiEndpoint;
     this.cheWorkspaceAutoStart = cheWorkspaceAutoStart;
     this.workspaceManager = workspaceManager;
@@ -133,8 +136,9 @@ public class WorkspaceService extends Service {
     this.pluginRegistryUrl = pluginRegistryUrl;
     this.devfileRegistryUrl = devfileRegistryUrl;
     this.devfileContentProvider = new URLFileContentProvider(null, urlFetcher);
-    this.defaultPersistVolumes = defaultPersistVolumes;
     this.logLimitBytes = logLimitBytes;
+    this.availableStorageTypes = availableStorageTypes;
+    this.preferredStorageType = preferredStorageType;
   }
 
   @POST
@@ -843,9 +847,8 @@ public class WorkspaceService extends Service {
     if (devfileRegistryUrl != null) {
       settings.put("cheWorkspaceDevfileRegistryUrl", devfileRegistryUrl);
     }
-
-    settings.put(CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY, Boolean.toString(defaultPersistVolumes));
-
+    settings.put(CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES, availableStorageTypes);
+    settings.put(CHE_WORKSPACE_STORAGE_PREFERRED_TYPE, preferredStorageType);
     return settings.build();
   }
 

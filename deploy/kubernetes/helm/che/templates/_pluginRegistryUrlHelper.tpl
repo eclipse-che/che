@@ -7,9 +7,9 @@
     {{- end }}
   {{- else }}
     {{- if .Values.global.tls.enabled }}
-      https://{{ printf .Values.global.chePluginRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}
+      https://{{ printf .Values.global.chePluginRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}/v3
     {{- else }}
-      http://{{ printf .Values.global.chePluginRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}
+      http://{{ printf .Values.global.chePluginRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}/v3
     {{- end }}
   {{- end }}
 {{- end }}

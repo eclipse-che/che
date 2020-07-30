@@ -20,6 +20,8 @@ import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStoragePodInterceptor;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
@@ -72,6 +74,8 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final TlsProvisioner<KubernetesEnvironment> externalServerTlsProvisioner;
     private final ImagePullSecretProvisioner imagePullSecretProvisioner;
     private final ProxySettingsProvisioner proxySettingsProvisioner;
+    private final AsyncStorageProvisioner asyncStorageProvisioner;
+    private final AsyncStoragePodInterceptor asyncStoragePodInterceptor;
     private final ServiceAccountProvisioner serviceAccountProvisioner;
     private final CertificateProvisioner certificateProvisioner;
     private final SshKeysProvisioner sshKeysProvisioner;
@@ -94,6 +98,8 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         TlsProvisionerProvider<KubernetesEnvironment> externalServerTlsProvisionerProvider,
         ImagePullSecretProvisioner imagePullSecretProvisioner,
         ProxySettingsProvisioner proxySettingsProvisioner,
+        AsyncStorageProvisioner asyncStorageProvisioner,
+        AsyncStoragePodInterceptor asyncStoragePodInterceptor,
         ServiceAccountProvisioner serviceAccountProvisioner,
         CertificateProvisioner certificateProvisioner,
         SshKeysProvisioner sshKeysProvisioner,
@@ -113,6 +119,8 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.externalServerTlsProvisioner = externalServerTlsProvisionerProvider.get();
       this.imagePullSecretProvisioner = imagePullSecretProvisioner;
       this.proxySettingsProvisioner = proxySettingsProvisioner;
+      this.asyncStorageProvisioner = asyncStorageProvisioner;
+      this.asyncStoragePodInterceptor = asyncStoragePodInterceptor;
       this.serviceAccountProvisioner = serviceAccountProvisioner;
       this.certificateProvisioner = certificateProvisioner;
       this.sshKeysProvisioner = sshKeysProvisioner;
@@ -130,6 +138,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       LOG.debug("Start provisioning Kubernetes environment for workspace '{}'", workspaceId);
       // 1 stage - update environment according Infrastructure specific
       if (pvcEnabled) {
+        asyncStoragePodInterceptor.intercept(k8sEnv, identity);
         LOG.debug("Provisioning logs volume for workspace '{}'", workspaceId);
         logsVolumeMachineProvisioner.provision(k8sEnv, identity);
       }
@@ -154,6 +163,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       imagePullSecretProvisioner.provision(k8sEnv, identity);
       proxySettingsProvisioner.provision(k8sEnv, identity);
       serviceAccountProvisioner.provision(k8sEnv, identity);
+      asyncStorageProvisioner.provision(k8sEnv, identity);
       certificateProvisioner.provision(k8sEnv, identity);
       sshKeysProvisioner.provision(k8sEnv, identity);
       vcsSslCertificateProvisioner.provision(k8sEnv, identity);
