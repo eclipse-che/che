@@ -30,6 +30,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityCon
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SshKeysProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisionerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
@@ -90,7 +91,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
         SecurityContextProvisioner securityContextProvisioner,
         PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
-        TlsProvisioner<KubernetesEnvironment> externalServerTlsProvisioner,
+        TlsProvisionerProvider<KubernetesEnvironment> externalServerTlsProvisionerProvider,
         ImagePullSecretProvisioner imagePullSecretProvisioner,
         ProxySettingsProvisioner proxySettingsProvisioner,
         ServiceAccountProvisioner serviceAccountProvisioner,
@@ -109,7 +110,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.logsVolumeMachineProvisioner = logsVolumeMachineProvisioner;
       this.securityContextProvisioner = securityContextProvisioner;
       this.podTerminationGracePeriodProvisioner = podTerminationGracePeriodProvisioner;
-      this.externalServerTlsProvisioner = externalServerTlsProvisioner;
+      this.externalServerTlsProvisioner = externalServerTlsProvisionerProvider.get();
       this.imagePullSecretProvisioner = imagePullSecretProvisioner;
       this.proxySettingsProvisioner = proxySettingsProvisioner;
       this.serviceAccountProvisioner = serviceAccountProvisioner;

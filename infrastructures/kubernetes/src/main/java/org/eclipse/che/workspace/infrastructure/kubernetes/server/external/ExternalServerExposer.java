@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
-import static java.util.Objects.requireNonNull;
-
 import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -50,31 +48,4 @@ public interface ExternalServerExposer<T extends KubernetesEnvironment> {
       String serverId,
       ServicePort servicePort,
       Map<String, ServerConfig> externalServers);
-
-  /** Lists all the possible server resolver strategies. */
-  enum Type {
-    GATEWAY("gateway"),
-    NATIVE("native");
-
-    private final String configValue;
-
-    Type(String configValue) {
-      this.configValue = configValue;
-    }
-
-    public String getConfigValue() {
-      return configValue;
-    }
-
-    public static Type fromConfigurationValue(String configValue) {
-      String vale = requireNonNull(configValue);
-      for (Type s : Type.values()) {
-        if (s.configValue.equals(configValue)) {
-          return s;
-        }
-      }
-
-      throw new IllegalArgumentException("Unknown server resolver strategy: " + configValue);
-    }
-  }
 }

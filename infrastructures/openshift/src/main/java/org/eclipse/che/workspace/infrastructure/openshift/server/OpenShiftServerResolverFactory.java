@@ -11,13 +11,14 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.server;
 
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.Service;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType.GATEWAY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType.NATIVE;
+
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.openshift.api.model.Route;
-import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.AbstractServerResolverFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ConfigMapServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
 
@@ -25,36 +26,19 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.Serve
  * Factory that decides by configuration, which {@link ServerResolver} implementation to use in
  * OpenShift environment.
  */
-public class OpenShiftServerResolverFactory {
-
-  private final ExternalServerExposer.Type type;
-  private final String cheHost;
+public class OpenShiftServerResolverFactory extends AbstractServerResolverFactory<Route> {
 
   @Inject
   public OpenShiftServerResolverFactory(
       @Named("che.host") String cheHost,
-      @Named("che.infra.kubernetes.single_host.workspace.exposure") String exposureStrategy) {
-    this.cheHost = cheHost;
-    type = ExternalServerExposer.Type.fromConfigurationValue(exposureStrategy);
-  }
-
-  /**
-   * Create {@link ServerResolver} for configured server strategy.
-   *
-   * <p>TODO: use {@link ConfigMapServerResolver} for gateway based single-host
-   *
-   * @return {@link ServerResolver} instance
-   */
-  public ServerResolver create(
-      List<Service> services, List<Route> routes, List<ConfigMap> configMaps) {
-    switch (type) {
-      case NATIVE:
-        return new RouteServerResolver(services, routes);
-      case GATEWAY:
-        return new ConfigMapServerResolver(services, configMaps, cheHost);
-      default:
-        throw new IllegalStateException(
-            "Unhandled server resolver strategy " + type + ". This is a bug.");
-    }
+      @Named("che.infra.kubernetes.server_strategy") String exposureStrategy,
+      @Named("che.infra.kubernetes.single_host.workspace.exposure") String wsExposureType) {
+    super(
+        exposureStrategy,
+        wsExposureType,
+        ImmutableMap.of(
+            GATEWAY, (ss, rs, cs) -> new ConfigMapServerResolver(ss, cs, cheHost),
+            NATIVE, (ss, rs, cs) -> new RouteServerResolver(ss, rs)),
+        "Failed to initialize OpenShiftServerResolverFactory for workspace exposure type '%s'.");
   }
 }

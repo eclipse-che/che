@@ -52,7 +52,7 @@ public class ServersConverter<T extends KubernetesEnvironment>
   public ServersConverter(
       ExternalServerExposerProvider<T> externalServerExposer,
       SecureServerExposerFactoryProvider<T> secureServerExposerFactoryProvider) {
-    this.externalServerExposer = externalServerExposer.getExposer();
+    this.externalServerExposer = externalServerExposer.get();
     this.secureServerExposerFactoryProvider = secureServerExposerFactoryProvider;
   }
 

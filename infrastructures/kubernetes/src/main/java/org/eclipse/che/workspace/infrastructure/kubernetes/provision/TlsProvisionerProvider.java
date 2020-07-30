@@ -9,29 +9,27 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
+package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.AbstractExposureStrategyAwareProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 
-@Singleton
-public class ExternalServerExposerProvider<T extends KubernetesEnvironment>
-    extends AbstractExposureStrategyAwareProvider<ExternalServerExposer<T>> {
-  @Inject
-  public ExternalServerExposerProvider(
-      @Named("che.infra.kubernetes.server_strategy") String exposureStrategy,
-      @Named("che.infra.kubernetes.single_host.workspace.exposure") String exposureType,
-      Map<WorkspaceExposureType, ExternalServerExposer<T>> exposers) {
+public class TlsProvisionerProvider<T extends KubernetesEnvironment>
+    extends AbstractExposureStrategyAwareProvider<TlsProvisioner<T>> {
 
+  @Inject
+  public TlsProvisionerProvider(
+      @Named("che.infra.kubernetes.server_strategy") String exposureStrategy,
+      @Named("che.infra.kubernetes.single_host.workspace.exposure") String wsExposureType,
+      Map<WorkspaceExposureType, TlsProvisioner<T>> mapping) {
     super(
         exposureStrategy,
-        exposureType,
-        exposers,
-        "Could not find an external server exposer implementation for the exposure type '%s'.");
+        wsExposureType,
+        mapping,
+        "Could not initialize TLS provisioners for workspace exposure type '%s'.");
   }
 }

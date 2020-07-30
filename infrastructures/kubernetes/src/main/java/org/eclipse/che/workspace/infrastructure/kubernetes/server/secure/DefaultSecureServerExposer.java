@@ -61,7 +61,7 @@ public class DefaultSecureServerExposer<T extends KubernetesEnvironment>
       @Assisted RuntimeIdentity identity,
       ProxyProvisionerFactory proxyProvisionerFactory,
       ExternalServerExposerProvider<T> exposer) {
-    this.exposer = exposer.getExposer();
+    this.exposer = exposer.get();
     this.proxyProvisioner = proxyProvisionerFactory.create(identity);
   }
 

@@ -55,6 +55,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueW
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspacePVCCleaner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumeStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiExternalEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiInternalEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
@@ -62,6 +63,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisio
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayServerExposer;
@@ -131,15 +133,15 @@ public class OpenShiftInfraModule extends AbstractModule {
     volumesStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
     bind(WorkspaceVolumesStrategy.class).toProvider(WorkspaceVolumeStrategyProvider.class);
 
-    MapBinder<ExternalServerExposer.Type, ExternalServerExposer<OpenShiftEnvironment>>
+    MapBinder<WorkspaceExposureType, ExternalServerExposer<OpenShiftEnvironment>>
         exposureStrategies =
             MapBinder.newMapBinder(
                 binder(),
-                new TypeLiteral<ExternalServerExposer.Type>() {},
+                new TypeLiteral<WorkspaceExposureType>() {},
                 new TypeLiteral<ExternalServerExposer<OpenShiftEnvironment>>() {});
-    exposureStrategies.addBinding(ExternalServerExposer.Type.NATIVE).to(RouteServerExposer.class);
+    exposureStrategies.addBinding(WorkspaceExposureType.NATIVE).to(RouteServerExposer.class);
     exposureStrategies
-        .addBinding(ExternalServerExposer.Type.GATEWAY)
+        .addBinding(WorkspaceExposureType.GATEWAY)
         .to(new TypeLiteral<GatewayServerExposer<OpenShiftEnvironment>>() {});
 
     bind(ServersConverter.class).to(new TypeLiteral<ServersConverter<OpenShiftEnvironment>>() {});
@@ -197,7 +199,16 @@ public class OpenShiftInfraModule extends AbstractModule {
     bind(SidecarToolingProvisioner.class)
         .to(new TypeLiteral<SidecarToolingProvisioner<OpenShiftEnvironment>>() {});
 
-    bind(new TypeLiteral<TlsProvisioner<OpenShiftEnvironment>>() {}).to(RouteTlsProvisioner.class);
+    MapBinder<WorkspaceExposureType, TlsProvisioner<OpenShiftEnvironment>> tlsProvisioners =
+        MapBinder.newMapBinder(
+            binder(),
+            new TypeLiteral<WorkspaceExposureType>() {},
+            new TypeLiteral<TlsProvisioner<OpenShiftEnvironment>>() {});
+    tlsProvisioners
+        .addBinding(WorkspaceExposureType.GATEWAY)
+        .to(new TypeLiteral<GatewayTlsProvisioner<OpenShiftEnvironment>>() {});
+    tlsProvisioners.addBinding(WorkspaceExposureType.NATIVE).to(RouteTlsProvisioner.class);
+
     bind(new TypeLiteral<KubernetesEnvironmentProvisioner<OpenShiftEnvironment>>() {})
         .to(OpenShiftEnvironmentProvisioner.class);
 

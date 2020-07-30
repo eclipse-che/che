@@ -77,6 +77,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesS
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
@@ -163,7 +164,9 @@ public class OpenShiftInternalRuntimeTest {
 
     when(startSynchronizerFactory.create(any())).thenReturn(startSynchronizer);
 
-    serverResolverFactory = new OpenShiftServerResolverFactory("che-host", MULTI_HOST_STRATEGY);
+    serverResolverFactory =
+        new OpenShiftServerResolverFactory(
+            "che-host", MULTI_HOST_STRATEGY, WorkspaceExposureType.NATIVE.getConfigValue());
 
     internalRuntime =
         new OpenShiftInternalRuntime(

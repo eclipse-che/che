@@ -29,6 +29,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettin
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SshKeysProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisionerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
@@ -38,7 +39,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.Serv
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftUniqueNamesProvisioner;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftPreviewUrlExposer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +79,7 @@ public class OpenShiftEnvironmentProvisioner
   public OpenShiftEnvironmentProvisioner(
       @Named("che.infra.kubernetes.pvc.enabled") boolean pvcEnabled,
       OpenShiftUniqueNamesProvisioner uniqueNamesProvisioner,
-      RouteTlsProvisioner routeTlsProvisioner,
+      TlsProvisionerProvider<OpenShiftEnvironment> routeTlsProvisionerProvider,
       ServersConverter<OpenShiftEnvironment> serversConverter,
       EnvVarsConverter envVarsConverter,
       RestartPolicyRewriter restartPolicyRewriter,
@@ -98,7 +98,7 @@ public class OpenShiftEnvironmentProvisioner
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
-    this.routeTlsProvisioner = routeTlsProvisioner;
+    this.routeTlsProvisioner = routeTlsProvisionerProvider.get();
     this.serversConverter = serversConverter;
     this.envVarsConverter = envVarsConverter;
     this.restartPolicyRewriter = restartPolicyRewriter;

@@ -134,6 +134,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogH
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesPreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.KubernetesServerResolverFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
@@ -253,7 +254,11 @@ public class KubernetesInternalRuntimeTest {
     machinesCache = new MapBasedMachinesCache();
     eventPublisher = new RuntimeEventsPublisher(eventService);
     serverResolverFactory =
-        new KubernetesServerResolverFactory(pathTransformInverter, "che-host", MULTI_HOST_STRATEGY);
+        new KubernetesServerResolverFactory(
+            pathTransformInverter,
+            "che-host",
+            MULTI_HOST_STRATEGY,
+            WorkspaceExposureType.NATIVE.getConfigValue());
 
     startSynchronizer = spy(new StartSynchronizer(eventService, 5, IDENTITY));
     when(startSynchronizerFactory.create(any())).thenReturn(startSynchronizer);

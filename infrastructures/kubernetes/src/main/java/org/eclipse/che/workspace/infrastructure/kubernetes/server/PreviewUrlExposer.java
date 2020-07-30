@@ -50,7 +50,7 @@ public class PreviewUrlExposer<T extends KubernetesEnvironment> {
 
   @Inject
   public PreviewUrlExposer(ExternalServerExposerProvider<T> externalServerExposer) {
-    this(externalServerExposer.getExposer());
+    this(externalServerExposer.get());
   }
 
   @VisibleForTesting
