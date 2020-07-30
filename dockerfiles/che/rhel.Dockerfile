@@ -32,7 +32,8 @@ RUN mkdir /logs /data && \
     chown -R user /home/user && \
     chmod -R g+rwX /home/user && \
     find /home/user -type d -exec chmod 777 {} \; && \
-    chmod 0777 /home/user/cacerts && \
+    # set group write permission so that entrypoint.sh can update permissions once file is updated w/ new cert
+    chmod g+w /home/user/cacerts && \
     java -version && echo -n "Server startup script in: " && \
     find /home/user/codeready -name catalina.sh | grep -z /home/user/codeready/tomcat/bin/catalina.sh
 

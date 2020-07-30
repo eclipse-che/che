@@ -308,6 +308,7 @@ add_cert_to_truststore() {
   echo "$1" > $SELF_SIGNED_CERT
 
   # make sure that owner has permissions to write and other groups have permissions to read
+  # note that this might not work when running as anyuid OpenShift user, which is why we're forcing a true if it fails
   chmod 644 $JAVA_TRUST_STORE || true
 
   echo yes | keytool -keystore $JAVA_TRUST_STORE -importcert -alias "$2" -file $SELF_SIGNED_CERT -storepass $DEFAULT_JAVA_TRUST_STOREPASS > /dev/null
