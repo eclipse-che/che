@@ -50,9 +50,9 @@ public class Openshift4TrustedCAProvisioner {
 
   @Inject
   public Openshift4TrustedCAProvisioner(
-      @Named("che.trusted_ca_bundles_config_map") String configMapName,
-      @Named("che.trusted_ca_bundles_config_map_labels") String configMapLabel,
-      @Named("che.trusted_ca_bundles_mount_path") String certificateMountPath,
+      @Named("che.infra.openshift.trusted_ca_bundles_config_map") String configMapName,
+      @Named("che.infra.openshift.trusted_ca_bundles_config_map_labels") String configMapLabel,
+      @Named("che.infra.openshift.trusted_ca_bundles_mount_path") String certificateMountPath,
       OpenShiftCheInstallationLocation cheInstallationLocation,
       OpenShiftClientFactory clientFactory)
       throws InfrastructureException {
