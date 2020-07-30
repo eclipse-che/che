@@ -19,7 +19,7 @@ RUN microdnf install java-11-openjdk-headless tar gzip shadow-utils findutils &&
     microdnf -y clean all && rm -rf /var/cache/yum && echo "Installed Packages" && rpm -qa | sort -V && echo "End Of Installed Packages" && \
     adduser -G root user && mkdir -p /home/user/codeready && \
     # fix certs & dir permissions - see file references in entrypoint.sh
-    for d in /home/user ${JAVA_HOME}/lib/security; do \
+    for d in /home/user; do \
       mkdir -p ${d}; cp /etc/pki/ca-trust/extracted/java/cacerts ${d}/cacerts && chmod 644 ${d}/cacerts; \
     done
 
