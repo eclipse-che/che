@@ -25,8 +25,8 @@ const workspaceRootFolderName: string = 'github.com';
 const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/golang/example/outyet`;
 const fileName: string = `main.go`;
 
-const taskTestOutyet: string = 'test outyet';
-const taskRunServer: string = 'run outyet';
+const taskTestOutyet: string = '1.3 Test outyet';
+const taskRunServer: string = '1.1 Run outyet';
 // const taskStopServer: string = 'stop outyet';
 const taskExpectedDialogText: string = 'A process is now listening on port 8080';
 
