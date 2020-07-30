@@ -268,6 +268,7 @@ export class Ide {
             await this.notificationCenter.open(timeout);
             try {
                 await this.notificationCenter.closeAll(timeout);
+                break;
             } catch (err) {
                 if (!(err instanceof error.TimeoutError)) {
                     throw err;
