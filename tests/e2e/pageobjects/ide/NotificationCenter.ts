@@ -70,23 +70,8 @@ export class NotificationCenter {
     async closeAll(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('NotificationCenter.closeAll');
 
-        for (let i: number = 0; i < 5; i++) {
-            await this.clickCloseAllNotificationsButton(timeout);
-            try {
-                await this.waitClearNotificationsList(timeout);
-            } catch (err) {
-                if (!(err instanceof error.TimeoutError)) {
-                    throw err;
-                }
-
-                if (i === 4) {
-                    Logger.debug('The last try to clear of the notification center was unsuccessful');
-
-                    throw err;
-                }
-            }
-        }
-
+        await this.clickCloseAllNotificationsButton(timeout);
+        await this.waitClearNotificationsList(timeout);
     }
 
 }
