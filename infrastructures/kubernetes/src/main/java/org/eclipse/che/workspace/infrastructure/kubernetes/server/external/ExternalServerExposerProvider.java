@@ -19,6 +19,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.AbstractExposureStrategyAwareProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 
+/**
+ * Provides {@link ExternalServerExposer} based on `che.infra.kubernetes.server_strategy` and
+ * `che.infra.kubernetes.single_host.workspace.exposure` properties.
+ *
+ * @param <T> type of environment
+ */
 @Singleton
 public class ExternalServerExposerProvider<T extends KubernetesEnvironment>
     extends AbstractExposureStrategyAwareProvider<ExternalServerExposer<T>> {

@@ -29,7 +29,7 @@ public enum WorkspaceExposureType {
   }
 
   public static WorkspaceExposureType fromConfigurationValue(String configValue) {
-    String vale = requireNonNull(configValue);
+    requireNonNull(configValue);
     for (WorkspaceExposureType s : WorkspaceExposureType.values()) {
       if (s.configValue.equals(configValue)) {
         return s;

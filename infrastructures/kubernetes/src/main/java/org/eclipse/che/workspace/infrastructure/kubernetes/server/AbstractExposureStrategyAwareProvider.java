@@ -13,15 +13,16 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 
 import java.util.Map;
 import javax.inject.Named;
+import javax.inject.Provider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.SingleHostExternalServiceExposureStrategy;
 
 /**
  * A simple base class for providers that are dependent on the server exposure strategy and
- * singlehost workspace exposure.
+ * single-host workspace exposure.
  *
  * @param <T> the type this provider provides.
  */
-public abstract class AbstractExposureStrategyAwareProvider<T> {
+public abstract class AbstractExposureStrategyAwareProvider<T> implements Provider<T> {
 
   protected final T instance;
 

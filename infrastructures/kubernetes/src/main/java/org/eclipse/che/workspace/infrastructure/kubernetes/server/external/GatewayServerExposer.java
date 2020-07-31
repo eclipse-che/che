@@ -16,8 +16,16 @@ import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
+/**
+ * Uses Traefik gateway configured with ConfigMaps to expose servers.
+ *
+ * <p>TODO: implement
+ *
+ * @param <T> type of environment
+ */
 public class GatewayServerExposer<T extends KubernetesEnvironment>
     implements ExternalServerExposer<T> {
+
   @Override
   public void expose(
       T k8sEnv,
@@ -26,6 +34,6 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
       String serverId,
       ServicePort servicePort,
       Map<String, ServerConfig> externalServers) {
-    throw new IllegalStateException("Not implemented yet.");
+    throw new UnsupportedOperationException("Not implemented yet.");
   }
 }
