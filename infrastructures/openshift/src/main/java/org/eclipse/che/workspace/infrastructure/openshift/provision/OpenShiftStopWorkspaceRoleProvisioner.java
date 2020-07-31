@@ -12,7 +12,11 @@
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
 import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
-import io.fabric8.openshift.api.model.*;
+import io.fabric8.openshift.api.model.OpenshiftRole;
+import io.fabric8.openshift.api.model.OpenshiftRoleBinding;
+import io.fabric8.openshift.api.model.OpenshiftRoleBindingBuilder;
+import io.fabric8.openshift.api.model.OpenshiftRoleBuilder;
+import io.fabric8.openshift.api.model.PolicyRuleBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -34,7 +38,8 @@ public class OpenShiftStopWorkspaceRoleProvisioner {
   private final String installationLocation;
   private final boolean stopWorkspaceRoleEnabled;
 
-  private static final Logger LOG = LoggerFactory.getLogger(OpenShiftCheInstallationLocation.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(OpenShiftStopWorkspaceRoleProvisioner.class);
 
   @Inject
   public OpenShiftStopWorkspaceRoleProvisioner(

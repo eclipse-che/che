@@ -93,7 +93,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogT
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.KubernetesServerResolverFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -128,7 +127,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners;
   private final KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner;
   private final SidecarToolingProvisioner<E> toolingProvisioner;
-  private final IngressPathTransformInverter ingressPathTransformInverter;
   private final RuntimeHangingDetector runtimeHangingDetector;
   private final PreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   private final SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
@@ -153,7 +151,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
       KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<E> toolingProvisioner,
-      IngressPathTransformInverter ingressPathTransformInverter,
       RuntimeHangingDetector runtimeHangingDetector,
       PreviewUrlCommandProvisioner previewUrlCommandProvisioner,
       SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner,
@@ -177,7 +174,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.toolingProvisioner = toolingProvisioner;
     this.kubernetesEnvironmentProvisioner = kubernetesEnvironmentProvisioner;
     this.internalEnvironmentProvisioners = internalEnvironmentProvisioners;
-    this.ingressPathTransformInverter = ingressPathTransformInverter;
     this.runtimeHangingDetector = runtimeHangingDetector;
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
     this.previewUrlCommandProvisioner = previewUrlCommandProvisioner;
@@ -195,31 +191,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       startSynchronizer.start();
 
       namespace.cleanUp();
-
-      // Tooling side car provisioner should be applied before other provisioners
-      // because new machines may be provisioned there
-      toolingProvisioner.provision(
-          context.getIdentity(), startSynchronizer, context.getEnvironment(), startOptions);
-
-      startSynchronizer.checkFailure();
-
-      // Workspace API provisioners should be reapplied here to bring needed
-      // changed into new machines that came during tooling provisioning
-      for (InternalEnvironmentProvisioner envProvisioner : internalEnvironmentProvisioners) {
-        envProvisioner.provision(context.getIdentity(), context.getEnvironment());
-      }
-
-      // commands might be updated during provisioning
-      runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
-
-      // Infrastructure specific provisioners should be applied last
-      // because it converts all Workspace API model objects that comes
-      // from previous provisioners into infrastructure specific objects
-      kubernetesEnvironmentProvisioner.provision(context.getEnvironment(), context.getIdentity());
-
-      secretAsContainerResourceProvisioner.provision(
-          context.getEnvironment(), context.getIdentity(), namespace);
-      LOG.debug("Provisioning of workspace '{}' completed.", workspaceId);
+      provisionWorkspace(startOptions, context, workspaceId);
 
       volumesStrategy.prepare(
           context.getEnvironment(),
@@ -298,6 +270,35 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     } finally {
       namespace.deployments().stopWatch();
     }
+  }
+
+  protected void provisionWorkspace(
+      Map<String, String> startOptions, KubernetesRuntimeContext<E> context, String workspaceId)
+      throws InfrastructureException {
+    // Tooling side car provisioner should be applied before other provisioners
+    // because new machines may be provisioned there
+    toolingProvisioner.provision(
+        context.getIdentity(), startSynchronizer, context.getEnvironment(), startOptions);
+
+    startSynchronizer.checkFailure();
+
+    // Workspace API provisioners should be reapplied here to bring needed
+    // changed into new machines that came during tooling provisioning
+    for (InternalEnvironmentProvisioner envProvisioner : internalEnvironmentProvisioners) {
+      envProvisioner.provision(context.getIdentity(), context.getEnvironment());
+    }
+
+    // commands might be updated during provisioning
+    runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
+
+    // Infrastructure specific provisioners should be applied last
+    // because it converts all Workspace API model objects that comes
+    // from previous provisioners into infrastructure specific objects
+    kubernetesEnvironmentProvisioner.provision(context.getEnvironment(), context.getIdentity());
+
+    secretAsContainerResourceProvisioner.provision(
+        context.getEnvironment(), context.getIdentity(), namespace);
+    LOG.debug("Provisioning of workspace '{}' completed.", workspaceId);
   }
 
   /**
