@@ -110,9 +110,6 @@ public class URLFactoryBuilder {
       Map<String, String> overrideProperties)
       throws BadRequestException {
     Iterator<String> devfileLocations = remoteFactoryUrl.devfileFileLocations().iterator();
-    if (!devfileLocations.hasNext()) {
-      return Optional.empty();
-    }
     String devfileYamlContent;
     while (devfileLocations.hasNext()) {
       String devfileLocation = devfileLocations.next();
@@ -120,7 +117,6 @@ public class URLFactoryBuilder {
       if (isNullOrEmpty(devfileYamlContent)) {
         continue;
       }
-
       try {
         DevfileImpl devfile = devfileManager.parseYaml(devfileYamlContent, overrideProperties);
         devfileManager.resolveReference(devfile, fileContentProvider);
