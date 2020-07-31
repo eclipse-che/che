@@ -93,7 +93,8 @@ public class GithubURLParser {
         .withRepository(repoName)
         .withBranch(branchName)
         .withSubfolder(matcher.group("subFolder"))
-        .withDevfileFilename("devfile.yaml")
+        .withDevfileFilename("devfile.yaml") // TODO: from conf property
+        .withDevfileFilename(".devfile.yaml")
         .withFactoryFilename(".factory.json");
   }
 }

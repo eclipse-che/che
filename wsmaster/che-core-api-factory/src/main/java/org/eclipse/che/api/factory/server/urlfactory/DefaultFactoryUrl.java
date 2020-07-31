@@ -11,26 +11,17 @@
  */
 package org.eclipse.che.api.factory.server.urlfactory;
 
+import static java.util.Collections.singletonList;
+
 /**
  * Default implementation of {@link RemoteFactoryUrl} which used with all factory URL's until there
  * is no specific implementation for given URL.
  */
 public class DefaultFactoryUrl implements RemoteFactoryUrl {
 
-  private String devfileFilename;
   private String devfileFileLocation;
   private String factoryFilename;
   private String factoryFileLocation;
-
-  @Override
-  public String getDevfileFilename() {
-    return devfileFilename;
-  }
-
-  public DefaultFactoryUrl withDevfileFilename(String devfileFilename) {
-    this.devfileFilename = devfileFilename;
-    return this;
-  }
 
   @Override
   public String getFactoryFilename() {
@@ -53,8 +44,8 @@ public class DefaultFactoryUrl implements RemoteFactoryUrl {
   }
 
   @Override
-  public String devfileFileLocation() {
-    return devfileFileLocation;
+  public Iterable<String> devfileFileLocations() {
+    return singletonList(devfileFileLocation);
   }
 
   public DefaultFactoryUrl withDevfileFileLocation(String devfileFileLocation) {

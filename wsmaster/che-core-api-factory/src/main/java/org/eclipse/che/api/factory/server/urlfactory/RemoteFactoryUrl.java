@@ -18,14 +18,6 @@ package org.eclipse.che.api.factory.server.urlfactory;
 public interface RemoteFactoryUrl {
 
   /**
-   * Filename of devfile (typically devfile.yml) or {@code null} if it cannot be clearly detected
-   * from provided factory url.
-   *
-   * @return devfile filename
-   */
-  String getDevfileFilename();
-
-  /**
    * Filename of factory json (typically .factory.json) or {@code null} if it cannot be clearly
    * detected from provided factory url.
    *
@@ -41,9 +33,9 @@ public interface RemoteFactoryUrl {
   String factoryFileLocation();
 
   /**
-   * Location of devfile. Must points to the raw devfile content.
+   * Possible locations of devfile. Must points to the raw devfile content.
    *
-   * @return devfile file location
+   * @return devfile file locations
    */
-  String devfileFileLocation();
+  Iterable<String> devfileFileLocations();
 }

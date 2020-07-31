@@ -19,13 +19,13 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_P
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
@@ -108,33 +108,39 @@ public class URLFactoryBuilder {
       RemoteFactoryUrl remoteFactoryUrl,
       FileContentProvider fileContentProvider,
       Map<String, String> overrideProperties)
-      throws BadRequestException, ServerException {
-    if (remoteFactoryUrl.devfileFileLocation() == null) {
+      throws BadRequestException {
+    Iterator<String> devfileLocations = remoteFactoryUrl.devfileFileLocations().iterator();
+    if (!devfileLocations.hasNext()) {
       return Optional.empty();
     }
-    final String devfileYamlContent =
-        urlFetcher.fetchSafely(remoteFactoryUrl.devfileFileLocation());
-    if (isNullOrEmpty(devfileYamlContent)) {
-      return Optional.empty();
-    }
-    try {
-      DevfileImpl devfile = devfileManager.parseYaml(devfileYamlContent, overrideProperties);
-      devfileManager.resolveReference(devfile, fileContentProvider);
-      devfile = ensureToUseGenerateName(devfile);
+    String devfileYamlContent;
+    while (devfileLocations.hasNext()) {
+      String devfileLocation = devfileLocations.next();
+      devfileYamlContent = urlFetcher.fetchSafely(devfileLocation);
+      if (isNullOrEmpty(devfileYamlContent)) {
+        continue;
+      }
 
-      FactoryDto factoryDto =
-          newDto(FactoryDto.class)
-              .withV(CURRENT_VERSION)
-              .withDevfile(DtoConverter.asDto(devfile))
-              .withSource(remoteFactoryUrl.getDevfileFilename());
-      return Optional.of(factoryDto);
-    } catch (DevfileException | OverrideParameterException e) {
-      throw new BadRequestException(
-          "Error occurred during creation a workspace from devfile located at `"
-              + remoteFactoryUrl.devfileFileLocation()
-              + "`. Cause: "
-              + e.getMessage());
+      try {
+        DevfileImpl devfile = devfileManager.parseYaml(devfileYamlContent, overrideProperties);
+        devfileManager.resolveReference(devfile, fileContentProvider);
+        devfile = ensureToUseGenerateName(devfile);
+
+        FactoryDto factoryDto =
+            newDto(FactoryDto.class)
+                .withV(CURRENT_VERSION)
+                .withDevfile(DtoConverter.asDto(devfile))
+                .withSource(devfileLocation);
+        return Optional.of(factoryDto);
+      } catch (DevfileException | OverrideParameterException e) {
+        throw new BadRequestException(
+            "Error occurred during creation a workspace from devfile located at `"
+                + devfileLocation
+                + "`. Cause: "
+                + e.getMessage());
+      }
     }
+    return Optional.empty();
   }
 
   /**
