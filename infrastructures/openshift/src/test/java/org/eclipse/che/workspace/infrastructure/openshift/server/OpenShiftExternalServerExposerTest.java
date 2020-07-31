@@ -26,14 +26,13 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link OpenShiftExternalServerExposer}.
+ * Tests {@link RouteServerExposer}.
  *
  * @author Sergii Leshchenko
  */
 public class OpenShiftExternalServerExposerTest {
 
-  private OpenShiftExternalServerExposer osExternalServerExposer =
-      new OpenShiftExternalServerExposer();
+  private RouteServerExposer osExternalServerExposer = new RouteServerExposer();
 
   @Test
   public void shouldAddRouteToEnvForExposingSpecifiedServer() {

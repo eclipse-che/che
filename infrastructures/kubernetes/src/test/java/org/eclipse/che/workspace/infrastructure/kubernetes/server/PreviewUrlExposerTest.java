@@ -10,7 +10,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
-package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
+package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 
 import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
@@ -34,7 +34,8 @@ import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.PreviewUrlImpl;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServerExposer;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
@@ -51,8 +52,8 @@ public class PreviewUrlExposerTest {
 
   @BeforeMethod
   public void setUp() {
-    ExternalServerExposer<KubernetesEnvironment> externalServerExposer =
-        new ExternalServerExposer<>(externalServiceExposureStrategy, Collections.emptyMap(), null);
+    IngressServerExposer externalServerExposer =
+        new IngressServerExposer(externalServiceExposureStrategy, Collections.emptyMap(), null);
     previewUrlExposer = new PreviewUrlExposer<>(externalServerExposer);
   }
 

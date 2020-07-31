@@ -28,6 +28,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
 
@@ -49,9 +50,9 @@ public class ServersConverter<T extends KubernetesEnvironment>
 
   @Inject
   public ServersConverter(
-      ExternalServerExposer<T> externalServerExposer,
+      ExternalServerExposerProvider<T> externalServerExposer,
       SecureServerExposerFactoryProvider<T> secureServerExposerFactoryProvider) {
-    this.externalServerExposer = externalServerExposer;
+    this.externalServerExposer = externalServerExposer.get();
     this.secureServerExposerFactoryProvider = secureServerExposerFactoryProvider;
   }
 

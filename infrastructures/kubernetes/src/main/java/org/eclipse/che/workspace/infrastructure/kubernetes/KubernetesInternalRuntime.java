@@ -93,8 +93,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogT
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.KubernetesServerResolverFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
@@ -127,10 +127,10 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners;
   private final KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner;
   private final SidecarToolingProvisioner<E> toolingProvisioner;
-  private final IngressPathTransformInverter ingressPathTransformInverter;
   private final RuntimeHangingDetector runtimeHangingDetector;
   private final PreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   private final SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
+  private final KubernetesServerResolverFactory serverResolverFactory;
   protected final Tracer tracer;
 
   @Inject
@@ -151,10 +151,10 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
       KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<E> toolingProvisioner,
-      IngressPathTransformInverter ingressPathTransformInverter,
       RuntimeHangingDetector runtimeHangingDetector,
       PreviewUrlCommandProvisioner previewUrlCommandProvisioner,
       SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner,
+      KubernetesServerResolverFactory kubernetesServerResolverFactory,
       Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace) {
@@ -174,11 +174,11 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.toolingProvisioner = toolingProvisioner;
     this.kubernetesEnvironmentProvisioner = kubernetesEnvironmentProvisioner;
     this.internalEnvironmentProvisioners = internalEnvironmentProvisioners;
-    this.ingressPathTransformInverter = ingressPathTransformInverter;
     this.runtimeHangingDetector = runtimeHangingDetector;
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
     this.previewUrlCommandProvisioner = previewUrlCommandProvisioner;
     this.secretAsContainerResourceProvisioner = secretAsContainerResourceProvisioner;
+    this.serverResolverFactory = kubernetesServerResolverFactory;
     this.tracer = tracer;
   }
 
@@ -614,7 +614,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     String workspaceId = getContext().getIdentity().getWorkspaceId();
 
     createSecrets(k8sEnv, workspaceId);
-    createConfigMaps(k8sEnv, workspaceId);
+    List<ConfigMap> createdConfigMaps = createConfigMaps(k8sEnv, workspaceId);
     List<Service> createdServices = createServices(k8sEnv, workspaceId);
 
     // needed for resolution later on, even though n routes are actually created by ingress
@@ -623,10 +623,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
     listenEvents();
 
-    final KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(ingressPathTransformInverter, createdServices, readyIngresses);
-
-    doStartMachine(serverResolver);
+    doStartMachine(
+        serverResolverFactory.create(createdServices, readyIngresses, createdConfigMaps));
   }
 
   @Traced
@@ -687,12 +685,15 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
   @Traced
   @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
-  void createConfigMaps(KubernetesEnvironment env, String workspaceId)
+  List<ConfigMap> createConfigMaps(KubernetesEnvironment env, String workspaceId)
       throws InfrastructureException {
     TracingTags.WORKSPACE_ID.set(workspaceId);
+
+    List<ConfigMap> createdConfigMaps = new ArrayList<>();
     for (ConfigMap configMap : env.getConfigMaps().values()) {
-      namespace.configMaps().create(configMap);
+      createdConfigMaps.add(namespace.configMaps().create(configMap));
     }
+    return createdConfigMaps;
   }
 
   @Traced
@@ -700,7 +701,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   List<Service> createServices(KubernetesEnvironment env, String workspaceId)
       throws InfrastructureException {
     TracingTags.WORKSPACE_ID.set(workspaceId);
-
     Collection<Service> servicesToCreate = env.getServices().values();
     List<Service> createdServices = new ArrayList<>(servicesToCreate.size());
     for (Service service : servicesToCreate) {
@@ -725,8 +725,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
    * @throws InfrastructureException when any error occurs while creating Kubernetes pods
    */
   @Traced
-  protected void doStartMachine(KubernetesServerResolver serverResolver)
-      throws InfrastructureException {
+  protected void doStartMachine(ServerResolver serverResolver) throws InfrastructureException {
 
     final KubernetesEnvironment environment = getContext().getEnvironment();
     final Map<String, InternalMachineConfig> machineConfigs = environment.getMachines();
@@ -818,7 +817,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       Pod createdPod,
       ObjectMeta toCreateMeta,
       Map<String, InternalMachineConfig> machineConfigs,
-      KubernetesServerResolver serverResolver)
+      ServerResolver serverResolver)
       throws InfrastructureException {
     final String workspaceId = getContext().getIdentity().getWorkspaceId();
     for (Container container : createdPod.getSpec().getContainers()) {

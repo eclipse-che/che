@@ -25,13 +25,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorag
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SshKeysProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisionerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
@@ -70,7 +71,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
     private final SecurityContextProvisioner securityContextProvisioner;
     private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
-    private final IngressTlsProvisioner externalServerIngressTlsProvisioner;
+    private final TlsProvisioner<KubernetesEnvironment> externalServerTlsProvisioner;
     private final ImagePullSecretProvisioner imagePullSecretProvisioner;
     private final ProxySettingsProvisioner proxySettingsProvisioner;
     private final AsyncStorageProvisioner asyncStorageProvisioner;
@@ -94,7 +95,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
         SecurityContextProvisioner securityContextProvisioner,
         PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
-        IngressTlsProvisioner externalServerIngressTlsProvisioner,
+        TlsProvisionerProvider<KubernetesEnvironment> externalServerTlsProvisionerProvider,
         ImagePullSecretProvisioner imagePullSecretProvisioner,
         ProxySettingsProvisioner proxySettingsProvisioner,
         AsyncStorageProvisioner asyncStorageProvisioner,
@@ -115,7 +116,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.logsVolumeMachineProvisioner = logsVolumeMachineProvisioner;
       this.securityContextProvisioner = securityContextProvisioner;
       this.podTerminationGracePeriodProvisioner = podTerminationGracePeriodProvisioner;
-      this.externalServerIngressTlsProvisioner = externalServerIngressTlsProvisioner;
+      this.externalServerTlsProvisioner = externalServerTlsProvisionerProvider.get();
       this.imagePullSecretProvisioner = imagePullSecretProvisioner;
       this.proxySettingsProvisioner = proxySettingsProvisioner;
       this.asyncStorageProvisioner = asyncStorageProvisioner;
@@ -156,7 +157,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       restartPolicyRewriter.provision(k8sEnv, identity);
       uniqueNamesProvisioner.provision(k8sEnv, identity);
       resourceLimitRequestProvisioner.provision(k8sEnv, identity);
-      externalServerIngressTlsProvisioner.provision(k8sEnv, identity);
+      externalServerTlsProvisioner.provision(k8sEnv, identity);
       securityContextProvisioner.provision(k8sEnv, identity);
       podTerminationGracePeriodProvisioner.provision(k8sEnv, identity);
       imagePullSecretProvisioner.provision(k8sEnv, identity);

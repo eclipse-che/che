@@ -12,7 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer.PATH_TRANSFORM_PATH_CATCH;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServerExposer.PATH_TRANSFORM_PATH_CATCH;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STARTING;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
@@ -76,6 +77,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesS
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
@@ -85,6 +87,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProje
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftRoutes;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftPreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.Openshift4TrustedCAProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerResolverFactory;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -145,6 +148,7 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private OpenShiftPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
   @Mock private Openshift4TrustedCAProvisioner trustedCAProvisioner;
+  private OpenShiftServerResolverFactory serverResolverFactory;
 
   @Mock(answer = Answers.RETURNS_MOCKS)
   private Tracer tracer;
@@ -161,6 +165,10 @@ public class OpenShiftInternalRuntimeTest {
     MockitoAnnotations.initMocks(this);
 
     when(startSynchronizerFactory.create(any())).thenReturn(startSynchronizer);
+
+    serverResolverFactory =
+        new OpenShiftServerResolverFactory(
+            "che-host", MULTI_HOST_STRATEGY, WorkspaceExposureType.NATIVE.getConfigValue());
 
     internalRuntime =
         new OpenShiftInternalRuntime(
@@ -183,6 +191,7 @@ public class OpenShiftInternalRuntimeTest {
             runtimeHangingDetector,
             previewUrlCommandProvisioner,
             secretAsContainerResourceProvisioner,
+            serverResolverFactory,
             tracer,
             trustedCAProvisioner,
             context,

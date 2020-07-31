@@ -61,11 +61,16 @@ public class KubernetesConfigsMaps {
    *
    * @param configMap config map to create
    * @throws InfrastructureException when any exception occurs
+   * @return created {@link ConfigMap}
    */
-  public void create(ConfigMap configMap) throws InfrastructureException {
+  public ConfigMap create(ConfigMap configMap) throws InfrastructureException {
     putLabel(configMap, CHE_WORKSPACE_ID_LABEL, workspaceId);
     try {
-      clientFactory.create(workspaceId).configMaps().inNamespace(namespace).create(configMap);
+      return clientFactory
+          .create(workspaceId)
+          .configMaps()
+          .inNamespace(namespace)
+          .create(configMap);
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
     }

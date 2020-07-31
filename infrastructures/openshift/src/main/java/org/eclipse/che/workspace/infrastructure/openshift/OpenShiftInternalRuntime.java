@@ -48,7 +48,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftPreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.Openshift4TrustedCAProvisioner;
-import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerResolver;
+import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerResolverFactory;
 
 /**
  * @author Sergii Leshchenko
@@ -58,6 +58,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
 
   private final OpenShiftProject project;
   private final Openshift4TrustedCAProvisioner trustedCAProvisioner;
+  private final OpenShiftServerResolverFactory serverResolverFactory;
 
   @Inject
   public OpenShiftInternalRuntime(
@@ -81,6 +82,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       OpenShiftPreviewUrlCommandProvisioner previewUrlCommandProvisioner,
       SecretAsContainerResourceProvisioner<OpenShiftEnvironment>
           secretAsContainerResourceProvisioner,
+      OpenShiftServerResolverFactory serverResolverFactory,
       Tracer tracer,
       Openshift4TrustedCAProvisioner trustedCAProvisioner,
       @Assisted OpenShiftRuntimeContext context,
@@ -102,15 +104,16 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         internalEnvironmentProvisioners,
         kubernetesEnvironmentProvisioner,
         toolingProvisioner,
-        null,
         runtimeHangingDetector,
         previewUrlCommandProvisioner,
         secretAsContainerResourceProvisioner,
+        null,
         tracer,
         context,
         project);
     this.project = project;
     this.trustedCAProvisioner = trustedCAProvisioner;
+    this.serverResolverFactory = serverResolverFactory;
   }
 
   @Override
@@ -130,13 +133,13 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     String workspaceId = getContext().getIdentity().getWorkspaceId();
 
     createSecrets(osEnv, workspaceId);
-    createConfigMaps(osEnv, workspaceId);
+    List<ConfigMap> createdConfigMaps = createConfigMaps(osEnv, workspaceId);
     List<Service> createdServices = createServices(osEnv, workspaceId);
     List<Route> createdRoutes = createRoutes(osEnv, workspaceId);
 
     listenEvents();
 
-    doStartMachine(new OpenShiftServerResolver(createdServices, createdRoutes));
+    doStartMachine(serverResolverFactory.create(createdServices, createdRoutes, createdConfigMaps));
   }
 
   @Traced
@@ -150,12 +153,14 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
 
   @Traced
   @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
-  void createConfigMaps(OpenShiftEnvironment env, String workspaceId)
+  List<ConfigMap> createConfigMaps(OpenShiftEnvironment env, String workspaceId)
       throws InfrastructureException {
     TracingTags.WORKSPACE_ID.set(workspaceId);
+    List<ConfigMap> createdConfigMaps = new ArrayList<>();
     for (ConfigMap configMap : env.getConfigMaps().values()) {
-      project.configMaps().create(configMap);
+      createdConfigMaps.add(project.configMaps().create(configMap));
     }
+    return createdConfigMaps;
   }
 
   @Traced
