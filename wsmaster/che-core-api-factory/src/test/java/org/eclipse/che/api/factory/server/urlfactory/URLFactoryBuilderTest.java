@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import java.io.IOException;
@@ -133,16 +134,16 @@ public class URLFactoryBuilderTest {
     FactoryDto factory =
         urlFactoryBuilder
             .createFactoryFromDevfile(
-                new DefaultFactoryUrl()
-                    .withDevfileFileLocation(myLocation)
-                    .withDevfileFilename("devfile.yml"),
+                new DefaultFactoryUrl().withDevfileFileLocation(myLocation),
                 s -> myLocation + ".list",
                 emptyMap())
             .get();
 
-    assertEquals(factory.getSource(), "devfile.yml");
+    assertNotNull(factory);
+    assertNull(factory.getSource());
   }
 
+ 
   @DataProvider
   public Object[][] devfiles() {
     final String NAME = "name";
@@ -175,7 +176,8 @@ public class URLFactoryBuilderTest {
           OverrideParameterException {
     DefaultFactoryUrl defaultFactoryUrl = mock(DefaultFactoryUrl.class);
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
-    when(defaultFactoryUrl.devfileFileLocation()).thenReturn("anything");
+    when(defaultFactoryUrl.devfileFileLocations())
+        .thenReturn(singletonMap("anything", "http://foo.bar/anything"));
     when(devfileManager.parseYaml(anyString(), anyMap())).thenReturn(devfile);
     when(urlFetcher.fetchSafely(anyString())).thenReturn("anything");
     FactoryDto factory =

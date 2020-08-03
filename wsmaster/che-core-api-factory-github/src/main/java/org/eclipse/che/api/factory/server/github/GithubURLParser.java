@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.factory.server.urlfactory.DevfileFilenamesProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 
 /**
@@ -27,7 +28,15 @@ import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 public class GithubURLParser {
 
   /** Fetcher to grab PR data */
-  @Inject private URLFetcher urlFetcher;
+  private URLFetcher urlFetcher;
+
+  private DevfileFilenamesProvider devfileFilenamesProvider;
+
+  @Inject
+  public GithubURLParser(URLFetcher urlFetcher, DevfileFilenamesProvider devfileFilenamesProvider) {
+    this.urlFetcher = urlFetcher;
+    this.devfileFilenamesProvider = devfileFilenamesProvider;
+  }
 
   /**
    * Regexp to find repository details (repository name, project name and branch and subfolder)
@@ -88,13 +97,14 @@ public class GithubURLParser {
       }
     }
 
-    return new GithubUrl()
-        .withUsername(repoUser)
-        .withRepository(repoName)
-        .withBranch(branchName)
-        .withSubfolder(matcher.group("subFolder"))
-        .withDevfileFilename("devfile.yaml") // TODO: from conf property
-        .withDevfileFilename(".devfile.yaml")
-        .withFactoryFilename(".factory.json");
+    GithubUrl githubUrl =
+        new GithubUrl()
+            .withUsername(repoUser)
+            .withRepository(repoName)
+            .withBranch(branchName)
+            .withFactoryFilename(".factory.json")
+            .withSubfolder(matcher.group("subFolder"));
+    devfileFilenamesProvider.getConfiguredDevfileFilenames().forEach(githubUrl::addDevfileFilename);
+    return githubUrl;
   }
 }

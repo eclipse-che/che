@@ -109,11 +109,12 @@ public class URLFactoryBuilder {
       FileContentProvider fileContentProvider,
       Map<String, String> overrideProperties)
       throws BadRequestException {
-    Iterator<String> devfileLocations = remoteFactoryUrl.devfileFileLocations().iterator();
+    Iterator<Map.Entry<String, String>> devfileLocations =
+        remoteFactoryUrl.devfileFileLocations().entrySet().iterator();
     String devfileYamlContent;
     while (devfileLocations.hasNext()) {
-      String devfileLocation = devfileLocations.next();
-      devfileYamlContent = urlFetcher.fetchSafely(devfileLocation);
+      Map.Entry<String, String> devfileLocation = devfileLocations.next();
+      devfileYamlContent = urlFetcher.fetchSafely(devfileLocation.getValue());
       if (isNullOrEmpty(devfileYamlContent)) {
         continue;
       }
@@ -126,7 +127,7 @@ public class URLFactoryBuilder {
             newDto(FactoryDto.class)
                 .withV(CURRENT_VERSION)
                 .withDevfile(DtoConverter.asDto(devfile))
-                .withSource(devfileLocation);
+                .withSource(devfileLocation.getKey());
         return Optional.of(factoryDto);
       } catch (DevfileException | OverrideParameterException e) {
         throw new BadRequestException(

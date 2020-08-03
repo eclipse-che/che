@@ -12,7 +12,9 @@
 package org.eclipse.che.api.factory.server.github;
 
 import com.google.common.base.Strings;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
@@ -46,7 +48,7 @@ public class GithubUrl implements RemoteFactoryUrl {
   private String factoryFilename;
 
   /** Devfile filename */
-  private List<String> devfileFilenames;
+  private List<String> devfileFilenames = new ArrayList<>();
 
   /**
    * Creation of this instance is made by the parser so user may not need to create a new instance
@@ -82,7 +84,7 @@ public class GithubUrl implements RemoteFactoryUrl {
     return this;
   }
 
-  protected GithubUrl withDevfileFilename(String devfileFilename) {
+  protected GithubUrl addDevfileFilename(String devfileFilename) {
     this.devfileFilenames.add(devfileFilename);
     return this;
   }
@@ -154,8 +156,8 @@ public class GithubUrl implements RemoteFactoryUrl {
    * @return location of devfile yaml file in a repository
    */
   @Override
-  public Iterable<String> devfileFileLocations() {
-    return devfileFilenames.stream().map(this::rawFileLocation).collect(Collectors.toList());
+  public Map<String, String> devfileFileLocations() {
+    return devfileFilenames.stream().collect(Collectors.toMap(key -> key, this::rawFileLocation));
   }
 
   /**

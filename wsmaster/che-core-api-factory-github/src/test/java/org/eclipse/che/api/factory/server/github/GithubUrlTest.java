@@ -11,10 +11,15 @@
  */
 package org.eclipse.che.api.factory.server.github;
 
+import static org.mockito.Mockito.lenient;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import org.eclipse.che.api.factory.server.urlfactory.DevfileFilenamesProvider;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
@@ -28,6 +33,8 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class GithubUrlTest {
 
+  @Mock private DevfileFilenamesProvider devfileFilenamesProvider;
+
   /** Parser used to create the url. */
   @InjectMocks private GithubURLParser githubUrlParser;
 
@@ -37,6 +44,9 @@ public class GithubUrlTest {
   /** Setup objects/ */
   @BeforeClass
   protected void init() {
+    lenient()
+        .when(devfileFilenamesProvider.getConfiguredDevfileFilenames())
+        .thenReturn(Arrays.asList("devfile.yaml", "foo.bar"));
     this.githubUrl = this.githubUrlParser.parse("https://github.com/eclipse/che");
     assertNotNull(this.githubUrl);
   }
@@ -44,9 +54,12 @@ public class GithubUrlTest {
   /** Check when there is devfile in the repository */
   @Test
   public void checkDevfileLocation() {
+    assertEquals(githubUrl.devfileFileLocations().size(), 2);
+    Iterator<String> iterator = githubUrl.devfileFileLocations().values().iterator();
     assertEquals(
-        githubUrl.devfileFileLocation(),
-        "https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml");
+        iterator.next(), "https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml");
+
+    assertEquals(iterator.next(), "https://raw.githubusercontent.com/eclipse/che/master/foo.bar");
   }
 
   /** Check when there is .factory.json file in the repository */

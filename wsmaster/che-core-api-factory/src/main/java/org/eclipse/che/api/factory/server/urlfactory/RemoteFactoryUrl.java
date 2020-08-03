@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.api.factory.server.urlfactory;
 
+import java.util.Map;
+
 /**
  * Provides basic information about the remote factory URL components. Vendor specific
  * implementations may provide wider range of details about the URL (like username, repository etc).
@@ -37,5 +39,5 @@ public interface RemoteFactoryUrl {
    *
    * @return devfile file locations
    */
-  Iterable<String> devfileFileLocations();
+  Map<String, String> devfileFileLocations();
 }

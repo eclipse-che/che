@@ -17,6 +17,8 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Arrays;
+import org.eclipse.che.api.factory.server.urlfactory.DevfileFilenamesProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -35,6 +37,7 @@ import org.testng.annotations.Test;
 public class GithubURLParserTest {
 
   @Mock private URLFetcher urlFetcher;
+  @Mock private DevfileFilenamesProvider devfileFilenamesProvider;
 
   /** Instance of component that will be tested. */
   @InjectMocks private GithubURLParser githubUrlParser;
@@ -48,6 +51,9 @@ public class GithubURLParserTest {
   @BeforeMethod
   public void init() {
     lenient().when(urlFetcher.fetchSafely(any(String.class))).thenReturn("");
+    lenient()
+        .when(devfileFilenamesProvider.getConfiguredDevfileFilenames())
+        .thenReturn(Arrays.asList("devfile.yaml", "foo.ber"));
   }
 
   /** Check URLs are valid with regexp */
