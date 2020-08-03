@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -116,7 +117,7 @@ public class IngressTlsProvisionerTest {
     assertEquals(ingress.getSpec().getTls().get(0).getHosts().get(0), host);
     assertEquals(ingress.getSpec().getTls().get(0).getSecretName(), "secretname");
 
-    verifyIngressAndServersTLS();
+    verifyServersTLS(ingress.getMetadata().getAnnotations());
   }
 
   @Test
@@ -135,9 +136,9 @@ public class IngressTlsProvisionerTest {
     assertEquals(ingress.getSpec().getTls().size(), 1);
     assertEquals(ingress.getSpec().getTls().get(0).getHosts().size(), 1);
     assertEquals(ingress.getSpec().getTls().get(0).getHosts().get(0), host);
-    assertEquals(ingress.getSpec().getTls().get(0).getSecretName(), null);
+    assertNull(ingress.getSpec().getTls().get(0).getSecretName());
 
-    verifyIngressAndServersTLS();
+    verifyServersTLS(ingress.getMetadata().getAnnotations());
   }
 
   @Test
@@ -158,7 +159,7 @@ public class IngressTlsProvisionerTest {
     assertEquals(ingress.getSpec().getTls().get(0).getHosts().get(0), host);
     assertEquals(ingress.getSpec().getTls().get(0).getSecretName(), null);
 
-    verifyIngressAndServersTLS();
+    verifyServersTLS(ingress.getMetadata().getAnnotations());
   }
 
   @Test
@@ -181,7 +182,7 @@ public class IngressTlsProvisionerTest {
     assertEquals(tlsSecret.getStringData().get("tls.key"), "key");
 
     assertEquals(tlsSecret.getType(), TLS_SECRET_TYPE);
-    verifyIngressAndServersTLS();
+    verifyServersTLS(ingress.getMetadata().getAnnotations());
   }
 
   @Test(
@@ -194,10 +195,9 @@ public class IngressTlsProvisionerTest {
     new IngressTlsProvisioner(true, "secret", "test", "");
   }
 
-  private void verifyIngressAndServersTLS() {
-    Map<String, ServerConfigImpl> ingressServers =
-        Annotations.newDeserializer(ingress.getMetadata().getAnnotations()).servers();
-    assertEquals(ingressServers.get("http-server").getProtocol(), "https");
-    assertEquals(ingressServers.get("ws-server").getProtocol(), "wss");
+  private void verifyServersTLS(Map<String, String> annotations) {
+    Map<String, ServerConfigImpl> servers = Annotations.newDeserializer(annotations).servers();
+    assertEquals(servers.get("http-server").getProtocol(), "https");
+    assertEquals(servers.get("ws-server").getProtocol(), "wss");
   }
 }

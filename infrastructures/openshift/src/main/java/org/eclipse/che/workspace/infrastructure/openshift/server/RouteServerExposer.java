@@ -16,9 +16,9 @@ import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Route;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
@@ -89,12 +89,8 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
  * @author Alexander Garagatyi
  * @see Annotations
  */
-public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenShiftEnvironment> {
-
-  public OpenShiftExternalServerExposer() {
-    super(null, Collections.emptyMap(), "%s");
-  }
-
+@Singleton
+public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnvironment> {
   @Override
   public void expose(
       OpenShiftEnvironment env,

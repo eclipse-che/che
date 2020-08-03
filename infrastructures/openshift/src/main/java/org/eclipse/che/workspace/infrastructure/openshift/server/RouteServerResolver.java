@@ -15,13 +15,14 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.RuntimeServerBuilder;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.AbstractServerResolver;
 
 /**
  * Helps to resolve {@link ServerImpl servers} by machine name according to specified {@link Route
@@ -34,12 +35,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.RuntimeServerB
  * @author Alexander Garagatyi
  * @see Annotations
  */
-public class OpenShiftServerResolver extends KubernetesServerResolver {
+public class RouteServerResolver extends AbstractServerResolver {
 
   private final Multimap<String, Route> routes;
 
-  public OpenShiftServerResolver(List<Service> services, List<Route> routes) {
-    super(null, services, Collections.emptyList());
+  public RouteServerResolver(List<Service> services, List<Route> routes) {
+    super(services);
 
     this.routes = ArrayListMultimap.create();
     for (Route route : routes) {
@@ -50,23 +51,31 @@ public class OpenShiftServerResolver extends KubernetesServerResolver {
   }
 
   @Override
-  protected void fillExternalServers(String machineName, Map<String, ServerImpl> servers) {
-    routes.get(machineName).forEach(route -> fillRouteServers(route, servers));
+  protected Map<String, ServerImpl> resolveExternalServers(String machineName) {
+    return routes
+        .get(machineName)
+        .stream()
+        .map(this::resolveRouteServers)
+        .flatMap(m -> m.entrySet().stream())
+        .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (v1, v2) -> v2));
   }
 
-  private void fillRouteServers(Route route, Map<String, ServerImpl> servers) {
-    Annotations.newDeserializer(route.getMetadata().getAnnotations())
+  private Map<String, ServerImpl> resolveRouteServers(Route route) {
+    return Annotations.newDeserializer(route.getMetadata().getAnnotations())
         .servers()
-        .forEach(
-            (name, config) ->
-                servers.put(
-                    name,
+        .entrySet()
+        .stream()
+        .collect(
+            Collectors.toMap(
+                Entry::getKey,
+                e ->
                     new RuntimeServerBuilder()
-                        .protocol(config.getProtocol())
+                        .protocol(e.getValue().getProtocol())
                         .host(route.getSpec().getHost())
-                        .path(config.getPath())
-                        .attributes(config.getAttributes())
-                        .targetPort(config.getPort())
-                        .build()));
+                        .path(e.getValue().getPath())
+                        .attributes(e.getValue().getAttributes())
+                        .targetPort(e.getValue().getPort())
+                        .build(),
+                (s1, s2) -> s2));
   }
 }

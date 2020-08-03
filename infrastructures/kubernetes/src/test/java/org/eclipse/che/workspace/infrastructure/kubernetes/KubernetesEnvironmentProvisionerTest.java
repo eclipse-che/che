@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.when;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner.KubernetesEnvironmentProvisionerImpl;
@@ -23,13 +24,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorag
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SshKeysProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisionerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
@@ -63,7 +65,11 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
   @Mock private SecurityContextProvisioner securityContextProvisioner;
   @Mock private PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
-  @Mock private IngressTlsProvisioner externalServerIngressTlsProvisioner;
+
+  @Mock
+  private TlsProvisionerProvider<KubernetesEnvironment> externalServerIngressTlsProvisionerProvider;
+
+  @Mock private TlsProvisioner<KubernetesEnvironment> externalServerIngressTlsProvisioner;
   @Mock private ImagePullSecretProvisioner imagePullSecretProvisioner;
   @Mock private ProxySettingsProvisioner proxySettingsProvisioner;
   @Mock private ServiceAccountProvisioner serviceAccountProvisioner;
@@ -81,6 +87,8 @@ public class KubernetesEnvironmentProvisionerTest {
 
   @BeforeMethod
   public void setUp() {
+    when(externalServerIngressTlsProvisionerProvider.get())
+        .thenReturn(externalServerIngressTlsProvisioner);
     k8sInfraProvisioner =
         new KubernetesEnvironmentProvisionerImpl(
             true,
@@ -93,7 +101,7 @@ public class KubernetesEnvironmentProvisionerTest {
             logsVolumeMachineProvisioner,
             securityContextProvisioner,
             podTerminationGracePeriodProvisioner,
-            externalServerIngressTlsProvisioner,
+            externalServerIngressTlsProvisionerProvider,
             imagePullSecretProvisioner,
             proxySettingsProvisioner,
             asyncStorageProvisioner,

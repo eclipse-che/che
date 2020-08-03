@@ -8,11 +8,20 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
+function getBaseUrl(): string {
+    const baseUrl: string | undefined = process.env.TS_SELENIUM_BASE_URL;
+    if (!baseUrl) {
+        return 'http://sample-url';
+    }
+
+    return baseUrl.replace(/\/$/, '');
+}
+
 export const TestConstants = {
     /**
      * Base URL of the application which should be checked
      */
-    TS_SELENIUM_BASE_URL: process.env.TS_SELENIUM_BASE_URL || 'http://sample-url',
+    TS_SELENIUM_BASE_URL: getBaseUrl(),
 
     /**
      * Base URl of web console OpenShift which uses to test OperatorHub.
