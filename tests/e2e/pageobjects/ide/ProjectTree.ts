@@ -299,6 +299,34 @@ export class ProjectTree {
         throw new error.TimeoutError('Exceeded the maximum number of checking attempts, project has not been imported');
     }
 
+    async waitProjectImportedNoSubfolder(projectName: string,
+        attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
+        visibilityItemPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5,
+        triesPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 30) {
+
+        Logger.debug(`ProjectTree.waitProjectImportedNoSubfolder "${projectName}"`);
+
+        const rootItemLocator: By = By.css(this.getTreeItemCssLocator(`${projectName}`));
+
+        for (let i = 0; i < attempts; i++) {
+            const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, 1, visibilityItemPolling);
+
+            if (!isProjectFolderVisible) {
+                Logger.trace(`ProjectTree.waitProjectImportedNoSubfolder project not located, reloading page.`);
+                await this.driverHelper.reloadPage();
+                await this.driverHelper.wait(triesPolling);
+                await this.ide.waitAndSwitchToIdeFrame();
+                await this.ide.waitIde();
+                await this.openProjectTreeContainer();
+                continue;
+            }
+
+            return;
+        }
+
+        throw new error.TimeoutError('Exceeded the maximum number of checking attempts, project has not been imported');
+    }
+
     private async  getWorkspacePathEntry(): Promise<string> {
         const nodeAttribute: string = 'data-node-id';
         const splitDelimeter = ':';
