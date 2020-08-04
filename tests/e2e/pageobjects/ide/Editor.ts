@@ -155,7 +155,6 @@ export class Editor {
     public async clickOnTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.clickOnTab "${tabTitle}"`);
 
-        await this.ide.closeAllNotifications();
         await this.driverHelper.waitAndClick(By.xpath(this.getTabXpathLocator(tabTitle)), timeout);
     }
 
@@ -170,7 +169,6 @@ export class Editor {
     public async selectTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.selectTab "${tabTitle}"`);
 
-        await this.ide.closeAllNotifications();
         await this.waitTab(tabTitle, timeout);
         await this.clickOnTab(tabTitle, timeout);
         await this.waitTabFocused(tabTitle, timeout);
