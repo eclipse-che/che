@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static org.testng.Assert.*;
 
+import java.util.Map;
 import org.testng.annotations.Test;
 
 public class TraefikGatewayConfigGeneratorTest {
@@ -41,10 +42,11 @@ public class TraefikGatewayConfigGeneratorTest {
             + "        prefixes:\n"
             + "        - \"/blabol-cesta\"";
 
-    String generatedConfig =
+    Map<String, String> generatedConfig =
         gatewayConfigGenerator.generate(
             "external-server-1", "http://service-url:1234", "/blabol-cesta");
 
-    assertEquals(generatedConfig, expectedConfig);
+    assertTrue(generatedConfig.containsKey("external-server-1.yml"));
+    assertEquals(generatedConfig.get("external-server-1.yml"), expectedConfig);
   }
 }
