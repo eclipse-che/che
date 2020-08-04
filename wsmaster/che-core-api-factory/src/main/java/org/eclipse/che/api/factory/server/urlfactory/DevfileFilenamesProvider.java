@@ -17,6 +17,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+/**
+ * Provides list of configured devfile filenames to look in repository-based factories.
+ */
 @Singleton
 public class DevfileFilenamesProvider {
 
@@ -28,7 +31,7 @@ public class DevfileFilenamesProvider {
     this.configuredDevfileFilenames = Splitter.on(",").splitToList(propertyValue);
   }
 
-  public Iterable<String> getConfiguredDevfileFilenames() {
+  public List<String> getConfiguredDevfileFilenames() {
     return configuredDevfileFilenames;
   }
 }

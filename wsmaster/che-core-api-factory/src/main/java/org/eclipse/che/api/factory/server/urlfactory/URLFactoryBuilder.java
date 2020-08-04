@@ -19,7 +19,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_P
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -109,12 +108,9 @@ public class URLFactoryBuilder {
       FileContentProvider fileContentProvider,
       Map<String, String> overrideProperties)
       throws BadRequestException {
-    Iterator<Map.Entry<String, String>> devfileLocations =
-        remoteFactoryUrl.devfileFileLocations().entrySet().iterator();
-    String devfileYamlContent;
-    while (devfileLocations.hasNext()) {
-      Map.Entry<String, String> devfileLocation = devfileLocations.next();
-      devfileYamlContent = urlFetcher.fetchSafely(devfileLocation.getValue());
+    for (Map.Entry<String, String> devfileLocation : remoteFactoryUrl.devfileFileLocations()
+        .entrySet()) {
+      String devfileYamlContent = urlFetcher.fetchSafely(devfileLocation.getValue());
       if (isNullOrEmpty(devfileYamlContent)) {
         continue;
       }

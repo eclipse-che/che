@@ -47,7 +47,7 @@ public class GithubUrl implements RemoteFactoryUrl {
   /** Factory json filename */
   private String factoryFilename;
 
-  /** Devfile filename */
+  /** Devfile filenames list */
   private List<String> devfileFilenames = new ArrayList<>();
 
   /**
@@ -151,9 +151,8 @@ public class GithubUrl implements RemoteFactoryUrl {
   }
 
   /**
-   * Provides location to raw content of the devfile yaml file
-   *
-   * @return location of devfile yaml file in a repository
+   * Provides map of configured devfile filenames and location to theirs raw content
+   * @return map of devfile filenames and locations
    */
   @Override
   public Map<String, String> devfileFileLocations() {

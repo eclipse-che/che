@@ -35,9 +35,9 @@ public interface RemoteFactoryUrl {
   String factoryFileLocation();
 
   /**
-   * Possible locations of devfile. Must points to the raw devfile content.
+   * Possible filenames and raw locations of devfile.
    *
-   * @return devfile file locations
+   * @return devfile filenames and locations map
    */
   Map<String, String> devfileFileLocations();
 }

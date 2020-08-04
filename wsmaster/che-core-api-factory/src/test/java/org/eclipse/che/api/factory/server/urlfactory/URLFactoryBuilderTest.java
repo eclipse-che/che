@@ -143,7 +143,7 @@ public class URLFactoryBuilderTest {
     assertNull(factory.getSource());
   }
 
- 
+
   @DataProvider
   public Object[][] devfiles() {
     final String NAME = "name";
