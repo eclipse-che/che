@@ -97,14 +97,12 @@ public class GithubURLParser {
       }
     }
 
-    GithubUrl githubUrl =
-        new GithubUrl()
+    return new GithubUrl()
             .withUsername(repoUser)
             .withRepository(repoName)
             .withBranch(branchName)
             .withFactoryFilename(".factory.json")
             .withSubfolder(matcher.group("subFolder"))
             .withDevfileFilenames(devfileFilenamesProvider.getConfiguredDevfileFilenames());
-    return githubUrl;
   }
 }
