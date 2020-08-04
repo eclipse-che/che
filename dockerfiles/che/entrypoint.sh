@@ -305,13 +305,10 @@ add_cert_to_truststore() {
 
   echo "$1" > $SELF_SIGNED_CERT
 
-  # make sure that owner has permissions to write and other groups have permissions to read
-  # note that this might not work when running as anyuid OpenShift user, which is why we're forcing a true if it fails
-  chmod 644 $JAVA_TRUST_STORE || true
-
+  # make sure that everyone has permission to write
   echo yes | keytool -keystore $JAVA_TRUST_STORE -importcert -alias "$2" -file $SELF_SIGNED_CERT -storepass $DEFAULT_JAVA_TRUST_STOREPASS > /dev/null
-  # allow only read by all groups
-  chmod 444 $JAVA_TRUST_STORE
+  # allow only read by all groups: note that this might not work when running as anyuid OpenShift user, which is why we're forcing a true if it fails
+  chmod 444 $JAVA_TRUST_STORE || true
   if [[ "$JAVA_OPTS" != *"-Djavax.net.ssl.trustStore"* && "$JAVA_OPTS" != *"-Djavax.net.ssl.trustStorePassword"* ]]; then
     export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=$JAVA_TRUST_STORE -Djavax.net.ssl.trustStorePassword=$DEFAULT_JAVA_TRUST_STOREPASS"
   fi
