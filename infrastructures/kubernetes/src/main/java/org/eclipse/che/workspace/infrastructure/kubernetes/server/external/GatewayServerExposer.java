@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ServicePort;
@@ -23,17 +24,20 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.IngressServerResolver;
 
 /**
  * Uses gateway configured with ConfigMaps to expose servers.
- *
- * <p>TODO: implement
  *
  * @param <T> type of environment
  */
 public class GatewayServerExposer<T extends KubernetesEnvironment>
     implements ExternalServerExposer<T> {
+
+  private static final Map<String, String> GATEWAY_CONFIGMAP_LABELS =
+      ImmutableMap.<String, String>builder()
+          .put("app", "che")
+          .put("role", "gateway-config")
+          .build();
 
   private final ExternalServiceExposureStrategy strategy;
   private final GatewayRouteConfigGenerator gatewayConfigGenerator;
@@ -47,10 +51,8 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
   }
 
   /**
-   * TODO: rewrite
-   * Exposes service port on given service externally (outside kubernetes cluster). The exposed
-   * service port is associated with a specific Server configuration. Server configuration should be
-   * encoded in the exposing object's annotations, to be used by {@link IngressServerResolver}.
+   * Exposes service port on given service externally (outside kubernetes cluster) using the Gateway
+   * specific configurations.
    *
    * @param k8sEnv Kubernetes environment
    * @param machineName machine containing servers
@@ -85,24 +87,41 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
       String serverId,
       ServicePort servicePort,
       Map<String, ServerConfig> serversConfigs) {
-    String serverName = KubernetesServerExposer.makeServerNameValidForDns(serverId);
-    String name = getIngressName(serviceName, serverName);
+    final String serverName = KubernetesServerExposer.makeServerNameValidForDns(serverId);
+    final String name = createName(serviceName, serverName);
+    final String serviceClusterUrl = createServiceUrl(serviceName, servicePort);
+    final String path = ensureEndsWithSlash(strategy.getExternalPath(serviceName, serverName));
+    final Map<String, String> configData =
+        gatewayConfigGenerator.generate(name, serviceClusterUrl, path);
+    final Map<String, String> annotations = createAnnotations(serversConfigs, path, machineName);
 
-    String serviceClusterUrl =
-        "http://"
-            + serviceName
-            + ".che.svc.cluster.local:"
-            + servicePort.getTargetPort().getIntVal().toString();
-    String path = ensureEndsWithSlash(strategy.getExternalPath(serviceName, serverName));
-    Map<String, String> configData = new HashMap<>();
+    return new ConfigMapBuilder()
+        .withNewMetadata()
+        .withName(name)
+        .withLabels(GATEWAY_CONFIGMAP_LABELS)
+        .withAnnotations(annotations)
+        .endMetadata()
+        .withData(configData)
+        .build();
+  }
 
-    String routeConfig = gatewayConfigGenerator.generate(name, serviceClusterUrl, path);
+  private String ensureEndsWithSlash(String path) {
+    return path.endsWith("/") ? path : path + '/';
+  }
 
-    configData.put(name + ".yml", routeConfig);
-    Map<String, String> labels = new HashMap<>();
-    labels.put("app", "che");
-    labels.put("role", "gateway-config");
+  private String createName(String serviceName, String serverName) {
+    return serviceName + "-" + serverName;
+  }
 
+  private String createServiceUrl(String serviceName, ServicePort servicePort) {
+    return "http://"
+        + serviceName
+        + ".che.svc.cluster.local:"
+        + servicePort.getTargetPort().getIntVal().toString();
+  }
+
+  private Map<String, String> createAnnotations(
+      Map<String, ServerConfig> serversConfigs, String path, String machineName) {
     Map<String, ServerConfig> configsWithPaths = new HashMap<>();
     for (String scKey : serversConfigs.keySet()) {
       ServerConfigImpl sc = new ServerConfigImpl(serversConfigs.get(scKey));
@@ -110,28 +129,9 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
       configsWithPaths.put(scKey, sc);
     }
 
-    Map<String, String> cmAnnotations =
-        new HashMap<>(
-            Annotations.newSerializer()
-                .servers(configsWithPaths)
-                .machineName(machineName)
-                .annotations());
-
-    return new ConfigMapBuilder()
-        .withNewMetadata()
-        .withName(name)
-        .withLabels(labels)
-        .withAnnotations(cmAnnotations)
-        .endMetadata()
-        .withData(configData)
-        .build();
-  }
-
-  private static String ensureEndsWithSlash(String path) {
-    return path.endsWith("/") ? path : path + '/';
-  }
-
-  private static String getIngressName(String serviceName, String serverName) {
-    return serviceName + "-" + serverName;
+    return Annotations.newSerializer()
+        .servers(configsWithPaths)
+        .machineName(machineName)
+        .annotations();
   }
 }
