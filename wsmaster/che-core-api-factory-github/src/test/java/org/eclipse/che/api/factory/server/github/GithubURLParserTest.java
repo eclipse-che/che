@@ -53,7 +53,7 @@ public class GithubURLParserTest {
     lenient().when(urlFetcher.fetchSafely(any(String.class))).thenReturn("");
     lenient()
         .when(devfileFilenamesProvider.getConfiguredDevfileFilenames())
-        .thenReturn(Arrays.asList("devfile.yaml", "foo.ber"));
+        .thenReturn(Arrays.asList("devfile.yaml", "foo.bar"));
   }
 
   /** Check URLs are valid with regexp */
