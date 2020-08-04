@@ -80,7 +80,8 @@ public class GitCredentialStorageFileSecretApplier extends FileSecretApplier {
         HashMap<String, String> newGitConfigMapData = new HashMap<>(gitConfigMapData);
         newGitConfigMapData.put(
             GitConfigProvisioner.GIT_CONFIG,
-            String.format(GIT_CREDENTIALS_FILE_STORE_PATTERN, gitSecretFilePath.toString()));
+            gitConfig
+                + String.format(GIT_CREDENTIALS_FILE_STORE_PATTERN, gitSecretFilePath.toString()));
         gitConfigMap.setData(newGitConfigMapData);
       }
     }
