@@ -25,8 +25,7 @@ export class Editor {
     private static readonly ADDITIONAL_SHIFTING_TO_X: number = 1;
 
 
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.Ide) private readonly ide: Ide) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     public async waitSuggestionContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('Editor.waitSuggestionContainer');
