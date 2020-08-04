@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
+import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.HashMap;
 import java.util.Map;
@@ -117,7 +118,13 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
     return "http://"
         + serviceName
         + ".che.svc.cluster.local:"
-        + servicePort.getTargetPort().getIntVal().toString();
+        + getTargetPort(servicePort.getTargetPort());
+  }
+
+  private String getTargetPort(IntOrString targetPort) {
+    return targetPort.getIntVal() != null
+        ? targetPort.getIntVal().toString()
+        : targetPort.getStrVal();
   }
 
   private Map<String, String> createAnnotations(
