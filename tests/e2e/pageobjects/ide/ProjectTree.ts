@@ -265,9 +265,10 @@ export class ProjectTree {
         const rootSubitemLocator: By = By.css(this.getTreeItemCssLocator(`${projectName}/${rootSubItem}`));
 
         for (let i = 0; i < attempts; i++) {
-            const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, attempts, visibilityItemPolling);
+            const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, 1, visibilityItemPolling);
 
             if (!isProjectFolderVisible) {
+                Logger.trace(`ProjectTree.waitProjectImported project not located, reloading page.`);
                 await this.driverHelper.reloadPage();
                 await this.driverHelper.wait(triesPolling);
                 await this.ide.waitAndSwitchToIdeFrame();
@@ -276,12 +277,14 @@ export class ProjectTree {
                 continue;
             }
 
+            Logger.trace(`ProjectTree.waitProjectImported project found, waiting for sub-items`);
             await this.expandItem(rootItem);
             await this.waitItemExpanded(rootItem);
 
-            const isRootSubItemVisible = await this.driverHelper.waitVisibilityBoolean(rootSubitemLocator, attempts, visibilityItemPolling);
+            const isRootSubItemVisible = await this.driverHelper.waitVisibilityBoolean(rootSubitemLocator, 1, visibilityItemPolling);
 
             if (!isRootSubItemVisible) {
+                Logger.trace(`ProjectTree.waitProjectImported sub-items not found, reloading page.`);
                 await this.driverHelper.reloadPage();
                 await this.driverHelper.wait(triesPolling);
                 await this.ide.waitAndSwitchToIdeFrame();

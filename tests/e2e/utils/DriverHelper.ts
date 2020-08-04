@@ -88,17 +88,25 @@ export class DriverHelper {
     }
 
     public async waitVisibility(elementLocator: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<WebElement> {
-        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = Math.ceil(timeout / polling);
 
         Logger.trace(`DriverHelper.waitVisibility ${elementLocator}`);
 
         for (let i = 0; i < attempts; i++) {
-            Logger.trace('DriverHelper.waitVisibility - Waiting until element is located');
-            const webElement: WebElement = await this.driver.wait(until.elementLocated(elementLocator), timeout);
-            Logger.trace('DriverHelper.waitVisibility - Element was located. Waitng for visibility now.');
+            let element: WebElement;
             try {
-                const visibleWebElement = await this.driver.wait(until.elementIsVisible(webElement), timeout);
+                element = await this.driver.wait(until.elementLocated(elementLocator), polling);
+            } catch (err) {
+                if (i >= attempts) {
+                    Logger.error(`DriverHelper.waitVisibility - failed with exception, out of attempts - ${err}`);
+                    throw err;
+                }
+                continue;
+            }
+
+            try {
+                const visibleWebElement = await this.driver.wait(until.elementIsVisible(element), polling);
                 Logger.trace('DriverHelper.waitVisibility - Element is located and is visible.');
                 return visibleWebElement;
             } catch (err) {
@@ -115,14 +123,14 @@ export class DriverHelper {
     }
 
     public async waitPresence(elementLocator: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<WebElement> {
-        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = Math.ceil(timeout / polling);
 
         Logger.trace(`DriverHelper.waitPresence ${elementLocator}`);
 
         for (let i = 0; i < attempts; i++) {
             try {
-                const webElement: WebElement = await this.driver.wait(until.elementLocated(elementLocator), timeout);
+                const webElement: WebElement = await this.driver.wait(until.elementLocated(elementLocator), polling);
                 return webElement;
             } catch (err) {
                 if (err instanceof error.StaleElementReferenceError) {
@@ -138,14 +146,14 @@ export class DriverHelper {
     }
 
     public async waitAllPresence(elementLocator: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<Array<WebElement>> {
-        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = Math.ceil(timeout / polling);
 
         Logger.trace(`DriverHelper.waitAllPresence ${elementLocator}`);
 
         for (let i = 0; i < attempts; i++) {
             try {
-                const webElements: Array<WebElement> = await this.driver.wait(until.elementsLocated(elementLocator), timeout);
+                const webElements: Array<WebElement> = await this.driver.wait(until.elementsLocated(elementLocator), polling);
                 return webElements;
             } catch (err) {
                 if (err instanceof error.StaleElementReferenceError) {
@@ -194,24 +202,34 @@ export class DriverHelper {
     }
 
     public async waitAllDisappearance(locators: Array<By>,
-        attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
-        polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
+        attemptsPerLocator: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
+        pollingPerLocator: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
 
         Logger.trace(`DriverHelper.waitAllDisappearance ${locators}`);
 
         for (const elementLocator of locators) {
-            await this.waitDisappearance(elementLocator, attempts, polling);
+            await this.waitDisappearance(elementLocator, attemptsPerLocator, pollingPerLocator);
         }
     }
 
     public async waitAndClick(elementLocator: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = Math.ceil(timeout / polling);
 
         Logger.trace(`DriverHelper.waitAndClick ${elementLocator}`);
 
         for (let i = 0; i < attempts; i++) {
-            const element: WebElement = await this.waitVisibility(elementLocator, timeout);
+            let element: WebElement;
+            try {
+                element = await this.waitVisibility(elementLocator, polling);
+            } catch (err) {
+                if (i >= attempts) {
+                    Logger.error(`DriverHelper.waitAndClick - failed with exception, out of attempts - ${err}`);
+                    throw err;
+                } else {
+                    continue;
+                }
+            }
 
             try {
                 await element.click();
@@ -228,7 +246,6 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
-
                 throw err;
             }
         }
@@ -237,17 +254,25 @@ export class DriverHelper {
 
     }
 
-    public async waitAndGetElementAttribute(elementLocator: By,
-        attribute: string,
-        visibilityTimeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
-
-        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
+    public async waitAndGetElementAttribute(elementLocator: By, attribute: string,
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = Math.ceil(timeout / polling);
 
         Logger.trace(`DriverHelper.waitAndGetElementAttribute ${elementLocator} attribute: '${attribute}'`);
 
         for (let i = 0; i < attempts; i++) {
-            const element: WebElement = await this.waitVisibility(elementLocator, visibilityTimeout);
+            let element: WebElement;
+            try {
+                element = await this.waitVisibility(elementLocator, polling);
+            } catch(err) {
+                if (i >= attempts) {
+                    Logger.error(`DriverHelper.waitAndGetElementAttribute - failed with exception, out of attempts - ${err}`);
+                    throw err;
+                } else {
+                    continue;
+                }
+            }
 
             try {
                 const attributeValue = await element.getAttribute(attribute);
@@ -257,7 +282,6 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
-
                 throw err;
             }
         }
@@ -265,17 +289,25 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum gettin of the '${attribute}' attribute attempts, from the '${elementLocator}' element`);
     }
 
-    public async waitAndGetCssValue(elementLocator: By,
-        cssAttribute: string,
-        visibilityTimeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
-
-        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
+    public async waitAndGetCssValue(elementLocator: By, cssAttribute: string,
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = Math.ceil(timeout / polling);
 
         Logger.trace(`DriverHelper.waitAndGetCssValue ${elementLocator} cssAttribute: ${cssAttribute}`);
 
         for (let i = 0; i < attempts; i++) {
-            const element: WebElement = await this.waitVisibility(elementLocator, visibilityTimeout);
+            let element: WebElement;
+            try {
+                element = await this.waitVisibility(elementLocator, polling);
+            } catch(err) {
+                if (i >= attempts) {
+                    Logger.error(`DriverHelper.waitAndGetCssValue - failed with exception, out of attempts - ${err}`);
+                    throw err;
+                } else {
+                    continue;
+                }
+            }
 
             try {
                 const cssAttributeValue = await element.getCssValue(cssAttribute);
@@ -285,7 +317,6 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
-
                 throw err;
             }
         }
@@ -310,13 +341,23 @@ export class DriverHelper {
     }
 
     public async type(elementLocator: By, text: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = Math.ceil(timeout / polling);
 
         Logger.trace(`DriverHelper.type ${elementLocator} text: ${text}`);
 
         for (let i = 0; i < attempts; i++) {
-            const element: WebElement = await this.waitVisibility(elementLocator, timeout);
+            let element: WebElement;
+            try {
+                element = await this.waitVisibility(elementLocator, polling);
+            } catch(err) {
+                if (i >= attempts) {
+                    Logger.error(`DriverHelper.type - failed with exception, out of attempts - ${err}`);
+                    throw err;
+                } else {
+                    continue;
+                }
+            }
 
             try {
                 await element.sendKeys(text);
@@ -326,7 +367,6 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
-
                 throw err;
             }
         }
@@ -335,13 +375,23 @@ export class DriverHelper {
     }
 
     public async typeToInvisible(elementLocator: By, text: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = Math.ceil(timeout / polling);
 
         Logger.trace(`DriverHelper.typeToInvisible ${elementLocator} text: ${text}`);
 
         for (let i = 0; i < attempts; i++) {
-            const element: WebElement = await this.waitPresence(elementLocator, timeout);
+            let element: WebElement;
+            try {
+                element = await this.waitPresence(elementLocator, polling);
+            } catch(err) {
+                if (i >= attempts) {
+                    Logger.error(`DriverHelper.typeToInvisible - failed with exception, out of attempts - ${err}`);
+                    throw err;
+                } else {
+                    continue;
+                }
+            }
 
             try {
                 await element.sendKeys(text);
@@ -351,7 +401,6 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
-
                 throw err;
             }
         }
@@ -360,13 +409,23 @@ export class DriverHelper {
     }
 
     public async clear(elementLocator: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = Math.ceil(timeout / polling);
 
         Logger.trace(`DriverHelper.clear ${elementLocator}`);
 
         for (let i = 0; i < attempts; i++) {
-            const element: WebElement = await this.waitVisibility(elementLocator, timeout);
+            let element: WebElement;
+            try {
+                element = await this.waitVisibility(elementLocator, polling);
+            } catch(err) {
+                if (i >= attempts) {
+                    Logger.error(`DriverHelper.clear - failed with exception, out of attempts - ${err}`);
+                    throw err;
+                } else {
+                    continue;
+                }
+            }
 
             try {
                 await element.clear();
@@ -376,7 +435,6 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
-
                 throw err;
             }
         }
@@ -385,13 +443,23 @@ export class DriverHelper {
     }
 
     public async clearInvisible(elementLocator: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = Math.ceil(timeout / polling);
 
         Logger.trace(`DriverHelper.clearInvisible ${elementLocator}`);
 
         for (let i = 0; i < attempts; i++) {
-            const element: WebElement = await this.waitPresence(elementLocator, timeout);
+            let element: WebElement;
+            try {
+                element = await this.waitPresence(elementLocator, polling);
+            } catch(err) {
+                if (i >= attempts) {
+                    Logger.error(`DriverHelper.clearInvisible - failed with exception, out of attempts - ${err}`);
+                    throw err;
+                } else {
+                    continue;
+                }
+            }
 
             try {
                 await element.clear();
@@ -401,7 +469,6 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
-
                 throw err;
             }
         }
@@ -426,13 +493,23 @@ export class DriverHelper {
     }
 
     public async waitAndGetText(elementLocator: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
-        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = Math.ceil(timeout / polling);
 
         Logger.trace(`DriverHelper.waitAndGetText ${elementLocator}`);
 
         for (let i = 0; i < attempts; i++) {
-            const element: WebElement = await this.waitVisibility(elementLocator, timeout);
+            let element: WebElement;
+            try {
+                element = await this.waitVisibility(elementLocator, polling);
+            } catch(err) {
+                if (i >= attempts) {
+                    Logger.error(`DriverHelper.waitAndGetText - failed with exception, out of attempts - ${err}`);
+                    throw err;
+                } else {
+                    continue;
+                }
+            }
 
             try {
                 const innerText: string = await element.getText();
@@ -442,7 +519,6 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
-
                 throw err;
             }
         }
@@ -492,18 +568,28 @@ export class DriverHelper {
             if (urlEquals) {
                 return true;
             }
-        });
+        }, timeout);
     }
 
     public async scrollTo(elementLocator: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = Math.ceil(timeout / polling);
 
         Logger.trace(`DriverHelper.scrollTo ${elementLocator}`);
 
         for (let i = 0; i < attempts; i++) {
-            const element: WebElement = await this.waitPresence(elementLocator, timeout);
-
+            let element: WebElement;
+            try {
+                element = await this.waitPresence(elementLocator, polling);
+            } catch(err) {
+                if (i >= attempts) {
+                    Logger.error(`DriverHelper.scrollTo - failed with exception, out of attempts - ${err}`);
+                    throw err;
+                } else {
+                    continue;
+                }
+            }
+            
             try {
                 await this.getAction().mouseMove(element).perform();
                 return;
@@ -512,7 +598,6 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
-
                 throw err;
             }
         }
