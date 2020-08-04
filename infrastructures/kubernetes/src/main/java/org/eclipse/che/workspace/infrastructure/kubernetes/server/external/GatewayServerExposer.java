@@ -33,7 +33,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServ
 public class GatewayServerExposer<T extends KubernetesEnvironment>
     implements ExternalServerExposer<T> {
 
-  private static final Map<String, String> GATEWAY_CONFIGMAP_LABELS =
+  protected static final Map<String, String> GATEWAY_CONFIGMAP_LABELS =
       ImmutableMap.<String, String>builder()
           .put("app", "che")
           .put("role", "gateway-config")
@@ -124,9 +124,7 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
       Map<String, ServerConfig> serversConfigs, String path, String machineName) {
     Map<String, ServerConfig> configsWithPaths = new HashMap<>();
     for (String scKey : serversConfigs.keySet()) {
-      ServerConfigImpl sc = new ServerConfigImpl(serversConfigs.get(scKey));
-      sc.setPath(path);
-      configsWithPaths.put(scKey, sc);
+      configsWithPaths.put(scKey, new ServerConfigImpl(serversConfigs.get(scKey)).withPath(path));
     }
 
     return Annotations.newSerializer()
