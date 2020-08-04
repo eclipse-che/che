@@ -103,8 +103,8 @@ public class GithubURLParser {
             .withRepository(repoName)
             .withBranch(branchName)
             .withFactoryFilename(".factory.json")
-            .withSubfolder(matcher.group("subFolder"));
-    githubUrl.withDevfileFilenames(devfileFilenamesProvider.getConfiguredDevfileFilenames());
+            .withSubfolder(matcher.group("subFolder"))
+            .withDevfileFilenames(devfileFilenamesProvider.getConfiguredDevfileFilenames());
     return githubUrl;
   }
 }
