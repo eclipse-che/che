@@ -17,13 +17,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-/**
- * Provides list of configured devfile filenames to look in repository-based factories.
- */
+/** Provides list of configured devfile filenames to look in repository-based factories. */
 @Singleton
 public class DevfileFilenamesProvider {
 
-  private List<String> configuredDevfileFilenames;
+  private final List<String> configuredDevfileFilenames;
 
   @Inject
   public DevfileFilenamesProvider(

@@ -47,6 +47,8 @@ public class DefaultFactoryUrl implements RemoteFactoryUrl {
 
   @Override
   public Map<String, String> devfileFileLocations() {
+    // since for general URL's we didn't have exact filename and always have only one
+    // location, so this kind of map is ok here
     return singletonMap(null, devfileFileLocation);
   }
 

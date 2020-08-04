@@ -108,8 +108,8 @@ public class URLFactoryBuilder {
       FileContentProvider fileContentProvider,
       Map<String, String> overrideProperties)
       throws BadRequestException {
-    for (Map.Entry<String, String> devfileLocation : remoteFactoryUrl.devfileFileLocations()
-        .entrySet()) {
+    for (Map.Entry<String, String> devfileLocation :
+        remoteFactoryUrl.devfileFileLocations().entrySet()) {
       String devfileYamlContent = urlFetcher.fetchSafely(devfileLocation.getValue());
       if (isNullOrEmpty(devfileYamlContent)) {
         continue;

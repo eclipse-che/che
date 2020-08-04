@@ -28,9 +28,9 @@ import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 public class GithubURLParser {
 
   /** Fetcher to grab PR data */
-  private URLFetcher urlFetcher;
+  private final URLFetcher urlFetcher;
 
-  private DevfileFilenamesProvider devfileFilenamesProvider;
+  private final DevfileFilenamesProvider devfileFilenamesProvider;
 
   @Inject
   public GithubURLParser(URLFetcher urlFetcher, DevfileFilenamesProvider devfileFilenamesProvider) {
@@ -104,7 +104,7 @@ public class GithubURLParser {
             .withBranch(branchName)
             .withFactoryFilename(".factory.json")
             .withSubfolder(matcher.group("subFolder"));
-    devfileFilenamesProvider.getConfiguredDevfileFilenames().forEach(githubUrl::addDevfileFilename);
+    githubUrl.withDevfileFilenames(devfileFilenamesProvider.getConfiguredDevfileFilenames());
     return githubUrl;
   }
 }

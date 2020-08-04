@@ -84,8 +84,8 @@ public class GithubUrl implements RemoteFactoryUrl {
     return this;
   }
 
-  protected GithubUrl addDevfileFilename(String devfileFilename) {
-    this.devfileFilenames.add(devfileFilename);
+  protected GithubUrl withDevfileFilenames(List<String> devfileFilenames) {
+    this.devfileFilenames.addAll(devfileFilenames);
     return this;
   }
 
@@ -152,6 +152,7 @@ public class GithubUrl implements RemoteFactoryUrl {
 
   /**
    * Provides map of configured devfile filenames and location to theirs raw content
+   *
    * @return map of devfile filenames and locations
    */
   @Override
