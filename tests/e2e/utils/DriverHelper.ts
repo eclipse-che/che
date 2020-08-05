@@ -265,7 +265,7 @@ export class DriverHelper {
             let element: WebElement;
             try {
                 element = await this.waitVisibility(elementLocator, polling);
-            } catch(err) {
+            } catch (err) {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.waitAndGetElementAttribute - failed with exception, out of attempts - ${err}`);
                     throw err;
@@ -300,7 +300,7 @@ export class DriverHelper {
             let element: WebElement;
             try {
                 element = await this.waitVisibility(elementLocator, polling);
-            } catch(err) {
+            } catch (err) {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.waitAndGetCssValue - failed with exception, out of attempts - ${err}`);
                     throw err;
@@ -350,7 +350,7 @@ export class DriverHelper {
             let element: WebElement;
             try {
                 element = await this.waitVisibility(elementLocator, polling);
-            } catch(err) {
+            } catch (err) {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.type - failed with exception, out of attempts - ${err}`);
                     throw err;
@@ -384,7 +384,7 @@ export class DriverHelper {
             let element: WebElement;
             try {
                 element = await this.waitPresence(elementLocator, polling);
-            } catch(err) {
+            } catch (err) {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.typeToInvisible - failed with exception, out of attempts - ${err}`);
                     throw err;
@@ -418,7 +418,7 @@ export class DriverHelper {
             let element: WebElement;
             try {
                 element = await this.waitVisibility(elementLocator, polling);
-            } catch(err) {
+            } catch (err) {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.clear - failed with exception, out of attempts - ${err}`);
                     throw err;
@@ -452,7 +452,7 @@ export class DriverHelper {
             let element: WebElement;
             try {
                 element = await this.waitPresence(elementLocator, polling);
-            } catch(err) {
+            } catch (err) {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.clearInvisible - failed with exception, out of attempts - ${err}`);
                     throw err;
@@ -502,7 +502,7 @@ export class DriverHelper {
             let element: WebElement;
             try {
                 element = await this.waitVisibility(elementLocator, polling);
-            } catch(err) {
+            } catch (err) {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.waitAndGetText - failed with exception, out of attempts - ${err}`);
                     throw err;
@@ -581,7 +581,7 @@ export class DriverHelper {
             let element: WebElement;
             try {
                 element = await this.waitPresence(elementLocator, polling);
-            } catch(err) {
+            } catch (err) {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.scrollTo - failed with exception, out of attempts - ${err}`);
                     throw err;
@@ -589,7 +589,7 @@ export class DriverHelper {
                     continue;
                 }
             }
-            
+
             try {
                 await this.getAction().mouseMove(element).perform();
                 return;
