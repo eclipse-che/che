@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisioner.getSecureProtocol;
 
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
@@ -19,13 +20,13 @@ import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressTLS;
 import io.fabric8.kubernetes.api.model.extensions.IngressTLSBuilder;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -39,7 +40,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  *
  * @author Guy Daich
  */
-public class IngressTlsProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
+@Singleton
+public class IngressTlsProvisioner
+    implements ConfigurationProvisioner<KubernetesEnvironment>,
+        TlsProvisioner<KubernetesEnvironment> {
   static final String TLS_SECRET_TYPE = "kubernetes.io/tls";
 
   private final boolean isTlsEnabled;
@@ -79,9 +83,8 @@ public class IngressTlsProvisioner implements ConfigurationProvisioner<Kubernete
       provisionTlsSecret(k8sEnv, wsTlsSecretName);
     }
 
-    Collection<Ingress> ingresses = k8sEnv.getIngresses().values();
-    for (Ingress ingress : ingresses) {
-      useSecureProtocolForServers(ingress);
+    for (Ingress ingress : k8sEnv.getIngresses().values()) {
+      useSecureProtocolForIngressServers(ingress);
       enableTLS(ingress, wsTlsSecretName);
     }
   }
@@ -120,22 +123,18 @@ public class IngressTlsProvisioner implements ConfigurationProvisioner<Kubernete
     ingress.getSpec().setTls(ingressTLSList);
   }
 
-  private void useSecureProtocolForServers(final Ingress ingress) {
+  private void useSecureProtocolForIngressServers(final Ingress ingress) {
     Map<String, ServerConfigImpl> servers =
         Annotations.newDeserializer(ingress.getMetadata().getAnnotations()).servers();
+
+    if (servers.isEmpty()) {
+      return;
+    }
 
     servers.values().forEach(s -> s.setProtocol(getSecureProtocol(s.getProtocol())));
 
     Map<String, String> annotations = Annotations.newSerializer().servers(servers).annotations();
 
     ingress.getMetadata().getAnnotations().putAll(annotations);
-  }
-
-  private String getSecureProtocol(final String protocol) {
-    if ("ws".equals(protocol)) {
-      return "wss";
-    } else if ("http".equals(protocol)) {
-      return "https";
-    } else return protocol;
   }
 }

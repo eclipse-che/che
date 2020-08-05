@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2012-2019 Red Hat, Inc.
+# Copyright (c) 2012-2020 Red Hat, Inc.
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -229,11 +229,11 @@ init() {
 
   if [ -z "$CHE_HOME" ]; then
     if [ -f "/assembly/tomcat/bin/catalina.sh" ]; then
-      echo "Found custom assembly in /assembly"
       export CHE_HOME="/assembly"
+      echo "Found custom assembly in ${CHE_HOME}"
     else
-      echo "Using embedded assembly."
       export CHE_HOME=$(echo /home/user/eclipse-che/)
+      echo "Using embedded assembly in ${CHE_HOME}."
     fi
   else
     export CHE_HOME=$(echo ${CHE_HOME})
@@ -260,7 +260,6 @@ init() {
   fi
 
   [ -z "$CHE_DATABASE" ] && export CHE_DATABASE=${CHE_DATA}/storage
-  [ -z "$CHE_TEMPLATE_STORAGE" ] && export CHE_TEMPLATE_STORAGE=${CHE_DATA}/templates
 
   perform_database_migration
 
@@ -280,7 +279,6 @@ init() {
     rm -rf "${CHE_DATA}"/stacks
   fi
 
-
   # A che property, which names the Docker network used for che + ws to communicate
   if [ -z "$CHE_DOCKER_NETWORK" ]; then
     NETWORK_NAME="bridge"
@@ -291,7 +289,7 @@ init() {
 }
 
 add_cert_to_truststore() {
-  DEFAULT_JAVA_TRUST_STORE=$JAVA_HOME/lib/security/cacerts
+  DEFAULT_JAVA_TRUST_STORE=${JAVA_HOME}/lib/security/cacerts
   DEFAULT_JAVA_TRUST_STOREPASS="changeit"
 
   JAVA_TRUST_STORE=/home/user/cacerts
@@ -308,7 +306,8 @@ add_cert_to_truststore() {
   echo "$1" > $SELF_SIGNED_CERT
 
   # make sure that owner has permissions to write and other groups have permissions to read
-  chmod 644 $JAVA_TRUST_STORE
+  # note that this might not work when running as anyuid OpenShift user, which is why we're forcing a true if it fails
+  chmod 644 $JAVA_TRUST_STORE || true
 
   echo yes | keytool -keystore $JAVA_TRUST_STORE -importcert -alias "$2" -file $SELF_SIGNED_CERT -storepass $DEFAULT_JAVA_TRUST_STOREPASS > /dev/null
   # allow only read by all groups

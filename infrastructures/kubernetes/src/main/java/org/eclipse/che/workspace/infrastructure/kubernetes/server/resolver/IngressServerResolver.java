@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.kubernetes.server;
+package org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -18,12 +18,15 @@ import com.google.common.collect.Multimap;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressRule;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.RuntimeServerBuilder;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 
 /**
@@ -38,22 +41,16 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Ingre
  * @see KubernetesServerExposer
  * @see Annotations
  */
-public class KubernetesServerResolver {
-  private final Multimap<String, Service> services;
+public class IngressServerResolver extends AbstractServerResolver {
   private final Multimap<String, Ingress> ingresses;
-  private IngressPathTransformInverter pathTransformInverter;
+  private final IngressPathTransformInverter pathTransformInverter;
 
-  public KubernetesServerResolver(
+  public IngressServerResolver(
       IngressPathTransformInverter pathTransformInverter,
       List<Service> services,
       List<Ingress> ingresses) {
+    super(services);
     this.pathTransformInverter = pathTransformInverter;
-    this.services = ArrayListMultimap.create();
-    for (Service service : services) {
-      String machineName =
-          Annotations.newDeserializer(service.getMetadata().getAnnotations()).machineName();
-      this.services.put(machineName, service);
-    }
 
     this.ingresses = ArrayListMultimap.create();
     for (Ingress ingress : ingresses) {
@@ -63,45 +60,17 @@ public class KubernetesServerResolver {
     }
   }
 
-  /**
-   * Resolves servers by the specified machine name.
-   *
-   * @param machineName machine to resolve servers
-   * @return resolved servers
-   */
-  public Map<String, ServerImpl> resolve(String machineName) {
-    Map<String, ServerImpl> servers = new HashMap<>();
-    fillInternalServers(machineName, servers);
-    fillExternalServers(machineName, servers);
-    return servers;
+  @Override
+  protected Map<String, ServerImpl> resolveExternalServers(String machineName) {
+    return ingresses
+        .get(machineName)
+        .stream()
+        .map(this::fillIngressServers)
+        .flatMap(m -> m.entrySet().stream())
+        .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (v1, v2) -> v2));
   }
 
-  private void fillInternalServers(String machineName, Map<String, ServerImpl> servers) {
-    services.get(machineName).forEach(service -> fillServiceServers(service, servers));
-  }
-
-  protected void fillExternalServers(String machineName, Map<String, ServerImpl> servers) {
-    ingresses.get(machineName).forEach(ingress -> fillIngressServers(ingress, servers));
-  }
-
-  private void fillServiceServers(Service service, Map<String, ServerImpl> servers) {
-    Annotations.newDeserializer(service.getMetadata().getAnnotations())
-        .servers()
-        .forEach(
-            (name, config) ->
-                servers.put(
-                    name,
-                    new RuntimeServerBuilder()
-                        .protocol(config.getProtocol())
-                        .host(service.getMetadata().getName())
-                        .port(config.getPort())
-                        .path(config.getPath())
-                        .attributes(config.getAttributes())
-                        .targetPort(config.getPort())
-                        .build()));
-  }
-
-  private void fillIngressServers(Ingress ingress, Map<String, ServerImpl> servers) {
+  private Map<String, ServerImpl> fillIngressServers(Ingress ingress) {
     IngressRule ingressRule = ingress.getSpec().getRules().get(0);
 
     // host either set by rule, or determined by LB ip
@@ -110,25 +79,27 @@ public class KubernetesServerResolver {
             ? ingressRule.getHost()
             : ingress.getStatus().getLoadBalancer().getIngress().get(0).getIp();
 
-    Annotations.newDeserializer(ingress.getMetadata().getAnnotations())
+    return Annotations.newDeserializer(ingress.getMetadata().getAnnotations())
         .servers()
-        .forEach(
-            (name, config) -> {
-              String path =
-                  buildPath(
-                      pathTransformInverter.undoPathTransformation(
-                          ingressRule.getHttp().getPaths().get(0).getPath()),
-                      config.getPath());
-              servers.put(
-                  name,
-                  new RuntimeServerBuilder()
-                      .protocol(config.getProtocol())
+        .entrySet()
+        .stream()
+        .collect(
+            Collectors.toMap(
+                Entry::getKey,
+                e -> {
+                  String path =
+                      buildPath(
+                          pathTransformInverter.undoPathTransformation(
+                              ingressRule.getHttp().getPaths().get(0).getPath()),
+                          e.getValue().getPath());
+                  return new RuntimeServerBuilder()
+                      .protocol(e.getValue().getProtocol())
                       .host(host)
                       .path(path)
-                      .attributes(config.getAttributes())
-                      .targetPort(config.getPort())
-                      .build());
-            });
+                      .attributes(e.getValue().getAttributes())
+                      .targetPort(e.getValue().getPort())
+                      .build();
+                }));
   }
 
   private String buildPath(String fragment1, @Nullable String fragment2) {

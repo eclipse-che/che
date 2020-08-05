@@ -25,19 +25,29 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.DoneableNamespace;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.NamespaceList;
+import io.fabric8.kubernetes.api.model.ServiceAccountList;
+import io.fabric8.kubernetes.api.model.rbac.Role;
+import io.fabric8.kubernetes.api.model.rbac.RoleBindingList;
+import io.fabric8.kubernetes.api.model.rbac.RoleList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.user.server.UserManager;
@@ -59,6 +69,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+import org.testng.collections.Sets;
 
 /**
  * Tests {@link KubernetesNamespaceFactory}.
@@ -73,8 +84,7 @@ public class KubernetesNamespaceFactoryTest {
 
   @Mock private KubernetesSharedPool pool;
   @Mock private KubernetesClientFactory clientFactory;
-
-  @Mock private KubernetesClient k8sClient;
+  private KubernetesClient k8sClient;
   @Mock private UserManager userManager;
 
   @Mock
@@ -84,10 +94,15 @@ public class KubernetesNamespaceFactoryTest {
 
   @Mock private Resource<Namespace, DoneableNamespace> namespaceResource;
 
+  private KubernetesServer serverMock;
+
   private KubernetesNamespaceFactory namespaceFactory;
 
   @BeforeMethod
   public void setUp() throws Exception {
+    serverMock = new KubernetesServer(true, true);
+    serverMock.before();
+    k8sClient = spy(serverMock.getClient());
     lenient().when(clientFactory.create()).thenReturn(k8sClient);
     lenient().when(k8sClient.namespaces()).thenReturn(namespaceOperation);
     lenient().when(namespaceOperation.withName(any())).thenReturn(namespaceResource);
@@ -101,6 +116,7 @@ public class KubernetesNamespaceFactoryTest {
   @AfterMethod
   public void tearDown() {
     EnvironmentContext.reset();
+    serverMock.after();
   }
 
   @Test
@@ -332,6 +348,156 @@ public class KubernetesNamespaceFactoryTest {
   }
 
   @Test
+  public void shouldBindToAllConfiguredClusterRoles() throws Exception {
+    // given
+    namespaceFactory =
+        spy(
+            new KubernetesNamespaceFactory(
+                "",
+                "serviceAccount",
+                "cr2, cr3",
+                "<workspaceid>",
+                false,
+                clientFactory,
+                userManager,
+                pool));
+    KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
+    when(toReturnNamespace.getWorkspaceId()).thenReturn("workspace123");
+    when(toReturnNamespace.getName()).thenReturn("workspace123");
+    doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespaceAccess(any(), any());
+    when(clientFactory.create(any())).thenReturn(k8sClient);
+
+    // pre-create the cluster roles
+    Stream.of("cr1", "cr2", "cr3")
+        .forEach(
+            cr ->
+                k8sClient
+                    .rbac()
+                    .clusterRoles()
+                    .createOrReplaceWithNew()
+                    .withNewMetadata()
+                    .withName(cr)
+                    .endMetadata()
+                    .done());
+
+    // when
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", null, USER_ID, "workspace123");
+    namespaceFactory.getOrCreate(identity);
+
+    // then
+    verify(namespaceFactory).doCreateServiceAccount("workspace123", "workspace123");
+
+    ServiceAccountList sas = k8sClient.serviceAccounts().inNamespace("workspace123").list();
+    assertEquals(sas.getItems().size(), 1);
+    assertEquals(sas.getItems().get(0).getMetadata().getName(), "serviceAccount");
+
+    RoleList roles = k8sClient.rbac().roles().inNamespace("workspace123").list();
+    assertEquals(
+        Sets.newHashSet("workspace-view", "exec"),
+        roles.getItems().stream().map(r -> r.getMetadata().getName()).collect(Collectors.toSet()));
+
+    RoleBindingList bindings = k8sClient.rbac().roleBindings().inNamespace("workspace123").list();
+    assertEquals(
+        bindings
+            .getItems()
+            .stream()
+            .map(r -> r.getMetadata().getName())
+            .collect(Collectors.toSet()),
+        Sets.newHashSet(
+            "serviceAccount-cluster0",
+            "serviceAccount-cluster1",
+            "serviceAccount-view",
+            "serviceAccount-exec"));
+  }
+
+  @Test
+  public void shouldCreateExecAndViewRolesAndBindings() throws Exception {
+    // given
+    namespaceFactory =
+        spy(
+            new KubernetesNamespaceFactory(
+                "",
+                "serviceAccount",
+                "",
+                "<workspaceid>",
+                false,
+                clientFactory,
+                userManager,
+                pool));
+    KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
+    when(toReturnNamespace.getWorkspaceId()).thenReturn("workspace123");
+    when(toReturnNamespace.getName()).thenReturn("workspace123");
+    doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespaceAccess(any(), any());
+    when(clientFactory.create(any())).thenReturn(k8sClient);
+
+    // when
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", null, USER_ID, "workspace123");
+    namespaceFactory.getOrCreate(identity);
+
+    // then
+    verify(namespaceFactory).doCreateServiceAccount("workspace123", "workspace123");
+
+    ServiceAccountList sas = k8sClient.serviceAccounts().inNamespace("workspace123").list();
+    assertEquals(sas.getItems().size(), 1);
+    assertEquals(sas.getItems().get(0).getMetadata().getName(), "serviceAccount");
+
+    RoleList roles = k8sClient.rbac().roles().inNamespace("workspace123").list();
+    assertEquals(
+        Sets.newHashSet("workspace-view", "exec"),
+        roles.getItems().stream().map(r -> r.getMetadata().getName()).collect(Collectors.toSet()));
+    Role role1 = roles.getItems().get(0);
+    Role role2 = roles.getItems().get(1);
+
+    assertFalse(
+        role1.getRules().containsAll(role2.getRules())
+            && role2.getRules().containsAll(role1.getRules()),
+        "exec and view roles should not be the same");
+
+    RoleBindingList bindings = k8sClient.rbac().roleBindings().inNamespace("workspace123").list();
+    assertEquals(
+        Sets.newHashSet("serviceAccount-view", "serviceAccount-exec"),
+        bindings
+            .getItems()
+            .stream()
+            .map(r -> r.getMetadata().getName())
+            .collect(Collectors.toSet()));
+  }
+
+  @Test
+  public void testNullClusterRolesResultsInEmptySet() {
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "blabol-<userid>-<username>-<userid>-<username>--",
+            "",
+            null,
+            "che-<userid>",
+            false,
+            clientFactory,
+            userManager,
+            pool);
+    assertTrue(namespaceFactory.getClusterRoleNames().isEmpty());
+  }
+
+  @Test
+  public void testClusterRolesProperlyParsed() {
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "blabol-<userid>-<username>-<userid>-<username>--",
+            "",
+            "  one,two, three ,,five  ",
+            "che-<userid>",
+            false,
+            clientFactory,
+            userManager,
+            pool);
+    Set<String> expected = Sets.newHashSet("one", "two", "three", "five");
+    assertTrue(namespaceFactory.getClusterRoleNames().containsAll(expected));
+    assertTrue(expected.containsAll(namespaceFactory.getClusterRoleNames()));
+  }
+
+  @Test
   public void
       testEvalNamespaceUsesNamespaceDefaultIfWorkspaceDoesntRecordNamespaceAndLegacyNamespaceDoesntExist()
           throws Exception {
@@ -360,7 +526,6 @@ public class KubernetesNamespaceFactoryTest {
   public void
       testEvalNamespaceUsesLegacyNamespaceIfWorkspaceDoesntRecordNamespaceAndLegacyNamespaceExists()
           throws Exception {
-
     namespaceFactory =
         new KubernetesNamespaceFactory(
             "blabol-<userid>-<username>-<userid>-<username>",
@@ -384,7 +549,6 @@ public class KubernetesNamespaceFactoryTest {
   @Test
   public void testEvalNamespaceUsesWorkspaceRecordedNamespaceIfWorkspaceRecordsIt()
       throws Exception {
-
     namespaceFactory =
         new KubernetesNamespaceFactory(
             "blabol-<userid>-<username>-<userid>-<username>",
@@ -410,7 +574,6 @@ public class KubernetesNamespaceFactoryTest {
 
   @Test
   public void testEvalNamespaceTreatsWorkspaceRecordedNamespaceLiterally() throws Exception {
-
     namespaceFactory =
         new KubernetesNamespaceFactory(
             "blabol-<userid>-<username>-<userid>-<username>",

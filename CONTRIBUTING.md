@@ -11,27 +11,61 @@
 
 Che is composed of multiple sub projects. For each projects we provide a *CONTRIBUTE.md* file describing how to setup the development environment to start your contribution. Most of the time, we encourage you to use Che to contribute to Che.
 
-Repository | Component | Description | Devfile | Contributing.md
+<!-- begin repository list -->
+Repository | Component | Description | Devfile | Documentation
 --- | --- | ---  | --- | ---
-[che](https://github.com/eclipse/che) | | (this repository) the main project repository | |
----| [wsmaster](https://github.com/eclipse/che/tree/master/wsmaster) | orchestrates the Che workspaces with devfiles on Kubernetes | [devfile ](https://github.com/eclipse/che/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#che-server-aka-ws-master)
---- | [dockerfiles](https://github.com/eclipse/che/tree/master/dockerfiles) | source code, dockerfiles to build our main docker images. Note that Che-theia related dockerfiles are located in che-theia repo. | | 
---- | [e2e](https://github.com/eclipse/che/tree/master/e2e) | source code of our integration tests. | | 
-[workspace-loader](https://github.com/eclipse/che-workspace-loader) |  |  | [devfile](https://github.com/eclipse/che-workspace-loader/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che-workspace-loader/blob/master/CONTRIBUTING.md)
-[dashboard](https://github.com/eclipse/che-dashboard) | | UI to manage workspaces, devfiles, etc. | [devfile](https://github.com/eclipse/che-dashboard/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard)
-[chectl](https://github.com/che-incubator/chectl) | | The CLI to install Che, create and start workspaces and devfiles | [devfile](https://github.com/che-incubator/chectl/blob/master/devfile.yaml) | [doc](https://github.com/che-incubator/chectl/blob/master/CONTRIBUTING.md)
+[che](https://github.com/eclipse/che) | | (this repository) the main project repository | [devfile](https://github.com/eclipse/che/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#che-server-aka-ws-master)
+---| [dockerfiles](https://github.com/eclipse/che/tree/master/dockerfiles) | source code, dockerfiles to build our main docker images. Note that Che-theia related dockerfiles are located in che-theia repo. | | |
+---| [wsmaster](https://github.com/eclipse/che/tree/master/wsmaster) | orchestrates the Che workspaces with devfiles on Kubernetes | | |
+---| [tests](https://github.com/eclipse/che/tree/master/tests) | source code of our integration tests. | | |
 [che-theia](https://github.com/eclipse/che-theia) | | Theia IDE integrated in Che. | [devfile](https://github.com/eclipse/che-theia/blob/master/devfiles/che-theia-all.devfile.yaml) | [doc](https://github.com/eclipse/che-theia/blob/master/CONTRIBUTING.md)
---- | [generator](https://github.com/eclipse/che-theia/tree/master/generator) | `che:theia init` CLI to prepare and build che-theia | | [doc](https://github.com/eclipse/che-theia/blob/master/generator/CONTRIBUTING.md)
-[devfile-registry](https://github.com/eclipse/che-devfile-registry) | | The default set of devfiles that would be made available on the Che dashboard stacks. | | 
-[docs](https://github.com/eclipse/che-docs) | | Eclipse Che documentation https://www.eclipse.org/che/docs/ source code. | [devfile](https://github.com/eclipse/che-docs/blob/master/devfile.yaml) | 
+---| [generator](https://github.com/eclipse/che-theia/tree/master/generator) | `che:theia init` CLI to prepare and build che-theia | | |
+[chectl](https://github.com/che-incubator/chectl) | | The CLI to install Che, create and start workspaces and devfiles | [devfile](https://github.com/che-incubator/chectl/blob/master/devfile.yaml) | [doc](https://github.com/che-incubator/chectl/blob/master/CONTRIBUTING.md)
+[dashboard](https://github.com/eclipse/che-dashboard) | | UI to manage workspaces, devfiles, etc. | [devfile](https://github.com/eclipse/che-dashboard/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard)
+[devfile-registry](https://github.com/eclipse/che-devfile-registry) | | The default set of devfiles that would be made available on the Che dashboard stacks. |  | 
+[docs](https://github.com/eclipse/che-docs) | | Eclipse Che documentation https://www.eclipse.org/che/docs/ source code. | [devfile](https://github.com/eclipse/che-docs/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard)
 [machine-exec](https://github.com/eclipse/che-machine-exec) | | Interface to execute tasks and terminals on other containers within a workspace. | [devfile](https://github.com/eclipse/che-machine-exec/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che-machine-exec/blob/master/CONTRIBUTING.md)
-[operator](https://github.com/eclipse/che-operator) | | Che operator to deploy, update and manage K8S/OpenShift resources of Che. | | 
+[operator](https://github.com/eclipse/che-operator) | | Che operator to deploy, update and manage K8S/OpenShift resources of Che. | [devfile](https://github.com/eclipse/che-operator/blob/master/devfile.yaml) | 
 [plugin-broker](https://github.com/eclipse/che-plugin-broker) | | The workspace microservice that is in charge of analyzing, preparing and installing the workspace components defined in a Devfile. | [devfile](https://github.com/eclipse/che-plugin-broker/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che-plugin-broker/blob/master/CONTRIBUTING.md)
-[plugin-registry](https://github.com/eclipse/che-plugin-registry) | | The default set of Che plugins (vscode extension + containers) or editors that could be installed on any Che workspaces. | |
-[redhat-developer/devfile](https://github.com/redhat-developer/devfile) | | Contribute to the devfile documentation: https://redhat-developer.github.io/devfile/ | | 
+[plugin-registry](https://github.com/eclipse/che-plugin-registry) | | The default set of Che plugins (vscode extension + containers) or editors that could be installed on any Che workspaces. |  | 
 [website](https://github.com/eclipse/che-website) | | https://eclipse.org/che website source code. | [devfile](https://github.com/eclipse/che-website/blob/master/devfile.yaml) | 
-[workspace-client](https://github.com/eclipse/che-workspace-client) | | JS library to interact with a che-server. | | 
-
+[workspace-client](https://github.com/eclipse/che-workspace-client) | | JS library to interact with a che-server. |  | 
+[workspace-loader](https://github.com/eclipse/che-workspace-loader) | | UI to load workspaces within dashboard | [devfile](https://github.com/eclipse/che-workspace-loader/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che-workspace-loader/blob/master/CONTRIBUTING.md)
+[che-sidecar-bazel](https://github.com/che-dockerfiles/che-sidecar-bazel) | | Eclipse Che Sidecar container for Bazel tooling |  | 
+[che-sidecar-protobuf](https://github.com/che-dockerfiles/che-sidecar-protobuf) | | Eclipse Che Sidecar container for Protobuf tooling |  | 
+[che-sidecar-tekton](https://github.com/che-dockerfiles/che-sidecar-tekton) | | Eclipse Che Sidecar container for Tekton tooling |  | 
+[che-sidecar-kubernetes-tooling](https://github.com/che-dockerfiles/che-sidecar-kubernetes-tooling) | | Eclipse Che Sidecar container for Kubernetes tooling |  | 
+[che-sidecar-openshift-connector](https://github.com/che-dockerfiles/che-sidecar-openshift-connector) | | Eclipse Che Sidecar container for OpenShift connector tooling |  | 
+[che-container-tools](https://github.com/che-dockerfiles/che-container-tools) | | Base image used for sidecars that service container tooling plugins |  | 
+[che-sidecar-python](https://github.com/che-dockerfiles/che-sidecar-python) | | Eclipse Che Sidecar container for python tooling |  | 
+[che-custom-nodejs-deasync](https://github.com/che-dockerfiles/che-custom-nodejs-deasync) | | Provides a custom nodejs binary embedding deasync node-gyp module as builtin module |  | 
+[che-sidecar-go](https://github.com/che-dockerfiles/che-sidecar-go) | | Eclipse Che sidecar container for go |  | 
+[che-sidecar-sonarlint](https://github.com/che-dockerfiles/che-sidecar-sonarlint) | | Eclipse Che sidecar container for sonalint extension |  | 
+[che-sidecar-dotnet](https://github.com/che-dockerfiles/che-sidecar-dotnet) | | Eclipse Che sidecar container for dotnet |  | 
+[che-sidecar-shellcheck](https://github.com/che-dockerfiles/che-sidecar-shellcheck) | | Eclipse Che sidecar container for shellcheck |  | 
+[che-sidecar-camelk](https://github.com/che-dockerfiles/che-sidecar-camelk) | | Eclipse Che sidecar container for camelk |  | 
+[che-sidecar-vale](https://github.com/che-dockerfiles/che-sidecar-vale) | | Eclipse Che sidecar container for vale |  | 
+[che-cert-manager-ca-cert-generator-image](https://github.com/che-dockerfiles/che-cert-manager-ca-cert-generator-image) | | CA cert generation job image used by chectl |  | 
+[che-buildkit-base](https://github.com/che-dockerfiles/che-buildkit-base) | | Eclipse Che Sidecar container for buildkit tooling |  | 
+[che-sidecar-scala](https://github.com/che-dockerfiles/che-sidecar-scala) | | Eclipse Che Sidecar container for scala tooling |  | 
+[che-buildah-base](https://github.com/che-dockerfiles/che-buildah-base) | | Use this image to build docker images using buildah |  | 
+[che-docker-registry-image-copier](https://github.com/che-dockerfiles/che-docker-registry-image-copier) | | copy images between public and private docker registry inside k8s cluster |  | 
+[che-php-base](https://github.com/che-dockerfiles/che-php-base) | | Base image to be used for the PHP devfile |  | 
+[che-tls-secret-creator](https://github.com/che-dockerfiles/che-tls-secret-creator) | | This images generates TLS certificates |  | 
+[build-action](https://github.com/che-dockerfiles/build-action) | | Custom GitHub Action for building sidecar Dockerfiles |  | 
+[che-sidecar-podman](https://github.com/che-dockerfiles/che-sidecar-podman) | | Eclipse Che Sidecar container for podman tooling |  | 
+[che-sidecar-clang](https://github.com/che-dockerfiles/che-sidecar-clang) | | Eclipse Che Sidecar container for clang tooling |  | 
+[che-sidecar-php](https://github.com/che-dockerfiles/che-sidecar-php) | | Eclipse Che Sidecar container for php tooling |  | 
+[che-sidecar-java](https://github.com/che-dockerfiles/che-sidecar-java) | | Eclipse Che Sidecar container for java tooling |  | 
+[che-sidecar-dependency-analytics](https://github.com/che-dockerfiles/che-sidecar-dependency-analytics) | | Eclipse Che Sidecar container for dependency analytics tooling |  | 
+[che-sidecar-node](https://github.com/che-dockerfiles/che-sidecar-node) | | Eclipse Che Sidecar container for node tooling |  | 
+[che-dashboard-next](https://github.com/che-incubator/che-dashboard-next) | | New dashboard for Eclipse CHE |  | 
+[che-theia-openshift-auth](https://github.com/che-incubator/che-theia-openshift-auth) | | OpenShift authentication plugin |  | 
+[configbump](https://github.com/che-incubator/configbump) | | Simple Kubernetes controller that is able to quickly synchronize a set of config maps |  | 
+[workspace-data-sync](https://github.com/che-incubator/workspace-data-sync) | | Provides the ability to increase I/O performance for a developer workspaces |  | 
+[che-workspace-telemetry-client](https://github.com/che-incubator/che-workspace-telemetry-client) | | abstract telemetry API and a Typescript implementation of the API. |  | 
+[kubernetes-image-puller](https://github.com/che-incubator/kubernetes-image-puller) | | ensures that all nodes in the cluster have those images cached |  | 
+<!-- end repository list -->
 
 ## Devfile to contribute
 

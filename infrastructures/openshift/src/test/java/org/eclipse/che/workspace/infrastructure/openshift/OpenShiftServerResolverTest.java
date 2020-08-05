@@ -31,13 +31,13 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.Serializer;
-import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerResolver;
+import org.eclipse.che.workspace.infrastructure.openshift.server.RouteServerResolver;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Test for {@link OpenShiftServerResolver}.
+ * Test for {@link RouteServerResolver}.
  *
  * @author Sergii Leshchenko
  */
@@ -61,8 +61,8 @@ public class OpenShiftServerResolverTest {
             ImmutableMap.of(
                 "http-server", new ServerConfigImpl("3054", "http", "/api", ATTRIBUTES_MAP)));
 
-    OpenShiftServerResolver serverResolver =
-        new OpenShiftServerResolver(singletonList(nonMatchedByPodService), singletonList(route));
+    RouteServerResolver serverResolver =
+        new RouteServerResolver(singletonList(nonMatchedByPodService), singletonList(route));
 
     // when
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
@@ -80,8 +80,7 @@ public class OpenShiftServerResolverTest {
             ImmutableMap.of(
                 "http-server", new ServerConfigImpl("3054", "http", "/api", ATTRIBUTES_MAP)));
 
-    OpenShiftServerResolver serverResolver =
-        new OpenShiftServerResolver(emptyList(), singletonList(route));
+    RouteServerResolver serverResolver = new RouteServerResolver(emptyList(), singletonList(route));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -103,8 +102,7 @@ public class OpenShiftServerResolverTest {
             singletonMap(
                 "http-server", new ServerConfigImpl("3054", "http", null, ATTRIBUTES_MAP)));
 
-    OpenShiftServerResolver serverResolver =
-        new OpenShiftServerResolver(emptyList(), singletonList(route));
+    RouteServerResolver serverResolver = new RouteServerResolver(emptyList(), singletonList(route));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -125,8 +123,7 @@ public class OpenShiftServerResolverTest {
             "machine",
             singletonMap("http-server", new ServerConfigImpl("3054", "http", "", ATTRIBUTES_MAP)));
 
-    OpenShiftServerResolver serverResolver =
-        new OpenShiftServerResolver(emptyList(), singletonList(route));
+    RouteServerResolver serverResolver = new RouteServerResolver(emptyList(), singletonList(route));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -148,8 +145,7 @@ public class OpenShiftServerResolverTest {
             singletonMap(
                 "http-server", new ServerConfigImpl("3054", "http", "api", ATTRIBUTES_MAP)));
 
-    OpenShiftServerResolver serverResolver =
-        new OpenShiftServerResolver(emptyList(), singletonList(route));
+    RouteServerResolver serverResolver = new RouteServerResolver(emptyList(), singletonList(route));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -173,8 +169,8 @@ public class OpenShiftServerResolverTest {
                 "http-server", new ServerConfigImpl("3054", "http", "api", ATTRIBUTES_MAP)));
     Route route = createRoute("matched", "machine", null);
 
-    OpenShiftServerResolver serverResolver =
-        new OpenShiftServerResolver(singletonList(service), singletonList(route));
+    RouteServerResolver serverResolver =
+        new RouteServerResolver(singletonList(service), singletonList(route));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -198,8 +194,8 @@ public class OpenShiftServerResolverTest {
                 "http-server", new ServerConfigImpl("3054/udp", "xxx", "api", ATTRIBUTES_MAP)));
     Route route = createRoute("matched", "machine", null);
 
-    OpenShiftServerResolver serverResolver =
-        new OpenShiftServerResolver(singletonList(service), singletonList(route));
+    RouteServerResolver serverResolver =
+        new RouteServerResolver(singletonList(service), singletonList(route));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 

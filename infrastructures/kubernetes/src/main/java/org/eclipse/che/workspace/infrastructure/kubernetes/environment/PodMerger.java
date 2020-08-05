@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
 import static java.lang.String.format;
+import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putAnnotations;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabels;
 
@@ -104,6 +105,10 @@ public class PodMerger {
 
       for (Volume volume : podData.getSpec().getVolumes()) {
         if (!volumes.add(volume.getName())) {
+          if (volume.getName().equals(PROJECTS_VOLUME_NAME)) {
+            // project volume already added, can be skipped
+            continue;
+          }
           throw new ValidationException(
               format(
                   "Pods have to have volumes with unique names but there are multiple `%s` volumes",

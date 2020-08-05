@@ -23,9 +23,12 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
-import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_STORAGE_PREFERRED_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES;
+import static org.eclipse.che.api.workspace.shared.Constants.SUPPORTED_RECIPE_TYPES;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
@@ -79,7 +82,6 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
-import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineDto;
@@ -134,6 +136,9 @@ public class WorkspaceServiceTest {
   @SuppressWarnings("unused")
   private static final EnvironmentFilter FILTER = new EnvironmentFilter();
 
+  private final String availableStorageTypes = "persistent,ephemeral,async";
+  private final String preferredStorageType = "persistent";
+
   @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private CheJsonProvider jsonProvider = new CheJsonProvider(Collections.emptySet());
 
@@ -155,9 +160,10 @@ public class WorkspaceServiceTest {
             linksGenerator,
             CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
             CHE_WORKSPACE_DEVFILE_REGISTRY_ULR,
-            CHE_WORKSPACES_DEFAULT_PERSIST_VOLUMES,
             urlFetcher,
-            LOG_LIMIT_BYTES);
+            LOG_LIMIT_BYTES,
+            availableStorageTypes,
+            preferredStorageType);
   }
 
   @Test
@@ -1348,7 +1354,7 @@ public class WorkspaceServiceTest {
   }
 
   @Test
-  public void shouldBeAbleToGetSettings() throws Exception {
+  public void shouldBeAbleToGetSettings() {
     when(wsManager.getSupportedRecipes()).thenReturn(ImmutableSet.of("dockerimage", "dockerfile"));
 
     final Response response =
@@ -1363,17 +1369,14 @@ public class WorkspaceServiceTest {
         new Gson().fromJson(response.print(), new TypeToken<Map<String, String>>() {}.getType());
     assertEquals(
         settings,
-        ImmutableMap.of(
-            Constants.SUPPORTED_RECIPE_TYPES,
-            "dockerimage,dockerfile",
-            Constants.CHE_WORKSPACE_AUTO_START,
-            "true",
-            "cheWorkspacePluginRegistryUrl",
-            CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
-            "cheWorkspaceDevfileRegistryUrl",
-            CHE_WORKSPACE_DEVFILE_REGISTRY_ULR,
-            CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY,
-            Boolean.toString(CHE_WORKSPACES_DEFAULT_PERSIST_VOLUMES)));
+        new ImmutableMap.Builder<>()
+            .put(SUPPORTED_RECIPE_TYPES, "dockerimage,dockerfile")
+            .put(CHE_WORKSPACE_AUTO_START, "true")
+            .put("cheWorkspacePluginRegistryUrl", CHE_WORKSPACE_PLUGIN_REGISTRY_ULR)
+            .put("cheWorkspaceDevfileRegistryUrl", CHE_WORKSPACE_DEVFILE_REGISTRY_ULR)
+            .put(CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES, availableStorageTypes)
+            .put(CHE_WORKSPACE_STORAGE_PREFERRED_TYPE, preferredStorageType)
+            .build());
   }
 
   private static String unwrapError(Response response) {

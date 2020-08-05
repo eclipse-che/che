@@ -48,7 +48,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -65,7 +65,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class KubernetesServerExposerTest {
 
-  @Mock private ExternalServerExposer<KubernetesEnvironment> externalServerExposer;
+  @Mock private IngressServerExposer externalServerExposer;
   @Mock private SecureServerExposer<KubernetesEnvironment> secureServerExposer;
 
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
