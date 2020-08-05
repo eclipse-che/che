@@ -102,7 +102,14 @@ export class DriverHelper {
                     Logger.error(`DriverHelper.waitVisibility - failed with exception, out of attempts - ${err}`);
                     throw err;
                 }
-                continue;
+
+                if (err instanceof error.TimeoutError) {
+                    Logger.trace(`DriverHelper.waitVisibility - Polling timed out, retrying`);
+                    continue;
+                }
+
+                Logger.error(`DriverHelper.waitVisibility - failed with an unexpected exception - ${err}`);
+                throw err;
             }
 
             try {
@@ -110,11 +117,18 @@ export class DriverHelper {
                 Logger.trace('DriverHelper.waitVisibility - Element is located and is visible.');
                 return visibleWebElement;
             } catch (err) {
+                if (err instanceof error.TimeoutError) {
+                    Logger.trace(`DriverHelper.waitVisibility - Polling timed out, retrying`);
+                    continue;
+                }
+
                 if (err instanceof error.StaleElementReferenceError) {
                     Logger.debug(`DriverHelper.waitVisibility - Stale element error - ${err}`);
                     await this.wait(polling);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.waitVisibility - failed with an unexpected exception - ${err}`);
                 throw err;
             }
         }
@@ -133,11 +147,17 @@ export class DriverHelper {
                 const webElement: WebElement = await this.driver.wait(until.elementLocated(elementLocator), polling);
                 return webElement;
             } catch (err) {
+                if (err instanceof error.TimeoutError) {
+                    Logger.trace(`DriverHelper.waitPresence - Polling timed out, retrying`);
+                    continue;
+                }
+
                 if (err instanceof error.StaleElementReferenceError) {
                     await this.wait(polling);
                     continue;
                 }
 
+                Logger.error(`DriverHelper.waitPresence - failed with an unexpected exception - ${err}`);
                 throw err;
             }
         }
@@ -156,11 +176,17 @@ export class DriverHelper {
                 const webElements: Array<WebElement> = await this.driver.wait(until.elementsLocated(elementLocator), polling);
                 return webElements;
             } catch (err) {
+                if (err instanceof error.TimeoutError) {
+                    Logger.trace(`DriverHelper.waitAllPresence - Polling timed out, retrying`);
+                    continue;
+                }
+
                 if (err instanceof error.StaleElementReferenceError) {
                     await this.wait(polling);
                     continue;
                 }
 
+                Logger.error(`DriverHelper.waitAllPresence - failed with an unexpected exception - ${err}`);
                 throw err;
             }
         }
@@ -226,9 +252,15 @@ export class DriverHelper {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.waitAndClick - failed with exception, out of attempts - ${err}`);
                     throw err;
-                } else {
+                }
+
+                if (err instanceof error.TimeoutError) {
+                    Logger.trace(`DriverHelper.waitAndClick - Polling timed out, retrying`);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.waitAndClick - failed with an unexpected exception - ${err}`);
+                throw err;
             }
 
             try {
@@ -241,11 +273,7 @@ export class DriverHelper {
                     continue;
                 }
 
-                if (err instanceof error.WebDriverError) {
-                    Logger.debug(`DriverHelper.waitAndClik - ${elementLocator} - WebDriverError - ${err}`);
-                    await this.wait(polling);
-                    continue;
-                }
+                Logger.error(`DriverHelper.waitAndClick - failed with an unexpected exception - ${err}`);
                 throw err;
             }
         }
@@ -269,9 +297,15 @@ export class DriverHelper {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.waitAndGetElementAttribute - failed with exception, out of attempts - ${err}`);
                     throw err;
-                } else {
+                }
+
+                if (err instanceof error.TimeoutError) {
+                    Logger.trace(`DriverHelper.waitAndGetElementAttribute - Polling timed out, retrying`);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.waitAndGetElementAttribute - failed with an unexpected exception - ${err}`);
+                throw err;
             }
 
             try {
@@ -282,6 +316,8 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.waitAndGetElementAttribute - failed with an unexpected exception - ${err}`);
                 throw err;
             }
         }
@@ -304,9 +340,15 @@ export class DriverHelper {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.waitAndGetCssValue - failed with exception, out of attempts - ${err}`);
                     throw err;
-                } else {
+                }
+
+                if (err instanceof error.TimeoutError) {
+                    Logger.trace(`DriverHelper.waitAndGetCssValue - Polling timed out, retrying`);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.waitAndGetCssValue - failed with an unexpected exception - ${err}`);
+                throw err;
             }
 
             try {
@@ -317,6 +359,8 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.waitAndGetCssValue - failed with an unexpected exception - ${err}`);
                 throw err;
             }
         }
@@ -354,9 +398,15 @@ export class DriverHelper {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.type - failed with exception, out of attempts - ${err}`);
                     throw err;
-                } else {
+                }
+
+                if (err instanceof error.TimeoutError) {
+                    Logger.trace(`DriverHelper.type - Polling timed out, retrying`);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.type - failed with an unexpected exception - ${err}`);
+                throw err;
             }
 
             try {
@@ -367,6 +417,8 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.type - failed with an unexpected exception - ${err}`);
                 throw err;
             }
         }
@@ -388,9 +440,15 @@ export class DriverHelper {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.typeToInvisible - failed with exception, out of attempts - ${err}`);
                     throw err;
-                } else {
+                }
+
+                if (err instanceof error.TimeoutError) {
+                    Logger.trace(`DriverHelper.typeToInvisible - Polling timed out, retrying`);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.typeToInvisible - failed with an unexpected exception - ${err}`);
+                throw err;
             }
 
             try {
@@ -401,6 +459,8 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.typeToInvisible - failed with an unexpected exception - ${err}`);
                 throw err;
             }
         }
@@ -422,9 +482,15 @@ export class DriverHelper {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.clear - failed with exception, out of attempts - ${err}`);
                     throw err;
-                } else {
+                }
+                
+                if (err instanceof error.TimeoutError) {
+                    Logger.trace(`DriverHelper.clear - Polling timed out, retrying`);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.clear - failed with an unexpected exception - ${err}`);
+                throw err;
             }
 
             try {
@@ -435,6 +501,8 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.clear - failed with an unexpected exception - ${err}`);
                 throw err;
             }
         }
@@ -456,9 +524,15 @@ export class DriverHelper {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.clearInvisible - failed with exception, out of attempts - ${err}`);
                     throw err;
-                } else {
+                }
+
+                if (err instanceof error.TimeoutError) {
+                    Logger.trace(`DriverHelper.clearInvisible - Polling timed out, retrying`);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.clearInvisible - failed with an unexpected exception - ${err}`);
+                throw err;
             }
 
             try {
@@ -469,6 +543,8 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.clearInvisible - failed with an unexpected exception - ${err}`);
                 throw err;
             }
         }
@@ -506,9 +582,15 @@ export class DriverHelper {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.waitAndGetText - failed with exception, out of attempts - ${err}`);
                     throw err;
-                } else {
+                }
+
+                if (err instanceof error.TimeoutError) {
+                    Logger.trace(`DriverHelper.waitAndGetText - Polling timed out, retrying`);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.waitAndGetText - failed with an unexpected exception - ${err}`);
+                throw err;
             }
 
             try {
@@ -519,6 +601,8 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.waitAndGetText - failed with an unexpected exception - ${err}`);
                 throw err;
             }
         }
@@ -585,9 +669,15 @@ export class DriverHelper {
                 if (i >= attempts) {
                     Logger.error(`DriverHelper.scrollTo - failed with exception, out of attempts - ${err}`);
                     throw err;
-                } else {
+                }
+
+                if (err instanceof error.TimeoutError) {
+                    Logger.trace(`DriverHelper.scrollTo - Polling timed out, retrying`);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.scrollTo - failed with an unexpected exception - ${err}`);
+                throw err;
             }
 
             try {
@@ -598,6 +688,8 @@ export class DriverHelper {
                     await this.wait(polling);
                     continue;
                 }
+
+                Logger.error(`DriverHelper.scrollTo - failed with an unexpected exception - ${err}`);
                 throw err;
             }
         }
