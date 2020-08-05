@@ -12,12 +12,14 @@
 package org.eclipse.che.api.factory.server.github;
 
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import org.eclipse.che.api.factory.server.urlfactory.DevfileFilenamesProvider;
+import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -44,8 +46,7 @@ public class GithubUrlTest {
   /** Setup objects/ */
   @BeforeClass
   protected void init() {
-    lenient()
-        .when(devfileFilenamesProvider.getConfiguredDevfileFilenames())
+    when(devfileFilenamesProvider.getConfiguredDevfileFilenames())
         .thenReturn(Arrays.asList("devfile.yaml", "foo.bar"));
     this.githubUrl = this.githubUrlParser.parse("https://github.com/eclipse/che");
     assertNotNull(this.githubUrl);
@@ -54,12 +55,18 @@ public class GithubUrlTest {
   /** Check when there is devfile in the repository */
   @Test
   public void checkDevfileLocation() {
-    assertEquals(githubUrl.devfileFileLocations().size(), 2);
-    Iterator<String> iterator = githubUrl.devfileFileLocations().values().iterator();
-    assertEquals(
-        iterator.next(), "https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml");
+    lenient()
+        .when(devfileFilenamesProvider.getConfiguredDevfileFilenames())
+        .thenReturn(Arrays.asList("devfile.yaml", "foo.bar"));
 
-    assertEquals(iterator.next(), "https://raw.githubusercontent.com/eclipse/che/master/foo.bar");
+    assertEquals(githubUrl.devfileFileLocations().size(), 2);
+    Iterator<DevfileLocation> iterator = githubUrl.devfileFileLocations().iterator();
+    assertEquals(
+        iterator.next().location(),
+        "https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml");
+
+    assertEquals(
+        iterator.next().location(), "https://raw.githubusercontent.com/eclipse/che/master/foo.bar");
   }
 
   /** Check when there is .factory.json file in the repository */

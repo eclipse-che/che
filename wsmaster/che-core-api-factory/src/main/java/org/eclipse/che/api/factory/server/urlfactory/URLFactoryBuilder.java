@@ -25,6 +25,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
@@ -108,9 +109,8 @@ public class URLFactoryBuilder {
       FileContentProvider fileContentProvider,
       Map<String, String> overrideProperties)
       throws BadRequestException {
-    for (Map.Entry<String, String> devfileLocation :
-        remoteFactoryUrl.devfileFileLocations().entrySet()) {
-      String devfileYamlContent = urlFetcher.fetchSafely(devfileLocation.getValue());
+    for (DevfileLocation location : remoteFactoryUrl.devfileFileLocations()) {
+      String devfileYamlContent = urlFetcher.fetchSafely(location.location());
       if (isNullOrEmpty(devfileYamlContent)) {
         continue;
       }
@@ -123,12 +123,12 @@ public class URLFactoryBuilder {
             newDto(FactoryDto.class)
                 .withV(CURRENT_VERSION)
                 .withDevfile(DtoConverter.asDto(devfile))
-                .withSource(devfileLocation.getKey());
+                .withSource(location.filename().isPresent() ? location.filename().get() : null);
         return Optional.of(factoryDto);
       } catch (DevfileException | OverrideParameterException e) {
         throw new BadRequestException(
             "Error occurred during creation a workspace from devfile located at `"
-                + devfileLocation
+                + location.location()
                 + "`. Cause: "
                 + e.getMessage());
       }

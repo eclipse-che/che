@@ -98,11 +98,11 @@ public class GithubURLParser {
     }
 
     return new GithubUrl()
-            .withUsername(repoUser)
-            .withRepository(repoName)
-            .withBranch(branchName)
-            .withFactoryFilename(".factory.json")
-            .withSubfolder(matcher.group("subFolder"))
-            .withDevfileFilenames(devfileFilenamesProvider.getConfiguredDevfileFilenames());
+        .withUsername(repoUser)
+        .withRepository(repoName)
+        .withBranch(branchName)
+        .withFactoryFilename(".factory.json")
+        .withSubfolder(matcher.group("subFolder"))
+        .withDevfileFilenames(devfileFilenamesProvider.getConfiguredDevfileFilenames());
   }
 }

@@ -19,7 +19,6 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -101,9 +100,6 @@ public class GithubFactoryParametersResolverTest {
             urlFactoryBuilder,
             projectConfigDtoMerger);
     assertNotNull(this.githubFactoryParametersResolver);
-    lenient()
-        .when(devfileFilenamesProvider.getConfiguredDevfileFilenames())
-        .thenReturn(Collections.singletonList("devfile.yaml"));
   }
 
   /** Check missing parameter name can't be accepted by this resolver */
@@ -161,6 +157,9 @@ public class GithubFactoryParametersResolverTest {
   @Test
   public void shouldReturnFactoryFromRepositoryWithDevfile() throws Exception {
 
+    when(devfileFilenamesProvider.getConfiguredDevfileFilenames())
+        .thenReturn(Collections.singletonList("devfile.yaml"));
+
     String githubUrl = "https://github.com/eclipse/che";
 
     FactoryDto computedFactory = generateDevfileFactory();
@@ -180,7 +179,7 @@ public class GithubFactoryParametersResolverTest {
         .createFactoryFromDevfile(factoryUrlArgumentCaptor.capture(), any(), anyMap());
     verify(urlFactoryBuilder, never()).buildDefaultDevfile(eq("che"));
     assertEquals(
-        factoryUrlArgumentCaptor.getValue().devfileFileLocations().values().iterator().next(),
+        factoryUrlArgumentCaptor.getValue().devfileFileLocations().iterator().next().location(),
         "https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml");
   }
 

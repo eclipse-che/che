@@ -12,6 +12,7 @@
 package org.eclipse.che.api.factory.server.urlfactory;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
@@ -29,8 +30,10 @@ import static org.testng.Assert.assertNull;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
@@ -176,7 +179,19 @@ public class URLFactoryBuilderTest {
     DefaultFactoryUrl defaultFactoryUrl = mock(DefaultFactoryUrl.class);
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
     when(defaultFactoryUrl.devfileFileLocations())
-        .thenReturn(singletonMap("anything", "http://foo.bar/anything"));
+        .thenReturn(
+            singletonList(
+                new DevfileLocation() {
+                  @Override
+                  public Optional<String> filename() {
+                    return Optional.empty();
+                  }
+
+                  @Override
+                  public String location() {
+                    return "http://foo.bar/anything";
+                  }
+                }));
     when(devfileManager.parseYaml(anyString(), anyMap())).thenReturn(devfile);
     when(urlFetcher.fetchSafely(anyString())).thenReturn("anything");
     FactoryDto factory =

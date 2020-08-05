@@ -14,7 +14,7 @@ package org.eclipse.che.api.factory.server.github;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
@@ -151,13 +151,28 @@ public class GithubUrl implements RemoteFactoryUrl {
   }
 
   /**
-   * Provides map of configured devfile filenames and location to theirs raw content
+   * Provides list of configured devfile filenames with locations
    *
-   * @return map of devfile filenames and locations
+   * @return list of devfile filenames and locations
    */
   @Override
-  public Map<String, String> devfileFileLocations() {
-    return devfileFilenames.stream().collect(Collectors.toMap(key -> key, this::rawFileLocation));
+  public List<DevfileLocation> devfileFileLocations() {
+    return devfileFilenames
+        .stream()
+        .map(
+            f ->
+                new DevfileLocation() {
+                  @Override
+                  public Optional<String> filename() {
+                    return Optional.ofNullable(f);
+                  }
+
+                  @Override
+                  public String location() {
+                    return rawFileLocation(f);
+                  }
+                })
+        .collect(Collectors.toList());
   }
 
   /**
