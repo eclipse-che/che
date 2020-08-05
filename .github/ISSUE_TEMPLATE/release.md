@@ -3,7 +3,7 @@ name: Release📦
 about: Create new release issue for Eclipse Che
 title: ''
 labels: 'kind/release'
-assignees: 'mkuznyetsov'
+assignees: ''
 
 ---
 
