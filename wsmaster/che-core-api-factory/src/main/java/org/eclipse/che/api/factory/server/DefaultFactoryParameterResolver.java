@@ -11,10 +11,14 @@
  */
 package org.eclipse.che.api.factory.server;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.inject.Inject;
@@ -66,12 +70,21 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
     // This should never be null, because our contract in #accept prohibits that
     String devfileLocation = factoryParameters.get(URL_PARAMETER_NAME);
 
+    URI devfileURI;
+    try {
+      devfileURI = new URL(devfileLocation).toURI();
+    } catch (MalformedURLException | URISyntaxException e) {
+      throw new BadRequestException(
+          format(
+              "Unable to process provided factory URL. Please check its validity and try again. Parser message: %s",
+              e.getMessage()));
+    }
     return urlFactoryBuilder
         .createFactoryFromDevfile(
             new DefaultFactoryUrl()
                 .withDevfileFileLocation(devfileLocation)
                 .withDevfileFilename(null),
-            new URLFileContentProvider(URI.create(devfileLocation), urlFetcher),
+            new URLFileContentProvider(devfileURI, urlFetcher),
             extractOverrideParams(factoryParameters))
         .orElse(null);
   }

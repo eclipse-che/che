@@ -49,6 +49,7 @@ import org.testng.annotations.Test;
 public class WorkspaceActivityManagerTest {
 
   private static final long DEFAULT_TIMEOUT = 60_000L; // 1 minute
+  private static final long DEFAULT_RUN_TIMEOUT = 0; // No run timeout
 
   @Mock private WorkspaceManager workspaceManager;
 
@@ -68,7 +69,11 @@ public class WorkspaceActivityManagerTest {
   private void setUp() throws Exception {
     activityManager =
         new WorkspaceActivityManager(
-            workspaceManager, workspaceActivityDao, eventService, DEFAULT_TIMEOUT);
+            workspaceManager,
+            workspaceActivityDao,
+            eventService,
+            DEFAULT_TIMEOUT,
+            DEFAULT_RUN_TIMEOUT);
 
     lenient().when(account.getName()).thenReturn("accountName");
     lenient().when(account.getId()).thenReturn("account123");

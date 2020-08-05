@@ -59,7 +59,7 @@ public abstract class KubernetesSecretApplier<E extends KubernetesEnvironment> {
         return env.getDevfile()
             .getComponents()
             .stream()
-            .filter(c -> c.getAlias().equals(componentName))
+            .filter(c -> componentName.equals(c.getAlias()))
             .findFirst();
       }
     }

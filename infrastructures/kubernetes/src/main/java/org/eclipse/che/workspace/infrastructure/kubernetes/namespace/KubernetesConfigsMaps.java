@@ -16,6 +16,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.Kube
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import java.util.Optional;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
@@ -39,15 +40,37 @@ public class KubernetesConfigsMaps {
   }
 
   /**
+   * Retrieves config map by name.
+   *
+   * @param configMapName name of config map to get
+   * @return config map optional
+   * @throws InfrastructureException when any exception occurs
+   */
+  public Optional<ConfigMap> get(String configMapName) throws InfrastructureException {
+    return Optional.ofNullable(
+        clientFactory
+            .create(workspaceId)
+            .configMaps()
+            .inNamespace(namespace)
+            .withName(configMapName)
+            .get());
+  }
+
+  /**
    * Creates specified config map.
    *
    * @param configMap config map to create
    * @throws InfrastructureException when any exception occurs
+   * @return created {@link ConfigMap}
    */
-  public void create(ConfigMap configMap) throws InfrastructureException {
+  public ConfigMap create(ConfigMap configMap) throws InfrastructureException {
     putLabel(configMap, CHE_WORKSPACE_ID_LABEL, workspaceId);
     try {
-      clientFactory.create(workspaceId).configMaps().inNamespace(namespace).create(configMap);
+      return clientFactory
+          .create(workspaceId)
+          .configMaps()
+          .inNamespace(namespace)
+          .create(configMap);
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
     }

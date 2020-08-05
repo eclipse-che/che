@@ -28,13 +28,17 @@ suite(`${stack} test`, async () => {
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
+    suite('Test opening file', async () => {
+        // opening file that soon should give time for LS to initialize
+        projectAndFileTests.openFile(fileFolderPath, tabTitle);
+    });
+
     suite('Validation of workspace build and run', async () => {
         codeExecutionTests.runTask(taskName, 120_000);
         codeExecutionTests.closeTerminal(taskName);
     });
 
     suite('Language server validation', async () => {
-        projectAndFileTests.openFile(fileFolderPath, tabTitle);
         commonLsTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
         commonLsTests.errorHighlighting(tabTitle, 'error', 11);
         commonLsTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');

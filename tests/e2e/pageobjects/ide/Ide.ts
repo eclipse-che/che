@@ -137,7 +137,13 @@ export class Ide {
         const mainIdeParts: Array<By> = [By.css(Ide.TOP_MENU_PANEL_CSS), By.css(Ide.LEFT_CONTENT_PANEL_CSS), By.id(Ide.EXPLORER_BUTTON_ID)];
 
         for (const idePartLocator of mainIdeParts) {
-            await this.driverHelper.waitVisibility(idePartLocator, timeout);
+            try {
+                await this.driverHelper.waitVisibility(idePartLocator, timeout);
+            } catch (err) {
+                if (err instanceof error.NoSuchWindowError) {
+                    await this.driverHelper.waitVisibility(idePartLocator, timeout);
+                }
+            }
         }
     }
 
@@ -258,8 +264,23 @@ export class Ide {
     async closeAllNotifications(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Ide.closeAllNotifications`);
 
-        await this.notificationCenter.open(timeout);
-        await this.notificationCenter.closeAll(timeout);
+        for (let i: number = 0; i < 5; i++) {
+            await this.notificationCenter.open(timeout);
+            try {
+                await this.notificationCenter.closeAll(timeout);
+                break;
+            } catch (err) {
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err;
+                }
+
+                if (i === 4) {
+                    Logger.debug('The last try to clear of the notification center was unsuccessful');
+
+                    throw err;
+                }
+            }
+        }
     }
 
     async waitApllicationIsReady(url: string,

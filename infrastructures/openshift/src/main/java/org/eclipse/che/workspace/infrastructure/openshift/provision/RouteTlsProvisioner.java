@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisioner.getSecureProtocol;
+
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteSpec;
 import io.fabric8.openshift.api.model.TLSConfig;
@@ -22,11 +24,11 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /**
@@ -36,7 +38,10 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
  * @author Ilya Buziuk
  */
 @Singleton
-public class RouteTlsProvisioner implements ConfigurationProvisioner<OpenShiftEnvironment> {
+public class RouteTlsProvisioner
+    implements TlsProvisioner<OpenShiftEnvironment>,
+        ConfigurationProvisioner<OpenShiftEnvironment> {
+
   static final String TERMINATION_EDGE = "edge";
   static final String TERMINATION_POLICY_REDIRECT = "Redirect";
   private final boolean isTlsEnabled;
@@ -48,9 +53,7 @@ public class RouteTlsProvisioner implements ConfigurationProvisioner<OpenShiftEn
 
   @Override
   @Traced
-  public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
-      throws InfrastructureException {
-
+  public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity) {
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     if (!isTlsEnabled) {
@@ -72,14 +75,6 @@ public class RouteTlsProvisioner implements ConfigurationProvisioner<OpenShiftEn
     Map<String, String> annotations = Annotations.newSerializer().servers(servers).annotations();
 
     route.getMetadata().getAnnotations().putAll(annotations);
-  }
-
-  private String getSecureProtocol(final String protocol) {
-    if ("ws".equals(protocol)) {
-      return "wss";
-    } else if ("http".equals(protocol)) {
-      return "https";
-    } else return protocol;
   }
 
   private void enableTls(final Route route) {
