@@ -48,7 +48,7 @@ public class GithubUrl implements RemoteFactoryUrl {
   private String factoryFilename;
 
   /** Devfile filenames list */
-  private List<String> devfileFilenames = new ArrayList<>();
+  private final List<String> devfileFilenames = new ArrayList<>();
 
   /**
    * Creation of this instance is made by the parser so user may not need to create a new instance
