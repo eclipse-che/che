@@ -157,22 +157,21 @@ public class GithubUrl implements RemoteFactoryUrl {
    */
   @Override
   public List<DevfileLocation> devfileFileLocations() {
-    return devfileFilenames
-        .stream()
-        .map(
-            f ->
-                new DevfileLocation() {
-                  @Override
-                  public Optional<String> filename() {
-                    return Optional.ofNullable(f);
-                  }
+    return devfileFilenames.stream().map(this::getDevfileLocation).collect(Collectors.toList());
+  }
 
-                  @Override
-                  public String location() {
-                    return rawFileLocation(f);
-                  }
-                })
-        .collect(Collectors.toList());
+  private DevfileLocation getDevfileLocation(String filename) {
+    return new DevfileLocation() {
+      @Override
+      public Optional<String> filename() {
+        return Optional.ofNullable(filename);
+      }
+
+      @Override
+      public String location() {
+        return rawFileLocation(filename);
+      }
+    };
   }
 
   /**
