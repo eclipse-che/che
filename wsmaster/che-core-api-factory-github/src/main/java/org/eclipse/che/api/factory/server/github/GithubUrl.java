@@ -164,7 +164,7 @@ public class GithubUrl implements RemoteFactoryUrl {
     return new DevfileLocation() {
       @Override
       public Optional<String> filename() {
-        return Optional.ofNullable(devfileFilename);
+        return Optional.of(devfileFilename);
       }
 
       @Override
