@@ -11,9 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
-import com.google.common.collect.ImmutableMap;
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.HashMap;
@@ -21,6 +18,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
+import org.eclipse.che.api.workspace.server.spi.environment.GatewayRouteConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -34,21 +32,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServ
 public class GatewayServerExposer<T extends KubernetesEnvironment>
     implements ExternalServerExposer<T> {
 
-  protected static final Map<String, String> GATEWAY_CONFIGMAP_LABELS =
-      ImmutableMap.<String, String>builder()
-          .put("app", "che")
-          .put("role", "gateway-config")
-          .build();
-
   private final ExternalServiceExposureStrategy strategy;
-  private final GatewayRouteConfigGenerator gatewayConfigGenerator;
 
   @Inject
   public GatewayServerExposer(
-      ExternalServiceExposureStrategy strategy,
-      GatewayRouteConfigGenerator gatewayConfigGenerator) {
+      ExternalServiceExposureStrategy strategy) {
     this.strategy = strategy;
-    this.gatewayConfigGenerator = gatewayConfigGenerator;
   }
 
   /**
@@ -76,34 +65,22 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
       // this is the ID for non-unique servers
       serverId = servicePort.getName();
     }
-    ConfigMap traefikGatewayConfig =
-        generateTraefikConfig(machineName, serviceName, serverId, servicePort, externalServers);
 
-    k8sEnv.getConfigMaps().put(traefikGatewayConfig.getMetadata().getName(), traefikGatewayConfig);
+    k8sEnv.addGatewayRouteConfig(
+        createGatewayRouteConfig(machineName, serviceName, serverId, servicePort, externalServers));
   }
 
-  private ConfigMap generateTraefikConfig(
-      String machineName,
+  private GatewayRouteConfig createGatewayRouteConfig(String machineName,
       String serviceName,
       String serverId,
       ServicePort servicePort,
       Map<String, ServerConfig> serversConfigs) {
     final String serverName = KubernetesServerExposer.makeServerNameValidForDns(serverId);
     final String name = createName(serviceName, serverName);
-    final String serviceClusterUrl = createServiceUrl(serviceName, servicePort);
     final String path = ensureEndsWithSlash(strategy.getExternalPath(serviceName, serverName));
-    final Map<String, String> configData =
-        gatewayConfigGenerator.generate(name, serviceClusterUrl, path);
     final Map<String, String> annotations = createAnnotations(serversConfigs, path, machineName);
-
-    return new ConfigMapBuilder()
-        .withNewMetadata()
-        .withName(name)
-        .withLabels(GATEWAY_CONFIGMAP_LABELS)
-        .withAnnotations(annotations)
-        .endMetadata()
-        .withData(configData)
-        .build();
+    return new GatewayRouteConfig(name, serviceName, getTargetPort(servicePort.getTargetPort()),
+        path, annotations);
   }
 
   private String ensureEndsWithSlash(String path) {
@@ -112,13 +89,6 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
 
   private String createName(String serviceName, String serverName) {
     return serviceName + "-" + serverName;
-  }
-
-  private String createServiceUrl(String serviceName, ServicePort servicePort) {
-    return "http://"
-        + serviceName
-        + ".che.svc.cluster.local:"
-        + getTargetPort(servicePort.getTargetPort());
   }
 
   private String getTargetPort(IntOrString targetPort) {

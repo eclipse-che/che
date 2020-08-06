@@ -131,6 +131,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final PreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   private final SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
   private final KubernetesServerResolverFactory serverResolverFactory;
+  private final GatewayRouterProvisioner gatewayRouterProvisioner;
   protected final Tracer tracer;
 
   @Inject
@@ -155,6 +156,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       PreviewUrlCommandProvisioner previewUrlCommandProvisioner,
       SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner,
       KubernetesServerResolverFactory kubernetesServerResolverFactory,
+      GatewayRouterProvisioner gatewayRouterProvisioner,
       Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace) {
@@ -180,6 +182,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.secretAsContainerResourceProvisioner = secretAsContainerResourceProvisioner;
     this.serverResolverFactory = kubernetesServerResolverFactory;
     this.tracer = tracer;
+    this.gatewayRouterProvisioner = gatewayRouterProvisioner;
   }
 
   @Override
@@ -615,6 +618,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
     createSecrets(k8sEnv, workspaceId);
     List<ConfigMap> createdConfigMaps = createConfigMaps(k8sEnv, workspaceId);
+    createdConfigMaps.addAll(gatewayRouterProvisioner.provision(getContext().getIdentity(), k8sEnv));
     List<Service> createdServices = createServices(k8sEnv, workspaceId);
 
     // needed for resolution later on, even though n routes are actually created by ingress

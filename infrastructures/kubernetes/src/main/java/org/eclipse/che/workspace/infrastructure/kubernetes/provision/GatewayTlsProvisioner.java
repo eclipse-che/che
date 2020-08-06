@@ -20,6 +20,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
+import org.eclipse.che.api.workspace.server.spi.environment.GatewayRouteConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -45,14 +46,14 @@ public class GatewayTlsProvisioner<T extends KubernetesEnvironment>
       return;
     }
 
-    for (ConfigMap cm : k8sEnv.getConfigMaps().values()) {
-      useSecureProtocolForGatewayServers(cm);
+    for (GatewayRouteConfig routeConfig : k8sEnv.getGatewayRouteConfigs()) {
+      useSecureProtocolForGatewayServers(routeConfig);
     }
   }
 
-  private void useSecureProtocolForGatewayServers(ConfigMap cm) {
+  private void useSecureProtocolForGatewayServers(GatewayRouteConfig routeConfig) {
     Map<String, ServerConfigImpl> servers =
-        Annotations.newDeserializer(cm.getMetadata().getAnnotations()).servers();
+        Annotations.newDeserializer(routeConfig.getAnnotations()).servers();
 
     if (servers.isEmpty()) {
       return;
@@ -61,8 +62,8 @@ public class GatewayTlsProvisioner<T extends KubernetesEnvironment>
     servers.values().forEach(s -> s.setProtocol(getSecureProtocol(s.getProtocol())));
 
     Map<String, String> annotations = Annotations.newSerializer().servers(servers).annotations();
-    if (!annotations.isEmpty() && cm.getMetadata().getAnnotations() != null) {
-      cm.getMetadata().getAnnotations().putAll(annotations);
+    if (!annotations.isEmpty() && routeConfig.getAnnotations() != null) {
+      routeConfig.getAnnotations().putAll(annotations);
     }
   }
 }

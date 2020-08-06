@@ -285,6 +285,7 @@ public class KubernetesInternalRuntimeTest {
             previewUrlCommandProvisioner,
             secretAsContainerResourceProvisioner,
             serverResolverFactory,
+            null,
             tracer,
             context,
             namespace);

@@ -20,6 +20,7 @@ import java.util.Optional;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.model.Config;
 
 /**
  * Defines an internal API for managing {@link ConfigMap} instances in {@link

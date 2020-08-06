@@ -192,6 +192,7 @@ public class OpenShiftInternalRuntimeTest {
             previewUrlCommandProvisioner,
             secretAsContainerResourceProvisioner,
             serverResolverFactory,
+            null,
             tracer,
             trustedCAProvisioner,
             context,

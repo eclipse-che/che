@@ -163,7 +163,6 @@ public class KubernetesInfraModule extends AbstractModule {
     bind(ExternalServiceExposureStrategy.class)
         .toProvider(IngressServiceExposureStrategyProvider.class);
 
-    bind(GatewayRouteConfigGenerator.class).to(TraefikGatewayRouteConfigGenerator.class);
     MapBinder<WorkspaceExposureType, ExternalServerExposer<KubernetesEnvironment>>
         exposureStrategies =
             MapBinder.newMapBinder(

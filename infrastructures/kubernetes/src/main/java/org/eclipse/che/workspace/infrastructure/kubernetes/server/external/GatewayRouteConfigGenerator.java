@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import java.util.Map;
+import org.eclipse.che.api.workspace.server.spi.environment.GatewayRouteConfig;
 
 /**
  * Generates config for single external server that we want to expose in the Gateway.
@@ -19,6 +20,7 @@ import java.util.Map;
  * <p>Implementation provides configuration for specific Gateway technology (e.g., Traefik).
  */
 public interface GatewayRouteConfigGenerator {
+  void addRouteConfig(GatewayRouteConfig routeConfig);
 
   /**
    * Generates content of configuration for service, defined by passed parameters, that should be
@@ -34,5 +36,5 @@ public interface GatewayRouteConfigGenerator {
    * @param path path to route and strip
    * @return full content of configuration for the service
    */
-  Map<String, String> generate(String name, String serviceUrl, String path);
+  Map<String, String> generate();
 }

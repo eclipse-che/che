@@ -47,8 +47,7 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
       KubernetesRuntimeStateCache runtimeStatuses,
       @Assisted T kubernetesEnvironment,
       @Assisted RuntimeIdentity identity,
-      @Assisted RuntimeInfrastructure infrastructure)
-      throws ValidationException, InfrastructureException {
+      @Assisted RuntimeInfrastructure infrastructure) {
     super(kubernetesEnvironment, identity, infrastructure);
     this.namespaceFactory = namespaceFactory;
     this.runtimeFactory = runtimeFactory;

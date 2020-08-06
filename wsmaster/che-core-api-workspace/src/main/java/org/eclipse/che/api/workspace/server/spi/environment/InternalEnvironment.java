@@ -46,6 +46,7 @@ public abstract class InternalEnvironment {
   private Map<String, String> attributes;
   private List<CommandImpl> commands;
   private DevfileImpl devfile;
+  private final List<GatewayRouteConfig> gatewayRouteConfigs = new ArrayList<>();
 
   protected InternalEnvironment() {
     this.warnings = new CopyOnWriteArrayList<>();
@@ -191,5 +192,13 @@ public abstract class InternalEnvironment {
 
   public void setDevfile(DevfileImpl devfile) {
     this.devfile = devfile;
+  }
+
+  public List<GatewayRouteConfig> getGatewayRouteConfigs() {
+    return gatewayRouteConfigs;
+  }
+
+  public void addGatewayRouteConfig(GatewayRouteConfig gatewayRouteConfig) {
+    gatewayRouteConfigs.add(gatewayRouteConfig);
   }
 }

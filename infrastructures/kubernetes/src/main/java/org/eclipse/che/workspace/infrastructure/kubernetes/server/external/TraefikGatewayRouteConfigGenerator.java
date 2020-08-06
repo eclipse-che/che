@@ -17,11 +17,14 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.workspace.server.spi.environment.GatewayRouteConfig;
 
 /**
- * Traefik configuration for single route looks like this (values in {} are parameters of {@link
+ * Traefik configuration for single route looks like this (values in {} are parameters of {link
  * GatewayRouteConfigGenerator#generate(String, String, String)} method):
  *
  * <pre>
@@ -47,18 +50,24 @@ import java.util.Map;
  */
 public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGenerator {
 
+  private final List<GatewayRouteConfig> routeConfigs = new ArrayList<>();
+
+  private final String serviceNamespace;
+
+  public TraefikGatewayRouteConfigGenerator(String serviceNamespace) {
+    this.serviceNamespace = serviceNamespace;
+  }
+
   /**
    * Generates Traefik specific configuration for single service.
    *
-   * @param name name of the service
+   * @param name       name of the service
    * @param serviceUrl url of service we want to route to
-   * @param path path to route and strip
+   * @param path       path to route and strip
    * @return traefik service route config
    */
-  @Override
-  public Map<String, String> generate(String name, String serviceUrl, String path) {
+  public String generate(String name, String serviceUrl, String path) {
     StringWriter sw = new StringWriter();
-
     try {
       YAMLGenerator generator =
           YAMLFactory.builder().disable(WRITE_DOC_START_MARKER).build().createGenerator(sw);
@@ -78,7 +87,7 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
 
       generator.flush();
 
-      return Collections.singletonMap(name + ".yml", sw.toString());
+      return sw.toString();
     } catch (IOException e) {
       e.printStackTrace();
       throw new RuntimeException(e);
@@ -169,5 +178,27 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
     generator.writeEndObject();
     generator.writeEndObject();
     generator.writeEndObject();
+  }
+
+  @Override
+  public void addRouteConfig(GatewayRouteConfig routeConfig) {
+    this.routeConfigs.add(routeConfig);
+  }
+
+  @Override
+  public Map<String, String> generate() {
+    Map<String, String> cmData = new HashMap<>();
+    for (GatewayRouteConfig routeConfig : routeConfigs) {
+      String traefikRouteConfig = generate(routeConfig.getName(),
+          createServiceUrl(routeConfig.getServiceName(), routeConfig.getServicePort()),
+          routeConfig.getRoutePath());
+      cmData.put(routeConfig.getName() + ".yml", traefikRouteConfig);
+    }
+    return cmData;
+  }
+
+  private String createServiceUrl(String serviceName, String servicePort) {
+    return String
+        .format("http://%s.%s.svc.cluster.local:%s", serviceName, serviceNamespace, servicePort);
   }
 }
