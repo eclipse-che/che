@@ -45,6 +45,8 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.user.server.ProfileManager;
+import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
@@ -83,6 +85,7 @@ public class WorkspaceManager {
   private final WorkspaceRuntimes runtimes;
   private final AccountManager accountManager;
   private final EventService eventService;
+  private final ProfileManager profileManager;
   private final WorkspaceValidator validator;
   private final DevfileIntegrityValidator devfileIntegrityValidator;
 
@@ -92,12 +95,14 @@ public class WorkspaceManager {
       WorkspaceRuntimes runtimes,
       EventService eventService,
       AccountManager accountManager,
+      ProfileManager profileManager,
       WorkspaceValidator validator,
       DevfileIntegrityValidator devfileIntegrityValidator) {
     this.workspaceDao = workspaceDao;
     this.runtimes = runtimes;
     this.accountManager = accountManager;
     this.eventService = eventService;
+    this.profileManager = profileManager;
     this.validator = validator;
     this.devfileIntegrityValidator = devfileIntegrityValidator;
   }
@@ -417,6 +422,10 @@ public class WorkspaceManager {
       workspaceDao.update(workspace);
     }
 
+    final String namespace = workspace.getNamespace();
+    final String wsKey = namespace + ":" + workspaceId;
+    final String owner = workspace.getRuntime().getOwner();
+
     runtimes
         .stopAsync(workspace, options)
         .whenComplete(
@@ -424,7 +433,27 @@ public class WorkspaceManager {
               if (workspace.isTemporary()) {
                 removeWorkspaceQuietly(workspace.getId());
               }
+              recordLastWorkspaceActivityTime(wsKey, owner);
             });
+  }
+
+
+  private void recordLastWorkspaceActivityTime(String wsKey, String owner) {
+    final ProfileImpl profile;
+    try {
+      profile = new ProfileImpl(profileManager.getById(owner));
+      Map<String, String> attributes = profile.getAttributes();
+      String value = Long.toString(currentTimeMillis());
+      attributes.put("LAST_TIME_ACCESS", value);
+      attributes.put("LAST_USED_WORKSPACE", wsKey);
+      profile.setAttributes(attributes);
+      profileManager.update(profile);
+      System.out.println("REGISTER >>>>> in " + wsKey + " at " + value);
+    } catch (NotFoundException e) {
+      e.printStackTrace();
+    } catch (ServerException e) {
+      e.printStackTrace();
+    }
   }
 
   /** Returns a set of supported recipe types */

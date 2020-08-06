@@ -76,6 +76,7 @@ import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.user.server.ProfileManager;
 import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
@@ -130,6 +131,7 @@ public class WorkspaceManagerTest {
   @Mock private WorkspaceValidator validator;
   @Mock private DevfileConverter devfileConverter;
   @Mock private DevfileIntegrityValidator devfileIntegrityValidator;
+  @Mock private ProfileManager profileManager;
 
   @Captor private ArgumentCaptor<WorkspaceImpl> workspaceCaptor;
 
@@ -143,6 +145,7 @@ public class WorkspaceManagerTest {
             runtimes,
             eventService,
             accountManager,
+            profileManager,
             validator,
             devfileIntegrityValidator);
     lenient()
