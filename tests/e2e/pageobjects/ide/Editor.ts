@@ -13,7 +13,6 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { By, Key, error, ActionSequence, Button } from 'selenium-webdriver';
-import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
 
 
@@ -25,8 +24,7 @@ export class Editor {
     private static readonly ADDITIONAL_SHIFTING_TO_X: number = 1;
 
 
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.Ide) private readonly ide: Ide) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     public async waitSuggestionContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('Editor.waitSuggestionContainer');
@@ -155,7 +153,6 @@ export class Editor {
     public async clickOnTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.clickOnTab "${tabTitle}"`);
 
-        await this.ide.closeAllNotifications();
         await this.driverHelper.waitAndClick(By.xpath(this.getTabXpathLocator(tabTitle)), timeout);
     }
 
@@ -170,7 +167,6 @@ export class Editor {
     public async selectTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.selectTab "${tabTitle}"`);
 
-        await this.ide.closeAllNotifications();
         await this.waitTab(tabTitle, timeout);
         await this.clickOnTab(tabTitle, timeout);
         await this.waitTabFocused(tabTitle, timeout);
