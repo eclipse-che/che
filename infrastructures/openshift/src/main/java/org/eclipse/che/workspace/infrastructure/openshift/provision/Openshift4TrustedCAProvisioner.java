@@ -32,8 +32,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 
 /**
- * Checks if config map with CA bundles are present in current namespace, and if it is, creates the
- * same in workspace project, allowing openshift to auto-inject values into it. (see
+ * Checks if config map with CA bundles is configured by specific property, and if it is, creates
+ * map for ca bundles in workspace project, allowing Openshift to auto-inject values into it. (see
  * https://docs.openshift.com/container-platform/4.3/networking/configuring-a-custom-pki.html#certificate-injection-using-operators_configuring-a-custom-pki)
  */
 @Singleton
@@ -56,7 +56,6 @@ public class Openshift4TrustedCAProvisioner {
     this.configMapName = configMapName;
     this.certificateMountPath = certificateMountPath;
     this.configMapLabelKeyValue = Splitter.on(",").withKeyValueSeparator("=").split(configMapLabel);
-
   }
 
   public void provision(KubernetesEnvironment k8sEnv, OpenShiftProject project)
