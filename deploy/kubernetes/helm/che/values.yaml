@@ -36,6 +36,8 @@ global:
   ingressAnnotationsPrefix: "nginx."
   # options: default-host, single-host, multi-host
   serverStrategy: multi-host
+  # Public hostname of the installed Che server. If value is omitted then it will be automatically set.
+  cheHost: ""
 
   ## Allows to enable and configure TLS
   tls:

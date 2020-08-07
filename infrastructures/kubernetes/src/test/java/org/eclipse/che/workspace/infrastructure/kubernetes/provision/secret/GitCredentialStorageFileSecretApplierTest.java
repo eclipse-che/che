@@ -134,6 +134,7 @@ public class GitCredentialStorageFileSecretApplierTest {
     String data = configMap.getData().get(GitConfigProvisioner.GIT_CONFIG);
     assertTrue(
         data.endsWith("[credential]\n\thelper = store --file /home/user/.git/credentials\n"));
+    assertTrue(data.startsWith(GIT_CONFIG_CONTENT));
   }
 
   @Test(
