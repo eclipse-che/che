@@ -30,6 +30,8 @@ import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -169,23 +171,12 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       String image,
       @Nullable String brokerVolumeName) {
     String containerName = generateContainerNameFromImageRef(image);
+    String[] cmdArgs = getCommandLineArgs(runtimeId).toArray(new String[0]);
     final ContainerBuilder cb =
         new ContainerBuilder()
             .withName(containerName)
             .withImage(image)
-            .withArgs(
-                "-push-endpoint",
-                cheWebsocketEndpoint,
-                "-runtime-id",
-                String.format(
-                    "%s:%s:%s",
-                    runtimeId.getWorkspaceId(),
-                    MoreObjects.firstNonNull(runtimeId.getEnvName(), ""),
-                    runtimeId.getOwnerId()),
-                "-cacert",
-                certProvisioner.isConfigured() ? certProvisioner.getCertPath() : "",
-                "--registry-address",
-                Strings.nullToEmpty(pluginRegistryUrl))
+            .withArgs(cmdArgs)
             .withImagePullPolicy(brokerPullPolicy)
             .withEnv(envVars);
     if (brokerVolumeName != null) {
@@ -197,6 +188,23 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     Containers.addRamLimit(container, "250Mi");
     Containers.addRamRequest(container, "250Mi");
     return container;
+  }
+
+  protected List<String> getCommandLineArgs(RuntimeIdentity runtimeId) {
+    return new ArrayList<String>(
+        Arrays.asList(
+            "-push-endpoint",
+            cheWebsocketEndpoint,
+            "-runtime-id",
+            String.format(
+                "%s:%s:%s",
+                runtimeId.getWorkspaceId(),
+                MoreObjects.firstNonNull(runtimeId.getEnvName(), ""),
+                runtimeId.getOwnerId()),
+            "-cacert",
+            certProvisioner.isConfigured() ? certProvisioner.getCertPath() : "",
+            "--registry-address",
+            Strings.nullToEmpty(pluginRegistryUrl)));
   }
 
   private Pod newPod() {

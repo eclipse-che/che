@@ -12,8 +12,10 @@
 package org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases;
 
 import com.google.common.annotations.Beta;
+import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -33,6 +35,8 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 public class OpenshiftBrokerEnvironmentFactory
     extends BrokerEnvironmentFactory<OpenShiftEnvironment> {
 
+  private final String caCertificatesMountPath;
+
   @Inject
   public OpenshiftBrokerEnvironmentFactory(
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
@@ -42,6 +46,7 @@ public class OpenshiftBrokerEnvironmentFactory
       @Named("che.workspace.plugin_broker.artifacts.image") String artifactsBrokerImage,
       @Named("che.workspace.plugin_broker.metadata.image") String metadataBrokerImage,
       @Nullable @Named("che.workspace.plugin_registry_url") String pluginRegistryUrl,
+      @Named("che.infra.openshift.trusted_ca_bundles_mount_path") String caCertificatesMountPath,
       CertificateProvisioner certProvisioner) {
     super(
         cheWebsocketEndpoint,
@@ -52,6 +57,7 @@ public class OpenshiftBrokerEnvironmentFactory
         metadataBrokerImage,
         pluginRegistryUrl,
         certProvisioner);
+    this.caCertificatesMountPath = caCertificatesMountPath;
   }
 
   @Override
@@ -61,5 +67,15 @@ public class OpenshiftBrokerEnvironmentFactory
         .setMachines(brokersConfigs.machines)
         .setPods(brokersConfigs.pods)
         .build();
+  }
+
+  @Override
+  protected List<String> getCommandLineArgs(RuntimeIdentity runtimeId) {
+    List<String> cmdArgs = super.getCommandLineArgs(runtimeId);
+
+    cmdArgs.add("-cadir");
+    cmdArgs.add(caCertificatesMountPath);
+
+    return cmdArgs;
   }
 }
