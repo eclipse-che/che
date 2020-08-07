@@ -11,31 +11,29 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import com.google.common.base.Splitter;
-import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
-import io.fabric8.openshift.client.OpenShiftClient;
-import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftCheInstallationLocation;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 
 /**
- * Checks if config map with CA bundles are present in current namespace, and if it is, creates the
- * same in workspace project, allowing openshift to auto-inject values into it. (see
+ * Checks if config map with CA bundles is configured by specific property, and if it is, creates
+ * map for ca bundles in workspace project, allowing Openshift to auto-inject values into it. (see
  * https://docs.openshift.com/container-platform/4.3/networking/configuring-a-custom-pki.html#certificate-injection-using-operators_configuring-a-custom-pki)
  */
 @Singleton
@@ -50,24 +48,14 @@ public class Openshift4TrustedCAProvisioner {
 
   @Inject
   public Openshift4TrustedCAProvisioner(
+      @Nullable @Named("che.trusted_ca_bundles_configmap") String caBundleConfigMap,
       @Named("che.infra.openshift.trusted_ca_bundles_config_map") String configMapName,
       @Named("che.infra.openshift.trusted_ca_bundles_config_map_labels") String configMapLabel,
-      @Named("che.infra.openshift.trusted_ca_bundles_mount_path") String certificateMountPath,
-      OpenShiftCheInstallationLocation cheInstallationLocation,
-      OpenShiftClientFactory clientFactory)
-      throws InfrastructureException {
+      @Named("che.infra.openshift.trusted_ca_bundles_mount_path") String certificateMountPath) {
+    this.trustedStoreInitialized = !isNullOrEmpty(caBundleConfigMap);
     this.configMapName = configMapName;
     this.certificateMountPath = certificateMountPath;
     this.configMapLabelKeyValue = Splitter.on(",").withKeyValueSeparator("=").split(configMapLabel);
-    OpenShiftClient client = clientFactory.createOC();
-    List<ConfigMap> configMapList =
-        client
-            .configMaps()
-            .inNamespace(cheInstallationLocation.getInstallationLocationNamespace())
-            .withLabels(configMapLabelKeyValue)
-            .list()
-            .getItems();
-    this.trustedStoreInitialized = !configMapList.isEmpty();
   }
 
   public void provision(KubernetesEnvironment k8sEnv, OpenShiftProject project)
