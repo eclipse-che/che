@@ -18,6 +18,7 @@ spec:
       CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
   auth:
     updateAdminPassword: false
+    openShiftoAuth: false
     identityProviderPassword: admin
 EOL
 
