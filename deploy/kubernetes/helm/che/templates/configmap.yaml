@@ -88,10 +88,10 @@ data:
   CHE_WORKSPACE_NO__PROXY: {{ .Values.cheWorkspaceNoProxy | quote}}
   CHE_LIMITS_WORKSPACE_IDLE_TIMEOUT: '{{ .Values.global.workspaceIdleTimeout }}'
 {{- if .Values.workspaceDefaultRamRequest }}
-  CHE_WORKSPACE_DEFAULT_MEMORY_REQUEST_MB: {{ .Values.workspaceDefaultRamRequest }}
+  CHE_WORKSPACE_DEFAULT_MEMORY_REQUEST_MB: {{ .Values.workspaceDefaultRamRequest | quote }}
 {{- end }}
 {{- if .Values.workspaceDefaultRamLimit }}
-  CHE_WORKSPACE_DEFAULT_MEMORY_LIMIT_MB: {{ .Values.workspaceDefaultRamLimit }}
+  CHE_WORKSPACE_DEFAULT_MEMORY_LIMIT_MB: {{ .Values.workspaceDefaultRamLimit | quote }}
 {{- end }}
 {{- if .Values.che.workspace.devfileRegistryUrl }}
   CHE_WORKSPACE_DEVFILE__REGISTRY__URL: {{ .Values.che.workspace.devfileRegistryUrl | quote }}
@@ -109,7 +109,7 @@ data:
   {{- end }}
 {{- end }}
 {{- if .Values.workspaceSidecarDefaultRamLimit }}
-  CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB: {{ .Values.workspaceSidecarDefaultRamLimit }}
+  CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB: {{ .Values.workspaceSidecarDefaultRamLimit | quote }}
 {{- end }}
 {{- if .Values.global.cheWorkspaceClusterRole }}
   CHE_INFRA_KUBERNETES_CLUSTER__ROLE__NAME: {{ .Values.global.cheWorkspaceClusterRole }}
