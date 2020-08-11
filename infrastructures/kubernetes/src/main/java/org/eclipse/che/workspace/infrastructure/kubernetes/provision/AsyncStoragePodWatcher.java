@@ -97,10 +97,6 @@ public class AsyncStoragePodWatcher {
         }
         long lastTimeAccessSec = parseLong(lastTimeAccess);
         long epochSec = clock.instant().getEpochSecond();
-        System.out.println(">>>>> :: epoch second" + epochSec);
-        System.out.println(">>>>> :: lastTime access" + lastTimeAccessSec);
-        long dif = epochSec - lastTimeAccessSec;
-        System.out.println(">>>>> :: " + dif + " >= " + shutdownTimeoutSec);
         if (epochSec - lastTimeAccessSec >= shutdownTimeoutSec) {
           PodResource<Pod, DoneablePod> podDoneablePodPodResource =
               kubernetesClientFactory
