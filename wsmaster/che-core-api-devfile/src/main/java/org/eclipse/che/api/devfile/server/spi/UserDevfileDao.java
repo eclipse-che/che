@@ -70,7 +70,6 @@ public interface UserDevfileDao {
   /**
    * Gets all devfiles which user can read filtered by given parameters in a given order
    *
-   * @param userId user identifier
    * @param maxItems the maximum number of workspaces to return
    * @param skipCount the number of workspaces to skip
    * @param filter additional conditions for the desired devfiles. Conditions represented as pairs
@@ -85,7 +84,6 @@ public interface UserDevfileDao {
    *     or 'desc'.
    */
   Page<UserDevfileImpl> getDevfiles(
-      String userId,
       int maxItems,
       int skipCount,
       List<Pair<String, String>> filter,

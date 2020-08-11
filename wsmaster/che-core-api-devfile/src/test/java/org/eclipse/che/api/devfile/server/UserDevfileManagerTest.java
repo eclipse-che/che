@@ -176,13 +176,11 @@ public class UserDevfileManagerTest {
     // given
     final UserDevfileImpl userDevfile = createUserDevfile();
     final UserDevfileImpl userDevfile2 = createUserDevfile();
-    when(userDevfileDao.getDevfiles(
-            CURRENT_USER_ID, 2, 30, Collections.emptyList(), Collections.emptyList()))
+    when(userDevfileDao.getDevfiles(2, 30, Collections.emptyList(), Collections.emptyList()))
         .thenReturn(new Page<>(asList(userDevfile, userDevfile2), 0, 2, 2));
     // when
     Page<UserDevfileImpl> actual =
-        userDevfileManager.getUserDevfiles(
-            CURRENT_USER_ID, 2, 30, Collections.emptyList(), Collections.emptyList());
+        userDevfileManager.getUserDevfiles(2, 30, Collections.emptyList(), Collections.emptyList());
     // then
     assertEquals(actual.getItems().size(), 2);
   }

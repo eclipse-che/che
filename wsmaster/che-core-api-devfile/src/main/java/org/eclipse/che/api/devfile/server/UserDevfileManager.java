@@ -134,13 +134,11 @@ public class UserDevfileManager {
    * UserDevfileDao#getDevfiles(String, int, int, List, List)}.
    */
   public Page<UserDevfileImpl> getUserDevfiles(
-      String userId,
       int maxItems,
       int skipCount,
       List<Pair<String, String>> filter,
       List<Pair<String, String>> order)
       throws ServerException {
-    requireNonNull(userId, "Required non-null user id");
-    return userDevfileDao.getDevfiles(userId, maxItems, skipCount, filter, order);
+    return userDevfileDao.getDevfiles(maxItems, skipCount, filter, order);
   }
 }

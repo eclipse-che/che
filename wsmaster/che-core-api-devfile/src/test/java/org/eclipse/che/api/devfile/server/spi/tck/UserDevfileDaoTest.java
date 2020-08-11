@@ -201,22 +201,19 @@ public class UserDevfileDaoTest {
     // given
     // when
     final Page<UserDevfileImpl> result =
-        userDevfileDaoDao.getDevfiles(
-            CURRENT_USER_ID, 30, 0, Collections.emptyList(), Collections.emptyList());
+        userDevfileDaoDao.getDevfiles(30, 0, Collections.emptyList(), Collections.emptyList());
     // then
     assertEquals(new HashSet<>(result.getItems()), new HashSet<>(asList(devfiles)));
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void shouldThrowIllegalStateExceptionOnNegativeLimit() throws Exception {
-    userDevfileDaoDao.getDevfiles(
-        CURRENT_USER_ID, 0, -2, Collections.emptyList(), Collections.emptyList());
+    userDevfileDaoDao.getDevfiles(0, -2, Collections.emptyList(), Collections.emptyList());
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void shouldThrowIllegalStateExceptionOnNegativeSkipCount() throws Exception {
-    userDevfileDaoDao.getDevfiles(
-        CURRENT_USER_ID, -2, 0, Collections.emptyList(), Collections.emptyList());
+    userDevfileDaoDao.getDevfiles(-2, 0, Collections.emptyList(), Collections.emptyList());
   }
 
   @Test
@@ -225,7 +222,6 @@ public class UserDevfileDaoTest {
     // when
     final Page<UserDevfileImpl> result =
         userDevfileDaoDao.getDevfiles(
-            CURRENT_USER_ID,
             30,
             0,
             ImmutableList.of(new Pair<>("devfile.metadata.name", "like:devfileName%")),
@@ -240,7 +236,6 @@ public class UserDevfileDaoTest {
     // when
     final Page<UserDevfileImpl> result =
         userDevfileDaoDao.getDevfiles(
-            CURRENT_USER_ID,
             30,
             0,
             ImmutableList.of(
@@ -260,7 +255,6 @@ public class UserDevfileDaoTest {
     // when
     final Page<UserDevfileImpl> result =
         userDevfileDaoDao.getDevfiles(
-            CURRENT_USER_ID,
             30,
             0,
             ImmutableList.of(new Pair<>("devfile.metadata.name", "like:%w345N%")),
@@ -276,7 +270,6 @@ public class UserDevfileDaoTest {
     // when
     final Page<UserDevfileImpl> result =
         userDevfileDaoDao.getDevfiles(
-            CURRENT_USER_ID,
             5,
             0,
             ImmutableList.of(new Pair<>("devfile.metadata.name", "like:devfileName%")),
@@ -296,11 +289,7 @@ public class UserDevfileDaoTest {
     // when
     final Page<UserDevfileImpl> result =
         userDevfileDaoDao.getDevfiles(
-            CURRENT_USER_ID,
-            devfiles.length,
-            0,
-            Collections.emptyList(),
-            ImmutableList.of(new Pair<>("id", "asc")));
+            devfiles.length, 0, Collections.emptyList(), ImmutableList.of(new Pair<>("id", "asc")));
     // then
     assertEquals(result.getItems().stream().toArray(UserDevfileImpl[]::new), expected);
   }
@@ -316,7 +305,6 @@ public class UserDevfileDaoTest {
     // when
     final Page<UserDevfileImpl> result =
         userDevfileDaoDao.getDevfiles(
-            CURRENT_USER_ID,
             devfiles.length,
             0,
             Collections.emptyList(),
@@ -336,7 +324,6 @@ public class UserDevfileDaoTest {
     // when
     final Page<UserDevfileImpl> result =
         userDevfileDaoDao.getDevfiles(
-            CURRENT_USER_ID,
             devfiles.length,
             0,
             Collections.emptyList(),
@@ -357,7 +344,6 @@ public class UserDevfileDaoTest {
     // when
     final Page<UserDevfileImpl> result =
         userDevfileDaoDao.getDevfiles(
-            CURRENT_USER_ID,
             maxitems,
             skipCount,
             Collections.emptyList(),
@@ -387,8 +373,7 @@ public class UserDevfileDaoTest {
       throws ServerException, NotFoundException, ConflictException {
     // given
     // when
-    userDevfileDaoDao.getDevfiles(
-        CURRENT_USER_ID, 0, 0, Collections.emptyList(), Collections.emptyList());
+    userDevfileDaoDao.getDevfiles(0, 0, Collections.emptyList(), Collections.emptyList());
     // then
   }
 
@@ -399,8 +384,7 @@ public class UserDevfileDaoTest {
       throws ServerException, NotFoundException, ConflictException {
     // given
     // when
-    userDevfileDaoDao.getDevfiles(
-        CURRENT_USER_ID, -5, 0, Collections.emptyList(), Collections.emptyList());
+    userDevfileDaoDao.getDevfiles(-5, 0, Collections.emptyList(), Collections.emptyList());
     // then
   }
 
@@ -412,8 +396,7 @@ public class UserDevfileDaoTest {
       throws ServerException, NotFoundException, ConflictException {
     // given
     // when
-    userDevfileDaoDao.getDevfiles(
-        CURRENT_USER_ID, 5, -1, Collections.emptyList(), Collections.emptyList());
+    userDevfileDaoDao.getDevfiles(5, -1, Collections.emptyList(), Collections.emptyList());
     // then
   }
 
@@ -427,7 +410,6 @@ public class UserDevfileDaoTest {
     // given
     // when
     userDevfileDaoDao.getDevfiles(
-        CURRENT_USER_ID,
         5,
         4,
         Collections.emptyList(),

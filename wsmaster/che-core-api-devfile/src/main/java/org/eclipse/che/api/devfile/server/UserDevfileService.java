@@ -52,7 +52,6 @@ import org.eclipse.che.api.core.model.workspace.devfile.UserDevfile;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.devfile.shared.dto.UserDevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.URLEncodedUtils;
 
@@ -182,12 +181,7 @@ public class UserDevfileService extends Service {
       }
     }
     Page<? extends UserDevfile> userDevfilesPage =
-        userDevfileManager.getUserDevfiles(
-            EnvironmentContext.getCurrent().getSubject().getUserId(),
-            maxItems,
-            skipCount,
-            query,
-            searchOrder);
+        userDevfileManager.getUserDevfiles(maxItems, skipCount, query, searchOrder);
 
     List<UserDevfileDto> list =
         userDevfilesPage

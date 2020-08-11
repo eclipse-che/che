@@ -112,14 +112,12 @@ public class JpaUserDevfileDao implements UserDevfileDao {
   @Override
   @Transactional(rollbackOn = {ServerException.class})
   public Page<UserDevfileImpl> getDevfiles(
-      String userId,
       int maxItems,
       int skipCount,
       List<Pair<String, String>> filter,
       List<Pair<String, String>> order)
       throws ServerException {
 
-    requireNonNull(userId);
     checkArgument(maxItems > 0, "The number of items has to be positive.");
     checkArgument(
         skipCount >= 0,

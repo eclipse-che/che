@@ -61,7 +61,6 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.mockito.ArgumentCaptor;
@@ -275,7 +274,7 @@ public class UserDevfileServiceTest {
     final UserDevfileImpl userDevfileImpl = new UserDevfileImpl(devfileDto);
     doReturn(new Page<>(ImmutableList.of(userDevfileImpl), 0, 1, 1))
         .when(userDevfileManager)
-        .getUserDevfiles(anyString(), anyInt(), anyInt(), anyList(), anyList());
+        .getUserDevfiles(anyInt(), anyInt(), anyList(), anyList());
 
     // when
     final Response response =
@@ -291,8 +290,7 @@ public class UserDevfileServiceTest {
     final List<UserDevfileDto> res = unwrapDtoList(response, UserDevfileDto.class);
     assertEquals(res.size(), 1);
     assertEquals(res.get(0).withLinks(emptyList()), devfileDto);
-    verify(userDevfileManager)
-        .getUserDevfiles(eq(Subject.ANONYMOUS.getUserId()), eq(30), eq(0), anyList(), anyList());
+    verify(userDevfileManager).getUserDevfiles(eq(30), eq(0), anyList(), anyList());
   }
 
   @Test
@@ -300,7 +298,7 @@ public class UserDevfileServiceTest {
     // given
     doReturn(new Page<>(Collections.emptyList(), 0, 1, 0))
         .when(userDevfileManager)
-        .getUserDevfiles(anyString(), anyInt(), anyInt(), anyList(), anyList());
+        .getUserDevfiles(anyInt(), anyInt(), anyList(), anyList());
     // when
     final Response response =
         given()
@@ -314,8 +312,7 @@ public class UserDevfileServiceTest {
             .statusCode(200)
             .get(SECURE_PATH + "/userdevfile");
     // then
-    verify(userDevfileManager)
-        .getUserDevfiles(eq(Subject.ANONYMOUS.getUserId()), eq(5), eq(52), anyList(), anyList());
+    verify(userDevfileManager).getUserDevfiles(eq(5), eq(52), anyList(), anyList());
   }
 
   @Test
@@ -323,7 +320,7 @@ public class UserDevfileServiceTest {
     // given
     doReturn(new Page<>(Collections.emptyList(), 0, 1, 0))
         .when(userDevfileManager)
-        .getUserDevfiles(anyString(), anyInt(), anyInt(), anyList(), anyList());
+        .getUserDevfiles(anyInt(), anyInt(), anyList(), anyList());
     Map<String, String> parameters =
         ImmutableMap.of("id", "sdfsdf5", "devfile.meta.name", "like:%dfdf");
     // when
@@ -342,9 +339,7 @@ public class UserDevfileServiceTest {
     Class<List<Pair<String, String>>> listClass =
         (Class<List<Pair<String, String>>>) (Class) ArrayList.class;
     ArgumentCaptor<List<Pair<String, String>>> filterCaptor = ArgumentCaptor.forClass(listClass);
-    verify(userDevfileManager)
-        .getUserDevfiles(
-            eq(Subject.ANONYMOUS.getUserId()), eq(30), eq(0), filterCaptor.capture(), anyList());
+    verify(userDevfileManager).getUserDevfiles(eq(30), eq(0), filterCaptor.capture(), anyList());
     assertEquals(
         filterCaptor.getValue(),
         ImmutableList.of(new Pair("devfile.meta.name", "like:%dfdf"), new Pair("id", "sdfsdf5")));
@@ -355,7 +350,7 @@ public class UserDevfileServiceTest {
     // given
     doReturn(new Page<>(Collections.emptyList(), 0, 1, 0))
         .when(userDevfileManager)
-        .getUserDevfiles(anyString(), anyInt(), anyInt(), anyList(), anyList());
+        .getUserDevfiles(anyInt(), anyInt(), anyList(), anyList());
     // when
     final Response response =
         given()
@@ -371,9 +366,7 @@ public class UserDevfileServiceTest {
     Class<List<Pair<String, String>>> listClass =
         (Class<List<Pair<String, String>>>) (Class) ArrayList.class;
     ArgumentCaptor<List<Pair<String, String>>> orderCaptor = ArgumentCaptor.forClass(listClass);
-    verify(userDevfileManager)
-        .getUserDevfiles(
-            eq(Subject.ANONYMOUS.getUserId()), eq(30), eq(0), anyList(), orderCaptor.capture());
+    verify(userDevfileManager).getUserDevfiles(eq(30), eq(0), anyList(), orderCaptor.capture());
     assertEquals(
         orderCaptor.getValue(), ImmutableList.of(new Pair("id", "asc"), new Pair("name", "desc")));
   }
