@@ -25,8 +25,8 @@ public class DevfileFilenamesProvider {
 
   @Inject
   public DevfileFilenamesProvider(
-      @Named("che.factory.default_devfile_filenames") String propertyValue) {
-    this.configuredDevfileFilenames = Splitter.on(",").splitToList(propertyValue);
+      @Named("che.factory.default_devfile_filenames") String devfileFilenames) {
+    this.configuredDevfileFilenames = Splitter.on(",").splitToList(devfileFilenames);
   }
 
   public List<String> getConfiguredDevfileFilenames() {
