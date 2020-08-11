@@ -21,6 +21,9 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.workspace.shared.Constants.CREATED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVE_WORKSPACE_ID;
+import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVITY_TIME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_NAME;
@@ -28,6 +31,8 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_GENERATE_
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 
 import com.google.inject.Inject;
+import java.time.Clock;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -45,8 +50,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.user.server.ProfileManager;
-import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
+import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
@@ -85,9 +89,10 @@ public class WorkspaceManager {
   private final WorkspaceRuntimes runtimes;
   private final AccountManager accountManager;
   private final EventService eventService;
-  private final ProfileManager profileManager;
+  private final PreferenceManager preferenceManager;
   private final WorkspaceValidator validator;
   private final DevfileIntegrityValidator devfileIntegrityValidator;
+  private final Clock clock;
 
   @Inject
   public WorkspaceManager(
@@ -95,16 +100,17 @@ public class WorkspaceManager {
       WorkspaceRuntimes runtimes,
       EventService eventService,
       AccountManager accountManager,
-      ProfileManager profileManager,
+      PreferenceManager preferenceManager,
       WorkspaceValidator validator,
       DevfileIntegrityValidator devfileIntegrityValidator) {
     this.workspaceDao = workspaceDao;
     this.runtimes = runtimes;
     this.accountManager = accountManager;
     this.eventService = eventService;
-    this.profileManager = profileManager;
+    this.preferenceManager = preferenceManager;
     this.validator = validator;
     this.devfileIntegrityValidator = devfileIntegrityValidator;
+    clock = Clock.systemDefaultZone();
   }
 
   /**
@@ -421,9 +427,7 @@ public class WorkspaceManager {
       workspace.getAttributes().put(STOPPED_ABNORMALLY_ATTRIBUTE_NAME, Boolean.toString(false));
       workspaceDao.update(workspace);
     }
-
-    final String namespace = workspace.getNamespace();
-    final String wsKey = namespace + ":" + workspaceId;
+    String namespace = workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
     final String owner = workspace.getRuntime().getOwner();
 
     runtimes
@@ -433,26 +437,33 @@ public class WorkspaceManager {
               if (workspace.isTemporary()) {
                 removeWorkspaceQuietly(workspace.getId());
               }
-              recordLastWorkspaceActivityTime(wsKey, owner);
+              if (!runtimes.isAnyActive()) {
+                recordLastWorkspaceStoppedTime(namespace, workspace.getId(), owner);
+              }
             });
   }
 
-
-  private void recordLastWorkspaceActivityTime(String wsKey, String owner) {
-    final ProfileImpl profile;
+  private void recordLastWorkspaceStoppedTime(String namespace, String workspaceId, String owner) {
     try {
-      profile = new ProfileImpl(profileManager.getById(owner));
-      Map<String, String> attributes = profile.getAttributes();
-      String value = Long.toString(currentTimeMillis());
-      attributes.put("LAST_TIME_ACCESS", value);
-      attributes.put("LAST_USED_WORKSPACE", wsKey);
-      profile.setAttributes(attributes);
-      profileManager.update(profile);
-      System.out.println("REGISTER >>>>> in " + wsKey + " at " + value);
-    } catch (NotFoundException e) {
-      e.printStackTrace();
+      Map<String, String> preferences = preferenceManager.find(owner);
+      String currentTime = Long.toString(clock.instant().getEpochSecond());
+      preferences.put(LAST_ACTIVITY_TIME, currentTime);
+      preferences.put(LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE, namespace);
+      preferences.put(LAST_ACTIVE_WORKSPACE_ID, workspaceId);
+      preferenceManager.update(owner, preferences);
     } catch (ServerException e) {
-      e.printStackTrace();
+      LOG.error(e.getMessage(), e);
+    }
+  }
+
+  private void cleanLastWorkspaceStoppedTime(String owner) {
+    try {
+      preferenceManager.remove(
+          owner,
+          Arrays.asList(
+              LAST_ACTIVITY_TIME, LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE, LAST_ACTIVE_WORKSPACE_ID));
+    } catch (ServerException e) {
+      LOG.error(e.getMessage(), e);
     }
   }
 
@@ -606,6 +617,8 @@ public class WorkspaceManager {
       workspace.getAttributes().remove(ERROR_MESSAGE_ATTRIBUTE_NAME);
 
       workspaceDao.update(workspace);
+
+      cleanLastWorkspaceStoppedTime(workspace.getRuntime().getOwner());
     } catch (NotFoundException | ServerException | ConflictException e) {
       LOG.warn(
           String.format(
