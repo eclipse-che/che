@@ -26,6 +26,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.PassThroughProxyProvisioner;
 
 /**
@@ -33,7 +34,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtprox
  *
  * <p>To expose secure servers it provisions proxy objects into environment with {@link
  * org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.ProxyProvisioner}. Then proxy
- * service port is made public accessible by {@link ExternalServerExposer<T>}.
+ * service port is made public accessible by {@link ExternalServerExposer <T>}.
  *
  * <p>In this way, requests to exposed secure servers will be routed via the proxy that is added one
  * per workspace.
@@ -59,8 +60,8 @@ public class DefaultSecureServerExposer<T extends KubernetesEnvironment>
   public DefaultSecureServerExposer(
       @Assisted RuntimeIdentity identity,
       ProxyProvisionerFactory proxyProvisionerFactory,
-      ExternalServerExposer<T> exposer) {
-    this.exposer = exposer;
+      ExternalServerExposerProvider<T> exposer) {
+    this.exposer = exposer.get();
     this.proxyProvisioner = proxyProvisionerFactory.create(identity);
   }
 

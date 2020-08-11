@@ -13,9 +13,12 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.when;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStoragePodInterceptor;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
@@ -24,14 +27,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminat
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SshKeysProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisionerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.ContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.AsyncStoragePodInterceptor;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.AsyncStorageProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftUniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftPreviewUrlExposer;
@@ -55,6 +57,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private RouteTlsProvisioner tlsRouteProvisioner;
+  @Mock private TlsProvisionerProvider<OpenShiftEnvironment> tlsRouteProvisionerProvider;
   @Mock private EnvVarsConverter envVarsProvisioner;
   @Mock private ServersConverter<OpenShiftEnvironment> serversProvisioner;
   @Mock private RestartPolicyRewriter restartPolicyRewriter;
@@ -78,11 +81,12 @@ public class OpenShiftEnvironmentProvisionerTest {
 
   @BeforeMethod
   public void setUp() {
+    when(tlsRouteProvisionerProvider.get()).thenReturn(tlsRouteProvisioner);
     osInfraProvisioner =
         new OpenShiftEnvironmentProvisioner(
             true,
             uniqueNamesProvisioner,
-            tlsRouteProvisioner,
+            tlsRouteProvisionerProvider,
             serversProvisioner,
             envVarsProvisioner,
             restartPolicyRewriter,

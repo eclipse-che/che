@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.openshift.provision;
+package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static java.lang.Boolean.parseBoolean;
@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -67,11 +68,11 @@ import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.shared.model.SshPair;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ServerServiceBuilder;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +86,7 @@ import org.slf4j.LoggerFactory;
  * exception.</br> During provision will be created: - storage Pod - service for rsync connection
  * via SSH - configmap, with public part of SSH key - PVC for storing backups;
  */
+@Singleton
 public class AsyncStorageProvisioner {
 
   private static final int SERVICE_PORT = 2222;
@@ -121,7 +123,7 @@ public class AsyncStorageProvisioner {
   private final String pvcName;
   private final String pvcStorageClassName;
   private final SshManager sshManager;
-  private final OpenShiftClientFactory clientFactory;
+  private final KubernetesClientFactory kubernetesClientFactory;
 
   @Inject
   public AsyncStorageProvisioner(
@@ -133,7 +135,7 @@ public class AsyncStorageProvisioner {
       @Named("che.infra.kubernetes.pvc.name") String pvcName,
       @Named("che.infra.kubernetes.pvc.storage_class_name") String pvcStorageClassName,
       SshManager sshManager,
-      OpenShiftClientFactory openShiftClientFactory) {
+      KubernetesClientFactory kubernetesClientFactory) {
     this.sidecarImagePullPolicy = sidecarImagePullPolicy;
     this.pvcQuantity = pvcQuantity;
     this.asyncStorageImage = asyncStorageImage;
@@ -142,12 +144,12 @@ public class AsyncStorageProvisioner {
     this.pvcName = pvcName;
     this.pvcStorageClassName = pvcStorageClassName;
     this.sshManager = sshManager;
-    this.clientFactory = openShiftClientFactory;
+    this.kubernetesClientFactory = kubernetesClientFactory;
   }
 
-  public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
+  public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-    if (!parseBoolean(osEnv.getAttributes().get(ASYNC_PERSIST_ATTRIBUTE))) {
+    if (!parseBoolean(k8sEnv.getAttributes().get(ASYNC_PERSIST_ATTRIBUTE))) {
       return;
     }
 
@@ -157,34 +159,34 @@ public class AsyncStorageProvisioner {
               "Workspace configuration not valid: Asynchronous storage available only for 'common' PVC strategy, but got %s",
               pvcStrategy);
       LOG.warn(message);
-      osEnv.addWarning(new WarningImpl(4200, message));
+      k8sEnv.addWarning(new WarningImpl(4200, message));
       throw new InfrastructureException(message);
     }
 
-    if (!isEphemeral(osEnv.getAttributes())) {
+    if (!isEphemeral(k8sEnv.getAttributes())) {
       String message =
           format(
               "Workspace configuration not valid: Asynchronous storage available only if '%s' attribute set to false",
               ASYNC_PERSIST_ATTRIBUTE);
       LOG.warn(message);
-      osEnv.addWarning(new WarningImpl(4200, message));
+      k8sEnv.addWarning(new WarningImpl(4200, message));
       throw new InfrastructureException(message);
     }
 
     String namespace = identity.getInfrastructureNamespace();
     String userId = identity.getOwnerId();
-    KubernetesClient oc = clientFactory.create(identity.getWorkspaceId());
+    KubernetesClient k8sClient = kubernetesClientFactory.create(identity.getWorkspaceId());
     String configMapName = namespace + ASYNC_STORAGE_CONFIG;
 
-    createPvcIfNotExist(oc, namespace, userId);
-    createConfigMapIfNotExist(oc, namespace, configMapName, userId, osEnv);
-    createAsyncStoragePodIfNotExist(oc, namespace, configMapName, userId);
-    createStorageServiceIfNotExist(oc, namespace, userId);
+    createPvcIfNotExist(k8sClient, namespace, userId);
+    createConfigMapIfNotExist(k8sClient, namespace, configMapName, userId, k8sEnv);
+    createAsyncStoragePodIfNotExist(k8sClient, namespace, configMapName, userId);
+    createStorageServiceIfNotExist(k8sClient, namespace, userId);
   }
 
-  private void createPvcIfNotExist(KubernetesClient oc, String namespace, String userId) {
+  private void createPvcIfNotExist(KubernetesClient k8sClient, String namespace, String userId) {
     Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim> claimResource =
-        oc.persistentVolumeClaims().inNamespace(namespace).withName(pvcName);
+        k8sClient.persistentVolumeClaims().inNamespace(namespace).withName(pvcName);
 
     if (claimResource.get() != null) {
       return; // pvc already exist
@@ -192,11 +194,11 @@ public class AsyncStorageProvisioner {
     PersistentVolumeClaim pvc =
         KubernetesObjectUtil.newPVC(pvcName, pvcAccessMode, pvcQuantity, pvcStorageClassName);
     KubernetesObjectUtil.putLabel(pvc.getMetadata(), CHE_USER_ID_LABEL, userId);
-    oc.persistentVolumeClaims().inNamespace(namespace).create(pvc);
+    k8sClient.persistentVolumeClaims().inNamespace(namespace).create(pvc);
   }
 
   /** Get or create new pair of SSH keys, this is need for securing rsync connection */
-  private List<SshPairImpl> getOrCreateSshPairs(String userId, OpenShiftEnvironment osEnv)
+  private List<SshPairImpl> getOrCreateSshPairs(String userId, KubernetesEnvironment k8sEnv)
       throws InfrastructureException {
     List<SshPairImpl> sshPairs;
     try {
@@ -204,7 +206,7 @@ public class AsyncStorageProvisioner {
     } catch (ServerException e) {
       String message = format("Unable to get SSH Keys. Cause: %s", e.getMessage());
       LOG.warn(message);
-      osEnv.addWarning(
+      k8sEnv.addWarning(
           new WarningImpl(
               NOT_ABLE_TO_PROVISION_SSH_KEYS,
               format(NOT_ABLE_TO_PROVISION_SSH_KEYS_MESSAGE, message)));
@@ -219,7 +221,7 @@ public class AsyncStorageProvisioner {
                 "Unable to generate the SSH key for async storage service. Cause: %S",
                 e.getMessage());
         LOG.warn(message);
-        osEnv.addWarning(
+        k8sEnv.addWarning(
             new WarningImpl(
                 NOT_ABLE_TO_PROVISION_SSH_KEYS,
                 format(NOT_ABLE_TO_PROVISION_SSH_KEYS_MESSAGE, message)));
@@ -231,19 +233,19 @@ public class AsyncStorageProvisioner {
 
   /** Create configmap with public part of SSH key */
   private void createConfigMapIfNotExist(
-      KubernetesClient oc,
+      KubernetesClient k8sClient,
       String namespace,
       String configMapName,
       String userId,
-      OpenShiftEnvironment osEnv)
+      KubernetesEnvironment k8sEnv)
       throws InfrastructureException {
     Resource<ConfigMap, DoneableConfigMap> mapResource =
-        oc.configMaps().inNamespace(namespace).withName(configMapName);
+        k8sClient.configMaps().inNamespace(namespace).withName(configMapName);
     if (mapResource.get() != null) { // map already exist
       return;
     }
 
-    List<SshPairImpl> sshPairs = getOrCreateSshPairs(userId, osEnv);
+    List<SshPairImpl> sshPairs = getOrCreateSshPairs(userId, k8sEnv);
     if (sshPairs == null) {
       return;
     }
@@ -258,7 +260,7 @@ public class AsyncStorageProvisioner {
             .endMetadata()
             .withData(sshConfigData)
             .build();
-    oc.configMaps().inNamespace(namespace).create(configMap);
+    k8sClient.configMaps().inNamespace(namespace).create(configMap);
   }
 
   /**
@@ -266,9 +268,9 @@ public class AsyncStorageProvisioner {
    * key and exposed port for rsync connection
    */
   private void createAsyncStoragePodIfNotExist(
-      KubernetesClient oc, String namespace, String configMap, String userId) {
+      KubernetesClient k8sClient, String namespace, String configMap, String userId) {
     PodResource<Pod, DoneablePod> podResource =
-        oc.pods().inNamespace(namespace).withName(ASYNC_STORAGE);
+        k8sClient.pods().inNamespace(namespace).withName(ASYNC_STORAGE);
     if (podResource.get() != null) {
       return; // pod already exist
     }
@@ -343,14 +345,14 @@ public class AsyncStorageProvisioner {
             .withSpec(podSpec)
             .build();
 
-    oc.pods().inNamespace(namespace).create(pod);
+    k8sClient.pods().inNamespace(namespace).create(pod);
   }
 
   /** Create service for serving rsync connection */
   private void createStorageServiceIfNotExist(
-      KubernetesClient oc, String namespace, String userId) {
+      KubernetesClient k8sClient, String namespace, String userId) {
     ServiceResource<Service, DoneableService> serviceResource =
-        oc.services().inNamespace(namespace).withName(ASYNC_STORAGE);
+        k8sClient.services().inNamespace(namespace).withName(ASYNC_STORAGE);
     if (serviceResource.get() != null) {
       return; // service already exist
     }
@@ -370,7 +372,6 @@ public class AsyncStorageProvisioner {
             .withPort(SERVICE_PORT)
             .withTargetPort(targetPort)
             .build();
-
     ServiceSpec spec = new ServiceSpec();
     spec.setPorts(singletonList(port));
     spec.setSelector(of("app", ASYNC_STORAGE));
@@ -383,6 +384,6 @@ public class AsyncStorageProvisioner {
             .withName(ASYNC_STORAGE)
             .build();
 
-    oc.services().inNamespace(namespace).create(service);
+    k8sClient.services().inNamespace(namespace).create(service);
   }
 }

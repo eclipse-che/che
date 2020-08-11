@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.factory.server.urlfactory.DevfileFilenamesProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 
 /**
@@ -27,7 +28,15 @@ import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 public class GithubURLParser {
 
   /** Fetcher to grab PR data */
-  @Inject private URLFetcher urlFetcher;
+  private final URLFetcher urlFetcher;
+
+  private final DevfileFilenamesProvider devfileFilenamesProvider;
+
+  @Inject
+  public GithubURLParser(URLFetcher urlFetcher, DevfileFilenamesProvider devfileFilenamesProvider) {
+    this.urlFetcher = urlFetcher;
+    this.devfileFilenamesProvider = devfileFilenamesProvider;
+  }
 
   /**
    * Regexp to find repository details (repository name, project name and branch and subfolder)
@@ -92,8 +101,8 @@ public class GithubURLParser {
         .withUsername(repoUser)
         .withRepository(repoName)
         .withBranch(branchName)
+        .withFactoryFilename(".factory.json")
         .withSubfolder(matcher.group("subFolder"))
-        .withDevfileFilename("devfile.yaml")
-        .withFactoryFilename(".factory.json");
+        .withDevfileFilenames(devfileFilenamesProvider.getConfiguredDevfileFilenames());
   }
 }
