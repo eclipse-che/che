@@ -35,8 +35,7 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
   private final ExternalServiceExposureStrategy strategy;
 
   @Inject
-  public GatewayServerExposer(
-      ExternalServiceExposureStrategy strategy) {
+  public GatewayServerExposer(ExternalServiceExposureStrategy strategy) {
     this.strategy = strategy;
   }
 
@@ -70,7 +69,8 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
         createGatewayRouteConfig(machineName, serviceName, serverId, servicePort, externalServers));
   }
 
-  private GatewayRouteConfig createGatewayRouteConfig(String machineName,
+  private GatewayRouteConfig createGatewayRouteConfig(
+      String machineName,
       String serviceName,
       String serverId,
       ServicePort servicePort,
@@ -79,8 +79,8 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
     final String name = createName(serviceName, serverName);
     final String path = ensureEndsWithSlash(strategy.getExternalPath(serviceName, serverName));
     final Map<String, String> annotations = createAnnotations(serversConfigs, path, machineName);
-    return new GatewayRouteConfig(name, serviceName, getTargetPort(servicePort.getTargetPort()),
-        path, annotations);
+    return new GatewayRouteConfig(
+        name, serviceName, getTargetPort(servicePort.getTargetPort()), path, annotations);
   }
 
   private String ensureEndsWithSlash(String path) {

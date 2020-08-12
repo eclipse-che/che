@@ -111,6 +111,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         secretAsContainerResourceProvisioner,
         null,
         gatewayRouterProvisioner,
+        null,
         tracer,
         context,
         project);
@@ -137,6 +138,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
 
     createSecrets(osEnv, workspaceId);
     List<ConfigMap> createdConfigMaps = createConfigMaps(osEnv, workspaceId);
+    createdConfigMaps.addAll(gatewayRouterProvisioner.provision(getContext().getIdentity(), osEnv));
     List<Service> createdServices = createServices(osEnv, workspaceId);
     List<Route> createdRoutes = createRoutes(osEnv, workspaceId);
 

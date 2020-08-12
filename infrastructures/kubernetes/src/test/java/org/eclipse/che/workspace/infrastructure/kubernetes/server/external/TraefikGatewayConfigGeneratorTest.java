@@ -1,4 +1,15 @@
-///*
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+/// *
 // * Copyright (c) 2012-2018 Red Hat, Inc.
 // * This program and the accompanying materials are made
 // * available under the terms of the Eclipse Public License 2.0
@@ -9,14 +20,14 @@
 // * Contributors:
 // *   Red Hat, Inc. - initial API and implementation
 // */
-//package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
+// package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 //
-//import static org.testng.Assert.*;
+// import static org.testng.Assert.*;
 //
-//import java.util.Map;
-//import org.testng.annotations.Test;
+// import java.util.Map;
+// import org.testng.annotations.Test;
 //
-//public class TraefikGatewayConfigGeneratorTest {
+// public class TraefikGatewayConfigGeneratorTest {
 //  private final GatewayRouteConfigGenerator gatewayConfigGenerator =
 //      new TraefikGatewayRouteConfigGenerator();
 //
@@ -49,4 +60,4 @@
 //    assertTrue(generatedConfig.containsKey("external-server-1.yml"));
 //    assertEquals(generatedConfig.get("external-server-1.yml"), expectedConfig);
 //  }
-//}
+// }

@@ -121,6 +121,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachi
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeCommandImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.CheNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
@@ -196,6 +197,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private KubernetesNamespace namespace;
+  @Mock private CheNamespace cheNamespace;
   @Mock private KubernetesServices services;
   @Mock private KubernetesIngresses ingresses;
   @Mock private KubernetesSecrets secrets;
@@ -211,6 +213,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
   @Mock private KubernetesPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
+  @Mock private GatewayRouterProvisioner gatewayRouterProvisioner;
   private KubernetesServerResolverFactory serverResolverFactory;
 
   @Mock
@@ -264,7 +267,7 @@ public class KubernetesInternalRuntimeTest {
     when(startSynchronizerFactory.create(any())).thenReturn(startSynchronizer);
 
     internalRuntime =
-        new KubernetesInternalRuntime<KubernetesEnvironment>(
+        new KubernetesInternalRuntime<>(
             13,
             5,
             new URLRewriter.NoOpURLRewriter(),
@@ -285,7 +288,8 @@ public class KubernetesInternalRuntimeTest {
             previewUrlCommandProvisioner,
             secretAsContainerResourceProvisioner,
             serverResolverFactory,
-            null,
+            gatewayRouterProvisioner,
+            cheNamespace,
             tracer,
             context,
             namespace);

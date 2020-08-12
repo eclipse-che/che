@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.openshift.environment;
+package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
 import com.google.inject.Inject;
 import javax.inject.Named;
@@ -18,26 +18,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * OpenShiftCheInstallationLocation checks the KUBERNETES_NAMESPACE and POD_NAMESPACE environment
- * variables to determine what namespace Che is installed in. Users should use this class to
- * retrieve the installation namespace name.
+ * This class checks the KUBERNETES_NAMESPACE and POD_NAMESPACE environment variables to determine
+ * what namespace Che is installed in. Users should use this class to retrieve the installation
+ * namespace name.
  *
  * @author Tom George
  */
 @Singleton
-public class OpenShiftCheInstallationLocation {
+public class CheInstallationLocation {
 
-  private static final Logger LOG = LoggerFactory.getLogger(OpenShiftCheInstallationLocation.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CheInstallationLocation.class);
 
   @Inject(optional = true)
   @Named("env.KUBERNETES_NAMESPACE")
-  private String kubernetesNamespace = null;
+  private String kubernetesNamespace;
 
   @Inject(optional = true)
   @Named("env.POD_NAMESPACE")
-  private String podNamespace = null;
+  private String podNamespace;
 
-  /** @return The name of the namespace where Che is installed */
+  /**
+   * @return The name of the namespace where Che is installed or null if both {@code
+   *     KUBERNETES_NAMESPACE} and {@code POD_NAMESPACE} environment variables are not set
+   */
   public String getInstallationLocationNamespace() {
     if (kubernetesNamespace == null && podNamespace == null) {
       LOG.warn(

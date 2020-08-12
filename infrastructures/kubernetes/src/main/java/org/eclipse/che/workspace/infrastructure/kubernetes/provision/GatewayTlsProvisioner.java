@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisioner.getSecureProtocol;
 
-import io.fabric8.kubernetes.api.model.ConfigMap;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;

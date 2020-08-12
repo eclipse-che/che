@@ -26,11 +26,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstallationLocation;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftCheInstallationLocation;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 
 /**
@@ -53,7 +53,7 @@ public class Openshift4TrustedCAProvisioner {
       @Named("che.infra.openshift.trusted_ca_bundles_config_map") String configMapName,
       @Named("che.infra.openshift.trusted_ca_bundles_config_map_labels") String configMapLabel,
       @Named("che.infra.openshift.trusted_ca_bundles_mount_path") String certificateMountPath,
-      OpenShiftCheInstallationLocation cheInstallationLocation,
+      CheInstallationLocation cheInstallationLocation,
       OpenShiftClientFactory clientFactory)
       throws InfrastructureException {
     this.configMapName = configMapName;

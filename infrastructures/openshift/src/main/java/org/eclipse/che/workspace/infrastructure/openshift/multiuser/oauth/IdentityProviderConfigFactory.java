@@ -118,6 +118,7 @@ public class IdentityProviderConfigFactory extends OpenShiftClientConfigFactory 
    * Builds the OpenShift {@link Config} object based on a default {@link Config} object and an
    * optional workspace Id.
    */
+  @Override
   public Config buildConfig(Config defaultConfig, @Nullable String workspaceId)
       throws InfrastructureException {
     Subject subject = EnvironmentContext.getCurrent().getSubject();

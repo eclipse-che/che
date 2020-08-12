@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
 import java.util.Map;
@@ -11,8 +22,12 @@ public class GatewayRouteConfig {
   private final String routePath;
   private final Map<String, String> annotations;
 
-  public GatewayRouteConfig(String name, String serviceName, String servicePort,
-      String routePath, Map<String, String> annotations) {
+  public GatewayRouteConfig(
+      String name,
+      String serviceName,
+      String servicePort,
+      String routePath,
+      Map<String, String> annotations) {
     this.name = name;
     this.serviceName = serviceName;
     this.servicePort = servicePort;
@@ -40,11 +55,11 @@ public class GatewayRouteConfig {
       return false;
     }
     GatewayRouteConfig that = (GatewayRouteConfig) o;
-    return Objects.equals(name, that.name) &&
-        Objects.equals(serviceName, that.serviceName) &&
-        Objects.equals(servicePort, that.servicePort) &&
-        Objects.equals(routePath, that.routePath) &&
-        Objects.equals(annotations, that.annotations);
+    return Objects.equals(name, that.name)
+        && Objects.equals(serviceName, that.serviceName)
+        && Objects.equals(servicePort, that.servicePort)
+        && Objects.equals(routePath, that.routePath)
+        && Objects.equals(annotations, that.annotations);
   }
 
   @Override

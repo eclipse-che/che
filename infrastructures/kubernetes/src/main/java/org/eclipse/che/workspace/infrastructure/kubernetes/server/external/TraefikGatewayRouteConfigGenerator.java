@@ -61,9 +61,9 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
   /**
    * Generates Traefik specific configuration for single service.
    *
-   * @param name       name of the service
+   * @param name name of the service
    * @param serviceUrl url of service we want to route to
-   * @param path       path to route and strip
+   * @param path path to route and strip
    * @return traefik service route config
    */
   public String generate(String name, String serviceUrl, String path) {
@@ -189,16 +189,18 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
   public Map<String, String> generate() {
     Map<String, String> cmData = new HashMap<>();
     for (GatewayRouteConfig routeConfig : routeConfigs) {
-      String traefikRouteConfig = generate(routeConfig.getName(),
-          createServiceUrl(routeConfig.getServiceName(), routeConfig.getServicePort()),
-          routeConfig.getRoutePath());
+      String traefikRouteConfig =
+          generate(
+              routeConfig.getName(),
+              createServiceUrl(routeConfig.getServiceName(), routeConfig.getServicePort()),
+              routeConfig.getRoutePath());
       cmData.put(routeConfig.getName() + ".yml", traefikRouteConfig);
     }
     return cmData;
   }
 
   private String createServiceUrl(String serviceName, String servicePort) {
-    return String
-        .format("http://%s.%s.svc.cluster.local:%s", serviceName, serviceNamespace, servicePort);
+    return String.format(
+        "http://%s.%s.svc.cluster.local:%s", serviceName, serviceNamespace, servicePort);
   }
 }

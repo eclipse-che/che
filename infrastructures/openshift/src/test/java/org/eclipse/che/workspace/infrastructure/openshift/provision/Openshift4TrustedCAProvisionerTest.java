@@ -37,11 +37,11 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstallationLocation;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftCheInstallationLocation;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -59,7 +59,7 @@ public class Openshift4TrustedCAProvisionerTest {
   private static final String CONFIGMAP_KEY = "testConfigMapKey";
   private static final String CONFIGMAP_VALUE = "testConfigMapValue";
 
-  @Mock OpenShiftCheInstallationLocation cheInstallationLocation;
+  @Mock CheInstallationLocation cheInstallationLocation;
   @Mock OpenShiftClientFactory clientFactory;
 
   @Mock private KubernetesEnvironment k8sEnv;

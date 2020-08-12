@@ -89,7 +89,6 @@ import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.security.oauth.EmbeddedOAuthAPI;
 import org.eclipse.che.security.oauth.OAuthAPI;
 import org.eclipse.che.security.oauth.OpenShiftOAuthModule;
-import org.eclipse.che.workspace.infrastructure.kubernetes.GatewayRouterProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructure;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
