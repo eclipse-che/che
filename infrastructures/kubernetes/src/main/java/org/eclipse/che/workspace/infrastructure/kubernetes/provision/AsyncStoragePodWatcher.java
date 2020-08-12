@@ -49,9 +49,9 @@ import org.slf4j.LoggerFactory;
  * recorded if last workspace stopped and cleanup on start any workspace. Required preferences to
  * initiate stop procedure for Asynchronous Storage Pod : {@link
  * org.eclipse.che.api.workspace.shared.Constants#LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE} : should
- * contain last used infrastructure namespace
- * {@link org.eclipse.che.api.workspace.shared.Constants#LAST_ACTIVITY_TIME} :
- * seconds then workspace stopped in the Java epoch time format (aka Unix time)
+ * contain last used infrastructure namespace {@link
+ * org.eclipse.che.api.workspace.shared.Constants#LAST_ACTIVITY_TIME} : seconds then workspace
+ * stopped in the Java epoch time format (aka Unix time)
  */
 @Singleton
 public class AsyncStoragePodWatcher {
