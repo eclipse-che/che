@@ -12,28 +12,19 @@
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
 import static com.google.common.collect.ImmutableMap.of;
-import static java.util.Collections.singletonList;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
-import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
-import io.fabric8.kubernetes.api.model.DoneableConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
-import io.fabric8.kubernetes.client.Watch;
-import io.fabric8.kubernetes.client.Watcher;
-import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
-import io.fabric8.kubernetes.client.dsl.MixedOperation;
-import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,47 +56,31 @@ public class Openshift4TrustedCAProvisionerTest {
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private OpenShiftProject openShiftProject;
   @Mock private KubernetesConfigsMaps kubernetesConfigsMaps;
-  @Mock private ConfigMapList configMapList;
 
   @Mock private OpenShiftClient k8sClient;
 
   Map<String, ConfigMap> envConfigMaps = new HashMap<>();
 
-  @Mock
-  private MixedOperation<
-          ConfigMap, ConfigMapList, DoneableConfigMap, Resource<ConfigMap, DoneableConfigMap>>
-      configMapOperation;
-
-  @Mock
-  private NonNamespaceOperation<
-          ConfigMap, ConfigMapList, DoneableConfigMap, Resource<ConfigMap, DoneableConfigMap>>
-      nonNamespaceOperation;
-
-  @Mock
-  private FilterWatchListDeletable<ConfigMap, ConfigMapList, Boolean, Watch, Watcher<ConfigMap>>
-      configMapResource;
-
   private Openshift4TrustedCAProvisioner trustedCAProvisioner;
 
   @BeforeMethod
   public void setup() throws Exception {
-
     lenient().when(clientFactory.createOC()).thenReturn(k8sClient);
-    lenient().when(k8sClient.configMaps()).thenReturn(configMapOperation);
-    lenient().when(configMapOperation.inNamespace(any())).thenReturn(nonNamespaceOperation);
-    lenient().when(nonNamespaceOperation.withLabels(any())).thenReturn(configMapResource);
-    lenient().when(configMapResource.list()).thenReturn(configMapList);
-    lenient().when(configMapList.getItems()).thenReturn(singletonList(newConfigMap()));
     lenient().when(openShiftProject.configMaps()).thenReturn(kubernetesConfigsMaps);
     lenient().when(k8sEnv.getConfigMaps()).thenReturn(envConfigMaps);
-
     this.trustedCAProvisioner =
         new Openshift4TrustedCAProvisioner(
-            CONFIGMAP_NAME,
-            CONFIGMAP_LABELS,
-            CERTIFICATE_MOUNT_PATH,
-            cheInstallationLocation,
-            clientFactory);
+            CONFIGMAP_NAME, CONFIGMAP_NAME, CONFIGMAP_LABELS, CERTIFICATE_MOUNT_PATH);
+  }
+
+  @Test
+  public void shouldDoNothingIfCAStoreIsNotInitialized() throws Exception {
+    Openshift4TrustedCAProvisioner localProvisioner =
+        new Openshift4TrustedCAProvisioner(
+            null, CONFIGMAP_NAME, CONFIGMAP_LABELS, CERTIFICATE_MOUNT_PATH);
+
+    localProvisioner.provision(k8sEnv, openShiftProject);
+    verifyZeroInteractions(k8sEnv, openShiftProject, clientFactory, openShiftProject);
   }
 
   @Test

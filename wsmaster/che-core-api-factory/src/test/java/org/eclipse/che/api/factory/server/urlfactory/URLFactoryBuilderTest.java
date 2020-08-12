@@ -12,6 +12,7 @@
 package org.eclipse.che.api.factory.server.urlfactory;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
@@ -23,13 +24,16 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
@@ -133,14 +137,13 @@ public class URLFactoryBuilderTest {
     FactoryDto factory =
         urlFactoryBuilder
             .createFactoryFromDevfile(
-                new DefaultFactoryUrl()
-                    .withDevfileFileLocation(myLocation)
-                    .withDevfileFilename("devfile.yml"),
+                new DefaultFactoryUrl().withDevfileFileLocation(myLocation),
                 s -> myLocation + ".list",
                 emptyMap())
             .get();
 
-    assertEquals(factory.getSource(), "devfile.yml");
+    assertNotNull(factory);
+    assertNull(factory.getSource());
   }
 
   @DataProvider
@@ -175,7 +178,20 @@ public class URLFactoryBuilderTest {
           OverrideParameterException {
     DefaultFactoryUrl defaultFactoryUrl = mock(DefaultFactoryUrl.class);
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
-    when(defaultFactoryUrl.devfileFileLocation()).thenReturn("anything");
+    when(defaultFactoryUrl.devfileFileLocations())
+        .thenReturn(
+            singletonList(
+                new DevfileLocation() {
+                  @Override
+                  public Optional<String> filename() {
+                    return Optional.empty();
+                  }
+
+                  @Override
+                  public String location() {
+                    return "http://foo.bar/anything";
+                  }
+                }));
     when(devfileManager.parseYaml(anyString(), anyMap())).thenReturn(devfile);
     when(urlFetcher.fetchSafely(anyString())).thenReturn("anything");
     FactoryDto factory =
