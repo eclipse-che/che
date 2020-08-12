@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import java.util.Map;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.GatewayRouteConfig;
 
 /**
@@ -36,15 +37,16 @@ public interface GatewayRouteConfigGenerator {
 
   /**
    * Generates content of configurations for services, defined earlier by added {@link
-   * GatewayRouteConfig}s with {@link GatewayRouteConfigGenerator#addRouteConfig(GatewayRouteConfig)}.
-   * Returned {@code Map<String, String>} will be used as a value of ConfigMap and injected into
-   * Gateway pod.
+   * GatewayRouteConfig}s with {@link
+   * GatewayRouteConfigGenerator#addRouteConfig(GatewayRouteConfig)}. Returned {@code Map<String,
+   * String>} will be used as a value of ConfigMap and injected into Gateway pod.
    *
    * <p>Implementation must ensure that Gateway configured with returned content will route the
    * requests on {@code path} into {@code serviceUrl}. Also it must strip {@code path} from request
    * url.
    *
-   * <p> Keys and Values of returned {@link Map} depends on gateway technology. e.g.:
+   * <p>Keys and Values of returned {@link Map} depends on gateway technology. e.g.:
+   *
    * <pre>
    *   service1.yml: {config-content-for-service-1}
    *   service2.yml: {config-content-for-service-2}
@@ -52,5 +54,5 @@ public interface GatewayRouteConfigGenerator {
    *
    * @return full content of configuration for the services
    */
-  Map<String, String> generate();
+  Map<String, String> generate() throws InfrastructureException;
 }

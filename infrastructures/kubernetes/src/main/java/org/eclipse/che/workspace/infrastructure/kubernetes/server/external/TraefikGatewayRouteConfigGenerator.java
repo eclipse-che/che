@@ -21,11 +21,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.GatewayRouteConfig;
 
-/**
- * Config generator for Traefik Gateway
- */
+/** Config generator for Traefik Gateway */
 public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGenerator {
 
   private final List<GatewayRouteConfig> routeConfigs = new ArrayList<>();
@@ -43,11 +42,12 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
 
   /**
    * Generate Traefik configuration for all added {@link GatewayRouteConfig}s.
-   * <p>
-   * Each {@link GatewayRouteConfig} is translated into Traefik configuration under extra key in
+   *
+   * <p>Each {@link GatewayRouteConfig} is translated into Traefik configuration under extra key in
    * returned {@link Map} `{GatewayRouteConfig#name}.yml`.
-   * <p>
-   * Content of single service configuration looks like this:
+   *
+   * <p>Content of single service configuration looks like this:
+   *
    * <pre>
    * http:
    *   routers:
@@ -70,7 +70,7 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
    * </pre>
    */
   @Override
-  public Map<String, String> generate() {
+  public Map<String, String> generate() throws InfrastructureException {
     Map<String, String> cmData = new HashMap<>();
     for (GatewayRouteConfig routeConfig : routeConfigs) {
       String traefikRouteConfig =
@@ -86,12 +86,13 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
   /**
    * Generates Traefik specific configuration for single service.
    *
-   * @param name       name of the service
+   * @param name name of the service
    * @param serviceUrl url of service we want to route to
-   * @param path       path to route and strip
+   * @param path path to route and strip
    * @return traefik service route config
    */
-  private String generate(String name, String serviceUrl, String path) {
+  private String generate(String name, String serviceUrl, String path)
+      throws InfrastructureException {
     StringWriter sw = new StringWriter();
     try {
       YAMLGenerator generator =
@@ -114,8 +115,7 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
 
       return sw.toString();
     } catch (IOException e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
+      throw new InfrastructureException(e);
     }
   }
 

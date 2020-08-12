@@ -41,10 +41,13 @@ public class CheInstallationLocation {
   /**
    * @return The name of the namespace where Che is installed or null if both {@code
    *     KUBERNETES_NAMESPACE} and {@code POD_NAMESPACE} environment variables are not set
+   * @throws InfrastructureException when both {@code KUBERNETES_NAMESPACE} and {@code
+   *     POD_NAMESPACE} are null
    */
   public String getInstallationLocationNamespace() throws InfrastructureException {
     if (kubernetesNamespace == null && podNamespace == null) {
-      throw new InfrastructureException("Neither KUBERNETES_NAMESPACE nor POD_NAMESPACE is defined. Unable to determine Che installation location");
+      throw new InfrastructureException(
+          "Neither KUBERNETES_NAMESPACE nor POD_NAMESPACE is defined. Unable to determine Che installation location");
     }
     return kubernetesNamespace == null ? podNamespace : kubernetesNamespace;
   }

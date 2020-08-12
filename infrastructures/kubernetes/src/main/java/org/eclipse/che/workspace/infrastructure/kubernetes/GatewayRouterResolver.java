@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.GatewayRouteConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayRouteConfigGenerator;
@@ -28,8 +29,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Gatew
 
 /**
  * Resolves {@link GatewayRouteConfig}s from {@link InternalEnvironment} into {@link ConfigMap}s.
- * Created instance of {@link ConfigMap} is annotated with {@link GatewayRouterResolver#GATEWAY_CONFIGMAP_LABELS},
- * which are needed so Configbump tool can pick them up and provide them to the Gateway pod.
+ * Created instance of {@link ConfigMap} is annotated with {@link
+ * GatewayRouterResolver#GATEWAY_CONFIGMAP_LABELS}, which are needed so Configbump tool can pick
+ * them up and provide them to the Gateway pod.
  */
 @Singleton
 public class GatewayRouterResolver {
@@ -43,12 +45,12 @@ public class GatewayRouterResolver {
   private final GatewayRouteConfigGeneratorFactory configGeneratorFactory;
 
   @Inject
-  public GatewayRouterResolver(
-      GatewayRouteConfigGeneratorFactory configGeneratorFactory) {
+  public GatewayRouterResolver(GatewayRouteConfigGeneratorFactory configGeneratorFactory) {
     this.configGeneratorFactory = configGeneratorFactory;
   }
 
-  public List<ConfigMap> resolve(RuntimeIdentity id, InternalEnvironment internalEnvironment) {
+  public List<ConfigMap> resolve(RuntimeIdentity id, InternalEnvironment internalEnvironment)
+      throws InfrastructureException {
     if (internalEnvironment.getGatewayRouteConfigs().isEmpty()) {
       return Collections.emptyList();
     }

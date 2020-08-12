@@ -696,7 +696,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   }
 
   @Traced
-  @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
   protected List<ConfigMap> createConfigMaps(KubernetesEnvironment env, RuntimeIdentity identity)
       throws InfrastructureException {
     TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
@@ -706,7 +705,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       createdConfigMaps.add(namespace.configMaps().create(configMap));
     }
     for (ConfigMap routeConfigMap : gatewayRouterResolver.resolve(identity, env)) {
-      createdConfigMaps.add(cheNamespace.createConfigMap(routeConfigMap, identity.getWorkspaceId()));
+      createdConfigMaps.add(
+          cheNamespace.createConfigMap(routeConfigMap, identity.getWorkspaceId()));
     }
     return createdConfigMaps;
   }
