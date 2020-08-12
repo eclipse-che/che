@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
@@ -102,10 +103,7 @@ public class AsyncStoragePodWatcherTest {
             "<username>",
             1);
 
-    InternalRuntime runtime = mock(InternalRuntime.class);
-    when(runtime.getOwner()).thenReturn(UUID.randomUUID().toString());
-    when(runtimes.getInProgress()).thenReturn(singleton(WORKSPACE_ID));
-    when(runtimes.getInternalRuntime(WORKSPACE_ID)).thenReturn(runtime);
+    when(runtimes.getInProgress(USER_ID)).thenReturn(emptySet());
 
     ObjectMeta meta = new ObjectMeta();
     meta.setName(ASYNC_STORAGE);
@@ -159,7 +157,7 @@ public class AsyncStoragePodWatcherTest {
     // has active runtime
     InternalRuntime runtime = mock(InternalRuntime.class);
     when(runtime.getOwner()).thenReturn(USER_ID);
-    when(runtimes.getInProgress()).thenReturn(singleton(WORKSPACE_ID));
+    when(runtimes.getInProgress(USER_ID)).thenReturn(singleton(WORKSPACE_ID));
     when(runtimes.getInternalRuntime(WORKSPACE_ID)).thenReturn(runtime);
 
     Page<UserImpl> userPage = new Page<>(Collections.singleton(user), 0, 1, 1);

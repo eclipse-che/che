@@ -828,6 +828,67 @@ public class WorkspaceRuntimesTest {
   }
 
   @Test
+  public void shouldReturnRuntimesIdsOfActiveWorkspacesForGivenOwner() throws Exception {
+    // given
+    String ws1 = generate("workspace", 6);
+    String ws2 = generate("workspace", 6);
+    String ws3 = generate("workspace", 6);
+    String owner = generate("user", 6);
+
+    when(statuses.asMap())
+        .thenReturn(
+            ImmutableMap.of(
+                ws1, WorkspaceStatus.STARTING,
+                ws2, WorkspaceStatus.RUNNING,
+                ws3, WorkspaceStatus.STOPPING));
+
+    RuntimeIdentityImpl runtimeIdentity1 =
+        new RuntimeIdentityImpl(ws1, generate("env", 6), owner, generate("infraNamespace", 6));
+
+    RuntimeIdentityImpl runtimeIdentity2 =
+        new RuntimeIdentityImpl(
+            ws2, generate("env", 6), generate("user", 6), generate("infraNamespace", 6));
+
+    RuntimeIdentityImpl runtimeIdentity3 =
+        new RuntimeIdentityImpl(
+            ws3, generate("env", 6), generate("user", 6), generate("infraNamespace", 6));
+
+    mockWorkspaceWithConfig(runtimeIdentity1);
+    mockWorkspaceWithConfig(runtimeIdentity2);
+    mockWorkspaceWithConfig(runtimeIdentity3);
+
+    RuntimeContext context1 = mockContext(runtimeIdentity1);
+    RuntimeContext context2 = mockContext(runtimeIdentity2);
+    RuntimeContext context3 = mockContext(runtimeIdentity3);
+
+    when(context1.getRuntime())
+        .thenReturn(new TestInternalRuntime(context1, emptyMap(), WorkspaceStatus.STARTING));
+    when(context2.getRuntime())
+        .thenReturn(new TestInternalRuntime(context2, emptyMap(), WorkspaceStatus.RUNNING));
+    when(context3.getRuntime())
+        .thenReturn(new TestInternalRuntime(context3, emptyMap(), WorkspaceStatus.STOPPING));
+
+    doReturn(context1).when(infrastructure).prepare(eq(runtimeIdentity1), any());
+    doReturn(context2).when(infrastructure).prepare(eq(runtimeIdentity2), any());
+    doReturn(context3).when(infrastructure).prepare(eq(runtimeIdentity3), any());
+
+    Set<RuntimeIdentity> identities =
+        ImmutableSet.of(runtimeIdentity1, runtimeIdentity2, runtimeIdentity3);
+
+    doReturn(identities).when(infrastructure).getIdentities();
+
+    InternalEnvironment internalEnvironment = mock(InternalEnvironment.class);
+    doReturn(internalEnvironment).when(testEnvFactory).create(any(Environment.class));
+
+    // when
+    Set<String> active = runtimes.getActive(owner);
+
+    // then
+    assertEquals(active.size(), 1);
+    assertTrue(active.containsAll(asList(ws1)));
+  }
+
+  @Test
   public void shouldReturnWorkspaceIdsOfRunningRuntimes() {
     // given
     when(statuses.asMap())

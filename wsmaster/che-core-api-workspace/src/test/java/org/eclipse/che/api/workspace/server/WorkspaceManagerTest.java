@@ -55,6 +55,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.util.Strings.isNullOrEmpty;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -878,7 +879,8 @@ public class WorkspaceManagerTest {
     final WorkspaceImpl workspace = createAndMockWorkspace(createConfig(), NAMESPACE_1);
     mockRuntime(workspace, RUNNING);
     mockAnyWorkspaceStop();
-    when(runtimes.isAnyActive()).thenReturn(true);
+    when(runtimes.getActive(anyString()))
+        .thenReturn(ImmutableSet.of(NameGenerator.generate("ws", 5)));
     long millis = System.currentTimeMillis();
     workspaceManager.stopWorkspace(workspace.getId(), emptyMap());
     verify(runtimes).stopAsync(workspace, emptyMap());

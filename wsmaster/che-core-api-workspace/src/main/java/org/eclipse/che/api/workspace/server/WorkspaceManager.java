@@ -15,6 +15,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
+import static java.time.Instant.now;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
@@ -30,7 +31,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_GENERATE_
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 
 import com.google.inject.Inject;
-import java.time.Clock;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -91,7 +91,6 @@ public class WorkspaceManager {
   private final PreferenceManager preferenceManager;
   private final WorkspaceValidator validator;
   private final DevfileIntegrityValidator devfileIntegrityValidator;
-  private final Clock clock;
 
   @Inject
   public WorkspaceManager(
@@ -109,7 +108,6 @@ public class WorkspaceManager {
     this.preferenceManager = preferenceManager;
     this.validator = validator;
     this.devfileIntegrityValidator = devfileIntegrityValidator;
-    clock = Clock.systemDefaultZone();
   }
 
   /**
@@ -436,16 +434,20 @@ public class WorkspaceManager {
               if (workspace.isTemporary()) {
                 removeWorkspaceQuietly(workspace.getId());
               }
-              if (!runtimes.isAnyActive()) {
-                recordLastWorkspaceStoppedTime(namespace, workspace.getId(), owner);
+              try {
+                if (runtimes.getActive(owner).isEmpty()) {
+                  recordLastWorkspaceStoppedTime(namespace, owner);
+                }
+              } catch (ServerException | InfrastructureException e) {
+                LOG.error(e.getMessage(), e);
               }
             });
   }
 
-  private void recordLastWorkspaceStoppedTime(String namespace, String workspaceId, String owner) {
+  private void recordLastWorkspaceStoppedTime(String namespace, String owner) {
     try {
       Map<String, String> preferences = preferenceManager.find(owner);
-      String currentTime = Long.toString(clock.instant().getEpochSecond());
+      String currentTime = Long.toString(now().getEpochSecond());
       preferences.put(LAST_ACTIVITY_TIME, currentTime);
       preferences.put(LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE, namespace);
       preferenceManager.update(owner, preferences);

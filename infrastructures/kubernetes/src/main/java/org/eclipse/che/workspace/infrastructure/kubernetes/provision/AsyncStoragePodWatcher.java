@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.Long.parseLong;
+import static java.time.Instant.now;
 import static org.eclipse.che.api.core.Pages.iterateLazily;
 import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVITY_TIME;
@@ -23,9 +24,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.Asyn
 import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.dsl.PodResource;
-import java.time.Clock;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -36,7 +35,6 @@ import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.schedule.ScheduleDelay;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -63,7 +61,6 @@ public class AsyncStoragePodWatcher {
   private final PreferenceManager preferenceManager;
   private final WorkspaceRuntimes runtimes;
   private final long shutdownTimeoutSec;
-  private final Clock clock = Clock.systemDefaultZone();
   private final boolean isAsyncStoragePodCanBeRun;
 
   @Inject
@@ -117,7 +114,10 @@ public class AsyncStoragePodWatcher {
       initialDelay = 1,
       delayParameterName = "che.infra.kubernetes.async.storage.shutdown_check_period_min")
   public void check() {
-    if (isAsyncStoragePodCanBeRun) { // if system not support async storage mode do nothing
+    if (isAsyncStoragePodCanBeRun
+        && shutdownTimeoutSec
+            > 0) { // if system not support async storage mode or idling time set to 0 or less
+      // do nothing
       for (User user :
           iterateLazily((maxItems, skipCount) -> userManager.getAll(maxItems, skipCount))) {
         try {
@@ -127,12 +127,12 @@ public class AsyncStoragePodWatcher {
           String namespace = preferences.get(LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE);
           if (isNullOrEmpty(namespace)
               || isNullOrEmpty(lastTimeAccess)
-              || isAnyRuntimeInProgress(owner)) {
+              || !runtimes.getInProgress(owner).isEmpty()) {
             continue;
           }
           long lastTimeAccessSec = parseLong(lastTimeAccess);
-          long epochSec = clock.instant().getEpochSecond();
-          if (epochSec - lastTimeAccessSec >= shutdownTimeoutSec) {
+          long nowSec = now().getEpochSecond();
+          if (nowSec - lastTimeAccessSec >= shutdownTimeoutSec) {
             PodResource<Pod, DoneablePod> podDoneablePodPodResource =
                 kubernetesClientFactory
                     .create()
@@ -148,24 +148,5 @@ public class AsyncStoragePodWatcher {
         }
       }
     }
-  }
-
-  /**
-   * Going to check is currently owner has workspaces in progress: it's status is {@link
-   * org.eclipse.che.api.core.model.workspace.WorkspaceStatus#STARTING} or {@link
-   * org.eclipse.che.api.core.model.workspace.WorkspaceStatus#STOPPING})
-   *
-   * @param owner the user id to check
-   */
-  private boolean isAnyRuntimeInProgress(String owner)
-      throws ServerException, InfrastructureException {
-    Set<String> inProgress = runtimes.getInProgress();
-    for (String wsId : inProgress) {
-      InternalRuntime<?> internalRuntime = runtimes.getInternalRuntime(wsId);
-      if (owner.equals(internalRuntime.getOwner())) {
-        return true;
-      }
-    }
-    return false;
   }
 }
