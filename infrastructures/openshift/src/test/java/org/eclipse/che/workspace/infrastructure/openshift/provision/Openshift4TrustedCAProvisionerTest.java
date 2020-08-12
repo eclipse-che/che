@@ -28,7 +28,6 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstallationLocation;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
@@ -50,7 +49,6 @@ public class Openshift4TrustedCAProvisionerTest {
   private static final String CONFIGMAP_KEY = "testConfigMapKey";
   private static final String CONFIGMAP_VALUE = "testConfigMapValue";
 
-  @Mock CheInstallationLocation cheInstallationLocation;
   @Mock OpenShiftClientFactory clientFactory;
 
   @Mock private KubernetesEnvironment k8sEnv;
