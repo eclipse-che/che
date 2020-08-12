@@ -55,6 +55,7 @@ public class GatewayRouterProvisioner {
       GatewayRouteConfigGenerator gatewayRouteConfigGenerator =
           new TraefikGatewayRouteConfigGenerator(id.getInfrastructureNamespace());
       gatewayRouteConfigGenerator.addRouteConfig(routeConfig);
+
       ConfigMapBuilder configMapBuilder =
           new ConfigMapBuilder()
               .withNewMetadata()
@@ -66,7 +67,6 @@ public class GatewayRouterProvisioner {
 
       ConfigMap routeConfigMap =
           cheNamespace.createConfigMap(configMapBuilder.build(), id.getWorkspaceId());
-      //      ConfigMap routeConfigMap = cheNamespace.configMaps().create(configMapBuilder.build());
       routeConfigMaps.add(routeConfigMap);
     }
 

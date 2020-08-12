@@ -77,14 +77,14 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
       Map<String, ServerConfig> serversConfigs) {
     final String serverName = KubernetesServerExposer.makeServerNameValidForDns(serverId);
     final String name = createName(serviceName, serverName);
-    final String path = ensureEndsWithSlash(strategy.getExternalPath(serviceName, serverName));
+    final String path = ensureDontEndsWithSlash(strategy.getExternalPath(serviceName, serverName));
     final Map<String, String> annotations = createAnnotations(serversConfigs, path, machineName);
     return new GatewayRouteConfig(
         name, serviceName, getTargetPort(servicePort.getTargetPort()), path, annotations);
   }
 
-  private String ensureEndsWithSlash(String path) {
-    return path.endsWith("/") ? path : path + '/';
+  private String ensureDontEndsWithSlash(String path) {
+    return path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
   }
 
   private String createName(String serviceName, String serverName) {

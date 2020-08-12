@@ -15,6 +15,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import javax.inject.Inject;
@@ -131,6 +132,11 @@ public class CheNamespace {
     @Override
     public KubernetesClient create() throws InfrastructureException {
       return super.create();
+    }
+
+    @Override
+    protected Config buildConfig(Config config, String workspaceId) {
+      return config;
     }
   }
 }
