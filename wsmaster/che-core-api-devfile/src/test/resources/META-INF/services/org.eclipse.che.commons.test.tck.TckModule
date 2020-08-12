@@ -1,1 +1,1 @@
-    org.eclipse.che.api.devfile.server.jpa.UserDevfileTckModule
+org.eclipse.che.api.devfile.server.jpa.UserDevfileTckModule

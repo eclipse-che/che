@@ -13,10 +13,12 @@
 
 -- add userdevfile table
 CREATE TABLE userdevfile (
-    id          VARCHAR(255)    NOT NULL UNIQUE,
-    devfile_id  BIGINT          NOT NULL UNIQUE,
+    id             VARCHAR(255)    NOT NULL UNIQUE,
+    devfile_id     BIGINT          NOT NULL UNIQUE,
+    generated_name VARCHAR(255) ,
     PRIMARY KEY (id)
 );
 CREATE INDEX index_userdevfile_devfile_id ON userdevfile (devfile_id);
+CREATE INDEX index_userdevfile_generated_name ON userdevfile(generated_name);
 ALTER TABLE userdevfile ADD CONSTRAINT fk_userdevfile_devfile_id FOREIGN KEY (devfile_id) REFERENCES devfile (id);
 CREATE INDEX index_devfile_meta_name ON devfile(meta_name);

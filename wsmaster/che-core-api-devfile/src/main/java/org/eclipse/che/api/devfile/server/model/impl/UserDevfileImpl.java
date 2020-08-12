@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.api.devfile.server.model.impl;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import com.google.common.annotations.Beta;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
+import javax.persistence.PostLoad;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import org.eclipse.che.api.core.model.workspace.devfile.Command;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
@@ -50,6 +55,9 @@ public class UserDevfileImpl implements UserDevfile {
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "devfile_id")
   private DevfileImpl devfile;
+
+  @Column(name = "generated_name")
+  private String generateName;
 
   public UserDevfileImpl() {}
 
@@ -131,6 +139,17 @@ public class UserDevfileImpl implements UserDevfile {
 
   public void setMetadata(MetadataImpl metadata) {
     devfile.setMetadata(metadata);
+  }
+
+  @PostLoad
+  public void postLoad() {
+    devfile.getMetadata().setGenerateName(generateName);
+  }
+
+  @PreUpdate
+  @PrePersist
+  public void beforeDb() {
+    generateName = devfile.getMetadata().getGenerateName();
   }
 
   @Override

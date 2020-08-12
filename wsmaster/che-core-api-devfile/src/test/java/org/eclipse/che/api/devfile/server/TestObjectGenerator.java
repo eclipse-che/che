@@ -49,6 +49,10 @@ public class TestObjectGenerator {
   }
 
   public static DevfileImpl createDevfile(String name) {
+    return createDevfile(name, "rosetta-");
+  }
+
+  public static DevfileImpl createDevfile(String name, String generatedName) {
 
     SourceImpl source1 =
         new SourceImpl(
@@ -165,7 +169,8 @@ public class TestObjectGenerator {
             asList(env1, env2),
             asList(endpoint1, endpoint2));
     component2.setSelector(singletonMap("key2", "value2"));
-
+    MetadataImpl metadata = new MetadataImpl(name);
+    metadata.setGenerateName(generatedName);
     DevfileImpl devfile =
         new DevfileImpl(
             "0.0.1",
@@ -173,7 +178,7 @@ public class TestObjectGenerator {
             asList(component1, component2),
             asList(command1, command2),
             singletonMap("attribute1", "value1"),
-            new MetadataImpl(name));
+            metadata);
 
     return devfile;
   }
