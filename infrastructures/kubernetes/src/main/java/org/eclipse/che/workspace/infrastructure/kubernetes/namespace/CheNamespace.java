@@ -44,7 +44,7 @@ public class CheNamespace {
   public CheNamespace(
       CheInstallationLocation installationLocation,
       CheKubernetesClientFactory clientFactory,
-      WorkspaceManager workspaceManager) {
+      WorkspaceManager workspaceManager) throws InfrastructureException {
     this.cheNamespaceName = installationLocation.getInstallationLocationNamespace();
     this.clientFactory = clientFactory;
     this.workspaceManager = workspaceManager;

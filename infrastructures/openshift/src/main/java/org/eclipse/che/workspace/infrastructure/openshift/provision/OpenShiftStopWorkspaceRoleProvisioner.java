@@ -45,7 +45,8 @@ public class OpenShiftStopWorkspaceRoleProvisioner {
   public OpenShiftStopWorkspaceRoleProvisioner(
       OpenShiftClientFactory clientFactory,
       CheInstallationLocation installationLocation,
-      @Named("che.workspace.stop.role.enabled") boolean stopWorkspaceRoleEnabled) {
+      @Named("che.workspace.stop.role.enabled") boolean stopWorkspaceRoleEnabled)
+      throws InfrastructureException {
     this.clientFactory = clientFactory;
     this.installationLocation = installationLocation.getInstallationLocationNamespace();
     this.stopWorkspaceRoleEnabled = stopWorkspaceRoleEnabled;

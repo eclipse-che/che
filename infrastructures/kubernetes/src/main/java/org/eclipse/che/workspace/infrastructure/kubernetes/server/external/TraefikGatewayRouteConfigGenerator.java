@@ -24,29 +24,7 @@ import java.util.Map;
 import org.eclipse.che.api.workspace.server.spi.environment.GatewayRouteConfig;
 
 /**
- * Traefik configuration for single route looks like this (values in {} are parameters of {link
- * GatewayRouteConfigGenerator#generate(String, String, String)} method):
- *
- * <pre>
- * http:
- *   routers:
- *     {name}:
- *       rule: "PathPrefix(`{path}`)"
- *       service: {name}
- *       middlewares:
- *       - "{name}"
- *       priority: 100
- *   services:
- *     {name}:
- *       loadBalancer:
- *         servers:
- *         - url: '{serviceUrl}'
- *   middlewares:
- *     {name}:
- *       stripPrefix:
- *         prefixes:
- *         - "{path}"
- * </pre>
+ * Config generator for Traefik Gateway
  */
 public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGenerator {
 
@@ -58,15 +36,62 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
     this.serviceNamespace = serviceNamespace;
   }
 
+  @Override
+  public void addRouteConfig(GatewayRouteConfig routeConfig) {
+    this.routeConfigs.add(routeConfig);
+  }
+
+  /**
+   * Generate Traefik configuration for all added {@link GatewayRouteConfig}s.
+   * <p>
+   * Each {@link GatewayRouteConfig} is translated into Traefik configuration under extra key in
+   * returned {@link Map} `{GatewayRouteConfig#name}.yml`.
+   * <p>
+   * Content of single service configuration looks like this:
+   * <pre>
+   * http:
+   *   routers:
+   *     {name}:
+   *       rule: "PathPrefix(`{GatewayRouteConfig#routePath}`)"
+   *       service: {GatewayRouteConfig#name}
+   *       middlewares:
+   *       - "{GatewayRouteConfig#name}"
+   *       priority: 100
+   *   services:
+   *     {name}:
+   *       loadBalancer:
+   *         servers:
+   *         - url: '{serviceUrl}'
+   *   middlewares:
+   *     {name}:
+   *       stripPrefix:
+   *         prefixes:
+   *         - "{GatewayRouteConfig#routePath}"
+   * </pre>
+   */
+  @Override
+  public Map<String, String> generate() {
+    Map<String, String> cmData = new HashMap<>();
+    for (GatewayRouteConfig routeConfig : routeConfigs) {
+      String traefikRouteConfig =
+          generate(
+              routeConfig.getName(),
+              createServiceUrl(routeConfig.getServiceName(), routeConfig.getServicePort()),
+              routeConfig.getRoutePath());
+      cmData.put(routeConfig.getName() + ".yml", traefikRouteConfig);
+    }
+    return cmData;
+  }
+
   /**
    * Generates Traefik specific configuration for single service.
    *
-   * @param name name of the service
+   * @param name       name of the service
    * @param serviceUrl url of service we want to route to
-   * @param path path to route and strip
+   * @param path       path to route and strip
    * @return traefik service route config
    */
-  public String generate(String name, String serviceUrl, String path) {
+  private String generate(String name, String serviceUrl, String path) {
     StringWriter sw = new StringWriter();
     try {
       YAMLGenerator generator =
@@ -178,25 +203,6 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
     generator.writeEndObject();
     generator.writeEndObject();
     generator.writeEndObject();
-  }
-
-  @Override
-  public void addRouteConfig(GatewayRouteConfig routeConfig) {
-    this.routeConfigs.add(routeConfig);
-  }
-
-  @Override
-  public Map<String, String> generate() {
-    Map<String, String> cmData = new HashMap<>();
-    for (GatewayRouteConfig routeConfig : routeConfigs) {
-      String traefikRouteConfig =
-          generate(
-              routeConfig.getName(),
-              createServiceUrl(routeConfig.getServiceName(), routeConfig.getServicePort()),
-              routeConfig.getRoutePath());
-      cmData.put(routeConfig.getName() + ".yml", traefikRouteConfig);
-    }
-    return cmData;
   }
 
   private String createServiceUrl(String serviceName, String servicePort) {

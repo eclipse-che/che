@@ -66,11 +66,13 @@ import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.GatewayRouterResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.CheNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
@@ -148,6 +150,8 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private OpenShiftPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
   @Mock private Openshift4TrustedCAProvisioner trustedCAProvisioner;
+  @Mock private GatewayRouterResolver gatewayRouterProvisioner;
+  @Mock private CheNamespace cheNamespace;
   private OpenShiftServerResolverFactory serverResolverFactory;
 
   @Mock(answer = Answers.RETURNS_MOCKS)
@@ -192,7 +196,8 @@ public class OpenShiftInternalRuntimeTest {
             previewUrlCommandProvisioner,
             secretAsContainerResourceProvisioner,
             serverResolverFactory,
-            null,
+            gatewayRouterProvisioner,
+            cheNamespace,
             tracer,
             trustedCAProvisioner,
             context,

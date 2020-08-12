@@ -132,8 +132,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final PreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   private final SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
   private final KubernetesServerResolverFactory serverResolverFactory;
-  private final CheNamespace cheNamespace;
-  protected final GatewayRouterProvisioner gatewayRouterProvisioner;
+  protected final CheNamespace cheNamespace;
+  protected final GatewayRouterResolver gatewayRouterResolver;
   protected final Tracer tracer;
 
   @Inject
@@ -158,7 +158,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       PreviewUrlCommandProvisioner previewUrlCommandProvisioner,
       SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner,
       KubernetesServerResolverFactory kubernetesServerResolverFactory,
-      GatewayRouterProvisioner gatewayRouterProvisioner,
+      GatewayRouterResolver gatewayRouterResolver,
       CheNamespace cheNamespace,
       Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
@@ -186,7 +186,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.secretAsContainerResourceProvisioner = secretAsContainerResourceProvisioner;
     this.serverResolverFactory = kubernetesServerResolverFactory;
     this.tracer = tracer;
-    this.gatewayRouterProvisioner = gatewayRouterProvisioner;
+    this.gatewayRouterResolver = gatewayRouterResolver;
   }
 
   @Override
@@ -626,9 +626,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     String workspaceId = getContext().getIdentity().getWorkspaceId();
 
     createSecrets(k8sEnv, workspaceId);
-    List<ConfigMap> createdConfigMaps = createConfigMaps(k8sEnv, workspaceId);
-    createdConfigMaps.addAll(
-        gatewayRouterProvisioner.provision(getContext().getIdentity(), k8sEnv));
+    List<ConfigMap> createdConfigMaps = createConfigMaps(k8sEnv, getContext().getIdentity());
     List<Service> createdServices = createServices(k8sEnv, workspaceId);
 
     // needed for resolution later on, even though n routes are actually created by ingress
@@ -699,13 +697,16 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
   @Traced
   @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
-  List<ConfigMap> createConfigMaps(KubernetesEnvironment env, String workspaceId)
+  protected List<ConfigMap> createConfigMaps(KubernetesEnvironment env, RuntimeIdentity identity)
       throws InfrastructureException {
-    TracingTags.WORKSPACE_ID.set(workspaceId);
+    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
 
     List<ConfigMap> createdConfigMaps = new ArrayList<>();
     for (ConfigMap configMap : env.getConfigMaps().values()) {
       createdConfigMaps.add(namespace.configMaps().create(configMap));
+    }
+    for (ConfigMap routeConfigMap : gatewayRouterResolver.resolve(identity, env)) {
+      createdConfigMaps.add(cheNamespace.createConfigMap(routeConfigMap, identity.getWorkspaceId()));
     }
     return createdConfigMaps;
   }

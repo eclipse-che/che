@@ -174,7 +174,7 @@ public class OpenShiftStopWorkspaceRoleProvisionerTest {
   }
 
   @Test
-  public void shouldCreateRoleBinding() {
+  public void shouldCreateRoleBinding() throws InfrastructureException {
     when(cheInstallationLocation.getInstallationLocationNamespace()).thenReturn("che");
     assertEquals(
         stopWorkspaceRoleProvisioner.createStopWorkspacesRoleBinding("developer-che"),

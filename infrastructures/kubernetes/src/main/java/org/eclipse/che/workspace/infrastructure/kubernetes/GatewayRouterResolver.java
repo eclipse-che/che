@@ -21,15 +21,18 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.GatewayRouteConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.CheNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayRouteConfigGenerator;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.TraefikGatewayRouteConfigGenerator;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayRouteConfigGeneratorFactory;
 
+/**
+ * Resolves {@link GatewayRouteConfig}s from {@link InternalEnvironment} into {@link ConfigMap}s.
+ * Created instance of {@link ConfigMap} is annotated with {@link GatewayRouterResolver#GATEWAY_CONFIGMAP_LABELS},
+ * which are needed so Configbump tool can pick them up and provide them to the Gateway pod.
+ */
 @Singleton
-public class GatewayRouterProvisioner {
+public class GatewayRouterResolver {
 
   protected static final Map<String, String> GATEWAY_CONFIGMAP_LABELS =
       ImmutableMap.<String, String>builder()
@@ -37,15 +40,15 @@ public class GatewayRouterProvisioner {
           .put("role", "gateway-config")
           .build();
 
-  private final CheNamespace cheNamespace;
+  private final GatewayRouteConfigGeneratorFactory configGeneratorFactory;
 
   @Inject
-  public GatewayRouterProvisioner(CheNamespace cheNamespace) {
-    this.cheNamespace = cheNamespace;
+  public GatewayRouterResolver(
+      GatewayRouteConfigGeneratorFactory configGeneratorFactory) {
+    this.configGeneratorFactory = configGeneratorFactory;
   }
 
-  public List<ConfigMap> provision(RuntimeIdentity id, InternalEnvironment internalEnvironment)
-      throws InfrastructureException {
+  public List<ConfigMap> resolve(RuntimeIdentity id, InternalEnvironment internalEnvironment) {
     if (internalEnvironment.getGatewayRouteConfigs().isEmpty()) {
       return Collections.emptyList();
     }
@@ -53,7 +56,7 @@ public class GatewayRouterProvisioner {
 
     for (GatewayRouteConfig routeConfig : internalEnvironment.getGatewayRouteConfigs()) {
       GatewayRouteConfigGenerator gatewayRouteConfigGenerator =
-          new TraefikGatewayRouteConfigGenerator(id.getInfrastructureNamespace());
+          configGeneratorFactory.create(id.getInfrastructureNamespace());
       gatewayRouteConfigGenerator.addRouteConfig(routeConfig);
 
       ConfigMapBuilder configMapBuilder =
@@ -65,9 +68,7 @@ public class GatewayRouterProvisioner {
               .endMetadata()
               .withData(gatewayRouteConfigGenerator.generate());
 
-      ConfigMap routeConfigMap =
-          cheNamespace.createConfigMap(configMapBuilder.build(), id.getWorkspaceId());
-      routeConfigMaps.add(routeConfigMap);
+      routeConfigMaps.add(configMapBuilder.build());
     }
 
     return routeConfigMaps;

@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 import com.google.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,10 +42,9 @@ public class CheInstallationLocation {
    * @return The name of the namespace where Che is installed or null if both {@code
    *     KUBERNETES_NAMESPACE} and {@code POD_NAMESPACE} environment variables are not set
    */
-  public String getInstallationLocationNamespace() {
+  public String getInstallationLocationNamespace() throws InfrastructureException {
     if (kubernetesNamespace == null && podNamespace == null) {
-      LOG.warn(
-          "Neither KUBERNETES_NAMESPACE nor POD_NAMESPACE is defined. Unable to determine Che installation location");
+      throw new InfrastructureException("Neither KUBERNETES_NAMESPACE nor POD_NAMESPACE is defined. Unable to determine Che installation location");
     }
     return kubernetesNamespace == null ? podNamespace : kubernetesNamespace;
   }

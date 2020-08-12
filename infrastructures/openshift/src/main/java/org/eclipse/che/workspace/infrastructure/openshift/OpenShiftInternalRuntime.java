@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.URLRewriter.NoOpURLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
@@ -32,13 +33,15 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
-import org.eclipse.che.workspace.infrastructure.kubernetes.GatewayRouterProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.GatewayRouterResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesRuntimeContext;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.CheNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -84,7 +87,8 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       SecretAsContainerResourceProvisioner<OpenShiftEnvironment>
           secretAsContainerResourceProvisioner,
       OpenShiftServerResolverFactory serverResolverFactory,
-      GatewayRouterProvisioner gatewayRouterProvisioner,
+      GatewayRouterResolver gatewayRouterProvisioner,
+      CheNamespace cheNamespace,
       Tracer tracer,
       Openshift4TrustedCAProvisioner trustedCAProvisioner,
       @Assisted OpenShiftRuntimeContext context,
@@ -111,7 +115,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         secretAsContainerResourceProvisioner,
         null,
         gatewayRouterProvisioner,
-        null,
+        cheNamespace,
         tracer,
         context,
         project);
@@ -137,8 +141,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     String workspaceId = getContext().getIdentity().getWorkspaceId();
 
     createSecrets(osEnv, workspaceId);
-    List<ConfigMap> createdConfigMaps = createConfigMaps(osEnv, workspaceId);
-    createdConfigMaps.addAll(gatewayRouterProvisioner.provision(getContext().getIdentity(), osEnv));
+    List<ConfigMap> createdConfigMaps = createConfigMaps(osEnv, getContext().getIdentity());
     List<Service> createdServices = createServices(osEnv, workspaceId);
     List<Route> createdRoutes = createRoutes(osEnv, workspaceId);
 
@@ -154,18 +157,6 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     for (Secret secret : env.getSecrets().values()) {
       project.secrets().create(secret);
     }
-  }
-
-  @Traced
-  @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
-  List<ConfigMap> createConfigMaps(OpenShiftEnvironment env, String workspaceId)
-      throws InfrastructureException {
-    TracingTags.WORKSPACE_ID.set(workspaceId);
-    List<ConfigMap> createdConfigMaps = new ArrayList<>();
-    for (ConfigMap configMap : env.getConfigMaps().values()) {
-      createdConfigMaps.add(project.configMaps().create(configMap));
-    }
-    return createdConfigMaps;
   }
 
   @Traced
