@@ -65,11 +65,11 @@ export class ProjectTree {
         Logger.debug('ProjectTree.openProjectTreeContainer');
 
         const selectedExplorerButtonLocator: By = By.css(Ide.SELECTED_EXPLORER_BUTTON_CSS);
-
+        Logger.trace(`ProjectTree.openProjectTreeContainer waitLeftToolbarButtonPresence`);
         await this.ide.waitLeftToolbarButton(LeftToolbarButton.Explorer, timeout);
 
         const isButtonEnabled: boolean = await this.driverHelper.waitVisibilityBoolean(selectedExplorerButtonLocator);
-
+        Logger.trace(`ProjectTree.openProjectTreeContainer leftToolbarButtonEnabled:${isButtonEnabled}`);
         if (!isButtonEnabled) {
             await this.ide.waitAndClickLeftToolbarButton(LeftToolbarButton.Explorer, timeout);
         }
@@ -226,9 +226,11 @@ export class ProjectTree {
         let pathEntry = `${projectName}`;
         let pathToItemInAssociatedWorkspace = pathToItem.replace(`${projectName}/`, '');
         let paths: Array<string> = new Array();
-
         // if we in the root of project
         if (pathToItem.split('/').length < 2) {
+            Logger.trace(`ProjectTree.expandPathAndOpenFileInAssociatedWorkspace has no subpaths, expanding root folder "${projectName}"`);
+            await this.expandItem(projectName);
+            Logger.trace(`ProjectTree.expandPathAndOpenFileInAssociatedWorkspace clicking on file "${projectName}/${fileName}"`);
             await this.clickOnItem(`${projectName}/${fileName}`, timeout);
             return;
         }
