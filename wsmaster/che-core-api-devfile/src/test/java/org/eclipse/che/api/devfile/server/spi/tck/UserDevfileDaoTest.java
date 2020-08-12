@@ -18,6 +18,7 @@ import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.devfile.server.TestObjectGenerator.createUserDevfile;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -26,12 +27,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.devfile.UserDevfile;
 import org.eclipse.che.api.devfile.server.model.impl.UserDevfileImpl;
 import org.eclipse.che.api.devfile.server.spi.UserDevfileDao;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -96,7 +99,7 @@ public class UserDevfileDaoTest {
   public void shouldGetUserDevfileById() throws Exception {
     final UserDevfileImpl devfile = devfiles[0];
 
-    assertEquals(userDevfileDaoDao.getById(devfile.getId()), devfile);
+    assertEquals(userDevfileDaoDao.getById(devfile.getId()), Optional.of(devfile));
   }
 
   @Test(dependsOnMethods = "shouldGetUserDevfileById")
@@ -104,7 +107,8 @@ public class UserDevfileDaoTest {
     final UserDevfileImpl devfile = createUserDevfile();
     userDevfileDaoDao.create(devfile);
 
-    assertEquals(userDevfileDaoDao.getById(devfile.getId()), new UserDevfileImpl(devfile));
+    assertEquals(
+        userDevfileDaoDao.getById(devfile.getId()), Optional.of(new UserDevfileImpl(devfile)));
   }
 
   @Test(expectedExceptions = NullPointerException.class)
@@ -157,16 +161,18 @@ public class UserDevfileDaoTest {
     // when
     userDevfileDaoDao.update(update);
     // then
-    assertEquals(userDevfileDaoDao.getById(update.getId()), update);
+    assertEquals(userDevfileDaoDao.getById(update.getId()), Optional.of(update));
   }
 
-  @Test(expectedExceptions = NotFoundException.class)
+  @Test
   public void shouldNotUpdateWorkspaceWhichDoesNotExist() throws Exception {
     // given
     final UserDevfileImpl userDevfile = devfiles[0];
     userDevfile.setId("non-existing-devfile");
     // when
-    userDevfileDaoDao.update(userDevfile);
+    Optional<UserDevfile> result = userDevfileDaoDao.update(userDevfile);
+    // then
+    assertFalse(result.isPresent());
   }
 
   @Test(expectedExceptions = NullPointerException.class)
@@ -184,11 +190,13 @@ public class UserDevfileDaoTest {
     userDevfileDaoDao.getById(null);
   }
 
-  @Test(expectedExceptions = NotFoundException.class, dependsOnMethods = "shouldGetUserDevfileById")
+  @Test(dependsOnMethods = "shouldGetUserDevfileById")
   public void shouldRemoveDevfile() throws Exception {
     final String userDevfileId = devfiles[0].getId();
     userDevfileDaoDao.remove(userDevfileId);
-    userDevfileDaoDao.getById(userDevfileId);
+    Optional<UserDevfile> result = userDevfileDaoDao.getById(userDevfileId);
+
+    assertFalse(result.isPresent());
   }
 
   @Test
@@ -200,7 +208,7 @@ public class UserDevfileDaoTest {
   public void shouldBeAbleToGetAvailableToUserDevfiles() throws ServerException {
     // given
     // when
-    final Page<UserDevfileImpl> result =
+    final Page<UserDevfile> result =
         userDevfileDaoDao.getDevfiles(30, 0, Collections.emptyList(), Collections.emptyList());
     // then
     assertEquals(new HashSet<>(result.getItems()), new HashSet<>(asList(devfiles)));
@@ -220,7 +228,7 @@ public class UserDevfileDaoTest {
   public void shouldBeAbleToGetAvailableToUserDevfilesWithFilter() throws ServerException {
     // given
     // when
-    final Page<UserDevfileImpl> result =
+    final Page<UserDevfile> result =
         userDevfileDaoDao.getDevfiles(
             30,
             0,
@@ -234,7 +242,7 @@ public class UserDevfileDaoTest {
   public void shouldNotAllowSearchWithInvalidFilter() throws ServerException {
     // given
     // when
-    final Page<UserDevfileImpl> result =
+    final Page<UserDevfile> result =
         userDevfileDaoDao.getDevfiles(
             30,
             0,
@@ -253,7 +261,7 @@ public class UserDevfileDaoTest {
     update.setName("New345Name");
     userDevfileDaoDao.update(update);
     // when
-    final Page<UserDevfileImpl> result =
+    final Page<UserDevfile> result =
         userDevfileDaoDao.getDevfiles(
             30,
             0,
@@ -268,7 +276,7 @@ public class UserDevfileDaoTest {
       throws ServerException, NotFoundException, ConflictException {
     // given
     // when
-    final Page<UserDevfileImpl> result =
+    final Page<UserDevfile> result =
         userDevfileDaoDao.getDevfiles(
             5,
             0,
@@ -287,7 +295,7 @@ public class UserDevfileDaoTest {
             .sorted(Comparator.comparing(UserDevfileImpl::getId))
             .toArray(UserDevfileImpl[]::new);
     // when
-    final Page<UserDevfileImpl> result =
+    final Page<UserDevfile> result =
         userDevfileDaoDao.getDevfiles(
             devfiles.length, 0, Collections.emptyList(), ImmutableList.of(new Pair<>("id", "asc")));
     // then
@@ -303,7 +311,7 @@ public class UserDevfileDaoTest {
             .sorted(Comparator.comparing(UserDevfileImpl::getId).reversed())
             .toArray(UserDevfileImpl[]::new);
     // when
-    final Page<UserDevfileImpl> result =
+    final Page<UserDevfile> result =
         userDevfileDaoDao.getDevfiles(
             devfiles.length,
             0,
@@ -322,7 +330,7 @@ public class UserDevfileDaoTest {
             .sorted(Comparator.comparing(UserDevfileImpl::getName))
             .toArray(UserDevfileImpl[]::new);
     // when
-    final Page<UserDevfileImpl> result =
+    final Page<UserDevfile> result =
         userDevfileDaoDao.getDevfiles(
             devfiles.length,
             0,
@@ -342,7 +350,7 @@ public class UserDevfileDaoTest {
             .sorted(Comparator.comparing(UserDevfileImpl::getId))
             .toArray(UserDevfileImpl[]::new);
     // when
-    final Page<UserDevfileImpl> result =
+    final Page<UserDevfile> result =
         userDevfileDaoDao.getDevfiles(
             maxitems,
             skipCount,

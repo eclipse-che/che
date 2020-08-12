@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -33,31 +34,28 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.devfile.UserDevfile;
 import org.eclipse.che.api.devfile.server.model.impl.UserDevfileImpl;
 import org.eclipse.che.api.devfile.server.spi.UserDevfileDao;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 import org.eclipse.che.core.db.jpa.IntegrityConstraintViolationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 @Beta
 public class JpaUserDevfileDao implements UserDevfileDao {
-  private static final Logger LOG = LoggerFactory.getLogger(JpaUserDevfileDao.class);
 
   @Inject private Provider<EntityManager> managerProvider;
   public static final List<Pair<String, String>> DEFAULT_ORDER =
       ImmutableList.of(new Pair<>("id", "ASC"));
 
   @Override
-  public UserDevfileImpl create(UserDevfileImpl devfile) throws ConflictException, ServerException {
+  public UserDevfile create(UserDevfile devfile) throws ConflictException, ServerException {
     requireNonNull(devfile);
     try {
-      doCreate(devfile);
+      doCreate(new UserDevfileImpl(devfile));
     } catch (DuplicateKeyException ex) {
       throw new ConflictException(
           format("Devfile with name '%s' already exists for current user", devfile.getName()));
@@ -71,11 +69,11 @@ public class JpaUserDevfileDao implements UserDevfileDao {
   }
 
   @Override
-  public UserDevfileImpl update(UserDevfileImpl update)
-      throws NotFoundException, ConflictException, ServerException {
+  public Optional<UserDevfile> update(UserDevfile update)
+      throws ConflictException, ServerException {
     requireNonNull(update);
     try {
-      return new UserDevfileImpl(doUpdate(update));
+      return doUpdate(new UserDevfileImpl(update)).map(UserDevfileImpl::new);
     } catch (DuplicateKeyException ex) {
       throw new ConflictException(
           format("Devfile with name '%s' already exists for current user", update.getName()));
@@ -96,14 +94,14 @@ public class JpaUserDevfileDao implements UserDevfileDao {
 
   @Override
   @Transactional(rollbackOn = {ServerException.class})
-  public UserDevfileImpl getById(String id) throws NotFoundException, ServerException {
+  public Optional<UserDevfile> getById(String id) throws ServerException {
     requireNonNull(id);
     try {
       final UserDevfileImpl devfile = managerProvider.get().find(UserDevfileImpl.class, id);
       if (devfile == null) {
-        throw new NotFoundException(format("Devfile with id '%s' doesn't exist", id));
+        return Optional.empty();
       }
-      return new UserDevfileImpl(devfile);
+      return Optional.of(new UserDevfileImpl(devfile));
     } catch (RuntimeException ex) {
       throw new ServerException(ex.getLocalizedMessage(), ex);
     }
@@ -111,7 +109,7 @@ public class JpaUserDevfileDao implements UserDevfileDao {
 
   @Override
   @Transactional(rollbackOn = {ServerException.class})
-  public Page<UserDevfileImpl> getDevfiles(
+  public Page<UserDevfile> getDevfiles(
       int maxItems,
       int skipCount,
       List<Pair<String, String>> filter,
@@ -182,15 +180,14 @@ public class JpaUserDevfileDao implements UserDevfileDao {
   }
 
   @Transactional
-  protected UserDevfileImpl doUpdate(UserDevfileImpl update) throws NotFoundException {
+  protected Optional<UserDevfileImpl> doUpdate(UserDevfileImpl update) {
     final EntityManager manager = managerProvider.get();
     if (manager.find(UserDevfileImpl.class, update.getId()) == null) {
-      throw new NotFoundException(
-          format("Could not update devfile with id %s because it doesn't exist", update.getId()));
+      return Optional.empty();
     }
     UserDevfileImpl merged = manager.merge(update);
     manager.flush();
-    return merged;
+    return Optional.of(merged);
   }
 
   @Transactional

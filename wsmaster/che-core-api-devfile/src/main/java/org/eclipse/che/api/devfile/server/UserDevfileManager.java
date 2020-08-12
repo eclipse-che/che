@@ -11,10 +11,12 @@
  */
 package org.eclipse.che.api.devfile.server;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
 import java.util.List;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
@@ -57,10 +59,10 @@ public class UserDevfileManager {
    *     for {@code owner})
    * @throws ServerException when any other error occurs
    */
-  public UserDevfileImpl createDevfile(Devfile devfile)
+  public UserDevfile createDevfile(Devfile devfile)
       throws ServerException, NotFoundException, ConflictException {
     requireNonNull(devfile, "Required non-null devfile");
-    UserDevfileImpl result =
+    UserDevfile result =
         userDevfileDao.create(
             new UserDevfileImpl(NameGenerator.generate("userdevfile", 16), devfile));
     LOG.debug(
@@ -83,7 +85,9 @@ public class UserDevfileManager {
    */
   public UserDevfile getById(String id) throws NotFoundException, ServerException {
     requireNonNull(id);
-    return userDevfileDao.getById(id);
+    Optional<UserDevfile> result = userDevfileDao.getById(id);
+    return result.orElseThrow(
+        () -> new NotFoundException(format("Devfile with id '%s' doesn't exist", id)));
   }
 
   /**
@@ -99,17 +103,22 @@ public class UserDevfileManager {
    * @throws NotFoundException when user devfile with given id not found
    * @throws ServerException when any server error occurs
    */
-  public UserDevfileImpl updateUserDevfile(UserDevfile update)
+  public UserDevfile updateUserDevfile(UserDevfile update)
       throws ConflictException, NotFoundException, ServerException {
     requireNonNull(update);
-    UserDevfileImpl result = userDevfileDao.update(new UserDevfileImpl(update));
+    Optional<UserDevfile> result = userDevfileDao.update(update);
+    UserDevfile devfile =
+        result.orElseThrow(
+            () ->
+                new NotFoundException(
+                    format("Devfile with id '%s' doesn't exist", update.getId())));
     LOG.debug(
         "UserDevfile '{}' with id '{}' update by user '{}'",
-        result.getName(),
-        result.getId(),
+        devfile.getName(),
+        devfile.getId(),
         EnvironmentContext.getCurrent().getSubject().getUserName());
-    eventService.publish(new DevfileUpdatedEvent(result));
-    return result;
+    eventService.publish(new DevfileUpdatedEvent(devfile));
+    return devfile;
   }
 
   /**
@@ -133,7 +142,7 @@ public class UserDevfileManager {
    * Gets list of devfiles. Parameters, returned values and possible exceptions are the same as in
    * UserDevfileDao#getDevfiles(String, int, int, List, List)}.
    */
-  public Page<UserDevfileImpl> getUserDevfiles(
+  public Page<UserDevfile> getUserDevfiles(
       int maxItems,
       int skipCount,
       List<Pair<String, String>> filter,

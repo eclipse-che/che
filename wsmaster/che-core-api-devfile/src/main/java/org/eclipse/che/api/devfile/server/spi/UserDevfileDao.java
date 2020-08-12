@@ -13,11 +13,11 @@ package org.eclipse.che.api.devfile.server.spi;
 
 import com.google.common.annotations.Beta;
 import java.util.List;
+import java.util.Optional;
 import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.devfile.server.model.impl.UserDevfileImpl;
+import org.eclipse.che.api.core.model.workspace.devfile.UserDevfile;
 import org.eclipse.che.commons.lang.Pair;
 
 /** Defines data access object contract for {@code UserDevfileImpl}. */
@@ -32,7 +32,7 @@ public interface UserDevfileDao {
    * @throws NullPointerException when {@code devfile} is null
    * @throws ServerException when any other error occurs
    */
-  UserDevfileImpl create(UserDevfileImpl devfile) throws ServerException, ConflictException;
+  UserDevfile create(UserDevfile devfile) throws ServerException, ConflictException;
 
   /**
    * Updates devfile to the new entity, using replacement strategy.
@@ -40,12 +40,10 @@ public interface UserDevfileDao {
    * @param devfile devfile to update
    * @return updated devfile
    * @throws NullPointerException when {@code devfile} is null
-   * @throws NotFoundException when given devfile is not found
    * @throws ConflictException when any conflict situation occurs
    * @throws ServerException when any other error occurs
    */
-  UserDevfileImpl update(UserDevfileImpl devfile)
-      throws NotFoundException, ConflictException, ServerException;
+  Optional<UserDevfile> update(UserDevfile devfile) throws ConflictException, ServerException;
 
   /**
    * Removes devfile.
@@ -62,10 +60,9 @@ public interface UserDevfileDao {
    * @param id devfile identifier
    * @return devfile instance, never null
    * @throws NullPointerException when {@code id} is null
-   * @throws NotFoundException when devfile with given {@code id} is not found
    * @throws ServerException when any other error occurs
    */
-  UserDevfileImpl getById(String id) throws NotFoundException, ServerException;
+  Optional<UserDevfile> getById(String id) throws ServerException;
 
   /**
    * Gets all devfiles which user can read filtered by given parameters in a given order
@@ -83,7 +80,7 @@ public interface UserDevfileDao {
    * @throws IllegalArgumentException when maxItems < 1 or skipCount < 0 or sort order is not 'asc'
    *     or 'desc'.
    */
-  Page<UserDevfileImpl> getDevfiles(
+  Page<UserDevfile> getDevfiles(
       int maxItems,
       int skipCount,
       List<Pair<String, String>> filter,
