@@ -22,7 +22,6 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.workspace.shared.Constants.CREATED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE;
-import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVE_WORKSPACE_ID;
 import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVITY_TIME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
@@ -449,7 +448,6 @@ public class WorkspaceManager {
       String currentTime = Long.toString(clock.instant().getEpochSecond());
       preferences.put(LAST_ACTIVITY_TIME, currentTime);
       preferences.put(LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE, namespace);
-      preferences.put(LAST_ACTIVE_WORKSPACE_ID, workspaceId);
       preferenceManager.update(owner, preferences);
     } catch (ServerException e) {
       LOG.error(e.getMessage(), e);
@@ -459,9 +457,7 @@ public class WorkspaceManager {
   private void cleanLastWorkspaceStoppedTime(String owner) {
     try {
       preferenceManager.remove(
-          owner,
-          Arrays.asList(
-              LAST_ACTIVITY_TIME, LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE, LAST_ACTIVE_WORKSPACE_ID));
+          owner, Arrays.asList(LAST_ACTIVITY_TIME, LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE));
     } catch (ServerException e) {
       LOG.error(e.getMessage(), e);
     }

@@ -24,7 +24,6 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API
 import static org.eclipse.che.api.workspace.shared.Constants.CREATED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE;
-import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVE_WORKSPACE_ID;
 import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVITY_TIME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
@@ -854,12 +853,7 @@ public class WorkspaceManagerTest {
     verify(runtimes).startAsync(workspace, workspace.getConfig().getDefaultEnv(), emptyMap());
     assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     verify(preferenceManager)
-        .remove(
-            "owner",
-            Arrays.asList(
-                LAST_ACTIVITY_TIME,
-                LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE,
-                LAST_ACTIVE_WORKSPACE_ID));
+        .remove("owner", Arrays.asList(LAST_ACTIVITY_TIME, LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE));
   }
 
   @Test
@@ -873,10 +867,9 @@ public class WorkspaceManagerTest {
     verify(runtimes).stopAsync(workspace, emptyMap());
     verify(workspaceDao).update(workspaceCaptor.capture());
     verify(preferenceManager).find("owner");
-    Map<String, String> pref = new HashMap<>(3);
+    Map<String, String> pref = new HashMap<>(2);
     pref.put(LAST_ACTIVITY_TIME, Long.toString(epochSecond));
     pref.put(LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE, INFRA_NAMESPACE);
-    pref.put(LAST_ACTIVE_WORKSPACE_ID, workspace.getId());
     verify(preferenceManager).update("owner", pref);
   }
 
@@ -890,18 +883,12 @@ public class WorkspaceManagerTest {
     workspaceManager.stopWorkspace(workspace.getId(), emptyMap());
     verify(runtimes).stopAsync(workspace, emptyMap());
     verify(workspaceDao).update(workspaceCaptor.capture());
-    Map<String, String> pref = new HashMap<>(3);
+    Map<String, String> pref = new HashMap<>(2);
     pref.put(LAST_ACTIVITY_TIME, Long.toString(millis));
     pref.put(LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE, INFRA_NAMESPACE);
-    pref.put(LAST_ACTIVE_WORKSPACE_ID, workspace.getId());
     verify(preferenceManager, never()).find("owner");
     verify(preferenceManager, never())
-        .remove(
-            "owner",
-            Arrays.asList(
-                LAST_ACTIVITY_TIME,
-                LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE,
-                LAST_ACTIVE_WORKSPACE_ID));
+        .remove("owner", Arrays.asList(LAST_ACTIVITY_TIME, LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE));
   }
 
   private void mockRuntimeStatus(WorkspaceImpl workspace, WorkspaceStatus status) {

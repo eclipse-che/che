@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -75,7 +76,6 @@ public class AsyncStoragePodWatcherTest {
     long epochSecond = Clock.systemDefaultZone().instant().getEpochSecond();
     long activityTime = epochSecond - 600; // stored time 10 minutes early
     userPref.put(Constants.LAST_ACTIVITY_TIME, Long.toString(activityTime));
-    userPref.put(Constants.LAST_ACTIVE_WORKSPACE_ID, WORKSPACE_ID);
     userPref.put(Constants.LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE, NAMESPACE);
     when(preferenceManager.find(USER_ID)).thenReturn(userPref);
 
@@ -92,7 +92,15 @@ public class AsyncStoragePodWatcherTest {
   public void shouldDeleteAsyncStoragePod() throws Exception {
     AsyncStoragePodWatcher watcher =
         new AsyncStoragePodWatcher(
-            kubernetesClientFactory, userManager, preferenceManager, runtimes, 1);
+            kubernetesClientFactory,
+            userManager,
+            preferenceManager,
+            runtimes,
+            1,
+            COMMON_STRATEGY,
+            false,
+            "<username>",
+            1);
 
     InternalRuntime runtime = mock(InternalRuntime.class);
     when(runtime.getOwner()).thenReturn(UUID.randomUUID().toString());
@@ -115,7 +123,15 @@ public class AsyncStoragePodWatcherTest {
   public void shouldNotDeleteAsyncStoragePodIfTooEarly() throws Exception {
     AsyncStoragePodWatcher watcher =
         new AsyncStoragePodWatcher(
-            kubernetesClientFactory, userManager, preferenceManager, runtimes, 10);
+            kubernetesClientFactory,
+            userManager,
+            preferenceManager,
+            runtimes,
+            10,
+            COMMON_STRATEGY,
+            false,
+            "<username>",
+            1);
     long epochSecond = clock.getEpochSecond();
     userPref.put(Constants.LAST_ACTIVITY_TIME, Long.toString(epochSecond));
 
@@ -130,7 +146,15 @@ public class AsyncStoragePodWatcherTest {
   public void shouldNotDeleteAsyncStoragePodIfHasActiveRuntime() throws Exception {
     AsyncStoragePodWatcher watcher =
         new AsyncStoragePodWatcher(
-            kubernetesClientFactory, userManager, preferenceManager, runtimes, 1);
+            kubernetesClientFactory,
+            userManager,
+            preferenceManager,
+            runtimes,
+            1,
+            COMMON_STRATEGY,
+            false,
+            "<username>",
+            1);
 
     // has active runtime
     InternalRuntime runtime = mock(InternalRuntime.class);
@@ -152,12 +176,108 @@ public class AsyncStoragePodWatcherTest {
   public void shouldNotDeleteAsyncStoragePodIfNoRecord() throws Exception {
     AsyncStoragePodWatcher watcher =
         new AsyncStoragePodWatcher(
-            kubernetesClientFactory, userManager, preferenceManager, runtimes, 1);
+            kubernetesClientFactory,
+            userManager,
+            preferenceManager,
+            runtimes,
+            1,
+            COMMON_STRATEGY,
+            false,
+            "<username>",
+            1);
     when(preferenceManager.find(USER_ID)).thenReturn(emptyMap()); // no records in user preferences
 
     watcher.check();
 
     verify(preferenceManager).find(USER_ID);
+    verifyNoMoreInteractions(kubernetesClientFactory);
+    verifyNoMoreInteractions(podResource);
+  }
+
+  @Test
+  public void shouldDoNothingIfNotCommonPvcStrategy() throws Exception {
+    AsyncStoragePodWatcher watcher =
+        new AsyncStoragePodWatcher(
+            kubernetesClientFactory,
+            userManager,
+            preferenceManager,
+            runtimes,
+            1,
+            "my-own-strategy",
+            false,
+            "<username>",
+            1);
+    when(preferenceManager.find(USER_ID)).thenReturn(emptyMap()); // no records in user preferences
+
+    watcher.check();
+
+    verifyNoMoreInteractions(preferenceManager);
+    verifyNoMoreInteractions(kubernetesClientFactory);
+    verifyNoMoreInteractions(podResource);
+  }
+
+  @Test
+  public void shouldDoNothingIfAllowedUserDefinedNamespaces() throws Exception {
+    AsyncStoragePodWatcher watcher =
+        new AsyncStoragePodWatcher(
+            kubernetesClientFactory,
+            userManager,
+            preferenceManager,
+            runtimes,
+            1,
+            "my-own-strategy",
+            true,
+            "<username>",
+            1);
+    when(preferenceManager.find(USER_ID)).thenReturn(emptyMap()); // no records in user preferences
+
+    watcher.check();
+
+    verifyNoMoreInteractions(preferenceManager);
+    verifyNoMoreInteractions(kubernetesClientFactory);
+    verifyNoMoreInteractions(podResource);
+  }
+
+  @Test
+  public void shouldDoNothingIfDefaultNamespaceNotCorrect() throws Exception {
+    AsyncStoragePodWatcher watcher =
+        new AsyncStoragePodWatcher(
+            kubernetesClientFactory,
+            userManager,
+            preferenceManager,
+            runtimes,
+            1,
+            "my-own-strategy",
+            true,
+            "<foo-bar>",
+            1);
+    when(preferenceManager.find(USER_ID)).thenReturn(emptyMap()); // no records in user preferences
+
+    watcher.check();
+
+    verifyNoMoreInteractions(preferenceManager);
+    verifyNoMoreInteractions(kubernetesClientFactory);
+    verifyNoMoreInteractions(podResource);
+  }
+
+  @Test
+  public void shouldDoNothingIfAllowMoreThanOneRuntime() throws Exception {
+    AsyncStoragePodWatcher watcher =
+        new AsyncStoragePodWatcher(
+            kubernetesClientFactory,
+            userManager,
+            preferenceManager,
+            runtimes,
+            1,
+            "my-own-strategy",
+            true,
+            "<foo-bar>",
+            2);
+    when(preferenceManager.find(USER_ID)).thenReturn(emptyMap()); // no records in user preferences
+
+    watcher.check();
+
+    verifyNoMoreInteractions(preferenceManager);
     verifyNoMoreInteractions(kubernetesClientFactory);
     verifyNoMoreInteractions(podResource);
   }

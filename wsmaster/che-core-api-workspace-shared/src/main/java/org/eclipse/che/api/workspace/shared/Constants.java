@@ -223,12 +223,6 @@ public final class Constants {
   public static final String LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE =
       "lastUsedInfrastructureNamespace";
 
-  /**
-   * The attribute for storing the last used workspace id, it recorded on workspace stop if no more
-   * running
-   */
-  public static final String LAST_ACTIVE_WORKSPACE_ID = "lastUsedWorkspaceId";
-
   /** The attribute for storing the time then last active workspace was stopped */
   public static final String LAST_ACTIVITY_TIME = "lastActivityTime";
 
