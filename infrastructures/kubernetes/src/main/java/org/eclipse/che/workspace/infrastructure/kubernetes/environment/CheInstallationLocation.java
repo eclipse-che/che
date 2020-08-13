@@ -11,12 +11,11 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class checks the KUBERNETES_NAMESPACE and POD_NAMESPACE environment variables to determine
@@ -27,9 +26,6 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class CheInstallationLocation {
-
-  private static final Logger LOG = LoggerFactory.getLogger(CheInstallationLocation.class);
-
   @Inject(optional = true)
   @Named("env.KUBERNETES_NAMESPACE")
   private String kubernetesNamespace;
@@ -37,6 +33,12 @@ public class CheInstallationLocation {
   @Inject(optional = true)
   @Named("env.POD_NAMESPACE")
   private String podNamespace;
+
+  @VisibleForTesting
+  CheInstallationLocation(String kubernetesNamespace, String podNamespace) {
+    this.kubernetesNamespace = kubernetesNamespace;
+    this.podNamespace = podNamespace;
+  }
 
   /**
    * @return The name of the namespace where Che is installed or null if both {@code

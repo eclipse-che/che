@@ -15,71 +15,107 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
-import okhttp3.EventListener;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
+import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
+import org.eclipse.che.workspace.infrastructure.kubernetes.CheKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstallationLocation;
 
+/**
+ * This singleton bean can be used to create K8S object in Che installation namespaces. These
+ * objects are related to particular workspace, but for some reason has to be created in Che
+ * namespace.
+ */
 @Singleton
 public class CheNamespace {
 
   private final String cheNamespaceName;
   private final CheKubernetesClientFactory clientFactory;
-  private final WorkspaceManager workspaceManager;
+  private final WorkspaceRuntimes workspaceRuntimes;
 
   @Inject
   public CheNamespace(
       CheInstallationLocation installationLocation,
       CheKubernetesClientFactory clientFactory,
-      WorkspaceManager workspaceManager)
+      WorkspaceRuntimes workspaceRuntimes)
       throws InfrastructureException {
     this.cheNamespaceName = installationLocation.getInstallationLocationNamespace();
     this.clientFactory = clientFactory;
-    this.workspaceManager = workspaceManager;
+    this.workspaceRuntimes = workspaceRuntimes;
   }
 
-  public ConfigMap createConfigMap(ConfigMap configMap, String workspaceId)
+  /**
+   * Creates given {@link ConfigMap}s in Che installation namespace labeled with `workspaceId` from
+   * given `identity`.
+   *
+   * <p>`workspaceId` from given `identity` must be valid workspace ID, that is in {@link
+   * WorkspaceStatus#STARTING} state. Otherwise, {@link InfrastructureException} is thrown.
+   *
+   * @param configMaps to create
+   * @param identity to validate and label configmaps
+   * @return created {@link ConfigMap}s
+   * @throws InfrastructureException when something goes wrong
+   */
+  public List<ConfigMap> createConfigMaps(List<ConfigMap> configMaps, RuntimeIdentity identity)
       throws InfrastructureException {
-    validate(workspaceId);
-
-    putLabel(configMap, CHE_WORKSPACE_ID_LABEL, workspaceId);
-    try {
-      return clientFactory.create().configMaps().inNamespace(cheNamespaceName).create(configMap);
-    } catch (KubernetesClientException e) {
-      throw new KubernetesInfrastructureException(e);
+    if (configMaps.isEmpty()) {
+      return configMaps;
     }
+    validate(identity, WorkspaceStatus.STARTING);
+
+    List<ConfigMap> createdConfigMaps = new ArrayList<>();
+    for (ConfigMap cm : configMaps) {
+      putLabel(cm, CHE_WORKSPACE_ID_LABEL, identity.getWorkspaceId());
+      createdConfigMaps.add(
+          clientFactory.create().configMaps().inNamespace(cheNamespaceName).create(cm));
+    }
+    return createdConfigMaps;
   }
 
-  private void validate(String workspaceId) throws InfrastructureException {
-    if (cheNamespaceName == null) {
-      throw new InfrastructureException("Unable to determine Che installation location");
+  /**
+   * Cleanup all objects related to given `workspaceId` in Che installation namespace.
+   *
+   * @param workspaceId to delete objects
+   * @throws InfrastructureException when workspaceId is null or something bad happen during
+   *     removing the objects
+   */
+  public void cleanUp(String workspaceId) throws InfrastructureException {
+    if (workspaceId == null) {
+      throw new InfrastructureException("workspaceId to cleanup can't be null");
     }
+    cleanUpConfigMaps(workspaceId);
+  }
 
+  /**
+   * Checks whether we have valid `workspaceId` and `owner` of existing workspace.
+   *
+   * @param identity to get `workspaceId` and `owner` to check
+   * @throws InfrastructureException when `workspaceId` is not valid workspace, is not in {@link
+   *     WorkspaceStatus#STARTING} state, is `null`, or owner does not match.
+   */
+  private void validate(RuntimeIdentity identity, WorkspaceStatus expectedStatus)
+      throws InfrastructureException {
     try {
-      Workspace ws = workspaceManager.getWorkspace(workspaceId);
-      if (ws.getStatus() != WorkspaceStatus.STARTING) {
-        throw new InfrastructureException("only for starting workspace");
+      InternalRuntime<?> runtime = workspaceRuntimes.getInternalRuntime(identity.getWorkspaceId());
+      if (!identity.getOwnerId().equals(runtime.getOwner())) {
+        throw new InfrastructureException("Given owner does not match workspace's actual owner.");
       }
-    } catch (NotFoundException | ServerException e) {
+
+      if (runtime.getStatus() != expectedStatus) {
+        throw new InfrastructureException("Can create objects only for starting workspaces.");
+      }
+    } catch (ServerException e) {
       throw new InfrastructureException(e);
     }
-  }
-
-  public void cleanUp(String workspaceId) throws InfrastructureException {
-    cleanUpConfigMaps(workspaceId);
   }
 
   private void cleanUpConfigMaps(String workspaceId) throws InfrastructureException {
@@ -93,51 +129,6 @@ public class CheNamespace {
           .delete();
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
-    }
-  }
-
-  @Singleton
-  private static class CheKubernetesClientFactory extends KubernetesClientFactory {
-
-    @Inject
-    public CheKubernetesClientFactory(
-        @Nullable @Named("che.infra.kubernetes.master_url") String masterUrl,
-        @Nullable @Named("che.infra.kubernetes.trust_certs") Boolean doTrustCerts,
-        @Named("che.infra.kubernetes.client.http.async_requests.max") int maxConcurrentRequests,
-        @Named("che.infra.kubernetes.client.http.async_requests.max_per_host")
-            int maxConcurrentRequestsPerHost,
-        @Named("che.infra.kubernetes.client.http.connection_pool.max_idle") int maxIdleConnections,
-        @Named("che.infra.kubernetes.client.http.connection_pool.keep_alive_min")
-            int connectionPoolKeepAlive,
-        EventListener eventListener) {
-      super(
-          masterUrl,
-          doTrustCerts,
-          maxConcurrentRequests,
-          maxConcurrentRequestsPerHost,
-          maxIdleConnections,
-          connectionPoolKeepAlive,
-          eventListener);
-    }
-
-    /** @param workspaceId ignored */
-    @Override
-    public KubernetesClient create(String workspaceId) throws InfrastructureException {
-      return create();
-    }
-
-    /**
-     * creates an instance of {@link KubernetesClient} that is meant to be used on Che installation
-     * namespace
-     */
-    @Override
-    public KubernetesClient create() throws InfrastructureException {
-      return super.create();
-    }
-
-    @Override
-    protected Config buildConfig(Config config, String workspaceId) {
-      return config;
     }
   }
 }

@@ -1137,16 +1137,17 @@ public class KubernetesInternalRuntimeTest {
     ConfigMap cmRoute2 =
         new ConfigMapBuilder().withNewMetadata().withName("route2").endMetadata().build();
 
+    List<ConfigMap> configMaps = Arrays.asList(cmRoute1, cmRoute2);
+
     when(gatewayRouterResolver.resolve(internalRuntime.getContext().getIdentity(), k8sEnv))
-        .thenReturn(Arrays.asList(cmRoute1, cmRoute2));
+        .thenReturn(configMaps);
 
     // when
     internalRuntime.start(emptyMap());
 
     // then
     verify(gatewayRouterResolver).resolve(internalRuntime.getContext().getIdentity(), k8sEnv);
-    verify(cheNamespace).createConfigMap(cmRoute1, WORKSPACE_ID);
-    verify(cheNamespace).createConfigMap(cmRoute2, WORKSPACE_ID);
+    verify(cheNamespace).createConfigMaps(configMaps, internalRuntime.getContext().getIdentity());
     verify(cheNamespace).cleanUp(WORKSPACE_ID);
   }
 
@@ -1162,7 +1163,7 @@ public class KubernetesInternalRuntimeTest {
 
     // then
     verify(gatewayRouterResolver).resolve(internalRuntime.getContext().getIdentity(), k8sEnv);
-    verify(cheNamespace, never()).createConfigMap(any(), any());
+    verify(cheNamespace).createConfigMaps(emptyList(), internalRuntime.getContext().getIdentity());
     verify(cheNamespace).cleanUp(WORKSPACE_ID);
   }
 

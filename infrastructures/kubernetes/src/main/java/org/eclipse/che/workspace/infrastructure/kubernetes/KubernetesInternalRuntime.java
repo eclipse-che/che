@@ -704,10 +704,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     for (ConfigMap configMap : env.getConfigMaps().values()) {
       createdConfigMaps.add(namespace.configMaps().create(configMap));
     }
-    for (ConfigMap routeConfigMap : gatewayRouterResolver.resolve(identity, env)) {
-      createdConfigMaps.add(
-          cheNamespace.createConfigMap(routeConfigMap, identity.getWorkspaceId()));
-    }
+    createdConfigMaps.addAll(
+        cheNamespace.createConfigMaps(gatewayRouterResolver.resolve(identity, env), identity));
+
     return createdConfigMaps;
   }
 
