@@ -96,6 +96,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftCookie
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftPreviewUrlExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.server.RouteServerExposer;
+import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.OpenshiftPluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases.OpenshiftBrokerEnvironmentFactory;
 
 /** @author Sergii Leshchenko */
@@ -199,8 +200,8 @@ public class OpenShiftInfraModule extends AbstractModule {
     bind(new TypeLiteral<BrokerEnvironmentFactory<OpenShiftEnvironment>>() {})
         .to(OpenshiftBrokerEnvironmentFactory.class);
 
-    bind(PluginBrokerManager.class)
-        .to(new TypeLiteral<PluginBrokerManager<OpenShiftEnvironment>>() {});
+    bind(new TypeLiteral<PluginBrokerManager<OpenShiftEnvironment>>() {})
+        .to(new TypeLiteral<OpenshiftPluginBrokerManager<OpenShiftEnvironment>>() {});
 
     bind(SidecarToolingProvisioner.class)
         .to(new TypeLiteral<SidecarToolingProvisioner<OpenShiftEnvironment>>() {});
