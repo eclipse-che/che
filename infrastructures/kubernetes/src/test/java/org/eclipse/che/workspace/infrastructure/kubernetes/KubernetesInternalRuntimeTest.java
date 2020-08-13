@@ -52,6 +52,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
@@ -75,6 +76,7 @@ import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
 import io.opentracing.Tracer;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -213,7 +215,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
   @Mock private KubernetesPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
-  @Mock private GatewayRouterResolver gatewayRouterProvisioner;
+  @Mock private GatewayRouterResolver gatewayRouterResolver;
   private KubernetesServerResolverFactory serverResolverFactory;
 
   @Mock
@@ -288,7 +290,7 @@ public class KubernetesInternalRuntimeTest {
             previewUrlCommandProvisioner,
             secretAsContainerResourceProvisioner,
             serverResolverFactory,
-            gatewayRouterProvisioner,
+            gatewayRouterResolver,
             cheNamespace,
             tracer,
             context,
@@ -1124,6 +1126,44 @@ public class KubernetesInternalRuntimeTest {
     assertEquals(
         new HashSet<>(containerNames),
         new HashSet<>(asList(CONTAINER_NAME_1, "injectedContainer")));
+  }
+
+  @Test
+  public void testGatewayRouteConfigsAreCreatedAsConfigmapsInCheNamespace()
+      throws InfrastructureException {
+    // given
+    ConfigMap cmRoute1 =
+        new ConfigMapBuilder().withNewMetadata().withName("route1").endMetadata().build();
+    ConfigMap cmRoute2 =
+        new ConfigMapBuilder().withNewMetadata().withName("route2").endMetadata().build();
+
+    when(gatewayRouterResolver.resolve(internalRuntime.getContext().getIdentity(), k8sEnv))
+        .thenReturn(Arrays.asList(cmRoute1, cmRoute2));
+
+    // when
+    internalRuntime.start(emptyMap());
+
+    // then
+    verify(gatewayRouterResolver).resolve(internalRuntime.getContext().getIdentity(), k8sEnv);
+    verify(cheNamespace).createConfigMap(cmRoute1, WORKSPACE_ID);
+    verify(cheNamespace).createConfigMap(cmRoute2, WORKSPACE_ID);
+    verify(cheNamespace).cleanUp(WORKSPACE_ID);
+  }
+
+  @Test
+  public void dontCreateAnythingInCheNamespaceWhenNoGatewayConfigs()
+      throws InfrastructureException {
+    // given
+    when(gatewayRouterResolver.resolve(internalRuntime.getContext().getIdentity(), k8sEnv))
+        .thenReturn(emptyList());
+
+    // when
+    internalRuntime.start(emptyMap());
+
+    // then
+    verify(gatewayRouterResolver).resolve(internalRuntime.getContext().getIdentity(), k8sEnv);
+    verify(cheNamespace, never()).createConfigMap(any(), any());
+    verify(cheNamespace).cleanUp(WORKSPACE_ID);
   }
 
   private static MachineStatusEvent newEvent(String machineName, MachineStatus status) {
