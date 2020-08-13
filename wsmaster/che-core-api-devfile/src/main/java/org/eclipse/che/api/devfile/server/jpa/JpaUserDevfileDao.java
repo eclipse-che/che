@@ -202,7 +202,6 @@ public class JpaUserDevfileDao implements UserDevfileDao {
 
   protected static class UserDevfileSearchQueryBuilder {
     private EntityManager entityManager;
-    private String userId;
     private int maxItems;
     private int skipCount;
     private String filter;
@@ -216,11 +215,6 @@ public class JpaUserDevfileDao implements UserDevfileDao {
 
     static UserDevfileSearchQueryBuilder newBuilder(EntityManager entityManager) {
       return new JpaUserDevfileDao.UserDevfileSearchQueryBuilder(entityManager);
-    }
-
-    protected UserDevfileSearchQueryBuilder withUserId(String userId) {
-      this.userId = userId;
-      return this;
     }
 
     protected UserDevfileSearchQueryBuilder withMaxItems(int maxItems) {
