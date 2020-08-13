@@ -20,6 +20,10 @@ import okhttp3.EventListener;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 
+/**
+ * This {@link KubernetesClientFactory} is used to access Che installation namespace. It always
+ * provides client with default {@link Config}.
+ */
 @Singleton
 public class CheKubernetesClientFactory extends KubernetesClientFactory {
 
