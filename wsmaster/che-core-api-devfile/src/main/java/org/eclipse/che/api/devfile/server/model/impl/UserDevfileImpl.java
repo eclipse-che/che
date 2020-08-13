@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.api.devfile.server.model.impl;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-
 import com.google.common.annotations.Beta;
 import java.util.List;
 import java.util.Map;
