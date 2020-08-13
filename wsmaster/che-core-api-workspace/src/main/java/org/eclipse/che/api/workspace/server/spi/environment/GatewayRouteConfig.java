@@ -16,7 +16,18 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+/**
+ * Data object that holds all needed info for configuring individual gateway routes.
+ *
+ * <p>It's used in case of gateway based single-host
+ * (`che.infra.kubernetes.server_strategy=default-host=single-host` AND
+ * `che.infra.kubernetes.single_host.workspace.exposure=gateway`).
+ *
+ * <p>Instances of {@link GatewayRouteConfig} are later transformed into gateway-specific
+ * configuration and into Kubernetes objects needed to properly configure the Gateway.
+ */
 public class GatewayRouteConfig {
+
   private final String name;
   private final String serviceName;
   private final String servicePort;
