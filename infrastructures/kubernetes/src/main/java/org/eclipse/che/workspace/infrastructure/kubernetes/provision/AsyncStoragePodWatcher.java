@@ -15,6 +15,8 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.Long.parseLong;
 import static java.time.Instant.now;
+import static java.time.Instant.ofEpochSecond;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.eclipse.che.api.core.Pages.iterateLazily;
 import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVITY_TIME;
@@ -24,8 +26,8 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.Asyn
 import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.dsl.PodResource;
+import java.time.Instant;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -79,7 +81,7 @@ public class AsyncStoragePodWatcher {
     this.userManager = userManager;
     this.preferenceManager = preferenceManager;
     this.runtimes = runtimes;
-    this.shutdownTimeoutSec = TimeUnit.MINUTES.toSeconds(shutdownTimeoutMin);
+    this.shutdownTimeoutSec = MINUTES.toSeconds(shutdownTimeoutMin);
 
     isAsyncStoragePodCanBeRun =
         isAsyncStoragePodCanBeRun(
@@ -110,7 +112,7 @@ public class AsyncStoragePodWatcher {
   }
 
   @ScheduleDelay(
-      unit = TimeUnit.MINUTES,
+      unit = MINUTES,
       initialDelay = 1,
       delayParameterName = "che.infra.kubernetes.async.storage.shutdown_check_period_min")
   public void check() {
@@ -125,22 +127,24 @@ public class AsyncStoragePodWatcher {
           Map<String, String> preferences = preferenceManager.find(owner);
           String lastTimeAccess = preferences.get(LAST_ACTIVITY_TIME);
           String namespace = preferences.get(LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE);
+
           if (isNullOrEmpty(namespace)
               || isNullOrEmpty(lastTimeAccess)
               || !runtimes.getInProgress(owner).isEmpty()) {
             continue;
           }
           long lastTimeAccessSec = parseLong(lastTimeAccess);
-          long nowSec = now().getEpochSecond();
-          if (nowSec - lastTimeAccessSec >= shutdownTimeoutSec) {
-            PodResource<Pod, DoneablePod> podDoneablePodPodResource =
+          Instant expectedShutdownAfter =
+              ofEpochSecond(lastTimeAccessSec).plusSeconds(shutdownTimeoutSec);
+          if (now().isAfter(expectedShutdownAfter)) {
+            PodResource<Pod, DoneablePod> doneablePodResource =
                 kubernetesClientFactory
                     .create()
                     .pods()
                     .inNamespace(namespace)
                     .withName(ASYNC_STORAGE);
-            if (podDoneablePodPodResource.get() != null) {
-              podDoneablePodPodResource.delete();
+            if (doneablePodResource.get() != null) {
+              doneablePodResource.delete();
             }
           }
         } catch (InfrastructureException | ServerException e) {

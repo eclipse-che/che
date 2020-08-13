@@ -11,9 +11,11 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
+import static java.time.Instant.now;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
+import static java.util.UUID.randomUUID;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -30,12 +32,9 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.PodResource;
-import java.time.Clock;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.user.server.UserManager;
@@ -53,10 +52,9 @@ import org.testng.annotations.Test;
 @Listeners(value = {MockitoTestNGListener.class})
 public class AsyncStoragePodWatcherTest {
 
-  private final String NAMESPACE = UUID.randomUUID().toString();
-  private final String WORKSPACE_ID = UUID.randomUUID().toString();
-  private final String USER_ID = UUID.randomUUID().toString();
-  private final Instant clock = Clock.systemDefaultZone().instant();
+  private final String NAMESPACE = randomUUID().toString();
+  private final String WORKSPACE_ID = randomUUID().toString();
+  private final String USER_ID = randomUUID().toString();
 
   private Map<String, String> userPref;
 
@@ -74,7 +72,7 @@ public class AsyncStoragePodWatcherTest {
   public void setUp() throws Exception {
     when(user.getId()).thenReturn(USER_ID);
     userPref = new HashMap<>(3);
-    long epochSecond = Clock.systemDefaultZone().instant().getEpochSecond();
+    long epochSecond = now().getEpochSecond();
     long activityTime = epochSecond - 600; // stored time 10 minutes early
     userPref.put(Constants.LAST_ACTIVITY_TIME, Long.toString(activityTime));
     userPref.put(Constants.LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE, NAMESPACE);
@@ -130,7 +128,7 @@ public class AsyncStoragePodWatcherTest {
             false,
             "<username>",
             1);
-    long epochSecond = clock.getEpochSecond();
+    long epochSecond = now().getEpochSecond();
     userPref.put(Constants.LAST_ACTIVITY_TIME, Long.toString(epochSecond));
 
     watcher.check();
@@ -271,6 +269,28 @@ public class AsyncStoragePodWatcherTest {
             true,
             "<foo-bar>",
             2);
+    when(preferenceManager.find(USER_ID)).thenReturn(emptyMap()); // no records in user preferences
+
+    watcher.check();
+
+    verifyNoMoreInteractions(preferenceManager);
+    verifyNoMoreInteractions(kubernetesClientFactory);
+    verifyNoMoreInteractions(podResource);
+  }
+
+  @Test
+  public void shouldDoNothingIfShutdownTimeSetToZero() throws Exception {
+    AsyncStoragePodWatcher watcher =
+        new AsyncStoragePodWatcher(
+            kubernetesClientFactory,
+            userManager,
+            preferenceManager,
+            runtimes,
+            0,
+            COMMON_STRATEGY,
+            false,
+            "<username>",
+            1);
     when(preferenceManager.find(USER_ID)).thenReturn(emptyMap()); // no records in user preferences
 
     watcher.check();
