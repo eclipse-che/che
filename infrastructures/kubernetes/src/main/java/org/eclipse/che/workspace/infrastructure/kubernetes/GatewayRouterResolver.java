@@ -49,6 +49,13 @@ public class GatewayRouterResolver {
     this.configGeneratorFactory = configGeneratorFactory;
   }
 
+  /**
+   * Resolves {@link GatewayRouteConfig}s from given {@link InternalEnvironment} into {@link
+   * ConfigMap}s. Data for the resulting configmaps are generated with {@link
+   * GatewayRouteConfigGenerator}, provided by {@link GatewayRouteConfigGeneratorFactory}.
+   *
+   * @return configmaps created from GatewayRouteConfigs and other environment info
+   */
   public List<ConfigMap> resolve(RuntimeIdentity id, InternalEnvironment internalEnvironment)
       throws InfrastructureException {
     if (internalEnvironment.getGatewayRouteConfigs().isEmpty()) {
@@ -64,7 +71,7 @@ public class GatewayRouterResolver {
       ConfigMapBuilder configMapBuilder =
           new ConfigMapBuilder()
               .withNewMetadata()
-              .withName(id.getWorkspaceId() + routeConfig.getName())
+              .withName(id.getWorkspaceId() + "-" + routeConfig.getName())
               .withLabels(GATEWAY_CONFIGMAP_LABELS)
               .withAnnotations(routeConfig.getAnnotations())
               .endMetadata()
