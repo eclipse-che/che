@@ -13,6 +13,10 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import javax.inject.Singleton;
 
+/**
+ * This Factory provides {@link GatewayRouteConfigGenerator} instances, so implementation using
+ * these can stay Gateway technology agnostic.
+ */
 @Singleton
 public class GatewayRouteConfigGeneratorFactory {
 
