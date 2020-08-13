@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -32,7 +33,7 @@ public class GatewayRouteConfig {
     this.serviceName = serviceName;
     this.servicePort = servicePort;
     this.routePath = routePath;
-    this.annotations = annotations;
+    this.annotations = new HashMap<>(annotations);
   }
 
   @Override
