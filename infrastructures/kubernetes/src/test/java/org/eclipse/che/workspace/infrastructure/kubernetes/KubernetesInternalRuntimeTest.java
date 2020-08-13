@@ -431,6 +431,7 @@ public class KubernetesInternalRuntimeTest {
     verify(secrets).create(any());
     verify(configMaps).create(any());
     verify(namespace).cleanUp();
+    verify(cheNamespace).cleanUp(WORKSPACE_ID);
     verify(namespace.deployments(), times(1)).watchEvents(any());
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
@@ -447,8 +448,9 @@ public class KubernetesInternalRuntimeTest {
     internalRuntime.start(emptyMap());
 
     InOrder cleanupInOrderExecutionVerification =
-        Mockito.inOrder(namespace, deployments, toolingProvisioner);
+        Mockito.inOrder(namespace, cheNamespace, deployments, toolingProvisioner);
     cleanupInOrderExecutionVerification.verify(namespace).cleanUp();
+    cleanupInOrderExecutionVerification.verify(cheNamespace).cleanUp(WORKSPACE_ID);
     cleanupInOrderExecutionVerification
         .verify(toolingProvisioner)
         .provision(any(), any(), any(), any());
@@ -652,6 +654,7 @@ public class KubernetesInternalRuntimeTest {
       internalRuntime.start(emptyMap());
     } catch (Exception rethrow) {
       verify(namespace, times(2)).cleanUp();
+      verify(cheNamespace, times(2)).cleanUp(WORKSPACE_ID);
       verify(namespace, never()).services();
       verify(namespace, never()).ingresses();
       throw rethrow;
@@ -731,11 +734,20 @@ public class KubernetesInternalRuntimeTest {
 
     verify(runtimeHangingDetector).stopTracking(IDENTITY);
     verify(namespace).cleanUp();
+    verify(cheNamespace).cleanUp(WORKSPACE_ID);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void throwsInfrastructureExceptionWhenKubernetesNamespaceCleanupFailed() throws Exception {
     doThrow(InfrastructureException.class).when(namespace).cleanUp();
+
+    internalRuntime.internalStop(emptyMap());
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void throwsInfrastructureExceptionWhenKubernetesCheNamespaceCleanupFailed()
+      throws Exception {
+    doThrow(InfrastructureException.class).when(cheNamespace).cleanUp(WORKSPACE_ID);
 
     internalRuntime.internalStop(emptyMap());
   }
