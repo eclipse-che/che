@@ -11,8 +11,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
+import static java.util.Collections.emptyMap;
+
 import com.google.common.base.Splitter;
-import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -32,12 +33,15 @@ public class NodeSelectorProvisioner implements ConfigurationProvisioner {
     this.nodeSelectorAttributes =
         nodeSelectorProperty != null
             ? Splitter.on(",").withKeyValueSeparator("=").split(nodeSelectorProperty)
-            : new HashMap<>();
+            : emptyMap();
   }
 
   @Override
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-    k8sEnv.getPodsData().values().forEach(d -> d.getSpec().setNodeSelector(nodeSelectorAttributes));
+    if (!nodeSelectorAttributes.isEmpty()) {
+      k8sEnv.getPodsData().values()
+          .forEach(d -> d.getSpec().setNodeSelector(nodeSelectorAttributes));
+    }
   }
 }
