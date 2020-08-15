@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2018 Red Hat, Inc.
+ * Copyright (c) 2012-2020 Red Hat, Inc.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -40,7 +40,9 @@ public class NodeSelectorProvisioner implements ConfigurationProvisioner {
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     if (!nodeSelectorAttributes.isEmpty()) {
-      k8sEnv.getPodsData().values()
+      k8sEnv
+          .getPodsData()
+          .values()
           .forEach(d -> d.getSpec().setNodeSelector(nodeSelectorAttributes));
     }
   }
