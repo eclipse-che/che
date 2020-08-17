@@ -19,25 +19,33 @@ import org.testng.annotations.Test;
 public class CheInstallationLocationTest {
   @Test
   public void returnKubernetesNamespaceWhenBothSet() throws InfrastructureException {
-    CheInstallationLocation cheInstallationLocation = new CheInstallationLocation("kube", "pod");
+    CheInstallationLocation cheInstallationLocation = new CheInstallationLocation();
+    cheInstallationLocation.kubernetesNamespace = "kube";
+    cheInstallationLocation.podNamespace = "pod";
     assertEquals(cheInstallationLocation.getInstallationLocationNamespace(), "kube");
   }
 
   @Test
   public void returnKubernetesNamespaceWhenItsOnlySet() throws InfrastructureException {
-    CheInstallationLocation cheInstallationLocation = new CheInstallationLocation("kube", null);
+    CheInstallationLocation cheInstallationLocation = new CheInstallationLocation();
+    cheInstallationLocation.kubernetesNamespace = "kube";
+    cheInstallationLocation.podNamespace = null;
     assertEquals(cheInstallationLocation.getInstallationLocationNamespace(), "kube");
   }
 
   @Test
   public void returnPodNamespaceWhenKubernetesNamespaceNotSet() throws InfrastructureException {
-    CheInstallationLocation cheInstallationLocation = new CheInstallationLocation(null, "pod");
+    CheInstallationLocation cheInstallationLocation = new CheInstallationLocation();
+    cheInstallationLocation.kubernetesNamespace = null;
+    cheInstallationLocation.podNamespace = "pod";
     assertEquals(cheInstallationLocation.getInstallationLocationNamespace(), "pod");
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void throwExceptionWhenNoneSet() throws InfrastructureException {
-    CheInstallationLocation cheInstallationLocation = new CheInstallationLocation(null, null);
+    CheInstallationLocation cheInstallationLocation = new CheInstallationLocation();
+    cheInstallationLocation.kubernetesNamespace = null;
+    cheInstallationLocation.podNamespace = null;
     cheInstallationLocation.getInstallationLocationNamespace();
   }
 }

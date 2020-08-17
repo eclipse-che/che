@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -28,17 +27,11 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 public class CheInstallationLocation {
   @Inject(optional = true)
   @Named("env.KUBERNETES_NAMESPACE")
-  private String kubernetesNamespace;
+  String kubernetesNamespace;
 
   @Inject(optional = true)
   @Named("env.POD_NAMESPACE")
-  private String podNamespace;
-
-  @VisibleForTesting
-  CheInstallationLocation(String kubernetesNamespace, String podNamespace) {
-    this.kubernetesNamespace = kubernetesNamespace;
-    this.podNamespace = podNamespace;
-  }
+  String podNamespace;
 
   /**
    * @return The name of the namespace where Che is installed or null if both {@code
