@@ -27,8 +27,6 @@ import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
@@ -41,16 +39,24 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphase
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.ListenBrokerEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.PrepareStorage;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.WaitBrokerResult;
+import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
+import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.Openshift4TrustedCAProvisioner;
 
+/**
+ * Deploys and runs Che plugin metadata broker. If Openshift 4 is used, then mounts trusted CA
+ * bundle into the broker container. Waits till the broker finishes its work and returns resolved
+ * workspace tooling or error if any.
+ */
 public class OpenshiftPluginBrokerManager<E extends KubernetesEnvironment>
     extends PluginBrokerManager<E> {
 
+  private final OpenShiftProjectFactory factory;
   private final Openshift4TrustedCAProvisioner trustedCAProvisioner;
 
   @Inject
   public OpenshiftPluginBrokerManager(
-      KubernetesNamespaceFactory factory,
+      OpenShiftProjectFactory factory,
       EventService eventService,
       KubernetesPluginsToolingValidator pluginsValidator,
       KubernetesEnvironmentProvisioner<E> environmentProvisioner,
@@ -73,6 +79,7 @@ public class OpenshiftPluginBrokerManager<E extends KubernetesEnvironment>
         runtimeEventsPublisher,
         tracer);
     this.trustedCAProvisioner = trustedCAProvisioner;
+    this.factory = factory;
   }
 
   @Beta
@@ -86,7 +93,7 @@ public class OpenshiftPluginBrokerManager<E extends KubernetesEnvironment>
       throws InfrastructureException {
 
     String workspaceId = identity.getWorkspaceId();
-    KubernetesNamespace kubernetesNamespace = factory.getOrCreate(identity);
+    OpenShiftProject openshiftProject = factory.getOrCreate(identity);
     BrokersResult brokersResult = new BrokersResult();
 
     E brokerEnvironment = brokerEnvironmentFactory.createForMetadataBroker(pluginFQNs, identity);
@@ -95,7 +102,7 @@ public class OpenshiftPluginBrokerManager<E extends KubernetesEnvironment>
     }
 
     environmentProvisioner.provision(brokerEnvironment, identity);
-    trustedCAProvisioner.provision(brokerEnvironment, kubernetesNamespace);
+    trustedCAProvisioner.provision(brokerEnvironment, openshiftProject);
 
     ListenBrokerEvents listenBrokerEvents = getListenEventPhase(workspaceId, brokersResult);
     PrepareStorage prepareStorage =
@@ -103,7 +110,7 @@ public class OpenshiftPluginBrokerManager<E extends KubernetesEnvironment>
     WaitBrokerResult waitBrokerResult = getWaitBrokerPhase(workspaceId, brokersResult);
     DeployBroker deployBroker =
         getDeployBrokerPhase(
-            identity, kubernetesNamespace, brokerEnvironment, brokersResult, startOptions);
+            identity, openshiftProject, brokerEnvironment, brokersResult, startOptions);
     LOG.debug("Entering plugin brokers deployment chain workspace '{}'", workspaceId);
     listenBrokerEvents.then(prepareStorage).then(deployBroker).then(waitBrokerResult);
     return listenBrokerEvents.execute();

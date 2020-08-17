@@ -39,6 +39,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphase
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.PrepareStorage;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.WaitBrokerResult;
 
+/**
+ * Deploys and runs Che plugin metadata broker. Waits till the broker finishes its work and returns
+ * resolved workspace tooling or error if any.
+ */
 public class KubernetesPluginBrokerManager<E extends KubernetesEnvironment>
     extends PluginBrokerManager<E> {
 

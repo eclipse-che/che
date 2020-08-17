@@ -193,15 +193,15 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   protected List<String> getCommandLineArgs(RuntimeIdentity runtimeId) {
     return new ArrayList<String>(
         Arrays.asList(
-            "-push-endpoint",
+            "--push-endpoint",
             cheWebsocketEndpoint,
-            "-runtime-id",
+            "--runtime-id",
             String.format(
                 "%s:%s:%s",
                 runtimeId.getWorkspaceId(),
                 MoreObjects.firstNonNull(runtimeId.getEnvName(), ""),
                 runtimeId.getOwnerId()),
-            "-cacert",
+            "--cacert",
             certProvisioner.isConfigured() ? certProvisioner.getCertPath() : "",
             "--registry-address",
             Strings.nullToEmpty(pluginRegistryUrl)));

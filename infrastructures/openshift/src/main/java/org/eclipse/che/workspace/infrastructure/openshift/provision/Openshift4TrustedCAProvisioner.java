@@ -29,7 +29,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
+import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 
 /**
  * Checks if config map with CA bundles is configured by specific property, and if it is, creates
@@ -58,7 +58,7 @@ public class Openshift4TrustedCAProvisioner {
     this.configMapLabelKeyValue = Splitter.on(",").withKeyValueSeparator("=").split(configMapLabel);
   }
 
-  public void provision(KubernetesEnvironment k8sEnv, KubernetesNamespace project)
+  public void provision(KubernetesEnvironment k8sEnv, OpenShiftProject project)
       throws InfrastructureException {
     if (!trustedStoreInitialized) {
       return;
