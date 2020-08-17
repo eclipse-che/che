@@ -16,27 +16,24 @@ In series, the following will be released via [che-release](https://github.com/e
 
 * che-theia, che-machine-exec, che-devfile registry, 
 * che-plugin-registry (once che-theia and machine-exec are done)
-* che-parent, che-dashboard, che-workspace-loader, and che (server assembly)
-
-Then manually:
-
-* release che server in Maven Central 
-
-Then by script:
-
+* che-parent, che-dashboard, che-workspace-loader, and che (server assembly), including release to [Maven Central](https://github.com/eclipse/che/issues/16043)
 * che-operator
+
+Then, these steps will be done, which still require some manual intervention (PR verification is not yet automated):
+
 * generation of OperatorHub PRs
 * chectl
 
-- [x] che-theia, che-machine-exec, che-devfile-registry, che-plugin-registry
-- [x] che-parent, che-dashboard, che-workspace-loader, che
-- [x] che-operator _(depends on all of the above)_
-  - [x] https://github.com/operator-framework/community-operators/pull/2123
-  - [x] https://github.com/operator-framework/community-operators/pull/2124
-- [x] chectl _(depends on all of the above)_
+- [ ] che-theia, che-machine-exec, che-devfile-registry, che-plugin-registry
+- [ ] che-parent, che-dashboard, che-workspace-loader, che
+- [ ] che-operator _(depends on all of the above)_
+  - [ ] https://github.com/operator-framework/community-operators/pull/xxxx
+  - [ ] https://github.com/operator-framework/community-operators/pull/xxxx
+- [ ] chectl _(depends on all of the above)_
 
 If this is a .0 release:
 
+- [ ] [send reminder to TLs to triage unresolved issues](https://github.com/eclipse/che/issues/17579)
 - [ ] complete current milestone
   - [ ] move incomplete *deferred* issues to backlog
   - [ ] move incomplete *WIP* issues to next milestone
@@ -53,5 +50,5 @@ If this is a .0 release:
 | @mkuznyetsov  | [che-dashboard](https://github.com/eclipse/che-dashboard/blob/master/RELEASE.md) | [cico_release.sh](https://github.com/eclipse/che-release/blob/master/cico_release.sh) | [centos](https://ci.centos.org/job/devtools-che-release-che-release/) | [`che-dashboard`](https://quay.io/repository/eclipse/che-dashboard?tag=next&tab=tags) |
 | @mkuznyetsov  | [che-workspace-loader](https://github.com/eclipse/che-workspace-loader/blob/master/RELEASE.md) | [cico_release.sh](https://github.com/eclipse/che-release/blob/master/cico_release.sh) | [centos](https://ci.centos.org/job/devtools-che-release-che-release) | [`che-workspace-loader`](https://quay.io/repository/eclipse/che-workspace-loader?tag=next&tab=tags) |
 | @mkuznyetsov  | [che](https://github.com/eclipse/che/blob/master/RELEASE.md) | [cico_release.sh](https://github.com/eclipse/che-release/blob/master/cico_release.sh) | [centos](https://ci.centos.org/job/devtools-che-release-che-release) | [che.core](https://search.maven.org/search?q=che.core),<br/> [`eclipse/che-server`](https://quay.io/eclipse/che-server),<br/>[`eclipse/che-endpoint-watcher`](https://quay.io/eclipse/che-endpoint-watcher),<br/> [`eclipse/che-keycloak`](https://quay.io/eclipse/che-keycloak),<br/> [`eclipse/che-postgres`](https://quay.io/eclipse/che-postgres),<br/> [`eclipse/che-server`](https://quay.io/eclipse/che-server),<br/> [`eclipse/che-e2e`](https://quay.io/eclipse/che-e2e) |
-| @tolusha| [che-operator](https://github.com/eclipse/che-operator/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-operator/blob/master/make-release.sh) | ? | [`eclipse/che-operator`](https://quay.io/eclipse/che-operator)| 
+| @tolusha| [che-operator](https://github.com/eclipse/che-operator/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-operator/blob/master/make-release.sh) | [centos](https://ci.centos.org/job/devtools-che-release-che-release) | [`eclipse/che-operator`](https://quay.io/eclipse/che-operator)| 
 | @tolusha| [chectl](https://github.com/che-incubator/chectl/blob/master/RELEASE.md) | [make-release.sh](https://github.com/che-incubator/chectl/blob/master/make-release.sh) | [travis](https://travis-ci.org/che-incubator/chectl) | [chectl releases](https://github.com/che-incubator/chectl/releases)

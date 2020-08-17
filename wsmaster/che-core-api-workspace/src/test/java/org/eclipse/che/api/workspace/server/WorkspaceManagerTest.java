@@ -23,6 +23,8 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 import static org.eclipse.che.api.workspace.shared.Constants.CREATED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVITY_TIME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_NAME;
@@ -53,7 +55,10 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.util.Strings.isNullOrEmpty;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import java.time.Clock;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +81,7 @@ import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
@@ -130,6 +136,7 @@ public class WorkspaceManagerTest {
   @Mock private WorkspaceValidator validator;
   @Mock private DevfileConverter devfileConverter;
   @Mock private DevfileIntegrityValidator devfileIntegrityValidator;
+  @Mock private PreferenceManager preferenceManager;
 
   @Captor private ArgumentCaptor<WorkspaceImpl> workspaceCaptor;
 
@@ -143,6 +150,7 @@ public class WorkspaceManagerTest {
             runtimes,
             eventService,
             accountManager,
+            preferenceManager,
             validator,
             devfileIntegrityValidator);
     lenient()
@@ -827,6 +835,62 @@ public class WorkspaceManagerTest {
     workspaceManager.createWorkspace(devfile, "ns", emptyMap(), null);
 
     // then exception is thrown
+  }
+
+  @Test
+  public void startsWorkspaceShouldCleanPreferences() throws Exception {
+    final WorkspaceImpl workspace = createAndMockWorkspace();
+    Runtime runtime = mockRuntime(workspace, WorkspaceStatus.RUNNING);
+    workspace.setRuntime(runtime);
+    Map<String, String> pref = new HashMap<>(2);
+    pref.put(LAST_ACTIVITY_TIME, "now");
+    pref.put(LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE, "my_namespace");
+    when(preferenceManager.find("owner")).thenReturn(pref);
+
+    mockAnyWorkspaceStart();
+    workspaceManager.startWorkspace(
+        workspace.getId(), workspace.getConfig().getDefaultEnv(), emptyMap());
+
+    verify(runtimes).startAsync(workspace, workspace.getConfig().getDefaultEnv(), emptyMap());
+    assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
+    verify(preferenceManager)
+        .remove("owner", Arrays.asList(LAST_ACTIVITY_TIME, LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE));
+  }
+
+  @Test
+  public void stopsLastWorkspaceShouldUpdatePreferences() throws Exception {
+    final WorkspaceImpl workspace = createAndMockWorkspace(createConfig(), NAMESPACE_1);
+    mockRuntime(workspace, RUNNING);
+    mockAnyWorkspaceStop();
+    when(runtimes.isAnyActive()).thenReturn(false);
+    long epochSecond = Clock.systemDefaultZone().instant().getEpochSecond();
+    workspaceManager.stopWorkspace(workspace.getId(), emptyMap());
+    verify(runtimes).stopAsync(workspace, emptyMap());
+    verify(workspaceDao).update(workspaceCaptor.capture());
+    verify(preferenceManager).find("owner");
+    Map<String, String> pref = new HashMap<>(2);
+    pref.put(LAST_ACTIVITY_TIME, Long.toString(epochSecond));
+    pref.put(LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE, INFRA_NAMESPACE);
+    verify(preferenceManager).update("owner", pref);
+  }
+
+  @Test
+  public void stopsWorkspaceShouldNotUpdatePreferencesIfOtherWorkspaceRunning() throws Exception {
+    final WorkspaceImpl workspace = createAndMockWorkspace(createConfig(), NAMESPACE_1);
+    mockRuntime(workspace, RUNNING);
+    mockAnyWorkspaceStop();
+    when(runtimes.getActive(anyString()))
+        .thenReturn(ImmutableSet.of(NameGenerator.generate("ws", 5)));
+    long millis = System.currentTimeMillis();
+    workspaceManager.stopWorkspace(workspace.getId(), emptyMap());
+    verify(runtimes).stopAsync(workspace, emptyMap());
+    verify(workspaceDao).update(workspaceCaptor.capture());
+    Map<String, String> pref = new HashMap<>(2);
+    pref.put(LAST_ACTIVITY_TIME, Long.toString(millis));
+    pref.put(LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE, INFRA_NAMESPACE);
+    verify(preferenceManager, never()).find("owner");
+    verify(preferenceManager, never())
+        .remove("owner", Arrays.asList(LAST_ACTIVITY_TIME, LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE));
   }
 
   private void mockRuntimeStatus(WorkspaceImpl workspace, WorkspaceStatus status) {

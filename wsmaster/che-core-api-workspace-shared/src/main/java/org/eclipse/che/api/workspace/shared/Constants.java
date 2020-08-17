@@ -216,5 +216,15 @@ public final class Constants {
   public static final String WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE =
       "infrastructureNamespace";
 
+  /**
+   * The attribute for storing the infrastructure namespace of last used workspace, it recorded on
+   * workspace stop if no more running
+   */
+  public static final String LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE =
+      "lastUsedInfrastructureNamespace";
+
+  /** The attribute for storing the time then last active workspace was stopped */
+  public static final String LAST_ACTIVITY_TIME = "lastActivityTime";
+
   private Constants() {}
 }
