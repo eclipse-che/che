@@ -17,22 +17,23 @@ import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
-import com.google.common.collect.ImmutableMap;
+import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.GatewayRouteConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
 public class GatewayTlsProvisionerTest {
+
   public static final String WORKSPACE_ID = "workspace123";
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
@@ -41,57 +42,64 @@ public class GatewayTlsProvisionerTest {
       new ServerConfigImpl("8080/tpc", "http", "/api", emptyMap());
   private final ServerConfigImpl wsServer =
       new ServerConfigImpl("8080/tpc", "ws", "/ws", emptyMap());
-  private final Map<String, ServerConfig> servers =
-      ImmutableMap.of("http-server", httpServer, "ws-server", wsServer);
   private final Map<String, String> annotations =
       singletonMap("annotation-key", "annotation-value");
   private final String machine = "machine";
 
-  @Test
-  public void provisionTlsForGatewayRouteConfig() throws Exception {
+  @Test(dataProvider = "tlsProvisionData")
+  public void provisionTlsForGatewayRouteConfig(
+      ServerConfigImpl server, boolean tlsEnabled, String expectedProtocol) throws Exception {
     // given
+    Map<String, String> composedAnnotations = new HashMap<>(annotations);
+    composedAnnotations.putAll(
+        Annotations.newSerializer().server("server", server).machineName(machine).annotations());
     GatewayRouteConfig routeConfig =
-        new GatewayRouteConfig("gate1", "svc1", "1234", "/hello", annotations);
+        new GatewayRouteConfig("gate1", "svc1", "1234", "/hello", "http", composedAnnotations);
+    GatewayTlsProvisioner<KubernetesEnvironment> gatewayTlsProvisioner =
+        new GatewayTlsProvisioner<>(tlsEnabled);
+
+    when(k8sEnv.getGatewayRouteConfigs()).thenReturn(singletonList(routeConfig));
+
+    // when
+    gatewayTlsProvisioner.provision(k8sEnv, runtimeIdentity);
+
+    // then
+    Map<String, ServerConfigImpl> servers =
+        Annotations.newDeserializer(routeConfig.getAnnotations()).servers();
+    assertEquals(servers.get("server").getProtocol(), expectedProtocol);
+  }
+
+  @DataProvider
+  public Object[][] tlsProvisionData() {
+    return new Object[][] {
+      {httpServer, true, "https"},
+      {httpServer, false, "http"},
+      {wsServer, true, "wss"},
+      {wsServer, false, "ws"},
+    };
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void throwExceptionWhenMultipleServersInGatewayRouteConfigAnnotations()
+      throws InfrastructureException {
+    // given
+    Map<String, String> composedAnnotations = new HashMap<>(annotations);
+    composedAnnotations.putAll(
+        Annotations.newSerializer()
+            .server("server1", httpServer)
+            .server("server2", wsServer)
+            .machineName(machine)
+            .annotations());
+    GatewayRouteConfig routeConfig =
+        new GatewayRouteConfig("gate1", "svc1", "1234", "/hello", "http", composedAnnotations);
+
+    when(k8sEnv.getGatewayRouteConfigs()).thenReturn(singletonList(routeConfig));
     GatewayTlsProvisioner<KubernetesEnvironment> gatewayTlsProvisioner =
         new GatewayTlsProvisioner<>(true);
 
-    routeConfig
-        .getAnnotations()
-        .putAll(Annotations.newSerializer().servers(servers).machineName(machine).annotations());
-
-    when(k8sEnv.getGatewayRouteConfigs()).thenReturn(singletonList(routeConfig));
-
     // when
     gatewayTlsProvisioner.provision(k8sEnv, runtimeIdentity);
 
-    // then
-    Map<String, ServerConfigImpl> servers =
-        Annotations.newDeserializer(routeConfig.getAnnotations()).servers();
-    assertEquals(servers.get("http-server").getProtocol(), "https");
-    assertEquals(servers.get("ws-server").getProtocol(), "wss");
-  }
-
-  @Test
-  public void shouldNotChangeProtocolWhenTlsDisabled() throws KubernetesInfrastructureException {
-    // given
-    GatewayRouteConfig routeConfig =
-        new GatewayRouteConfig("gate1", "svc1", "1234", "/hello", annotations);
-    GatewayTlsProvisioner<KubernetesEnvironment> gatewayTlsProvisioner =
-        new GatewayTlsProvisioner<>(false);
-
-    routeConfig
-        .getAnnotations()
-        .putAll(Annotations.newSerializer().servers(servers).machineName(machine).annotations());
-
-    when(k8sEnv.getGatewayRouteConfigs()).thenReturn(singletonList(routeConfig));
-
-    // when
-    gatewayTlsProvisioner.provision(k8sEnv, runtimeIdentity);
-
-    // then
-    Map<String, ServerConfigImpl> servers =
-        Annotations.newDeserializer(routeConfig.getAnnotations()).servers();
-    assertEquals(servers.get("http-server").getProtocol(), "http");
-    assertEquals(servers.get("ws-server").getProtocol(), "ws");
+    // then exception
   }
 }

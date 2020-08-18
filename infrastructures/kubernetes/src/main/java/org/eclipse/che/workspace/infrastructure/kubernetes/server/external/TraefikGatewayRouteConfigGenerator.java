@@ -77,7 +77,8 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
           generate(
               routeConfig.getName(),
               createServiceUrl(routeConfig.getServiceName(), routeConfig.getServicePort()),
-              routeConfig.getRoutePath());
+              routeConfig.getRoutePath(),
+              routeConfig.getProtocol());
       cmData.put(routeConfig.getName() + ".yml", traefikRouteConfig);
     }
     return cmData;
@@ -91,7 +92,7 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
    * @param path path to route and strip
    * @return traefik service route config
    */
-  private String generate(String name, String serviceUrl, String path)
+  private String generate(String name, String serviceUrl, String path, String protocol)
       throws InfrastructureException {
     StringWriter sw = new StringWriter();
     try {
@@ -109,7 +110,7 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
       generateServices(generator, name, serviceUrl);
 
       generator.writeFieldName("middlewares");
-      generateMiddlewares(generator, name, path);
+      generateMiddlewares(generator, name, path, protocol);
 
       generator.flush();
 
@@ -143,6 +144,7 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
     generator.writeFieldName("middlewares");
     generator.writeStartArray();
     generator.writeString(name);
+    generator.writeString(name + "_headers");
     generator.writeEndArray();
     generator.writeFieldName("priority");
     generator.writeNumber(100);
@@ -189,8 +191,8 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
    *     - "{path}"
    * </pre>
    */
-  private void generateMiddlewares(YAMLGenerator generator, String name, String path)
-      throws IOException {
+  private void generateMiddlewares(
+      YAMLGenerator generator, String name, String path, String protocol) throws IOException {
     generator.writeStartObject();
     generator.writeFieldName(name);
     generator.writeStartObject();
@@ -202,6 +204,19 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
     generator.writeEndArray();
     generator.writeEndObject();
     generator.writeEndObject();
+
+    generator.writeFieldName(name + "_headers");
+    generator.writeStartObject();
+    generator.writeFieldName("headers");
+    generator.writeStartObject();
+    generator.writeFieldName("customRequestHeaders");
+    generator.writeStartObject();
+    generator.writeFieldName("X-Forwarded-Proto");
+    generator.writeString(protocol);
+    generator.writeEndObject();
+    generator.writeEndObject();
+    generator.writeEndObject();
+
     generator.writeEndObject();
   }
 

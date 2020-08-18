@@ -19,9 +19,9 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.GatewayRouteConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
@@ -39,8 +39,7 @@ public class GatewayTlsProvisioner<T extends KubernetesEnvironment>
   }
 
   @Override
-  public void provision(T k8sEnv, RuntimeIdentity identity)
-      throws KubernetesInfrastructureException {
+  public void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException {
     if (!isTlsEnabled) {
       return;
     }
@@ -50,19 +49,26 @@ public class GatewayTlsProvisioner<T extends KubernetesEnvironment>
     }
   }
 
-  private void useSecureProtocolForGatewayServers(GatewayRouteConfig routeConfig) {
+  private void useSecureProtocolForGatewayServers(GatewayRouteConfig routeConfig)
+      throws InfrastructureException {
     Map<String, ServerConfigImpl> servers =
         Annotations.newDeserializer(routeConfig.getAnnotations()).servers();
 
     if (servers.isEmpty()) {
       return;
     }
-
-    servers.values().forEach(s -> s.setProtocol(getSecureProtocol(s.getProtocol())));
-
-    Map<String, String> annotations = Annotations.newSerializer().servers(servers).annotations();
-    if (!annotations.isEmpty() && routeConfig.getAnnotations() != null) {
-      routeConfig.getAnnotations().putAll(annotations);
+    if (servers.size() != 1) {
+      throw new InfrastructureException(
+          "Expected exactly 1 server in GatewayRouteConfig [" + routeConfig.toString() + "]");
     }
+    String scKey = servers.keySet().stream().findFirst().get();
+    ServerConfigImpl serverConfig = servers.get(scKey);
+    String protocol = getSecureProtocol(serverConfig.getProtocol());
+    routeConfig.setProtocol(protocol);
+
+    serverConfig.setProtocol(protocol);
+    routeConfig
+        .getAnnotations()
+        .putAll(Annotations.newSerializer().server(scKey, serverConfig).annotations());
   }
 }

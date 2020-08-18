@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.ServicePort;
-import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -65,8 +64,11 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
       serverId = servicePort.getName();
     }
 
-    k8sEnv.addGatewayRouteConfig(
-        createGatewayRouteConfig(machineName, serviceName, serverId, servicePort, externalServers));
+    for (String esKey : externalServers.keySet()) {
+      k8sEnv.addGatewayRouteConfig(
+          createGatewayRouteConfig(
+              machineName, serviceName, serverId, servicePort, esKey, externalServers.get(esKey)));
+    }
   }
 
   private GatewayRouteConfig createGatewayRouteConfig(
@@ -74,13 +76,19 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
       String serviceName,
       String serverId,
       ServicePort servicePort,
-      Map<String, ServerConfig> serversConfigs) {
+      String scRef,
+      ServerConfig serverConfig) {
     final String serverName = KubernetesServerExposer.makeServerNameValidForDns(serverId);
     final String name = createName(serviceName, serverName);
     final String path = ensureDontEndsWithSlash(strategy.getExternalPath(serviceName, serverName));
-    final Map<String, String> annotations = createAnnotations(serversConfigs, path, machineName);
+    final String protocol = serverConfig.getProtocol();
+    final Map<String, String> annotations =
+        Annotations.newSerializer()
+            .server(scRef, new ServerConfigImpl(serverConfig).withPath(path))
+            .machineName(machineName)
+            .annotations();
     return new GatewayRouteConfig(
-        name, serviceName, getTargetPort(servicePort.getTargetPort()), path, annotations);
+        name, serviceName, getTargetPort(servicePort.getTargetPort()), path, protocol, annotations);
   }
 
   private String ensureDontEndsWithSlash(String path) {
@@ -95,18 +103,5 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
     return targetPort.getIntVal() != null
         ? targetPort.getIntVal().toString()
         : targetPort.getStrVal();
-  }
-
-  private Map<String, String> createAnnotations(
-      Map<String, ServerConfig> serversConfigs, String path, String machineName) {
-    Map<String, ServerConfig> configsWithPaths = new HashMap<>();
-    for (String scKey : serversConfigs.keySet()) {
-      configsWithPaths.put(scKey, new ServerConfigImpl(serversConfigs.get(scKey)).withPath(path));
-    }
-
-    return Annotations.newSerializer()
-        .servers(configsWithPaths)
-        .machineName(machineName)
-        .annotations();
   }
 }

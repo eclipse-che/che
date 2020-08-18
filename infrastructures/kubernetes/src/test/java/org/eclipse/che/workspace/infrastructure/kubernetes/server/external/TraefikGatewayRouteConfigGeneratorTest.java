@@ -35,6 +35,7 @@ public class TraefikGatewayRouteConfigGeneratorTest {
             + "      service: \"external-server-1\"\n"
             + "      middlewares:\n"
             + "      - \"external-server-1\"\n"
+            + "      - \"external-server-1_headers\"\n"
             + "      priority: 100\n"
             + "  services:\n"
             + "    external-server-1:\n"
@@ -45,11 +46,20 @@ public class TraefikGatewayRouteConfigGeneratorTest {
             + "    external-server-1:\n"
             + "      stripPrefix:\n"
             + "        prefixes:\n"
-            + "        - \"/blabol-cesta\"";
+            + "        - \"/blabol-cesta\"\n"
+            + "    external-server-1_headers:\n"
+            + "      headers:\n"
+            + "        customRequestHeaders:\n"
+            + "          X-Forwarded-Proto: \"http\"";
 
     GatewayRouteConfig routeConfig =
         new GatewayRouteConfig(
-            "external-server-1", "service-url", "1234", "/blabol-cesta", Collections.emptyMap());
+            "external-server-1",
+            "service-url",
+            "1234",
+            "/blabol-cesta",
+            "http",
+            Collections.emptyMap());
     gatewayConfigGenerator.addRouteConfig(routeConfig);
     Map<String, String> generatedConfig = gatewayConfigGenerator.generate();
 
@@ -60,8 +70,8 @@ public class TraefikGatewayRouteConfigGeneratorTest {
   @Test
   public void testMultipleRouteConfigsAreGeneratedAsMultipleMapEntries()
       throws InfrastructureException {
-    GatewayRouteConfig c1 = new GatewayRouteConfig("c1", "", "", "", Collections.emptyMap());
-    GatewayRouteConfig c2 = new GatewayRouteConfig("c2", "", "", "", Collections.emptyMap());
+    GatewayRouteConfig c1 = new GatewayRouteConfig("c1", "", "", "", "", Collections.emptyMap());
+    GatewayRouteConfig c2 = new GatewayRouteConfig("c2", "", "", "", "", Collections.emptyMap());
     gatewayConfigGenerator.addRouteConfig(c1);
     gatewayConfigGenerator.addRouteConfig(c2);
     Map<String, String> generatedConfig = gatewayConfigGenerator.generate();

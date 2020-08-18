@@ -61,8 +61,10 @@ public class GatewayRouterResolverTest {
   public void testRouteConfigsAreResolvedToConfigMaps() throws InfrastructureException {
     List<GatewayRouteConfig> configs =
         Arrays.asList(
-            new GatewayRouteConfig("g1", "s1", "1", "/1", Collections.singletonMap("a1", "v1")),
-            new GatewayRouteConfig("g2", "s2", "2", "/2", Collections.singletonMap("a2", "v2")));
+            new GatewayRouteConfig(
+                "g1", "s1", "1", "/1", "http", Collections.singletonMap("a1", "v1")),
+            new GatewayRouteConfig(
+                "g2", "s2", "2", "/2", "http", Collections.singletonMap("a2", "v2")));
     when(internalEnvironment.getGatewayRouteConfigs()).thenReturn(configs);
 
     List<ConfigMap> configMaps =

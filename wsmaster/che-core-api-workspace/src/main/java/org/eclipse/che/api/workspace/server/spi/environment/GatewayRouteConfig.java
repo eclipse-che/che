@@ -32,6 +32,7 @@ public class GatewayRouteConfig {
   private final String serviceName;
   private final String servicePort;
   private final String routePath;
+  private String protocol;
   private final Map<String, String> annotations;
 
   public GatewayRouteConfig(
@@ -39,11 +40,13 @@ public class GatewayRouteConfig {
       String serviceName,
       String servicePort,
       String routePath,
+      String protocol,
       Map<String, String> annotations) {
     this.name = name;
     this.serviceName = serviceName;
     this.servicePort = servicePort;
     this.routePath = routePath;
+    this.protocol = protocol;
     this.annotations = new HashMap<>(annotations);
   }
 
@@ -54,6 +57,7 @@ public class GatewayRouteConfig {
         .add("serviceName='" + serviceName + "'")
         .add("servicePort='" + servicePort + "'")
         .add("routePath='" + routePath + "'")
+        .add("protocol='" + protocol + "'")
         .add("annotations=" + annotations)
         .toString();
   }
@@ -71,12 +75,13 @@ public class GatewayRouteConfig {
         && Objects.equals(serviceName, that.serviceName)
         && Objects.equals(servicePort, that.servicePort)
         && Objects.equals(routePath, that.routePath)
+        && Objects.equals(protocol, that.protocol)
         && Objects.equals(annotations, that.annotations);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, serviceName, servicePort, routePath, annotations);
+    return Objects.hash(name, serviceName, servicePort, routePath, protocol, annotations);
   }
 
   public String getName() {
@@ -97,5 +102,13 @@ public class GatewayRouteConfig {
 
   public String getServicePort() {
     return servicePort;
+  }
+
+  public String getProtocol() {
+    return protocol;
+  }
+
+  public void setProtocol(String protocol) {
+    this.protocol = protocol;
   }
 }
