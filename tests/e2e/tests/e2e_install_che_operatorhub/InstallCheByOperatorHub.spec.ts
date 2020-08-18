@@ -25,7 +25,7 @@ suite('E2E', async () => {
 
         test('Click on the Create New, wait CSV yaml', async () => {
             await ocpWebConsole.clickCreateNewCheClusterLink();
-            await ocpWebConsole.waitCreateCheClusterYaml(10_000);
+            await ocpWebConsole.waitCreateCheClusterYaml();
         });
 
         test('Open editor replace widget in the Che Cluster yaml', async () => {

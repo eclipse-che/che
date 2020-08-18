@@ -112,7 +112,7 @@ export class Editor {
                     throw err;
                 }
 
-                await this.closeSuggestionContainer(editorTabTitle, 3_000);
+                await this.closeSuggestionContainer(editorTabTitle, TimeoutConstants.TS_CLOSE_SUGGESTION_CONTAINER_TIMEOUT);
                 await this.pressControlSpaceCombination(editorTabTitle);
             }
         }, timeout);

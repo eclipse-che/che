@@ -14,7 +14,7 @@ export const TimeoutConstants = {
     /**
      * Timeout in milliseconds waiting for install Eclipse Che by OperatorHub UI, "600 000" by default.
      */
-    TS_SELENIUM_INSTALL_ECLIPSE_CHE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 600000,
+    TS_SELENIUM_INSTALL_ECLIPSE_CHE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 600_000,
 
     /**
      * Wait between workspace started and IDE ready to be used, "20 000" by default.
@@ -24,7 +24,7 @@ export const TimeoutConstants = {
     /**
      * Timeout in milliseconds waiting for workspace start, "360 000" by default.
      */
-    TS_SELENIUM_START_WORKSPACE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 360000,
+    TS_SELENIUM_START_WORKSPACE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 360_000,
 
     /**
      * Timeout in milliseconds waiting for page load, "20 000" by default.
@@ -99,6 +99,11 @@ export const TimeoutConstants = {
      * Wait for file to be opened in editor, "30 000" by default.
      */
     TS_OPEN_EDITOR_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 30_000,
+
+    /**
+     * Wait for suggestion container closure, "3 000" by default.
+     */
+    TS_CLOSE_SUGGESTION_CONTAINER_TIMEOUT: Number(process.env.TS_CLOSE_SUGGESTION_CONTAINER_TIMEOUT) || 3_000,
 
 
     // -------------------------------------------- IDE --------------------------------------------
@@ -185,5 +190,25 @@ export const TimeoutConstants = {
     /**
      * Timeout for Che cluster title visibility in OcpWebConsolePage, "10 000" by default.
      */
-    TS_SELENIUM_RESOURCES_CHE_CLUSTER_TITLE_TIMEOUT: Number(process.env.TS_SELENIUM_RESOURCES_CHE_CLUSTER_TITLE_TIMEOUT) || 10_000
+    TS_SELENIUM_RESOURCES_CHE_CLUSTER_TITLE_TIMEOUT: Number(process.env.TS_SELENIUM_RESOURCES_CHE_CLUSTER_TITLE_TIMEOUT) || 10_000,
+
+
+    // ------------------------------------ OPENSHIFT RELATED ------------------------------------
+
+    /**
+     * Timeout for obtaining cluster IP, "10 000" by default.
+     */
+    TS_GET_CLUSTER_IP_TIMEOUT: Number(process.env.TS_GET_CLUSTER_IP_TIMEOUT) || 10_000,
+
+    /**
+     * Timeout for waiting fr openshift connector tree, "10 000" by default.
+     */
+    TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT: Number(process.env.TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT) || 10_000,
+
+    /**
+     * Timeout for creating CheCluster yaml, "10 000" by default.
+     */
+    TS_CREATE_CHECLUSTER_YAML_TIMEOUT: Number(process.env.TS_CREATE_CHECLUSTER_YAML_TIMEOUT) || 10_000,
+
+
 };

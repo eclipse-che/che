@@ -76,13 +76,13 @@ suite('Openshift connector user story', async () => {
     await projectTree.waitProjectImported(projectName, 'index.js');
     await dashboard.waitDisappearanceNavigationMenu();
     await openshiftPlugin.clickOnOpenshiftToollBarIcon();
-    await openshiftPlugin.waitOpenshiftConnectorTree(10_000);
+    await openshiftPlugin.waitOpenshiftConnectorTree();
   });
 
   test('Login into current cluster', async () => {
     const provideAuthenticationSuffix: string = `for basic authentication to the API server ${selectSugestionSuffix}`;
     const loginIntoClusterMessage: string = 'You are already logged in the cluster. Do you want to login to a different cluster?';
-    const openshiftIP: string = await openshiftPlugin.getClusterIP(10_000);
+    const openshiftIP: string = await openshiftPlugin.getClusterIP();
     await openshiftPlugin.clickOnApplicationToolbarItem(OpenshiftAppExplorerToolbar.LogIntoCluster);
     await ide.clickOnNotificationButton(loginIntoClusterMessage, 'Yes');
     await quickOpenContainer.clickOnContainerItem('Credentials');

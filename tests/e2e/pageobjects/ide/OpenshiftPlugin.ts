@@ -44,7 +44,7 @@ export class OpenshiftPlugin {
         await this.ide.waitAndClickLeftToolbarButton(LeftToolbarButton.Openshift, timeout);
     }
 
-    async waitOpenshiftConnectorTree(timeout: number) {
+    async waitOpenshiftConnectorTree(timeout: number = TimeoutConstants.TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT) {
         Logger.debug(`OpenshiftPlugin.waitOpenshiftConnectorTree`);
         await this.driverHelper.waitPresence(By.id('openshiftProjectExplorer'), timeout);
     }
@@ -54,7 +54,7 @@ export class OpenshiftPlugin {
         await this.driverHelper.waitAndClick(By.css(`div [title='${item}']`), timeout);
     }
 
-    async getClusterIP(timeout: number): Promise<string> {
+    async getClusterIP(timeout: number = TimeoutConstants.TS_GET_CLUSTER_IP_TIMEOUT): Promise<string> {
         Logger.debug(`OpenshiftPlugin.getClusterIP`);
         return await this.driverHelper.waitAndGetText(By.xpath('//div[@id=\'openshiftProjectExplorer\']//div[@title [contains(text(), https)]]'), timeout);
     }

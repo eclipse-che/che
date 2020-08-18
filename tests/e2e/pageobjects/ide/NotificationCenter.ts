@@ -12,12 +12,8 @@ import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { Logger } from '../../utils/Logger';
-<<<<<<< HEAD
 import { By } from 'selenium-webdriver';
-=======
-import { By, error } from 'selenium-webdriver';
 import { TimeoutConstants } from '../../TimeoutConstants';
->>>>>>> e10526bbec... Removing default timeout
 
 
 

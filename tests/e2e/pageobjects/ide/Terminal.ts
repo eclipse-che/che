@@ -90,7 +90,7 @@ export class Terminal {
         return await this.driverHelper.waitAndGetText(By.xpath(Terminal.TERMINAL_ROWS_XPATH_LOCATOR_PREFFIX + `[${terminalIndex}]`), timeout);
     }
 
-    async selectTabByPrefixAndWaitText(terminalTab: string, expectedText: string, timeout: number) {
+    async selectTabByPrefixAndWaitText(terminalTab: string, expectedText: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT) {
         Logger.debug(`Terminal.selectTabByPrefixAndWaitText tab: ${terminalTab} text: ${expectedText}`);
 
         const terminalTabLocatorWithPreffix: string = `//li[contains(@title, '${terminalTab}')]`;

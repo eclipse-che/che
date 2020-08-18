@@ -56,20 +56,14 @@ class CheReporter extends mocha.reporters.Spec {
 `;
 
       if ( TestConstants.TS_SELENIUM_PRINT_TIMEOUT_VARIABLES ) {
-        launchInformation = launchInformation + `
-      TS_SELENIUM_PRINT_TIMEOUT_VARIABLES is set to true:
-        `;
+        launchInformation += `\n      TS_SELENIUM_PRINT_TIMEOUT_VARIABLES is set to true: \n`;
         Object.entries(TimeoutConstants).forEach(
-          ([key, value]) => launchInformation = launchInformation + `
-          ${key}: ${value}`);
+          ([key, value]) => launchInformation += `\n         ${key}: ${value}`);
       } else {
-        launchInformation = launchInformation + `
-      to output timeout variables, set TS_SELENIUM_PRINT_TIMEOUT_VARIABLES to true`;
+        launchInformation += `\n      to output timeout variables, set TS_SELENIUM_PRINT_TIMEOUT_VARIABLES to true`;
       }
 
-      launchInformation = launchInformation + `
-########################################################
-      `;
+      launchInformation += `\n ######################################################## \n`;
 
       console.log(launchInformation);
 

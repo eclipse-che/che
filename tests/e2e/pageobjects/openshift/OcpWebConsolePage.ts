@@ -133,13 +133,15 @@ export class OcpWebConsolePage {
         await this.driverHelper.waitAndClick(createNewCheLusterLinkLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
     }
 
-    async waitCreateCheClusterYaml(timeout: number) {
+    async waitCreateCheClusterYaml(timeout: number = TimeoutConstants.TS_CREATE_CHECLUSTER_YAML_TIMEOUT) {
         Logger.debug('OcpWebConsolePage.waitCreateCheClusterYaml');
 
         const headerTextCheClusterLocator: By = By.xpath('//h1[contains(text(), \'Cluster\')]');
         const createCheClusterYamlLocator: By = By.css('div[class=yaml-editor]');
+
         await this.driverHelper.waitVisibility(headerTextCheClusterLocator, timeout);
         await this.driverHelper.waitVisibility(createCheClusterYamlLocator, timeout);
+
     }
 
     async openEditorReplaceWidget() {
