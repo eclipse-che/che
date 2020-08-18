@@ -11,6 +11,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
+import static java.lang.Boolean.TRUE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
+
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.Map;
@@ -87,6 +90,7 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
             .server(scRef, new ServerConfigImpl(serverConfig).withPath(path))
             .machineName(machineName)
             .annotations();
+    annotations.put(CREATE_IN_CHE_INSTALLATION_NAMESPACE, TRUE.toString());
     return new GatewayRouteConfig(
         name, serviceName, getTargetPort(servicePort.getTargetPort()), path, protocol, annotations);
   }

@@ -32,7 +32,6 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
-import org.eclipse.che.workspace.infrastructure.kubernetes.GatewayRouterResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesRuntimeContext;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
@@ -85,7 +84,6 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       SecretAsContainerResourceProvisioner<OpenShiftEnvironment>
           secretAsContainerResourceProvisioner,
       OpenShiftServerResolverFactory serverResolverFactory,
-      GatewayRouterResolver gatewayRouterProvisioner,
       CheNamespace cheNamespace,
       Tracer tracer,
       Openshift4TrustedCAProvisioner trustedCAProvisioner,
@@ -112,7 +110,6 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         previewUrlCommandProvisioner,
         secretAsContainerResourceProvisioner,
         null,
-        gatewayRouterProvisioner,
         cheNamespace,
         tracer,
         context,

@@ -11,9 +11,12 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.CHECK_SERVERS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_MACHINES_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_RUNNING_ASYNC;
@@ -133,7 +136,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
   private final KubernetesServerResolverFactory serverResolverFactory;
   protected final CheNamespace cheNamespace;
-  protected final GatewayRouterResolver gatewayRouterResolver;
   protected final Tracer tracer;
 
   @Inject
@@ -158,7 +160,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       PreviewUrlCommandProvisioner previewUrlCommandProvisioner,
       SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner,
       KubernetesServerResolverFactory kubernetesServerResolverFactory,
-      GatewayRouterResolver gatewayRouterResolver,
       CheNamespace cheNamespace,
       Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
@@ -186,7 +187,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.secretAsContainerResourceProvisioner = secretAsContainerResourceProvisioner;
     this.serverResolverFactory = kubernetesServerResolverFactory;
     this.tracer = tracer;
-    this.gatewayRouterResolver = gatewayRouterResolver;
   }
 
   @Override
@@ -702,10 +702,23 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
     List<ConfigMap> createdConfigMaps = new ArrayList<>();
     for (ConfigMap configMap : env.getConfigMaps().values()) {
-      createdConfigMaps.add(namespace.configMaps().create(configMap));
+      Map<String, String> annotations = configMap.getMetadata().getAnnotations();
+      if (annotations == null
+          || annotations.isEmpty()
+          || FALSE
+              .toString()
+              .equals(
+                  annotations.getOrDefault(
+                      CREATE_IN_CHE_INSTALLATION_NAMESPACE, FALSE.toString()))) {
+        createdConfigMaps.add(namespace.configMaps().create(configMap));
+      } else if (TRUE.toString()
+          .equals(
+              annotations.getOrDefault(CREATE_IN_CHE_INSTALLATION_NAMESPACE, FALSE.toString()))) {
+        createdConfigMaps.add(cheNamespace.createConfigMap(configMap, identity));
+      } else {
+        throw new InfrastructureException("what?");
+      }
     }
-    createdConfigMaps.addAll(
-        cheNamespace.createConfigMaps(gatewayRouterResolver.resolve(identity, env), identity));
 
     return createdConfigMaps;
   }

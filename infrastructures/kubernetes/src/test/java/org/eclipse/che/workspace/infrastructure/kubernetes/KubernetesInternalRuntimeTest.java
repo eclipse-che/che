@@ -215,7 +215,6 @@ public class KubernetesInternalRuntimeTest {
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
   @Mock private KubernetesPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
-  @Mock private GatewayRouterResolver gatewayRouterResolver;
   private KubernetesServerResolverFactory serverResolverFactory;
 
   @Mock
@@ -290,7 +289,6 @@ public class KubernetesInternalRuntimeTest {
             previewUrlCommandProvisioner,
             secretAsContainerResourceProvisioner,
             serverResolverFactory,
-            gatewayRouterResolver,
             cheNamespace,
             tracer,
             context,
@@ -1139,31 +1137,11 @@ public class KubernetesInternalRuntimeTest {
 
     List<ConfigMap> configMaps = Arrays.asList(cmRoute1, cmRoute2);
 
-    when(gatewayRouterResolver.resolve(internalRuntime.getContext().getIdentity(), k8sEnv))
-        .thenReturn(configMaps);
-
     // when
     internalRuntime.start(emptyMap());
 
     // then
-    verify(gatewayRouterResolver).resolve(internalRuntime.getContext().getIdentity(), k8sEnv);
     verify(cheNamespace).createConfigMaps(configMaps, internalRuntime.getContext().getIdentity());
-    verify(cheNamespace).cleanUp(WORKSPACE_ID);
-  }
-
-  @Test
-  public void dontCreateAnythingInCheNamespaceWhenNoGatewayConfigs()
-      throws InfrastructureException {
-    // given
-    when(gatewayRouterResolver.resolve(internalRuntime.getContext().getIdentity(), k8sEnv))
-        .thenReturn(emptyList());
-
-    // when
-    internalRuntime.start(emptyMap());
-
-    // then
-    verify(gatewayRouterResolver).resolve(internalRuntime.getContext().getIdentity(), k8sEnv);
-    verify(cheNamespace).createConfigMaps(emptyList(), internalRuntime.getContext().getIdentity());
     verify(cheNamespace).cleanUp(WORKSPACE_ID);
   }
 

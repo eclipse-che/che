@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
 public class TraefikGatewayRouteConfigGeneratorTest {
 
   private final GatewayRouteConfigGenerator gatewayConfigGenerator =
-      new TraefikGatewayRouteConfigGenerator("che-namespace");
+      new TraefikGatewayRouteConfigGenerator();
 
   @Test
   public void testGenerateGatewayConfig() throws InfrastructureException {
@@ -61,7 +61,7 @@ public class TraefikGatewayRouteConfigGeneratorTest {
             "http",
             Collections.emptyMap());
     gatewayConfigGenerator.addRouteConfig(routeConfig);
-    Map<String, String> generatedConfig = gatewayConfigGenerator.generate();
+    Map<String, String> generatedConfig = gatewayConfigGenerator.generate("che-namespace");
 
     assertTrue(generatedConfig.containsKey("external-server-1.yml"));
     assertEquals(generatedConfig.get("external-server-1.yml"), expectedConfig);
@@ -74,7 +74,7 @@ public class TraefikGatewayRouteConfigGeneratorTest {
     GatewayRouteConfig c2 = new GatewayRouteConfig("c2", "", "", "", "", Collections.emptyMap());
     gatewayConfigGenerator.addRouteConfig(c1);
     gatewayConfigGenerator.addRouteConfig(c2);
-    Map<String, String> generatedConfig = gatewayConfigGenerator.generate();
+    Map<String, String> generatedConfig = gatewayConfigGenerator.generate("che-namespace");
 
     assertTrue(generatedConfig.containsKey("c1.yml"));
     assertTrue(generatedConfig.containsKey("c2.yml"));

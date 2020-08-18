@@ -54,5 +54,5 @@ public interface GatewayRouteConfigGenerator {
    *
    * @return full content of configuration for the services
    */
-  Map<String, String> generate() throws InfrastructureException;
+  Map<String, String> generate(String namespace) throws InfrastructureException;
 }

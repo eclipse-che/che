@@ -22,6 +22,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStoragePodInterceptor;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
@@ -80,6 +81,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private GitConfigProvisioner gitConfigProvisioner;
   @Mock private PreviewUrlExposer previewUrlExposer;
   @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
+  @Mock private GatewayRouterProvisioner gatewayRouterProvisioner;
 
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> k8sInfraProvisioner;
 
@@ -111,7 +113,8 @@ public class KubernetesEnvironmentProvisionerTest {
             sshKeysProvisioner,
             gitConfigProvisioner,
             previewUrlExposer,
-            vcsSslCertificateProvisioner);
+            vcsSslCertificateProvisioner,
+            gatewayRouterProvisioner);
     provisionOrder =
         inOrder(
             logsVolumeMachineProvisioner,

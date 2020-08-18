@@ -29,12 +29,6 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
 
   private final List<GatewayRouteConfig> routeConfigs = new ArrayList<>();
 
-  private final String serviceNamespace;
-
-  public TraefikGatewayRouteConfigGenerator(String serviceNamespace) {
-    this.serviceNamespace = serviceNamespace;
-  }
-
   @Override
   public void addRouteConfig(GatewayRouteConfig routeConfig) {
     this.routeConfigs.add(routeConfig);
@@ -70,13 +64,14 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
    * </pre>
    */
   @Override
-  public Map<String, String> generate() throws InfrastructureException {
+  public Map<String, String> generate(String namespace) throws InfrastructureException {
     Map<String, String> cmData = new HashMap<>();
     for (GatewayRouteConfig routeConfig : routeConfigs) {
       String traefikRouteConfig =
           generate(
               routeConfig.getName(),
-              createServiceUrl(routeConfig.getServiceName(), routeConfig.getServicePort()),
+              createServiceUrl(
+                  routeConfig.getServiceName(), routeConfig.getServicePort(), namespace),
               routeConfig.getRoutePath(),
               routeConfig.getProtocol());
       cmData.put(routeConfig.getName() + ".yml", traefikRouteConfig);
@@ -220,7 +215,7 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
     generator.writeEndObject();
   }
 
-  private String createServiceUrl(String serviceName, String servicePort) {
+  private String createServiceUrl(String serviceName, String servicePort, String serviceNamespace) {
     return String.format(
         "http://%s.%s.svc.cluster.local:%s", serviceName, serviceNamespace, servicePort);
   }

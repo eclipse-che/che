@@ -65,6 +65,26 @@ public class CheNamespace {
    * @return created {@link ConfigMap}s
    * @throws InfrastructureException when something goes wrong
    */
+  public ConfigMap createConfigMap(ConfigMap configMap, RuntimeIdentity identity)
+      throws InfrastructureException {
+    validate(identity, WorkspaceStatus.STARTING);
+
+    putLabel(configMap, CHE_WORKSPACE_ID_LABEL, identity.getWorkspaceId());
+    return clientFactory.create().configMaps().inNamespace(cheNamespaceName).create(configMap);
+  }
+
+  /**
+   * Creates given {@link ConfigMap}s in Che installation namespace labeled with `workspaceId` from
+   * given `identity`.
+   *
+   * <p>`workspaceId` from given `identity` must be valid workspace ID, that is in {@link
+   * WorkspaceStatus#STARTING} state. Otherwise, {@link InfrastructureException} is thrown.
+   *
+   * @param configMaps to create
+   * @param identity to validate and label configmaps
+   * @return created {@link ConfigMap}s
+   * @throws InfrastructureException when something goes wrong
+   */
   public List<ConfigMap> createConfigMaps(List<ConfigMap> configMaps, RuntimeIdentity identity)
       throws InfrastructureException {
     if (configMaps.isEmpty()) {

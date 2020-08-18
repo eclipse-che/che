@@ -41,6 +41,9 @@ public class Annotations {
 
   public static final String MACHINE_NAME_ANNOTATION = ANNOTATION_PREFIX + "machine.name";
 
+  public static final String CREATE_IN_CHE_INSTALLATION_NAMESPACE =
+      ANNOTATION_PREFIX + "installation.namespace";
+
   /** Pattern that matches server annotations e.g. "org.eclipse.che.server.exec-agent.port". */
   private static final Pattern SERVER_ANNOTATION_PATTERN =
       Pattern.compile("org\\.eclipse\\.che\\.server\\.(?<ref>[\\w-/]+)\\..+");

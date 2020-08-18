@@ -46,7 +46,7 @@ public abstract class InternalEnvironment {
   private Map<String, String> attributes;
   private List<CommandImpl> commands;
   private DevfileImpl devfile;
-  private List<GatewayRouteConfig> gatewayRouteConfigs;
+  private final List<GatewayRouteConfig> gatewayRouteConfigs;
 
   protected InternalEnvironment() {
     this.warnings = new CopyOnWriteArrayList<>();
