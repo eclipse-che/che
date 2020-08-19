@@ -40,7 +40,7 @@ export class OcpLoginPage {
         Logger.debug('OcpLoginPage.clickOnLoginProviderTitle');
 
         const loginProviderTitleLocator: By = By.xpath(`//a[text()=\'${TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
-        await this.driverHelper.waitAndClick(loginProviderTitleLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(loginProviderTitleLocator);
     }
 
     async isIdentityProviderLinkVisible(): Promise<boolean> {
@@ -68,7 +68,7 @@ export class OcpLoginPage {
         Logger.debug('OcpLoginPage.clickOnApproveAuthorizeAccessOpenshift');
 
         const approveAuthorizeAccessOcpLocator: By = By.css('input[name=\'approve\']');
-        await this.driverHelper.waitAndClick(approveAuthorizeAccessOcpLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(approveAuthorizeAccessOcpLocator);
     }
 
     async enterUserNameOpenShift(userName: string) {
@@ -87,7 +87,7 @@ export class OcpLoginPage {
         Logger.debug('OcpLoginPage.clickOnLoginButton');
 
         const loginButtonlocator: By = By.css('button[type=submit]');
-        await this.driverHelper.waitAndClick(loginButtonlocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(loginButtonlocator);
     }
 
     async waitDisappearanceOpenShiftLoginWelcomePage() {
@@ -107,7 +107,7 @@ export class OcpLoginPage {
         Logger.debug('OcpLoginPage.clickOnLinkAccountButton');
 
         const linkAccountLocator: By = By.id(`linkAccount`);
-        this.driverHelper.waitAndClick(linkAccountLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        this.driverHelper.waitAndClick(linkAccountLocator);
     }
 
 }

@@ -23,7 +23,7 @@ export class PreviewWidget {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Ide) private readonly ide: Ide) { }
 
-    async waitUrl(expectedUrl: string, timeout: number) {
+    async waitUrl(expectedUrl: string, timeout: number = TimeoutConstants.TS_WAIT_URL_TIMEOUT) {
         Logger.debug(`PreviewWidget.waitUrl ${expectedUrl}`);
 
         await this.driverHelper.waitAttributeValue(PreviewWidget.WIDGET_URL_LOCATOR, 'value', expectedUrl, timeout);
@@ -39,7 +39,7 @@ export class PreviewWidget {
         Logger.debug('PreviewWidget.clearUrl');
 
         await this.typeUrl(Key.chord(Key.CONTROL, 'a', Key.DELETE));
-        await this.waitUrl('', 5_000);
+        await this.waitUrl('');
     }
 
     async typeAndApplyUrl(url: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) {
@@ -118,7 +118,7 @@ export class PreviewWidget {
         Logger.debug('PreviewWidget.refreshPage');
 
         const refreshButtonLocator: By = By.css('.theia-mini-browser .theia-mini-browser-refresh');
-        await this.driverHelper.waitAndClick(refreshButtonLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(refreshButtonLocator);
     }
 
     async switchBackToIdeFrame() {

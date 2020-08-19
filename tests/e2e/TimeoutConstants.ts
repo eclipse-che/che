@@ -32,14 +32,19 @@ export const TimeoutConstants = {
     TS_SELENIUM_LOAD_PAGE_TIMEOUT: Number(process.env.TS_SELENIUM_LOAD_PAGE_TIMEOUT) || 20_000,
 
     /**
-     * Wait for loader absence, "60 000" by default
+     * Wait for loader absence, "60 000" by default.
      */
     TS_WAIT_LOADER_ABSENCE_TIMEOUT: Number(process.env.TS_WAIT_LOADER_ABSENCE_TIMEOUT) || 60_000,
 
     /**
-     * Wait for loader absence, "60 000" by default
+     * Wait for loader absence, "60 000" by default.
      */
     TS_WAIT_LOADER_PRESENCE_TIMEOUT: Number(process.env.TS_WAIT_LOADER_PRESENCE_TIMEOUT) || 60_000,
+
+    /**
+     * Timeout waiting for URL, "5 000" by default.
+     */
+    TS_WAIT_URL_TIMEOUT: Number(process.env.TS_WAIT_URL_TIMEOUT) || 5_000,
 
     // -------------------------------------------- DASHBOARD --------------------------------------------
     /**
@@ -156,7 +161,7 @@ export const TimeoutConstants = {
     /**
      * Default timeout for interaction with terminal, "3 000" by default
      */
-    TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT: Number(process.env.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT) || 3_000,
+    TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT: Number(process.env.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT) || 5_000,
 
     /**
      * Default timeout for preview widget, "10 000" by default

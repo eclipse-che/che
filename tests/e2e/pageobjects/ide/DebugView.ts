@@ -24,7 +24,7 @@ export class DebugView {
     async clickOnDebugConfigurationDropDown() {
         Logger.debug('DebugView.clickOnDebugConfigurationDropDown');
 
-        await this.driverHelper.waitAndClick(By.css('select.debug-configuration'), TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(By.css('select.debug-configuration'));
     }
 
     async clickOnDebugConfigurationItem(itemText: string) {
@@ -32,7 +32,7 @@ export class DebugView {
 
         const configurationItemLocator: By = By.xpath(`//select[contains(@class,'debug-configuration')]//option[text()=\'${itemText}\']`);
 
-        await this.driverHelper.waitAndClick(configurationItemLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(configurationItemLocator);
         await this.ide.performKeyCombination(Key.ESCAPE);
     }
 

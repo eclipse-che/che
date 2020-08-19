@@ -31,7 +31,7 @@ export class ProjectTree {
         Logger.debug('ProjectTree.clickCollapseAllButton');
 
         const collapseAllButtonLocator: By = By.css('div.theia-sidepanel-toolbar div.theia-collapse-all-icon');
-        await this.driverHelper.waitAndClick(collapseAllButtonLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(collapseAllButtonLocator);
     }
 
     async waitTreeCollapsed(projectName: string, rootSubItem: string) {
@@ -203,6 +203,12 @@ export class ProjectTree {
         }
     }
 
+    /**
+     *
+     * @param pathToItem path to the file that should be opened
+     * @param fileName file that should be opened
+     * @param timeoutForSigleItem timeout applied for every item in path to be opened
+     */
     async expandPathAndOpenFile(pathToItem: string, fileName: string, timeoutForSigleItem: number = TimeoutConstants.TS_OPEN_EDITOR_TIMEOUT) {
         Logger.debug(`ProjectTree.expandPathAndOpenFile "${pathToItem}" filename: ${fileName}`);
 

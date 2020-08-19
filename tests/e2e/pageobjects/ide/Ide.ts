@@ -120,7 +120,7 @@ export class Ide {
         Logger.debug(`Ide.clickOnNotificationButton "${notificationText}" buttonText: "${buttonText}"`);
 
         const yesButtonLocator: string = `//div[@class='theia-notification-list']//span[contains(.,'${notificationText}')]/parent::div/parent::div/parent::div/div[@class='theia-notification-list-item-content-bottom']//div[@class='theia-notification-buttons']//button[text()='${buttonText}'] `;
-        await this.driverHelper.waitAndClick(By.xpath(yesButtonLocator), TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(By.xpath(yesButtonLocator));
     }
 
     async waitWorkspaceAndIde(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {

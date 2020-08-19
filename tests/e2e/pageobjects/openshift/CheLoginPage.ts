@@ -42,7 +42,7 @@ export class CheLoginPage {
     async clickEclipseCheLoginButton() {
         Logger.debug('CheLoginPage.clickEclipseCheLoginButton');
 
-        await this.driverHelper.waitAndClick(By.id('kc-login'), TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(By.id('kc-login'));
     }
 
     async isFirstBrokerLoginPageVisible(): Promise<boolean> {
@@ -79,7 +79,7 @@ export class CheLoginPage {
         Logger.debug('CheLoginPage.clickOnSubmitButton');
 
         const submitButtonlocator: By = By.css('input[type=submit]');
-        await this.driverHelper.waitAndClick(submitButtonlocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(submitButtonlocator);
     }
 
     async waitDisappearanceBrokerLoginPage() {

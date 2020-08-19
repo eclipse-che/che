@@ -87,7 +87,7 @@ export class DialogWindow {
     async getApplicationUrlFromDialog(dialogWindowText: string) {
         const notificationTextLocator: By = By.xpath(`${DialogWindow.DIALOG_BODY_XPATH_LOCATOR}//*[contains(text(), '${dialogWindowText}')]`);
 
-        let dialogWindow = await this.driverHelper.waitAndGetText(notificationTextLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        let dialogWindow = await this.driverHelper.waitAndGetText(notificationTextLocator);
         let regexp: RegExp = new RegExp('^.*(https?://.*)$');
 
         if (!regexp.test(dialogWindow)) {

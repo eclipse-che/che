@@ -55,7 +55,7 @@ export class OcpWebConsolePage {
         Logger.debug('OcpWebConsolePage.clickOnInstallButton');
 
         const installOperatorButtonLocator: By = By.xpath('//*[text()=\'Install\']');
-        await this.driverHelper.waitAndClick(installOperatorButtonLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(installOperatorButtonLocator);
     }
 
     async waitCreateOperatorSubscriptionPage() {
@@ -76,7 +76,7 @@ export class OcpWebConsolePage {
         Logger.debug('OcpWebConsolePage.clickOnDropdownNamespaceListOnSubscriptionPage');
 
         const selectNamespaceLocator: By = By.id('dropdown-selectbox');
-        await this.driverHelper.waitAndClick(selectNamespaceLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(selectNamespaceLocator);
     }
 
     async waitListBoxNamespacesOnSubscriptionPage() {
@@ -91,21 +91,21 @@ export class OcpWebConsolePage {
 
         const namespaceItemInDropDownId: string = `${TestConstants.TS_SELENIUM_INSTALL_PROJECT_NAME}-Project-link`;
         const namespaceItemInDropDownLocator: By = By.id(namespaceItemInDropDownId);
-        await this.driverHelper.waitAndClick(namespaceItemInDropDownLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(namespaceItemInDropDownLocator);
     }
 
     async clickOnSubscribeButtonOnSubscriptionPage() {
         Logger.debug('OcpWebConsolePage.clickOnSubscribeButtonOnSubscriptionPage');
 
         const subscribeOperatorButtonLocator: By = By.xpath('//button[text()=\'Subscribe\']');
-        await this.driverHelper.waitAndClick(subscribeOperatorButtonLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(subscribeOperatorButtonLocator);
     }
 
     async selectInstalledOperatorsOnNavPanel() {
         Logger.debug('OcpWebConsolePage.selectInstalledOperatorsOnNavPanel');
 
         const installedOperatorsItemNavPanelLocator: By = By.xpath('//a[text()=\'Installed Operators\']');
-        await this.driverHelper.waitAndClick(installedOperatorsItemNavPanelLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(installedOperatorsItemNavPanelLocator);
     }
 
     async waitInstalledOperatorLogoName() {
@@ -117,7 +117,7 @@ export class OcpWebConsolePage {
     async clickOnInstalledOperatorLogoName() {
         Logger.debug('OcpWebConsolePage.clickOnInstalledOperatorLogoName');
 
-        await this.driverHelper.waitAndClick(By.xpath(OcpWebConsolePage.OPERATOR_LOGO_NAME_XPATH), TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(By.xpath(OcpWebConsolePage.OPERATOR_LOGO_NAME_XPATH));
     }
 
     async waitOverviewCsvOperator() {
@@ -130,7 +130,7 @@ export class OcpWebConsolePage {
         Logger.debug('OcpWebConsolePage.clickCreateNewCheClusterLink');
 
         const createNewCheLusterLinkLocator: By = By.partialLinkText('Create');
-        await this.driverHelper.waitAndClick(createNewCheLusterLinkLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(createNewCheLusterLinkLocator);
     }
 
     async waitCreateCheClusterYaml(timeout: number = TimeoutConstants.TS_CREATE_CHECLUSTER_YAML_TIMEOUT) {
@@ -163,7 +163,7 @@ export class OcpWebConsolePage {
         Logger.debug('OcpWebConsolePage.clickOnCreateCheClusterButton');
 
         const createCheClusterButtonLocator: By = By.id('save-changes');
-        await this.driverHelper.waitAndClick(createCheClusterButtonLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(createCheClusterButtonLocator);
     }
 
     async waitResourcesCheClusterTitle() {
@@ -177,7 +177,7 @@ export class OcpWebConsolePage {
         Logger.debug('OcpWebConsolePage.clickOnCheClusterResourcesName');
 
         const cheClusterResourcesNameLocator: By = By.css('a[class^=co-resource-item]');
-        await this.driverHelper.waitAndClick(cheClusterResourcesNameLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(cheClusterResourcesNameLocator);
     }
 
     async waitKeycloakAdminConsoleUrl() {
@@ -200,9 +200,9 @@ export class OcpWebConsolePage {
         const userDropdownLocator: By = By.css('*[data-test=user-dropdown]');
         const dropdownMenuLocator: By = By.css('*[role=menu]');
         const dropdownMenuItemLocator: By = By.xpath('//a[text()=\'Log out\']');
-        await this.driverHelper.waitAndClick(userDropdownLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(userDropdownLocator);
         await this.driverHelper.waitVisibility(dropdownMenuLocator, TimeoutConstants.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
-        await this.driverHelper.waitAndClick(dropdownMenuItemLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.waitAndClick(dropdownMenuItemLocator);
     }
 
 }

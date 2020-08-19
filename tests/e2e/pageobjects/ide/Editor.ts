@@ -242,7 +242,7 @@ export class Editor {
 
         const editorBodyLocator: By = By.xpath(`//div[contains(@data-uri, \'${tabTitle}')]//div[@class=\'view-lines\']`);
         // const editorBodyLocator: By = By.xpath('//div[@class=\'view-lines\']');
-        const editorText: string = await this.driverHelper.waitAndGetText(editorBodyLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        const editorText: string = await this.driverHelper.waitAndGetText(editorBodyLocator);
         return editorText;
     }
 
@@ -307,7 +307,7 @@ export class Editor {
         Logger.debug(`Editor.performKeyCombination title: "${editorTabTitle}" text: "${text}"`);
 
         const interactionContainerLocator: By = this.getEditorActionArreaLocator(editorTabTitle);
-        await this.driverHelper.type(interactionContainerLocator, text, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.type(interactionContainerLocator, text);
     }
 
     async type(editorTabTitle: string, text: string, line: number) {

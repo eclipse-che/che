@@ -50,7 +50,7 @@ export class QuickOpenContainer {
     public async typeAndSelectSuggestion(text: string, suggestedText: string) {
         Logger.debug('QuickOpenContainer.typeAndSelectSuggestion');
 
-        await this.driverHelper.type(By.css('div.monaco-inputbox  input.input'), text, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        await this.driverHelper.type(By.css('div.monaco-inputbox  input.input'), text);
         // sometimes the UI dropdawn may closed unexpectedly for more stability add 500ms delay.
         await this.driverHelper.wait(500);
         await this.clickOnContainerItem(suggestedText);

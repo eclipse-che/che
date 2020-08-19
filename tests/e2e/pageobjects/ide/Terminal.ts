@@ -59,7 +59,7 @@ export class Terminal {
         await this.driverHelper.waitAndClick(terminalTabCloseIconLocator, timeout);
     }
 
-    async closeTerminalTab(tabTitle: string, timeout: number = 5_000) {
+    async closeTerminalTab(tabTitle: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT) {
         Logger.debug(`Terminal.closeTerminalTab "${tabTitle}"`);
 
         await this.clickOnTabCloseIcon(tabTitle, timeout);
@@ -143,13 +143,13 @@ export class Terminal {
             `//li[contains(@id, 'shell-tab-terminal') or contains(@id, 'shell-tab-plugin')]` +
             `//div[@class='p-TabBar-tabLabel']`;
 
-        const terminalTabs: WebElement[] = await this.driverHelper.waitAllPresence(By.xpath(terminalTabTitleXpathLocator), TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+        const terminalTabs: WebElement[] = await this.driverHelper.waitAllPresence(By.xpath(terminalTabTitleXpathLocator));
         let terminalTitles: string[] = [];
 
 
         for (let i: number = 1; i <= terminalTabs.length; i++) {
             const terminalTabLocator: By = By.xpath(`(${terminalTabTitleXpathLocator})[${i}]`);
-            const currentTerminalTitle: string = await this.driverHelper.waitAndGetText(terminalTabLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+            const currentTerminalTitle: string = await this.driverHelper.waitAndGetText(terminalTabLocator);
 
             if (currentTerminalTitle.search(terminalTitle) > -1) {
                 Logger.debug(`Terminal index: ${i}`);
