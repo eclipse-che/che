@@ -11,11 +11,9 @@
  */
 package org.eclipse.che.multiuser.permission.devfile;
 
-import javax.inject.Inject;
 import javax.ws.rs.Path;
 import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.devfile.DevfileService;
+import org.eclipse.che.api.devfile.server.DevfileService;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
 import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericResourceMethod;
@@ -26,13 +24,6 @@ import org.everrest.core.resource.GenericResourceMethod;
 public class DevfilePermissionsFilter extends CheMethodInvokerFilter {
 
   public static final String GET_SCHEMA_METHOD = "getSchema";
-
-  private final WorkspaceManager workspaceManager;
-
-  @Inject
-  public DevfilePermissionsFilter(WorkspaceManager workspaceManager) {
-    this.workspaceManager = workspaceManager;
-  }
 
   @Override
   protected void filter(GenericResourceMethod genericResourceMethod, Object[] arguments)

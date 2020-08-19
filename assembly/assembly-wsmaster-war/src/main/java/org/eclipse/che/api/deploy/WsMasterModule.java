@@ -157,7 +157,7 @@ public class WsMasterModule extends AbstractModule {
     bind(WorkspaceEntityProvider.class);
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
-    bind(org.eclipse.che.api.devfile.server.UserDevfileService.class);
+    bind(org.eclipse.che.api.devfile.server.DevfileService.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
 
     Multibinder<InternalEnvironmentProvisioner> internalEnvironmentProvisioners =

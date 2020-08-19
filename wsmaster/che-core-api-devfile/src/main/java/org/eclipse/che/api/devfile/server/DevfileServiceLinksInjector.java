@@ -22,10 +22,10 @@ import org.eclipse.che.api.core.util.LinksHelper;
 import org.eclipse.che.api.devfile.shared.Constants;
 import org.eclipse.che.api.devfile.shared.dto.UserDevfileDto;
 
-/** Helps to inject {@link UserDevfileService} related links. */
+/** Helps to inject {@link DevfileService} related links. */
 @Beta
 @Singleton
-public class UserDevfileServiceLinksInjector {
+public class DevfileServiceLinksInjector {
   public UserDevfileDto injectLinks(UserDevfileDto userDevfileDto, ServiceContext serviceContext) {
     return userDevfileDto.withLinks(
         ImmutableList.of(
@@ -34,8 +34,8 @@ public class UserDevfileServiceLinksInjector {
                 serviceContext
                     .getBaseUriBuilder()
                     .clone()
-                    .path(UserDevfileService.class)
-                    .path(UserDevfileService.class, "getById")
+                    .path(DevfileService.class)
+                    .path(DevfileService.class, "getById")
                     .build(userDevfileDto.getId())
                     .toString(),
                 null,

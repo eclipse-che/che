@@ -15,8 +15,8 @@ import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.devfile.server.DtoConverter.asDto;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import io.swagger.annotations.Api;
@@ -24,6 +24,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -51,23 +52,47 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.devfile.UserDevfile;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.devfile.shared.dto.UserDevfileDto;
+import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.URLEncodedUtils;
 
-/** Defines Persistent Devfile REST API. */
-@Api(value = "/userdevfile", description = "Persistent Devfile REST API")
-@Path("/userdevfile")
-@Beta
-public class UserDevfileService extends Service {
+@Api(value = "/devfile", description = "Devfile REST API")
+@Path("/devfile")
+public class DevfileService extends Service {
+
+  private final DevfileSchemaProvider schemaCachedProvider;
   private final UserDevfileManager userDevfileManager;
-  private final UserDevfileServiceLinksInjector linksInjector;
+  private final DevfileServiceLinksInjector linksInjector;
 
   @Inject
-  public UserDevfileService(
-      UserDevfileManager userDevfileManager, UserDevfileServiceLinksInjector linksInjector) {
+  public DevfileService(
+      DevfileSchemaProvider schemaCachedProvider,
+      UserDevfileManager userDevfileManager,
+      DevfileServiceLinksInjector linksInjector) {
     this.userDevfileManager = userDevfileManager;
     this.linksInjector = linksInjector;
+    this.schemaCachedProvider = schemaCachedProvider;
+  }
+
+  /**
+   * Retrieves the json schema.
+   *
+   * @return json schema
+   */
+  @GET
+  @Produces(APPLICATION_JSON)
+  @ApiOperation(value = "Retrieves current version of devfile JSON schema")
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "The schema successfully retrieved"),
+    @ApiResponse(code = 500, message = "Internal server error occurred")
+  })
+  public Response getSchema() throws ServerException {
+    try {
+      return Response.ok(schemaCachedProvider.getSchemaContent(CURRENT_API_VERSION)).build();
+    } catch (IOException e) {
+      throw new ServerException(e);
+    }
   }
 
   @POST
@@ -122,6 +147,7 @@ public class UserDevfileService extends Service {
   }
 
   @GET
+  @Path("list")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
       value = "Get devfiles which user can read",

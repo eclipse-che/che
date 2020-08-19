@@ -24,7 +24,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.eclipse.che.api.workspace.server.devfile.DevfileService;
+import org.eclipse.che.api.devfile.server.DevfileService;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.multiuser.permission.devfile.DevfilePermissionsFilter;
@@ -62,7 +62,7 @@ public class DevfilePermissionsFilterTest {
             .collect(Collectors.toList());
 
     // then
-    assertEquals(collect.size(), 1);
+    assertEquals(collect.size(), 6);
     assertTrue(collect.contains(DevfilePermissionsFilter.GET_SCHEMA_METHOD));
   }
 

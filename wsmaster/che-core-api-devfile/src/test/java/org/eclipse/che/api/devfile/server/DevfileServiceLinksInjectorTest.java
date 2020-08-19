@@ -30,9 +30,9 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
-public class UserDevfileServiceLinksInjectorTest {
+public class DevfileServiceLinksInjectorTest {
   private static final String URI_BASE = "http://localhost:8080";
-  private static final String SERVICE_PATH = "/userdevfile";
+  private static final String SERVICE_PATH = "/devfile";
 
   @Mock ServiceContext context;
 
@@ -48,7 +48,7 @@ public class UserDevfileServiceLinksInjectorTest {
   public void shouldInjectLinks() {
     // given
     final UserDevfileDto userDevfileDto = DtoFactory.newDto(UserDevfileDto.class).withId("id123");
-    UserDevfileServiceLinksInjector linksInjector = new UserDevfileServiceLinksInjector();
+    DevfileServiceLinksInjector linksInjector = new DevfileServiceLinksInjector();
     // when
     final UserDevfileDto withLinks = linksInjector.injectLinks(userDevfileDto, context);
     // then

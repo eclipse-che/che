@@ -15,6 +15,7 @@ import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
@@ -51,7 +52,6 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.devfile.server.model.impl.UserDevfileImpl;
 import org.eclipse.che.api.devfile.server.spi.UserDevfileDao;
 import org.eclipse.che.api.devfile.shared.dto.UserDevfileDto;
-import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.devfile.DevfileEntityProvider;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
@@ -61,10 +61,11 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
@@ -73,14 +74,20 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/** Tests for {@link UserDevfileService}. */
-@Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
-public class UserDevfileServiceTest {
+@Listeners({EverrestJetty.class, MockitoTestNGListener.class})
+public class DevfileServiceTest {
+
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
+  private ApiExceptionMapper exceptionMapper;
+
+  private DevfileSchemaProvider schemaProvider = new DevfileSchemaProvider();
+
+  private static final Subject SUBJECT = new SubjectImpl("user", "user123", "token", false);
 
   private static final String CURRENT_USER_ID = "user123";
 
   private final String USER_DEVFILE_ID = NameGenerator.generate("usrd", 16);
-  ApiExceptionMapper mapper;
+
   CheJsonProvider jsonProvider = new CheJsonProvider(new HashSet<>());
   private DevfileEntityProvider devfileEntityProvider =
       new DevfileEntityProvider(
@@ -90,11 +97,27 @@ public class UserDevfileServiceTest {
   @Mock UserDevfileDao userDevfileDao;
   @Mock UserDevfileManager userDevfileManager;
   @Mock EventService eventService;
-  @Mock UserDevfileServiceLinksInjector linksInjector;
-  @InjectMocks UserDevfileService userDevfileService;
+  @Mock DevfileServiceLinksInjector linksInjector;
+
+  DevfileService userDevfileService;
+
+  @Test
+  public void shouldRetrieveSchema() throws Exception {
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .when()
+            .get(SECURE_PATH + "/devfile");
+
+    assertEquals(response.getStatusCode(), 200);
+    assertEquals(
+        response.getBody().asString(), schemaProvider.getSchemaContent(CURRENT_API_VERSION));
+  }
 
   @BeforeMethod
   public void setup() {
+    this.userDevfileService = new DevfileService(schemaProvider, userDevfileManager, linksInjector);
     lenient()
         .when(linksInjector.injectLinks(any(UserDevfileDto.class), any(ServiceContext.class)))
         .thenAnswer((Answer<UserDevfileDto>) invocation -> invocation.getArgument(0));
@@ -103,7 +126,8 @@ public class UserDevfileServiceTest {
   @Test
   public void shouldCreateUserDevfile() throws Exception {
     final DevfileDto devfileDto =
-        DtoConverter.asDto(TestObjectGenerator.createDevfile("devfile-name"));
+        org.eclipse.che.api.workspace.server.DtoConverter.asDto(
+            TestObjectGenerator.createDevfile("devfile-name"));
     final UserDevfileImpl userDevfileImpl = new UserDevfileImpl(null, devfileDto);
 
     when(userDevfileManager.createDevfile(any(Devfile.class))).thenReturn(userDevfileImpl);
@@ -115,7 +139,7 @@ public class UserDevfileServiceTest {
             .contentType("application/json")
             .body(devfileDto)
             .when()
-            .post(SECURE_PATH + "/userdevfile");
+            .post(SECURE_PATH + "/devfile");
 
     assertEquals(response.getStatusCode(), 201);
     assertEquals(new UserDevfileImpl(unwrapDto(response, UserDevfileDto.class)), userDevfileImpl);
@@ -135,7 +159,7 @@ public class UserDevfileServiceTest {
             .when()
             .expect()
             .statusCode(200)
-            .get(SECURE_PATH + "/userdevfile/id-22323");
+            .get(SECURE_PATH + "/devfile/id-22323");
 
     assertEquals(new UserDevfileImpl(unwrapDto(response, UserDevfileDto.class)), userDevfile);
     verify(userDevfileManager).getById(eq("id-22323"));
@@ -155,7 +179,7 @@ public class UserDevfileServiceTest {
             .expect()
             .statusCode(404)
             .when()
-            .get(SECURE_PATH + "/userdevfile/" + USER_DEVFILE_ID);
+            .get(SECURE_PATH + "/devfile/" + USER_DEVFILE_ID);
 
     assertEquals(unwrapDto(response, ServiceError.class).getMessage(), errMessage);
   }
@@ -164,7 +188,8 @@ public class UserDevfileServiceTest {
   public void shouldThrowNotFoundExceptionWhenUpdatingNonExistingUserDevfile() throws Exception {
     // given
     final DevfileDto devfileDto =
-        DtoConverter.asDto(TestObjectGenerator.createDevfile("devfile-name"));
+        org.eclipse.che.api.workspace.server.DtoConverter.asDto(
+            TestObjectGenerator.createDevfile("devfile-name"));
 
     doThrow(new NotFoundException(format("User devfile with id %s is not found.", USER_DEVFILE_ID)))
         .when(userDevfileManager)
@@ -177,7 +202,7 @@ public class UserDevfileServiceTest {
             .contentType(APPLICATION_JSON)
             .body(JsonHelper.toJson(devfileDto))
             .when()
-            .put(SECURE_PATH + "/userdevfile/" + USER_DEVFILE_ID);
+            .put(SECURE_PATH + "/devfile/" + USER_DEVFILE_ID);
     // then
     assertEquals(response.getStatusCode(), 404);
     assertEquals(
@@ -200,7 +225,7 @@ public class UserDevfileServiceTest {
             .contentType(APPLICATION_JSON)
             .body(JsonHelper.toJson(devfileDto))
             .when()
-            .put(SECURE_PATH + "/userdevfile/" + devfileDto.getId());
+            .put(SECURE_PATH + "/devfile/" + devfileDto.getId());
     // then
     assertEquals(response.getStatusCode(), 200);
     assertEquals(new UserDevfileImpl(unwrapDto(response, UserDevfileDto.class)), userDevfileImpl);
@@ -228,7 +253,7 @@ public class UserDevfileServiceTest {
             .contentType(APPLICATION_JSON)
             .body(JsonHelper.toJson(devfileDto))
             .when()
-            .put(SECURE_PATH + "/userdevfile/" + newID);
+            .put(SECURE_PATH + "/devfile/" + newID);
     // then
     assertEquals(response.getStatusCode(), 200);
     assertEquals(
@@ -247,7 +272,7 @@ public class UserDevfileServiceTest {
         .expect()
         .statusCode(204)
         .when()
-        .delete(SECURE_PATH + "/userdevfile/" + USER_DEVFILE_ID);
+        .delete(SECURE_PATH + "/devfile/" + USER_DEVFILE_ID);
     // then
     verify(userDevfileManager).removeUserDevfile(USER_DEVFILE_ID);
   }
@@ -262,7 +287,7 @@ public class UserDevfileServiceTest {
             .auth()
             .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .when()
-            .delete(SECURE_PATH + "/userdevfile/" + USER_DEVFILE_ID);
+            .delete(SECURE_PATH + "/devfile/" + USER_DEVFILE_ID);
     // then
     assertEquals(response.getStatusCode(), 204);
   }
@@ -285,7 +310,7 @@ public class UserDevfileServiceTest {
             .when()
             .expect()
             .statusCode(200)
-            .get(SECURE_PATH + "/userdevfile");
+            .get(SECURE_PATH + "/devfile/list");
     // then
     final List<UserDevfileDto> res = unwrapDtoList(response, UserDevfileDto.class);
     assertEquals(res.size(), 1);
@@ -310,7 +335,7 @@ public class UserDevfileServiceTest {
             .when()
             .expect()
             .statusCode(200)
-            .get(SECURE_PATH + "/userdevfile");
+            .get(SECURE_PATH + "/devfile/list");
     // then
     verify(userDevfileManager).getUserDevfiles(eq(5), eq(52), anyList(), anyList());
   }
@@ -334,7 +359,7 @@ public class UserDevfileServiceTest {
             .when()
             .expect()
             .statusCode(200)
-            .get(SECURE_PATH + "/userdevfile");
+            .get(SECURE_PATH + "/devfile/list");
     // then
     Class<List<Pair<String, String>>> listClass =
         (Class<List<Pair<String, String>>>) (Class) ArrayList.class;
@@ -361,7 +386,7 @@ public class UserDevfileServiceTest {
             .when()
             .expect()
             .statusCode(200)
-            .get(SECURE_PATH + "/userdevfile");
+            .get(SECURE_PATH + "/devfile/list");
     // then
     Class<List<Pair<String, String>>> listClass =
         (Class<List<Pair<String, String>>>) (Class) ArrayList.class;
@@ -384,7 +409,7 @@ public class UserDevfileServiceTest {
             .when()
             .expect()
             .statusCode(400)
-            .get(SECURE_PATH + "/userdevfile");
+            .get(SECURE_PATH + "/devfile/list");
 
     // then
     assertEquals(
