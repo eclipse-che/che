@@ -83,7 +83,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtprox
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxyProvisionerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxySecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.NonTlsDistributedClusterModeNotifier;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
@@ -227,8 +226,8 @@ public class KubernetesInfraModule extends AbstractModule {
     bind(new TypeLiteral<BrokerEnvironmentFactory<KubernetesEnvironment>>() {})
         .to(KubernetesBrokerEnvironmentFactory.class);
 
-    bind(new TypeLiteral<PluginBrokerManager<KubernetesEnvironment>>() {})
-        .to(new TypeLiteral<KubernetesPluginBrokerManager<KubernetesEnvironment>>() {});
+    bind(PluginBrokerManager.class)
+        .to(new TypeLiteral<PluginBrokerManager<KubernetesEnvironment>>() {});
 
     bind(SidecarToolingProvisioner.class)
         .to(new TypeLiteral<SidecarToolingProvisioner<KubernetesEnvironment>>() {});

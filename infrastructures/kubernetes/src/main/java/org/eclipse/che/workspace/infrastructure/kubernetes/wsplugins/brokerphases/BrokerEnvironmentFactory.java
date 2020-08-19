@@ -15,7 +15,6 @@ import static java.util.Collections.singletonMap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
@@ -59,11 +58,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
  * <p>It has to be extended to be used in the kubernetes or openshift infrastructures because of the
  * usage of a complex inheritance between components of these infrastructures.
  *
- * <p>This API is in <b>Beta</b> and is subject to changes or removal.
- *
  * @author Oleksandr Garagatyi
  */
-@Beta
 public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> {
 
   @VisibleForTesting static final String CONFIG_MAP_NAME_SUFFIX = "broker-config-map";
@@ -133,7 +129,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     return doCreate(brokersConfigs);
   }
 
-  private BrokersConfigs getBrokersConfigs(
+  protected BrokersConfigs getBrokersConfigs(
       Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID, String brokerImage)
       throws InfrastructureException {
 
