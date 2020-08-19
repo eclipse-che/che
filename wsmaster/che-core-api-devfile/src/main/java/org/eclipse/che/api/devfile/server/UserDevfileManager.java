@@ -37,6 +37,7 @@ import org.eclipse.che.commons.lang.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Facade for {@link UserDevfile} related operations. */
 @Beta
 @Singleton
 public class UserDevfileManager {

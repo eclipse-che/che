@@ -43,6 +43,7 @@ import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 import org.eclipse.che.core.db.jpa.IntegrityConstraintViolationException;
 
+/** JPA based implementation of {@link UserDevfileDao}. */
 @Singleton
 @Beta
 public class JpaUserDevfileDao implements UserDevfileDao {
