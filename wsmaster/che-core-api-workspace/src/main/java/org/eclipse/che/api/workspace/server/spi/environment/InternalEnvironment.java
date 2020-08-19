@@ -46,11 +46,9 @@ public abstract class InternalEnvironment {
   private Map<String, String> attributes;
   private List<CommandImpl> commands;
   private DevfileImpl devfile;
-  private final List<GatewayRouteConfig> gatewayRouteConfigs;
 
   protected InternalEnvironment() {
     this.warnings = new CopyOnWriteArrayList<>();
-    this.gatewayRouteConfigs = new ArrayList<>();
   }
 
   protected InternalEnvironment(
@@ -62,7 +60,6 @@ public abstract class InternalEnvironment {
       this.warnings.addAll(warnings);
     }
     this.type = recipe != null ? recipe.getType() : null;
-    this.gatewayRouteConfigs = new ArrayList<>();
   }
 
   protected InternalEnvironment(InternalEnvironment internalEnvironment) {
@@ -73,7 +70,6 @@ public abstract class InternalEnvironment {
     this.attributes = internalEnvironment.getAttributes();
     this.commands = internalEnvironment.getCommands();
     this.devfile = internalEnvironment.getDevfile();
-    this.gatewayRouteConfigs = new ArrayList<>(internalEnvironment.getGatewayRouteConfigs());
   }
 
   /**
@@ -195,13 +191,5 @@ public abstract class InternalEnvironment {
 
   public void setDevfile(DevfileImpl devfile) {
     this.devfile = devfile;
-  }
-
-  public List<GatewayRouteConfig> getGatewayRouteConfigs() {
-    return gatewayRouteConfigs;
-  }
-
-  public void addGatewayRouteConfig(GatewayRouteConfig gatewayRouteConfig) {
-    gatewayRouteConfigs.add(gatewayRouteConfig);
   }
 }

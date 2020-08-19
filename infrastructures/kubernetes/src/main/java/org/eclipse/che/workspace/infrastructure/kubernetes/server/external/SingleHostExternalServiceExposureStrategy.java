@@ -60,4 +60,8 @@ public class SingleHostExternalServiceExposureStrategy implements ExternalServic
   public String getExternalPath(String serviceName, String serverName) {
     return "/" + serviceName + "/" + serverName;
   }
+
+  public static String extractServiceNameFromExternalPath(String path) {
+    return path.substring(1).split("/")[0];
+  }
 }

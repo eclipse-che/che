@@ -14,11 +14,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
-import org.eclipse.che.api.workspace.server.spi.environment.GatewayRouteConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.testng.annotations.Test;
 
@@ -42,7 +40,7 @@ public class GatewayServerExposerTest {
   public void testExposeServiceWithGatewayConfigmap() {
     KubernetesEnvironment k8sEnv = KubernetesEnvironment.builder().build();
     serverExposer.expose(k8sEnv, machineName, serviceName, serverId, servicePort, servers);
-    List<GatewayRouteConfig> configMaps = k8sEnv.getGatewayRouteConfigs();
+//    List<GatewayRouteConfig> configMaps = k8sEnv.getGatewayRouteConfigs();
 
     // TODO: assert created route configs
 

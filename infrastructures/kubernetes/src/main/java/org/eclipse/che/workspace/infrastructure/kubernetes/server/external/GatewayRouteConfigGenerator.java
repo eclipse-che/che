@@ -11,34 +11,25 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import java.util.Map;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.GatewayRouteConfig;
 
 /**
  * Generates config for external servers that we want to expose in the Gateway.
  *
- * <p>Implementation must accept new {@link GatewayRouteConfig}s with {@link
- * GatewayRouteConfigGenerator#addRouteConfig(GatewayRouteConfig)}. Then call to {@link
- * GatewayRouteConfigGenerator#generate()} must generate gateway specific configuration for all
- * added {@link GatewayRouteConfig}s.
  *
  * <p>Implementation provides configuration for specific Gateway technology (e.g., Traefik).
  */
 public interface GatewayRouteConfigGenerator {
 
   /**
-   * Add {@link GatewayRouteConfig} to the generator so it can be generated later with {@link
-   * GatewayRouteConfigGenerator#generate()}
-   *
    * @param routeConfig config to add
    */
-  void addRouteConfig(GatewayRouteConfig routeConfig);
+  void addRouteConfig(String name, ConfigMap routeConfig);
 
   /**
    * Generates content of configurations for services, defined earlier by added {@link
-   * GatewayRouteConfig}s with {@link
-   * GatewayRouteConfigGenerator#addRouteConfig(GatewayRouteConfig)}. Returned {@code Map<String,
    * String>} will be used as a value of ConfigMap and injected into Gateway pod.
    *
    * <p>Implementation must ensure that Gateway configured with returned content will route the
@@ -54,5 +45,5 @@ public interface GatewayRouteConfigGenerator {
    *
    * @return full content of configuration for the services
    */
-  Map<String, String> generate(String namespace) throws InfrastructureException;
+  Map<String, String> generate(String serviceName, String servicePort, String namespace) throws InfrastructureException;
 }

@@ -77,6 +77,9 @@ public interface ServerConfig {
    */
   String SERVER_NAME_ATTRIBUTE = "serverName";
 
+  String SERVICE_NAME_ATTRIBUTE = "serviceName";
+  String SERVICE_PORT_ATTRIBUTE = "servicePort";
+
   /**
    * Port used by server.
    *

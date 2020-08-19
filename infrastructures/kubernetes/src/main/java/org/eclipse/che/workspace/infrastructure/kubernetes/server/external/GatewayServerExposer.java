@@ -12,18 +12,22 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static java.lang.Boolean.TRUE;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_NAME_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_PORT_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
-import org.eclipse.che.api.workspace.server.spi.environment.GatewayRouteConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
 
 /**
@@ -68,31 +72,39 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
     }
 
     for (String esKey : externalServers.keySet()) {
-      k8sEnv.addGatewayRouteConfig(
-          createGatewayRouteConfig(
-              machineName, serviceName, serverId, servicePort, esKey, externalServers.get(esKey)));
+      final String serverName = KubernetesServerExposer.makeServerNameValidForDns(serverId);
+      final String name = createName(serviceName, serverName);
+      k8sEnv.getConfigMaps().put(name,
+          createGatewayRouteConfigmap(name, machineName, serviceName, servicePort, serverName, esKey,
+              externalServers.get(esKey)));
     }
   }
 
-  private GatewayRouteConfig createGatewayRouteConfig(
-      String machineName,
+  private ConfigMap createGatewayRouteConfigmap(String name, String machineName,
       String serviceName,
-      String serverId,
       ServicePort servicePort,
+      String serverName,
       String scRef,
       ServerConfig serverConfig) {
-    final String serverName = KubernetesServerExposer.makeServerNameValidForDns(serverId);
-    final String name = createName(serviceName, serverName);
+
     final String path = ensureDontEndsWithSlash(strategy.getExternalPath(serviceName, serverName));
-    final String protocol = serverConfig.getProtocol();
+    serverConfig.getAttributes().put(SERVICE_NAME_ATTRIBUTE, serviceName);
+    serverConfig.getAttributes().put(SERVICE_PORT_ATTRIBUTE, getTargetPort(servicePort.getTargetPort()));
+
     final Map<String, String> annotations =
         Annotations.newSerializer()
             .server(scRef, new ServerConfigImpl(serverConfig).withPath(path))
             .machineName(machineName)
             .annotations();
     annotations.put(CREATE_IN_CHE_INSTALLATION_NAMESPACE, TRUE.toString());
-    return new GatewayRouteConfig(
-        name, serviceName, getTargetPort(servicePort.getTargetPort()), path, protocol, annotations);
+
+    ConfigMapBuilder gatewayConfigMap = new ConfigMapBuilder()
+        .withNewMetadata()
+        .withName(name)
+        .withLabels(GatewayRouterProvisioner.GATEWAY_CONFIGMAP_LABELS)
+        .withAnnotations(annotations)
+        .endMetadata();
+    return gatewayConfigMap.build();
   }
 
   private String ensureDontEndsWithSlash(String path) {
