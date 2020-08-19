@@ -118,13 +118,13 @@ public class BrokerEnvironmentFactoryTest {
     assertEquals(
         container.getArgs().toArray(),
         new String[] {
-          "-push-endpoint",
+          "--push-endpoint",
           PUSH_ENDPOINT,
-          "-runtime-id",
+          "--runtime-id",
           String.format(
               "%s:%s:%s",
               runtimeId.getWorkspaceId(), runtimeId.getEnvName(), runtimeId.getOwnerId()),
-          "-cacert",
+          "--cacert",
           "/tmp/che/cacert",
           "--registry-address",
           DEFAULT_REGISTRY,
