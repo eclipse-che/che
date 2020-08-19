@@ -14,6 +14,7 @@ import { CLASSES } from '../../inversify.types';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TestConstants } from '../../TestConstants';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 @injectable()
 export class OcpLoginPage {
@@ -32,14 +33,14 @@ export class OcpLoginPage {
     async waitOpenShiftLoginWelcomePage() {
         Logger.debug('OcpLoginPage.waitOpenShiftLoginWelcomePage');
 
-        await this.driverHelper.waitVisibility(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH));
+        await this.driverHelper.waitVisibility(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async clickOnLoginProviderTitle() {
         Logger.debug('OcpLoginPage.clickOnLoginProviderTitle');
 
         const loginProviderTitleLocator: By = By.xpath(`//a[text()=\'${TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
-        await this.driverHelper.waitAndClick(loginProviderTitleLocator);
+        await this.driverHelper.waitAndClick(loginProviderTitleLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
     }
 
     async isIdentityProviderLinkVisible(): Promise<boolean> {
@@ -60,14 +61,14 @@ export class OcpLoginPage {
         Logger.debug('OcpLoginPage.waitAuthorizeOpenShiftIdentityProviderPage');
 
         const authorizeOpenshiftIdentityProviderPageLocator: By = By.xpath('//h1[text()=\'Authorize Access\']');
-        await this.driverHelper.waitVisibility(authorizeOpenshiftIdentityProviderPageLocator);
+        await this.driverHelper.waitVisibility(authorizeOpenshiftIdentityProviderPageLocator, TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async clickOnApproveAuthorizeAccessButton() {
         Logger.debug('OcpLoginPage.clickOnApproveAuthorizeAccessOpenshift');
 
         const approveAuthorizeAccessOcpLocator: By = By.css('input[name=\'approve\']');
-        await this.driverHelper.waitAndClick(approveAuthorizeAccessOcpLocator);
+        await this.driverHelper.waitAndClick(approveAuthorizeAccessOcpLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
     }
 
     async enterUserNameOpenShift(userName: string) {
@@ -86,7 +87,7 @@ export class OcpLoginPage {
         Logger.debug('OcpLoginPage.clickOnLoginButton');
 
         const loginButtonlocator: By = By.css('button[type=submit]');
-        await this.driverHelper.waitAndClick(loginButtonlocator);
+        await this.driverHelper.waitAndClick(loginButtonlocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
     }
 
     async waitDisappearanceOpenShiftLoginWelcomePage() {
@@ -106,7 +107,7 @@ export class OcpLoginPage {
         Logger.debug('OcpLoginPage.clickOnLinkAccountButton');
 
         const linkAccountLocator: By = By.id(`linkAccount`);
-        this.driverHelper.waitAndClick(linkAccountLocator);
+        this.driverHelper.waitAndClick(linkAccountLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
     }
 
 }

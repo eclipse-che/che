@@ -10,11 +10,11 @@
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { TestConstants } from '../../TestConstants';
 import { Logger } from '../../utils/Logger';
 import { DialogWindow } from '../ide/DialogWindow';
 import { OpenWorkspaceWidget } from '../ide/OpenWorkspaceWidget';
 import { By } from 'selenium-webdriver';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 export enum Locations {
     Theia = 'theia',
@@ -36,36 +36,31 @@ export class OpenDialogWidget {
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper
     ) { }
 
-    async waitOpenDialogWindow(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug(`OpenDialogWidget.waitOpenDialogWindow`);
-        await this.dialogWindow.waitDialog(timeout);
-    }
-
-    async selectLocation(location: Locations, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async selectLocation(location: Locations, timeout: number = TimeoutConstants.TS_SELENIUM_DIALOG_WIDGET_TIMEOUT) {
         Logger.debug(`OpenDialogWidget.selectLocation`);
         await this.driverHelper.type(By.css('div.theia-NavigationPanel select'), location, timeout);
     }
 
-    async selectItemInTree(pathToItem: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async selectItemInTree(pathToItem: string) {
         Logger.debug(`OpenDialogWidget.selectItemInTree "${pathToItem}"`);
         await this.openWorkspaceWidget.selectItemInTree(pathToItem);
     }
 
 
-    async expandItemInTreeToPath(pathToItem: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async expandItemInTreeToPath(pathToItem: string, timeout: number = TimeoutConstants.TS_SELENIUM_DIALOG_WIDGET_TIMEOUT) {
         Logger.debug(`OpenDialogWidget.expandItemInTreeToPath "${pathToItem}"`);
         await this.openWorkspaceWidget.expandTreeToPath(pathToItem, timeout);
     }
 
-    async clickOnButton(button: Buttons, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async clickOnButton(button: Buttons) {
         Logger.debug(`OpenDialogWidget.clickOnButton ${button}`);
         await this.dialogWindow.clickToButton(button);
     }
 
-    async selectLocationAndAddContextFolder(location: Locations, path: string, button: Buttons, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        await this.selectLocation(location, timeout);
-        await this.expandItemInTreeToPath(path, timeout);
-        await this.clickOnButton(button, timeout);
+    async selectLocationAndAddContextFolder(location: Locations, path: string, button: Buttons) {
+        await this.selectLocation(location, TimeoutConstants.TS_SELENIUM_DIALOG_WIDGET_TIMEOUT);
+        await this.expandItemInTreeToPath(path, TimeoutConstants.TS_SELENIUM_DIALOG_WIDGET_TIMEOUT);
+        await this.clickOnButton(button);
         await this.dialogWindow.waitDialogDissappearance();
     }
 

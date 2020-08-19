@@ -14,6 +14,7 @@ import { By, error, Key } from 'selenium-webdriver';
 import { TestConstants } from '../../TestConstants';
 import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 @injectable()
 export class PreviewWidget {
@@ -22,33 +23,33 @@ export class PreviewWidget {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Ide) private readonly ide: Ide) { }
 
-    async waitUrl(expectedUrl: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitUrl(expectedUrl: string, timeout: number) {
         Logger.debug(`PreviewWidget.waitUrl ${expectedUrl}`);
 
         await this.driverHelper.waitAttributeValue(PreviewWidget.WIDGET_URL_LOCATOR, 'value', expectedUrl, timeout);
     }
 
-    async typeUrl(url: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async typeUrl(url: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) {
         Logger.debug(`PreviewWidget.typeUrl ${url}`);
 
         await this.driverHelper.type(PreviewWidget.WIDGET_URL_LOCATOR, url, timeout);
     }
 
-    async clearUrl(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async clearUrl() {
         Logger.debug('PreviewWidget.clearUrl');
 
         await this.typeUrl(Key.chord(Key.CONTROL, 'a', Key.DELETE));
-        await this.waitUrl('', timeout);
+        await this.waitUrl('', 5_000);
     }
 
-    async typeAndApplyUrl(url: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async typeAndApplyUrl(url: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) {
         Logger.debug(`PreviewWidget.typeAndApplyUrl ${url}`);
 
-        await this.clearUrl(timeout);
+        await this.clearUrl();
         await this.typeUrl(Key.chord(url, Key.ENTER), timeout);
     }
 
-    async waitApplicationOpened(expectedUrl: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitApplicationOpened(expectedUrl: string, timeout: number) {
         Logger.debug(`PreviewWidget.waitApplicationOpened ${expectedUrl}`);
 
         await this.driverHelper.getDriver().wait(async () => {
@@ -69,14 +70,8 @@ export class PreviewWidget {
         Logger.debug('PreviewWidget.waitAndSwitchToWidgetFrame');
 
         const iframeLocator: By = By.css('div.theia-mini-browser iframe');
-        await this.driverHelper.waitAndSwitchToFrame(iframeLocator);
+        await this.driverHelper.waitAndSwitchToFrame(iframeLocator, TimeoutConstants.TS_SELENIUM_PREVIEW_WIDGET_DEFAULT_TIMEOUT);
 
-    }
-
-    async waitPreviewWidget(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug('PreviewWidget.waitPreviewWidget');
-
-        await this.driverHelper.waitVisibility(By.css('div.theia-mini-browser'), timeout);
     }
 
     async waitPreviewWidgetAbsence() {
@@ -86,7 +81,7 @@ export class PreviewWidget {
     }
 
     async waitContentAvailable(contentLocator: By,
-        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
+        timeout: number,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5) {
 
         Logger.debug(`PreviewWidget.waitContentAvailable ${contentLocator}`);
@@ -107,34 +102,13 @@ export class PreviewWidget {
         }, timeout);
     }
 
-    async waitContentAvailableInAssociatedWorkspace(contentLocator: By,
-        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
-        polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5) {
-
-        Logger.debug(`PreviewWidget.waitContentAvailableInAssociatedWorkspace ${contentLocator}`);
-
-        await this.waitAndSwitchToWidgetFrame();
-        await this.driverHelper.getDriver().wait(async () => {
-            const isApplicationTitleVisible: boolean = await this.driverHelper.isVisible(contentLocator);
-            if (isApplicationTitleVisible) {
-                await this.driverHelper.getDriver().switchTo().defaultContent();
-                return true;
-            }
-
-            await this.driverHelper.getDriver().switchTo().defaultContent();
-            await this.refreshPage();
-            await this.waitAndSwitchToWidgetFrame();
-            await this.driverHelper.wait(polling);
-        }, timeout);
-    }
-
-    async waitVisibility(element: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitVisibility(element: By, timeout: number) {
         Logger.debug(`PreviewWidget.waitVisibility ${element}`);
 
         await this.driverHelper.waitVisibility(element, timeout);
     }
 
-    async waitAndClick(element: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitAndClick(element: By, timeout: number = TimeoutConstants.TS_SELENIUM_PREVIEW_WIDGET_DEFAULT_TIMEOUT) {
         Logger.debug(`PreviewWidget.waitAndClick ${element}`);
 
         await this.driverHelper.waitAndClick(element, timeout);
@@ -144,7 +118,7 @@ export class PreviewWidget {
         Logger.debug('PreviewWidget.refreshPage');
 
         const refreshButtonLocator: By = By.css('.theia-mini-browser .theia-mini-browser-refresh');
-        await this.driverHelper.waitAndClick(refreshButtonLocator);
+        await this.driverHelper.waitAndClick(refreshButtonLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
     }
 
     async switchBackToIdeFrame() {

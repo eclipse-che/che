@@ -28,14 +28,14 @@ export function runTask(taskName: string, timeout: number) {
 export function runTaskWithDialogShellAndOpenLink(taskName: string, expectedDialogText: string, timeout: number) {
     test(`Run command '${taskName}' expecting dialog shell`, async () => {
         await topMenu.runTask(taskName);
-        await dialogWindow.waitDialogAndOpenLink(timeout, expectedDialogText);
+        await dialogWindow.waitDialogAndOpenLink(expectedDialogText, timeout);
     });
 }
 
 export function runTaskWithDialogShellDjangoWorkaround(taskName: string, expectedDialogText: string, urlSubPath: string, timeout: number) {
     test(`Run command '${taskName}' expecting dialog shell`, async () => {
         await topMenu.runTask(taskName);
-        await dialogWindow.waitDialog(timeout, expectedDialogText);
+        await dialogWindow.waitDialog(expectedDialogText, timeout);
         const dialogRedirectUrl: string = await dialogWindow.getApplicationUrlFromDialog(expectedDialogText);
         const augmentedPreviewUrl: string = dialogRedirectUrl + urlSubPath;
         await dialogWindow.closeDialog();
@@ -52,7 +52,7 @@ export function runTaskWithDialogShellDjangoWorkaround(taskName: string, expecte
 export function runTaskWithDialogShellAndClose(taskName: string, expectedDialogText: string, timeout: number) {
     test(`Run command '${taskName}' expecting dialog shell`, async () => {
         await topMenu.runTask(taskName);
-        await dialogWindow.waitDialog(timeout, expectedDialogText);
+        await dialogWindow.waitDialog(expectedDialogText, timeout);
         await dialogWindow.closeDialog();
         await dialogWindow.waitDialogDissappearance();
     });

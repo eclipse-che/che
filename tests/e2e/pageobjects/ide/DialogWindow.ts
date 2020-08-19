@@ -12,8 +12,8 @@ import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
-import { TestConstants } from '../../TestConstants';
 import { Ide } from './Ide';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 @injectable()
 export class DialogWindow {
@@ -28,37 +28,37 @@ export class DialogWindow {
         return await this.driverHelper.isVisible(By.xpath(DialogWindow.DIALOG_BODY_XPATH_LOCATOR));
     }
 
-    async waitAndCloseIfAppear(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitAndCloseIfAppear() {
         Logger.debug('DialogWindow.waitAndCloseIfAppear');
 
         const dialogDisplayes: boolean = await this.driverHelper.waitVisibilityBoolean(By.xpath(DialogWindow.DIALOG_BODY_XPATH_LOCATOR));
 
         if (dialogDisplayes) {
-            await this.closeDialog(timeout);
-            await this.waitDialogDissappearance(timeout);
+            await this.closeDialog();
+            await this.waitDialogDissappearance();
         }
 
     }
 
-    async clickToButton(buttonText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async clickToButton(buttonText: string) {
         Logger.debug('DialogWindow.clickToButton');
         const buttonLocator: By = By.xpath(`${DialogWindow.DIALOG_BODY_XPATH_LOCATOR}//button[text()='${buttonText}']`);
-        await this.driverHelper.waitAndClick(buttonLocator, timeout);
+        await this.driverHelper.waitAndClick(buttonLocator, TimeoutConstants.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
     }
 
-    async closeDialog(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async closeDialog() {
         Logger.debug('DialogWindow.closeDialog');
 
-        await this.clickToButton('close', timeout);
+        await this.clickToButton('close');
     }
 
-    async clickToOpenLinkButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async clickToOpenLinkButton() {
         Logger.debug('DialogWindow.clickToOpenLinkButton');
 
-        await this.clickToButton('Open Link', timeout);
+        await this.clickToButton('Open Link');
     }
 
-    async waitDialog(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT, dialogText: string = '') {
+    async waitDialog(dialogText: string = '', timeout: number = TimeoutConstants.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT) {
         Logger.debug('DialogWindow.waitDialog');
 
         // if dialog text is provided uses xpath with this text
@@ -69,25 +69,25 @@ export class DialogWindow {
         await this.driverHelper.waitVisibility(By.xpath(dialogXpathLocator), timeout);
     }
 
-    async waitDialogAndOpenLink(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT, dialogText: string = '') {
+    async waitDialogAndOpenLink(dialogText: string = '', applicationReaddyTimeout: number) {
         Logger.debug('DialogWindow.waitDialogAndOpenLink');
 
-        await this.waitDialog(timeout, dialogText);
-        await this.ide.waitApllicationIsReady(await this.getApplicationUrlFromDialog(dialogText), timeout);
-        await this.clickToOpenLinkButton(timeout);
-        await this.waitDialogDissappearance(timeout);
+        await this.waitDialog(dialogText);
+        await this.ide.waitApllicationIsReady(await this.getApplicationUrlFromDialog(dialogText), applicationReaddyTimeout);
+        await this.clickToOpenLinkButton();
+        await this.waitDialogDissappearance();
     }
 
-    async waitDialogDissappearance(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitDialogDissappearance() {
         Logger.debug('DialogWindow.waitDialogDissappearance');
 
-        await this.driverHelper.waitDisappearanceWithTimeout(By.xpath(DialogWindow.CLOSE_BUTTON_XPATH_LOCATOR));
+        await this.driverHelper.waitDisappearanceWithTimeout(By.xpath(DialogWindow.CLOSE_BUTTON_XPATH_LOCATOR), TimeoutConstants.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
     }
 
     async getApplicationUrlFromDialog(dialogWindowText: string) {
         const notificationTextLocator: By = By.xpath(`${DialogWindow.DIALOG_BODY_XPATH_LOCATOR}//*[contains(text(), '${dialogWindowText}')]`);
 
-        let dialogWindow = await this.driverHelper.waitAndGetText(notificationTextLocator);
+        let dialogWindow = await this.driverHelper.waitAndGetText(notificationTextLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
         let regexp: RegExp = new RegExp('^.*(https?://.*)$');
 
         if (!regexp.test(dialogWindow)) {

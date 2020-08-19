@@ -76,13 +76,13 @@ suite('Openshift connector user story', async () => {
     await projectTree.waitProjectImported(projectName, 'index.js');
     await dashboard.waitDisappearanceNavigationMenu();
     await openshiftPlugin.clickOnOpenshiftToollBarIcon();
-    await openshiftPlugin.waitOpenshiftConnectorTree();
+    await openshiftPlugin.waitOpenshiftConnectorTree(10_000);
   });
 
   test('Login into current cluster', async () => {
     const provideAuthenticationSuffix: string = `for basic authentication to the API server ${selectSugestionSuffix}`;
     const loginIntoClusterMessage: string = 'You are already logged in the cluster. Do you want to login to a different cluster?';
-    const openshiftIP: string = await openshiftPlugin.getClusterIP();
+    const openshiftIP: string = await openshiftPlugin.getClusterIP(10_000);
     await openshiftPlugin.clickOnApplicationToolbarItem(OpenshiftAppExplorerToolbar.LogIntoCluster);
     await ide.clickOnNotificationButton(loginIntoClusterMessage, 'Yes');
     await quickOpenContainer.clickOnContainerItem('Credentials');
@@ -117,7 +117,7 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.clickOnContainerItem(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
     await quickOpenContainer.clickOnContainerItem('node-js-app');
     await quickOpenContainer.clickOnContainerItem('component-node-js');
-    await terminal.selectTabByPrefixAndWaitText('OpenShift: Push', 'Changes successfully pushed to component', TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+    await terminal.selectTabByPrefixAndWaitText('OpenShift: Push', 'Changes successfully pushed to component', 30_000);
   });
 
 });

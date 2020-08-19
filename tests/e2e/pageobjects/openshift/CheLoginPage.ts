@@ -13,6 +13,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 @injectable()
 export class CheLoginPage {
@@ -23,7 +24,7 @@ export class CheLoginPage {
     async waitEclipseCheLoginFormPage() {
             Logger.debug('CheLoginPage.waitEclipseCheLoginFormPage');
 
-            await this.driverHelper.waitVisibility(By.id('kc-form-login'));
+            await this.driverHelper.waitVisibility(By.id('kc-form-login'), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async inputUserNameEclipseCheLoginPage(userName: string) {
@@ -41,7 +42,7 @@ export class CheLoginPage {
     async clickEclipseCheLoginButton() {
         Logger.debug('CheLoginPage.clickEclipseCheLoginButton');
 
-        await this.driverHelper.waitAndClick(By.id('kc-login'));
+        await this.driverHelper.waitAndClick(By.id('kc-login'), TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
     }
 
     async isFirstBrokerLoginPageVisible(): Promise<boolean> {
@@ -53,7 +54,7 @@ export class CheLoginPage {
     async waitFirstBrokerLoginPage() {
         Logger.debug('CheLoginPage.waitFirstBrokerLoginPage');
 
-        await this.driverHelper.waitVisibility(By.id('kc-update-profile-form'));
+        await this.driverHelper.waitVisibility(By.id('kc-update-profile-form'), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async enterEmailFirstBrokerLoginPage(email: string) {
@@ -78,7 +79,7 @@ export class CheLoginPage {
         Logger.debug('CheLoginPage.clickOnSubmitButton');
 
         const submitButtonlocator: By = By.css('input[type=submit]');
-        await this.driverHelper.waitAndClick(submitButtonlocator);
+        await this.driverHelper.waitAndClick(submitButtonlocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
     }
 
     async waitDisappearanceBrokerLoginPage() {

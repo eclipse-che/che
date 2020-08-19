@@ -11,12 +11,12 @@ import { DriverHelper } from '../../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
 import 'reflect-metadata';
 import { CLASSES, TYPES } from '../../../inversify.types';
-import { TestConstants } from '../../../TestConstants';
 import { By } from 'selenium-webdriver';
 import { WorkspaceDetails } from './WorkspaceDetails';
 import { ITestWorkspaceUtil } from '../../../utils/workspace/ITestWorkspaceUtil';
 import { WorkspaceStatus } from '../../../utils/workspace/WorkspaceStatus';
 import { Logger } from '../../../utils/Logger';
+import { TimeoutConstants } from '../../../TimeoutConstants';
 
 
 @injectable()
@@ -25,28 +25,28 @@ export class WorkspaceDetailsPlugins {
         @inject(CLASSES.WorkspaceDetails) private readonly workspaceDetails: WorkspaceDetails,
         @inject(TYPES.WorkspaceUtil) private readonly testWorkspaceUtil: ITestWorkspaceUtil) { }
 
-    async waitPluginListItem(pluginName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitPluginListItem(pluginName: string) {
         Logger.debug(`WorkspaceDetailsPlugins.waitPluginListItem ${pluginName}`);
 
         const pluginListItemLocator: By = By.css(this.getPluginListItemCssLocator(pluginName));
 
-        await this.driverHelper.waitVisibility(pluginListItemLocator, timeout);
+        await this.driverHelper.waitVisibility(pluginListItemLocator, TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT);
     }
 
-    async enablePlugin(pluginName: string, pluginVersion?: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async enablePlugin(pluginName: string, pluginVersion?: string) {
         Logger.debug(`WorkspaceDetailsPlugins.enablePlugin ${pluginName}:${pluginVersion}`);
 
-        await this.waitPluginDisabling(pluginName, pluginVersion, timeout);
-        await this.clickOnPluginListItemSwitcher(pluginName, pluginVersion, timeout);
-        await this.waitPluginEnabling(pluginName, pluginVersion, timeout);
+        await this.waitPluginDisabling(pluginName, pluginVersion);
+        await this.clickOnPluginListItemSwitcher(pluginName, pluginVersion);
+        await this.waitPluginEnabling(pluginName, pluginVersion);
     }
 
-    async disablePlugin(pluginName: string, pluginVersion?: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async disablePlugin(pluginName: string, pluginVersion?: string) {
         Logger.debug(`WorkspaceDetailsPlugins.disablePlugin ${pluginName}:${pluginVersion}`);
 
-        await this.waitPluginEnabling(pluginName, pluginVersion, timeout);
-        await this.clickOnPluginListItemSwitcher(pluginName, pluginVersion, timeout);
-        await this.waitPluginDisabling(pluginName, pluginVersion, timeout);
+        await this.waitPluginEnabling(pluginName, pluginVersion);
+        await this.clickOnPluginListItemSwitcher(pluginName, pluginVersion);
+        await this.waitPluginDisabling(pluginName, pluginVersion);
     }
 
     async addPluginAndOpenWorkspace(namespace: string, workspaceName: string, pluginName: string, pluginId: string, pluginVersion?: string) {
@@ -74,20 +74,20 @@ export class WorkspaceDetailsPlugins {
 
     private async clickOnPluginListItemSwitcher(pluginName: string,
         pluginVersion?: string,
-        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
 
         const pluginListItemSwitcherLocator = By.css(this.getPluginListItemSwitcherCssLocator(pluginName, pluginVersion));
 
         await this.driverHelper.waitAndClick(pluginListItemSwitcherLocator, timeout);
     }
 
-    private async waitPluginEnabling(pluginName: string, pluginVersion?: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    private async waitPluginEnabling(pluginName: string, pluginVersion?: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         const enabledPluginSwitcherLocator: By = By.css(`${this.getPluginListItemCssLocator(pluginName, pluginVersion)} md-switch[aria-checked='true']`);
 
         await this.driverHelper.waitVisibility(enabledPluginSwitcherLocator, timeout);
     }
 
-    private async waitPluginDisabling(pluginName: string, pluginVersion?: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    private async waitPluginDisabling(pluginName: string, pluginVersion?: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         const disabledPluginSwitcherLocator: By = By.css(`${this.getPluginListItemCssLocator(pluginName, pluginVersion)} md-switch[aria-checked='false']`);
 
         await this.driverHelper.waitVisibility(disabledPluginSwitcherLocator, timeout);

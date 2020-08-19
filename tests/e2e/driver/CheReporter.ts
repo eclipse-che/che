@@ -20,6 +20,7 @@ import { ScreenCatcher } from '../utils/ScreenCatcher';
 import { ITestWorkspaceUtil } from '../utils/workspace/ITestWorkspaceUtil';
 import { PreferencesHandler, AskForConfirmationType } from '../utils/PreferencesHandler';
 import { CheApiRequestHandler } from '../utils/requestHandlers/CheApiRequestHandler';
+import { TimeoutConstants } from '../TimeoutConstants';
 
 const e2eContainer = inversifyConfig.e2eContainer;
 const driver: IDriver = e2eContainer.get(TYPES.Driver);
@@ -43,11 +44,10 @@ class CheReporter extends mocha.reporters.Spec {
 
       TS_SELENIUM_DEFAULT_ATTEMPTS: ${TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS}
       TS_SELENIUM_DEFAULT_POLLING: ${TestConstants.TS_SELENIUM_DEFAULT_POLLING}
-      TS_SELENIUM_DEFAULT_TIMEOUT: ${TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT}
 
-      TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT: ${TestConstants.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT}
-      TS_SELENIUM_LOAD_PAGE_TIMEOUT: ${TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT}
-      TS_SELENIUM_START_WORKSPACE_TIMEOUT: ${TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT}
+      TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT: ${TimeoutConstants.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT}
+      TS_SELENIUM_LOAD_PAGE_TIMEOUT: ${TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT}
+      TS_SELENIUM_START_WORKSPACE_TIMEOUT: ${TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT}
       TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS: ${TestConstants.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS}
       TS_SELENIUM_WORKSPACE_STATUS_POLLING: ${TestConstants.TS_SELENIUM_WORKSPACE_STATUS_POLLING}
       TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS: ${TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS}
