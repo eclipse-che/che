@@ -24,7 +24,9 @@ import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STA
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner.GATEWAY_CONFIGMAP_LABELS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -1131,17 +1133,37 @@ public class KubernetesInternalRuntimeTest {
       throws InfrastructureException {
     // given
     ConfigMap cmRoute1 =
-        new ConfigMapBuilder().withNewMetadata().withName("route1").endMetadata().build();
+        new ConfigMapBuilder()
+            .withNewMetadata()
+            .withName("route1")
+            .withLabels(GATEWAY_CONFIGMAP_LABELS)
+            .withAnnotations(ImmutableMap.of(CREATE_IN_CHE_INSTALLATION_NAMESPACE, "true"))
+            .endMetadata()
+            .build();
     ConfigMap cmRoute2 =
+        new ConfigMapBuilder()
+            .withNewMetadata()
+            .withName("route2")
+            .withLabels(GATEWAY_CONFIGMAP_LABELS)
+            .withAnnotations(ImmutableMap.of(CREATE_IN_CHE_INSTALLATION_NAMESPACE, "true"))
+            .endMetadata()
+            .build();
+    ConfigMap cm3 =
         new ConfigMapBuilder().withNewMetadata().withName("route2").endMetadata().build();
 
-    List<ConfigMap> configMaps = Arrays.asList(cmRoute1, cmRoute2);
+    Map<String, ConfigMap> configMaps =
+        ImmutableMap.of("route1", cmRoute1, "route2", cmRoute2, "cm3", cm3);
+    when(k8sEnv.getConfigMaps()).thenReturn(configMaps);
+
+    List<ConfigMap> expectedCreatedCheNamespaceConfigmaps = Arrays.asList(cmRoute1, cmRoute2);
 
     // when
     internalRuntime.start(emptyMap());
 
     // then
-    verify(cheNamespace).createConfigMaps(configMaps, internalRuntime.getContext().getIdentity());
+    verify(cheNamespace)
+        .createConfigMaps(
+            expectedCreatedCheNamespaceConfigmaps, internalRuntime.getContext().getIdentity());
     verify(cheNamespace).cleanUp(WORKSPACE_ID);
   }
 
