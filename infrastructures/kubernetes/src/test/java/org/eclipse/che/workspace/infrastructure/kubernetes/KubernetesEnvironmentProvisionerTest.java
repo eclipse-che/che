@@ -132,7 +132,8 @@ public class KubernetesEnvironmentProvisionerTest {
             serviceAccountProvisioner,
             certificateProvisioner,
             gitConfigProvisioner,
-            previewUrlExposer);
+            previewUrlExposer,
+            gatewayRouterProvisioner);
   }
 
   @Test
@@ -158,6 +159,7 @@ public class KubernetesEnvironmentProvisionerTest {
     provisionOrder.verify(serviceAccountProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(certificateProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(gitConfigProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(gatewayRouterProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }
