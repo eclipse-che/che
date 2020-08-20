@@ -2,6 +2,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_PORT_ATTRIBUTE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.isLabeled;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -16,8 +17,15 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayRouteConfigGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayRouteConfigGeneratorFactory;
 
+/**
+ * This provisioner finds {@link ConfigMap}s, that configures the single-host Gateway, generates
+ * Gateway configuration and puts it into their data.
+ *
+ * <p>It uses {@link GatewayRouteConfigGenerator} to generate the gateway configuration.
+ */
 public class GatewayRouterProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
 
+  /** Configmap labeled with these holds the configuration of single-host gateway route */
   public static final Map<String, String> GATEWAY_CONFIGMAP_LABELS =
       ImmutableMap.<String, String>builder()
           .put("app", "che")
@@ -36,41 +44,57 @@ public class GatewayRouterProvisioner implements ConfigurationProvisioner<Kubern
       throws InfrastructureException {
     for (Entry<String, ConfigMap> configMapEntry : k8sEnv.getConfigMaps().entrySet()) {
       if (isGatewayConfig(configMapEntry.getValue())) {
+        ConfigMap gatewayConfigMap = configMapEntry.getValue();
 
+        Map<String, ServerConfigImpl> servers =
+            new Annotations.Deserializer(gatewayConfigMap.getMetadata().getAnnotations()).servers();
+        if (servers.size() != 1) {
+          throw new InfrastructureException(
+              "Expected only 1 server in gateway config ConfigMap's annotations.");
+        }
+        Entry<String, ServerConfigImpl> serverConfigEntry = servers.entrySet().iterator().next();
+        ServerConfigImpl server = serverConfigEntry.getValue();
+
+        if (!server.getAttributes().containsKey(SERVICE_NAME_ATTRIBUTE)
+            || !server.getAttributes().containsKey(SERVICE_PORT_ATTRIBUTE)) {
+          throw new InfrastructureException(
+              "Expected `serviceName` and `servicePort` in gateway config ServerConfig attributes.");
+        }
+
+        // We're now creating only 1 gateway route configuration per ConfigMap, so we need to create
+        // generator in each loop iteration.
         GatewayRouteConfigGenerator gatewayRouteConfigGenerator =
             configGeneratorFactory.create(identity.getInfrastructureNamespace());
-        gatewayRouteConfigGenerator
-            .addRouteConfig(configMapEntry.getKey(), configMapEntry.getValue());
+        gatewayRouteConfigGenerator.addRouteConfig(configMapEntry.getKey(), gatewayConfigMap);
 
-        Map<String, ServerConfigImpl> servers = new Annotations.Deserializer(
-            configMapEntry.getValue().getMetadata().getAnnotations()).servers();
-        if (servers.size() != 1) {
-          throw new InfrastructureException("expected 1");
-        }
-        String scKey = servers.keySet().stream().findFirst().get();
-        ServerConfigImpl server = servers.get(scKey);
+        Map<String, String> gatewayConfiguration =
+            gatewayRouteConfigGenerator.generate(identity.getInfrastructureNamespace());
+        gatewayConfigMap.setData(gatewayConfiguration);
 
-        if (!server.getAttributes().containsKey(SERVICE_NAME_ATTRIBUTE) ||
-            !server.getAttributes().containsKey(SERVICE_PORT_ATTRIBUTE)) {
-          throw new InfrastructureException("Need serviceName and servicePort");
-        }
-
-        final String serviceName = server.getAttributes().get(SERVICE_NAME_ATTRIBUTE);
-        final String servicePort = server.getAttributes().get(SERVICE_PORT_ATTRIBUTE);
-
-        configMapEntry.getValue()
-            .setData(gatewayRouteConfigGenerator.generate(serviceName, servicePort,
-                identity.getInfrastructureNamespace()));
+        // Configuration is now generated, so remove these internal attributes
+        server.getAttributes().remove(SERVICE_NAME_ATTRIBUTE);
+        server.getAttributes().remove(SERVICE_PORT_ATTRIBUTE);
+        gatewayConfigMap
+            .getMetadata()
+            .getAnnotations()
+            .putAll(
+                new Annotations.Serializer()
+                    .server(serverConfigEntry.getKey(), server)
+                    .annotations());
       }
     }
   }
 
+  /**
+   * Check whether configmap is gateway route configuration. That is defined by {@link
+   * GatewayRouterProvisioner#GATEWAY_CONFIGMAP_LABELS} labels.
+   *
+   * @param configMap to check
+   * @return `true` if ConfigMap is gateway route configuration, `false` otherwise
+   */
   public static boolean isGatewayConfig(ConfigMap configMap) {
-    Map<String, String> labels = configMap.getMetadata().getLabels();
     for (Entry<String, String> labelEntry : GATEWAY_CONFIGMAP_LABELS.entrySet()) {
-      if (labels == null || !labels.containsKey(labelEntry.getKey()) || !labels
-          .get(labelEntry.getKey())
-          .equals(labelEntry.getValue())) {
+      if (!isLabeled(configMap, labelEntry.getKey(), labelEntry.getValue())) {
         return false;
       }
     }
