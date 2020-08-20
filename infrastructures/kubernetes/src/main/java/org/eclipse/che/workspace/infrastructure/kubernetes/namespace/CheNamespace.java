@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
@@ -20,6 +22,7 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
@@ -28,6 +31,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.CheKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstallationLocation;
@@ -70,6 +74,17 @@ public class CheNamespace {
   private ConfigMap createConfigMap(ConfigMap configMap, RuntimeIdentity identity)
       throws InfrastructureException {
     putLabel(configMap, CHE_WORKSPACE_ID_LABEL, identity.getWorkspaceId());
+    // check that ConfigMap is properly annotated to be created in Che installation namespace
+    Map<String, String> annotations = configMap.getMetadata().getAnnotations();
+    if (annotations == null
+        || !annotations
+            .getOrDefault(CREATE_IN_CHE_INSTALLATION_NAMESPACE, FALSE.toString())
+            .equals(TRUE.toString())) {
+      throw new InfrastructureException(
+          String.format(
+              "ConfigMap '%s' to be created in Che installation namespace is not properly annotated with '%s=true'. This is a bug, please report.",
+              configMap.getMetadata().getName(), CREATE_IN_CHE_INSTALLATION_NAMESPACE));
+    }
     // remove this annotation, so it's not exposed in actual k8s object
     configMap.getMetadata().getAnnotations().remove(CREATE_IN_CHE_INSTALLATION_NAMESPACE);
     return clientFactory.create().configMaps().inNamespace(cheNamespaceName).create(configMap);
@@ -81,6 +96,9 @@ public class CheNamespace {
    *
    * <p>`workspaceId` from given `identity` must be valid workspace ID, that is in {@link
    * WorkspaceStatus#STARTING} state. Otherwise, {@link InfrastructureException} is thrown.
+   *
+   * <p>all given {@code configMaps} must be annotated with {@link
+   * Annotations#CREATE_IN_CHE_INSTALLATION_NAMESPACE} set to 'true'.
    *
    * @param configMaps to create
    * @param identity to validate and label configmaps

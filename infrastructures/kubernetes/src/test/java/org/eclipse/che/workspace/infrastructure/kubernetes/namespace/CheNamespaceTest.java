@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -18,6 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
@@ -28,6 +30,7 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -93,9 +96,23 @@ public class CheNamespaceTest {
     // given
     when(internalRuntime.getOwner()).thenReturn(OWNER_ID);
     when(internalRuntime.getStatus()).thenReturn(WorkspaceStatus.STARTING);
+    Map<String, String> cheNamespaceAnnotations =
+        ImmutableMap.of(CREATE_IN_CHE_INSTALLATION_NAMESPACE, "true");
 
-    ConfigMap cm1 = new ConfigMapBuilder().withNewMetadata().withName("cm1").endMetadata().build();
-    ConfigMap cm2 = new ConfigMapBuilder().withNewMetadata().withName("cm2").endMetadata().build();
+    ConfigMap cm1 =
+        new ConfigMapBuilder()
+            .withNewMetadata()
+            .withName("cm1")
+            .withAnnotations(cheNamespaceAnnotations)
+            .endMetadata()
+            .build();
+    ConfigMap cm2 =
+        new ConfigMapBuilder()
+            .withNewMetadata()
+            .withName("cm2")
+            .withAnnotations(cheNamespaceAnnotations)
+            .endMetadata()
+            .build();
 
     when(clientFactory.create()).thenReturn(kubeClient);
     when(kubeClient.configMaps()).thenReturn(kubeConfigMaps);
@@ -111,6 +128,55 @@ public class CheNamespaceTest {
     assertEquals(createdConfigMaps.size(), 2);
     createdConfigMaps.forEach(
         cm -> assertEquals(cm.getMetadata().getLabels().get(CHE_WORKSPACE_ID_LABEL), WORKSPACE_ID));
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void failWhenTryToCreateCmWithoutAnnotation() throws InfrastructureException {
+    // given
+    when(internalRuntime.getOwner()).thenReturn(OWNER_ID);
+    when(internalRuntime.getStatus()).thenReturn(WorkspaceStatus.STARTING);
+
+    ConfigMap cm1 = new ConfigMapBuilder().withNewMetadata().withName("cm1").endMetadata().build();
+
+    when(clientFactory.create()).thenReturn(kubeClient);
+    when(kubeClient.configMaps()).thenReturn(kubeConfigMaps);
+    when(kubeConfigMaps.inNamespace(CHE_NAMESPACE)).thenReturn(kubeConfigMapsInNamespace);
+    when(kubeConfigMapsInNamespace.create(any(ConfigMap.class))).thenReturn(cm1);
+
+    List<ConfigMap> configMapsToCreate = Collections.singletonList(cm1);
+
+    // when
+    cheNamespace.createConfigMaps(configMapsToCreate, identity);
+
+    // then exception
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void failWhenTryToCreateCmWithWronglySetAnnotation() throws InfrastructureException {
+    // given
+    when(internalRuntime.getOwner()).thenReturn(OWNER_ID);
+    when(internalRuntime.getStatus()).thenReturn(WorkspaceStatus.STARTING);
+
+    ConfigMap cm1 =
+        new ConfigMapBuilder()
+            .withNewMetadata()
+            .withName("cm1")
+            .withAnnotations(
+                Collections.singletonMap(CREATE_IN_CHE_INSTALLATION_NAMESPACE, "blabol"))
+            .endMetadata()
+            .build();
+
+    when(clientFactory.create()).thenReturn(kubeClient);
+    when(kubeClient.configMaps()).thenReturn(kubeConfigMaps);
+    when(kubeConfigMaps.inNamespace(CHE_NAMESPACE)).thenReturn(kubeConfigMapsInNamespace);
+    when(kubeConfigMapsInNamespace.create(any(ConfigMap.class))).thenReturn(cm1);
+
+    List<ConfigMap> configMapsToCreate = Collections.singletonList(cm1);
+
+    // when
+    cheNamespace.createConfigMaps(configMapsToCreate, identity);
+
+    // then exception
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
