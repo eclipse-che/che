@@ -58,6 +58,10 @@ public class Openshift4TrustedCAProvisioner {
     this.configMapLabelKeyValue = Splitter.on(",").withKeyValueSeparator("=").split(configMapLabel);
   }
 
+  public boolean isTrustedStoreInitialized() {
+    return trustedStoreInitialized;
+  }
+
   public void provision(KubernetesEnvironment k8sEnv, OpenShiftProject project)
       throws InfrastructureException {
     if (!trustedStoreInitialized) {

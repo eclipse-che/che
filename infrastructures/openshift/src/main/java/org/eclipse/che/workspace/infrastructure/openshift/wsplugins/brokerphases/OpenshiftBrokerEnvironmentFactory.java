@@ -93,8 +93,10 @@ public class OpenshiftBrokerEnvironmentFactory
   protected List<String> getCommandLineArgs(RuntimeIdentity runtimeId) {
     List<String> cmdArgs = super.getCommandLineArgs(runtimeId);
 
-    cmdArgs.add("--cadir");
-    cmdArgs.add(caCertificatesMountPath);
+    if (trustedCAProvisioner.isTrustedStoreInitialized()) {
+      cmdArgs.add("--cadir");
+      cmdArgs.add(caCertificatesMountPath);
+    }
 
     return cmdArgs;
   }
