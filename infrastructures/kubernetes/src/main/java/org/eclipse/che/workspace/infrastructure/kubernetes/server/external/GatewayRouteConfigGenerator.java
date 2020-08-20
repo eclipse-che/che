@@ -44,7 +44,7 @@ public interface GatewayRouteConfigGenerator {
    * requests on {@code path} into {@code serviceUrl}. Also it must strip {@code path} from request
    * url.
    *
-   * <p>Keys and Values of returned {@link Map} depends on gateway technology. e.g.:
+   * <p>Returned Map's Keys will be used as file names, Values as their content. e.g.:
    *
    * <pre>
    *   service1.yml: {config-content-for-service-1}
