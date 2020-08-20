@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodTemplateSpec;
@@ -704,8 +705,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
     List<ConfigMap> cheNamespaceConfigMaps = new ArrayList<>();
     for (ConfigMap configMap : env.getConfigMaps().values()) {
-      Map<String, String> annotations = configMap.getMetadata().getAnnotations();
-      if (shouldCreateInCheNamespace(annotations)) {
+      if (shouldCreateInCheNamespace(configMap)) {
         // we collect the che namespace configmaps into separate list
         cheNamespaceConfigMaps.add(configMap);
       } else {
@@ -724,11 +724,15 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
    * Annotations#CREATE_IN_CHE_INSTALLATION_NAMESPACE} annotation set exactly to `true`. In all
    * other cases we create the object in Workspace's namespace.
    *
-   * @param annotations object's annotations
+   * @param k8sObject object to check
    * @return `true` if {@link Annotations#CREATE_IN_CHE_INSTALLATION_NAMESPACE} is set to `true`.
    *     False otherwise.
    */
-  private boolean shouldCreateInCheNamespace(Map<String, String> annotations) {
+  private boolean shouldCreateInCheNamespace(HasMetadata k8sObject) {
+    if (k8sObject.getMetadata() == null) {
+      return false;
+    }
+    Map<String, String> annotations = k8sObject.getMetadata().getAnnotations();
     if (annotations == null || annotations.isEmpty()) {
       return false;
     }
