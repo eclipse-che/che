@@ -50,7 +50,9 @@ public class GatewayRouterProvisioner implements ConfigurationProvisioner<Kubern
             new Annotations.Deserializer(gatewayConfigMap.getMetadata().getAnnotations()).servers();
         if (servers.size() != 1) {
           throw new InfrastructureException(
-              "Expected only 1 server in gateway config ConfigMap's annotations.");
+              "Expected only 1 server in gateway config ConfigMap's '"
+                  + gatewayConfigMap.getMetadata().getName()
+                  + "' annotations. This is a bug, please report.");
         }
         Entry<String, ServerConfigImpl> serverConfigEntry = servers.entrySet().iterator().next();
         ServerConfigImpl server = serverConfigEntry.getValue();
@@ -58,7 +60,9 @@ public class GatewayRouterProvisioner implements ConfigurationProvisioner<Kubern
         if (!server.getAttributes().containsKey(SERVICE_NAME_ATTRIBUTE)
             || !server.getAttributes().containsKey(SERVICE_PORT_ATTRIBUTE)) {
           throw new InfrastructureException(
-              "Expected `serviceName` and `servicePort` in gateway config ServerConfig attributes.");
+              "Expected `serviceName` and `servicePort` in gateway config ServerConfig attributes for gateway config Configmap '"
+                  + gatewayConfigMap.getMetadata().getName()
+                  + "'. This is a bug, please report.");
         }
 
         // We're now creating only 1 gateway route configuration per ConfigMap, so we need to create

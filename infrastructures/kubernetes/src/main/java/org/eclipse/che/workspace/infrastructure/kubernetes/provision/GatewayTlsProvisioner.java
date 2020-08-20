@@ -15,6 +15,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsP
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -46,29 +47,35 @@ public class GatewayTlsProvisioner<T extends KubernetesEnvironment>
 
     for (ConfigMap configMap : k8sEnv.getConfigMaps().values()) {
       if (GatewayRouterProvisioner.isGatewayConfig(configMap)) {
-        useSecureProtocolForGatewayCm(configMap);
+        useSecureProtocolForGatewayConfigMap(configMap);
       }
     }
   }
 
-  private void useSecureProtocolForGatewayCm(ConfigMap cm) throws InfrastructureException {
+  private void useSecureProtocolForGatewayConfigMap(ConfigMap configMap)
+      throws InfrastructureException {
     Map<String, ServerConfigImpl> servers =
-        Annotations.newDeserializer(cm.getMetadata().getAnnotations()).servers();
+        Annotations.newDeserializer(configMap.getMetadata().getAnnotations()).servers();
 
     if (servers.isEmpty()) {
       return;
     }
     if (servers.size() != 1) {
       throw new InfrastructureException(
-          "Expected exactly 1 server in Gateway ConfigMap [" + cm.toString() + "]");
+          "Expected exactly 1 server in Gateway configuration ConfigMap '"
+              + configMap.getMetadata().getName()
+              + "'. This is a bug, please report.");
     }
-    String scKey = servers.keySet().stream().findFirst().get();
-    ServerConfigImpl serverConfig = servers.get(scKey);
-    String protocol = getSecureProtocol(serverConfig.getProtocol());
+    Entry<String, ServerConfigImpl> serverConfigEntry = servers.entrySet().iterator().next();
+    ServerConfigImpl serverConfig = serverConfigEntry.getValue();
 
-    serverConfig.setProtocol(protocol);
-    cm.getMetadata()
+    serverConfig.setProtocol(getSecureProtocol(serverConfig.getProtocol()));
+    configMap
+        .getMetadata()
         .getAnnotations()
-        .putAll(Annotations.newSerializer().server(scKey, serverConfig).annotations());
+        .putAll(
+            Annotations.newSerializer()
+                .server(serverConfigEntry.getKey(), serverConfig)
+                .annotations());
   }
 }
