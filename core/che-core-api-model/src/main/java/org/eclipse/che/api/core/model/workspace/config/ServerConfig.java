@@ -77,7 +77,18 @@ public interface ServerConfig {
    */
   String SERVER_NAME_ATTRIBUTE = "serverName";
 
+  /**
+   * This attribute is used to remember name of the service for single-host gateway configuration.
+   * It's used internally only, so the attribute is removed from {@link ServerConfig}'s attributes
+   * before going outside.
+   */
   String SERVICE_NAME_ATTRIBUTE = "serviceName";
+
+  /**
+   * This attribute is used to remember port of the service for single-host gateway configuration.
+   * It's used internally only, so the attribute is removed from {@link ServerConfig}'s attributes
+   * before going outside.
+   */
   String SERVICE_PORT_ATTRIBUTE = "servicePort";
 
   /**

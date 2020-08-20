@@ -11,12 +11,14 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -60,16 +62,16 @@ public class CheNamespace {
    * <p>`workspaceId` from given `identity` must be valid workspace ID, that is in {@link
    * WorkspaceStatus#STARTING} state. Otherwise, {@link InfrastructureException} is thrown.
    *
-   * @param configMaps to create
+   * @param configMap to create
    * @param identity to validate and label configmaps
    * @return created {@link ConfigMap}s
    * @throws InfrastructureException when something goes wrong
    */
-  public ConfigMap createConfigMap(ConfigMap configMap, RuntimeIdentity identity)
+  private ConfigMap createConfigMap(ConfigMap configMap, RuntimeIdentity identity)
       throws InfrastructureException {
-    validate(identity, WorkspaceStatus.STARTING);
-
     putLabel(configMap, CHE_WORKSPACE_ID_LABEL, identity.getWorkspaceId());
+    // remove this annotation, so it's not exposed in actual k8s object
+    configMap.getMetadata().getAnnotations().remove(CREATE_IN_CHE_INSTALLATION_NAMESPACE);
     return clientFactory.create().configMaps().inNamespace(cheNamespaceName).create(configMap);
   }
 
@@ -88,15 +90,13 @@ public class CheNamespace {
   public List<ConfigMap> createConfigMaps(List<ConfigMap> configMaps, RuntimeIdentity identity)
       throws InfrastructureException {
     if (configMaps.isEmpty()) {
-      return configMaps;
+      return Collections.emptyList();
     }
     validate(identity, WorkspaceStatus.STARTING);
 
     List<ConfigMap> createdConfigMaps = new ArrayList<>();
     for (ConfigMap cm : configMaps) {
-      putLabel(cm, CHE_WORKSPACE_ID_LABEL, identity.getWorkspaceId());
-      createdConfigMaps.add(
-          clientFactory.create().configMaps().inNamespace(cheNamespaceName).create(cm));
+      createdConfigMaps.add(createConfigMap(cm, identity));
     }
     return createdConfigMaps;
   }

@@ -701,26 +701,41 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
 
     List<ConfigMap> createdConfigMaps = new ArrayList<>();
+
+    List<ConfigMap> cheNamespaceConfigMaps = new ArrayList<>();
     for (ConfigMap configMap : env.getConfigMaps().values()) {
       Map<String, String> annotations = configMap.getMetadata().getAnnotations();
-      if (annotations == null
-          || annotations.isEmpty()
-          || FALSE
-              .toString()
-              .equals(
-                  annotations.getOrDefault(
-                      CREATE_IN_CHE_INSTALLATION_NAMESPACE, FALSE.toString()))) {
-        createdConfigMaps.add(namespace.configMaps().create(configMap));
-      } else if (TRUE.toString()
-          .equals(
-              annotations.getOrDefault(CREATE_IN_CHE_INSTALLATION_NAMESPACE, FALSE.toString()))) {
-        createdConfigMaps.add(cheNamespace.createConfigMap(configMap, identity));
+      if (shouldCreateInCheNamespace(annotations)) {
+        // we collect the che namespace configmaps into separate list
+        cheNamespaceConfigMaps.add(configMap);
       } else {
-        throw new InfrastructureException("what?");
+        createdConfigMaps.add(namespace.configMaps().create(configMap));
       }
     }
 
+    // create che namespace configmaps in one batch, because we're doing some extra checks inside
+    createdConfigMaps.addAll(cheNamespace.createConfigMaps(cheNamespaceConfigMaps, identity));
+
     return createdConfigMaps;
+  }
+
+  /**
+   * Create in Che installation namespace only if there is {@link
+   * Annotations#CREATE_IN_CHE_INSTALLATION_NAMESPACE} annotation set exactly to `true`. In all
+   * other cases we create the object in Workspace's namespace.
+   *
+   * @param annotations object's annotations
+   * @return `true` if {@link Annotations#CREATE_IN_CHE_INSTALLATION_NAMESPACE} is set to `true`.
+   *     False otherwise.
+   */
+  private boolean shouldCreateInCheNamespace(Map<String, String> annotations) {
+    if (annotations == null || annotations.isEmpty()) {
+      return false;
+    }
+
+    return annotations
+        .getOrDefault(CREATE_IN_CHE_INSTALLATION_NAMESPACE, FALSE.toString())
+        .equals(TRUE.toString());
   }
 
   @Traced
