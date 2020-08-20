@@ -20,7 +20,7 @@ import javax.inject.Singleton;
 @Singleton
 public class GatewayRouteConfigGeneratorFactory {
 
-  public GatewayRouteConfigGenerator create(String namespace) {
+  public GatewayRouteConfigGenerator create() {
     return new TraefikGatewayRouteConfigGenerator();
   }
 }

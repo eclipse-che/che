@@ -18,18 +18,25 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 /**
  * Generates config for external servers that we want to expose in the Gateway.
  *
- *
  * <p>Implementation provides configuration for specific Gateway technology (e.g., Traefik).
  */
 public interface GatewayRouteConfigGenerator {
 
   /**
+   * Add prepared {@link ConfigMap},that will hold gateway route configuration, to the generator. So
+   * it can be generated later with {@link GatewayRouteConfigGenerator#generate(String)}.
+   *
+   * <p>Provided {@link ConfigMap} must be properly labeled and must be annotated with {@link
+   * org.eclipse.che.api.core.model.workspace.config.ServerConfig} annotations.
+   *
    * @param routeConfig config to add
+   * @throws InfrastructureException when passed ConfigMap is not gateway configuration ConfigMap
    */
-  void addRouteConfig(String name, ConfigMap routeConfig);
+  void addRouteConfig(String name, ConfigMap routeConfig) throws InfrastructureException;
 
   /**
    * Generates content of configurations for services, defined earlier by added {@link
+   * GatewayRouteConfigGenerator#addRouteConfig(String, ConfigMap)}. Returned {@code Map<String,
    * String>} will be used as a value of ConfigMap and injected into Gateway pod.
    *
    * <p>Implementation must ensure that Gateway configured with returned content will route the
@@ -45,5 +52,5 @@ public interface GatewayRouteConfigGenerator {
    *
    * @return full content of configuration for the services
    */
-  Map<String, String> generate(String serviceName, String servicePort, String namespace) throws InfrastructureException;
+  Map<String, String> generate(String namespace) throws InfrastructureException;
 }

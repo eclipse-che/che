@@ -67,8 +67,7 @@ public class GatewayRouterProvisioner implements ConfigurationProvisioner<Kubern
 
         // We're now creating only 1 gateway route configuration per ConfigMap, so we need to create
         // generator in each loop iteration.
-        GatewayRouteConfigGenerator gatewayRouteConfigGenerator =
-            configGeneratorFactory.create(identity.getInfrastructureNamespace());
+        GatewayRouteConfigGenerator gatewayRouteConfigGenerator = configGeneratorFactory.create();
         gatewayRouteConfigGenerator.addRouteConfig(configMapEntry.getKey(), gatewayConfigMap);
 
         Map<String, String> gatewayConfiguration =
