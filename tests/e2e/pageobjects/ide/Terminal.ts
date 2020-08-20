@@ -19,6 +19,14 @@ export class Terminal {
     private static readonly TERMINAL_ROWS_XPATH_LOCATOR_PREFFIX = '(//div[contains(@class, \'terminal-container\')]//div[contains(@class, \'terminal\')]//div[contains(@class, \'xterm-rows\')])';
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
+    async waitTab(tabTitle: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT) {
+        Logger.debug(`Terminal.waitTab "${tabTitle}"`);
+
+        const terminalTabLocator: By = By.css(this.getTerminalTabCssLocator(tabTitle));
+
+        await this.driverHelper.waitVisibility(terminalTabLocator, timeout);
+    }
+    
     async waitTabAbsence(tabTitle: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT) {
         Logger.debug(`Terminal.waitTabAbsence "${tabTitle}"`);
 
