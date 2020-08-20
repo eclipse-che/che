@@ -12,6 +12,9 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature.WRITE_DOC_START_MARKER;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_NAME_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_PORT_ATTRIBUTE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner.isGatewayConfig;
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
@@ -25,42 +28,68 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 
-/** Config generator for Traefik Gateway */
+/**
+ * Config generator for Traefik Gateway.
+ *
+ * <p>Content of single service configuration looks like this:
+ *
+ * <pre>
+ * http:
+ *   routers:
+ *     {name}:
+ *       rule: "PathPrefix(`{path}`)"
+ *       service: {name}
+ *       middlewares:
+ *       - "{name}"
+ *       - "{name}_headers"
+ *       priority: 100
+ *   services:
+ *     {name}:
+ *       loadBalancer:
+ *         servers:
+ *         - url: '{serviceUrl}'
+ *   middlewares:
+ *     {name}:
+ *       stripPrefix:
+ *         prefixes:
+ *         - "{GatewayRouteConfig#routePath}"
+ *     {name}_headers:
+ *       customRequestHeaders:
+ *         X-Forwarded-Proto: "{protocol}"
+ * </pre>
+ */
 public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGenerator {
+
+  private static final String SERVICE_URL_FORMAT = "http://%s.%s.svc.cluster.local:%s";
 
   private final Map<String, ConfigMap> routeConfigs = new HashMap<>();
 
   @Override
-  public void addRouteConfig(String name, ConfigMap routeConfig) {
-    this.routeConfigs.put(name, routeConfig);
+  public void addRouteConfig(String name, ConfigMap routeConfig) throws InfrastructureException {
+    if (isGatewayConfig(routeConfig)) {
+      this.routeConfigs.put(name, routeConfig);
+    } else {
+      throw new InfrastructureException(
+          "Not a gateway configuration ConfigMap '"
+              + routeConfig.getMetadata().getName()
+              + "'. This is a bug, please report.");
+    }
   }
 
   /**
-   * <p>Content of single service configuration looks like this:
+   * Generates configuration for all configs added by {@link
+   * TraefikGatewayRouteConfigGenerator#addRouteConfig(String, ConfigMap)} so far. It does not
+   * change them, so this method can be used repeatedly.
    *
-   * <pre>
-   * http:
-   *   routers:
-   *     {name}:
-   *       rule: "PathPrefix(`{GatewayRouteConfig#routePath}`)"
-   *       service: {GatewayRouteConfig#name}
-   *       middlewares:
-   *       - "{GatewayRouteConfig#name}"
-   *       priority: 100
-   *   services:
-   *     {name}:
-   *       loadBalancer:
-   *         servers:
-   *         - url: '{serviceUrl}'
-   *   middlewares:
-   *     {name}:
-   *       stripPrefix:
-   *         prefixes:
-   *         - "{GatewayRouteConfig#routePath}"
-   * </pre>
+   * <p>Returned {@code Map<String, String>} has keys created from {@code name} parameter of {@link
+   * TraefikGatewayRouteConfigGenerator#addRouteConfig(String, ConfigMap)} + '.yml' suffix. Values
+   * are full configuration for single gateway route. This map is suppose to be directly used as
+   * {@link ConfigMap}'s data.
+   *
+   * @return map with added routes configurations
    */
   @Override
-  public Map<String, String> generate(String serviceName, String servicePort, String namespace) throws InfrastructureException {
+  public Map<String, String> generate(String namespace) throws InfrastructureException {
     Map<String, String> cmData = new HashMap<>();
     for (Entry<String, ConfigMap> routeConfig : routeConfigs.entrySet()) {
       Map<String, ServerConfigImpl> servers =
@@ -70,13 +99,16 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
         throw new InfrastructureException(
             "Expected exactly 1 server [" + routeConfig.getValue().toString() + "]");
       }
-      ServerConfigImpl server = servers.get(servers.keySet().stream().findFirst().get());
+      ServerConfigImpl server = servers.get(servers.keySet().iterator().next());
+      String serviceName = server.getAttributes().get(SERVICE_NAME_ATTRIBUTE);
+      String servicePort = server.getAttributes().get(SERVICE_PORT_ATTRIBUTE);
 
-      String traefikRouteConfig = generate(
-          routeConfig.getKey(),
-          createServiceUrl(serviceName, servicePort, namespace),
-          server.getPath(),
-          server.getProtocol());
+      String traefikRouteConfig =
+          generate(
+              routeConfig.getKey(),
+              createServiceUrl(serviceName, servicePort, namespace),
+              server.getPath(),
+              server.getProtocol());
       cmData.put(routeConfig.getKey() + ".yml", traefikRouteConfig);
     }
     return cmData;
@@ -88,6 +120,7 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
    * @param name name of the service
    * @param serviceUrl url of service we want to route to
    * @param path path to route and strip
+   * @param protocol protocol of the service to properly set the headers
    * @return traefik service route config
    */
   private String generate(String name, String serviceUrl, String path, String protocol)
@@ -110,6 +143,9 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
       generator.writeFieldName("middlewares");
       generateMiddlewares(generator, name, path, protocol);
 
+      generator.writeEndObject();
+      generator.writeEndObject();
+
       generator.flush();
 
       return sw.toString();
@@ -127,6 +163,7 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
    *   service: "{name}"
    *   middlewares:
    *   - "{name}"
+   *   - "{name}_headers
    *   priority: 100
    * </pre>
    */
@@ -187,6 +224,10 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
    *   stripPrefix:
    *     prefixes:
    *     - "{path}"
+   * {name}_headers:
+   *   headers:
+   *     customRequestHeaders:
+   *       X-Forwarded-Proto: "{protocol}"
    * </pre>
    */
   private void generateMiddlewares(
@@ -218,8 +259,7 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
     generator.writeEndObject();
   }
 
-  String createServiceUrl(String serviceName, String servicePort, String serviceNamespace) {
-    return String.format(
-        "http://%s.%s.svc.cluster.local:%s", serviceName, serviceNamespace, servicePort);
+  private String createServiceUrl(String serviceName, String servicePort, String serviceNamespace) {
+    return String.format(SERVICE_URL_FORMAT, serviceName, serviceNamespace, servicePort);
   }
 }

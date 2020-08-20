@@ -74,13 +74,24 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
     for (String esKey : externalServers.keySet()) {
       final String serverName = KubernetesServerExposer.makeServerNameValidForDns(serverId);
       final String name = createName(serviceName, serverName);
-      k8sEnv.getConfigMaps().put(name,
-          createGatewayRouteConfigmap(name, machineName, serviceName, servicePort, serverName, esKey,
-              externalServers.get(esKey)));
+      k8sEnv
+          .getConfigMaps()
+          .put(
+              name,
+              createGatewayRouteConfigmap(
+                  name,
+                  machineName,
+                  serviceName,
+                  servicePort,
+                  serverName,
+                  esKey,
+                  externalServers.get(esKey)));
     }
   }
 
-  private ConfigMap createGatewayRouteConfigmap(String name, String machineName,
+  private ConfigMap createGatewayRouteConfigmap(
+      String name,
+      String machineName,
       String serviceName,
       ServicePort servicePort,
       String serverName,
@@ -89,7 +100,9 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
 
     final String path = ensureDontEndsWithSlash(strategy.getExternalPath(serviceName, serverName));
     serverConfig.getAttributes().put(SERVICE_NAME_ATTRIBUTE, serviceName);
-    serverConfig.getAttributes().put(SERVICE_PORT_ATTRIBUTE, getTargetPort(servicePort.getTargetPort()));
+    serverConfig
+        .getAttributes()
+        .put(SERVICE_PORT_ATTRIBUTE, getTargetPort(servicePort.getTargetPort()));
 
     final Map<String, String> annotations =
         Annotations.newSerializer()
@@ -98,12 +111,13 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
             .annotations();
     annotations.put(CREATE_IN_CHE_INSTALLATION_NAMESPACE, TRUE.toString());
 
-    ConfigMapBuilder gatewayConfigMap = new ConfigMapBuilder()
-        .withNewMetadata()
-        .withName(name)
-        .withLabels(GatewayRouterProvisioner.GATEWAY_CONFIGMAP_LABELS)
-        .withAnnotations(annotations)
-        .endMetadata();
+    ConfigMapBuilder gatewayConfigMap =
+        new ConfigMapBuilder()
+            .withNewMetadata()
+            .withName(name)
+            .withLabels(GatewayRouterProvisioner.GATEWAY_CONFIGMAP_LABELS)
+            .withAnnotations(annotations)
+            .endMetadata();
     return gatewayConfigMap.build();
   }
 

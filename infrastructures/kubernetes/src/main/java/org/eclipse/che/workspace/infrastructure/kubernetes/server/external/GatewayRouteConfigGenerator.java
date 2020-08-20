@@ -37,7 +37,8 @@ public interface GatewayRouteConfigGenerator {
   /**
    * Generates content of configurations for services, defined earlier by added {@link
    * GatewayRouteConfigGenerator#addRouteConfig(String, ConfigMap)}. Returned {@code Map<String,
-   * String>} will be used as a value of ConfigMap and injected into Gateway pod.
+   * String>} must be ready to be used as a {@link ConfigMap}'s data, which is further injected into
+   * Gateway pod.
    *
    * <p>Implementation must ensure that Gateway configured with returned content will route the
    * requests on {@code path} into {@code serviceUrl}. Also it must strip {@code path} from request
