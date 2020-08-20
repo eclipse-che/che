@@ -50,7 +50,7 @@ public class GatewayRouterProvisioner implements ConfigurationProvisioner<Kubern
             new Annotations.Deserializer(gatewayConfigMap.getMetadata().getAnnotations()).servers();
         if (servers.size() != 1) {
           throw new InfrastructureException(
-              "Expected only 1 server in gateway config ConfigMap's '"
+              "Expected exactly 1 server in gateway config ConfigMap's '"
                   + gatewayConfigMap.getMetadata().getName()
                   + "' annotations. This is a bug, please report.");
         }
