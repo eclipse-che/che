@@ -16,6 +16,7 @@ import java.net.URI;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -46,7 +47,8 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
       KubernetesRuntimeStateCache runtimeStatuses,
       @Assisted T kubernetesEnvironment,
       @Assisted RuntimeIdentity identity,
-      @Assisted RuntimeInfrastructure infrastructure) {
+      @Assisted RuntimeInfrastructure infrastructure)
+      throws ValidationException, InfrastructureException {
     super(kubernetesEnvironment, identity, infrastructure);
     this.namespaceFactory = namespaceFactory;
     this.runtimeFactory = runtimeFactory;
