@@ -11,12 +11,18 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner.GATEWAY_CONFIGMAP_LABELS;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.Collections;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.testng.annotations.Test;
 
@@ -38,34 +44,37 @@ public class GatewayServerExposerTest {
 
   @Test
   public void testExposeServiceWithGatewayConfigmap() {
+    // given
     KubernetesEnvironment k8sEnv = KubernetesEnvironment.builder().build();
+
+    // when
     serverExposer.expose(k8sEnv, machineName, serviceName, serverId, servicePort, servers);
-//    List<GatewayRouteConfig> configMaps = k8sEnv.getGatewayRouteConfigs();
 
-    // TODO: assert created route configs
+    // then
+    Map<String, ConfigMap> configMaps = k8sEnv.getConfigMaps();
+    assertTrue(configMaps.containsKey(serviceName + "-" + serverId));
+    ConfigMap serverConfigMap = configMaps.get("service-server");
 
-    //    assertTrue(configMaps.containsKey(serviceName + "-" + serverId));
-    //
-    //    ConfigMap serverConfigMap = configMaps.get("service-server");
-    //
-    //    Map<String, String> serverConfigMapData = serverConfigMap.getData();
-    //    assertTrue(serverConfigMapData.containsKey("hello"));
-    //    assertEquals(
-    //        serverConfigMapData.get("hello"),
-    //        "service-server#http://service.che.svc.cluster.local:1234#/service/server/");
-    //    assertEquals(serverConfigMap.getMetadata().getLabels(), GATEWAY_CONFIGMAP_LABELS);
-    //
-    //    Map<String, String> annotations = serverConfigMap.getMetadata().getAnnotations();
-    //    Annotations.Deserializer deserializer = Annotations.newDeserializer(annotations);
-    //    assertEquals(deserializer.machineName(), machineName);
-    //
-    //    Map<String, ServerConfigImpl> exposedServers = deserializer.servers();
-    //    assertTrue(exposedServers.containsKey("serverOne"));
-    //
-    //    ServerConfig s1 = exposedServers.get("serverOne");
-    //    assertEquals(s1.getAttributes(), s1attrs);
-    //    assertEquals(s1.getPort(), "1111");
-    //    assertEquals(s1.getProtocol(), "ws");
-    //    assertEquals(s1.getPath(), "/service/server/");
+    // data should be empty at this point
+    assertTrue(serverConfigMap.getData() == null || serverConfigMap.getData().isEmpty());
+
+    assertEquals(serverConfigMap.getMetadata().getLabels(), GATEWAY_CONFIGMAP_LABELS);
+
+    Map<String, String> annotations = serverConfigMap.getMetadata().getAnnotations();
+    Annotations.Deserializer deserializer = Annotations.newDeserializer(annotations);
+    assertEquals(deserializer.machineName(), machineName);
+
+    Map<String, ServerConfigImpl> exposedServers = deserializer.servers();
+    assertTrue(exposedServers.containsKey("serverOne"));
+
+    ServerConfig s1 = exposedServers.get("serverOne");
+    assertEquals(
+        s1.getAttributes().get(s1attrs.keySet().iterator().next()),
+        s1attrs.values().iterator().next());
+    assertEquals(s1.getAttributes().get(ServerConfigImpl.SERVICE_NAME_ATTRIBUTE), "service");
+    assertEquals(s1.getAttributes().get(ServerConfigImpl.SERVICE_PORT_ATTRIBUTE), "1234");
+    assertEquals(s1.getPort(), "1111");
+    assertEquals(s1.getProtocol(), "ws");
+    assertEquals(s1.getPath(), "/service/server");
   }
 }
