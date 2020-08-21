@@ -11,18 +11,16 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.shouldCreateInCheNamespace;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
@@ -32,7 +30,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
-import org.eclipse.che.workspace.infrastructure.kubernetes.CheKubernetesClientFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstallationLocation;
 
@@ -45,13 +43,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstal
 public class CheNamespace {
 
   private final String cheNamespaceName;
-  private final CheKubernetesClientFactory clientFactory;
+  private final CheServerKubernetesClientFactory clientFactory;
   private final WorkspaceRuntimes workspaceRuntimes;
 
   @Inject
   public CheNamespace(
       CheInstallationLocation installationLocation,
-      CheKubernetesClientFactory clientFactory,
+      CheServerKubernetesClientFactory clientFactory,
       WorkspaceRuntimes workspaceRuntimes)
       throws InfrastructureException {
     this.cheNamespaceName = installationLocation.getInstallationLocationNamespace();
@@ -75,11 +73,7 @@ public class CheNamespace {
       throws InfrastructureException {
     putLabel(configMap, CHE_WORKSPACE_ID_LABEL, identity.getWorkspaceId());
     // check that ConfigMap is properly annotated to be created in Che installation namespace
-    Map<String, String> annotations = configMap.getMetadata().getAnnotations();
-    if (annotations == null
-        || !annotations
-            .getOrDefault(CREATE_IN_CHE_INSTALLATION_NAMESPACE, FALSE.toString())
-            .equals(TRUE.toString())) {
+    if (!shouldCreateInCheNamespace(configMap)) {
       throw new InfrastructureException(
           String.format(
               "ConfigMap '%s' to be created in Che installation namespace is not properly annotated with '%s=true'. This is a bug, please report.",

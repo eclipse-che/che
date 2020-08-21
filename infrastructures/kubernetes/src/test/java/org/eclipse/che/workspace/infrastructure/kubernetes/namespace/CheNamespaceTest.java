@@ -37,7 +37,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
-import org.eclipse.che.workspace.infrastructure.kubernetes.CheKubernetesClientFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstallationLocation;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -55,7 +55,7 @@ public class CheNamespaceTest {
   private CheNamespace cheNamespace;
 
   @Mock private CheInstallationLocation cheInstallationLocation;
-  @Mock private CheKubernetesClientFactory clientFactory;
+  @Mock private CheServerKubernetesClientFactory clientFactory;
   @Mock private WorkspaceRuntimes workspaceRuntimes;
   @Mock private RuntimeIdentity identity;
   @Mock private KubernetesClient kubeClient;

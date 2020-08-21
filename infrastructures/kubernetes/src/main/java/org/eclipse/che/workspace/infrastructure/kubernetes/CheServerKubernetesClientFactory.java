@@ -25,10 +25,10 @@ import org.eclipse.che.commons.annotation.Nullable;
  * provides client with default {@link Config}.
  */
 @Singleton
-public class CheKubernetesClientFactory extends KubernetesClientFactory {
+public class CheServerKubernetesClientFactory extends KubernetesClientFactory {
 
   @Inject
-  public CheKubernetesClientFactory(
+  public CheServerKubernetesClientFactory(
       @Nullable @Named("che.infra.kubernetes.master_url") String masterUrl,
       @Nullable @Named("che.infra.kubernetes.trust_certs") Boolean doTrustCerts,
       @Named("che.infra.kubernetes.client.http.async_requests.max") int maxConcurrentRequests,

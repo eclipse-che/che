@@ -11,12 +11,10 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.shouldCreateInCheNamespace;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.CHECK_SERVERS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_MACHINES_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_RUNNING_ASYNC;
@@ -25,7 +23,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodTemplateSpec;
@@ -717,29 +714,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     createdConfigMaps.addAll(cheNamespace.createConfigMaps(cheNamespaceConfigMaps, identity));
 
     return createdConfigMaps;
-  }
-
-  /**
-   * Create in Che installation namespace only if there is {@link
-   * Annotations#CREATE_IN_CHE_INSTALLATION_NAMESPACE} annotation set exactly to `true`. In all
-   * other cases we create the object in Workspace's namespace.
-   *
-   * @param k8sObject object to check
-   * @return `true` if {@link Annotations#CREATE_IN_CHE_INSTALLATION_NAMESPACE} is set to `true`.
-   *     False otherwise.
-   */
-  private boolean shouldCreateInCheNamespace(HasMetadata k8sObject) {
-    if (k8sObject.getMetadata() == null) {
-      return false;
-    }
-    Map<String, String> annotations = k8sObject.getMetadata().getAnnotations();
-    if (annotations == null || annotations.isEmpty()) {
-      return false;
-    }
-
-    return annotations
-        .getOrDefault(CREATE_IN_CHE_INSTALLATION_NAMESPACE, FALSE.toString())
-        .equals(TRUE.toString());
   }
 
   @Traced
