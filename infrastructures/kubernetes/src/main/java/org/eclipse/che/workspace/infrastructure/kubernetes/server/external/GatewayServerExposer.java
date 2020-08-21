@@ -98,7 +98,7 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
       String scRef,
       ServerConfig serverConfig) {
 
-    final String path = ensureDontEndsWithSlash(strategy.getExternalPath(serviceName, serverName));
+    final String path = ensureEndsWithSlash(strategy.getExternalPath(serviceName, serverName));
     serverConfig.getAttributes().put(SERVICE_NAME_ATTRIBUTE, serviceName);
     serverConfig
         .getAttributes()
@@ -121,8 +121,8 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
     return gatewayConfigMap.build();
   }
 
-  private String ensureDontEndsWithSlash(String path) {
-    return path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
+  private String ensureEndsWithSlash(String path) {
+    return path.endsWith("/") ? path : path + '/';
   }
 
   private String createName(String serviceName, String serverName) {

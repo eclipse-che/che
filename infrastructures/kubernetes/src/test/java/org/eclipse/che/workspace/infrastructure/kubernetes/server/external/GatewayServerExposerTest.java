@@ -75,6 +75,6 @@ public class GatewayServerExposerTest {
     assertEquals(s1.getAttributes().get(ServerConfigImpl.SERVICE_PORT_ATTRIBUTE), "1234");
     assertEquals(s1.getPort(), "1111");
     assertEquals(s1.getProtocol(), "ws");
-    assertEquals(s1.getPath(), "/service/server");
+    assertEquals(s1.getPath(), "/service/server/");
   }
 }
