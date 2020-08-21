@@ -16,7 +16,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.RECIPE_CONTAINER_SO
 
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
