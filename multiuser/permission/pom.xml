@@ -28,7 +28,6 @@
         <module>che-multiuser-permission-devfile</module>
         <module>che-multiuser-permission-workspace</module>
         <module>che-multiuser-permission-workspace-activity</module>
-        <module>che-multiuser-permission-factory</module>
         <module>che-multiuser-permission-system</module>
         <module>che-multiuser-permission-resource</module>
         <module>che-multiuser-permission-logger</module>

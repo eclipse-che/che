@@ -27,7 +27,6 @@ import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -90,9 +89,6 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
       for (Map.Entry<String, ? extends MachineConfig> machineEntry :
           sourceEnv.getMachines().entrySet()) {
         MachineConfig machineConfig = machineEntry.getValue();
-
-        List<Installer> installers = Collections.emptyList();
-
         machines.put(
             machineEntry.getKey(),
             new InternalMachineConfig(
