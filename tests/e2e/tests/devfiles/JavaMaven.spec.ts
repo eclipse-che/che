@@ -40,7 +40,7 @@ suite(`${stack} test`, async () => {
 
     suite('Language server validation', async () => {
         commonLsTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
-        commonLsTests.errorHighlighting(tabTitle, 'error', 11);
+        commonLsTests.errorHighlighting(tabTitle, 'error_text', 11);
         commonLsTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');
         commonLsTests.codeNavigation(tabTitle, 9, 10, codeNavigationClassName);
     });
