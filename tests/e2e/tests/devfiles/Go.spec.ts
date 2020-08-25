@@ -17,7 +17,7 @@ import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 import { Logger } from '../../utils/Logger';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
 
-const preferencesHalder: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
+const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
 const workspaceStack: string = 'Go';
 const workspaceSampleName: string = 'src';
@@ -25,8 +25,8 @@ const workspaceRootFolderName: string = 'github.com';
 const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/golang/example/outyet`;
 const fileName: string = `main.go`;
 
-const taskTestOutyet: string = 'test outyet';
-const taskRunServer: string = 'run outyet';
+const taskTestOutyet: string = '1.3 Test outyet';
+const taskRunServer: string = '1.1 Run outyet';
 // const taskStopServer: string = 'stop outyet';
 const taskExpectedDialogText: string = 'A process is now listening on port 8080';
 
@@ -35,7 +35,7 @@ suite(`${workspaceStack} test`, async () => {
     suite(`Create ${workspaceStack} workspace`, async () => {
         test('Workaround for issue #16113', async () => {
             Logger.warn(`Manually setting a preference for golang devfile LS based on issue: https://github.com/eclipse/che/issues/16113`);
-            await preferencesHalder.setUseGoLanaguageServer();
+            await preferencesHandler.setUseGoLanaguageServer();
         });
         workspaceHandler.createAndOpenWorkspace(workspaceStack);
         projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);

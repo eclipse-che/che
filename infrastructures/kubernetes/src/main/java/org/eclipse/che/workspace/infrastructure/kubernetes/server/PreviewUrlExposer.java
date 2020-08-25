@@ -16,6 +16,7 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_UNIQUE_PART_SIZE;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
@@ -31,6 +32,7 @@ import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Ingresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Services;
 
@@ -47,7 +49,12 @@ public class PreviewUrlExposer<T extends KubernetesEnvironment> {
   private final ExternalServerExposer<T> externalServerExposer;
 
   @Inject
-  public PreviewUrlExposer(ExternalServerExposer<T> externalServerExposer) {
+  public PreviewUrlExposer(ExternalServerExposerProvider<T> externalServerExposer) {
+    this(externalServerExposer.get());
+  }
+
+  @VisibleForTesting
+  protected PreviewUrlExposer(ExternalServerExposer<T> externalServerExposer) {
     this.externalServerExposer = externalServerExposer;
   }
 

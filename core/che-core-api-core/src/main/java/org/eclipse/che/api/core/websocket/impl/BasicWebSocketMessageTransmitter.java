@@ -51,11 +51,11 @@ public class BasicWebSocketMessageTransmitter implements WebSocketMessageTransmi
     }
 
     if (!sessionOptional.isPresent() || !sessionOptional.get().isOpen()) {
-      LOG.debug("Session is not registered or closed, adding message to pending");
+      LOG.trace("Session is not registered or closed, adding message to pending");
 
       reSender.add(endpointId, message);
     } else {
-      LOG.debug("Session registered and open, sending message");
+      LOG.trace("Session registered and open, sending message");
 
       try {
         sessionOptional.get().getBasicRemote().sendText(message);

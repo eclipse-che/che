@@ -34,7 +34,7 @@ public class CountedRejectedExecutionHandler implements RejectedExecutionHandler
     this.counter =
         Counter.builder("executor.rejected")
             .tags(Tags.concat(tags, "name", name))
-            .description("The number of tasks that was not accepted for execution")
+            .description("The number of tasks not accepted for execution")
             .baseUnit(BaseUnits.TASKS)
             .register(registry);
   }

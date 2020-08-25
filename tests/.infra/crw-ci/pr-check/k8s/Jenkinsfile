@@ -11,7 +11,8 @@ pipeline {
     }
 
     environment {
-        PATH = "/tmp:/qa/tools/opt/apache-maven-3.5.4/bin:$PATH"
+        PATH = "/tmp:/qa/tools/opt/apache-maven-3.6.1/bin:/qa/tools/opt/openjdk-11.0.6.10/bin:$PATH"
+        JAVA_HOME="/qa/tools/opt/openjdk-11.0.6.10"
         JENKINS_BUILD = "true"
 
         DEVFILE_PATH = "${WORKSPACE}/test-workspace-devfile.yaml"
@@ -78,6 +79,7 @@ pipeline {
                     } else {
                         mutableCheImageTag = cheImageTag
                     }
+                    sh "sudo yum install -y glibc.i686 libfreetype.so.6 libfontconfig.so.1 libstdc++.so.6"
                 }
             }
         }
@@ -160,7 +162,6 @@ pipeline {
                         sh """
                             project_list=(
                                 eclipse/che-parent
-                                eclipse/che-docs
                             )
                             
                             for project in \${project_list[@]};
@@ -323,9 +324,6 @@ EOL"""
                      CHE_URL=https://${cheHost}
                      docker run --shm-size=1g --net=host --ipc=host \\
                        -p 5920:5920 \\
-                       -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \\
-                       -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=420000 \\
-                       -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \\
                        -e TS_SELENIUM_BASE_URL=\${CHE_URL} \\
                        -e TS_SELENIUM_LOG_LEVEL='DEBUG' \\
                        -e TS_SELENIUM_MULTIUSER="true" \\

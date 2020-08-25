@@ -16,10 +16,11 @@ import { By, error } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { NotificationCenter } from './NotificationCenter';
 
-export enum RightToolbarButton {
+export enum LeftToolbarButton {
     Explorer = 'Explorer',
     Git = 'Git',
-    Debug = 'Debug'
+    Debug = 'Debug',
+    Openshift = 'OpenShift'
 }
 
 @injectable()
@@ -136,21 +137,27 @@ export class Ide {
         const mainIdeParts: Array<By> = [By.css(Ide.TOP_MENU_PANEL_CSS), By.css(Ide.LEFT_CONTENT_PANEL_CSS), By.id(Ide.EXPLORER_BUTTON_ID)];
 
         for (const idePartLocator of mainIdeParts) {
-            await this.driverHelper.waitVisibility(idePartLocator, timeout);
+            try {
+                await this.driverHelper.waitVisibility(idePartLocator, timeout);
+            } catch (err) {
+                if (err instanceof error.NoSuchWindowError) {
+                    await this.driverHelper.waitVisibility(idePartLocator, timeout);
+                }
+            }
         }
     }
 
-    async waitRightToolbarButton(buttonTitle: RightToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug('Ide.waitRightToolbarButton');
+    async waitLeftToolbarButton(buttonTitle: LeftToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Ide.waitLeftToolbarButton');
 
-        const buttonLocator: By = this.getRightToolbarButtonLocator(buttonTitle);
+        const buttonLocator: By = this.getLeftToolbarButtonLocator(buttonTitle);
         await this.driverHelper.waitVisibility(buttonLocator, timeout);
     }
 
-    async waitAndClickRightToolbarButton(buttonTitle: RightToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug('Ide.waitAndClickRightToolbarButton');
+    async waitAndClickLeftToolbarButton(buttonTitle: LeftToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug('Ide.waitAndClickLeftToolbarButton');
 
-        const buttonLocator: By = this.getRightToolbarButtonLocator(buttonTitle);
+        const buttonLocator: By = this.getLeftToolbarButtonLocator(buttonTitle);
         await this.driverHelper.waitAndClick(buttonLocator, timeout);
     }
 
@@ -257,8 +264,23 @@ export class Ide {
     async closeAllNotifications(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug(`Ide.closeAllNotifications`);
 
-        await this.notificationCenter.open(timeout);
-        await this.notificationCenter.closeAll(timeout);
+        for (let i: number = 0; i < 5; i++) {
+            await this.notificationCenter.open(timeout);
+            try {
+                await this.notificationCenter.closeAll(timeout);
+                break;
+            } catch (err) {
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err;
+                }
+
+                if (i === 4) {
+                    Logger.debug('The last try to clear of the notification center was unsuccessful');
+
+                    throw err;
+                }
+            }
+        }
     }
 
     async waitApllicationIsReady(url: string,
@@ -284,7 +306,7 @@ export class Ide {
             `//li[@title[contains(.,'${buttonTitle}')] and contains(@id, 'shell-tab')] and contains(@class, 'p-mod-current')`);
     }
 
-    private getRightToolbarButtonLocator(buttonTitle: String): By {
+    private getLeftToolbarButtonLocator(buttonTitle: String): By {
         return By.xpath(`//div[@id='theia-left-content-panel']//ul[@class='p-TabBar-content']` +
             `//li[@title[contains(.,'${buttonTitle}')] and contains(@id, 'shell-tab')]`);
     }

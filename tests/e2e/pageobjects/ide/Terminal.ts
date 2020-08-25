@@ -16,6 +16,7 @@ import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class Terminal {
+    private static readonly TERMINAL_ROWS_XPATH_LOCATOR_PREFFIX = '(//div[contains(@class, \'terminal-container\')]//div[contains(@class, \'terminal\')]//div[contains(@class, \'xterm-rows\')])';
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -93,11 +94,22 @@ export class Terminal {
         Logger.debug(`Terminal.getText tab: ${terminalTab}`);
 
         const terminalIndex: number = await this.getTerminalIndex(terminalTab);
-        const terminalRowsXpathLocator: string = `(//div[contains(@class, 'terminal-container')]` +
-            `//div[contains(@class, 'terminal')]//div[contains(@class, 'xterm-rows')])[${terminalIndex}]`;
-
         await this.selectTerminalTab(terminalTab, timeout);
-        return await this.driverHelper.waitAndGetText(By.xpath(terminalRowsXpathLocator), timeout);
+        return await this.driverHelper.waitAndGetText(By.xpath(Terminal.TERMINAL_ROWS_XPATH_LOCATOR_PREFFIX + `[${terminalIndex}]`), timeout);
+    }
+
+    async selectTabByPrefixAndWaitText(terminalTab: string, expectedText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        Logger.debug(`Terminal.selectTabByPrefixAndWaitText tab: ${terminalTab} text: ${expectedText}`);
+
+        const terminalTabLocatorWithPreffix: string = `//li[contains(@title, '${terminalTab}')]`;
+        const terminalIndex: number = await this.getTerminalIndex(terminalTab);
+
+        await this.driverHelper.waitAndClick(By.xpath(terminalTabLocatorWithPreffix), timeout);
+        await this.driverHelper.waitUntilTrue(async () => {
+            const terminalText: string = await this.driverHelper.waitAndGetText(By.xpath(Terminal.TERMINAL_ROWS_XPATH_LOCATOR_PREFFIX + `[${terminalIndex}]`), timeout);
+            return terminalText.includes(expectedText);
+
+        }, timeout);
     }
 
     async waitText(terminalTab: string, expectedText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -120,6 +132,21 @@ export class Terminal {
     }
 
     private async getTerminalIndex(terminalTitle: string): Promise<number> {
+        for (let i: number = 0; i < 10; i++) {
+            try {
+                return await this.searchTerminalIndex(terminalTitle);
+            } catch (err) {
+                if (!(err instanceof error.NoSuchElementError)) {
+                    throw err;
+                }
+
+            }
+        }
+
+        throw new error.NoSuchElementError(`The terminal with title '${terminalTitle}' has not been found.`);
+    }
+
+    private async searchTerminalIndex(terminalTitle: string): Promise<number> {
         const terminalTabTitleXpathLocator: string = `//div[@id='theia-bottom-content-panel']` +
             `//li[contains(@id, 'shell-tab-terminal') or contains(@id, 'shell-tab-plugin')]` +
             `//div[@class='p-TabBar-tabLabel']`;
@@ -140,8 +167,9 @@ export class Terminal {
             terminalTitles.push(currentTerminalTitle);
         }
 
-        throw new error.WebDriverError(`The terminal with title '${terminalTitle}' has not been found.\n` +
+        throw new error.NoSuchElementError(`The terminal with title '${terminalTitle}' has not been found.\n` +
             `List of the tabs:\n${terminalTitles}`);
+
     }
 
     private getTerminalEditorInteractionEditorLocator(terminalIndex: number): By {

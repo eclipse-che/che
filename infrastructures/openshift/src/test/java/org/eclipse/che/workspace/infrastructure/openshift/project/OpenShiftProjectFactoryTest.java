@@ -120,7 +120,7 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "legacy",
             "",
-            "",
+            null,
             "defaultNs",
             false,
             clientFactory,
@@ -141,7 +141,7 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "legacy",
             "",
-            "",
+            null,
             "defaultNs",
             true,
             clientFactory,
@@ -165,7 +165,7 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "legacy",
             "",
-            "",
+            null,
             "defaultNs",
             false,
             clientFactory,
@@ -188,7 +188,7 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "projectName",
             "",
-            "",
+            null,
             null,
             false,
             clientFactory,
@@ -222,7 +222,7 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "predefined",
             "",
-            "",
+            null,
             "che-default",
             false,
             clientFactory,
@@ -255,7 +255,7 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "predefined",
             "",
-            "",
+            null,
             "che-default",
             false,
             clientFactory,
@@ -288,7 +288,7 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "predefined",
             "",
-            "",
+            null,
             "che-default",
             false,
             clientFactory,
@@ -313,7 +313,7 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "predefined",
             "",
-            "",
+            null,
             "default",
             true,
             clientFactory,
@@ -354,7 +354,7 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "predefined",
             "",
-            "",
+            null,
             "default",
             true,
             clientFactory,
@@ -390,7 +390,7 @@ public class OpenShiftProjectFactoryTest {
         new OpenShiftProjectFactory(
             "predefined",
             "",
-            "",
+            null,
             "default-ns",
             true,
             clientFactory,
@@ -418,7 +418,7 @@ public class OpenShiftProjectFactoryTest {
             new OpenShiftProjectFactory(
                 "predefined",
                 "",
-                "",
+                null,
                 "new-default",
                 false,
                 clientFactory,
@@ -450,7 +450,7 @@ public class OpenShiftProjectFactoryTest {
             new OpenShiftProjectFactory(
                 "",
                 "serviceAccount",
-                "",
+                null,
                 "<workspaceid>",
                 false,
                 clientFactory,
@@ -484,7 +484,7 @@ public class OpenShiftProjectFactoryTest {
             new OpenShiftProjectFactory(
                 "",
                 "serviceAccount",
-                "",
+                null,
                 "<workspaceid>",
                 false,
                 clientFactory,
@@ -520,7 +520,7 @@ public class OpenShiftProjectFactoryTest {
             new OpenShiftProjectFactory(
                 "",
                 "serviceAccount",
-                "",
+                null,
                 "<workspaceid>",
                 false,
                 clientFactory,

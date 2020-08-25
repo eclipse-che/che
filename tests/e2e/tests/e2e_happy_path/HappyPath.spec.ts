@@ -11,13 +11,13 @@
 import { e2eContainer } from '../../inversify.config';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TYPES, CLASSES } from '../../inversify.types';
-import { Ide, RightToolbarButton } from '../../pageobjects/ide/Ide';
+import { Ide, LeftToolbarButton } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { PreviewWidget } from '../../pageobjects/ide/PreviewWidget';
 import { TestConstants } from '../../TestConstants';
-import { RightToolbar } from '../../pageobjects/ide/RightToolbar';
+import { LeftToolbar } from '../../pageobjects/ide/LeftToolBar';
 import { By, Key, error } from 'selenium-webdriver';
 import { DebugView } from '../../pageobjects/ide/DebugView';
 import { DialogWindow } from '../../pageobjects/ide/DialogWindow';
@@ -33,7 +33,7 @@ const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const contextMenu: ContextMenu = e2eContainer.get(CLASSES.ContextMenu);
 const previewWidget: PreviewWidget = e2eContainer.get(CLASSES.PreviewWidget);
-const rightToolbar: RightToolbar = e2eContainer.get(CLASSES.RightToolbar);
+const leftToolbar: LeftToolbar = e2eContainer.get(CLASSES.LeftToolbar);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const warningDialog: DialogWindow = e2eContainer.get(CLASSES.DialogWindow);
@@ -73,7 +73,7 @@ suite('Validation of workspace start', async () => {
     });
 
     test('Wait until project is imported', async () => {
-        await projectTree.openProjectTreeContainer();
+        await projectTree.openProjectTreeContainer(10_000);
         await projectTree.waitProjectImported(projectName, 'src');
     });
 
@@ -96,7 +96,7 @@ suite('Language server validation', async () => {
             await ide.waitStatusBarContains('Activating Language Support for Java');
         }
 
-        await ide.waitStatusBarTextAbsence('Activating Language Support for Java', 1800000);
+        await ide.waitStatusBarTextAbsence('Activating Language Support for Java', 900_000);
         await checkJavaPathCompletion();
     });
 
@@ -117,7 +117,7 @@ suite('Language server validation', async () => {
     test('Suggestion', async () => {
         await editor.moveCursorToLineAndChar(javaFileName, 32, 21);
         await editor.pressControlSpaceCombination(javaFileName);
-        await editor.waitSuggestionWithScrolling(javaFileName, 'run(Class<?> primarySource, String... args) : ConfigurableApplicationContext', 120000);
+        await editor.waitSuggestionWithScrolling(javaFileName, 'run(Class<?> primarySource, String... args) : ConfigurableApplicationContext', 120_000);
     });
 
     test('Codenavigation', async () => {
@@ -153,25 +153,25 @@ suite('Validation of workspace build and run', async () => {
         // workaround for issue: https://github.com/eclipse/che/issues/14771
 
         // await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'build-output.txt');
-        await projectTree.expandPathAndOpenFile(projectName, 'result-build-output.txt', 220000);
+        await projectTree.expandPathAndOpenFile(projectName, 'result-build-output.txt', 220_000);
         await editor.waitText('result-build-output.txt', '[INFO] BUILD SUCCESS');
         // await editor.followAndWaitForText('build-output.txt', '[INFO] BUILD SUCCESS', 300000, 10000);
     });
 
     test('Run application', async () => {
         await topMenu.runTask('run');
-        await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
-        applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 120000);
-        await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
+        await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120_000);
+        applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 120_000);
+        await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120_000);
     });
 
     test('Check the running application', async () => {
-        await previewWidget.waitApplicationOpened(applicationUrl, 60000);
-        await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60000, 10000);
+        await previewWidget.waitApplicationOpened(applicationUrl, 60_000);
+        await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60_000, 10_000);
     });
 
     test('Close preview widget', async () => {
-        await rightToolbar.clickOnToolIcon('Preview');
+        await leftToolbar.clickOnToolIcon('Preview');
         await previewWidget.waitPreviewWidgetAbsence();
 
     });
@@ -201,7 +201,7 @@ suite('Display source code changes in the running application', async () => {
     test('Build application with changes', async () => {
         await topMenu.runTask('build');
         await projectTree.collapseProjectTree(projectName + '/src', 'main');
-        await projectTree.expandPathAndOpenFile(projectName, 'result-build.txt', 300000);
+        await projectTree.expandPathAndOpenFile(projectName, 'result-build.txt', 300_000);
         await editor.waitText('result-build.txt', '[INFO] BUILD SUCCESS');
 
         // workaround for issue: https://github.com/eclipse/che/issues/14771
@@ -217,19 +217,19 @@ suite('Display source code changes in the running application', async () => {
 
     test('Run application with changes', async () => {
         await topMenu.runTask('run-with-changes');
-        await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
-        applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 120000);
-        await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
+        await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120_000);
+        applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 120_000);
+        await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120_000);
     });
 
     test('Check changes are displayed', async () => {
-        await previewWidget.waitApplicationOpened(applicationUrl, 60000);
-        await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60000, 10000);
+        await previewWidget.waitApplicationOpened(applicationUrl, 60_000);
+        await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60_000, 10_000);
         await checkErrorMessageInApplicationController();
     });
 
     test('Close preview widget', async () => {
-        await rightToolbar.clickOnToolIcon('Preview');
+        await leftToolbar.clickOnToolIcon('Preview');
         await previewWidget.waitPreviewWidgetAbsence();
     });
 
@@ -250,13 +250,13 @@ suite('Validation of debug functionality', async () => {
 
     test('Launch debug', async () => {
         await topMenu.runTask('run-debug');
-        await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 180000);
-        applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 180000);
-        await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 180000);
+        await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 180_000);
+        applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 180_000);
+        await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 180_000);
     });
 
     test('Check content of the launched application', async () => {
-        await previewWidget.waitApplicationOpened(applicationUrl, 60000);
+        await previewWidget.waitApplicationOpened(applicationUrl, 60_000);
         await previewWidget.waitAndSwitchToWidgetFrame();
         await previewWidget.waitAndClick(SpringAppLocators.springHomeButtonLocator);
         await driverHelper.getDriver().switchTo().defaultContent();
@@ -267,7 +267,7 @@ suite('Validation of debug functionality', async () => {
     test('Run debug and check application stop in the breakpoint', async () => {
         await editor.selectTab(weclomeControllerJavaFileName);
         await topMenu.selectOption('View', 'Debug');
-        await ide.waitRightToolbarButton(RightToolbarButton.Debug);
+        await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
         await debugView.clickOnDebugConfigurationDropDown();
         await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote');
         await debugView.clickOnRunDebugButton();

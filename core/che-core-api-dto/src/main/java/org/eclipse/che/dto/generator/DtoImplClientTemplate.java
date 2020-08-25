@@ -1434,7 +1434,7 @@ public class DtoImplClientTemplate extends DtoImpl {
       return sb.toString();
     } else {
       throw new IllegalArgumentException(
-          "We do not handle the type '" + type == null ? null : type.getTypeName() + "'.");
+          "Cannot handle type '" + type == null ? null : type.getTypeName() + "'.");
     }
   }
 

@@ -58,10 +58,10 @@ public class ResourceLimitAttributesProvisioner {
           "Requested default container resource limit is less than default request. Request parameter will be ignored.");
     }
 
-    if (memoryLimit <= 0) { // if limit only is undefined
+    if (memoryLimit <= 0 && defaultMemoryLimit > 0) {
       memoryLimit = defaultMemoryLimit;
     }
-    if (memoryRequest <= 0) { // if request only is undefined
+    if (memoryRequest <= 0 && defaultMemoryRequest > 0) {
       memoryRequest = defaultMemoryRequest;
     }
     if (memoryRequest > memoryLimit) { // if both properties are defined, but not consistent
@@ -71,10 +71,11 @@ public class ResourceLimitAttributesProvisioner {
     final Map<String, String> attributes = machineConfig.getAttributes();
     String configuredLimit = attributes.get(MEMORY_LIMIT_ATTRIBUTE);
     String configuredRequest = attributes.get(MEMORY_REQUEST_ATTRIBUTE);
-    if (isNullOrEmpty(configuredLimit)) {
+    // Added < 0  check to avoid bypassing limit if someone is set negative value into attribute.
+    if (isNullOrEmpty(configuredLimit) || Long.parseLong(configuredLimit) <= 0) {
       attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(memoryLimit));
     }
-    if (isNullOrEmpty(configuredRequest)) {
+    if (isNullOrEmpty(configuredRequest) || Long.parseLong(configuredRequest) <= 0) {
       attributes.put(MEMORY_REQUEST_ATTRIBUTE, String.valueOf(memoryRequest));
     }
   }
@@ -102,10 +103,10 @@ public class ResourceLimitAttributesProvisioner {
           "Requested default container resource limit is less than default request. Request parameter will be ignored.");
     }
 
-    if (cpuLimit <= 0) { // if limit only is undefined
+    if (cpuLimit <= 0 && defaultCPULimit > 0) {
       cpuLimit = defaultCPULimit;
     }
-    if (cpuRequest <= 0) { // if request only is undefined
+    if (cpuRequest <= 0 && defaultCPURequest > 0) {
       cpuRequest = defaultCPURequest;
     }
     if (cpuRequest > cpuLimit) { // if both properties are defined, but not consistent
@@ -115,10 +116,11 @@ public class ResourceLimitAttributesProvisioner {
     final Map<String, String> attributes = machineConfig.getAttributes();
     String configuredLimit = attributes.get(CPU_LIMIT_ATTRIBUTE);
     String configuredRequest = attributes.get(CPU_REQUEST_ATTRIBUTE);
-    if (isNullOrEmpty(configuredLimit)) {
+    // Added < 0  check to avoid bypassing limit if someone is set negative value into attribute.
+    if (isNullOrEmpty(configuredLimit) || Float.parseFloat(configuredLimit) <= 0) {
       attributes.put(CPU_LIMIT_ATTRIBUTE, Float.toString(cpuLimit));
     }
-    if (isNullOrEmpty(configuredRequest)) {
+    if (isNullOrEmpty(configuredRequest) || Float.parseFloat(configuredRequest) <= 0) {
       attributes.put(CPU_REQUEST_ATTRIBUTE, Float.toString(cpuRequest));
     }
   }

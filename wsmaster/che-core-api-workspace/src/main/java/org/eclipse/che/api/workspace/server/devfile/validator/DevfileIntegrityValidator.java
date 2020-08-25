@@ -22,14 +22,18 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMP
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.devfile.Action;
 import org.eclipse.che.api.core.model.workspace.devfile.Command;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
+import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Env;
 import org.eclipse.che.api.core.model.workspace.devfile.Project;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
@@ -110,6 +114,22 @@ public class DevfileIntegrityValidator {
         throw new DevfileFormatException(
             format("Duplicate component alias found:'%s'", component.getAlias()));
       }
+      Optional<Map.Entry<String, Long>> duplicatedEndpoint =
+          component
+              .getEndpoints()
+              .stream()
+              .map(Endpoint::getName)
+              .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+              .entrySet()
+              .stream()
+              .filter(e -> e.getValue() > 1L)
+              .findFirst();
+      if (duplicatedEndpoint.isPresent()) {
+        throw new DevfileFormatException(
+            format(
+                "Duplicated endpoint name '%s' found in '%s' component",
+                duplicatedEndpoint.get().getKey(), getIdentifiableComponentName(component)));
+      }
 
       Set<String> tempSet = new HashSet<>();
       for (Env env : component.getEnv()) {
@@ -130,6 +150,14 @@ public class DevfileIntegrityValidator {
                 "There are multiple components '%s' of type '%s' that cannot be uniquely"
                     + " identified. Please add aliases that would distinguish the components.",
                 getIdentifiableComponentName(component), component.getType()));
+      }
+
+      if (component.getAutomountWorkspaceSecrets() != null && component.getAlias() == null) {
+        throw new DevfileFormatException(
+            format(
+                "The 'automountWorkspaceSecrets' property cannot be used in component which doesn't have alias. "
+                    + "Please add alias to component '%s' that would allow to distinguish its containers.",
+                getIdentifiableComponentName(component)));
       }
 
       switch (component.getType()) {

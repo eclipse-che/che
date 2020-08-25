@@ -29,13 +29,16 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import org.eclipse.che.api.factory.server.urlfactory.DevfileFilenamesProvider;
 import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
@@ -43,10 +46,10 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -58,15 +61,19 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class GithubFactoryParametersResolverTest {
 
+  @Mock private URLFetcher urlFetcher;
+
+  @Mock private DevfileFilenamesProvider devfileFilenamesProvider;
+
   /** Parser which will allow to check validity of URLs and create objects. */
-  @Spy private GithubURLParser githubUrlParser = new GithubURLParser();
+  private GithubURLParser githubUrlParser;
 
   /** Converter allowing to convert github URL to other objects. */
   @Spy
   private GithubSourceStorageBuilder githubSourceStorageBuilder = new GithubSourceStorageBuilder();
 
   /** ProjectDtoMerger */
-  @Mock private ProjectConfigDtoMerger projectConfigDtoMerger = new ProjectConfigDtoMerger();
+  @Mock private ProjectConfigDtoMerger projectConfigDtoMerger;
 
   /** Parser which will allow to check validity of URLs and create objects. */
   @Mock private URLFactoryBuilder urlFactoryBuilder;
@@ -79,7 +86,21 @@ public class GithubFactoryParametersResolverTest {
   @Captor private ArgumentCaptor<RemoteFactoryUrl> factoryUrlArgumentCaptor;
 
   /** Instance of resolver that will be tested. */
-  @InjectMocks private GithubFactoryParametersResolver githubFactoryParametersResolver;
+  private GithubFactoryParametersResolver githubFactoryParametersResolver;
+
+  @BeforeMethod
+  protected void init() {
+    githubUrlParser = new GithubURLParser(urlFetcher, devfileFilenamesProvider);
+    assertNotNull(this.githubUrlParser);
+    githubFactoryParametersResolver =
+        new GithubFactoryParametersResolver(
+            githubUrlParser,
+            urlFetcher,
+            githubSourceStorageBuilder,
+            urlFactoryBuilder,
+            projectConfigDtoMerger);
+    assertNotNull(this.githubFactoryParametersResolver);
+  }
 
   /** Check missing parameter name can't be accepted by this resolver */
   @Test
@@ -136,6 +157,9 @@ public class GithubFactoryParametersResolverTest {
   @Test
   public void shouldReturnFactoryFromRepositoryWithDevfile() throws Exception {
 
+    when(devfileFilenamesProvider.getConfiguredDevfileFilenames())
+        .thenReturn(Collections.singletonList("devfile.yaml"));
+
     String githubUrl = "https://github.com/eclipse/che";
 
     FactoryDto computedFactory = generateDevfileFactory();
@@ -155,10 +179,8 @@ public class GithubFactoryParametersResolverTest {
         .createFactoryFromDevfile(factoryUrlArgumentCaptor.capture(), any(), anyMap());
     verify(urlFactoryBuilder, never()).buildDefaultDevfile(eq("che"));
     assertEquals(
-        factoryUrlArgumentCaptor.getValue().devfileFileLocation(),
+        factoryUrlArgumentCaptor.getValue().devfileFileLocations().iterator().next().location(),
         "https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml");
-
-    assertEquals(factoryUrlArgumentCaptor.getValue().getDevfileFilename(), "devfile.yaml");
   }
 
   @Test

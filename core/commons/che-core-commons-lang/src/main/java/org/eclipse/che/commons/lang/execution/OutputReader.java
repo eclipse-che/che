@@ -89,7 +89,7 @@ public class OutputReader {
     try {
       reader.close();
     } catch (IOException e) {
-      LOG.error("Can't close stream", e);
+      LOG.error("Cannot close stream", e);
     }
   }
 

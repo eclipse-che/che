@@ -42,19 +42,19 @@ public class FileStoresMeterBinder implements MeterBinder {
 
       Gauge.builder("disk.free", fileStore, exceptionToNonWrapper(FileStore::getUnallocatedSpace))
           .tags(tagsWithPath)
-          .description("Unallocated space for file store")
+          .description("Unallocated space for file storage")
           .baseUnit("bytes")
           .strongReference(true)
           .register(registry);
       Gauge.builder("disk.total", fileStore, exceptionToNonWrapper(FileStore::getTotalSpace))
           .tags(tagsWithPath)
-          .description("Total space for file store")
+          .description("Total space for file storage")
           .baseUnit("bytes")
           .strongReference(true)
           .register(registry);
       Gauge.builder("disk.usable", fileStore, exceptionToNonWrapper(FileStore::getUsableSpace))
           .tags(tagsWithPath)
-          .description("Usable space for file store")
+          .description("Usable space for file storage")
           .baseUnit("bytes")
           .strongReference(true)
           .register(registry);

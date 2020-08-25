@@ -13,12 +13,14 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesDevfileBindings.ALLOWED_ENVIRONMENT_TYPE_UPGRADES_KEY_NAME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesDevfileBindings.KUBERNETES_BASED_ENVIRONMENTS_KEY_NAME;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesListBuilder;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import java.util.HashSet;
@@ -119,10 +121,23 @@ public class KubernetesEnvironmentProvisioner {
       // workspace already has k8s/OS recipe
       // it is needed to merge existing recipe objects with component's ones
       List<HasMetadata> envObjects = unmarshalObjects(envRecipe);
+      mergeProjectsPVC(envObjects, componentObjects);
       envObjects.addAll(componentObjects);
+      checkItemsHasUniqueKindToName(envObjects);
 
       envRecipe.setContent(asYaml(envObjects));
     }
+  }
+
+  private void mergeProjectsPVC(List<HasMetadata> envObjects, List<HasMetadata> componentObjects) {
+    componentObjects.removeIf(
+        co ->
+            co instanceof PersistentVolumeClaim
+                && co.getMetadata().getName().equals(PROJECTS_VOLUME_NAME)
+                && envObjects
+                    .stream()
+                    .filter(envObject -> envObject instanceof PersistentVolumeClaim)
+                    .anyMatch(pvc -> pvc.equals(co)));
   }
 
   private List<HasMetadata> unmarshalObjects(RecipeImpl k8sRecipe) throws DevfileException {

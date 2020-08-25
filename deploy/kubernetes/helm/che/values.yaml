@@ -36,6 +36,8 @@ global:
   ingressAnnotationsPrefix: "nginx."
   # options: default-host, single-host, multi-host
   serverStrategy: multi-host
+  # Public hostname of the installed Che server. If value is omitted then it will be automatically set.
+  cheHost: ""
 
   ## Allows to enable and configure TLS
   tls:
@@ -46,8 +48,9 @@ global:
     secretName: che-tls
 
     ## If self-signed certificate flag is enabled
-    ## then CA certificate from `tls.secretName` will be propagated to Che components' trust stores
-    useSelfSignedCerts: false
+    ## then CA certificate from `tls.selfSignedCertSecretName` will be propagated to Che components' trust stores
+    useSelfSignedCerts: true
+    selfSignedCertSecretName: self-signed-certificate
 
     ## Name of the config-map with public certificates to add to Java trust store of the Che server.
     serverTrustStoreConfigMapName: ""

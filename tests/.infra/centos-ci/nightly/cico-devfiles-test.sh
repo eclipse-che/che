@@ -15,6 +15,7 @@ function prepareCustomResourcePatchFile() {
 spec:
   auth:
     updateAdminPassword: false
+    openShiftoAuth: false
 EOL
 
   cat /tmp/custom-resource-patch.yaml

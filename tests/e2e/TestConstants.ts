@@ -8,11 +8,20 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
+function getBaseUrl(): string {
+    const baseUrl: string | undefined = process.env.TS_SELENIUM_BASE_URL;
+    if (!baseUrl) {
+        return 'http://sample-url';
+    }
+
+    return baseUrl.replace(/\/$/, '');
+}
+
 export const TestConstants = {
     /**
      * Base URL of the application which should be checked
      */
-    TS_SELENIUM_BASE_URL: process.env.TS_SELENIUM_BASE_URL || 'http://sample-url',
+    TS_SELENIUM_BASE_URL: getBaseUrl(),
 
     /**
      * Base URl of web console OpenShift which uses to test OperatorHub.
@@ -52,7 +61,7 @@ export const TestConstants = {
     /**
      * Timeout in milliseconds waiting for page load, "120 000" by default.
      */
-    TS_SELENIUM_LOAD_PAGE_TIMEOUT: Number(process.env.TS_SELENIUM_LOAD_PAGE_TIMEOUT) || 120000,
+    TS_SELENIUM_LOAD_PAGE_TIMEOUT: Number(process.env.TS_SELENIUM_LOAD_PAGE_TIMEOUT) || 180000,
 
     /**
      * Timeout in milliseconds waiting for language server initialization, "180 000" by default.
@@ -62,7 +71,7 @@ export const TestConstants = {
     /**
      * Default timeout for most of the waitings, "20 000" by default.
      */
-    TS_SELENIUM_DEFAULT_TIMEOUT: Number(process.env.TS_SELENIUM_DEFAULT_TIMEOUT) || 20000,
+    TS_SELENIUM_DEFAULT_TIMEOUT: Number(process.env.TS_SELENIUM_DEFAULT_TIMEOUT) || 60000,
 
     /**
      * Default ammount of tries, "5" by default.
@@ -117,7 +126,7 @@ export const TestConstants = {
     /**
      * Value of TLS Support property in the 'Create Che Cluster' yaml using OperatorHub.
      */
-    TS_SELENIUM_VALUE_TLS_SUPPORT: process.env.TS_SELENIUM_VALUE_TLS_SUPPORT || 'false',
+    TS_SELENIUM_VALUE_TLS_SUPPORT: process.env.TS_SELENIUM_VALUE_TLS_SUPPORT || 'true',
 
     /**
      * Value of Self Sign Cert property in the 'Create Che Cluster' yaml using OperatorHub.
@@ -233,6 +242,21 @@ export const TestConstants = {
     /**
      * Token for a github repository with permissions which allow add the ssh keys
      */
-    TS_GITHUB_TEST_REPO_ACCESS_TOKEN: process.env.TS_GITHUB_TEST_REPO_ACCESS_TOKEN || ''
+    TS_GITHUB_TEST_REPO_ACCESS_TOKEN: process.env.TS_GITHUB_TEST_REPO_ACCESS_TOKEN || '',
+
+    /**
+     * Login for a user whom has been created in the test Openshift cluster. Need for Openshift connector test
+     */
+    TS_TEST_OPENSHIFT_PLUGIN_USERNAME: process.env.TS_TEST_OPENSHIFT_PLUGIN_USERNAME || '',
+
+    /**
+     * Password for a user whom has been created in the test Openshift cluster. Need for Openshift connector test
+     */
+    TS_TEST_OPENSHIFT_PLUGIN_PASSWORD: process.env.TS_TEST_OPENSHIFT_PLUGIN_PASSWORD || '',
+
+    /**
+     * The name of project in the Openshidt plugin tree
+     */
+    TS_TEST_OPENSHIFT_PLUGIN_PROJECT: process.env.TS_TEST_OPENSHIFT_PLUGIN_PROJECT || ''
 
 };

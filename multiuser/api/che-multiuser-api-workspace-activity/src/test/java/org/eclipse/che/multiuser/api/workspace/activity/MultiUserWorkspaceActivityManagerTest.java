@@ -35,6 +35,7 @@ import org.testng.annotations.Test;
 public class MultiUserWorkspaceActivityManagerTest {
   private static final long DEFAULT_TIMEOUT = 60_000L; // 1 minute
   private static final long USER_LIMIT_TIMEOUT = 120_000L; // 2 minutes
+  private static final long DEFAULT_RUN_TIMEOUT = 0; // No default run timeout
 
   @Mock private AccountManager accountManager;
   @Mock private ResourceManager resourceManager;
@@ -58,7 +59,8 @@ public class MultiUserWorkspaceActivityManagerTest {
             eventService,
             accountManager,
             resourceManager,
-            DEFAULT_TIMEOUT);
+            DEFAULT_TIMEOUT,
+            DEFAULT_RUN_TIMEOUT);
 
     when(account.getId()).thenReturn("account123");
     when(accountManager.getByName(anyString())).thenReturn(account);

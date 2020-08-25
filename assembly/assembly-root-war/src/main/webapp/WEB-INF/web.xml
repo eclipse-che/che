@@ -17,11 +17,6 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          version="3.0">
 
-    <servlet>
-        <servlet-name>IDE</servlet-name>
-        <servlet-class>org.eclipse.che.IDEController</servlet-class>
-    </servlet>
-
     <listener>
         <listener-class>org.eclipse.che.inject.CheBootstrap</listener-class>
     </listener>
@@ -65,12 +60,8 @@
     </filter-mapping>
 
     <servlet-mapping>
-        <servlet-name>IDE</servlet-name>
-        <url-pattern>/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
         <servlet-name>default</servlet-name>
-        <url-pattern>/_app/*</url-pattern>
+        <url-pattern>/*</url-pattern>
     </servlet-mapping>
 
     <security-role>

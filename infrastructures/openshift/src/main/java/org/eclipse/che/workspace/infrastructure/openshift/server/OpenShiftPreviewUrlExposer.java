@@ -12,12 +12,14 @@
 
 package org.eclipse.che.workspace.infrastructure.openshift.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerProvider;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.util.Routes;
 
@@ -30,6 +32,12 @@ public class OpenShiftPreviewUrlExposer extends PreviewUrlExposer<OpenShiftEnvir
 
   @Inject
   public OpenShiftPreviewUrlExposer(
+      ExternalServerExposerProvider<OpenShiftEnvironment> externalServerExposer) {
+    super(externalServerExposer);
+  }
+
+  @VisibleForTesting
+  protected OpenShiftPreviewUrlExposer(
       ExternalServerExposer<OpenShiftEnvironment> externalServerExposer) {
     super(externalServerExposer);
   }

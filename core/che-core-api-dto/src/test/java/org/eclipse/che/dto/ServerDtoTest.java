@@ -424,7 +424,7 @@ public class ServerDtoTest {
   @Test(
       expectedExceptions = IllegalArgumentException.class,
       expectedExceptionsMessageRegExp =
-          "Only interfaces can be DTO, but class java.lang.String is not")
+          "Only interfaces can be DTO, but class java.lang.String is not an interface.")
   public void shouldThrowExceptionWhenThereIsClassType() {
     DtoFactory.newDto(String.class);
   }

@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import org.eclipse.che.api.factory.server.urlfactory.DevfileFilenamesProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -35,6 +36,7 @@ import org.testng.annotations.Test;
 public class GithubURLParserTest {
 
   @Mock private URLFetcher urlFetcher;
+  @Mock private DevfileFilenamesProvider devfileFilenamesProvider;
 
   /** Instance of component that will be tested. */
   @InjectMocks private GithubURLParser githubUrlParser;

@@ -239,6 +239,11 @@ public class CascadeRemovalTest {
                 bind(Long.class)
                     .annotatedWith(Names.named("che.limits.workspace.idle.timeout"))
                     .toInstance(100000L);
+
+                bind(Long.class)
+                    .annotatedWith(Names.named("che.limits.workspace.run.timeout"))
+                    .toInstance(0L);
+
                 bind(UserManager.class);
                 bind(AccountManager.class);
 

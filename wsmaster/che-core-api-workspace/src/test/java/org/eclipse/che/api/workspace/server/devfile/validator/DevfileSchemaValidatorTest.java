@@ -53,6 +53,7 @@ public class DevfileSchemaValidatorTest {
       {"kubernetes_openshift_component/devfile_kubernetes_component.yaml"},
       {"kubernetes_openshift_component/devfile_kubernetes_component_absolute_reference.yaml"},
       {"component/devfile_without_any_component.yaml"},
+      {"component/devfile_component_with_automount_secrets.yaml"},
       {
         "kubernetes_openshift_component/devfile_kubernetes_component_reference_and_content_as_block.yaml"
       },

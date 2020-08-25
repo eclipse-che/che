@@ -7,7 +7,7 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 buildAndDeployArtifacts() {
-  scl enable rh-maven33 'mvn clean install -U -Pintegration'
+  mvn clean install -U -Pintegration
   if [[ $? -eq 0 ]]; then
     echo 'Build Success!'
     echo 'Going to deploy artifacts'
@@ -128,8 +128,11 @@ function installStartDocker() {
 }
 
 function installMvn() {
-  yum install --assumeyes -d1 centos-release-scl
-  yum install --assumeyes -d1 rh-maven33
+    mkdir -p /opt/apache-maven && curl -sSL https://downloads.apache.org/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar -xz --strip=1 -C /opt/apache-maven
+    export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+    export PATH="/usr/lib/jvm/java-11-openjdk:/opt/apache-maven/bin:/usr/bin:${PATH:-/bin:/usr/bin}"
+    export JAVACONFDIRS="/etc/java${JAVACONFDIRS:+:}${JAVACONFDIRS:-}"
+    export M2_HOME="/opt/apache-maven"
 }
 
 function installNodejs() {
@@ -172,8 +175,7 @@ function installDependencies() {
     bzip2 \
     golang \
     make \
-    java-1.8.0-openjdk \
-    java-1.8.0-openjdk-devel
+    java-11-openjdk-devel
   installMvn
   installNodejs
   insalllYarn
@@ -383,7 +385,6 @@ function setupEnvs() {
     QUAY_ECLIPSE_CHE_USERNAME \
     QUAY_ECLIPSE_CHE_PASSWORD)"
 
-  export PATH=$PATH:/opt/rh/rh-maven33/root/bin
 }
 
 function configureGithubTestUser() {

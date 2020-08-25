@@ -25,6 +25,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_STA
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -132,8 +133,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatc
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesPreviewUrlCommandProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.KubernetesServerResolverFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
@@ -201,11 +205,13 @@ public class KubernetesInternalRuntimeTest {
   @Mock private WorkspaceProbesFactory workspaceProbesFactory;
   @Mock private ProbeScheduler probesScheduler;
   @Mock private WorkspaceProbes workspaceProbes;
-  @Mock private KubernetesServerResolver kubernetesServerResolver;
+  @Mock private ServerResolver serverResolver;
   @Mock private InternalEnvironmentProvisioner internalEnvironmentProvisioner;
   @Mock private IngressPathTransformInverter pathTransformInverter;
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
   @Mock private KubernetesPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
+  @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
+  private KubernetesServerResolverFactory serverResolverFactory;
 
   @Mock
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> kubernetesEnvironmentProvisioner;
@@ -247,6 +253,12 @@ public class KubernetesInternalRuntimeTest {
     runtimeStatesCache = new MapBasedRuntimeStateCache();
     machinesCache = new MapBasedMachinesCache();
     eventPublisher = new RuntimeEventsPublisher(eventService);
+    serverResolverFactory =
+        new KubernetesServerResolverFactory(
+            pathTransformInverter,
+            "che-host",
+            MULTI_HOST_STRATEGY,
+            WorkspaceExposureType.NATIVE.getConfigValue());
 
     startSynchronizer = spy(new StartSynchronizer(eventService, 5, IDENTITY));
     when(startSynchronizerFactory.create(any())).thenReturn(startSynchronizer);
@@ -269,9 +281,10 @@ public class KubernetesInternalRuntimeTest {
             ImmutableSet.of(internalEnvironmentProvisioner),
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
-            pathTransformInverter,
             runtimeHangingDetector,
             previewUrlCommandProvisioner,
+            secretAsContainerResourceProvisioner,
+            serverResolverFactory,
             tracer,
             context,
             namespace);
@@ -742,7 +755,7 @@ public class KubernetesInternalRuntimeTest {
             getCurrentTimestampWithOneHourShiftAhead());
     final ArgumentCaptor<RuntimeLogEvent> captor = ArgumentCaptor.forClass(RuntimeLogEvent.class);
 
-    internalRuntime.doStartMachine(kubernetesServerResolver);
+    internalRuntime.doStartMachine(serverResolver);
     logsPublisher.handle(out1);
     logsPublisher.handle(out2);
 

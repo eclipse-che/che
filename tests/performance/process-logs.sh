@@ -4,10 +4,11 @@ function printHelp {
   echo "Script for processing logs of laod tests."
   echo "-f     folder where logs are stored"
   echo "-t     timestamp of the run"
-  echo "-c     test count"
+  echo "-c     completitions count"
+  echo "-u     users count"
 }
 
-while getopts "f:t:c:h" opt; do 
+while getopts "f:t:c:u:h" opt; do 
   case $opt in
     h) printHelp
       ;;
@@ -15,7 +16,9 @@ while getopts "f:t:c:h" opt; do
       ;;
     t) export TIMESTAMP=$OPTARG
       ;;
-    c) export TEST_COUNT=$OPTARG
+    c) export COMPLETITIONS_COUNT=$OPTARG
+      ;;
+    u) export USERS_COUNT=$OPTARG
       ;;
     \?) # invalid option
       exit 1
@@ -26,6 +29,8 @@ while getopts "f:t:c:h" opt; do
       ;;
   esac
 done
+
+TEST_COUNT=$((USERS_COUNT*COMPLETITIONS_COUNT))
 
 CURRENT_DIR=$(pwd)
 
@@ -54,6 +59,9 @@ for d in */ ; do
   fi
 done
 cd $CURRENT_DIR
+
+echo "Tests setup: $USERS_COUNT users, each running $COMPLETITIONS_COUNT workspaces" 
+echo -e "Tests setup: $USERS_COUNT users, each running $COMPLETITIONS_COUNT workspaces \n \n" > $sumupFile
 
 if [[ $failedUsers == "" ]]; then
   echo "All tests has passed, yay!"
