@@ -23,6 +23,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.Certificate
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.NodeSelectorProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
@@ -74,6 +75,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private GitConfigProvisioner gitConfigProvisioner;
   @Mock private OpenShiftPreviewUrlExposer previewUrlEndpointsProvisioner;
   @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
+  @Mock private NodeSelectorProvisioner nodeSelectorProvisioner;
 
   private OpenShiftEnvironmentProvisioner osInfraProvisioner;
 
@@ -96,6 +98,7 @@ public class OpenShiftEnvironmentProvisionerTest {
             podTerminationGracePeriodProvisioner,
             imagePullSecretProvisioner,
             proxySettingsProvisioner,
+            nodeSelectorProvisioner,
             asyncStorageProvisioner,
             asyncStoragePodObserver,
             serviceAccountProvisioner,
@@ -114,6 +117,7 @@ public class OpenShiftEnvironmentProvisionerTest {
             tlsRouteProvisioner,
             restartPolicyRewriter,
             ramLimitProvisioner,
+            nodeSelectorProvisioner,
             podTerminationGracePeriodProvisioner,
             imagePullSecretProvisioner,
             proxySettingsProvisioner,
@@ -137,6 +141,7 @@ public class OpenShiftEnvironmentProvisionerTest {
     provisionOrder.verify(uniqueNamesProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(tlsRouteProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(ramLimitProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(nodeSelectorProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder
         .verify(podTerminationGracePeriodProvisioner)
         .provision(eq(osEnv), eq(runtimeIdentity));
