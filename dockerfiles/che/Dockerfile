@@ -44,5 +44,3 @@ RUN mkdir /logs /data && \
     chmod g+w /home/user/cacerts && \
     java -version && echo -n "Server startup script in: " && \
     find /home/user/eclipse-che -name catalina.sh | grep -z /home/user/eclipse-che/tomcat/bin/catalina.sh
-
-USER user
