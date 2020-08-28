@@ -32,7 +32,8 @@ import org.testng.annotations.Test;
  */
 public class OpenShiftExternalServerExposerTest {
 
-  private RouteServerExposer osExternalServerExposer = new RouteServerExposer();
+  private static final String LABELS = "foo=bar";
+  private RouteServerExposer osExternalServerExposer = new RouteServerExposer(LABELS);
 
   @Test
   public void shouldAddRouteToEnvForExposingSpecifiedServer() {
@@ -61,5 +62,6 @@ public class OpenShiftExternalServerExposerTest {
     Deserializer annotations = Annotations.newDeserializer(route.getMetadata().getAnnotations());
     assertEquals(annotations.machineName(), "machine123");
     assertEquals(annotations.servers(), servers);
+    assertEquals(route.getMetadata().getLabels().get("foo"), "bar");
   }
 }

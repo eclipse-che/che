@@ -11,8 +11,10 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
+import com.google.common.base.Splitter;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -39,16 +41,22 @@ public class IngressServerExposer implements ExternalServerExposer<KubernetesEnv
 
   private final ExternalServiceExposureStrategy serviceExposureStrategy;
   private final Map<String, String> ingressAnnotations;
+  private final Map<String, String> labels;
   private final String pathTransformFmt;
 
   @Inject
   public IngressServerExposer(
       ExternalServiceExposureStrategy serviceExposureStrategy,
       @Named("infra.kubernetes.ingress.annotations") Map<String, String> annotations,
+      @Nullable @Named("che.infra.kubernetes.ingress.labels") String labelsProperty,
       @Nullable @Named("che.infra.kubernetes.ingress.path_transform") String pathTransformFmt) {
     this.serviceExposureStrategy = serviceExposureStrategy;
     this.ingressAnnotations = annotations;
     this.pathTransformFmt = pathTransformFmt == null ? PATH_TRANSFORM_PATH_CATCH : pathTransformFmt;
+    this.labels =
+        labelsProperty != null
+            ? Splitter.on(",").withKeyValueSeparator("=").split(labelsProperty)
+            : new HashMap<>();
   }
 
   /**
@@ -102,6 +110,7 @@ public class IngressServerExposer implements ExternalServerExposer<KubernetesEnv
         .withMachineName(machineName)
         .withServiceName(serviceName)
         .withAnnotations(ingressAnnotations)
+        .withLabels(labels)
         .withServicePort(servicePort.getName())
         .withServers(servers)
         .build();
