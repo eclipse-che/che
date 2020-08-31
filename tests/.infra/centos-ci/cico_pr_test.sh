@@ -54,6 +54,12 @@ deployCheIntoCluster  --che-operator-cr-patch-yaml=/tmp/custom-resource-patch.ya
 seleniumTestsSetup
 createIndentityProvider
 
+export OPENSHIFT_USERNAME=developer
+export OPENSHIFT_PASSWORD=123
+export OPENSHIFT_REGULAR_USERNAME=developer
+export OPENSHIFT_REGULAR_PASSWORD=123
+export OPENSHIFT_REGULAR_EMAIL=${OPENSHIFT_REGULAR_USERNAME}@1.com
+
 bash /root/payload/tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
   --threads=3 \
   --host=${CHE_ROUTE} \
