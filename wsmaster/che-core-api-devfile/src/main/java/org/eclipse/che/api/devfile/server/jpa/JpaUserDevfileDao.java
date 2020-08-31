@@ -109,7 +109,7 @@ public class JpaUserDevfileDao implements UserDevfileDao {
   }
 
   @Override
-  @Transactional(rollbackOn = {ServerException.class})
+  @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
   public Page<UserDevfile> getDevfiles(
       int maxItems,
       int skipCount,

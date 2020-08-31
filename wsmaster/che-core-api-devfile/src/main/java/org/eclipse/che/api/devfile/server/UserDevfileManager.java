@@ -65,8 +65,7 @@ public class UserDevfileManager {
       throws ServerException, NotFoundException, ConflictException {
     requireNonNull(devfile, "Required non-null devfile");
     UserDevfile result =
-        userDevfileDao.create(
-            new UserDevfileImpl(NameGenerator.generate("userdevfile", 16), devfile));
+        userDevfileDao.create(new UserDevfileImpl(NameGenerator.generate("devfile", 16), devfile));
     LOG.debug(
         "UserDevfile '{}' with id '{}' created by user '{}'",
         result.getName(),

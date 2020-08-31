@@ -31,48 +31,43 @@ public interface UserDevfileDto extends UserDevfile, Hyperlinks {
 
   UserDevfileDto withId(String id);
 
-  @Override
+  String getId();
+
   String getApiVersion();
 
   void setApiVersion(String apiVersion);
 
   UserDevfileDto withApiVersion(String apiVersion);
 
-  @Override
   List<ProjectDto> getProjects();
 
   void setProjects(List<ProjectDto> projects);
 
   UserDevfileDto withProjects(List<ProjectDto> projects);
 
-  @Override
   List<ComponentDto> getComponents();
 
   void setComponents(List<ComponentDto> components);
 
   UserDevfileDto withComponents(List<ComponentDto> components);
 
-  @Override
   List<DevfileCommandDto> getCommands();
 
   void setCommands(List<DevfileCommandDto> commands);
 
   UserDevfileDto withCommands(List<DevfileCommandDto> commands);
 
-  @Override
   Map<String, String> getAttributes();
 
   void setAttributes(Map<String, String> attributes);
 
   UserDevfileDto withAttributes(Map<String, String> attributes);
 
-  @Override
   MetadataDto getMetadata();
 
   void setMetadata(MetadataDto metadata);
 
   UserDevfileDto withMetadata(MetadataDto metadata);
 
-  @Override
   UserDevfileDto withLinks(List<Link> links);
 }
