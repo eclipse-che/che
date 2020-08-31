@@ -68,15 +68,15 @@ public class AsyncStoragePodInterceptor {
     String namespace = identity.getInfrastructureNamespace();
     String workspaceId = identity.getWorkspaceId();
 
-    RollableScalableResource<Deployment, DoneableDeployment> asyncStoragePodResource =
-        getAsyncStoragePodResource(namespace, workspaceId);
+    RollableScalableResource<Deployment, DoneableDeployment> asyncStorageDeploymentResource =
+        getAsyncStorageDeploymentResource(namespace, workspaceId);
 
-    if (asyncStoragePodResource.get() == null) { // pod doesn't exist
+    if (asyncStorageDeploymentResource.get() == null) { // pod doesn't exist
       return;
     }
 
     try {
-      deleteAsyncStoragePod(asyncStoragePodResource)
+      deleteAsyncStoragePod(asyncStorageDeploymentResource)
           .get(DELETE_POD_TIMEOUT_IN_MIN, TimeUnit.MINUTES);
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
@@ -96,8 +96,9 @@ public class AsyncStoragePodInterceptor {
     }
   }
 
-  private RollableScalableResource<Deployment, DoneableDeployment> getAsyncStoragePodResource(
-      String namespace, String workspaceId) throws InfrastructureException {
+  private RollableScalableResource<Deployment, DoneableDeployment>
+      getAsyncStorageDeploymentResource(String namespace, String workspaceId)
+          throws InfrastructureException {
     return kubernetesClientFactory
         .create(workspaceId)
         .apps()

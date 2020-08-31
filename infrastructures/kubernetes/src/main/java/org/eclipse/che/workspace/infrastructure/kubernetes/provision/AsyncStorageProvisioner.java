@@ -270,13 +270,12 @@ public class AsyncStorageProvisioner {
    * key and exposed port for rsync connection
    */
   private void createAsyncStoragePodIfNotExist(
-      KubernetesClient k8sClient, String namespace, String configMap, String userId)
-      throws InfrastructureException {
+      KubernetesClient k8sClient, String namespace, String configMap, String userId) {
 
     RollableScalableResource<Deployment, DoneableDeployment> resource =
         k8sClient.apps().deployments().inNamespace(namespace).withName(ASYNC_STORAGE);
     if (resource.get() != null) {
-      return; // pod already exist
+      return; // deployment already exist
     }
 
     String containerName = Names.generateName(ASYNC_STORAGE);
