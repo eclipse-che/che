@@ -11,6 +11,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.server;
 
+import static java.util.Collections.emptyMap;
+
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Service;
@@ -18,8 +21,10 @@ import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Route;
 import java.util.HashMap;
 import java.util.Map;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
@@ -91,6 +96,17 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
  */
 @Singleton
 public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnvironment> {
+
+  private final Map<String, String> labels;
+
+  public RouteServerExposer(
+      @Nullable @Named("che.infra.openshift.route.labels") String labelsProperty) {
+    this.labels =
+        labelsProperty != null
+            ? Splitter.on(",").withKeyValueSeparator("=").split(labelsProperty)
+            : emptyMap();
+  }
+
   @Override
   public void expose(
       OpenShiftEnvironment env,
@@ -105,6 +121,7 @@ public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnviro
             .withMachineName(machineName)
             .withTargetPort(servicePort.getName())
             .withServers(externalServers)
+            .withLabels(labels)
             .withTo(serviceName)
             .build();
     env.getRoutes().put(commonRoute.getMetadata().getName(), commonRoute);
@@ -116,6 +133,7 @@ public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnviro
     private String serviceName;
     private IntOrString targetPort;
     private Map<String, ServerConfig> servers;
+    private Map<String, String> labels;
     private String machineName;
 
     private RouteBuilder withName(String name) {
@@ -147,6 +165,11 @@ public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnviro
       return this;
     }
 
+    private RouteBuilder withLabels(Map<String, String> labels) {
+      this.labels = labels;
+      return this;
+    }
+
     public RouteBuilder withMachineName(String machineName) {
       this.machineName = machineName;
       return this;
@@ -161,6 +184,7 @@ public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnviro
           .withName(name.replace("/", "-"))
           .withAnnotations(
               Annotations.newSerializer().servers(servers).machineName(machineName).annotations())
+          .withLabels(labels)
           .endMetadata()
           .withNewSpec()
           .withNewTo()

@@ -43,7 +43,7 @@ public class OpenShiftPreviewUrlExposerTest {
 
   @BeforeMethod
   public void setUp() {
-    RouteServerExposer externalServerExposer = new RouteServerExposer();
+    RouteServerExposer externalServerExposer = new RouteServerExposer("a=b");
     previewUrlEndpointsProvisioner = new OpenShiftPreviewUrlExposer(externalServerExposer);
   }
 
