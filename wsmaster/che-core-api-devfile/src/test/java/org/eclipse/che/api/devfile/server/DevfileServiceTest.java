@@ -396,27 +396,6 @@ public class DevfileServiceTest {
         orderCaptor.getValue(), ImmutableList.of(new Pair("id", "asc"), new Pair("name", "desc")));
   }
 
-  @Test
-  public void shouldNotAllowToGetMoreWhen60Items() throws Exception {
-    // given
-    // when
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .contentType("application/json")
-            .queryParam("maxItems", 61)
-            .when()
-            .expect()
-            .statusCode(400)
-            .get(SECURE_PATH + "/devfile/list");
-
-    // then
-    assertEquals(
-        unwrapDto(response, ServiceError.class).getMessage(),
-        "Maximum allowed page size is 60 but requested 61");
-  }
-
   private static <T> T unwrapDto(Response response, Class<T> dtoClass) {
     return DtoFactory.getInstance().createDtoFromJson(response.asString(), dtoClass);
   }

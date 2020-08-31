@@ -18,12 +18,11 @@ import org.eclipse.che.api.devfile.shared.dto.UserDevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 
 public class DtoConverter {
-  public static UserDevfileDto asDto(UserDevfile userDevfiledevfile) {
-    DevfileDto devfileDto =
-        org.eclipse.che.api.workspace.server.DtoConverter.asDto(userDevfiledevfile);
+  public static UserDevfileDto asDto(UserDevfile userDevfile) {
+    DevfileDto devfileDto = org.eclipse.che.api.workspace.server.DtoConverter.asDto(userDevfile);
     return newDto(UserDevfileDto.class)
-        .withId(userDevfiledevfile.getId())
-        .withApiVersion(userDevfiledevfile.getApiVersion())
+        .withId(userDevfile.getId())
+        .withApiVersion(userDevfile.getApiVersion())
         .withCommands(devfileDto.getCommands())
         .withComponents(devfileDto.getComponents())
         .withProjects(devfileDto.getProjects())

@@ -58,6 +58,7 @@ public class UserDevfileManager {
    * @return new persisted devfile instance
    * @throws ConflictException when any conflict occurs (e.g Devfile with such name already exists
    *     for {@code owner})
+   * @throws NullPointerException when {@code devfile} is null
    * @throws ServerException when any other error occurs
    */
   public UserDevfile createDevfile(Devfile devfile)

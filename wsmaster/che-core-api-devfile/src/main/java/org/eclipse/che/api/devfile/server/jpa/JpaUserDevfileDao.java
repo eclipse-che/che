@@ -138,8 +138,7 @@ public class JpaUserDevfileDao implements UserDevfileDao {
       List<Pair<String, String>> invalidSortOrder =
           order
               .stream()
-              .filter(p -> !p.second.equalsIgnoreCase("asc"))
-              .filter(p -> !p.second.equalsIgnoreCase("desc"))
+              .filter(p -> !p.second.equalsIgnoreCase("asc") && !p.second.equalsIgnoreCase("desc"))
               .collect(Collectors.toList());
       if (!invalidSortOrder.isEmpty()) {
         throw new IllegalArgumentException(

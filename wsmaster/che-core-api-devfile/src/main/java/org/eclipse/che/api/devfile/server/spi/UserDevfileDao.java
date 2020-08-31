@@ -75,7 +75,6 @@ public interface UserDevfileDao {
    *     otherwise <b>=</b> condition.
    * @param order - a list of fields and directions of sort. By default items would be sorted by id.
    * @return list of devfiles which user can read, never null
-   * @throws NullPointerException when {@code id} is null
    * @throws ServerException when any other error occurs during devfile fetching
    * @throws IllegalArgumentException when maxItems < 1 or skipCount < 0 or sort order is not 'asc'
    *     or 'desc'.

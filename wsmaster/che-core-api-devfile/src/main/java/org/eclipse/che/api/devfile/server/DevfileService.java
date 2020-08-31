@@ -176,9 +176,6 @@ public class DevfileService extends Service {
           @QueryParam("order")
           String order)
       throws ServerException, BadRequestException {
-    if (maxItems > 60) {
-      throw new BadRequestException("Maximum allowed page size is 60 but requested " + maxItems);
-    }
     final Set<String> skip = ImmutableSet.of("token", "skipCount", "maxItems", "order");
     Map<String, Set<String>> queryParams = URLEncodedUtils.parse(uriInfo.getRequestUri());
     final List<Pair<String, String>> query =
