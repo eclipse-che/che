@@ -25,6 +25,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount;
 import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccountPage;
 import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakHeaderButtons;
 import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPasswordPage;
+import org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -42,7 +43,8 @@ public class AccountTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private KeycloakHeaderButtons keycloakHeaderButtons;
-  private Account initialTestUserAccount;
+  @Inject private Account initialTestUserAccount;
+  @Inject private OpenShiftLoginPage openShiftLoginPage;
 
   @BeforeClass
   public void setup() {
@@ -59,6 +61,8 @@ public class AccountTest {
             .withEmail(testUser.getEmail())
             .withFirstName("UserFirstName")
             .withLastName("UserLastName");
+
+    openShiftLoginPage.login();
 
     dashboard.open(testUser.getName(), testUser.getPassword());
     dashboard.waitDashboardToolbarTitle();

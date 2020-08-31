@@ -32,6 +32,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOvervie
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status;
+import org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage;
 import org.openqa.selenium.TimeoutException;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -60,12 +61,15 @@ public class WorkspacesListTest {
   @Inject private WorkspaceOverview workspaceOverview;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
+  @Inject private OpenShiftLoginPage openShiftLoginPage;
 
   private String workspaceName;
   private String workspaceName1;
 
   @BeforeClass
   public void setUp() throws Exception {
+    openShiftLoginPage.login();
+
     dashboard.open();
     workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
     dashboard.open();

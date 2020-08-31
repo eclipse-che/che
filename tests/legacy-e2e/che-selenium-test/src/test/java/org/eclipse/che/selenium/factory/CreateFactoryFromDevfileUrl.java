@@ -21,6 +21,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.slf4j.Logger;
@@ -41,11 +42,13 @@ public class CreateFactoryFromDevfileUrl {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private OpenShiftLoginPage openShiftLoginPage;
 
   private TestFactory testFactoryWithKeepDir;
 
   @BeforeClass
   public void setUp() throws Exception {
+    openShiftLoginPage.login();
     testFactoryWithKeepDir = testFactoryInitializer.fromUrl(YAML_URL);
   }
 

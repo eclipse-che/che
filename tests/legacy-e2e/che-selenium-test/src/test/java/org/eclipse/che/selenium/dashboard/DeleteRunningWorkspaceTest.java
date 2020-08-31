@@ -23,13 +23,13 @@ import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class DeleteRunningWorkspaceTest {
-
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
@@ -37,13 +37,13 @@ public class DeleteRunningWorkspaceTest {
   @Inject private WorkspaceOverview workspaceOverview;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
+  @Inject private OpenShiftLoginPage openShiftLoginPage;
 
   private String workspaceName;
 
   @BeforeClass
   public void setUp() throws Exception {
-    dashboard.open();
-    workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
+    openShiftLoginPage.login();
   }
 
   @AfterClass
@@ -53,8 +53,9 @@ public class DeleteRunningWorkspaceTest {
 
   @Test
   public void deleteRunningWorkspaceTest() {
-    dashboard.open();
+    workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
 
+    dashboard.open();
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectWorkspaceItemName(workspaceName);
     workspaceDetails.waitToolbarTitleName(workspaceName);

@@ -24,6 +24,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.testng.annotations.AfterClass;
@@ -41,12 +42,15 @@ public class RollingUpdateStrategyWithWorkspacesStartStopTest {
   @Inject private TheiaIde theiaIde;
   @Inject private TheiaProjectTree theiaProjectTree;
   @Inject private DefaultTestUser defaultTestUser;
+  @Inject private OpenShiftLoginPage openShiftLoginPage;
 
   private String startedWorkspaceName;
   private String stoppedWorkspaceName;
 
   @BeforeClass
   public void setUp() throws Exception {
+    openShiftLoginPage.login();
+
     dashboard.open();
     startedWorkspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
     dashboard.open();
