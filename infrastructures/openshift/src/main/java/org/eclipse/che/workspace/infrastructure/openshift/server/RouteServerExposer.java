@@ -21,6 +21,7 @@ import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Route;
 import java.util.HashMap;
 import java.util.Map;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -99,6 +100,7 @@ public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnviro
 
   private final Map<String, String> labels;
 
+  @Inject
   public RouteServerExposer(
       @Nullable @Named("che.infra.openshift.route.labels") String labelsProperty) {
     this.labels =
