@@ -166,10 +166,7 @@ public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnviro
     }
 
     private RouteBuilder withLabels(Map<String, String> labels) {
-      if (this.labels == null) {
-        this.labels = new HashMap<>();
-      }
-      this.labels.putAll(labels);
+      this.labels = labels;
       return this;
     }
 
