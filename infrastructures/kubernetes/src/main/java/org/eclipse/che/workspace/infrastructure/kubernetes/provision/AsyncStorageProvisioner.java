@@ -17,6 +17,7 @@ import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.workspace.shared.Constants.ASYNC_PERSIST_ATTRIBUTE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_DEPLOYMENT_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_USER_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_SSH_KEYS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_SSH_KEYS_MESSAGE;
@@ -31,15 +32,14 @@ import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.DoneableConfigMap;
 import io.fabric8.kubernetes.api.model.DoneablePersistentVolumeClaim;
-import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.DoneableService;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.IntOrStringBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.PodSpecBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
@@ -51,12 +51,18 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
+import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.dsl.PodResource;
+import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import io.fabric8.kubernetes.client.dsl.ServiceResource;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -268,10 +274,12 @@ public class AsyncStorageProvisioner {
    * key and exposed port for rsync connection
    */
   private void createAsyncStoragePodIfNotExist(
-      KubernetesClient k8sClient, String namespace, String configMap, String userId) {
-    PodResource<Pod, DoneablePod> podResource =
-        k8sClient.pods().inNamespace(namespace).withName(ASYNC_STORAGE);
-    if (podResource.get() != null) {
+      KubernetesClient k8sClient, String namespace, String configMap, String userId)
+      throws InfrastructureException {
+
+    RollableScalableResource<Deployment, DoneableDeployment> resource =
+        k8sClient.apps().deployments().inNamespace(namespace).withName(ASYNC_STORAGE);
+    if (resource.get() != null) {
       return; // pod already exist
     }
 
@@ -333,19 +341,37 @@ public class AsyncStorageProvisioner {
     PodSpec podSpec =
         podSpecBuilder.withContainers(container).withVolumes(storageVolume, sshKeyVolume).build();
 
-    Pod pod =
-        new PodBuilder()
-            .withApiVersion("v1")
-            .withKind("Pod")
-            .withNewMetadata()
-            .withName(ASYNC_STORAGE)
+    ObjectMetaBuilder metaBuilder = new ObjectMetaBuilder();
+    ObjectMeta meta =
+        metaBuilder
+            .withLabels(
+                of(
+                    "app",
+                    ASYNC_STORAGE,
+                    CHE_USER_ID_LABEL,
+                    userId,
+                    CHE_DEPLOYMENT_NAME_LABEL,
+                    ASYNC_STORAGE))
             .withNamespace(namespace)
-            .withLabels(of("app", ASYNC_STORAGE, CHE_USER_ID_LABEL, userId))
-            .endMetadata()
-            .withSpec(podSpec)
+            .withName(ASYNC_STORAGE)
             .build();
 
-    k8sClient.pods().inNamespace(namespace).create(pod);
+    Deployment deployment =
+        new DeploymentBuilder()
+            .withMetadata(meta)
+            .withNewSpec()
+            .withNewSelector()
+            .withMatchLabels(meta.getLabels())
+            .endSelector()
+            .withReplicas(1)
+            .withNewTemplate()
+            .withMetadata(meta)
+            .withSpec(podSpec)
+            .endTemplate()
+            .endSpec()
+            .build();
+
+    k8sClient.apps().deployments().inNamespace(namespace).create(deployment);
   }
 
   /** Create service for serving rsync connection */
@@ -386,4 +412,5 @@ public class AsyncStorageProvisioner {
 
     k8sClient.services().inNamespace(namespace).create(service);
   }
+  
 }

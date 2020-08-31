@@ -24,17 +24,19 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
-import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.AppsAPIGroupDSL;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-import io.fabric8.kubernetes.client.dsl.PodResource;
+import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.util.UUID;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -56,10 +58,11 @@ public class AsyncStoragePodInterceptorTest {
   @Mock private RuntimeIdentity identity;
   @Mock private KubernetesClientFactory clientFactory;
   @Mock private KubernetesClient kubernetesClient;
-  @Mock private PodResource<Pod, DoneablePod> podResource;
+  @Mock private RollableScalableResource<Deployment, DoneableDeployment> podResource;
   @Mock private MixedOperation mixedOperationPod;
   @Mock private NonNamespaceOperation namespacePodOperation;
   @Mock private FilterWatchListDeletable<Pod, PodList, Boolean, Watch, Watcher<Pod>> deletable;
+  @Mock private AppsAPIGroupDSL apps;
 
   private AsyncStoragePodInterceptor asyncStoragePodInterceptor;
 
@@ -102,7 +105,8 @@ public class AsyncStoragePodInterceptorTest {
     when(clientFactory.create(WORKSPACE_ID)).thenReturn(kubernetesClient);
     when(kubernetesEnvironment.getAttributes()).thenReturn(emptyMap());
 
-    when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
+    when(kubernetesClient.apps()).thenReturn(apps);
+    when(apps.deployments()).thenReturn(mixedOperationPod);
     when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
     when(podResource.get()).thenReturn(null);
@@ -121,16 +125,17 @@ public class AsyncStoragePodInterceptorTest {
     when(clientFactory.create(WORKSPACE_ID)).thenReturn(kubernetesClient);
     when(kubernetesEnvironment.getAttributes()).thenReturn(emptyMap());
 
-    when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
+    when(kubernetesClient.apps()).thenReturn(apps);
+    when(apps.deployments()).thenReturn(mixedOperationPod);
     when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
 
     ObjectMeta meta = new ObjectMeta();
     meta.setName(ASYNC_STORAGE);
-    Pod pod = new Pod();
-    pod.setMetadata(meta);
+    Deployment deployment = new Deployment();
+    deployment.setMetadata(meta);
 
-    when(podResource.get()).thenReturn(pod);
+    when(podResource.get()).thenReturn(deployment);
     when(podResource.withPropagationPolicy("Background")).thenReturn(deletable);
 
     Watch watch = mock(Watch.class);
@@ -151,16 +156,17 @@ public class AsyncStoragePodInterceptorTest {
     when(kubernetesEnvironment.getAttributes())
         .thenReturn(ImmutableMap.of(PERSIST_VOLUMES_ATTRIBUTE, "true"));
 
-    when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
+    when(kubernetesClient.apps()).thenReturn(apps);
+    when(apps.deployments()).thenReturn(mixedOperationPod);
     when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
 
     ObjectMeta meta = new ObjectMeta();
     meta.setName(ASYNC_STORAGE);
-    Pod pod = new Pod();
-    pod.setMetadata(meta);
+    Deployment deployment = new Deployment();
+    deployment.setMetadata(meta);
 
-    when(podResource.get()).thenReturn(pod);
+    when(podResource.get()).thenReturn(deployment);
     when(podResource.withPropagationPolicy("Background")).thenReturn(deletable);
 
     Watch watch = mock(Watch.class);

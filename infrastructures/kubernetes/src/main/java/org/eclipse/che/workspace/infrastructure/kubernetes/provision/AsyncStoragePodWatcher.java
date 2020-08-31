@@ -23,9 +23,9 @@ import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVITY_TIME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
 
-import io.fabric8.kubernetes.api.model.DoneablePod;
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.client.dsl.PodResource;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
+import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.time.Instant;
 import java.util.Map;
 import javax.inject.Inject;
@@ -137,14 +137,15 @@ public class AsyncStoragePodWatcher {
           Instant expectedShutdownAfter =
               ofEpochSecond(lastTimeAccessSec).plusSeconds(shutdownTimeoutSec);
           if (now().isAfter(expectedShutdownAfter)) {
-            PodResource<Pod, DoneablePod> doneablePodResource =
+            RollableScalableResource<Deployment, DoneableDeployment> doneableResource =
                 kubernetesClientFactory
                     .create()
-                    .pods()
+                    .apps()
+                    .deployments()
                     .inNamespace(namespace)
                     .withName(ASYNC_STORAGE);
-            if (doneablePodResource.get() != null) {
-              doneablePodResource.delete();
+            if (doneableResource.get() != null) {
+              doneableResource.delete();
             }
           }
         } catch (InfrastructureException | ServerException e) {

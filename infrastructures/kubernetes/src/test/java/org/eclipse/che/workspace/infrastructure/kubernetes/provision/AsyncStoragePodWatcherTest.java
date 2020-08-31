@@ -25,13 +25,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.AppsAPIGroupDSL;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-import io.fabric8.kubernetes.client.dsl.PodResource;
+import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,10 +64,11 @@ public class AsyncStoragePodWatcherTest {
   @Mock private PreferenceManager preferenceManager;
   @Mock private WorkspaceRuntimes runtimes;
   @Mock private KubernetesClient kubernetesClient;
-  @Mock private PodResource<Pod, DoneablePod> podResource;
+  @Mock private RollableScalableResource<Deployment, DoneableDeployment> deploymentResource;
   @Mock private MixedOperation mixedOperationPod;
   @Mock private NonNamespaceOperation namespacePodOperation;
   @Mock private UserImpl user;
+  @Mock private AppsAPIGroupDSL apps;
 
   @BeforeMethod
   public void setUp() throws Exception {
@@ -82,9 +84,10 @@ public class AsyncStoragePodWatcherTest {
     when(userManager.getAll(anyInt(), anyLong())).thenReturn(userPage);
 
     when(kubernetesClientFactory.create()).thenReturn(kubernetesClient);
-    when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
+    when(kubernetesClient.apps()).thenReturn(apps);
+    when(apps.deployments()).thenReturn(mixedOperationPod);
     when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
-    when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
+    when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(deploymentResource);
   }
 
   @Test
@@ -105,14 +108,14 @@ public class AsyncStoragePodWatcherTest {
 
     ObjectMeta meta = new ObjectMeta();
     meta.setName(ASYNC_STORAGE);
-    Pod pod = new Pod();
-    pod.setMetadata(meta);
-    when(podResource.get()).thenReturn(pod);
+    Deployment deployment = new Deployment();
+    deployment.setMetadata(meta);
+    when(deploymentResource.get()).thenReturn(deployment);
 
     watcher.check();
 
     verify(preferenceManager).find(USER_ID);
-    verify(podResource).delete();
+    verify(deploymentResource).delete();
   }
 
   @Test
@@ -135,7 +138,7 @@ public class AsyncStoragePodWatcherTest {
 
     verify(preferenceManager).find(USER_ID);
     verifyNoMoreInteractions(kubernetesClientFactory);
-    verifyNoMoreInteractions(podResource);
+    verifyNoMoreInteractions(deploymentResource);
   }
 
   @Test
@@ -165,7 +168,7 @@ public class AsyncStoragePodWatcherTest {
 
     verify(preferenceManager).find(USER_ID);
     verifyNoMoreInteractions(kubernetesClientFactory);
-    verifyNoMoreInteractions(podResource);
+    verifyNoMoreInteractions(deploymentResource);
   }
 
   @Test
@@ -187,7 +190,7 @@ public class AsyncStoragePodWatcherTest {
 
     verify(preferenceManager).find(USER_ID);
     verifyNoMoreInteractions(kubernetesClientFactory);
-    verifyNoMoreInteractions(podResource);
+    verifyNoMoreInteractions(deploymentResource);
   }
 
   @Test
@@ -209,7 +212,7 @@ public class AsyncStoragePodWatcherTest {
 
     verifyNoMoreInteractions(preferenceManager);
     verifyNoMoreInteractions(kubernetesClientFactory);
-    verifyNoMoreInteractions(podResource);
+    verifyNoMoreInteractions(deploymentResource);
   }
 
   @Test
@@ -231,7 +234,7 @@ public class AsyncStoragePodWatcherTest {
 
     verifyNoMoreInteractions(preferenceManager);
     verifyNoMoreInteractions(kubernetesClientFactory);
-    verifyNoMoreInteractions(podResource);
+    verifyNoMoreInteractions(deploymentResource);
   }
 
   @Test
@@ -253,7 +256,7 @@ public class AsyncStoragePodWatcherTest {
 
     verifyNoMoreInteractions(preferenceManager);
     verifyNoMoreInteractions(kubernetesClientFactory);
-    verifyNoMoreInteractions(podResource);
+    verifyNoMoreInteractions(deploymentResource);
   }
 
   @Test
@@ -275,7 +278,7 @@ public class AsyncStoragePodWatcherTest {
 
     verifyNoMoreInteractions(preferenceManager);
     verifyNoMoreInteractions(kubernetesClientFactory);
-    verifyNoMoreInteractions(podResource);
+    verifyNoMoreInteractions(deploymentResource);
   }
 
   @Test
@@ -297,6 +300,6 @@ public class AsyncStoragePodWatcherTest {
 
     verifyNoMoreInteractions(preferenceManager);
     verifyNoMoreInteractions(kubernetesClientFactory);
-    verifyNoMoreInteractions(podResource);
+    verifyNoMoreInteractions(deploymentResource);
   }
 }
