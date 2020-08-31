@@ -22,6 +22,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStoragePodInterceptor;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
@@ -82,6 +83,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private PreviewUrlExposer previewUrlExposer;
   @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
   @Mock private NodeSelectorProvisioner nodeSelectorProvisioner;
+  @Mock private GatewayRouterProvisioner gatewayRouterProvisioner;
 
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> k8sInfraProvisioner;
 
@@ -114,7 +116,8 @@ public class KubernetesEnvironmentProvisionerTest {
             sshKeysProvisioner,
             gitConfigProvisioner,
             previewUrlExposer,
-            vcsSslCertificateProvisioner);
+            vcsSslCertificateProvisioner,
+            gatewayRouterProvisioner);
     provisionOrder =
         inOrder(
             logsVolumeMachineProvisioner,
@@ -133,7 +136,8 @@ public class KubernetesEnvironmentProvisionerTest {
             serviceAccountProvisioner,
             certificateProvisioner,
             gitConfigProvisioner,
-            previewUrlExposer);
+            previewUrlExposer,
+            gatewayRouterProvisioner);
   }
 
   @Test
@@ -160,6 +164,7 @@ public class KubernetesEnvironmentProvisionerTest {
     provisionOrder.verify(serviceAccountProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(certificateProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(gitConfigProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(gatewayRouterProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }

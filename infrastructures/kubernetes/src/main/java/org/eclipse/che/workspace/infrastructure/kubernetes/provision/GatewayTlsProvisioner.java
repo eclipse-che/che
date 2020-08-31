@@ -15,13 +15,14 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsP
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
@@ -39,30 +40,42 @@ public class GatewayTlsProvisioner<T extends KubernetesEnvironment>
   }
 
   @Override
-  public void provision(T k8sEnv, RuntimeIdentity identity)
-      throws KubernetesInfrastructureException {
+  public void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException {
     if (!isTlsEnabled) {
       return;
     }
 
-    for (ConfigMap cm : k8sEnv.getConfigMaps().values()) {
-      useSecureProtocolForGatewayServers(cm);
+    for (ConfigMap configMap : k8sEnv.getConfigMaps().values()) {
+      if (GatewayRouterProvisioner.isGatewayConfig(configMap)) {
+        useSecureProtocolForGatewayConfigMap(configMap);
+      }
     }
   }
 
-  private void useSecureProtocolForGatewayServers(ConfigMap cm) {
+  private void useSecureProtocolForGatewayConfigMap(ConfigMap configMap)
+      throws InfrastructureException {
     Map<String, ServerConfigImpl> servers =
-        Annotations.newDeserializer(cm.getMetadata().getAnnotations()).servers();
+        Annotations.newDeserializer(configMap.getMetadata().getAnnotations()).servers();
 
     if (servers.isEmpty()) {
       return;
     }
-
-    servers.values().forEach(s -> s.setProtocol(getSecureProtocol(s.getProtocol())));
-
-    Map<String, String> annotations = Annotations.newSerializer().servers(servers).annotations();
-    if (!annotations.isEmpty() && cm.getMetadata().getAnnotations() != null) {
-      cm.getMetadata().getAnnotations().putAll(annotations);
+    if (servers.size() != 1) {
+      throw new InfrastructureException(
+          "Expected exactly 1 server in Gateway configuration ConfigMap '"
+              + configMap.getMetadata().getName()
+              + "'. This is a bug, please report.");
     }
+    Entry<String, ServerConfigImpl> serverConfigEntry = servers.entrySet().iterator().next();
+    ServerConfigImpl serverConfig = serverConfigEntry.getValue();
+
+    serverConfig.setProtocol(getSecureProtocol(serverConfig.getProtocol()));
+    configMap
+        .getMetadata()
+        .getAnnotations()
+        .putAll(
+            Annotations.newSerializer()
+                .server(serverConfigEntry.getKey(), serverConfig)
+                .annotations());
   }
 }

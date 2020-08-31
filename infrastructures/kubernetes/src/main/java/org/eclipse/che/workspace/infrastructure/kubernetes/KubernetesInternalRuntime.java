@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.shouldCreateInCheNamespace;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.CHECK_SERVERS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_MACHINES_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_RUNNING_ASYNC;
@@ -85,6 +86,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.PodMerger;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.CheNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatchTimeouts;
@@ -131,6 +133,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final PreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   private final SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
   private final KubernetesServerResolverFactory serverResolverFactory;
+  protected final CheNamespace cheNamespace;
   protected final Tracer tracer;
 
   @Inject
@@ -155,6 +158,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       PreviewUrlCommandProvisioner previewUrlCommandProvisioner,
       SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner,
       KubernetesServerResolverFactory kubernetesServerResolverFactory,
+      CheNamespace cheNamespace,
       Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace) {
@@ -167,6 +171,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.probeScheduler = probeScheduler;
     this.probesFactory = probesFactory;
     this.namespace = namespace;
+    this.cheNamespace = cheNamespace;
     this.eventPublisher = eventPublisher;
     this.executor = sharedPool.getExecutor();
     this.runtimeStates = runtimeStates;
@@ -190,7 +195,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       startSynchronizer.setStartThread();
       startSynchronizer.start();
 
-      namespace.cleanUp();
+      cleanUp(workspaceId);
       provisionWorkspace(startOptions, context, workspaceId);
 
       volumesStrategy.prepare(
@@ -255,7 +260,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // stop watching before namespace cleaning up
       namespace.deployments().stopWatch(true);
       try {
-        namespace.cleanUp();
+        cleanUp(workspaceId);
       } catch (InfrastructureException cleanUppingEx) {
         LOG.warn(
             "Failed to clean up namespace after workspace '{}' start failing. Cause: {}",
@@ -270,6 +275,11 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     } finally {
       namespace.deployments().stopWatch();
     }
+  }
+
+  private void cleanUp(String workspaceId) throws InfrastructureException {
+    namespace.cleanUp();
+    cheNamespace.cleanUp(workspaceId);
   }
 
   protected void provisionWorkspace(
@@ -584,7 +594,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           // Che Server that is crashed so start is hung up in STOPPING phase.
           // Need to clean up runtime resources
           probeScheduler.cancel(identity.getWorkspaceId());
-          namespace.cleanUp();
+          cleanUp(identity.getWorkspaceId());
         }
       } catch (InterruptedException e) {
         throw new InfrastructureException(
@@ -594,7 +604,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // runtime is RUNNING. Clean up used resources
       // Cancels workspace servers probes if any
       probeScheduler.cancel(identity.getWorkspaceId());
-      namespace.cleanUp();
+      cleanUp(identity.getWorkspaceId());
     }
   }
 
@@ -614,7 +624,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     String workspaceId = getContext().getIdentity().getWorkspaceId();
 
     createSecrets(k8sEnv, workspaceId);
-    List<ConfigMap> createdConfigMaps = createConfigMaps(k8sEnv, workspaceId);
+    List<ConfigMap> createdConfigMaps = createConfigMaps(k8sEnv, getContext().getIdentity());
     List<Service> createdServices = createServices(k8sEnv, workspaceId);
 
     // needed for resolution later on, even though n routes are actually created by ingress
@@ -684,15 +694,25 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   }
 
   @Traced
-  @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
-  List<ConfigMap> createConfigMaps(KubernetesEnvironment env, String workspaceId)
+  protected List<ConfigMap> createConfigMaps(KubernetesEnvironment env, RuntimeIdentity identity)
       throws InfrastructureException {
-    TracingTags.WORKSPACE_ID.set(workspaceId);
+    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
 
     List<ConfigMap> createdConfigMaps = new ArrayList<>();
+
+    List<ConfigMap> cheNamespaceConfigMaps = new ArrayList<>();
     for (ConfigMap configMap : env.getConfigMaps().values()) {
-      createdConfigMaps.add(namespace.configMaps().create(configMap));
+      if (shouldCreateInCheNamespace(configMap)) {
+        // we collect the che namespace configmaps into separate list
+        cheNamespaceConfigMaps.add(configMap);
+      } else {
+        createdConfigMaps.add(namespace.configMaps().create(configMap));
+      }
     }
+
+    // create che namespace configmaps in one batch, because we're doing some extra checks inside
+    createdConfigMaps.addAll(cheNamespace.createConfigMaps(cheNamespaceConfigMaps, identity));
+
     return createdConfigMaps;
   }
 
