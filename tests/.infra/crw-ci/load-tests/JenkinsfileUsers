@@ -36,6 +36,14 @@ pipeline {
         choice(name: 'environment', 
                 choices: ['Che', 'CRW'], 
                 description: 'Environment, where users should be created. Can be Che or CRW.')
+        
+        string(name: 'keycloakAdminUsername',
+                defaultValue: 'admin',
+                description: 'Keycloak admin username, default to "admin".')
+
+        string(name: 'keycloakAdminPassword',
+                defaultValue: 'admin',
+                description: 'Keacloak admin password, deafult to "admin".')
 
     }
     environment {
@@ -78,7 +86,7 @@ pipeline {
                 sh """
                   cd $PATH_TO_SCRIPTS
                   oc config use-context ${env.CHE_CONTEXT}
-                  ./create_users.sh -n $USERNAME_BASE -m $USERNAME_PASS -s $startingIndex -c $numberOfUsers -e $environment
+                  ./create_users.sh -n $USERNAME_BASE -m $USERNAME_PASS -s $startingIndex -c $numberOfUsers -e $environment -a keycloakAdminUsername -p keycloakAdminPassword
                 """
             }
         }

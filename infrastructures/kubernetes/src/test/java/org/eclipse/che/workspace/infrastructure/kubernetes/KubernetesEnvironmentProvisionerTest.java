@@ -26,6 +26,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRout
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.NodeSelectorProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
@@ -81,6 +82,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private GitConfigProvisioner gitConfigProvisioner;
   @Mock private PreviewUrlExposer previewUrlExposer;
   @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
+  @Mock private NodeSelectorProvisioner nodeSelectorProvisioner;
   @Mock private GatewayRouterProvisioner gatewayRouterProvisioner;
 
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> k8sInfraProvisioner;
@@ -106,6 +108,7 @@ public class KubernetesEnvironmentProvisionerTest {
             externalServerIngressTlsProvisionerProvider,
             imagePullSecretProvisioner,
             proxySettingsProvisioner,
+            nodeSelectorProvisioner,
             asyncStorageProvisioner,
             asyncStoragePodObserver,
             serviceAccountProvisioner,
@@ -124,6 +127,7 @@ public class KubernetesEnvironmentProvisionerTest {
             envVarsProvisioner,
             restartPolicyRewriter,
             ramLimitProvisioner,
+            nodeSelectorProvisioner,
             securityContextProvisioner,
             podTerminationGracePeriodProvisioner,
             externalServerIngressTlsProvisioner,
@@ -147,6 +151,7 @@ public class KubernetesEnvironmentProvisionerTest {
     provisionOrder.verify(restartPolicyRewriter).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(uniqueNamesProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(ramLimitProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(nodeSelectorProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder
         .verify(externalServerIngressTlsProvisioner)
         .provision(eq(k8sEnv), eq(runtimeIdentity));
