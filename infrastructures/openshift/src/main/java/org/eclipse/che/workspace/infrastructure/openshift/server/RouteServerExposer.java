@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.server;
 
+import static java.util.Collections.emptyMap;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.IntOrString;
@@ -102,7 +104,7 @@ public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnviro
     this.labels =
         labelsProperty != null
             ? Splitter.on(",").withKeyValueSeparator("=").split(labelsProperty)
-            : new HashMap<>();
+            : emptyMap();
   }
 
   @Override

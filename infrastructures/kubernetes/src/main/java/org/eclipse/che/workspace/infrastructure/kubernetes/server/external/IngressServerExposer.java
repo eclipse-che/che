@@ -11,10 +11,11 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
+import static java.util.Collections.emptyMap;
+
 import com.google.common.base.Splitter;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -56,7 +57,7 @@ public class IngressServerExposer implements ExternalServerExposer<KubernetesEnv
     this.labels =
         labelsProperty != null
             ? Splitter.on(",").withKeyValueSeparator("=").split(labelsProperty)
-            : new HashMap<>();
+            : emptyMap();
   }
 
   /**
