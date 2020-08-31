@@ -21,8 +21,8 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstallationLocation;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftCheInstallationLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +44,9 @@ public class OpenShiftStopWorkspaceRoleProvisioner {
   @Inject
   public OpenShiftStopWorkspaceRoleProvisioner(
       OpenShiftClientFactory clientFactory,
-      OpenShiftCheInstallationLocation installationLocation,
-      @Named("che.workspace.stop.role.enabled") boolean stopWorkspaceRoleEnabled) {
+      CheInstallationLocation installationLocation,
+      @Named("che.workspace.stop.role.enabled") boolean stopWorkspaceRoleEnabled)
+      throws InfrastructureException {
     this.clientFactory = clientFactory;
     this.installationLocation = installationLocation.getInstallationLocationNamespace();
     this.stopWorkspaceRoleEnabled = stopWorkspaceRoleEnabled;

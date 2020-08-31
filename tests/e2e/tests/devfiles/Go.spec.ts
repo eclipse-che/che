@@ -17,7 +17,7 @@ import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 import { Logger } from '../../utils/Logger';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
 
-const preferencesHalder: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
+const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
 const workspaceStack: string = 'Go';
 const workspaceSampleName: string = 'src';
@@ -35,7 +35,7 @@ suite(`${workspaceStack} test`, async () => {
     suite(`Create ${workspaceStack} workspace`, async () => {
         test('Workaround for issue #16113', async () => {
             Logger.warn(`Manually setting a preference for golang devfile LS based on issue: https://github.com/eclipse/che/issues/16113`);
-            await preferencesHalder.setUseGoLanaguageServer();
+            await preferencesHandler.setUseGoLanaguageServer();
         });
         workspaceHandler.createAndOpenWorkspace(workspaceStack);
         projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);

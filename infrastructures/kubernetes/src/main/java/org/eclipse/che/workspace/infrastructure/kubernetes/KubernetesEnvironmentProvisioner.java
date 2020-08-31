@@ -23,9 +23,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStoragePodInterceptor;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.NodeSelectorProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
@@ -74,6 +76,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final TlsProvisioner<KubernetesEnvironment> externalServerTlsProvisioner;
     private final ImagePullSecretProvisioner imagePullSecretProvisioner;
     private final ProxySettingsProvisioner proxySettingsProvisioner;
+    private final NodeSelectorProvisioner nodeSelectorProvisioner;
     private final AsyncStorageProvisioner asyncStorageProvisioner;
     private final AsyncStoragePodInterceptor asyncStoragePodInterceptor;
     private final ServiceAccountProvisioner serviceAccountProvisioner;
@@ -82,6 +85,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final GitConfigProvisioner gitConfigProvisioner;
     private final PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer;
     private final VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
+    private final GatewayRouterProvisioner gatewayRouterProvisioner;
 
     @Inject
     public KubernetesEnvironmentProvisionerImpl(
@@ -98,6 +102,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         TlsProvisionerProvider<KubernetesEnvironment> externalServerTlsProvisionerProvider,
         ImagePullSecretProvisioner imagePullSecretProvisioner,
         ProxySettingsProvisioner proxySettingsProvisioner,
+        NodeSelectorProvisioner nodeSelectorProvisioner,
         AsyncStorageProvisioner asyncStorageProvisioner,
         AsyncStoragePodInterceptor asyncStoragePodInterceptor,
         ServiceAccountProvisioner serviceAccountProvisioner,
@@ -105,7 +110,8 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         SshKeysProvisioner sshKeysProvisioner,
         GitConfigProvisioner gitConfigProvisioner,
         PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer,
-        VcsSslCertificateProvisioner vcsSslCertificateProvisioner) {
+        VcsSslCertificateProvisioner vcsSslCertificateProvisioner,
+        GatewayRouterProvisioner gatewayRouterProvisioner) {
       this.pvcEnabled = pvcEnabled;
       this.volumesStrategy = volumesStrategy;
       this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -119,6 +125,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.externalServerTlsProvisioner = externalServerTlsProvisionerProvider.get();
       this.imagePullSecretProvisioner = imagePullSecretProvisioner;
       this.proxySettingsProvisioner = proxySettingsProvisioner;
+      this.nodeSelectorProvisioner = nodeSelectorProvisioner;
       this.asyncStorageProvisioner = asyncStorageProvisioner;
       this.asyncStoragePodInterceptor = asyncStoragePodInterceptor;
       this.serviceAccountProvisioner = serviceAccountProvisioner;
@@ -127,6 +134,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.vcsSslCertificateProvisioner = vcsSslCertificateProvisioner;
       this.gitConfigProvisioner = gitConfigProvisioner;
       this.previewUrlExposer = previewUrlExposer;
+      this.gatewayRouterProvisioner = gatewayRouterProvisioner;
     }
 
     @Traced
@@ -157,6 +165,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       restartPolicyRewriter.provision(k8sEnv, identity);
       uniqueNamesProvisioner.provision(k8sEnv, identity);
       resourceLimitRequestProvisioner.provision(k8sEnv, identity);
+      nodeSelectorProvisioner.provision(k8sEnv, identity);
       externalServerTlsProvisioner.provision(k8sEnv, identity);
       securityContextProvisioner.provision(k8sEnv, identity);
       podTerminationGracePeriodProvisioner.provision(k8sEnv, identity);
@@ -168,6 +177,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       sshKeysProvisioner.provision(k8sEnv, identity);
       vcsSslCertificateProvisioner.provision(k8sEnv, identity);
       gitConfigProvisioner.provision(k8sEnv, identity);
+      gatewayRouterProvisioner.provision(k8sEnv, identity);
       LOG.debug("Provisioning Kubernetes environment done for workspace '{}'", workspaceId);
     }
   }
