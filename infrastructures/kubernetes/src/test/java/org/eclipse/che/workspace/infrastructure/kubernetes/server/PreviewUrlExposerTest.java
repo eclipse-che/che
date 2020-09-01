@@ -53,7 +53,8 @@ public class PreviewUrlExposerTest {
   @BeforeMethod
   public void setUp() {
     IngressServerExposer externalServerExposer =
-        new IngressServerExposer(externalServiceExposureStrategy, Collections.emptyMap(), null);
+        new IngressServerExposer(
+            externalServiceExposureStrategy, Collections.emptyMap(), null, null);
     previewUrlExposer = new PreviewUrlExposer<>(externalServerExposer);
   }
 
