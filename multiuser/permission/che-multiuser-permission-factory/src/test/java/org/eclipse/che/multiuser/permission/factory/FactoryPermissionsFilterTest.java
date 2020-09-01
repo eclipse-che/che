@@ -72,117 +72,6 @@ public class FactoryPermissionsFilterTest {
 
   @InjectMocks private FactoryPermissionsFilter permissionsFilter;
 
-  @Test
-  public void shouldCheckPermissionsOnGettingFactoryJsonByWorkspaceId() throws Exception {
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .when()
-            .get(SECURE_PATH + "/factory/workspace/workspace123");
-
-    assertEquals(response.getStatusCode(), 204);
-    verify(service).getFactoryJson(eq("workspace123"), nullable(String.class));
-    verify(subject).checkPermission(DOMAIN_ID, "workspace123", READ);
-  }
-
-  @Test
-  public void shouldReturnForbiddenWhenUserDoesHavePermissionsToReadWorkspaceOnGettingFactoryJson()
-      throws Exception {
-    doThrow(new ForbiddenException("User in not authorized"))
-        .when(subject)
-        .checkPermission(anyString(), anyString(), anyString());
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .when()
-            .get(SECURE_PATH + "/factory/workspace/workspace123");
-
-    assertEquals(response.getStatusCode(), 403);
-  }
-
-  @Test
-  public void shouldMakeSureThatUserIsCreatorOnUpdatingFactory() throws Exception {
-    doReturn("user123").when(subject).getUserId();
-
-    Factory factory = mock(Factory.class);
-    doReturn(new AuthorImpl("user123", 12345L)).when(factory).getCreator();
-    when(factoryManager.getById("factory123")).thenReturn(factory);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .contentType("application/json")
-            .body(DtoFactory.newDto(FactoryDto.class))
-            .when()
-            .put(SECURE_PATH + "/factory/factory123");
-
-    assertEquals(response.getStatusCode(), 204);
-    verify(service).updateFactory(eq("factory123"), any(FactoryDto.class));
-  }
-
-  @Test
-  public void shouldReturnForbiddenWhenUserIsNotCreatorOnUpdatingFactory() throws Exception {
-    doReturn("user321").when(subject).getUserId();
-
-    Factory factory = mock(Factory.class);
-    doReturn(new AuthorImpl("user123", 12345L)).when(factory).getCreator();
-    when(factoryManager.getById("factory123")).thenReturn(factory);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .contentType("application/json")
-            .body(DtoFactory.newDto(FactoryDto.class))
-            .when()
-            .put(SECURE_PATH + "/factory/factory123");
-
-    assertEquals(response.getStatusCode(), 403);
-    verify(service, never()).updateFactory(any(), any());
-  }
-
-  @Test
-  public void shouldMakeSureThatUserIsCreatorOnRemovingFactory() throws Exception {
-    doReturn("user123").when(subject).getUserId();
-
-    Factory factory = mock(Factory.class);
-    doReturn(new AuthorImpl("user123", 12345L)).when(factory).getCreator();
-    when(factoryManager.getById("factory123")).thenReturn(factory);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .when()
-            .delete(SECURE_PATH + "/factory/factory123");
-
-    assertEquals(response.getStatusCode(), 204);
-    verify(service).removeFactory(eq("factory123"));
-  }
-
-  @Test
-  public void shouldReturnForbiddenWhenUserIsNotCreatorOnRemovingForeignFactory() throws Exception {
-    doReturn("user321").when(subject).getUserId();
-
-    Factory factory = mock(Factory.class);
-    doReturn(new AuthorImpl("user123", 12345L)).when(factory).getCreator();
-    when(factoryManager.getById("factory123")).thenReturn(factory);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .when()
-            .delete(SECURE_PATH + "/factory/factory123");
-
-    assertEquals(response.getStatusCode(), 403);
-    verify(service, never()).removeFactory(any());
-  }
-
   @Test(dataProvider = "publicMethods")
   public void shouldDoNothingWhenPublicMethodMethodIsCalled(String name, Class[] parameterTypes)
       throws Exception {
@@ -196,10 +85,8 @@ public class FactoryPermissionsFilterTest {
   @DataProvider(name = "publicMethods")
   public Object[][] publicMethods() {
     return new Object[][] {
-      {"saveFactory", new Class[] {FactoryDto.class}},
-      {"getFactory", new Class[] {String.class, Boolean.class}},
+
       {"resolveFactory", new Class[] {Map.class, Boolean.class}},
-      {"getFactoryByAttribute", new Class[] {Integer.class, Integer.class, UriInfo.class}},
     };
   }
 
