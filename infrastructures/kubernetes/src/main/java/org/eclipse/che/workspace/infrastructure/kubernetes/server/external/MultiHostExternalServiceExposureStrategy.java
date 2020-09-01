@@ -12,7 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServiceExposureStrategyProvider.STRATEGY_PROPERTY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ServiceExposureStrategyProvider.STRATEGY_PROPERTY;
 
 import com.google.common.base.Strings;
 import javax.inject.Inject;
