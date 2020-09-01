@@ -26,6 +26,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Command;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
@@ -39,6 +40,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 
 @Entity(name = "UserDevfile")
+@Table(name = "userdevfile")
 @NamedQueries({
   @NamedQuery(name = "UserDevfile.getAll", query = "SELECT d FROM UserDevfile d ORDER BY d.id"),
   @NamedQuery(name = "UserDevfile.getAllCount", query = "SELECT COUNT(d) FROM UserDevfile d"),

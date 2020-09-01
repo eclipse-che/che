@@ -182,6 +182,7 @@
                         <configuration>
                             <includes>
                                 <include>**/spi/tck/*.*</include>
+                                <include>**/devfile/server/TestObjectGenerator.*</include>
                             </includes>
                         </configuration>
                     </execution>

@@ -64,7 +64,6 @@ public class UserDevfileDaoTest {
   private static final int ENTRY_COUNT = 10;
 
   private UserDevfileImpl[] devfiles;
-  private UserImpl[] users;
 
   @Inject private UserDevfileDao userDevfileDaoDao;
 
@@ -75,24 +74,18 @@ public class UserDevfileDaoTest {
   @BeforeMethod
   public void setUp() throws Exception {
     devfiles = new UserDevfileImpl[ENTRY_COUNT];
-    users = new UserImpl[ENTRY_COUNT];
-    for (int i = 0; i < ENTRY_COUNT; i++) {
-      users[i] = new UserImpl("userId_" + i, "email_" + i, "name" + i);
-    }
     for (int i = 0; i < ENTRY_COUNT; i++) {
       devfiles[i] =
           createUserDevfile(
               NameGenerator.generate("id-" + i + "-", 6),
               NameGenerator.generate("devfileName-" + i, 6));
     }
-    userTckRepository.createAll(Arrays.asList(users));
     devfileTckRepository.createAll(Stream.of(devfiles).map(UserDevfileImpl::new).collect(toList()));
   }
 
   @AfterMethod
   public void cleanUp() throws Exception {
     devfileTckRepository.removeAll();
-    userTckRepository.removeAll();
   }
 
   @Test
