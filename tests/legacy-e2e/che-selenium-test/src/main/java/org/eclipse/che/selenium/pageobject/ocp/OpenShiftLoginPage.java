@@ -169,9 +169,7 @@ public class OpenShiftLoginPage {
   public void login() {
     seleniumWebDriver.navigate().to(testDashboardUrlProvider.get());
 
-    if (cheLoginPage.isOpened()) {
-      dashboard.open();
-    } else {
+    if (!cheLoginPage.isOpened()) {
       if (codereadyOpenShiftLoginPage.isIdentityProviderLinkVisible(IDENTITY_PROVIDER_NAME)) {
         codereadyOpenShiftLoginPage.clickOnIdentityProviderLink(IDENTITY_PROVIDER_NAME);
       }

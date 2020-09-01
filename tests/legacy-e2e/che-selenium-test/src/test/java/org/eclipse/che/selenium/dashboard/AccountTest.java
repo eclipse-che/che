@@ -58,7 +58,7 @@ public class AccountTest {
     changedTestUserAccount =
         new Account()
             .withLogin(testUser.getName())
-            .withEmail(testUser.getEmail())
+            .withEmail(testUser.getName() + "@2.com")
             .withFirstName("UserFirstName")
             .withLastName("UserLastName");
 
@@ -74,7 +74,7 @@ public class AccountTest {
 
   public void shouldChangeEmailFirstAndLastName() {
     dashboardAccount.getTitle().equals("Account");
-    //    assertEquals(dashboardAccount.getAllFields(), initialTestUserAccount);
+
     dashboardAccount.clickOnEditButton();
 
     seleniumWebDriverHelper.switchToNextWindow(parentWindow);
