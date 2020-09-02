@@ -47,6 +47,7 @@ public class ExternalServerIngressBuilder {
   private Map<String, ? extends ServerConfig> serversConfigs;
   private String machineName;
   private Map<String, String> annotations;
+  private Map<String, String> labels;
 
   public ExternalServerIngressBuilder withHost(String host) {
     this.host = host;
@@ -89,6 +90,11 @@ public class ExternalServerIngressBuilder {
     return this;
   }
 
+  public ExternalServerIngressBuilder withLabels(Map<String, String> labels) {
+    this.labels = labels;
+    return this;
+  }
+
   public Ingress build() {
 
     IngressBackend ingressBackend =
@@ -125,7 +131,11 @@ public class ExternalServerIngressBuilder {
     return new io.fabric8.kubernetes.api.model.extensions.IngressBuilder()
         .withSpec(ingressSpec)
         .withMetadata(
-            new ObjectMetaBuilder().withName(name).withAnnotations(ingressAnnotations).build())
+            new ObjectMetaBuilder()
+                .withName(name)
+                .withAnnotations(ingressAnnotations)
+                .withLabels(labels)
+                .build())
         .build();
   }
 }

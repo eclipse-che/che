@@ -12,7 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
@@ -27,9 +27,9 @@ public interface TlsProvisioner<T extends KubernetesEnvironment> {
    * If TLS enabled, updates protocol to secure one and ensures that underlying exposure objects are
    * properly configured.
    *
-   * @throws KubernetesInfrastructureException in case of any infrastructure failure
+   * @throws InfrastructureException in case of any infrastructure failure
    */
-  void provision(T k8sEnv, RuntimeIdentity identity) throws KubernetesInfrastructureException;
+  void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException;
 
   /**
    * Returns the secure version of the provided protocol or the same protocol if the conversion is

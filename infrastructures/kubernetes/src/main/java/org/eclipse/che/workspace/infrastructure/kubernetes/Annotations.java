@@ -41,6 +41,14 @@ public class Annotations {
 
   public static final String MACHINE_NAME_ANNOTATION = ANNOTATION_PREFIX + "machine.name";
 
+  /**
+   * Object annotated with this set to `true` should be created in Che installation namespace. It's
+   * used only internally so it may be removed before actually creating k8s object, so it's not
+   * exposed.
+   */
+  public static final String CREATE_IN_CHE_INSTALLATION_NAMESPACE =
+      ANNOTATION_PREFIX + "installation.namespace";
+
   /** Pattern that matches server annotations e.g. "org.eclipse.che.server.exec-agent.port". */
   private static final Pattern SERVER_ANNOTATION_PATTERN =
       Pattern.compile("org\\.eclipse\\.che\\.server\\.(?<ref>[\\w-/]+)\\..+");

@@ -37,7 +37,9 @@ public class ConfigMapServerResolver extends AbstractServerResolver {
     for (ConfigMap configMap : configMaps) {
       String machineName =
           Annotations.newDeserializer(configMap.getMetadata().getAnnotations()).machineName();
-      this.configMaps.put(machineName, configMap);
+      if (machineName != null) {
+        this.configMaps.put(machineName, configMap);
+      }
     }
   }
 

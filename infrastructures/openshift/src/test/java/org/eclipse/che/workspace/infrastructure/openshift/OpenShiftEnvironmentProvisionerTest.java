@@ -20,6 +20,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStoragePodInterceptor;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
@@ -76,6 +77,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private OpenShiftPreviewUrlExposer previewUrlEndpointsProvisioner;
   @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
   @Mock private NodeSelectorProvisioner nodeSelectorProvisioner;
+  @Mock private GatewayRouterProvisioner gatewayRouterProvisioner;
 
   private OpenShiftEnvironmentProvisioner osInfraProvisioner;
 
@@ -106,7 +108,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             sshKeysProvisioner,
             gitConfigProvisioner,
             previewUrlEndpointsProvisioner,
-            vcsSslCertificateProvisioner);
+            vcsSslCertificateProvisioner,
+            gatewayRouterProvisioner);
     provisionOrder =
         inOrder(
             logsVolumeMachineProvisioner,
@@ -126,7 +129,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             sshKeysProvisioner,
             vcsSslCertificateProvisioner,
             gitConfigProvisioner,
-            previewUrlEndpointsProvisioner);
+            previewUrlEndpointsProvisioner,
+            gatewayRouterProvisioner);
   }
 
   @Test
@@ -152,6 +156,7 @@ public class OpenShiftEnvironmentProvisionerTest {
     provisionOrder.verify(sshKeysProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(vcsSslCertificateProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(gitConfigProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(gatewayRouterProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }
