@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner.GATEWAY_CONFIGMAP_LABELS;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -26,8 +26,10 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.GatewayConfigmapLabels;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -38,6 +40,7 @@ public class GatewayTlsProvisionerTest {
   public static final String WORKSPACE_ID = "workspace123";
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
+  @Mock private GatewayConfigmapLabels gatewayConfigmapLabels;
 
   private final ServerConfigImpl httpServer =
       new ServerConfigImpl("8080/tpc", "http", "/api", emptyMap());
@@ -46,6 +49,11 @@ public class GatewayTlsProvisionerTest {
   private final Map<String, String> annotations =
       singletonMap("annotation-key", "annotation-value");
   private final String machine = "machine";
+
+  @BeforeMethod
+  public void setUp() {
+    when(gatewayConfigmapLabels.isGatewayConfig(any(ConfigMap.class))).thenReturn(true);
+  }
 
   @Test(dataProvider = "tlsProvisionData")
   public void provisionTlsForGatewayRouteConfigmaps(
@@ -58,13 +66,12 @@ public class GatewayTlsProvisionerTest {
         new ConfigMapBuilder()
             .withNewMetadata()
             .withName("route")
-            .withLabels(GATEWAY_CONFIGMAP_LABELS)
             .withAnnotations(composedAnnotations)
             .endMetadata()
             .build();
 
     GatewayTlsProvisioner<KubernetesEnvironment> gatewayTlsProvisioner =
-        new GatewayTlsProvisioner<>(tlsEnabled);
+        new GatewayTlsProvisioner<>(tlsEnabled, gatewayConfigmapLabels);
 
     when(k8sEnv.getConfigMaps()).thenReturn(singletonMap("route", routeConfigMap));
 
@@ -102,14 +109,13 @@ public class GatewayTlsProvisionerTest {
         new ConfigMapBuilder()
             .withNewMetadata()
             .withName("route")
-            .withLabels(GATEWAY_CONFIGMAP_LABELS)
             .withAnnotations(composedAnnotations)
             .endMetadata()
             .build();
 
     when(k8sEnv.getConfigMaps()).thenReturn(singletonMap("route", routeConfigMap));
     GatewayTlsProvisioner<KubernetesEnvironment> gatewayTlsProvisioner =
-        new GatewayTlsProvisioner<>(true);
+        new GatewayTlsProvisioner<>(true, gatewayConfigmapLabels);
 
     // when
     gatewayTlsProvisioner.provision(k8sEnv, runtimeIdentity);

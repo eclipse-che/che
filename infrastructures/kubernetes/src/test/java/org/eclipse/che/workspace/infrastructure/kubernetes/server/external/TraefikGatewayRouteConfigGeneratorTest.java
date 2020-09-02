@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_PORT_ATTRIBUTE;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner.GATEWAY_CONFIGMAP_LABELS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -75,7 +74,6 @@ public class TraefikGatewayRouteConfigGeneratorTest {
         new ConfigMapBuilder()
             .withNewMetadata()
             .withName("route")
-            .withLabels(GATEWAY_CONFIGMAP_LABELS)
             .withAnnotations(annotations)
             .endMetadata()
             .build();
@@ -102,7 +100,6 @@ public class TraefikGatewayRouteConfigGeneratorTest {
         new ConfigMapBuilder()
             .withNewMetadata()
             .withName("route")
-            .withLabels(GATEWAY_CONFIGMAP_LABELS)
             .withAnnotations(annotations)
             .endMetadata()
             .build();
@@ -131,19 +128,11 @@ public class TraefikGatewayRouteConfigGeneratorTest {
         new ConfigMapBuilder()
             .withNewMetadata()
             .withName("route")
-            .withLabels(GATEWAY_CONFIGMAP_LABELS)
             .withAnnotations(annotations)
             .endMetadata()
             .build();
     gatewayConfigGenerator.addRouteConfig("c1", routeConfig);
 
     gatewayConfigGenerator.generate("che-namespace");
-  }
-
-  @Test(expectedExceptions = InfrastructureException.class)
-  public void failWhenAddConfigmapWithoutLabels() throws InfrastructureException {
-    ConfigMap routeConfig =
-        new ConfigMapBuilder().withNewMetadata().withName("route").endMetadata().build();
-    gatewayConfigGenerator.addRouteConfig("c1", routeConfig);
   }
 }

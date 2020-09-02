@@ -14,7 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_PORT_ATTRIBUTE;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner.GATEWAY_CONFIGMAP_LABELS;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,10 +33,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayRouteConfigGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayRouteConfigGeneratorFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.GatewayConfigmapLabels;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -47,6 +47,7 @@ public class GatewayRouterProvisionerTest {
 
   @Mock private GatewayRouteConfigGeneratorFactory configGeneratorFactory;
   @Mock private GatewayRouteConfigGenerator gatewayRouteConfigGenerator;
+  @Mock private GatewayConfigmapLabels gatewayConfigmapLabels;
   @Mock private KubernetesEnvironment env;
   @Mock private RuntimeIdentity identity;
 
@@ -65,19 +66,16 @@ public class GatewayRouterProvisionerTest {
     lenient().when(configGeneratorFactory.create()).thenReturn(gatewayRouteConfigGenerator);
     lenient().when(identity.getInfrastructureNamespace()).thenReturn(NAMESPACE);
 
-    gatewayRouterProvisioner = new GatewayRouterProvisioner(configGeneratorFactory);
+    when(gatewayConfigmapLabels.isGatewayConfig(any(ConfigMap.class))).thenReturn(true);
+    gatewayRouterProvisioner =
+        new GatewayRouterProvisioner(configGeneratorFactory, gatewayConfigmapLabels);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void testFailWhenNoServersInConfigmapAnnotations() throws InfrastructureException {
     // given
     ConfigMap gatewayRouteConfigMap =
-        new ConfigMapBuilder()
-            .withNewMetadata()
-            .withName("route")
-            .withLabels(GATEWAY_CONFIGMAP_LABELS)
-            .endMetadata()
-            .build();
+        new ConfigMapBuilder().withNewMetadata().withName("route").endMetadata().build();
     when(env.getConfigMaps()).thenReturn(Collections.singletonMap("route", gatewayRouteConfigMap));
 
     // when
@@ -99,7 +97,6 @@ public class GatewayRouterProvisionerTest {
         new ConfigMapBuilder()
             .withNewMetadata()
             .withName("route")
-            .withLabels(GATEWAY_CONFIGMAP_LABELS)
             .withAnnotations(annotationsWith2Servers)
             .endMetadata()
             .build();
@@ -121,7 +118,6 @@ public class GatewayRouterProvisionerTest {
         new ConfigMapBuilder()
             .withNewMetadata()
             .withName("route")
-            .withLabels(GATEWAY_CONFIGMAP_LABELS)
             .withAnnotations(annotationsWith2Servers)
             .endMetadata()
             .build();
@@ -143,7 +139,6 @@ public class GatewayRouterProvisionerTest {
         new ConfigMapBuilder()
             .withNewMetadata()
             .withName("route")
-            .withLabels(GATEWAY_CONFIGMAP_LABELS)
             .withAnnotations(annotationsWith2Servers)
             .endMetadata()
             .build();
@@ -175,26 +170,5 @@ public class GatewayRouterProvisionerTest {
     // verify that provisioner included the data info configmap
     Map<String, String> actualData = gatewayRouteConfigMap.getData();
     assertEquals(actualData, expectedData);
-  }
-
-  @Test(dataProvider = "isGatewayConfigData")
-  public void testIsGatewayConfig(Map<String, String> labels, boolean isGatewayConfigExpected) {
-    ConfigMap cm =
-        new ConfigMapBuilder().withNewMetadata().withLabels(labels).endMetadata().build();
-    assertEquals(GatewayRouterProvisioner.isGatewayConfig(cm), isGatewayConfigExpected);
-  }
-
-  @DataProvider
-  public Object[][] isGatewayConfigData() {
-    return new Object[][] {
-      {GATEWAY_CONFIGMAP_LABELS, true},
-      {ImmutableMap.builder().putAll(GATEWAY_CONFIGMAP_LABELS).put("other", "value").build(), true},
-      {emptyMap(), false},
-      {ImmutableMap.of("one", "two"), false},
-      {ImmutableMap.of(), false},
-      {ImmutableMap.of("app", "yes", "role", "no"), false},
-      {ImmutableMap.of("app", GATEWAY_CONFIGMAP_LABELS.get("app"), "role", "no"), false},
-      {ImmutableMap.of("app", "no", "role", GATEWAY_CONFIGMAP_LABELS.get("role")), false},
-    };
   }
 }

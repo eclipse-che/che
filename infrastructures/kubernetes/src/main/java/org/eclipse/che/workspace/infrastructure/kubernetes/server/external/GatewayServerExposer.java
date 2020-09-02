@@ -27,8 +27,8 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.GatewayConfigmapLabels;
 
 /**
  * Uses gateway configured with ConfigMaps to expose servers.
@@ -39,10 +39,13 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
     implements ExternalServerExposer<T> {
 
   private final ExternalServiceExposureStrategy strategy;
+  private final GatewayConfigmapLabels configmapLabels;
 
   @Inject
-  public GatewayServerExposer(ExternalServiceExposureStrategy strategy) {
+  public GatewayServerExposer(
+      ExternalServiceExposureStrategy strategy, GatewayConfigmapLabels configmapLabels) {
     this.strategy = strategy;
+    this.configmapLabels = configmapLabels;
   }
 
   /**
@@ -115,7 +118,7 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
         new ConfigMapBuilder()
             .withNewMetadata()
             .withName(name)
-            .withLabels(GatewayRouterProvisioner.GATEWAY_CONFIGMAP_LABELS)
+            .withLabels(configmapLabels.getLabels())
             .withAnnotations(annotations)
             .endMetadata();
     return gatewayConfigMap.build();
