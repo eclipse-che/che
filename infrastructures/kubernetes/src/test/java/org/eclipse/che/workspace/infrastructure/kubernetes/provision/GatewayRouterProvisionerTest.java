@@ -16,6 +16,7 @@ import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVI
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_PORT_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -127,6 +128,30 @@ public class GatewayRouterProvisionerTest {
     gatewayRouterProvisioner.provision(env, identity);
 
     // then exception
+  }
+
+  @Test
+  public void testNoProvisionWhenNoMatchingLabels() throws InfrastructureException {
+    // given
+    Map<String, String> annotationsWith2Servers =
+        new Annotations.Serializer().server("s1", serverConfig).annotations();
+
+    ConfigMap gatewayRouteConfigMap =
+        new ConfigMapBuilder()
+            .withNewMetadata()
+            .withName("route")
+            .withAnnotations(annotationsWith2Servers)
+            .endMetadata()
+            .build();
+    when(env.getConfigMaps()).thenReturn(Collections.singletonMap("route", gatewayRouteConfigMap));
+
+    when(gatewayConfigmapLabels.isGatewayConfig(gatewayRouteConfigMap)).thenReturn(false);
+
+    // when
+    gatewayRouterProvisioner.provision(env, identity);
+
+    // then
+    verify(configGeneratorFactory, never()).create();
   }
 
   @Test
