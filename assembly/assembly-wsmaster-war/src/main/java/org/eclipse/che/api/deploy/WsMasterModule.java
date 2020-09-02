@@ -358,7 +358,6 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.multiuser.permission.user.UserServicePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.logger.LoggerServicePermissionsFilter.class);
 
-    bind(org.eclipse.che.multiuser.permission.factory.FactoryPermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.devfile.DevfilePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.workspace.activity.ActivityPermissionsFilter.class);
     bind(AdminPermissionInitializer.class).asEagerSingleton();

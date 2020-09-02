@@ -45,8 +45,6 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -126,26 +124,6 @@ public class WorkspacePermissionsFilterTest {
   }
 
   @Test
-  public void shouldCheckAccountPermissionsAccessOnWorkspaceCreationFromConfig() throws Exception {
-    doNothing().when(permissionsFilter).checkAccountPermissions(anyString(), any());
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .contentType("application/json")
-            .body(DtoFactory.newDto(WorkspaceConfigDto.class))
-            .when()
-            .post(SECURE_PATH + "/workspace?namespace=userok");
-
-    assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService)
-        .create(any(WorkspaceConfigDto.class), any(), any(), any(), eq("userok"));
-    verify(permissionsFilter).checkAccountPermissions("userok", AccountOperation.CREATE_WORKSPACE);
-    verifyZeroInteractions(subject);
-  }
-
-  @Test
   public void shouldCheckAccountPermissionsAccessOnWorkspaceCreationFromDevfile() throws Exception {
     doNothing().when(permissionsFilter).checkAccountPermissions(anyString(), any());
 
@@ -205,24 +183,6 @@ public class WorkspacePermissionsFilterTest {
     verify(workspaceService).getByNamespace(any(), eq("userok"));
     verify(permissionsFilter, never())
         .checkAccountPermissions("userok", AccountOperation.MANAGE_WORKSPACES);
-    verifyZeroInteractions(subject);
-  }
-
-  @Test
-  public void shouldCheckAccountPermissionsOnStartingWorkspaceFromConfig() throws Exception {
-    doNothing().when(permissionsFilter).checkAccountPermissions(anyString(), any());
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .contentType("application/json")
-            .when()
-            .post(SECURE_PATH + "/workspace/runtime?namespace=userok");
-
-    assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).startFromConfig(any(), any(), eq("userok"));
-    verify(permissionsFilter).checkAccountPermissions("userok", AccountOperation.CREATE_WORKSPACE);
     verifyZeroInteractions(subject);
   }
 
@@ -382,163 +342,6 @@ public class WorkspacePermissionsFilterTest {
     verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("read"));
   }
 
-  @Test
-  public void shouldCheckPermissionsOnProjectAdding() throws Exception {
-    when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .pathParam("id", "workspace123")
-            .contentType("application/json")
-            .when()
-            .post(SECURE_PATH + "/workspace/{id}/project");
-
-    assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).addProject(eq("workspace123"), any());
-    verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
-  }
-
-  @Test
-  public void shouldCheckPermissionsOnProjectRemoving() throws Exception {
-    when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .pathParam("id", "workspace123")
-            .when()
-            .delete(SECURE_PATH + "/workspace/{id}/project/spring");
-
-    assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).deleteProject(eq("workspace123"), eq("spring"));
-    verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
-  }
-
-  @Test
-  public void shouldCheckPermissionsOnProjectUpdating() throws Exception {
-    when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .pathParam("id", "workspace123")
-            .when()
-            .put(SECURE_PATH + "/workspace/{id}/project/spring");
-
-    assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).updateProject(eq("workspace123"), eq("spring"), any());
-    verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
-  }
-
-  @Test
-  public void shouldCheckPermissionsOnCommandAdding() throws Exception {
-    when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .contentType("application/json")
-            .pathParam("id", "workspace123")
-            .when()
-            .post(SECURE_PATH + "/workspace/{id}/command");
-
-    assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).addCommand(eq("workspace123"), any());
-    verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
-  }
-
-  @Test
-  public void shouldCheckPermissionsOnCommandRemoving() throws Exception {
-    when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .pathParam("id", "workspace123")
-            .when()
-            .delete(SECURE_PATH + "/workspace/{id}/command/run-application");
-
-    assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).deleteCommand(eq("workspace123"), eq("run-application"));
-    verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
-  }
-
-  @Test
-  public void shouldCheckPermissionsOnCommandUpdating() throws Exception {
-    when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .pathParam("id", "workspace123")
-            .when()
-            .put(SECURE_PATH + "/workspace/{id}/command/run-application");
-
-    assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).updateCommand(eq("workspace123"), eq("run-application"), any());
-    verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
-  }
-
-  @Test
-  public void shouldCheckPermissionsOnEnvironmentAdding() throws Exception {
-    when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .pathParam("id", "workspace123")
-            .contentType("application/json")
-            .when()
-            .post(SECURE_PATH + "/workspace/{id}/environment");
-
-    assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService)
-        .addEnvironment(eq("workspace123"), nullable(EnvironmentDto.class), nullable(String.class));
-    verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
-  }
-
-  @Test
-  public void shouldCheckPermissionsOnEnvironmentRemoving() throws Exception {
-    when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .pathParam("id", "workspace123")
-            .when()
-            .delete(SECURE_PATH + "/workspace/{id}/environment/ubuntu");
-
-    assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).deleteEnvironment(eq("workspace123"), eq("ubuntu"));
-    verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
-  }
-
-  @Test
-  public void shouldCheckPermissionsOnEnvironmentUpdating() throws Exception {
-    when(subject.hasPermission("workspace", "workspace123", "configure")).thenReturn(true);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .pathParam("id", "workspace123")
-            .when()
-            .put(SECURE_PATH + "/workspace/{id}/environment/ubuntu");
-
-    assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).updateEnvironment(eq("workspace123"), eq("ubuntu"), any());
-    verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("configure"));
-  }
-
   @Test(
       expectedExceptions = ForbiddenException.class,
       expectedExceptionsMessageRegExp =
@@ -632,18 +435,8 @@ public class WorkspacePermissionsFilterTest {
   public Object[][] pathsProvider() {
     return new Object[][] {
       {"/workspace/workspace123", "get", WorkspaceDomain.READ},
-      {"/workspace/workspace123", "put", WorkspaceDomain.CONFIGURE},
       {"/workspace/workspace123/runtime", "post", WorkspaceDomain.RUN},
       {"/workspace/workspace123/runtime", "delete", WorkspaceDomain.RUN},
-      {"/workspace/workspace123/command", "post", WorkspaceDomain.CONFIGURE},
-      {"/workspace/workspace123/command/run-application", "put", WorkspaceDomain.CONFIGURE},
-      {"/workspace/workspace123/command/run-application", "delete", WorkspaceDomain.CONFIGURE},
-      {"/workspace/workspace123/environment", "post", WorkspaceDomain.CONFIGURE},
-      {"/workspace/workspace123/environment/myEnvironment", "put", WorkspaceDomain.CONFIGURE},
-      {"/workspace/workspace123/environment/myEnvironment", "delete", WorkspaceDomain.CONFIGURE},
-      {"/workspace/workspace123/project", "post", WorkspaceDomain.CONFIGURE},
-      {"/workspace/workspace123/project/spring", "put", WorkspaceDomain.CONFIGURE},
-      {"/workspace/workspace123/project/spring", "delete", WorkspaceDomain.CONFIGURE},
     };
   }
 
