@@ -342,7 +342,7 @@ public class AsyncStorageProvisioner {
             .withLabels(
                 of(
                     "app",
-                    ASYNC_STORAGE,
+                    "che",
                     CHE_USER_ID_LABEL,
                     userId,
                     CHE_DEPLOYMENT_NAME_LABEL,

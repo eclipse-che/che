@@ -23,8 +23,11 @@ import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVITY_TIME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
 
+import io.fabric8.kubernetes.api.model.DoneablePod;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
+import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.time.Instant;
 import java.util.Map;
@@ -137,6 +140,7 @@ public class AsyncStoragePodWatcher {
           Instant expectedShutdownAfter =
               ofEpochSecond(lastTimeAccessSec).plusSeconds(shutdownTimeoutSec);
           if (now().isAfter(expectedShutdownAfter)) {
+            removeAsyncStoragePodWithoutDeployment(namespace);
             RollableScalableResource<Deployment, DoneableDeployment> doneableResource =
                 kubernetesClientFactory
                     .create()
@@ -152,6 +156,22 @@ public class AsyncStoragePodWatcher {
           LOG.error(e.getMessage(), e);
         }
       }
+    }
+  }
+
+  /**
+   * Cleanup existed Async Storage pods running without Deployment see
+   * https://github.com/eclipse/che/issues/17616. Method can be removed in 7.20.x
+   *
+   * @param namespace
+   * @throws InfrastructureException
+   */
+  private void removeAsyncStoragePodWithoutDeployment(String namespace)
+      throws InfrastructureException {
+    PodResource<Pod, DoneablePod> doneablePodResource =
+        kubernetesClientFactory.create().pods().inNamespace(namespace).withName(ASYNC_STORAGE);
+    if (doneablePodResource.get() != null) {
+      doneablePodResource.delete();
     }
   }
 }

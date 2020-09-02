@@ -25,13 +25,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.AppsAPIGroupDSL;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,6 +68,9 @@ public class AsyncStoragePodWatcherTest {
   @Mock private WorkspaceRuntimes runtimes;
   @Mock private KubernetesClient kubernetesClient;
   @Mock private RollableScalableResource<Deployment, DoneableDeployment> deploymentResource;
+  @Mock private MixedOperation mixedOperation;
+  @Mock private NonNamespaceOperation namespaceOperation;
+  @Mock private PodResource<Pod, DoneablePod> podResource;
   @Mock private MixedOperation mixedOperationPod;
   @Mock private NonNamespaceOperation namespacePodOperation;
   @Mock private UserImpl user;
@@ -85,13 +91,18 @@ public class AsyncStoragePodWatcherTest {
 
     when(kubernetesClientFactory.create()).thenReturn(kubernetesClient);
     when(kubernetesClient.apps()).thenReturn(apps);
-    when(apps.deployments()).thenReturn(mixedOperationPod);
+    when(apps.deployments()).thenReturn(mixedOperation);
+    when(mixedOperation.inNamespace(NAMESPACE)).thenReturn(namespaceOperation);
+    when(namespaceOperation.withName(ASYNC_STORAGE)).thenReturn(deploymentResource);
+
+    when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
     when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
-    when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(deploymentResource);
+    when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
+    when(podResource.get()).thenReturn(null);
   }
 
   @Test
-  public void shouldDeleteAsyncStoragePod() throws Exception {
+  public void shouldDeleteAsyncStorageDeployment() throws Exception {
     AsyncStoragePodWatcher watcher =
         new AsyncStoragePodWatcher(
             kubernetesClientFactory,
