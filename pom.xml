@@ -27,12 +27,12 @@
     <modules>
         <module>core</module>
         <module>wsmaster</module>
-        <module>typescript-dto/dto-pom.xml</module>
         <module>multiuser</module>
         <module>infrastructures</module>
         <module>wsmaster/integration-tests</module>
         <module>assembly</module>
         <module>tests/legacy-e2e</module>
+        <module>typescript-dto/dto-pom.xml</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
