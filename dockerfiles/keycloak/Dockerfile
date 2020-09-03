@@ -8,7 +8,6 @@
 
 FROM jboss/keycloak:6.0.1
 ADD che /opt/jboss/keycloak/themes/che
-ADD che-username-edit-disabled /opt/jboss/keycloak/themes/che-username-edit-disabled
 ADD . /scripts/
 ADD cli /scripts/cli
 RUN ln -s /opt/jboss/tools/docker-entrypoint.sh && \
