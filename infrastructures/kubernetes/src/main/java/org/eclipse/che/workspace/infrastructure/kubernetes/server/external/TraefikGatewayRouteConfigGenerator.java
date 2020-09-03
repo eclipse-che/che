@@ -14,7 +14,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 import static com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature.WRITE_DOC_START_MARKER;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_PORT_ATTRIBUTE;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner.isGatewayConfig;
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
@@ -65,15 +64,8 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
   private final Map<String, ConfigMap> routeConfigs = new HashMap<>();
 
   @Override
-  public void addRouteConfig(String name, ConfigMap routeConfig) throws InfrastructureException {
-    if (isGatewayConfig(routeConfig)) {
-      this.routeConfigs.put(name, routeConfig);
-    } else {
-      throw new InfrastructureException(
-          "Not a gateway configuration ConfigMap '"
-              + routeConfig.getMetadata().getName()
-              + "'. This is a bug, please report.");
-    }
+  public void addRouteConfig(String name, ConfigMap routeConfig) {
+    this.routeConfigs.put(name, routeConfig);
   }
 
   /**

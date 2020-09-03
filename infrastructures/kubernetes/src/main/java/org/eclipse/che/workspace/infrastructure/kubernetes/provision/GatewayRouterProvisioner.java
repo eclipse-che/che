@@ -13,9 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_PORT_ATTRIBUTE;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.isLabeled;
 
-import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,6 +25,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayRouteConfigGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayRouteConfigGeneratorFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.GatewayConfigmapLabels;
 
 /**
  * This provisioner finds {@link ConfigMap}s, that configures the single-host Gateway, generates
@@ -36,25 +35,22 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Gatew
  */
 public class GatewayRouterProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
 
-  /** Configmap labeled with these holds the configuration of single-host gateway route */
-  public static final Map<String, String> GATEWAY_CONFIGMAP_LABELS =
-      ImmutableMap.<String, String>builder()
-          .put("app", "che")
-          .put("role", "gateway-config")
-          .build();
-
   private final GatewayRouteConfigGeneratorFactory configGeneratorFactory;
+  private final GatewayConfigmapLabels configmapLabels;
 
   @Inject
-  public GatewayRouterProvisioner(GatewayRouteConfigGeneratorFactory configGeneratorFactory) {
+  public GatewayRouterProvisioner(
+      GatewayRouteConfigGeneratorFactory configGeneratorFactory,
+      GatewayConfigmapLabels configmapLabels) {
     this.configGeneratorFactory = configGeneratorFactory;
+    this.configmapLabels = configmapLabels;
   }
 
   @Override
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     for (Entry<String, ConfigMap> configMapEntry : k8sEnv.getConfigMaps().entrySet()) {
-      if (isGatewayConfig(configMapEntry.getValue())) {
+      if (configmapLabels.isGatewayConfig(configMapEntry.getValue())) {
         ConfigMap gatewayConfigMap = configMapEntry.getValue();
 
         Map<String, ServerConfigImpl> servers =
@@ -97,21 +93,5 @@ public class GatewayRouterProvisioner implements ConfigurationProvisioner<Kubern
                     .annotations());
       }
     }
-  }
-
-  /**
-   * Check whether configmap is gateway route configuration. That is defined by {@link
-   * GatewayRouterProvisioner#GATEWAY_CONFIGMAP_LABELS} labels.
-   *
-   * @param configMap to check
-   * @return `true` if ConfigMap is gateway route configuration, `false` otherwise
-   */
-  public static boolean isGatewayConfig(ConfigMap configMap) {
-    for (Entry<String, String> labelEntry : GATEWAY_CONFIGMAP_LABELS.entrySet()) {
-      if (!isLabeled(configMap, labelEntry.getKey(), labelEntry.getValue())) {
-        return false;
-      }
-    }
-    return true;
   }
 }
