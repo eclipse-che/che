@@ -30,17 +30,17 @@ public class GatewayConfigmapLabels {
 
   @Inject
   public GatewayConfigmapLabels(
-      @Named("che.infra.kubernetes.single_host.gateway.configmap.labels") String labelsProperty)
+      @Named("che.infra.kubernetes.singlehost.gateway.configmap_labels") String labelsProperty)
       throws InfrastructureException {
     if (labelsProperty == null || labelsProperty.isEmpty()) {
       throw new InfrastructureException(
-          "for gateway single-host, 'che.infra.kubernetes.single_host.gateway.configmap.labels' property must be defined");
+          "for gateway single-host, 'che.infra.kubernetes.singlehost.gateway.configmap_labels' property must be defined");
     }
     try {
       this.labels = Splitter.on(",").trimResults().withKeyValueSeparator("=").split(labelsProperty);
     } catch (IllegalArgumentException iae) {
       throw new InfrastructureException(
-          "'che.infra.kubernetes.single_host.gateway.configmap.labels' is set to invalid value. It must be in format `name1=value1,name2=value2`. Check the documentation for further details.",
+          "'che.infra.kubernetes.singlehost.gateway.configmap_labels' is set to invalid value. It must be in format `name1=value1,name2=value2`. Check the documentation for further details.",
           iae);
     }
   }
@@ -51,7 +51,7 @@ public class GatewayConfigmapLabels {
 
   /**
    * Check whether configmap is gateway route configuration. That is defined with labels provided by
-   * `che.infra.kubernetes.single_host.gateway.configmap.labels` configuration property.
+   * `che.infra.kubernetes.singlehost.gateway.configmap_labels` configuration property.
    *
    * @param configMap to check
    * @return `true` if ConfigMap is gateway route configuration, `false` otherwise
