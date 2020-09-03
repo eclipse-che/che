@@ -11,17 +11,16 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.util;
 
-import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.isLabeled;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.base.Splitter;
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
 /** Little utility bean helping with Gateway ConfigMaps labels. */
 @Singleton
@@ -31,13 +30,19 @@ public class GatewayConfigmapLabels {
 
   @Inject
   public GatewayConfigmapLabels(
-      @Named("che.infra.kubernetes.single_host.gateway.configmap.labels") String[] labelsProperty) {
-    // TODO: use Collectors.toUnmodifiableMap when JDK11 features are allowed
-    this.labels =
-        ImmutableMap.copyOf(
-            Arrays.stream(labelsProperty)
-                .map(label -> label.split("=", 2))
-                .collect(toMap(l -> l[0], l -> l[1])));
+      @Named("che.infra.kubernetes.single_host.gateway.configmap.labels") String labelsProperty)
+      throws InfrastructureException {
+    if (labelsProperty == null || labelsProperty.isEmpty()) {
+      throw new InfrastructureException(
+          "for gateway single-host, 'che.infra.kubernetes.single_host.gateway.configmap.labels' property must be defined");
+    }
+    try {
+      this.labels = Splitter.on(",").trimResults().withKeyValueSeparator("=").split(labelsProperty);
+    } catch (IllegalArgumentException iae) {
+      throw new InfrastructureException(
+          "'che.infra.kubernetes.single_host.gateway.configmap.labels' is set to invalid value. It must be in format `name1=value1,name2=value2`. Check the documentation for further details.",
+          iae);
+    }
   }
 
   public Map<String, String> getLabels() {

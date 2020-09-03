@@ -17,6 +17,7 @@ import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import java.util.Map;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -24,40 +25,51 @@ public class GatewayConfigmapLabelsTest {
 
   @Test(dataProvider = "isGatewayConfigData")
   public void testIsGatewayConfig(
-      String[] labelsProperty, Map<String, String> labels, boolean isGatewayConfigExpected) {
+      String labelsProperty, Map<String, String> labels, boolean isGatewayConfigExpected)
+      throws InfrastructureException {
     GatewayConfigmapLabels gatewayConfigmapLabels = new GatewayConfigmapLabels(labelsProperty);
     ConfigMap cm =
         new ConfigMapBuilder().withNewMetadata().withLabels(labels).endMetadata().build();
     assertEquals(gatewayConfigmapLabels.isGatewayConfig(cm), isGatewayConfigExpected);
   }
 
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void failsToConstructWhenLabelsAreNull() throws InfrastructureException {
+    new GatewayConfigmapLabels(null);
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void failsToConstructWhenLabelsAreEmpty() throws InfrastructureException {
+    new GatewayConfigmapLabels("");
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void failsToConstructWhenLabelsAreNotValid() throws InfrastructureException {
+    new GatewayConfigmapLabels("badvalue");
+  }
+
   @DataProvider
   public Object[][] isGatewayConfigData() {
     return new Object[][] {
       {
-        new String[] {"app=che", "component=che-gateway-config"},
+        "app=che,component=che-gateway-config",
         ImmutableMap.of("app", "che", "component", "che-gateway-config"),
         true
       },
       {
-        new String[] {"app=che"},
+        "app=che, component=che-gateway-config",
         ImmutableMap.of("app", "che", "component", "che-gateway-config"),
         true
       },
-      {new String[] {}, ImmutableMap.of("any", "label"), true},
-      {new String[] {}, ImmutableMap.of(), true},
+      {"app=che", ImmutableMap.of("app", "che", "component", "che-gateway-config"), true},
       {
-        new String[] {"app=che", "component=che-gateway-config"},
+        "app=che,component=che-gateway-config",
         ImmutableMap.of("app", "cheche", "component", "che-gateway-config"),
         false
       },
+      {"app=che,component=che-gateway-config", ImmutableMap.of("app", "cheche"), false},
       {
-        new String[] {"app=che", "component=che-gateway-config"},
-        ImmutableMap.of("app", "cheche"),
-        false
-      },
-      {
-        new String[] {"app=che", "component=che-gateway-config"},
+        "app=che,component=che-gateway-config",
         ImmutableMap.of("component", "che-gateway-config"),
         false
       },
