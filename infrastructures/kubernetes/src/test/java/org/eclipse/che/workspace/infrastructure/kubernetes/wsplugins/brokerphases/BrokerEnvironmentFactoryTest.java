@@ -100,7 +100,7 @@ public class BrokerEnvironmentFactoryTest {
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
-    factory.createForMetadataBroker(pluginFQNs, runtimeId);
+    factory.createForMetadataBroker(pluginFQNs, runtimeId, false);
 
     // then
     verify(factory).doCreate(captor.capture());
@@ -128,11 +128,12 @@ public class BrokerEnvironmentFactoryTest {
           "/tmp/che/cacert",
           "--registry-address",
           DEFAULT_REGISTRY,
-          "-metas",
+          "--metas",
           "/broker-config/config.json",
         });
   }
 
+  @Test
   public void testArtifactsBrokerSelfSignedCertificate() throws Exception {
     when(certProvisioner.isConfigured()).thenReturn(true);
     when(certProvisioner.getCertPath()).thenReturn("/tmp/che/cacert");
@@ -141,7 +142,7 @@ public class BrokerEnvironmentFactoryTest {
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
-    factory.createForArtifactsBroker(pluginFQNs, runtimeId);
+    factory.createForArtifactsBroker(pluginFQNs, runtimeId, false);
 
     // then
     verify(factory).doCreate(captor.capture());
@@ -159,19 +160,69 @@ public class BrokerEnvironmentFactoryTest {
     assertEquals(
         container.getArgs().toArray(),
         new String[] {
-          "-push-endpoint",
+          "--push-endpoint",
           PUSH_ENDPOINT,
-          "-runtime-id",
+          "--runtime-id",
           String.format(
               "%s:%s:%s",
               runtimeId.getWorkspaceId(), runtimeId.getEnvName(), runtimeId.getOwnerId()),
-          "-cacert",
+          "--cacert",
           "/tmp/che/cacert",
           "--registry-address",
           DEFAULT_REGISTRY,
-          "-metas",
+          "--metas",
           "/broker-config/config.json",
         });
+  }
+
+  @Test
+  public void testAddsMergeArgToArtifactsBroker() throws Exception {
+    // given
+    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id"));
+    ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
+
+    // when
+    factory.createForArtifactsBroker(pluginFQNs, runtimeId, true);
+
+    // then
+    verify(factory).doCreate(captor.capture());
+    BrokersConfigs brokersConfigs = captor.getValue();
+
+    List<Container> containers =
+        brokersConfigs
+            .pods
+            .values()
+            .stream()
+            .flatMap(p -> p.getSpec().getContainers().stream())
+            .collect(Collectors.toList());
+    assertEquals(containers.size(), 1);
+    Container container = containers.get(0);
+    assertTrue(container.getArgs().stream().anyMatch(e -> "--merge-plugins".equals(e)));
+  }
+
+  @Test
+  public void testAddsMergeArgToMetadataBroker() throws Exception {
+    // given
+    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id"));
+    ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
+
+    // when
+    factory.createForMetadataBroker(pluginFQNs, runtimeId, true);
+
+    // then
+    verify(factory).doCreate(captor.capture());
+    BrokersConfigs brokersConfigs = captor.getValue();
+
+    List<Container> containers =
+        brokersConfigs
+            .pods
+            .values()
+            .stream()
+            .flatMap(p -> p.getSpec().getContainers().stream())
+            .collect(Collectors.toList());
+    assertEquals(containers.size(), 1);
+    Container container = containers.get(0);
+    assertTrue(container.getArgs().stream().anyMatch(e -> "--merge-plugins".equals(e)));
   }
 
   @Test
@@ -181,7 +232,7 @@ public class BrokerEnvironmentFactoryTest {
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
-    factory.createForMetadataBroker(pluginFQNs, runtimeId);
+    factory.createForMetadataBroker(pluginFQNs, runtimeId, false);
 
     // then
     verify(factory).doCreate(captor.capture());
@@ -200,7 +251,7 @@ public class BrokerEnvironmentFactoryTest {
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
-    factory.createForArtifactsBroker(pluginFQNs, runtimeId);
+    factory.createForArtifactsBroker(pluginFQNs, runtimeId, false);
 
     // then
     verify(factory).doCreate(captor.capture());
@@ -222,7 +273,7 @@ public class BrokerEnvironmentFactoryTest {
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
-    factory.createForMetadataBroker(pluginFQNs, runtimeId);
+    factory.createForMetadataBroker(pluginFQNs, runtimeId, false);
 
     // then
     verify(factory).doCreate(captor.capture());
@@ -254,7 +305,7 @@ public class BrokerEnvironmentFactoryTest {
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
-    factory.createForArtifactsBroker(pluginFQNs, runtimeId);
+    factory.createForArtifactsBroker(pluginFQNs, runtimeId, false);
 
     // then
     verify(factory).doCreate(captor.capture());
@@ -283,7 +334,7 @@ public class BrokerEnvironmentFactoryTest {
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
-    factory.createForArtifactsBroker(pluginFQNs, runtimeId);
+    factory.createForArtifactsBroker(pluginFQNs, runtimeId, false);
 
     // then
     verify(factory).doCreate(captor.capture());
@@ -300,7 +351,7 @@ public class BrokerEnvironmentFactoryTest {
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
-    factory.createForMetadataBroker(pluginFQNs, runtimeId);
+    factory.createForMetadataBroker(pluginFQNs, runtimeId, false);
 
     // then
     verify(factory).doCreate(captor.capture());

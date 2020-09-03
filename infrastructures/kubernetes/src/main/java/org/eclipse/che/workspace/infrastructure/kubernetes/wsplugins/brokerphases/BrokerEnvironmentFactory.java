@@ -105,9 +105,11 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
    * @param runtimeID ID of the runtime the broker would be started
    * @return kubernetes environment (or its extension) with the Plugin broker objects
    */
-  public E createForMetadataBroker(Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID)
+  public E createForMetadataBroker(
+      Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID, boolean mergePlugins)
       throws InfrastructureException {
-    BrokersConfigs brokersConfigs = getBrokersConfigs(pluginFQNs, runtimeID, metadataBrokerImage);
+    BrokersConfigs brokersConfigs =
+        getBrokersConfigs(pluginFQNs, runtimeID, metadataBrokerImage, mergePlugins);
     return doCreate(brokersConfigs);
   }
 
@@ -116,11 +118,14 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
    *
    * @param pluginFQNs fully qualified names of plugins that needs to be resolved by the broker
    * @param runtimeID ID of the runtime the broker would be started
+   * @param mergePlugins whether the broker should be configured to merge plugins where possible
    * @return kubernetes environment (or its extension) with the Plugin broker objects
    */
-  public E createForArtifactsBroker(Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID)
+  public E createForArtifactsBroker(
+      Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID, boolean mergePlugins)
       throws InfrastructureException {
-    BrokersConfigs brokersConfigs = getBrokersConfigs(pluginFQNs, runtimeID, artifactsBrokerImage);
+    BrokersConfigs brokersConfigs =
+        getBrokersConfigs(pluginFQNs, runtimeID, artifactsBrokerImage, mergePlugins);
     brokersConfigs
         .machines
         .values()
@@ -130,7 +135,10 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   }
 
   protected BrokersConfigs getBrokersConfigs(
-      Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID, String brokerImage)
+      Collection<PluginFQN> pluginFQNs,
+      RuntimeIdentity runtimeID,
+      String brokerImage,
+      boolean mergePlugins)
       throws InfrastructureException {
 
     String configMapName = generateUniqueName(CONFIG_MAP_NAME_SUFFIX);
@@ -143,7 +151,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
                 authEnableEnvVarProvider.get(runtimeID), machineTokenEnvVarProvider.get(runtimeID))
             .map(this::asEnvVar)
             .collect(Collectors.toList());
-    Container container = newContainer(runtimeID, envVars, brokerImage, configMapVolume);
+    Container container =
+        newContainer(runtimeID, envVars, brokerImage, configMapVolume, mergePlugins);
     pod.getSpec().getContainers().add(container);
     pod.getSpec().getVolumes().add(newConfigMapVolume(configMapName, configMapVolume));
 
@@ -165,9 +174,10 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       RuntimeIdentity runtimeId,
       List<EnvVar> envVars,
       String image,
-      @Nullable String brokerVolumeName) {
+      @Nullable String brokerVolumeName,
+      boolean mergePlugins) {
     String containerName = generateContainerNameFromImageRef(image);
-    String[] cmdArgs = getCommandLineArgs(runtimeId).toArray(new String[0]);
+    String[] cmdArgs = getCommandLineArgs(runtimeId, mergePlugins).toArray(new String[0]);
     final ContainerBuilder cb =
         new ContainerBuilder()
             .withName(containerName)
@@ -178,7 +188,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     if (brokerVolumeName != null) {
       cb.withVolumeMounts(
           new VolumeMount(CONF_FOLDER + "/", null, brokerVolumeName, true, null, null));
-      cb.addToArgs("-metas", CONF_FOLDER + "/" + CONFIG_FILE);
+      cb.addToArgs("--metas", CONF_FOLDER + "/" + CONFIG_FILE);
     }
     Container container = cb.build();
     Containers.addRamLimit(container, "250Mi");
@@ -186,21 +196,26 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     return container;
   }
 
-  protected List<String> getCommandLineArgs(RuntimeIdentity runtimeId) {
-    return new ArrayList<String>(
-        Arrays.asList(
-            "--push-endpoint",
-            cheWebsocketEndpoint,
-            "--runtime-id",
-            String.format(
-                "%s:%s:%s",
-                runtimeId.getWorkspaceId(),
-                MoreObjects.firstNonNull(runtimeId.getEnvName(), ""),
-                runtimeId.getOwnerId()),
-            "--cacert",
-            certProvisioner.isConfigured() ? certProvisioner.getCertPath() : "",
-            "--registry-address",
-            Strings.nullToEmpty(pluginRegistryUrl)));
+  protected List<String> getCommandLineArgs(RuntimeIdentity runtimeId, boolean mergePlugins) {
+    ArrayList<String> args =
+        new ArrayList<>(
+            Arrays.asList(
+                "--push-endpoint",
+                cheWebsocketEndpoint,
+                "--runtime-id",
+                String.format(
+                    "%s:%s:%s",
+                    runtimeId.getWorkspaceId(),
+                    MoreObjects.firstNonNull(runtimeId.getEnvName(), ""),
+                    runtimeId.getOwnerId()),
+                "--cacert",
+                certProvisioner.isConfigured() ? certProvisioner.getCertPath() : "",
+                "--registry-address",
+                Strings.nullToEmpty(pluginRegistryUrl)));
+    if (mergePlugins) {
+      args.add("--merge-plugins");
+    }
+    return args;
   }
 
   private Pod newPod() {
