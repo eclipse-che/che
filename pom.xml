@@ -27,6 +27,7 @@
     <modules>
         <module>core</module>
         <module>wsmaster</module>
+        <module>typescript-dto/dto-pom.xml</module>
         <module>multiuser</module>
         <module>infrastructures</module>
         <module>wsmaster/integration-tests</module>
