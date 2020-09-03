@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.util;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.isLabeled;
 
 import com.google.common.base.Splitter;
@@ -20,7 +21,7 @@ import java.util.Map.Entry;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.inject.ConfigurationException;
 
 /** Little utility bean helping with Gateway ConfigMaps labels. */
 @Singleton
@@ -30,16 +31,15 @@ public class GatewayConfigmapLabels {
 
   @Inject
   public GatewayConfigmapLabels(
-      @Named("che.infra.kubernetes.singlehost.gateway.configmap_labels") String labelsProperty)
-      throws InfrastructureException {
-    if (labelsProperty == null || labelsProperty.isEmpty()) {
-      throw new InfrastructureException(
+      @Named("che.infra.kubernetes.singlehost.gateway.configmap_labels") String labelsProperty) {
+    if (isNullOrEmpty(labelsProperty)) {
+      throw new ConfigurationException(
           "for gateway single-host, 'che.infra.kubernetes.singlehost.gateway.configmap_labels' property must be defined");
     }
     try {
       this.labels = Splitter.on(",").trimResults().withKeyValueSeparator("=").split(labelsProperty);
     } catch (IllegalArgumentException iae) {
-      throw new InfrastructureException(
+      throw new ConfigurationException(
           "'che.infra.kubernetes.singlehost.gateway.configmap_labels' is set to invalid value. It must be in format `name1=value1,name2=value2`. Check the documentation for further details.",
           iae);
     }

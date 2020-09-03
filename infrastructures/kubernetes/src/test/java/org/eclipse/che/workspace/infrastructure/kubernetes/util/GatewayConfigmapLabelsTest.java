@@ -17,7 +17,7 @@ import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import java.util.Map;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.inject.ConfigurationException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -25,26 +25,25 @@ public class GatewayConfigmapLabelsTest {
 
   @Test(dataProvider = "isGatewayConfigData")
   public void testIsGatewayConfig(
-      String labelsProperty, Map<String, String> labels, boolean isGatewayConfigExpected)
-      throws InfrastructureException {
+      String labelsProperty, Map<String, String> labels, boolean isGatewayConfigExpected) {
     GatewayConfigmapLabels gatewayConfigmapLabels = new GatewayConfigmapLabels(labelsProperty);
     ConfigMap cm =
         new ConfigMapBuilder().withNewMetadata().withLabels(labels).endMetadata().build();
     assertEquals(gatewayConfigmapLabels.isGatewayConfig(cm), isGatewayConfigExpected);
   }
 
-  @Test(expectedExceptions = InfrastructureException.class)
-  public void failsToConstructWhenLabelsAreNull() throws InfrastructureException {
+  @Test(expectedExceptions = ConfigurationException.class)
+  public void failsToConstructWhenLabelsAreNull() {
     new GatewayConfigmapLabels(null);
   }
 
-  @Test(expectedExceptions = InfrastructureException.class)
-  public void failsToConstructWhenLabelsAreEmpty() throws InfrastructureException {
+  @Test(expectedExceptions = ConfigurationException.class)
+  public void failsToConstructWhenLabelsAreEmpty() {
     new GatewayConfigmapLabels("");
   }
 
-  @Test(expectedExceptions = InfrastructureException.class)
-  public void failsToConstructWhenLabelsAreNotValid() throws InfrastructureException {
+  @Test(expectedExceptions = ConfigurationException.class)
+  public void failsToConstructWhenLabelsAreNotValid() {
     new GatewayConfigmapLabels("badvalue");
   }
 
