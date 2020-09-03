@@ -10,7 +10,7 @@
                         <label for="username" class="${properties.kcLabelClass!}">${msg("username")}</label>
                     </div>
                     <div class="${properties.kcInputWrapperClass!}">
-                        <input type="text" id="username" name="username" value="${(user.username!'')}" class="${properties.kcInputClass!}" readonly />
+                        <input type="text" id="username" name="username" value="${(user.username!'')}" class="${properties.kcInputClass!}" pattern="[a-z]([-a-z0-9]{0,61}[a-z0-9])?" title="An alphanumeric (a-z, and 0-9) string, with a maximum length of 63 characters, with the '-' character allowed anywhere except the first or last character." />
                     </div>
                 </div>
             </#if>
