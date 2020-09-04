@@ -64,13 +64,13 @@ export class ProjectTree {
     async openProjectTreeContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('ProjectTree.openProjectTreeContainer');
 
-        const selectedExplorerButtonLocator: By = By.css(Ide.SELECTED_EXPLORER_BUTTON_CSS);
+        const explorerButtonActiveLocator: By = this.getLeftToolbarButtonActiveLocator(LeftToolbarButton.Explorer);
         Logger.trace(`ProjectTree.openProjectTreeContainer waitLeftToolbarButtonPresence`);
         await this.ide.waitLeftToolbarButton(LeftToolbarButton.Explorer, timeout);
 
-        const isButtonEnabled: boolean = await this.driverHelper.waitVisibilityBoolean(selectedExplorerButtonLocator);
-        Logger.trace(`ProjectTree.openProjectTreeContainer leftToolbarButtonEnabled:${isButtonEnabled}`);
-        if (!isButtonEnabled) {
+        const isButtonActive: boolean = await this.driverHelper.waitVisibilityBoolean(explorerButtonActiveLocator);
+        Logger.trace(`ProjectTree.openProjectTreeContainer leftToolbarButtonActive:${isButtonActive}`);
+        if (!isButtonActive) {
             await this.ide.waitAndClickLeftToolbarButton(LeftToolbarButton.Explorer, timeout);
         }
 
@@ -334,6 +334,11 @@ export class ProjectTree {
         const splitDelimeter = ':';
         const attribute: string = await this.driverHelper.waitAndGetElementAttribute(By.css(`div[${nodeAttribute}]`), nodeAttribute);
         return attribute.split(splitDelimeter)[0] + splitDelimeter;
+    }
+
+    private getLeftToolbarButtonActiveLocator(buttonTitle: String): By {
+        return By.xpath(`//div[@id='theia-left-content-panel']//ul[@class='p-TabBar-content']` +
+            `//li[@title[contains(.,'${buttonTitle}')] and contains(@id, 'shell-tab') and contains(@class, 'p-mod-current')]`);
     }
 
     private async getItemCss(itemPath: string): Promise<string> {
