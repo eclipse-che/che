@@ -42,14 +42,15 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This interceptor checks whether the starting workspace is configured with persistent storage and
- * makes sure to stop the async storage pod (if any is running) to prevent "Multi-Attach error for
- * volume". After the async storage pod is stopped and deleted, the workspace start is resumed.
+ * makes sure to stop the async storage deployment (if any is running) to prevent "Multi-Attach
+ * error for volume". After the async storage deployment is stopped and deleted, the workspace start
+ * is resumed.
  */
 @Singleton
 public class AsyncStoragePodInterceptor {
 
   private static final Logger LOG = LoggerFactory.getLogger(AsyncStoragePodInterceptor.class);
-  private static final int DELETE_POD_TIMEOUT_IN_MIN = 5;
+  private static final int DELETE_DEPLOYMENT_TIMEOUT_IN_MIN = 5;
 
   private final KubernetesClientFactory kubernetesClientFactory;
   private final String pvcStrategy;
@@ -82,17 +83,18 @@ public class AsyncStoragePodInterceptor {
 
     try {
       deleteAsyncStorageDeployment(asyncStorageDeploymentResource)
-          .get(DELETE_POD_TIMEOUT_IN_MIN, TimeUnit.MINUTES);
+          .get(DELETE_DEPLOYMENT_TIMEOUT_IN_MIN, TimeUnit.MINUTES);
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
       throw new InfrastructureException(
           format(
-              "Interrupted while waiting for pod '%s' removal. " + ex.getMessage(), ASYNC_STORAGE),
+              "Interrupted while waiting for deployment '%s' removal. " + ex.getMessage(),
+              ASYNC_STORAGE),
           ex);
     } catch (ExecutionException ex) {
       throw new InfrastructureException(
           format(
-              "Error occurred while waiting for pod '%s' removal. " + ex.getMessage(),
+              "Error occurred while waiting for deployment '%s' removal. " + ex.getMessage(),
               ASYNC_STORAGE),
           ex);
     } catch (TimeoutException ex) {
@@ -128,7 +130,7 @@ public class AsyncStoragePodInterceptor {
       return deleteFuture.whenComplete(
           (v, e) -> {
             if (e != null) {
-              LOG.warn("Failed to remove pod {} cause {}", ASYNC_STORAGE, e.getMessage());
+              LOG.warn("Failed to remove deployment {} cause {}", ASYNC_STORAGE, e.getMessage());
             }
             watch.close();
           });
