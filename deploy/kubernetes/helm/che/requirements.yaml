@@ -8,6 +8,10 @@
 #
 
 dependencies:
+  - name: che-gateway
+    repository: file://./custom-charts/che-gateway/
+    version: 0.0.1
+    condition: global.gatewaySingleHost
   - name: che-devfile-registry
     repository: file://./custom-charts/che-devfile-registry/
     version: 0.0.1

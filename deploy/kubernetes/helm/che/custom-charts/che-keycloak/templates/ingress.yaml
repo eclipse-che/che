@@ -7,6 +7,8 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
+{{- if ne .Values.global.singleHostExposure "gateway" }}
+
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -46,3 +48,5 @@ spec:
         backend:
           serviceName: keycloak
           servicePort: 5050
+
+{{- end }}
