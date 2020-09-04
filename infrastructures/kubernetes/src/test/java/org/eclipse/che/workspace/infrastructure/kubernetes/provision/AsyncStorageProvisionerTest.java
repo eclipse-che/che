@@ -37,11 +37,16 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.AppsAPIGroupDSL;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import io.fabric8.kubernetes.client.dsl.ServiceResource;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,6 +59,8 @@ import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -77,15 +84,20 @@ public class AsyncStorageProvisionerTest {
   @Mock private Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim> pvcResource;
   @Mock private Resource<ConfigMap, DoneableConfigMap> mapResource;
   @Mock private PodResource<Pod, DoneablePod> podResource;
+  @Mock private RollableScalableResource<Deployment, DoneableDeployment> deploymentResource;
   @Mock private ServiceResource<Service, DoneableService> serviceResource;
   @Mock private MixedOperation mixedOperationPvc;
   @Mock private MixedOperation mixedOperationConfigMap;
   @Mock private MixedOperation mixedOperationPod;
+  @Mock private MixedOperation mixedOperationDeployment;
   @Mock private MixedOperation mixedOperationService;
   @Mock private NonNamespaceOperation namespacePvcOperation;
   @Mock private NonNamespaceOperation namespaceConfigMapOperation;
   @Mock private NonNamespaceOperation namespacePodOperation;
+  @Mock private NonNamespaceOperation namespaceDeploymentOperation;
   @Mock private NonNamespaceOperation namespaceServiceOperation;
+  @Mock private AppsAPIGroupDSL apps;
+  @Captor private ArgumentCaptor<Watcher<Pod>> watcherCaptor;
 
   private Map<String, String> attributes;
   private AsyncStorageProvisioner asyncStorageProvisioner;
@@ -180,10 +192,11 @@ public class AsyncStorageProvisionerTest {
     when(namespaceConfigMapOperation.withName(anyString())).thenReturn(mapResource);
     when(mapResource.get()).thenReturn(null);
 
-    when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
-    when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
-    when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
-    when(podResource.get()).thenReturn(null);
+    when(kubernetesClient.apps()).thenReturn(apps);
+    when(apps.deployments()).thenReturn(mixedOperationDeployment);
+    when(mixedOperationDeployment.inNamespace(NAMESPACE)).thenReturn(namespaceDeploymentOperation);
+    when(namespaceDeploymentOperation.withName(ASYNC_STORAGE)).thenReturn(deploymentResource);
+    when(deploymentResource.get()).thenReturn(null);
 
     when(kubernetesClient.services()).thenReturn(mixedOperationService);
     when(mixedOperationService.inNamespace(NAMESPACE)).thenReturn(namespaceServiceOperation);
@@ -191,6 +204,7 @@ public class AsyncStorageProvisionerTest {
     when(serviceResource.get()).thenReturn(null);
 
     asyncStorageProvisioner.provision(kubernetesEnvironment, identity);
+
     verify(identity, times(1)).getInfrastructureNamespace();
     verify(identity, times(1)).getOwnerId();
     verify(sshManager, times(1)).getPairs(USER, "internal");
@@ -198,7 +212,8 @@ public class AsyncStorageProvisionerTest {
     verify(kubernetesClient.services().inNamespace(NAMESPACE), times(1)).create(any(Service.class));
     verify(kubernetesClient.configMaps().inNamespace(NAMESPACE), times(1))
         .create(any(ConfigMap.class));
-    verify(kubernetesClient.pods().inNamespace(NAMESPACE), times(1)).create(any(Pod.class));
+    verify(kubernetesClient.apps().deployments().inNamespace(NAMESPACE), times(1))
+        .create(any(Deployment.class));
     verify(kubernetesClient.persistentVolumeClaims().inNamespace(NAMESPACE), times(1))
         .create(any(PersistentVolumeClaim.class));
   }
@@ -231,6 +246,12 @@ public class AsyncStorageProvisionerTest {
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
     when(podResource.get()).thenReturn(null);
 
+    when(kubernetesClient.apps()).thenReturn(apps);
+    when(apps.deployments()).thenReturn(mixedOperationDeployment);
+    when(mixedOperationDeployment.inNamespace(NAMESPACE)).thenReturn(namespaceDeploymentOperation);
+    when(namespaceDeploymentOperation.withName(ASYNC_STORAGE)).thenReturn(deploymentResource);
+    when(deploymentResource.get()).thenReturn(null);
+
     when(kubernetesClient.services()).thenReturn(mixedOperationService);
     when(mixedOperationService.inNamespace(NAMESPACE)).thenReturn(namespaceServiceOperation);
     when(namespaceServiceOperation.withName(ASYNC_STORAGE)).thenReturn(serviceResource);
@@ -245,7 +266,8 @@ public class AsyncStorageProvisionerTest {
     verify(kubernetesClient.services().inNamespace(NAMESPACE), times(1)).create(any(Service.class));
     verify(kubernetesClient.configMaps().inNamespace(NAMESPACE), never())
         .create(any(ConfigMap.class));
-    verify(kubernetesClient.pods().inNamespace(NAMESPACE), times(1)).create(any(Pod.class));
+    verify(kubernetesClient.apps().deployments().inNamespace(NAMESPACE), times(1))
+        .create(any(Deployment.class));
     verify(kubernetesClient.persistentVolumeClaims().inNamespace(NAMESPACE), times(1))
         .create(any(PersistentVolumeClaim.class));
   }
@@ -273,11 +295,16 @@ public class AsyncStorageProvisionerTest {
     when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
     when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
+
+    when(kubernetesClient.apps()).thenReturn(apps);
+    when(apps.deployments()).thenReturn(mixedOperationDeployment);
+    when(mixedOperationDeployment.inNamespace(NAMESPACE)).thenReturn(namespaceDeploymentOperation);
+    when(namespaceDeploymentOperation.withName(ASYNC_STORAGE)).thenReturn(deploymentResource);
     ObjectMeta meta = new ObjectMeta();
     meta.setName(ASYNC_STORAGE);
-    Pod pod = new Pod();
-    pod.setMetadata(meta);
-    when(podResource.get()).thenReturn(pod);
+    Deployment deployment = new Deployment();
+    deployment.setMetadata(meta);
+    when(deploymentResource.get()).thenReturn(deployment);
 
     when(kubernetesClient.services()).thenReturn(mixedOperationService);
     when(mixedOperationService.inNamespace(NAMESPACE)).thenReturn(namespaceServiceOperation);
@@ -322,6 +349,12 @@ public class AsyncStorageProvisionerTest {
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
     when(podResource.get()).thenReturn(null);
 
+    when(kubernetesClient.apps()).thenReturn(apps);
+    when(apps.deployments()).thenReturn(mixedOperationDeployment);
+    when(mixedOperationDeployment.inNamespace(NAMESPACE)).thenReturn(namespaceDeploymentOperation);
+    when(namespaceDeploymentOperation.withName(ASYNC_STORAGE)).thenReturn(deploymentResource);
+    when(deploymentResource.get()).thenReturn(null);
+
     when(kubernetesClient.services()).thenReturn(mixedOperationService);
     when(mixedOperationService.inNamespace(NAMESPACE)).thenReturn(namespaceServiceOperation);
     when(namespaceServiceOperation.withName(ASYNC_STORAGE)).thenReturn(serviceResource);
@@ -339,7 +372,8 @@ public class AsyncStorageProvisionerTest {
     verify(kubernetesClient.services().inNamespace(NAMESPACE), never()).create(any(Service.class));
     verify(kubernetesClient.configMaps().inNamespace(NAMESPACE), times(1))
         .create(any(ConfigMap.class));
-    verify(kubernetesClient.pods().inNamespace(NAMESPACE), times(1)).create(any(Pod.class));
+    verify(kubernetesClient.apps().deployments().inNamespace(NAMESPACE), times(1))
+        .create(any(Deployment.class));
     verify(kubernetesClient.persistentVolumeClaims().inNamespace(NAMESPACE), times(1))
         .create(any(PersistentVolumeClaim.class));
   }
