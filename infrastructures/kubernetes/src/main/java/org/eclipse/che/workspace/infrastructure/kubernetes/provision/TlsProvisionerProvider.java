@@ -20,7 +20,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExpos
 
 /**
  * Provides {@link TlsProvisioner} based on `che.infra.kubernetes.server_strategy` and
- * `che.infra.kubernetes.single_host.workspace.exposure` properties.
+ * `che.infra.kubernetes.singlehost.workspace.exposure` properties.
  *
  * @param <T> type of environment
  */
@@ -30,7 +30,7 @@ public class TlsProvisionerProvider<T extends KubernetesEnvironment>
   @Inject
   public TlsProvisionerProvider(
       @Named("che.infra.kubernetes.server_strategy") String exposureStrategy,
-      @Named("che.infra.kubernetes.single_host.workspace.exposure") String wsExposureType,
+      @Named("che.infra.kubernetes.singlehost.workspace.exposure") String wsExposureType,
       Map<WorkspaceExposureType, TlsProvisioner<T>> mapping) {
     super(
         exposureStrategy,

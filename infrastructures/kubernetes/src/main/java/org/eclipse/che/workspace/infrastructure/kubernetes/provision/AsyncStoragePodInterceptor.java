@@ -18,10 +18,13 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.Asyn
 
 import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.PodResource;
+import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -39,14 +42,15 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This interceptor checks whether the starting workspace is configured with persistent storage and
- * makes sure to stop the async storage pod (if any is running) to prevent "Multi-Attach error for
- * volume". After the async storage pod is stopped and deleted, the workspace start is resumed.
+ * makes sure to stop the async storage deployment (if any is running) to prevent "Multi-Attach
+ * error for volume". After the async storage deployment is stopped and deleted, the workspace start
+ * is resumed.
  */
 @Singleton
 public class AsyncStoragePodInterceptor {
 
   private static final Logger LOG = LoggerFactory.getLogger(AsyncStoragePodInterceptor.class);
-  private static final int DELETE_POD_TIMEOUT_IN_MIN = 5;
+  private static final int DELETE_DEPLOYMENT_TIMEOUT_IN_MIN = 5;
 
   private final KubernetesClientFactory kubernetesClientFactory;
   private final String pvcStrategy;
@@ -65,29 +69,32 @@ public class AsyncStoragePodInterceptor {
       return;
     }
 
+    removeAsyncStoragePodWithoutDeployment(identity);
+
     String namespace = identity.getInfrastructureNamespace();
     String workspaceId = identity.getWorkspaceId();
 
-    PodResource<Pod, DoneablePod> asyncStoragePodResource =
-        getAsyncStoragePodResource(namespace, workspaceId);
+    RollableScalableResource<Deployment, DoneableDeployment> asyncStorageDeploymentResource =
+        getAsyncStorageDeploymentResource(namespace, workspaceId);
 
-    if (asyncStoragePodResource.get() == null) { // pod doesn't exist
+    if (asyncStorageDeploymentResource.get() == null) { // deployment doesn't exist
       return;
     }
 
     try {
-      deleteAsyncStoragePod(asyncStoragePodResource)
-          .get(DELETE_POD_TIMEOUT_IN_MIN, TimeUnit.MINUTES);
+      deleteAsyncStorageDeployment(asyncStorageDeploymentResource)
+          .get(DELETE_DEPLOYMENT_TIMEOUT_IN_MIN, TimeUnit.MINUTES);
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
       throw new InfrastructureException(
           format(
-              "Interrupted while waiting for pod '%s' removal. " + ex.getMessage(), ASYNC_STORAGE),
+              "Interrupted while waiting for deployment '%s' removal. " + ex.getMessage(),
+              ASYNC_STORAGE),
           ex);
     } catch (ExecutionException ex) {
       throw new InfrastructureException(
           format(
-              "Error occurred while waiting for pod '%s' removal. " + ex.getMessage(),
+              "Error occurred while waiting for deployment '%s' removal. " + ex.getMessage(),
               ASYNC_STORAGE),
           ex);
     } catch (TimeoutException ex) {
@@ -96,13 +103,70 @@ public class AsyncStoragePodInterceptor {
     }
   }
 
-  private PodResource<Pod, DoneablePod> getAsyncStoragePodResource(
-      String namespace, String workspaceId) throws InfrastructureException {
+  private RollableScalableResource<Deployment, DoneableDeployment>
+      getAsyncStorageDeploymentResource(String namespace, String workspaceId)
+          throws InfrastructureException {
     return kubernetesClientFactory
         .create(workspaceId)
-        .pods()
+        .apps()
+        .deployments()
         .inNamespace(namespace)
         .withName(ASYNC_STORAGE);
+  }
+
+  private CompletableFuture<Void> deleteAsyncStorageDeployment(
+      RollableScalableResource<Deployment, DoneableDeployment> resource)
+      throws InfrastructureException {
+    Watch toCloseOnException = null;
+    try {
+      final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
+      final Watch watch = resource.watch(new DeleteWatcher<>(deleteFuture));
+      toCloseOnException = watch;
+
+      Boolean deleteSucceeded = resource.withPropagationPolicy("Background").delete();
+      if (deleteSucceeded == null || !deleteSucceeded) {
+        deleteFuture.complete(null);
+      }
+      return deleteFuture.whenComplete(
+          (v, e) -> {
+            if (e != null) {
+              LOG.warn("Failed to remove deployment {} cause {}", ASYNC_STORAGE, e.getMessage());
+            }
+            watch.close();
+          });
+    } catch (KubernetesClientException e) {
+      if (toCloseOnException != null) {
+        toCloseOnException.close();
+      }
+      throw new KubernetesInfrastructureException(e);
+    } catch (Exception e) {
+      if (toCloseOnException != null) {
+        toCloseOnException.close();
+      }
+      throw e;
+    }
+  }
+
+  /**
+   * Cleanup existed Async Storage pods running without Deployment see
+   * https://github.com/eclipse/che/issues/17616. Method can be removed in 7.20.x
+   */
+  private void removeAsyncStoragePodWithoutDeployment(RuntimeIdentity identity)
+      throws InfrastructureException {
+    String namespace = identity.getInfrastructureNamespace();
+    String workspaceId = identity.getWorkspaceId();
+
+    PodResource<Pod, DoneablePod> asyncStoragePodResource =
+        kubernetesClientFactory
+            .create(workspaceId)
+            .pods()
+            .inNamespace(namespace)
+            .withName(ASYNC_STORAGE);
+
+    if (asyncStoragePodResource.get()
+        != null) { // remove existed pod to replace it with deployment on provision step
+      deleteAsyncStoragePod(asyncStoragePodResource);
+    }
   }
 
   private CompletableFuture<Void> deleteAsyncStoragePod(PodResource<Pod, DoneablePod> podResource)
