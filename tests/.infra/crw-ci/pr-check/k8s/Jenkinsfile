@@ -223,11 +223,12 @@ spec:
   server:
     cheImage: '${cheImageRepo}'
     cheImageTag: '${mutableCheImageTag}'
+    serverExposureStrategy: 'single-host'
+    singleHostWorkspaceExposureType: 'gateway'
+    customCheProperties:
+       CHE_INFRA_KUBERNETES_SINGLEHOST_WORKSPACE_EXPOSURE: 'gateway' 
   auth:
     updateAdminPassword: false
-  k8s:
-    ingressDomain: '\$(minikube ip).nip.io'
-    ingressStrategy: 'single-host'
 EOL"""
 
                     echo "Install Che"
@@ -236,6 +237,7 @@ EOL"""
                         --k8spodreadytimeout=180000 \\
                         --listr-renderer=verbose \\
                         --platform=minikube \\
+                        --che-operator-image=quay.io/lkrejci/che-operator:gateway \\                                                                                                                                         
                         --che-operator-cr-patch-yaml=$CUSTOM_RESOURCE_PATCH_FILE
                     """
 
