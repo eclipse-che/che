@@ -282,27 +282,6 @@ suite('Validation of debug functionality', async () => {
     });
 });
 
-async function checkErrorMessageInApplicationController() {
-    await previewWidget.waitAndSwitchToWidgetFrame();
-    await previewWidget.waitAndClick(SpringAppLocators.springMenuButtonLocator);
-    await previewWidget.waitAndClick(SpringAppLocators.springErrorButtonLocator);
-
-    try {
-        await previewWidget.waitVisibility(SpringAppLocators.springErrorMessageLocator);
-    } catch (err) {
-
-        await driverHelper.getDriver().switchTo().defaultContent();
-        await ide.waitAndSwitchToIdeFrame();
-
-        await previewWidget.waitAndSwitchToWidgetFrame();
-        await previewWidget.waitVisibility(SpringAppLocators.springErrorMessageLocator);
-    }
-
-
-    await driverHelper.getDriver().switchTo().defaultContent();
-    await ide.waitAndSwitchToIdeFrame();
-}
-
 async function checkCodeNavigationWithContextMenu() {
     await contextMenu.invokeContextMenuOnActiveElementWithKeys();
     await contextMenu.waitContextMenuAndClickOnItem('Go to Definition');
