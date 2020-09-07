@@ -26,11 +26,12 @@ public interface GatewayRouteConfigGenerator {
    * Add prepared {@link ConfigMap},that will hold gateway route configuration, to the generator. So
    * it can be generated later with {@link GatewayRouteConfigGenerator#generate(String)}.
    *
-   * <p>Provided {@link ConfigMap} must be properly labeled and must be annotated with {@link
-   * org.eclipse.che.api.core.model.workspace.config.ServerConfig} annotations.
+   * <p>Provided {@link ConfigMap} must be annotated with {@link
+   * org.eclipse.che.api.core.model.workspace.config.ServerConfig} annotations. It's responsibility
+   * of the caller to ensure that. The {@link GatewayRouteConfigGenerator} fails on {@link
+   * GatewayRouteConfigGenerator#generate(String)} when invalid {@link ConfigMap}s are added to it.
    *
    * @param routeConfig config to add
-   * @throws InfrastructureException when passed ConfigMap is not gateway configuration ConfigMap
    */
   void addRouteConfig(String name, ConfigMap routeConfig) throws InfrastructureException;
 

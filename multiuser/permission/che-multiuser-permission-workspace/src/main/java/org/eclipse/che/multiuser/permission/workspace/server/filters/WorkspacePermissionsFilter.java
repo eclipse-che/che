@@ -101,12 +101,6 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
           return;
         }
 
-      case "startFromConfig":
-        {
-          checkAccountPermissions((String) arguments[2], AccountOperation.CREATE_WORKSPACE);
-          return;
-        }
-
       case "delete":
         key = ((String) arguments[0]);
         action = DELETE;
@@ -126,22 +120,11 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
         if (superPrivilegesChecker.hasSuperPrivileges()) {
           return;
         }
-        // fall through
-      case "checkAgentHealth":
         key = ((String) arguments[0]);
         action = READ;
         break;
 
       case "update":
-      case "addProject":
-      case "deleteProject":
-      case "updateProject":
-      case "addEnvironment":
-      case "deleteEnvironment":
-      case "updateEnvironment":
-      case "addCommand":
-      case "deleteCommand":
-      case "updateCommand":
         key = ((String) arguments[0]);
         action = CONFIGURE;
         break;

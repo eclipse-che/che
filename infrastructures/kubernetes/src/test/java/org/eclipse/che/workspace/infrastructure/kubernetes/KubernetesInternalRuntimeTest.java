@@ -26,7 +26,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_STA
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner.GATEWAY_CONFIGMAP_LABELS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -1136,7 +1135,6 @@ public class KubernetesInternalRuntimeTest {
         new ConfigMapBuilder()
             .withNewMetadata()
             .withName("route1")
-            .withLabels(GATEWAY_CONFIGMAP_LABELS)
             .withAnnotations(ImmutableMap.of(CREATE_IN_CHE_INSTALLATION_NAMESPACE, "true"))
             .endMetadata()
             .build();
@@ -1144,7 +1142,6 @@ public class KubernetesInternalRuntimeTest {
         new ConfigMapBuilder()
             .withNewMetadata()
             .withName("route2")
-            .withLabels(GATEWAY_CONFIGMAP_LABELS)
             .withAnnotations(ImmutableMap.of(CREATE_IN_CHE_INSTALLATION_NAMESPACE, "true"))
             .endMetadata()
             .build();

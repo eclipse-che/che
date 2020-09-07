@@ -45,7 +45,7 @@ public abstract class AbstractExposureStrategyAwareProvider<T> implements Provid
    */
   protected AbstractExposureStrategyAwareProvider(
       @Named("che.infra.kubernetes.server_strategy") String exposureStrategy,
-      @Named("che.infra.kubernetes.single_host.workspace.exposure") String wsExposureType,
+      @Named("che.infra.kubernetes.singlehost.workspace.exposure") String wsExposureType,
       Map<WorkspaceExposureType, T> mapping,
       String errorMessageTemplate) {
     if (exposureStrategy.equals(SingleHostExternalServiceExposureStrategy.SINGLE_HOST_STRATEGY)) {

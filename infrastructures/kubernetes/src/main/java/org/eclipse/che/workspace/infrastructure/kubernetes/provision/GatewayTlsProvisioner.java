@@ -24,6 +24,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.GatewayConfigmapLabels;
 
 /**
  * Enables Transport Layer Security (TLS) for external server implemented with gateway ConfigMaps.
@@ -32,11 +33,15 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 public class GatewayTlsProvisioner<T extends KubernetesEnvironment>
     implements ConfigurationProvisioner<T>, TlsProvisioner<T> {
 
-  final boolean isTlsEnabled;
+  private final boolean isTlsEnabled;
+  private final GatewayConfigmapLabels configmapLabels;
 
   @Inject
-  public GatewayTlsProvisioner(@Named("che.infra.kubernetes.tls_enabled") boolean isTlsEnabled) {
+  public GatewayTlsProvisioner(
+      @Named("che.infra.kubernetes.tls_enabled") boolean isTlsEnabled,
+      GatewayConfigmapLabels configmapLabels) {
     this.isTlsEnabled = isTlsEnabled;
+    this.configmapLabels = configmapLabels;
   }
 
   @Override
@@ -46,7 +51,7 @@ public class GatewayTlsProvisioner<T extends KubernetesEnvironment>
     }
 
     for (ConfigMap configMap : k8sEnv.getConfigMaps().values()) {
-      if (GatewayRouterProvisioner.isGatewayConfig(configMap)) {
+      if (configmapLabels.isGatewayConfig(configMap)) {
         useSecureProtocolForGatewayConfigMap(configMap);
       }
     }
