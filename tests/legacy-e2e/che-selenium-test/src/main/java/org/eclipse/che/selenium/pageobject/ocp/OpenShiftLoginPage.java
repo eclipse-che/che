@@ -28,7 +28,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.site.CheLoginPage;
@@ -67,7 +66,6 @@ public class OpenShiftLoginPage {
     String USERNAME_INPUT_NAME = "username";
     String PASSWORD_INPUT_NAME = "password";
     String LOGIN_BUTTON_XPATH = "//button[contains(text(),'Log In')]";
-
     String SUBMIT_BUTTON_XPATH = "//input[@value='Submit']";
     String FIRST_NAME_NAME = "firstName";
     String LAST_NAME_NAME = "lastName";
@@ -115,8 +113,7 @@ public class OpenShiftLoginPage {
     seleniumWebDriverHelper.setValue(passwordInput, password);
     seleniumWebDriverHelper.waitAndClick(loginButton);
 
-    WaitUtils.sleepQuietly(3);
-    // waitOnClose();
+    waitOnClose();
   }
 
   public void waitOnOpen() {
@@ -124,14 +121,13 @@ public class OpenShiftLoginPage {
   }
 
   private void waitOnClose() {
-    seleniumWebDriverHelper.waitAllInvisibility(asList(usernameInput, passwordInput, loginButton));
+    seleniumWebDriverHelper.waitAllInvisibility(asList(loginButton));
   }
 
   public void submit(String userName, String email) {
     seleniumWebDriverHelper.setValue(firstUsername, userName);
     seleniumWebDriverHelper.setValue(lastUsername, userName);
     seleniumWebDriverHelper.setValue(emailName, email);
-    seleniumWebDriverHelper.setValue(usernameInput, userName);
 
     seleniumWebDriverHelper.waitAndClick(submitButton);
   }
@@ -153,7 +149,7 @@ public class OpenShiftLoginPage {
 
   public Boolean isOpenshiftLoginPageVisible() {
     try {
-      seleniumWebDriverHelper.waitVisibility(By.id("inputUsername"));
+      seleniumWebDriverHelper.waitVisibility(By.id("kc-page-title"));
     } catch (TimeoutException e) {
       return false;
     }

@@ -58,7 +58,7 @@ public class AccountTest {
     changedTestUserAccount =
         new Account()
             .withLogin(testUser.getName())
-            .withEmail(testUser.getName() + "@2.com")
+            .withEmail(testUser.getEmail())
             .withFirstName("UserFirstName")
             .withLastName("UserLastName");
 
