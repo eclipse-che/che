@@ -47,6 +47,7 @@ public class DeleteStoppingWorkspaceTest {
   public void setUp() throws Exception {
     openShiftLoginPage.login();
 
+    dashboard.open();
     workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
   }
 

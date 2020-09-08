@@ -44,6 +44,9 @@ public class DeleteRunningWorkspaceTest {
   @BeforeClass
   public void setUp() throws Exception {
     openShiftLoginPage.login();
+
+    dashboard.open();
+    workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
   }
 
   @AfterClass
@@ -53,9 +56,8 @@ public class DeleteRunningWorkspaceTest {
 
   @Test
   public void deleteRunningWorkspaceTest() {
-    workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
-
     dashboard.open();
+
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectWorkspaceItemName(workspaceName);
     workspaceDetails.waitToolbarTitleName(workspaceName);
