@@ -11,10 +11,11 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner.GATEWAY_CONFIGMAP_LABELS;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.ServicePort;
@@ -24,9 +25,22 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.GatewayConfigmapLabels;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+@Listeners(MockitoTestNGListener.class)
 public class GatewayServerExposerTest {
+  private static final Map<String, String> GATEWAY_CONFIGMAP_LABELS =
+      ImmutableMap.<String, String>builder()
+          .put("app", "che")
+          .put("role", "gateway-config")
+          .build();
+
+  @Mock private GatewayConfigmapLabels gatewayConfigmapLabels;
 
   private final String machineName = "machine";
   private final String serviceName = "service";
@@ -39,8 +53,15 @@ public class GatewayServerExposerTest {
   private final Map<String, ServerConfig> servers =
       Collections.singletonMap("serverOne", new ServerConfigImpl("1111", "ws", null, s1attrs));
 
-  private final ExternalServerExposer<KubernetesEnvironment> serverExposer =
-      new GatewayServerExposer<>(new SingleHostExternalServiceExposureStrategy("che-host"));
+  private ExternalServerExposer<KubernetesEnvironment> serverExposer;
+
+  @BeforeMethod
+  public void setUp() {
+    when(gatewayConfigmapLabels.getLabels()).thenReturn(GATEWAY_CONFIGMAP_LABELS);
+    serverExposer =
+        new GatewayServerExposer<>(
+            new SingleHostExternalServiceExposureStrategy("che-host"), gatewayConfigmapLabels);
+  }
 
   @Test
   public void testExposeServiceWithGatewayConfigmap() {

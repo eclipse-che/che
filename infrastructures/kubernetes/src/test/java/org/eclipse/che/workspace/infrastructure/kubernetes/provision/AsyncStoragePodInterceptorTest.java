@@ -28,13 +28,17 @@ import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.AppsAPIGroupDSL;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.PodResource;
+import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.util.UUID;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -56,10 +60,14 @@ public class AsyncStoragePodInterceptorTest {
   @Mock private RuntimeIdentity identity;
   @Mock private KubernetesClientFactory clientFactory;
   @Mock private KubernetesClient kubernetesClient;
+  @Mock private RollableScalableResource<Deployment, DoneableDeployment> deploymentResource;
   @Mock private PodResource<Pod, DoneablePod> podResource;
+  @Mock private MixedOperation mixedOperation;
   @Mock private MixedOperation mixedOperationPod;
+  @Mock private NonNamespaceOperation namespaceOperation;
   @Mock private NonNamespaceOperation namespacePodOperation;
   @Mock private FilterWatchListDeletable<Pod, PodList, Boolean, Watch, Watcher<Pod>> deletable;
+  @Mock private AppsAPIGroupDSL apps;
 
   private AsyncStoragePodInterceptor asyncStoragePodInterceptor;
 
@@ -70,6 +78,11 @@ public class AsyncStoragePodInterceptorTest {
 
   @Test
   public void shouldDoNothingIfNotCommonStrategy() throws Exception {
+    when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
+    when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
+    when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
+    when(podResource.get()).thenReturn(null);
+
     AsyncStoragePodInterceptor asyncStoragePodInterceptor =
         new AsyncStoragePodInterceptor(randomUUID().toString(), clientFactory);
     asyncStoragePodInterceptor.intercept(kubernetesEnvironment, identity);
@@ -107,6 +120,12 @@ public class AsyncStoragePodInterceptorTest {
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
     when(podResource.get()).thenReturn(null);
 
+    when(kubernetesClient.apps()).thenReturn(apps);
+    when(apps.deployments()).thenReturn(mixedOperation);
+    when(mixedOperation.inNamespace(NAMESPACE)).thenReturn(namespaceOperation);
+    when(namespaceOperation.withName(ASYNC_STORAGE)).thenReturn(deploymentResource);
+    when(deploymentResource.get()).thenReturn(null);
+
     asyncStoragePodInterceptor.intercept(kubernetesEnvironment, identity);
     verifyNoMoreInteractions(clientFactory);
     verifyNoMoreInteractions(identity);
@@ -124,17 +143,23 @@ public class AsyncStoragePodInterceptorTest {
     when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
     when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
+    when(podResource.get()).thenReturn(null);
+
+    when(kubernetesClient.apps()).thenReturn(apps);
+    when(apps.deployments()).thenReturn(mixedOperation);
+    when(mixedOperation.inNamespace(NAMESPACE)).thenReturn(namespaceOperation);
+    when(namespaceOperation.withName(ASYNC_STORAGE)).thenReturn(deploymentResource);
 
     ObjectMeta meta = new ObjectMeta();
     meta.setName(ASYNC_STORAGE);
-    Pod pod = new Pod();
-    pod.setMetadata(meta);
+    Deployment deployment = new Deployment();
+    deployment.setMetadata(meta);
 
-    when(podResource.get()).thenReturn(pod);
-    when(podResource.withPropagationPolicy("Background")).thenReturn(deletable);
+    when(deploymentResource.get()).thenReturn(deployment);
+    when(deploymentResource.withPropagationPolicy("Background")).thenReturn(deletable);
 
     Watch watch = mock(Watch.class);
-    when(podResource.watch(any())).thenReturn(watch);
+    when(deploymentResource.watch(any())).thenReturn(watch);
 
     asyncStoragePodInterceptor.intercept(kubernetesEnvironment, identity);
     verify(deletable).delete();
@@ -154,17 +179,23 @@ public class AsyncStoragePodInterceptorTest {
     when(kubernetesClient.pods()).thenReturn(mixedOperationPod);
     when(mixedOperationPod.inNamespace(NAMESPACE)).thenReturn(namespacePodOperation);
     when(namespacePodOperation.withName(ASYNC_STORAGE)).thenReturn(podResource);
+    when(podResource.get()).thenReturn(null);
+
+    when(kubernetesClient.apps()).thenReturn(apps);
+    when(apps.deployments()).thenReturn(mixedOperation);
+    when(mixedOperation.inNamespace(NAMESPACE)).thenReturn(namespaceOperation);
+    when(namespaceOperation.withName(ASYNC_STORAGE)).thenReturn(deploymentResource);
 
     ObjectMeta meta = new ObjectMeta();
     meta.setName(ASYNC_STORAGE);
-    Pod pod = new Pod();
-    pod.setMetadata(meta);
+    Deployment deployment = new Deployment();
+    deployment.setMetadata(meta);
 
-    when(podResource.get()).thenReturn(pod);
-    when(podResource.withPropagationPolicy("Background")).thenReturn(deletable);
+    when(deploymentResource.get()).thenReturn(deployment);
+    when(deploymentResource.withPropagationPolicy("Background")).thenReturn(deletable);
 
     Watch watch = mock(Watch.class);
-    when(podResource.watch(any())).thenReturn(watch);
+    when(deploymentResource.watch(any())).thenReturn(watch);
 
     asyncStoragePodInterceptor.intercept(kubernetesEnvironment, identity);
     verify(deletable).delete();

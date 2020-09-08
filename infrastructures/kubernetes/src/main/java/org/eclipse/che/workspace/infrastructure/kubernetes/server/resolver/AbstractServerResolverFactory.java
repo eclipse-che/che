@@ -32,7 +32,7 @@ public class AbstractServerResolverFactory<T> {
 
   protected AbstractServerResolverFactory(
       @Named("che.infra.kubernetes.server_strategy") String exposureStrategy,
-      @Named("che.infra.kubernetes.single_host.workspace.exposure") String wsExposureType,
+      @Named("che.infra.kubernetes.singlehost.workspace.exposure") String wsExposureType,
       Map<WorkspaceExposureType, ResolverConstructor<T>> mapping,
       String errorMessageTemplate) {
     constructorProvider =
