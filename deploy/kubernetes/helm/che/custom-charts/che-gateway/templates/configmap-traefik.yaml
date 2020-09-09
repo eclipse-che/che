@@ -22,8 +22,12 @@ data:
     entrypoints:
       http:
         address: ":8080"
+        forwardedHeaders:
+          insecure: true
       https:
         address: ":8443"
+        forwardedHeaders:
+          insecure: true
     providers:
       file:
         directory: "/dynamic-config"
