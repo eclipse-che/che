@@ -7,7 +7,7 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-{{- if ne .Values.global.singleHostExposure "gateway" }}
+{{- if not (and (eq .Values.global.serverStrategy "single-host") (eq .Values.global.singleHostExposure "gateway")) }}
 
 apiVersion: extensions/v1beta1
 kind: Ingress

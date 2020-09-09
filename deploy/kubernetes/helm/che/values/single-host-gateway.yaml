@@ -10,5 +10,6 @@
 global:
   serverStrategy: single-host
   singleHostExposure: gateway
+  singleHostGatewayLabels: app=che,component=che-gateway-config
 cheSinglehostGateway:
   deploy: true

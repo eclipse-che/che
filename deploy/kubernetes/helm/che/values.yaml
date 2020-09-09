@@ -38,6 +38,7 @@ global:
   serverStrategy: multi-host
   # exposure type for `serverStrategy: single-host`. options: native, gateway
   singleHostExposure: native
+  # labels used for single-host gateway ConfigMaps
   singleHostGatewayLabels: app=che,component=che-gateway-config
   # Public hostname of the installed Che server. If value is omitted then it will be automatically set.
   cheHost: ""
