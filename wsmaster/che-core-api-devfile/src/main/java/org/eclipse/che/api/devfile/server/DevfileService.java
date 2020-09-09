@@ -116,8 +116,7 @@ public class DevfileService extends Service {
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public Response create(
-      @ApiParam(value = "The devfile of the workspace to create", required = true)
-          DevfileDto devfile,
+      @ApiParam(value = "The devfile to create", required = true) DevfileDto devfile,
       @HeaderParam(CONTENT_TYPE) MediaType contentType)
       throws ConflictException, BadRequestException, ForbiddenException, NotFoundException,
           ServerException {
@@ -135,7 +134,7 @@ public class DevfileService extends Service {
   @ApiOperation(value = "Get devfile by its identifier")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The response contains requested workspace entity"),
-    @ApiResponse(code = 404, message = "The workspace with specified id does not exist"),
+    @ApiResponse(code = 404, message = "The devfile with specified id does not exist"),
     @ApiResponse(code = 403, message = "The user is not allowed to read devfile"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
@@ -172,7 +171,7 @@ public class DevfileService extends Service {
           @QueryParam("maxItems")
           Integer maxItems,
       @ApiParam(
-              "A list of fields and directions of sort. By default items would be sorted by id.Example id:asc,devfile.metadata.name desc.")
+              "A list of fields and directions of sort. By default items would be sorted by id. Example id:asc,devfile.metadata.name desc.")
           @QueryParam("order")
           String order)
       throws ServerException, BadRequestException {

@@ -94,7 +94,7 @@ public class JpaUserDevfileDao implements UserDevfileDao {
   }
 
   @Override
-  @Transactional(rollbackOn = {ServerException.class})
+  @Transactional(rollbackOn = {ServerException.class, RuntimeException.class})
   public Optional<UserDevfile> getById(String id) throws ServerException {
     requireNonNull(id);
     try {
