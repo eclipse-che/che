@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.pageobject.ocp;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.ADD_TO_EXISTING_ACCOUNT_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.APPROVE_BUTTON_NAME;
 import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.EMAIL_NAME;
 import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.FIRST_NAME_NAME;
@@ -29,7 +30,6 @@ import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
-import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.site.CheLoginPage;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
@@ -46,7 +46,6 @@ public class OpenShiftLoginPage {
   @Inject private CheLoginPage cheLoginPage;
   @Inject private TestDashboardUrlProvider testDashboardUrlProvider;
   @Inject private OpenShiftLoginPage codereadyOpenShiftLoginPage;
-  @Inject private Dashboard dashboard;
 
   @Inject(optional = true)
   @Named("env.openshift.regular.username")
@@ -72,6 +71,7 @@ public class OpenShiftLoginPage {
     String EMAIL_NAME = "email";
     String APPROVE_BUTTON_NAME = "approve";
     String IDENTITY_PROVIDER_LINK_XPATH = "//a[@title='Log in with %s']";
+    String ADD_TO_EXISTING_ACCOUNT_BUTTON_ID = "linkAccount";
   }
 
   @FindBy(name = USERNAME_INPUT_NAME)
@@ -97,6 +97,9 @@ public class OpenShiftLoginPage {
 
   @FindBy(name = APPROVE_BUTTON_NAME)
   private WebElement approveButton;
+
+  @FindBy(id = ADD_TO_EXISTING_ACCOUNT_BUTTON_ID)
+  private WebElement addToExistingAccountButton;
 
   @Inject
   public OpenShiftLoginPage(
@@ -128,6 +131,7 @@ public class OpenShiftLoginPage {
     seleniumWebDriverHelper.setValue(firstUsername, userName);
     seleniumWebDriverHelper.setValue(lastUsername, userName);
     seleniumWebDriverHelper.setValue(emailName, email);
+    seleniumWebDriverHelper.setValue(usernameInput, "admin");
 
     seleniumWebDriverHelper.waitAndClick(submitButton);
   }
@@ -162,6 +166,10 @@ public class OpenShiftLoginPage {
         By.xpath(format(IDENTITY_PROVIDER_LINK_XPATH, identityProviderName)));
   }
 
+  public void addToExistingAccount() {
+    seleniumWebDriverHelper.waitAndClick(addToExistingAccountButton);
+  }
+
   public void login() {
     seleniumWebDriver.navigate().to(testDashboardUrlProvider.get());
 
@@ -172,7 +180,6 @@ public class OpenShiftLoginPage {
 
       codereadyOpenShiftLoginPage.login(openShiftUsername, openShiftPassword);
 
-      // authorize ocp-client to access OpenShift account
       if (codereadyOpenShiftLoginPage.isApproveButtonVisible()) {
         authorizeOpenShiftAccessPage.waitOnOpen();
         authorizeOpenShiftAccessPage.allowPermissions();
@@ -180,6 +187,9 @@ public class OpenShiftLoginPage {
 
       if (codereadyOpenShiftLoginPage.isOpenshiftLoginPageVisible()) {
         codereadyOpenShiftLoginPage.submit(openShiftUsername, openShiftEmail);
+
+        addToExistingAccount();
+        cheLoginPage.loginWithPredefinedUsername("admin");
       }
     }
   }
