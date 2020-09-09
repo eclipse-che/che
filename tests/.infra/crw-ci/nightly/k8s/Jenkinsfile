@@ -59,7 +59,7 @@ pipeline {
                        }
                 }
 
-                stage('Run devfile tests') {
+                /*stage('Run devfile tests') {
                     steps {
                         build job: 'che16904-basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                 parameters: [
@@ -97,7 +97,7 @@ pipeline {
                                                 value: 'nightly')
                                 ]
                     }
-                }
+                }*/
 
                 stage('Run Git SSH flow tests') {
                     steps {
