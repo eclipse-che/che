@@ -141,7 +141,7 @@ public class UserDevfileManager {
 
   /**
    * Gets list of devfiles. Parameters, returned values and possible exceptions are the same as in
-   * UserDevfileDao#getDevfiles(String, int, int, List, List)}.
+   * {@link UserDevfileDao#getDevfiles(int, int, List, List)}
    */
   public Page<UserDevfile> getUserDevfiles(
       int maxItems,
