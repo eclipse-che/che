@@ -19,6 +19,7 @@
     <test name="all">
         <classes>
             <class name="org.eclipse.che.selenium.dashboard.workspaces.WorkspacesListTest"/>
+            <class name="org.eclipse.che.selenium.dashboard.AccountTest"/>
         </classes>
     </test>
 </suite>
