@@ -45,7 +45,6 @@ public class TraefikGatewayRouteConfigGeneratorTest {
             + "      service: \"external-server-1\"\n"
             + "      middlewares:\n"
             + "      - \"external-server-1\"\n"
-            + "      - \"external-server-1_headers\"\n"
             + "      priority: 100\n"
             + "  services:\n"
             + "    external-server-1:\n"
@@ -56,11 +55,7 @@ public class TraefikGatewayRouteConfigGeneratorTest {
             + "    external-server-1:\n"
             + "      stripPrefix:\n"
             + "        prefixes:\n"
-            + "        - \"/blabol-cesta\"\n"
-            + "    external-server-1_headers:\n"
-            + "      headers:\n"
-            + "        customRequestHeaders:\n"
-            + "          X-Forwarded-Proto: \"https\"";
+            + "        - \"/blabol-cesta\"";
 
     ServerConfigImpl serverConfig =
         new ServerConfigImpl(
