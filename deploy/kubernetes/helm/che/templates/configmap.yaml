@@ -81,6 +81,8 @@ data:
 {{- end }}
   CHE_INFRA_KUBERNETES_INGRESS_PATH__TRANSFORM: '%s(.*)'
   CHE_INFRA_KUBERNETES_SERVER__STRATEGY: {{ .Values.global.serverStrategy }}
+  CHE_INFRA_KUBERNETES_SINGLEHOST_WORKSPACE_EXPOSURE: {{ .Values.global.singleHostExposure | quote }}
+  CHE_INFRA_KUBERNETES_SINGLEHOST_GATEWAY_CONFIGMAP__LABELS: {{ .Values.global.singleHostGatewayLabels | quote }}
   CHE_LOGGER_CONFIG: {{ .Values.global.log.loggerConfig | quote}}
   CHE_LOGS_APPENDERS_IMPL: {{ .Values.global.log.appenderName }}
   CHE_WORKSPACE_HTTP__PROXY: {{ .Values.cheWorkspaceHttpProxy | quote}}

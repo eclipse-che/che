@@ -53,8 +53,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
  *         prefixes:
  *         - "{GatewayRouteConfig#routePath}"
  *     {name}_headers:
- *       customRequestHeaders:
- *         X-Forwarded-Proto: "{protocol}"
+ *       headers:
+ *         customRequestHeaders:
+ *           X-Forwarded-Proto: "{protocol}"
  * </pre>
  */
 public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGenerator {
