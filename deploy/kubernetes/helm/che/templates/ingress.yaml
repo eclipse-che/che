@@ -37,5 +37,9 @@ spec:
       paths:
       - path: /
         backend:
+{{- if and (eq .Values.global.serverStrategy "single-host") (eq .Values.global.singleHostExposure "gateway") }}
+          serviceName: che-gateway
+{{- else }}
           serviceName: che-host
+{{- end }}
           servicePort: 8080
