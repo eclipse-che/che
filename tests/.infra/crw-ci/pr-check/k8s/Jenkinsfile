@@ -224,7 +224,7 @@ spec:
     cheImage: '${cheImageRepo}'
     cheImageTag: '${mutableCheImageTag}'
     serverExposureStrategy: 'single-host'
-    serverExposureStrategy: 'gateway'
+    singleHostExposureType: 'gateway'
     customCheProperties:
   auth:
     updateAdminPassword: false
