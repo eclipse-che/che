@@ -224,9 +224,8 @@ spec:
     cheImage: '${cheImageRepo}'
     cheImageTag: '${mutableCheImageTag}'
     serverExposureStrategy: 'single-host'
-    singleHostWorkspaceExposureType: 'gateway'
+    serverExposureStrategy: 'gateway'
     customCheProperties:
-       CHE_INFRA_KUBERNETES_SINGLEHOST_WORKSPACE_EXPOSURE: 'gateway' 
   auth:
     updateAdminPassword: false
 EOL"""
