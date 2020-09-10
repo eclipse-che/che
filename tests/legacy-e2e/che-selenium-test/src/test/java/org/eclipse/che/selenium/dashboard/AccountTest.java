@@ -17,7 +17,7 @@ import static org.testng.Assert.assertTrue;
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.account.Account;
@@ -37,7 +37,7 @@ public class AccountTest {
 
   @Inject private Dashboard dashboard;
   @Inject private DashboardAccount dashboardAccount;
-  @Inject private DefaultTestUser testUser;
+  @Inject private TestUser testUser;
   @Inject private KeycloakAccountPage keycloakAccount;
   @Inject private KeycloakPasswordPage keycloakPasswordPage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
@@ -123,19 +123,13 @@ public class AccountTest {
     keycloakPasswordPage.clickOnSavePasswordButton();
     keycloakPasswordPage.waitTextInSuccessAlert("Your password has been updated.");
 
-    keycloakPasswordPage.setPasswordFieldValue("changedPassword");
-    keycloakPasswordPage.setNewPasswordFieldValue(testUser.getPassword());
-    keycloakPasswordPage.setNewPasswordConfirmationFieldValue(testUser.getPassword());
-    keycloakPasswordPage.clickOnSavePasswordButton();
-    keycloakPasswordPage.waitTextInSuccessAlert("Your password has been updated.");
-
     closeWindowAndSwitchToParent(parentWindow);
 
     dashboard.clickOnUsernameButton();
     dashboard.clickOnLogoutItem();
 
     openShiftLoginPage.login();
-    dashboard.open(testUser.getName(), testUser.getPassword());
+    dashboard.open(testUser.getName(), "changedPassword");
 
     dashboard.waitDashboardToolbarTitle();
   }

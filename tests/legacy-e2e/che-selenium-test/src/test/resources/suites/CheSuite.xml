@@ -31,6 +31,7 @@
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterRenameWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterWorkspaceRestartTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CheckStoppingWsByTimeoutTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.AccountTest"/>
         </classes>
     </test>
 
