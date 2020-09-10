@@ -24,7 +24,7 @@ spec:
       CHE_WORKSPACE_AGENT_DEV_INACTIVE__STOP__TIMEOUT__MS: '300000'
   auth:
     updateAdminPassword: false
-    openShiftoAuth: true
+    openShiftoAuth: false
     identityProviderPassword: admin
 EOL
 
@@ -53,17 +53,6 @@ installCheCtl
 deployCheIntoCluster  --che-operator-cr-patch-yaml=/tmp/custom-resource-patch.yaml
 seleniumTestsSetup
 createIndentityProvider
-
-export OPENSHIFT_USERNAME=developer
-export OPENSHIFT_PASSWORD=123
-export OPENSHIFT_REGULAR_USERNAME=developer
-export OPENSHIFT_REGULAR_PASSWORD=123
-export OPENSHIFT_REGULAR_EMAIL=${OPENSHIFT_REGULAR_USERNAME}@1.com
-
-export TEST_USER_NAME=admin
-export CHE_TESTUSER_NAME=${TEST_USER_NAME}
-export CHE_TESTUSER_PASSWORD=admin
-export CHE_TESTUSER_EMAIL=${TEST_USER_NAME}@admin.com
 
 bash /root/payload/tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
   --threads=3 \
