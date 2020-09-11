@@ -20,7 +20,8 @@ export class CheMultiuserTokenHandler implements ITokenHandler {
 
         let keycloakUrl = this.handleTrailingSlash(TestConstants.TS_SELENIUM_BASE_URL);
         const keycloakAuthSuffix = 'auth/realms/che/protocol/openid-connect/token';
-        keycloakUrl = keycloakUrl.replace('che', 'keycloak') + keycloakAuthSuffix;
+        // keycloakUrl = keycloakUrl.replace('che', 'keycloak') + keycloakAuthSuffix;
+        keycloakUrl = keycloakUrl + keycloakAuthSuffix;
         params = {
             client_id: 'che-public',
             username: TestConstants.TS_SELENIUM_USERNAME,
