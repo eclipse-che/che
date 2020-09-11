@@ -11,7 +11,7 @@ components:
   - type: cheEditor
     id: eclipse/che-theia/next
     memoryLimit: 768Mi
-  - type: openshift
+  - type: kubernetes
     alias: petclinic-web
     reference: https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/containers-happy-path.yaml
     selector:
