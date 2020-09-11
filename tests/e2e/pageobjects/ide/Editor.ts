@@ -13,7 +13,6 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { By, Key, error, ActionSequence, Button } from 'selenium-webdriver';
-import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
 
 

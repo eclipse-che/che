@@ -8,6 +8,7 @@
 
 FROM jboss/keycloak:6.0.1
 ADD che /opt/jboss/keycloak/themes/che
+ADD che-username-readonly /opt/jboss/keycloak/themes/che-username-readonly
 ADD . /scripts/
 ADD cli /scripts/cli
 RUN ln -s /opt/jboss/tools/docker-entrypoint.sh && \

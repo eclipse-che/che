@@ -44,6 +44,7 @@ public class DefaultHostExternalServiceExposureStrategyTest {
 
   private static final String MACHINE_NAME = "pod/main";
   private static final String SERVICE_NAME = SERVER_PREFIX + "12345678" + "-" + MACHINE_NAME;
+  private static final String LABELS = "foo=bar";
 
   private IngressServerExposer externalServerExposer;
   private KubernetesEnvironment kubernetesEnvironment;
@@ -65,7 +66,7 @@ public class DefaultHostExternalServiceExposureStrategyTest {
         KubernetesEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
     externalServerExposer =
         new IngressServerExposer(
-            new DefaultHostExternalServiceExposureStrategy(), emptyMap(), "%s");
+            new DefaultHostExternalServiceExposureStrategy(), emptyMap(), LABELS, "%s");
   }
 
   @Test

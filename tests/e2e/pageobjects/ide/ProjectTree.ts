@@ -64,13 +64,13 @@ export class ProjectTree {
     async openProjectTreeContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         Logger.debug('ProjectTree.openProjectTreeContainer');
 
-        const selectedExplorerButtonLocator: By = By.css(Ide.SELECTED_EXPLORER_BUTTON_CSS);
-
+        const explorerButtonActiveLocator: By = this.getLeftToolbarButtonActiveLocator(LeftToolbarButton.Explorer);
+        Logger.trace(`ProjectTree.openProjectTreeContainer waitLeftToolbarButtonPresence`);
         await this.ide.waitLeftToolbarButton(LeftToolbarButton.Explorer, timeout);
 
-        const isButtonEnabled: boolean = await this.driverHelper.waitVisibilityBoolean(selectedExplorerButtonLocator);
-
-        if (!isButtonEnabled) {
+        const isButtonActive: boolean = await this.driverHelper.waitVisibilityBoolean(explorerButtonActiveLocator);
+        Logger.trace(`ProjectTree.openProjectTreeContainer leftToolbarButtonActive:${isButtonActive}`);
+        if (!isButtonActive) {
             await this.ide.waitAndClickLeftToolbarButton(LeftToolbarButton.Explorer, timeout);
         }
 
@@ -226,9 +226,11 @@ export class ProjectTree {
         let pathEntry = `${projectName}`;
         let pathToItemInAssociatedWorkspace = pathToItem.replace(`${projectName}/`, '');
         let paths: Array<string> = new Array();
-
         // if we in the root of project
         if (pathToItem.split('/').length < 2) {
+            Logger.trace(`ProjectTree.expandPathAndOpenFileInAssociatedWorkspace has no subpaths, expanding root folder "${projectName}"`);
+            await this.expandItem(projectName);
+            Logger.trace(`ProjectTree.expandPathAndOpenFileInAssociatedWorkspace clicking on file "${projectName}/${fileName}"`);
             await this.clickOnItem(`${projectName}/${fileName}`, timeout);
             return;
         }
@@ -265,7 +267,8 @@ export class ProjectTree {
         const rootSubitemLocator: By = By.css(this.getTreeItemCssLocator(`${projectName}/${rootSubItem}`));
 
         for (let i = 0; i < attempts; i++) {
-            const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, 1, visibilityItemPolling);
+            // do five checks of the item in one fifth of the time given for root folder item (was causing frequent reloads of the workspace)
+            const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, 5, visibilityItemPolling / 5);
 
             if (!isProjectFolderVisible) {
                 Logger.trace(`ProjectTree.waitProjectImported project not located, reloading page.`);
@@ -281,10 +284,39 @@ export class ProjectTree {
             await this.expandItem(rootItem);
             await this.waitItemExpanded(rootItem);
 
-            const isRootSubItemVisible = await this.driverHelper.waitVisibilityBoolean(rootSubitemLocator, 1, visibilityItemPolling);
+            // do five checks of the item in one fifth of the time given for root folder item (was causing frequent reloads of the workspace)
+            const isRootSubItemVisible = await this.driverHelper.waitVisibilityBoolean(rootSubitemLocator, 5, visibilityItemPolling / 5);
 
             if (!isRootSubItemVisible) {
                 Logger.trace(`ProjectTree.waitProjectImported sub-items not found, reloading page.`);
+                await this.driverHelper.reloadPage();
+                await this.driverHelper.wait(triesPolling);
+                await this.ide.waitAndSwitchToIdeFrame();
+                await this.ide.waitIde();
+                await this.openProjectTreeContainer();
+                continue;
+            }
+
+            return;
+        }
+
+        throw new error.TimeoutError('Exceeded the maximum number of checking attempts, project has not been imported');
+    }
+
+    async waitProjectImportedNoSubfolder(projectName: string,
+        attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
+        visibilityItemPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5,
+        triesPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 30) {
+
+        Logger.debug(`ProjectTree.waitProjectImportedNoSubfolder "${projectName}"`);
+
+        const rootItemLocator: By = By.css(this.getTreeItemCssLocator(`${projectName}`));
+
+        for (let i = 0; i < attempts; i++) {
+            const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, 1, visibilityItemPolling);
+
+            if (!isProjectFolderVisible) {
+                Logger.trace(`ProjectTree.waitProjectImportedNoSubfolder project not located, reloading page.`);
                 await this.driverHelper.reloadPage();
                 await this.driverHelper.wait(triesPolling);
                 await this.ide.waitAndSwitchToIdeFrame();
@@ -304,6 +336,11 @@ export class ProjectTree {
         const splitDelimeter = ':';
         const attribute: string = await this.driverHelper.waitAndGetElementAttribute(By.css(`div[${nodeAttribute}]`), nodeAttribute);
         return attribute.split(splitDelimeter)[0] + splitDelimeter;
+    }
+
+    private getLeftToolbarButtonActiveLocator(buttonTitle: String): By {
+        return By.xpath(`//div[@id='theia-left-content-panel']//ul[@class='p-TabBar-content']` +
+            `//li[@title[contains(.,'${buttonTitle}')] and contains(@id, 'shell-tab') and contains(@class, 'p-mod-current')]`);
     }
 
     private async getItemCss(itemPath: string): Promise<string> {

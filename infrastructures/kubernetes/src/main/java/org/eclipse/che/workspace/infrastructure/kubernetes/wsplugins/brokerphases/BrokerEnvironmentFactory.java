@@ -15,7 +15,6 @@ import static java.util.Collections.singletonMap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
@@ -30,6 +29,8 @@ import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -57,11 +58,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
  * <p>It has to be extended to be used in the kubernetes or openshift infrastructures because of the
  * usage of a complex inheritance between components of these infrastructures.
  *
- * <p>This API is in <b>Beta</b> and is subject to changes or removal.
- *
  * @author Oleksandr Garagatyi
  */
-@Beta
 public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> {
 
   @VisibleForTesting static final String CONFIG_MAP_NAME_SUFFIX = "broker-config-map";
@@ -131,7 +129,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     return doCreate(brokersConfigs);
   }
 
-  private BrokersConfigs getBrokersConfigs(
+  protected BrokersConfigs getBrokersConfigs(
       Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID, String brokerImage)
       throws InfrastructureException {
 
@@ -169,23 +167,12 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       String image,
       @Nullable String brokerVolumeName) {
     String containerName = generateContainerNameFromImageRef(image);
+    String[] cmdArgs = getCommandLineArgs(runtimeId).toArray(new String[0]);
     final ContainerBuilder cb =
         new ContainerBuilder()
             .withName(containerName)
             .withImage(image)
-            .withArgs(
-                "-push-endpoint",
-                cheWebsocketEndpoint,
-                "-runtime-id",
-                String.format(
-                    "%s:%s:%s",
-                    runtimeId.getWorkspaceId(),
-                    MoreObjects.firstNonNull(runtimeId.getEnvName(), ""),
-                    runtimeId.getOwnerId()),
-                "-cacert",
-                certProvisioner.isConfigured() ? certProvisioner.getCertPath() : "",
-                "--registry-address",
-                Strings.nullToEmpty(pluginRegistryUrl))
+            .withArgs(cmdArgs)
             .withImagePullPolicy(brokerPullPolicy)
             .withEnv(envVars);
     if (brokerVolumeName != null) {
@@ -197,6 +184,23 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     Containers.addRamLimit(container, "250Mi");
     Containers.addRamRequest(container, "250Mi");
     return container;
+  }
+
+  protected List<String> getCommandLineArgs(RuntimeIdentity runtimeId) {
+    return new ArrayList<String>(
+        Arrays.asList(
+            "--push-endpoint",
+            cheWebsocketEndpoint,
+            "--runtime-id",
+            String.format(
+                "%s:%s:%s",
+                runtimeId.getWorkspaceId(),
+                MoreObjects.firstNonNull(runtimeId.getEnvName(), ""),
+                runtimeId.getOwnerId()),
+            "--cacert",
+            certProvisioner.isConfigured() ? certProvisioner.getCertPath() : "",
+            "--registry-address",
+            Strings.nullToEmpty(pluginRegistryUrl)));
   }
 
   private Pod newPod() {

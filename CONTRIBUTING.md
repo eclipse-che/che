@@ -201,3 +201,44 @@ EOF
 
 Also `CHE_API_INTERNAL`, `CHE_API_EXTERNAL` and `CHE_API` should be set in runner container and point to new Che server API.
 If one uses provided devfile, they are already set to: `http://che-dev:8080/api`, which should be changed in case of https protocol.
+
+
+## Pull Request Template and its Checklist
+
+Che repositories includes a GitHub Pull Request Template. Contributors must read and complete the template. In particular there is a list of requirements that the author needs to fulfil to merge the PR. This sections goes into the details of this checklist.
+
+### The Eclipse Contributor Agreement is valid
+
+The author has completed the [Eclipse Contributor Agreement](https://accounts.eclipse.org/user/eca) and has signed the commits using his email.
+
+### Code produced is complete
+
+No `TODO` comments left in the PR source code.
+
+### Code builds without errors
+
+The author has verified that code builds, tests pass and linters are happy.
+
+### Tests are covering the bugfix
+
+If the Pull Request fixes a bug it must includes a new automated test. The test validates the fix and protect against future regressions.
+
+### The repository devfile is up to date and works
+
+The devfile commands used to build and run the application are still working.
+
+### Sections "What issues does this PR fix or reference" and "How to test this PR" completed
+
+Never omit the two sections "What issues does this PR fix or reference" and "How to test this PR".
+
+### Relevant user documentation updated
+
+The author has documented the changes to Che installation, usage or management in [Che documentation](https://github.com/eclipse/che-docs).
+
+### Relevant contributing documentation updated
+
+Document changes to the steps to contribute to the project in the `CONTRIBUTING.md` files.
+
+### CI/CD changes implemented, documented and communicated
+
+Update CI/CD scripts and documentation when the PR includes changes to the build, test, distribute or deploy procedures. Communicate CI/CD changes to the whole community with an email.

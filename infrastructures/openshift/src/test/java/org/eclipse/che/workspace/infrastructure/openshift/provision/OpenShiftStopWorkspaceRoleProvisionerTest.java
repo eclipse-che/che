@@ -36,8 +36,8 @@ import io.fabric8.openshift.api.model.OpenshiftRoleList;
 import io.fabric8.openshift.api.model.PolicyRuleBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstallationLocation;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftCheInstallationLocation;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -52,7 +52,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class OpenShiftStopWorkspaceRoleProvisionerTest {
 
-  @Mock private OpenShiftCheInstallationLocation cheInstallationLocation;
+  @Mock private CheInstallationLocation cheInstallationLocation;
   private OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner;
 
   @Mock private OpenShiftClientFactory clientFactory;
@@ -174,7 +174,7 @@ public class OpenShiftStopWorkspaceRoleProvisionerTest {
   }
 
   @Test
-  public void shouldCreateRoleBinding() {
+  public void shouldCreateRoleBinding() throws InfrastructureException {
     when(cheInstallationLocation.getInstallationLocationNamespace()).thenReturn("che");
     assertEquals(
         stopWorkspaceRoleProvisioner.createStopWorkspacesRoleBinding("developer-che"),

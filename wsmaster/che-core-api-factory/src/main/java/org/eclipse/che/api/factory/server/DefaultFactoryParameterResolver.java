@@ -81,9 +81,7 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
     }
     return urlFactoryBuilder
         .createFactoryFromDevfile(
-            new DefaultFactoryUrl()
-                .withDevfileFileLocation(devfileLocation)
-                .withDevfileFilename(null),
+            new DefaultFactoryUrl().withDevfileFileLocation(devfileLocation),
             new URLFileContentProvider(devfileURI, urlFetcher),
             extractOverrideParams(factoryParameters))
         .orElse(null);

@@ -13,7 +13,7 @@ import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../TestConstants';
 import { Logger } from '../../utils/Logger';
-import { By, error } from 'selenium-webdriver';
+import { By } from 'selenium-webdriver';
 
 
 

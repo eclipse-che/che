@@ -72,8 +72,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Exter
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServiceExposureStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ServiceExposureStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.SingleHostExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
@@ -158,8 +158,7 @@ public class KubernetesInfraModule extends AbstractModule {
     ingressStrategies
         .addBinding(DEFAULT_HOST_STRATEGY)
         .to(DefaultHostExternalServiceExposureStrategy.class);
-    bind(ExternalServiceExposureStrategy.class)
-        .toProvider(IngressServiceExposureStrategyProvider.class);
+    bind(ExternalServiceExposureStrategy.class).toProvider(ServiceExposureStrategyProvider.class);
 
     MapBinder<WorkspaceExposureType, ExternalServerExposer<KubernetesEnvironment>>
         exposureStrategies =

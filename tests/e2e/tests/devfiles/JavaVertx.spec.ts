@@ -30,7 +30,7 @@ suite(`${stack} test`, async () => {
 
     suite('Language server validation', async () => {
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
-        commonLsTests.errorHighlighting(tabTitle, 'error', 20);
+        commonLsTests.errorHighlighting(tabTitle, 'error_text', 20);
         commonLsTests.suggestionInvoking(tabTitle, 19, 31, 'router(Vertx vertx) : Router');
         commonLsTests.autocomplete(tabTitle, 19, 7, 'Router - io.vertx.ext.web');
         commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName);
