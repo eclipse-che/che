@@ -44,8 +44,8 @@ function createServerPatchFile(){
 function startCheServer(){
     createServerPatchFile "$1"
     
-    if chectl server:start --listr-renderer=verbose -a operator -p openshift --k8spodreadytimeout=360000 --che-operator-cr-patch-yaml=/tmp/che-cr-patch.yaml; then
-        echo "Started succesfully"
+    if chectl server:start --listr-renderer=verbose -a operator -p openshift --k8spodreadytimeout=360000 --che-operator-cr-patch-yaml=/tmp/che-cr-patch.yaml --chenamespace=eclipse-che; then
+        echo "Started successfully"
         oc get checluster -o yaml
     else
         echo "======== oc get events ========"
@@ -62,7 +62,7 @@ function createTestWorkspace(){
     local devfile_url=$(readConfigProperty test.workspace.devfile.url)
     local userAccessToken=$(obtainUserToken)
     
-    chectl workspace:create --start --access-token "$userAccessToken" --devfile="$devfile_url"
+    chectl workspace:create --start --access-token "$userAccessToken" --chenamespace=eclipse-che --devfile="$devfile_url"
 }
 
 function runTest() {

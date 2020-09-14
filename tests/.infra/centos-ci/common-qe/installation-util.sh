@@ -155,11 +155,11 @@ function installAndStartMinishift() {
     oc rollout latest router
     oc rollout status dc router
     
-    oc create namespace che
+    oc create namespace eclipse-che
     
     cp rootCA.crt ca.crt
-    oc create secret generic self-signed-certificate --from-file=ca.crt -n=che
-    oc project che
+    oc create secret generic self-signed-certificate --from-file=ca.crt --namespace=eclipse-che
+    oc project eclipse-che
 }
 
 function setup_environment(){
