@@ -25,7 +25,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
@@ -53,7 +52,6 @@ public class WorkspaceDetailsOverviewTest {
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
-  @Inject private OpenShiftLoginPage openShiftLoginPage;
 
   private String workspaceName;
 
@@ -64,8 +62,6 @@ public class WorkspaceDetailsOverviewTest {
 
   @Test()
   public void shouldCheckExportAsFile() {
-    openShiftLoginPage.login();
-
     dashboard.open();
     workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
 

@@ -29,7 +29,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage;
+import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
@@ -60,14 +60,12 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   @Inject private TheiaProposalForm theiaProposalForm;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private DefaultTestUser defaultTestUser;
-  @Inject private OpenShiftLoginPage openShiftLoginPage;
+  @Inject private Dashboard dashboard;
 
   private TestFactory testFactoryWithSpecificBranch;
 
   @BeforeClass
   public void setUp() throws Exception {
-    openShiftLoginPage.login();
-
     // preconditions - add the project to the test repository
     Path entryPath = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
     testAuxiliaryRepo.addContent(entryPath);
@@ -78,6 +76,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
 
     testFactoryWithSpecificBranch =
         testFactoryInitializer.fromUrl(repositoryUrl + "/tree/" + SECOND_BRANCH_NAME);
+    dashboard.open();
   }
 
   @AfterClass

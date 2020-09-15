@@ -25,7 +25,6 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
-import org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.openqa.selenium.By;
 import org.testng.annotations.AfterClass;
@@ -40,7 +39,6 @@ public class CheckStoppingWsByTimeoutTest {
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
   @Inject private TheiaIde theiaIde;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
-  @Inject private OpenShiftLoginPage openShiftLoginPage;
 
   @Inject
   @Named("che.workspace_agent_dev_inactive_stop_timeout_ms")
@@ -54,8 +52,6 @@ public class CheckStoppingWsByTimeoutTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    openShiftLoginPage.login();
-
     dashboard.open();
     workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
   }

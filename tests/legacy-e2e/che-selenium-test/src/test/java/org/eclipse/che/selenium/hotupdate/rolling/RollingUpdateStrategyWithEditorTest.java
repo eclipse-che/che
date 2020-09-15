@@ -26,7 +26,6 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
-import org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.openqa.selenium.TimeoutException;
@@ -46,14 +45,11 @@ public class RollingUpdateStrategyWithEditorTest {
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
   @Inject private TheiaIde theiaIde;
   @Inject private TheiaProjectTree theiaProjectTree;
-  @Inject private OpenShiftLoginPage openShiftLoginPage;
 
   private String workspaceName;
 
   @BeforeClass
   public void setUp() throws Exception {
-    openShiftLoginPage.login();
-
     dashboard.open();
     workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
   }

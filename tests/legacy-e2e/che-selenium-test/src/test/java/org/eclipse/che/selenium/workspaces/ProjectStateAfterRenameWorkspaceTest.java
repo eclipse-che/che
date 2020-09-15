@@ -23,7 +23,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage;
 import org.eclipse.che.selenium.pageobject.theia.TheiaEditor;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
@@ -48,14 +47,11 @@ public class ProjectStateAfterRenameWorkspaceTest {
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private Workspaces workspaces;
   @Inject private WorkspaceOverview workspaceOverview;
-  @Inject private OpenShiftLoginPage openShiftLoginPage;
 
   private String workspaceName;
 
   @BeforeClass
   public void setUp() throws Exception {
-    openShiftLoginPage.login();
-
     dashboard.open();
     workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
   }

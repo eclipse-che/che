@@ -20,7 +20,6 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
-import org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage;
 import org.eclipse.che.selenium.pageobject.theia.TheiaEditor;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
@@ -42,14 +41,11 @@ public class ProjectStateAfterRefreshTest {
   @Inject private TheiaProjectTree theiaProjectTree;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TheiaEditor theiaEditor;
-  @Inject private OpenShiftLoginPage openShiftLoginPage;
 
   private String workspaceName;
 
   @BeforeClass
   public void setUp() throws Exception {
-    openShiftLoginPage.login();
-
     dashboard.open();
     workspaceName = createWorkspaceHelper.createAndStartWorkspace(Devfile.JAVA_MAVEN);
   }

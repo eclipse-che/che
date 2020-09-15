@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.pageobject.ocp;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.ADD_TO_EXISTING_ACCOUNT_BUTTON_ID;
+import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.ALLOW_PERMISSIONS_BUTTON_NAME;
 import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.APPROVE_BUTTON_NAME;
 import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.EMAIL_NAME;
 import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.FIRST_NAME_NAME;
@@ -22,6 +23,7 @@ import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locator
 import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.LOGIN_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.PASSWORD_INPUT_NAME;
 import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.SUBMIT_BUTTON_XPATH;
+import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.UPDATE_LOGIN_PAGE_ID;
 import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.USERNAME_INPUT_NAME;
 
 import com.google.inject.Inject;
@@ -39,13 +41,23 @@ import org.openqa.selenium.support.PageFactory;
 
 @Singleton
 public class OpenShiftLoginPage {
-  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
-  @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private AuthorizeOpenShiftAccessPage authorizeOpenShiftAccessPage;
-  @Inject private CheLoginPage cheLoginPage;
-  @Inject private TestDashboardUrlProvider testDashboardUrlProvider;
-  @Inject private OpenShiftLoginPage codereadyOpenShiftLoginPage;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final SeleniumWebDriver seleniumWebDriver;
+  private final CheLoginPage cheLoginPage;
+
+  @Inject
+  public OpenShiftLoginPage(
+      SeleniumWebDriver seleniumWebDriver,
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      CheLoginPage cheLoginPage,
+      TestDashboardUrlProvider testDashboardUrlProvider) {
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    this.seleniumWebDriver = seleniumWebDriver;
+    this.cheLoginPage = cheLoginPage;
+
+    PageFactory.initElements(seleniumWebDriver, this);
+  }
 
   @Inject(optional = true)
   @Named("env.openshift.regular.username")
@@ -72,7 +84,12 @@ public class OpenShiftLoginPage {
     String APPROVE_BUTTON_NAME = "approve";
     String IDENTITY_PROVIDER_LINK_XPATH = "//a[@title='Log in with %s']";
     String ADD_TO_EXISTING_ACCOUNT_BUTTON_ID = "linkAccount";
+    String ALLOW_PERMISSIONS_BUTTON_NAME = "approve";
+    String UPDATE_LOGIN_PAGE_ID = "kc-page-title";
   }
+
+  @FindBy(name = ALLOW_PERMISSIONS_BUTTON_NAME)
+  private WebElement allowPermissionsButton;
 
   @FindBy(name = USERNAME_INPUT_NAME)
   private WebElement usernameInput;
@@ -100,14 +117,6 @@ public class OpenShiftLoginPage {
 
   @FindBy(id = ADD_TO_EXISTING_ACCOUNT_BUTTON_ID)
   private WebElement addToExistingAccountButton;
-
-  @Inject
-  public OpenShiftLoginPage(
-      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
-    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
-
-    PageFactory.initElements(seleniumWebDriver, this);
-  }
 
   public void login(String username, String password) {
     waitOnOpen();
@@ -151,9 +160,9 @@ public class OpenShiftLoginPage {
     return true;
   }
 
-  public Boolean isOpenshiftLoginPageVisible() {
+  public Boolean isOpenshiftUpdateLoginPageVisible() {
     try {
-      seleniumWebDriverHelper.waitVisibility(By.id("kc-page-title"));
+      seleniumWebDriverHelper.waitVisibility(By.id(UPDATE_LOGIN_PAGE_ID));
     } catch (TimeoutException e) {
       return false;
     }
@@ -171,26 +180,38 @@ public class OpenShiftLoginPage {
   }
 
   public void login() {
-    seleniumWebDriver.navigate().to(testDashboardUrlProvider.get());
-
-    if (!cheLoginPage.isOpened()) {
-      if (codereadyOpenShiftLoginPage.isIdentityProviderLinkVisible(IDENTITY_PROVIDER_NAME)) {
-        codereadyOpenShiftLoginPage.clickOnIdentityProviderLink(IDENTITY_PROVIDER_NAME);
+    if (isOpened()) {
+      if (isIdentityProviderLinkVisible(IDENTITY_PROVIDER_NAME)) {
+        clickOnIdentityProviderLink(IDENTITY_PROVIDER_NAME);
       }
 
-      codereadyOpenShiftLoginPage.login(openShiftUsername, openShiftPassword);
+      login(openShiftUsername, openShiftPassword);
 
-      if (codereadyOpenShiftLoginPage.isApproveButtonVisible()) {
-        authorizeOpenShiftAccessPage.waitOnOpen();
-        authorizeOpenShiftAccessPage.allowPermissions();
+      if (isApproveButtonVisible()) {
+        allowPermissions();
       }
 
-      if (codereadyOpenShiftLoginPage.isOpenshiftLoginPageVisible()) {
-        codereadyOpenShiftLoginPage.submit(openShiftUsername, openShiftEmail);
+      if (isOpenshiftUpdateLoginPageVisible()) {
+        submit(openShiftUsername, openShiftEmail);
 
         addToExistingAccount();
         cheLoginPage.loginWithPredefinedUsername("admin");
       }
     }
+  }
+
+  public boolean isOpened() {
+    try {
+      waitOnOpen();
+    } catch (TimeoutException e) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public void allowPermissions() {
+    seleniumWebDriverHelper.waitAndClick(allowPermissionsButton);
+    seleniumWebDriverHelper.waitInvisibility(allowPermissionsButton);
   }
 }
