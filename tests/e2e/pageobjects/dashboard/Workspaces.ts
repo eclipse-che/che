@@ -14,6 +14,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 
 @injectable()
@@ -22,19 +23,19 @@ export class Workspaces {
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    async waitPage(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitPage(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         Logger.debug('Workspaces.waitPage');
 
         await this.driverHelper.waitVisibility(By.css(Workspaces.ADD_WORKSPACE_BUTTON_CSS), timeout);
     }
 
-    async clickAddWorkspaceButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async clickAddWorkspaceButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug('Workspaces.clickAddWorkspaceButton');
 
         await this.driverHelper.waitAndClick(By.css(Workspaces.ADD_WORKSPACE_BUTTON_CSS), timeout);
     }
 
-    async waitWorkspaceListItem(workspaceName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitWorkspaceListItem(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceListItem "${workspaceName}"`);
 
         const workspaceListItemLocator: By = By.css(this.getWorkspaceListItemLocator(workspaceName));
@@ -42,7 +43,7 @@ export class Workspaces {
         await this.driverHelper.waitVisibility(workspaceListItemLocator, timeout);
     }
 
-    async clickOnStopWorkspaceButton(workspaceName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async clickOnStopWorkspaceButton(workspaceName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug(`Workspaces.clickOnStopWorkspaceButton "${workspaceName}"`);
 
         const stopWorkspaceButtonLocator: By = By.css(`#ws-name-${workspaceName} .workspace-status[uib-tooltip="Stop workspace"]`);
@@ -50,7 +51,7 @@ export class Workspaces {
         await this.driverHelper.waitAndClick(stopWorkspaceButtonLocator, timeout);
     }
 
-    async waitWorkspaceWithRunningStatus(workspaceName: string, timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
+    async waitWorkspaceWithRunningStatus(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceWithRunningStatus "${workspaceName}"`);
 
         const runningStatusLocator: By = By.css(this.getWorkspaceStatusCssLocator(workspaceName, 'RUNNING'));
@@ -58,7 +59,7 @@ export class Workspaces {
         await this.driverHelper.waitVisibility(runningStatusLocator, timeout);
     }
 
-    async waitWorkspaceWithStoppedStatus(workspaceName: string, timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
+    async waitWorkspaceWithStoppedStatus(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceWithStoppedStatus "${workspaceName}"`);
 
         const stoppedStatusLocator: By = By.css(this.getWorkspaceStatusCssLocator(workspaceName, 'STOPPED'));
@@ -66,7 +67,7 @@ export class Workspaces {
         await this.driverHelper.waitVisibility(stoppedStatusLocator, timeout);
     }
 
-    async clickWorkspaceListItem(workspaceName: string, timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
+    async clickWorkspaceListItem(workspaceName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug(`Workspaces.clickWorkspaceListItem "${workspaceName}"`);
 
         let namespace: string = TestConstants.TS_SELENIUM_USERNAME;
@@ -75,7 +76,7 @@ export class Workspaces {
         await this.driverHelper.waitAndClick(workspaceListItemLocator, timeout);
     }
 
-    async clickDeleteButtonOnWorkspaceDetails(timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
+    async clickDeleteButtonOnWorkspaceDetails(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug('Workspaces.clickDeleteButtonOnWorkspaceDetails');
 
         const deleteButtonOnWorkspaceDetailsLocator: By = By.css('che-button-danger[che-button-title=\'Delete\']');
@@ -83,7 +84,7 @@ export class Workspaces {
         await this.driverHelper.waitAndClick(deleteButtonOnWorkspaceDetailsLocator, timeout);
     }
 
-    async waitWorkspaceListItemAbcence(workspaceName: string, timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
+    async waitWorkspaceListItemAbcence(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceListItemAbcence "${workspaceName}"`);
 
         let namespace: string = TestConstants.TS_SELENIUM_USERNAME;
@@ -92,7 +93,7 @@ export class Workspaces {
         await this.driverHelper.waitDisappearance(workspaceListItemLocator, timeout);
     }
 
-    async confirmWorkspaceDeletion(timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
+    async confirmWorkspaceDeletion(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug('Workspaces.confirmWorkspaceDeletion');
 
         const checkbox: By = By.xpath(`//che-popup//input[@id='enable-button' and contains(@class, 'ng-empty')]`);

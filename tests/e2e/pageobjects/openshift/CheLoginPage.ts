@@ -13,6 +13,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 @injectable()
 export class CheLoginPage {
@@ -23,7 +24,7 @@ export class CheLoginPage {
     async waitEclipseCheLoginFormPage() {
             Logger.debug('CheLoginPage.waitEclipseCheLoginFormPage');
 
-            await this.driverHelper.waitVisibility(By.id('kc-form-login'));
+            await this.driverHelper.waitVisibility(By.id('kc-form-login'), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async inputUserNameEclipseCheLoginPage(userName: string) {
@@ -53,7 +54,7 @@ export class CheLoginPage {
     async waitFirstBrokerLoginPage() {
         Logger.debug('CheLoginPage.waitFirstBrokerLoginPage');
 
-        await this.driverHelper.waitVisibility(By.id('kc-update-profile-form'));
+        await this.driverHelper.waitVisibility(By.id('kc-update-profile-form'), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async enterEmailFirstBrokerLoginPage(email: string) {

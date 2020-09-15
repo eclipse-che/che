@@ -39,7 +39,6 @@ export function waitWorkspaceReadinessNoSubfolder(sampleName : string) {
 
 export function openFile(filePath: string, fileName: string) {
     test('Expand project and open file in editor', async () => {
-        await projectTree.expandPathAndOpenFileInAssociatedWorkspace(filePath, fileName);
         await projectTree.expandPathAndOpenFile(filePath, fileName);
         await editor.selectTab(fileName);
     });

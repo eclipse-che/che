@@ -25,6 +25,7 @@ import { Terminal } from '../../pageobjects/ide/Terminal';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import * as fs from 'fs';
 import { ContextMenu } from '../../pageobjects/ide/ContextMenu';
+import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -38,11 +39,12 @@ const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const warningDialog: DialogWindow = e2eContainer.get(CLASSES.DialogWindow);
 const projectName: string = 'petclinic';
+const workspaceRootFolderName: string = 'src';
 const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
 const workspaceName: string = TestConstants.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME;
 const workspaceUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${namespace}/${workspaceName}`;
-const pathToJavaFolder: string = `${projectName}/src/main/java/org/springframework/samples/petclinic`;
-const pathToChangedJavaFileFolder: string = `${projectName}/src/main/java/org/springframework/samples/petclinic/system`;
+const pathToJavaFolder: string = `${projectName}/${workspaceRootFolderName}/main/java/org/springframework/samples/petclinic`;
+const pathToChangedJavaFileFolder: string = `${projectName}/${workspaceRootFolderName}/main/java/org/springframework/samples/petclinic/system`;
 const classPathFilename: string = '.classpath';
 const javaFileName: string = 'PetClinicApplication.java';
 const weclomeControllerJavaFileName: string = 'WelcomeController.java';
@@ -68,15 +70,7 @@ suite('Validation of workspace start', async () => {
         await loginPage.login();
     });
 
-    test('Wait workspace running state', async () => {
-        await ide.waitWorkspaceAndIde();
-    });
-
-    test('Wait until project is imported', async () => {
-        await projectTree.openProjectTreeContainer(10_000);
-        await projectTree.waitProjectImported(projectName, 'src');
-    });
-
+    await projectAndFileTests.waitWorkspaceReadiness(projectName, workspaceRootFolderName);
 });
 
 suite('Language server validation', async () => {
@@ -203,16 +197,6 @@ suite('Display source code changes in the running application', async () => {
         await projectTree.collapseProjectTree(projectName + '/src', 'main');
         await projectTree.expandPathAndOpenFile(projectName, 'result-build.txt', 300_000);
         await editor.waitText('result-build.txt', '[INFO] BUILD SUCCESS');
-
-        // workaround for issue: https://github.com/eclipse/che/issues/14771
-
-        /*await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'build.txt');
-        await editor.waitEditorAvailable('build.txt');
-        await editor.clickOnTab('build.txt');
-        await editor.waitTabFocused('build.txt');
-        await editor.followAndWaitForText('build.txt', '[INFO] BUILD SUCCESS', 300000, 5000);*/
-
-
     });
 
     test('Run application with changes', async () => {
@@ -288,14 +272,14 @@ async function checkErrorMessageInApplicationController() {
     await previewWidget.waitAndClick(SpringAppLocators.springErrorButtonLocator);
 
     try {
-        await previewWidget.waitVisibility(SpringAppLocators.springErrorMessageLocator);
+        await previewWidget.waitVisibility(SpringAppLocators.springErrorMessageLocator, 15_000);
     } catch (err) {
 
         await driverHelper.getDriver().switchTo().defaultContent();
         await ide.waitAndSwitchToIdeFrame();
 
         await previewWidget.waitAndSwitchToWidgetFrame();
-        await previewWidget.waitVisibility(SpringAppLocators.springErrorMessageLocator);
+        await previewWidget.waitVisibility(SpringAppLocators.springErrorMessageLocator, 15_000);
     }
 
 

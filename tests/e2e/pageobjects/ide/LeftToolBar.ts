@@ -10,9 +10,9 @@
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { TestConstants } from '../../TestConstants';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 
 
@@ -20,13 +20,13 @@ import { Logger } from '../../utils/Logger';
 export class LeftToolbar {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    async waitToolbar(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitToolbar(timeout: number = TimeoutConstants.TS_SELENIUM_TOOLBAR_TIMEOUT) {
         Logger.debug('RightToolbar.waitToolbar');
 
         await this.driverHelper.waitVisibility(By.css('div.theia-app-right'), timeout);
     }
 
-    async clickOnToolIcon(iconTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async clickOnToolIcon(iconTitle: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) {
         Logger.debug(`RightToolbar.clickOnToolIcon "${iconTitle}"`);
 
         const toolIconLocator: By = By.css(`div.theia-app-right .p-TabBar-content li[title='${iconTitle}']`);
