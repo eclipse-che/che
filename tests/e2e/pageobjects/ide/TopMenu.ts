@@ -1,11 +1,11 @@
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { TestConstants } from '../../TestConstants';
 import { By, error } from 'selenium-webdriver';
 import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
 import { QuickOpenContainer } from './QuickOpenContainer';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
@@ -25,7 +25,7 @@ export class TopMenu {
         @inject(CLASSES.Ide) private readonly ide: Ide,
         @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer) { }
 
-    public async waitTopMenu(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    public async waitTopMenu(timeout: number = TimeoutConstants.TS_SELENIUM_TOOLBAR_TIMEOUT) {
         Logger.debug('TopMenu.waitTopMenu');
 
         for (const buttonText of TopMenu.TOP_MENU_BUTTONS) {
@@ -41,7 +41,7 @@ export class TopMenu {
         await this.clickOnSubmenuItem(submenuItemtext);
     }
 
-    public async clickOnTopMenuButton(buttonText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    public async clickOnTopMenuButton(buttonText: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) {
         Logger.debug(`TopMenu.clickOnTopMenuButton "${buttonText}"`);
 
         const buttonLocator: By = this.getTopMenuButtonLocator(buttonText);
@@ -50,7 +50,7 @@ export class TopMenu {
         await this.driverHelper.waitAndClick(buttonLocator, timeout);
     }
 
-    public async clickOnSubmenuItem(itemText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    public async clickOnSubmenuItem(itemText: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) {
         Logger.debug(`TopMenu.clickOnSubmenuItem "${itemText}"`);
 
         const submenuItemLocator: By = this.getSubmenuItemLocator(itemText);

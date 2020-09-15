@@ -16,6 +16,7 @@ import { TestConstants } from '../../TestConstants';
 import { By, error } from 'selenium-webdriver';
 import { Editor } from './Editor';
 import { Logger } from '../../utils/Logger';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 @injectable()
 export class ProjectTree {
@@ -37,7 +38,7 @@ export class ProjectTree {
         Logger.debug(`ProjectTree.waitTreeCollapsed project: "${projectName}", subitem: "${rootSubItem}"`);
 
         const rootSubitemLocator: By = By.css(this.getTreeItemCssLocator(`${projectName}/${rootSubItem}`));
-        await this.driverHelper.waitDisappearanceWithTimeout(rootSubitemLocator);
+        await this.driverHelper.waitDisappearanceWithTimeout(rootSubitemLocator, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
     }
 
     async collapseProjectTree(projectName: string, rootSubItem: string) {
@@ -54,14 +55,7 @@ export class ProjectTree {
         await this.waitItemCollapsed(`${projectName}/${expandedRootItem}`);
     }
 
-    async collapseAssociatedWorkspaceProjectTree(projectName: string, rootSubItem: string) {
-        Logger.debug(`ProjectTree.collapseProjectTree project: "${projectName}", subitem: "${rootSubItem}"`);
-
-        await this.clickCollapseAllButton();
-        await this.waitTreeCollapsed(projectName, rootSubItem);
-    }
-
-    async openProjectTreeContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async openProjectTreeContainer(timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
         Logger.debug('ProjectTree.openProjectTreeContainer');
 
         const explorerButtonActiveLocator: By = this.getLeftToolbarButtonActiveLocator(LeftToolbarButton.Explorer);
@@ -77,7 +71,7 @@ export class ProjectTree {
         await this.waitProjectTreeContainer();
     }
 
-    async waitItemExpanded(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitItemExpanded(itemPath: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
         Logger.debug(`ProjectTree.waitItemExpanded "${itemPath}"`);
 
         const locator: string = await this.getExpandedItemCssLocator(itemPath);
@@ -85,7 +79,7 @@ export class ProjectTree {
         await this.driverHelper.waitVisibility(expandedItemLocator, timeout);
     }
 
-    async waitItemCollapsed(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitItemCollapsed(itemPath: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
         Logger.debug(`ProjectTree.waitItemCollapsed "${itemPath}"`);
 
         const locator: string = await this.getCollapsedItemCssLocator(itemPath);
@@ -94,7 +88,7 @@ export class ProjectTree {
         await this.driverHelper.waitVisibility(collapsedItemLocator, timeout);
     }
 
-    async waitProjectTreeContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitProjectTreeContainer(timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
         Logger.debug('ProjectTree.waitProjectTreeContainer');
 
         await this.driverHelper.waitPresence(By.css(ProjectTree.PROJECT_TREE_CONTAINER_CSS), timeout);
@@ -108,7 +102,7 @@ export class ProjectTree {
         await this.driverHelper.waitDisappearance(By.css(ProjectTree.PROJECT_TREE_CONTAINER_CSS), attempts, polling);
     }
 
-    async waitItem(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitItem(itemPath: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
         Logger.debug(`ProjectTree.waitItem "${itemPath}"`);
 
         const locator: string = await this.getItemCss(itemPath);
@@ -125,7 +119,7 @@ export class ProjectTree {
         await this.driverHelper.waitDisappearance(By.css(locator), attempts, polling);
     }
 
-    async clickOnItem(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async clickOnItem(itemPath: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_CLICK_ON_ITEM_TIMEOUT) {
         Logger.debug(`ProjectTree.clickOnItem "${itemPath}"`);
 
         const locator: string = await this.getItemCss(itemPath);
@@ -133,14 +127,14 @@ export class ProjectTree {
         await this.waitItemSelected(itemPath, timeout);
     }
 
-    async waitItemSelected(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitItemSelected(itemPath: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
         Logger.debug(`ProjectTree.waitItemSelected "${itemPath}"`);
 
         const selectedItemLocator: By = By.css(`div[title='/projects/${itemPath}'].theia-mod-selected.theia-mod-focus`);
         await this.driverHelper.waitVisibility(selectedItemLocator, timeout);
     }
 
-    async expandItem(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async expandItem(itemPath: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_CLICK_ON_ITEM_TIMEOUT) {
         Logger.debug(`ProjectTree.expandItem "${itemPath}"`);
 
         const locator: string = await this.getExpandIconCssLocator(itemPath);
@@ -171,7 +165,7 @@ export class ProjectTree {
         }, timeout);
     }
 
-    async collapseItem(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async collapseItem(itemPath: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_CLICK_ON_ITEM_TIMEOUT) {
         Logger.debug(`ProjectTree.collapseItem "${itemPath}"`);
 
         const locator: string = await this.getExpandIconCssLocator(itemPath);
@@ -188,7 +182,7 @@ export class ProjectTree {
         await this.waitItemCollapsed(itemPath, timeout);
     }
 
-    async expandPath(path: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async expandPath(path: string, timeout: number = TimeoutConstants.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT) {
         Logger.debug(`ProjectTree.expandPath "${path}"`);
 
         let items: Array<string> = path.split('/');
@@ -209,48 +203,19 @@ export class ProjectTree {
         }
     }
 
-    async expandPathAndOpenFile(pathToItem: string, fileName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    /**
+     *
+     * @param pathToItem path to the file that should be opened
+     * @param fileName file that should be opened
+     * @param timeoutForSigleItem timeout applied for every item in path to be opened
+     */
+    async expandPathAndOpenFile(pathToItem: string, fileName: string, timeoutForSigleItem: number = TimeoutConstants.TS_OPEN_EDITOR_TIMEOUT) {
         Logger.debug(`ProjectTree.expandPathAndOpenFile "${pathToItem}" filename: ${fileName}`);
 
-        await this.expandPath(pathToItem, timeout);
-        await this.clickOnItem(`${pathToItem}/${fileName}`, timeout);
+        await this.expandPath(pathToItem, timeoutForSigleItem);
+        await this.clickOnItem(`${pathToItem}/${fileName}`, timeoutForSigleItem);
 
-        await this.editor.waitEditorOpened(fileName, timeout);
-        await this.editor.waitTab(fileName);
-    }
-
-    async expandPathAndOpenFileInAssociatedWorkspace(pathToItem: string, fileName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        Logger.debug(`ProjectTree.expandPathAndOpenFileInAssociatedWorkspace "${pathToItem}"`);
-
-        let projectName: string = pathToItem.split('/')[0];
-        let pathEntry = `${projectName}`;
-        let pathToItemInAssociatedWorkspace = pathToItem.replace(`${projectName}/`, '');
-        let paths: Array<string> = new Array();
-        // if we in the root of project
-        if (pathToItem.split('/').length < 2) {
-            Logger.trace(`ProjectTree.expandPathAndOpenFileInAssociatedWorkspace has no subpaths, expanding root folder "${projectName}"`);
-            await this.expandItem(projectName);
-            Logger.trace(`ProjectTree.expandPathAndOpenFileInAssociatedWorkspace clicking on file "${projectName}/${fileName}"`);
-            await this.clickOnItem(`${projectName}/${fileName}`, timeout);
-            return;
-        }
-        // make direct path for each project tree item
-        pathToItemInAssociatedWorkspace.split('/')
-            .forEach(item => {
-                pathEntry = pathEntry + `/${item}`;
-                paths.push(pathEntry);
-            });
-
-
-        // expand each project tree item
-        for (const path of paths) {
-            await this.expandItem(path, timeout);
-        }
-        // open file
-        await this.clickOnItem(`${projectName}/${pathToItemInAssociatedWorkspace}/${fileName}`, timeout);
-
-        // check file appearance in the editor
-        await this.editor.waitEditorOpened(fileName, timeout);
+        await this.editor.waitEditorOpened(fileName);
         await this.editor.waitTab(fileName);
     }
 
@@ -334,7 +299,7 @@ export class ProjectTree {
     private async  getWorkspacePathEntry(): Promise<string> {
         const nodeAttribute: string = 'data-node-id';
         const splitDelimeter = ':';
-        const attribute: string = await this.driverHelper.waitAndGetElementAttribute(By.css(`div[${nodeAttribute}]`), nodeAttribute);
+        const attribute: string = await this.driverHelper.waitAndGetElementAttribute(By.css(`div[${nodeAttribute}]`), nodeAttribute, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
         return attribute.split(splitDelimeter)[0] + splitDelimeter;
     }
 
