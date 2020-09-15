@@ -145,15 +145,15 @@ pipeline {
         }
     }
 
- //   post {
- //       failure {
- //           script {
- //               if (emails != "") {
- //                   mail to: emails,
- //                       subject: "Jenkins Job $currentBuild.fullDisplayName has failed.",
- //                       body: "Build $currentBuild.absoluteUrl has failed."
- //               }
- //           }
- //       }
- //   }
+    post {
+        failure {
+            script {
+                if (emails != "") {
+                    mail to: emails,
+                        subject: "Jenkins Job $currentBuild.fullDisplayName has failed.",
+                        body: "Build $currentBuild.absoluteUrl has failed."
+                }
+            }
+        }
+    }
 }

@@ -21,6 +21,7 @@
 ## Custom launch
 
 - Use environment variables which described in the **```'TestConstants.ts'```** file
+- Use environment variables for setting timeouts if needed. You can see the list in **```'TimeoutConstants.ts'```**. You can see the list of those variables and their value if you set the ```'TS_SELENIUM_PRINT_TIMEOUT_VARIABLES = true'```
 
 ## Docker launch
 

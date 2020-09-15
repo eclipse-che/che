@@ -11,15 +11,15 @@
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { TestConstants } from '../../TestConstants';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 @injectable()
 export class GetStarted {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    async waitTitleContains(expectedText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitTitleContains(expectedText: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`GetStarted.waitTitleContains text: "${expectedText}"`);
 
         const pageTitleLocator: By = By.xpath(`//div[contains(@title, '${expectedText}')]`);
@@ -27,13 +27,13 @@ export class GetStarted {
         await this.driverHelper.waitVisibility(pageTitleLocator, timeout);
     }
 
-    async waitPage(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitPage(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         Logger.debug('GetStarted.waitPage');
 
         await this.waitTitleContains('Getting Started', timeout);
     }
 
-    async waitSample(sampleName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitSample(sampleName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`GetStarted.waitSample sampleName: "${sampleName}"`);
 
         const sampleLocator: By = this.getSampleLocator(sampleName);
@@ -41,7 +41,7 @@ export class GetStarted {
         await this.driverHelper.waitVisibility(sampleLocator, timeout);
     }
 
-    async clickOnSample(sampleName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async clickOnSample(sampleName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug(`GetStarted.clickOnSample sampleName: "${sampleName}"`);
 
         const sampleLocator: By = this.getSampleLocator(sampleName);
@@ -49,7 +49,7 @@ export class GetStarted {
         await this.driverHelper.waitAndClick(sampleLocator, timeout);
     }
 
-    async waitSampleSelected(sampleName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitSampleSelected(sampleName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`GetStarted.waitSampleSelected sampleName: "${sampleName}"`);
 
         const selectedSampleLocator: By =
@@ -58,7 +58,7 @@ export class GetStarted {
         await this.driverHelper.waitVisibility(selectedSampleLocator, timeout);
     }
 
-    async waitSampleUnselected(sampleName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitSampleUnselected(sampleName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`GetStarted.waitSampleUnselected sampleName: "${sampleName}"`);
 
         const unselectedSampleLocator: By =
@@ -67,7 +67,7 @@ export class GetStarted {
         await this.driverHelper.waitVisibility(unselectedSampleLocator, timeout);
     }
 
-    async clickCreateAndOpenButton(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async clickCreateAndOpenButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug('GetStarted.clickCreateAndOpenButton');
 
         const createAndOpenButtonLocator: By =
