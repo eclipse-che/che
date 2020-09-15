@@ -122,8 +122,8 @@ public class WorkspaceServiceTest {
   private static final String NAMESPACE = "user";
   private static final String USER_ID = "user123";
   private static final String API_ENDPOINT = "http://localhost:8080/api";
-  private static final String CHE_WORKSPACE_PLUGIN_REGISTRY_ULR = "http://localhost:9898/plugins/";
-  private static final String CHE_WORKSPACE_DEVFILE_REGISTRY_ULR =
+  private static final String CHE_WORKSPACE_PLUGIN_REGISTRY_URL = "http://localhost:9898/plugins/";
+  private static final String CHE_WORKSPACE_DEVFILE_REGISTRY_URL =
       "http://localhost:9898/devfiles/";
   private static final boolean CHE_WORKSPACES_DEFAULT_PERSIST_VOLUMES = false;
   private static final Long LOG_LIMIT_BYTES = 64L;
@@ -155,8 +155,8 @@ public class WorkspaceServiceTest {
             wsManager,
             machineTokenProvider,
             linksGenerator,
-            CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
-            CHE_WORKSPACE_DEVFILE_REGISTRY_ULR,
+            CHE_WORKSPACE_PLUGIN_REGISTRY_URL,
+            CHE_WORKSPACE_DEVFILE_REGISTRY_URL,
             urlFetcher,
             LOG_LIMIT_BYTES,
             availableStorageTypes,
@@ -871,8 +871,8 @@ public class WorkspaceServiceTest {
         new ImmutableMap.Builder<>()
             .put(SUPPORTED_RECIPE_TYPES, "dockerimage,dockerfile")
             .put(CHE_WORKSPACE_AUTO_START, "true")
-            .put("cheWorkspacePluginRegistryUrl", CHE_WORKSPACE_PLUGIN_REGISTRY_ULR)
-            .put("cheWorkspaceDevfileRegistryUrl", CHE_WORKSPACE_DEVFILE_REGISTRY_ULR)
+            .put("cheWorkspacePluginRegistryUrl", CHE_WORKSPACE_PLUGIN_REGISTRY_URL)
+            .put("cheWorkspaceDevfileRegistryUrl", CHE_WORKSPACE_DEVFILE_REGISTRY_URL)
             .put(CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES, availableStorageTypes)
             .put(CHE_WORKSPACE_STORAGE_PREFERRED_TYPE, preferredStorageType)
             .build());
