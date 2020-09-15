@@ -79,7 +79,7 @@ suite('Language server validation', async () => {
         await editor.selectTab(javaFileName);
 
         try {
-            await ide.checkLsInitializationStart('Activating Language Support for Java');
+            await ide.checkLsInitializationStart('Activating Java Test Runner');
         } catch (err) {
             if (!(err instanceof error.TimeoutError)) {
                 throw err;
@@ -87,10 +87,10 @@ suite('Language server validation', async () => {
 
             console.log('Known flakiness has occurred https://github.com/eclipse/che/issues/14944');
             await driverHelper.reloadPage();
-            await ide.waitStatusBarContains('Activating Language Support for Java');
+            await ide.waitStatusBarContains('Activating Java Test Runner');
         }
 
-        await ide.waitStatusBarTextAbsence('Activating Language Support for Java', 900_000);
+        await ide.waitStatusBarTextAbsence('Activating Java Test Runner', 900_000);
         await checkJavaPathCompletion();
     });
 
