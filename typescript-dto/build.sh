@@ -9,17 +9,25 @@
 #
 # See: https://sipb.mit.edu/doc/safe-shell/
 
-set -e
 set -u
 
 rm -f ./index.d.ts
 
 docker run -i --rm -v "$HOME/.m2:/root/.m2" \
                    -v "$(pwd)/dto-pom.xml:/usr/src/mymaven/pom.xml" \
-                   -w /usr/src/mymaven maven:3.3-jdk-8 \
+                   -w /usr/src/mymaven maven:3.6.3-jdk-11 \
                     /bin/bash -c "mvn -q -U -DskipTests=true -Dfindbugs.skip=true -Dskip-validate-sources install \
                     && cat target/dts-dto-typescript.d.ts" >> index.d.ts
+                    
+if [ $? -ne 0 ]; then
+    echo "Build has failed, will not proceed with publishing"
+    exit 1
+fi
 
 CHE_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec -f ../pom.xml)
-
 docker build -t eclipse-che-ts-api --build-arg CHE_VERSION=${CHE_VERSION} --build-arg NPM_AUTH_TOKEN=${NPM_AUTH_TOKEN} .
+if [ $? -ne 0 ]; then
+    echo "Publishing has failed"
+    exit 1
+fi
+
