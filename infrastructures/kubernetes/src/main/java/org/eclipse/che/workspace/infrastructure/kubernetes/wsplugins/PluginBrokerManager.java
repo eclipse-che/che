@@ -102,6 +102,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
       StartSynchronizer startSynchronizer,
       Collection<PluginFQN> pluginFQNs,
       boolean isEphemeral,
+      boolean mergePlugins,
       Map<String, String> startOptions)
       throws InfrastructureException {
 
@@ -109,7 +110,8 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
     KubernetesNamespace kubernetesNamespace = factory.getOrCreate(identity);
     BrokersResult brokersResult = new BrokersResult();
 
-    E brokerEnvironment = brokerEnvironmentFactory.createForMetadataBroker(pluginFQNs, identity);
+    E brokerEnvironment =
+        brokerEnvironmentFactory.createForMetadataBroker(pluginFQNs, identity, mergePlugins);
     if (isEphemeral) {
       EphemeralWorkspaceUtility.makeEphemeral(brokerEnvironment.getAttributes());
     }

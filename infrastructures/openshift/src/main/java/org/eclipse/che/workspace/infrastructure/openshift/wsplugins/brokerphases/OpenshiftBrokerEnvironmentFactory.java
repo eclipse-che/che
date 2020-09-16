@@ -81,8 +81,10 @@ public class OpenshiftBrokerEnvironmentFactory
 
   @Override
   public OpenShiftEnvironment createForMetadataBroker(
-      Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID) throws InfrastructureException {
-    BrokersConfigs brokersConfigs = getBrokersConfigs(pluginFQNs, runtimeID, metadataBrokerImage);
+      Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID, boolean mergePlugins)
+      throws InfrastructureException {
+    BrokersConfigs brokersConfigs =
+        getBrokersConfigs(pluginFQNs, runtimeID, metadataBrokerImage, mergePlugins);
     OpenShiftEnvironment openShiftEnvironment = doCreate(brokersConfigs);
     OpenShiftProject openshiftProject = factory.getOrCreate(runtimeID);
     trustedCAProvisioner.provision(openShiftEnvironment, openshiftProject);
@@ -90,8 +92,8 @@ public class OpenshiftBrokerEnvironmentFactory
   }
 
   @Override
-  protected List<String> getCommandLineArgs(RuntimeIdentity runtimeId) {
-    List<String> cmdArgs = super.getCommandLineArgs(runtimeId);
+  protected List<String> getCommandLineArgs(RuntimeIdentity runtimeId, boolean mergePlugins) {
+    List<String> cmdArgs = super.getCommandLineArgs(runtimeId, mergePlugins);
 
     if (trustedCAProvisioner.isTrustedStoreInitialized()) {
       cmdArgs.add("--cadir");
