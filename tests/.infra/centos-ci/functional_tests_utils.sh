@@ -408,7 +408,10 @@ function installDockerCompose() {
 function seleniumTestsSetup() {
   echo "======== Start selenium tests ========"
   cd /root/payload
+
   export CHE_INFRASTRUCTURE=openshift
+  export CHE_OPENSHIFT_PROJECT=eclipse-che
+
   defineCheRoute
 
   mvn clean install -pl :che-selenium-test -am -DskipTests=true -U

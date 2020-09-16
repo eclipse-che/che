@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Names.createMachineNameAnnotations;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doReturn;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -123,14 +124,14 @@ public class KubernetesArtifactsBrokerApplierTest {
             .build();
     doReturn(brokerEnvironment)
         .when(brokerEnvironmentFactory)
-        .createForArtifactsBroker(any(), any());
+        .createForArtifactsBroker(any(), any(), anyBoolean());
 
     applier = new KubernetesArtifactsBrokerApplier<>(brokerEnvironmentFactory);
   }
 
   @Test
   public void shouldAddBrokerMachineToWorkspaceEnvironment() throws Exception {
-    applier.apply(workspaceEnvironment, runtimeID, pluginFQNs);
+    applier.apply(workspaceEnvironment, runtimeID, pluginFQNs, false);
 
     assertNotNull(workspaceEnvironment.getMachines());
     assertTrue(workspaceEnvironment.getMachines().values().contains(brokerMachine));
@@ -138,7 +139,7 @@ public class KubernetesArtifactsBrokerApplierTest {
 
   @Test
   public void shouldAddBrokerConfigMapsToWorkspaceEnvironment() throws Exception {
-    applier.apply(workspaceEnvironment, runtimeID, pluginFQNs);
+    applier.apply(workspaceEnvironment, runtimeID, pluginFQNs, false);
 
     ConfigMap workspaceConfigMap = workspaceEnvironment.getConfigMaps().get(BROKER_CONFIGMAP_NAME);
     assertNotNull(workspaceConfigMap);
@@ -153,7 +154,7 @@ public class KubernetesArtifactsBrokerApplierTest {
 
   @Test
   public void shouldAddBrokerAsInitContainerOnWorkspacePod() throws Exception {
-    applier.apply(workspaceEnvironment, runtimeID, pluginFQNs);
+    applier.apply(workspaceEnvironment, runtimeID, pluginFQNs, false);
 
     List<Container> initContainers = workspacePod.getSpec().getInitContainers();
     assertEquals(initContainers.size(), 1);
@@ -162,7 +163,7 @@ public class KubernetesArtifactsBrokerApplierTest {
 
   @Test
   public void shouldAddBrokerVolumesToWorkspacePod() throws Exception {
-    applier.apply(workspaceEnvironment, runtimeID, pluginFQNs);
+    applier.apply(workspaceEnvironment, runtimeID, pluginFQNs, false);
 
     List<Volume> workspaceVolumes = workspacePod.getSpec().getVolumes();
     assertEquals(workspaceVolumes.size(), 1);
