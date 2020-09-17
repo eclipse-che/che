@@ -1,9 +1,9 @@
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { TestConstants } from '../../TestConstants';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
@@ -21,7 +21,7 @@ export class GitPlugin {
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    async openGitPluginContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async openGitPluginContainer(timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
         Logger.debug('GitPlugin.openGitPluginContainer');
 
         const sourceControlGitBtnXpathLocator: string = '//li[@id=\'shell-tab-scm-view-container\' and contains(@style, \'height\')]';
@@ -29,67 +29,68 @@ export class GitPlugin {
         await this.waitViewOfContainer(timeout);
     }
 
-    async waitViewOfContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitViewOfContainer(timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
         Logger.debug('GitPlugin.waitViewOfContainer');
 
         const gitHubContainerIdLocator: By = By.id('scm-view-container--scm-view');
         await this.driverHelper.waitVisibility(gitHubContainerIdLocator, timeout);
     }
 
-    async waitCommitMessageTextArea(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitCommitMessageTextArea(timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
         Logger.debug('GitPlugin.waitCommitMessageTextArea');
 
         const textAreaCssLocator: By = By.css(GitPlugin.COMMIT_MESSAGE_TEXTAREA_CSS);
         await this.driverHelper.waitVisibility(textAreaCssLocator, timeout);
     }
 
-    async typeCommitMessage(commitMessage: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async typeCommitMessage(commitMessage: string, timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
         Logger.debug('GitPlugin.typeCommitMessage');
 
         await this.waitCommitMessageTextArea(timeout);
         await this.driverHelper.type(By.css(GitPlugin.COMMIT_MESSAGE_TEXTAREA_CSS), commitMessage, timeout);
     }
 
-    async selectCommandInMoreActionsMenu(commandName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async selectCommandInMoreActionsMenu(commandName: string, timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
         Logger.debug('GitPlugin.selectCommandInMoreActionsMenu');
 
         await this.clickOnMoreActions(timeout);
         await this.driverHelper.waitAndClick(By.xpath(`//li[@data-command]/div[text()=\'${commandName}\']`), timeout);
     }
 
-    async clickOnMoreActions(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async clickOnMoreActions(timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
         Logger.debug('GitPlugin.clickOnMoreActions');
 
         await this.driverHelper.waitAndClick(By.id('__more__'), timeout);
     }
 
-    async waitChangedFileInChagesList(expectedItem: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitChangedFileInChagesList(expectedItem: string, timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
         Logger.debug('GitPlugin.waitChangedFileInChagesList');
 
         await this.driverHelper.waitPresence(By.xpath(`//span[@class='name' and text()=\'${expectedItem}\']`), timeout);
     }
 
-    async waitStagedFileInStagedChanges(expectedStagedItem: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitStagedFileInStagedChanges(expectedStagedItem: string, timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
         Logger.debug('GitPlugin.waitStagedFileInStagedChanges');
 
         await this.driverHelper.waitPresence(By.xpath(`//div[text()='Staged Changes']/parent::div/parent::div/parent::div/following-sibling::div//span[text()=\'${expectedStagedItem}\']`), timeout);
     }
 
-    async commitFromScmView(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async commitFromScmView(timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
         Logger.debug('GitPlugin.commitFromScmView');
 
         await this.driverHelper.waitAndClick(By.id('__scm-view-container_title:__plugin.scm.title.action.git.commit'), timeout);
     }
 
-    async stageAllChanges(expectedStagedItem: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async stageAllChanges(expectedStagedItem: string, timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
         Logger.debug('GitPlugin.stageAllChanges');
 
-        await this.driverHelper.scrollTo(By.xpath('//div[@class=\'noWrapInfo theia-TreeNodeSegmentGrow\' and text()=\'Changes\']'), timeout);
+        await this.driverHelper.waitVisibility(By.xpath('//div[@class=\'noWrapInfo theia-TreeNodeSegmentGrow\' and text()=\'Changes\']'), timeout);
+        await this.driverHelper.scrollTo(By.xpath('//div[@class=\'noWrapInfo theia-TreeNodeSegmentGrow\' and text()=\'Changes\']'));
         await this.driverHelper.waitAndClick(By.xpath('//a[@title=\'Stage All Changes\']'), timeout);
         await this.waitStagedFileInStagedChanges(expectedStagedItem);
     }
 
-    async waitDataIsSynchronized(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitDataIsSynchronized(timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
         Logger.debug('GitPlugin.waitDataIsSynchronized');
         await this.driverHelper.waitDisappearance(By.xpath(`//div[contains(@title,'Synchronize Changes')]//span[contains(.,' 0↓')]`), timeout);
     }

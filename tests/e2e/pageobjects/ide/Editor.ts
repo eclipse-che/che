@@ -14,6 +14,7 @@ import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { By, Key, error, ActionSequence, Button } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 
 @injectable()
@@ -26,13 +27,13 @@ export class Editor {
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    public async waitSuggestionContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    public async waitSuggestionContainer(timeout: number = TimeoutConstants.TS_SUGGESTION_TIMEOUT) {
         Logger.debug('Editor.waitSuggestionContainer');
 
         await this.driverHelper.waitVisibility(By.css(Editor.SUGGESTION_WIDGET_BODY_CSS), timeout);
     }
 
-    public async waitSuggestionContainerClosed(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    public async waitSuggestionContainerClosed(timeout: number = TimeoutConstants.TS_SUGGESTION_TIMEOUT) {
         Logger.debug('Editor.waitSuggestionContainerClosed');
 
         await this.driverHelper.waitDisappearanceWithTimeout(By.css(Editor.SUGGESTION_WIDGET_BODY_CSS), timeout);
@@ -40,7 +41,7 @@ export class Editor {
 
     public async waitSuggestion(editorTabTitle: string,
         suggestionText: string,
-        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
+        timeout: number = TimeoutConstants.TS_SUGGESTION_TIMEOUT,
         lineNumber?: number,
         charNumber?: number) {
 
@@ -61,7 +62,7 @@ export class Editor {
 
     }
 
-    public async closeSuggestionContainer(editorTabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    public async closeSuggestionContainer(editorTabTitle: string, timeout: number = TimeoutConstants.TS_SUGGESTION_TIMEOUT) {
         Logger.debug(`Editor.closeSuggestionContainer tabTitle: "${editorTabTitle}"`);
 
         await this.driverHelper.getDriver().wait(async () => {
@@ -96,7 +97,7 @@ export class Editor {
 
     public async waitSuggestionWithScrolling(editorTabTitle: string,
         suggestionText: string,
-        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        timeout: number = TimeoutConstants.TS_SUGGESTION_TIMEOUT) {
 
         Logger.debug(`Editor.waitSuggestion tabTitle: "${editorTabTitle}" suggestion: "${suggestionText}"`);
 
@@ -104,14 +105,14 @@ export class Editor {
 
         await this.driverHelper.getDriver().wait(async () => {
             try {
-                await this.scrollAndSearchSuggestion(editorTabTitle, suggestionLocator, 40000);
+                await this.scrollAndSearchSuggestion(editorTabTitle, suggestionLocator, timeout / 3);
                 return true;
             } catch (err) {
                 if (!(err instanceof error.TimeoutError)) {
                     throw err;
                 }
 
-                await this.closeSuggestionContainer(editorTabTitle, timeout);
+                await this.closeSuggestionContainer(editorTabTitle, TimeoutConstants.TS_CLOSE_SUGGESTION_CONTAINER_TIMEOUT);
                 await this.pressControlSpaceCombination(editorTabTitle);
             }
         }, timeout);
@@ -129,13 +130,13 @@ export class Editor {
         await this.performKeyCombination(editorTabTitle, Key.ESCAPE);
     }
 
-    public async clickOnSuggestion(suggestionText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    public async clickOnSuggestion(suggestionText: string, timeout: number = TimeoutConstants.TS_SUGGESTION_TIMEOUT) {
         Logger.debug(`Editor.clickOnSuggestion "${suggestionText}"`);
 
         await this.driverHelper.waitAndClick(this.getSuggestionLineXpathLocator(suggestionText), timeout);
     }
 
-    public async waitTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    public async waitTab(tabTitle: string, timeout: number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
         Logger.debug(`Editor.waitTab "${tabTitle}"`);
 
         await this.driverHelper.waitVisibility(By.xpath(this.getTabXpathLocator(tabTitle)), timeout);
@@ -150,13 +151,13 @@ export class Editor {
         await this.driverHelper.waitDisappearance(By.xpath(this.getTabXpathLocator(tabTitle)), attempt, polling);
     }
 
-    public async clickOnTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    public async clickOnTab(tabTitle: string, timeout: number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
         Logger.debug(`Editor.clickOnTab "${tabTitle}"`);
 
         await this.driverHelper.waitAndClick(By.xpath(this.getTabXpathLocator(tabTitle)), timeout);
     }
 
-    public async waitTabFocused(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    public async waitTabFocused(tabTitle: string, timeout: number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
         Logger.debug(`Editor.waitTabFocused "${tabTitle}"`);
 
         const focusedTabLocator: By = By.xpath(`//li[contains(@class, 'p-TabBar-tab') and contains(@class, 'theia-mod-active')]//div[text()='${tabTitle}']`);
@@ -164,15 +165,15 @@ export class Editor {
         await this.driverHelper.waitVisibility(focusedTabLocator, timeout);
     }
 
-    public async selectTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    public async selectTab(tabTitle: string) {
         Logger.debug(`Editor.selectTab "${tabTitle}"`);
 
-        await this.waitTab(tabTitle, timeout);
-        await this.clickOnTab(tabTitle, timeout);
-        await this.waitTabFocused(tabTitle, timeout);
+        await this.waitTab(tabTitle);
+        await this.clickOnTab(tabTitle);
+        await this.waitTabFocused(tabTitle);
     }
 
-    async closeTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async closeTab(tabTitle: string, timeout: number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
         Logger.debug(`Editor.closeTab "${tabTitle}"`);
 
         const tabCloseButtonLocator: By = By.xpath(`//div[text()='${tabTitle}']/parent::li//div[contains(@class, 'p-TabBar-tabCloseIcon')]`);
@@ -180,7 +181,7 @@ export class Editor {
         await this.driverHelper.waitAndClick(tabCloseButtonLocator, timeout);
     }
 
-    async waitTabWithUnsavedStatus(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitTabWithUnsavedStatus(tabTitle: string, timeout: number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
         Logger.debug(`Editor.waitTabWithUnsavedStatus "${tabTitle}"`);
 
         const unsavedTabLocator: By = this.getTabWithUnsavedStatus(tabTitle);
@@ -188,7 +189,7 @@ export class Editor {
         await this.driverHelper.waitVisibility(unsavedTabLocator, timeout);
     }
 
-    async waitTabWithSavedStatus(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitTabWithSavedStatus(tabTitle: string, timeout: number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
         Logger.debug(`Editor.waitTabWithSavedStatus "${tabTitle}"`);
 
         const unsavedTabLocator: By = this.getTabWithUnsavedStatus(tabTitle);
@@ -209,7 +210,7 @@ export class Editor {
 
     }
 
-    async waitEditorOpened(editorTabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitEditorOpened(editorTabTitle: string, timeout: number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
         Logger.debug(`Editor.waitEditorOpened "${editorTabTitle}"`);
 
         const firstEditorLineLocator: By = By.xpath(this.getEditorLineXpathLocator(1));
@@ -218,7 +219,7 @@ export class Editor {
         await this.driverHelper.waitPresence(firstEditorLineLocator, timeout);
     }
 
-    async waitEditorAvailable(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitEditorAvailable(tabTitle: string, timeout: number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
         Logger.debug(`Editor.waitEditorAvailable "${tabTitle}"`);
 
         await this.waitTab(tabTitle, timeout);
@@ -246,7 +247,7 @@ export class Editor {
     }
 
     async waitText(tabTitle: string, expectedText: string,
-        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
+        timeout: number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
 
         Logger.debug(`Editor.waitText "${tabTitle}"`);
@@ -265,12 +266,12 @@ export class Editor {
 
     async followAndWaitForText(editorTabTitle: string,
         expectedText: string,
-        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
+        timeout: number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
 
         Logger.debug(`Editor.followAndWaitForText title: "${editorTabTitle}" text: "${expectedText}"`);
 
-        await this.selectTab(editorTabTitle, timeout);
+        await this.selectTab(editorTabTitle);
         await this.driverHelper.getDriver().wait(async () => {
             await this.performKeyCombination(editorTabTitle, Key.chord(Key.CONTROL, Key.END));
             const editorText: string = await this.getEditorVisibleText(editorTabTitle);
@@ -317,33 +318,33 @@ export class Editor {
         await this.performKeyCombination(editorTabTitle, text);
     }
 
-    async waitErrorInLine(lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitErrorInLine(lineNumber: number, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
         Logger.debug(`Editor.waitErrorInLine line: "${lineNumber}"`);
 
         const errorInLineLocator: By = await this.getErrorInLineLocator(lineNumber);
         await this.driverHelper.waitVisibility(errorInLineLocator, timeout);
     }
 
-    async waitErrorInLineDisappearance(lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitErrorInLineDisappearance(lineNumber: number, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
         Logger.debug(`Editor.waitErrorInLineDisappearance line: "${lineNumber}"`);
 
         const errorInLineLocator: By = await this.getErrorInLineLocator(lineNumber);
         await this.driverHelper.waitDisappearanceWithTimeout(errorInLineLocator, timeout);
     }
 
-    async waitStoppedDebugBreakpoint(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitStoppedDebugBreakpoint(tabTitle: string, lineNumber: number, timeout: number = TimeoutConstants.TS_BREAKPOINT_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.waitStoppedDebugBreakpoint title: "${tabTitle}" line: "${lineNumber}"`);
 
         await this.driverHelper.waitUntilTrue(() => this.isBreakpointPresent(tabTitle, lineNumber, true), timeout);
     }
 
-    async waitBreakpoint(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitBreakpoint(tabTitle: string, lineNumber: number, timeout: number =  TimeoutConstants.TS_BREAKPOINT_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.waitBreakpoint title: "${tabTitle}" line: "${lineNumber}"`);
 
         await this.driverHelper.waitUntilTrue(() => this.isBreakpointPresent(tabTitle, lineNumber), timeout);
     }
 
-    async waitBreakpointAbsence(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitBreakpointAbsence(tabTitle: string, lineNumber: number, timeout: number =  TimeoutConstants.TS_BREAKPOINT_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.waitBreakpointAbsence title: "${tabTitle}" line: "${lineNumber}"`);
         await this.driverHelper.waitUntilTrue(() => !this.isBreakpointPresent(tabTitle, lineNumber), timeout);
     }
@@ -379,7 +380,7 @@ export class Editor {
 
         const lineNumberLocator: By = By.xpath(`//div[contains(@class, 'line-numbers') and text()='${lineNumber}']` +
             `//parent::div[contains(@style, 'position')]`);
-        let elementStyleValue: string = await this.driverHelper.waitAndGetElementAttribute(lineNumberLocator, 'style');
+        let elementStyleValue: string = await this.driverHelper.waitAndGetElementAttribute(lineNumberLocator, 'style', TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
 
         elementStyleValue = elementStyleValue.replace('position: absolute; top: ', '');
         elementStyleValue = elementStyleValue.replace('px; width: 100%; height: 19px;', '');
@@ -482,7 +483,7 @@ export class Editor {
 
     private async waitSuggestionWithResettingCursor(editorTabTitle: string,
         suggestionText: string,
-        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
+        timeout: number = TimeoutConstants.TS_SUGGESTION_TIMEOUT,
         lineNumber: number,
         charNumber: number) {
 
@@ -514,7 +515,7 @@ export class Editor {
 
     private async waitSuggestionWithoutResettingCursor(editorTabTitle: string,
         suggestionText: string,
-        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        timeout: number = TimeoutConstants.TS_SUGGESTION_TIMEOUT) {
 
         Logger.debug(`Editor.waitSuggestion tabTitle: "${editorTabTitle}" suggestion: "${suggestionText}"`);
 

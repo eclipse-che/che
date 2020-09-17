@@ -49,31 +49,6 @@ export const TestConstants = {
     TS_SELENIUM_RESOLUTION_HEIGHT: Number(process.env.TS_SELENIUM_RESOLUTION_HEIGHT) || 1080,
 
     /**
-     * Timeout in milliseconds waiting for install Eclipse Che by OperatorHub UI, "600 000" by default.
-     */
-    TS_SELENIUM_INSTALL_ECLIPSE_CHE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 600000,
-
-    /**
-     * Timeout in milliseconds waiting for workspace start, "240 000" by default.
-     */
-    TS_SELENIUM_START_WORKSPACE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 360000,
-
-    /**
-     * Timeout in milliseconds waiting for page load, "120 000" by default.
-     */
-    TS_SELENIUM_LOAD_PAGE_TIMEOUT: Number(process.env.TS_SELENIUM_LOAD_PAGE_TIMEOUT) || 180000,
-
-    /**
-     * Timeout in milliseconds waiting for language server initialization, "180 000" by default.
-     */
-    TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT: Number(process.env.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT) || 180000,
-
-    /**
-     * Default timeout for most of the waitings, "20 000" by default.
-     */
-    TS_SELENIUM_DEFAULT_TIMEOUT: Number(process.env.TS_SELENIUM_DEFAULT_TIMEOUT) || 60000,
-
-    /**
      * Default ammount of tries, "5" by default.
      */
     TS_SELENIUM_DEFAULT_ATTEMPTS: Number(process.env.TS_SELENIUM_DEFAULT_ATTEMPTS) || 5,
@@ -257,6 +232,11 @@ export const TestConstants = {
     /**
      * The name of project in the Openshidt plugin tree
      */
-    TS_TEST_OPENSHIFT_PLUGIN_PROJECT: process.env.TS_TEST_OPENSHIFT_PLUGIN_PROJECT || ''
+    TS_TEST_OPENSHIFT_PLUGIN_PROJECT: process.env.TS_TEST_OPENSHIFT_PLUGIN_PROJECT || '',
+
+    /**
+     * Print all timeout variables when tests launch, defaulte to false
+     */
+    TS_SELENIUM_PRINT_TIMEOUT_VARIABLES: process.env.TS_SELENIUM_PRINT_TIMEOUT_VARIABLES || false
 
 };

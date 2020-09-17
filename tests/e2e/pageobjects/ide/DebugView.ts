@@ -13,7 +13,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { By, Key, WebElement } from 'selenium-webdriver';
 import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
-import { TestConstants } from '../../TestConstants';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 
 @injectable()
@@ -41,7 +41,7 @@ export class DebugView {
 
         const runDebugButtonLocator: By = By.xpath('//span[@title=\'Start Debugging\']');
 
-        await this.driverHelper.waitAndClick(runDebugButtonLocator);
+        await this.driverHelper.waitAndClick(runDebugButtonLocator, TimeoutConstants.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
     }
 
     /**
@@ -49,7 +49,7 @@ export class DebugView {
      *
      * @param timeout
      */
-    async waitForDebuggerToConnect(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitForDebuggerToConnect(timeout: number = TimeoutConstants.TS_DEBUGGER_CONNECTION_TIMEOUT) {
         await this.driverHelper.getDriver().wait(async () => {
             Logger.debug(`Waiting for debugger to connect (threads to appear in "Threads" view)`);
             const threadElements: WebElement[] = await this.driverHelper.getDriver().findElements(By.xpath(`//div[contains(@class, 'theia-debug-thread')]`));

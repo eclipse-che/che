@@ -11,12 +11,15 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
+import static org.eclipse.che.api.workspace.shared.Constants.MERGE_PLUGINS_ATTRIBUTE;
+
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
@@ -44,17 +47,20 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
   private final KubernetesArtifactsBrokerApplier<E> artifactsBrokerApplier;
   private final PluginFQNParser pluginFQNParser;
   private final PluginBrokerManager<E> pluginBrokerManager;
+  private final boolean defaultMergePlugins;
 
   @Inject
   public SidecarToolingProvisioner(
       Map<String, ChePluginsApplier> workspaceNextAppliers,
       KubernetesArtifactsBrokerApplier<E> artifactsBrokerApplier,
       PluginFQNParser pluginFQNParser,
-      PluginBrokerManager<E> pluginBrokerManager) {
+      PluginBrokerManager<E> pluginBrokerManager,
+      @Named("che.workspace.plugin_broker.default_merge_plugins") String defaultMergePlugins) {
     this.workspaceNextAppliers = ImmutableMap.copyOf(workspaceNextAppliers);
     this.artifactsBrokerApplier = artifactsBrokerApplier;
     this.pluginFQNParser = pluginFQNParser;
     this.pluginBrokerManager = pluginBrokerManager;
+    this.defaultMergePlugins = Boolean.parseBoolean(defaultMergePlugins);
   }
 
   @Traced
@@ -79,12 +85,21 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
     }
 
     boolean isEphemeral = EphemeralWorkspaceUtility.isEphemeral(environment.getAttributes());
+    boolean mergePlugins = shouldMergePlugins(environment.getAttributes());
     List<ChePlugin> chePlugins =
         pluginBrokerManager.getTooling(
-            identity, startSynchronizer, pluginFQNs, isEphemeral, startOptions);
+            identity, startSynchronizer, pluginFQNs, isEphemeral, mergePlugins, startOptions);
 
     pluginsApplier.apply(identity, environment, chePlugins);
-    artifactsBrokerApplier.apply(environment, identity, pluginFQNs);
+    artifactsBrokerApplier.apply(environment, identity, pluginFQNs, mergePlugins);
     LOG.debug("Finished sidecar tooling provisioning workspace '{}'", identity.getWorkspaceId());
+  }
+
+  private boolean shouldMergePlugins(Map<String, String> attributes) {
+    String devfileMergePlugins = attributes.get(MERGE_PLUGINS_ATTRIBUTE);
+    if (devfileMergePlugins != null) {
+      return Boolean.parseBoolean(devfileMergePlugins);
+    }
+    return defaultMergePlugins;
   }
 }
