@@ -41,12 +41,9 @@ suite(`${workspaceStack} test`, async () => {
         projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
-    suite(`'Language server validation'`, async () => {
+    suite('Test opening file', async () => {
+        // opening file that soon should give time for LS to initialize
         projectManager.openFile(fileFolderPath, fileName);
-        commonLsTests.suggestionInvoking(fileName, 42, 10, 'Parse');
-        commonLsTests.autocomplete(fileName, 42, 10, 'Parse');
-        commonLsTests.errorHighlighting(fileName, 'error;\n', 42);
-        // commonLsTests.codeNavigation(fileName, 42, 10, 'flag.go'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
     });
 
     suite('Test golang example', async () => {
@@ -57,6 +54,13 @@ suite(`${workspaceStack} test`, async () => {
     suite('Run golang example server', async () => {
         codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskRunServer, taskExpectedDialogText, 30_000);
         // codeExecutionHelper.runTask(taskStopServer, 5_000); // stop outyet task causes the server to die with exit code 143 https://github.com/eclipse/che/issues/17005
+    });
+
+    suite(`'Language server validation'`, async () => {
+        commonLsTests.suggestionInvoking(fileName, 42, 10, 'Parse');
+        commonLsTests.autocomplete(fileName, 42, 10, 'Parse');
+        commonLsTests.errorHighlighting(fileName, 'error;\n', 42);
+        // commonLsTests.codeNavigation(fileName, 42, 10, 'flag.go'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
     });
 
     suite('Stop and remove workspace', async() => {
