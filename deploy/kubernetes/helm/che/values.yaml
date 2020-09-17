@@ -108,6 +108,7 @@ che:
 #      waitTimeoutMin: "3"
 #    pluginRegistryUrl: "https://che-plugin-registry.openshift.io/v3"
   disableProbes: false
+  logLevel: "INFO"
 
 cheDevfileRegistry:
   deploy: true

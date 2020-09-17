@@ -60,6 +60,25 @@ export class Ide {
         await this.driverHelper.waitVisibility(notificationLocator, timeout);
     }
 
+    async waitTaskExitCodeNotificationBoolean(exitCode: string, timeout: number = TimeoutConstants.TS_SELENIUM_WAIT_TASK_EXIT_CODE_TIMEOUT) : Promise<boolean> {
+        Logger.debug(`Ide.waitTaskExitCodeNotification "has exited with code ${exitCode}."`);
+
+        const exitCodeNotificationLocator: By = By.xpath(this.getNotificationXpathLocator(`has exited with code`));
+        const notificationLocator: By = By.xpath(this.getNotificationXpathLocator(`has exited with code ${exitCode}.`));
+
+        Logger.info(`Ide.waitTaskExitCodeNotification waiting for any exit code notification.`);
+        try {
+            await this.driverHelper.waitVisibility(exitCodeNotificationLocator);
+        } catch (err) {
+            if (err instanceof error.TimeoutError) {
+                Logger.error(`Ide.waitTaskExitCodeNotificationBoolean wait for notification timed out.`);
+            }
+            throw err;
+        }
+        Logger.info(`Ide.waitTaskExitCodeNotification checking for correct exit core:${exitCode}`);
+        return await this.driverHelper.waitVisibilityBoolean(notificationLocator, 1, 1000);
+    }
+
     async waitNotificationAndClickOnButton(notificationText: string,
         buttonText: string,
         timeout: number = TimeoutConstants.TS_NOTIFICATION_CENTER_TIMEOUT) {

@@ -42,7 +42,7 @@ public class AccountTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private KeycloakHeaderButtons keycloakHeaderButtons;
-  private Account initialTestUserAccount;
+  @Inject private Account initialTestUserAccount;
 
   @BeforeClass
   public void setup() {
@@ -70,7 +70,7 @@ public class AccountTest {
 
   public void shouldChangeEmailFirstAndLastName() {
     dashboardAccount.getTitle().equals("Account");
-    //    assertEquals(dashboardAccount.getAllFields(), initialTestUserAccount);
+
     dashboardAccount.clickOnEditButton();
 
     seleniumWebDriverHelper.switchToNextWindow(parentWindow);
@@ -117,7 +117,6 @@ public class AccountTest {
     keycloakPasswordPage.setNewPasswordFieldValue("changedPassword");
     keycloakPasswordPage.setNewPasswordConfirmationFieldValue("changedPassword");
     keycloakPasswordPage.clickOnSavePasswordButton();
-
     keycloakPasswordPage.waitTextInSuccessAlert("Your password has been updated.");
 
     closeWindowAndSwitchToParent(parentWindow);

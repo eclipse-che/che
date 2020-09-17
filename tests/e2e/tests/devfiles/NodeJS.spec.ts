@@ -25,24 +25,33 @@ const taskRunWebApp: string = 'run the web app';
 const taskExpectedDialogText: string = 'A process is now listening on port 3000';
 
 suite(`${workspaceStack} test`, async () => {
+
     suite(`Create ${workspaceStack}`, async () => {
         workspaceHandler.createAndOpenWorkspace(workspaceStack);
         projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
+
+    suite('Test opening file', async () => {
+        // opening file that soon should give time for LS to initialize
+        projectManager.openFile(fileFolderPath, fileName);
+    });
+
     suite('Download dependencies', async () => {
         codeExecutionHelper.runTask(taskDownloadDependencies, 60_000);
         codeExecutionHelper.closeTerminal(taskDownloadDependencies);
     });
+
+    suite('Run nodejs application', async () => {
+        codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskRunWebApp, taskExpectedDialogText, 30_000);
+    });
+
     suite(`'Language server validation'`, async () => {
-        projectManager.openFile(fileFolderPath, fileName);
         commonLsTests.errorHighlighting(fileName, 'error text;\n', 17);
         commonLsTests.suggestionInvoking(fileName, 15, 20, 'require');
         commonLsTests.autocomplete(fileName, 15, 20, 'require');
         // commonLsTests.codeNavigation(fileName, 19, 10, 'index.d.ts'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
     });
-    suite('Run nodejs application', async () => {
-        codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskRunWebApp, taskExpectedDialogText, 30_000);
-    });
+
     suite('Stop and remove workspace', async() => {
         let workspaceName = 'not defined';
         suiteSetup( async () => {
