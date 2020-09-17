@@ -15,6 +15,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.che.api.core.ValidationException;
 
@@ -49,6 +50,15 @@ public final class NamespaceNameValidator {
    */
   public static boolean isValid(String name) {
     return validateInternal(name).isOk();
+  }
+
+  public static String reduceToValid(String namespaceName) {
+    Matcher m = METADATA_NAME_PATTERN.matcher(namespaceName);
+    String reduced = "";
+    while (m.find()) {
+      reduced = reduced.concat(m.group(0));
+    }
+    return reduced.substring(0, Math.min(METADATA_NAME_MAX_LENGTH, reduced.length()));
   }
 
   @VisibleForTesting

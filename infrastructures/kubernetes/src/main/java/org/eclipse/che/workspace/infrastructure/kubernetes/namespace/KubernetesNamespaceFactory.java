@@ -47,6 +47,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -87,6 +88,7 @@ public class KubernetesNamespaceFactory {
   private final String serviceAccountName;
   private final Set<String> clusterRoleNames;
   private final KubernetesClientFactory clientFactory;
+  private final boolean namespaceCreationAllowed;
   private final UserManager userManager;
   protected final KubernetesSharedPool sharedPool;
 
@@ -98,10 +100,12 @@ public class KubernetesNamespaceFactory {
       @Nullable @Named("che.infra.kubernetes.namespace.default") String defaultNamespaceName,
       @Named("che.infra.kubernetes.namespace.allow_user_defined")
           boolean allowUserDefinedNamespaces,
+      @Named("che.infra.kubernetes.namespace.creation_allowed") boolean namespaceCreationAllowed,
       KubernetesClientFactory clientFactory,
       UserManager userManager,
       KubernetesSharedPool sharedPool)
       throws ConfigurationException {
+    this.namespaceCreationAllowed = namespaceCreationAllowed;
     this.userManager = userManager;
     this.legacyNamespaceName = legacyNamespaceName;
     this.serviceAccountName = serviceAccountName;
@@ -302,6 +306,9 @@ public class KubernetesNamespaceFactory {
    * @throws InfrastructureException on failure
    */
   protected boolean canCreateNamespace(RuntimeIdentity identity) throws InfrastructureException {
+    if (!namespaceCreationAllowed) {
+      return false;
+    }
     if (allowUserDefinedNamespaces) {
       return true;
     } else {
@@ -321,7 +328,7 @@ public class KubernetesNamespaceFactory {
           new NamespaceResolutionContext(
               identity.getWorkspaceId(), identity.getOwnerId(), owner.getName());
 
-      String resolvedDefaultNamespace = evalPlaceholders(defaultNamespaceName, resolutionContext);
+      String resolvedDefaultNamespace = evaluateNamespaceName(resolutionContext);
 
       return resolvedDefaultNamespace.equals(requiredNamespace);
     }
@@ -453,6 +460,24 @@ public class KubernetesNamespaceFactory {
   public String evaluateNamespaceName(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
     String namespace = evalPlaceholders(defaultNamespaceName, resolutionCtx);
+
+    if (!NamespaceNameValidator.isValid(namespace)) {
+      Optional<KubernetesNamespaceMeta> namespaceMetaOptional;
+      String modified = NamespaceNameValidator.reduceToValid(namespace);
+      if (modified.isEmpty()) {
+        throw new InfrastructureException(
+            format(
+                "Evaluated empty namespace name for workspace %s", resolutionCtx.getWorkspaceId()));
+      }
+      do {
+        modified =
+            modified
+                .substring(0, Math.min(55, modified.length()))
+                .concat(NameGenerator.generate("-", 6));
+        namespaceMetaOptional = fetchNamespace(modified);
+      } while (namespaceMetaOptional.isPresent());
+      namespace = modified;
+    }
 
     LOG.debug(
         "Evaluated the namespace for workspace {} using the namespace default to {}",

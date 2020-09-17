@@ -14,8 +14,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.ValidationResult.INVALID;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.ValidationResult.NULL_OR_EMPTY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.ValidationResult.TOO_LONG;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.reduceToValid;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.validateInternal;
-import static org.testng.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -42,6 +43,15 @@ public class NamespaceNameValidatorTest {
   @Test(dataProvider = "invalidDnsNames")
   public void testFailsOnInvalidChars(String invalidName) {
     assertEquals(INVALID, validateInternal(invalidName));
+  }
+
+  @Test
+  public void reduceToValidTest() {
+    assertEquals("fef123-ahzz", reduceToValid("_fef_123-ah_*zz**"));
+    assertEquals(
+        63,
+        reduceToValid("looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong")
+            .length());
   }
 
   @DataProvider
