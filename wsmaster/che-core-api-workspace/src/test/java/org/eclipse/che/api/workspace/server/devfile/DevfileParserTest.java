@@ -43,7 +43,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
-public class DevfileManagerTest {
+public class DevfileParserTest {
 
   private static final String DEVFILE_YAML_CONTENT = "devfile yaml stub";
 
@@ -56,13 +56,12 @@ public class DevfileManagerTest {
   @Mock private JsonNode devfileJsonNode;
   private DevfileImpl devfile;
 
-  private DevfileManager devfileManager;
+  private DevfileParser devfileParser;
 
   @BeforeMethod
   public void setUp() throws Exception {
     devfile = new DevfileImpl();
-    devfileManager =
-        new DevfileManager(schemaValidator, integrityValidator, yamlMapper, jsonMapper);
+    devfileParser = new DevfileParser(schemaValidator, integrityValidator, yamlMapper, jsonMapper);
 
     lenient().when(jsonMapper.treeToValue(any(), eq(DevfileImpl.class))).thenReturn(devfile);
     lenient().when(yamlMapper.treeToValue(any(), eq(DevfileImpl.class))).thenReturn(devfile);
@@ -72,7 +71,7 @@ public class DevfileManagerTest {
   @Test
   public void testValidateAndParse() throws Exception {
     // when
-    DevfileImpl parsed = devfileManager.parseYaml(DEVFILE_YAML_CONTENT);
+    DevfileImpl parsed = devfileParser.parseYaml(DEVFILE_YAML_CONTENT);
 
     // then
     assertEquals(parsed, devfile);
@@ -93,7 +92,7 @@ public class DevfileManagerTest {
     devfile.getComponents().add(component);
 
     // when
-    DevfileImpl parsed = devfileManager.parseYaml(DEVFILE_YAML_CONTENT);
+    DevfileImpl parsed = devfileParser.parseYaml(DEVFILE_YAML_CONTENT);
 
     // then
     assertNotNull(parsed.getCommands().get(0).getAttributes());
@@ -113,7 +112,7 @@ public class DevfileManagerTest {
     devfile.getComponents().add(component);
 
     // when
-    devfileManager.resolveReference(devfile, contentProvider);
+    devfileParser.resolveReference(devfile, contentProvider);
 
     // then
     verify(contentProvider).fetchContent(eq("myfile.yaml"));
@@ -125,7 +124,7 @@ public class DevfileManagerTest {
       expectedExceptionsMessageRegExp = "Unable to parse Devfile - provided source is empty")
   public void shouldThrowDevfileExceptionWhenEmptyObjectProvided() throws Exception {
     // when
-    devfileManager.parseJson("{}");
+    devfileParser.parseJson("{}");
   }
 
   @Test(
@@ -133,7 +132,7 @@ public class DevfileManagerTest {
       expectedExceptionsMessageRegExp = "Unable to parse Devfile - provided source is empty")
   public void shouldThrowDevfileExceptionWhenEmptySourceProvided() throws Exception {
     // when
-    devfileManager.parseJson("");
+    devfileParser.parseJson("");
   }
 
   @Test(
@@ -150,7 +149,7 @@ public class DevfileManagerTest {
     devfile.getComponents().add(component);
 
     // when
-    devfileManager.resolveReference(devfile, contentProvider);
+    devfileParser.resolveReference(devfile, contentProvider);
 
     // then exception is thrown
   }
@@ -163,7 +162,7 @@ public class DevfileManagerTest {
     doThrow(new DevfileFormatException("non valid")).when(schemaValidator).validate(any());
 
     // when
-    devfileManager.parseYaml(DEVFILE_YAML_CONTENT);
+    devfileParser.parseYaml(DEVFILE_YAML_CONTENT);
   }
 
   @Test(
@@ -177,6 +176,6 @@ public class DevfileManagerTest {
     doThrow(jsonException).when(jsonMapper).treeToValue(any(), any());
 
     // when
-    devfileManager.parseJson(DEVFILE_YAML_CONTENT);
+    devfileParser.parseJson(DEVFILE_YAML_CONTENT);
   }
 }

@@ -28,7 +28,7 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
-import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
+import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
@@ -53,18 +53,18 @@ public class URLFactoryBuilder {
   private final String defaultChePlugins;
 
   private final URLFetcher urlFetcher;
-  private final DevfileManager devfileManager;
+  private final DevfileParser devfileParser;
 
   @Inject
   public URLFactoryBuilder(
       @Named("che.factory.default_editor") String defaultCheEditor,
       @Named("che.factory.default_plugins") String defaultChePlugins,
       URLFetcher urlFetcher,
-      DevfileManager devfileManager) {
+      DevfileParser devfileParser) {
     this.defaultCheEditor = defaultCheEditor;
     this.defaultChePlugins = defaultChePlugins;
     this.urlFetcher = urlFetcher;
-    this.devfileManager = devfileManager;
+    this.devfileParser = devfileParser;
   }
 
   /**
@@ -115,8 +115,8 @@ public class URLFactoryBuilder {
         continue;
       }
       try {
-        DevfileImpl devfile = devfileManager.parseYaml(devfileYamlContent, overrideProperties);
-        devfileManager.resolveReference(devfile, fileContentProvider);
+        DevfileImpl devfile = devfileParser.parseYaml(devfileYamlContent, overrideProperties);
+        devfileParser.resolveReference(devfile, fileContentProvider);
         devfile = ensureToUseGenerateName(devfile);
 
         FactoryDto factoryDto =

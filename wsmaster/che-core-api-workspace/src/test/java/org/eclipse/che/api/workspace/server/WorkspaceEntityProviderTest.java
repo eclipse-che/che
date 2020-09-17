@@ -20,7 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
-import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
+import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
@@ -34,14 +34,14 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class WorkspaceEntityProviderTest {
 
-  @Mock private DevfileManager devfileManager;
+  @Mock private DevfileParser devfileParser;
 
   @InjectMocks private WorkspaceEntityProvider workspaceEntityProvider;
 
   @Test
   public void shouldBuildDtoFromValidJson() throws Exception {
 
-    when(devfileManager.parseJson(anyString())).thenReturn(new DevfileImpl());
+    when(devfileParser.parseJson(anyString())).thenReturn(new DevfileImpl());
 
     WorkspaceDto actual = newDto(WorkspaceDto.class).withDevfile(newDto(DevfileDto.class));
 
@@ -54,6 +54,6 @@ public class WorkspaceEntityProviderTest {
         new ByteArrayInputStream(
             DtoFactory.getInstance().toJson(actual).getBytes(StandardCharsets.UTF_8)));
 
-    verify(devfileManager).parseJson(anyString());
+    verify(devfileParser).parseJson(anyString());
   }
 }

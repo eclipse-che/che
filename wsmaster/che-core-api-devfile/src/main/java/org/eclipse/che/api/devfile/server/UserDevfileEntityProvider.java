@@ -9,16 +9,14 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server.devfile;
+package org.eclipse.che.api.devfile.server;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 
-import com.google.common.io.CharStreams;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -29,7 +27,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
@@ -38,74 +35,70 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
+import org.eclipse.che.api.devfile.shared.dto.UserDevfileDto;
+import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
-import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.dto.server.DtoFactory;
 
 /**
- * Parses {@link DevfileDto} either from Json or yaml content, and performs schema validation before
- * the actual DTO created.
- *
- * @author Max Shaposhnyk
+ * Entity provider for {@link UserDevfileDto}. Performs schema validation of devfile part of the
+ * user devfile before actual {@link UserDevfileDto} creation.
  */
 @Singleton
 @Provider
 @Produces({APPLICATION_JSON})
-@Consumes({APPLICATION_JSON, "text/yaml", "text/x-yaml"})
-public class DevfileEntityProvider
-    implements MessageBodyReader<DevfileDto>, MessageBodyWriter<DevfileDto> {
+@Consumes({APPLICATION_JSON})
+public class UserDevfileEntityProvider
+    implements MessageBodyReader<UserDevfileDto>, MessageBodyWriter<UserDevfileDto> {
 
   private DevfileParser devfileParser;
+  private ObjectMapper mapper = new ObjectMapper();
 
   @Inject
-  public DevfileEntityProvider(DevfileParser devfileParser) {
+  public UserDevfileEntityProvider(DevfileParser devfileParser) {
     this.devfileParser = devfileParser;
   }
 
   @Override
   public boolean isReadable(
       Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    return type == DevfileDto.class;
+    return type == UserDevfileDto.class;
   }
 
   @Override
-  public DevfileDto readFrom(
-      Class<DevfileDto> type,
+  public UserDevfileDto readFrom(
+      Class<UserDevfileDto> type,
       Type genericType,
       Annotation[] annotations,
       MediaType mediaType,
       MultivaluedMap<String, String> httpHeaders,
       InputStream entityStream)
       throws IOException, WebApplicationException {
-
     try {
-      if (mediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
-        return asDto(
-            devfileParser.parseJson(
-                CharStreams.toString(
-                    new InputStreamReader(entityStream, getCharsetOrUtf8(mediaType)))));
-      } else if (mediaType.isCompatible(MediaType.valueOf("text/yaml"))
-          || mediaType.isCompatible(MediaType.valueOf("text/x-yaml"))) {
-        return asDto(
-            devfileParser.parseYaml(
-                CharStreams.toString(
-                    new InputStreamReader(entityStream, getCharsetOrUtf8(mediaType)))));
+      JsonNode wsNode = mapper.readTree(entityStream);
+      JsonNode devfileNode = wsNode.path("devfile");
+      if (!devfileNode.isNull() && !devfileNode.isMissingNode()) {
+        devfileParser.parseJson(devfileNode.toString());
+      } else {
+        throw new BadRequestException("Mandatory field `devfile` is not defined.");
       }
+      return DtoFactory.getInstance().createDtoFromJson(wsNode.toString(), UserDevfileDto.class);
     } catch (DevfileFormatException e) {
       throw new BadRequestException(e.getMessage());
+    } catch (IOException e) {
+      throw new WebApplicationException(e.getMessage(), e);
     }
-    throw new NotSupportedException("Unknown media type " + mediaType.toString());
   }
 
   @Override
   public boolean isWriteable(
       Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    return DevfileDto.class.isAssignableFrom(type);
+    return UserDevfileDto.class.isAssignableFrom(type);
   }
 
   @Override
   public long getSize(
-      DevfileDto devfileDto,
+      UserDevfileDto userDevfileDto,
       Class<?> type,
       Type genericType,
       Annotation[] annotations,
@@ -115,7 +108,7 @@ public class DevfileEntityProvider
 
   @Override
   public void writeTo(
-      DevfileDto devfileDto,
+      UserDevfileDto userDevfileDto,
       Class<?> type,
       Type genericType,
       Annotation[] annotations,
@@ -125,16 +118,8 @@ public class DevfileEntityProvider
       throws IOException, WebApplicationException {
     httpHeaders.putSingle(HttpHeaders.CACHE_CONTROL, "public, no-cache, no-store, no-transform");
     try (Writer w = new OutputStreamWriter(entityStream, StandardCharsets.UTF_8)) {
-      w.write(DtoFactory.getInstance().toJson(devfileDto));
+      w.write(DtoFactory.getInstance().toJson(userDevfileDto));
       w.flush();
     }
-  }
-
-  private String getCharsetOrUtf8(MediaType mediaType) {
-    String charset = mediaType == null ? null : mediaType.getParameters().get("charset");
-    if (isNullOrEmpty(charset)) {
-      charset = "UTF-8";
-    }
-    return charset;
   }
 }
