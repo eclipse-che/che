@@ -64,7 +64,7 @@ data:
   CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_FS__GROUP: "{{ .Values.global.securityContext.fsGroup }}"
   CHE_LOCAL_CONF_DIR: /etc/conf
   CHE_LOGS_DIR: /data/logs
-  CHE_LOG_LEVEL: "INFO"
+  CHE_LOG_LEVEL: {{ .Values.che.logLevel | quote }}
   CHE_MULTIUSER: {{ .Values.global.multiuser | quote }}
   CHE_OAUTH_GITHUB_CLIENTID: {{ .Values.global.gitHubClientID | quote}}
   CHE_OAUTH_GITHUB_CLIENTSECRET: {{ .Values.global.gitHubClientSecret | quote}}
