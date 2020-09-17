@@ -157,6 +157,8 @@ public class WsMasterModule extends AbstractModule {
     bind(WorkspaceEntityProvider.class);
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
+    bind(org.eclipse.che.api.devfile.server.DevfileService.class);
+    bind(org.eclipse.che.api.devfile.server.UserDevfileEntityProvider.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
 
     Multibinder<InternalEnvironmentProvisioner> internalEnvironmentProvisioners =
@@ -288,6 +290,7 @@ public class WsMasterModule extends AbstractModule {
 
     install(new org.eclipse.che.api.user.server.jpa.UserJpaModule());
     install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
+    install(new org.eclipse.che.api.devfile.server.jpa.UserDevfileJpaModule());
 
     bind(org.eclipse.che.api.user.server.CheUserCreator.class);
 
@@ -344,6 +347,11 @@ public class WsMasterModule extends AbstractModule {
         new org.eclipse.che.multiuser.permission.workspace.server.jpa
             .MultiuserWorkspaceJpaModule());
     install(new MultiUserWorkspaceActivityModule());
+    install(
+        new org.eclipse.che.multiuser.permission.devfile.server.jpa
+            .MultiuserUserDevfileJpaModule());
+    install(
+        new org.eclipse.che.multiuser.permission.devfile.server.UserDevfileApiPermissionsModule());
 
     // Permission filters
     bind(org.eclipse.che.multiuser.permission.system.SystemServicePermissionsFilter.class);
@@ -358,7 +366,6 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.multiuser.permission.user.UserServicePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.logger.LoggerServicePermissionsFilter.class);
 
-    bind(org.eclipse.che.multiuser.permission.devfile.DevfilePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.workspace.activity.ActivityPermissionsFilter.class);
     bind(AdminPermissionInitializer.class).asEagerSingleton();
     bind(

@@ -703,6 +703,22 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-devfile</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-devfile</artifactId>
+                <version>${che.version}</version>
+                <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-devfile-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-dto</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -1112,6 +1128,12 @@
                 <groupId>org.eclipse.che.multiuser</groupId>
                 <artifactId>che-multiuser-permission-devfile</artifactId>
                 <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-permission-devfile</artifactId>
+                <version>${che.version}</version>
+                <classifier>tests</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.multiuser</groupId>
