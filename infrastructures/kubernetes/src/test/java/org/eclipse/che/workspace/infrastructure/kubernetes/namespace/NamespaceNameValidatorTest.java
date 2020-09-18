@@ -14,7 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.ValidationResult.INVALID;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.ValidationResult.NULL_OR_EMPTY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.ValidationResult.TOO_LONG;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.reduceToValid;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.normalize;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.validateInternal;
 import static org.junit.Assert.assertEquals;
 
@@ -46,11 +46,13 @@ public class NamespaceNameValidatorTest {
   }
 
   @Test
-  public void reduceToValidTest() {
-    assertEquals("fef123-ahzz", reduceToValid("_fef_123-ah_*zz**"));
+  public void normalizeTest() {
+    assertEquals("gmail-foo-bar", normalize("gmail@foo.bar"));
+    assertEquals("fef-123-ah-zz", normalize("_fef_123-ah_*zz**"));
+    assertEquals("a-b-hello", normalize("a-b#-hello"));
     assertEquals(
         63,
-        reduceToValid("looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong")
+        normalize("looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong")
             .length());
   }
 

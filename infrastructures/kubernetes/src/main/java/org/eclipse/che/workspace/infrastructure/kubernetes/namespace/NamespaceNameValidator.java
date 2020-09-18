@@ -24,6 +24,7 @@ public final class NamespaceNameValidator {
   private static final int METADATA_NAME_MAX_LENGTH = 63;
   private static final String METADATA_NAME_REGEX = "[a-z0-9]([-a-z0-9]*[a-z0-9])?";
   private static final Pattern METADATA_NAME_PATTERN = Pattern.compile(METADATA_NAME_REGEX);
+  private static final Pattern NEGATED_NAME_PATTERN = Pattern.compile("[^a-z0-9]([^-a-z0-9]*[^a-z0-9])?");
 
   private NamespaceNameValidator() {
     throw new AssertionError();
@@ -52,13 +53,16 @@ public final class NamespaceNameValidator {
     return validateInternal(name).isOk();
   }
 
-  public static String reduceToValid(String namespaceName) {
-    Matcher m = METADATA_NAME_PATTERN.matcher(namespaceName);
-    String reduced = "";
-    while (m.find()) {
-      reduced = reduced.concat(m.group(0));
+  public static String normalize(String namespaceName) {
+    Matcher matcher = NEGATED_NAME_PATTERN.matcher(namespaceName);
+    String replaced = matcher.replaceAll("-");
+    while (!isValid(replaced)) {
+      // the only thing might happen is dashes at beginning and/or end, lets strip them
+      replaced = replaced.replaceAll("^-|-$", "");
+      // cannot chain since length will be computed for initial string before replace
+      replaced = replaced.substring(0, Math.min(METADATA_NAME_MAX_LENGTH, replaced.length()));
     }
-    return reduced.substring(0, Math.min(METADATA_NAME_MAX_LENGTH, reduced.length()));
+    return replaced;
   }
 
   @VisibleForTesting

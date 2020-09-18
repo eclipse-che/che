@@ -463,20 +463,20 @@ public class KubernetesNamespaceFactory {
 
     if (!NamespaceNameValidator.isValid(namespace)) {
       Optional<KubernetesNamespaceMeta> namespaceMetaOptional;
-      String modified = NamespaceNameValidator.reduceToValid(namespace);
-      if (modified.isEmpty()) {
+      String normalizedNamespace = NamespaceNameValidator.normalize(namespace);
+      if (normalizedNamespace.isEmpty()) {
         throw new InfrastructureException(
             format(
                 "Evaluated empty namespace name for workspace %s", resolutionCtx.getWorkspaceId()));
       }
       do {
-        modified =
-            modified
-                .substring(0, Math.min(55, modified.length()))
+        normalizedNamespace =
+            normalizedNamespace
+                .substring(0, Math.min(55, normalizedNamespace.length()))
                 .concat(NameGenerator.generate("-", 6));
-        namespaceMetaOptional = fetchNamespace(modified);
+        namespaceMetaOptional = fetchNamespace(normalizedNamespace);
       } while (namespaceMetaOptional.isPresent());
-      namespace = modified;
+      namespace = normalizedNamespace;
     }
 
     LOG.debug(
