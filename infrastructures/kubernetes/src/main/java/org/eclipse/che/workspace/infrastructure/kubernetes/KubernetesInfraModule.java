@@ -166,7 +166,9 @@ public class KubernetesInfraModule extends AbstractModule {
                 binder(),
                 new TypeLiteral<WorkspaceExposureType>() {},
                 new TypeLiteral<ExternalServerExposer<KubernetesEnvironment>>() {});
-    exposureStrategies.addBinding(WorkspaceExposureType.NATIVE).to(IngressServerExposer.class);
+    exposureStrategies
+        .addBinding(WorkspaceExposureType.NATIVE)
+        .to(new TypeLiteral<IngressServerExposer<KubernetesEnvironment>>() {});
     exposureStrategies
         .addBinding(WorkspaceExposureType.GATEWAY)
         .to(new TypeLiteral<GatewayServerExposer<KubernetesEnvironment>>() {});

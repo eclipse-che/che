@@ -91,6 +91,8 @@ public interface ServerConfig {
    */
   String SERVICE_PORT_ATTRIBUTE = "servicePort";
 
+  String DEVFILE_ENDPOINT = "devfileEndpoint";
+
   /**
    * Port used by server.
    *
