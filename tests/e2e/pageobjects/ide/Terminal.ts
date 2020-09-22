@@ -26,7 +26,7 @@ export class Terminal {
 
         await this.driverHelper.waitVisibility(terminalTabLocator, timeout);
     }
-    
+
     async waitTabAbsence(tabTitle: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT) {
         Logger.debug(`Terminal.waitTabAbsence "${tabTitle}"`);
 
