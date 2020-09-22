@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.INGRESS_DOMAIN_PROPERTY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.SingleHostExternalServiceExposureStrategy.SINGLE_HOST_STRATEGY;
 
 import java.util.Map;
 import javax.inject.Inject;
@@ -40,8 +41,8 @@ public class ExternalServerExposerProvider<T extends KubernetesEnvironment>
   public ExternalServerExposerProvider(
       @Named("che.infra.kubernetes.server_strategy") String exposureStrategy,
       @Named("che.infra.kubernetes.singlehost.workspace.exposure") String exposureType,
-      @Named("che.infra.kubernetes.singlehost.workspace.force_subdomain_devfile_endpoints")
-          boolean forceSubdomainEndpoints,
+      @Named("che.infra.kubernetes.singlehost.workspace.expose_devfile_endpoints_on_subdomains")
+          boolean exposeDevfileEndpointsOnSubdomains,
       @Named(INGRESS_DOMAIN_PROPERTY) String domain,
       @Named("infra.kubernetes.ingress.annotations") Map<String, String> annotations,
       @Nullable @Named("che.infra.kubernetes.ingress.labels") String labelsProperty,
@@ -53,8 +54,8 @@ public class ExternalServerExposerProvider<T extends KubernetesEnvironment>
         exposureType,
         exposers,
         "Could not find an external server exposer implementation for the exposure type '%s'.");
-    this.forceSubdomainEndpoints = forceSubdomainEndpoints;
-    if (forceSubdomainEndpoints) {
+    if (SINGLE_HOST_STRATEGY.equals(exposureStrategy) && exposeDevfileEndpointsOnSubdomains) {
+      this.forceSubdomainEndpoints = true;
       this.combinedInstance =
           new CombinedSingleHostServerExposer<>(
               new IngressServerExposer<>(
@@ -64,6 +65,7 @@ public class ExternalServerExposerProvider<T extends KubernetesEnvironment>
                   pathTransformFmt),
               instance);
     } else {
+      this.forceSubdomainEndpoints = false;
       this.combinedInstance = null;
     }
   }

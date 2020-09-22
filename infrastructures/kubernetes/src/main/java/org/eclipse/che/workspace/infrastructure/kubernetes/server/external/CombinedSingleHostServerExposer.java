@@ -56,10 +56,7 @@ public class CombinedSingleHostServerExposer<T extends KubernetesEnvironment>
     for (String esKey : externalServers.keySet()) {
       ServerConfig serverConfig = externalServers.get(esKey);
       if (TRUE.toString()
-          .equals(
-              serverConfig
-                  .getAttributes()
-                  .getOrDefault(DEVFILE_ENDPOINT, FALSE.toString()))) {
+          .equals(serverConfig.getAttributes().getOrDefault(DEVFILE_ENDPOINT, FALSE.toString()))) {
         subdomainServers.put(esKey, serverConfig);
       } else {
         subpathServers.put(esKey, serverConfig);
