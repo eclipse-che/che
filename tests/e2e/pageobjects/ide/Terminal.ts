@@ -38,7 +38,7 @@ export class Terminal {
     async clickOnTab(tabTitle: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT) {
         Logger.debug(`Terminal.clickOnTab "${tabTitle}"`);
 
-        const terminalTabLocator: By = By.css(this.getTerminalTabCssLocator(tabTitle));
+        const terminalTabLocator: By = By.css(`${this.getTerminalTabCssLocator(tabTitle)} div.theia-tab-icon-label`);
 
         await this, this.driverHelper.waitAndClick(terminalTabLocator, timeout);
     }
