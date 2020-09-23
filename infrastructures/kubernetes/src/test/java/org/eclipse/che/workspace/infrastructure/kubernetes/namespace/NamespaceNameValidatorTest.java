@@ -16,7 +16,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.Name
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.ValidationResult.TOO_LONG;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.normalize;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.validateInternal;
-import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -25,35 +25,47 @@ public class NamespaceNameValidatorTest {
 
   @Test
   public void testFailsOnNull() {
-    assertEquals(NULL_OR_EMPTY, validateInternal(null));
+    assertEquals(validateInternal(null), NULL_OR_EMPTY);
   }
 
   @Test
   public void testFailsOnEmpty() {
-    assertEquals(NULL_OR_EMPTY, validateInternal(""));
+    assertEquals(validateInternal(""), NULL_OR_EMPTY);
   }
 
   @Test
   public void testFailsOnTooLong() {
     assertEquals(
-        TOO_LONG,
-        validateInternal("0123456789012345678901234567890123456789012345678901234567890123"));
+        validateInternal("0123456789012345678901234567890123456789012345678901234567890123"),
+        TOO_LONG);
   }
 
   @Test(dataProvider = "invalidDnsNames")
   public void testFailsOnInvalidChars(String invalidName) {
-    assertEquals(INVALID, validateInternal(invalidName));
+    assertEquals(validateInternal(invalidName), INVALID);
+  }
+
+  @Test(dataProvider = "invalidUsernames")
+  public void normalizeTest(String raw, String expected) {
+    assertEquals(expected, normalize(raw));
   }
 
   @Test
-  public void normalizeTest() {
-    assertEquals("gmail-foo-bar", normalize("gmail@foo.bar"));
-    assertEquals("fef-123-ah-zz", normalize("_fef_123-ah_*zz**"));
-    assertEquals("a-b-hello", normalize("a-b#-hello"));
+  public void normalizeLengthTest() {
     assertEquals(
         63,
         normalize("looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong")
             .length());
+  }
+
+  @DataProvider
+  public static Object[][] invalidUsernames() {
+    return new Object[][] {
+      new Object[] {"gmail@foo.bar", "gmail-foo-bar"},
+      new Object[] {"_fef_123-ah_*zz**", "fef-123-ah-zz"},
+      new Object[] {"a-b#-hello", "a-b-hello"},
+      new Object[] {"a---------b", "a-b"},
+    };
   }
 
   @DataProvider

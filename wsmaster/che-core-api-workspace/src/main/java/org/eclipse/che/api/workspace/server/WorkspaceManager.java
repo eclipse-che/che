@@ -456,6 +456,17 @@ public class WorkspaceManager {
     }
   }
 
+  private void recordEvaluatedNamespaceName(String namespace) {
+    try {
+      String owner = EnvironmentContext.getCurrent().getSubject().getUserId();
+      Map<String, String> preferences = preferenceManager.find(owner);
+      preferences.put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
+      preferenceManager.update(owner, preferences);
+    } catch (ServerException e) {
+      LOG.error(e.getMessage(), e);
+    }
+  }
+
   private void cleanLastWorkspaceStoppedTime(String owner) {
     try {
       preferenceManager.remove(
@@ -514,6 +525,7 @@ public class WorkspaceManager {
         workspace
             .getAttributes()
             .put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, targetNamespace);
+        recordEvaluatedNamespaceName(targetNamespace);
       } catch (InfrastructureException e) {
         throw new ServerException(e);
       }
@@ -674,6 +686,7 @@ public class WorkspaceManager {
         workspace
             .getAttributes()
             .put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, targetNamespace);
+        recordEvaluatedNamespaceName(targetNamespace);
       } catch (InfrastructureException e) {
         throw new ServerException(e);
       }

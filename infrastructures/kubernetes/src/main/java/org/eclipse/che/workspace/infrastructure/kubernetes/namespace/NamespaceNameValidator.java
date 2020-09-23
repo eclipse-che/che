@@ -15,7 +15,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.che.api.core.ValidationException;
 
@@ -24,7 +23,6 @@ public final class NamespaceNameValidator {
   private static final int METADATA_NAME_MAX_LENGTH = 63;
   private static final String METADATA_NAME_REGEX = "[a-z0-9]([-a-z0-9]*[a-z0-9])?";
   private static final Pattern METADATA_NAME_PATTERN = Pattern.compile(METADATA_NAME_REGEX);
-  private static final Pattern NEGATED_NAME_PATTERN = Pattern.compile("[^a-z0-9]([^-a-z0-9]*[^a-z0-9])?");
 
   private NamespaceNameValidator() {
     throw new AssertionError();
@@ -53,16 +51,23 @@ public final class NamespaceNameValidator {
     return validateInternal(name).isOk();
   }
 
+  /**
+   * Normalizes input namespace name to K8S accepted format
+   *
+   * @param namespaceName input namespace name
+   * @return normalized namespoace name
+   */
   public static String normalize(String namespaceName) {
-    Matcher matcher = NEGATED_NAME_PATTERN.matcher(namespaceName);
-    String replaced = matcher.replaceAll("-");
-    while (!isValid(replaced)) {
-      // the only thing might happen is dashes at beginning and/or end, lets strip them
-      replaced = replaced.replaceAll("^-|-$", "");
-      // cannot chain since length will be computed for initial string before replace
-      replaced = replaced.substring(0, Math.min(METADATA_NAME_MAX_LENGTH, replaced.length()));
-    }
-    return replaced;
+    namespaceName =
+        namespaceName
+            .replaceAll("[^-a-zA-Z0-9]", "-") // replace invalid chars with '-'
+            .replaceAll("-+", "-") // replace multiple '-' with single ones
+            .replaceAll("^-|-$", ""); // trim dashes at beginning/end of the string
+    return namespaceName.substring(
+        0,
+        Math.min(
+            namespaceName.length(),
+            METADATA_NAME_MAX_LENGTH)); // limit length to METADATA_NAME_MAX_LENGTH
   }
 
   @VisibleForTesting

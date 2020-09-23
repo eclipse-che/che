@@ -42,6 +42,7 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
@@ -90,6 +91,7 @@ public class KubernetesNamespaceFactory {
   private final KubernetesClientFactory clientFactory;
   private final boolean namespaceCreationAllowed;
   private final UserManager userManager;
+  private final PreferenceManager preferenceManager;
   protected final KubernetesSharedPool sharedPool;
 
   @Inject
@@ -103,6 +105,7 @@ public class KubernetesNamespaceFactory {
       @Named("che.infra.kubernetes.namespace.creation_allowed") boolean namespaceCreationAllowed,
       KubernetesClientFactory clientFactory,
       UserManager userManager,
+      PreferenceManager preferenceManager,
       KubernetesSharedPool sharedPool)
       throws ConfigurationException {
     this.namespaceCreationAllowed = namespaceCreationAllowed;
@@ -112,6 +115,7 @@ public class KubernetesNamespaceFactory {
     this.clientFactory = clientFactory;
     this.defaultNamespaceName = defaultNamespaceName;
     this.allowUserDefinedNamespaces = allowUserDefinedNamespaces;
+    this.preferenceManager = preferenceManager;
     this.sharedPool = sharedPool;
 
     if (isNullOrEmpty(defaultNamespaceName)) {
@@ -459,7 +463,9 @@ public class KubernetesNamespaceFactory {
    */
   public String evaluateNamespaceName(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
-    String namespace = evalPlaceholders(defaultNamespaceName, resolutionCtx);
+    String namespace =
+        getPreferencesNamespaceName(resolutionCtx)
+            .orElseGet(() -> evalPlaceholders(defaultNamespaceName, resolutionCtx));
 
     if (!NamespaceNameValidator.isValid(namespace)) {
       Optional<KubernetesNamespaceMeta> namespaceMetaOptional;
@@ -540,6 +546,17 @@ public class KubernetesNamespaceFactory {
       }
     }
     return evaluated;
+  }
+
+  private Optional<String> getPreferencesNamespaceName(NamespaceResolutionContext context) {
+    try {
+      String owner = context.getUserId();
+      Map<String, String> preferences = preferenceManager.find(owner);
+      return Optional.ofNullable(preferences.get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE));
+    } catch (ServerException e) {
+      LOG.error(e.getMessage(), e);
+    }
+    return Optional.empty();
   }
 
   @VisibleForTesting
