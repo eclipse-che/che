@@ -27,5 +27,6 @@
         <module>che-multiuser-keycloak-shared</module>
         <module>che-multiuser-keycloak-server</module>
         <module>che-multiuser-keycloak-token-provider</module>
+        <module>che-multiuser-keycloak-user-remover</module>
     </modules>
 </project>
