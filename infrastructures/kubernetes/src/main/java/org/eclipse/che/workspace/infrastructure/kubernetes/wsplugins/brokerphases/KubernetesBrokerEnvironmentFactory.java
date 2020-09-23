@@ -19,7 +19,6 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVar
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory.BrokersConfigs;
 
 /**
  * Extends {@link BrokerEnvironmentFactory} to be used in the kubernetes infrastructure.
@@ -41,6 +40,8 @@ public class KubernetesBrokerEnvironmentFactory
       @Named("che.workspace.plugin_broker.artifacts.image") String artifactsBrokerImage,
       @Named("che.workspace.plugin_broker.metadata.image") String metadataBrokerImage,
       @Nullable @Named("che.workspace.plugin_registry_url") String pluginRegistryUrl,
+      @Nullable @Named("che.workspace.plugin_registry_internal_url")
+          String pluginRegistryInternalUrl,
       CertificateProvisioner certProvisioner) {
     super(
         cheWebsocketEndpoint,
@@ -50,6 +51,7 @@ public class KubernetesBrokerEnvironmentFactory
         artifactsBrokerImage,
         metadataBrokerImage,
         pluginRegistryUrl,
+        pluginRegistryInternalUrl,
         certProvisioner);
   }
 
