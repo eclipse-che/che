@@ -71,7 +71,6 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
       OpenShiftClientConfigFactory clientConfigFactory,
       OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner,
       UserManager userManager,
-
       PreferenceManager preferenceManager,
       KubernetesSharedPool sharedPool,
       @Nullable @Named("che.infra.openshift.oauth_identity_provider")

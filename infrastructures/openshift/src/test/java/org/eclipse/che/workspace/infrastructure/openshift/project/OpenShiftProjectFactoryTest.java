@@ -179,7 +179,8 @@ public class OpenShiftProjectFactoryTest {
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
-            preferenceManager, pool,
+            preferenceManager,
+            pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
     projectFactory.checkIfNamespaceIsAllowed("any-namespace");

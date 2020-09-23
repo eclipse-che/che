@@ -419,6 +419,36 @@ public class KubernetesNamespaceFactoryTest {
   }
 
   @Test
+  public void shouldReturnDefaultNamespaceWhenCreatingIsNotIsNotAllowed() throws Exception {
+    // given
+    namespaceFactory =
+        spy(
+            new KubernetesNamespaceFactory(
+                "predefined",
+                "",
+                "",
+                "new-default",
+                true,
+                false,
+                clientFactory,
+                userManager,
+                preferenceManager,
+                pool));
+    KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
+    doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespaceAccess(any(), any());
+
+    // when
+    RuntimeIdentity identity =
+        new RuntimeIdentityImpl("workspace123", null, USER_ID, "old-default");
+    KubernetesNamespace namespace = namespaceFactory.getOrCreate(identity);
+
+    // then
+    assertEquals(toReturnNamespace, namespace);
+    verify(namespaceFactory, never()).doCreateServiceAccount(any(), any());
+    verify(toReturnNamespace).prepare(eq(false));
+  }
+
+  @Test
   public void shouldPrepareWorkspaceServiceAccountIfItIsConfiguredAndNamespaceIsNotPredefined()
       throws Exception {
     // given
