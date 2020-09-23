@@ -263,6 +263,21 @@ public class WorkspaceManagerTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked") // for captor
+  public void updatesPreferencesWithInfraNamespaceOnWorkspaceCreation() throws Exception {
+    final WorkspaceConfig cfg = createConfig();
+    ArgumentCaptor<Map<String, String>> prefsCaptor = ArgumentCaptor.forClass(Map.class);
+    when(runtimes.evalInfrastructureNamespace(any(NamespaceResolutionContext.class)))
+        .thenReturn("user-defined");
+
+    workspaceManager.createWorkspace(cfg, NAMESPACE_1, emptyMap());
+
+    verify(preferenceManager).update(anyString(), prefsCaptor.capture());
+    assertEquals(
+        prefsCaptor.getValue().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE), "user-defined");
+  }
+
+  @Test
   public void nameIsUsedWhenNameAndGenerateNameSet()
       throws ValidationException, ConflictException, NotFoundException, ServerException,
           InfrastructureException {

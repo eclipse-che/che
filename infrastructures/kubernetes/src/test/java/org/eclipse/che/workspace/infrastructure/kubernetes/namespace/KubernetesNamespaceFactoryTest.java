@@ -689,7 +689,7 @@ public class KubernetesNamespaceFactoryTest {
             Collections.singletonMap(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "che-123"));
     String namespace =
         namespaceFactory.evaluateNamespaceName(
-            new NamespaceResolutionContext("workspace123", "user123", "jodoe"));
+            new NamespaceResolutionContext("workspace123", "user123", "jondoe"));
 
     assertEquals(namespace, "che-123");
   }
