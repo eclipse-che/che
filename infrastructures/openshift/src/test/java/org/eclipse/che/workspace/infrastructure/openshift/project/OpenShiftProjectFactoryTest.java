@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
@@ -83,6 +84,7 @@ public class OpenShiftProjectFactoryTest {
   @Mock private OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner;
   @Mock private WorkspaceManager workspaceManager;
   @Mock private UserManager userManager;
+  @Mock private PreferenceManager preferenceManager;
   @Mock private KubernetesSharedPool pool;
 
   @Mock
@@ -123,10 +125,12 @@ public class OpenShiftProjectFactoryTest {
             null,
             "defaultNs",
             false,
+            true,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -144,10 +148,12 @@ public class OpenShiftProjectFactoryTest {
             null,
             "defaultNs",
             true,
+            true,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -168,11 +174,12 @@ public class OpenShiftProjectFactoryTest {
             null,
             "defaultNs",
             false,
+            true,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
-            pool,
+            preferenceManager, pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
     projectFactory.checkIfNamespaceIsAllowed("any-namespace");
@@ -191,10 +198,12 @@ public class OpenShiftProjectFactoryTest {
             null,
             null,
             false,
+            true,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
   }
@@ -225,10 +234,12 @@ public class OpenShiftProjectFactoryTest {
             null,
             "che-default",
             false,
+            true,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -258,10 +269,12 @@ public class OpenShiftProjectFactoryTest {
             null,
             "che-default",
             false,
+            true,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -291,10 +304,12 @@ public class OpenShiftProjectFactoryTest {
             null,
             "che-default",
             false,
+            true,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -316,10 +331,12 @@ public class OpenShiftProjectFactoryTest {
             null,
             "default",
             true,
+            true,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -357,10 +374,12 @@ public class OpenShiftProjectFactoryTest {
             null,
             "default",
             true,
+            true,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -393,10 +412,12 @@ public class OpenShiftProjectFactoryTest {
             null,
             "default-ns",
             true,
+            true,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -421,10 +442,12 @@ public class OpenShiftProjectFactoryTest {
                 null,
                 "new-default",
                 false,
+                true,
                 clientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
                 userManager,
+                preferenceManager,
                 pool,
                 NO_OAUTH_IDENTITY_PROVIDER));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
@@ -453,10 +476,12 @@ public class OpenShiftProjectFactoryTest {
                 null,
                 "<workspaceid>",
                 false,
+                true,
                 clientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
                 userManager,
+                preferenceManager,
                 pool,
                 NO_OAUTH_IDENTITY_PROVIDER));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
@@ -487,10 +512,12 @@ public class OpenShiftProjectFactoryTest {
                 null,
                 "<workspaceid>",
                 false,
+                true,
                 clientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
                 userManager,
+                preferenceManager,
                 pool,
                 OAUTH_IDENTITY_PROVIDER));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
@@ -523,10 +550,12 @@ public class OpenShiftProjectFactoryTest {
                 null,
                 "<workspaceid>",
                 false,
+                true,
                 clientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
                 userManager,
+                preferenceManager,
                 pool,
                 NO_OAUTH_IDENTITY_PROVIDER));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);

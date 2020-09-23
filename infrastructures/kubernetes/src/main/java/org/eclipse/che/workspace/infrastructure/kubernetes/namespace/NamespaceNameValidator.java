@@ -55,7 +55,7 @@ public final class NamespaceNameValidator {
    * Normalizes input namespace name to K8S accepted format
    *
    * @param namespaceName input namespace name
-   * @return normalized namespoace name
+   * @return normalized namespace name
    */
   public static String normalize(String namespaceName) {
     namespaceName =
