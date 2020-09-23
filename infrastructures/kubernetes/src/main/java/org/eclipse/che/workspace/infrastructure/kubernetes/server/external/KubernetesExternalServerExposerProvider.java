@@ -35,7 +35,6 @@ public class KubernetesExternalServerExposerProvider<T extends KubernetesEnviron
     extends AbstractExposureStrategyAwareProvider<ExternalServerExposer<T>>
     implements ExternalServerExposerProvider<T> {
 
-  private final boolean forceSubdomainEndpoints;
   private final ExternalServerExposer<T> combinedInstance;
 
   protected final String labelsProperty;
@@ -68,22 +67,16 @@ public class KubernetesExternalServerExposerProvider<T extends KubernetesEnviron
     this.pathTransformFmt = pathTransformFmt;
 
     if (SINGLE_HOST_STRATEGY.equals(exposureStrategy) && exposeDevfileEndpointsOnSubdomains) {
-      this.forceSubdomainEndpoints = true;
       this.combinedInstance =
           new CombinedSingleHostServerExposer<>(createSubdomainServerExposer(), instance);
     } else {
-      this.forceSubdomainEndpoints = false;
       this.combinedInstance = null;
     }
   }
 
   @Override
   public ExternalServerExposer<T> get() {
-    if (forceSubdomainEndpoints) {
-      return combinedInstance;
-    } else {
-      return instance;
-    }
+    return combinedInstance != null ? combinedInstance : instance;
   }
 
   protected ExternalServerExposer<T> createSubdomainServerExposer() {

@@ -12,7 +12,6 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.DEVFILE_ENDPOINT;
 
 import io.fabric8.kubernetes.api.model.ServicePort;
@@ -55,8 +54,8 @@ public class CombinedSingleHostServerExposer<T extends KubernetesEnvironment>
 
     for (String esKey : externalServers.keySet()) {
       ServerConfig serverConfig = externalServers.get(esKey);
-      if (TRUE.toString()
-          .equals(serverConfig.getAttributes().getOrDefault(DEVFILE_ENDPOINT, FALSE.toString()))) {
+      if (Boolean.parseBoolean(
+          serverConfig.getAttributes().getOrDefault(DEVFILE_ENDPOINT, FALSE.toString()))) {
         subdomainServers.put(esKey, serverConfig);
       } else {
         subpathServers.put(esKey, serverConfig);
