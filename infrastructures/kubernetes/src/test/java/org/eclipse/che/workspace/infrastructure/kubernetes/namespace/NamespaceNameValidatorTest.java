@@ -65,6 +65,7 @@ public class NamespaceNameValidatorTest {
       new Object[] {"_fef_123-ah_*zz**", "fef-123-ah-zz"},
       new Object[] {"a-b#-hello", "a-b-hello"},
       new Object[] {"a---------b", "a-b"},
+      new Object[] {"--ab--", "ab"}
     };
   }
 
