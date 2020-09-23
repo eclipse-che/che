@@ -91,6 +91,7 @@ public interface ServerConfig {
    */
   String SERVICE_PORT_ATTRIBUTE = "servicePort";
 
+  // TODO: javadoc
   String DEVFILE_ENDPOINT = "devfileEndpoint";
 
   /**

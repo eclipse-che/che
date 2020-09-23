@@ -14,5 +14,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 import javax.inject.Provider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
+// TODO: javadocs
 public interface ExternalServerExposerProvider<T extends KubernetesEnvironment>
     extends Provider<ExternalServerExposer<T>> {}

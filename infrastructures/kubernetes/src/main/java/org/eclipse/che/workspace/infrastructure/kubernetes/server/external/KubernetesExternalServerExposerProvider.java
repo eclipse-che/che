@@ -30,6 +30,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExpos
  *
  * @param <T> type of environment
  */
+// TODO: update javadocs with "combined" thing
 @Singleton
 public class KubernetesExternalServerExposerProvider<T extends KubernetesEnvironment>
     extends AbstractExposureStrategyAwareProvider<ExternalServerExposer<T>>

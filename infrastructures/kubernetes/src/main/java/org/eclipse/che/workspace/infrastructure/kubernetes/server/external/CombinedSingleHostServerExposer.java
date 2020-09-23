@@ -21,6 +21,8 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
+// TODO: javadocs
+// TODO: test
 @Singleton
 public class CombinedSingleHostServerExposer<T extends KubernetesEnvironment>
     implements ExternalServerExposer<T> {

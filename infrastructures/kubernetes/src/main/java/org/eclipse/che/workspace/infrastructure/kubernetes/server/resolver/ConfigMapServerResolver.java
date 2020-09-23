@@ -24,6 +24,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.RuntimeServerBuilder;
 
 /** Resolves servers from ConfigMaps, used with Gateway based single-host */
+// TODO: test native resolver
 public class ConfigMapServerResolver extends AbstractServerResolver {
 
   private final Multimap<String, ConfigMap> configMaps;
