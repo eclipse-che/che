@@ -21,7 +21,7 @@ pipeline {
             steps {
                 script {
                     catchError(buildResult: 'UNSTABLE', stageResult: 'FAILED') {
-                        retry(1) {
+                        retry(2) {
                             build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                     parameters: [
                                             string(name: 'cheImageRepo',
@@ -67,7 +67,7 @@ pipeline {
             steps {
                 script {
                     catchError(buildResult: 'UNSTABLE', stageResult: 'FAILED') {
-                        retry(1) {
+                        retry(2) {
                             build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                     parameters: [
                                             string(name: 'cheImageRepo',
@@ -113,7 +113,7 @@ pipeline {
             steps {
                 script {
                     catchError(buildResult: 'UNSTABLE', stageResult: 'FAILED') {
-                        retry(1) {
+                        retry(2) {
                             withCredentials([string(credentialsId: 'e45af3e6-8061-4d02-b187-b1c3bb133d3a', variable: 'github_oauth_token')]) {
                                 build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                         parameters: [
