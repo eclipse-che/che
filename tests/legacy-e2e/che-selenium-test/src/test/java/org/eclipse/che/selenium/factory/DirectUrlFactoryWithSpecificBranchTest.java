@@ -29,6 +29,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
@@ -59,6 +60,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   @Inject private TheiaProposalForm theiaProposalForm;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private DefaultTestUser defaultTestUser;
+  @Inject private Dashboard dashboard;
 
   private TestFactory testFactoryWithSpecificBranch;
 
@@ -74,6 +76,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
 
     testFactoryWithSpecificBranch =
         testFactoryInitializer.fromUrl(repositoryUrl + "/tree/" + SECOND_BRANCH_NAME);
+    dashboard.open();
   }
 
   @AfterClass

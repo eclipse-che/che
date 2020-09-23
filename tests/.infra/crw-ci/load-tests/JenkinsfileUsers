@@ -41,7 +41,7 @@ pipeline {
                 defaultValue: 'admin',
                 description: 'Keycloak admin username, default to "admin".')
 
-        string(name: 'keycloakAdminPassword',
+        password(name: 'keycloakAdminPassword',
                 defaultValue: 'admin',
                 description: 'Keacloak admin password, deafult to "admin".')
 
@@ -86,7 +86,7 @@ pipeline {
                 sh """
                   cd $PATH_TO_SCRIPTS
                   oc config use-context ${env.CHE_CONTEXT}
-                  ./create_users.sh -n $USERNAME_BASE -m $USERNAME_PASS -s $startingIndex -c $numberOfUsers -e $environment -a keycloakAdminUsername -p keycloakAdminPassword
+                  ./create_users.sh -n $USERNAME_BASE -m $USERNAME_PASS -s $startingIndex -c $numberOfUsers -e $environment -a $keycloakAdminUsername -p $keycloakAdminPassword
                 """
             }
         }

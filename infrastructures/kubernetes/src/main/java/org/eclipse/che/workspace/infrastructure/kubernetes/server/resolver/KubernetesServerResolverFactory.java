@@ -32,7 +32,7 @@ public class KubernetesServerResolverFactory extends AbstractServerResolverFacto
       IngressPathTransformInverter pathTransformInverter,
       @Named("che.host") String cheHost,
       @Named("che.infra.kubernetes.server_strategy") String exposureStrategy,
-      @Named("che.infra.kubernetes.single_host.workspace.exposure") String wsExposureType) {
+      @Named("che.infra.kubernetes.singlehost.workspace.exposure") String wsExposureType) {
 
     super(
         exposureStrategy,

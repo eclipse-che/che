@@ -41,8 +41,6 @@
     </scm>
     <properties>
         <?SORTPOM IGNORE?>
-        <java.target.version>8</java.target.version>
-        <jdk.min.version>11</jdk.min.version>
         <build.info>${project.version}</build.info>
         <che.dashboard.version>7.19.0-SNAPSHOT</che.dashboard.version>
         <che.version>7.19.0-SNAPSHOT</che.version>
@@ -1113,11 +1111,6 @@
             <dependency>
                 <groupId>org.eclipse.che.multiuser</groupId>
                 <artifactId>che-multiuser-permission-devfile</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.multiuser</groupId>
-                <artifactId>che-multiuser-permission-factory</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

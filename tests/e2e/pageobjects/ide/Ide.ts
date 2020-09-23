@@ -15,6 +15,7 @@ import { TestConstants } from '../../TestConstants';
 import { By, error } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { NotificationCenter } from './NotificationCenter';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 export enum LeftToolbarButton {
     Explorer = 'Explorer',
@@ -39,7 +40,7 @@ export class Ide {
         @inject(CLASSES.NotificationCenter) private readonly notificationCenter: NotificationCenter
     ) { }
 
-    async waitAndSwitchToIdeFrame(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+    async waitAndSwitchToIdeFrame(timeout: number = TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
         Logger.debug('Ide.waitAndSwitchToIdeFrame');
         try {
             await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
@@ -52,16 +53,35 @@ export class Ide {
         }
     }
 
-    async waitNotification(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitNotification(notificationText: string, timeout: number = TimeoutConstants.TS_NOTIFICATION_CENTER_TIMEOUT) {
         Logger.debug(`Ide.waitNotification "${notificationText}"`);
 
         const notificationLocator: By = By.xpath(this.getNotificationXpathLocator(notificationText));
         await this.driverHelper.waitVisibility(notificationLocator, timeout);
     }
 
+    async waitTaskExitCodeNotificationBoolean(exitCode: string, timeout: number = TimeoutConstants.TS_SELENIUM_WAIT_TASK_EXIT_CODE_TIMEOUT) : Promise<boolean> {
+        Logger.debug(`Ide.waitTaskExitCodeNotification "has exited with code ${exitCode}."`);
+
+        const exitCodeNotificationLocator: By = By.xpath(this.getNotificationXpathLocator(`has exited with code`));
+        const notificationLocator: By = By.xpath(this.getNotificationXpathLocator(`has exited with code ${exitCode}.`));
+
+        Logger.info(`Ide.waitTaskExitCodeNotification waiting for any exit code notification.`);
+        try {
+            await this.driverHelper.waitVisibility(exitCodeNotificationLocator, timeout);
+        } catch (err) {
+            if (err instanceof error.TimeoutError) {
+                Logger.error(`Ide.waitTaskExitCodeNotificationBoolean wait for notification timed out.`);
+            }
+            throw err;
+        }
+        Logger.info(`Ide.waitTaskExitCodeNotification checking for correct exit core:${exitCode}`);
+        return await this.driverHelper.waitVisibilityBoolean(notificationLocator, 1, 1000);
+    }
+
     async waitNotificationAndClickOnButton(notificationText: string,
         buttonText: string,
-        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        timeout: number = TimeoutConstants.TS_NOTIFICATION_CENTER_TIMEOUT) {
 
         Logger.debug(`Ide.waitNotificationAndClickOnButton "${notificationText}" buttonText: "${buttonText}"`);
 
@@ -85,15 +105,14 @@ export class Ide {
         }, timeout);
     }
 
-    async waitNotificationAndConfirm(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitNotificationAndConfirm(notificationText: string, timeout: number = TimeoutConstants.TS_NOTIFICATION_CENTER_TIMEOUT) {
         Logger.debug(`Ide.waitNotificationAndConfirm "${notificationText}"`);
 
         await this.waitNotificationAndClickOnButton(notificationText, 'yes', timeout);
     }
 
-    async waitNotificationAndOpenLink(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitNotificationAndOpenLink(notificationText: string, timeout: number) {
         Logger.debug(`Ide.waitNotificationAndOpenLink "${notificationText}"`);
-
         await this.waitNotification(notificationText, timeout);
         await this.waitApllicationIsReady(await this.getApplicationUrlFromNotification(notificationText), timeout);
         await this.waitNotificationAndClickOnButton(notificationText, 'Open Link', timeout);
@@ -123,7 +142,7 @@ export class Ide {
         await this.driverHelper.waitAndClick(By.xpath(yesButtonLocator));
     }
 
-    async waitWorkspaceAndIde(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+    async waitWorkspaceAndIde(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
 
         Logger.debug('Ide.waitWorkspaceAndIde');
 
@@ -131,7 +150,7 @@ export class Ide {
         await this.waitIde(timeout);
     }
 
-    async waitIde(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+    async waitIde(timeout: number = TimeoutConstants.TS_IDE_LOAD_TIMEOUT) {
         Logger.debug('Ide.waitIde');
 
         const mainIdeParts: Array<By> = [By.css(Ide.TOP_MENU_PANEL_CSS), By.css(Ide.LEFT_CONTENT_PANEL_CSS), By.id(Ide.EXPLORER_BUTTON_ID)];
@@ -147,33 +166,33 @@ export class Ide {
         }
     }
 
-    async waitLeftToolbarButton(buttonTitle: LeftToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitLeftToolbarButton(buttonTitle: LeftToolbarButton, timeout: number = TimeoutConstants.TS_SELENIUM_TOOLBAR_TIMEOUT) {
         Logger.debug('Ide.waitLeftToolbarButton');
 
         const buttonLocator: By = this.getLeftToolbarButtonLocator(buttonTitle);
         await this.driverHelper.waitVisibility(buttonLocator, timeout);
     }
 
-    async waitAndClickLeftToolbarButton(buttonTitle: LeftToolbarButton, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitAndClickLeftToolbarButton(buttonTitle: LeftToolbarButton, timeout: number = TimeoutConstants.TS_SELENIUM_TOOLBAR_TIMEOUT) {
         Logger.debug('Ide.waitAndClickLeftToolbarButton');
 
         const buttonLocator: By = this.getLeftToolbarButtonLocator(buttonTitle);
         await this.driverHelper.waitAndClick(buttonLocator, timeout);
     }
 
-    async waitTopMenuPanel(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitTopMenuPanel(timeout: number = TimeoutConstants.TS_SELENIUM_TOOLBAR_TIMEOUT) {
         Logger.debug('Ide.waitTopMenuPanel');
 
         await this.driverHelper.waitVisibility(By.css(Ide.TOP_MENU_PANEL_CSS), timeout);
     }
 
-    async waitLeftContentPanel(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitLeftContentPanel(timeout: number = TimeoutConstants.TS_SELENIUM_TOOLBAR_TIMEOUT) {
         Logger.debug('Ide.waitLeftContentPanel');
 
-        await this.driverHelper.waitVisibility(By.css(Ide.LEFT_CONTENT_PANEL_CSS));
+        await this.driverHelper.waitVisibility(By.css(Ide.LEFT_CONTENT_PANEL_CSS), timeout);
     }
 
-    async waitPreloaderAbsent(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+    async waitPreloaderAbsent(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = timeout / polling;
         Logger.debug('Ide.waitPreloaderAbsent');
@@ -181,13 +200,13 @@ export class Ide {
         await this.driverHelper.waitDisappearance(By.css(Ide.PRELOADER_CSS), attempts, polling);
     }
 
-    async waitPreloaderVisible(timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
+    async waitPreloaderVisible(timeout: number = TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
         Logger.debug('Ide.waitPreloaderVisible');
 
         await this.driverHelper.waitVisibility(By.css(Ide.PRELOADER_CSS), timeout);
     }
 
-    async waitStatusBarContains(expectedText: string, timeout: number = TestConstants.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT) {
+    async waitStatusBarContains(expectedText: string, timeout: number = TimeoutConstants.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT) {
         const statusBarLocator: By = By.css('div[id=\'theia-statusBar\']');
 
         Logger.debug(`Ide.waitStatusBarContains "${expectedText}"`);
@@ -205,7 +224,7 @@ export class Ide {
         }, timeout);
     }
 
-    async waitStatusBarTextAbsence(expectedText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitStatusBarTextAbsence(expectedText: string, timeout: number = TimeoutConstants.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT) {
         const statusBarLocator: By = By.css('div[id=\'theia-statusBar\']');
 
         Logger.debug(`Ide.waitStatusBarTextAbsence "${expectedText}"`);
@@ -233,21 +252,21 @@ export class Ide {
         await this.waitStatusBarContains(expectedTextInStatusBar, 20000);
     }
 
-    async performKeyCombination(keyCombination: string) {
+    async performKeyCombination(keyCombination: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) {
         Logger.debug(`Ide.performKeyCombination "${keyCombination}"`);
 
         const bodyLocator: By = By.tagName('body');
-        await this.driverHelper.type(bodyLocator, keyCombination);
+        await this.driverHelper.type(bodyLocator, keyCombination, timeout);
     }
 
-    async waitRightToolbarButtonSelection(buttonTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitRightToolbarButtonSelection(buttonTitle: string, timeout: number = TimeoutConstants.TS_SELENIUM_TOOLBAR_TIMEOUT) {
         Logger.debug('Ide.waitRightToolbarButtonSelection');
 
         const selectedRightToolbarButtonLocator: By = this.getSelectedRightToolbarButtonLocator(buttonTitle);
         await this.driverHelper.waitVisibility(selectedRightToolbarButtonLocator, timeout);
     }
 
-    async getApplicationUrlFromNotification(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async getApplicationUrlFromNotification(notificationText: string, timeout: number = TimeoutConstants.TS_NOTIFICATION_CENTER_TIMEOUT) {
         Logger.debug(`Ide.getApplicationUrlFromNotification ${notificationText}`);
 
         const notificationTextLocator: By = By.xpath(`//div[@class='theia-notification-message']/span[contains(.,'${notificationText}')]`);
@@ -261,11 +280,11 @@ export class Ide {
         return notification.split(regexp)[1];
     }
 
-    async closeAllNotifications(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async closeAllNotifications(timeout: number = TimeoutConstants.TS_NOTIFICATION_CENTER_TIMEOUT) {
         Logger.debug(`Ide.closeAllNotifications`);
 
         for (let i: number = 0; i < 5; i++) {
-            await this.notificationCenter.open(timeout);
+            await this.notificationCenter.open();
             try {
                 await this.notificationCenter.closeAll(timeout);
                 break;
@@ -284,7 +303,7 @@ export class Ide {
     }
 
     async waitApllicationIsReady(url: string,
-        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        timeout: number) {
 
         Logger.debug(`Ide.waitApllicationIsReady ${url}`);
 

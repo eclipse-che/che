@@ -14,7 +14,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 import static com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature.WRITE_DOC_START_MARKER;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVICE_PORT_ATTRIBUTE;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner.isGatewayConfig;
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
@@ -41,7 +40,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
  *       service: {name}
  *       middlewares:
  *       - "{name}"
- *       - "{name}_headers"
  *       priority: 100
  *   services:
  *     {name}:
@@ -53,9 +51,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
  *       stripPrefix:
  *         prefixes:
  *         - "{GatewayRouteConfig#routePath}"
- *     {name}_headers:
- *       customRequestHeaders:
- *         X-Forwarded-Proto: "{protocol}"
  * </pre>
  */
 public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGenerator {
@@ -65,15 +60,8 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
   private final Map<String, ConfigMap> routeConfigs = new HashMap<>();
 
   @Override
-  public void addRouteConfig(String name, ConfigMap routeConfig) throws InfrastructureException {
-    if (isGatewayConfig(routeConfig)) {
-      this.routeConfigs.put(name, routeConfig);
-    } else {
-      throw new InfrastructureException(
-          "Not a gateway configuration ConfigMap '"
-              + routeConfig.getMetadata().getName()
-              + "'. This is a bug, please report.");
-    }
+  public void addRouteConfig(String name, ConfigMap routeConfig) {
+    this.routeConfigs.put(name, routeConfig);
   }
 
   /**
@@ -107,8 +95,7 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
           generate(
               routeConfig.getKey(),
               createServiceUrl(serviceName, servicePort, namespace),
-              server.getPath(),
-              server.getProtocol());
+              server.getPath());
       cmData.put(routeConfig.getKey() + ".yml", traefikRouteConfig);
     }
     return cmData;
@@ -120,10 +107,9 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
    * @param name name of the service
    * @param serviceUrl url of service we want to route to
    * @param path path to route and strip
-   * @param protocol protocol of the service to properly set the headers
    * @return traefik service route config
    */
-  private String generate(String name, String serviceUrl, String path, String protocol)
+  private String generate(String name, String serviceUrl, String path)
       throws InfrastructureException {
     StringWriter sw = new StringWriter();
     try {
@@ -141,7 +127,7 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
       generateServices(generator, name, serviceUrl);
 
       generator.writeFieldName("middlewares");
-      generateMiddlewares(generator, name, path, protocol);
+      generateMiddlewares(generator, name, path);
 
       generator.writeEndObject();
       generator.writeEndObject();
@@ -163,7 +149,6 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
    *   service: "{name}"
    *   middlewares:
    *   - "{name}"
-   *   - "{name}_headers
    *   priority: 100
    * </pre>
    */
@@ -179,7 +164,6 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
     generator.writeFieldName("middlewares");
     generator.writeStartArray();
     generator.writeString(name);
-    generator.writeString(name + "_headers");
     generator.writeEndArray();
     generator.writeFieldName("priority");
     generator.writeNumber(100);
@@ -224,14 +208,10 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
    *   stripPrefix:
    *     prefixes:
    *     - "{path}"
-   * {name}_headers:
-   *   headers:
-   *     customRequestHeaders:
-   *       X-Forwarded-Proto: "{protocol}"
    * </pre>
    */
-  private void generateMiddlewares(
-      YAMLGenerator generator, String name, String path, String protocol) throws IOException {
+  private void generateMiddlewares(YAMLGenerator generator, String name, String path)
+      throws IOException {
     generator.writeStartObject();
     generator.writeFieldName(name);
     generator.writeStartObject();
@@ -243,19 +223,6 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
     generator.writeEndArray();
     generator.writeEndObject();
     generator.writeEndObject();
-
-    generator.writeFieldName(name + "_headers");
-    generator.writeStartObject();
-    generator.writeFieldName("headers");
-    generator.writeStartObject();
-    generator.writeFieldName("customRequestHeaders");
-    generator.writeStartObject();
-    generator.writeFieldName("X-Forwarded-Proto");
-    generator.writeString(protocol);
-    generator.writeEndObject();
-    generator.writeEndObject();
-    generator.writeEndObject();
-
     generator.writeEndObject();
   }
 

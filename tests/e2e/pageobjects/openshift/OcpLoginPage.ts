@@ -14,6 +14,7 @@ import { CLASSES } from '../../inversify.types';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TestConstants } from '../../TestConstants';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 @injectable()
 export class OcpLoginPage {
@@ -32,7 +33,7 @@ export class OcpLoginPage {
     async waitOpenShiftLoginWelcomePage() {
         Logger.debug('OcpLoginPage.waitOpenShiftLoginWelcomePage');
 
-        await this.driverHelper.waitVisibility(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH));
+        await this.driverHelper.waitVisibility(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async clickOnLoginProviderTitle() {
@@ -60,7 +61,7 @@ export class OcpLoginPage {
         Logger.debug('OcpLoginPage.waitAuthorizeOpenShiftIdentityProviderPage');
 
         const authorizeOpenshiftIdentityProviderPageLocator: By = By.xpath('//h1[text()=\'Authorize Access\']');
-        await this.driverHelper.waitVisibility(authorizeOpenshiftIdentityProviderPageLocator);
+        await this.driverHelper.waitVisibility(authorizeOpenshiftIdentityProviderPageLocator, TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async clickOnApproveAuthorizeAccessButton() {
