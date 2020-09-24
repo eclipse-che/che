@@ -21,7 +21,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExpos
 
 /**
  * Provides {@link ExternalServerExposer} based on `che.infra.kubernetes.server_strategy` and
- * `che.infra.kubernetes.single_host.workspace.exposure` properties.
+ * `che.infra.kubernetes.singlehost.workspace.exposure` properties.
  *
  * @param <T> type of environment
  */
@@ -31,7 +31,7 @@ public class ExternalServerExposerProvider<T extends KubernetesEnvironment>
   @Inject
   public ExternalServerExposerProvider(
       @Named("che.infra.kubernetes.server_strategy") String exposureStrategy,
-      @Named("che.infra.kubernetes.single_host.workspace.exposure") String exposureType,
+      @Named("che.infra.kubernetes.singlehost.workspace.exposure") String exposureType,
       Map<WorkspaceExposureType, ExternalServerExposer<T>> exposers) {
 
     super(

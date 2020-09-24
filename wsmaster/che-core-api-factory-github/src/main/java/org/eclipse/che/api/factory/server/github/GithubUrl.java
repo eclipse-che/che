@@ -12,7 +12,11 @@
 package org.eclipse.che.api.factory.server.github;
 
 import com.google.common.base.Strings;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
 
 /**
@@ -43,8 +47,8 @@ public class GithubUrl implements RemoteFactoryUrl {
   /** Factory json filename */
   private String factoryFilename;
 
-  /** Devfile filename */
-  private String devfileFilename;
+  /** Devfile filenames list */
+  private final List<String> devfileFilenames = new ArrayList<>();
 
   /**
    * Creation of this instance is made by the parser so user may not need to create a new instance
@@ -80,18 +84,8 @@ public class GithubUrl implements RemoteFactoryUrl {
     return this;
   }
 
-  /**
-   * Gets devfile file name of this github url
-   *
-   * @return the devfile file name
-   */
-  @Override
-  public String getDevfileFilename() {
-    return this.devfileFilename;
-  }
-
-  protected GithubUrl withDevfileFilename(String devfileFilename) {
-    this.devfileFilename = devfileFilename;
+  protected GithubUrl withDevfileFilenames(List<String> devfileFilenames) {
+    this.devfileFilenames.addAll(devfileFilenames);
     return this;
   }
 
@@ -157,13 +151,27 @@ public class GithubUrl implements RemoteFactoryUrl {
   }
 
   /**
-   * Provides location to raw content of the devfile yaml file
+   * Provides list of configured devfile filenames with locations
    *
-   * @return location of devfile yaml file in a repository
+   * @return list of devfile filenames and locations
    */
   @Override
-  public String devfileFileLocation() {
-    return rawFileLocation(devfileFilename);
+  public List<DevfileLocation> devfileFileLocations() {
+    return devfileFilenames.stream().map(this::createDevfileLocation).collect(Collectors.toList());
+  }
+
+  private DevfileLocation createDevfileLocation(String devfileFilename) {
+    return new DevfileLocation() {
+      @Override
+      public Optional<String> filename() {
+        return Optional.of(devfileFilename);
+      }
+
+      @Override
+      public String location() {
+        return rawFileLocation(devfileFilename);
+      }
+    };
   }
 
   /**

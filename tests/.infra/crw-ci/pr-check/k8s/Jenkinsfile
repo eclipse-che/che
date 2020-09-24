@@ -233,11 +233,12 @@ EOL"""
                         --k8spodreadytimeout=180000 \\
                         --listr-renderer=verbose \\
                         --platform=minikube \\
-                        --che-operator-cr-patch-yaml=$CUSTOM_RESOURCE_PATCH_FILE
+                        --che-operator-cr-patch-yaml=$CUSTOM_RESOURCE_PATCH_FILE \\
+                        --chenamespace=eclipse-che
                     """
 
                     cheHost = sh(
-                            script: "kubectl get ingress che -n=che -o=jsonpath={'.spec.rules[0].host'}",
+                            script: "kubectl get ingress che --namespace=eclipse-che -o=jsonpath={'.spec.rules[0].host'}",
                             returnStdout: true
                     ).trim()
 
@@ -287,7 +288,7 @@ EOL"""
                     }
 
                     sh """   
-                        KEYCLOAK_BASE_URL="https://\$(kubectl get ingress/keycloak -n che -o jsonpath='{.spec.rules[0].host}')/auth"
+                        KEYCLOAK_BASE_URL="https://\$(kubectl get ingress/keycloak --namespace=eclipse-che -o jsonpath='{.spec.rules[0].host}')/auth"
     
                         USER_ACCESS_TOKEN=\$(curl -k -X POST \$KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token \\
                            -H "Content-Type: application/x-www-form-urlencoded" \\
@@ -298,7 +299,8 @@ EOL"""
     
                         ${pathToChectl} workspace:create --start \\
                            --devfile=${DEVFILE_PATH} \\
-                           --access-token "\$USER_ACCESS_TOKEN"
+                           --access-token "\$USER_ACCESS_TOKEN" \\
+                           --chenamespace=eclipse-che
                     """
                 }
             }
@@ -328,8 +330,8 @@ EOL"""
         cleanup {
             sh """                   
                 mkdir -p $LOGS_AND_CONFIGS/kubectl
-                kubectl --namespace=che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
-                kubectl --namespace=che get events -o json > $LOGS_AND_CONFIGS/kubectl/events.json || true
+                kubectl --namespace=eclipse-che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
+                kubectl --namespace=eclipse-che get events -o json > $LOGS_AND_CONFIGS/kubectl/events.json || true
 
                 mkdir -p $LOGS_AND_CONFIGS/che-config
 
@@ -337,24 +339,24 @@ EOL"""
                 cp ${DEVFILE_PATH} $LOGS_AND_CONFIGS || true
                 cp ${CUSTOM_RESOURCE_PATCH_FILE} $LOGS_AND_CONFIGS || true
 
-                kubectl get checluster --namespace=che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml || true
-                kubectl get configmaps --namespace=che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
-                kubectl get ingresses --namespace=che > $LOGS_AND_CONFIGS/che-config/ingresses.txt || true
-                kubectl get pods --namespace=che >$LOGS_AND_CONFIGS/che-config/pods.txt || true
-                kubectl get all -n che -o yaml > $LOGS_AND_CONFIGS/che-config/all.yaml || true
+                kubectl get checluster --namespace=eclipse-che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml || true
+                kubectl get configmaps --namespace=eclipse-che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
+                kubectl get ingresses --namespace=eclipse-che > $LOGS_AND_CONFIGS/che-config/ingresses.txt || true
+                kubectl get pods --namespace=eclipse-che >$LOGS_AND_CONFIGS/che-config/pods.txt || true
+                kubectl get all --namespace=eclipse-che -o yaml > $LOGS_AND_CONFIGS/che-config/all.yaml || true
 
                 mkdir -p $LOGS_AND_CONFIGS/che-logs
-                export PODS=\$(kubectl get pod --namespace=che | awk 'NR>1 {print \$1}')
+                export PODS=\$(kubectl get pod --namespace=eclipse-che | awk 'NR>1 {print \$1}')
                 for pod in \$PODS ; do \
-                    kubectl logs --namespace=che "\${pod}" -n che > $LOGS_AND_CONFIGS/che-logs/"\${pod}".pod.log || true; \
+                    kubectl logs --namespace=eclipse-che "\${pod}" --namespace=eclipse-che > $LOGS_AND_CONFIGS/che-logs/"\${pod}".pod.log || true; \
                 done
 
                 mkdir -p $LOGS_AND_CONFIGS/workspace-logs
-                export WS_POD=\$(kubectl get pod --namespace=che | grep ".workspace-" | awk '{print \$1}')
-                for c in \$(kubectl get pod --namespace=che \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do \\
-                    kubectl logs \$(kubectl get pod --namespace=che | grep ".workspace-" | awk '{print \$1}') "\${c}" -n che > $LOGS_AND_CONFIGS/workspace-logs/"\${c}".container.log || true; \\
+                export WS_POD=\$(kubectl get pod --namespace=eclipse-che | grep ".workspace-" | awk '{print \$1}')
+                for c in \$(kubectl get pod --namespace=eclipse-che \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do \\
+                    kubectl logs \$(kubectl get pod --namespace=eclipse-che | grep ".workspace-" | awk '{print \$1}') "\${c}" --namespace=eclipse-che > $LOGS_AND_CONFIGS/workspace-logs/"\${c}".container.log || true; \\
                 done
-                kubectl describe pod --namespace=che \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
+                kubectl describe pod --namespace=eclipse-che \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
 
                 mkdir -p $LOGS_AND_CONFIGS/docker
                 docker image ls > $LOGS_AND_CONFIGS/docker/images.txt || true

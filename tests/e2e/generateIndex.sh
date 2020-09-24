@@ -5,6 +5,7 @@ echo "import * as inversifyConfig from './inversify.config';
 export { inversifyConfig };
 export * from './inversify.types';
 export * from './TestConstants';
+export * from './TimeoutConstants';
 " > index.ts
 
 listOfDirs="driver utils pageobjects testsLibrary"

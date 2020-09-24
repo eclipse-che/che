@@ -37,6 +37,7 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
+import org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
@@ -61,6 +62,8 @@ public class Dashboard {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final WebDriverWaitFactory webDriverWaitFactory;
   private final boolean isMultiuser;
+
+  @Inject private OpenShiftLoginPage openShiftLoginPage;
 
   @Inject
   public Dashboard(
@@ -273,6 +276,7 @@ public class Dashboard {
   /** Open dashboard as default uses */
   public void open() {
     seleniumWebDriver.get(testDashboardUrlProvider.get().toString());
+    openShiftLoginPage.login();
     entrance.login(defaultUser);
     waitDashboardToolbarTitle();
   }
@@ -280,6 +284,7 @@ public class Dashboard {
   /** Open dashboard with provided username and password */
   public void open(String userName, String userPassword) {
     seleniumWebDriver.get(testDashboardUrlProvider.get().toString());
+    openShiftLoginPage.login();
     if (loginPage.isOpened()) {
       loginPage.login(userName, userPassword);
     }

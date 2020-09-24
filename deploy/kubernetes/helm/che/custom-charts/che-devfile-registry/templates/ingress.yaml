@@ -7,6 +7,8 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
+{{- if not (and (eq .Values.global.serverStrategy "single-host") (eq .Values.global.singleHostExposure "gateway")) }}
+
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -49,3 +51,5 @@ spec:
     - {{ template "devfileRegistryHost" . }}
     secretName: {{ .Values.global.tls.secretName }}
 {{- end -}}
+
+{{- end }}

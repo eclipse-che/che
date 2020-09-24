@@ -38,6 +38,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetecto
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.CheNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -83,6 +84,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       SecretAsContainerResourceProvisioner<OpenShiftEnvironment>
           secretAsContainerResourceProvisioner,
       OpenShiftServerResolverFactory serverResolverFactory,
+      CheNamespace cheNamespace,
       Tracer tracer,
       Openshift4TrustedCAProvisioner trustedCAProvisioner,
       @Assisted OpenShiftRuntimeContext context,
@@ -108,6 +110,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         previewUrlCommandProvisioner,
         secretAsContainerResourceProvisioner,
         null,
+        cheNamespace,
         tracer,
         context,
         project);
@@ -133,7 +136,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     String workspaceId = getContext().getIdentity().getWorkspaceId();
 
     createSecrets(osEnv, workspaceId);
-    List<ConfigMap> createdConfigMaps = createConfigMaps(osEnv, workspaceId);
+    List<ConfigMap> createdConfigMaps = createConfigMaps(osEnv, getContext().getIdentity());
     List<Service> createdServices = createServices(osEnv, workspaceId);
     List<Route> createdRoutes = createRoutes(osEnv, workspaceId);
 
@@ -149,18 +152,6 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     for (Secret secret : env.getSecrets().values()) {
       project.secrets().create(secret);
     }
-  }
-
-  @Traced
-  @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
-  List<ConfigMap> createConfigMaps(OpenShiftEnvironment env, String workspaceId)
-      throws InfrastructureException {
-    TracingTags.WORKSPACE_ID.set(workspaceId);
-    List<ConfigMap> createdConfigMaps = new ArrayList<>();
-    for (ConfigMap configMap : env.getConfigMaps().values()) {
-      createdConfigMaps.add(project.configMaps().create(configMap));
-    }
-    return createdConfigMaps;
   }
 
   @Traced

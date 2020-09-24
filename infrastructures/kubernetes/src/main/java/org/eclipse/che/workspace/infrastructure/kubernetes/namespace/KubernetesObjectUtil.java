@@ -12,6 +12,9 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -33,6 +36,7 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentSpec;
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 
 /**
  * Helps to work with Kubernetes objects.
@@ -223,5 +227,30 @@ public class KubernetesObjectUtil {
     final PersistentVolumeClaimVolumeSource pvcs =
         new PersistentVolumeClaimVolumeSourceBuilder().withClaimName(pvcName).build();
     return new VolumeBuilder().withPersistentVolumeClaim(pvcs).withName(name).build();
+  }
+
+  /**
+   * Checks the object if it is propetly annotated to be created in Che installation namespace.
+   *
+   * <p>Create in Che installation namespace only if there is {@link
+   * Annotations#CREATE_IN_CHE_INSTALLATION_NAMESPACE} annotation set exactly to `true`. In all
+   * other cases we create the object in Workspace's namespace.
+   *
+   * @param k8sObject object to check
+   * @return `true` if {@link Annotations#CREATE_IN_CHE_INSTALLATION_NAMESPACE} is set to `true`.
+   *     `false` otherwise.
+   */
+  public static boolean shouldCreateInCheNamespace(HasMetadata k8sObject) {
+    if (k8sObject.getMetadata() == null) {
+      return false;
+    }
+    Map<String, String> annotations = k8sObject.getMetadata().getAnnotations();
+    if (annotations == null || annotations.isEmpty()) {
+      return false;
+    }
+
+    return annotations
+        .getOrDefault(CREATE_IN_CHE_INSTALLATION_NAMESPACE, FALSE.toString())
+        .equals(TRUE.toString());
   }
 }

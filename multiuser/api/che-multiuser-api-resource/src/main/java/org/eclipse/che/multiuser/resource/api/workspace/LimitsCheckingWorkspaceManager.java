@@ -32,6 +32,7 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
@@ -78,6 +79,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
       WorkspaceRuntimes runtimes,
       EventService eventService,
       AccountManager accountManager,
+      PreferenceManager preferenceManager,
       WorkspaceValidator workspaceValidator,
       // own injects
       @Named("che.limits.workspace.env.ram") String maxRamPerEnv,
@@ -90,6 +92,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         runtimes,
         eventService,
         accountManager,
+        preferenceManager,
         workspaceValidator,
         devfileIntegrityValidator);
     this.environmentRamCalculator = environmentRamCalculator;

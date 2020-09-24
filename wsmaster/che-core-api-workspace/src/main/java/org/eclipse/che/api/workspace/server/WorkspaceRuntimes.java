@@ -37,6 +37,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -584,6 +585,28 @@ public class WorkspaceRuntimes {
   }
 
   /**
+   * Gets the workspaces identifiers owned by given user. If an identifier is present in set then
+   * that workspace wasn't stopped at the moment of method execution.
+   *
+   * @param owner
+   * @return workspaces identifiers for those workspaces that are active(not stopped), or an empty
+   *     set if there is no a single active workspace
+   * @throws ServerException
+   * @throws InfrastructureException
+   */
+  public Set<String> getActive(String owner) throws ServerException, InfrastructureException {
+    Set<String> activeForOwner = new HashSet<>();
+    Set<String> active = getActive();
+    for (String workspaceId : active) {
+      InternalRuntime<?> internalRuntime = getInternalRuntime(workspaceId);
+      if (owner.equals(internalRuntime.getOwner())) {
+        activeForOwner.add(workspaceId);
+      }
+    }
+    return ImmutableSet.copyOf(activeForOwner);
+  }
+
+  /**
    * Returns true if there is at least one workspace active(it's status is different from {@link
    * WorkspaceStatus#STOPPED}), otherwise returns false.
    */
@@ -604,6 +627,23 @@ public class WorkspaceRuntimes {
         .map(Entry::getKey)
         .filter(this::containsThisRuntimesId)
         .collect(toSet());
+  }
+
+  /**
+   * Gets the list of workspace id's which are currently starting or stopping on given node and
+   * owned by given user id. (it's status is {@link WorkspaceStatus#STARTING} or {@link
+   * WorkspaceStatus#STOPPING})
+   */
+  public Set<String> getInProgress(String owner) throws ServerException, InfrastructureException {
+    Set<String> inProgressForOwner = new HashSet<>();
+    Set<String> inProgress = getInProgress();
+    for (String workspaceId : inProgress) {
+      InternalRuntime<?> internalRuntime = getInternalRuntime(workspaceId);
+      if (owner.equals(internalRuntime.getOwner())) {
+        inProgressForOwner.add(workspaceId);
+      }
+    }
+    return ImmutableSet.copyOf(inProgressForOwner);
   }
 
   /**

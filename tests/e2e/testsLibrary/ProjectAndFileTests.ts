@@ -26,9 +26,19 @@ export function waitWorkspaceReadiness(sampleName : string, folder: string) {
     });
 }
 
+export function waitWorkspaceReadinessNoSubfolder(sampleName : string) {
+    test('Wait for workspace readiness', async () => {
+        await ide.waitAndSwitchToIdeFrame();
+        await ide.waitPreloaderVisible();
+        await ide.waitPreloaderAbsent();
+        await ide.waitIde();
+        await projectTree.openProjectTreeContainer();
+        await projectTree.waitProjectImportedNoSubfolder(sampleName);
+    });
+}
+
 export function openFile(filePath: string, fileName: string) {
     test('Expand project and open file in editor', async () => {
-        await projectTree.expandPathAndOpenFileInAssociatedWorkspace(filePath, fileName);
         await projectTree.expandPathAndOpenFile(filePath, fileName);
         await editor.selectTab(fileName);
     });
