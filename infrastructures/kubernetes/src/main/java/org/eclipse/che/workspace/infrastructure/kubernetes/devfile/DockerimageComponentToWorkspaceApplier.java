@@ -142,8 +142,7 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
                 .stream()
                 .collect(
                     Collectors.toMap(
-                        Endpoint::getName,
-                        e -> ServerConfigImpl.createFromEndpoint(e, true)))); // TODO: test
+                        Endpoint::getName, e -> ServerConfigImpl.createFromEndpoint(e, true))));
 
     dockerimageComponent
         .getVolumes()
