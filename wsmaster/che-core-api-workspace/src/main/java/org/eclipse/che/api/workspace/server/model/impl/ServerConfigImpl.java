@@ -180,7 +180,6 @@ public class ServerConfigImpl implements ServerConfig {
         + '}';
   }
 
-  // TODO: test
   public static ServerConfigImpl createFromEndpoint(Endpoint endpoint, boolean devfileEndpoint) {
     HashMap<String, String> attributes = new HashMap<>(endpoint.getAttributes());
     attributes.put(SERVER_NAME_ATTRIBUTE, endpoint.getName());
