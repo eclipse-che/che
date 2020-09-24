@@ -24,18 +24,17 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.RuntimeServerBuilder;
 
 /** Resolves servers from ConfigMaps, used with Gateway based single-host */
-// TODO: test native resolver
 public class ConfigMapServerResolver extends AbstractServerResolver {
 
   private final Multimap<String, ConfigMap> configMaps;
   private final String cheHost;
-  private final AbstractServerResolver nativeServerResolver;
+  private final ServerResolver nativeServerResolver;
 
   public ConfigMapServerResolver(
       Iterable<Service> services,
       Iterable<ConfigMap> configMaps,
       String cheHost,
-      AbstractServerResolver nativeServerResolver) {
+      ServerResolver nativeServerResolver) {
     super(services);
     this.nativeServerResolver = nativeServerResolver;
     this.cheHost = cheHost;
@@ -51,7 +50,7 @@ public class ConfigMapServerResolver extends AbstractServerResolver {
   }
 
   @Override
-  protected Map<String, ServerImpl> resolveExternalServers(String machineName) {
+  public Map<String, ServerImpl> resolveExternalServers(String machineName) {
     Map<String, ServerImpl> serverMap = new HashMap<>();
     serverMap.putAll(nativeServerResolver.resolveExternalServers(machineName));
     serverMap.putAll(

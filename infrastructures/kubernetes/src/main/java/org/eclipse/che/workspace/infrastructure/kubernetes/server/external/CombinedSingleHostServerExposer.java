@@ -21,7 +21,6 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
-// TODO: test
 /**
  * This {@link ExternalServerExposer} is used in single-host mode when we need to expose some
  * servers on subdomain, instead of subpaths.
