@@ -16,12 +16,20 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.CombinedSingleHostServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.KubernetesExternalServerExposerProvider;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.server.RouteServerExposer;
 
+/**
+ * Provides {@link ExternalServerExposer} based on `che.infra.kubernetes.server_strategy` and
+ * `che.infra.kubernetes.singlehost.workspace.exposure` properties.
+ *
+ * <p>Based on server strategy, it can create a {@link CombinedSingleHostServerExposer} with
+ * OpenShift specific {@link RouteServerExposer} for exposing servers on subdomains.
+ */
 public class OpenShiftExternalServerExposerProvider
     extends KubernetesExternalServerExposerProvider<OpenShiftEnvironment>
     implements ExternalServerExposerProvider<OpenShiftEnvironment> {

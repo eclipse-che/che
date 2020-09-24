@@ -28,9 +28,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExpos
  * Provides {@link ExternalServerExposer} based on `che.infra.kubernetes.server_strategy` and
  * `che.infra.kubernetes.singlehost.workspace.exposure` properties.
  *
+ * <p>Based on server strategy, it can create a {@link CombinedSingleHostServerExposer} with
+ * Kubernetes specific {@link IngressServerExposer} for exposing servers on subdomains.
+ *
  * @param <T> type of environment
  */
-// TODO: update javadocs with "combined" thing
 @Singleton
 public class KubernetesExternalServerExposerProvider<T extends KubernetesEnvironment>
     extends AbstractExposureStrategyAwareProvider<ExternalServerExposer<T>>
