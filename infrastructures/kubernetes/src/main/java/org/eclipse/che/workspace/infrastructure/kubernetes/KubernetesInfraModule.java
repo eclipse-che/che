@@ -172,7 +172,8 @@ public class KubernetesInfraModule extends AbstractModule {
         .addBinding(WorkspaceExposureType.GATEWAY)
         .to(new TypeLiteral<GatewayServerExposer<KubernetesEnvironment>>() {});
 
-    bind(ExternalServerExposerProvider.class).to(KubernetesExternalServerExposerProvider.class);
+    bind(new TypeLiteral<ExternalServerExposerProvider<KubernetesEnvironment>>() {})
+        .to(new TypeLiteral<KubernetesExternalServerExposerProvider<KubernetesEnvironment>>() {});
 
     bind(ServersConverter.class).to(new TypeLiteral<ServersConverter<KubernetesEnvironment>>() {});
     bind(PreviewUrlExposer.class)
