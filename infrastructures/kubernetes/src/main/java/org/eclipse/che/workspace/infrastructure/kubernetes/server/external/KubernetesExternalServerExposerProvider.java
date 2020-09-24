@@ -70,7 +70,7 @@ public class KubernetesExternalServerExposerProvider<T extends KubernetesEnviron
     this.pathTransformFmt = pathTransformFmt;
 
     if (SINGLE_HOST_STRATEGY.equals(exposureStrategy)
-        && SINGLE_HOST_STRATEGY.equals(devfileEndpointsExposure)) {
+        && MULTI_HOST_STRATEGY.equals(devfileEndpointsExposure)) {
       this.combinedInstance =
           new CombinedSingleHostServerExposer<>(createSubdomainServerExposer(), instance);
     } else {
