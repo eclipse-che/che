@@ -50,8 +50,8 @@ public class KubernetesExternalServerExposerProvider<T extends KubernetesEnviron
   public KubernetesExternalServerExposerProvider(
       @Named("che.infra.kubernetes.server_strategy") String exposureStrategy,
       @Named("che.infra.kubernetes.singlehost.workspace.exposure") String exposureType,
-      @Named("che.infra.kubernetes.singlehost.workspace.expose_devfile_endpoints_on_subdomains")
-          boolean exposeDevfileEndpointsOnSubdomains,
+      @Named("che.infra.kubernetes.singlehost.workspace.devfile_endpoint_exposure")
+          String devfileEndpointsExposure,
       @Named(INGRESS_DOMAIN_PROPERTY) String domain,
       @Named("infra.kubernetes.ingress.annotations") Map<String, String> annotations,
       @Nullable @Named("che.infra.kubernetes.ingress.labels") String labelsProperty,
@@ -69,7 +69,8 @@ public class KubernetesExternalServerExposerProvider<T extends KubernetesEnviron
     this.labelsProperty = labelsProperty;
     this.pathTransformFmt = pathTransformFmt;
 
-    if (SINGLE_HOST_STRATEGY.equals(exposureStrategy) && exposeDevfileEndpointsOnSubdomains) {
+    if (SINGLE_HOST_STRATEGY.equals(exposureStrategy)
+        && SINGLE_HOST_STRATEGY.equals(devfileEndpointsExposure)) {
       this.combinedInstance =
           new CombinedSingleHostServerExposer<>(createSubdomainServerExposer(), instance);
     } else {

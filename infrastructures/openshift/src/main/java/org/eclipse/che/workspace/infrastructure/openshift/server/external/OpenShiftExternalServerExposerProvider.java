@@ -38,14 +38,14 @@ public class OpenShiftExternalServerExposerProvider
   public OpenShiftExternalServerExposerProvider(
       @Named("che.infra.kubernetes.server_strategy") String exposureStrategy,
       @Named("che.infra.kubernetes.singlehost.workspace.exposure") String exposureType,
-      @Named("che.infra.kubernetes.singlehost.workspace.expose_devfile_endpoints_on_subdomains")
-          boolean exposeDevfileEndpointsOnSubdomains,
+      @Named("che.infra.kubernetes.singlehost.workspace.devfile_endpoint_exposure")
+          String devfileEndpointExposure,
       @Nullable @Named("che.infra.openshift.route.labels") String labelsProperty,
       Map<WorkspaceExposureType, ExternalServerExposer<OpenShiftEnvironment>> exposers) {
     super(
         exposureStrategy,
         exposureType,
-        exposeDevfileEndpointsOnSubdomains,
+        devfileEndpointExposure,
         null,
         null,
         labelsProperty,
