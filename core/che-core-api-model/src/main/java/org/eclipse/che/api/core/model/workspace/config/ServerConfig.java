@@ -91,7 +91,9 @@ public interface ServerConfig {
    */
   String SERVICE_PORT_ATTRIBUTE = "servicePort";
 
-  // TODO: javadoc
+  /**
+   * This attributes is marking that server come from the devfile endpoint. Used internally only.
+   */
   String DEVFILE_ENDPOINT = "devfileEndpoint";
 
   /**
