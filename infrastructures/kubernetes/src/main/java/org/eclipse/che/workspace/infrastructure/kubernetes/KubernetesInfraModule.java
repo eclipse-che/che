@@ -75,6 +75,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Gatew
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.KubernetesExternalServerExposerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultihostIngressServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ServiceExposureStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.SingleHostExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
@@ -171,6 +172,10 @@ public class KubernetesInfraModule extends AbstractModule {
     exposureStrategies
         .addBinding(WorkspaceExposureType.GATEWAY)
         .to(new TypeLiteral<GatewayServerExposer<KubernetesEnvironment>>() {});
+
+    bind(new TypeLiteral<ExternalServerExposer<KubernetesEnvironment>>() {})
+        .annotatedWith(com.google.inject.name.Names.named("multihost-exposer"))
+        .to(new TypeLiteral<MultihostIngressServerExposer<KubernetesEnvironment>>() {});
 
     bind(new TypeLiteral<ExternalServerExposerProvider<KubernetesEnvironment>>() {})
         .to(new TypeLiteral<KubernetesExternalServerExposerProvider<KubernetesEnvironment>>() {});

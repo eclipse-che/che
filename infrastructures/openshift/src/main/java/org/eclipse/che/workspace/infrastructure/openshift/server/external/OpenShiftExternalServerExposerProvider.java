@@ -14,7 +14,6 @@ package org.eclipse.che.workspace.infrastructure.openshift.server.external;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.CombinedSingleHostServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
@@ -40,21 +39,8 @@ public class OpenShiftExternalServerExposerProvider
       @Named("che.infra.kubernetes.singlehost.workspace.exposure") String exposureType,
       @Named("che.infra.kubernetes.singlehost.workspace.devfile_endpoint_exposure")
           String devfileEndpointExposure,
-      @Nullable @Named("che.infra.openshift.route.labels") String labelsProperty,
+      @Named("multihost-exposer") ExternalServerExposer<OpenShiftEnvironment> multihostExposer,
       Map<WorkspaceExposureType, ExternalServerExposer<OpenShiftEnvironment>> exposers) {
-    super(
-        exposureStrategy,
-        exposureType,
-        devfileEndpointExposure,
-        null,
-        null,
-        labelsProperty,
-        null,
-        exposers);
-  }
-
-  @Override
-  protected ExternalServerExposer<OpenShiftEnvironment> createSubdomainServerExposer() {
-    return new RouteServerExposer(labelsProperty);
+    super(exposureStrategy, exposureType, devfileEndpointExposure, multihostExposer, exposers);
   }
 }

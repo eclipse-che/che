@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.INGRESS_DOMAIN_PROPERTY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.SingleHostExternalServiceExposureStrategy.SINGLE_HOST_STRATEGY;
 
@@ -19,7 +18,6 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.AbstractExposureStrategyAwareProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
@@ -40,39 +38,23 @@ public class KubernetesExternalServerExposerProvider<T extends KubernetesEnviron
 
   private final ExternalServerExposer<T> combinedInstance;
 
-  protected final String labelsProperty;
-
-  private final String domain;
-  private final Map<String, String> annotations;
-  private final String pathTransformFmt;
-
   @Inject
   public KubernetesExternalServerExposerProvider(
       @Named("che.infra.kubernetes.server_strategy") String exposureStrategy,
       @Named("che.infra.kubernetes.singlehost.workspace.exposure") String exposureType,
       @Named("che.infra.kubernetes.singlehost.workspace.devfile_endpoint_exposure")
           String devfileEndpointsExposure,
-      @Named(INGRESS_DOMAIN_PROPERTY) String domain,
-      @Named("infra.kubernetes.ingress.annotations") Map<String, String> annotations,
-      @Nullable @Named("che.infra.kubernetes.ingress.labels") String labelsProperty,
-      @Nullable @Named("che.infra.kubernetes.ingress.path_transform") String pathTransformFmt,
+      @Named("multihost-exposer") ExternalServerExposer<T> multihostExposer,
       Map<WorkspaceExposureType, ExternalServerExposer<T>> exposers) {
-
     super(
         exposureStrategy,
         exposureType,
         exposers,
         "Could not find an external server exposer implementation for the exposure type '%s'.");
 
-    this.domain = domain;
-    this.annotations = annotations;
-    this.labelsProperty = labelsProperty;
-    this.pathTransformFmt = pathTransformFmt;
-
     if (SINGLE_HOST_STRATEGY.equals(exposureStrategy)
         && MULTI_HOST_STRATEGY.equals(devfileEndpointsExposure)) {
-      this.combinedInstance =
-          new CombinedSingleHostServerExposer<>(createSubdomainServerExposer(), instance);
+      this.combinedInstance = new CombinedSingleHostServerExposer<>(multihostExposer, instance);
     } else {
       this.combinedInstance = null;
     }
@@ -81,13 +63,5 @@ public class KubernetesExternalServerExposerProvider<T extends KubernetesEnviron
   @Override
   public ExternalServerExposer<T> get() {
     return combinedInstance != null ? combinedInstance : instance;
-  }
-
-  protected ExternalServerExposer<T> createSubdomainServerExposer() {
-    return new IngressServerExposer<>(
-        new MultiHostExternalServiceExposureStrategy(domain, MULTI_HOST_STRATEGY),
-        annotations,
-        labelsProperty,
-        pathTransformFmt);
   }
 }

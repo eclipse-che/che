@@ -154,6 +154,10 @@ public class OpenShiftInfraModule extends AbstractModule {
         .addBinding(WorkspaceExposureType.GATEWAY)
         .to(new TypeLiteral<GatewayServerExposer<OpenShiftEnvironment>>() {});
 
+    bind(new TypeLiteral<ExternalServerExposer<OpenShiftEnvironment>>() {})
+        .annotatedWith(com.google.inject.name.Names.named("multihost-exposer"))
+        .to(RouteServerExposer.class);
+
     bind(new TypeLiteral<ExternalServerExposerProvider<OpenShiftEnvironment>>() {})
         .to(OpenShiftExternalServerExposerProvider.class);
 

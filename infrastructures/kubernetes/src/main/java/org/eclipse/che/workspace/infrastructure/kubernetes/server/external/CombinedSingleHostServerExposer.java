@@ -17,7 +17,6 @@ import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.DEVFI
 import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.HashMap;
 import java.util.Map;
-import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
@@ -33,7 +32,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  *
  * @param <T> environment type
  */
-@Singleton
 public class CombinedSingleHostServerExposer<T extends KubernetesEnvironment>
     implements ExternalServerExposer<T> {
 
