@@ -178,6 +178,11 @@ export const TimeoutConstants = {
      */
     TS_SELENIUM_WAIT_FOR_URL: Number(process.env.TS_SELENIUM_WAIT_FOR_URL) || 10_000,
 
+    /**
+     * Timeout waiting for an executed task to finish, waiting stops automatically if any exit code notification is present, "300 000" by default
+     */
+    TS_SELENIUM_WAIT_TASK_EXIT_CODE_TIMEOUT: Number(process.env.TS_SELENIUM_WAIT_TASK_EXIT_CODE_TIMEOUT) || 300_000,
+
 
 
     // ------------------------------------ OCP WEB CONSOLE PAGE ------------------------------------
