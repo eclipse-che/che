@@ -173,7 +173,7 @@ export class Terminal {
         }
 
         throw new error.NoSuchElementError(`The terminal with title '${terminalTitle}' has not been found.\n` +
-            `List of the tabs:\n${terminalTitles}`);
+            ` > List of the tabs:\n > ${terminalTitles}`);
 
     }
 
