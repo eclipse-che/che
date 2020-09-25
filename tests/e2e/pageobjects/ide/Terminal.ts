@@ -140,6 +140,11 @@ export class Terminal {
                     throw err;
                 }
 
+                if ((err instanceof error.NoSuchElementError) && (i === 9)) {
+                    throw err;
+                }
+
+                await this.driverHelper.wait(2000);
             }
         }
 
@@ -168,7 +173,7 @@ export class Terminal {
         }
 
         throw new error.NoSuchElementError(`The terminal with title '${terminalTitle}' has not been found.\n` +
-            `List of the tabs:\n${terminalTitles}`);
+            ` > List of the tabs:\n > ${terminalTitles}`);
 
     }
 
