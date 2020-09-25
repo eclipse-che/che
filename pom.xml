@@ -1416,6 +1416,7 @@
             <id>fast</id>
             <properties>
                 <findbugs.skip>true</findbugs.skip>
+                <fmt.skip>true</fmt.skip>
                 <license.skip>true</license.skip>
                 <mdep.analyze.skip>true</mdep.analyze.skip>
                 <skipTests>true</skipTests>
