@@ -140,6 +140,11 @@ export class Terminal {
                     throw err;
                 }
 
+                if ((err instanceof error.NoSuchElementError) && (i === 9)) {
+                    throw err;
+                }
+
+                await this.driverHelper.wait(2000);
             }
         }
 
