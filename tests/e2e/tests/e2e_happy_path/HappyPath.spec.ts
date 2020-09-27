@@ -194,6 +194,7 @@ suite('Display source code changes in the running application', async () => {
 
     test('Build application with changes', async () => {
         await topMenu.runTask('build');
+        await projectTree.clickOnItem(projectName + '/src/main/java');
         await projectTree.collapseProjectTree(projectName + '/src', 'main');
         await projectTree.expandPathAndOpenFile(projectName, 'result-build.txt', 300_000);
         await editor.waitText('result-build.txt', '[INFO] BUILD SUCCESS');
