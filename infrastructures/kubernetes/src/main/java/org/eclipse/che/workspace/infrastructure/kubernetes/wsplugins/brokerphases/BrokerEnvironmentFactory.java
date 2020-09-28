@@ -102,8 +102,9 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     if (!isNullOrEmpty(pluginRegistryInternalUrl)) {
       pluginRegistryUrl = pluginRegistryInternalUrl;
     }
-    LOGGER.info("Plugin registry url: {}", pluginRegistryUrl);
+
     this.pluginRegistryUrl = pluginRegistryUrl;
+    LOGGER.info("Plugin registry url: {}", this.pluginRegistryUrl);
     this.certProvisioner = certProvisioner;
   }
 
