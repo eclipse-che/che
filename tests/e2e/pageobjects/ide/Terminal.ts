@@ -118,7 +118,15 @@ export class Terminal {
         await this.selectTerminalTab(terminalTab, timeout);
         await this.driverHelper.waitUntilTrue(async () => {
             const terminalText: string = await this.getText(terminalTab, timeout);
-            return terminalText.includes(expectedText);
+
+            if (terminalText.includes(expectedText)) {
+                Logger.debug('Expected text is present in the terminal output');
+                return true;
+            }
+
+            Logger.debug('Expected text is not present in the terminal output');
+            await this.driverHelper.wait(1000);
+            return false;
 
         }, timeout);
     }
@@ -165,7 +173,6 @@ export class Terminal {
             const currentTerminalTitle: string = await this.driverHelper.waitAndGetText(terminalTabLocator);
 
             if (currentTerminalTitle.search(terminalTitle) > -1) {
-                Logger.debug(`Terminal index: ${i}`);
                 return i;
             }
 
