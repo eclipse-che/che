@@ -117,6 +117,9 @@ export class Terminal {
 
         await this.selectTerminalTab(terminalTab, timeout);
         await this.driverHelper.waitUntilTrue(async () => {
+            // separates each method iteration to the readable blocks in the terminal log
+            Logger.debug('----------------------------------------------');
+
             const terminalText: string = await this.getText(terminalTab, timeout);
 
             if (terminalText.includes(expectedText)) {
