@@ -18,16 +18,6 @@ import org.eclipse.che.account.spi.jpa.JpaAccountDao;
 import org.eclipse.che.api.devfile.server.model.impl.UserDevfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.devfile.SerializableConverter;
-import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
-import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
@@ -66,17 +56,7 @@ public class JpaTckModule extends TckModule {
             .addEntityClasses(
                 AccountImpl.class,
                 UserImpl.class,
-                WorkspaceImpl.class,
-                WorkspaceConfigImpl.class,
-                ProjectConfigImpl.class,
-                EnvironmentImpl.class,
                 UserDevfilePermissionImpl.class,
-                MachineConfigImpl.class,
-                SourceStorageImpl.class,
-                ServerConfigImpl.class,
-                CommandImpl.class,
-                RecipeImpl.class,
-                VolumeImpl.class,
                 // devfile
                 ActionImpl.class,
                 org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl.class,
@@ -89,8 +69,6 @@ public class JpaTckModule extends TckModule {
                 SourceImpl.class,
                 UserDevfileImpl.class,
                 org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl.class)
-            .addEntityClass(
-                "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
             .addClass(SerializableConverter.class)
             .setExceptionHandler(H2ExceptionHandler.class)
             .build());

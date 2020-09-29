@@ -38,10 +38,10 @@ public interface UserDevfilePermissionDao {
    * @param userDevfileId user devfile identifier
    * @param userId user identifier
    * @return userDevfilePermissions instance, never null
-   * @throws NullPointerException when {@code workspace} or {@code user} is null
-   * @throws NotFoundException when worker with given {@code workspace} and {@code user} was not
-   *     found
-   * @throws ServerException when any other error occurs during worker fetching
+   * @throws NullPointerException when {@code userDevfileId} or {@code userId} is null
+   * @throws NotFoundException when permission with given {@code userDevfileId} and {@code userId}
+   *     was not found
+   * @throws ServerException when any other error occurs during permission fetching
    */
   UserDevfilePermissionImpl getUserDevfilePermission(String userDevfileId, String userId)
       throws ServerException, NotFoundException;
@@ -49,12 +49,12 @@ public interface UserDevfilePermissionDao {
   /**
    * Removes userDevfilePermissions
    *
-   * <p>Doesn't throw an exception when userDevfilePermissions with given {@code UserDevfile} and
-   * {@code user} does not exist
+   * <p>Doesn't throw an exception when userDevfilePermissions with given {@code userDevfileId} and
+   * {@code userId} does not exist
    *
    * @param userDevfileId workspace identifier
    * @param userId user identifier
-   * @throws NullPointerException when {@code UserDevfile} or {@code user} is null
+   * @throws NullPointerException when {@code userDevfileId} or {@code userId} is null
    * @throws ServerException when any other error occurs during userDevfilePermissions removing
    */
   void removeUserDevfilePermission(String userDevfileId, String userId) throws ServerException;
@@ -66,7 +66,7 @@ public interface UserDevfilePermissionDao {
    * @param maxItems the maximum number of userDevfilePermissions to return
    * @param skipCount the number of userDevfilePermissions to skip
    * @return list of userDevfilePermissions instance
-   * @throws NullPointerException when {@code userDevfile} is null
+   * @throws NullPointerException when {@code userDevfileId} is null
    * @throws ServerException when any other error occurs during userDevfilePermissions fetching
    */
   Page<UserDevfilePermissionImpl> getUserDevfilePermission(
@@ -77,7 +77,7 @@ public interface UserDevfilePermissionDao {
    *
    * @param userId user identifier
    * @return list of UserDevfilePermissions instance
-   * @throws NullPointerException when {@code user} is null
+   * @throws NullPointerException when {@code userId} is null
    * @throws ServerException when any other error occurs during UserDevfilePermissions fetching
    */
   List<UserDevfilePermissionImpl> getUserDevfilePermissionByUser(String userId)

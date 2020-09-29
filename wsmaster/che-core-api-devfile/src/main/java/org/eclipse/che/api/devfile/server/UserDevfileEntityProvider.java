@@ -51,8 +51,8 @@ import org.eclipse.che.dto.server.DtoFactory;
 public class UserDevfileEntityProvider
     implements MessageBodyReader<UserDevfileDto>, MessageBodyWriter<UserDevfileDto> {
 
-  private DevfileParser devfileParser;
-  private ObjectMapper mapper = new ObjectMapper();
+  private final DevfileParser devfileParser;
+  private final ObjectMapper mapper = new ObjectMapper();
 
   @Inject
   public UserDevfileEntityProvider(DevfileParser devfileParser) {

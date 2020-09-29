@@ -38,7 +38,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
       query = "SELECT d FROM UserDevfile d WHERE d.account.name = :namespace"),
   @NamedQuery(
       name = "UserDevfile.getByNamespaceCount",
-      query = "SELECT COUNT(d) " + "FROM UserDevfile d " + "WHERE d.account.name = :namespace "),
+      query = "SELECT COUNT(d) FROM UserDevfile d WHERE d.account.name = :namespace "),
   @NamedQuery(name = "UserDevfile.getAll", query = "SELECT d FROM UserDevfile d ORDER BY d.id"),
   @NamedQuery(name = "UserDevfile.getTotalCount", query = "SELECT COUNT(d) FROM UserDevfile d"),
 })

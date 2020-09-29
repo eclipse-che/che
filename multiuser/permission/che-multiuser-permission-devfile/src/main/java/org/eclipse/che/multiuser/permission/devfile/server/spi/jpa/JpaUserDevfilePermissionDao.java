@@ -93,12 +93,12 @@ public class JpaUserDevfilePermissionDao
               .stream()
               .map(UserDevfilePermissionImpl::new)
               .collect(toList());
-      final Long workersCount =
+      final Long permissionsCount =
           entityManager
               .createNamedQuery("UserDevfilePermission.getCountByUserDevfileId", Long.class)
               .setParameter("userDevfileId", instanceId)
               .getSingleResult();
-      return new Page<>(permissions, skipCount, maxItems, workersCount);
+      return new Page<>(permissions, skipCount, maxItems, permissionsCount);
     } catch (RuntimeException e) {
       throw new ServerException(e.getLocalizedMessage(), e);
     }
@@ -111,9 +111,7 @@ public class JpaUserDevfilePermissionDao
       return doGet(userId, instanceId);
     } catch (NoResultException e) {
       throw new NotFoundException(
-          format(
-              "User devfile permission for devfile '%s' with id '%s' was not found.",
-              instanceId, userId));
+          format("User %s does not have permissions assigned to devfile %s.", instanceId, userId));
     } catch (RuntimeException e) {
       throw new ServerException(e.getMessage(), e);
     }
@@ -173,7 +171,7 @@ public class JpaUserDevfilePermissionDao
   }
 
   @Singleton
-  public static class RemoveUserDevfilePermissionsBeforeUserDevfuleRemovedEventSubscriber
+  public static class RemoveUserDevfilePermissionsBeforeUserDevfileRemovedEventSubscriber
       extends CascadeEventSubscriber<BeforeDevfileRemovedEvent> {
     private static final int PAGE_SIZE = 100;
 

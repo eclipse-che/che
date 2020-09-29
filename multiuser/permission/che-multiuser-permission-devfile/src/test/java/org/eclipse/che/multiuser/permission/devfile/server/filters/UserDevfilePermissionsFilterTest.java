@@ -129,7 +129,7 @@ public class UserDevfilePermissionsFilterTest {
             .auth()
             .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .when()
-            .get(SECURE_PATH + "/devfile/list");
+            .get(SECURE_PATH + "/devfile/search");
     // then
     assertEquals(response.getStatusCode(), 200);
     verifyZeroInteractions(subject);

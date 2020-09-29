@@ -179,7 +179,7 @@ public class DevfileService extends Service {
   }
 
   @GET
-  @Path("list")
+  @Path("search")
   @Produces(APPLICATION_JSON)
   @ApiOperation(
       value = "Get devfiles which user can read",

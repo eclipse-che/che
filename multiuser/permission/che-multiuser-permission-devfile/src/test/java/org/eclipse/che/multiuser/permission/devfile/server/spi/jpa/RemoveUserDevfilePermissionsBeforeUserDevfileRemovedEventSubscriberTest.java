@@ -26,21 +26,21 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.multiuser.permission.devfile.server.TestObjectGenerator;
 import org.eclipse.che.multiuser.permission.devfile.server.model.impl.UserDevfilePermissionImpl;
-import org.eclipse.che.multiuser.permission.devfile.server.spi.jpa.JpaUserDevfilePermissionDao.RemoveUserDevfilePermissionsBeforeUserDevfuleRemovedEventSubscriber;
+import org.eclipse.che.multiuser.permission.devfile.server.spi.jpa.JpaUserDevfilePermissionDao.RemoveUserDevfilePermissionsBeforeUserDevfileRemovedEventSubscriber;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-/** Tests for {@link RemoveUserDevfilePermissionsBeforeUserDevfuleRemovedEventSubscriber} */
+/** Tests for {@link RemoveUserDevfilePermissionsBeforeUserDevfileRemovedEventSubscriber} */
 public class RemoveUserDevfilePermissionsBeforeUserDevfileRemovedEventSubscriberTest {
   private TckResourcesCleaner tckResourcesCleaner;
   private EntityManager manager;
   private JpaUserDevfilePermissionDao userDevfilePermissionsDao;
   private JpaUserDevfileDao userDevfileDao;
 
-  private RemoveUserDevfilePermissionsBeforeUserDevfuleRemovedEventSubscriber subscriber;
+  private RemoveUserDevfilePermissionsBeforeUserDevfileRemovedEventSubscriber subscriber;
 
   private UserDevfileImpl userDevfile;
   private UserDevfilePermissionImpl[] userDevfilePermissions;
@@ -71,7 +71,7 @@ public class RemoveUserDevfilePermissionsBeforeUserDevfileRemovedEventSubscriber
     userDevfileDao = injector.getInstance(JpaUserDevfileDao.class);
     subscriber =
         injector.getInstance(
-            RemoveUserDevfilePermissionsBeforeUserDevfuleRemovedEventSubscriber.class);
+            RemoveUserDevfilePermissionsBeforeUserDevfileRemovedEventSubscriber.class);
     subscriber.subscribe();
     tckResourcesCleaner = injector.getInstance(TckResourcesCleaner.class);
   }

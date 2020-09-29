@@ -16,7 +16,6 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.eclipse.che.api.core.Pages.iterate;
 import static org.eclipse.che.api.devfile.server.jpa.JpaUserDevfileDao.UserDevfileSearchQueryBuilder.newBuilder;
 
 import com.google.common.annotations.Beta;
@@ -29,14 +28,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.api.core.ConflictException;
@@ -45,22 +41,17 @@ import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.devfile.UserDevfile;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.devfile.server.UserDevfileManager;
 import org.eclipse.che.api.devfile.server.event.BeforeDevfileRemovedEvent;
 import org.eclipse.che.api.devfile.server.model.impl.UserDevfileImpl;
 import org.eclipse.che.api.devfile.server.spi.UserDevfileDao;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 import org.eclipse.che.core.db.jpa.IntegrityConstraintViolationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** JPA based implementation of {@link UserDevfileDao}. */
 @Singleton
 @Beta
 public class JpaUserDevfileDao implements UserDevfileDao {
-  private static final Logger LOG = LoggerFactory.getLogger(JpaUserDevfileDao.class);
 
   protected final Provider<EntityManager> managerProvider;
   protected final AccountDao accountDao;
@@ -78,8 +69,7 @@ public class JpaUserDevfileDao implements UserDevfileDao {
   }
 
   @Override
-  public UserDevfile create(UserDevfile userDevfile)
-      throws ConflictException, ServerException, NotFoundException {
+  public UserDevfile create(UserDevfile userDevfile) throws ConflictException, ServerException {
     requireNonNull(userDevfile);
     try {
       Account account = accountDao.getByName(userDevfile.getNamespace());
@@ -89,13 +79,18 @@ public class JpaUserDevfileDao implements UserDevfileDao {
     } catch (DuplicateKeyException ex) {
       throw new ConflictException(
           format(
-              "Devfile with name '%s' already exists in current account '%s'",
+              "Devfile with name '%s' already exists in the specified account '%s'",
               userDevfile.getName(), userDevfile.getNamespace()));
     } catch (IntegrityConstraintViolationException ex) {
       throw new ConflictException(
-          "Could not create devfile with creator that refers on non-existent user");
+          "Could not create devfile with creator that refers to a non-existent user");
     } catch (RuntimeException ex) {
       throw new ServerException(ex.getMessage(), ex);
+    } catch (NotFoundException e) {
+      throw new ConflictException(
+          format(
+              "Not able to create devfile in requested namespace %s bacause it is not found",
+              userDevfile.getNamespace()));
     }
   }
 
@@ -200,7 +195,7 @@ public class JpaUserDevfileDao implements UserDevfileDao {
           filter.stream().filter(p -> !p.first.equalsIgnoreCase("name")).collect(toList());
       if (!invalidFilter.isEmpty()) {
         throw new IllegalArgumentException(
-            "Filtering allowed only on `name`. But got: " + invalidFilter);
+            "Filtering allowed only by name but got: " + invalidFilter);
       }
     }
     List<Pair<String, String>> effectiveOrder = DEFAULT_ORDER;
@@ -211,8 +206,7 @@ public class JpaUserDevfileDao implements UserDevfileDao {
               .filter(p -> !p.first.equalsIgnoreCase("name") && !p.first.equalsIgnoreCase("id"))
               .collect(toList());
       if (!invalidOrder.isEmpty()) {
-        throw new IllegalArgumentException(
-            "Order allowed only on `name`. But got: " + invalidOrder);
+        throw new IllegalArgumentException("Order allowed only by name but got: " + invalidOrder);
       }
 
       List<Pair<String, String>> invalidSortOrder =
@@ -222,7 +216,7 @@ public class JpaUserDevfileDao implements UserDevfileDao {
               .collect(Collectors.toList());
       if (!invalidSortOrder.isEmpty()) {
         throw new IllegalArgumentException(
-            "Invalid sort order direction. Possible values 'asc' or 'desc'. But got: "
+            "Invalid sort order direction. Possible values are 'asc' or 'desc' but got: "
                 + invalidSortOrder);
       }
       effectiveOrder = order;
@@ -386,35 +380,6 @@ public class JpaUserDevfileDao implements UserDevfileDao {
               .setMaxResults(maxItems);
       params.forEach((k, v) -> typedQuery.setParameter(k, v));
       return typedQuery;
-    }
-  }
-
-  @Singleton
-  public static class RemoveUserDevfileBeforeAccountRemovedEventSubscriber
-      extends CascadeEventSubscriber<BeforeAccountRemovedEvent> {
-
-    @Inject private EventService eventService;
-    @Inject private UserDevfileManager userDevfileManager;
-
-    @PostConstruct
-    public void subscribe() {
-      eventService.subscribe(this, BeforeAccountRemovedEvent.class);
-    }
-
-    @PreDestroy
-    public void unsubscribe() {
-      eventService.unsubscribe(this, BeforeAccountRemovedEvent.class);
-    }
-
-    @Override
-    public void onCascadeEvent(BeforeAccountRemovedEvent event) throws Exception {
-      for (UserDevfile userDevfile :
-          iterate(
-              (maxItems, skipCount) ->
-                  userDevfileManager.getByNamespace(
-                      event.getAccount().getName(), maxItems, skipCount))) {
-        userDevfileManager.removeUserDevfile(userDevfile.getId());
-      }
     }
   }
 }

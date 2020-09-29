@@ -77,7 +77,7 @@ public class JpaUserDevfilePermissionDaoTest {
     manager.clear();
 
     final UserDevfileImpl userDevfile = TestObjectGenerator.createUserDevfile();
-    // Persist the userdevfule
+    // Persist the userdevfile
     manager.getTransaction().begin();
     manager.persist(userDevfile);
     manager.getTransaction().commit();

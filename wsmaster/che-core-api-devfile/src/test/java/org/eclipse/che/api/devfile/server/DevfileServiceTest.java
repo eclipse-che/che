@@ -168,8 +168,6 @@ public class DevfileServiceTest {
             .contentType("application/json")
             .body(DtoFactory.getInstance().toJson(userDevfileDto))
             .when()
-            .log()
-            .all()
             .post(SECURE_PATH + "/devfile");
 
     assertEquals(response.getStatusCode(), 400);
@@ -257,8 +255,6 @@ public class DevfileServiceTest {
             .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .contentType(APPLICATION_JSON)
             .body(DtoFactory.getInstance().toJson(devfileDto))
-            .log()
-            .all()
             .when()
             .put(SECURE_PATH + "/devfile/" + devfileDto.getId());
     // then
@@ -282,8 +278,6 @@ public class DevfileServiceTest {
             .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .contentType(APPLICATION_JSON)
             .body(DtoFactory.getInstance().toJson(userDevfileDto))
-            .log()
-            .all()
             .when()
             .put(SECURE_PATH + "/devfile/" + userDevfileDto.getId());
     // then
@@ -374,7 +368,7 @@ public class DevfileServiceTest {
             .when()
             .expect()
             .statusCode(200)
-            .get(SECURE_PATH + "/devfile/list");
+            .get(SECURE_PATH + "/devfile/search");
     // then
     final List<UserDevfileDto> res = unwrapDtoList(response, UserDevfileDto.class);
     assertEquals(res.size(), 1);
@@ -399,7 +393,7 @@ public class DevfileServiceTest {
             .when()
             .expect()
             .statusCode(200)
-            .get(SECURE_PATH + "/devfile/list");
+            .get(SECURE_PATH + "/devfile/search");
     // then
     verify(userDevfileManager).getUserDevfiles(eq(5), eq(52), anyList(), anyList());
   }
@@ -423,7 +417,7 @@ public class DevfileServiceTest {
             .when()
             .expect()
             .statusCode(200)
-            .get(SECURE_PATH + "/devfile/list");
+            .get(SECURE_PATH + "/devfile/search");
     // then
     Class<List<Pair<String, String>>> listClass =
         (Class<List<Pair<String, String>>>) (Class) ArrayList.class;
@@ -450,7 +444,7 @@ public class DevfileServiceTest {
             .when()
             .expect()
             .statusCode(200)
-            .get(SECURE_PATH + "/devfile/list");
+            .get(SECURE_PATH + "/devfile/search");
     // then
     Class<List<Pair<String, String>>> listClass =
         (Class<List<Pair<String, String>>>) (Class) ArrayList.class;

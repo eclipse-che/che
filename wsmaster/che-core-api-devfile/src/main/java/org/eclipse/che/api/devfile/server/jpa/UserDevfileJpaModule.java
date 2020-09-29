@@ -13,6 +13,7 @@ package org.eclipse.che.api.devfile.server.jpa;
 
 import com.google.common.annotations.Beta;
 import com.google.inject.AbstractModule;
+import org.eclipse.che.api.devfile.server.RemoveUserDevfileBeforeAccountRemovedEventSubscriber;
 import org.eclipse.che.api.devfile.server.spi.UserDevfileDao;
 
 @Beta
@@ -20,7 +21,6 @@ public class UserDevfileJpaModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(UserDevfileDao.class).to(JpaUserDevfileDao.class);
-    bind(JpaUserDevfileDao.RemoveUserDevfileBeforeAccountRemovedEventSubscriber.class)
-        .asEagerSingleton();
+    bind(RemoveUserDevfileBeforeAccountRemovedEventSubscriber.class).asEagerSingleton();
   }
 }

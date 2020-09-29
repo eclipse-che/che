@@ -32,9 +32,9 @@ public interface UserDevfileDao {
    * @return created devfile
    * @throws NullPointerException when {@code devfile} is null
    * @throws ServerException when any other error occurs
+   * @throws ConflictException when required namespace is not found.
    */
-  UserDevfile create(UserDevfile devfile)
-      throws ServerException, ConflictException, NotFoundException;
+  UserDevfile create(UserDevfile devfile) throws ServerException, ConflictException;
 
   /**
    * Updates devfile to the new entity, using replacement strategy.

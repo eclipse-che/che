@@ -474,8 +474,8 @@ public class UserDevfileDaoTest {
   @Test(
       expectedExceptions = IllegalArgumentException.class,
       expectedExceptionsMessageRegExp =
-          "Invalid sort order direction\\. Possible values 'asc' or 'desc'\\."
-              + " But got: \\[\\{first=name, second=ddd}, \\{first=id, second=bla}]")
+          "Invalid sort order direction\\. Possible values are 'asc' or 'desc'"
+              + " but got: \\[\\{first=name, second=ddd}, \\{first=id, second=bla}]")
   public void shouldFailOnInvalidSortOrder()
       throws ServerException, NotFoundException, ConflictException {
     // given
