@@ -106,7 +106,7 @@ public class MultiuserJpaUserDevfileDao extends JpaUserDevfileDao {
               .append("LEFT JOIN permission.userDevfile userdevfile ")
               .append(filter);
       TypedQuery<Long> typedQuery = entityManager.createQuery(query.toString(), Long.class);
-      params.forEach((k, v) -> typedQuery.setParameter(k, v));
+      params.forEach(typedQuery::setParameter);
       return typedQuery;
     }
 

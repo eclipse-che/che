@@ -45,6 +45,13 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 @Beta
 public class UserDevfileImpl implements UserDevfile {
 
+  /**
+   * In {@MetadataImpl} name is mandatory and generateName is transient. That is not suitable for
+   * UserDevfile because we need to handle situations when the name is not defined and generateName
+   * is defined. To workaround that original name and generateName stored in individual fields
+   * meta_name and meta_generated_name. But at the same time, we can't leave metadata filed null in
+   * devfile because of database hard constrain. To replace that FAKE_META is used.
+   */
   private static final MetadataImpl FAKE_META = new MetadataImpl("name");
 
   @Id
