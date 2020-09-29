@@ -21,6 +21,8 @@ spec:
     matchLabels:
       app: che
       component: keycloak
+  strategy:
+    type: {{ .Values.deploymentStrategy }}
   template:
     metadata:
       labels:

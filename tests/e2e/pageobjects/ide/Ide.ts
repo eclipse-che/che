@@ -68,7 +68,7 @@ export class Ide {
 
         Logger.info(`Ide.waitTaskExitCodeNotification waiting for any exit code notification.`);
         try {
-            await this.driverHelper.waitVisibility(exitCodeNotificationLocator);
+            await this.driverHelper.waitVisibility(exitCodeNotificationLocator, timeout);
         } catch (err) {
             if (err instanceof error.TimeoutError) {
                 Logger.error(`Ide.waitTaskExitCodeNotificationBoolean wait for notification timed out.`);

@@ -57,18 +57,31 @@ export class PreferencesHandler {
 
     private async setPreference(attribute: string, value: string) {
         Logger.trace(`PreferencesHandler.setPreferences ${attribute} to ${value}`);
-        const response = await this.requestHandler.get('api/preferences');
-        const userPref = response.data;
+        let response;
         try {
-            const theiaPref = JSON.parse(userPref['theia-user-preferences']);
+            response = await this.requestHandler.get('api/preferences');
+        } catch (e) {
+            Logger.error(`PreferencesHandler.setPreferences failed to get user preferences`);
+            throw e;
+        }
+        let userPref = response.data;
+        try {
+            let theiaPref = JSON.parse(userPref['theia-user-preferences']);
             theiaPref[attribute] = value;
             userPref['theia-user-preferences'] = JSON.stringify(theiaPref);
-            this.requestHandler.post('api/preferences', userPref);
+            await this.requestHandler.post('api/preferences', userPref);
         } catch (e) {
             // setting terminal before running a workspace, so no theia preferences are set
-            const theiaPref = `{ "${attribute}":"${value}" }`;
+            Logger.warn(`PreferencesHandler.setPreference could not set theia-user-preferences from api/preferences response, forcing manually.`);
+            let theiaPref = `{ "${attribute}":"${value}" }`;
             userPref['theia-user-preferences'] = JSON.stringify(JSON.parse(theiaPref));
-            this.requestHandler.post('api/preferences', userPref);
+            try {
+                await this.requestHandler.post('api/preferences', userPref);
+            } catch (e) {
+                Logger.error(`PreferencesHandler.setPreference failed to manually set preferences value.`);
+                throw e;
+            }
         }
+        Logger.trace(`PreferencesHandler.setPreferences ${attribute} to ${value} done.`);
     }
 }

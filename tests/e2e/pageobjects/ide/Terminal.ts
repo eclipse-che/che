@@ -26,7 +26,7 @@ export class Terminal {
 
         await this.driverHelper.waitVisibility(terminalTabLocator, timeout);
     }
-    
+
     async waitTabAbsence(tabTitle: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT) {
         Logger.debug(`Terminal.waitTabAbsence "${tabTitle}"`);
 
@@ -38,7 +38,7 @@ export class Terminal {
     async clickOnTab(tabTitle: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT) {
         Logger.debug(`Terminal.clickOnTab "${tabTitle}"`);
 
-        const terminalTabLocator: By = By.css(this.getTerminalTabCssLocator(tabTitle));
+        const terminalTabLocator: By = By.css(`${this.getTerminalTabCssLocator(tabTitle)} div.theia-tab-icon-label`);
 
         await this, this.driverHelper.waitAndClick(terminalTabLocator, timeout);
     }
@@ -117,8 +117,19 @@ export class Terminal {
 
         await this.selectTerminalTab(terminalTab, timeout);
         await this.driverHelper.waitUntilTrue(async () => {
+            // separates each method iteration to the readable blocks in the terminal log
+            Logger.debug('----------------------------------------------');
+
             const terminalText: string = await this.getText(terminalTab, timeout);
-            return terminalText.includes(expectedText);
+
+            if (terminalText.includes(expectedText)) {
+                Logger.debug('Expected text is present in the terminal output');
+                return true;
+            }
+
+            Logger.debug('Expected text is not present in the terminal output');
+            await this.driverHelper.wait(1000);
+            return false;
 
         }, timeout);
     }
@@ -140,6 +151,11 @@ export class Terminal {
                     throw err;
                 }
 
+                if ((err instanceof error.NoSuchElementError) && (i === 9)) {
+                    throw err;
+                }
+
+                await this.driverHelper.wait(2000);
             }
         }
 
@@ -160,7 +176,6 @@ export class Terminal {
             const currentTerminalTitle: string = await this.driverHelper.waitAndGetText(terminalTabLocator);
 
             if (currentTerminalTitle.search(terminalTitle) > -1) {
-                Logger.debug(`Terminal index: ${i}`);
                 return i;
             }
 
@@ -168,7 +183,7 @@ export class Terminal {
         }
 
         throw new error.NoSuchElementError(`The terminal with title '${terminalTitle}' has not been found.\n` +
-            `List of the tabs:\n${terminalTitles}`);
+            ` > List of the tabs:\n > ${terminalTitles}`);
 
     }
 
