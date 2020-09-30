@@ -105,7 +105,7 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
     openShiftLoginPage.login();
 
     // authorize ocp-client to access OpenShift account
-    authorizeOpenShiftAccessPage.waitOnOpen();
+    /*authorizeOpenShiftAccessPage.waitOnOpen();
     authorizeOpenShiftAccessPage.allowPermissions();
 
     // fill first broker profile page
@@ -146,6 +146,6 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
     openShiftProjectCatalogPage.open();
     openShiftProjectCatalogPage.waitProject(projectName);
     openShiftProjectCatalogPage.clickOnProject(projectName);
-    openShiftProjectCatalogPage.waitResourceAbsence("workspace");
+    openShiftProjectCatalogPage.waitResourceAbsence("workspace");*/
   }
 }
