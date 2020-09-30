@@ -100,7 +100,9 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
 
     // login to OCP from login page with default test user credentials
     openShiftLoginPage.waitOnOpen();
-    openShiftLoginPage.login(defaultTestUser.getName(), defaultTestUser.getPassword());
+    // openShiftLoginPage.login(defaultTestUser.getName(), defaultTestUser.getPassword());
+    // Draft to login to CHE 'single-host' with oAuth to implement launching 'Happy path': https://github.com/eclipse/che/issues/17789
+    openShiftLoginPage.login();
 
     // authorize ocp-client to access OpenShift account
     authorizeOpenShiftAccessPage.waitOnOpen();
