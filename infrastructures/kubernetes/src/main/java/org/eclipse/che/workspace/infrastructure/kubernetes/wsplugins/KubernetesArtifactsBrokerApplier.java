@@ -50,10 +50,14 @@ public class KubernetesArtifactsBrokerApplier<E extends KubernetesEnvironment> {
    * broker's configmap, machines, and volumes added in addition to the init container
    */
   public void apply(
-      E workspaceEnvironment, RuntimeIdentity runtimeID, Collection<PluginFQN> pluginFQNs)
+      E workspaceEnvironment,
+      RuntimeIdentity runtimeID,
+      Collection<PluginFQN> pluginFQNs,
+      boolean mergePlugins)
       throws InfrastructureException {
 
-    E brokerEnvironment = brokerEnvironmentFactory.createForArtifactsBroker(pluginFQNs, runtimeID);
+    E brokerEnvironment =
+        brokerEnvironmentFactory.createForArtifactsBroker(pluginFQNs, runtimeID, mergePlugins);
 
     Map<String, PodData> workspacePods = workspaceEnvironment.getPodsData();
     if (workspacePods.size() != 1) {

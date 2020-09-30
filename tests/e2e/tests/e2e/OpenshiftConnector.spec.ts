@@ -117,7 +117,7 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.clickOnContainerItem(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
     await quickOpenContainer.clickOnContainerItem('node-js-app');
     await quickOpenContainer.clickOnContainerItem('component-node-js');
-    await terminal.selectTabByPrefixAndWaitText('OpenShift: Push', 'Changes successfully pushed to component', TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+    await terminal.selectTabByPrefixAndWaitText('OpenShift: Push', 'Changes successfully pushed to component', 30_000);
   });
 
 });

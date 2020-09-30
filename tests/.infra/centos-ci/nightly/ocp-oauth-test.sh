@@ -14,7 +14,7 @@ spec:
   server:
     customCheProperties:
       CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
-      CHE_WORKSPACE_AGENT_DEV_INACTIVE__STOP__TIMEOUT__MS: '300000'
+      CHE_WORKSPACE_AGENT_DEV_INACTIVE__STOP__TIMEOUT__MS: '180000'
   auth:
     openShiftoAuth: true
     updateAdminPassword: false
@@ -34,14 +34,24 @@ installCheCtl
 deployCheIntoCluster  --che-operator-cr-patch-yaml=/tmp/custom-resource-patch.yaml
 seleniumTestsSetup
 
+export OPENSHIFT_USERNAME=developer
+export OPENSHIFT_PASSWORD=123
+export OPENSHIFT_REGULAR_USERNAME=developer
+export OPENSHIFT_REGULAR_PASSWORD=123
+export OPENSHIFT_REGULAR_EMAIL=${OPENSHIFT_REGULAR_USERNAME}@1.com
+
+export TEST_USER_NAME=admin
+export CHE_TESTUSER_NAME=${TEST_USER_NAME}
+export CHE_TESTUSER_PASSWORD=admin
+export CHE_TESTUSER_EMAIL=${TEST_USER_NAME}@admin.com
+
 bash tests/legacy-e2e/che-selenium-test/selenium-tests.sh \
-  --threads=1 \
+  --threads=3 \
   --host=${CHE_ROUTE} \
   --https \
   --port=443 \
   --multiuser \
   --fail-script-on-failed-tests \
-  --test=org.eclipse.che.selenium.site.ocpoauth.** \
   || IS_TESTS_FAILED=true
 
 echo "=========================== THIS IS POST TEST ACTIONS =============================="

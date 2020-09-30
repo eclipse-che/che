@@ -29,7 +29,6 @@ import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class DeleteRunningWorkspaceTest {
-
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
