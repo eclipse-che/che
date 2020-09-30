@@ -252,7 +252,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       LOG.warn(
           "Failed to start Kubernetes runtime of workspace {}. Cause: {}",
           workspaceId,
-          startFailureCause.getMessage());
+          startFailureCause.getMessage(),
+          startFailureCause);
       boolean interrupted =
           Thread.interrupted() || startFailureCause instanceof RuntimeStartInterruptedException;
       // Cancels workspace servers probes if any
@@ -265,7 +266,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         LOG.warn(
             "Failed to clean up namespace after workspace '{}' start failing. Cause: {}",
             context.getIdentity().getWorkspaceId(),
-            cleanUppingEx.getMessage());
+            cleanUppingEx.getMessage(),
+            cleanUppingEx);
       }
 
       if (interrupted) {
