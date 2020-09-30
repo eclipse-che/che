@@ -14,7 +14,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.ValidationResult.INVALID;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.ValidationResult.NULL_OR_EMPTY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.ValidationResult.TOO_LONG;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.normalize;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.validateInternal;
 import static org.testng.Assert.assertEquals;
 
@@ -43,30 +42,6 @@ public class NamespaceNameValidatorTest {
   @Test(dataProvider = "invalidDnsNames")
   public void testFailsOnInvalidChars(String invalidName) {
     assertEquals(validateInternal(invalidName), INVALID);
-  }
-
-  @Test(dataProvider = "invalidUsernames")
-  public void normalizeTest(String raw, String expected) {
-    assertEquals(expected, normalize(raw));
-  }
-
-  @Test
-  public void normalizeLengthTest() {
-    assertEquals(
-        63,
-        normalize("looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong")
-            .length());
-  }
-
-  @DataProvider
-  public static Object[][] invalidUsernames() {
-    return new Object[][] {
-      new Object[] {"gmail@foo.bar", "gmail-foo-bar"},
-      new Object[] {"_fef_123-ah_*zz**", "fef-123-ah-zz"},
-      new Object[] {"a-b#-hello", "a-b-hello"},
-      new Object[] {"a---------b", "a-b"},
-      new Object[] {"--ab--", "ab"}
-    };
   }
 
   @DataProvider

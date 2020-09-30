@@ -74,6 +74,7 @@ import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.collections.Sets;
@@ -834,6 +835,57 @@ public class KubernetesNamespaceFactoryTest {
 
     // this is an invalid name, but that is not a purpose of this test.
     assertEquals(namespace, "<userid>");
+  }
+
+  @Test(dataProvider = "invalidUsernames")
+  public void normalizeTest(String raw, String expected) {
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "",
+            "",
+            "",
+            "che-<userid>",
+            false,
+            true,
+            clientFactory,
+            userManager,
+            preferenceManager,
+            pool);
+    assertEquals(expected, namespaceFactory.normalizeNamespaceName(raw));
+  }
+
+  @Test
+  public void normalizeLengthTest() {
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "",
+            "",
+            "",
+            "che-<userid>",
+            false,
+            true,
+            clientFactory,
+            userManager,
+            preferenceManager,
+            pool);
+
+    assertEquals(
+        63,
+        namespaceFactory
+            .normalizeNamespaceName(
+                "looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong")
+            .length());
+  }
+
+  @DataProvider
+  public static Object[][] invalidUsernames() {
+    return new Object[][] {
+      new Object[] {"gmail@foo.bar", "gmail-foo-bar"},
+      new Object[] {"_fef_123-ah_*zz**", "fef-123-ah-zz"},
+      new Object[] {"a-b#-hello", "a-b-hello"},
+      new Object[] {"a---------b", "a-b"},
+      new Object[] {"--ab--", "ab"}
+    };
   }
 
   private void prepareNamespaceToBeFoundByName(String name, Namespace namespace) throws Exception {

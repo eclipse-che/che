@@ -18,6 +18,7 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.METADATA_NAME_MAX_LENGTH;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
@@ -476,7 +477,7 @@ public class KubernetesNamespaceFactory {
 
     if (!NamespaceNameValidator.isValid(namespace)) {
       Optional<KubernetesNamespaceMeta> namespaceMetaOptional;
-      String normalizedNamespace = NamespaceNameValidator.normalize(namespace);
+      String normalizedNamespace = normalizeNamespaceName(namespace);
       if (normalizedNamespace.isEmpty()) {
         throw new InfrastructureException(
             format(
@@ -592,6 +593,26 @@ public class KubernetesNamespaceFactory {
       LOG.error(e.getMessage(), e);
     }
     return Optional.empty();
+  }
+
+  /**
+   * Normalizes input namespace name to K8S accepted format
+   *
+   * @param namespaceName input namespace name
+   * @return normalized namespace name
+   */
+  @VisibleForTesting
+  String normalizeNamespaceName(String namespaceName) {
+    namespaceName =
+        namespaceName
+            .replaceAll("[^-a-zA-Z0-9]", "-") // replace invalid chars with '-'
+            .replaceAll("-+", "-") // replace multiple '-' with single ones
+            .replaceAll("^-|-$", ""); // trim dashes at beginning/end of the string
+    return namespaceName.substring(
+        0,
+        Math.min(
+            namespaceName.length(),
+            METADATA_NAME_MAX_LENGTH)); // limit length to METADATA_NAME_MAX_LENGTH
   }
 
   /**

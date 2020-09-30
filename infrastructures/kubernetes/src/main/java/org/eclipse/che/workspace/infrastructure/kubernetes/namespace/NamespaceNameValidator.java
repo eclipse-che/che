@@ -20,7 +20,7 @@ import org.eclipse.che.api.core.ValidationException;
 
 public final class NamespaceNameValidator {
 
-  private static final int METADATA_NAME_MAX_LENGTH = 63;
+  static final int METADATA_NAME_MAX_LENGTH = 63;
   private static final String METADATA_NAME_REGEX = "[a-z0-9]([-a-z0-9]*[a-z0-9])?";
   private static final Pattern METADATA_NAME_PATTERN = Pattern.compile(METADATA_NAME_REGEX);
 
@@ -49,25 +49,6 @@ public final class NamespaceNameValidator {
    */
   public static boolean isValid(String name) {
     return validateInternal(name).isOk();
-  }
-
-  /**
-   * Normalizes input namespace name to K8S accepted format
-   *
-   * @param namespaceName input namespace name
-   * @return normalized namespace name
-   */
-  public static String normalize(String namespaceName) {
-    namespaceName =
-        namespaceName
-            .replaceAll("[^-a-zA-Z0-9]", "-") // replace invalid chars with '-'
-            .replaceAll("-+", "-") // replace multiple '-' with single ones
-            .replaceAll("^-|-$", ""); // trim dashes at beginning/end of the string
-    return namespaceName.substring(
-        0,
-        Math.min(
-            namespaceName.length(),
-            METADATA_NAME_MAX_LENGTH)); // limit length to METADATA_NAME_MAX_LENGTH
   }
 
   @VisibleForTesting
