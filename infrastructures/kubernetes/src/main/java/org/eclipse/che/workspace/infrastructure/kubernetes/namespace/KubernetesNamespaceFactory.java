@@ -502,7 +502,7 @@ public class KubernetesNamespaceFactory {
     if (allowUserDefinedNamespaces
         && resolutionCtx.isPersistAfterCreate()
         && !defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
-      recordEvaluatedNamespaceName(namespace);
+      recordEvaluatedNamespaceName(namespace, resolutionCtx);
     }
     return namespace;
   }
@@ -566,9 +566,9 @@ public class KubernetesNamespaceFactory {
    * Stores computed namespace name and it's template into user preferences. Template is required to
    * track its changes and re-generate namespace in case it didn't matches.
    */
-  private void recordEvaluatedNamespaceName(String namespace) {
+  private void recordEvaluatedNamespaceName(String namespace, NamespaceResolutionContext context) {
     try {
-      String owner = EnvironmentContext.getCurrent().getSubject().getUserId();
+      final String owner = context.getUserId();
       Map<String, String> preferences = preferenceManager.find(owner);
       preferences.put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
       preferences.put(NAMESPACE_TEMPLATE_ATTRIBUTE, defaultNamespaceName);
