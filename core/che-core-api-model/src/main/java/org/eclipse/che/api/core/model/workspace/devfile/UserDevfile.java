@@ -20,8 +20,9 @@ public interface UserDevfile {
   String getName();
 
   /**
-   * Returns the namespace of the current devfile instance. Devfile name is unique for devfiles in
-   * the same namespace.
+   * Returns the namespace also known as the account name. This name can be the name of the
+   * organization or the name of the user to which this devfile belong to. Namespace and name
+   * uniquely identify devfile.
    */
   String getNamespace();
 
