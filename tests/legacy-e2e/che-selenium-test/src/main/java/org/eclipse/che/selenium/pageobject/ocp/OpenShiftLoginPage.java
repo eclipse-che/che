@@ -180,7 +180,8 @@ public class OpenShiftLoginPage {
   }
 
   public void login() {
-    if (isOpened()) {
+    // Workaround to 'Link admin CHE account with admin OCP account' 
+    // if (isOpened()) {
       if (isIdentityProviderLinkVisible(IDENTITY_PROVIDER_NAME)) {
         clickOnIdentityProviderLink(IDENTITY_PROVIDER_NAME);
       }
@@ -197,7 +198,7 @@ public class OpenShiftLoginPage {
         addToExistingAccount();
         cheLoginPage.loginWithPredefinedUsername("admin");
       }
-    }
+    // }
   }
 
   public boolean isOpened() {
