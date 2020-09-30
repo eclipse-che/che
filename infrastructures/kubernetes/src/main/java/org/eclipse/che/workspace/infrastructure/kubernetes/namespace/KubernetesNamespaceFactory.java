@@ -468,7 +468,8 @@ public class KubernetesNamespaceFactory {
   public String evaluateNamespaceName(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
     String namespace;
-    Optional<Pair<String, String>> namespaceOptional = getPreferencesNamespaceName(resolutionCtx);
+    Optional<Pair<String, String>> namespaceOptional =
+        allowUserDefinedNamespaces ? getPreferencesNamespaceName(resolutionCtx) : Optional.empty();
     if (namespaceOptional.isEmpty() || !isStoredTemplateValid(namespaceOptional.get().second)) {
       namespace = evalPlaceholders(defaultNamespaceName, resolutionCtx);
     } else {
@@ -498,7 +499,8 @@ public class KubernetesNamespaceFactory {
         resolutionCtx.getWorkspaceId(),
         namespace);
 
-    if (resolutionCtx.isPersistAfterCreate()
+    if (allowUserDefinedNamespaces
+        && resolutionCtx.isPersistAfterCreate()
         && !defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
       recordEvaluatedNamespaceName(namespace);
     }

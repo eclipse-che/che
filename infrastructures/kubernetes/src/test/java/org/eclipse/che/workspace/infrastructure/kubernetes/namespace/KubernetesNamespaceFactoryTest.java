@@ -680,7 +680,7 @@ public class KubernetesNamespaceFactoryTest {
             "",
             "",
             "che-<userid>",
-            false,
+            true,
             true,
             clientFactory,
             userManager,
@@ -701,6 +701,35 @@ public class KubernetesNamespaceFactoryTest {
 
   @Test
   public void testEvalNamespaceSkipsNamespaceFromUserPreferencesIfTemplateChanged()
+      throws Exception {
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "blabol-<userid>-<username>-<userid>-<username>--",
+            "",
+            "",
+            "che-<userid>-<username>",
+            true,
+            true,
+            clientFactory,
+            userManager,
+            preferenceManager,
+            pool);
+
+    Map<String, String> prefs = new HashMap<>();
+    // returned but ignored
+    prefs.put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "che-123");
+    prefs.put(NAMESPACE_TEMPLATE_ATTRIBUTE, "che-<userid>");
+
+    when(preferenceManager.find(anyString())).thenReturn(prefs);
+    String namespace =
+        namespaceFactory.evaluateNamespaceName(
+            new NamespaceResolutionContext("workspace123", "user123", "jondoe"));
+
+    assertEquals(namespace, "che-user123-jondoe");
+  }
+
+  @Test
+  public void testEvalNamespaceSkipsNamespaceFromUserPreferencesIfUserAllowedPropertySetFalse()
       throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
@@ -737,7 +766,7 @@ public class KubernetesNamespaceFactoryTest {
             "",
             "",
             "che-<workspaceid>-<username>",
-            false,
+            true,
             true,
             clientFactory,
             userManager,
@@ -766,7 +795,7 @@ public class KubernetesNamespaceFactoryTest {
             "",
             "",
             "che-<userid>",
-            false,
+            true,
             true,
             clientFactory,
             userManager,
