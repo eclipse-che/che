@@ -79,7 +79,7 @@ pipeline {
                     } else {
                         mutableCheImageTag = cheImageTag
                     }
-                    sh "sudo yum install -y glibc.i686 libfreetype.so.6 libfontconfig.so.1 libstdc++.so.6"
+                    sh "sudo yum install -y glibc.i686 libfreetype.so.6 libfontconfig.so.1 libstdc++-devel.i686"
                 }
             }
         }
