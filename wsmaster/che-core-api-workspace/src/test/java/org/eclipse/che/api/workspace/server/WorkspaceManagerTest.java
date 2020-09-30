@@ -241,7 +241,7 @@ public class WorkspaceManagerTest {
     verify(workspaceDao).create(workspace);
     verify(runtimes)
         .evalInfrastructureNamespace(
-            new NamespaceResolutionContext(workspace.getId(), USER_ID, NAMESPACE_1));
+            new NamespaceResolutionContext(workspace.getId(), USER_ID, NAMESPACE_1, true));
   }
 
   @Test
@@ -260,21 +260,6 @@ public class WorkspaceManagerTest {
         "user-defined");
     verify(workspaceDao).create(workspace);
     verify(runtimes, never()).evalInfrastructureNamespace(any());
-  }
-
-  @Test
-  @SuppressWarnings("unchecked") // for captor
-  public void updatesPreferencesWithInfraNamespaceOnWorkspaceCreation() throws Exception {
-    final WorkspaceConfig cfg = createConfig();
-    ArgumentCaptor<Map<String, String>> prefsCaptor = ArgumentCaptor.forClass(Map.class);
-    when(runtimes.evalInfrastructureNamespace(any(NamespaceResolutionContext.class)))
-        .thenReturn("user-defined");
-
-    workspaceManager.createWorkspace(cfg, NAMESPACE_1, emptyMap());
-
-    verify(preferenceManager).update(anyString(), prefsCaptor.capture());
-    assertEquals(
-        prefsCaptor.getValue().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE), "user-defined");
   }
 
   @Test
@@ -641,7 +626,7 @@ public class WorkspaceManagerTest {
         "evaluated-legacy");
     verify(runtimes)
         .evalLegacyInfrastructureNamespace(
-            new NamespaceResolutionContext(workspace.getId(), USER_ID, NAMESPACE_1));
+            new NamespaceResolutionContext(workspace.getId(), USER_ID, NAMESPACE_1, true));
   }
 
   @Test
@@ -683,7 +668,7 @@ public class WorkspaceManagerTest {
         "evaluated-legal");
     verify(runtimes)
         .evalInfrastructureNamespace(
-            new NamespaceResolutionContext(workspace.getId(), USER_ID, NAMESPACE_1));
+            new NamespaceResolutionContext(workspace.getId(), USER_ID, NAMESPACE_1, true));
   }
 
   @Test

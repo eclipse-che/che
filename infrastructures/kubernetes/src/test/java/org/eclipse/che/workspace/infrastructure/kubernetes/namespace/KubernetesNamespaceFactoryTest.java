@@ -16,6 +16,7 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory.NAMESPACE_TEMPLATE_CHECKSUM_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -46,11 +47,14 @@ import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.user.server.PreferenceManager;
@@ -684,14 +688,84 @@ public class KubernetesNamespaceFactoryTest {
             preferenceManager,
             pool);
 
-    when(preferenceManager.find(anyString()))
-        .thenReturn(
-            Collections.singletonMap(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "che-123"));
+    Checksum checksum = new CRC32();
+    checksum.update("che-<userid>".getBytes());
+
+    Map<String, String> prefs = new HashMap<>();
+    prefs.put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "che-123");
+    prefs.put(NAMESPACE_TEMPLATE_CHECKSUM_ATTRIBUTE, Long.toString(checksum.getValue()));
+
+    when(preferenceManager.find(anyString())).thenReturn(prefs);
     String namespace =
         namespaceFactory.evaluateNamespaceName(
             new NamespaceResolutionContext("workspace123", "user123", "jondoe"));
 
     assertEquals(namespace, "che-123");
+  }
+
+  @Test
+  public void testEvalNamespaceSkipsNamespaceFromUserPreferencesIfTemplateChanged()
+      throws Exception {
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "blabol-<userid>-<username>-<userid>-<username>--",
+            "",
+            "",
+            "che-<userid>-<username>",
+            false,
+            true,
+            clientFactory,
+            userManager,
+            preferenceManager,
+            pool);
+
+    Checksum checksum = new CRC32();
+    // didn't match current template
+    checksum.update("che-<userid>".getBytes());
+
+    Map<String, String> prefs = new HashMap<>();
+    // returned but ignored
+    prefs.put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "che-123");
+    prefs.put(NAMESPACE_TEMPLATE_CHECKSUM_ATTRIBUTE, Long.toString(checksum.getValue()));
+
+    when(preferenceManager.find(anyString())).thenReturn(prefs);
+    String namespace =
+        namespaceFactory.evaluateNamespaceName(
+            new NamespaceResolutionContext("workspace123", "user123", "jondoe"));
+
+    assertEquals(namespace, "che-user123-jondoe");
+  }
+
+  @Test
+  public void testEvalNamespaceSkipsNamespaceFromUserPreferencesIfTemplateContainsWorkspaceId()
+      throws Exception {
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "blabol-<userid>-<username>-<userid>-<username>--",
+            "",
+            "",
+            "che-<workspaceid>-<username>",
+            false,
+            true,
+            clientFactory,
+            userManager,
+            preferenceManager,
+            pool);
+
+    Checksum checksum = new CRC32();
+    // didn't match current template
+    checksum.update("che-<workspaceid>-<username>".getBytes());
+
+    Map<String, String> prefs = new HashMap<>();
+    // returned but ignored
+    prefs.put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "che-123");
+    prefs.put(NAMESPACE_TEMPLATE_CHECKSUM_ATTRIBUTE, Long.toString(checksum.getValue()));
+
+    String namespace =
+        namespaceFactory.evaluateNamespaceName(
+            new NamespaceResolutionContext("workspace123", "user123", "jondoe"));
+
+    assertEquals(namespace, "che-workspace123-jondoe");
   }
 
   @Test

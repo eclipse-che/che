@@ -35,6 +35,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 import javax.inject.Named;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -49,6 +51,7 @@ import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -74,6 +77,8 @@ public class KubernetesNamespaceFactory {
   private static final String USERNAME_PLACEHOLDER = "<username>";
   private static final String USERID_PLACEHOLDER = "<userid>";
   private static final String WORKSPACEID_PLACEHOLDER = "<workspaceid>";
+
+  static final String NAMESPACE_TEMPLATE_CHECKSUM_ATTRIBUTE = "infrastructureNamespaceChecksum";
 
   static {
     NAMESPACE_NAME_PLACEHOLDERS.put(USERNAME_PLACEHOLDER, NamespaceResolutionContext::getUserName);
@@ -463,9 +468,14 @@ public class KubernetesNamespaceFactory {
    */
   public String evaluateNamespaceName(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
-    String namespace =
-        getPreferencesNamespaceName(resolutionCtx)
-            .orElseGet(() -> evalPlaceholders(defaultNamespaceName, resolutionCtx));
+    String namespace;
+    Optional<Pair<String, String>> namespaceOptional = getPreferencesNamespaceName(resolutionCtx);
+    if (namespaceOptional.isEmpty()
+        || !matchCurrentDefaultTemplate(namespaceOptional.get().second)) {
+      namespace = evalPlaceholders(defaultNamespaceName, resolutionCtx);
+    } else {
+      namespace = namespaceOptional.get().first;
+    }
 
     if (!NamespaceNameValidator.isValid(namespace)) {
       Optional<KubernetesNamespaceMeta> namespaceMetaOptional;
@@ -490,6 +500,10 @@ public class KubernetesNamespaceFactory {
         resolutionCtx.getWorkspaceId(),
         namespace);
 
+    if (resolutionCtx.isPersistAfterCreate()
+        && !defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
+      recordEvaluatedNamespaceName(namespace);
+    }
     return namespace;
   }
 
@@ -548,15 +562,44 @@ public class KubernetesNamespaceFactory {
     return evaluated;
   }
 
-  private Optional<String> getPreferencesNamespaceName(NamespaceResolutionContext context) {
+  private void recordEvaluatedNamespaceName(String namespace) {
+    try {
+      String owner = EnvironmentContext.getCurrent().getSubject().getUserId();
+      Map<String, String> preferences = preferenceManager.find(owner);
+      preferences.put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, namespace);
+      preferences.put(NAMESPACE_TEMPLATE_CHECKSUM_ATTRIBUTE, crc32(defaultNamespaceName));
+      preferenceManager.update(owner, preferences);
+    } catch (ServerException e) {
+      LOG.error(e.getMessage(), e);
+    }
+  }
+
+  /** Returns stored namespace if any, and its default template checksum */
+  private Optional<Pair<String, String>> getPreferencesNamespaceName(
+      NamespaceResolutionContext context) {
     try {
       String owner = context.getUserId();
       Map<String, String> preferences = preferenceManager.find(owner);
-      return Optional.ofNullable(preferences.get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE));
+      if (preferences.containsKey(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE)
+          && preferences.containsKey(NAMESPACE_TEMPLATE_CHECKSUM_ATTRIBUTE)) {
+        return Optional.of(
+            Pair.of(
+                preferences.get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE),
+                preferences.get(NAMESPACE_TEMPLATE_CHECKSUM_ATTRIBUTE)));
+      }
     } catch (ServerException e) {
       LOG.error(e.getMessage(), e);
     }
     return Optional.empty();
+  }
+
+  private boolean matchCurrentDefaultTemplate(String storedNamespaceChecksum) {
+    if (defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
+      // we must never use stored namespace if there is workspaceid placeholder
+      return false;
+    }
+    // check that template didn't changed yet, otherwise, we cannot use stored value anymore
+    return storedNamespaceChecksum.equals(crc32(defaultNamespaceName));
   }
 
   @VisibleForTesting
@@ -572,5 +615,12 @@ public class KubernetesNamespaceFactory {
 
   protected Set<String> getClusterRoleNames() {
     return clusterRoleNames;
+  }
+
+  private String crc32(String in) {
+    byte[] bytes = in.getBytes();
+    Checksum checksum = new CRC32();
+    checksum.update(bytes, 0, bytes.length);
+    return Long.toString(checksum.getValue());
   }
 }
