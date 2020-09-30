@@ -78,7 +78,8 @@ public class KubernetesNamespaceFactory {
   private static final String USERID_PLACEHOLDER = "<userid>";
   private static final String WORKSPACEID_PLACEHOLDER = "<workspaceid>";
 
-  static final String NAMESPACE_TEMPLATE_CHECKSUM_ATTRIBUTE = "infrastructureNamespaceChecksum";
+  static final String NAMESPACE_TEMPLATE_CHECKSUM_ATTRIBUTE =
+      "infrastructureNamespaceTemplateChecksum";
 
   static {
     NAMESPACE_NAME_PLACEHOLDERS.put(USERNAME_PLACEHOLDER, NamespaceResolutionContext::getUserName);
@@ -470,8 +471,7 @@ public class KubernetesNamespaceFactory {
       throws InfrastructureException {
     String namespace;
     Optional<Pair<String, String>> namespaceOptional = getPreferencesNamespaceName(resolutionCtx);
-    if (namespaceOptional.isEmpty()
-        || !matchCurrentDefaultTemplate(namespaceOptional.get().second)) {
+    if (namespaceOptional.isEmpty() || !isStoredTemplateValid(namespaceOptional.get().second)) {
       namespace = evalPlaceholders(defaultNamespaceName, resolutionCtx);
     } else {
       namespace = namespaceOptional.get().first;
@@ -562,6 +562,10 @@ public class KubernetesNamespaceFactory {
     return evaluated;
   }
 
+  /**
+   * Stores computed namespace name and it's template checksum into user preferences. Checksum is
+   * required to track template changes and re-generate namespace in case it didn't matches.
+   */
   private void recordEvaluatedNamespaceName(String namespace) {
     try {
       String owner = EnvironmentContext.getCurrent().getSubject().getUserId();
@@ -574,7 +578,7 @@ public class KubernetesNamespaceFactory {
     }
   }
 
-  /** Returns stored namespace if any, and its default template checksum */
+  /** Returns stored namespace if any, and its default template checksum. */
   private Optional<Pair<String, String>> getPreferencesNamespaceName(
       NamespaceResolutionContext context) {
     try {
@@ -593,7 +597,11 @@ public class KubernetesNamespaceFactory {
     return Optional.empty();
   }
 
-  private boolean matchCurrentDefaultTemplate(String storedNamespaceChecksum) {
+  /**
+   * Checks that current template does not contains workspace id and compares current and stored
+   * template checksum.
+   */
+  private boolean isStoredTemplateValid(String storedNamespaceChecksum) {
     if (defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
       // we must never use stored namespace if there is workspaceid placeholder
       return false;
