@@ -76,7 +76,7 @@ public class OpenShiftLoginPage {
   protected interface Locators {
     String USERNAME_INPUT_NAME = "username";
     String PASSWORD_INPUT_NAME = "password";
-    String LOGIN_BUTTON_XPATH = "//button[contains(text(),'Log In')]";
+    String LOGIN_BUTTON_XPATH = "//button[@type='submit']";
     String SUBMIT_BUTTON_XPATH = "//input[@value='Submit']";
     String FIRST_NAME_NAME = "firstName";
     String LAST_NAME_NAME = "lastName";
