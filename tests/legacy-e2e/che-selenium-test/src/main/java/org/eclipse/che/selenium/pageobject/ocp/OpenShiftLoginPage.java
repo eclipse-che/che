@@ -68,7 +68,7 @@ public class OpenShiftLoginPage {
   private String openShiftPassword;
 
   @Inject(optional = true)
-  @Named("env.openshift.admin.email")
+  @Named("env.openshift.regular.email")
   private String openShiftEmail;
 
   private static final String IDENTITY_PROVIDER_NAME = "htpasswd";
