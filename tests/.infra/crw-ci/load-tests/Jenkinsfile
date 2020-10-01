@@ -21,6 +21,10 @@ pipeline {
                 defaultValue: '',
                 description: 'Password for login to the cluster where CHE is running.')
 
+        string(name: 'serverLabel',
+                defaultValue: 'che',
+                description: 'Label for server pod.')
+
         string(name: 'testClusterUrl',
                 defaultValue: '',
                 description: 'URL to the cluster where CHE should run.')
@@ -117,19 +121,54 @@ pipeline {
             }
         }
         stage('Run load tests') {
-            steps {
-                sh """
-                  ROOT=`pwd`
-                  cd $pathToScripts
+            parallel {
+                stage('Gather server logs') {
+                    steps {
+                        script {
+                            sh """
+                            set +x
+                            touch server-logs.txt
 
-                  oc config use-context ${env.CHE_CONTEXT}
-                  checlusterName=`oc get checluster -o jsonpath='{.items[].metadata.name}'`
-                  CHE_URL=`oc get checluster \$checlusterName -o jsonpath='{.status.cheURL}'`
-                  
-                  oc config use-context ${env.TEST_CONTEXT}
-                  mkdir \$ROOT/report
-                  ./load-tests.sh -u user -p load-user -n $numberOfUsers -i $testingImage -r \$CHE_URL -f \$ROOT/report -t $numberOfRepetitions -l $logLevel
-                """
+                            oc config use-context ${env.CHE_CONTEXT}
+                            oc logs -f \$(oc get pods -l app=$serverLabel,component=$serverLabel -o name) >> server-logs.txt || echo "Process gathering logs was killed."
+                            """
+                        }
+                    }
+                }
+                stage('Run test scripts') {
+                    steps {
+                        script {
+                            sh """
+                            set +x
+                            ROOT=`pwd`
+                            cd $pathToScripts
+                            
+                            oc config use-context ${env.CHE_CONTEXT}
+                            checlusterName=`oc get checluster -o jsonpath='{.items[].metadata.name}'`
+                            CHE_URL=`oc get checluster \$checlusterName -o jsonpath='{.status.cheURL}'`
+                            
+                            mkdir \$ROOT/report/
+                            oc config use-context ${env.TEST_CONTEXT}
+                            ./load-tests.sh -u user -p load-user -n $numberOfUsers -i $testingImage -r \$CHE_URL -f \$ROOT/report -t $numberOfRepetitions -l $logLevel
+                            """
+                        }
+                    }
+                    post {
+                        always {
+                            script {
+                                sh """
+                                set +x
+                                pId=\$(ps x | grep "oc logs -f" | grep -v "grep" | head -n 1 | awk '{print \$1}')
+                                kill \$pId
+
+                                ROOT=`pwd`
+                                cp server-logs.txt \$ROOT/report
+                                """
+                            }
+                        }
+
+                    }
+                }
             }
             post {
                 success {

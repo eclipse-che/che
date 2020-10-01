@@ -46,7 +46,7 @@ import org.eclipse.che.inject.ConfigurationException;
 public class MultiHostExternalServiceExposureStrategy implements ExternalServiceExposureStrategy {
 
   public static final String MULTI_HOST_STRATEGY = "multi-host";
-  private static final String INGRESS_DOMAIN_PROPERTY = "che.infra.kubernetes.ingress.domain";
+  protected static final String INGRESS_DOMAIN_PROPERTY = "che.infra.kubernetes.ingress.domain";
 
   private final String domain;
 
