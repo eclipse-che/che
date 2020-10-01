@@ -264,7 +264,8 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
                 .getEndpoints()
                 .stream()
                 .collect(
-                    Collectors.toMap(Endpoint::getName, ServerConfigImpl::createFromEndpoint)));
+                    Collectors.toMap(
+                        Endpoint::getName, e -> ServerConfigImpl.createFromEndpoint(e, true))));
   }
 
   private void provisionVolumes(
