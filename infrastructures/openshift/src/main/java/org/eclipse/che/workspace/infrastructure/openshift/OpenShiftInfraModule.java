@@ -72,6 +72,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.Serv
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ServiceExposureStrategyProvider;
@@ -101,6 +102,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftCookie
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftPreviewUrlExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.server.RouteServerExposer;
+import org.eclipse.che.workspace.infrastructure.openshift.server.external.OpenShiftExternalServerExposerProvider;
 import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases.OpenshiftBrokerEnvironmentFactory;
 
 /** @author Sergii Leshchenko */
@@ -146,14 +148,18 @@ public class OpenShiftInfraModule extends AbstractModule {
 
     MapBinder<WorkspaceExposureType, ExternalServerExposer<OpenShiftEnvironment>>
         exposureStrategies =
-            MapBinder.newMapBinder(
-                binder(),
-                new TypeLiteral<WorkspaceExposureType>() {},
-                new TypeLiteral<ExternalServerExposer<OpenShiftEnvironment>>() {});
+            MapBinder.newMapBinder(binder(), new TypeLiteral<>() {}, new TypeLiteral<>() {});
     exposureStrategies.addBinding(WorkspaceExposureType.NATIVE).to(RouteServerExposer.class);
     exposureStrategies
         .addBinding(WorkspaceExposureType.GATEWAY)
         .to(new TypeLiteral<GatewayServerExposer<OpenShiftEnvironment>>() {});
+
+    bind(new TypeLiteral<ExternalServerExposer<OpenShiftEnvironment>>() {})
+        .annotatedWith(com.google.inject.name.Names.named("multihost-exposer"))
+        .to(RouteServerExposer.class);
+
+    bind(new TypeLiteral<ExternalServerExposerProvider<OpenShiftEnvironment>>() {})
+        .to(OpenShiftExternalServerExposerProvider.class);
 
     bind(ServersConverter.class).to(new TypeLiteral<ServersConverter<OpenShiftEnvironment>>() {});
     bind(PreviewUrlExposer.class).to(new TypeLiteral<OpenShiftPreviewUrlExposer>() {});
