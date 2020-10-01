@@ -21,11 +21,13 @@ import static org.eclipse.che.api.devfile.server.jpa.JpaUserDevfileDao.UserDevfi
 import com.google.common.annotations.Beta;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.persist.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -56,9 +58,13 @@ public class JpaUserDevfileDao implements UserDevfileDao {
   protected final Provider<EntityManager> managerProvider;
   protected final AccountDao accountDao;
   protected final EventService eventService;
-
+  /** sorting order that would be used by default during search. */
   public static final List<Pair<String, String>> DEFAULT_ORDER =
       ImmutableList.of(new Pair<>("id", "ASC"));
+  /** Set of field that is eligible to use for search. */
+  public static final Set<String> VALID_SEARCH_FIELDS = ImmutableSet.of("name");
+  /** Set of field that is eligible to use for sorting during search. */
+  public static final Set<String> VALID_ORDER_FIELDS = ImmutableSet.of("id", "name");
 
   @Inject
   public JpaUserDevfileDao(
@@ -192,10 +198,13 @@ public class JpaUserDevfileDao implements UserDevfileDao {
       throws ServerException {
     if (filter != null && !filter.isEmpty()) {
       List<Pair<String, String>> invalidFilter =
-          filter.stream().filter(p -> !p.first.equalsIgnoreCase("name")).collect(toList());
+          filter
+              .stream()
+              .filter(p -> !VALID_SEARCH_FIELDS.contains(p.first.toLowerCase()))
+              .collect(toList());
       if (!invalidFilter.isEmpty()) {
         throw new IllegalArgumentException(
-            "Filtering allowed only by name but got: " + invalidFilter);
+            "Filtering allowed only by " + VALID_SEARCH_FIELDS + " but got: " + invalidFilter);
       }
     }
     List<Pair<String, String>> effectiveOrder = DEFAULT_ORDER;
@@ -203,10 +212,11 @@ public class JpaUserDevfileDao implements UserDevfileDao {
       List<Pair<String, String>> invalidOrder =
           order
               .stream()
-              .filter(p -> !p.first.equalsIgnoreCase("name") && !p.first.equalsIgnoreCase("id"))
+              .filter(p -> !VALID_ORDER_FIELDS.contains(p.first.toLowerCase()))
               .collect(toList());
       if (!invalidOrder.isEmpty()) {
-        throw new IllegalArgumentException("Order allowed only by name but got: " + invalidOrder);
+        throw new IllegalArgumentException(
+            "Order allowed only by " + VALID_ORDER_FIELDS + "¬ but got: " + invalidOrder);
       }
 
       List<Pair<String, String>> invalidSortOrder =
@@ -302,6 +312,8 @@ public class JpaUserDevfileDao implements UserDevfileDao {
     public UserDevfileSearchQueryBuilder(EntityManager entityManager) {
       this.entityManager = entityManager;
       this.params = new HashMap<>();
+      this.filter = "";
+      this.order = "";
     }
 
     public static UserDevfileSearchQueryBuilder newBuilder(EntityManager entityManager) {
@@ -320,13 +332,15 @@ public class JpaUserDevfileDao implements UserDevfileDao {
 
     public UserDevfileSearchQueryBuilder withFilter(List<Pair<String, String>> filter) {
       if (filter == null || filter.isEmpty()) {
-        this.filter = "";
         return this;
       }
       final StringJoiner matcher = new StringJoiner(" AND ", " WHERE ", " ");
       int i = 0;
       for (Pair<String, String> attribute : filter) {
-
+        if (!VALID_SEARCH_FIELDS.contains(attribute.first.toLowerCase())) {
+          throw new IllegalArgumentException(
+              "Filtering allowed only by " + VALID_SEARCH_FIELDS + " but got: " + attribute.first);
+        }
         final String parameterName = "parameterName" + i++;
         if (attribute.second.startsWith("like:")) {
           params.put(parameterName, attribute.second.substring(5));
@@ -342,11 +356,16 @@ public class JpaUserDevfileDao implements UserDevfileDao {
 
     public UserDevfileSearchQueryBuilder withOrder(List<Pair<String, String>> order) {
       if (order == null || order.isEmpty()) {
-        this.order = "";
         return this;
       }
       final StringJoiner matcher = new StringJoiner(", ", " ORDER BY ", " ");
-      order.forEach(pair -> matcher.add("userdevfile." + pair.first + " " + pair.second));
+      for (Pair<String, String> pair : order) {
+        if (!VALID_ORDER_FIELDS.contains(pair.first.toLowerCase())) {
+          throw new IllegalArgumentException(
+              "Order allowed only by " + VALID_ORDER_FIELDS + " but got: " + pair.first);
+        }
+        matcher.add("userdevfile." + pair.first + " " + pair.second);
+      }
       this.order = matcher.toString();
 
       return this;

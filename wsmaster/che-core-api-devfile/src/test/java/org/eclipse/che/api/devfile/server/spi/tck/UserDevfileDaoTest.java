@@ -31,6 +31,8 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.persistence.EntityManager;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -40,6 +42,7 @@ import org.eclipse.che.api.core.model.workspace.devfile.UserDevfile;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.devfile.server.TestObjectGenerator;
 import org.eclipse.che.api.devfile.server.event.BeforeDevfileRemovedEvent;
+import org.eclipse.che.api.devfile.server.jpa.JpaUserDevfileDao;
 import org.eclipse.che.api.devfile.server.model.impl.UserDevfileImpl;
 import org.eclipse.che.api.devfile.server.spi.UserDevfileDao;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -54,6 +57,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -80,6 +84,8 @@ public class UserDevfileDaoTest {
   @Inject private TckRepository<UserImpl> userTckRepository;
 
   @Inject private TckRepository<AccountImpl> accountRepo;
+
+  @Inject private Provider<EntityManager> entityManagerProvider;
 
   @BeforeMethod
   public void setUp() throws Exception {
@@ -513,5 +519,71 @@ public class UserDevfileDaoTest {
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowNpeWhenGettingDevfilesByNullNamespace() throws Exception {
     userDevfileDaoDao.getByNamespace(null, 30, 0);
+  }
+
+  @Test(dataProvider = "validOrderFiled")
+  public void shouldTestValidOrderFileds(String filed) {
+    JpaUserDevfileDao.UserDevfileSearchQueryBuilder queryBuilder =
+        new JpaUserDevfileDao.UserDevfileSearchQueryBuilder(null);
+    try {
+      queryBuilder.withOrder(ImmutableList.of(new Pair<>(filed, "blah")));
+    } catch (IllegalArgumentException e) {
+      Assert.fail(filed + " is valid but failed");
+    }
+  }
+
+  @Test(
+      dataProvider = "invalidOrderField",
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp = "Order allowed only by \\[id, name\\] but got: .*")
+  public void shouldTestInvalidOrderFileds(String filed) {
+    JpaUserDevfileDao.UserDevfileSearchQueryBuilder queryBuilder =
+        new JpaUserDevfileDao.UserDevfileSearchQueryBuilder(null);
+    queryBuilder.withOrder(ImmutableList.of(new Pair<>(filed, "blah")));
+  }
+
+  @Test(dataProvider = "validSearchFiled")
+  public void shouldTestValidSearchFileds(String filed) {
+    JpaUserDevfileDao.UserDevfileSearchQueryBuilder queryBuilder =
+        new JpaUserDevfileDao.UserDevfileSearchQueryBuilder(null);
+    try {
+      queryBuilder.withFilter(ImmutableList.of(new Pair<>(filed, "blah")));
+    } catch (IllegalArgumentException e) {
+      Assert.fail(filed + " is valid but failed");
+    }
+  }
+
+  @Test(
+      dataProvider = "invalidSearchField",
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp = "Filtering allowed only by \\[name\\] but got: .*")
+  public void shouldTestInvalidSearchFileds(String filed) {
+    JpaUserDevfileDao.UserDevfileSearchQueryBuilder queryBuilder =
+        new JpaUserDevfileDao.UserDevfileSearchQueryBuilder(null);
+    queryBuilder.withFilter(ImmutableList.of(new Pair<>(filed, "blah")));
+  }
+
+  @DataProvider
+  public Object[][] validOrderFiled() {
+    return new Object[][] {{"id"}, {"Id"}, {"name"}, {"nAmE"}};
+  }
+
+  @DataProvider
+  public Object[][] invalidOrderField() {
+    return new Object[][] {{"devfile"}, {"meta_name"}, {"description"}, {"meta_generated_name"}};
+  }
+
+  @DataProvider
+  public Object[][] validSearchFiled() {
+    return new Object[][] {
+      {"name"}, {"NaMe"},
+    };
+  }
+
+  @DataProvider
+  public Object[][] invalidSearchField() {
+    return new Object[][] {
+      {"id"}, {"devfile"}, {"ID"}, {"meta_name"}, {"description"}, {"meta_generated_name"}
+    };
   }
 }
