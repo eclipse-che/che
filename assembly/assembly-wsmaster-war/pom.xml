@@ -442,7 +442,6 @@
                                 <dep>io.jaegertracing:jaeger-tracerresolver</dep>
                                 <dep>org.eclipse.che.multiuser:che-multiuser-personal-account</dep>
                                 <dep>org.eclipse.che.multiuser:che-multiuser-keycloak-token-provider</dep>
-                                <dep>org.eclipse.che.multiuser:che-multiuser-keycloak-user-remover</dep>
                                 <dep>org.eclipse.persistence:org.eclipse.persistence.extension</dep>
                                 <dep>org.eclipse.persistence:org.eclipse.persistence.jpa</dep>
                                 <dep>org.jgroups.kubernetes:jgroups-kubernetes</dep>

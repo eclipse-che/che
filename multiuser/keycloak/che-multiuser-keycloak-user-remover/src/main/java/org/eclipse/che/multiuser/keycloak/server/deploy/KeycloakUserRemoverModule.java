@@ -12,10 +12,8 @@
 package org.eclipse.che.multiuser.keycloak.server.deploy;
 
 import com.google.inject.AbstractModule;
-import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakUserRemover.RemoveUserListener;
 
-@DynaModule
 public class KeycloakUserRemoverModule extends AbstractModule {
   @Override
   protected void configure() {
