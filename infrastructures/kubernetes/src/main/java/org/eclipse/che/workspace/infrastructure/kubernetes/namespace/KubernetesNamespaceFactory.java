@@ -468,12 +468,11 @@ public class KubernetesNamespaceFactory {
   public String evaluateNamespaceName(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
     String namespace;
-    Optional<Pair<String, String>> namespaceOptional =
-        allowUserDefinedNamespaces ? getPreferencesNamespaceName(resolutionCtx) : Optional.empty();
-    if (namespaceOptional.isEmpty() || !isStoredTemplateValid(namespaceOptional.get().second)) {
+    Optional<Pair<String, String>> storedNamespace = getPreferencesNamespaceName(resolutionCtx);
+    if (storedNamespace.isEmpty() || !isStoredTemplateValid(storedNamespace.get().second)) {
       namespace = evalPlaceholders(defaultNamespaceName, resolutionCtx);
     } else {
-      namespace = namespaceOptional.get().first;
+      namespace = storedNamespace.get().first;
     }
 
     if (!NamespaceNameValidator.isValid(namespace)) {
@@ -499,8 +498,7 @@ public class KubernetesNamespaceFactory {
         resolutionCtx.getWorkspaceId(),
         namespace);
 
-    if (allowUserDefinedNamespaces
-        && resolutionCtx.isPersistAfterCreate()
+    if (resolutionCtx.isPersistAfterCreate()
         && !defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
       recordEvaluatedNamespaceName(namespace, resolutionCtx);
     }
@@ -567,6 +565,9 @@ public class KubernetesNamespaceFactory {
    * track its changes and re-generate namespace in case it didn't matches.
    */
   private void recordEvaluatedNamespaceName(String namespace, NamespaceResolutionContext context) {
+    if (!allowUserDefinedNamespaces) {
+      return;
+    }
     try {
       final String owner = context.getUserId();
       Map<String, String> preferences = preferenceManager.find(owner);
@@ -581,6 +582,9 @@ public class KubernetesNamespaceFactory {
   /** Returns stored namespace if any, and its default template. */
   private Optional<Pair<String, String>> getPreferencesNamespaceName(
       NamespaceResolutionContext context) {
+    if (!allowUserDefinedNamespaces) {
+      return Optional.empty();
+    }
     try {
       String owner = context.getUserId();
       Map<String, String> preferences = preferenceManager.find(owner);

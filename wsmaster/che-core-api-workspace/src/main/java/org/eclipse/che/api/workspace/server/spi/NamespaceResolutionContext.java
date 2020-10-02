@@ -14,9 +14,10 @@ package org.eclipse.che.api.workspace.server.spi;
 import java.util.Objects;
 
 /**
- * Holds information needed for resolving placeholders in the namespace name.
- * The {@code persistAfterCreate} attribute indicates whether namespace name should be persisted after
+ * Holds information needed for resolving placeholders in the namespace name. The {@code
+ * persistAfterCreate} attribute indicates whether namespace name should be persisted after
  * resolution (if the infrastructure supports it).
+ *
  * @author Lukas Krejci
  * @author Sergii Leshchenko
  */
