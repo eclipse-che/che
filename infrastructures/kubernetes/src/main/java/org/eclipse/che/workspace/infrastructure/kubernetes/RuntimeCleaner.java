@@ -15,15 +15,20 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.server.externa
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.CheNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 
+/**
+ * Little helper bean that decides what is needed to cleanup for given workspace. It does not delete
+ * anything on it's own, but delegates the cleaning operations to provided {@link
+ * KubernetesNamespace} and {@link CheNamespace}.
+ */
+@Singleton
 public class RuntimeCleaner {
-
   private final boolean cleanupCheNamespace;
-
   private final CheNamespace cheNamespace;
 
   @Inject
@@ -38,6 +43,14 @@ public class RuntimeCleaner {
             && WorkspaceExposureType.GATEWAY.getConfigValue().equals(singleHostStrategy);
   }
 
+  /**
+   * Remove all workspace related k8s objects in both workspace's namespace and in Che namespace if
+   * needed.
+   *
+   * @param namespace to cleanup
+   * @param workspaceId to cleanup
+   * @throws InfrastructureException when exception during cleaning occurs.
+   */
   public void cleanUp(KubernetesNamespace namespace, String workspaceId)
       throws InfrastructureException {
     namespace.cleanUp();
