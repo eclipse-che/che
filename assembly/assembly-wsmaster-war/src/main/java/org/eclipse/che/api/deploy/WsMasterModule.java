@@ -321,7 +321,7 @@ public class WsMasterModule extends AbstractModule {
     // In single user mode jwtproxy provisioner isn't actually bound at all, but since
     // it is the new default, we need to "fake it" by binding the passthrough provisioner
     // as the jwtproxy impl.
-    configureFakeJwtProxySecureProvisioner(infrastructure);
+    configureImpostorJwtProxySecureProvisioner(infrastructure);
   }
 
   private void configureMultiUserMode(
@@ -431,7 +431,7 @@ public class WsMasterModule extends AbstractModule {
     }
   }
 
-  private void configureFakeJwtProxySecureProvisioner(String infrastructure) {
+  private void configureImpostorJwtProxySecureProvisioner(String infrastructure) {
     if (KubernetesInfrastructure.NAME.equals(infrastructure)) {
       MapBinder.newMapBinder(
               binder(),
