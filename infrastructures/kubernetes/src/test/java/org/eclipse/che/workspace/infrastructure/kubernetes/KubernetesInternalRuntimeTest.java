@@ -216,6 +216,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
   @Mock private KubernetesPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
+  @Mock private RuntimeCleaner runtimeCleaner;
   private KubernetesServerResolverFactory serverResolverFactory;
 
   @Mock
@@ -290,6 +291,7 @@ public class KubernetesInternalRuntimeTest {
             previewUrlCommandProvisioner,
             secretAsContainerResourceProvisioner,
             serverResolverFactory,
+            runtimeCleaner,
             cheNamespace,
             tracer,
             context,
