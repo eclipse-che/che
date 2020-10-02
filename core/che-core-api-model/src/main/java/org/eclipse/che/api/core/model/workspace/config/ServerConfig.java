@@ -97,6 +97,9 @@ public interface ServerConfig {
    */
   String REQUIRE_SUBDOMAIN = "requireSubdomain";
 
+  /** Attribute that specifies the base location of the JWT authenticating callback. */
+  String ENDPOINT_ORIGIN = "endpointOrigin";
+
   /**
    * Port used by server.
    *
@@ -248,6 +251,29 @@ public interface ServerConfig {
   }
 
   /**
+   * Returns the base location of the JWT authenticating callback.
+   *
+   * @param attributes the server attributes
+   */
+  static @Nullable String getEndpointOrigin(Map<String, String> attributes) {
+    return attributes.get(ENDPOINT_ORIGIN);
+  }
+
+  /**
+   * Sets the base location of the JWT authenticating callback.
+   *
+   * @param attributes the server attributes
+   * @param value the auth origin or null if none should be used
+   */
+  static void setEndpointOrigin(Map<String, String> attributes, @Nullable String value) {
+    if (value == null) {
+      attributes.remove(ENDPOINT_ORIGIN);
+    } else {
+      attributes.putIfAbsent(ENDPOINT_ORIGIN, value);
+    }
+  }
+
+  /**
    * Finds the unsecured paths configuration in the provided attributes.s
    *
    * @param attributes the attributes with additional server configuration
@@ -303,6 +329,11 @@ public interface ServerConfig {
   /** @see #isRequireSubdomain(Map) */
   default boolean isRequireSubdomain() {
     return isRequireSubdomain(getAttributes());
+  }
+
+  /** @see #getEndpointOrigin(Map) */
+  default String getEndpointOrigin() {
+    return getEndpointOrigin(getAttributes());
   }
 }
 

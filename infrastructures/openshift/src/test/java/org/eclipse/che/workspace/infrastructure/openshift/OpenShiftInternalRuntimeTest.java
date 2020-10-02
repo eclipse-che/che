@@ -80,6 +80,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesS
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ServiceExposureStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
@@ -151,6 +152,7 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
   @Mock private Openshift4TrustedCAProvisioner trustedCAProvisioner;
   @Mock private CheNamespace cheNamespace;
+  @Mock private ServiceExposureStrategyProvider serviceExposureStrategyProvider;
   @Mock private RuntimeCleaner runtimeCleaner;
   private OpenShiftServerResolverFactory serverResolverFactory;
 

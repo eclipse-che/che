@@ -167,9 +167,9 @@ class Loader {
      * @param {string} redirectUrl a redirect URL
      * @param {string} token
      */
-    asyncAuthenticate(redirectUrl, token) {
+    asyncAuthenticate(redirectUrl, endpointOrigin, token) {
         redirectUrl = new URL(redirectUrl);
-        const url = redirectUrl.origin + redirectUrl.pathname.replace("//", "/") + "jwt/auth";
+        const url = "https://" + redirectUrl.host + ("/" + endpointOrigin + "/jwt/auth").replace("//", "/");
         return new Promise((resolve, reject) => {
             const request = new XMLHttpRequest();
             request.open('GET', url);
@@ -228,7 +228,7 @@ class Loader {
         const workspace = await loader.asyncGetWorkspace(workspaceId);
         const server = await loader.asyncGetMatchedServer(workspace, redirectUrl);
         const token = await loader.asyncGetWsToken(workspace);
-        await loader.asyncAuthenticate(server.url, token);
+        await loader.asyncAuthenticate(server.url, server.attributes.endpointOrigin, token);
 
         window.location.replace(redirectUrl);
     } catch (errorMessage) {

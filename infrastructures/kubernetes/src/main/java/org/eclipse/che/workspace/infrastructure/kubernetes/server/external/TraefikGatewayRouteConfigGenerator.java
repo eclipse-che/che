@@ -95,7 +95,7 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
           generate(
               routeConfig.getKey(),
               createServiceUrl(serviceName, servicePort, namespace),
-              server.getPath());
+              server.getEndpointOrigin());
       cmData.put(routeConfig.getKey() + ".yml", traefikRouteConfig);
     }
     return cmData;

@@ -16,6 +16,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.UNKNOWN;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
@@ -26,12 +27,15 @@ import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteBuilder;
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.Serializer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.server.RouteServerResolver;
+import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -42,11 +46,13 @@ import org.testng.annotations.Test;
  * @author Sergii Leshchenko
  */
 @Listeners(MockitoTestNGListener.class)
-public class OpenShiftServerResolverTest {
+public class RouteServerResolverTest {
 
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
   private static final int CONTAINER_PORT = 3054;
   private static final String ROUTE_HOST = "localhost";
+
+  @Mock private ExternalServiceExposureStrategy externalServiceExposureStrategy;
 
   @Test
   public void
@@ -90,7 +96,9 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("http://localhost/api")
             .withStatus(UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(
+                defaultAttributeAnd(
+                    Constants.SERVER_PORT_ATTRIBUTE, "3054", ServerConfig.ENDPOINT_ORIGIN, "/")));
   }
 
   @Test
@@ -112,7 +120,9 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("http://localhost")
             .withStatus(UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(
+                defaultAttributeAnd(
+                    Constants.SERVER_PORT_ATTRIBUTE, "3054", ServerConfig.ENDPOINT_ORIGIN, "/")));
   }
 
   @Test
@@ -133,7 +143,9 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("http://localhost")
             .withStatus(UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(
+                defaultAttributeAnd(
+                    Constants.SERVER_PORT_ATTRIBUTE, "3054", ServerConfig.ENDPOINT_ORIGIN, "/")));
   }
 
   @Test
@@ -155,7 +167,9 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("http://localhost/api")
             .withStatus(UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(
+                defaultAttributeAnd(
+                    Constants.SERVER_PORT_ATTRIBUTE, "3054", ServerConfig.ENDPOINT_ORIGIN, "/")));
   }
 
   @Test
@@ -180,7 +194,9 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("http://service11:3054/api")
             .withStatus(UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(
+                defaultAttributeAnd(
+                    Constants.SERVER_PORT_ATTRIBUTE, "3054", ServerConfig.ENDPOINT_ORIGIN, "/")));
   }
 
   @Test
@@ -205,7 +221,44 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("xxx://service11:3054/api")
             .withStatus(UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(
+                defaultAttributeAnd(
+                    Constants.SERVER_PORT_ATTRIBUTE, "3054", ServerConfig.ENDPOINT_ORIGIN, "/")));
+  }
+
+  @Test
+  public void shouldSetEndpointOrigin() {
+    // given
+    Route route =
+        new RouteBuilder()
+            .withNewMetadata()
+            .addToAnnotations(
+                Annotations.newSerializer()
+                    .machineName("m1")
+                    .server(
+                        "svr",
+                        new ServerConfigImpl()
+                            .withPort("8080")
+                            .withProtocol("http")
+                            .withPath("/kachny"))
+                    .annotations())
+            .endMetadata()
+            .withNewSpec()
+            .withHost("che.host")
+            .endSpec()
+            .build();
+
+    RouteServerResolver serverResolver = new RouteServerResolver(emptyList(), singletonList(route));
+
+    // when
+    Map<String, ServerImpl> resolvedServers = serverResolver.resolve("m1");
+
+    // then
+    ServerImpl svr = resolvedServers.get("svr");
+    assertNotNull(svr);
+
+    assertEquals("/", ServerConfig.getEndpointOrigin(svr.getAttributes()));
+    assertEquals("http://che.host/kachny", svr.getUrl());
   }
 
   private Service createService(
@@ -254,9 +307,17 @@ public class OpenShiftServerResolverTest {
         .build();
   }
 
-  private Map<String, String> defaultAttributeAnd(String key, String value) {
-    HashMap<String, String> map = new HashMap<>(ATTRIBUTES_MAP);
-    map.put(key, value);
-    return map;
+  private Map<String, String> defaultAttributeAnd(String... keyValues) {
+    HashMap<String, String> attributes = new HashMap<>(ATTRIBUTES_MAP);
+    String key = null;
+    for (String v : keyValues) {
+      if (key == null) {
+        key = v;
+      } else {
+        attributes.put(key, v);
+        key = null;
+      }
+    }
+    return attributes;
   }
 }
