@@ -11,33 +11,13 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
-import java.util.Map;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
+import javax.inject.Provider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.AbstractExposureStrategyAwareProvider;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 
 /**
- * Provides {@link ExternalServerExposer} based on `che.infra.kubernetes.server_strategy` and
- * `che.infra.kubernetes.singlehost.workspace.exposure` properties.
+ * Provides {@link ExternalServerExposer} implementations based on configuration.
  *
  * @param <T> type of environment
  */
-@Singleton
-public class ExternalServerExposerProvider<T extends KubernetesEnvironment>
-    extends AbstractExposureStrategyAwareProvider<ExternalServerExposer<T>> {
-  @Inject
-  public ExternalServerExposerProvider(
-      @Named("che.infra.kubernetes.server_strategy") String exposureStrategy,
-      @Named("che.infra.kubernetes.singlehost.workspace.exposure") String exposureType,
-      Map<WorkspaceExposureType, ExternalServerExposer<T>> exposers) {
-
-    super(
-        exposureStrategy,
-        exposureType,
-        exposers,
-        "Could not find an external server exposer implementation for the exposure type '%s'.");
-  }
-}
+public interface ExternalServerExposerProvider<T extends KubernetesEnvironment>
+    extends Provider<ExternalServerExposer<T>> {}

@@ -38,7 +38,10 @@ public class KubernetesServerResolverFactory extends AbstractServerResolverFacto
         exposureStrategy,
         wsExposureType,
         ImmutableMap.of(
-            GATEWAY, (ss, is, cs) -> new ConfigMapServerResolver(ss, cs, cheHost),
+            GATEWAY,
+                (ss, is, cs) ->
+                    new ConfigMapServerResolver(
+                        ss, cs, cheHost, new IngressServerResolver(pathTransformInverter, ss, is)),
             NATIVE, (ss, is, cs) -> new IngressServerResolver(pathTransformInverter, ss, is)),
         "Failed to initialize KubernetesServerResolverFactory for workspace exposure type '%s'.");
   }

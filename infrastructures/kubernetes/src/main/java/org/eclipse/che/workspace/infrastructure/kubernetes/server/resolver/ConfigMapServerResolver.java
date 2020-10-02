@@ -15,6 +15,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Service;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -27,10 +28,15 @@ public class ConfigMapServerResolver extends AbstractServerResolver {
 
   private final Multimap<String, ConfigMap> configMaps;
   private final String cheHost;
+  private final ServerResolver nativeServerResolver;
 
   public ConfigMapServerResolver(
-      Iterable<Service> services, Iterable<ConfigMap> configMaps, String cheHost) {
+      Iterable<Service> services,
+      Iterable<ConfigMap> configMaps,
+      String cheHost,
+      ServerResolver nativeServerResolver) {
     super(services);
+    this.nativeServerResolver = nativeServerResolver;
     this.cheHost = cheHost;
 
     this.configMaps = ArrayListMultimap.create();
@@ -44,13 +50,17 @@ public class ConfigMapServerResolver extends AbstractServerResolver {
   }
 
   @Override
-  protected Map<String, ServerImpl> resolveExternalServers(String machineName) {
-    return configMaps
-        .get(machineName)
-        .stream()
-        .map(this::fillGatewayServers)
-        .flatMap(m -> m.entrySet().stream())
-        .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (s1, s2) -> s2));
+  public Map<String, ServerImpl> resolveExternalServers(String machineName) {
+    Map<String, ServerImpl> serverMap = new HashMap<>();
+    serverMap.putAll(nativeServerResolver.resolveExternalServers(machineName));
+    serverMap.putAll(
+        configMaps
+            .get(machineName)
+            .stream()
+            .map(this::fillGatewayServers)
+            .flatMap(m -> m.entrySet().stream())
+            .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (s1, s2) -> s2)));
+    return serverMap;
   }
 
   private Map<String, ServerImpl> fillGatewayServers(ConfigMap configMap) {

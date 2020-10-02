@@ -37,7 +37,9 @@ public class OpenShiftServerResolverFactory extends AbstractServerResolverFactor
         exposureStrategy,
         wsExposureType,
         ImmutableMap.of(
-            GATEWAY, (ss, rs, cs) -> new ConfigMapServerResolver(ss, cs, cheHost),
+            GATEWAY,
+                (ss, rs, cs) ->
+                    new ConfigMapServerResolver(ss, cs, cheHost, new RouteServerResolver(ss, rs)),
             NATIVE, (ss, rs, cs) -> new RouteServerResolver(ss, rs)),
         "Failed to initialize OpenShiftServerResolverFactory for workspace exposure type '%s'.");
   }
