@@ -224,6 +224,7 @@ spec:
     cheImage: '${cheImageRepo}'
     cheImageTag: '${mutableCheImageTag}'
     serverExposureStrategy: 'single-host'
+  k8s:  
     singleHostExposureType: 'gateway'
   auth:
     updateAdminPassword: false
