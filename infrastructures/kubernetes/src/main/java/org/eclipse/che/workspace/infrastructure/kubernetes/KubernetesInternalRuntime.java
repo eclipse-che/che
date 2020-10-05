@@ -250,9 +250,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
       startSynchronizer.completeExceptionally(startFailureCause);
       LOG.warn(
-          "Failed to start Kubernetes runtime of workspace {}.",
-          workspaceId,
-          startFailureCause);
+          "Failed to start Kubernetes runtime of workspace {}.", workspaceId, startFailureCause);
       boolean interrupted =
           Thread.interrupted() || startFailureCause instanceof RuntimeStartInterruptedException;
       // Cancels workspace servers probes if any
