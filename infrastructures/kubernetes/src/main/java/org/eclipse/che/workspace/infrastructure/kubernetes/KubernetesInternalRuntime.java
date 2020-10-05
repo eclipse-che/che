@@ -133,6 +133,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final PreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   private final SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
   private final KubernetesServerResolverFactory serverResolverFactory;
+  private final RuntimeCleaner runtimeCleaner;
   protected final CheNamespace cheNamespace;
   protected final Tracer tracer;
 
@@ -158,6 +159,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       PreviewUrlCommandProvisioner previewUrlCommandProvisioner,
       SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner,
       KubernetesServerResolverFactory kubernetesServerResolverFactory,
+      RuntimeCleaner runtimeCleaner,
       CheNamespace cheNamespace,
       Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
@@ -184,6 +186,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.previewUrlCommandProvisioner = previewUrlCommandProvisioner;
     this.secretAsContainerResourceProvisioner = secretAsContainerResourceProvisioner;
     this.serverResolverFactory = kubernetesServerResolverFactory;
+    this.runtimeCleaner = runtimeCleaner;
     this.tracer = tracer;
   }
 
@@ -195,7 +198,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       startSynchronizer.setStartThread();
       startSynchronizer.start();
 
-      cleanUp(workspaceId);
+      runtimeCleaner.cleanUp(namespace, workspaceId);
       provisionWorkspace(startOptions, context, workspaceId);
 
       volumesStrategy.prepare(
@@ -260,7 +263,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // stop watching before namespace cleaning up
       namespace.deployments().stopWatch(true);
       try {
-        cleanUp(workspaceId);
+        runtimeCleaner.cleanUp(namespace, workspaceId);
       } catch (InfrastructureException cleanUppingEx) {
         LOG.warn(
             "Failed to clean up namespace after workspace '{}' start failing. Cause: {}",
@@ -275,11 +278,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     } finally {
       namespace.deployments().stopWatch();
     }
-  }
-
-  private void cleanUp(String workspaceId) throws InfrastructureException {
-    namespace.cleanUp();
-    cheNamespace.cleanUp(workspaceId);
   }
 
   protected void provisionWorkspace(
@@ -594,7 +592,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           // Che Server that is crashed so start is hung up in STOPPING phase.
           // Need to clean up runtime resources
           probeScheduler.cancel(identity.getWorkspaceId());
-          cleanUp(identity.getWorkspaceId());
+          runtimeCleaner.cleanUp(namespace, identity.getWorkspaceId());
         }
       } catch (InterruptedException e) {
         throw new InfrastructureException(
@@ -604,7 +602,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // runtime is RUNNING. Clean up used resources
       // Cancels workspace servers probes if any
       probeScheduler.cancel(identity.getWorkspaceId());
-      cleanUp(identity.getWorkspaceId());
+      runtimeCleaner.cleanUp(namespace, identity.getWorkspaceId());
     }
   }
 
