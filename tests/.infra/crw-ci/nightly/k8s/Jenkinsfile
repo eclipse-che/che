@@ -12,7 +12,7 @@ pipeline {
 
     parameters {
         string(name: 'emails',
-                defaultValue: 'oshmarai@redhat.com',
+                defaultValue: 'dnochevn@redhat.com,kfoniok@redhat.com',
                 description: 'Comma-separated list of emails to send results')
     }
 
@@ -23,8 +23,11 @@ pipeline {
                     catchError(buildResult: 'UNSTABLE', stageResult: 'FAILED') {
                         stage('Run Happy path tests') {
                             retry(2) {
-                                build job: 'basic-MultiUser-Che-single-host-check-e2e-tests-against-k8s',
+                                build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                         parameters: [
+                                                booleanParam(name: 'cheSingleHost',
+                                                        value: false),
+
                                                 string(name: 'cheImageRepo',
                                                         value: 'quay.io/eclipse/che-server'),
 
@@ -35,7 +38,7 @@ pipeline {
                                                         value: false),
 
                                                 string(name: 'ghprbSourceBranch',
-                                                        value: 'che#16904'),
+                                                        value: 'master'),
 
                                                 string(name: 'ghprbPullId',
                                                         value: ''),
@@ -65,8 +68,11 @@ pipeline {
                     catchError(buildResult: 'UNSTABLE', stageResult: 'FAILED') {
                         stage('Run devfile tests') {
                             retry(2) {
-                                build job: 'basic-MultiUser-Che-single-host-check-e2e-tests-against-k8s',
+                                build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                         parameters: [
+                                                booleanParam(name: 'cheSingleHost',
+                                                        value: false),
+
                                                 string(name: 'cheImageRepo',
                                                         value: 'quay.io/eclipse/che-server'),
 
@@ -108,8 +114,11 @@ pipeline {
                         stage('Run Git SSH flow tests') {
                             retry(2) {
                                 withCredentials([string(credentialsId: 'e45af3e6-8061-4d02-b187-b1c3bb133d3a', variable: 'github_oauth_token')]) {
-                                    build job: 'basic-MultiUser-Che-single-host-check-e2e-tests-against-k8s',
+                                    build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                             parameters: [
+                                                    booleanParam(name: 'cheSingleHost',
+                                                        value: false),
+
                                                     string(name: 'cheImageRepo',
                                                             value: 'quay.io/eclipse/che-server'),
 
