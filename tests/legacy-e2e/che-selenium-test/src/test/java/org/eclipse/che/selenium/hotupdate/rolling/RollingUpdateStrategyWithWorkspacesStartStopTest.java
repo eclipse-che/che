@@ -15,7 +15,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import org.eclipse.che.selenium.core.client.CheTestSystemClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.hotupdate.HotUpdateUtil;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -24,22 +23,17 @@ import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
-import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Ihor Okhrimenko */
 public class RollingUpdateStrategyWithWorkspacesStartStopTest {
-  @Inject private CheTestSystemClient cheTestSystemClient;
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
   @Inject private HotUpdateUtil hotUpdateUtil;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
-  @Inject private TheiaIde theiaIde;
-  @Inject private TheiaProjectTree theiaProjectTree;
   @Inject private DefaultTestUser defaultTestUser;
 
   private String startedWorkspaceName;

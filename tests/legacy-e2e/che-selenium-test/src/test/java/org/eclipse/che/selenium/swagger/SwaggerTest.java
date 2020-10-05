@@ -16,7 +16,6 @@ import static org.testng.Assert.assertEquals;
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -24,7 +23,6 @@ import org.testng.annotations.Test;
 public class SwaggerTest {
 
   @Inject private TestIdeUrlProvider ideUrlProvider;
-  @Inject private Loader loader;
   @Inject private SeleniumWebDriver driver;
 
   private String swaggerUrl;
