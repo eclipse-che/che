@@ -790,25 +790,6 @@ public class KubernetesPluginsToolingApplierTest {
   }
 
   @Test
-  public void shouldSetJWTServerExposerAttributeIfAuthEnabled() throws Exception {
-    applier =
-        new KubernetesPluginsToolingApplier(
-            TEST_IMAGE_POLICY,
-            MEMORY_LIMIT_MB,
-            MEMORY_REQUEST_MB,
-            CPU_LIMIT,
-            CPU_REQUEST,
-            true,
-            projectsRootEnvVariableProvider,
-            chePluginsVolumeApplier,
-            envVars);
-
-    applier.apply(runtimeIdentity, internalEnvironment, singletonList(createChePlugin()));
-
-    assertEquals(internalEnvironment.getAttributes().get(SECURE_EXPOSER_IMPL_PROPERTY), "jwtproxy");
-  }
-
-  @Test
   public void shouldNotSetJWTServerExposerAttributeIfAuthEnabledButAttributeIsPresent()
       throws Exception {
     applier =

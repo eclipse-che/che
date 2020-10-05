@@ -66,6 +66,7 @@ import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeCleaner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
@@ -150,6 +151,7 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
   @Mock private Openshift4TrustedCAProvisioner trustedCAProvisioner;
   @Mock private CheNamespace cheNamespace;
+  @Mock private RuntimeCleaner runtimeCleaner;
   private OpenShiftServerResolverFactory serverResolverFactory;
 
   @Mock(answer = Answers.RETURNS_MOCKS)
@@ -194,6 +196,7 @@ public class OpenShiftInternalRuntimeTest {
             previewUrlCommandProvisioner,
             secretAsContainerResourceProvisioner,
             serverResolverFactory,
+            runtimeCleaner,
             cheNamespace,
             tracer,
             trustedCAProvisioner,
