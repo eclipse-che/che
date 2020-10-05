@@ -13,11 +13,13 @@ package org.eclipse.che.api.workspace.server.model.impl;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.DEVFILE_ENDPOINT;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.INTERNAL_SERVER_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVER_NAME_ATTRIBUTE;
 import static org.testng.Assert.*;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
@@ -105,5 +107,30 @@ public class ServerConfigImplTest {
     assertFalse(serverConfig.getAttributes().isEmpty());
     assertEquals(
         serverConfig.getAttributes().get(INTERNAL_SERVER_ATTRIBUTE), Boolean.TRUE.toString());
+  }
+
+  @Test
+  public void testCreateFromEndpointDevfileEndpointAttributeSet() {
+    ServerConfig serverConfig =
+        ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, new HashMap<>()), true);
+
+    assertTrue(serverConfig.getAttributes().containsKey(DEVFILE_ENDPOINT));
+    assertTrue(Boolean.parseBoolean(serverConfig.getAttributes().get(DEVFILE_ENDPOINT)));
+  }
+
+  @Test
+  public void testCreateFromEndpointDevfileEndpointAttributeNotSet() {
+    ServerConfig serverConfig =
+        ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, new HashMap<>()), false);
+
+    assertFalse(serverConfig.getAttributes().containsKey(DEVFILE_ENDPOINT));
+  }
+
+  @Test
+  public void testCreateFromEndpointDevfileEndpointAttributeNotSetWhenDefault() {
+    ServerConfig serverConfig =
+        ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, new HashMap<>()));
+
+    assertFalse(serverConfig.getAttributes().containsKey(DEVFILE_ENDPOINT));
   }
 }

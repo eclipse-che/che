@@ -18,6 +18,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.DEVFILE_ENDPOINT;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
@@ -678,6 +679,8 @@ public class KubernetesComponentToWorkspaceApplierTest {
               assertEquals(serverConfigs.get(endpointName).getPort(), endpointPort.toString());
               assertEquals(serverConfigs.get(endpointName).getPath(), endpointPath);
               assertEquals(serverConfigs.get(endpointName).getProtocol(), endpointProtocol);
+              assertEquals(
+                  serverConfigs.get(endpointName).getAttributes().get(DEVFILE_ENDPOINT), "true");
               assertEquals(
                   serverConfigs.get(endpointName).isSecure(), Boolean.parseBoolean(endpointSecure));
               assertEquals(
