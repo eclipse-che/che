@@ -222,7 +222,7 @@ pipeline {
             steps {
                 script {
                     echo "Create custom-resource patch file"
-                    if (cheSingleHost == true) {
+                    if (cheSingleHost.toBoolean() == true) {
                         sh """cat > $CUSTOM_RESOURCE_PATCH_FILE <<EOL
 spec:
   server:
@@ -247,8 +247,6 @@ EOL"""
                     }
 
                     echo "Install Che"
-                    echo "CR patch file"
-                    echo "$CUSTOM_RESOURCE_PATCH_FILE"
                     sh """
                         ${pathToChectl} server:start \\
                         --k8spodreadytimeout=180000 \\
@@ -318,7 +316,7 @@ EOL"""
                         sh "cp ${WORKSPACE}/tests/e2e/files/happy-path/happy-path-workspace.yaml $DEVFILE_PATH"
                     }
 
-                    if (cheSingleHost == true) {
+                    if (cheSingleHost.toBoolean() == true) {
                         KEYCLOAK_BASE_URL = sh(
                             script: "https://\$(kubectl get ingress/che --namespace=eclipse-che -o jsonpath='{.spec.rules[0].host}')/auth",
                             returnStdout: true
