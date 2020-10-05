@@ -46,7 +46,7 @@ suite(`${workspaceStack} test`, async () => {
         projectManager.openFile(fileFolderPath, fileName);
     });
 
-    suite('Test golang example', async () => {
+    suite.skip('Test golang example', async () => {
         codeExecutionHelper.runTask(taskTestOutyet, 60_000);
         codeExecutionHelper.closeTerminal(taskTestOutyet);
     });
