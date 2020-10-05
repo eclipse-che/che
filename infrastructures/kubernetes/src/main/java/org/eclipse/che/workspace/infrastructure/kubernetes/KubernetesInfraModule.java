@@ -78,13 +78,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Multi
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultihostIngressServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ServiceExposureStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.SingleHostExternalServiceExposureStrategy;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.PassThroughProxySecureServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxyProvisionerFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxySecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.NonTlsDistributedClusterModeNotifier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
@@ -204,30 +198,6 @@ public class KubernetesInfraModule extends AbstractModule {
     chePluginsAppliers
         .addBinding(KubernetesEnvironment.TYPE)
         .to(KubernetesPluginsToolingApplier.class);
-
-    MapBinder<String, SecureServerExposerFactory<KubernetesEnvironment>>
-        secureServerExposerFactories =
-            MapBinder.newMapBinder(
-                binder(),
-                new TypeLiteral<String>() {},
-                new TypeLiteral<SecureServerExposerFactory<KubernetesEnvironment>>() {});
-
-    install(new FactoryModuleBuilder().build(JwtProxyConfigBuilderFactory.class));
-    install(new FactoryModuleBuilder().build(PassThroughProxyProvisionerFactory.class));
-    install(
-        new FactoryModuleBuilder()
-            .implement(
-                new TypeLiteral<SecureServerExposer<KubernetesEnvironment>>() {},
-                new TypeLiteral<PassThroughProxySecureServerExposer<KubernetesEnvironment>>() {})
-            .build(
-                new TypeLiteral<
-                    PassThroughProxySecureServerExposerFactory<KubernetesEnvironment>>() {}));
-
-    secureServerExposerFactories
-        .addBinding("default")
-        .to(
-            new TypeLiteral<
-                PassThroughProxySecureServerExposerFactory<KubernetesEnvironment>>() {});
 
     bind(BrokerService.class);
 
