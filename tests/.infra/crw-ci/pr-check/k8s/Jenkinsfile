@@ -318,13 +318,13 @@ EOL"""
 
                     if (cheSingleHost.toBoolean() == true) {
                         KEYCLOAK_BASE_URL = sh(
-                            script: "https://\$(kubectl get ingress/che --namespace=eclipse-che -o jsonpath='{.spec.rules[0].host}')/auth",
+                            script: "https://$(kubectl get ingress/che --namespace=eclipse-che -o jsonpath='{.spec.rules[0].host}')/auth",
                             returnStdout: true
                         ).trim()
 
                     } else {
                         KEYCLOAK_BASE_URL = sh(
-                            script: "https://\$(kubectl get ingress/keycloak --namespace=eclipse-che -o jsonpath='{.spec.rules[0].host}')/auth",
+                            script: "https://$(kubectl get ingress/keycloak --namespace=eclipse-che -o jsonpath='{.spec.rules[0].host}')/auth",
                             returnStdout: true
                         ).trim()
                     }
