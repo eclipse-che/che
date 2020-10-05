@@ -92,6 +92,11 @@ public interface ServerConfig {
   String SERVICE_PORT_ATTRIBUTE = "servicePort";
 
   /**
+   * This attributes is marking that server come from the devfile endpoint. Used internally only.
+   */
+  String DEVFILE_ENDPOINT = "devfileEndpoint";
+
+  /**
    * Port used by server.
    *
    * <p>It may contain protocol(tcp or udp) after '/' symbol. If protocol is missing tcp will be

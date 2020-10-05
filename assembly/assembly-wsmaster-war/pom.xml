@@ -285,6 +285,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-keycloak-user-remover</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-machine-authentication</artifactId>
         </dependency>
         <dependency>

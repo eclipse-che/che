@@ -79,6 +79,7 @@ import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
 import org.eclipse.che.multiuser.api.workspace.activity.MultiUserWorkspaceActivityModule;
 import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakModule;
+import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakUserRemoverModule;
 import org.eclipse.che.multiuser.machine.authentication.server.MachineAuthModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationApiModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationJpaModule;
@@ -373,6 +374,7 @@ public class WsMasterModule extends AbstractModule {
     install(new OrganizationJpaModule());
 
     install(new KeycloakModule());
+    install(new KeycloakUserRemoverModule());
 
     install(new MachineAuthModule());
     bind(RequestTokenExtractor.class).to(ChainedTokenExtractor.class);
