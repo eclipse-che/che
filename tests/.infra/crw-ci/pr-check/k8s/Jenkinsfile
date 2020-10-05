@@ -17,6 +17,7 @@ pipeline {
 
         DEVFILE_PATH = "${WORKSPACE}/test-workspace-devfile.yaml"
         CUSTOM_RESOURCE_PATCH_FILE = "${WORKSPACE}/custom-resource-patch.yaml"
+        KEYCLOAK_BASE_URL = ""
 
         SUCCESS_THRESHOLD = 5
 
