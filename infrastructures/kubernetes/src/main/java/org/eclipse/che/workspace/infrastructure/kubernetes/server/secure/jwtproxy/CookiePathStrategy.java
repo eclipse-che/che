@@ -21,7 +21,7 @@ import java.util.function.BiFunction;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServiceExposureStrategyProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ServiceExposureStrategyProvider;
 
 /**
  * The cookie path for the access token cookie is server-strategy dependent. This class represents
@@ -42,7 +42,7 @@ public class CookiePathStrategy {
 
   @Inject
   public CookiePathStrategy(
-      @Named(IngressServiceExposureStrategyProvider.STRATEGY_PROPERTY) String serverStrategy) {
+      @Named(ServiceExposureStrategyProvider.STRATEGY_PROPERTY) String serverStrategy) {
     switch (serverStrategy) {
       case MULTI_HOST_STRATEGY:
         getCookiePath = (__, ___) -> "/";

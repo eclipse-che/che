@@ -2,6 +2,7 @@ import * as inversifyConfig from './inversify.config';
 export { inversifyConfig };
 export * from './inversify.types';
 export * from './TestConstants';
+export * from './TimeoutConstants';
 
 export * from './driver/ChromeDriver';
 export * from './driver/IDriver';

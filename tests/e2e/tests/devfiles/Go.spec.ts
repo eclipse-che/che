@@ -17,7 +17,7 @@ import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 import { Logger } from '../../utils/Logger';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
 
-const preferencesHalder: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
+const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
 const workspaceStack: string = 'Go';
 const workspaceSampleName: string = 'src';
@@ -25,8 +25,8 @@ const workspaceRootFolderName: string = 'github.com';
 const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/golang/example/outyet`;
 const fileName: string = `main.go`;
 
-const taskTestOutyet: string = 'test outyet';
-const taskRunServer: string = 'run outyet';
+const taskTestOutyet: string = '1.3 Test outyet';
+const taskRunServer: string = '1.1 Run outyet';
 // const taskStopServer: string = 'stop outyet';
 const taskExpectedDialogText: string = 'A process is now listening on port 8080';
 
@@ -35,18 +35,15 @@ suite(`${workspaceStack} test`, async () => {
     suite(`Create ${workspaceStack} workspace`, async () => {
         test('Workaround for issue #16113', async () => {
             Logger.warn(`Manually setting a preference for golang devfile LS based on issue: https://github.com/eclipse/che/issues/16113`);
-            await preferencesHalder.setUseGoLanaguageServer();
+            await preferencesHandler.setUseGoLanaguageServer();
         });
         workspaceHandler.createAndOpenWorkspace(workspaceStack);
         projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
-    suite(`'Language server validation'`, async () => {
+    suite('Test opening file', async () => {
+        // opening file that soon should give time for LS to initialize
         projectManager.openFile(fileFolderPath, fileName);
-        commonLsTests.suggestionInvoking(fileName, 42, 10, 'Parse');
-        commonLsTests.autocomplete(fileName, 42, 10, 'Parse');
-        commonLsTests.errorHighlighting(fileName, 'error;\n', 42);
-        // commonLsTests.codeNavigation(fileName, 42, 10, 'flag.go'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
     });
 
     suite('Test golang example', async () => {
@@ -57,6 +54,13 @@ suite(`${workspaceStack} test`, async () => {
     suite('Run golang example server', async () => {
         codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskRunServer, taskExpectedDialogText, 30_000);
         // codeExecutionHelper.runTask(taskStopServer, 5_000); // stop outyet task causes the server to die with exit code 143 https://github.com/eclipse/che/issues/17005
+    });
+
+    suite(`'Language server validation'`, async () => {
+        commonLsTests.suggestionInvoking(fileName, 42, 10, 'Parse');
+        commonLsTests.autocomplete(fileName, 42, 10, 'Parse');
+        commonLsTests.errorHighlighting(fileName, 'error;\n', 42);
+        // commonLsTests.codeNavigation(fileName, 42, 10, 'flag.go'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
     });
 
     suite('Stop and remove workspace', async() => {

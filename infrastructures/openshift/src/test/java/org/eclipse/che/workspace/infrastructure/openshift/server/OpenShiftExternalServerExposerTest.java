@@ -26,14 +26,14 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link OpenShiftExternalServerExposer}.
+ * Tests {@link RouteServerExposer}.
  *
  * @author Sergii Leshchenko
  */
 public class OpenShiftExternalServerExposerTest {
 
-  private OpenShiftExternalServerExposer osExternalServerExposer =
-      new OpenShiftExternalServerExposer();
+  private static final String LABELS = "foo=bar";
+  private RouteServerExposer osExternalServerExposer = new RouteServerExposer(LABELS);
 
   @Test
   public void shouldAddRouteToEnvForExposingSpecifiedServer() {
@@ -62,5 +62,6 @@ public class OpenShiftExternalServerExposerTest {
     Deserializer annotations = Annotations.newDeserializer(route.getMetadata().getAnnotations());
     assertEquals(annotations.machineName(), "machine123");
     assertEquals(annotations.servers(), servers);
+    assertEquals(route.getMetadata().getLabels().get("foo"), "bar");
   }
 }

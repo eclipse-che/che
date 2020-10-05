@@ -17,16 +17,19 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMP
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
@@ -50,6 +53,7 @@ public class DefaultEditorProvisionerTest {
 
   private static final String TERMINAL_PLUGIN_NAME = "theia-terminal";
   private static final String TERMINAL_PLUGIN_VERSION = "0.0.4";
+  private static final String ASYNC_STORAGE_PLUGIN_REF = "eclipse/che-async-pv-plugin/nightly";
   private static final String TERMINAL_PLUGIN_REF =
       EDITOR_PUBLISHER + "/" + TERMINAL_PLUGIN_NAME + "/" + TERMINAL_PLUGIN_VERSION;
 
@@ -65,7 +69,9 @@ public class DefaultEditorProvisionerTest {
   @Test
   public void shouldNotProvisionDefaultEditorIfItIsNotConfigured() throws Exception {
     // given
-    provisioner = new DefaultEditorProvisioner(null, new String[] {}, fqnParser, pluginFQNParser);
+    provisioner =
+        new DefaultEditorProvisioner(
+            null, new String[] {}, ASYNC_STORAGE_PLUGIN_REF, fqnParser, pluginFQNParser);
     DevfileImpl devfile = new DevfileImpl();
 
     // when
@@ -82,6 +88,7 @@ public class DefaultEditorProvisionerTest {
         new DefaultEditorProvisioner(
             EDITOR_REF,
             new String[] {TERMINAL_PLUGIN_REF, COMMAND_PLUGIN_REF},
+            "",
             fqnParser,
             pluginFQNParser);
     DevfileImpl devfile = new DevfileImpl();
@@ -103,7 +110,7 @@ public class DefaultEditorProvisionerTest {
     // given
     provisioner =
         new DefaultEditorProvisioner(
-            EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser, pluginFQNParser);
+            EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, "", fqnParser, pluginFQNParser);
 
     DevfileImpl devfile = new DevfileImpl();
     ComponentImpl defaultEditorWithDifferentVersion =
@@ -129,7 +136,7 @@ public class DefaultEditorProvisionerTest {
     // given
     provisioner =
         new DefaultEditorProvisioner(
-            EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser, pluginFQNParser);
+            EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, "", fqnParser, pluginFQNParser);
 
     DevfileImpl devfile = new DevfileImpl();
     ComponentImpl defaultEditorWithDifferentVersion =
@@ -156,7 +163,7 @@ public class DefaultEditorProvisionerTest {
     // given
     provisioner =
         new DefaultEditorProvisioner(
-            EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser, pluginFQNParser);
+            EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, "", fqnParser, pluginFQNParser);
 
     DevfileImpl devfile = new DevfileImpl();
     ComponentImpl editorWithNameSimilarToDefault =
@@ -180,7 +187,7 @@ public class DefaultEditorProvisionerTest {
     // given
     provisioner =
         new DefaultEditorProvisioner(
-            EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser, pluginFQNParser);
+            EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, "", fqnParser, pluginFQNParser);
 
     DevfileImpl devfile = new DevfileImpl();
     devfile.getAttributes().put(EDITOR_FREE_DEVFILE_ATTRIBUTE, "true");
@@ -200,7 +207,7 @@ public class DefaultEditorProvisionerTest {
     // given
     provisioner =
         new DefaultEditorProvisioner(
-            EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser, pluginFQNParser);
+            EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, "", fqnParser, pluginFQNParser);
 
     DevfileImpl devfile = new DevfileImpl();
     ComponentImpl pluginWithNameSimilarToDefault =
@@ -224,7 +231,7 @@ public class DefaultEditorProvisionerTest {
       throws Exception {
     // given
     provisioner =
-        new DefaultEditorProvisioner(EDITOR_REF, new String[] {}, fqnParser, pluginFQNParser);
+        new DefaultEditorProvisioner(EDITOR_REF, new String[] {}, "", fqnParser, pluginFQNParser);
     DevfileImpl devfile = new DevfileImpl();
     ComponentImpl nonDefaultEditor =
         new ComponentImpl(EDITOR_COMPONENT_TYPE, "anypublisher/anyname/v" + EDITOR_VERSION);
@@ -244,7 +251,7 @@ public class DefaultEditorProvisionerTest {
       throws Exception {
     // given
     provisioner =
-        new DefaultEditorProvisioner(EDITOR_REF, new String[] {}, fqnParser, pluginFQNParser);
+        new DefaultEditorProvisioner(EDITOR_REF, new String[] {}, "", fqnParser, pluginFQNParser);
     DevfileImpl devfile = new DevfileImpl();
     ComponentImpl myTheiaEditor =
         new ComponentImpl(
@@ -265,7 +272,7 @@ public class DefaultEditorProvisionerTest {
       throws Exception {
     // given
     provisioner =
-        new DefaultEditorProvisioner(EDITOR_REF, new String[] {}, fqnParser, pluginFQNParser);
+        new DefaultEditorProvisioner(EDITOR_REF, new String[] {}, "", fqnParser, pluginFQNParser);
     DevfileImpl devfile = new DevfileImpl();
     ComponentImpl myTheiaEditor =
         new ComponentImpl(
@@ -300,7 +307,7 @@ public class DefaultEditorProvisionerTest {
     // given
     provisioner =
         new DefaultEditorProvisioner(
-            EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser, pluginFQNParser);
+            EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, "", fqnParser, pluginFQNParser);
     DevfileImpl devfile = new DevfileImpl();
     ComponentImpl myTerminal =
         new ComponentImpl(
@@ -323,7 +330,7 @@ public class DefaultEditorProvisionerTest {
     // given
     provisioner =
         new DefaultEditorProvisioner(
-            EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser, pluginFQNParser);
+            EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, "", fqnParser, pluginFQNParser);
     DevfileImpl devfile = new DevfileImpl();
     String meta =
         "apiVersion: v2\n"
@@ -360,6 +367,7 @@ public class DefaultEditorProvisionerTest {
         new DefaultEditorProvisioner(
             EDITOR_REF,
             new String[] {EDITOR_PUBLISHER + "/" + "my-plugin/v2.0"},
+            "",
             fqnParser,
             pluginFQNParser);
     DevfileImpl devfile = new DevfileImpl();
@@ -389,6 +397,7 @@ public class DefaultEditorProvisionerTest {
         new DefaultEditorProvisioner(
             EDITOR_REF,
             new String[] {EDITOR_PUBLISHER + "/" + "my-plugin/v2.0", referencePluginRef},
+            "",
             fqnParser,
             pluginFQNParser);
     String meta =
@@ -414,6 +423,59 @@ public class DefaultEditorProvisionerTest {
     List<ComponentImpl> components = devfile.getComponents();
     assertEquals(components.size(), 3);
     assertTrue(components.contains(myPlugin));
+  }
+
+  @Test
+  public void shouldProvisionAsyncStoragePluginsIfWorkspaceHasOnlyOneAttribute() throws Exception {
+    // given
+    provisioner =
+        new DefaultEditorProvisioner(
+            EDITOR_REF,
+            new String[] {TERMINAL_PLUGIN_REF},
+            ASYNC_STORAGE_PLUGIN_REF,
+            fqnParser,
+            pluginFQNParser);
+
+    DevfileImpl devfile = new DevfileImpl();
+    devfile.setAttributes(ImmutableMap.of(Constants.ASYNC_PERSIST_ATTRIBUTE, "true"));
+    // when
+    provisioner.apply(devfile, fileContentProvider);
+
+    // then
+    List<ComponentImpl> components = devfile.getComponents();
+    assertEquals(components.size(), 2);
+
+    assertFalse(
+        components.contains(new ComponentImpl(PLUGIN_COMPONENT_TYPE, ASYNC_STORAGE_PLUGIN_REF)));
+  }
+
+  @Test
+  public void shouldProvisionAsyncStoragePluginsIfWorkspaceHasBothAttributes() throws Exception {
+    // given
+    provisioner =
+        new DefaultEditorProvisioner(
+            EDITOR_REF,
+            new String[] {TERMINAL_PLUGIN_REF},
+            ASYNC_STORAGE_PLUGIN_REF,
+            fqnParser,
+            pluginFQNParser);
+
+    DevfileImpl devfile = new DevfileImpl();
+    devfile.setAttributes(
+        ImmutableMap.of(
+            Constants.ASYNC_PERSIST_ATTRIBUTE,
+            "true",
+            Constants.PERSIST_VOLUMES_ATTRIBUTE,
+            "false"));
+    // when
+    provisioner.apply(devfile, fileContentProvider);
+
+    // then
+    List<ComponentImpl> components = devfile.getComponents();
+    assertEquals(components.size(), 3);
+
+    assertTrue(
+        components.contains(new ComponentImpl(PLUGIN_COMPONENT_TYPE, ASYNC_STORAGE_PLUGIN_REF)));
   }
 
   private ComponentImpl findById(List<ComponentImpl> components, String id) {

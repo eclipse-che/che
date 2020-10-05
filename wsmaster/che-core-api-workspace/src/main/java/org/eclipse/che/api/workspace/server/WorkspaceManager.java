@@ -15,12 +15,15 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
+import static java.time.Instant.now;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.workspace.shared.Constants.CREATED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVITY_TIME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_NAME;
@@ -28,6 +31,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_GENERATE_
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 
 import com.google.inject.Inject;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -45,6 +49,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
@@ -83,6 +88,7 @@ public class WorkspaceManager {
   private final WorkspaceRuntimes runtimes;
   private final AccountManager accountManager;
   private final EventService eventService;
+  private final PreferenceManager preferenceManager;
   private final WorkspaceValidator validator;
   private final DevfileIntegrityValidator devfileIntegrityValidator;
 
@@ -92,12 +98,14 @@ public class WorkspaceManager {
       WorkspaceRuntimes runtimes,
       EventService eventService,
       AccountManager accountManager,
+      PreferenceManager preferenceManager,
       WorkspaceValidator validator,
       DevfileIntegrityValidator devfileIntegrityValidator) {
     this.workspaceDao = workspaceDao;
     this.runtimes = runtimes;
     this.accountManager = accountManager;
     this.eventService = eventService;
+    this.preferenceManager = preferenceManager;
     this.validator = validator;
     this.devfileIntegrityValidator = devfileIntegrityValidator;
   }
@@ -416,6 +424,8 @@ public class WorkspaceManager {
       workspace.getAttributes().put(STOPPED_ABNORMALLY_ATTRIBUTE_NAME, Boolean.toString(false));
       workspaceDao.update(workspace);
     }
+    String namespace = workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
+    final String owner = workspace.getRuntime().getOwner();
 
     runtimes
         .stopAsync(workspace, options)
@@ -424,7 +434,35 @@ public class WorkspaceManager {
               if (workspace.isTemporary()) {
                 removeWorkspaceQuietly(workspace.getId());
               }
+              try {
+                if (runtimes.getActive(owner).isEmpty()) {
+                  recordLastWorkspaceStoppedTime(namespace, owner);
+                }
+              } catch (ServerException | InfrastructureException e) {
+                LOG.error(e.getMessage(), e);
+              }
             });
+  }
+
+  private void recordLastWorkspaceStoppedTime(String namespace, String owner) {
+    try {
+      Map<String, String> preferences = preferenceManager.find(owner);
+      String currentTime = Long.toString(now().getEpochSecond());
+      preferences.put(LAST_ACTIVITY_TIME, currentTime);
+      preferences.put(LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE, namespace);
+      preferenceManager.update(owner, preferences);
+    } catch (ServerException e) {
+      LOG.error(e.getMessage(), e);
+    }
+  }
+
+  private void cleanLastWorkspaceStoppedTime(String owner) {
+    try {
+      preferenceManager.remove(
+          owner, Arrays.asList(LAST_ACTIVITY_TIME, LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE));
+    } catch (ServerException e) {
+      LOG.error(e.getMessage(), e);
+    }
   }
 
   /** Returns a set of supported recipe types */
@@ -577,6 +615,8 @@ public class WorkspaceManager {
       workspace.getAttributes().remove(ERROR_MESSAGE_ATTRIBUTE_NAME);
 
       workspaceDao.update(workspace);
+
+      cleanLastWorkspaceStoppedTime(workspace.getRuntime().getOwner());
     } catch (NotFoundException | ServerException | ConflictException e) {
       LOG.warn(
           String.format(

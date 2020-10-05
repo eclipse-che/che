@@ -1,9 +1,9 @@
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { TestConstants } from '../../TestConstants';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
@@ -19,7 +19,7 @@ import { Logger } from '../../utils/Logger';
 export class QuickOpenContainer {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    public async waitContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    public async waitContainer(timeout: number = TimeoutConstants.TS_SELENIUM_TOP_MENU_QUICK_CONTAINER_TIMEOUT) {
         Logger.debug('QuickOpenContainer.waitContainer');
 
         const monacoQuickOpenContainerLocator: By = By.xpath('//div[@class=\'monaco-quick-open-widget\']');
@@ -33,7 +33,7 @@ export class QuickOpenContainer {
         await this.driverHelper.waitDisappearance(monacoQuickOpenContainerLocator);
     }
 
-    public async clickOnContainerItem(itemText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    public async clickOnContainerItem(itemText: string, timeout: number = TimeoutConstants.TS_SELENIUM_TOP_MENU_QUICK_CONTAINER_TIMEOUT) {
         Logger.debug(`QuickOpenContainer.clickOnContainerItem "${itemText}"`);
 
         const quickContainerItemLocator: By = By.css(`div[aria-label="${itemText}, picker"]`);

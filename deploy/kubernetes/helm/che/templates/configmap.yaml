@@ -64,7 +64,7 @@ data:
   CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_FS__GROUP: "{{ .Values.global.securityContext.fsGroup }}"
   CHE_LOCAL_CONF_DIR: /etc/conf
   CHE_LOGS_DIR: /data/logs
-  CHE_LOG_LEVEL: "INFO"
+  CHE_LOG_LEVEL: {{ .Values.che.logLevel | quote }}
   CHE_MULTIUSER: {{ .Values.global.multiuser | quote }}
   CHE_OAUTH_GITHUB_CLIENTID: {{ .Values.global.gitHubClientID | quote}}
   CHE_OAUTH_GITHUB_CLIENTSECRET: {{ .Values.global.gitHubClientSecret | quote}}
@@ -72,7 +72,7 @@ data:
   CHE_OAUTH_OPENSHIFT_CLIENTSECRET: {{ .Values.global.openShiftClientSecret | quote}}
   CHE_OAUTH_OPENSHIFT_OAUTH__ENDPOINT: {{ .Values.global.openShiftOAuthEndpoint | quote}}
   CHE_OAUTH_OPENSHIFT_VERIFY__TOKEN__URL: {{ .Values.global.openShiftVerifyTokenUrl | quote}}
-  JAVA_OPTS: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true -Xms20m "
+  JAVA_OPTS: "-XX:MaxRAMPercentage=85.0 "
   CHE_WORKSPACE_AUTO_START: "false"
 {{- if .Values.global.tls.enabled }}
   CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON: '{"kubernetes.io/ingress.class": "nginx", "kubernetes.io/tls-acme": "true", "{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/rewrite-target": "/$1","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/ssl-redirect": "true","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-connect-timeout": "3600","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-read-timeout": "3600"}'
@@ -81,6 +81,8 @@ data:
 {{- end }}
   CHE_INFRA_KUBERNETES_INGRESS_PATH__TRANSFORM: '%s(.*)'
   CHE_INFRA_KUBERNETES_SERVER__STRATEGY: {{ .Values.global.serverStrategy }}
+  CHE_INFRA_KUBERNETES_SINGLEHOST_WORKSPACE_EXPOSURE: {{ .Values.global.singleHostExposure | quote }}
+  CHE_INFRA_KUBERNETES_SINGLEHOST_GATEWAY_CONFIGMAP__LABELS: {{ .Values.global.singleHostGatewayLabels | quote }}
   CHE_LOGGER_CONFIG: {{ .Values.global.log.loggerConfig | quote}}
   CHE_LOGS_APPENDERS_IMPL: {{ .Values.global.log.appenderName }}
   CHE_WORKSPACE_HTTP__PROXY: {{ .Values.cheWorkspaceHttpProxy | quote}}
@@ -88,28 +90,20 @@ data:
   CHE_WORKSPACE_NO__PROXY: {{ .Values.cheWorkspaceNoProxy | quote}}
   CHE_LIMITS_WORKSPACE_IDLE_TIMEOUT: '{{ .Values.global.workspaceIdleTimeout }}'
 {{- if .Values.workspaceDefaultRamRequest }}
-  CHE_WORKSPACE_DEFAULT_MEMORY_REQUEST_MB: {{ .Values.workspaceDefaultRamRequest }}
+  CHE_WORKSPACE_DEFAULT_MEMORY_REQUEST_MB: {{ .Values.workspaceDefaultRamRequest | quote }}
 {{- end }}
 {{- if .Values.workspaceDefaultRamLimit }}
-  CHE_WORKSPACE_DEFAULT_MEMORY_LIMIT_MB: {{ .Values.workspaceDefaultRamLimit }}
+  CHE_WORKSPACE_DEFAULT_MEMORY_LIMIT_MB: {{ .Values.workspaceDefaultRamLimit | quote }}
 {{- end }}
 {{- if .Values.che.workspace.devfileRegistryUrl }}
   CHE_WORKSPACE_DEVFILE__REGISTRY__URL: {{ .Values.che.workspace.devfileRegistryUrl | quote }}
 {{- else if .Values.cheDevfileRegistry.deploy }}
-  {{- if .Values.global.tls.enabled }}
-  CHE_WORKSPACE_DEVFILE__REGISTRY__URL: https://{{ printf .Values.global.cheDevfileRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}
-  {{- else }}
-  CHE_WORKSPACE_DEVFILE__REGISTRY__URL: http://{{ printf .Values.global.cheDevfileRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}
-  {{- end }}
+  CHE_WORKSPACE_DEVFILE__REGISTRY__URL: {{ template "devfileRegistryUrl" . }}
 {{- end }}
 {{- if .Values.che.workspace.pluginRegistryUrl }}
   CHE_WORKSPACE_PLUGIN__REGISTRY__URL: {{ .Values.che.workspace.pluginRegistryUrl | quote }}
 {{- else if .Values.chePluginRegistry.deploy }}
-  {{- if .Values.global.tls.enabled }}
-  CHE_WORKSPACE_PLUGIN__REGISTRY__URL: https://{{ printf .Values.global.chePluginRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}/v3
-  {{- else }}
-  CHE_WORKSPACE_PLUGIN__REGISTRY__URL: http://{{ printf .Values.global.chePluginRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}/v3
-  {{- end }}
+  CHE_WORKSPACE_PLUGIN__REGISTRY__URL: {{ template "pluginRegistryUrl" . }}
 {{- end }}
 {{- if .Values.che.workspace.pluginBroker }}
   {{- if .Values.che.workspace.pluginBroker.waitTimeoutMin }}
@@ -117,7 +111,7 @@ data:
   {{- end }}
 {{- end }}
 {{- if .Values.workspaceSidecarDefaultRamLimit }}
-  CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB: {{ .Values.workspaceSidecarDefaultRamLimit }}
+  CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB: {{ .Values.workspaceSidecarDefaultRamLimit | quote }}
 {{- end }}
 {{- if .Values.global.cheWorkspaceClusterRole }}
   CHE_INFRA_KUBERNETES_CLUSTER__ROLE__NAME: {{ .Values.global.cheWorkspaceClusterRole }}

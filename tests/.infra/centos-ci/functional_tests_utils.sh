@@ -7,7 +7,7 @@
 # http://www.eclipse.org/legal/epl-v10.html
 
 buildAndDeployArtifacts() {
-  scl enable rh-maven33 'mvn clean install -U -Pintegration'
+  mvn clean install -U -Pintegration
   if [[ $? -eq 0 ]]; then
     echo 'Build Success!'
     echo 'Going to deploy artifacts'
@@ -128,8 +128,11 @@ function installStartDocker() {
 }
 
 function installMvn() {
-  yum install --assumeyes -d1 centos-release-scl
-  yum install --assumeyes -d1 rh-maven33
+    mkdir -p /opt/apache-maven && curl -sSL https://downloads.apache.org/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar -xz --strip=1 -C /opt/apache-maven
+    export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+    export PATH="/usr/lib/jvm/java-11-openjdk:/opt/apache-maven/bin:/usr/bin:${PATH:-/bin:/usr/bin}"
+    export JAVACONFDIRS="/etc/java${JAVACONFDIRS:+:}${JAVACONFDIRS:-}"
+    export M2_HOME="/opt/apache-maven"
 }
 
 function installNodejs() {
@@ -172,8 +175,7 @@ function installDependencies() {
     bzip2 \
     golang \
     make \
-    java-1.8.0-openjdk \
-    java-1.8.0-openjdk-devel
+    java-11-openjdk-devel
   installMvn
   installNodejs
   insalllYarn
@@ -269,7 +271,7 @@ function getOpenshiftLogs() {
 
 function deployCheIntoCluster() {
   echo "======== Start to install CHE ========"
-  if chectl server:start --listr-renderer=verbose -a operator -p minishift --k8spodreadytimeout=360000 $1; then
+  if chectl server:start --listr-renderer=verbose -a operator -p minishift --k8spodreadytimeout=360000 $1 --chenamespace=eclipse-che; then
     echo "Started successfully"
     oc get checluster -o yaml
   else
@@ -319,9 +321,9 @@ createTestWorkspaceAndRunTest() {
   DEV_FILE_URL=$1
   echo "====== Create test workspace ======"
   if [[ ${DEV_FILE_URL} = "" ]]; then # by default it is used 'happy-path-devfile' yaml from CHE 'master' branch
-    chectl workspace:create --start --access-token "$USER_ACCESS_TOKEN" --devfile=https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
+    chectl workspace:create --start --access-token "$USER_ACCESS_TOKEN" --chenamespace=eclipse-che --devfile=https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
   else
-    chectl workspace:create --start --access-token "$USER_ACCESS_TOKEN" $1 # it can be directly indicated other URL to 'devfile' yaml
+    chectl workspace:create --start --access-token "$USER_ACCESS_TOKEN" --chenamespace=eclipse-che $1 # it can be directly indicated other URL to 'devfile' yaml
   fi
 
   ### Create directory for report
@@ -383,7 +385,6 @@ function setupEnvs() {
     QUAY_ECLIPSE_CHE_USERNAME \
     QUAY_ECLIPSE_CHE_PASSWORD)"
 
-  export PATH=$PATH:/opt/rh/rh-maven33/root/bin
 }
 
 function configureGithubTestUser() {
@@ -407,7 +408,10 @@ function installDockerCompose() {
 function seleniumTestsSetup() {
   echo "======== Start selenium tests ========"
   cd /root/payload
+
   export CHE_INFRASTRUCTURE=openshift
+  export CHE_OPENSHIFT_PROJECT=eclipse-che
+
   defineCheRoute
 
   mvn clean install -pl :che-selenium-test -am -DskipTests=true -U
@@ -423,8 +427,8 @@ function saveSeleniumTestResult() {
 function createIndentityProvider() {
   CHE_MULTI_USER_GITHUB_CLIENTID_OCP=04cbc0f8172109322223
   CHE_MULTI_USER_GITHUB_SECRET_OCP=a0a9b8602bb0916d322223e71b7ed92036563b7a
-  keycloakPodName=$(oc get pod --namespace=che | grep keycloak | awk '{print $1}')
-  /tmp/oc exec $keycloakPodName --namespace=che -- /opt/jboss/keycloak/bin/kcadm.sh create identity-provider/instances -r che -s alias=github -s providerId=github -s enabled=true -s storeToken=true -s addReadTokenRoleOnCreate=true -s 'config.useJwksUrl="true"' -s config.clientId=$CHE_MULTI_USER_GITHUB_CLIENTID_OCP -s config.clientSecret=$CHE_MULTI_USER_GITHUB_SECRET_OCP -s 'config.defaultScope="repo,user,write:public_key"' --no-config --server http://localhost:8080/auth --user admin --password admin --realm master
+  keycloakPodName=$(oc get pod --namespace=eclipse-che | grep keycloak | awk '{print $1}')
+  /tmp/oc exec $keycloakPodName --namespace=eclipse-che -- /opt/jboss/keycloak/bin/kcadm.sh create identity-provider/instances -r che -s alias=github -s providerId=github -s enabled=true -s storeToken=true -s addReadTokenRoleOnCreate=true -s 'config.useJwksUrl="true"' -s config.clientId=$CHE_MULTI_USER_GITHUB_CLIENTID_OCP -s config.clientSecret=$CHE_MULTI_USER_GITHUB_SECRET_OCP -s 'config.defaultScope="repo,user,write:public_key"' --no-config --server http://localhost:8080/auth --user admin --password admin --realm master
 }
 
 function runDevfileTestSuite() {
@@ -491,10 +495,10 @@ function setupSelfSignedCertificate() {
   oc rollout status dc router
 
   ## Pre-create a namespace for Che
-  oc create namespace che
+  oc create namespace eclipse-che
 
   ## Create a secret from the CA certificate
   cp rootCA.crt ca.crt
-  oc create secret generic self-signed-certificate --from-file=ca.crt -n=che
-  oc project che
+  oc create secret generic self-signed-certificate --from-file=ca.crt --namespace=eclipse-che
+  oc project eclipse-che
 }

@@ -8,11 +8,20 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
+function getBaseUrl(): string {
+    const baseUrl: string | undefined = process.env.TS_SELENIUM_BASE_URL;
+    if (!baseUrl) {
+        return 'http://sample-url';
+    }
+
+    return baseUrl.replace(/\/$/, '');
+}
+
 export const TestConstants = {
     /**
      * Base URL of the application which should be checked
      */
-    TS_SELENIUM_BASE_URL: process.env.TS_SELENIUM_BASE_URL || 'http://sample-url',
+    TS_SELENIUM_BASE_URL: getBaseUrl(),
 
     /**
      * Base URl of web console OpenShift which uses to test OperatorHub.
@@ -38,31 +47,6 @@ export const TestConstants = {
      * Browser height resolution, "1080" by default.
      */
     TS_SELENIUM_RESOLUTION_HEIGHT: Number(process.env.TS_SELENIUM_RESOLUTION_HEIGHT) || 1080,
-
-    /**
-     * Timeout in milliseconds waiting for install Eclipse Che by OperatorHub UI, "600 000" by default.
-     */
-    TS_SELENIUM_INSTALL_ECLIPSE_CHE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 600000,
-
-    /**
-     * Timeout in milliseconds waiting for workspace start, "240 000" by default.
-     */
-    TS_SELENIUM_START_WORKSPACE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 360000,
-
-    /**
-     * Timeout in milliseconds waiting for page load, "120 000" by default.
-     */
-    TS_SELENIUM_LOAD_PAGE_TIMEOUT: Number(process.env.TS_SELENIUM_LOAD_PAGE_TIMEOUT) || 120000,
-
-    /**
-     * Timeout in milliseconds waiting for language server initialization, "180 000" by default.
-     */
-    TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT: Number(process.env.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT) || 180000,
-
-    /**
-     * Default timeout for most of the waitings, "20 000" by default.
-     */
-    TS_SELENIUM_DEFAULT_TIMEOUT: Number(process.env.TS_SELENIUM_DEFAULT_TIMEOUT) || 20000,
 
     /**
      * Default ammount of tries, "5" by default.
@@ -117,7 +101,7 @@ export const TestConstants = {
     /**
      * Value of TLS Support property in the 'Create Che Cluster' yaml using OperatorHub.
      */
-    TS_SELENIUM_VALUE_TLS_SUPPORT: process.env.TS_SELENIUM_VALUE_TLS_SUPPORT || 'false',
+    TS_SELENIUM_VALUE_TLS_SUPPORT: process.env.TS_SELENIUM_VALUE_TLS_SUPPORT || 'true',
 
     /**
      * Value of Self Sign Cert property in the 'Create Che Cluster' yaml using OperatorHub.
@@ -238,16 +222,21 @@ export const TestConstants = {
     /**
      * Login for a user whom has been created in the test Openshift cluster. Need for Openshift connector test
      */
-    TS_TEST_OPENSHIFT_PLUGIN_USERNAME: process.env.TS_LOGIN_NAME_OF_OPENSHIFT_REGULAR_USER || '',
+    TS_TEST_OPENSHIFT_PLUGIN_USERNAME: process.env.TS_TEST_OPENSHIFT_PLUGIN_USERNAME || '',
 
     /**
      * Password for a user whom has been created in the test Openshift cluster. Need for Openshift connector test
      */
-    TS_TEST_OPENSHIFT_PLUGIN_PASSWORD: process.env.TS_PASSWORD_OF_OPENSHIFT_REGULAR_USER || '',
+    TS_TEST_OPENSHIFT_PLUGIN_PASSWORD: process.env.TS_TEST_OPENSHIFT_PLUGIN_PASSWORD || '',
 
     /**
      * The name of project in the Openshidt plugin tree
      */
-    TS_TEST_OPENSHIFT_PLUGIN_PROJECT: process.env.TS_TEST_OPENSHIFT_PLUGIN_PROJECT || ''
+    TS_TEST_OPENSHIFT_PLUGIN_PROJECT: process.env.TS_TEST_OPENSHIFT_PLUGIN_PROJECT || '',
+
+    /**
+     * Print all timeout variables when tests launch, defaulte to false
+     */
+    TS_SELENIUM_PRINT_TIMEOUT_VARIABLES: process.env.TS_SELENIUM_PRINT_TIMEOUT_VARIABLES || false
 
 };

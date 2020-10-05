@@ -10,6 +10,7 @@
 
 import { CLASSES, Terminal, TopMenu, Ide, DialogWindow, DriverHelper } from '..';
 import { e2eContainer } from '../inversify.config';
+import {error} from 'selenium-webdriver';
 import Axios from 'axios';
 
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
@@ -21,21 +22,24 @@ const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 export function runTask(taskName: string, timeout: number) {
     test(`Run command '${taskName}'`, async () => {
         await topMenu.runTask(taskName);
-        await ide.waitNotification('has exited with code 0.', timeout);
+        const taskExitCode : boolean = await ide.waitTaskExitCodeNotificationBoolean('0', timeout);
+        if (!taskExitCode) {
+            throw new error.NoSuchElementError(`Run task finished with incorrect exit code!`);
+        }
     });
 }
 
 export function runTaskWithDialogShellAndOpenLink(taskName: string, expectedDialogText: string, timeout: number) {
     test(`Run command '${taskName}' expecting dialog shell`, async () => {
         await topMenu.runTask(taskName);
-        await dialogWindow.waitDialogAndOpenLink(timeout, expectedDialogText);
+        await dialogWindow.waitDialogAndOpenLink(expectedDialogText, timeout);
     });
 }
 
 export function runTaskWithDialogShellDjangoWorkaround(taskName: string, expectedDialogText: string, urlSubPath: string, timeout: number) {
     test(`Run command '${taskName}' expecting dialog shell`, async () => {
         await topMenu.runTask(taskName);
-        await dialogWindow.waitDialog(timeout, expectedDialogText);
+        await dialogWindow.waitDialog(expectedDialogText, timeout);
         const dialogRedirectUrl: string = await dialogWindow.getApplicationUrlFromDialog(expectedDialogText);
         const augmentedPreviewUrl: string = dialogRedirectUrl + urlSubPath;
         await dialogWindow.closeDialog();
@@ -52,7 +56,7 @@ export function runTaskWithDialogShellDjangoWorkaround(taskName: string, expecte
 export function runTaskWithDialogShellAndClose(taskName: string, expectedDialogText: string, timeout: number) {
     test(`Run command '${taskName}' expecting dialog shell`, async () => {
         await topMenu.runTask(taskName);
-        await dialogWindow.waitDialog(timeout, expectedDialogText);
+        await dialogWindow.waitDialog(expectedDialogText, timeout);
         await dialogWindow.closeDialog();
         await dialogWindow.waitDialogDissappearance();
     });

@@ -45,7 +45,7 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
         await editor.waitTabFocused(openedTab);
         await editor.moveCursorToLineAndChar(openedTab, line, char);
         await editor.pressControlSpaceCombination(openedTab);
-        await editor.waitSuggestionWithScrolling(openedTab, suggestionText);
+        await editor.waitSuggestion(openedTab, suggestionText);
     });
  }
 
@@ -68,8 +68,21 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
 
  export function codeNavigation(openedFile: string, line: number, char: number, codeNavigationClassName: string) {
     test('Codenavigation', async () => {
-        await editor.moveCursorToLineAndChar(openedFile, line, char);
-        await editor.performKeyCombination(openedFile, Key.chord(Key.CONTROL, Key.F12));
-        await editor.waitEditorAvailable(codeNavigationClassName);
+        // adding retry to fix https://github.com/eclipse/che/issues/17411
+        try {
+            await editor.moveCursorToLineAndChar(openedFile, line, char);
+            await editor.performKeyCombination(openedFile, Key.chord(Key.CONTROL, Key.F12));
+            await editor.waitEditorAvailable(codeNavigationClassName);
+        } catch (err) {
+            if (err instanceof error.TimeoutError) {
+                Logger.warn('Code navigation didn\'t work. Trying again.');
+                await editor.moveCursorToLineAndChar(openedFile, line, char);
+                await editor.performKeyCombination(openedFile, Key.chord(Key.CONTROL, Key.F12));
+                await editor.waitEditorAvailable(codeNavigationClassName);
+            } else {
+                Logger.error('Code navigation didn\'t work even after retrying.');
+                throw err;
+            }
+        }
     });
  }

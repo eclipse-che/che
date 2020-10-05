@@ -13,17 +13,23 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.when;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStoragePodInterceptor;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.NodeSelectorProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SshKeysProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisionerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.ContainerResourceProvisioner;
@@ -53,6 +59,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private RouteTlsProvisioner tlsRouteProvisioner;
+  @Mock private TlsProvisionerProvider<OpenShiftEnvironment> tlsRouteProvisionerProvider;
   @Mock private EnvVarsConverter envVarsProvisioner;
   @Mock private ServersConverter<OpenShiftEnvironment> serversProvisioner;
   @Mock private RestartPolicyRewriter restartPolicyRewriter;
@@ -62,11 +69,15 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private ImagePullSecretProvisioner imagePullSecretProvisioner;
   @Mock private ProxySettingsProvisioner proxySettingsProvisioner;
   @Mock private ServiceAccountProvisioner serviceAccountProvisioner;
+  @Mock private AsyncStorageProvisioner asyncStorageProvisioner;
+  @Mock private AsyncStoragePodInterceptor asyncStoragePodObserver;
   @Mock private CertificateProvisioner certificateProvisioner;
   @Mock private SshKeysProvisioner sshKeysProvisioner;
   @Mock private GitConfigProvisioner gitConfigProvisioner;
   @Mock private OpenShiftPreviewUrlExposer previewUrlEndpointsProvisioner;
   @Mock private VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
+  @Mock private NodeSelectorProvisioner nodeSelectorProvisioner;
+  @Mock private GatewayRouterProvisioner gatewayRouterProvisioner;
 
   private OpenShiftEnvironmentProvisioner osInfraProvisioner;
 
@@ -74,11 +85,12 @@ public class OpenShiftEnvironmentProvisionerTest {
 
   @BeforeMethod
   public void setUp() {
+    when(tlsRouteProvisionerProvider.get()).thenReturn(tlsRouteProvisioner);
     osInfraProvisioner =
         new OpenShiftEnvironmentProvisioner(
             true,
             uniqueNamesProvisioner,
-            tlsRouteProvisioner,
+            tlsRouteProvisionerProvider,
             serversProvisioner,
             envVarsProvisioner,
             restartPolicyRewriter,
@@ -88,12 +100,16 @@ public class OpenShiftEnvironmentProvisionerTest {
             podTerminationGracePeriodProvisioner,
             imagePullSecretProvisioner,
             proxySettingsProvisioner,
+            nodeSelectorProvisioner,
+            asyncStorageProvisioner,
+            asyncStoragePodObserver,
             serviceAccountProvisioner,
             certificateProvisioner,
             sshKeysProvisioner,
             gitConfigProvisioner,
             previewUrlEndpointsProvisioner,
-            vcsSslCertificateProvisioner);
+            vcsSslCertificateProvisioner,
+            gatewayRouterProvisioner);
     provisionOrder =
         inOrder(
             logsVolumeMachineProvisioner,
@@ -104,6 +120,7 @@ public class OpenShiftEnvironmentProvisionerTest {
             tlsRouteProvisioner,
             restartPolicyRewriter,
             ramLimitProvisioner,
+            nodeSelectorProvisioner,
             podTerminationGracePeriodProvisioner,
             imagePullSecretProvisioner,
             proxySettingsProvisioner,
@@ -112,7 +129,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             sshKeysProvisioner,
             vcsSslCertificateProvisioner,
             gitConfigProvisioner,
-            previewUrlEndpointsProvisioner);
+            previewUrlEndpointsProvisioner,
+            gatewayRouterProvisioner);
   }
 
   @Test
@@ -127,6 +145,7 @@ public class OpenShiftEnvironmentProvisionerTest {
     provisionOrder.verify(uniqueNamesProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(tlsRouteProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(ramLimitProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(nodeSelectorProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder
         .verify(podTerminationGracePeriodProvisioner)
         .provision(eq(osEnv), eq(runtimeIdentity));
@@ -137,6 +156,7 @@ public class OpenShiftEnvironmentProvisionerTest {
     provisionOrder.verify(sshKeysProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(vcsSslCertificateProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(gitConfigProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(gatewayRouterProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }

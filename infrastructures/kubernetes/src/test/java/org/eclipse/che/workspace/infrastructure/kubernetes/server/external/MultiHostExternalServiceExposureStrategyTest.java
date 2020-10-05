@@ -45,8 +45,9 @@ public class MultiHostExternalServiceExposureStrategyTest {
   private static final String MACHINE_NAME = "pod/main";
   private static final String SERVICE_NAME = SERVER_PREFIX + "12345678" + "-" + MACHINE_NAME;
   private static final String DOMAIN = "che.com";
+  private static final String LABELS = "foo=bar";
 
-  private ExternalServerExposer<KubernetesEnvironment> externalServerExposer;
+  private IngressServerExposer externalServerExposer;
   private KubernetesEnvironment kubernetesEnvironment;
 
   @BeforeMethod
@@ -65,9 +66,10 @@ public class MultiHostExternalServiceExposureStrategyTest {
     kubernetesEnvironment =
         KubernetesEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
     externalServerExposer =
-        new ExternalServerExposer<>(
+        new IngressServerExposer(
             new MultiHostExternalServiceExposureStrategy(DOMAIN, MULTI_HOST_STRATEGY),
             emptyMap(),
+            LABELS,
             "%s");
   }
 
@@ -128,5 +130,6 @@ public class MultiHostExternalServiceExposureStrategyTest {
     assertEquals(serverConfig, expected);
 
     assertEquals(ingressAnnotations.machineName(), machineName);
+    assertEquals(ingress.getMetadata().getLabels().get("foo"), "bar");
   }
 }

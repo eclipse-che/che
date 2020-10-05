@@ -72,7 +72,8 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-
+        - name: KUBERNETES_NAMESPACE
+          value: {{ .Release.Namespace }}
 
         # If git-self-signed-cert is used then configure Che Server with certificate content
         # to propagate it to the specified location and provide particular configuration for Git service
@@ -100,7 +101,7 @@ spec:
           valueFrom:
             secretKeyRef:
               key: ca.crt
-              name: {{ .Values.global.tls.secretName }}
+              name: {{ .Values.global.tls.selfSignedCertSecretName }}
               optional: false
         {{- end }}
 

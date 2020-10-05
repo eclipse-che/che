@@ -12,7 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServiceExposureStrategyProvider.STRATEGY_PROPERTY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ServiceExposureStrategyProvider.STRATEGY_PROPERTY;
 
 import com.google.common.base.Strings;
 import javax.inject.Inject;
@@ -46,7 +46,7 @@ import org.eclipse.che.inject.ConfigurationException;
 public class MultiHostExternalServiceExposureStrategy implements ExternalServiceExposureStrategy {
 
   public static final String MULTI_HOST_STRATEGY = "multi-host";
-  private static final String INGRESS_DOMAIN_PROPERTY = "che.infra.kubernetes.ingress.domain";
+  protected static final String INGRESS_DOMAIN_PROPERTY = "che.infra.kubernetes.ingress.domain";
 
   private final String domain;
 

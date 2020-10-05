@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.shared;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 
@@ -42,21 +43,18 @@ public final class Constants {
   public static final String CHE_WORKSPACE_AUTO_START = "che.workspace.auto_start";
 
   /**
-   * The configuration property that defines a default value for persist volumes that clients like
-   * Dashboard should propose for users during workspace creation.
-   *
-   * <p>Possible values: true or false
-   *
-   * <ul>
-   *   <li>In case of true - PersistentVolumeClaims are used by declared volumes by user and
-   *       plugins. `true` value is supposed not to be set explicitly in Devfile attributes since
-   *       it's default fixed behaviour.
-   *   <li>In case of false - emptyDir is used instead of PVCs. Note that data will be lost after
-   *       workspace restart.
-   * </ul>
+   * The configuration property that defines available values for storage types that clients like
+   * Dashboard should propose for users during workspace creation/update.
    */
-  public static final String CHE_WORKSPACE_PERSIST_VOLUMES_PROPERTY =
-      "che.workspace.persist_volumes.default";
+  public static final String CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES =
+      "che.workspace.storage.available_types";
+
+  /**
+   * The configuration property that defines a preferred value for storage type that clients like
+   * Dashboard should propose for users during workspace creation/update.
+   */
+  public static final String CHE_WORKSPACE_STORAGE_PREFERRED_TYPE =
+      "che.workspace.storage.preferred_type";
 
   /** Property name for Che plugin registry url. */
   public static final String CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY =
@@ -108,7 +106,7 @@ public final class Constants {
 
   /**
    * The attribute allows to configure workspace to be ephemeral with no PVC attached on K8S /
-   * OpenShift infrastructure. Should be set/read from {@link WorkspaceConfig#getAttributes}.
+   * OpenShift infrastructure. Should be set/read from {@link Devfile#getAttributes}.
    *
    * <p>Value is expected to be boolean, and if set to 'false' regardless of the PVC strategy,
    * workspace volumes would be created as `emptyDir`. When a workspace Pod is removed for any
@@ -122,8 +120,35 @@ public final class Constants {
   public static final String PERSIST_VOLUMES_ATTRIBUTE = "persistVolumes";
 
   /**
+   * This attribute enables or disables merging plugins while provisioning a workspace. When
+   * enabled, the plugin broker will be configured to attempt to merge plugins where possible (when
+   * two or more plugins share the same image and do not have conflicting settings). Should be
+   * set/read from {@link Devfile#getAttributes}.
+   *
+   * <p>Value is expected to be boolean; if it set to true, then the broker will attempt to merge
+   * plugins in the current devfile, otherwise it will not. The behavior when this property is not
+   * present in a devfile is governed by the configuration property {@code
+   * che.workspace.plugin_broker.default_merge_plugins}.
+   */
+  public static final String MERGE_PLUGINS_ATTRIBUTE = "mergePlugins";
+
+  /**
+   * The attribute allows to configure workspace with async storage support this configuration. Make
+   * sense only in case org.eclipse.che.api.workspace.shared.Constants#PERSIST_VOLUMES_ATTRIBUTE set
+   * to 'false'.
+   *
+   * <p>Should be set/read from {@link Devfile#getAttributes}.
+   *
+   * <p>Value is expected to be boolean, and if set to 'true' special plugin will be added to
+   * workspace. It will provide ability to backup/restore project source to the async storage.
+   * Workspace volumes still would be created as `emptyDir`. During stopping workspace project
+   * source will be sent to the storage Pod and restore from it on next restarts.
+   */
+  public static final String ASYNC_PERSIST_ATTRIBUTE = "asyncPersist";
+
+  /**
    * Contains a list of workspace tooling plugins that should be used in a workspace. Should be
-   * set/read from {@link WorkspaceConfig#getAttributes}.
+   * set/read from {@link Devfile#getAttributes}.
    *
    * <p>Value is comma separated list of plugins in a format: '< plugin1ID >,<plugin2ID >'<br>
    * Spaces around commas are trimmed. <br>
@@ -204,6 +229,16 @@ public final class Constants {
    */
   public static final String WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE =
       "infrastructureNamespace";
+
+  /**
+   * The attribute for storing the infrastructure namespace of last used workspace, it recorded on
+   * workspace stop if no more running
+   */
+  public static final String LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE =
+      "lastUsedInfrastructureNamespace";
+
+  /** The attribute for storing the time then last active workspace was stopped */
+  public static final String LAST_ACTIVITY_TIME = "lastActivityTime";
 
   private Constants() {}
 }

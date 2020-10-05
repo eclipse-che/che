@@ -26,7 +26,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServerExposer;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -47,7 +47,7 @@ public class JwtProxySecureServerExposerTest {
 
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private JwtProxyProvisioner jwtProxyProvisioner;
-  @Mock private ExternalServerExposer<KubernetesEnvironment> externalServerExposer;
+  @Mock private IngressServerExposer externalServerExposer;
 
   private JwtProxySecureServerExposer<KubernetesEnvironment> secureServerExposer;
 

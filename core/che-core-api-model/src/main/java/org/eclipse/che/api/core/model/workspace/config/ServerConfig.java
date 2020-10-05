@@ -78,6 +78,25 @@ public interface ServerConfig {
   String SERVER_NAME_ATTRIBUTE = "serverName";
 
   /**
+   * This attribute is used to remember name of the service for single-host gateway configuration.
+   * It's used internally only, so the attribute is removed from {@link ServerConfig}'s attributes
+   * before going outside.
+   */
+  String SERVICE_NAME_ATTRIBUTE = "serviceName";
+
+  /**
+   * This attribute is used to remember port of the service for single-host gateway configuration.
+   * It's used internally only, so the attribute is removed from {@link ServerConfig}'s attributes
+   * before going outside.
+   */
+  String SERVICE_PORT_ATTRIBUTE = "servicePort";
+
+  /**
+   * This attributes is marking that server come from the devfile endpoint. Used internally only.
+   */
+  String DEVFILE_ENDPOINT = "devfileEndpoint";
+
+  /**
    * Port used by server.
    *
    * <p>It may contain protocol(tcp or udp) after '/' symbol. If protocol is missing tcp will be

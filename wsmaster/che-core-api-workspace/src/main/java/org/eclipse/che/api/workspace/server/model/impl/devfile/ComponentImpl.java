@@ -105,6 +105,9 @@ public class ComponentImpl implements Component {
   @Column(name = "mount_sources")
   private Boolean mountSources;
 
+  @Column(name = "automount_secrets")
+  private Boolean automountWorkspaceSecrets;
+
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
       name = "devfile_component_command",
@@ -186,6 +189,7 @@ public class ComponentImpl implements Component {
       String cpuLimit,
       String cpuRequest,
       Boolean mountSources,
+      Boolean automountWorkspaceSecrets,
       List<String> command,
       List<String> args,
       List<? extends Volume> volumes,
@@ -213,6 +217,7 @@ public class ComponentImpl implements Component {
     this.cpuLimit = cpuLimit;
     this.cpuRequest = cpuRequest;
     this.mountSources = mountSources;
+    this.automountWorkspaceSecrets = automountWorkspaceSecrets;
     this.command = command;
     this.args = args;
     if (volumes != null) {
@@ -244,6 +249,7 @@ public class ComponentImpl implements Component {
         component.getCpuLimit(),
         component.getCpuRequest(),
         component.getMountSources(),
+        component.getAutomountWorkspaceSecrets(),
         component.getCommand(),
         component.getArgs(),
         component.getVolumes(),
@@ -395,6 +401,15 @@ public class ComponentImpl implements Component {
   }
 
   @Override
+  public Boolean getAutomountWorkspaceSecrets() {
+    return automountWorkspaceSecrets;
+  }
+
+  public void setAutomountWorkspaceSecrets(Boolean automountWorkspaceSecrets) {
+    this.automountWorkspaceSecrets = automountWorkspaceSecrets;
+  }
+
+  @Override
   public List<String> getCommand() {
     if (command == null) {
       command = new ArrayList<>();
@@ -464,6 +479,7 @@ public class ComponentImpl implements Component {
     }
     ComponentImpl component = (ComponentImpl) o;
     return getMountSources() == component.getMountSources()
+        && getAutomountWorkspaceSecrets() == component.getAutomountWorkspaceSecrets()
         && Objects.equals(generatedId, component.generatedId)
         && Objects.equals(alias, component.alias)
         && Objects.equals(type, component.type)
@@ -500,6 +516,7 @@ public class ComponentImpl implements Component {
         getSelector(),
         getEntrypoints(),
         getMountSources(),
+        getAutomountWorkspaceSecrets(),
         getCommand(),
         getArgs(),
         getVolumes(),
@@ -542,6 +559,8 @@ public class ComponentImpl implements Component {
         + '\''
         + ", mountSources="
         + mountSources
+        + ", automountWorkspaceSecrets="
+        + automountWorkspaceSecrets
         + ", command="
         + command
         + ", args="

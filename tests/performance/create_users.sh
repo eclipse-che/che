@@ -11,14 +11,17 @@ function printHelp {
   echo "$(basename "$0") [-n <base_username>] [-m <user_password>] [-s <starting_index>] [-c <user_count>] [-e <tested_environment]" 
   echo -e "Script for creating users on Che or CRW."
   echo -e "where:"
+  echo -e "-c    number of users that should be created"
+  echo -e "-e    tested environment - can be Che or CRW"
   echo -e "-n    base part of username (e.g. 'user')"
   echo -e "-m    common password"
   echo -e "-s    starting index of a users (generated name will look like e.g. 'user1')"
-  echo -e "-c    number of users that should be created"
-  echo -e "-e    tested environment - can be Che or CRW"
+  echo -e "optional:"
+  echo -e "-a    admin username, default to 'admin'"
+  echo -e "-p    admin password, default to 'admin'"
 }
 
-while getopts "hn:n:m:s:c:e:" opt; do 
+while getopts "hn:n:m:s:c:e:a:p:" opt; do 
   case $opt in
     h) printHelp
       exit 0
@@ -32,6 +35,10 @@ while getopts "hn:n:m:s:c:e:" opt; do
     s) export STARTING_INDEX=$OPTARG
       ;;
     c) export USER_COUNT=$OPTARG
+      ;;
+    a) export ADMIN_USERNAME=$OPTARG
+      ;;
+    p) export ADMIN_PASS=$OPTARG
       ;;
     \?)
       echo "\"$opt\" is an invalid option!"
@@ -52,8 +59,13 @@ if [ -z $USERNAME ] || [ -z $STARTING_INDEX ] || [ -z $USER_COUNT ] || [ -z $PAS
   exit 1
 fi
 
-ADMIN_USERNAME=admin
-ADMIN_PASS=admin
+if [ -z $ADMIN_USERNAME ]; then
+  ADMIN_USERNAME="admin"
+fi
+if [ -z $ADMIN_PASS ]; then
+  ADMIN_PASS="admin"
+fi
+
 if [ "$TESTED_ENV" == "Che" ]; then
   REALM="che"
 else 

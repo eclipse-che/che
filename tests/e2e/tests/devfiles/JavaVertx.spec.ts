@@ -20,7 +20,6 @@ const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName
 const tabTitle: string = 'HttpApplication.java';
 const codeNavigationClassName: string = 'RouterImpl.class';
 const buildTaskName: string = 'maven build';
-const LSstarting: string = 'Activating Language Support for Java';
 const stack: string = 'Java Vert.x';
 
 suite(`${stack} test`, async () => {
@@ -29,18 +28,21 @@ suite(`${stack} test`, async () => {
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
-    suite('Language server validation', async () => {
+    suite('Test opening file', async () => {
+        // opening file that soon should give time for LS to initialize
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
-        commonLsTests.waitLSInitialization(LSstarting, 1_800_000, 360_000);
-        commonLsTests.suggestionInvoking(tabTitle, 19, 31, 'router(Vertx vertx) : Router');
-        commonLsTests.errorHighlighting(tabTitle, 'error', 20);
-        commonLsTests.autocomplete(tabTitle, 19, 7, 'Router - io.vertx.ext.web');
-        commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName);
     });
 
     suite('Validation of project build', async () => {
         codeExecutionTests.runTask(buildTaskName, 120_000);
         codeExecutionTests.closeTerminal(buildTaskName);
+    });
+
+    suite('Language server validation', async () => {
+        commonLsTests.errorHighlighting(tabTitle, 'error_text;', 20);
+        commonLsTests.suggestionInvoking(tabTitle, 19, 31, 'router(Vertx vertx) : Router');
+        commonLsTests.autocomplete(tabTitle, 19, 7, 'Router - io.vertx.ext.web');
+        commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName);
     });
 
     suite ('Stopping and deleting the workspace', async () => {

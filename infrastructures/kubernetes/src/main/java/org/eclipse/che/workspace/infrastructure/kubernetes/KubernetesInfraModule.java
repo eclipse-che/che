@@ -54,18 +54,29 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueW
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspacePVCCleaner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumeStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayTlsProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiExternalEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiInternalEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesPreviewUrlCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressAnnotationsProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.DefaultHostExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServiceExposureStrategyProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.KubernetesExternalServerExposerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultihostIngressServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ServiceExposureStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.SingleHostExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
@@ -86,9 +97,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.Brok
 public class KubernetesInfraModule extends AbstractModule {
   @Override
   protected void configure() {
-    Multibinder.newSetBinder(binder(), WorkspaceAttributeValidator.class)
-        .addBinding()
-        .to(K8sInfraNamespaceWsAttributeValidator.class);
+    Multibinder<WorkspaceAttributeValidator> workspaceAttributeValidators =
+        Multibinder.newSetBinder(binder(), WorkspaceAttributeValidator.class);
+    workspaceAttributeValidators.addBinding().to(K8sInfraNamespaceWsAttributeValidator.class);
+    workspaceAttributeValidators.addBinding().to(AsyncStorageModeValidator.class);
 
     bind(KubernetesNamespaceService.class);
 
@@ -100,6 +112,16 @@ public class KubernetesInfraModule extends AbstractModule {
 
     bind(RuntimeInfrastructure.class).to(KubernetesInfrastructure.class);
     bind(InconsistentRuntimesDetector.class).asEagerSingleton();
+
+    MapBinder<WorkspaceExposureType, TlsProvisioner<KubernetesEnvironment>> tlsProvisioners =
+        MapBinder.newMapBinder(
+            binder(),
+            new TypeLiteral<WorkspaceExposureType>() {},
+            new TypeLiteral<TlsProvisioner<KubernetesEnvironment>>() {});
+    tlsProvisioners
+        .addBinding(WorkspaceExposureType.GATEWAY)
+        .to(new TypeLiteral<GatewayTlsProvisioner<KubernetesEnvironment>>() {});
+    tlsProvisioners.addBinding(WorkspaceExposureType.NATIVE).to(IngressTlsProvisioner.class);
 
     bind(new TypeLiteral<KubernetesEnvironmentProvisioner<KubernetesEnvironment>>() {})
         .to(KubernetesEnvironmentProvisioner.KubernetesEnvironmentProvisionerImpl.class);
@@ -139,8 +161,24 @@ public class KubernetesInfraModule extends AbstractModule {
     ingressStrategies
         .addBinding(DEFAULT_HOST_STRATEGY)
         .to(DefaultHostExternalServiceExposureStrategy.class);
-    bind(ExternalServiceExposureStrategy.class)
-        .toProvider(IngressServiceExposureStrategyProvider.class);
+    bind(ExternalServiceExposureStrategy.class).toProvider(ServiceExposureStrategyProvider.class);
+
+    MapBinder<WorkspaceExposureType, ExternalServerExposer<KubernetesEnvironment>>
+        exposureStrategies =
+            MapBinder.newMapBinder(binder(), new TypeLiteral<>() {}, new TypeLiteral<>() {});
+    exposureStrategies
+        .addBinding(WorkspaceExposureType.NATIVE)
+        .to(new TypeLiteral<IngressServerExposer<KubernetesEnvironment>>() {});
+    exposureStrategies
+        .addBinding(WorkspaceExposureType.GATEWAY)
+        .to(new TypeLiteral<GatewayServerExposer<KubernetesEnvironment>>() {});
+
+    bind(new TypeLiteral<ExternalServerExposer<KubernetesEnvironment>>() {})
+        .annotatedWith(com.google.inject.name.Names.named("multihost-exposer"))
+        .to(new TypeLiteral<MultihostIngressServerExposer<KubernetesEnvironment>>() {});
+
+    bind(new TypeLiteral<ExternalServerExposerProvider<KubernetesEnvironment>>() {})
+        .to(new TypeLiteral<KubernetesExternalServerExposerProvider<KubernetesEnvironment>>() {});
 
     bind(ServersConverter.class).to(new TypeLiteral<ServersConverter<KubernetesEnvironment>>() {});
     bind(PreviewUrlExposer.class)
@@ -231,5 +269,6 @@ public class KubernetesInfraModule extends AbstractModule {
         binder(), KubernetesEnvironment.TYPE);
 
     bind(NonTlsDistributedClusterModeNotifier.class);
+    bind(AsyncStorageProvisioner.class);
   }
 }

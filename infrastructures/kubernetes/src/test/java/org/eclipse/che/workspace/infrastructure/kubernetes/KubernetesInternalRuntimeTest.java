@@ -24,7 +24,9 @@ import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STA
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
 import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -51,6 +53,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
@@ -74,6 +77,7 @@ import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
 import io.opentracing.Tracer;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -120,6 +124,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachi
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeCommandImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.CheNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
@@ -132,9 +137,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatc
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesPreviewUrlCommandProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.KubernetesServerResolverFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
@@ -193,6 +200,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private KubernetesNamespace namespace;
+  @Mock private CheNamespace cheNamespace;
   @Mock private KubernetesServices services;
   @Mock private KubernetesIngresses ingresses;
   @Mock private KubernetesSecrets secrets;
@@ -202,12 +210,13 @@ public class KubernetesInternalRuntimeTest {
   @Mock private WorkspaceProbesFactory workspaceProbesFactory;
   @Mock private ProbeScheduler probesScheduler;
   @Mock private WorkspaceProbes workspaceProbes;
-  @Mock private KubernetesServerResolver kubernetesServerResolver;
+  @Mock private ServerResolver serverResolver;
   @Mock private InternalEnvironmentProvisioner internalEnvironmentProvisioner;
   @Mock private IngressPathTransformInverter pathTransformInverter;
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
   @Mock private KubernetesPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
+  private KubernetesServerResolverFactory serverResolverFactory;
 
   @Mock
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> kubernetesEnvironmentProvisioner;
@@ -249,12 +258,18 @@ public class KubernetesInternalRuntimeTest {
     runtimeStatesCache = new MapBasedRuntimeStateCache();
     machinesCache = new MapBasedMachinesCache();
     eventPublisher = new RuntimeEventsPublisher(eventService);
+    serverResolverFactory =
+        new KubernetesServerResolverFactory(
+            pathTransformInverter,
+            "che-host",
+            MULTI_HOST_STRATEGY,
+            WorkspaceExposureType.NATIVE.getConfigValue());
 
     startSynchronizer = spy(new StartSynchronizer(eventService, 5, IDENTITY));
     when(startSynchronizerFactory.create(any())).thenReturn(startSynchronizer);
 
     internalRuntime =
-        new KubernetesInternalRuntime<KubernetesEnvironment>(
+        new KubernetesInternalRuntime<>(
             13,
             5,
             new URLRewriter.NoOpURLRewriter(),
@@ -271,10 +286,11 @@ public class KubernetesInternalRuntimeTest {
             ImmutableSet.of(internalEnvironmentProvisioner),
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
-            pathTransformInverter,
             runtimeHangingDetector,
             previewUrlCommandProvisioner,
             secretAsContainerResourceProvisioner,
+            serverResolverFactory,
+            cheNamespace,
             tracer,
             context,
             namespace);
@@ -416,6 +432,7 @@ public class KubernetesInternalRuntimeTest {
     verify(secrets).create(any());
     verify(configMaps).create(any());
     verify(namespace).cleanUp();
+    verify(cheNamespace).cleanUp(WORKSPACE_ID);
     verify(namespace.deployments(), times(1)).watchEvents(any());
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
@@ -432,8 +449,9 @@ public class KubernetesInternalRuntimeTest {
     internalRuntime.start(emptyMap());
 
     InOrder cleanupInOrderExecutionVerification =
-        Mockito.inOrder(namespace, deployments, toolingProvisioner);
+        Mockito.inOrder(namespace, cheNamespace, deployments, toolingProvisioner);
     cleanupInOrderExecutionVerification.verify(namespace).cleanUp();
+    cleanupInOrderExecutionVerification.verify(cheNamespace).cleanUp(WORKSPACE_ID);
     cleanupInOrderExecutionVerification
         .verify(toolingProvisioner)
         .provision(any(), any(), any(), any());
@@ -637,6 +655,7 @@ public class KubernetesInternalRuntimeTest {
       internalRuntime.start(emptyMap());
     } catch (Exception rethrow) {
       verify(namespace, times(2)).cleanUp();
+      verify(cheNamespace, times(2)).cleanUp(WORKSPACE_ID);
       verify(namespace, never()).services();
       verify(namespace, never()).ingresses();
       throw rethrow;
@@ -716,11 +735,20 @@ public class KubernetesInternalRuntimeTest {
 
     verify(runtimeHangingDetector).stopTracking(IDENTITY);
     verify(namespace).cleanUp();
+    verify(cheNamespace).cleanUp(WORKSPACE_ID);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void throwsInfrastructureExceptionWhenKubernetesNamespaceCleanupFailed() throws Exception {
     doThrow(InfrastructureException.class).when(namespace).cleanUp();
+
+    internalRuntime.internalStop(emptyMap());
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void throwsInfrastructureExceptionWhenKubernetesCheNamespaceCleanupFailed()
+      throws Exception {
+    doThrow(InfrastructureException.class).when(cheNamespace).cleanUp(WORKSPACE_ID);
 
     internalRuntime.internalStop(emptyMap());
   }
@@ -745,7 +773,7 @@ public class KubernetesInternalRuntimeTest {
             getCurrentTimestampWithOneHourShiftAhead());
     final ArgumentCaptor<RuntimeLogEvent> captor = ArgumentCaptor.forClass(RuntimeLogEvent.class);
 
-    internalRuntime.doStartMachine(kubernetesServerResolver);
+    internalRuntime.doStartMachine(serverResolver);
     logsPublisher.handle(out1);
     logsPublisher.handle(out2);
 
@@ -1097,6 +1125,43 @@ public class KubernetesInternalRuntimeTest {
     assertEquals(
         new HashSet<>(containerNames),
         new HashSet<>(asList(CONTAINER_NAME_1, "injectedContainer")));
+  }
+
+  @Test
+  public void testGatewayRouteConfigsAreCreatedAsConfigmapsInCheNamespace()
+      throws InfrastructureException {
+    // given
+    ConfigMap cmRoute1 =
+        new ConfigMapBuilder()
+            .withNewMetadata()
+            .withName("route1")
+            .withAnnotations(ImmutableMap.of(CREATE_IN_CHE_INSTALLATION_NAMESPACE, "true"))
+            .endMetadata()
+            .build();
+    ConfigMap cmRoute2 =
+        new ConfigMapBuilder()
+            .withNewMetadata()
+            .withName("route2")
+            .withAnnotations(ImmutableMap.of(CREATE_IN_CHE_INSTALLATION_NAMESPACE, "true"))
+            .endMetadata()
+            .build();
+    ConfigMap cm3 =
+        new ConfigMapBuilder().withNewMetadata().withName("route2").endMetadata().build();
+
+    Map<String, ConfigMap> configMaps =
+        ImmutableMap.of("route1", cmRoute1, "route2", cmRoute2, "cm3", cm3);
+    when(k8sEnv.getConfigMaps()).thenReturn(configMaps);
+
+    List<ConfigMap> expectedCreatedCheNamespaceConfigmaps = Arrays.asList(cmRoute1, cmRoute2);
+
+    // when
+    internalRuntime.start(emptyMap());
+
+    // then
+    verify(cheNamespace)
+        .createConfigMaps(
+            expectedCreatedCheNamespaceConfigmaps, internalRuntime.getContext().getIdentity());
+    verify(cheNamespace).cleanUp(WORKSPACE_ID);
   }
 
   private static MachineStatusEvent newEvent(String machineName, MachineStatus status) {

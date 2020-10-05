@@ -50,17 +50,43 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
     doUpdateOptionally(workspaceId, a -> a.setExpiration(null));
   }
 
+  /**
+   * Finds any workspaces that have expired.
+   *
+   * <p>A workspace is expired when the expiration value is less than the current time or when the
+   * difference between the current time and the last running time is greater than the run timeout
+   *
+   * @param timestamp expiration time
+   * @param runTimeout time after which the workspace will be stopped regardless of activity
+   * @return
+   */
   @Override
   @Transactional(rollbackOn = ServerException.class)
-  public List<String> findExpired(long timestamp) throws ServerException {
+  public List<String> findExpiredRunTimeout(long timestamp, long runTimeout)
+      throws ServerException {
     try {
       return managerProvider
           .get()
-          .createNamedQuery("WorkspaceActivity.getExpired", WorkspaceActivity.class)
+          .createNamedQuery("WorkspaceActivity.getExpiredRunTimeout", String.class)
+          .setParameter("timeDifference", timestamp - runTimeout)
+          .getResultList()
+          .stream()
+          .collect(Collectors.toList());
+    } catch (RuntimeException x) {
+      throw new ServerException(x.getLocalizedMessage(), x);
+    }
+  }
+
+  @Override
+  @Transactional(rollbackOn = ServerException.class)
+  public List<String> findExpiredIdle(long timestamp) throws ServerException {
+    try {
+      return managerProvider
+          .get()
+          .createNamedQuery("WorkspaceActivity.getExpiredIdle", String.class)
           .setParameter("expiration", timestamp)
           .getResultList()
           .stream()
-          .map(WorkspaceActivity::getWorkspaceId)
           .collect(Collectors.toList());
     } catch (RuntimeException x) {
       throw new ServerException(x.getLocalizedMessage(), x);

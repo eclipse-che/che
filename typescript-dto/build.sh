@@ -20,6 +20,12 @@ docker run -i --rm -v "$HOME/.m2:/root/.m2" \
                     /bin/bash -c "mvn -q -U -DskipTests=true -Dfindbugs.skip=true -Dskip-validate-sources install \
                     && cat target/dts-dto-typescript.d.ts" >> index.d.ts
 
-CHE_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec -f ../pom.xml)
+# validate that index.d.ts has kind of valid output
+if ! grep "export namespace" index.d.ts; then
+  echo "Invalid output generated for index.d.ts"
+  exit 1
+fi
 
-docker build -t eclipse-che-ts-api --build-arg CHE_VERSION=${CHE_VERSION} --build-arg NPM_AUTH_TOKEN=${NPM_AUTH_TOKEN} .
+CHE_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args="\${project.version}" --non-recursive exec:exec -f ../pom.xml)
+
+docker build -t eclipse-che-ts-api --build-arg CHE_VERSION="${CHE_VERSION}" --build-arg NPM_AUTH_TOKEN="${NPM_AUTH_TOKEN}" .

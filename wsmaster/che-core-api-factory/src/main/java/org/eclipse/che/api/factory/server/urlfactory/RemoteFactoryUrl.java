@@ -11,19 +11,14 @@
  */
 package org.eclipse.che.api.factory.server.urlfactory;
 
+import java.util.List;
+import java.util.Optional;
+
 /**
  * Provides basic information about the remote factory URL components. Vendor specific
  * implementations may provide wider range of details about the URL (like username, repository etc).
  */
 public interface RemoteFactoryUrl {
-
-  /**
-   * Filename of devfile (typically devfile.yml) or {@code null} if it cannot be clearly detected
-   * from provided factory url.
-   *
-   * @return devfile filename
-   */
-  String getDevfileFilename();
 
   /**
    * Filename of factory json (typically .factory.json) or {@code null} if it cannot be clearly
@@ -41,9 +36,16 @@ public interface RemoteFactoryUrl {
   String factoryFileLocation();
 
   /**
-   * Location of devfile. Must points to the raw devfile content.
+   * List of possible filenames and raw locations of devfile.
    *
-   * @return devfile file location
+   * @return devfile filenames and locations list
    */
-  String devfileFileLocation();
+  List<DevfileLocation> devfileFileLocations();
+
+  /** Describes devfile location, including filename if any. */
+  interface DevfileLocation {
+    Optional<String> filename();
+
+    String location();
+  }
 }

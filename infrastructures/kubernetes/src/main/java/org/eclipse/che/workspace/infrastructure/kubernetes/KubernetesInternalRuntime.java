@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.shouldCreateInCheNamespace;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.CHECK_SERVERS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_MACHINES_START;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_RUNNING_ASYNC;
@@ -85,6 +86,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.PodMerger;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.CheNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatchTimeouts;
@@ -92,9 +94,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatc
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogToEventPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecretAsContainerResourceProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.KubernetesServerResolverFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
@@ -127,10 +129,11 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners;
   private final KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner;
   private final SidecarToolingProvisioner<E> toolingProvisioner;
-  private final IngressPathTransformInverter ingressPathTransformInverter;
   private final RuntimeHangingDetector runtimeHangingDetector;
   private final PreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   private final SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
+  private final KubernetesServerResolverFactory serverResolverFactory;
+  protected final CheNamespace cheNamespace;
   protected final Tracer tracer;
 
   @Inject
@@ -151,10 +154,11 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
       KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<E> toolingProvisioner,
-      IngressPathTransformInverter ingressPathTransformInverter,
       RuntimeHangingDetector runtimeHangingDetector,
       PreviewUrlCommandProvisioner previewUrlCommandProvisioner,
       SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner,
+      KubernetesServerResolverFactory kubernetesServerResolverFactory,
+      CheNamespace cheNamespace,
       Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace) {
@@ -167,6 +171,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.probeScheduler = probeScheduler;
     this.probesFactory = probesFactory;
     this.namespace = namespace;
+    this.cheNamespace = cheNamespace;
     this.eventPublisher = eventPublisher;
     this.executor = sharedPool.getExecutor();
     this.runtimeStates = runtimeStates;
@@ -174,11 +179,11 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.toolingProvisioner = toolingProvisioner;
     this.kubernetesEnvironmentProvisioner = kubernetesEnvironmentProvisioner;
     this.internalEnvironmentProvisioners = internalEnvironmentProvisioners;
-    this.ingressPathTransformInverter = ingressPathTransformInverter;
     this.runtimeHangingDetector = runtimeHangingDetector;
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
     this.previewUrlCommandProvisioner = previewUrlCommandProvisioner;
     this.secretAsContainerResourceProvisioner = secretAsContainerResourceProvisioner;
+    this.serverResolverFactory = kubernetesServerResolverFactory;
     this.tracer = tracer;
   }
 
@@ -190,31 +195,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       startSynchronizer.setStartThread();
       startSynchronizer.start();
 
-      namespace.cleanUp();
-
-      // Tooling side car provisioner should be applied before other provisioners
-      // because new machines may be provisioned there
-      toolingProvisioner.provision(
-          context.getIdentity(), startSynchronizer, context.getEnvironment(), startOptions);
-
-      startSynchronizer.checkFailure();
-
-      // Workspace API provisioners should be reapplied here to bring needed
-      // changed into new machines that came during tooling provisioning
-      for (InternalEnvironmentProvisioner envProvisioner : internalEnvironmentProvisioners) {
-        envProvisioner.provision(context.getIdentity(), context.getEnvironment());
-      }
-
-      // commands might be updated during provisioning
-      runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
-
-      // Infrastructure specific provisioners should be applied last
-      // because it converts all Workspace API model objects that comes
-      // from previous provisioners into infrastructure specific objects
-      kubernetesEnvironmentProvisioner.provision(context.getEnvironment(), context.getIdentity());
-
-      secretAsContainerResourceProvisioner.provision(context.getEnvironment(), namespace);
-      LOG.debug("Provisioning of workspace '{}' completed.", workspaceId);
+      cleanUp(workspaceId);
+      provisionWorkspace(startOptions, context, workspaceId);
 
       volumesStrategy.prepare(
           context.getEnvironment(),
@@ -278,7 +260,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // stop watching before namespace cleaning up
       namespace.deployments().stopWatch(true);
       try {
-        namespace.cleanUp();
+        cleanUp(workspaceId);
       } catch (InfrastructureException cleanUppingEx) {
         LOG.warn(
             "Failed to clean up namespace after workspace '{}' start failing. Cause: {}",
@@ -293,6 +275,40 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     } finally {
       namespace.deployments().stopWatch();
     }
+  }
+
+  private void cleanUp(String workspaceId) throws InfrastructureException {
+    namespace.cleanUp();
+    cheNamespace.cleanUp(workspaceId);
+  }
+
+  protected void provisionWorkspace(
+      Map<String, String> startOptions, KubernetesRuntimeContext<E> context, String workspaceId)
+      throws InfrastructureException {
+    // Tooling side car provisioner should be applied before other provisioners
+    // because new machines may be provisioned there
+    toolingProvisioner.provision(
+        context.getIdentity(), startSynchronizer, context.getEnvironment(), startOptions);
+
+    startSynchronizer.checkFailure();
+
+    // Workspace API provisioners should be reapplied here to bring needed
+    // changed into new machines that came during tooling provisioning
+    for (InternalEnvironmentProvisioner envProvisioner : internalEnvironmentProvisioners) {
+      envProvisioner.provision(context.getIdentity(), context.getEnvironment());
+    }
+
+    // commands might be updated during provisioning
+    runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
+
+    // Infrastructure specific provisioners should be applied last
+    // because it converts all Workspace API model objects that comes
+    // from previous provisioners into infrastructure specific objects
+    kubernetesEnvironmentProvisioner.provision(context.getEnvironment(), context.getIdentity());
+
+    secretAsContainerResourceProvisioner.provision(
+        context.getEnvironment(), context.getIdentity(), namespace);
+    LOG.debug("Provisioning of workspace '{}' completed.", workspaceId);
   }
 
   /**
@@ -578,7 +594,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           // Che Server that is crashed so start is hung up in STOPPING phase.
           // Need to clean up runtime resources
           probeScheduler.cancel(identity.getWorkspaceId());
-          namespace.cleanUp();
+          cleanUp(identity.getWorkspaceId());
         }
       } catch (InterruptedException e) {
         throw new InfrastructureException(
@@ -588,7 +604,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // runtime is RUNNING. Clean up used resources
       // Cancels workspace servers probes if any
       probeScheduler.cancel(identity.getWorkspaceId());
-      namespace.cleanUp();
+      cleanUp(identity.getWorkspaceId());
     }
   }
 
@@ -608,7 +624,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     String workspaceId = getContext().getIdentity().getWorkspaceId();
 
     createSecrets(k8sEnv, workspaceId);
-    createConfigMaps(k8sEnv, workspaceId);
+    List<ConfigMap> createdConfigMaps = createConfigMaps(k8sEnv, getContext().getIdentity());
     List<Service> createdServices = createServices(k8sEnv, workspaceId);
 
     // needed for resolution later on, even though n routes are actually created by ingress
@@ -617,10 +633,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
     listenEvents();
 
-    final KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(ingressPathTransformInverter, createdServices, readyIngresses);
-
-    doStartMachine(serverResolver);
+    doStartMachine(
+        serverResolverFactory.create(createdServices, readyIngresses, createdConfigMaps));
   }
 
   @Traced
@@ -680,13 +694,26 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   }
 
   @Traced
-  @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
-  void createConfigMaps(KubernetesEnvironment env, String workspaceId)
+  protected List<ConfigMap> createConfigMaps(KubernetesEnvironment env, RuntimeIdentity identity)
       throws InfrastructureException {
-    TracingTags.WORKSPACE_ID.set(workspaceId);
+    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
+
+    List<ConfigMap> createdConfigMaps = new ArrayList<>();
+
+    List<ConfigMap> cheNamespaceConfigMaps = new ArrayList<>();
     for (ConfigMap configMap : env.getConfigMaps().values()) {
-      namespace.configMaps().create(configMap);
+      if (shouldCreateInCheNamespace(configMap)) {
+        // we collect the che namespace configmaps into separate list
+        cheNamespaceConfigMaps.add(configMap);
+      } else {
+        createdConfigMaps.add(namespace.configMaps().create(configMap));
+      }
     }
+
+    // create che namespace configmaps in one batch, because we're doing some extra checks inside
+    createdConfigMaps.addAll(cheNamespace.createConfigMaps(cheNamespaceConfigMaps, identity));
+
+    return createdConfigMaps;
   }
 
   @Traced
@@ -694,7 +721,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   List<Service> createServices(KubernetesEnvironment env, String workspaceId)
       throws InfrastructureException {
     TracingTags.WORKSPACE_ID.set(workspaceId);
-
     Collection<Service> servicesToCreate = env.getServices().values();
     List<Service> createdServices = new ArrayList<>(servicesToCreate.size());
     for (Service service : servicesToCreate) {
@@ -719,8 +745,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
    * @throws InfrastructureException when any error occurs while creating Kubernetes pods
    */
   @Traced
-  protected void doStartMachine(KubernetesServerResolver serverResolver)
-      throws InfrastructureException {
+  protected void doStartMachine(ServerResolver serverResolver) throws InfrastructureException {
 
     final KubernetesEnvironment environment = getContext().getEnvironment();
     final Map<String, InternalMachineConfig> machineConfigs = environment.getMachines();
@@ -812,7 +837,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       Pod createdPod,
       ObjectMeta toCreateMeta,
       Map<String, InternalMachineConfig> machineConfigs,
-      KubernetesServerResolver serverResolver)
+      ServerResolver serverResolver)
       throws InfrastructureException {
     final String workspaceId = getContext().getIdentity().getWorkspaceId();
     for (Container container : createdPod.getSpec().getContainers()) {
