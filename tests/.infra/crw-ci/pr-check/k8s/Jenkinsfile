@@ -331,7 +331,7 @@ EOL"""
                     }
 
                     sh """       
-                        USER_ACCESS_TOKEN=\$(curl -k -X POST ${KEYCLOAK_BASE_URL}/realms/che/protocol/openid-connect/token \\
+                        USER_ACCESS_TOKEN=\$(curl -k -X POST \$KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token \\
                            -H "Content-Type: application/x-www-form-urlencoded" \\
                            -d "username=admin" \\
                            -d "password=admin" \\
