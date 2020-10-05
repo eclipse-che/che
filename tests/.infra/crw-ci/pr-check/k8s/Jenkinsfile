@@ -27,7 +27,7 @@ pipeline {
     }
 
     parameters {
-booleanParam(name: 'cheSingleHost',
+        booleanParam(name: 'cheSingleHost',
                defaultValue: false,
                description: 'Configuration Che server strategy')
 
@@ -247,6 +247,8 @@ EOL"""
                     }
 
                     echo "Install Che"
+                    echo "CR patch file"
+                    echo "$CUSTOM_RESOURCE_PATCH_FILE"
                     sh """
                         ${pathToChectl} server:start \\
                         --k8spodreadytimeout=180000 \\
@@ -296,7 +298,7 @@ EOL"""
 
                     echo "CheCluster yaml content"
                     sh """
-                        kubectl get checluster -n che -o yaml 
+                        kubectl get checluster -n eclipse-che -o yaml 
                     """
                 }
             }
