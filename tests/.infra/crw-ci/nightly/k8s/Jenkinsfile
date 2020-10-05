@@ -23,7 +23,7 @@ pipeline {
                     catchError(buildResult: 'UNSTABLE', stageResult: 'FAILED') {
                         stage('Run Happy path tests') {
                             retry(2) {
-                                build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
+                                build job: 'basic-MultiUser-Che-single-host-check-e2e-tests-against-k8s',
                                         parameters: [
                                                 booleanParam(name: 'cheSingleHost',
                                                         value: false),
