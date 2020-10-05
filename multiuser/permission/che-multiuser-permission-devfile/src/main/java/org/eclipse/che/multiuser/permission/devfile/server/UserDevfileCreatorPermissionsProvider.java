@@ -49,7 +49,7 @@ public class UserDevfileCreatorPermissionsProvider implements EventSubscriber<De
 
   @PreDestroy
   void unsubscribe() {
-    eventService.subscribe(this);
+    eventService.unsubscribe(this);
   }
 
   @Override
