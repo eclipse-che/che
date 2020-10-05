@@ -35,4 +35,12 @@ public interface ServerResolver {
    * @return resolved servers
    */
   Map<String, ServerImpl> resolve(String machineName);
+
+  /**
+   * Resolve external servers from implementation specific k8s object and it's annotations.
+   *
+   * @param machineName machine to resolve servers
+   * @return resolved servers
+   */
+  Map<String, ServerImpl> resolveExternalServers(String machineName);
 }
