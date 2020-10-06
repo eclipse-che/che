@@ -38,6 +38,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.devfile.server.model.impl.UserDevfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.test.tck.JpaCleaner;
@@ -68,6 +69,11 @@ import org.eclipse.che.multiuser.organization.spi.impl.OrganizationImpl;
 import org.eclipse.che.multiuser.organization.spi.jpa.JpaMemberDao;
 import org.eclipse.che.multiuser.organization.spi.jpa.JpaOrganizationDao;
 import org.eclipse.che.multiuser.organization.spi.jpa.JpaOrganizationDistributedResourcesDao;
+import org.eclipse.che.multiuser.permission.devfile.server.UserDevfileDomain;
+import org.eclipse.che.multiuser.permission.devfile.server.model.UserDevfilePermission;
+import org.eclipse.che.multiuser.permission.devfile.server.model.impl.UserDevfilePermissionImpl;
+import org.eclipse.che.multiuser.permission.devfile.server.spi.UserDevfilePermissionDao;
+import org.eclipse.che.multiuser.permission.devfile.server.spi.jpa.JpaUserDevfilePermissionDao;
 import org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.WorkerDao;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.JpaWorkerDao;
@@ -159,6 +165,9 @@ public class MultiuserMySqlTckModule extends TckModule {
     bind(new TypeLiteral<TckRepository<SignatureKeyPairImpl>>() {})
         .toInstance(new JpaTckRepository<>(SignatureKeyPairImpl.class));
 
+    bind(new TypeLiteral<TckRepository<UserDevfileImpl>>() {})
+        .toInstance(new JpaTckRepository<>(UserDevfileImpl.class));
+
     // dao
     bind(OrganizationDao.class).to(JpaOrganizationDao.class);
     bind(OrganizationDistributedResourcesDao.class)
@@ -170,6 +179,12 @@ public class MultiuserMySqlTckModule extends TckModule {
     bind(SignatureKeyDao.class).to(JpaSignatureKeyDao.class);
     bind(new TypeLiteral<PermissionsDao<MemberImpl>>() {}).to(JpaMemberDao.class);
     bind(new TypeLiteral<AbstractPermissionsDomain<MemberImpl>>() {}).to(OrganizationDomain.class);
+
+    bind(UserDevfilePermissionDao.class).to(JpaUserDevfilePermissionDao.class);
+    bind(new TypeLiteral<AbstractPermissionsDomain<UserDevfilePermissionImpl>>() {})
+        .to(UserDevfileDomain.class);
+    bind(new TypeLiteral<TckRepository<UserDevfilePermission>>() {})
+        .toInstance(new JpaTckRepository<>(UserDevfilePermission.class));
 
     // SHA-512 ecnryptor is faster than PBKDF2 so it is better for testing
     bind(PasswordEncryptor.class).to(SHA512PasswordEncryptor.class).in(Singleton.class);

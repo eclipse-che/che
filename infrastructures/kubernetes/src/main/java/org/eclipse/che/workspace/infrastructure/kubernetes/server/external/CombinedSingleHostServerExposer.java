@@ -12,7 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static java.lang.Boolean.FALSE;
-import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.DEVFILE_ENDPOINT;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.REQUIRE_SUBDOMAIN;
 
 import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.HashMap;
@@ -48,7 +48,7 @@ public class CombinedSingleHostServerExposer<T extends KubernetesEnvironment>
   /**
    * Exposes given 'externalServers' to either subdomain or subpath, using 2 different {@link
    * ExternalServerExposer}s. Which one to use for individual server is determined with {@link
-   * ServerConfig#DEVFILE_ENDPOINT} attribute.
+   * ServerConfig#REQUIRE_SUBDOMAIN} attribute.
    *
    * @param k8sEnv environment
    * @param machineName machine containing servers
@@ -78,7 +78,7 @@ public class CombinedSingleHostServerExposer<T extends KubernetesEnvironment>
     for (String esKey : externalServers.keySet()) {
       ServerConfig serverConfig = externalServers.get(esKey);
       if (Boolean.parseBoolean(
-          serverConfig.getAttributes().getOrDefault(DEVFILE_ENDPOINT, FALSE.toString()))) {
+          serverConfig.getAttributes().getOrDefault(REQUIRE_SUBDOMAIN, FALSE.toString()))) {
         subdomainServers.put(esKey, serverConfig);
       } else {
         subpathServers.put(esKey, serverConfig);
