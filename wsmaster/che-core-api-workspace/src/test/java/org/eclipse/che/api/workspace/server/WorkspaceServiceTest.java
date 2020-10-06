@@ -69,7 +69,12 @@ import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
+import org.eclipse.che.api.workspace.server.devfile.DevfileEntityProvider;
+import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
+import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
+import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
+import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
@@ -138,6 +143,13 @@ public class WorkspaceServiceTest {
 
   @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private CheJsonProvider jsonProvider = new CheJsonProvider(Collections.emptySet());
+
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
+  private DevfileEntityProvider devfileEntityProvider =
+      new DevfileEntityProvider(
+          new DevfileParser(
+              new DevfileSchemaValidator(new DevfileSchemaProvider()),
+              new DevfileIntegrityValidator(Collections.emptyMap())));
 
   @Mock private WorkspaceManager wsManager;
   @Mock private MachineTokenProvider machineTokenProvider;

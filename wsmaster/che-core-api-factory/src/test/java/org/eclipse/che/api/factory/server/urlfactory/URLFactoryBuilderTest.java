@@ -35,7 +35,7 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
-import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
+import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
@@ -68,7 +68,7 @@ public class URLFactoryBuilderTest {
   /** Grab content of URLs */
   @Mock private URLFetcher urlFetcher;
 
-  @Mock private DevfileManager devfileManager;
+  @Mock private DevfileParser devfileParser;
 
   /** Tested instance. */
   private URLFactoryBuilder urlFactoryBuilder;
@@ -76,7 +76,7 @@ public class URLFactoryBuilderTest {
   @BeforeClass
   public void setUp() {
     this.urlFactoryBuilder =
-        new URLFactoryBuilder(defaultEditor, defaultPlugin, urlFetcher, devfileManager);
+        new URLFactoryBuilder(defaultEditor, defaultPlugin, urlFetcher, devfileParser);
   }
 
   @Test
@@ -132,7 +132,7 @@ public class URLFactoryBuilderTest {
     workspaceConfigImpl.setDefaultEnv("name");
 
     when(urlFetcher.fetchSafely(anyString())).thenReturn("random_content");
-    when(devfileManager.parseYaml(anyString(), anyMap())).thenReturn(devfile);
+    when(devfileParser.parseYaml(anyString(), anyMap())).thenReturn(devfile);
 
     FactoryDto factory =
         urlFactoryBuilder
@@ -192,7 +192,7 @@ public class URLFactoryBuilderTest {
                     return "http://foo.bar/anything";
                   }
                 }));
-    when(devfileManager.parseYaml(anyString(), anyMap())).thenReturn(devfile);
+    when(devfileParser.parseYaml(anyString(), anyMap())).thenReturn(devfile);
     when(urlFetcher.fetchSafely(anyString())).thenReturn("anything");
     FactoryDto factory =
         urlFactoryBuilder
