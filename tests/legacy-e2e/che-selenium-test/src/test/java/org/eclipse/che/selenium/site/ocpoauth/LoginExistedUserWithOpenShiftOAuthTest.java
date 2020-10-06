@@ -99,13 +99,11 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
     seleniumWebDriver.navigate().to(testDashboardUrlProvider.get());
 
     // login to OCP from login page with default test user credentials
-    // Workaround to login to CHE 'single-host' with oAuth to implement launching 'Happy path': https://github.com/eclipse/che/issues/17789
-    // openShiftLoginPage.waitOnOpen();
-    // openShiftLoginPage.login(defaultTestUser.getName(), defaultTestUser.getPassword());
-    openShiftLoginPage.login();
+    openShiftLoginPage.waitOnOpen();
+    openShiftLoginPage.login(defaultTestUser.getName(), defaultTestUser.getPassword());
 
     // authorize ocp-client to access OpenShift account
-    /*authorizeOpenShiftAccessPage.waitOnOpen();
+    authorizeOpenShiftAccessPage.waitOnOpen();
     authorizeOpenShiftAccessPage.allowPermissions();
 
     // fill first broker profile page
@@ -146,6 +144,6 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
     openShiftProjectCatalogPage.open();
     openShiftProjectCatalogPage.waitProject(projectName);
     openShiftProjectCatalogPage.clickOnProject(projectName);
-    openShiftProjectCatalogPage.waitResourceAbsence("workspace");*/
+    openShiftProjectCatalogPage.waitResourceAbsence("workspace");
   }
 }

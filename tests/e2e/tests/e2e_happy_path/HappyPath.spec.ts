@@ -210,8 +210,7 @@ suite('Display source code changes in the running application', async () => {
     test('Check changes are displayed', async () => {
         await previewWidget.waitApplicationOpened(applicationUrl, 60_000);
         await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60_000, 10_000);
-        // workaround for issue: https://github.com/eclipse/che/issues/17783
-        // await checkErrorMessageInApplicationController();
+        await checkErrorMessageInApplicationController();
     });
 
     test('Close preview widget', async () => {
@@ -244,8 +243,7 @@ suite('Validation of debug functionality', async () => {
     test('Check content of the launched application', async () => {
         await previewWidget.waitApplicationOpened(applicationUrl, 60_000);
         await previewWidget.waitAndSwitchToWidgetFrame();
-        // workaround for issue: https://github.com/eclipse/che/issues/17783
-        // await previewWidget.waitAndClick(SpringAppLocators.springHomeButtonLocator);
+        await previewWidget.waitAndClick(SpringAppLocators.springHomeButtonLocator);
         await driverHelper.getDriver().switchTo().defaultContent();
         await ide.waitAndSwitchToIdeFrame();
     });
@@ -269,7 +267,7 @@ suite('Validation of debug functionality', async () => {
     });
 });
 
-/*async function checkErrorMessageInApplicationController() {
+async function checkErrorMessageInApplicationController() {
     await previewWidget.waitAndSwitchToWidgetFrame();
     await previewWidget.waitAndClick(SpringAppLocators.springMenuButtonLocator);
     await previewWidget.waitAndClick(SpringAppLocators.springErrorButtonLocator);
@@ -288,7 +286,7 @@ suite('Validation of debug functionality', async () => {
 
     await driverHelper.getDriver().switchTo().defaultContent();
     await ide.waitAndSwitchToIdeFrame();
-}*/
+}
 
 async function checkCodeNavigationWithContextMenu() {
     await contextMenu.invokeContextMenuOnActiveElementWithKeys();
@@ -316,4 +314,3 @@ async function checkJavaPathCompletion() {
         await editor.waitTabWithSavedStatus(classPathFilename);
     }
 }
-

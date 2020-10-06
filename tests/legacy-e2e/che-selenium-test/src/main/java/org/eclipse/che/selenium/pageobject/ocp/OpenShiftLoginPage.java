@@ -60,11 +60,11 @@ public class OpenShiftLoginPage {
   }
 
   @Inject(optional = true)
-  @Named("env.openshift.username")
+  @Named("env.openshift.regular.username")
   private String openShiftUsername;
 
   @Inject(optional = true)
-  @Named("env.openshift.password")
+  @Named("env.openshift.regular.password")
   private String openShiftPassword;
 
   @Inject(optional = true)
@@ -76,7 +76,7 @@ public class OpenShiftLoginPage {
   protected interface Locators {
     String USERNAME_INPUT_NAME = "username";
     String PASSWORD_INPUT_NAME = "password";
-    String LOGIN_BUTTON_XPATH = "//button[@type='submit']";
+    String LOGIN_BUTTON_XPATH = "//button[contains(text(),'Log In')]";
     String SUBMIT_BUTTON_XPATH = "//input[@value='Submit']";
     String FIRST_NAME_NAME = "firstName";
     String LAST_NAME_NAME = "lastName";
@@ -180,8 +180,7 @@ public class OpenShiftLoginPage {
   }
 
   public void login() {
-    // Workaround to 'Link admin CHE account with admin OCP account' 
-    // if (isOpened()) {
+    if (isOpened()) {
       if (isIdentityProviderLinkVisible(IDENTITY_PROVIDER_NAME)) {
         clickOnIdentityProviderLink(IDENTITY_PROVIDER_NAME);
       }
@@ -198,7 +197,7 @@ public class OpenShiftLoginPage {
         addToExistingAccount();
         cheLoginPage.loginWithPredefinedUsername("admin");
       }
-    // }
+    }
   }
 
   public boolean isOpened() {

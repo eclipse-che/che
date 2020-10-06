@@ -20,9 +20,7 @@ export class CheMultiuserTokenHandler implements ITokenHandler {
 
         let keycloakUrl = this.handleTrailingSlash(TestConstants.TS_SELENIUM_BASE_URL);
         const keycloakAuthSuffix = 'auth/realms/che/protocol/openid-connect/token';
-        // related to run 'single-host' on OCP: https://github.com/eclipse/che/issues/17789
-        // keycloakUrl = keycloakUrl.replace('che', 'keycloak') + keycloakAuthSuffix;
-        keycloakUrl = keycloakUrl + keycloakAuthSuffix;
+        keycloakUrl = keycloakUrl.replace('che', 'keycloak') + keycloakAuthSuffix;
         params = {
             client_id: 'che-public',
             username: TestConstants.TS_SELENIUM_USERNAME,
