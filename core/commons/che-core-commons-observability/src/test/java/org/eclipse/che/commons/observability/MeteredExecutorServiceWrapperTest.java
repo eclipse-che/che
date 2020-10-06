@@ -12,7 +12,6 @@
 package org.eclipse.che.commons.observability;
 
 import static org.eclipse.che.commons.test.AssertRetry.assertWithRetry;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -90,94 +89,17 @@ public class MeteredExecutorServiceWrapperTest {
     runnableTaskStart.await(10, TimeUnit.SECONDS);
     future.get(1, TimeUnit.MINUTES);
 
-    assertEquals(
-        registry
-            .get("thread.factory.terminated")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .counter()
-            .count(),
-        0.0);
-    assertEquals(
-        registry
-            .get("thread.factory.running")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .gauge()
-            .value(),
-        1.0);
-    assertEquals(
-        registry
-            .get("thread.factory.created")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .counter()
-            .count(),
-        1.0);
-    assertEquals(
-        registry
-            .get("executor.rejected")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .counter()
-            .count(),
-        0.0);
-
-    assertEquals(
-        registry
-            .get("executor.pool.size")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .gauge()
-            .value(),
-        1.0);
-    assertWithRetry(
-        () ->
-            registry
-                .get("executor.completed")
-                .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-                .tags(userTags)
-                .functionCounter()
-                .count(),
-        1.0,
-        10,
-        50);
-    assertEquals(
-        registry
-            .get("executor.queued")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .gauge()
-            .value(),
-        0.0);
-    assertEquals(
-        registry
-            .get("executor.idle")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .timer()
-            .count(),
-        1);
-    assertEquals(
-        registry
-            .get("executor.queue.remaining")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .gauge()
-            .value(),
-        (double) Integer.MAX_VALUE);
-    assertEquals(
-        registry
-            .get("executor")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .timer()
-            .count(),
-        1);
-    assertEquals(
-        registry
-            .get("executor.active")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .gauge()
-            .value(),
-        0.0);
+    assertCounter("thread.factory.terminated", 0.0);
+    assertGauge("thread.factory.running", 1.0);
+    assertCounter("thread.factory.created", 1.0);
+    assertCounter("executor.rejected", 0.0);
+    assertGauge("executor.pool.size", 1.0);
+    assertFunctionCounter("executor.completed", 1.0);
+    assertGauge("executor.queued", 0.0);
+    assertTimerCount("executor.idle", 1L);
+    assertGauge("executor.queue.remaining", (double) Integer.MAX_VALUE);
+    assertTimerCount("executor", 1L);
+    assertGauge("executor.active", 0.0);
   }
 
   @Test
@@ -197,111 +119,19 @@ public class MeteredExecutorServiceWrapperTest {
 
     runnableTaskStart.await(10, TimeUnit.SECONDS);
 
-    assertEquals(
-        registry
-            .get("thread.factory.terminated")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .counter()
-            .count(),
-        0.0);
-    assertEquals(
-        registry
-            .get("thread.factory.running")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .gauge()
-            .value(),
-        1.0);
-    assertEquals(
-        registry
-            .get("thread.factory.created")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .counter()
-            .count(),
-        1.0);
-    assertEquals(
-        registry
-            .get("executor.rejected")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .counter()
-            .count(),
-        0.0);
-
-    assertEquals(
-        registry
-            .get("executor.pool.size")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .gauge()
-            .value(),
-        1.0);
-    assertWithRetry(
-        () ->
-            registry
-                .get("executor.completed")
-                .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-                .tags(userTags)
-                .functionCounter()
-                .count(),
-        1.0,
-        10,
-        50);
-
-    assertEquals(
-        registry
-            .get("executor.queued")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .gauge()
-            .value(),
-        1.0);
-    assertEquals(
-        registry
-            .get("executor.idle")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .timer()
-            .count(),
-        0);
-    assertEquals(
-        registry
-            .get("executor.queue.remaining")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .gauge()
-            .value(),
-        (double) Integer.MAX_VALUE);
-    assertEquals(
-        registry
-            .get("executor")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .timer()
-            .count(),
-        1);
-    assertEquals(
-        registry
-            .get("executor.active")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .gauge()
-            .value(),
-        0.0);
-    assertEquals(
-        registry
-            .get("executor.scheduled.once")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .counter()
-            .count(),
-        0.0);
-    assertEquals(
-        registry
-            .get("executor.scheduled.repetitively")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .counter()
-            .count(),
-        1.0);
+    assertCounter("thread.factory.terminated", 0.0);
+    assertGauge("thread.factory.running", 1.0);
+    assertCounter("thread.factory.created", 1.0);
+    assertCounter("executor.rejected", 0.0);
+    assertGauge("executor.pool.size", 1.0);
+    assertFunctionCounter("executor.completed", 1.0);
+    assertGauge("executor.queued", 1.0);
+    assertTimerCount("executor.idle", 0L);
+    assertGauge("executor.queue.remaining", (double) Integer.MAX_VALUE);
+    assertTimerCount("executor", 1L);
+    assertGauge("executor.active", 0.0);
+    assertCounter("executor.scheduled.once", 0.0);
+    assertCounter("executor.scheduled.repetitively", 1.0);
   }
 
   @Test
@@ -318,70 +148,15 @@ public class MeteredExecutorServiceWrapperTest {
     executor.schedule(runnableTaskStart::countDown, new CronExpression(" * * * ? * * *"));
     // then
     runnableTaskStart.await(10, TimeUnit.SECONDS);
-    assertEquals(
-        registry
-            .get("thread.factory.terminated")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .counter()
-            .count(),
-        0.0);
-    assertEquals(
-        registry
-            .get("thread.factory.running")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .gauge()
-            .value(),
-        2.0);
-    assertEquals(
-        registry
-            .get("thread.factory.created")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .counter()
-            .count(),
-        2.0);
-    assertEquals(
-        registry
-            .get("executor.rejected")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .counter()
-            .count(),
-        0.0);
 
-    assertEquals(
-        registry
-            .get("executor.pool.size")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .gauge()
-            .value(),
-        2.0);
-    assertEquals(
-        registry
-            .get("executor.completed")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .functionCounter()
-            .count(),
-        1.0);
-    assertWithRetry(
-        () ->
-            registry
-                .get("executor.queued")
-                .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-                .tags(userTags)
-                .gauge()
-                .value(),
-        1.0,
-        10,
-        50);
-    assertEquals(
-        registry
-            .get("executor.idle")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .timer()
-            .count(),
-        0);
+    assertCounter("thread.factory.terminated", 0.0);
+    assertGauge("thread.factory.running", 2.0);
+    assertCounter("thread.factory.created", 2.0);
+    assertCounter("executor.rejected", 0.0);
+    assertGauge("executor.pool.size", 2.0);
+    assertFunctionCounter("executor.completed", 1.0);
+    assertGauge("executor.queued", 1.0);
+    assertTimerCount("executor.idle", 0L);
     assertTrue(
         registry
                 .get("executor.queue.remaining")
@@ -390,45 +165,67 @@ public class MeteredExecutorServiceWrapperTest {
                 .gauge()
                 .value()
             > 0.0);
-    assertEquals(
-        registry
-            .get("executor")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .timer()
-            .count(),
-        1);
-    assertEquals(
-        registry
-            .get("executor.active")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .gauge()
-            .value(),
-        1.0);
-    assertEquals(
-        registry
-            .get("executor.scheduled.once")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .counter()
-            .count(),
-        0.0);
-    assertEquals(
-        registry
-            .get("executor.scheduled.repetitively")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .counter()
-            .count(),
-        0.0);
-    assertEquals(
-        registry
-            .get("executor.scheduled.cron")
-            .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
-            .tags(userTags)
-            .counter()
-            .count(),
-        1.0);
+
+    assertTimerCount("executor", 1L);
+    assertGauge("executor.active", 1.0);
+    assertCounter("executor.scheduled.once", 0.0);
+    assertCounter("executor.scheduled.repetitively", 0.0);
+    assertCounter("executor.scheduled.cron", 1.0);
+  }
+
+  public void assertCounter(String counterName, Double value) throws InterruptedException {
+    assertWithRetry(
+        () ->
+            registry
+                .get(counterName)
+                .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
+                .tags(userTags)
+                .counter()
+                .count(),
+        value,
+        20,
+        50);
+  }
+
+  public void assertFunctionCounter(String counterName, Double value) throws InterruptedException {
+    assertWithRetry(
+        () ->
+            registry
+                .get(counterName)
+                .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
+                .tags(userTags)
+                .functionCounter()
+                .count(),
+        value,
+        20,
+        50);
+  }
+
+  public void assertGauge(String gaugeName, Double value) throws InterruptedException {
+    assertWithRetry(
+        () ->
+            registry
+                .get(gaugeName)
+                .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
+                .tags(userTags)
+                .gauge()
+                .value(),
+        value,
+        20,
+        50);
+  }
+
+  public void assertTimerCount(String timerName, Long value) throws InterruptedException {
+    assertWithRetry(
+        () ->
+            registry
+                .get(timerName)
+                .tag("name", MeteredExecutorServiceWrapperTest.class.getName())
+                .tags(userTags)
+                .timer()
+                .count(),
+        value,
+        20,
+        50);
   }
 }
