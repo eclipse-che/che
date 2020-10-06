@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.FORCE_SUBDOMAIN;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.REQUIRE_SUBDOMAIN;
 import static org.mockito.Mockito.verify;
 
 import io.fabric8.kubernetes.api.model.ServicePort;
@@ -44,8 +44,9 @@ public class CombinedSingleHostServerExposerTest {
     // given
     ServerConfig s1 = new ServerConfigImpl("1", "http", "/", emptyMap());
     ServerConfig s2 =
-        new ServerConfigImpl("2", "http", "/", singletonMap(FORCE_SUBDOMAIN, "false"));
-    ServerConfig s3 = new ServerConfigImpl("3", "http", "/", singletonMap(FORCE_SUBDOMAIN, "true"));
+        new ServerConfigImpl("2", "http", "/", singletonMap(REQUIRE_SUBDOMAIN, "false"));
+    ServerConfig s3 =
+        new ServerConfigImpl("3", "http", "/", singletonMap(REQUIRE_SUBDOMAIN, "true"));
 
     CombinedSingleHostServerExposer<KubernetesEnvironment> serverExposer =
         new CombinedSingleHostServerExposer<>(subdomainExposer, subpathExposer);
