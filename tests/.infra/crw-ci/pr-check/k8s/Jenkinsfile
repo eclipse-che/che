@@ -257,11 +257,6 @@ EOL"""
                         --chenamespace=eclipse-che
                     """
 
-                    echo "CheCluster yaml content"
-                    sh """
-                        kubectl get checluster -n che -o yaml 
-                    """
-
                     cheHost = sh(
                             script: "kubectl get ingress che --namespace=eclipse-che -o=jsonpath={'.spec.rules[0].host'}",
                             returnStdout: true
