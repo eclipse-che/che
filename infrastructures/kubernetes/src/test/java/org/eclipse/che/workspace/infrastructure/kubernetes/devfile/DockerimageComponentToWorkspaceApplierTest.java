@@ -350,7 +350,7 @@ public class DockerimageComponentToWorkspaceApplierTest {
     Map<String, String> attributes = serverConfig.getAttributes();
     assertEquals(attributes.get(ServerConfig.INTERNAL_SERVER_ATTRIBUTE), "true");
     assertEquals(attributes.get("secure"), "false");
-    assertEquals(attributes.get(ServerConfig.DEVFILE_ENDPOINT), "true");
+    assertEquals(attributes.get(ServerConfig.REQUIRE_SUBDOMAIN), "true");
   }
 
   @Test
