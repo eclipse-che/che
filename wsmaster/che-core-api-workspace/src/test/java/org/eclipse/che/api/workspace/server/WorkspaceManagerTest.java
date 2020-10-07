@@ -241,7 +241,7 @@ public class WorkspaceManagerTest {
     verify(workspaceDao).create(workspace);
     verify(runtimes)
         .evalInfrastructureNamespace(
-            new NamespaceResolutionContext(workspace.getId(), USER_ID, NAMESPACE_1));
+            new NamespaceResolutionContext(workspace.getId(), USER_ID, NAMESPACE_1, true));
   }
 
   @Test
@@ -626,7 +626,7 @@ public class WorkspaceManagerTest {
         "evaluated-legacy");
     verify(runtimes)
         .evalLegacyInfrastructureNamespace(
-            new NamespaceResolutionContext(workspace.getId(), USER_ID, NAMESPACE_1));
+            new NamespaceResolutionContext(workspace.getId(), USER_ID, NAMESPACE_1, true));
   }
 
   @Test
@@ -668,7 +668,7 @@ public class WorkspaceManagerTest {
         "evaluated-legal");
     verify(runtimes)
         .evalInfrastructureNamespace(
-            new NamespaceResolutionContext(workspace.getId(), USER_ID, NAMESPACE_1));
+            new NamespaceResolutionContext(workspace.getId(), USER_ID, NAMESPACE_1, true));
   }
 
   @Test
