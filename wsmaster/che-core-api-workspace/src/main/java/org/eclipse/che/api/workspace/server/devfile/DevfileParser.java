@@ -45,7 +45,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
  */
 @Beta
 @Singleton
-public class DevfileManager {
+public class DevfileParser {
 
   private ObjectMapper yamlMapper;
   private ObjectMapper jsonMapper;
@@ -54,7 +54,7 @@ public class DevfileManager {
   private final OverridePropertiesApplier overridePropertiesApplier;
 
   @Inject
-  public DevfileManager(
+  public DevfileParser(
       DevfileSchemaValidator schemaValidator, DevfileIntegrityValidator integrityValidator) {
     this(
         schemaValidator,
@@ -64,7 +64,7 @@ public class DevfileManager {
   }
 
   @VisibleForTesting
-  DevfileManager(
+  DevfileParser(
       DevfileSchemaValidator schemaValidator,
       DevfileIntegrityValidator integrityValidator,
       ObjectMapper yamlMapper,

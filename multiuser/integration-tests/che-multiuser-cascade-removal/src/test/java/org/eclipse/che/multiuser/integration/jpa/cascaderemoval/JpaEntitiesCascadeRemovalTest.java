@@ -24,6 +24,9 @@ import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjec
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createUser;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createWorker;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createWorkspace;
+import static org.eclipse.che.multiuser.permission.devfile.server.UserDevfileDomain.DELETE;
+import static org.eclipse.che.multiuser.permission.devfile.server.UserDevfileDomain.READ;
+import static org.eclipse.che.multiuser.permission.devfile.server.UserDevfileDomain.UPDATE;
 import static org.eclipse.che.multiuser.resource.spi.jpa.JpaFreeResourcesLimitDao.RemoveFreeResourcesLimitSubscriber;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
@@ -33,6 +36,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -54,6 +58,8 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.devfile.server.model.impl.UserDevfileImpl;
+import org.eclipse.che.api.devfile.server.spi.UserDevfileDao;
 import org.eclipse.che.api.factory.server.jpa.FactoryJpaModule;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
@@ -106,6 +112,10 @@ import org.eclipse.che.multiuser.organization.shared.model.Organization;
 import org.eclipse.che.multiuser.organization.spi.MemberDao;
 import org.eclipse.che.multiuser.organization.spi.impl.MemberImpl;
 import org.eclipse.che.multiuser.organization.spi.impl.OrganizationImpl;
+import org.eclipse.che.multiuser.permission.devfile.server.jpa.MultiuserUserDevfileJpaModule;
+import org.eclipse.che.multiuser.permission.devfile.server.model.impl.UserDevfilePermissionImpl;
+import org.eclipse.che.multiuser.permission.devfile.server.spi.UserDevfilePermissionDao;
+import org.eclipse.che.multiuser.permission.devfile.server.spi.jpa.JpaUserDevfilePermissionDao.RemoveUserDevfilePermissionsBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.multiuser.permission.workspace.server.jpa.MultiuserWorkspaceJpaModule;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.WorkerDao;
 import org.eclipse.che.multiuser.resource.api.AvailableResourcesProvider;
@@ -143,6 +153,8 @@ public class JpaEntitiesCascadeRemovalTest {
   private SshDao sshDao;
   private FactoryDao factoryDao;
   private WorkerDao workerDao;
+  private UserDevfilePermissionDao userDevfilePermissionDao;
+  private UserDevfileDao userDevfileDao;
   private SignatureKeyDao signatureKeyDao;
   private FreeResourcesLimitDao freeResourcesLimitDao;
   private OrganizationManager organizationManager;
@@ -195,6 +207,9 @@ public class JpaEntitiesCascadeRemovalTest {
 
   private FreeResourcesLimitImpl freeResourcesLimit2;
 
+  private UserDevfileImpl devfile;
+  private UserDevfilePermissionImpl devfilePermission;
+
   private H2JpaCleaner h2JpaCleaner;
 
   @BeforeMethod
@@ -221,6 +236,8 @@ public class JpaEntitiesCascadeRemovalTest {
                 install(new MultiuserWorkspaceJpaModule());
                 install(new MachineAuthModule());
                 install(new DevfileModule());
+                install(new MultiuserUserDevfileJpaModule());
+
                 bind(ExecutorServiceWrapper.class).to(NoopExecutorServiceWrapper.class);
 
                 bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
@@ -305,6 +322,8 @@ public class JpaEntitiesCascadeRemovalTest {
     workspaceDao = injector.getInstance(WorkspaceDao.class);
     factoryDao = injector.getInstance(FactoryDao.class);
     workerDao = injector.getInstance(WorkerDao.class);
+    userDevfileDao = injector.getInstance(UserDevfileDao.class);
+    userDevfilePermissionDao = injector.getInstance(UserDevfilePermissionDao.class);
     signatureKeyDao = injector.getInstance(SignatureKeyDao.class);
     freeResourcesLimitDao = injector.getInstance(FreeResourcesLimitDao.class);
     organizationManager = injector.getInstance(OrganizationManager.class);
@@ -334,10 +353,18 @@ public class JpaEntitiesCascadeRemovalTest {
     assertTrue(preferenceDao.getPreferences(user.getId()).isEmpty());
     assertTrue(sshDao.get(user.getId()).isEmpty());
     assertTrue(workspaceDao.getByNamespace(account.getName(), 30, 0).isEmpty());
+    assertTrue(userDevfileDao.getByNamespace(account.getName(), 30, 0).isEmpty());
     assertTrue(factoryDao.getByUser(user.getId(), 30, 0).isEmpty());
     // Check workers and parent entity is removed
     assertTrue(workspaceDao.getByNamespace(user2.getId(), 30, 0).isEmpty());
+    assertTrue(userDevfileDao.getByNamespace(user2.getId(), 30, 0).isEmpty());
     assertEquals(workerDao.getWorkers(workspace3.getId(), 1, 0).getTotalItemsCount(), 0);
+    assertNull(
+        notFoundToNull(
+            () ->
+                userDevfilePermissionDao.getUserDevfilePermission(devfile.getId(), user2.getId())));
+    assertFalse(userDevfileDao.getById(devfile.getId()).isPresent());
+
     // Permissions are removed
     // Non-removed user permissions and stack are present
     // Check existence of organizations
@@ -391,6 +418,11 @@ public class JpaEntitiesCascadeRemovalTest {
     assertNotNull(notFoundToNull(() -> organizationManager.getById(childOrganization.getId())));
     assertNotNull(notFoundToNull(() -> organizationManager.getById(organization2.getId())));
     assertNotNull(notFoundToNull(() -> signatureKeyDao.get(workspace2.getId())));
+    assertTrue(userDevfileDao.getById(devfile.getId()).isPresent());
+    assertNotNull(
+        notFoundToNull(
+            () ->
+                userDevfilePermissionDao.getUserDevfilePermission(devfile.getId(), user2.getId())));
     assertFalse(
         organizationResourcesDistributor.getResourcesCaps(childOrganization.getId()).isEmpty());
     wipeTestData();
@@ -399,7 +431,11 @@ public class JpaEntitiesCascadeRemovalTest {
   @DataProvider(name = "beforeRemoveRollbackActions")
   public Object[][] beforeRemoveActions() {
     return new Class[][] {
-      {RemoveOrganizationOnLastUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class}
+      {RemoveOrganizationOnLastUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
+      {
+        RemoveUserDevfilePermissionsBeforeUserRemovedEventSubscriber.class,
+        BeforeUserRemovedEvent.class
+      }
     };
   }
 
@@ -453,6 +489,13 @@ public class JpaEntitiesCascadeRemovalTest {
     organizationResourcesDistributor.capResources(
         childOrganization.getId(),
         singletonList(new ResourceImpl(RamResourceType.ID, 1024, RamResourceType.UNIT)));
+
+    userDevfileDao.create(
+        devfile = TestObjectsFactory.createUserDevfile("id-dev1", "devfile1", account));
+    userDevfilePermissionDao.store(
+        devfilePermission =
+            new UserDevfilePermissionImpl(
+                devfile.getId(), user2.getId(), ImmutableList.of(READ, DELETE, UPDATE)));
   }
 
   private void prepareCreator(String userId) {
@@ -476,6 +519,9 @@ public class JpaEntitiesCascadeRemovalTest {
     organizationManager.remove(organization2.getId());
 
     workerDao.removeWorker(workspace3.getId(), user2.getId());
+
+    userDevfilePermissionDao.removeUserDevfilePermission(devfile.getId(), user2.getId());
+    userDevfileDao.remove(devfile.getId());
 
     factoryDao.remove(factory1.getId());
     factoryDao.remove(factory2.getId());

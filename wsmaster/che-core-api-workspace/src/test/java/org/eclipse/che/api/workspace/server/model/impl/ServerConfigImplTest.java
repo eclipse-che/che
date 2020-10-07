@@ -13,8 +13,8 @@ package org.eclipse.che.api.workspace.server.model.impl;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.DEVFILE_ENDPOINT;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.INTERNAL_SERVER_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.REQUIRE_SUBDOMAIN;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SERVER_NAME_ATTRIBUTE;
 import static org.testng.Assert.*;
 
@@ -114,8 +114,8 @@ public class ServerConfigImplTest {
     ServerConfig serverConfig =
         ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, new HashMap<>()), true);
 
-    assertTrue(serverConfig.getAttributes().containsKey(DEVFILE_ENDPOINT));
-    assertTrue(Boolean.parseBoolean(serverConfig.getAttributes().get(DEVFILE_ENDPOINT)));
+    assertTrue(serverConfig.getAttributes().containsKey(REQUIRE_SUBDOMAIN));
+    assertTrue(Boolean.parseBoolean(serverConfig.getAttributes().get(REQUIRE_SUBDOMAIN)));
   }
 
   @Test
@@ -123,7 +123,7 @@ public class ServerConfigImplTest {
     ServerConfig serverConfig =
         ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, new HashMap<>()), false);
 
-    assertFalse(serverConfig.getAttributes().containsKey(DEVFILE_ENDPOINT));
+    assertFalse(serverConfig.getAttributes().containsKey(REQUIRE_SUBDOMAIN));
   }
 
   @Test
@@ -131,6 +131,6 @@ public class ServerConfigImplTest {
     ServerConfig serverConfig =
         ServerConfigImpl.createFromEndpoint(new EndpointImpl("name", 123, new HashMap<>()));
 
-    assertFalse(serverConfig.getAttributes().containsKey(DEVFILE_ENDPOINT));
+    assertFalse(serverConfig.getAttributes().containsKey(REQUIRE_SUBDOMAIN));
   }
 }

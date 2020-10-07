@@ -24,24 +24,24 @@ public class NamespaceNameValidatorTest {
 
   @Test
   public void testFailsOnNull() {
-    assertEquals(NULL_OR_EMPTY, validateInternal(null));
+    assertEquals(validateInternal(null), NULL_OR_EMPTY);
   }
 
   @Test
   public void testFailsOnEmpty() {
-    assertEquals(NULL_OR_EMPTY, validateInternal(""));
+    assertEquals(validateInternal(""), NULL_OR_EMPTY);
   }
 
   @Test
   public void testFailsOnTooLong() {
     assertEquals(
-        TOO_LONG,
-        validateInternal("0123456789012345678901234567890123456789012345678901234567890123"));
+        validateInternal("0123456789012345678901234567890123456789012345678901234567890123"),
+        TOO_LONG);
   }
 
   @Test(dataProvider = "invalidDnsNames")
   public void testFailsOnInvalidChars(String invalidName) {
-    assertEquals(INVALID, validateInternal(invalidName));
+    assertEquals(validateInternal(invalidName), INVALID);
   }
 
   @DataProvider

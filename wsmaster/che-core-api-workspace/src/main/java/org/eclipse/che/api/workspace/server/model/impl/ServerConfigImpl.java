@@ -197,7 +197,7 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     if (devfileEndpoint) {
-      attributes.put(DEVFILE_ENDPOINT, Boolean.TRUE.toString());
+      attributes.put(REQUIRE_SUBDOMAIN, Boolean.TRUE.toString());
     }
 
     return new ServerConfigImpl(Integer.toString(endpoint.getPort()), protocol, path, attributes);

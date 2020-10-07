@@ -55,11 +55,11 @@ import org.eclipse.che.dto.server.DtoFactory;
 public class DevfileEntityProvider
     implements MessageBodyReader<DevfileDto>, MessageBodyWriter<DevfileDto> {
 
-  private DevfileManager devfileManager;
+  private DevfileParser devfileParser;
 
   @Inject
-  public DevfileEntityProvider(DevfileManager devfileManager) {
-    this.devfileManager = devfileManager;
+  public DevfileEntityProvider(DevfileParser devfileParser) {
+    this.devfileParser = devfileParser;
   }
 
   @Override
@@ -81,13 +81,13 @@ public class DevfileEntityProvider
     try {
       if (mediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
         return asDto(
-            devfileManager.parseJson(
+            devfileParser.parseJson(
                 CharStreams.toString(
                     new InputStreamReader(entityStream, getCharsetOrUtf8(mediaType)))));
       } else if (mediaType.isCompatible(MediaType.valueOf("text/yaml"))
           || mediaType.isCompatible(MediaType.valueOf("text/x-yaml"))) {
         return asDto(
-            devfileManager.parseYaml(
+            devfileParser.parseYaml(
                 CharStreams.toString(
                     new InputStreamReader(entityStream, getCharsetOrUtf8(mediaType)))));
       }

@@ -39,11 +39,17 @@ suite(`${stack} test`, async () => {
         prepareEditorForLSTests();
     });
 
-    suite('Validation of workspace build and run', async () => {
+    suite.skip('Installing dependencies', async () => {
         codeExecutionTests.runTask(updateDependenciesTaskName, 120_000);
         codeExecutionTests.closeTerminal(updateDependenciesTaskName);
+    });
+
+    suite.skip('Validation of workspace build', async () => {
         codeExecutionTests.runTask(buildTaskName, 30_000);
         codeExecutionTests.closeTerminal(buildTaskName);
+    });
+
+    suite.skip('Run .NET Core example application', async () => {
         codeExecutionTests.runTaskWithDialogShellAndOpenLink(runTaskName, runTaskNameExpectedString , 30_000);
     });
 
