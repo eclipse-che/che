@@ -30,7 +30,7 @@ pipeline {
                                 build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                         parameters: [
                                                 booleanParam(name: 'cheSingleHost',
-                                                        value: cheSingleHost),
+                                                        value: cheSingleHost.toBoolean()),
 
                                                 string(name: 'cheImageRepo',
                                                         value: 'quay.io/eclipse/che-server'),
@@ -75,7 +75,7 @@ pipeline {
                                 build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                         parameters: [
                                                 booleanParam(name: 'cheSingleHost',
-                                                        value: cheSingleHost),
+                                                        value: cheSingleHost.toBoolean()),
 
                                                 string(name: 'cheImageRepo',
                                                         value: 'quay.io/eclipse/che-server'),
@@ -121,7 +121,7 @@ pipeline {
                                     build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                             parameters: [
                                                     booleanParam(name: 'cheSingleHost',
-                                                        value: cheSingleHost),
+                                                        value: cheSingleHost.toBoolean()),
 
                                                     string(name: 'cheImageRepo',
                                                             value: 'quay.io/eclipse/che-server'),
