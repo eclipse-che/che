@@ -38,7 +38,7 @@ suite(`${stack} test`, async () => {
         prepareEditorForLSTests();
     });
 
-    suite('Configuration of dependencies', async () => {
+    suite.skip('Configuration of dependencies', async () => {
         codeExecutionTests.runTask(depTaskName, 30_000);
     });
 
@@ -49,7 +49,7 @@ suite(`${stack} test`, async () => {
         // commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName); // there is no codenavigation in the php simple stack (no object oriented code)
     });
 
-    suite('Validation of project build', async () => {
+    suite.skip('Validation of project build', async () => {
         codeExecutionTests.runTaskWithDialogShellAndOpenLink(buildTaskName, buildTaskLinkExpectedText, 30_000);
     });
 
