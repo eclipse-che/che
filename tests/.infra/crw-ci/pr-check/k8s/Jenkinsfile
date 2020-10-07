@@ -289,11 +289,6 @@ EOL"""
                             fi
                             done
                     """
-
-                    echo "CheCluster yaml content"
-                    sh """
-                        kubectl get checluster -n eclipse-che -o yaml 
-                    """
                 }
             }
         }
