@@ -33,7 +33,7 @@ suite(`${stack} test`, async () => {
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
     });
 
-    suite('Validation of workspace build and run', async () => {
+    suite.skip('Validation of workspace build and run', async () => {
         codeExecutionTests.runTask(taskName, 120_000);
         codeExecutionTests.closeTerminal(taskName);
     });
@@ -42,7 +42,7 @@ suite(`${stack} test`, async () => {
         commonLsTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
         commonLsTests.errorHighlighting(tabTitle, 'error_text', 11);
         commonLsTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');
-        commonLsTests.codeNavigation(tabTitle, 9, 10, codeNavigationClassName);
+        commonLsTests.codeNavigation(tabTitle, 9, 10, codeNavigationClassName, 30_000); // extended timout to give LS enough time to start
     });
 
     suite ('Stopping and deleting the workspace', async () => {

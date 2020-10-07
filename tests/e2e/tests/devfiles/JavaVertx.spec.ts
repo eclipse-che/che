@@ -33,7 +33,7 @@ suite(`${stack} test`, async () => {
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
     });
 
-    suite('Validation of project build', async () => {
+    suite.skip('Validation of project build', async () => {
         codeExecutionTests.runTask(buildTaskName, 120_000);
         codeExecutionTests.closeTerminal(buildTaskName);
     });
@@ -42,7 +42,7 @@ suite(`${stack} test`, async () => {
         commonLsTests.errorHighlighting(tabTitle, 'error_text;', 20);
         commonLsTests.suggestionInvoking(tabTitle, 19, 31, 'router(Vertx vertx) : Router');
         commonLsTests.autocomplete(tabTitle, 19, 7, 'Router - io.vertx.ext.web');
-        commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName);
+        commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName, 30_000); // extended timout to give LS enough time to start
     });
 
     suite ('Stopping and deleting the workspace', async () => {

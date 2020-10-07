@@ -539,7 +539,7 @@ public class WorkspaceManager {
   private NamespaceResolutionContext buildResolutionContext(WorkspaceImpl workspace) {
     Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
     return new NamespaceResolutionContext(
-        workspace.getId(), currentSubject.getUserId(), currentSubject.getUserName());
+        workspace.getId(), currentSubject.getUserId(), currentSubject.getUserName(), true);
   }
 
   /** Returns first non-null argument or null if both are null. */

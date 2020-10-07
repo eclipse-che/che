@@ -17,14 +17,12 @@ import { WorkspaceNameHandler, Editor, CLASSES } from '../..';
 
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 
-const workspaceSampleName: string = 'php-web-simple';
+const workspaceSampleName: string = 'cpp-hello-world';
 const fileFolderPath: string = `${workspaceSampleName}`;
-const tabTitle: string = 'index.php';
-// const codeNavigationClassName: string = 'RouterImpl.class';
-const depTaskName: string = 'Configure Apache Web Server DocumentRoot';
-const buildTaskName: string = 'Start Apache Web Server';
-const buildTaskLinkExpectedText: string = 'A process is now listening on port 8080.';
-const stack: string = 'PHP Simple';
+const tabTitle: string = 'hello.cpp';
+const buildTaskName: string = 'build';
+const runTaskName: string = 'run';
+const stack: string = 'C/C++';
 
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
@@ -38,19 +36,16 @@ suite(`${stack} test`, async () => {
         prepareEditorForLSTests();
     });
 
-    suite.skip('Configuration of dependencies', async () => {
-        codeExecutionTests.runTask(depTaskName, 30_000);
+    suite.skip('Validation of project build', async () => {
+        codeExecutionTests.runTask(buildTaskName, 30_000);
+        codeExecutionTests.runTask(runTaskName, 30_000);
     });
 
     suite('Language server validation', async () => {
-        commonLsTests.errorHighlighting(tabTitle, `error_text;`, 14);
-        commonLsTests.suggestionInvoking(tabTitle, 14, 26, '$test');
-        commonLsTests.autocomplete(tabTitle, 15, 5, 'phpinfo');
-        // commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName); // there is no codenavigation in the php simple stack (no object oriented code)
-    });
-
-    suite.skip('Validation of project build', async () => {
-        codeExecutionTests.runTaskWithDialogShellAndOpenLink(buildTaskName, buildTaskLinkExpectedText, 30_000);
+        commonLsTests.errorHighlighting(tabTitle, `error_text;`, 12);
+        commonLsTests.suggestionInvoking(tabTitle, 15, 22, 'test');
+        commonLsTests.autocomplete(tabTitle, 15, 9, 'printf');
+        // commonLsTests.codeNavigation(tabTitle, 15, 9, 'stdio.h'); currently not working because of LS not exposing Ctrl + F12 combination
     });
 
     suite ('Stopping and deleting the workspace', async () => {
@@ -70,9 +65,11 @@ suite(`${stack} test`, async () => {
 
 export function prepareEditorForLSTests() {
     test(`Prepare file for LS tests`, async () => {
-        await editor.moveCursorToLineAndChar(tabTitle, 12, 4);
-        await editor.performKeyCombination(tabTitle, '\n$test = " test";');
-        await editor.moveCursorToLineAndChar(tabTitle, 14, 20);
-        await editor.performKeyCombination(tabTitle, ' . $test;\nphpinfo();');
+        await editor.moveCursorToLineAndChar(tabTitle, 6, 1);
+        await editor.performKeyCombination(tabTitle, '#include <cstdio>\n');
+        await editor.moveCursorToLineAndChar(tabTitle, 10, 1);
+        await editor.performKeyCombination(tabTitle, '\nchar const *test = "test";\n');
+        await editor.moveCursorToLineAndChar(tabTitle, 15, 5);
+        await editor.performKeyCombination(tabTitle, 'printf("%s\\n", test);\n');
     });
 }

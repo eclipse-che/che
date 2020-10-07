@@ -36,16 +36,16 @@ suite(`${workspaceStack} test`, async () => {
         projectManager.openFile(fileFolderPath, fileName);
     });
 
-    suite('Package Quarkus application', async () => {
+    suite.skip('Package Quarkus application', async () => {
         codeExecutionHelper.runTask(taskPackage, 180_000);
         codeExecutionHelper.closeTerminal(taskPackage);
     });
 
-    suite.skip('Package Quarkus Native bundle', async () => { // enable again once https://github.com/eclipse/che/issues/17356 is fixed
+    suite.skip('Package Quarkus Native bundle', async () => {
         codeExecutionHelper.runTask(taskPackageNative, 600_000);
         codeExecutionHelper.closeTerminal(taskPackageNative);
     });
-    suite.skip('Start Quarkus Native application', async () => { // enable again once https://github.com/eclipse/che/issues/17356 is fixed
+    suite.skip('Start Quarkus Native application', async () => {
         codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskStartNative, taskExpectedDialogText, 90_000);
     });
 
@@ -53,7 +53,7 @@ suite(`${workspaceStack} test`, async () => {
         commonLsTests.errorHighlighting(fileName, 'error_text;', 7);
         commonLsTests.suggestionInvoking(fileName, 8, 33, 'String');
         commonLsTests.autocomplete(fileName, 8, 33, 'String');
-        commonLsTests.codeNavigation(fileName, 8, 33, 'String.class');
+        commonLsTests.codeNavigation(fileName, 8, 33, 'String.class', 30_000); // extended timout to give LS enough time to start
     });
 
     suite('Stop and remove workspace', async() => {
