@@ -30,7 +30,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.site.CheLoginPage;
 import org.openqa.selenium.By;
@@ -50,8 +49,7 @@ public class OpenShiftLoginPage {
   public OpenShiftLoginPage(
       SeleniumWebDriver seleniumWebDriver,
       SeleniumWebDriverHelper seleniumWebDriverHelper,
-      CheLoginPage cheLoginPage,
-      TestDashboardUrlProvider testDashboardUrlProvider) {
+      CheLoginPage cheLoginPage) {
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.seleniumWebDriver = seleniumWebDriver;
     this.cheLoginPage = cheLoginPage;
