@@ -167,6 +167,16 @@ pipeline {
     }
 
     post {
+        success {
+            script {
+                if (emails != "") {
+                    mail to: emails,
+                            subject: "Jenkins Job $currentBuild.fullDisplayName has passed successfully.",
+                            body: "Build $currentBuild.absoluteUrl has passed successfully."
+                }
+            }
+        }
+    
         failure {
             script {
                 if (emails != "") {

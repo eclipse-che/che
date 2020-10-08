@@ -12,7 +12,7 @@ pipeline {
 
     parameters {
         string(name: 'emails',
-                defaultValue: 'oshmarai@redhat.com',
+                defaultValue: 'dnochevn@redhat.com, oshmarai@redhat.com',
                 description: 'Comma-separated list of emails to send results')
     }
 
@@ -163,6 +163,16 @@ pipeline {
     }
 
     post {
+        success {
+            script {
+                if (emails != "") {
+                    mail to: emails,
+                            subject: "Jenkins Job $currentBuild.fullDisplayName has passed successfully.",
+                            body: "Build $currentBuild.absoluteUrl has passed successfully."
+                }
+            }
+        }
+    
         failure {
             script {
                 if (emails != "") {
