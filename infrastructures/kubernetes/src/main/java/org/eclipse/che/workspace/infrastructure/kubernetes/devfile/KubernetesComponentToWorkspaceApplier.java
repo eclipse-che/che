@@ -240,7 +240,10 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       List<PodData> podsData, ComponentImpl component) throws DevfileException {
     Map<String, MachineConfigImpl> machineConfigs = new HashMap<>();
     for (PodData podData : podsData) {
-      for (Container container : podData.getSpec().getContainers()) {
+      List<Container> containers = new ArrayList<>();
+      containers.addAll(podData.getSpec().getContainers());
+      containers.addAll(podData.getSpec().getInitContainers());
+      for (Container container : containers) {
         String machineName = machineName(podData, container);
 
         MachineConfigImpl config = new MachineConfigImpl();

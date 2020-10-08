@@ -119,7 +119,7 @@ public class KubernetesEnvironmentFactory
     }
 
     if (deployments.size() + pods.size() > 1) {
-      mergePods(pods, deployments, services);
+      mergePods(pods, deployments, services, machines);
     }
 
     if (isAnyIngressPresent) {
@@ -158,7 +158,7 @@ public class KubernetesEnvironmentFactory
    * @throws ValidationException if the specified lists has pods with conflicting configuration
    */
   private void mergePods(
-      Map<String, Pod> pods, Map<String, Deployment> deployments, Map<String, Service> services)
+      Map<String, Pod> pods, Map<String, Deployment> deployments, Map<String, Service> services, Map<String, InternalMachineConfig> machines)
       throws ValidationException {
     List<PodData> podsData =
         Stream.concat(

@@ -93,6 +93,9 @@ public class KubernetesEnvironmentPodsValidator {
         for (Container container : pod.getSpec().getContainers()) {
           missingMachines.remove(Names.machineName(pod, container));
         }
+        for (Container container : pod.getSpec().getInitContainers()) {
+          missingMachines.remove(Names.machineName(pod, container));
+        }
       }
     }
     checkArgument(
