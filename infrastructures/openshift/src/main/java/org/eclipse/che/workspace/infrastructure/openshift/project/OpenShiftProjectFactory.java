@@ -32,6 +32,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.impls.KubernetesNamespaceMetaImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
@@ -67,6 +68,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
       @Named("che.infra.kubernetes.namespace.allow_user_defined")
           boolean allowUserDefinedNamespaces,
       @Named("che.infra.kubernetes.namespace.creation_allowed") boolean namespaceCreationAllowed,
+      @Named("che.infra.kubernetes.namespace.labels") String projectLabels,
       OpenShiftClientFactory clientFactory,
       OpenShiftClientConfigFactory clientConfigFactory,
       OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner,
@@ -82,6 +84,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
         defaultNamespaceName,
         allowUserDefinedNamespaces,
         namespaceCreationAllowed,
+        projectLabels,
         clientFactory,
         userManager,
         preferenceManager,
@@ -180,6 +183,19 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
             e);
       }
     }
+  }
+
+  protected List<String> findLabeledNamespaces(NamespaceResolutionContext resolutionCtx)
+      throws InfrastructureException {
+    return clientFactory
+        .createOC()
+        .projects()
+        .withLabels(evalLabels(resolutionCtx))
+        .list()
+        .getItems()
+        .stream()
+        .map(p -> p.getMetadata().getName())
+        .collect(Collectors.toList());
   }
 
   @Override
