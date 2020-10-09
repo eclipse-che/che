@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.api.workspace.server.hc;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
@@ -39,12 +37,7 @@ class TerminalHttpConnectionServerChecker extends HttpConnectionServerChecker {
   }
 
   @Override
-  boolean isConnectionSuccessful(HttpURLConnection conn) {
-    try {
-      int responseCode = conn.getResponseCode();
-      return responseCode == 404;
-    } catch (IOException e) {
-      return false;
-    }
+  boolean isConnectionSuccessful(int responseCode) {
+    return responseCode == 404;
   }
 }
