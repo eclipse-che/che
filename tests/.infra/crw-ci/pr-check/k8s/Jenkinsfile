@@ -230,6 +230,8 @@ spec:
     cheImage: '${cheImageRepo}'
     cheImageTag: '${mutableCheImageTag}'
     serverExposureStrategy: 'single-host'
+    customCheProperties:
+      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
   k8s:  
     singleHostExposureType: 'gateway'
   auth:
@@ -242,6 +244,8 @@ spec:
   server:
     cheImage: '${cheImageRepo}'
     cheImageTag: '${mutableCheImageTag}'
+    customCheProperties:
+      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
   auth:
     updateAdminPassword: false
 EOL"""
