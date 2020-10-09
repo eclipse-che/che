@@ -96,11 +96,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     this.machineTokenEnvVarProvider = machineTokenEnvVarProvider;
     this.artifactsBrokerImage = artifactsBrokerImage;
     this.metadataBrokerImage = metadataBrokerImage;
-    if (!isNullOrEmpty(pluginRegistryInternalUrl)) {
-      pluginRegistryUrl = pluginRegistryInternalUrl;
-    }
-
-    this.pluginRegistryUrl = pluginRegistryUrl;
+    this.pluginRegistryUrl = isNullOrEmpty(pluginRegistryInternalUrl) ? pluginRegistryUrl : pluginRegistryInternalUrl;
     this.certProvisioner = certProvisioner;
   }
 
