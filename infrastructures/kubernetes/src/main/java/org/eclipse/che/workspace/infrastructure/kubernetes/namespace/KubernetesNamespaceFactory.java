@@ -186,14 +186,20 @@ public class KubernetesNamespaceFactory {
       return;
     }
 
-    //TODO: labeled namespace is also ok
     String defaultNamespace =
         evalPlaceholders(defaultNamespaceName, EnvironmentContext.getCurrent().getSubject(), null);
     if (!namespaceName.equals(defaultNamespace)) {
-      throw new ValidationException(
-          format(
-              "User defined namespaces are not allowed. Only the default namespace '%s' is available.",
-              defaultNamespaceName));
+      try {
+        if (!findLabeledNamespaces(EnvironmentContext.getCurrent().getSubject().getUserName())
+            .contains(namespaceName)) {
+          throw new ValidationException(
+              format(
+                  "User defined namespaces are not allowed. Only the default namespace '%s' is available.",
+                  defaultNamespaceName));
+        }
+      } catch (InfrastructureException e) {
+        throw new ValidationException("Some infrastructure failure caused failed validation.", e);
+      }
     }
   }
 
@@ -492,7 +498,7 @@ public class KubernetesNamespaceFactory {
 
   private Optional<String> findLabeledNamespace(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
-    List<String> labeledNamespace = findLabeledNamespaces(resolutionCtx);
+    List<String> labeledNamespace = findLabeledNamespaces(resolutionCtx.getUserName());
     if (!labeledNamespace.isEmpty()) {
       String foundNamespace = labeledNamespace.stream().findFirst().get();
       if (labeledNamespace.size() > 1) {
@@ -551,12 +557,11 @@ public class KubernetesNamespaceFactory {
     return namespace;
   }
 
-  protected List<String> findLabeledNamespaces(NamespaceResolutionContext resolutionCtx)
-      throws InfrastructureException {
+  protected List<String> findLabeledNamespaces(String username) throws InfrastructureException {
     return clientFactory
         .create()
         .namespaces()
-        .withLabels(evalLabels(resolutionCtx))
+        .withLabels(evalLabels(username))
         .list()
         .getItems()
         .stream()
@@ -564,12 +569,12 @@ public class KubernetesNamespaceFactory {
         .collect(Collectors.toList());
   }
 
-  protected Map<String, String> evalLabels(NamespaceResolutionContext resolutionCtx) {
+  protected Map<String, String> evalLabels(String username) {
     Map<String, String> evaluatedLabels = new HashMap<>();
     for (String labelName : namespaceLabels.keySet()) {
       String labelValue = namespaceLabels.get(labelName);
       if (labelValue.contains("%s")) {
-        labelValue = String.format(labelValue, resolutionCtx.getUserName());
+        labelValue = String.format(labelValue, username);
       }
       evaluatedLabels.put(labelName, labelValue);
     }
