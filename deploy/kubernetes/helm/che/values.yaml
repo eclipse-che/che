@@ -17,7 +17,6 @@ cheWorkspaceHttpProxy: ""
 cheWorkspaceHttpsProxy: ""
 cheWorkspaceNoProxy: ""
 cheImage: quay.io/eclipse/che-server:nightly
-cheDashboardImage: quay.io/eclipse/che-dashboard:next
 cheImagePullPolicy: Always
 cheKeycloakRealm: "che"
 cheKeycloakClientId: "che-public"
@@ -110,6 +109,14 @@ che:
 #    pluginRegistryUrl: "https://che-plugin-registry.openshift.io/v3"
   disableProbes: false
   logLevel: "INFO"
+
+dashboard:
+  image: quay.io/eclipse/che-dashboard:next
+  imagePullPolicy: "Always"
+  memoryRequest: 16Mi
+  memoryLimit: 256Mi
+  cpuRequest: 50m
+  cpuLimit: 500m
 
 cheDevfileRegistry:
   deploy: true

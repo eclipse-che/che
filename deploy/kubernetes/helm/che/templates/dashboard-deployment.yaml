@@ -31,16 +31,18 @@ spec:
     spec:
       containers:
       - name: che-dashboard
-        image: {{ .Values.cheDashboardImage }}
-        imagePullPolicy: {{ .Values.cheImagePullPolicy }}
+        image: {{ .Values.dashboard.image }}
+        imagePullPolicy: {{ .Values.dashboard.imagePullPolicy }}
         ports:
           - containerPort: 8080
             name: http
         resources:
           limits:
-            memory: 256Mi
+            memory: {{ .Values.dashboard.memoryLimit }}
+            cpu: {{ .Values.dashboard.cpuLimit }}
           requests:
-            memory: 128Mi
+            memory: {{ .Values.dashboard.memoryRequest }}
+            cpu: {{ .Values.dashboard.cpuRequest }}
         livenessProbe:
           httpGet:
             path: /
