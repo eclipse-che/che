@@ -17,6 +17,7 @@ pipeline {
 
         DEVFILE_PATH = "${WORKSPACE}/test-workspace-devfile.yaml"
         CUSTOM_RESOURCE_PATCH_FILE = "${WORKSPACE}/custom-resource-patch.yaml"
+        KEYCLOAK_BASE_URL = ""
 
         SUCCESS_THRESHOLD = 5
 
@@ -27,6 +28,10 @@ pipeline {
     }
 
     parameters {
+        booleanParam(name: 'cheSingleHost',
+               defaultValue: false,
+               description: 'Configuration Che server strategy')
+
         string(name: 'cheImageRepo',
                 defaultValue: "maxura/che-server",
                 description: 'Repo of Che server image')
@@ -218,14 +223,33 @@ pipeline {
             steps {
                 script {
                     echo "Create custom-resource patch file"
-                    sh """cat > $CUSTOM_RESOURCE_PATCH_FILE <<EOL
+                    if (cheSingleHost.toBoolean() == true) {
+                        sh """cat > $CUSTOM_RESOURCE_PATCH_FILE <<EOL
 spec:
   server:
     cheImage: '${cheImageRepo}'
     cheImageTag: '${mutableCheImageTag}'
+    serverExposureStrategy: 'single-host'
+    customCheProperties:
+      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
+  k8s:  
+    singleHostExposureType: 'gateway'
   auth:
     updateAdminPassword: false
 EOL"""
+
+                    } else {
+                        sh """cat > $CUSTOM_RESOURCE_PATCH_FILE <<EOL
+spec:
+  server:
+    cheImage: '${cheImageRepo}'
+    cheImageTag: '${mutableCheImageTag}'
+    customCheProperties:
+      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
+  auth:
+    updateAdminPassword: false
+EOL"""
+                    }
 
                     echo "Install Che"
                     sh """
@@ -287,10 +311,21 @@ EOL"""
                         sh "cp ${WORKSPACE}/tests/e2e/files/happy-path/happy-path-workspace.yaml $DEVFILE_PATH"
                     }
 
-                    sh """   
-                        KEYCLOAK_BASE_URL="https://\$(kubectl get ingress/keycloak --namespace=eclipse-che -o jsonpath='{.spec.rules[0].host}')/auth"
-    
-                        USER_ACCESS_TOKEN=\$(curl -k -X POST \$KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token \\
+                    if (cheSingleHost.toBoolean() == true) {
+                        KEYCLOAK_BASE_URL = sh(
+                            script: "kubectl get ingress/che --namespace=eclipse-che -o jsonpath='{.spec.rules[0].host}'",
+                            returnStdout: true
+                        ).trim()
+
+                    } else {
+                        KEYCLOAK_BASE_URL = sh(
+                            script: "kubectl get ingress/keycloak --namespace=eclipse-che -o jsonpath='{.spec.rules[0].host}'",
+                            returnStdout: true
+                        ).trim()
+                    }
+
+                    sh """       
+                        USER_ACCESS_TOKEN=\$(curl -k -X POST https://${KEYCLOAK_BASE_URL}/auth/realms/che/protocol/openid-connect/token \\
                            -H "Content-Type: application/x-www-form-urlencoded" \\
                            -d "username=admin" \\
                            -d "password=admin" \\
