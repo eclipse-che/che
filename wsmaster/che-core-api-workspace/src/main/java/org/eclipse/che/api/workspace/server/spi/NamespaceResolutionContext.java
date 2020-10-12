@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.server.spi;
 
 import java.util.Objects;
+import org.eclipse.che.commons.subject.Subject;
 
 /**
  * Holds information needed for resolving placeholders in the namespace name. The {@code
@@ -26,6 +27,10 @@ public class NamespaceResolutionContext {
   private final String userId;
   private final String userName;
   private final boolean persistAfterCreate;
+
+  public NamespaceResolutionContext(Subject subject) {
+    this(null, subject.getUserId(), subject.getUserName(), false);
+  }
 
   public NamespaceResolutionContext(String workspaceId, String userId, String userName) {
     this(workspaceId, userId, userName, false);

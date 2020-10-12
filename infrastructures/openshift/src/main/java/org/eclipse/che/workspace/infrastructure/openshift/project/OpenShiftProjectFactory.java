@@ -32,6 +32,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.impls.KubernetesNamespaceMetaImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
@@ -184,15 +185,16 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
     }
   }
 
-  protected List<String> findLabeledNamespaces(String username) throws InfrastructureException {
+  protected List<KubernetesNamespaceMeta> findLabeledNamespaces(
+      NamespaceResolutionContext namespaceCtx) throws InfrastructureException {
     return clientFactory
         .createOC()
         .projects()
-        .withLabels(evalLabels(username))
+        .withLabels(evaluateLabels(namespaceCtx))
         .list()
         .getItems()
         .stream()
-        .map(p -> p.getMetadata().getName())
+        .map(this::asNamespaceMeta)
         .collect(Collectors.toList());
   }
 
