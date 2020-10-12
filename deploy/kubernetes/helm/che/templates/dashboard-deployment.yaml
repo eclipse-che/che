@@ -48,12 +48,14 @@ spec:
             path: /dashboard/
             port: 8080
             scheme: HTTP
-          initialDelaySeconds: 120
-          timeoutSeconds: 10
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 3
         readinessProbe:
           httpGet:
             path: /dashboard/
             port: 8080
             scheme: HTTP
-          initialDelaySeconds: 15
-          timeoutSeconds: 60
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          timeoutSeconds: 3
