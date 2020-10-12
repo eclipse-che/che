@@ -15,24 +15,18 @@ metadata:
   labels:
     app: che
     component: che-gateway-config
-  name: che-gateway-route-che
+  name: che-gateway-route-dashboard
 data:
-  che.yml: |
+  dashboard.yml: |
     http:
       routers:
-        che:
-          rule: "PathPrefix(`/`)"
-          service: che
-          priority: 1
-        # The path rule for Che Dashboard next hosted by Che Server. It should be removed after https://github.com/eclipse/che/issues/17647 is fixed
-        dashboard-next:
-          rule: "PathPrefix(`/dashboard/next`)"
-          service: che
-          priority: 20
+        che-dashboard:
+          rule: "PathPrefix(`/dashboard/`)"
+          service: che-dashboard
+          priority: 10
       services:
-        che:
+        che-dashboard:
           loadBalancer:
             servers:
-            - url: 'http://che-host:8080'
-
+            - url: 'http://che-dashboard:8080'
 {{- end }}

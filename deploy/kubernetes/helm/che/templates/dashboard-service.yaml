@@ -7,5 +7,19 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-global:
-  multiuser: true
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: che
+    component: che-dashboard
+  name: che-dashboard
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: che
+    component: che-dashboard
