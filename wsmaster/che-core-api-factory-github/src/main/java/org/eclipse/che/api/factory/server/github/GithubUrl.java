@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.api.factory.server.github;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
+
 import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,17 +31,14 @@ import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
  */
 public class GithubUrl implements RemoteFactoryUrl {
 
-  /** Master branch is the default. */
-  private static final String DEFAULT_BRANCH_NAME = "master";
-
   /** Username part of github URL */
   private String username;
 
   /** Repository part of the URL. */
   private String repository;
 
-  /** Branch name (by default if it is omitted it is "master" branch) */
-  private String branch = DEFAULT_BRANCH_NAME;
+  /** Branch name */
+  private String branch;
 
   /** Subfolder if any */
   private String subfolder;
@@ -184,7 +183,7 @@ public class GithubUrl implements RemoteFactoryUrl {
         .add("https://raw.githubusercontent.com")
         .add(username)
         .add(repository)
-        .add(branch)
+        .add(firstNonNull(branch, "HEAD"))
         .add(fileName)
         .toString();
   }

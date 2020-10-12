@@ -63,10 +63,10 @@ public class GithubUrlTest {
     Iterator<DevfileLocation> iterator = githubUrl.devfileFileLocations().iterator();
     assertEquals(
         iterator.next().location(),
-        "https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml");
+        "https://raw.githubusercontent.com/eclipse/che/HEAD/devfile.yaml");
 
     assertEquals(
-        iterator.next().location(), "https://raw.githubusercontent.com/eclipse/che/master/foo.bar");
+        iterator.next().location(), "https://raw.githubusercontent.com/eclipse/che/HEAD/foo.bar");
   }
 
   /** Check when there is .factory.json file in the repository */
@@ -74,7 +74,7 @@ public class GithubUrlTest {
   public void checkFactoryJsonFileLocation() {
     assertEquals(
         githubUrl.factoryFileLocation(),
-        "https://raw.githubusercontent.com/eclipse/che/master/.factory.json");
+        "https://raw.githubusercontent.com/eclipse/che/HEAD/.factory.json");
   }
 
   /** Check the original repository */
