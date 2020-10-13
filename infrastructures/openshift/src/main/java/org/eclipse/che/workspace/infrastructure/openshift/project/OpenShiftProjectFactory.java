@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.openshift.project;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -187,15 +188,30 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
 
   protected List<KubernetesNamespaceMeta> findLabeledNamespaces(
       NamespaceResolutionContext namespaceCtx) throws InfrastructureException {
-    return clientFactory
-        .createOC()
-        .projects()
-        .withLabels(evaluateLabels(namespaceCtx))
-        .list()
-        .getItems()
-        .stream()
-        .map(this::asNamespaceMeta)
-        .collect(Collectors.toList());
+    Map<String, String> labels = evaluateLabels(namespaceCtx);
+    try {
+      return clientFactory
+          .createOC()
+          .projects()
+          .withLabels(labels)
+          .list()
+          .getItems()
+          .stream()
+          .map(this::asNamespaceMeta)
+          .collect(Collectors.toList());
+    } catch (KubernetesClientException kce) {
+      if (kce.getCode() == 403) {
+        LOG.warn(
+            "Trying to fetch projects with labels '{}', but failed for lack of permissions. Cause: '{}'",
+            labels,
+            kce.getMessage());
+        return emptyList();
+      } else {
+        throw new InfrastructureException(
+            "Error occurred when tried to list all available projects. Cause: " + kce.getMessage(),
+            kce);
+      }
+    }
   }
 
   @Override
@@ -210,8 +226,16 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
           .map(this::asNamespaceMeta)
           .collect(Collectors.toList());
     } catch (KubernetesClientException e) {
-      throw new InfrastructureException(
-          "Error occurred when tried to list all available projects. Cause: " + e.getMessage(), e);
+      if (e.getCode() == 403) {
+        LOG.warn(
+            "Trying to fetch all namespaces, but failed for lack of permissions. Cause: {}",
+            e.getMessage());
+        return emptyList();
+      } else {
+        throw new InfrastructureException(
+            "Error occurred when tried to list all available projects. Cause: " + e.getMessage(),
+            e);
+      }
     }
   }
 

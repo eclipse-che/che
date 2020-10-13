@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
@@ -28,6 +29,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -207,7 +209,7 @@ public class KubernetesNamespaceFactory {
     }
 
     // if user defined namespaces are allowed - fetch all available
-    List<KubernetesNamespaceMeta> namespaces = fetchNamespaces();
+    List<KubernetesNamespaceMeta> namespaces = new ArrayList<>(fetchNamespaces());
 
     provisionDefaultNamespace(namespaces);
 
@@ -296,9 +298,16 @@ public class KubernetesNamespaceFactory {
           .map(this::asNamespaceMeta)
           .collect(Collectors.toList());
     } catch (KubernetesClientException e) {
-      throw new InfrastructureException(
-          "Error occurred when tried to list all available namespaces. Cause: " + e.getMessage(),
-          e);
+      if (e.getCode() == 403) {
+        LOG.warn(
+            "Trying to fetch all namespaces, but failed for lack of permissions. Cause: {}",
+            e.getMessage());
+        return emptyList();
+      } else {
+        throw new InfrastructureException(
+            "Error occurred when tried to list all available namespaces. Cause: " + e.getMessage(),
+            e);
+      }
     }
   }
 
@@ -553,15 +562,31 @@ public class KubernetesNamespaceFactory {
 
   protected List<KubernetesNamespaceMeta> findLabeledNamespaces(
       NamespaceResolutionContext namespaceCtx) throws InfrastructureException {
-    return clientFactory
-        .create()
-        .namespaces()
-        .withLabels(evaluateLabels(namespaceCtx))
-        .list()
-        .getItems()
-        .stream()
-        .map(this::asNamespaceMeta)
-        .collect(Collectors.toList());
+    Map<String, String> labels = evaluateLabels(namespaceCtx);
+    try {
+      return clientFactory
+          .create()
+          .namespaces()
+          .withLabels(labels)
+          .list()
+          .getItems()
+          .stream()
+          .map(this::asNamespaceMeta)
+          .collect(Collectors.toList());
+    } catch (KubernetesClientException kce) {
+      if (kce.getCode() == 403) {
+        LOG.warn(
+            "Trying to fetch namespaces with labels '{}', but failed for lack of permissions. Cause: '{}'",
+            labels,
+            kce.getMessage());
+        return emptyList();
+      } else {
+        throw new InfrastructureException(
+            "Error occurred when tried to list all available namespaces. Cause: "
+                + kce.getMessage(),
+            kce);
+      }
+    }
   }
 
   protected Map<String, String> evaluateLabels(NamespaceResolutionContext namespaceCtx) {
