@@ -88,7 +88,7 @@
         <javax.validation.version>1.1.0.Final</javax.validation.version>
         <javax.websocket.api.version>1.1</javax.websocket.api.version>
         <javax.ws.rs.version>2.0</javax.ws.rs.version>
-        <junit.version>4.11</junit.version>
+        <junit.version>4.13.1</junit.version>
         <logstash.logback.encoder.version>4.11</logstash.logback.encoder.version>
         <mysql.connector.version>8.0.16</mysql.connector.version>
         <net.java.dev.jna.version>4.1.0</net.java.dev.jna.version>
