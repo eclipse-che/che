@@ -14,6 +14,10 @@ pipeline {
         string(name: 'emails',
                 defaultValue: 'dnochevn@redhat.com,kfoniok@redhat.com',
                 description: 'Comma-separated list of emails to send results')
+
+        booleanParam(name: 'cheSingleHost',
+                defaultValue: false,
+                description: 'Configuration Che server strategy')        
     }
 
     stages {
@@ -25,6 +29,9 @@ pipeline {
                             retry(2) {
                                 build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                         parameters: [
+                                                booleanParam(name: 'cheSingleHost',
+                                                        value: cheSingleHost.toBoolean()),
+
                                                 string(name: 'cheImageRepo',
                                                         value: 'quay.io/eclipse/che-server'),
 
@@ -67,6 +74,9 @@ pipeline {
                             retry(2) {
                                 build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                         parameters: [
+                                                booleanParam(name: 'cheSingleHost',
+                                                        value: cheSingleHost.toBoolean()),
+
                                                 string(name: 'cheImageRepo',
                                                         value: 'quay.io/eclipse/che-server'),
 
@@ -110,6 +120,9 @@ pipeline {
                                 withCredentials([string(credentialsId: 'e45af3e6-8061-4d02-b187-b1c3bb133d3a', variable: 'github_oauth_token')]) {
                                     build job: 'basic-MultiUser-Che-check-e2e-tests-against-k8s',
                                             parameters: [
+                                                    booleanParam(name: 'cheSingleHost',
+                                                        value: cheSingleHost.toBoolean()),
+
                                                     string(name: 'cheImageRepo',
                                                             value: 'quay.io/eclipse/che-server'),
 
@@ -154,6 +167,16 @@ pipeline {
     }
 
     post {
+        success {
+            script {
+                if (emails != "") {
+                    mail to: emails,
+                            subject: "Jenkins Job $currentBuild.fullDisplayName has passed successfully.",
+                            body: "Build $currentBuild.absoluteUrl has passed successfully."
+                }
+            }
+        }
+    
         failure {
             script {
                 if (emails != "") {

@@ -151,7 +151,7 @@ public class GithubFactoryParametersResolverTest {
     assertEquals(factory, computedFactory);
     SourceDto source = factory.getDevfile().getProjects().get(0).getSource();
     assertEquals(source.getLocation(), githubUrl + ".git");
-    assertEquals(source.getBranch(), "master");
+    assertEquals(source.getBranch(), null);
   }
 
   @Test
@@ -180,7 +180,7 @@ public class GithubFactoryParametersResolverTest {
     verify(urlFactoryBuilder, never()).buildDefaultDevfile(eq("che"));
     assertEquals(
         factoryUrlArgumentCaptor.getValue().devfileFileLocations().iterator().next().location(),
-        "https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml");
+        "https://raw.githubusercontent.com/eclipse/che/HEAD/devfile.yaml");
   }
 
   @Test
@@ -248,7 +248,7 @@ public class GithubFactoryParametersResolverTest {
     verify(urlFactoryBuilder, never()).buildDefaultDevfile(eq("che"));
     assertEquals(
         factoryUrlArgumentCaptor.getValue().factoryFileLocation(),
-        "https://raw.githubusercontent.com/eclipse/che/master/.factory.json");
+        "https://raw.githubusercontent.com/eclipse/che/HEAD/.factory.json");
 
     assertEquals(factoryUrlArgumentCaptor.getValue().getFactoryFilename(), ".factory.json");
   }

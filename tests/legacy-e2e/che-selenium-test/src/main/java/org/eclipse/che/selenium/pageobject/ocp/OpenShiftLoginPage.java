@@ -74,7 +74,7 @@ public class OpenShiftLoginPage {
   protected interface Locators {
     String USERNAME_INPUT_NAME = "username";
     String PASSWORD_INPUT_NAME = "password";
-    String LOGIN_BUTTON_XPATH = "//button[contains(text(),'Log In')]";
+    String LOGIN_BUTTON_XPATH = "//div/*[contains(text(),'Log ')]";
     String SUBMIT_BUTTON_XPATH = "//input[@value='Submit']";
     String FIRST_NAME_NAME = "firstName";
     String LAST_NAME_NAME = "lastName";
@@ -178,11 +178,11 @@ public class OpenShiftLoginPage {
   }
 
   public void login() {
-    if (isOpened()) {
-      if (isIdentityProviderLinkVisible(IDENTITY_PROVIDER_NAME)) {
-        clickOnIdentityProviderLink(IDENTITY_PROVIDER_NAME);
-      }
+    if (isIdentityProviderLinkVisible(IDENTITY_PROVIDER_NAME)) {
+      clickOnIdentityProviderLink(IDENTITY_PROVIDER_NAME);
+    }
 
+    if (isOpened()) {
       login(openShiftUsername, openShiftPassword);
 
       if (isApproveButtonVisible()) {
