@@ -43,10 +43,14 @@ import io.fabric8.kubernetes.api.model.rbac.RoleBindingList;
 import io.fabric8.kubernetes.api.model.rbac.RoleList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watch;
+import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +93,7 @@ public class KubernetesNamespaceFactoryTest {
 
   private static final String USER_ID = "userid";
   private static final String USER_NAME = "username";
-  private static final String NAMESPACE_LABELS = "for-user=%s";
+  private static final String NAMESPACE_LABELS = "che-username=<username>";
 
   @Mock private KubernetesSharedPool pool;
   @Mock private KubernetesClientFactory clientFactory;
@@ -108,6 +112,12 @@ public class KubernetesNamespaceFactoryTest {
 
   private KubernetesNamespaceFactory namespaceFactory;
 
+  @Mock
+  private FilterWatchListDeletable<Namespace, NamespaceList, Boolean, Watch, Watcher<Namespace>>
+      namespaceListResource;
+
+  @Mock private NamespaceList namespaceList;
+
   @BeforeMethod
   public void setUp() throws Exception {
     serverMock = new KubernetesServer(true, true);
@@ -115,8 +125,13 @@ public class KubernetesNamespaceFactoryTest {
     k8sClient = spy(serverMock.getClient());
     lenient().when(clientFactory.create()).thenReturn(k8sClient);
     lenient().when(k8sClient.namespaces()).thenReturn(namespaceOperation);
+
     lenient().when(namespaceOperation.withName(any())).thenReturn(namespaceResource);
     lenient().when(namespaceResource.get()).thenReturn(mock(Namespace.class));
+
+    lenient().when(namespaceOperation.withLabels(any())).thenReturn(namespaceListResource);
+    lenient().when(namespaceListResource.list()).thenReturn(namespaceList);
+    lenient().when(namespaceList.getItems()).thenReturn(Collections.emptyList());
 
     lenient()
         .when(userManager.getById(USER_ID))
