@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
@@ -34,6 +35,9 @@ import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watch;
+import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.api.model.DoneableProject;
@@ -99,6 +103,12 @@ public class OpenShiftProjectFactoryTest {
 
   private OpenShiftProjectFactory projectFactory;
 
+  @Mock
+  private FilterWatchListDeletable<Project, ProjectList, Boolean, Watch, Watcher<Project>>
+      projectListResource;
+
+  @Mock private ProjectList projectList;
+
   @BeforeMethod
   public void setUp() throws Exception {
     lenient().when(clientFactory.createOC()).thenReturn(osClient);
@@ -110,6 +120,10 @@ public class OpenShiftProjectFactoryTest {
 
     lenient().when(projectOperation.withName(any())).thenReturn(projectResource);
     lenient().when(projectResource.get()).thenReturn(mock(Project.class));
+
+    lenient().when(projectOperation.withLabels(any())).thenReturn(projectListResource);
+    lenient().when(projectListResource.list()).thenReturn(projectList);
+    lenient().when(projectList.getItems()).thenReturn(emptyList());
 
     lenient()
         .when(userManager.getById(USER_ID))
