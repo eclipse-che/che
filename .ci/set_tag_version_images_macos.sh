@@ -20,5 +20,6 @@ sed -i '' "s/che-devfile-registry:nightly/che-devfile-registry:$1/g" ../deploy/k
 sed -i '' "s/che-postgres:nightly/che-postgres:$1/g" ../deploy/kubernetes/helm/che/custom-charts/che-postgres/values.yaml
 sed -i '' "s/che-keycloak:nightly/che-keycloak:$1/g" ../deploy/kubernetes/helm/che/custom-charts/che-keycloak/values.yaml
 sed -i '' "s/eclipse\/che-server:nightly/eclipse\/che-server:$1/g" ../deploy/kubernetes/helm/che/values.yaml
+sed -i '' "s/eclipse\/che-dashboard:next/eclipse\/che-dashboard:$1/g" ../deploy/kubernetes/helm/che/values.yaml
 
 
