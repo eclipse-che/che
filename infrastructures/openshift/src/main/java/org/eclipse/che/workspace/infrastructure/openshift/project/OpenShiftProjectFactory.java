@@ -188,7 +188,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
 
   protected List<KubernetesNamespaceMeta> findLabeledNamespaces(
       NamespaceResolutionContext namespaceCtx) throws InfrastructureException {
-    Map<String, String> labels = evaluateLabels(namespaceCtx);
+    Map<String, String> labels = evaluateLabelsPlaceholders(namespaceCtx);
     try {
       return clientFactory
           .createOC()

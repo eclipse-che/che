@@ -597,7 +597,7 @@ public class KubernetesNamespaceFactory {
    */
   protected List<KubernetesNamespaceMeta> findLabeledNamespaces(
       NamespaceResolutionContext namespaceCtx) throws InfrastructureException {
-    Map<String, String> labels = evaluateLabels(namespaceCtx);
+    Map<String, String> labels = evaluateLabelsPlaceholders(namespaceCtx);
     try {
       return clientFactory
           .create()
@@ -630,7 +630,8 @@ public class KubernetesNamespaceFactory {
    *
    * @return evaluated labels
    */
-  protected Map<String, String> evaluateLabels(NamespaceResolutionContext namespaceCtx) {
+  protected Map<String, String> evaluateLabelsPlaceholders(
+      NamespaceResolutionContext namespaceCtx) {
     Map<String, String> evaluatedLabels = new HashMap<>();
     for (String labelName : namespaceLabels.keySet()) {
       String evaluatedLabelValue =
