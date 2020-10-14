@@ -145,11 +145,11 @@ export class Terminal {
                 return true;
             }
             if (terminalClass.includes('fa-times-circle')) { // css for failed icon
-                Logger.error('The error occured when waiting for task "' + taskName + '" to succeed.');
-                throw new Error('The error occured when waiting for task "' + taskName + '" to succeed.');
+                Logger.error('Task "' + taskName + '" failed.');
+                throw new Error('Task "' + taskName + '" failed.');
             }
             return false;
-        }, timeout);
+        }, timeout, "Timed out waiting for task " + taskName + " to succeed.");
     }
 
     private getTerminalTabCssLocator(tabTitle: string): string {
