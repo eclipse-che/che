@@ -475,8 +475,16 @@ public class KubernetesNamespaceFactory {
   /**
    * Evaluates namespace according to the specified context.
    *
-   * <p>Kubernetes infrastructure use checks is evaluated legacy namespace exists, if it does - use
-   * it. Otherwise evaluated new default namespace name;
+   * <p>First we try to find namespace with labels set in `che.infra.kubernetes.namespace.labels`
+   * property. If any found, we take the first one and use it. See: {@link
+   * KubernetesNamespaceFactory#findFirstLabeledNamespace(NamespaceResolutionContext)}
+   *
+   * <p>Then we try to find namespace stored in persisted user's preferences and use it if it is
+   * found. See: {@link KubernetesNamespaceFactory#findStoredNamespace(NamespaceResolutionContext)}
+   *
+   * <p>As a last option, we construct namespace name from `che.infra.kubernetes.namespace.default`
+   * property. See: {@link
+   * KubernetesNamespaceFactory#evalDefaultNamespace(NamespaceResolutionContext)}
    *
    * @param resolutionCtx context for namespace evaluation
    * @return evaluated namespace name
@@ -491,6 +499,11 @@ public class KubernetesNamespaceFactory {
         .orElse(evalDefaultNamespace(resolutionCtx));
   }
 
+  /**
+   * Finds first namespace matches labels set by `che.infra.kubernetes.namespace.labels` property.
+   *
+   * @return first found labeled namespace if such namespace exists
+   */
   private Optional<String> findFirstLabeledNamespace(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
     List<KubernetesNamespaceMeta> labeledNamespaces = findLabeledNamespaces(resolutionCtx);
@@ -517,6 +530,11 @@ public class KubernetesNamespaceFactory {
     }
   }
 
+  /**
+   * Finds namespace name stored in User's preferences and ensures it is still valid.
+   *
+   * @return user's stored namespace if exists
+   */
   private Optional<String> findStoredNamespace(NamespaceResolutionContext resolutionCtx) {
     Optional<Pair<String, String>> storedNamespace = getPreferencesNamespaceName(resolutionCtx);
     if (storedNamespace.isPresent() && isStoredTemplateValid(storedNamespace.get().second)) {
@@ -526,6 +544,12 @@ public class KubernetesNamespaceFactory {
     }
   }
 
+  /**
+   * Constructs the namespace name from `che.infra.kubernetes.namespace.default` property. Ensures
+   * that all placeholders are evaluated and final namespace name is in valid format.
+   *
+   * @return ready-to-use namespace name
+   */
   private String evalDefaultNamespace(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
     String namespace = evalPlaceholders(defaultNamespaceName, resolutionCtx);
@@ -560,6 +584,17 @@ public class KubernetesNamespaceFactory {
     return namespace;
   }
 
+  /**
+   * Finds all namespaces that matches the labels configured in
+   * `che.infra.kubernetes.namespace.labels` property. Makes sure that placeholder in the property
+   * are correctly evaluated.
+   *
+   * <p>If used ServiceAccount does not have permissions to list the namespaces, returns the empty
+   * list.
+   *
+   * @return namespaces that matches the configured labels
+   * @throws InfrastructureException in case of any Kubernetes request failure
+   */
   protected List<KubernetesNamespaceMeta> findLabeledNamespaces(
       NamespaceResolutionContext namespaceCtx) throws InfrastructureException {
     Map<String, String> labels = evaluateLabels(namespaceCtx);
@@ -589,6 +624,12 @@ public class KubernetesNamespaceFactory {
     }
   }
 
+  /**
+   * Evaluate placeholder in `che.infra.kubernetes.namespace.labels` property with given {@link
+   * NamespaceResolutionContext}.
+   *
+   * @return evaluated labels
+   */
   protected Map<String, String> evaluateLabels(NamespaceResolutionContext namespaceCtx) {
     Map<String, String> evaluatedLabels = new HashMap<>();
     for (String labelName : namespaceLabels.keySet()) {
