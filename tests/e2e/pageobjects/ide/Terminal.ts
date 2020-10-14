@@ -134,6 +134,27 @@ export class Terminal {
         }, timeout);
     }
 
+    public async waitIconSuccess(taskName: string, timeout: number) {
+        const startTime = new Date().getTime();
+        const terminalTabLocator: By = By.css(`${this.getTerminalTabCssLocator(taskName)} div.p-TabBar-tabIcon`);
+        await this.driverHelper.waitVisibility(terminalTabLocator, TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT);
+        let terminalClass = await this.driverHelper.waitAndGetElementAttribute(terminalTabLocator, 'class');
+
+        while ( !terminalClass.includes('fa-check') ) { // css for tick icon
+            if (terminalClass.includes('fa-times-circle')) { // css for failed icon
+                Logger.error('The error occured when waiting for task "' + taskName + '" to succeed.');
+                throw new Error('The error occured when waiting for task "' + taskName + '" to succeed.');
+            }
+            let endtime = new Date().getTime();
+            if ( endtime - startTime >= timeout) {
+                Logger.error('The error occured when waiting for task "' + taskName + '" to succeed.');
+                throw new error.TimeoutError('The error occured when waiting for task "' + taskName + '" to succeed.');
+            }
+            this.driverHelper.sleep(1_000);
+            terminalClass = await this.driverHelper.waitAndGetElementAttribute(terminalTabLocator, 'class');
+        }
+    }
+
     private getTerminalTabCssLocator(tabTitle: string): string {
         return `li[title='${tabTitle}']`;
     }

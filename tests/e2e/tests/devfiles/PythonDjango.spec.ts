@@ -30,17 +30,17 @@ suite(`${workspaceStack} test`, async () => {
         projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
-    suite.skip('Install dependencies', async () => {
+    suite('Install dependencies', async () => {
         codeExecutionHelper.runTask(taskInstallDependencies, 60_000);
         codeExecutionHelper.closeTerminal(taskInstallDependencies);
     });
 
-    suite.skip('Migrate Django application project', async () => {
+    suite('Migrate Django application project', async () => {
         codeExecutionHelper.runTask(taskMigrate, 30_000);
         codeExecutionHelper.closeTerminal(taskMigrate);
     });
 
-    suite.skip('Run django server', async () => {
+    suite('Run django server', async () => {
         codeExecutionHelper.runTaskWithDialogShellDjangoWorkaround(taskRunServer, taskExpectedDialogText, taskCustomUrlSubpath, 30_000);
     });
 

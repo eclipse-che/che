@@ -36,16 +36,16 @@ suite(`${workspaceStack} test`, async () => {
         projectManager.openFile(fileFolderPath, fileName);
     });
 
-    suite.skip('Package Quarkus application', async () => {
+    suite('Package Quarkus application', async () => {
         codeExecutionHelper.runTask(taskPackage, 180_000);
         codeExecutionHelper.closeTerminal(taskPackage);
     });
 
-    suite.skip('Package Quarkus Native bundle', async () => {
+    suite('Package Quarkus Native bundle', async () => {
         codeExecutionHelper.runTask(taskPackageNative, 600_000);
         codeExecutionHelper.closeTerminal(taskPackageNative);
     });
-    suite.skip('Start Quarkus Native application', async () => {
+    suite('Start Quarkus Native application', async () => {
         codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskStartNative, taskExpectedDialogText, 90_000);
     });
 

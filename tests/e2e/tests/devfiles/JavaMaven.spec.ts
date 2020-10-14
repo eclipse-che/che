@@ -33,7 +33,7 @@ suite(`${stack} test`, async () => {
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
     });
 
-    suite.skip('Validation of workspace build and run', async () => {
+    suite('Validation of workspace build and run', async () => {
         codeExecutionTests.runTask(taskName, 120_000);
         codeExecutionTests.closeTerminal(taskName);
     });
