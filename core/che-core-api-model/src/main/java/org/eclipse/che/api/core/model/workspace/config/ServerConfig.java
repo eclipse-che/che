@@ -227,6 +227,18 @@ public interface ServerConfig {
     }
   }
 
+  static boolean isRequireSubdomain(Map<String, String> attributes) {
+    return AttributesEvaluator.booleanAttr(attributes, REQUIRE_SUBDOMAIN, false);
+  }
+
+  static void setRequireSubdomain(Map<String, String> attributes, boolean value) {
+    if (value) {
+      attributes.put(REQUIRE_SUBDOMAIN, Boolean.TRUE.toString());
+    } else {
+      attributes.remove(REQUIRE_SUBDOMAIN);
+    }
+  }
+
   /**
    * Finds the unsecured paths configuration in the provided attributes.s
    *
@@ -278,6 +290,10 @@ public interface ServerConfig {
   /** @see #isDiscoverable(Map) */
   default boolean isDiscoverable() {
     return isDiscoverable(getAttributes());
+  }
+
+  default boolean isRequireSubdomain() {
+    return isRequireSubdomain(getAttributes());
   }
 }
 

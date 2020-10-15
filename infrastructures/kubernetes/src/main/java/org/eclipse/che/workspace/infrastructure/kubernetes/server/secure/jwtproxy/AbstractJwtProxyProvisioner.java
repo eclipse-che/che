@@ -51,6 +51,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ServerServiceBuilder;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.ProxyProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 
@@ -73,7 +74,9 @@ abstract class AbstractJwtProxyProvisioner implements ProxyProvisioner {
   private final Map<String, String> attributes;
   private final String serviceName;
   private final ExternalServiceExposureStrategy externalServiceExposureStrategy;
+  private final MultiHostExternalServiceExposureStrategy multiHostExternalServiceExposureStrategy;
   private final CookiePathStrategy cookiePathStrategy;
+  private final MultiHostCookiePathStrategy multihostCookiePathStrategy;
   private final String imagePullPolicy;
   private int availablePort;
   private final KeyPair keyPair;
@@ -97,7 +100,9 @@ abstract class AbstractJwtProxyProvisioner implements ProxyProvisioner {
       KeyPair signatureKeyPair,
       JwtProxyConfigBuilderFactory jwtProxyConfigBuilderFactory,
       ExternalServiceExposureStrategy externalServiceExposureStrategy,
+      MultiHostExternalServiceExposureStrategy multiHostStrategy,
       CookiePathStrategy cookiePathStrategy,
+      MultiHostCookiePathStrategy multihostCookiePathStrategy,
       String jwtProxyImage,
       String memoryLimitBytes,
       String cpuLimitCores,
@@ -108,7 +113,9 @@ abstract class AbstractJwtProxyProvisioner implements ProxyProvisioner {
     this.proxyConfigBuilder = jwtProxyConfigBuilderFactory.create(workspaceId);
     this.jwtProxyImage = jwtProxyImage;
     this.externalServiceExposureStrategy = externalServiceExposureStrategy;
+    this.multiHostExternalServiceExposureStrategy = multiHostStrategy;
     this.cookiePathStrategy = cookiePathStrategy;
+    this.multihostCookiePathStrategy = multihostCookiePathStrategy;
     this.imagePullPolicy = imagePullPolicy;
     this.serviceName = generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + "-jwtproxy";
 
@@ -156,6 +163,7 @@ abstract class AbstractJwtProxyProvisioner implements ProxyProvisioner {
       String backendServiceName,
       ServicePort backendServicePort,
       String protocol,
+      boolean requireSubdomain,
       Map<String, ServerConfig> secureServers)
       throws InfrastructureException {
     Preconditions.checkArgument(
@@ -197,6 +205,13 @@ abstract class AbstractJwtProxyProvisioner implements ProxyProvisioner {
 
     k8sEnv.getServices().get(serviceName).getSpec().getPorts().add(exposedPort);
 
+    CookiePathStrategy actualCookiePathStrategy =
+        requireSubdomain ? multihostCookiePathStrategy : cookiePathStrategy;
+    ExternalServiceExposureStrategy actualExposureStrategy =
+        requireSubdomain
+            ? multiHostExternalServiceExposureStrategy
+            : externalServiceExposureStrategy;
+
     // JwtProxySecureServerExposer creates no service for the exposed secure servers and
     // assumes everything will be proxied from localhost, because JWT proxy is collocated
     // with the workspace pod (because it is added to the environment as an injectable pod).
@@ -212,8 +227,8 @@ abstract class AbstractJwtProxyProvisioner implements ProxyProvisioner {
         "http://" + backendServiceName + ":" + backendServicePort.getTargetPort().getIntVal(),
         excludes,
         cookiesAuthEnabled == null ? false : cookiesAuthEnabled,
-        cookiePathStrategy.get(serviceName, exposedPort),
-        externalServiceExposureStrategy.getExternalPath(serviceName, exposedPort.getName()));
+        actualCookiePathStrategy.get(serviceName, exposedPort),
+        actualExposureStrategy.getExternalPath(serviceName, exposedPort.getName()));
     k8sEnv
         .getConfigMaps()
         .get(getConfigMapName())
