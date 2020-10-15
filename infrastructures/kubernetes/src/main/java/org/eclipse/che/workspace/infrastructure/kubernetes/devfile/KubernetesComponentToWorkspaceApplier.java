@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
@@ -161,7 +162,10 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     List<PodData> podsData = getPodDatas(componentObjects);
     podsData
         .stream()
-        .flatMap(e -> e.getSpec().getContainers().stream())
+        .flatMap(
+            e ->
+                Stream.concat(
+                    e.getSpec().getContainers().stream(), e.getSpec().getInitContainers().stream()))
         .forEach(c -> c.setImagePullPolicy(imagePullPolicy));
 
     if (Boolean.TRUE.equals(k8sComponent.getMountSources())) {

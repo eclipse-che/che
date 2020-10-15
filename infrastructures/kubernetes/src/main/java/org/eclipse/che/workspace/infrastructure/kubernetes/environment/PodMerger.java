@@ -101,7 +101,8 @@ public class PodMerger {
           initContainer.setName(NameGenerator.generate(initContainer.getName(), 4));
         }
         // store original recipe machine name
-        Names.putMachineName(basePodMeta, initContainer.getName(), Names.machineName(podMeta, initContainer));
+        Names.putMachineName(
+            basePodMeta, initContainer.getName(), Names.machineName(podMeta, initContainer));
         baseSpec.getInitContainers().add(initContainer);
       }
 
