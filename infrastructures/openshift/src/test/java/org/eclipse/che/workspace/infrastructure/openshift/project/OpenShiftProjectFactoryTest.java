@@ -23,6 +23,7 @@ import static org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJE
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -34,6 +35,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.ImmutableMap;
+import io.fabric8.kubernetes.api.model.Status;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
@@ -58,7 +60,9 @@ import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -83,7 +87,8 @@ public class OpenShiftProjectFactoryTest {
   private static final String USER_NAME = "username";
   private static final String NO_OAUTH_IDENTITY_PROVIDER = null;
   private static final String OAUTH_IDENTITY_PROVIDER = "openshift-v4";
-  private static final String NAMESPACE_LABELS = "for-user=%s";
+  private static final String NAMESPACE_LABEL_NAME = "for-user";
+  private static final String NAMESPACE_LABELS = NAMESPACE_LABEL_NAME + "=<username>";
 
   @Mock private OpenShiftClientConfigFactory configFactory;
   @Mock private OpenShiftClientFactory clientFactory;
@@ -229,6 +234,107 @@ public class OpenShiftProjectFactoryTest {
             preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
+  }
+
+  @Test
+  public void shouldReturnLabeledNamespacesWhenFound() throws InfrastructureException {
+    // given
+    List<Project> projects =
+        Arrays.asList(
+            createProject("ns1", "project1", "desc1", "Active"),
+            createProject("ns2", "project2", "desc2", "Active"));
+    doReturn(projects).when(projectList).getItems();
+
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "predefined",
+            "",
+            "",
+            "che-default",
+            false,
+            true,
+            NAMESPACE_LABELS,
+            clientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            preferenceManager,
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
+    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("jondoe", "123", null, false));
+
+    // when
+    List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
+
+    // then
+    assertEquals(availableNamespaces.size(), 2);
+    verify(projectOperation).withLabels(Map.of(NAMESPACE_LABEL_NAME, "jondoe"));
+    assertEquals(availableNamespaces.get(0).getName(), "ns1");
+    assertEquals(availableNamespaces.get(1).getName(), "ns2");
+  }
+
+  @Test
+  public void shouldNotThrowAnExceptionWhenNotAllowedToListNamespaces() throws Exception {
+    // given
+    Project p = createProject("ns1", "project1", "desc1", "Active");
+    doThrow(new KubernetesClientException("Not allowed.", 403, new Status()))
+        .when(projectList)
+        .getItems();
+    prepareNamespaceToBeFoundByName("che-default", p);
+
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "predefined",
+            "",
+            "",
+            "che-default",
+            false,
+            true,
+            NAMESPACE_LABELS,
+            clientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            preferenceManager,
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
+    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("jondoe", "123", null, false));
+
+    // when
+    List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
+
+    // then
+    assertEquals(availableNamespaces.get(0).getName(), "ns1");
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void throwAnExceptionWhenErrorListingNamespaces() throws Exception {
+    // given
+    doThrow(new KubernetesClientException("Not allowed.", 500, new Status()))
+        .when(projectList)
+        .getItems();
+
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "predefined",
+            "",
+            "",
+            "che-default",
+            false,
+            true,
+            NAMESPACE_LABELS,
+            clientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            preferenceManager,
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
+
+    // when
+    projectFactory.list();
+
+    // then throw
   }
 
   @Test
@@ -608,6 +714,38 @@ public class OpenShiftProjectFactoryTest {
     verify(projectFactory).doCreateServiceAccount("workspace123", "workspace123");
     verify(serviceAccount).prepare();
     verify(stopWorkspaceRoleProvisioner, times(0)).provision("workspace123");
+  }
+
+  @Test
+  public void testEvalNamespaceNameWhenLabeledNamespacesFound() throws InfrastructureException {
+    List<Project> projects =
+        Arrays.asList(
+            createProject("ns1", "project1", "desc1", "Active"),
+            createProject("ns2", "project2", "desc2", "Active"));
+    doReturn(projects).when(projectList).getItems();
+
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "legacy",
+            "",
+            "",
+            "defaultNs",
+            false,
+            true,
+            NAMESPACE_LABELS,
+            clientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            preferenceManager,
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
+
+    String namespace =
+        projectFactory.evaluateNamespaceName(
+            new NamespaceResolutionContext("workspace123", "user123", "jondoe"));
+
+    assertEquals(namespace, "ns1");
   }
 
   private void prepareNamespaceToBeFoundByName(String name, Project project) throws Exception {

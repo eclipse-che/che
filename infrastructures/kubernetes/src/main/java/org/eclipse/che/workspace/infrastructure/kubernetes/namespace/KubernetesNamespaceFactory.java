@@ -479,8 +479,8 @@ public class KubernetesNamespaceFactory {
    * property. If any found, we take the first one and use it. See: {@link
    * KubernetesNamespaceFactory#findFirstLabeledNamespace(NamespaceResolutionContext)}
    *
-   * <p>Then we try to find namespace stored in persisted user's preferences and use it if it is
-   * found. See: {@link KubernetesNamespaceFactory#findStoredNamespace(NamespaceResolutionContext)}
+   * <p>Then we try to find namespace stored in persisted user's preferences and use it if found.
+   * See: {@link KubernetesNamespaceFactory#findStoredNamespace(NamespaceResolutionContext)}
    *
    * <p>As a last option, we construct namespace name from `che.infra.kubernetes.namespace.default`
    * property. See: {@link
@@ -494,9 +494,13 @@ public class KubernetesNamespaceFactory {
    */
   public String evaluateNamespaceName(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
-    return findFirstLabeledNamespace(resolutionCtx)
-        .or(() -> findStoredNamespace(resolutionCtx))
-        .orElse(evalDefaultNamespace(resolutionCtx));
+    Optional<String> namespace =
+        findFirstLabeledNamespace(resolutionCtx).or(() -> findStoredNamespace(resolutionCtx));
+    if (namespace.isPresent()) {
+      return namespace.get();
+    } else {
+      return evalDefaultNamespace(resolutionCtx);
+    }
   }
 
   /**
