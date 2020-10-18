@@ -101,22 +101,21 @@ public class URLFetcherTest {
     assertNull(content);
   }
 
-  //  /** Check that when url doesn't exist */
-  //  @Test(
-  //      expectedExceptions = IOException.class,
-  //      expectedExceptionsMessageRegExp =
-  //          ".*url_fetcher_test_resource.json-invalid \\(No such file or directory\\)")
-  //  public void checkMissingContentUnsafeGet() throws Exception {
-  //
-  //    // test to download this class object
-  //    URL urlJson =
-  // getClass().getClassLoader().getResource("devfile/url_fetcher_test_resource.json");
-  //    Assert.assertNotNull(urlJson);
-  //
-  //    // add extra path to make url not found
-  //    String content = urlFetcher.fetch(urlJson.toString() + "-invalid");
-  //    assertNull(content);
-  //  }
+  /** Check that when url doesn't exist */
+  @Test(
+      expectedExceptions = IOException.class,
+      expectedExceptionsMessageRegExp =
+          ".*url_fetcher_test_resource.json-invalid \\(No such file or directory\\)")
+  public void checkMissingContentUnsafeGet() throws Exception {
+
+    // test to download this class object
+    URL urlJson = getClass().getClassLoader().getResource("devfile/url_fetcher_test_resource.json");
+    Assert.assertNotNull(urlJson);
+
+    // add extra path to make url not found
+    String content = urlFetcher.fetch(urlJson.toString() + "-invalid");
+    assertNull(content);
+  }
 
   /** Check when we reach custom limit */
   @Test
