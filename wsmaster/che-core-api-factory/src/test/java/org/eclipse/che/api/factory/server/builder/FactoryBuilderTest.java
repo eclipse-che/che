@@ -224,7 +224,6 @@ public class FactoryBuilderTest {
                 singletonMap(
                     "devmachine",
                     newDto(MachineConfigDto.class)
-                        .withInstallers(singletonList("org.eclipse.che.ws-agent"))
                         .withAttributes(
                             singletonMap(MEMORY_LIMIT_ATTRIBUTE, "" + 512L * 1024L * 1024L))));
 

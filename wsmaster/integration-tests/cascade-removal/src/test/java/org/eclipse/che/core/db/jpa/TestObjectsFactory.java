@@ -16,7 +16,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -203,7 +202,6 @@ public final class TestObjectsFactory {
     final ServerConfigImpl serverConf2 =
         new ServerConfigImpl("2266", "ftp", "/path2", singletonMap("key", "value"));
     newMachine.setServers(ImmutableMap.of("ref1", serverConf1, "ref2", serverConf2));
-    newMachine.setInstallers(ImmutableList.of("agent5", "agent4"));
     newMachine.setAttributes(singletonMap("att1", "val"));
     newMachine.setEnv(singletonMap("CHE_ENV", "value"));
 
