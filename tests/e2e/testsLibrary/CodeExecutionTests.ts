@@ -10,7 +10,6 @@
 
 import { CLASSES, Terminal, TopMenu, Ide, DialogWindow, DriverHelper } from '..';
 import { e2eContainer } from '../inversify.config';
-import {error} from 'selenium-webdriver';
 import Axios from 'axios';
 
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
@@ -22,10 +21,7 @@ const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 export function runTask(taskName: string, timeout: number) {
     test(`Run command '${taskName}'`, async () => {
         await topMenu.runTask(taskName);
-        const taskExitCode : boolean = await ide.waitTaskExitCodeNotificationBoolean('0', timeout);
-        if (!taskExitCode) {
-            throw new error.NoSuchElementError(`Run task finished with incorrect exit code!`);
-        }
+        await terminal.waitIconSuccess(taskName, timeout);
     });
 }
 

@@ -46,13 +46,13 @@ suite(`${workspaceStack} test`, async () => {
         projectManager.openFile(fileFolderPath, fileName);
     });
 
-    suite.skip('Test golang example', async () => {
+    suite('Test golang example', async () => {
         codeExecutionHelper.runTask(taskTestOutyet, 60_000);
         codeExecutionHelper.closeTerminal(taskTestOutyet);
     });
 
     suite('Run golang example server', async () => {
-        codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskRunServer, taskExpectedDialogText, 30_000);
+        codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskRunServer, taskExpectedDialogText, 40_000);
         // codeExecutionHelper.runTask(taskStopServer, 5_000); // stop outyet task causes the server to die with exit code 143 https://github.com/eclipse/che/issues/17005
     });
 
