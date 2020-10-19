@@ -5,11 +5,6 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-sed -i "s/DEFAULT_PLUGIN_REGISTRY_IMAGE_TAG=\".*\"/DEFAULT_PLUGIN_REGISTRY_IMAGE_TAG=\"$1\"/g" ../deploy/openshift/deploy_che.sh
-sed -i "s/DEFAULT_DEVFILE_REGISTRY_IMAGE_TAG=\".*\"/DEFAULT_DEVFILE_REGISTRY_IMAGE_TAG=\"$1\"/g" ../deploy/openshift/deploy_che.sh
-sed -i "s/DEFAULT_CHE_IMAGE_TAG=\".*\"/DEFAULT_CHE_IMAGE_TAG=\"$1\"/g" ../deploy/openshift/deploy_che.sh
-sed -i "s/DEFAULT_KEYCLOAK_IMAGE_TAG=\".*\"/DEFAULT_KEYCLOAK_IMAGE_TAG=\"$1\"/g" ../deploy/openshift/deploy_che.sh
-
 sed -i "s/che.factory.default_editor=eclipse\/che-theia\/.*/che.factory.default_editor=eclipse\/che-theia\/$1/g" ../assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/che.properties
 sed -i "s/che.factory.default_plugins=eclipse\/che-machine-exec-plugin\/.*/che.factory.default_plugins=eclipse\/che-machine-exec-plugin\/$1/g" ../assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/che.properties
 sed -i "s/che.workspace.devfile.default_editor=eclipse\/che-theia\/.*/che.workspace.devfile.default_editor=eclipse\/che-theia\/$1/g" ../assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/che.properties
