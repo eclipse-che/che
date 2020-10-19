@@ -103,6 +103,9 @@ public class KubernetesEnvironmentPodsValidatorTest {
 
     // when
     podsValidator.validate(kubernetesEnvironment);
+
+    // then
+    // no exception means machine matches init container - it's expected
   }
 
   @Test(
