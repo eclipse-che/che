@@ -62,16 +62,12 @@ public abstract class AbstractExposureStrategyAwareProvider<T> implements Provid
     instanceMap = mapping;
   }
 
-  /**
-   * Returns the object mapped to the configured exposure type.
-   */
+  /** Returns the object mapped to the configured exposure type. */
   public T get() {
     return instance;
   }
 
-  /**
-   * Returns the object mapped to the provided exposure type.
-   */
+  /** Returns the object mapped to the provided exposure type. */
   public T get(WorkspaceExposureType exposureType) {
     return instanceMap.get(exposureType);
   }

@@ -228,16 +228,16 @@ public interface ServerConfig {
   }
 
   /**
-   * This is checking if the attributes configure the server to be exposed on a subdomain if we're on single-host.
-   * It has no effect on other server exposure strategies.
+   * This is checking if the attributes configure the server to be exposed on a subdomain if we're
+   * on single-host. It has no effect on other server exposure strategies.
    */
   static boolean isRequireSubdomain(Map<String, String> attributes) {
     return AttributesEvaluator.booleanAttr(attributes, REQUIRE_SUBDOMAIN, false);
   }
 
   /**
-   * Modify the attributes to configure the server to be exposed on a subdomain if we're on single-host.
-   * It has no effect on other server exposure strategies.
+   * Modify the attributes to configure the server to be exposed on a subdomain if we're on
+   * single-host. It has no effect on other server exposure strategies.
    */
   static void setRequireSubdomain(Map<String, String> attributes, boolean value) {
     if (value) {
