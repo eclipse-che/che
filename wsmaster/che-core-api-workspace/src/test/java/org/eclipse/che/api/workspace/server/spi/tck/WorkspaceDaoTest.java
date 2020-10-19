@@ -488,7 +488,6 @@ public class WorkspaceDaoTest {
     final ServerConfigImpl serverConf2 =
         new ServerConfigImpl("2266", "ftp", "path2", singletonMap("key", "value"));
     newMachine.setServers(ImmutableMap.of("ref1", serverConf1, "ref2", serverConf2));
-    newMachine.setInstallers(ImmutableList.of("agent5", "agent4"));
     newMachine.setAttributes(singletonMap("att1", "val"));
     newMachine.setAttributes(singletonMap("CHE_ENV", "value"));
     final EnvironmentImpl newEnv = new EnvironmentImpl();
@@ -503,7 +502,6 @@ public class WorkspaceDaoTest {
     final List<String> machineNames = new ArrayList<>(defaultEnv.getMachines().keySet());
     // Update an existing machine
     final MachineConfigImpl existingMachine = defaultEnv.getMachines().get(machineNames.get(1));
-    existingMachine.setInstallers(asList("new-agent1", "new-agent2"));
     existingMachine.setAttributes(
         ImmutableMap.of(
             "attr1", "value1",
@@ -780,7 +778,6 @@ public class WorkspaceDaoTest {
     final ServerConfigImpl serverConf2 =
         new ServerConfigImpl("2266", "ftp", "path2", singletonMap("key", "value"));
     exMachine1.setServers(ImmutableMap.of("ref1", serverConf1, "ref2", serverConf2));
-    exMachine1.setInstallers(ImmutableList.of("agent5", "agent4"));
     exMachine1.setAttributes(singletonMap("att1", "val"));
     exMachine1.setEnv(ImmutableMap.of("CHE_ENV1", "value", "CHE_ENV2", "value"));
     exMachine1.setVolumes(
@@ -796,7 +793,6 @@ public class WorkspaceDaoTest {
     final ServerConfigImpl serverConf4 =
         new ServerConfigImpl("2334", "wss", "path4", singletonMap("key", "value"));
     exMachine2.setServers(ImmutableMap.of("ref1", serverConf3, "ref2", serverConf4));
-    exMachine2.setInstallers(ImmutableList.of("agent2", "agent1"));
     exMachine2.setAttributes(singletonMap("att1", "val"));
     exMachine2.setEnv(singletonMap("CHE_ENV2", "value"));
     exMachine2.setVolumes(ImmutableMap.of("vol2", new VolumeImpl().withPath("/path/2")));
@@ -805,7 +801,6 @@ public class WorkspaceDaoTest {
     final ServerConfigImpl serverConf5 =
         new ServerConfigImpl("2333", "https", "path5", singletonMap("key", "value"));
     exMachine3.setServers(singletonMap("ref1", serverConf5));
-    exMachine3.setInstallers(ImmutableList.of("agent6", "agent2"));
     exMachine3.setAttributes(singletonMap("att1", "val"));
     exMachine3.setEnv(singletonMap("CHE_ENV3", "value"));
     exMachine3.setVolumes(ImmutableMap.of("vol3", new VolumeImpl().withPath("/path/3")));

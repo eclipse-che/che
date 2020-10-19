@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.core.model.workspace.config;
 
-import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 
@@ -74,15 +73,6 @@ public interface MachineConfig {
    * {@link Component} of the devfile which was a source of the given machine.
    */
   String DEVFILE_COMPONENT_ALIAS_ATTRIBUTE = "component";
-
-  /**
-   * Returns configured installers.
-   *
-   * <p>Values can be installer id with version separated with ':' symbol or just id then latest
-   * version will be used. Values examples: org.exec-agent:v1.0, org.exec-agent,
-   * org.exec-agent:latest.
-   */
-  List<String> getInstallers();
 
   /** Returns mapping of references to configurations of servers deployed into machine. */
   Map<String, ? extends ServerConfig> getServers();

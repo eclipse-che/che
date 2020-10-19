@@ -19,7 +19,6 @@ import static org.eclipse.che.api.workspace.server.SidecarToolingWorkspaceUtil.i
 
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
@@ -94,9 +93,6 @@ public class WorkspaceValidator {
           command.getName(),
           config.getName());
     }
-
-    // ensure using either plugins or installers but not both
-    validatePlugins(config);
   }
 
   /**
@@ -206,28 +202,6 @@ public class WorkspaceValidator {
                 "Value '%s' of attribute '%s' in machine '%s' is illegal",
                 attributeValue, attributeName, machineName));
       }
-    }
-  }
-
-  /**
-   * Check that workspace has either plugins defined in attributes (Che 7) or installers defined in
-   * machines (Che 6).
-   *
-   * @throws ValidationException if workspace config contains both installers section and nonempty
-   *     plugins or editor field in attributes.
-   */
-  private void validatePlugins(WorkspaceConfig config) throws ValidationException {
-    Optional<String> installers =
-        config
-            .getEnvironments()
-            .values()
-            .stream()
-            .flatMap(env -> env.getMachines().values().stream())
-            .flatMap(machine -> machine.getInstallers().stream())
-            .findAny();
-    Map<String, String> attributes = config.getAttributes();
-    if (isSidecarBasedWorkspace(attributes) && installers.isPresent()) {
-      throw new ValidationException("Workspace config cannot have both plugins and installers.");
     }
   }
 

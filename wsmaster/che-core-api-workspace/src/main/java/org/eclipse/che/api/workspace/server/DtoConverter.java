@@ -307,8 +307,7 @@ public final class DtoConverter {
 
   /** Converts {@link MachineConfig} to {@link MachineConfigDto}. */
   public static MachineConfigDto asDto(MachineConfig machine) {
-    MachineConfigDto machineDto =
-        newDto(MachineConfigDto.class).withInstallers(machine.getInstallers());
+    MachineConfigDto machineDto = newDto(MachineConfigDto.class);
     if (machine.getServers() != null) {
       machineDto.setServers(
           machine

@@ -954,7 +954,6 @@ public class WorkspaceServiceTest {
   private static EnvironmentDto createEnvDto() {
     MachineConfigImpl devMachine =
         new MachineConfigImpl(
-            singletonList("org.eclipse.che.ws-agent"),
             null,
             singletonMap("CHE_ENV", "value"),
             singletonMap(MEMORY_LIMIT_ATTRIBUTE, "10000"),
