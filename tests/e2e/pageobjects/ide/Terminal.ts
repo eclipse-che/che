@@ -149,7 +149,7 @@ export class Terminal {
                 throw new Error('Task "' + taskName + '" failed.');
             }
             return false;
-        }, timeout, "Timed out waiting for task " + taskName + " to succeed.");
+        }, timeout, 'Timed out waiting for task ' + taskName + ' to succeed.');
     }
 
     private getTerminalTabCssLocator(tabTitle: string): string {

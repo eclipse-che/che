@@ -11,6 +11,7 @@
 import { CLASSES, Terminal, TopMenu, Ide, DialogWindow, DriverHelper } from '..';
 import { e2eContainer } from '../inversify.config';
 import Axios from 'axios';
+import { TimeoutConstants } from '../TimeoutConstants';
 
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
@@ -21,6 +22,16 @@ const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 export function runTask(taskName: string, timeout: number) {
     test(`Run command '${taskName}'`, async () => {
         await topMenu.runTask(taskName);
+        await terminal.waitIconSuccess(taskName, timeout);
+    });
+}
+
+export function runTaskInputText(taskName: string, inputText: string, timeout: number) {
+    test(`Run command '${taskName}' expecting dialog shell`, async () => {
+        await topMenu.runTask(taskName);
+        await terminal.waitText(taskName, 'Enter your name', TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT);
+        await terminal.clickOnTab(taskName);
+        await terminal.type(taskName, inputText);
         await terminal.waitIconSuccess(taskName, timeout);
     });
 }

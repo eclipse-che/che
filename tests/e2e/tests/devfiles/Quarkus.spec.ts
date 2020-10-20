@@ -13,17 +13,17 @@ import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as workspaceHandler from '../../testsLibrary/WorksapceHandlingTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
+import { Key } from 'selenium-webdriver';
 
-const workspaceStack: string = 'Quarkus Tools';
+const workspaceStack: string = 'Quarkus CLI';
 const workspaceSampleName: string = 'quarkus-quickstarts';
-const workspaceRootFolderName: string = 'getting-started';
-const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/src/main/java/org/acme/getting/started`;
+const workspaceRootFolderName: string = 'getting-started-command-mode';
+const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/src/main/java/org/acme/getting/started/commandmode`;
 const fileName: string = `GreetingService.java`;
 
 const taskPackage: string = 'Package';
 const taskPackageNative: string = 'Package Native';
 const taskStartNative: string = 'Start Native';
-const taskExpectedDialogText: string = 'A process is now listening on port 8080';
 
 suite(`${workspaceStack} test`, async () => {
     suite(`Create ${workspaceStack}`, async () => {
@@ -46,7 +46,7 @@ suite(`${workspaceStack} test`, async () => {
         codeExecutionHelper.closeTerminal(taskPackageNative);
     });
     suite('Start Quarkus Native application', async () => {
-        codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskStartNative, taskExpectedDialogText, 90_000);
+        codeExecutionHelper.runTaskInputText(taskStartNative, 'Test User' + Key.ENTER, 90_000);
     });
 
     suite(`'Language server validation'`, async () => {
