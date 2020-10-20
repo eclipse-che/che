@@ -14,6 +14,8 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putAnnotations;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabels;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.shouldCreateInCheNamespace;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.CHECK_SERVERS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_MACHINES_START;
@@ -782,7 +784,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           injectables.add(new PodData(toCreate));
           Deployment deployment = podMerger.merge(injectables);
           deployment.getMetadata().setName(toCreate.getMetadata().getName());
-
+          putAnnotations(deployment.getMetadata(), toCreate.getMetadata().getAnnotations());
+          putLabels(deployment.getMetadata(), toCreate.getMetadata().getLabels());
           createdPod = namespace.deployments().deploy(deployment);
         } catch (ValidationException e) {
           throw new InfrastructureException(e);

@@ -26,6 +26,8 @@ import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_STA
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putAnnotations;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabels;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -1066,6 +1068,49 @@ public class KubernetesInternalRuntimeTest {
     assertEquals(
         new HashSet<>(containerNames),
         new HashSet<>(asList(CONTAINER_NAME_1, CONTAINER_NAME_2, "injectedContainer")));
+  }
+
+  @Test
+  public void testDeploymentLabelsAndAnnotations() throws Exception {
+    // given
+    Map<String, Pod> injectedPods =
+        ImmutableMap.of("injected", mockPod(singletonList(mockContainer("injectedContainer"))));
+
+    doReturn(ImmutableMap.of(M1_NAME, injectedPods)).when(k8sEnv).getInjectablePodsCopy();
+
+    doReturn(emptyMap()).when(k8sEnv).getPodsCopy();
+    Deployment deployment = mockDeployment(singletonList(mockContainer(CONTAINER_NAME_1)));
+
+    putLabels(deployment.getMetadata(), ImmutableMap.of("k1", "v2", "k3", "v4"));
+    putAnnotations(deployment.getMetadata(), ImmutableMap.of("ak1", "av2", "ak3", "av4"));
+    doReturn(ImmutableMap.of(WORKSPACE_POD_NAME, deployment)).when(k8sEnv).getDeploymentsCopy();
+
+    doReturn(
+            ImmutableMap.of(
+                M1_NAME,
+                mock(InternalMachineConfig.class),
+                WORKSPACE_POD_NAME + "/injectedContainer",
+                mock(InternalMachineConfig.class)))
+        .when(k8sEnv)
+        .getMachines();
+
+    // when
+    internalRuntime.start(emptyMap());
+
+    // then
+    ArgumentCaptor<Deployment> deploymentCaptor = ArgumentCaptor.forClass(Deployment.class);
+
+    verify(deployments).deploy(deploymentCaptor.capture());
+    assertTrue(deployment.getMetadata().getLabels().containsKey("k1"));
+    assertTrue(deployment.getMetadata().getLabels().containsKey("k3"));
+    assertEquals(
+        deployment.getMetadata().getLabels(),
+        deploymentCaptor.getValue().getMetadata().getLabels());
+    assertTrue(deployment.getMetadata().getAnnotations().containsKey("ak1"));
+    assertTrue(deployment.getMetadata().getAnnotations().containsKey("ak3"));
+    assertEquals(
+        deployment.getMetadata().getAnnotations(),
+        deploymentCaptor.getValue().getMetadata().getAnnotations());
   }
 
   @Test

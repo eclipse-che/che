@@ -59,5 +59,14 @@ public final class Warnings {
   public static final String NOT_ABLE_TO_PROVISION_SSH_KEYS_MESSAGE =
       "Not able to provision SSH Keys. Message: '%s'";
 
+  public static final int NOT_ABLE_TO_PROVISION_WORKSPACE_DEPLOYMENT = 4200;
+  public static final String NOT_ABLE_TO_PROVISION_WORKSPACE_DEPLOYMENT_MESSAGE =
+      "Not able to find workspace attributes for %s. Reason %s";
+
+  public static final int NOT_ABLE_TO_PROVISION_WORKSPACE_DEPLOYMENT_LABELS_OR_ANNOTATIONS = 4250;
+  public static final String
+      NOT_ABLE_TO_PROVISION_WORKSPACE_DEPLOYMENT_LABELS_OR_ANNOTATIONS_MESSAGE =
+          "Not able to provision workspace %s deployment labels or annotations because of invalid configuration. Reason: '%s'";
+
   private Warnings() {}
 }
