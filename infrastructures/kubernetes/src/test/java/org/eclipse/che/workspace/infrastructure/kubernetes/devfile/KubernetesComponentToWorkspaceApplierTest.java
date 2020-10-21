@@ -48,6 +48,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
@@ -581,7 +582,10 @@ public class KubernetesComponentToWorkspaceApplierTest {
         if (p.getSpec() == null) {
           continue;
         }
-        for (Container con : p.getSpec().getContainers()) {
+        List<Container> containers = new ArrayList<>();
+        containers.addAll(p.getSpec().getContainers());
+        containers.addAll(p.getSpec().getInitContainers());
+        for (Container con : containers) {
           assertEquals(con.getImagePullPolicy(), "Never");
         }
       }
@@ -699,7 +703,11 @@ public class KubernetesComponentToWorkspaceApplierTest {
         .filter(item -> item instanceof Pod)
         .map(item -> (Pod) item)
         .filter(pod -> pod.getSpec() != null)
-        .flatMap(pod -> pod.getSpec().getContainers().stream())
+        .flatMap(
+            pod ->
+                Stream.concat(
+                    pod.getSpec().getContainers().stream(),
+                    pod.getSpec().getInitContainers().stream()))
         .forEach(c -> c.setImagePullPolicy(imagePullPolicy));
   }
 

@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
@@ -161,7 +162,10 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     List<PodData> podsData = getPodDatas(componentObjects);
     podsData
         .stream()
-        .flatMap(e -> e.getSpec().getContainers().stream())
+        .flatMap(
+            e ->
+                Stream.concat(
+                    e.getSpec().getContainers().stream(), e.getSpec().getInitContainers().stream()))
         .forEach(c -> c.setImagePullPolicy(imagePullPolicy));
 
     if (Boolean.TRUE.equals(k8sComponent.getMountSources())) {
@@ -240,7 +244,10 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       List<PodData> podsData, ComponentImpl component) throws DevfileException {
     Map<String, MachineConfigImpl> machineConfigs = new HashMap<>();
     for (PodData podData : podsData) {
-      for (Container container : podData.getSpec().getContainers()) {
+      List<Container> containers = new ArrayList<>();
+      containers.addAll(podData.getSpec().getContainers());
+      containers.addAll(podData.getSpec().getInitContainers());
+      for (Container container : containers) {
         String machineName = machineName(podData, container);
 
         MachineConfigImpl config = new MachineConfigImpl();
