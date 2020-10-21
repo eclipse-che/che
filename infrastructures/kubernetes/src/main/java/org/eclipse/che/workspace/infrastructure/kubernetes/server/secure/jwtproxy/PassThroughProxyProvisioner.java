@@ -23,6 +23,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 
 /**
@@ -36,7 +37,9 @@ public class PassThroughProxyProvisioner extends AbstractJwtProxyProvisioner {
   public PassThroughProxyProvisioner(
       JwtProxyConfigBuilderFactory jwtProxyConfigBuilderFactory,
       ExternalServiceExposureStrategy externalServiceExposureStrategy,
+      MultiHostExternalServiceExposureStrategy multiHostStrategy,
       CookiePathStrategy cookiePathStrategy,
+      MultiHostCookiePathStrategy multiHostCookiePathStrategy,
       @Named("che.server.secure_exposer.jwtproxy.image") String jwtImage,
       @Named("che.server.secure_exposer.jwtproxy.memory_limit") String memoryLimitBytes,
       @Named("che.server.secure_exposer.jwtproxy.cpu_limit") String cpuLimitCores,
@@ -47,7 +50,9 @@ public class PassThroughProxyProvisioner extends AbstractJwtProxyProvisioner {
         constructSignatureKeyPair(),
         jwtProxyConfigBuilderFactory,
         externalServiceExposureStrategy,
+        multiHostStrategy,
         cookiePathStrategy,
+        multiHostCookiePathStrategy,
         jwtImage,
         memoryLimitBytes,
         cpuLimitCores,

@@ -27,6 +27,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -56,6 +58,7 @@ import org.eclipse.che.multiuser.machine.authentication.server.signature.Signatu
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -81,7 +84,10 @@ public class JwtProxyProvisionerTest {
   @Mock private PublicKey publicKey;
   @Mock private JwtProxyConfigBuilderFactory configBuilderFactory;
   @Mock private ExternalServiceExposureStrategy externalServiceExposureStrategy;
-  private CookiePathStrategy cookiePathStrategy = new CookiePathStrategy(MULTI_HOST_STRATEGY);
+  @Mock private MultiHostExternalServiceExposureStrategy multiHostExternalServiceExposureStrategy;
+  private CookiePathStrategy cookiePathStrategy = spy(new CookiePathStrategy(MULTI_HOST_STRATEGY));
+  private MultiHostCookiePathStrategy multiHostCookiePathStrategy =
+      spy(new MultiHostCookiePathStrategy());
 
   private JwtProxyProvisioner jwtProxyProvisioner;
   private KubernetesEnvironment k8sEnv;
@@ -101,7 +107,9 @@ public class JwtProxyProvisionerTest {
             signatureKeyManager,
             configBuilderFactory,
             externalServiceExposureStrategy,
+            multiHostExternalServiceExposureStrategy,
             cookiePathStrategy,
+            multiHostCookiePathStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
             "0.5",
@@ -135,6 +143,7 @@ public class JwtProxyProvisionerTest {
         "terminal",
         port,
         "TCP",
+        false,
         ImmutableMap.of("server", secureServer));
 
     // then
@@ -205,6 +214,7 @@ public class JwtProxyProvisionerTest {
         "terminal",
         port,
         "TCP",
+        false,
         ImmutableMap.of("server1", server1, "server2", server2, "server3", server3));
   }
 
@@ -219,7 +229,9 @@ public class JwtProxyProvisionerTest {
             signatureKeyManager,
             configBuilderFactory,
             externalServiceExposureStrategy,
+            multiHostExternalServiceExposureStrategy,
             cookiePathStrategy,
+            multiHostCookiePathStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
             "500m",
@@ -250,6 +262,7 @@ public class JwtProxyProvisionerTest {
         "terminal",
         port,
         "TCP",
+        false,
         ImmutableMap.of("server1", server1));
 
     // then
@@ -267,7 +280,9 @@ public class JwtProxyProvisionerTest {
             signatureKeyManager,
             configBuilderFactory,
             externalServiceExposureStrategy,
+            multiHostExternalServiceExposureStrategy,
             cookiePathStrategy,
+            multiHostCookiePathStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
             "0.5",
@@ -287,6 +302,7 @@ public class JwtProxyProvisionerTest {
         "terminal",
         port,
         "TCP",
+        false,
         ImmutableMap.of("server1", server1));
 
     // then
@@ -306,7 +322,9 @@ public class JwtProxyProvisionerTest {
             signatureKeyManager,
             configBuilderFactory,
             externalServiceExposureStrategy,
+            multiHostExternalServiceExposureStrategy,
             cookiePathStrategy,
+            multiHostCookiePathStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
             "0.5",
@@ -320,12 +338,65 @@ public class JwtProxyProvisionerTest {
 
     // when
     jwtProxyProvisioner.expose(
-        k8sEnv, podWithName(), "machine", null, port, "TCP", ImmutableMap.of("server1", server1));
+        k8sEnv,
+        podWithName(),
+        "machine",
+        null,
+        port,
+        "TCP",
+        false,
+        ImmutableMap.of("server1", server1));
 
     // then
     verify(configBuilder)
         .addVerifierProxy(
             eq(4400), eq("http://127.0.0.1:4401"), eq(emptySet()), eq(false), eq("/"), isNull());
+  }
+
+  @Test
+  public void multiHostStrategiesUsedForServerRequiringSubdomain() throws Exception {
+    // given
+    JwtProxyConfigBuilder configBuilder = mock(JwtProxyConfigBuilder.class);
+    when(configBuilderFactory.create(any())).thenReturn(configBuilder);
+
+    jwtProxyProvisioner =
+        new JwtProxyProvisioner(
+            signatureKeyManager,
+            configBuilderFactory,
+            externalServiceExposureStrategy,
+            multiHostExternalServiceExposureStrategy,
+            cookiePathStrategy,
+            multiHostCookiePathStrategy,
+            "eclipse/che-jwtproxy",
+            "128mb",
+            "0.5",
+            "Always",
+            runtimeId);
+
+    ServerConfigImpl server1 = new ServerConfigImpl("4401/tcp", "http", "/", emptyMap());
+
+    ServicePort port = new ServicePort();
+    port.setTargetPort(new IntOrString(4401));
+
+    // when
+    jwtProxyProvisioner.expose(
+        k8sEnv,
+        podWithName(),
+        "machine",
+        null,
+        port,
+        "TCP",
+        true,
+        ImmutableMap.of("server1", server1));
+
+    // then
+    verify(configBuilder)
+        .addVerifierProxy(
+            eq(4400), eq("http://127.0.0.1:4401"), eq(emptySet()), eq(false), eq("/"), isNull());
+    verify(externalServiceExposureStrategy, never()).getExternalPath(any(), any());
+    verify(cookiePathStrategy, never()).get(any(), any());
+    verify(multiHostExternalServiceExposureStrategy).getExternalPath(any(), any());
+    verify(multiHostCookiePathStrategy).get(any(), any());
   }
 
   private static PodData podWithName() {
