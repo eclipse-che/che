@@ -196,7 +196,9 @@ public class ServerConfigImpl implements ServerConfig {
       ServerConfig.setInternal(attributes, true);
     }
 
-    ServerConfig.setRequireSubdomain(attributes, devfileEndpoint);
+    if (devfileEndpoint) {
+      attributes.put(REQUIRE_SUBDOMAIN, Boolean.TRUE.toString());
+    }
 
     return new ServerConfigImpl(Integer.toString(endpoint.getPort()), protocol, path, attributes);
   }

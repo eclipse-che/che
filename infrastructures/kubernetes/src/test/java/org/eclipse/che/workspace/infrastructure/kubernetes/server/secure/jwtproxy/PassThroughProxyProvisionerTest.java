@@ -33,7 +33,6 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
@@ -62,9 +61,7 @@ public class PassThroughProxyProvisionerTest {
         new PassThroughProxyProvisioner(
             configBuilderFactory,
             mock(ExternalServiceExposureStrategy.class),
-            mock(MultiHostExternalServiceExposureStrategy.class),
             new CookiePathStrategy(MULTI_HOST_STRATEGY),
-            new MultiHostCookiePathStrategy(),
             "eclipse/che-jwtproxy",
             "128mb",
             "0.5",
@@ -87,7 +84,6 @@ public class PassThroughProxyProvisionerTest {
         "terminal",
         port,
         "TCP",
-        false,
         ImmutableMap.of("server1", server1));
 
     // then

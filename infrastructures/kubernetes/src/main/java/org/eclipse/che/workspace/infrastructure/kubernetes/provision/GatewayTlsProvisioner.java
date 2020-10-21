@@ -24,7 +24,6 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.GatewayConfigmapLabels;
 
 /**
@@ -36,16 +35,13 @@ public class GatewayTlsProvisioner<T extends KubernetesEnvironment>
 
   private final boolean isTlsEnabled;
   private final GatewayConfigmapLabels configmapLabels;
-  private final TlsProvisioner<T> nativeProvisioner;
 
   @Inject
   public GatewayTlsProvisioner(
       @Named("che.infra.kubernetes.tls_enabled") boolean isTlsEnabled,
-      GatewayConfigmapLabels configmapLabels,
-      TlsProvisionerProvider<T> provisionerProvider) {
+      GatewayConfigmapLabels configmapLabels) {
     this.isTlsEnabled = isTlsEnabled;
     this.configmapLabels = configmapLabels;
-    this.nativeProvisioner = provisionerProvider.get(WorkspaceExposureType.NATIVE);
   }
 
   @Override
@@ -59,8 +55,6 @@ public class GatewayTlsProvisioner<T extends KubernetesEnvironment>
         useSecureProtocolForGatewayConfigMap(configMap);
       }
     }
-
-    nativeProvisioner.provision(k8sEnv, identity);
   }
 
   private void useSecureProtocolForGatewayConfigMap(ConfigMap configMap)
