@@ -20,7 +20,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManagerException;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ServiceExposureStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 
 /**
@@ -49,8 +49,9 @@ public class JwtProxyProvisioner extends AbstractJwtProxyProvisioner {
   public JwtProxyProvisioner(
       SignatureKeyManager signatureKeyManager,
       JwtProxyConfigBuilderFactory jwtProxyConfigBuilderFactory,
-      ExternalServiceExposureStrategy externalServiceExposureStrategy,
+      ServiceExposureStrategyProvider serviceExposureStrategyProvider,
       CookiePathStrategy cookiePathStrategy,
+      MultiHostCookiePathStrategy multiHostCookiePathStrategy,
       @Named("che.server.secure_exposer.jwtproxy.image") String jwtProxyImage,
       @Named("che.server.secure_exposer.jwtproxy.memory_limit") String memoryLimitBytes,
       @Named("che.server.secure_exposer.jwtproxy.cpu_limit") String cpuLimitCores,
@@ -60,8 +61,10 @@ public class JwtProxyProvisioner extends AbstractJwtProxyProvisioner {
     super(
         constructKeyPair(signatureKeyManager, identity),
         jwtProxyConfigBuilderFactory,
-        externalServiceExposureStrategy,
+        serviceExposureStrategyProvider.get(),
+        serviceExposureStrategyProvider.getMultiHost(),
         cookiePathStrategy,
+        multiHostCookiePathStrategy,
         jwtProxyImage,
         memoryLimitBytes,
         cpuLimitCores,

@@ -26,6 +26,7 @@ public class ServiceExposureStrategyProvider implements Provider<ExternalService
   public static final String STRATEGY_PROPERTY = "che.infra.kubernetes.server_strategy";
 
   private final ExternalServiceExposureStrategy namingStrategy;
+  private final ExternalServiceExposureStrategy multiHostStrategy;
 
   @Inject
   public ServiceExposureStrategyProvider(
@@ -38,10 +39,22 @@ public class ServiceExposureStrategyProvider implements Provider<ExternalService
       throw new ConfigurationException(
           format("Unsupported server naming strategy '%s' configured", strategy));
     }
+
+    multiHostStrategy =
+        strategies.get(MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY);
+    if (multiHostStrategy == null) {
+      throw new ConfigurationException(
+          "No implementation for 'multi-host' server exposure strategy configured even though it is"
+              + " mandatory.");
+    }
   }
 
   @Override
   public ExternalServiceExposureStrategy get() {
     return namingStrategy;
+  }
+
+  public ExternalServiceExposureStrategy getMultiHost() {
+    return multiHostStrategy;
   }
 }

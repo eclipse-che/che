@@ -25,6 +25,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Singl
 public abstract class AbstractExposureStrategyAwareProvider<T> implements Provider<T> {
 
   protected final T instance;
+  protected final Map<WorkspaceExposureType, T> instanceMap;
 
   /**
    * Constructs a new provider returning one of the instances from the provided mapping
@@ -57,9 +58,17 @@ public abstract class AbstractExposureStrategyAwareProvider<T> implements Provid
     if (instance == null) {
       throw new IllegalStateException(String.format(errorMessageTemplate, wsExposureType));
     }
+
+    instanceMap = mapping;
   }
 
+  /** Returns the object mapped to the configured exposure type. */
   public T get() {
     return instance;
+  }
+
+  /** Returns the object mapped to the provided exposure type. */
+  public T get(WorkspaceExposureType exposureType) {
+    return instanceMap.get(exposureType);
   }
 }
