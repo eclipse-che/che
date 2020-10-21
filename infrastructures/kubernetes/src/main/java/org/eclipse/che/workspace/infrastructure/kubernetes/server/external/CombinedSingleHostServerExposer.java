@@ -11,9 +11,11 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
-import static java.util.stream.Collectors.toMap;
+import static java.lang.Boolean.FALSE;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.REQUIRE_SUBDOMAIN;
 
 import io.fabric8.kubernetes.api.model.ServicePort;
+import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -70,8 +72,18 @@ public class CombinedSingleHostServerExposer<T extends KubernetesEnvironment>
       serverId = servicePort.getName();
     }
 
-    Map<String, ServerConfig> subpathServers = getStrategyConformingServers(externalServers);
-    Map<String, ServerConfig> subdomainServers = getServersRequiringSubdomain(externalServers);
+    Map<String, ServerConfig> subpathServers = new HashMap<>();
+    Map<String, ServerConfig> subdomainServers = new HashMap<>();
+
+    for (String esKey : externalServers.keySet()) {
+      ServerConfig serverConfig = externalServers.get(esKey);
+      if (Boolean.parseBoolean(
+          serverConfig.getAttributes().getOrDefault(REQUIRE_SUBDOMAIN, FALSE.toString()))) {
+        subdomainServers.put(esKey, serverConfig);
+      } else {
+        subpathServers.put(esKey, serverConfig);
+      }
+    }
 
     if (!subpathServers.isEmpty()) {
       subpathServerExposer.expose(
@@ -82,25 +94,5 @@ public class CombinedSingleHostServerExposer<T extends KubernetesEnvironment>
       subdomainServerExposer.expose(
           k8sEnv, machineName, serviceName, serverId, servicePort, subdomainServers);
     }
-  }
-
-  @Override
-  public Map<String, ServerConfig> getStrategyConformingServers(
-      Map<String, ServerConfig> externalServers) {
-    return externalServers
-        .entrySet()
-        .stream()
-        .filter(e -> !e.getValue().isRequireSubdomain())
-        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-  }
-
-  @Override
-  public Map<String, ServerConfig> getServersRequiringSubdomain(
-      Map<String, ServerConfig> externalServers) {
-    return externalServers
-        .entrySet()
-        .stream()
-        .filter(e -> e.getValue().isRequireSubdomain())
-        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 }

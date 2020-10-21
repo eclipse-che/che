@@ -12,7 +12,6 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import io.fabric8.kubernetes.api.model.ServicePort;
-import java.util.Collections;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -49,28 +48,4 @@ public interface ExternalServerExposer<T extends KubernetesEnvironment> {
       String serverId,
       ServicePort servicePort,
       Map<String, ServerConfig> externalServers);
-
-  /**
-   * Returns the servers from the provided map that should be deployed using the current configured
-   * server exposure strategy.
-   *
-   * @param externalServers all the external servers that are being deployed
-   * @return a view of the provided map
-   */
-  default Map<String, ServerConfig> getStrategyConformingServers(
-      Map<String, ServerConfig> externalServers) {
-    return externalServers;
-  }
-
-  /**
-   * Returns the servers from the provided map that should be deployed on a subdomain regardless of
-   * the current configured server exposure strategy.
-   *
-   * @param externalServers all the external servers that are being deployed
-   * @return a view of the provided map
-   */
-  default Map<String, ServerConfig> getServersRequiringSubdomain(
-      Map<String, ServerConfig> externalServers) {
-    return Collections.emptyMap();
-  }
 }
