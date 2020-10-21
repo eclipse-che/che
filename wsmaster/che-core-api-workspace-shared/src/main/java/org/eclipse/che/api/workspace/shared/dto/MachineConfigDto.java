@@ -13,7 +13,6 @@ package org.eclipse.che.api.workspace.shared.dto;
 
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
 
-import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.factory.FactoryParameter;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
@@ -22,13 +21,6 @@ import org.eclipse.che.dto.shared.DTO;
 /** @author Alexander Garagatyi */
 @DTO
 public interface MachineConfigDto extends MachineConfig {
-  @Override
-  @FactoryParameter(obligation = OPTIONAL)
-  List<String> getInstallers();
-
-  void setInstallers(List<String> installers);
-
-  MachineConfigDto withInstallers(List<String> installers);
 
   @Override
   @FactoryParameter(obligation = OPTIONAL)

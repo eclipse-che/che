@@ -36,12 +36,12 @@ suite(`${workspaceStack} test`, async () => {
         projectManager.openFile(fileFolderPath, fileName);
     });
 
-    suite.skip('Download dependencies', async () => {
+    suite('Download dependencies', async () => {
         codeExecutionHelper.runTask(taskDownloadDependencies, 60_000);
         codeExecutionHelper.closeTerminal(taskDownloadDependencies);
     });
 
-    suite.skip('Run nodejs application', async () => {
+    suite('Run nodejs application', async () => {
         codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskRunWebApp, taskExpectedDialogText, 30_000);
     });
 

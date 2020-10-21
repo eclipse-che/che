@@ -11,9 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.model.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -45,13 +43,6 @@ public class MachineConfigImpl implements MachineConfig {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-      name = "externalmachine_installers",
-      joinColumns = @JoinColumn(name = "externalmachine_id"))
-  @Column(name = "installers")
-  private List<String> installers;
-
-  @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(
       name = "externalmachine_attributes",
       joinColumns = @JoinColumn(name = "externalmachine_id"))
   @MapKeyColumn(name = "attributes_key")
@@ -79,14 +70,10 @@ public class MachineConfigImpl implements MachineConfig {
   public MachineConfigImpl() {}
 
   public MachineConfigImpl(
-      List<String> installers,
       Map<String, ? extends ServerConfig> servers,
       Map<String, String> env,
       Map<String, String> attributes,
       Map<String, ? extends Volume> volumes) {
-    if (installers != null) {
-      this.installers = new ArrayList<>(installers);
-    }
     if (servers != null) {
       this.servers =
           servers
@@ -113,29 +100,7 @@ public class MachineConfigImpl implements MachineConfig {
   }
 
   public MachineConfigImpl(MachineConfig machine) {
-    this(
-        machine.getInstallers(),
-        machine.getServers(),
-        machine.getEnv(),
-        machine.getAttributes(),
-        machine.getVolumes());
-  }
-
-  @Override
-  public List<String> getInstallers() {
-    if (installers == null) {
-      installers = new ArrayList<>();
-    }
-    return installers;
-  }
-
-  public void setInstallers(List<String> installers) {
-    this.installers = installers;
-  }
-
-  public MachineConfigImpl withInstallers(List<String> installers) {
-    this.installers = installers;
-    return this;
+    this(machine.getServers(), machine.getEnv(), machine.getAttributes(), machine.getVolumes());
   }
 
   @Override
@@ -216,7 +181,6 @@ public class MachineConfigImpl implements MachineConfig {
     }
     final MachineConfigImpl that = (MachineConfigImpl) obj;
     return Objects.equals(id, that.id)
-        && getInstallers().equals(that.getInstallers())
         && getEnv().equals(that.getEnv())
         && getAttributes().equals(that.getAttributes())
         && getServers().equals(that.getServers())
@@ -227,7 +191,6 @@ public class MachineConfigImpl implements MachineConfig {
   public int hashCode() {
     int hash = 7;
     hash = 31 * hash + Objects.hashCode(id);
-    hash = 31 * hash + getInstallers().hashCode();
     hash = 31 * hash + getEnv().hashCode();
     hash = 31 * hash + getAttributes().hashCode();
     hash = 31 * hash + getServers().hashCode();
@@ -240,8 +203,6 @@ public class MachineConfigImpl implements MachineConfig {
     return "MachineConfigImpl{"
         + "id="
         + id
-        + ", installers="
-        + installers
         + ", env="
         + env
         + ", attributes="

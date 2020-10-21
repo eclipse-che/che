@@ -36,7 +36,7 @@ suite(`${stack} test`, async () => {
         prepareEditorForLSTests();
     });
 
-    suite.skip('Validation of project build', async () => {
+    suite('Validation of project build', async () => {
         codeExecutionTests.runTask(buildTaskName, 30_000);
         codeExecutionTests.runTask(runTaskName, 30_000);
     });

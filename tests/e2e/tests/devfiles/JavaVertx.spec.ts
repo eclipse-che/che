@@ -33,7 +33,7 @@ suite(`${stack} test`, async () => {
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
     });
 
-    suite.skip('Validation of project build', async () => {
+    suite('Validation of project build', async () => {
         codeExecutionTests.runTask(buildTaskName, 120_000);
         codeExecutionTests.closeTerminal(buildTaskName);
     });

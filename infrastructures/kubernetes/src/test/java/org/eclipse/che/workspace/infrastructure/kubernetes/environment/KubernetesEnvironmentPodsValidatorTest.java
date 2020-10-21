@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -81,6 +82,32 @@ public class KubernetesEnvironmentPodsValidatorTest {
     podsValidator.validate(kubernetesEnvironment);
   }
 
+  @Test
+  public void shouldPassWhenMachineIsDeclaredAndIsInitContainerInKubernetesRecipe()
+      throws Exception {
+    // given
+    String podName = "pod1";
+    Pod pod =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName(podName)
+            .endMetadata()
+            .withNewSpec()
+            .withInitContainers(singletonList(createContainer("init")))
+            .endSpec()
+            .build();
+    PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
+    when(kubernetesEnvironment.getPodsData()).thenReturn(ImmutableMap.of(podName, podData));
+    when(kubernetesEnvironment.getMachines())
+        .thenReturn(ImmutableMap.of(podName + "/init", mock(InternalMachineConfig.class)));
+
+    // when
+    podsValidator.validate(kubernetesEnvironment);
+
+    // then
+    // no exception means machine matches init container - it's expected
+  }
+
   @Test(
       expectedExceptions = ValidationException.class,
       expectedExceptionsMessageRegExp = "Environment contains pod with missing metadata")
@@ -145,6 +172,35 @@ public class KubernetesEnvironmentPodsValidatorTest {
         .get(0)
         .getVolumeMounts()
         .add(new VolumeMountBuilder().withName("non-existing").withMountPath("/tmp/data").build());
+    PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
+    when(kubernetesEnvironment.getPodsData()).thenReturn(ImmutableMap.of(podName, podData));
+    when(kubernetesEnvironment.getMachines())
+        .thenReturn(ImmutableMap.of(podName + "/main", mock(InternalMachineConfig.class)));
+
+    // when
+    podsValidator.validate(kubernetesEnvironment);
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Container 'foo' in pod 'pod1' contains volume mount that references missing volume 'non-existing'")
+  public void shouldThrowExceptionWhenInitContainerHasVolumeMountThatReferencesMissingPodVolume()
+      throws Exception {
+    // given
+    String podName = "pod1";
+    Pod pod = createPod("pod1", "main");
+    pod.getSpec()
+        .getInitContainers()
+        .add(
+            new ContainerBuilder()
+                .withName("foo")
+                .withVolumeMounts(
+                    new VolumeMountBuilder()
+                        .withName("non-existing")
+                        .withMountPath("/tmp/data")
+                        .build())
+                .build());
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     when(kubernetesEnvironment.getPodsData()).thenReturn(ImmutableMap.of(podName, podData));
     when(kubernetesEnvironment.getMachines())

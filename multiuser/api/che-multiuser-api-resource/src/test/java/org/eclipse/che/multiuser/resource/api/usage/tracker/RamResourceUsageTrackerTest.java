@@ -187,6 +187,6 @@ public class RamResourceUsageTrackerTest {
 
   private static MachineConfigImpl createMachineConfig(long memoryMb) {
     return new MachineConfigImpl(
-        null, null, null, ImmutableMap.of(MEMORY_LIMIT_ATTRIBUTE, valueOf(memoryMb)), null);
+        null, null, ImmutableMap.of(MEMORY_LIMIT_ATTRIBUTE, valueOf(memoryMb)), null);
   }
 }

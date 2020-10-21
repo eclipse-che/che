@@ -1019,7 +1019,6 @@ public class WorkspaceManagerTest {
   private static WorkspaceConfigImpl createConfig() {
     MachineConfigImpl machineConfig =
         new MachineConfigImpl(
-            singletonList("org.eclipse.che.ws-agent"),
             singletonMap("server", createServerConfig()),
             singletonMap("CHE_ENV", "value"),
             singletonMap(MEMORY_LIMIT_ATTRIBUTE, "10000"),

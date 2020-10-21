@@ -13,7 +13,6 @@ package org.eclipse.che.api.factory.server;
 
 import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.valueOf;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static org.eclipse.che.api.factory.server.FactoryService.VALIDATE_QUERY_PARAMETER;
@@ -242,7 +241,6 @@ public class FactoryServiceTest {
     environmentRecipe.setLocation("location");
     final EnvironmentImpl env = new EnvironmentImpl();
     final MachineConfigImpl extendedMachine = new MachineConfigImpl();
-    extendedMachine.setInstallers(singletonList("agent"));
     extendedMachine.setAttributes(singletonMap("att1", "value"));
     extendedMachine.setServers(
         singletonMap(
