@@ -13,9 +13,13 @@ package org.eclipse.che.multiuser.permission.workspace.server.spi.jpa;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
+import static java.util.Map.of;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.Pages.iterate;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
+import static org.eclipse.che.api.workspace.shared.Constants.REMOVE_WORKSPACE_AFTER_STOP;
 
 import com.google.inject.persist.Transactional;
 import java.util.List;
@@ -40,6 +44,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 
@@ -306,12 +311,62 @@ public class MultiuserJpaWorkspaceDao implements WorkspaceDao {
 
     @Override
     public void onCascadeEvent(BeforeAccountRemovedEvent event) throws Exception {
+      boolean nonStoppedExists = false;
       for (WorkspaceImpl workspace :
           iterate(
               (maxItems, skipCount) ->
                   workspaceManager.getByNamespace(
                       event.getAccount().getName(), false, maxItems, skipCount))) {
-        workspaceManager.removeWorkspace(workspace.getId());
+        if (STOPPED.equals(workspace.getStatus())) {
+          workspaceManager.removeWorkspace(workspace.getId());
+          continue;
+        }
+
+        nonStoppedExists = true;
+
+        if (STOPPING.equals(workspace.getStatus())) {
+          // it's not possible to forcibly stop workspace. Continue check other and fail after this
+          // to retry
+          continue;
+        }
+
+        // workspace is RUNNING or STARTING. It's needed to stop them and remove after
+        tryStopAndRemoveWithSA(workspace);
+      }
+
+      if (!nonStoppedExists) {
+        // all workspace are already removed
+        return;
+      }
+
+      // There is at least one workspace that was marked to be stop/removed after stop.
+      // It's needed to check if it's finished already
+      for (WorkspaceImpl workspace :
+          iterate(
+              (maxItems, skipCount) ->
+                  workspaceManager.getByNamespace(
+                      event.getAccount().getName(), false, maxItems, skipCount))) {
+        if (!STOPPED.equals(workspace.getStatus())) {
+          throw new ConflictException("User has workspace that is not stopped yet. Try again");
+        }
+      }
+      // Every workspace that was marked as to remove after stop is already removed
+    }
+
+    /**
+     * Going to reset EnvironmentContext, in this case Service Account(SA) credentials will be used
+     * for stopping workspace. If SA have required permissions workspace will be stopped otherwise
+     * exception thrown.
+     */
+    private void tryStopAndRemoveWithSA(WorkspaceImpl workspace)
+        throws ServerException, NotFoundException, ConflictException {
+      EnvironmentContext current = EnvironmentContext.getCurrent();
+      try {
+        EnvironmentContext.reset();
+        // Stop workspace and remove it after it was stopped
+        workspaceManager.stopWorkspace(workspace.getId(), of(REMOVE_WORKSPACE_AFTER_STOP, "true"));
+      } finally {
+        EnvironmentContext.setCurrent(current);
       }
     }
   }
