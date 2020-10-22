@@ -20,7 +20,9 @@ const workspaceRootFolderName: string = 'src';
 const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/main/java/org/springframework/samples/petclinic`;
 const tabTitle: string = 'PetClinicApplication.java';
 const codeNavigationClassName: string = 'SpringApplication.class';
-const taskName: string = 'maven build';
+const buildTaskName: string = 'maven build';
+const runTaskName: string = 'run webapp';
+const runTaskExpectedDialogue: string = 'A process is now listening on port 8080.';
 
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
@@ -33,15 +35,20 @@ suite(`${stack} test`, async () => {
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
     });
 
-    suite('Validation of workspace build and run', async () => {
-        codeExecutionTests.runTask(taskName, 240_000);
-        codeExecutionTests.closeTerminal(taskName);
+    suite('Validation of workspace build', async () => {
+        codeExecutionTests.runTask(buildTaskName, 360_000);
+        codeExecutionTests.closeTerminal(buildTaskName);
+    });
+
+    suite('Validation of workspace execution', async () => {
+        codeExecutionTests.runTaskWithDialogShellAndOpenLink(runTaskName, runTaskExpectedDialogue, 30_000);
+        codeExecutionTests.closeTerminal(runTaskName);
     });
 
     suite('Language server validation', async () => {
         commonLsTests.autocomplete(tabTitle, 32, 56, 'args : String[]');
         commonLsTests.errorHighlighting(tabTitle, 'error_text', 30);
-        commonLsTests.codeNavigation(tabTitle, 32, 23, codeNavigationClassName, 30_000); // extended timout to give LS enough time to start
+        commonLsTests.codeNavigation(tabTitle, 32, 23, codeNavigationClassName);
         commonLsTests.suggestionInvoking(tabTitle, 32, 23, 'run(Class<?>');
     });
 
