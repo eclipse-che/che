@@ -71,7 +71,6 @@ export class TopMenu {
         }
 
         await this.quickOpenContainer.clickOnContainerItem(task);
-        await this.quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
     }
 
     private getTopMenuButtonLocator(buttonText: string): By {
