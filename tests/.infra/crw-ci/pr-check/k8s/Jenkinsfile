@@ -17,7 +17,6 @@ pipeline {
 
         DEVFILE_PATH = "${WORKSPACE}/test-workspace-devfile.yaml"
         CUSTOM_RESOURCE_PATCH_FILE = "${WORKSPACE}/custom-resource-patch.yaml"
-        KEYCLOAK_BASE_URL = ""
 
         SUCCESS_THRESHOLD = 5
 
@@ -311,30 +310,11 @@ EOL"""
                         sh "cp ${WORKSPACE}/tests/e2e/files/happy-path/happy-path-workspace.yaml $DEVFILE_PATH"
                     }
 
-                    if (cheSingleHost.toBoolean() == true) {
-                        KEYCLOAK_BASE_URL = sh(
-                            script: "kubectl get ingress/che --namespace=eclipse-che -o jsonpath='{.spec.rules[0].host}'",
-                            returnStdout: true
-                        ).trim()
+                    sh """
+                        ${pathToChectl} auth:login -u admin -p admin --chenamespace=eclipse-che
 
-                    } else {
-                        KEYCLOAK_BASE_URL = sh(
-                            script: "kubectl get ingress/keycloak --namespace=eclipse-che -o jsonpath='{.spec.rules[0].host}'",
-                            returnStdout: true
-                        ).trim()
-                    }
-
-                    sh """       
-                        USER_ACCESS_TOKEN=\$(curl -k -X POST https://${KEYCLOAK_BASE_URL}/auth/realms/che/protocol/openid-connect/token \\
-                           -H "Content-Type: application/x-www-form-urlencoded" \\
-                           -d "username=admin" \\
-                           -d "password=admin" \\
-                           -d "grant_type=password" \\
-                           -d "client_id=che-public" | jq -r .access_token)
-    
                         ${pathToChectl} workspace:create --start \\
                            --devfile=${DEVFILE_PATH} \\
-                           --access-token "\$USER_ACCESS_TOKEN" \\
                            --chenamespace=eclipse-che
                     """
                 }
