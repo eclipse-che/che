@@ -170,7 +170,7 @@ class Loader {
     asyncAuthenticate(redirectUrl, endpointOrigin, token) {
         redirectUrl = new URL(redirectUrl);
         // if endpointOrigin is just "/", we'd end up with "///jwt/auth". So we replace two or more consecutive / with a single /.
-        const url = "https://" + redirectUrl.host + ("/" + endpointOrigin + "/jwt/auth").replace(/\/{2,}/g, "/");
+        const url = redirectUrl.protocol + "//" + redirectUrl.host + ("/" + endpointOrigin + "/jwt/auth").replace(/\/{2,}/g, "/");
         return new Promise((resolve, reject) => {
             const request = new XMLHttpRequest();
             request.open('GET', url);
