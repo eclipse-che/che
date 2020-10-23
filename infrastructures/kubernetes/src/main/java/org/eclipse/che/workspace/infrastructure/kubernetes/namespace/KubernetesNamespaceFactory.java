@@ -648,12 +648,12 @@ public class KubernetesNamespaceFactory {
   protected Map<String, String> evaluateAnnotationPlaceholders(
       NamespaceResolutionContext namespaceCtx) {
     Map<String, String> evaluatedAnnotations = new HashMap<>();
-    for (String labelName : namespaceAnnotations.keySet()) {
-      String evaluatedLabelValue =
+    for (String annotationName : namespaceAnnotations.keySet()) {
+      String evaluatedAnnotationValue =
           namespaceAnnotations
-              .get(labelName)
+              .get(annotationName)
               .replace(USERNAME_PLACEHOLDER, namespaceCtx.getUserName());
-      evaluatedAnnotations.put(labelName, evaluatedLabelValue);
+      evaluatedAnnotations.put(annotationName, evaluatedAnnotationValue);
     }
     return evaluatedAnnotations;
   }
