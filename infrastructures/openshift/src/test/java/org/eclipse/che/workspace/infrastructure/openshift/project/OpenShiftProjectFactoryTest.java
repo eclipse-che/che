@@ -243,12 +243,20 @@ public class OpenShiftProjectFactoryTest {
   }
 
   @Test
-  public void shouldReturnLabeledNamespacesWhenFound() throws InfrastructureException {
+  public void shouldReturnPreparedNamespacesWhenFound() throws InfrastructureException {
     // given
     List<Project> projects =
         Arrays.asList(
-            createProject("ns1", "project1", "desc1", "Active"),
-            createProject("ns2", "project2", "desc2", "Active"));
+            createProject(
+                "ns1", "project1", "desc1", "Active", Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe")),
+            createProject(
+                "ns3",
+                "project3",
+                "desc3",
+                "Active",
+                Map.of(NAMESPACE_ANNOTATION_NAME, "some_other_user")),
+            createProject(
+                "ns2", "project2", "desc2", "Active", Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe")));
     doReturn(projects).when(projectList).getItems();
 
     projectFactory =
@@ -275,7 +283,6 @@ public class OpenShiftProjectFactoryTest {
 
     // then
     assertEquals(availableNamespaces.size(), 2);
-    verify(projectOperation).withLabels(Map.of(NAMESPACE_LABEL_NAME, "jondoe"));
     assertEquals(availableNamespaces.get(0).getName(), "ns1");
     assertEquals(availableNamespaces.get(1).getName(), "ns2");
   }
@@ -736,11 +743,19 @@ public class OpenShiftProjectFactoryTest {
   }
 
   @Test
-  public void testEvalNamespaceNameWhenLabeledNamespacesFound() throws InfrastructureException {
+  public void testEvalNamespaceNameWhenPreparedNamespacesFound() throws InfrastructureException {
     List<Project> projects =
         Arrays.asList(
-            createProject("ns1", "project1", "desc1", "Active"),
-            createProject("ns2", "project2", "desc2", "Active"));
+            createProject(
+                "ns1", "project1", "desc1", "Active", Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe")),
+            createProject(
+                "ns3",
+                "project3",
+                "desc3",
+                "Active",
+                Map.of(NAMESPACE_ANNOTATION_NAME, "some_other_user")),
+            createProject(
+                "ns2", "project2", "desc2", "Active", Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe")));
     doReturn(projects).when(projectList).getItems();
 
     projectFactory =
@@ -798,12 +813,24 @@ public class OpenShiftProjectFactoryTest {
   }
 
   private Project createProject(String name, String displayName, String description, String phase) {
+    return createProject(name, displayName, description, phase, emptyMap());
+  }
+
+  private Project createProject(
+      String name,
+      String displayName,
+      String description,
+      String phase,
+      Map<String, String> extraAnnotations) {
     Map<String, String> annotations = new HashMap<>();
     if (displayName != null) {
       annotations.put(PROJECT_DISPLAY_NAME_ANNOTATION, displayName);
     }
     if (description != null) {
       annotations.put(PROJECT_DESCRIPTION_ANNOTATION, description);
+    }
+    if (extraAnnotations != null) {
+      annotations.putAll(extraAnnotations);
     }
 
     return new ProjectBuilder()

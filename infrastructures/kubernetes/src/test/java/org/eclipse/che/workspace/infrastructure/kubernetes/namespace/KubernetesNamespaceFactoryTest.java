@@ -239,13 +239,14 @@ public class KubernetesNamespaceFactoryTest {
   }
 
   @Test
-  public void shouldReturnLabeledNamespacesWhenFound() throws InfrastructureException {
+  public void shouldReturnPreparedNamespacesWhenFound() throws InfrastructureException {
     // given
     List<Namespace> namespaces =
         Arrays.asList(
             new NamespaceBuilder()
                 .withNewMetadata()
                 .withName("ns1")
+                .withAnnotations(Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe"))
                 .endMetadata()
                 .withNewStatus()
                 .withNewPhase("Active")
@@ -254,6 +255,16 @@ public class KubernetesNamespaceFactoryTest {
             new NamespaceBuilder()
                 .withNewMetadata()
                 .withName("ns2")
+                .withAnnotations(Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe"))
+                .endMetadata()
+                .withNewStatus()
+                .withNewPhase("Active")
+                .endStatus()
+                .build(),
+            new NamespaceBuilder()
+                .withNewMetadata()
+                .withName("ns3")
+                .withAnnotations(Map.of(NAMESPACE_ANNOTATION_NAME, "some_other_user"))
                 .endMetadata()
                 .withNewStatus()
                 .withNewPhase("Active")
@@ -282,7 +293,7 @@ public class KubernetesNamespaceFactoryTest {
 
     // then
     assertEquals(availableNamespaces.size(), 2);
-    verify(namespaceOperation).withLabels(Map.of(NAMESPACE_LABEL_NAME, "jondoe"));
+    verify(namespaceOperation).withLabels(Map.of(NAMESPACE_LABEL_NAME, "workspace"));
     assertEquals(availableNamespaces.get(0).getName(), "ns1");
     assertEquals(availableNamespaces.get(1).getName(), "ns2");
   }
@@ -1056,12 +1067,13 @@ public class KubernetesNamespaceFactoryTest {
   }
 
   @Test
-  public void testEvalNamespaceNameWhenLabeledNamespacesFound() throws InfrastructureException {
+  public void testEvalNamespaceNameWhenPreparedNamespacesFound() throws InfrastructureException {
     List<Namespace> namespaces =
         Arrays.asList(
             new NamespaceBuilder()
                 .withNewMetadata()
                 .withName("ns1")
+                .withAnnotations(Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe"))
                 .endMetadata()
                 .withNewStatus()
                 .withNewPhase("Active")
@@ -1070,6 +1082,7 @@ public class KubernetesNamespaceFactoryTest {
             new NamespaceBuilder()
                 .withNewMetadata()
                 .withName("ns2")
+                .withAnnotations(Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe"))
                 .endMetadata()
                 .withNewStatus()
                 .withNewPhase("Active")
