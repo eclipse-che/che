@@ -666,6 +666,9 @@ public class KubernetesNamespaceFactory {
    * @return true if `object` contains all `annotations`. False otherwise.
    */
   protected boolean matchesAnnotations(HasMetadata object, Map<String, String> annotations) {
+    if (object.getMetadata().getAnnotations() == null) {
+      return false;
+    }
     return object.getMetadata().getAnnotations().entrySet().containsAll(annotations.entrySet());
   }
 
