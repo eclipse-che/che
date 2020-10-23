@@ -1112,6 +1112,41 @@ public class KubernetesNamespaceFactoryTest {
     assertEquals(namespace, "ns1");
   }
 
+  @Test
+  public void testUsernamePlaceholderInLabelsIsNotEvaluated() throws InfrastructureException {
+    List<Namespace> namespaces =
+        singletonList(
+            new NamespaceBuilder()
+                .withNewMetadata()
+                .withName("ns1")
+                .withAnnotations(Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe"))
+                .endMetadata()
+                .withNewStatus()
+                .withNewPhase("Active")
+                .endStatus()
+                .build());
+    doReturn(namespaces).when(namespaceList).getItems();
+
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "legacy",
+            "",
+            "",
+            "defaultNs",
+            false,
+            true,
+            "try_placeholder_here=<username>",
+            NAMESPACE_ANNOTATIONS,
+            clientFactory,
+            userManager,
+            preferenceManager,
+            pool);
+    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("jondoe", "123", null, false));
+    namespaceFactory.list();
+
+    verify(namespaceOperation).withLabels(Map.of("try_placeholder_here", "<username>"));
+  }
+
   @Test(dataProvider = "invalidUsernames")
   public void normalizeTest(String raw, String expected) {
     namespaceFactory =

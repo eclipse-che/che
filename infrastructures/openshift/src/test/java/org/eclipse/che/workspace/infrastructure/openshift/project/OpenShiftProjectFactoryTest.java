@@ -783,6 +783,37 @@ public class OpenShiftProjectFactoryTest {
     assertEquals(namespace, "ns1");
   }
 
+  @Test
+  public void testUsernamePlaceholderInLabelsIsNotEvaluated() throws InfrastructureException {
+    List<Project> projects =
+        singletonList(
+            createProject(
+                "ns1", "project1", "desc1", "Active", Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe")));
+    doReturn(projects).when(projectList).getItems();
+
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "predefined",
+            "",
+            null,
+            "che-default",
+            false,
+            true,
+            "try_placeholder_here=<username>",
+            NAMESPACE_ANNOTATIONS,
+            clientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            preferenceManager,
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
+    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("jondoe", "123", null, false));
+    projectFactory.list();
+
+    verify(projectOperation).withLabels(Map.of("try_placeholder_here", "<username>"));
+  }
+
   private void prepareNamespaceToBeFoundByName(String name, Project project) throws Exception {
     @SuppressWarnings("unchecked")
     Resource<Project, DoneableProject> getProjectByNameOperation = mock(Resource.class);
