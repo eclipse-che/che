@@ -105,7 +105,7 @@ public class JwtProxyProvisionerTest {
                 URI.create("http://che.api"), "iss", "1h", "", runtimeId.getWorkspaceId()));
 
     when(serviceExposureStrategyProvider.get()).thenReturn(externalServiceExposureStrategy);
-    when(serviceExposureStrategyProvider.getMultiHost())
+    when(serviceExposureStrategyProvider.getMultiHostStrategy())
         .thenReturn(multiHostExternalServiceExposureStrategy);
 
     jwtProxyProvisioner =

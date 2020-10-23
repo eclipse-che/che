@@ -48,7 +48,7 @@ public class PassThroughProxyProvisioner extends AbstractJwtProxyProvisioner {
         constructSignatureKeyPair(),
         jwtProxyConfigBuilderFactory,
         serviceExposureStrategyProvider.get(),
-        serviceExposureStrategyProvider.getMultiHost(),
+        serviceExposureStrategyProvider.getMultiHostStrategy(),
         cookiePathStrategy,
         multiHostCookiePathStrategy,
         jwtImage,

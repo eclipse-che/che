@@ -61,7 +61,7 @@ public class PassThroughProxyProvisionerTest {
     ServiceExposureStrategyProvider exposureStrategyProvider =
         mock(ServiceExposureStrategyProvider.class);
     when(exposureStrategyProvider.get()).thenReturn(mock(ExternalServiceExposureStrategy.class));
-    when(exposureStrategyProvider.getMultiHost())
+    when(exposureStrategyProvider.getMultiHostStrategy())
         .thenReturn(mock(ExternalServiceExposureStrategy.class));
 
     PassThroughProxyProvisioner passThroughProxyProvisioner =

@@ -62,7 +62,7 @@ public class JwtProxyProvisioner extends AbstractJwtProxyProvisioner {
         constructKeyPair(signatureKeyManager, identity),
         jwtProxyConfigBuilderFactory,
         serviceExposureStrategyProvider.get(),
-        serviceExposureStrategyProvider.getMultiHost(),
+        serviceExposureStrategyProvider.getMultiHostStrategy(),
         cookiePathStrategy,
         multiHostCookiePathStrategy,
         jwtProxyImage,
