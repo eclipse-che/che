@@ -79,6 +79,7 @@ import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
 import org.eclipse.che.multiuser.api.workspace.activity.MultiUserWorkspaceActivityModule;
 import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakModule;
+import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakUserRemoverModule;
 import org.eclipse.che.multiuser.machine.authentication.server.MachineAuthModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationApiModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationJpaModule;
@@ -92,9 +93,14 @@ import org.eclipse.che.security.oauth.OpenShiftOAuthModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructure;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.PassThroughProxySecureServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyProvisionerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxySecureServerExposerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxyProvisionerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxySecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.metrics.InfrastructureMetricsModule;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
@@ -157,6 +163,8 @@ public class WsMasterModule extends AbstractModule {
     bind(WorkspaceEntityProvider.class);
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
+    bind(org.eclipse.che.api.devfile.server.DevfileService.class);
+    bind(org.eclipse.che.api.devfile.server.UserDevfileEntityProvider.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
 
     Multibinder<InternalEnvironmentProvisioner> internalEnvironmentProvisioners =
@@ -236,10 +244,15 @@ public class WsMasterModule extends AbstractModule {
     bindConstant().annotatedWith(Names.named("jndi.datasource.name")).to("java:/comp/env/jdbc/che");
 
     String infrastructure = System.getenv("CHE_INFRASTRUCTURE_ACTIVE");
+
+    install(new FactoryModuleBuilder().build(JwtProxyConfigBuilderFactory.class));
+    install(new FactoryModuleBuilder().build(PassThroughProxyProvisionerFactory.class));
+    installDefaultSecureServerExposer(infrastructure);
+
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
       configureMultiUserMode(persistenceProperties, infrastructure);
     } else {
-      configureSingleUserMode(persistenceProperties);
+      configureSingleUserMode(persistenceProperties, infrastructure);
     }
 
     install(
@@ -277,7 +290,8 @@ public class WsMasterModule extends AbstractModule {
     install(new OpenShiftOAuthModule());
   }
 
-  private void configureSingleUserMode(Map<String, String> persistenceProperties) {
+  private void configureSingleUserMode(
+      Map<String, String> persistenceProperties, String infrastructure) {
     persistenceProperties.put(
         PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
         "org.eclipse.che.core.db.h2.jpa.eclipselink.H2ExceptionHandler");
@@ -288,6 +302,7 @@ public class WsMasterModule extends AbstractModule {
 
     install(new org.eclipse.che.api.user.server.jpa.UserJpaModule());
     install(new org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule());
+    install(new org.eclipse.che.api.devfile.server.jpa.UserDevfileJpaModule());
 
     bind(org.eclipse.che.api.user.server.CheUserCreator.class);
 
@@ -305,6 +320,11 @@ public class WsMasterModule extends AbstractModule {
         .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache.class);
 
     install(new org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule());
+
+    // In single user mode jwtproxy provisioner isn't actually bound at all, but since
+    // it is the new default, we need to "fake it" by binding the passthrough provisioner
+    // as the jwtproxy impl.
+    configureImpostorJwtProxySecureProvisioner(infrastructure);
   }
 
   private void configureMultiUserMode(
@@ -344,6 +364,11 @@ public class WsMasterModule extends AbstractModule {
         new org.eclipse.che.multiuser.permission.workspace.server.jpa
             .MultiuserWorkspaceJpaModule());
     install(new MultiUserWorkspaceActivityModule());
+    install(
+        new org.eclipse.che.multiuser.permission.devfile.server.jpa
+            .MultiuserUserDevfileJpaModule());
+    install(
+        new org.eclipse.che.multiuser.permission.devfile.server.UserDevfileApiPermissionsModule());
 
     // Permission filters
     bind(org.eclipse.che.multiuser.permission.system.SystemServicePermissionsFilter.class);
@@ -358,7 +383,6 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.multiuser.permission.user.UserServicePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.logger.LoggerServicePermissionsFilter.class);
 
-    bind(org.eclipse.che.multiuser.permission.devfile.DevfilePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.workspace.activity.ActivityPermissionsFilter.class);
     bind(AdminPermissionInitializer.class).asEagerSingleton();
     bind(
@@ -373,6 +397,7 @@ public class WsMasterModule extends AbstractModule {
     install(new OrganizationJpaModule());
 
     install(new KeycloakModule());
+    install(new KeycloakUserRemoverModule());
 
     install(new MachineAuthModule());
     bind(RequestTokenExtractor.class).to(ChainedTokenExtractor.class);
@@ -410,6 +435,70 @@ public class WsMasterModule extends AbstractModule {
               new TypeLiteral<SecureServerExposerFactory<OpenShiftEnvironment>>() {})
           .addBinding("jwtproxy")
           .to(new TypeLiteral<JwtProxySecureServerExposerFactory<OpenShiftEnvironment>>() {});
+    }
+  }
+
+  private void configureImpostorJwtProxySecureProvisioner(String infrastructure) {
+    if (KubernetesInfrastructure.NAME.equals(infrastructure)) {
+      MapBinder.newMapBinder(
+              binder(),
+              new TypeLiteral<String>() {},
+              new TypeLiteral<SecureServerExposerFactory<KubernetesEnvironment>>() {})
+          .addBinding("jwtproxy")
+          .to(
+              new TypeLiteral<
+                  PassThroughProxySecureServerExposerFactory<KubernetesEnvironment>>() {});
+    } else {
+      MapBinder.newMapBinder(
+              binder(),
+              new TypeLiteral<String>() {},
+              new TypeLiteral<SecureServerExposerFactory<OpenShiftEnvironment>>() {})
+          .addBinding("jwtproxy")
+          .to(
+              new TypeLiteral<
+                  PassThroughProxySecureServerExposerFactory<OpenShiftEnvironment>>() {});
+    }
+  }
+
+  private void installDefaultSecureServerExposer(String infrastructure) {
+    if (KubernetesInfrastructure.NAME.equals(infrastructure)) {
+      MapBinder<String, SecureServerExposerFactory<KubernetesEnvironment>>
+          secureServerExposerFactories =
+              MapBinder.newMapBinder(binder(), new TypeLiteral<>() {}, new TypeLiteral<>() {});
+
+      install(
+          new FactoryModuleBuilder()
+              .implement(
+                  new TypeLiteral<SecureServerExposer<KubernetesEnvironment>>() {},
+                  new TypeLiteral<PassThroughProxySecureServerExposer<KubernetesEnvironment>>() {})
+              .build(
+                  new TypeLiteral<
+                      PassThroughProxySecureServerExposerFactory<KubernetesEnvironment>>() {}));
+
+      secureServerExposerFactories
+          .addBinding("default")
+          .to(
+              new TypeLiteral<
+                  PassThroughProxySecureServerExposerFactory<KubernetesEnvironment>>() {});
+    } else {
+      MapBinder<String, SecureServerExposerFactory<OpenShiftEnvironment>>
+          secureServerExposerFactories =
+              MapBinder.newMapBinder(binder(), new TypeLiteral<>() {}, new TypeLiteral<>() {});
+
+      install(
+          new FactoryModuleBuilder()
+              .implement(
+                  new TypeLiteral<SecureServerExposer<OpenShiftEnvironment>>() {},
+                  new TypeLiteral<PassThroughProxySecureServerExposer<OpenShiftEnvironment>>() {})
+              .build(
+                  new TypeLiteral<
+                      PassThroughProxySecureServerExposerFactory<OpenShiftEnvironment>>() {}));
+
+      secureServerExposerFactories
+          .addBinding("default")
+          .to(
+              new TypeLiteral<
+                  PassThroughProxySecureServerExposerFactory<OpenShiftEnvironment>>() {});
     }
   }
 }

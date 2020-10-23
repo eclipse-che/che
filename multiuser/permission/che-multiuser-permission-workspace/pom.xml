@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-permission</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>7.20.0-SNAPSHOT</version>
+        <version>7.21.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-permission-workspace</artifactId>
     <name>Che Multiuser :: Workspace Permissions</name>
@@ -72,6 +72,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

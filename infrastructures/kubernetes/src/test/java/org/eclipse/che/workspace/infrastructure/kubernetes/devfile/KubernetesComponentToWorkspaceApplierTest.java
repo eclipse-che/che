@@ -18,6 +18,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.REQUIRE_SUBDOMAIN;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
@@ -47,6 +48,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
@@ -580,7 +582,10 @@ public class KubernetesComponentToWorkspaceApplierTest {
         if (p.getSpec() == null) {
           continue;
         }
-        for (Container con : p.getSpec().getContainers()) {
+        List<Container> containers = new ArrayList<>();
+        containers.addAll(p.getSpec().getContainers());
+        containers.addAll(p.getSpec().getInitContainers());
+        for (Container con : containers) {
           assertEquals(con.getImagePullPolicy(), "Never");
         }
       }
@@ -679,6 +684,8 @@ public class KubernetesComponentToWorkspaceApplierTest {
               assertEquals(serverConfigs.get(endpointName).getPath(), endpointPath);
               assertEquals(serverConfigs.get(endpointName).getProtocol(), endpointProtocol);
               assertEquals(
+                  serverConfigs.get(endpointName).getAttributes().get(REQUIRE_SUBDOMAIN), "true");
+              assertEquals(
                   serverConfigs.get(endpointName).isSecure(), Boolean.parseBoolean(endpointSecure));
               assertEquals(
                   serverConfigs.get(endpointName).isInternal(),
@@ -696,7 +703,11 @@ public class KubernetesComponentToWorkspaceApplierTest {
         .filter(item -> item instanceof Pod)
         .map(item -> (Pod) item)
         .filter(pod -> pod.getSpec() != null)
-        .flatMap(pod -> pod.getSpec().getContainers().stream())
+        .flatMap(
+            pod ->
+                Stream.concat(
+                    pod.getSpec().getContainers().stream(),
+                    pod.getSpec().getInitContainers().stream()))
         .forEach(c -> c.setImagePullPolicy(imagePullPolicy));
   }
 

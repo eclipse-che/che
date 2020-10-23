@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.server;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.time.Instant.now;
@@ -24,6 +25,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.CREATED_ATTRIBUTE_N
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVITY_TIME;
+import static org.eclipse.che.api.workspace.shared.Constants.REMOVE_WORKSPACE_AFTER_STOP;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_NAME;
@@ -431,7 +433,8 @@ public class WorkspaceManager {
         .stopAsync(workspace, options)
         .whenComplete(
             (aVoid, throwable) -> {
-              if (workspace.isTemporary()) {
+              if (workspace.isTemporary()
+                  || parseBoolean(options.get(REMOVE_WORKSPACE_AFTER_STOP))) {
                 removeWorkspaceQuietly(workspace.getId());
               }
               try {
@@ -539,7 +542,7 @@ public class WorkspaceManager {
   private NamespaceResolutionContext buildResolutionContext(WorkspaceImpl workspace) {
     Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
     return new NamespaceResolutionContext(
-        workspace.getId(), currentSubject.getUserId(), currentSubject.getUserName());
+        workspace.getId(), currentSubject.getUserId(), currentSubject.getUserName(), true);
   }
 
   /** Returns first non-null argument or null if both are null. */

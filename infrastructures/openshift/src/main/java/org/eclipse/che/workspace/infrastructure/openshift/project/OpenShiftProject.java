@@ -208,6 +208,9 @@ public class OpenShiftProject extends KubernetesNamespace {
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {
         // project is foreign or doesn't exist
+        LOG.warn(
+            "Trying to get namespace '{}', but failed because the lack of permissions.",
+            projectName);
         return null;
       } else {
         throw new KubernetesInfrastructureException(e);

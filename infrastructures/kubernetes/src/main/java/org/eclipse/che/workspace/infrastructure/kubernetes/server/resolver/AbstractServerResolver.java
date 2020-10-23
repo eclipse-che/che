@@ -76,12 +76,4 @@ public abstract class AbstractServerResolver implements ServerResolver {
                         .build(),
                 (s1, s2) -> s2));
   }
-
-  /**
-   * Resolve external servers from implementation specific k8s object and it's annotations.
-   *
-   * @param machineName machine to resolve servers
-   * @return resolved servers
-   */
-  protected abstract Map<String, ServerImpl> resolveExternalServers(String machineName);
 }

@@ -15,7 +15,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Te
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import org.eclipse.che.selenium.core.client.CheTestSystemClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.hotupdate.HotUpdateUtil;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -43,7 +42,6 @@ import org.testng.annotations.Test;
 
 /** @author Katerina Kanova */
 public class RollingUpdateStrategyWithStartedWorkspaceTest {
-  @Inject private CheTestSystemClient cheTestSystemClient;
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
   @Inject private HotUpdateUtil hotUpdateUtil;

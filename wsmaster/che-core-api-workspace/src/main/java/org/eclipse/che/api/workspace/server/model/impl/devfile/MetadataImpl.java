@@ -35,6 +35,11 @@ public class MetadataImpl implements Metadata {
     this.name = name;
   }
 
+  public MetadataImpl(String name, String generateName) {
+    this.name = name;
+    this.generateName = generateName;
+  }
+
   public MetadataImpl(Metadata metadata) {
     this.name = metadata.getName();
     this.generateName = metadata.getGenerateName();

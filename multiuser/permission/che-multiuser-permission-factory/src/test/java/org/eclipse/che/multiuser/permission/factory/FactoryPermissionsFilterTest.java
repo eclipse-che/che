@@ -11,36 +11,15 @@
  */
 package org.eclipse.che.multiuser.permission.factory;
 
-import static com.jayway.restassured.RestAssured.given;
-import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.DOMAIN_ID;
-import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.READ;
-import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
-import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
-import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
-import com.jayway.restassured.response.Response;
 import java.util.Map;
-import javax.ws.rs.core.UriInfo;
 import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.factory.server.FactoryManager;
 import org.eclipse.che.api.factory.server.FactoryService;
-import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.core.Filter;
 import org.everrest.core.GenericContainerRequest;
@@ -85,7 +64,6 @@ public class FactoryPermissionsFilterTest {
   @DataProvider(name = "publicMethods")
   public Object[][] publicMethods() {
     return new Object[][] {
-
       {"resolveFactory", new Class[] {Map.class, Boolean.class}},
     };
   }
