@@ -30,7 +30,6 @@ import com.google.inject.Singleton;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.openshift.api.model.Project;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -135,9 +134,7 @@ public class KubernetesNamespaceFactory {
     Splitter.MapSplitter csvMapSplitter = Splitter.on(",").withKeyValueSeparator("=");
     //noinspection UnstableApiUsage
     this.namespaceLabels =
-        isNullOrEmpty(namespaceLabels)
-            ? emptyMap()
-            : csvMapSplitter.split(namespaceLabels);
+        isNullOrEmpty(namespaceLabels) ? emptyMap() : csvMapSplitter.split(namespaceLabels);
     //noinspection UnstableApiUsage
     this.namespaceAnnotations =
         isNullOrEmpty(namespaceAnnotations)
@@ -600,9 +597,10 @@ public class KubernetesNamespaceFactory {
   }
 
   /**
-   * Finds all namespaces that matches the labels configured in `che.infra.kubernetes.namespace.labels`
-   * and annotations in `che.infra.kubernetes.namespace.annotations` properties. Makes sure that
-   * placeholder in the annotations property are correctly evaluated.
+   * Finds all namespaces that matches the labels configured in
+   * `che.infra.kubernetes.namespace.labels` and annotations in
+   * `che.infra.kubernetes.namespace.annotations` properties. Makes sure that placeholder in the
+   * annotations property are correctly evaluated.
    *
    * <p>If used ServiceAccount does not have permissions to list the namespaces, returns the empty
    * list.
@@ -613,15 +611,12 @@ public class KubernetesNamespaceFactory {
   protected List<KubernetesNamespaceMeta> findPreparedNamespaces(
       NamespaceResolutionContext namespaceCtx) throws InfrastructureException {
     try {
-      List<Namespace> workspaceNamespaces = clientFactory
-          .create()
-          .namespaces()
-          .withLabels(namespaceLabels)
-          .list()
-          .getItems();
+      List<Namespace> workspaceNamespaces =
+          clientFactory.create().namespaces().withLabels(namespaceLabels).list().getItems();
       if (!workspaceNamespaces.isEmpty()) {
         Map<String, String> evaluatedAnnotations = evaluateAnnotationPlaceholders(namespaceCtx);
-        return workspaceNamespaces.stream()
+        return workspaceNamespaces
+            .stream()
             .filter(p -> matchesAnnotations(p, evaluatedAnnotations))
             .map(this::asNamespaceMeta)
             .collect(Collectors.toList());
@@ -655,7 +650,8 @@ public class KubernetesNamespaceFactory {
     Map<String, String> evaluatedAnnotations = new HashMap<>();
     for (String labelName : namespaceAnnotations.keySet()) {
       String evaluatedLabelValue =
-          namespaceAnnotations.get(labelName)
+          namespaceAnnotations
+              .get(labelName)
               .replace(USERNAME_PLACEHOLDER, namespaceCtx.getUserName());
       evaluatedAnnotations.put(labelName, evaluatedLabelValue);
     }
@@ -665,7 +661,7 @@ public class KubernetesNamespaceFactory {
   /**
    * Checks if given `object` contains all given `annotations` with exact values.
    *
-   * @param object      to check
+   * @param object to check
    * @param annotations that given `object` has to contain
    * @return true if `object` contains all `annotations`. False otherwise.
    */
