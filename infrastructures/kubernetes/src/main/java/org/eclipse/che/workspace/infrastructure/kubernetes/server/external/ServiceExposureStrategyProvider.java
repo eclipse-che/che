@@ -49,18 +49,16 @@ public class ServiceExposureStrategyProvider implements Provider<ExternalService
     }
   }
 
-  /**
-   * Returns the configured exposure strategy.
-   */
+  /** Returns the configured exposure strategy. */
   @Override
   public ExternalServiceExposureStrategy get() {
     return namingStrategy;
   }
 
   /**
-   * Returns the multi-host exposure strategy, regardless of which default exposure strategy is configured.
-   * This is used in workspaces with mixed endpoints (i.e. plugins by default deployed using the configured strategy and devfile endpoints
-   * by default deployed using multi-host).
+   * Returns the multi-host exposure strategy, regardless of which default exposure strategy is
+   * configured. This is used in workspaces with mixed endpoints (i.e. plugins by default deployed
+   * using the configured strategy and devfile endpoints by default deployed using multi-host).
    */
   public ExternalServiceExposureStrategy getMultiHostStrategy() {
     return multiHostStrategy;
