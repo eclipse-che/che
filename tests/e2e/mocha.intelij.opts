@@ -2,6 +2,6 @@
 -u tdd
 --bail
 --full-trace
---reporter 'dist/driver/CheReporter.js
---spec dist/tests/login/Login.spec.js
+--reporter './dist/driver/CheReporter.js'
+--spec './dist/tests/login/Login.spec.js'
 --spec './dist/tests/intelij/IntelijOpenWorkspace.spec.js'
