@@ -43,7 +43,15 @@ public abstract class AbstractServerResolver implements ServerResolver {
     }
   }
 
-  public static String buildPath(String fragment1, @Nullable String fragment2) {
+  /**
+   * Joins together the two URL path fragments together and makes sure the returned path ends with a
+   * slash.
+   *
+   * @param fragment1 the root path fragment
+   * @param fragment2 the sub-path fragment
+   * @return the two path fragments joined together
+   */
+  protected static String buildPath(String fragment1, @Nullable String fragment2) {
     StringBuilder sb = new StringBuilder(fragment1);
 
     if (!isNullOrEmpty(fragment2)) {
