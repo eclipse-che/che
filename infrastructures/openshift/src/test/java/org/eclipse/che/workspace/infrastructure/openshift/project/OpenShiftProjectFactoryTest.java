@@ -87,8 +87,10 @@ public class OpenShiftProjectFactoryTest {
   private static final String USER_NAME = "username";
   private static final String NO_OAUTH_IDENTITY_PROVIDER = null;
   private static final String OAUTH_IDENTITY_PROVIDER = "openshift-v4";
-  private static final String NAMESPACE_LABEL_NAME = "for-user";
-  private static final String NAMESPACE_LABELS = NAMESPACE_LABEL_NAME + "=<username>";
+  private static final String NAMESPACE_LABEL_NAME = "component";
+  private static final String NAMESPACE_LABELS = NAMESPACE_LABEL_NAME + "=workspace";
+  private static final String NAMESPACE_ANNOTATION_NAME = "owner";
+  private static final String NAMESPACE_ANNOTATIONS = NAMESPACE_ANNOTATION_NAME + "=<username>";
 
   @Mock private OpenShiftClientConfigFactory configFactory;
   @Mock private OpenShiftClientFactory clientFactory;
@@ -150,6 +152,7 @@ public class OpenShiftProjectFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
@@ -174,6 +177,7 @@ public class OpenShiftProjectFactoryTest {
             true,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
@@ -201,6 +205,7 @@ public class OpenShiftProjectFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
@@ -227,6 +232,7 @@ public class OpenShiftProjectFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
@@ -254,6 +260,7 @@ public class OpenShiftProjectFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
@@ -291,6 +298,7 @@ public class OpenShiftProjectFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
@@ -323,6 +331,7 @@ public class OpenShiftProjectFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
@@ -365,6 +374,7 @@ public class OpenShiftProjectFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
@@ -401,6 +411,7 @@ public class OpenShiftProjectFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
@@ -437,6 +448,7 @@ public class OpenShiftProjectFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
@@ -465,6 +477,7 @@ public class OpenShiftProjectFactoryTest {
             true,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
@@ -509,6 +522,7 @@ public class OpenShiftProjectFactoryTest {
             true,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
@@ -548,6 +562,7 @@ public class OpenShiftProjectFactoryTest {
             true,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
@@ -579,6 +594,7 @@ public class OpenShiftProjectFactoryTest {
                 false,
                 true,
                 NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
                 clientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
@@ -614,6 +630,7 @@ public class OpenShiftProjectFactoryTest {
                 false,
                 true,
                 NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
                 clientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
@@ -651,6 +668,7 @@ public class OpenShiftProjectFactoryTest {
                 false,
                 true,
                 NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
                 clientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
@@ -690,6 +708,7 @@ public class OpenShiftProjectFactoryTest {
                 false,
                 true,
                 NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
                 clientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
@@ -733,6 +752,7 @@ public class OpenShiftProjectFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
