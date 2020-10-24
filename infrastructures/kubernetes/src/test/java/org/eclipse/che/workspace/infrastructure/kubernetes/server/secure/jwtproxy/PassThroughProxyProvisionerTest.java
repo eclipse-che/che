@@ -33,6 +33,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ServiceExposureStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
@@ -57,11 +58,18 @@ public class PassThroughProxyProvisionerTest {
     JwtProxyConfigBuilder configBuilder = mock(JwtProxyConfigBuilder.class);
     when(configBuilderFactory.create(any())).thenReturn(configBuilder);
 
+    ServiceExposureStrategyProvider exposureStrategyProvider =
+        mock(ServiceExposureStrategyProvider.class);
+    when(exposureStrategyProvider.get()).thenReturn(mock(ExternalServiceExposureStrategy.class));
+    when(exposureStrategyProvider.getMultiHostStrategy())
+        .thenReturn(mock(ExternalServiceExposureStrategy.class));
+
     PassThroughProxyProvisioner passThroughProxyProvisioner =
         new PassThroughProxyProvisioner(
             configBuilderFactory,
-            mock(ExternalServiceExposureStrategy.class),
+            exposureStrategyProvider,
             new CookiePathStrategy(MULTI_HOST_STRATEGY),
+            new MultiHostCookiePathStrategy(),
             "eclipse/che-jwtproxy",
             "128mb",
             "0.5",
@@ -84,6 +92,7 @@ public class PassThroughProxyProvisionerTest {
         "terminal",
         port,
         "TCP",
+        false,
         ImmutableMap.of("server1", server1));
 
     // then

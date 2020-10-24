@@ -14,6 +14,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -26,6 +29,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.GatewayConfigmapLabels;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -41,6 +45,8 @@ public class GatewayTlsProvisionerTest {
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private GatewayConfigmapLabels gatewayConfigmapLabels;
+  @Mock private TlsProvisionerProvider<KubernetesEnvironment> tlsProvisionerProvider;
+  @Mock private TlsProvisioner<KubernetesEnvironment> nativeTlsProvisioner;
 
   private final ServerConfigImpl httpServer =
       new ServerConfigImpl("8080/tpc", "http", "/api", emptyMap());
@@ -52,7 +58,9 @@ public class GatewayTlsProvisionerTest {
 
   @BeforeMethod
   public void setUp() {
-    when(gatewayConfigmapLabels.isGatewayConfig(any(ConfigMap.class))).thenReturn(true);
+    lenient().when(gatewayConfigmapLabels.isGatewayConfig(any(ConfigMap.class))).thenReturn(true);
+    when(tlsProvisionerProvider.get(eq(WorkspaceExposureType.NATIVE)))
+        .thenReturn(nativeTlsProvisioner);
   }
 
   @Test(dataProvider = "tlsProvisionData")
@@ -71,7 +79,7 @@ public class GatewayTlsProvisionerTest {
             .build();
 
     GatewayTlsProvisioner<KubernetesEnvironment> gatewayTlsProvisioner =
-        new GatewayTlsProvisioner<>(tlsEnabled, gatewayConfigmapLabels);
+        new GatewayTlsProvisioner<>(tlsEnabled, gatewayConfigmapLabels, tlsProvisionerProvider);
 
     when(k8sEnv.getConfigMaps()).thenReturn(singletonMap("route", routeConfigMap));
 
@@ -115,11 +123,24 @@ public class GatewayTlsProvisionerTest {
 
     when(k8sEnv.getConfigMaps()).thenReturn(singletonMap("route", routeConfigMap));
     GatewayTlsProvisioner<KubernetesEnvironment> gatewayTlsProvisioner =
-        new GatewayTlsProvisioner<>(true, gatewayConfigmapLabels);
+        new GatewayTlsProvisioner<>(true, gatewayConfigmapLabels, tlsProvisionerProvider);
 
     // when
     gatewayTlsProvisioner.provision(k8sEnv, runtimeIdentity);
 
     // then exception
+  }
+
+  @Test
+  public void nativeRoutesProvisioned() throws Exception {
+    // given
+    GatewayTlsProvisioner<KubernetesEnvironment> gatewayTlsProvisioner =
+        new GatewayTlsProvisioner<>(true, gatewayConfigmapLabels, tlsProvisionerProvider);
+
+    // when
+    gatewayTlsProvisioner.provision(k8sEnv, runtimeIdentity);
+
+    // then
+    verify(nativeTlsProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
   }
 }

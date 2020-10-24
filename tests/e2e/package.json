@@ -18,6 +18,7 @@
     "test-openshift-connector": "./generateIndex.sh &&  npm run lint && npm run tsc && mocha --opts mocha-connector.opts",
     "test-all-devfiles": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-all-devfiles.opts",
     "test-factory": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-factory.opts",
+    "test-intelij": "tsc && mocha --opts mocha.intelij.opts",
     "lint": "tslint --fix -p .",
     "tsc": "tsc -p ."
   },
