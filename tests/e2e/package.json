@@ -19,6 +19,7 @@
     "test-all-devfiles": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-all-devfiles.opts",
     "test-factory": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-factory.opts",
     "test-intelij": "tsc && mocha --opts mocha.intelij.opts",
+    "test-oauth": "tsc && mocha --opts mocha.ocp.link.opts",
     "lint": "tslint --fix -p .",
     "tsc": "tsc -p ."
   },
