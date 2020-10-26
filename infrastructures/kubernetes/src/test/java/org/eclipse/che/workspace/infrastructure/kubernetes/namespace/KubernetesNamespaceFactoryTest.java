@@ -96,8 +96,10 @@ public class KubernetesNamespaceFactoryTest {
 
   private static final String USER_ID = "userid";
   private static final String USER_NAME = "username";
-  private static final String NAMESPACE_LABEL_NAME = "che-username";
-  private static final String NAMESPACE_LABELS = NAMESPACE_LABEL_NAME + "=<username>";
+  private static final String NAMESPACE_LABEL_NAME = "component";
+  private static final String NAMESPACE_LABELS = NAMESPACE_LABEL_NAME + "=workspace";
+  private static final String NAMESPACE_ANNOTATION_NAME = "owner";
+  private static final String NAMESPACE_ANNOTATIONS = NAMESPACE_ANNOTATION_NAME + "=<username>";
 
   @Mock private KubernetesSharedPool pool;
   @Mock private KubernetesClientFactory clientFactory;
@@ -160,6 +162,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -181,6 +184,7 @@ public class KubernetesNamespaceFactoryTest {
             true,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -230,6 +234,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -251,6 +256,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -258,13 +264,14 @@ public class KubernetesNamespaceFactoryTest {
   }
 
   @Test
-  public void shouldReturnLabeledNamespacesWhenFound() throws InfrastructureException {
+  public void shouldReturnPreparedNamespacesWhenFound() throws InfrastructureException {
     // given
     List<Namespace> namespaces =
         Arrays.asList(
             new NamespaceBuilder()
                 .withNewMetadata()
                 .withName("ns1")
+                .withAnnotations(Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe"))
                 .endMetadata()
                 .withNewStatus()
                 .withNewPhase("Active")
@@ -273,6 +280,16 @@ public class KubernetesNamespaceFactoryTest {
             new NamespaceBuilder()
                 .withNewMetadata()
                 .withName("ns2")
+                .withAnnotations(Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe"))
+                .endMetadata()
+                .withNewStatus()
+                .withNewPhase("Active")
+                .endStatus()
+                .build(),
+            new NamespaceBuilder()
+                .withNewMetadata()
+                .withName("ns3")
+                .withAnnotations(Map.of(NAMESPACE_ANNOTATION_NAME, "some_other_user"))
                 .endMetadata()
                 .withNewStatus()
                 .withNewPhase("Active")
@@ -289,6 +306,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -300,7 +318,7 @@ public class KubernetesNamespaceFactoryTest {
 
     // then
     assertEquals(availableNamespaces.size(), 2);
-    verify(namespaceOperation).withLabels(Map.of(NAMESPACE_LABEL_NAME, "jondoe"));
+    verify(namespaceOperation).withLabels(Map.of(NAMESPACE_LABEL_NAME, "workspace"));
     assertEquals(availableNamespaces.get(0).getName(), "ns1");
     assertEquals(availableNamespaces.get(1).getName(), "ns2");
   }
@@ -331,6 +349,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -360,6 +379,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -393,6 +413,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -420,6 +441,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -450,6 +472,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -475,6 +498,7 @@ public class KubernetesNamespaceFactoryTest {
             true,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -509,6 +533,7 @@ public class KubernetesNamespaceFactoryTest {
             true,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -544,6 +569,7 @@ public class KubernetesNamespaceFactoryTest {
             true,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -573,6 +599,7 @@ public class KubernetesNamespaceFactoryTest {
                 false,
                 true,
                 NAMESPACE_LABELS,
+                NAMESPACE_ANNOTATIONS,
                 clientFactory,
                 userManager,
                 preferenceManager,
@@ -604,6 +631,7 @@ public class KubernetesNamespaceFactoryTest {
                 true,
                 false,
                 NAMESPACE_LABELS,
+                NAMESPACE_ANNOTATIONS,
                 clientFactory,
                 userManager,
                 preferenceManager,
@@ -636,6 +664,7 @@ public class KubernetesNamespaceFactoryTest {
                 false,
                 true,
                 NAMESPACE_LABELS,
+                NAMESPACE_ANNOTATIONS,
                 clientFactory,
                 userManager,
                 preferenceManager,
@@ -672,6 +701,7 @@ public class KubernetesNamespaceFactoryTest {
                 false,
                 true,
                 NAMESPACE_LABELS,
+                NAMESPACE_ANNOTATIONS,
                 clientFactory,
                 userManager,
                 preferenceManager,
@@ -739,6 +769,7 @@ public class KubernetesNamespaceFactoryTest {
                 false,
                 true,
                 NAMESPACE_LABELS,
+                NAMESPACE_ANNOTATIONS,
                 clientFactory,
                 userManager,
                 preferenceManager,
@@ -794,6 +825,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -812,6 +844,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -834,6 +867,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -860,6 +894,7 @@ public class KubernetesNamespaceFactoryTest {
             true,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -889,6 +924,7 @@ public class KubernetesNamespaceFactoryTest {
             true,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -919,6 +955,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -949,6 +986,7 @@ public class KubernetesNamespaceFactoryTest {
             true,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -979,6 +1017,7 @@ public class KubernetesNamespaceFactoryTest {
             true,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -1005,6 +1044,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -1033,6 +1073,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -1051,12 +1092,13 @@ public class KubernetesNamespaceFactoryTest {
   }
 
   @Test
-  public void testEvalNamespaceNameWhenLabeledNamespacesFound() throws InfrastructureException {
+  public void testEvalNamespaceNameWhenPreparedNamespacesFound() throws InfrastructureException {
     List<Namespace> namespaces =
         Arrays.asList(
             new NamespaceBuilder()
                 .withNewMetadata()
                 .withName("ns1")
+                .withAnnotations(Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe"))
                 .endMetadata()
                 .withNewStatus()
                 .withNewPhase("Active")
@@ -1065,6 +1107,7 @@ public class KubernetesNamespaceFactoryTest {
             new NamespaceBuilder()
                 .withNewMetadata()
                 .withName("ns2")
+                .withAnnotations(Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe"))
                 .endMetadata()
                 .withNewStatus()
                 .withNewPhase("Active")
@@ -1081,6 +1124,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -1091,6 +1135,41 @@ public class KubernetesNamespaceFactoryTest {
             new NamespaceResolutionContext("workspace123", "user123", "jondoe"));
 
     assertEquals(namespace, "ns1");
+  }
+
+  @Test
+  public void testUsernamePlaceholderInLabelsIsNotEvaluated() throws InfrastructureException {
+    List<Namespace> namespaces =
+        singletonList(
+            new NamespaceBuilder()
+                .withNewMetadata()
+                .withName("ns1")
+                .withAnnotations(Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe"))
+                .endMetadata()
+                .withNewStatus()
+                .withNewPhase("Active")
+                .endStatus()
+                .build());
+    doReturn(namespaces).when(namespaceList).getItems();
+
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "legacy",
+            "",
+            "",
+            "defaultNs",
+            false,
+            true,
+            "try_placeholder_here=<username>",
+            NAMESPACE_ANNOTATIONS,
+            clientFactory,
+            userManager,
+            preferenceManager,
+            pool);
+    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("jondoe", "123", null, false));
+    namespaceFactory.list();
+
+    verify(namespaceOperation).withLabels(Map.of("try_placeholder_here", "<username>"));
   }
 
   @Test(dataProvider = "invalidUsernames")
@@ -1104,6 +1183,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
@@ -1122,6 +1202,7 @@ public class KubernetesNamespaceFactoryTest {
             false,
             true,
             NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
