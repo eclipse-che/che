@@ -23,6 +23,11 @@ items:
       app.kubernetes.io/component: webapp
       app.kubernetes.io/part-of: petclinic
   spec:
+    initContainers:
+    - command:
+          - "echo foo:bar"
+      image: "openjdk:11-jre-openjdk9"
+      name: "init"
     containers:
     - name: server
       image: mariolet/petclinic

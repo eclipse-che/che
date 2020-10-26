@@ -142,6 +142,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesP
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ServiceExposureStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.KubernetesServerResolverFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -218,6 +219,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
   @Mock private KubernetesPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
+  @Mock private ServiceExposureStrategyProvider serviceExposureStrategyProvider;
   @Mock private RuntimeCleaner runtimeCleaner;
   private KubernetesServerResolverFactory serverResolverFactory;
 

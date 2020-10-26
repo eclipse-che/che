@@ -14,6 +14,8 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
@@ -25,8 +27,10 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -88,6 +92,8 @@ public class KubernetesNamespaceFactory {
 
   private final String defaultNamespaceName;
   private final boolean allowUserDefinedNamespaces;
+  protected final Map<String, String> namespaceLabels;
+  protected final Map<String, String> namespaceAnnotations;
 
   private final String legacyNamespaceName;
   private final String serviceAccountName;
@@ -107,6 +113,8 @@ public class KubernetesNamespaceFactory {
       @Named("che.infra.kubernetes.namespace.allow_user_defined")
           boolean allowUserDefinedNamespaces,
       @Named("che.infra.kubernetes.namespace.creation_allowed") boolean namespaceCreationAllowed,
+      @Named("che.infra.kubernetes.namespace.labels") String namespaceLabels,
+      @Named("che.infra.kubernetes.namespace.annotations") String namespaceAnnotations,
       KubernetesClientFactory clientFactory,
       UserManager userManager,
       PreferenceManager preferenceManager,
@@ -122,6 +130,17 @@ public class KubernetesNamespaceFactory {
     this.preferenceManager = preferenceManager;
     this.sharedPool = sharedPool;
 
+    //noinspection UnstableApiUsage
+    Splitter.MapSplitter csvMapSplitter = Splitter.on(",").withKeyValueSeparator("=");
+    //noinspection UnstableApiUsage
+    this.namespaceLabels =
+        isNullOrEmpty(namespaceLabels) ? emptyMap() : csvMapSplitter.split(namespaceLabels);
+    //noinspection UnstableApiUsage
+    this.namespaceAnnotations =
+        isNullOrEmpty(namespaceAnnotations)
+            ? emptyMap()
+            : csvMapSplitter.split(namespaceAnnotations);
+
     if (isNullOrEmpty(defaultNamespaceName)) {
       throw new ConfigurationException("che.infra.kubernetes.namespace.default must be configured");
     }
@@ -133,11 +152,6 @@ public class KubernetesNamespaceFactory {
     } else {
       this.clusterRoleNames = Collections.emptySet();
     }
-  }
-
-  private boolean hasPlaceholders(String namespaceName) {
-    return namespaceName != null
-        && NAMESPACE_NAME_PLACEHOLDERS.keySet().stream().anyMatch(namespaceName::contains);
   }
 
   /**
@@ -172,21 +186,38 @@ public class KubernetesNamespaceFactory {
     String defaultNamespace =
         evalPlaceholders(defaultNamespaceName, EnvironmentContext.getCurrent().getSubject(), null);
     if (!namespaceName.equals(defaultNamespace)) {
-      throw new ValidationException(
-          format(
-              "User defined namespaces are not allowed. Only the default namespace '%s' is available.",
-              defaultNamespaceName));
+      try {
+        List<KubernetesNamespaceMeta> labeledNamespaces =
+            findPreparedNamespaces(
+                new NamespaceResolutionContext(EnvironmentContext.getCurrent().getSubject()));
+        if (labeledNamespaces.stream().noneMatch(n -> n.getName().equals(namespaceName))) {
+          throw new ValidationException(
+              format(
+                  "User defined namespaces are not allowed. Only the default namespace '%s' is available.",
+                  defaultNamespaceName));
+        }
+      } catch (InfrastructureException e) {
+        throw new ValidationException("Some infrastructure failure caused failed validation.", e);
+      }
     }
   }
 
   /** Returns list of k8s namespaces names where a user is able to run workspaces. */
   public List<KubernetesNamespaceMeta> list() throws InfrastructureException {
     if (!allowUserDefinedNamespaces) {
-      return singletonList(getDefaultNamespace());
+      NamespaceResolutionContext resolutionCtx =
+          new NamespaceResolutionContext(EnvironmentContext.getCurrent().getSubject());
+
+      List<KubernetesNamespaceMeta> labeledNamespaces = findPreparedNamespaces(resolutionCtx);
+      if (!labeledNamespaces.isEmpty()) {
+        return labeledNamespaces;
+      } else {
+        return singletonList(getDefaultNamespace(resolutionCtx));
+      }
     }
 
     // if user defined namespaces are allowed - fetch all available
-    List<KubernetesNamespaceMeta> namespaces = fetchNamespaces();
+    List<KubernetesNamespaceMeta> namespaces = new ArrayList<>(fetchNamespaces());
 
     provisionDefaultNamespace(namespaces);
 
@@ -197,16 +228,8 @@ public class KubernetesNamespaceFactory {
    * Returns default namespace, it's based on existing namespace if there is such or just object
    * holder if there is no such namespace on cluster.
    */
-  private KubernetesNamespaceMeta getDefaultNamespace() throws InfrastructureException {
-    // the default namespace must be configured if user defined are not allowed
-    // so return only it
-    NamespaceResolutionContext resolutionCtx =
-        new NamespaceResolutionContext(
-            // workspace id is not know at this stage.
-            // It's good enough to have <workspaceid> placeholder after evaluating
-            null,
-            EnvironmentContext.getCurrent().getSubject().getUserId(),
-            EnvironmentContext.getCurrent().getSubject().getUserName());
+  private KubernetesNamespaceMeta getDefaultNamespace(NamespaceResolutionContext resolutionCtx)
+      throws InfrastructureException {
     String evaluatedName = evaluateNamespaceName(resolutionCtx);
 
     Optional<KubernetesNamespaceMeta> defaultNamespaceOpt = fetchNamespace(evaluatedName);
@@ -283,9 +306,16 @@ public class KubernetesNamespaceFactory {
           .map(this::asNamespaceMeta)
           .collect(Collectors.toList());
     } catch (KubernetesClientException e) {
-      throw new InfrastructureException(
-          "Error occurred when tried to list all available namespaces. Cause: " + e.getMessage(),
-          e);
+      if (e.getCode() == 403) {
+        LOG.warn(
+            "Trying to fetch all namespaces, but failed for lack of permissions. Cause: {}",
+            e.getMessage());
+        return emptyList();
+      } else {
+        throw new InfrastructureException(
+            "Error occurred when tried to list all available namespaces. Cause: " + e.getMessage(),
+            e);
+      }
     }
   }
 
@@ -348,11 +378,8 @@ public class KubernetesNamespaceFactory {
    *
    * @param namespaceName the name of the namespace the workspace is stored in
    * @param workspace the workspace
-   * @throws InfrastructureException in case of legacy workspaces that don't store their namespace
-   *     in the attributes, this method might fail
    */
-  protected boolean isWorkspaceNamespaceManaged(String namespaceName, Workspace workspace)
-      throws InfrastructureException {
+  protected boolean isWorkspaceNamespaceManaged(String namespaceName, Workspace workspace) {
     return namespaceName != null && namespaceName.contains(workspace.getId());
   }
 
@@ -456,8 +483,16 @@ public class KubernetesNamespaceFactory {
   /**
    * Evaluates namespace according to the specified context.
    *
-   * <p>Kubernetes infrastructure use checks is evaluated legacy namespace exists, if it does - use
-   * it. Otherwise evaluated new default namespace name;
+   * <p>First we try to find namespace with labels set in `che.infra.kubernetes.namespace.labels`
+   * property. If any found, we take the first one and use it. See: {@link
+   * KubernetesNamespaceFactory#findFirstLabeledNamespace(NamespaceResolutionContext)}
+   *
+   * <p>Then we try to find namespace stored in persisted user's preferences and use it if found.
+   * See: {@link KubernetesNamespaceFactory#findStoredNamespace(NamespaceResolutionContext)}
+   *
+   * <p>As a last option, we construct namespace name from `che.infra.kubernetes.namespace.default`
+   * property. See: {@link
+   * KubernetesNamespaceFactory#evalDefaultNamespace(NamespaceResolutionContext)}
    *
    * @param resolutionCtx context for namespace evaluation
    * @return evaluated namespace name
@@ -467,13 +502,69 @@ public class KubernetesNamespaceFactory {
    */
   public String evaluateNamespaceName(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
-    String namespace;
-    Optional<Pair<String, String>> storedNamespace = getPreferencesNamespaceName(resolutionCtx);
-    if (storedNamespace.isEmpty() || !isStoredTemplateValid(storedNamespace.get().second)) {
-      namespace = evalPlaceholders(defaultNamespaceName, resolutionCtx);
+    Optional<String> namespace =
+        findFirstLabeledNamespace(resolutionCtx).or(() -> findStoredNamespace(resolutionCtx));
+    if (namespace.isPresent()) {
+      return namespace.get();
     } else {
-      namespace = storedNamespace.get().first;
+      return evalDefaultNamespace(resolutionCtx);
     }
+  }
+
+  /**
+   * Finds first namespace matches labels set by `che.infra.kubernetes.namespace.labels` property.
+   *
+   * @return first found labeled namespace if such namespace exists
+   */
+  private Optional<String> findFirstLabeledNamespace(NamespaceResolutionContext resolutionCtx)
+      throws InfrastructureException {
+    List<KubernetesNamespaceMeta> labeledNamespaces = findPreparedNamespaces(resolutionCtx);
+    if (!labeledNamespaces.isEmpty()) {
+      String foundNamespace =
+          labeledNamespaces
+              .stream()
+              .findFirst()
+              .map(KubernetesNamespaceMeta::getName)
+              .orElseThrow(
+                  () ->
+                      new InfrastructureException(
+                          "Failed when fetching labeled namespaces. It should not happen. Please report a bug if you see this!"));
+      if (labeledNamespaces.size() > 1) {
+        LOG.warn(
+            "found '{}' matching labeled namespaces {}. Using '{}'.",
+            labeledNamespaces.size(),
+            labeledNamespaces.toString(),
+            foundNamespace);
+      }
+      return Optional.of(foundNamespace);
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Finds namespace name stored in User's preferences and ensures it is still valid.
+   *
+   * @return user's stored namespace if exists
+   */
+  private Optional<String> findStoredNamespace(NamespaceResolutionContext resolutionCtx) {
+    Optional<Pair<String, String>> storedNamespace = getPreferencesNamespaceName(resolutionCtx);
+    if (storedNamespace.isPresent() && isStoredTemplateValid(storedNamespace.get().second)) {
+      return Optional.of(storedNamespace.get().first);
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Constructs the namespace name from `che.infra.kubernetes.namespace.default` property. Ensures
+   * that all placeholders are evaluated and final namespace name is in valid format.
+   *
+   * @return ready-to-use namespace name
+   */
+  private String evalDefaultNamespace(NamespaceResolutionContext resolutionCtx)
+      throws InfrastructureException {
+    String namespace = evalPlaceholders(defaultNamespaceName, resolutionCtx);
 
     if (!NamespaceNameValidator.isValid(namespace)) {
       Optional<KubernetesNamespaceMeta> namespaceMetaOptional;
@@ -503,6 +594,82 @@ public class KubernetesNamespaceFactory {
       recordEvaluatedNamespaceName(namespace, resolutionCtx);
     }
     return namespace;
+  }
+
+  /**
+   * Finds all namespaces that matches the labels configured in
+   * `che.infra.kubernetes.namespace.labels` and annotations in
+   * `che.infra.kubernetes.namespace.annotations` properties. Makes sure that placeholder in the
+   * annotations property are correctly evaluated.
+   *
+   * <p>If used ServiceAccount does not have permissions to list the namespaces, returns the empty
+   * list.
+   *
+   * @return namespaces that matches the configured labels and annotations
+   * @throws InfrastructureException in case of any Kubernetes request failure
+   */
+  protected List<KubernetesNamespaceMeta> findPreparedNamespaces(
+      NamespaceResolutionContext namespaceCtx) throws InfrastructureException {
+    try {
+      List<Namespace> workspaceNamespaces =
+          clientFactory.create().namespaces().withLabels(namespaceLabels).list().getItems();
+      if (!workspaceNamespaces.isEmpty()) {
+        Map<String, String> evaluatedAnnotations = evaluateAnnotationPlaceholders(namespaceCtx);
+        return workspaceNamespaces
+            .stream()
+            .filter(p -> matchesAnnotations(p, evaluatedAnnotations))
+            .map(this::asNamespaceMeta)
+            .collect(Collectors.toList());
+      } else {
+        return emptyList();
+      }
+    } catch (KubernetesClientException kce) {
+      if (kce.getCode() == 403) {
+        LOG.warn(
+            "Trying to fetch namespaces with labels '{}', but failed for lack of permissions. Cause: '{}'",
+            namespaceLabels,
+            kce.getMessage());
+        return emptyList();
+      } else {
+        throw new InfrastructureException(
+            "Error occurred when tried to list all available namespaces. Cause: "
+                + kce.getMessage(),
+            kce);
+      }
+    }
+  }
+
+  /**
+   * Evaluate placeholder in `che.infra.kubernetes.namespace.annotations` property with given {@link
+   * NamespaceResolutionContext}.
+   *
+   * @return evaluated labels
+   */
+  protected Map<String, String> evaluateAnnotationPlaceholders(
+      NamespaceResolutionContext namespaceCtx) {
+    Map<String, String> evaluatedAnnotations = new HashMap<>();
+    for (String annotationName : namespaceAnnotations.keySet()) {
+      String evaluatedAnnotationValue =
+          namespaceAnnotations
+              .get(annotationName)
+              .replace(USERNAME_PLACEHOLDER, namespaceCtx.getUserName());
+      evaluatedAnnotations.put(annotationName, evaluatedAnnotationValue);
+    }
+    return evaluatedAnnotations;
+  }
+
+  /**
+   * Checks if given `object` contains all given `annotations` with exact values.
+   *
+   * @param object to check
+   * @param annotations that given `object` has to contain
+   * @return true if `object` contains all `annotations`. False otherwise.
+   */
+  protected boolean matchesAnnotations(HasMetadata object, Map<String, String> annotations) {
+    if (object.getMetadata().getAnnotations() == null) {
+      return false;
+    }
+    return object.getMetadata().getAnnotations().entrySet().containsAll(annotations.entrySet());
   }
 
   public void deleteIfManaged(Workspace workspace) throws InfrastructureException {

@@ -336,6 +336,9 @@ public class KubernetesNamespace {
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {
         // namespace is foreign or doesn't exist
+        LOG.warn(
+            "Trying to get namespace '{}', but failed because the lack of permissions.",
+            namespaceName);
         return null;
       } else {
         throw new KubernetesInfrastructureException(e);

@@ -97,6 +97,9 @@ public interface ServerConfig {
    */
   String REQUIRE_SUBDOMAIN = "requireSubdomain";
 
+  /** Attribute that specifies the base location of the JWT authenticating callback. */
+  String ENDPOINT_ORIGIN = "endpointOrigin";
+
   /**
    * Port used by server.
    *
@@ -228,6 +231,49 @@ public interface ServerConfig {
   }
 
   /**
+   * This is checking if the attributes configure the server to be exposed on a subdomain if we're
+   * on single-host. It has no effect on other server exposure strategies.
+   */
+  static boolean isRequireSubdomain(Map<String, String> attributes) {
+    return AttributesEvaluator.booleanAttr(attributes, REQUIRE_SUBDOMAIN, false);
+  }
+
+  /**
+   * Modify the attributes to configure the server to be exposed on a subdomain if we're on
+   * single-host. It has no effect on other server exposure strategies.
+   */
+  static void setRequireSubdomain(Map<String, String> attributes, boolean value) {
+    if (value) {
+      attributes.put(REQUIRE_SUBDOMAIN, Boolean.TRUE.toString());
+    } else {
+      attributes.remove(REQUIRE_SUBDOMAIN);
+    }
+  }
+
+  /**
+   * Returns the base location of the JWT authenticating callback.
+   *
+   * @param attributes the server attributes
+   */
+  static @Nullable String getEndpointOrigin(Map<String, String> attributes) {
+    return attributes.get(ENDPOINT_ORIGIN);
+  }
+
+  /**
+   * Sets the base location of the JWT authenticating callback.
+   *
+   * @param attributes the server attributes
+   * @param value the auth origin or null if none should be used
+   */
+  static void setEndpointOrigin(Map<String, String> attributes, @Nullable String value) {
+    if (value == null) {
+      attributes.remove(ENDPOINT_ORIGIN);
+    } else {
+      attributes.putIfAbsent(ENDPOINT_ORIGIN, value);
+    }
+  }
+
+  /**
    * Finds the unsecured paths configuration in the provided attributes.s
    *
    * @param attributes the attributes with additional server configuration
@@ -278,6 +324,16 @@ public interface ServerConfig {
   /** @see #isDiscoverable(Map) */
   default boolean isDiscoverable() {
     return isDiscoverable(getAttributes());
+  }
+
+  /** @see #isRequireSubdomain(Map) */
+  default boolean isRequireSubdomain() {
+    return isRequireSubdomain(getAttributes());
+  }
+
+  /** @see #getEndpointOrigin(Map) */
+  default String getEndpointOrigin() {
+    return getEndpointOrigin(getAttributes());
   }
 }
 

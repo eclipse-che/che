@@ -31,6 +31,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  */
 public interface SecureServerExposer<T extends KubernetesEnvironment> {
 
+  String AUTH_ENDPOINT_PATH = "/jwt/auth";
+
   /**
    * Creates a service that should handle the traffic for the provided secure ports that are exposed
    * on the container from the pod.

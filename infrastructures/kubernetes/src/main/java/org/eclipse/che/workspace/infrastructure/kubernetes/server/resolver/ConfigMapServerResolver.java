@@ -71,14 +71,20 @@ public class ConfigMapServerResolver extends AbstractServerResolver {
         .collect(
             Collectors.toMap(
                 Entry::getKey,
-                e ->
-                    new RuntimeServerBuilder()
-                        .protocol(e.getValue().getProtocol())
-                        .host(cheHost)
-                        .path(e.getValue().getPath())
-                        .attributes(e.getValue().getAttributes())
-                        .targetPort(e.getValue().getPort())
-                        .build(),
+                e -> {
+                  boolean requiresSubdomain = e.getValue().isRequireSubdomain();
+                  String root = requiresSubdomain ? "/" : e.getValue().getEndpointOrigin();
+                  String path = buildPath(root, e.getValue().getPath());
+
+                  return new RuntimeServerBuilder()
+                      .protocol(e.getValue().getProtocol())
+                      .host(cheHost)
+                      .path(path)
+                      .endpointOrigin(root)
+                      .attributes(e.getValue().getAttributes())
+                      .targetPort(e.getValue().getPort())
+                      .build();
+                },
                 (s1, s2) -> s2));
   }
 }

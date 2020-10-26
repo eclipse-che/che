@@ -79,7 +79,7 @@ export class GetStarted {
     private getSampleLocator(sampleName: string): By {
         Logger.trace(`GetStarted.getSampleLocator sampleName: ${sampleName}`);
 
-        return By.xpath(`//div[contains(@devfile, 'devfile')]/div/b[contains(text(), '${sampleName}')]`);
+        return By.xpath(`//div[contains(@devfile, 'devfile')]/div/b[text()='${sampleName}']`);
     }
 
 }
