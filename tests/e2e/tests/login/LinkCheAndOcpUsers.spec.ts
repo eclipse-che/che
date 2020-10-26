@@ -29,14 +29,14 @@ suite('Link users', async () => {
 
     test('Update account information', async () => {
         await updateAccountInformation.enterEmail('admin@admin.com', TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT * 2);
-        await updateAccountInformation.enterFirstName('admin', TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT * 2);
-        await updateAccountInformation.enterLastName('admin', TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT * 2);
+        await updateAccountInformation.enterFirstName(TestConstants.TS_SELENIUM_USERNAME, TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT * 2);
+        await updateAccountInformation.enterLastName(TestConstants.TS_SELENIUM_USERNAME, TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT * 2);
         await updateAccountInformation.clickConfirmButton(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT * 2);
         await updateAccountInformation.clickAddToExistingAccountButton(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT * 2);
     });
 
     test('Login to Che', async () => {
-        await updateAccountInformation.enterPassword('admin', TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT * 2);
+        await updateAccountInformation.enterPassword(TestConstants.TS_SELENIUM_PASSWORD, TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT * 2);
         await updateAccountInformation.clickLogInButton(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT * 2);
         await dashboard.waitPage(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT * 2);
     });
