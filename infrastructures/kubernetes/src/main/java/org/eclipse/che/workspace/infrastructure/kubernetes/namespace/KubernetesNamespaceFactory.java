@@ -206,7 +206,7 @@ public class KubernetesNamespaceFactory {
   public List<KubernetesNamespaceMeta> list() throws InfrastructureException {
     if (!allowUserDefinedNamespaces) {
       NamespaceResolutionContext resolutionCtx =
-          new NamespaceResolutionContext(EnvironmentContext.getCurrent().getSubject(), true);
+          new NamespaceResolutionContext(EnvironmentContext.getCurrent().getSubject());
 
       List<KubernetesNamespaceMeta> labeledNamespaces = findPreparedNamespaces(resolutionCtx);
       if (!labeledNamespaces.isEmpty()) {
@@ -589,8 +589,7 @@ public class KubernetesNamespaceFactory {
         resolutionCtx.getWorkspaceId(),
         namespace);
 
-    if (resolutionCtx.isPersistAfterCreate()
-        && !defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
+    if (!defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
       recordEvaluatedNamespaceName(namespace, resolutionCtx);
     }
     return namespace;

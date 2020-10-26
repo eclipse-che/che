@@ -194,11 +194,9 @@ public class KubernetesNamespaceFactoryTest {
   }
 
   @Test
-  public void
-  shouldLookAtStoredNamespacesOnCheckingIfNamespaceIsAllowed()
-      throws Exception {
+  public void shouldLookAtStoredNamespacesOnCheckingIfNamespaceIsAllowed() throws Exception {
 
-    Map<String,String> prefs = new HashMap<>();
+    Map<String, String> prefs = new HashMap<>();
     prefs.put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "any-namespace");
     prefs.put(NAMESPACE_TEMPLATE_ATTRIBUTE, "defaultNs");
 
