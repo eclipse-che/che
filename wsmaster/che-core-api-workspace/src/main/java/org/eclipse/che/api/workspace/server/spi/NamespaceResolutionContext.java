@@ -32,6 +32,10 @@ public class NamespaceResolutionContext {
     this(null, subject.getUserId(), subject.getUserName(), false);
   }
 
+  public NamespaceResolutionContext(Subject subject, boolean persistAfterCreate) {
+    this(null, subject.getUserId(), subject.getUserName(), persistAfterCreate);
+  }
+
   public NamespaceResolutionContext(String workspaceId, String userId, String userName) {
     this(workspaceId, userId, userName, false);
   }

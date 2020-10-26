@@ -174,14 +174,14 @@ public class KubernetesNamespaceFactory {
       // any namespace name is allowed but workspace start may fail
       return;
     }
+    NamespaceResolutionContext context = new NamespaceResolutionContext(
+        EnvironmentContext.getCurrent().getSubject());
 
-    String defaultNamespace =
-        evalPlaceholders(defaultNamespaceName, EnvironmentContext.getCurrent().getSubject(), null);
+    String defaultNamespace = findStoredNamespace(context).orElse(
+        evalPlaceholders(defaultNamespaceName, context));
     if (!namespaceName.equals(defaultNamespace)) {
       try {
-        List<KubernetesNamespaceMeta> labeledNamespaces =
-            findLabeledNamespaces(
-                new NamespaceResolutionContext(EnvironmentContext.getCurrent().getSubject()));
+        List<KubernetesNamespaceMeta> labeledNamespaces = findLabeledNamespaces(context);
         if (labeledNamespaces.stream().noneMatch(n -> n.getName().equals(namespaceName))) {
           throw new ValidationException(
               format(
@@ -198,7 +198,7 @@ public class KubernetesNamespaceFactory {
   public List<KubernetesNamespaceMeta> list() throws InfrastructureException {
     if (!allowUserDefinedNamespaces) {
       NamespaceResolutionContext resolutionCtx =
-          new NamespaceResolutionContext(EnvironmentContext.getCurrent().getSubject());
+          new NamespaceResolutionContext(EnvironmentContext.getCurrent().getSubject(), true);
 
       List<KubernetesNamespaceMeta> labeledNamespaces = findLabeledNamespaces(resolutionCtx);
       if (!labeledNamespaces.isEmpty()) {
@@ -602,6 +602,9 @@ public class KubernetesNamespaceFactory {
   protected List<KubernetesNamespaceMeta> findLabeledNamespaces(
       NamespaceResolutionContext namespaceCtx) throws InfrastructureException {
     Map<String, String> labels = evaluateLabelsPlaceholders(namespaceCtx);
+    if (!labels.isEmpty()) {
+      return emptyList();
+    }
     try {
       return clientFactory
           .create()
@@ -705,9 +708,6 @@ public class KubernetesNamespaceFactory {
    * track its changes and re-generate namespace in case it didn't matches.
    */
   private void recordEvaluatedNamespaceName(String namespace, NamespaceResolutionContext context) {
-    if (!allowUserDefinedNamespaces) {
-      return;
-    }
     try {
       final String owner = context.getUserId();
       Map<String, String> preferences = preferenceManager.find(owner);
@@ -722,9 +722,6 @@ public class KubernetesNamespaceFactory {
   /** Returns stored namespace if any, and its default template. */
   private Optional<Pair<String, String>> getPreferencesNamespaceName(
       NamespaceResolutionContext context) {
-    if (!allowUserDefinedNamespaces) {
-      return Optional.empty();
-    }
     try {
       String owner = context.getUserId();
       Map<String, String> preferences = preferenceManager.find(owner);
