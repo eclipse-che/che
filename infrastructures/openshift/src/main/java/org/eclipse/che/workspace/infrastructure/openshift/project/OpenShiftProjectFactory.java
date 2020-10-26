@@ -70,6 +70,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
           boolean allowUserDefinedNamespaces,
       @Named("che.infra.kubernetes.namespace.creation_allowed") boolean namespaceCreationAllowed,
       @Named("che.infra.kubernetes.namespace.labels") String projectLabels,
+      @Named("che.infra.kubernetes.namespace.annotations") String projectAnnotations,
       OpenShiftClientFactory clientFactory,
       OpenShiftClientConfigFactory clientConfigFactory,
       OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner,
@@ -86,6 +87,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
         allowUserDefinedNamespaces,
         namespaceCreationAllowed,
         projectLabels,
+        projectAnnotations,
         clientFactory,
         userManager,
         preferenceManager,
@@ -186,24 +188,26 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
     }
   }
 
-  protected List<KubernetesNamespaceMeta> findLabeledNamespaces(
+  protected List<KubernetesNamespaceMeta> findPreparedNamespaces(
       NamespaceResolutionContext namespaceCtx) throws InfrastructureException {
-    Map<String, String> labels = evaluateLabelsPlaceholders(namespaceCtx);
     try {
-      return clientFactory
-          .createOC()
-          .projects()
-          .withLabels(labels)
-          .list()
-          .getItems()
-          .stream()
-          .map(this::asNamespaceMeta)
-          .collect(Collectors.toList());
+      List<Project> workspaceProjects =
+          clientFactory.createOC().projects().withLabels(namespaceLabels).list().getItems();
+      if (!workspaceProjects.isEmpty()) {
+        Map<String, String> evaluatedAnnotations = evaluateAnnotationPlaceholders(namespaceCtx);
+        return workspaceProjects
+            .stream()
+            .filter(p -> matchesAnnotations(p, evaluatedAnnotations))
+            .map(this::asNamespaceMeta)
+            .collect(Collectors.toList());
+      } else {
+        return emptyList();
+      }
     } catch (KubernetesClientException kce) {
       if (kce.getCode() == 403) {
         LOG.warn(
             "Trying to fetch projects with labels '{}', but failed for lack of permissions. Cause: '{}'",
-            labels,
+            namespaceLabels,
             kce.getMessage());
         return emptyList();
       } else {
