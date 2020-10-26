@@ -93,6 +93,32 @@ public class DefaultSecureServerExposer<T extends KubernetesEnvironment>
       Map<String, ServerConfig> secureServers)
       throws InfrastructureException {
 
+    Map<String, ServerConfig> conformingServers =
+        exposer.getStrategyConformingServers(secureServers);
+    Map<String, ServerConfig> subdomainServers =
+        exposer.getServersRequiringSubdomain(secureServers);
+
+    if (!conformingServers.isEmpty()) {
+      doExpose(
+          k8sEnv, pod, machineName, serviceName, serverId, servicePort, false, conformingServers);
+    }
+
+    if (!subdomainServers.isEmpty()) {
+      doExpose(
+          k8sEnv, pod, machineName, serviceName, serverId, servicePort, true, subdomainServers);
+    }
+  }
+
+  private void doExpose(
+      T k8sEnv,
+      PodData pod,
+      String machineName,
+      @Nullable String serviceName,
+      @Nullable String serverId,
+      ServicePort servicePort,
+      boolean requireSubdomain,
+      Map<String, ServerConfig> secureServers)
+      throws InfrastructureException {
     ServicePort exposedServicePort =
         proxyProvisioner.expose(
             k8sEnv,
@@ -101,6 +127,7 @@ public class DefaultSecureServerExposer<T extends KubernetesEnvironment>
             serviceName,
             servicePort,
             servicePort.getProtocol(),
+            requireSubdomain,
             secureServers);
 
     exposer.expose(

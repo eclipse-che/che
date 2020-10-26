@@ -19,7 +19,7 @@ import { TimeoutConstants } from '../../TimeoutConstants';
 
 @injectable()
 export class TopMenu {
-    private static readonly TOP_MENU_BUTTONS: string[] = ['File', 'Edit', 'Selection', 'View', 'Go', 'Debug', 'Terminal', 'Help'];
+    private static readonly TOP_MENU_BUTTONS: string[] = ['File', 'Edit', 'Selection', 'View', 'Go', 'Run', 'Terminal', 'Help'];
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Ide) private readonly ide: Ide,

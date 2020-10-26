@@ -72,7 +72,7 @@ export class DialogWindow {
     async waitDialogAndOpenLink(dialogText: string = '', applicationReaddyTimeout: number) {
         Logger.debug('DialogWindow.waitDialogAndOpenLink');
 
-        await this.waitDialog(dialogText);
+        await this.waitDialog(dialogText, applicationReaddyTimeout);
         await this.ide.waitApllicationIsReady(await this.getApplicationUrlFromDialog(dialogText), applicationReaddyTimeout);
         await this.clickToOpenLinkButton();
         await this.waitDialogDissappearance();

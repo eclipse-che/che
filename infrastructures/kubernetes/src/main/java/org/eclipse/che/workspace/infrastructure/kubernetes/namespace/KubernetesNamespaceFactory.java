@@ -27,6 +27,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.util.ArrayList;
@@ -92,6 +93,7 @@ public class KubernetesNamespaceFactory {
   private final String defaultNamespaceName;
   private final boolean allowUserDefinedNamespaces;
   protected final Map<String, String> namespaceLabels;
+  protected final Map<String, String> namespaceAnnotations;
 
   private final String legacyNamespaceName;
   private final String serviceAccountName;
@@ -112,6 +114,7 @@ public class KubernetesNamespaceFactory {
           boolean allowUserDefinedNamespaces,
       @Named("che.infra.kubernetes.namespace.creation_allowed") boolean namespaceCreationAllowed,
       @Named("che.infra.kubernetes.namespace.labels") String namespaceLabels,
+      @Named("che.infra.kubernetes.namespace.annotations") String namespaceAnnotations,
       KubernetesClientFactory clientFactory,
       UserManager userManager,
       PreferenceManager preferenceManager,
@@ -128,10 +131,15 @@ public class KubernetesNamespaceFactory {
     this.sharedPool = sharedPool;
 
     //noinspection UnstableApiUsage
+    Splitter.MapSplitter csvMapSplitter = Splitter.on(",").withKeyValueSeparator("=");
+    //noinspection UnstableApiUsage
     this.namespaceLabels =
-        isNullOrEmpty(namespaceLabels)
+        isNullOrEmpty(namespaceLabels) ? emptyMap() : csvMapSplitter.split(namespaceLabels);
+    //noinspection UnstableApiUsage
+    this.namespaceAnnotations =
+        isNullOrEmpty(namespaceAnnotations)
             ? emptyMap()
-            : Splitter.on(",").withKeyValueSeparator("=").split(namespaceLabels);
+            : csvMapSplitter.split(namespaceAnnotations);
 
     if (isNullOrEmpty(defaultNamespaceName)) {
       throw new ConfigurationException("che.infra.kubernetes.namespace.default must be configured");
@@ -174,14 +182,14 @@ public class KubernetesNamespaceFactory {
       // any namespace name is allowed but workspace start may fail
       return;
     }
-    NamespaceResolutionContext context = new NamespaceResolutionContext(
-        EnvironmentContext.getCurrent().getSubject());
+    NamespaceResolutionContext context =
+        new NamespaceResolutionContext(EnvironmentContext.getCurrent().getSubject());
 
-    String defaultNamespace = findStoredNamespace(context).orElse(
-        evalPlaceholders(defaultNamespaceName, context));
+    final String defaultNamespace =
+        findStoredNamespace(context).orElse(evalPlaceholders(defaultNamespaceName, context));
     if (!namespaceName.equals(defaultNamespace)) {
       try {
-        List<KubernetesNamespaceMeta> labeledNamespaces = findLabeledNamespaces(context);
+        List<KubernetesNamespaceMeta> labeledNamespaces = findPreparedNamespaces(context);
         if (labeledNamespaces.stream().noneMatch(n -> n.getName().equals(namespaceName))) {
           throw new ValidationException(
               format(
@@ -200,7 +208,7 @@ public class KubernetesNamespaceFactory {
       NamespaceResolutionContext resolutionCtx =
           new NamespaceResolutionContext(EnvironmentContext.getCurrent().getSubject(), true);
 
-      List<KubernetesNamespaceMeta> labeledNamespaces = findLabeledNamespaces(resolutionCtx);
+      List<KubernetesNamespaceMeta> labeledNamespaces = findPreparedNamespaces(resolutionCtx);
       if (!labeledNamespaces.isEmpty()) {
         return labeledNamespaces;
       } else {
@@ -510,7 +518,7 @@ public class KubernetesNamespaceFactory {
    */
   private Optional<String> findFirstLabeledNamespace(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
-    List<KubernetesNamespaceMeta> labeledNamespaces = findLabeledNamespaces(resolutionCtx);
+    List<KubernetesNamespaceMeta> labeledNamespaces = findPreparedNamespaces(resolutionCtx);
     if (!labeledNamespaces.isEmpty()) {
       String foundNamespace =
           labeledNamespaces
@@ -590,36 +598,36 @@ public class KubernetesNamespaceFactory {
 
   /**
    * Finds all namespaces that matches the labels configured in
-   * `che.infra.kubernetes.namespace.labels` property. Makes sure that placeholder in the property
-   * are correctly evaluated.
+   * `che.infra.kubernetes.namespace.labels` and annotations in
+   * `che.infra.kubernetes.namespace.annotations` properties. Makes sure that placeholder in the
+   * annotations property are correctly evaluated.
    *
    * <p>If used ServiceAccount does not have permissions to list the namespaces, returns the empty
    * list.
    *
-   * @return namespaces that matches the configured labels
+   * @return namespaces that matches the configured labels and annotations
    * @throws InfrastructureException in case of any Kubernetes request failure
    */
-  protected List<KubernetesNamespaceMeta> findLabeledNamespaces(
+  protected List<KubernetesNamespaceMeta> findPreparedNamespaces(
       NamespaceResolutionContext namespaceCtx) throws InfrastructureException {
-    Map<String, String> labels = evaluateLabelsPlaceholders(namespaceCtx);
-    if (!labels.isEmpty()) {
-      return emptyList();
-    }
     try {
-      return clientFactory
-          .create()
-          .namespaces()
-          .withLabels(labels)
-          .list()
-          .getItems()
-          .stream()
-          .map(this::asNamespaceMeta)
-          .collect(Collectors.toList());
+      List<Namespace> workspaceNamespaces =
+          clientFactory.create().namespaces().withLabels(namespaceLabels).list().getItems();
+      if (!workspaceNamespaces.isEmpty()) {
+        Map<String, String> evaluatedAnnotations = evaluateAnnotationPlaceholders(namespaceCtx);
+        return workspaceNamespaces
+            .stream()
+            .filter(p -> matchesAnnotations(p, evaluatedAnnotations))
+            .map(this::asNamespaceMeta)
+            .collect(Collectors.toList());
+      } else {
+        return emptyList();
+      }
     } catch (KubernetesClientException kce) {
       if (kce.getCode() == 403) {
         LOG.warn(
             "Trying to fetch namespaces with labels '{}', but failed for lack of permissions. Cause: '{}'",
-            labels,
+            namespaceLabels,
             kce.getMessage());
         return emptyList();
       } else {
@@ -632,20 +640,36 @@ public class KubernetesNamespaceFactory {
   }
 
   /**
-   * Evaluate placeholder in `che.infra.kubernetes.namespace.labels` property with given {@link
+   * Evaluate placeholder in `che.infra.kubernetes.namespace.annotations` property with given {@link
    * NamespaceResolutionContext}.
    *
    * @return evaluated labels
    */
-  protected Map<String, String> evaluateLabelsPlaceholders(
+  protected Map<String, String> evaluateAnnotationPlaceholders(
       NamespaceResolutionContext namespaceCtx) {
-    Map<String, String> evaluatedLabels = new HashMap<>();
-    for (String labelName : namespaceLabels.keySet()) {
-      String evaluatedLabelValue =
-          namespaceLabels.get(labelName).replace(USERNAME_PLACEHOLDER, namespaceCtx.getUserName());
-      evaluatedLabels.put(labelName, evaluatedLabelValue);
+    Map<String, String> evaluatedAnnotations = new HashMap<>();
+    for (String annotationName : namespaceAnnotations.keySet()) {
+      String evaluatedAnnotationValue =
+          namespaceAnnotations
+              .get(annotationName)
+              .replace(USERNAME_PLACEHOLDER, namespaceCtx.getUserName());
+      evaluatedAnnotations.put(annotationName, evaluatedAnnotationValue);
     }
-    return evaluatedLabels;
+    return evaluatedAnnotations;
+  }
+
+  /**
+   * Checks if given `object` contains all given `annotations` with exact values.
+   *
+   * @param object to check
+   * @param annotations that given `object` has to contain
+   * @return true if `object` contains all `annotations`. False otherwise.
+   */
+  protected boolean matchesAnnotations(HasMetadata object, Map<String, String> annotations) {
+    if (object.getMetadata().getAnnotations() == null) {
+      return false;
+    }
+    return object.getMetadata().getAnnotations().entrySet().containsAll(annotations.entrySet());
   }
 
   public void deleteIfManaged(Workspace workspace) throws InfrastructureException {
