@@ -193,6 +193,35 @@ public class KubernetesNamespaceFactoryTest {
     namespaceFactory.checkIfNamespaceIsAllowed("any-namespace");
   }
 
+  @Test
+  public void
+  shouldLookAtStoredNamespacesOnCheckingIfNamespaceIsAllowed()
+      throws Exception {
+
+    Map<String,String> prefs = new HashMap<>();
+    prefs.put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "any-namespace");
+    prefs.put(NAMESPACE_TEMPLATE_ATTRIBUTE, "defaultNs");
+
+    when(preferenceManager.find(anyString())).thenReturn(prefs);
+
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "legacy",
+            "",
+            "",
+            "defaultNs",
+            false,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
+            clientFactory,
+            userManager,
+            preferenceManager,
+            pool);
+
+    namespaceFactory.checkIfNamespaceIsAllowed("any-namespace");
+  }
+
   @Test(
       expectedExceptions = ValidationException.class,
       expectedExceptionsMessageRegExp =
