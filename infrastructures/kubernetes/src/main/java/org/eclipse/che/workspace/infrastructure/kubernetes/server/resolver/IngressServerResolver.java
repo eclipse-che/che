@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import io.fabric8.kubernetes.api.model.Service;
@@ -23,7 +21,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.RuntimeServerBuilder;
@@ -87,41 +84,24 @@ public class IngressServerResolver extends AbstractServerResolver {
             Collectors.toMap(
                 Entry::getKey,
                 e -> {
-                  String path =
-                      buildPath(
-                          pathTransformInverter.undoPathTransformation(
-                              ingressRule.getHttp().getPaths().get(0).getPath()),
-                          e.getValue().getPath());
+                  String root =
+                      pathTransformInverter.undoPathTransformation(
+                          ingressRule.getHttp().getPaths().get(0).getPath());
+
+                  String path = buildPath(root, e.getValue().getPath());
+
+                  // the /jwt/auth needs to be based on the webroot of the server, not the path of
+                  // the endpoint.
+                  String endpointOrigin = buildPath(root, "/");
+
                   return new RuntimeServerBuilder()
                       .protocol(e.getValue().getProtocol())
                       .host(host)
                       .path(path)
+                      .endpointOrigin(endpointOrigin)
                       .attributes(e.getValue().getAttributes())
                       .targetPort(e.getValue().getPort())
                       .build();
                 }));
-  }
-
-  private String buildPath(String fragment1, @Nullable String fragment2) {
-    StringBuilder sb = new StringBuilder(fragment1);
-
-    if (!isNullOrEmpty(fragment2)) {
-      if (!fragment1.endsWith("/")) {
-        sb.append('/');
-      }
-
-      if (fragment2.startsWith("/")) {
-        sb.append(fragment2.substring(1));
-      } else {
-        sb.append(fragment2);
-      }
-    }
-
-    // always end server URLs with a slash, so that they can be safely sub-path'd..
-    if (sb.charAt(sb.length() - 1) != '/') {
-      sb.append('/');
-    }
-
-    return sb.toString();
   }
 }
