@@ -34,7 +34,7 @@ import { TopMenu } from './pageobjects/ide/TopMenu';
 import { QuickOpenContainer } from './pageobjects/ide/QuickOpenContainer';
 import { PreviewWidget } from './pageobjects/ide/PreviewWidget';
 import { GitPlugin } from './pageobjects/ide/GitPlugin';
-import { LeftToolbar} from './pageobjects/ide/LeftToolBar';
+import { LeftToolbar } from './pageobjects/ide/LeftToolBar';
 import { Terminal } from './pageobjects/ide/Terminal';
 import { DebugView } from './pageobjects/ide/DebugView';
 import { DialogWindow } from './pageobjects/ide/DialogWindow';
@@ -52,10 +52,11 @@ import { CheSingleUserAuthorizationHeaderHandler } from './utils/requestHandlers
 import { ITokenHandler } from './utils/requestHandlers/tokens/ITokenHandler';
 import { CheApiRequestHandler } from './utils/requestHandlers/CheApiRequestHandler';
 import { CheGitApi } from './utils/VCS/CheGitApi';
-import { GitHubUtil} from './utils/VCS/github/GitHubUtil';
+import { GitHubUtil } from './utils/VCS/github/GitHubUtil';
 import { GetStarted } from './pageobjects/dashboard/GetStarted';
 import { OpenshiftPlugin } from './pageobjects/ide/OpenshiftPlugin';
 import { OpenDialogWidget } from './pageobjects/ide/OpenDialogWidget';
+import { UpdateAccountInformationPage } from './pageobjects/login/UpdateAccountInformationPage';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -109,5 +110,6 @@ e2eContainer.bind<GitHubUtil>(CLASSES.GitHubUtil).to(GitHubUtil);
 e2eContainer.bind<OpenshiftPlugin>(CLASSES.OpenshiftPlugin).to(OpenshiftPlugin);
 e2eContainer.bind<GetStarted>(CLASSES.GetStarted).to(GetStarted);
 e2eContainer.bind<OpenDialogWidget>(CLASSES.OpenDialogWidget).to(OpenDialogWidget);
+e2eContainer.bind<UpdateAccountInformationPage>(CLASSES.UpdateAccountInformationPage).to(UpdateAccountInformationPage);
 
 export { e2eContainer };
