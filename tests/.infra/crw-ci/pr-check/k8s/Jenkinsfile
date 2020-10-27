@@ -40,7 +40,7 @@ pipeline {
                 description: 'Tag of Che server image')
 
         booleanParam(name: 'buildChe',
-                defaultValue: true,
+                defaultValue: false,
                 description: 'Should build Che server')
 
         string(name: 'e2eTestToRun',
@@ -155,7 +155,8 @@ pipeline {
 
                 stage("Build Che including upstream projects") {
                     when {
-                        expression { return buildChe.toString() == 'true' }
+                        expression { return buildChe.toString() == 'true' || params.ghprbCommentBody == null || params.ghprbCommentBody.toString().contains("--rebuild")
+                        }
                     }
 
                     steps {
@@ -203,7 +204,8 @@ pipeline {
 
         stage("Build and push che-server image") {
             when {
-                expression { return buildChe.toString() == 'true' }
+                expression { return buildChe.toString() == 'true' || params.ghprbCommentBody == null || params.ghprbCommentBody.toString().contains("--rebuild")
+                }
             }
 
             steps {
