@@ -37,9 +37,12 @@ import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.Serializer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.IngressServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
+import org.mockito.Mockito;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
@@ -54,6 +57,13 @@ public class IngressServerResolverTest {
   private static final String INGRESS_IP = "127.0.0.1";
   private static final String INGRESS_RULE_PATH_PREFIX = "/server-8080";
   private static final String INGRESS_PATH_PREFIX = "server-8080";
+
+  private ExternalServiceExposureStrategy externalServiceExposureStrategy;
+
+  @BeforeMethod
+  public void setupMocks() {
+    externalServiceExposureStrategy = Mockito.mock(ExternalServiceExposureStrategy.class);
+  }
 
   @Test
   public void
@@ -100,7 +110,12 @@ public class IngressServerResolverTest {
         new ServerImpl()
             .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/api/")
             .withStatus(ServerStatus.UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(
+                defaultAttributeAnd(
+                    Constants.SERVER_PORT_ATTRIBUTE,
+                    "3054",
+                    ServerConfig.ENDPOINT_ORIGIN,
+                    INGRESS_PATH_PREFIX + "/")));
   }
 
   @Test
@@ -123,7 +138,12 @@ public class IngressServerResolverTest {
         new ServerImpl()
             .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/")
             .withStatus(ServerStatus.UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(
+                defaultAttributeAnd(
+                    Constants.SERVER_PORT_ATTRIBUTE,
+                    "3054",
+                    ServerConfig.ENDPOINT_ORIGIN,
+                    INGRESS_PATH_PREFIX + "/")));
   }
 
   @Test
@@ -146,7 +166,12 @@ public class IngressServerResolverTest {
         new ServerImpl()
             .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/")
             .withStatus(ServerStatus.UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(
+                defaultAttributeAnd(
+                    Constants.SERVER_PORT_ATTRIBUTE,
+                    "3054",
+                    ServerConfig.ENDPOINT_ORIGIN,
+                    INGRESS_PATH_PREFIX + "/")));
   }
 
   @Test
@@ -169,7 +194,12 @@ public class IngressServerResolverTest {
         new ServerImpl()
             .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/api/")
             .withStatus(ServerStatus.UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(
+                defaultAttributeAnd(
+                    Constants.SERVER_PORT_ATTRIBUTE,
+                    "3054",
+                    ServerConfig.ENDPOINT_ORIGIN,
+                    INGRESS_PATH_PREFIX + "/")));
   }
 
   @Test
@@ -194,7 +224,9 @@ public class IngressServerResolverTest {
         new ServerImpl()
             .withUrl("http://service11:3054/api")
             .withStatus(ServerStatus.UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(
+                defaultAttributeAnd(
+                    Constants.SERVER_PORT_ATTRIBUTE, "3054", ServerConfig.ENDPOINT_ORIGIN, "/")));
   }
 
   @Test
@@ -219,7 +251,9 @@ public class IngressServerResolverTest {
         new ServerImpl()
             .withUrl("xxx://service11:3054/api")
             .withStatus(ServerStatus.UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(
+                defaultAttributeAnd(
+                    Constants.SERVER_PORT_ATTRIBUTE, "3054", ServerConfig.ENDPOINT_ORIGIN, "/")));
   }
 
   private Service createService(
@@ -278,9 +312,17 @@ public class IngressServerResolverTest {
         .build();
   }
 
-  private Map<String, String> defaultAttributeAnd(String key, String value) {
+  private Map<String, String> defaultAttributeAnd(String... keyValues) {
     HashMap<String, String> attributes = new HashMap<>(ATTRIBUTES_MAP);
-    attributes.put(key, value);
+    String key = null;
+    for (String v : keyValues) {
+      if (key == null) {
+        key = v;
+      } else {
+        attributes.put(key, v);
+        key = null;
+      }
+    }
     return attributes;
   }
 

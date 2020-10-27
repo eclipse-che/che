@@ -31,6 +31,7 @@ public class RuntimeServerBuilder {
   private String host;
   private String port;
   private String path;
+  private String endpointOrigin;
   private Map<String, String> attributes;
   private String targetPort;
 
@@ -54,6 +55,11 @@ public class RuntimeServerBuilder {
     return this;
   }
 
+  public RuntimeServerBuilder endpointOrigin(String authPath) {
+    this.endpointOrigin = authPath;
+    return this;
+  }
+
   public RuntimeServerBuilder attributes(Map<String, String> attributes) {
     this.attributes = attributes;
     return this;
@@ -65,6 +71,9 @@ public class RuntimeServerBuilder {
   }
 
   public ServerImpl build() {
+    if (endpointOrigin == null) {
+      endpointOrigin = "/";
+    }
     StringBuilder ub = new StringBuilder();
     if (protocol != null) {
       ub.append(protocol).append("://");
@@ -83,6 +92,7 @@ public class RuntimeServerBuilder {
     }
     Map<String, String> completeAttributes = new HashMap<>(attributes);
     completeAttributes.put(Constants.SERVER_PORT_ATTRIBUTE, targetPort);
+    ServerConfig.setEndpointOrigin(completeAttributes, endpointOrigin);
     return new ServerImpl()
         .withUrl(ub.toString())
         .withStatus(ServerStatus.UNKNOWN)

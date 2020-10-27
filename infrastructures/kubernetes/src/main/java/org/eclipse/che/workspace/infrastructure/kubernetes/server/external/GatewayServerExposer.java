@@ -23,7 +23,6 @@ import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -103,13 +102,14 @@ public class GatewayServerExposer<T extends KubernetesEnvironment>
 
     final String path = ensureEndsWithSlash(strategy.getExternalPath(serviceName, serverName));
     serverConfig.getAttributes().put(SERVICE_NAME_ATTRIBUTE, serviceName);
+    ServerConfig.setEndpointOrigin(serverConfig.getAttributes(), path);
     serverConfig
         .getAttributes()
         .put(SERVICE_PORT_ATTRIBUTE, getTargetPort(servicePort.getTargetPort()));
 
     final Map<String, String> annotations =
         Annotations.newSerializer()
-            .server(scRef, new ServerConfigImpl(serverConfig).withPath(path))
+            .server(scRef, serverConfig)
             .machineName(machineName)
             .annotations();
     annotations.put(CREATE_IN_CHE_INSTALLATION_NAMESPACE, TRUE.toString());

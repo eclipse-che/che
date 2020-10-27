@@ -35,11 +35,11 @@ suite(`${stack} test`, async () => {
     });
 
     suite('Validation of commands', async () => {
-        codeExecutionTests.runTask(compileTaskkName, 180_000);
+        codeExecutionTests.runTask(compileTaskkName, 240_000);
         codeExecutionTests.closeTerminal(compileTaskkName);
-        codeExecutionTests.runTask(runTaskName, 60_000);
+        codeExecutionTests.runTask(runTaskName, 120_000);
         codeExecutionTests.closeTerminal(runTaskName);
-        codeExecutionTests.runTask(testTaskName, 60_000);
+        codeExecutionTests.runTask(testTaskName, 120_000);
         codeExecutionTests.closeTerminal(testTaskName);
     });
 

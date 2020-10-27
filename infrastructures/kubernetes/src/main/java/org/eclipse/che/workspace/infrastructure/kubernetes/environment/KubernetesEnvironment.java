@@ -437,4 +437,29 @@ public class KubernetesEnvironment extends InternalEnvironment {
       return "PodData{" + "podSpec=" + podSpec + ", podMeta=" + podMeta + ", role=" + role + '}';
     }
   }
+
+  @Override
+  public String toString() {
+    return "KubernetesEnvironment{"
+        + "pods="
+        + pods
+        + ", deployments="
+        + deployments
+        + ", podData="
+        + podData
+        + ", services="
+        + services
+        + ", ingresses="
+        + ingresses
+        + ", persistentVolumeClaims="
+        + persistentVolumeClaims
+        + ", secrets="
+        + secrets
+        + ", configMaps="
+        + configMaps
+        + ", injectablePods="
+        + injectablePods
+        + "} "
+        + super.toString();
+  }
 }
