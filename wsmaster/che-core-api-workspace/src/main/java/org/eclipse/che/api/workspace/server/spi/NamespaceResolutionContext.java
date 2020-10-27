@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.server.spi;
 
 import java.util.Objects;
+import org.eclipse.che.commons.subject.Subject;
 
 /**
  * Holds information needed for resolving placeholders in the namespace name. The {@code
@@ -25,18 +26,15 @@ public class NamespaceResolutionContext {
   private final String workspaceId;
   private final String userId;
   private final String userName;
-  private final boolean persistAfterCreate;
 
-  public NamespaceResolutionContext(String workspaceId, String userId, String userName) {
-    this(workspaceId, userId, userName, false);
+  public NamespaceResolutionContext(Subject subject) {
+    this(null, subject.getUserId(), subject.getUserName());
   }
 
-  public NamespaceResolutionContext(
-      String workspaceId, String userId, String userName, boolean persistAfterCreate) {
+  public NamespaceResolutionContext(String workspaceId, String userId, String userName) {
     this.workspaceId = workspaceId;
     this.userId = userId;
     this.userName = userName;
-    this.persistAfterCreate = persistAfterCreate;
   }
 
   public String getWorkspaceId() {
@@ -51,10 +49,6 @@ public class NamespaceResolutionContext {
     return userName;
   }
 
-  public boolean isPersistAfterCreate() {
-    return persistAfterCreate;
-  }
-
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {
@@ -66,13 +60,12 @@ public class NamespaceResolutionContext {
     final NamespaceResolutionContext that = (NamespaceResolutionContext) obj;
     return Objects.equals(workspaceId, that.workspaceId)
         && Objects.equals(userId, that.userId)
-        && Objects.equals(userName, that.userName)
-        && Objects.equals(persistAfterCreate, that.persistAfterCreate);
+        && Objects.equals(userName, that.userName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(workspaceId, userId, userName, persistAfterCreate);
+    return Objects.hash(workspaceId, userId, userName);
   }
 
   @Override
@@ -86,9 +79,6 @@ public class NamespaceResolutionContext {
         + '\''
         + ", userName='"
         + userName
-        + '\''
-        + ", persistAfterCreate='"
-        + persistAfterCreate
         + '\''
         + '}';
   }
