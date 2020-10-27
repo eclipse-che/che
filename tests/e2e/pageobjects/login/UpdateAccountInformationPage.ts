@@ -61,4 +61,10 @@ export class UpdateAccountInformationPage {
         await this.driverHelper.waitAndClick(By.id('kc-login'), timeout);
     }
 
+    async clickToAllowSelectedPermissionsButton(timeout: number){
+        Logger.debug('UpdateAccountInformationPage.clickToAllowSelectedPermissionsButton');
+
+        await this.driverHelper.waitAndClick(By.xpath('//input[@name=\'approve\']'), timeout);
+    }
+
 }
