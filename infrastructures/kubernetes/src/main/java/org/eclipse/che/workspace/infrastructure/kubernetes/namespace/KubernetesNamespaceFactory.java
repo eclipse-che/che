@@ -168,9 +168,11 @@ public class KubernetesNamespaceFactory {
       // any namespace name is allowed but workspace start may fail
       return;
     }
+    NamespaceResolutionContext context =
+        new NamespaceResolutionContext(EnvironmentContext.getCurrent().getSubject());
 
-    String defaultNamespace =
-        evalPlaceholders(defaultNamespaceName, EnvironmentContext.getCurrent().getSubject(), null);
+    final String defaultNamespace =
+        findStoredNamespace(context).orElse(evalPlaceholders(defaultNamespaceName, context));
     if (!namespaceName.equals(defaultNamespace)) {
       throw new ValidationException(
           format(
@@ -468,11 +470,11 @@ public class KubernetesNamespaceFactory {
   public String evaluateNamespaceName(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
     String namespace;
-    Optional<Pair<String, String>> storedNamespace = getPreferencesNamespaceName(resolutionCtx);
-    if (storedNamespace.isEmpty() || !isStoredTemplateValid(storedNamespace.get().second)) {
-      namespace = evalPlaceholders(defaultNamespaceName, resolutionCtx);
+    Optional<String> namespaceOptional = findStoredNamespace(resolutionCtx);
+    if (namespaceOptional.isPresent()) {
+      namespace = namespaceOptional.get();
     } else {
-      namespace = storedNamespace.get().first;
+      namespace = evalPlaceholders(defaultNamespaceName, resolutionCtx);
     }
 
     if (!NamespaceNameValidator.isValid(namespace)) {
@@ -498,8 +500,7 @@ public class KubernetesNamespaceFactory {
         resolutionCtx.getWorkspaceId(),
         namespace);
 
-    if (resolutionCtx.isPersistAfterCreate()
-        && !defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
+    if (!defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
       recordEvaluatedNamespaceName(namespace, resolutionCtx);
     }
     return namespace;
@@ -509,6 +510,20 @@ public class KubernetesNamespaceFactory {
     KubernetesNamespace namespace = get(workspace);
     if (isWorkspaceNamespaceManaged(namespace.getName(), workspace)) {
       namespace.delete();
+    }
+  }
+
+  /**
+   * Finds namespace name stored in User's preferences and ensures it is still valid.
+   *
+   * @return user's stored namespace if exists
+   */
+  private Optional<String> findStoredNamespace(NamespaceResolutionContext resolutionCtx) {
+    Optional<Pair<String, String>> storedNamespace = getPreferencesNamespaceName(resolutionCtx);
+    if (storedNamespace.isPresent() && isStoredTemplateValid(storedNamespace.get().second)) {
+      return Optional.of(storedNamespace.get().first);
+    } else {
+      return Optional.empty();
     }
   }
 
@@ -565,9 +580,6 @@ public class KubernetesNamespaceFactory {
    * track its changes and re-generate namespace in case it didn't matches.
    */
   private void recordEvaluatedNamespaceName(String namespace, NamespaceResolutionContext context) {
-    if (!allowUserDefinedNamespaces) {
-      return;
-    }
     try {
       final String owner = context.getUserId();
       Map<String, String> preferences = preferenceManager.find(owner);
@@ -582,9 +594,6 @@ public class KubernetesNamespaceFactory {
   /** Returns stored namespace if any, and its default template. */
   private Optional<Pair<String, String>> getPreferencesNamespaceName(
       NamespaceResolutionContext context) {
-    if (!allowUserDefinedNamespaces) {
-      return Optional.empty();
-    }
     try {
       String owner = context.getUserId();
       Map<String, String> preferences = preferenceManager.find(owner);
