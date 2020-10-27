@@ -36,7 +36,7 @@ suite(`${stack} test`, async () => {
     });
 
     suite('Validation of workspace build', async () => {
-        codeExecutionTests.runTask(buildTaskName, 360_000);
+        codeExecutionTests.runTask(buildTaskName, 420_000);
         codeExecutionTests.closeTerminal(buildTaskName);
     });
 
