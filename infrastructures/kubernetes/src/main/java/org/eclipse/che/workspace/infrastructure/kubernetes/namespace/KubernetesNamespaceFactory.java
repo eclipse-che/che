@@ -182,14 +182,14 @@ public class KubernetesNamespaceFactory {
       // any namespace name is allowed but workspace start may fail
       return;
     }
+    NamespaceResolutionContext context =
+        new NamespaceResolutionContext(EnvironmentContext.getCurrent().getSubject());
 
-    String defaultNamespace =
-        evalPlaceholders(defaultNamespaceName, EnvironmentContext.getCurrent().getSubject(), null);
+    final String defaultNamespace =
+        findStoredNamespace(context).orElse(evalPlaceholders(defaultNamespaceName, context));
     if (!namespaceName.equals(defaultNamespace)) {
       try {
-        List<KubernetesNamespaceMeta> labeledNamespaces =
-            findPreparedNamespaces(
-                new NamespaceResolutionContext(EnvironmentContext.getCurrent().getSubject()));
+        List<KubernetesNamespaceMeta> labeledNamespaces = findPreparedNamespaces(context);
         if (labeledNamespaces.stream().noneMatch(n -> n.getName().equals(namespaceName))) {
           throw new ValidationException(
               format(
@@ -589,8 +589,7 @@ public class KubernetesNamespaceFactory {
         resolutionCtx.getWorkspaceId(),
         namespace);
 
-    if (resolutionCtx.isPersistAfterCreate()
-        && !defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
+    if (!defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
       recordEvaluatedNamespaceName(namespace, resolutionCtx);
     }
     return namespace;
@@ -732,9 +731,6 @@ public class KubernetesNamespaceFactory {
    * track its changes and re-generate namespace in case it didn't matches.
    */
   private void recordEvaluatedNamespaceName(String namespace, NamespaceResolutionContext context) {
-    if (!allowUserDefinedNamespaces) {
-      return;
-    }
     try {
       final String owner = context.getUserId();
       Map<String, String> preferences = preferenceManager.find(owner);
@@ -749,9 +745,6 @@ public class KubernetesNamespaceFactory {
   /** Returns stored namespace if any, and its default template. */
   private Optional<Pair<String, String>> getPreferencesNamespaceName(
       NamespaceResolutionContext context) {
-    if (!allowUserDefinedNamespaces) {
-      return Optional.empty();
-    }
     try {
       String owner = context.getUserId();
       Map<String, String> preferences = preferenceManager.find(owner);
