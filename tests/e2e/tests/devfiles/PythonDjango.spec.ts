@@ -17,6 +17,7 @@ const workspaceStack: string = 'Python Django';
 const workspaceSampleName: string = 'django-realworld-example-app';
 const workspaceRootFolderName: string = 'conduit';
 
+const taskSetUpVenv: string = 'set up venv';
 const taskInstallDependencies: string = 'install dependencies';
 const taskMigrate: string = 'migrate';
 const taskRunServer: string = 'run server';
@@ -28,6 +29,11 @@ suite(`${workspaceStack} test`, async () => {
     suite(`Create ${workspaceStack} workspace`, async () => {
         workspaceHandler.createAndOpenWorkspace(workspaceStack);
         projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
+    });
+
+    suite('Set up venv', async () => {
+        codeExecutionHelper.runTask(taskSetUpVenv, 60_000);
+        codeExecutionHelper.closeTerminal(taskSetUpVenv);
     });
 
     suite('Install dependencies', async () => {
