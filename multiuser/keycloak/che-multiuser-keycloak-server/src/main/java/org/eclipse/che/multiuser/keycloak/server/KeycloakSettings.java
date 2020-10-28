@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_INTERNAL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.CLIENT_ID_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.FIXED_REDIRECT_URL_FOR_DASHBOARD;
@@ -55,12 +56,14 @@ public class KeycloakSettings {
   private static final String DEFAULT_USERNAME_CLAIM = "preferred_username";
 
   private final Map<String, String> settings;
+  private final Map<String, String> internalSettings;
 
   @Inject
   public KeycloakSettings(
       @Named("che.api") String cheServerEndpoint,
       @Nullable @Named(JS_ADAPTER_URL_SETTING) String jsAdapterUrl,
       @Nullable @Named(AUTH_SERVER_URL_SETTING) String serverURL,
+      @Nullable @Named(AUTH_SERVER_URL_INTERNAL_SETTING) String serverInternalURL,
       @Nullable @Named(REALM_SETTING) String realm,
       @Named(CLIENT_ID_SETTING) String clientId,
       @Nullable @Named(OIDC_PROVIDER_SETTING) String oidcProvider,
@@ -70,10 +73,15 @@ public class KeycloakSettings {
       @Nullable @Named(GITHUB_ENDPOINT_SETTING) String gitHubEndpoint,
       @Named(USE_FIXED_REDIRECT_URLS_SETTING) boolean useFixedRedirectUrls) {
 
+    if (serverInternalURL == null) {
+      serverInternalURL = serverURL;
+    }
     if (serverURL == null && oidcProvider == null) {
       throw new RuntimeException(
           "Either the '"
               + AUTH_SERVER_URL_SETTING
+              + "'or'"
+              + AUTH_SERVER_URL_INTERNAL_SETTING
               + "' or '"
               + OIDC_PROVIDER_SETTING
               + "' property should be set");
@@ -83,7 +91,8 @@ public class KeycloakSettings {
       throw new RuntimeException("The '" + REALM_SETTING + "' property should be set");
     }
 
-    String wellKnownEndpoint = oidcProvider != null ? oidcProvider : serverURL + "/realms/" + realm;
+    String wellKnownEndpoint =
+        oidcProvider != null ? oidcProvider : serverInternalURL + "/realms/" + realm;
     if (!wellKnownEndpoint.endsWith("/")) {
       wellKnownEndpoint = wellKnownEndpoint + "/";
     }
@@ -109,10 +118,16 @@ public class KeycloakSettings {
     LOG.info("openid configuration = {}", openIdConfiguration);
 
     Map<String, String> settings = Maps.newHashMap();
+    Map<String, String> internalSettings = Maps.newHashMap();
     settings.put(
         USERNAME_CLAIM_SETTING, usernameClaim == null ? DEFAULT_USERNAME_CLAIM : usernameClaim);
     settings.put(CLIENT_ID_SETTING, clientId);
     settings.put(REALM_SETTING, realm);
+
+    if (serverInternalURL != null) {
+      internalSettings.put(AUTH_SERVER_URL_INTERNAL_SETTING, serverInternalURL);
+    }
+
     if (serverURL != null) {
       settings.put(AUTH_SERVER_URL_SETTING, serverURL);
       settings.put(PROFILE_ENDPOINT_SETTING, serverURL + "/realms/" + realm + "/account");
@@ -132,14 +147,24 @@ public class KeycloakSettings {
     if (tokenEndpoint != null) {
       settings.put(TOKEN_ENDPOINT_SETTING, tokenEndpoint);
     }
+
     String userInfoEndpoint = (String) openIdConfiguration.get("userinfo_endpoint");
     if (userInfoEndpoint != null) {
       settings.put(USERINFO_ENDPOINT_SETTING, userInfoEndpoint);
+      if (serverURL != null) {
+        String internalInfoEndpoint = userInfoEndpoint.replace(serverURL, serverInternalURL);
+        internalSettings.put(USERINFO_ENDPOINT_SETTING, internalInfoEndpoint);
+      }
     }
     String jwksUriEndpoint = (String) openIdConfiguration.get("jwks_uri");
     if (jwksUriEndpoint != null) {
       settings.put(JWKS_ENDPOINT_SETTING, jwksUriEndpoint);
+      if (serverURL != null) {
+        String internalJwksUriEndpoint = jwksUriEndpoint.replace(serverURL, serverInternalURL);
+        internalSettings.put(JWKS_ENDPOINT_SETTING, internalJwksUriEndpoint);
+      }
     }
+
     settings.put(OSO_ENDPOINT_SETTING, osoEndpoint);
     settings.put(GITHUB_ENDPOINT_SETTING, gitHubEndpoint);
 
@@ -161,9 +186,14 @@ public class KeycloakSettings {
     settings.put(JS_ADAPTER_URL_SETTING, jsAdapterUrl);
 
     this.settings = Collections.unmodifiableMap(settings);
+    this.internalSettings = Collections.unmodifiableMap(internalSettings);
   }
 
   public Map<String, String> get() {
     return settings;
+  }
+
+  public Map<String, String> getInternalSettings() {
+    return internalSettings;
   }
 }
