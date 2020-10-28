@@ -83,6 +83,26 @@ public class RouteTlsProvisionerTest {
     assertEquals(servers.get("http-server").getProtocol(), "https");
     assertEquals(servers.get("ws-server").getProtocol(), "wss");
   }
+  @Test
+  public void shouldNotThrowNPE() throws Exception {
+    // given
+    RouteTlsProvisioner tlsProvisioner = new RouteTlsProvisioner(true);
+
+    final Map<String, Route> routes = new HashMap<>();
+    Route route =
+            new RouteBuilder()
+                    .withNewMetadata()
+                    .withName("name")
+                    .endMetadata()
+                    .withNewSpec()
+                    .endSpec()
+                    .build();
+    routes.put("route", route);
+    when(osEnv.getRoutes()).thenReturn(routes);
+
+    // when
+    tlsProvisioner.provision(osEnv, runtimeIdentity);
+  }
 
   private Route createRoute(String name, Map<String, ServerConfigImpl> servers) {
     return new RouteBuilder()
