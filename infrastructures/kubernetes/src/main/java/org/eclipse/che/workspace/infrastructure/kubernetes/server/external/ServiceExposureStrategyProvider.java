@@ -26,6 +26,7 @@ public class ServiceExposureStrategyProvider implements Provider<ExternalService
   public static final String STRATEGY_PROPERTY = "che.infra.kubernetes.server_strategy";
 
   private final ExternalServiceExposureStrategy namingStrategy;
+  private final ExternalServiceExposureStrategy multiHostStrategy;
 
   @Inject
   public ServiceExposureStrategyProvider(
@@ -38,10 +39,28 @@ public class ServiceExposureStrategyProvider implements Provider<ExternalService
       throw new ConfigurationException(
           format("Unsupported server naming strategy '%s' configured", strategy));
     }
+
+    multiHostStrategy =
+        strategies.get(MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY);
+    if (multiHostStrategy == null) {
+      throw new ConfigurationException(
+          "No implementation for 'multi-host' server exposure strategy configured even though it is"
+              + " mandatory.");
+    }
   }
 
+  /** Returns the configured exposure strategy. */
   @Override
   public ExternalServiceExposureStrategy get() {
     return namingStrategy;
+  }
+
+  /**
+   * Returns the multi-host exposure strategy, regardless of which default exposure strategy is
+   * configured. This is used in workspaces with mixed endpoints (i.e. plugins by default deployed
+   * using the configured strategy and devfile endpoints by default deployed using multi-host).
+   */
+  public ExternalServiceExposureStrategy getMultiHostStrategy() {
+    return multiHostStrategy;
   }
 }

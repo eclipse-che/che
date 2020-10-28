@@ -110,6 +110,14 @@ che:
   disableProbes: false
   logLevel: "INFO"
 
+dashboard:
+  image: quay.io/eclipse/che-dashboard:next
+  imagePullPolicy: "Always"
+  memoryRequest: 16Mi
+  memoryLimit: 256Mi
+  cpuRequest: 50m
+  cpuLimit: 500m
+
 cheDevfileRegistry:
   deploy: true
 

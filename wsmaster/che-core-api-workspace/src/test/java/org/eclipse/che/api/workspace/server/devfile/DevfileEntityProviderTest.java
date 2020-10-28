@@ -29,14 +29,14 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class DevfileEntityProviderTest {
 
-  @Mock private DevfileManager devfileManager;
+  @Mock private DevfileParser devfileParser;
 
   @InjectMocks private DevfileEntityProvider devfileEntityProvider;
 
   @Test
   public void shouldBuildDtoFromValidYaml() throws Exception {
 
-    when(devfileManager.parseYaml(anyString())).thenReturn(new DevfileImpl());
+    when(devfileParser.parseYaml(anyString())).thenReturn(new DevfileImpl());
 
     devfileEntityProvider.readFrom(
         DevfileDto.class,
@@ -46,13 +46,13 @@ public class DevfileEntityProviderTest {
         new MultivaluedHashMap<>(),
         getClass().getClassLoader().getResourceAsStream("devfile/devfile.yaml"));
 
-    verify(devfileManager).parseYaml(anyString());
+    verify(devfileParser).parseYaml(anyString());
   }
 
   @Test
   public void shouldBuildDtoFromValidJson() throws Exception {
 
-    when(devfileManager.parseJson(anyString())).thenReturn(new DevfileImpl());
+    when(devfileParser.parseJson(anyString())).thenReturn(new DevfileImpl());
 
     devfileEntityProvider.readFrom(
         DevfileDto.class,
@@ -62,7 +62,7 @@ public class DevfileEntityProviderTest {
         new MultivaluedHashMap<>(),
         getClass().getClassLoader().getResourceAsStream("devfile/devfile.json"));
 
-    verify(devfileManager).parseJson(anyString());
+    verify(devfileParser).parseJson(anyString());
   }
 
   @Test(

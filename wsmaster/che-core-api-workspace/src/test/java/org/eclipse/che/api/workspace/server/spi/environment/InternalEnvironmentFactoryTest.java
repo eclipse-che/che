@@ -99,7 +99,7 @@ public class InternalEnvironmentFactoryTest {
     doReturn(normalizedServers).when(environmentFactory).normalizeServers(any());
 
     ImmutableMap<String, ServerConfigImpl> sourceServers = ImmutableMap.of("server", server);
-    MachineConfigImpl machineConfig = new MachineConfigImpl(null, sourceServers, null, null, null);
+    MachineConfigImpl machineConfig = new MachineConfigImpl(sourceServers, null, null, null);
 
     EnvironmentImpl env = new EnvironmentImpl(null, ImmutableMap.of("machine", machineConfig));
 

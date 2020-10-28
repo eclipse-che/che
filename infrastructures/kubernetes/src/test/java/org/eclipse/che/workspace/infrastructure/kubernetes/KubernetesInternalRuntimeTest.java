@@ -26,6 +26,8 @@ import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_STA
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putAnnotations;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabels;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -140,6 +142,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesP
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ServiceExposureStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.KubernetesServerResolverFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -216,6 +219,8 @@ public class KubernetesInternalRuntimeTest {
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
   @Mock private KubernetesPreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
+  @Mock private ServiceExposureStrategyProvider serviceExposureStrategyProvider;
+  @Mock private RuntimeCleaner runtimeCleaner;
   private KubernetesServerResolverFactory serverResolverFactory;
 
   @Mock
@@ -290,6 +295,7 @@ public class KubernetesInternalRuntimeTest {
             previewUrlCommandProvisioner,
             secretAsContainerResourceProvisioner,
             serverResolverFactory,
+            runtimeCleaner,
             cheNamespace,
             tracer,
             context,
@@ -431,8 +437,7 @@ public class KubernetesInternalRuntimeTest {
     verify(services).create(any());
     verify(secrets).create(any());
     verify(configMaps).create(any());
-    verify(namespace).cleanUp();
-    verify(cheNamespace).cleanUp(WORKSPACE_ID);
+    verify(runtimeCleaner).cleanUp(namespace, WORKSPACE_ID);
     verify(namespace.deployments(), times(1)).watchEvents(any());
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
@@ -449,9 +454,8 @@ public class KubernetesInternalRuntimeTest {
     internalRuntime.start(emptyMap());
 
     InOrder cleanupInOrderExecutionVerification =
-        Mockito.inOrder(namespace, cheNamespace, deployments, toolingProvisioner);
-    cleanupInOrderExecutionVerification.verify(namespace).cleanUp();
-    cleanupInOrderExecutionVerification.verify(cheNamespace).cleanUp(WORKSPACE_ID);
+        Mockito.inOrder(runtimeCleaner, deployments, toolingProvisioner);
+    cleanupInOrderExecutionVerification.verify(runtimeCleaner).cleanUp(namespace, WORKSPACE_ID);
     cleanupInOrderExecutionVerification
         .verify(toolingProvisioner)
         .provision(any(), any(), any(), any());
@@ -654,8 +658,7 @@ public class KubernetesInternalRuntimeTest {
     try {
       internalRuntime.start(emptyMap());
     } catch (Exception rethrow) {
-      verify(namespace, times(2)).cleanUp();
-      verify(cheNamespace, times(2)).cleanUp(WORKSPACE_ID);
+      verify(runtimeCleaner, times(2)).cleanUp(namespace, WORKSPACE_ID);
       verify(namespace, never()).services();
       verify(namespace, never()).ingresses();
       throw rethrow;
@@ -693,7 +696,10 @@ public class KubernetesInternalRuntimeTest {
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void throwsInfrastructureExceptionWhenErrorOccursAndCleanupFailed() throws Exception {
-    doNothing().doThrow(InfrastructureException.class).when(namespace).cleanUp();
+    doNothing()
+        .doThrow(InfrastructureException.class)
+        .when(runtimeCleaner)
+        .cleanUp(namespace, WORKSPACE_ID);
     when(k8sEnv.getServices()).thenReturn(singletonMap("testService", mock(Service.class)));
     when(services.create(any())).thenThrow(new InfrastructureException("service creation failed"));
     doThrow(IllegalStateException.class).when(namespace).services();
@@ -701,7 +707,7 @@ public class KubernetesInternalRuntimeTest {
     try {
       internalRuntime.start(emptyMap());
     } catch (Exception rethrow) {
-      verify(namespace, times(2)).cleanUp();
+      verify(runtimeCleaner, times(2)).cleanUp(namespace, WORKSPACE_ID);
       verify(namespace).services();
       verify(namespace, never()).ingresses();
       throw rethrow;
@@ -734,21 +740,12 @@ public class KubernetesInternalRuntimeTest {
     internalRuntime.internalStop(emptyMap());
 
     verify(runtimeHangingDetector).stopTracking(IDENTITY);
-    verify(namespace).cleanUp();
-    verify(cheNamespace).cleanUp(WORKSPACE_ID);
+    verify(runtimeCleaner).cleanUp(namespace, WORKSPACE_ID);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void throwsInfrastructureExceptionWhenKubernetesNamespaceCleanupFailed() throws Exception {
-    doThrow(InfrastructureException.class).when(namespace).cleanUp();
-
-    internalRuntime.internalStop(emptyMap());
-  }
-
-  @Test(expectedExceptions = InfrastructureException.class)
-  public void throwsInfrastructureExceptionWhenKubernetesCheNamespaceCleanupFailed()
-      throws Exception {
-    doThrow(InfrastructureException.class).when(cheNamespace).cleanUp(WORKSPACE_ID);
+    doThrow(InfrastructureException.class).when(runtimeCleaner).cleanUp(namespace, WORKSPACE_ID);
 
     internalRuntime.internalStop(emptyMap());
   }
@@ -1076,6 +1073,49 @@ public class KubernetesInternalRuntimeTest {
   }
 
   @Test
+  public void testDeploymentLabelsAndAnnotations() throws Exception {
+    // given
+    Map<String, Pod> injectedPods =
+        ImmutableMap.of("injected", mockPod(singletonList(mockContainer("injectedContainer"))));
+
+    doReturn(ImmutableMap.of(M1_NAME, injectedPods)).when(k8sEnv).getInjectablePodsCopy();
+
+    doReturn(emptyMap()).when(k8sEnv).getPodsCopy();
+    Deployment deployment = mockDeployment(singletonList(mockContainer(CONTAINER_NAME_1)));
+
+    putLabels(deployment.getMetadata(), ImmutableMap.of("k1", "v2", "k3", "v4"));
+    putAnnotations(deployment.getMetadata(), ImmutableMap.of("ak1", "av2", "ak3", "av4"));
+    doReturn(ImmutableMap.of(WORKSPACE_POD_NAME, deployment)).when(k8sEnv).getDeploymentsCopy();
+
+    doReturn(
+            ImmutableMap.of(
+                M1_NAME,
+                mock(InternalMachineConfig.class),
+                WORKSPACE_POD_NAME + "/injectedContainer",
+                mock(InternalMachineConfig.class)))
+        .when(k8sEnv)
+        .getMachines();
+
+    // when
+    internalRuntime.start(emptyMap());
+
+    // then
+    ArgumentCaptor<Deployment> deploymentCaptor = ArgumentCaptor.forClass(Deployment.class);
+
+    verify(deployments).deploy(deploymentCaptor.capture());
+    assertTrue(deployment.getMetadata().getLabels().containsKey("k1"));
+    assertTrue(deployment.getMetadata().getLabels().containsKey("k3"));
+    assertEquals(
+        deployment.getMetadata().getLabels(),
+        deploymentCaptor.getValue().getMetadata().getLabels());
+    assertTrue(deployment.getMetadata().getAnnotations().containsKey("ak1"));
+    assertTrue(deployment.getMetadata().getAnnotations().containsKey("ak3"));
+    assertEquals(
+        deployment.getMetadata().getAnnotations(),
+        deploymentCaptor.getValue().getMetadata().getAnnotations());
+  }
+
+  @Test
   public void testInjectablePodsMergedIntoRuntimeDeployments() throws Exception {
     // given
     Map<String, Pod> injectedPods =
@@ -1161,7 +1201,7 @@ public class KubernetesInternalRuntimeTest {
     verify(cheNamespace)
         .createConfigMaps(
             expectedCreatedCheNamespaceConfigmaps, internalRuntime.getContext().getIdentity());
-    verify(cheNamespace).cleanUp(WORKSPACE_ID);
+    verify(runtimeCleaner).cleanUp(namespace, WORKSPACE_ID);
   }
 
   private static MachineStatusEvent newEvent(String machineName, MachineStatus status) {

@@ -24,7 +24,6 @@ public class DevfileModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(DevfileService.class);
     bind(DevfileEntityProvider.class);
 
     DevfileBindings.onWorkspaceApplierBinder(

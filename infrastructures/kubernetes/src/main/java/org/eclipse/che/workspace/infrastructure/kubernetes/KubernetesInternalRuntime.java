@@ -14,6 +14,8 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putAnnotations;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabels;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.shouldCreateInCheNamespace;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.CHECK_SERVERS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_MACHINES_START;
@@ -133,6 +135,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final PreviewUrlCommandProvisioner previewUrlCommandProvisioner;
   private final SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
   private final KubernetesServerResolverFactory serverResolverFactory;
+  private final RuntimeCleaner runtimeCleaner;
   protected final CheNamespace cheNamespace;
   protected final Tracer tracer;
 
@@ -158,6 +161,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       PreviewUrlCommandProvisioner previewUrlCommandProvisioner,
       SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner,
       KubernetesServerResolverFactory kubernetesServerResolverFactory,
+      RuntimeCleaner runtimeCleaner,
       CheNamespace cheNamespace,
       Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
@@ -184,6 +188,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.previewUrlCommandProvisioner = previewUrlCommandProvisioner;
     this.secretAsContainerResourceProvisioner = secretAsContainerResourceProvisioner;
     this.serverResolverFactory = kubernetesServerResolverFactory;
+    this.runtimeCleaner = runtimeCleaner;
     this.tracer = tracer;
   }
 
@@ -195,7 +200,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       startSynchronizer.setStartThread();
       startSynchronizer.start();
 
-      cleanUp(workspaceId);
+      runtimeCleaner.cleanUp(namespace, workspaceId);
       provisionWorkspace(startOptions, context, workspaceId);
 
       volumesStrategy.prepare(
@@ -250,9 +255,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
       startSynchronizer.completeExceptionally(startFailureCause);
       LOG.warn(
-          "Failed to start Kubernetes runtime of workspace {}. Cause: {}",
-          workspaceId,
-          startFailureCause.getMessage());
+          "Failed to start Kubernetes runtime of workspace {}.", workspaceId, startFailureCause);
       boolean interrupted =
           Thread.interrupted() || startFailureCause instanceof RuntimeStartInterruptedException;
       // Cancels workspace servers probes if any
@@ -260,12 +263,12 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // stop watching before namespace cleaning up
       namespace.deployments().stopWatch(true);
       try {
-        cleanUp(workspaceId);
+        runtimeCleaner.cleanUp(namespace, workspaceId);
       } catch (InfrastructureException cleanUppingEx) {
         LOG.warn(
-            "Failed to clean up namespace after workspace '{}' start failing. Cause: {}",
+            "Failed to clean up namespace after workspace '{}' start failing.",
             context.getIdentity().getWorkspaceId(),
-            cleanUppingEx.getMessage());
+            cleanUppingEx);
       }
 
       if (interrupted) {
@@ -275,11 +278,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     } finally {
       namespace.deployments().stopWatch();
     }
-  }
-
-  private void cleanUp(String workspaceId) throws InfrastructureException {
-    namespace.cleanUp();
-    cheNamespace.cleanUp(workspaceId);
   }
 
   protected void provisionWorkspace(
@@ -494,14 +492,12 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
               getContext().getIdentity(), machineName, MachineStatus.FAILED);
         } catch (InfrastructureException e) {
           LOG.error(
-              "Unable to update status of the machine '{}:{}'. Cause: {}",
+              "Unable to update status of the machine '{}:{}'.",
               getContext().getIdentity().getWorkspaceId(),
               machineName,
-              e.getMessage());
+              e);
         }
         eventPublisher.sendFailedEvent(machineName, ex.getMessage(), getContext().getIdentity());
-      } else {
-        String message = ex.getMessage() + " (happened elsewhere)";
       }
       return null;
     };
@@ -542,10 +538,10 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
             getContext().getIdentity(), machineName, MachineStatus.RUNNING);
       } catch (InfrastructureException e) {
         LOG.error(
-            "Unable to update status of the machine '{}:{}'. Cause: {}",
+            "Unable to update status of the machine '{}:{}'.",
             getContext().getIdentity().getWorkspaceId(),
             machineName,
-            e.getMessage());
+            e);
       }
       eventPublisher.sendRunningEvent(machineName, getContext().getIdentity());
     };
@@ -594,7 +590,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           // Che Server that is crashed so start is hung up in STOPPING phase.
           // Need to clean up runtime resources
           probeScheduler.cancel(identity.getWorkspaceId());
-          cleanUp(identity.getWorkspaceId());
+          runtimeCleaner.cleanUp(namespace, identity.getWorkspaceId());
         }
       } catch (InterruptedException e) {
         throw new InfrastructureException(
@@ -604,7 +600,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // runtime is RUNNING. Clean up used resources
       // Cancels workspace servers probes if any
       probeScheduler.cancel(identity.getWorkspaceId());
-      cleanUp(identity.getWorkspaceId());
+      runtimeCleaner.cleanUp(namespace, identity.getWorkspaceId());
     }
   }
 
@@ -788,7 +784,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           injectables.add(new PodData(toCreate));
           Deployment deployment = podMerger.merge(injectables);
           deployment.getMetadata().setName(toCreate.getMetadata().getName());
-
+          putAnnotations(deployment.getMetadata(), toCreate.getMetadata().getAnnotations());
+          putLabels(deployment.getMetadata(), toCreate.getMetadata().getLabels());
           createdPod = namespace.deployments().deploy(deployment);
         } catch (ValidationException e) {
           throw new InfrastructureException(e);
@@ -1071,11 +1068,11 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         eventPublisher.sendServerRunningEvent(machineName, serverRef, url, identity);
       } catch (InfrastructureException e) {
         LOG.error(
-            "Unable to update status of the server '{}:{}:{}'. Cause: {}",
+            "Unable to update status of the server '{}:{}:{}'.",
             identity.getWorkspaceId(),
             machineName,
             serverRef,
-            e.getMessage());
+            e);
       }
     }
   }
@@ -1108,11 +1105,11 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         }
       } catch (InfrastructureException e) {
         LOG.error(
-            "Unable to update status of the server '{}:{}:{}'. Cause: {}",
+            "Unable to update status of the server '{}:{}:{}'.",
             identity.getWorkspaceId(),
             machineName,
             serverName,
-            e.getMessage());
+            e);
       }
     }
   }

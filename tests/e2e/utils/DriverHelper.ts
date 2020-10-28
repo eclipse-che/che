@@ -716,4 +716,8 @@ export class DriverHelper {
 
         return this.driver;
     }
+
+    public sleep(time: number) {
+        this.driver.sleep(time);
+    }
 }

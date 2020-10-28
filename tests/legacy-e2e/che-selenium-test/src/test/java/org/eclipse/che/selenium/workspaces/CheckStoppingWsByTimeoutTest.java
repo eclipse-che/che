@@ -25,7 +25,6 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
-import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.openqa.selenium.By;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -37,7 +36,6 @@ public class CheckStoppingWsByTimeoutTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
-  @Inject private TheiaIde theiaIde;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject

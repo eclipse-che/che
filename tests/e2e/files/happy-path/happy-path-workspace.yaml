@@ -35,6 +35,8 @@ components:
     mountSources: true
   - type: chePlugin
     id: redhat/java/latest
+    preferences:
+      java.server.launchMode: Standard
   - type: chePlugin
     id: redhat/vscode-yaml/latest
 commands:

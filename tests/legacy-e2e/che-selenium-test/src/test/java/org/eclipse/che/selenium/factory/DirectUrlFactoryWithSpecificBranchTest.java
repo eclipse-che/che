@@ -32,8 +32,6 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
-import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
-import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
 import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +54,6 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   @Inject private TestFactoryInitializer testFactoryInitializer;
   @Inject private TheiaIde theiaIde;
   @Inject private TheiaProjectTree theiaProjectTree;
-  @Inject private TheiaTerminal theiaTerminal;
-  @Inject private TheiaProposalForm theiaProposalForm;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private Dashboard dashboard;

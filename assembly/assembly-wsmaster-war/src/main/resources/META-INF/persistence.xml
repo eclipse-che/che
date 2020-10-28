@@ -58,12 +58,14 @@
         <class>org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl</class>
         <class>org.eclipse.che.api.workspace.server.devfile.SerializableConverter</class>
+        <class>org.eclipse.che.api.devfile.server.model.impl.UserDevfileImpl</class>
 
         <class>org.eclipse.che.api.ssh.server.model.impl.SshPairImpl</class>
         
         <class>org.eclipse.che.multiuser.api.permission.server.model.impl.SystemPermissionsImpl</class>
         <class>org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermissions</class>
         <class>org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl</class>
+        <class>org.eclipse.che.multiuser.permission.devfile.server.model.impl.UserDevfilePermissionImpl</class>
 
         <class>org.eclipse.che.multiuser.resource.spi.impl.FreeResourcesLimitImpl</class>
         <class>org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl</class>

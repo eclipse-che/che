@@ -35,7 +35,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
+import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
@@ -54,12 +54,12 @@ import org.eclipse.che.dto.server.DtoFactory;
 public class WorkspaceEntityProvider
     implements MessageBodyReader<WorkspaceDto>, MessageBodyWriter<WorkspaceDto> {
 
-  private DevfileManager devfileManager;
+  private DevfileParser devfileParser;
   private ObjectMapper mapper = new ObjectMapper();
 
   @Inject
-  public WorkspaceEntityProvider(DevfileManager devfileManager) {
-    this.devfileManager = devfileManager;
+  public WorkspaceEntityProvider(DevfileParser devfileParser) {
+    this.devfileParser = devfileParser;
   }
 
   @Override
@@ -81,7 +81,7 @@ public class WorkspaceEntityProvider
       JsonNode wsNode = mapper.readTree(entityStream);
       JsonNode devfileNode = wsNode.path("devfile");
       if (!devfileNode.isNull() && !devfileNode.isMissingNode()) {
-        devfileManager.parseJson(devfileNode.toString());
+        devfileParser.parseJson(devfileNode.toString());
       }
       return DtoFactory.getInstance().createDtoFromJson(wsNode.toString(), WorkspaceDto.class);
     } catch (DevfileFormatException e) {

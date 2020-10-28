@@ -64,7 +64,7 @@ public class JpaFactoryDao implements FactoryDao {
           format("Factory with name '%s' already exists for current user", factory.getName()));
     } catch (IntegrityConstraintViolationException ex) {
       throw new ConflictException(
-          "Could not create factory with creator that refers on non-existent user");
+          "Could not create factory with creator that refers to a non-existent user");
     } catch (RuntimeException ex) {
       throw new ServerException(ex.getLocalizedMessage(), ex);
     }

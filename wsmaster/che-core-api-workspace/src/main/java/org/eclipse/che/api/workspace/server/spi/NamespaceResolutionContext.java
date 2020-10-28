@@ -12,9 +12,12 @@
 package org.eclipse.che.api.workspace.server.spi;
 
 import java.util.Objects;
+import org.eclipse.che.commons.subject.Subject;
 
 /**
- * Holds information needed for resolving placeholders in the namespace name.
+ * Holds information needed for resolving placeholders in the namespace name. The {@code
+ * persistAfterCreate} attribute indicates whether namespace name should be persisted after
+ * resolution (if the infrastructure supports it).
  *
  * @author Lukas Krejci
  * @author Sergii Leshchenko
@@ -23,6 +26,10 @@ public class NamespaceResolutionContext {
   private final String workspaceId;
   private final String userId;
   private final String userName;
+
+  public NamespaceResolutionContext(Subject subject) {
+    this(null, subject.getUserId(), subject.getUserName());
+  }
 
   public NamespaceResolutionContext(String workspaceId, String userId, String userName) {
     this.workspaceId = workspaceId;

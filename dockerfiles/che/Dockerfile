@@ -19,7 +19,7 @@ FROM ${CHE_DASHBOARD_ORGANIZATION}/che-dashboard:${CHE_DASHBOARD_VERSION} as che
 FROM ${CHE_DASHBOARD_NEXT_ORGANIZATION}/che-dashboard-next:${CHE_DASHBOARD_NEXT_VERSION} as che_dashboard_next
 FROM ${CHE_WORKSPACE_LOADER_ORGANIZATION}/che-workspace-loader:${CHE_WORKSPACE_LOADER_VERSION} as che_workspace_loader_base
 
-FROM openjdk:11-jre-slim
+FROM adoptopenjdk/openjdk11:jre-11.0.8_10
 ENV LANG=C.UTF-8
 RUN echo "%root ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && rm -rf /tmp/*
 EXPOSE 8000 8080

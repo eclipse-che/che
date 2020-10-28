@@ -31,7 +31,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServ
  * @see ExternalServerExposer
  */
 @Singleton
-public class IngressServerExposer implements ExternalServerExposer<KubernetesEnvironment> {
+public class IngressServerExposer<T extends KubernetesEnvironment>
+    implements ExternalServerExposer<T> {
 
   /**
    * A string to look for in the value of the "che.infra.kubernetes.ingress.path_transform"
@@ -69,7 +70,7 @@ public class IngressServerExposer implements ExternalServerExposer<KubernetesEnv
    */
   @Override
   public void expose(
-      KubernetesEnvironment k8sEnv,
+      T k8sEnv,
       @Nullable String machineName,
       String serviceName,
       String serverId,

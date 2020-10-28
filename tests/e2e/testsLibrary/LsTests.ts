@@ -9,7 +9,7 @@
  **********************************************************************/
 
 import { e2eContainer } from '../inversify.config';
-import { Editor, CLASSES, Ide } from '..';
+import { Editor, CLASSES, Ide, TimeoutConstants } from '..';
 import { Key, error } from 'selenium-webdriver';
 import { Logger } from '../utils/Logger';
 
@@ -66,19 +66,19 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
     });
  }
 
- export function codeNavigation(openedFile: string, line: number, char: number, codeNavigationClassName: string) {
+ export function codeNavigation(openedFile: string, line: number, char: number, codeNavigationClassName: string, timeout : number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
     test('Codenavigation', async () => {
         // adding retry to fix https://github.com/eclipse/che/issues/17411
         try {
             await editor.moveCursorToLineAndChar(openedFile, line, char);
             await editor.performKeyCombination(openedFile, Key.chord(Key.CONTROL, Key.F12));
-            await editor.waitEditorAvailable(codeNavigationClassName);
+            await editor.waitEditorAvailable(codeNavigationClassName, timeout);
         } catch (err) {
             if (err instanceof error.TimeoutError) {
                 Logger.warn('Code navigation didn\'t work. Trying again.');
                 await editor.moveCursorToLineAndChar(openedFile, line, char);
                 await editor.performKeyCombination(openedFile, Key.chord(Key.CONTROL, Key.F12));
-                await editor.waitEditorAvailable(codeNavigationClassName);
+                await editor.waitEditorAvailable(codeNavigationClassName, timeout);
             } else {
                 Logger.error('Code navigation didn\'t work even after retrying.');
                 throw err;

@@ -13,17 +13,17 @@ import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as workspaceHandler from '../../testsLibrary/WorksapceHandlingTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
+import { Key } from 'selenium-webdriver';
 
-const workspaceStack: string = 'Quarkus Tools';
+const workspaceStack: string = 'Quarkus CLI';
 const workspaceSampleName: string = 'quarkus-quickstarts';
-const workspaceRootFolderName: string = 'getting-started';
-const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/src/main/java/org/acme/getting/started`;
+const workspaceRootFolderName: string = 'getting-started-command-mode';
+const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/src/main/java/org/acme/getting/started/commandmode`;
 const fileName: string = `GreetingService.java`;
 
 const taskPackage: string = 'Package';
 const taskPackageNative: string = 'Package Native';
 const taskStartNative: string = 'Start Native';
-const taskExpectedDialogText: string = 'A process is now listening on port 8080';
 
 suite(`${workspaceStack} test`, async () => {
     suite(`Create ${workspaceStack}`, async () => {
@@ -41,19 +41,19 @@ suite(`${workspaceStack} test`, async () => {
         codeExecutionHelper.closeTerminal(taskPackage);
     });
 
-    suite.skip('Package Quarkus Native bundle', async () => { // enable again once https://github.com/eclipse/che/issues/17356 is fixed
+    suite('Package Quarkus Native bundle', async () => {
         codeExecutionHelper.runTask(taskPackageNative, 600_000);
         codeExecutionHelper.closeTerminal(taskPackageNative);
     });
-    suite.skip('Start Quarkus Native application', async () => { // enable again once https://github.com/eclipse/che/issues/17356 is fixed
-        codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskStartNative, taskExpectedDialogText, 90_000);
+    suite('Start Quarkus Native application', async () => {
+        codeExecutionHelper.runTaskInputText(taskStartNative, 'Test User' + Key.ENTER, 90_000);
     });
 
     suite(`'Language server validation'`, async () => {
         commonLsTests.errorHighlighting(fileName, 'error_text;', 7);
         commonLsTests.suggestionInvoking(fileName, 8, 33, 'String');
         commonLsTests.autocomplete(fileName, 8, 33, 'String');
-        commonLsTests.codeNavigation(fileName, 8, 33, 'String.class');
+        commonLsTests.codeNavigation(fileName, 8, 33, 'String.class', 30_000); // extended timout to give LS enough time to start
     });
 
     suite('Stop and remove workspace', async() => {
