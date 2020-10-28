@@ -22,7 +22,7 @@ const dashboardUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}`;
 suite('The "IntelijOpenWorkspace" userstory', async () => {
     suite('Open workspace', async () => {
         test('Open workspace', async () => {
-            await driverHelper.navigateToUrl(`${dashboardUrl}/dashboard/#/ide/admin/java-11-intelij`);
+            await driverHelper.navigateToUrl(`${dashboardUrl}/dashboard/#/ide/admin/java-11-intellij`);
         });
 
         test('Wait workspace', async () => {
