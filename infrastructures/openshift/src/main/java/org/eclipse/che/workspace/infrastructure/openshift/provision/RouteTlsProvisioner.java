@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putAnnotations;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisioner.getSecureProtocol;
 
 import io.fabric8.openshift.api.model.Route;
@@ -73,8 +74,7 @@ public class RouteTlsProvisioner
     servers.values().forEach(s -> s.setProtocol(getSecureProtocol(s.getProtocol())));
 
     Map<String, String> annotations = Annotations.newSerializer().servers(servers).annotations();
-
-    route.getMetadata().getAnnotations().putAll(annotations);
+    putAnnotations(route.getMetadata(), annotations);
   }
 
   private void enableTls(final Route route) {
