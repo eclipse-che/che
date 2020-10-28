@@ -77,14 +77,13 @@ pipeline {
     stages {
         stage("Setup environment") {
             steps {
-                script {
+                script { 
                     if (cheImageTag == null || cheImageTag == '') {
                         mutableCheImageTag = ghprbPullId
                     } else {
                         mutableCheImageTag = cheImageTag
                     }
-                    sh "sudo yum install -y glibc.i686 libfreetype.so.6 libfontconfig.so.1 libstdc++-devel.i686"
-                }
+               }
             }
         }
 
@@ -155,15 +154,15 @@ pipeline {
 
                 stage("Build Che including upstream projects") {
                     when {
-                        expression { return buildChe.toString() == 'true' || params.ghprbCommentBody == null || params.ghprbCommentBody.toString().contains("--rebuild")
+                        expression { 
+                            return buildChe.toString() == 'true' || (params['ghprbCommentBody'] && (params.ghprbCommentBody == 'null' || params.ghprbCommentBody.contains("--rebuild")))
                         }
                     }
 
                     steps {
-                        echo "buildChe = $params.buildChe"
-                        echo "createTestWorkspace = $params.createTestWorkspace"
-
                         echo "Build branch ${ghprbSourceBranch} of upstream projects"
+                        sh "sudo yum install -y glibc.i686 libfreetype.so.6 libfontconfig.so.1 libstdc++-devel.i686"
+
                         sh """
                             project_list=(
                                 eclipse/che-parent
@@ -204,7 +203,8 @@ pipeline {
 
         stage("Build and push che-server image") {
             when {
-                expression { return buildChe.toString() == 'true' || params.ghprbCommentBody == null || params.ghprbCommentBody.toString().contains("--rebuild")
+                expression {
+                    return buildChe.toString() == 'true' || (params['ghprbCommentBody'] && (params.ghprbCommentBody == 'null' || params.ghprbCommentBody.contains("--rebuild"))) 
                 }
             }
 
