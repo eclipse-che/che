@@ -83,6 +83,7 @@ public class RouteTlsProvisionerTest {
     assertEquals(servers.get("http-server").getProtocol(), "https");
     assertEquals(servers.get("ws-server").getProtocol(), "wss");
   }
+
   @Test
   public void shouldNotThrowNPE() throws Exception {
     // given
@@ -90,13 +91,13 @@ public class RouteTlsProvisionerTest {
 
     final Map<String, Route> routes = new HashMap<>();
     Route route =
-            new RouteBuilder()
-                    .withNewMetadata()
-                    .withName("name")
-                    .endMetadata()
-                    .withNewSpec()
-                    .endSpec()
-                    .build();
+        new RouteBuilder()
+            .withNewMetadata()
+            .withName("name")
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
     routes.put("route", route);
     when(osEnv.getRoutes()).thenReturn(routes);
 
