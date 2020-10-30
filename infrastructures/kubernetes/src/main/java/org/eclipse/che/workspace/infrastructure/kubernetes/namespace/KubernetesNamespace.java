@@ -28,6 +28,9 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -37,6 +40,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.slf4j.Logger;
@@ -70,12 +74,14 @@ public class KubernetesNamespace {
   private final KubernetesPersistentVolumeClaims pvcs;
   private final KubernetesIngresses ingresses;
   private final KubernetesClientFactory clientFactory;
+  private final KubernetesClientFactory cheClientFactory;
   private final KubernetesSecrets secrets;
   private final KubernetesConfigsMaps configMaps;
 
   @VisibleForTesting
   protected KubernetesNamespace(
       KubernetesClientFactory clientFactory,
+      KubernetesClientFactory cheClientFactory,
       String workspaceId,
       String name,
       KubernetesDeployments deployments,
@@ -85,6 +91,7 @@ public class KubernetesNamespace {
       KubernetesSecrets secrets,
       KubernetesConfigsMaps configMaps) {
     this.clientFactory = clientFactory;
+    this.cheClientFactory = cheClientFactory;
     this.workspaceId = workspaceId;
     this.name = name;
     this.deployments = deployments;
@@ -96,8 +103,10 @@ public class KubernetesNamespace {
   }
 
   public KubernetesNamespace(
-      KubernetesClientFactory clientFactory, Executor executor, String name, String workspaceId) {
+      KubernetesClientFactory clientFactory, KubernetesClientFactory cheClientFactory,
+      Executor executor, String name, String workspaceId) {
     this.clientFactory = clientFactory;
+    this.cheClientFactory = cheClientFactory;
     this.workspaceId = workspaceId;
     this.name = name;
     this.deployments = new KubernetesDeployments(name, workspaceId, clientFactory, executor);
@@ -114,11 +123,12 @@ public class KubernetesNamespace {
    * <p>Preparing includes creating if needed and waiting for default service account.
    *
    * @param canCreate defines what to do when the namespace is not found. The namespace is created
-   *     when {@code true}, otherwise an exception is thrown.
+   *                  when {@code true}, otherwise an exception is thrown.
    * @throws InfrastructureException if any exception occurs during namespace preparation or if the
-   *     namespace doesn't exist and {@code canCreate} is {@code false}.
+   *                                 namespace doesn't exist and {@code canCreate} is {@code
+   *                                 false}.
    */
-  void prepare(boolean canCreate) throws InfrastructureException {
+  void prepare(boolean canCreate, Map<String, String> labels) throws InfrastructureException {
     KubernetesClient client = clientFactory.create(workspaceId);
     Namespace namespace = get(name, client);
 
@@ -127,7 +137,35 @@ public class KubernetesNamespace {
         throw new InfrastructureException(
             format("Creating the namespace '%s' is not allowed, yet it was not found.", name));
       }
-      create(name, client);
+      namespace = create(name, client);
+    }
+    label(namespace, labels);
+  }
+
+  protected Namespace label(Namespace namespace, Map<String, String> ensureLabels)
+      throws InfrastructureException {
+    Map<String, String> currentLabels = namespace.getMetadata().getLabels();
+    Map<String, String> newLabels =
+        currentLabels != null ? new HashMap<>(currentLabels) : new HashMap<>();
+
+    if (newLabels.entrySet().containsAll(ensureLabels.entrySet())) {
+      LOG.debug("Nothing to do, namespace already has all labels.");
+      return namespace;
+    }
+
+    newLabels.putAll(ensureLabels);
+    namespace.getMetadata().setLabels(newLabels);
+
+    try {
+      return cheClientFactory.create()
+          .namespaces()
+          .createOrReplace(namespace);
+    } catch (KubernetesClientException kce) {
+      if (kce.getCode() == 403) {
+        LOG.debug("Can't label the namespace due to lack of permissions ¯\\_(ツ)_/¯");
+        return namespace;
+      }
+      throw kce;
     }
   }
 
@@ -231,17 +269,19 @@ public class KubernetesNamespace {
     }
   }
 
-  private void create(String namespaceName, KubernetesClient client)
+  private Namespace create(String namespaceName, KubernetesClient client)
       throws InfrastructureException {
     try {
-      client
+      Namespace namespace = client
           .namespaces()
           .createNew()
           .withNewMetadata()
           .withName(namespaceName)
+          .withLabels(Map.of("A", "B"))
           .endMetadata()
           .done();
       waitDefaultServiceAccount(namespaceName, client);
+      return namespace;
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {
         LOG.error(
@@ -288,7 +328,7 @@ public class KubernetesNamespace {
               .withName(DEFAULT_SERVICE_ACCOUNT_NAME);
       watch =
           saResource.watch(
-              new Watcher<ServiceAccount>() {
+              new Watcher<>() {
                 @Override
                 public void eventReceived(Action action, ServiceAccount serviceAccount) {
                   if (predicate.test(serviceAccount)) {
