@@ -1,4 +1,4 @@
-///*
+/// *
 // * Copyright (c) 2012-2018 Red Hat, Inc.
 // * This program and the accompanying materials are made
 // * available under the terms of the Eclipse Public License 2.0
@@ -9,90 +9,94 @@
 // * Contributors:
 // *   Red Hat, Inc. - initial API and implementation
 // */
-//package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
+// package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 //
-//import static java.util.Collections.emptyMap;
-//import static java.util.Collections.singletonList;
-//import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
-//import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
-//import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
-//import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory.NAMESPACE_TEMPLATE_ATTRIBUTE;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.ArgumentMatchers.anyMap;
-//import static org.mockito.ArgumentMatchers.anyString;
-//import static org.mockito.ArgumentMatchers.eq;
-//import static org.mockito.Mockito.doReturn;
-//import static org.mockito.Mockito.doThrow;
-//import static org.mockito.Mockito.lenient;
-//import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.never;
-//import static org.mockito.Mockito.spy;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//import static org.testng.Assert.assertEquals;
-//import static org.testng.Assert.assertFalse;
-//import static org.testng.Assert.assertNull;
-//import static org.testng.Assert.assertTrue;
+// import static java.util.Collections.emptyMap;
+// import static java.util.Collections.singletonList;
+// import static
+// org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE;
+// import static
+// org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
+// import static
+// org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
+// import static
+// org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory.NAMESPACE_TEMPLATE_ATTRIBUTE;
+// import static org.mockito.ArgumentMatchers.any;
+// import static org.mockito.ArgumentMatchers.anyMap;
+// import static org.mockito.ArgumentMatchers.anyString;
+// import static org.mockito.ArgumentMatchers.eq;
+// import static org.mockito.Mockito.doReturn;
+// import static org.mockito.Mockito.doThrow;
+// import static org.mockito.Mockito.lenient;
+// import static org.mockito.Mockito.mock;
+// import static org.mockito.Mockito.never;
+// import static org.mockito.Mockito.spy;
+// import static org.mockito.Mockito.verify;
+// import static org.mockito.Mockito.when;
+// import static org.testng.Assert.assertEquals;
+// import static org.testng.Assert.assertFalse;
+// import static org.testng.Assert.assertNull;
+// import static org.testng.Assert.assertTrue;
 //
-//import com.google.common.collect.ImmutableMap;
-//import io.fabric8.kubernetes.api.model.DoneableNamespace;
-//import io.fabric8.kubernetes.api.model.Namespace;
-//import io.fabric8.kubernetes.api.model.NamespaceBuilder;
-//import io.fabric8.kubernetes.api.model.NamespaceList;
-//import io.fabric8.kubernetes.api.model.ServiceAccountList;
-//import io.fabric8.kubernetes.api.model.Status;
-//import io.fabric8.kubernetes.api.model.rbac.Role;
-//import io.fabric8.kubernetes.api.model.rbac.RoleBindingList;
-//import io.fabric8.kubernetes.api.model.rbac.RoleList;
-//import io.fabric8.kubernetes.client.KubernetesClient;
-//import io.fabric8.kubernetes.client.KubernetesClientException;
-//import io.fabric8.kubernetes.client.Watch;
-//import io.fabric8.kubernetes.client.Watcher;
-//import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
-//import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-//import io.fabric8.kubernetes.client.dsl.Resource;
-//import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
-//import java.util.Arrays;
-//import java.util.Collections;
-//import java.util.HashMap;
-//import java.util.List;
-//import java.util.Map;
-//import java.util.Set;
-//import java.util.stream.Collectors;
-//import java.util.stream.Stream;
-//import org.eclipse.che.api.core.ValidationException;
-//import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-//import org.eclipse.che.api.user.server.PreferenceManager;
-//import org.eclipse.che.api.user.server.UserManager;
-//import org.eclipse.che.api.user.server.model.impl.UserImpl;
-//import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
-//import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-//import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl.WorkspaceImplBuilder;
-//import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-//import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
-//import org.eclipse.che.api.workspace.shared.Constants;
-//import org.eclipse.che.commons.env.EnvironmentContext;
-//import org.eclipse.che.commons.subject.SubjectImpl;
-//import org.eclipse.che.inject.ConfigurationException;
-//import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
-//import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
-//import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
-//import org.mockito.Mock;
-//import org.mockito.testng.MockitoTestNGListener;
-//import org.testng.annotations.AfterMethod;
-//import org.testng.annotations.BeforeMethod;
-//import org.testng.annotations.DataProvider;
-//import org.testng.annotations.Listeners;
-//import org.testng.annotations.Test;
-//import org.testng.collections.Sets;
+// import com.google.common.collect.ImmutableMap;
+// import io.fabric8.kubernetes.api.model.DoneableNamespace;
+// import io.fabric8.kubernetes.api.model.Namespace;
+// import io.fabric8.kubernetes.api.model.NamespaceBuilder;
+// import io.fabric8.kubernetes.api.model.NamespaceList;
+// import io.fabric8.kubernetes.api.model.ServiceAccountList;
+// import io.fabric8.kubernetes.api.model.Status;
+// import io.fabric8.kubernetes.api.model.rbac.Role;
+// import io.fabric8.kubernetes.api.model.rbac.RoleBindingList;
+// import io.fabric8.kubernetes.api.model.rbac.RoleList;
+// import io.fabric8.kubernetes.client.KubernetesClient;
+// import io.fabric8.kubernetes.client.KubernetesClientException;
+// import io.fabric8.kubernetes.client.Watch;
+// import io.fabric8.kubernetes.client.Watcher;
+// import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
+// import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+// import io.fabric8.kubernetes.client.dsl.Resource;
+// import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
+// import java.util.Arrays;
+// import java.util.Collections;
+// import java.util.HashMap;
+// import java.util.List;
+// import java.util.Map;
+// import java.util.Set;
+// import java.util.stream.Collectors;
+// import java.util.stream.Stream;
+// import org.eclipse.che.api.core.ValidationException;
+// import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+// import org.eclipse.che.api.user.server.PreferenceManager;
+// import org.eclipse.che.api.user.server.UserManager;
+// import org.eclipse.che.api.user.server.model.impl.UserImpl;
+// import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
+// import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+// import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl.WorkspaceImplBuilder;
+// import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+// import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
+// import org.eclipse.che.api.workspace.shared.Constants;
+// import org.eclipse.che.commons.env.EnvironmentContext;
+// import org.eclipse.che.commons.subject.SubjectImpl;
+// import org.eclipse.che.inject.ConfigurationException;
+// import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
+// import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
+// import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
+// import org.mockito.Mock;
+// import org.mockito.testng.MockitoTestNGListener;
+// import org.testng.annotations.AfterMethod;
+// import org.testng.annotations.BeforeMethod;
+// import org.testng.annotations.DataProvider;
+// import org.testng.annotations.Listeners;
+// import org.testng.annotations.Test;
+// import org.testng.collections.Sets;
 //
-///**
+/// **
 // * Tests {@link KubernetesNamespaceFactory}.
 // *
 // * @author Sergii Leshchenko
 // */
-//@Listeners(MockitoTestNGListener.class)
-//public class KubernetesNamespaceFactoryTest {
+// @Listeners(MockitoTestNGListener.class)
+// public class KubernetesNamespaceFactoryTest {
 //
 //  private static final String USER_ID = "userid";
 //  private static final String USER_NAME = "username";
@@ -173,7 +177,8 @@
 //
 //  @Test
 //  public void
-//      shouldNotThrowExceptionIfNonDefaultNamespaceIsSpecifiedAndUserDefinedAreAllowedOnCheckingIfNamespaceIsAllowed()
+//
+// shouldNotThrowExceptionIfNonDefaultNamespaceIsSpecifiedAndUserDefinedAreAllowedOnCheckingIfNamespaceIsAllowed()
 //          throws Exception {
 //    namespaceFactory =
 //        new KubernetesNamespaceFactory(
@@ -223,9 +228,11 @@
 //  @Test(
 //      expectedExceptions = ValidationException.class,
 //      expectedExceptionsMessageRegExp =
-//          "User defined namespaces are not allowed. Only the default namespace 'defaultNs' is available.")
+//          "User defined namespaces are not allowed. Only the default namespace 'defaultNs' is
+// available.")
 //  public void
-//      shouldThrowExceptionIfNonDefaultNamespaceIsSpecifiedAndUserDefinedAreNotAllowedOnCheckingIfNamespaceIsAllowed()
+//
+// shouldThrowExceptionIfNonDefaultNamespaceIsSpecifiedAndUserDefinedAreNotAllowedOnCheckingIfNamespaceIsAllowed()
 //          throws Exception {
 //    namespaceFactory =
 //        new KubernetesNamespaceFactory(
@@ -247,7 +254,8 @@
 //
 //  @Test(
 //      expectedExceptions = ConfigurationException.class,
-//      expectedExceptionsMessageRegExp = "che.infra.kubernetes.namespace.default must be configured")
+//      expectedExceptionsMessageRegExp = "che.infra.kubernetes.namespace.default must be
+// configured")
 //  public void shouldThrowExceptionIfNoDefaultNamespaceIsConfigured() {
 //    namespaceFactory =
 //        new KubernetesNamespaceFactory(
@@ -582,7 +590,8 @@
 //  }
 //
 //  @Test
-//  public void shouldRequireNamespacePriorExistenceIfDifferentFromDefaultAndUserDefinedIsNotAllowed()
+//  public void
+// shouldRequireNamespacePriorExistenceIfDifferentFromDefaultAndUserDefinedIsNotAllowed()
 //      throws Exception {
 //    // There is only one scenario where this can happen. The workspace was created and started in
 //    // some default namespace. Then server was reconfigured to use a different default namespace
@@ -742,7 +751,8 @@
 //    RoleList roles = k8sClient.rbac().roles().inNamespace("workspace123").list();
 //    assertEquals(
 //        Sets.newHashSet("workspace-view", "exec"),
-//        roles.getItems().stream().map(r -> r.getMetadata().getName()).collect(Collectors.toSet()));
+//        roles.getItems().stream().map(r ->
+// r.getMetadata().getName()).collect(Collectors.toSet()));
 //
 //    RoleBindingList bindings = k8sClient.rbac().roleBindings().inNamespace("workspace123").list();
 //    assertEquals(
@@ -797,7 +807,8 @@
 //    RoleList roles = k8sClient.rbac().roles().inNamespace("workspace123").list();
 //    assertEquals(
 //        Sets.newHashSet("workspace-view", "exec"),
-//        roles.getItems().stream().map(r -> r.getMetadata().getName()).collect(Collectors.toSet()));
+//        roles.getItems().stream().map(r ->
+// r.getMetadata().getName()).collect(Collectors.toSet()));
 //    Role role1 = roles.getItems().get(0);
 //    Role role2 = roles.getItems().get(1);
 //
@@ -858,7 +869,8 @@
 //
 //  @Test
 //  public void
-//      testEvalNamespaceUsesNamespaceDefaultIfWorkspaceDoesntRecordNamespaceAndLegacyNamespaceDoesntExist()
+//
+// testEvalNamespaceUsesNamespaceDefaultIfWorkspaceDoesntRecordNamespaceAndLegacyNamespaceDoesntExist()
 //          throws Exception {
 //    namespaceFactory =
 //        new KubernetesNamespaceFactory(
@@ -1008,7 +1020,8 @@
 //
 //  @Test
 //  public void
-//      testEvalNamespaceUsesLegacyNamespaceIfWorkspaceDoesntRecordNamespaceAndLegacyNamespaceExists()
+//
+// testEvalNamespaceUsesLegacyNamespaceIfWorkspaceDoesntRecordNamespaceAndLegacyNamespaceExists()
 //          throws Exception {
 //    namespaceFactory =
 //        new KubernetesNamespaceFactory(
@@ -1084,7 +1097,8 @@
 //    WorkspaceImpl workspace =
 //        new WorkspaceImplBuilder()
 //            .setAttributes(
-//                ImmutableMap.of(Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, "<userid>"))
+//                ImmutableMap.of(Constants.WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE,
+// "<userid>"))
 //            .build();
 //
 //    String namespace = namespaceFactory.getNamespaceName(workspace);
@@ -1231,11 +1245,13 @@
 //
 //  private void prepareNamespaceToBeFoundByLabel(String username, List<Namespace> namespaces) {
 //    //
-//    // lenient().doReturn(namespaceListResource).when(namespaceOperation).withLabels(Map.of(NAMESPACE_LABEL_NAME, username));
+//    //
+// lenient().doReturn(namespaceListResource).when(namespaceOperation).withLabels(Map.of(NAMESPACE_LABEL_NAME, username));
 //    doReturn(namespaceList).when(namespaceListResource).list();
 //  }
 //
-//  private void prepareNamespaceToBeFoundByName(String name, Namespace namespace) throws Exception {
+//  private void prepareNamespaceToBeFoundByName(String name, Namespace namespace) throws Exception
+// {
 //    @SuppressWarnings("unchecked")
 //    Resource<Namespace, DoneableNamespace> getNamespaceByNameOperation = mock(Resource.class);
 //    when(namespaceOperation.withName(name)).thenReturn(getNamespaceByNameOperation);
@@ -1243,7 +1259,8 @@
 //    when(getNamespaceByNameOperation.get()).thenReturn(namespace);
 //  }
 //
-//  private void throwOnTryToGetNamespaceByName(String namespaceName, Throwable e) throws Exception {
+//  private void throwOnTryToGetNamespaceByName(String namespaceName, Throwable e) throws Exception
+// {
 //    @SuppressWarnings("unchecked")
 //    Resource<Namespace, DoneableNamespace> getNamespaceByNameOperation = mock(Resource.class);
 //    when(namespaceOperation.withName(namespaceName)).thenReturn(getNamespaceByNameOperation);
@@ -1273,4 +1290,4 @@
 //        .endStatus()
 //        .build();
 //  }
-//}
+// }

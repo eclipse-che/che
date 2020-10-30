@@ -1,4 +1,4 @@
-///*
+/// *
 // * Copyright (c) 2012-2018 Red Hat, Inc.
 // * This program and the accompanying materials are made
 // * available under the terms of the Eclipse Public License 2.0
@@ -9,79 +9,86 @@
 // * Contributors:
 // *   Red Hat, Inc. - initial API and implementation
 // */
-//package org.eclipse.che.workspace.infrastructure.openshift.project;
+// package org.eclipse.che.workspace.infrastructure.openshift.project;
 //
-//import static java.util.Collections.emptyList;
-//import static java.util.Collections.emptyMap;
-//import static java.util.Collections.singletonList;
-//import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
-//import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
-//import static org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJECT_DESCRIPTION_ANNOTATION;
-//import static org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJECT_DESCRIPTION_ATTRIBUTE;
-//import static org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJECT_DISPLAY_NAME_ANNOTATION;
-//import static org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJECT_DISPLAY_NAME_ATTRIBUTE;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.ArgumentMatchers.eq;
-//import static org.mockito.Mockito.doReturn;
-//import static org.mockito.Mockito.doThrow;
-//import static org.mockito.Mockito.lenient;
-//import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.never;
-//import static org.mockito.Mockito.spy;
-//import static org.mockito.Mockito.times;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//import static org.testng.Assert.assertEquals;
-//import static org.testng.Assert.assertNull;
+// import static java.util.Collections.emptyList;
+// import static java.util.Collections.emptyMap;
+// import static java.util.Collections.singletonList;
+// import static
+// org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
+// import static
+// org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
+// import static
+// org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJECT_DESCRIPTION_ANNOTATION;
+// import static
+// org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJECT_DESCRIPTION_ATTRIBUTE;
+// import static
+// org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJECT_DISPLAY_NAME_ANNOTATION;
+// import static
+// org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJECT_DISPLAY_NAME_ATTRIBUTE;
+// import static org.mockito.ArgumentMatchers.any;
+// import static org.mockito.ArgumentMatchers.eq;
+// import static org.mockito.Mockito.doReturn;
+// import static org.mockito.Mockito.doThrow;
+// import static org.mockito.Mockito.lenient;
+// import static org.mockito.Mockito.mock;
+// import static org.mockito.Mockito.never;
+// import static org.mockito.Mockito.spy;
+// import static org.mockito.Mockito.times;
+// import static org.mockito.Mockito.verify;
+// import static org.mockito.Mockito.when;
+// import static org.testng.Assert.assertEquals;
+// import static org.testng.Assert.assertNull;
 //
-//import com.google.common.collect.ImmutableMap;
-//import io.fabric8.kubernetes.api.model.Status;
-//import io.fabric8.kubernetes.client.KubernetesClientException;
-//import io.fabric8.kubernetes.client.Watch;
-//import io.fabric8.kubernetes.client.Watcher;
-//import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
-//import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-//import io.fabric8.kubernetes.client.dsl.Resource;
-//import io.fabric8.openshift.api.model.DoneableProject;
-//import io.fabric8.openshift.api.model.Project;
-//import io.fabric8.openshift.api.model.ProjectBuilder;
-//import io.fabric8.openshift.api.model.ProjectList;
-//import io.fabric8.openshift.client.OpenShiftClient;
-//import java.util.Arrays;
-//import java.util.HashMap;
-//import java.util.List;
-//import java.util.Map;
-//import org.eclipse.che.api.core.ValidationException;
-//import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-//import org.eclipse.che.api.user.server.PreferenceManager;
-//import org.eclipse.che.api.user.server.UserManager;
-//import org.eclipse.che.api.user.server.model.impl.UserImpl;
-//import org.eclipse.che.api.workspace.server.WorkspaceManager;
-//import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
-//import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-//import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-//import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
-//import org.eclipse.che.commons.env.EnvironmentContext;
-//import org.eclipse.che.commons.subject.SubjectImpl;
-//import org.eclipse.che.inject.ConfigurationException;
-//import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
-//import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
-//import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
-//import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-//import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftStopWorkspaceRoleProvisioner;
-//import org.mockito.Mock;
-//import org.mockito.testng.MockitoTestNGListener;
-//import org.testng.annotations.BeforeMethod;
-//import org.testng.annotations.Listeners;
-//import org.testng.annotations.Test;
+// import com.google.common.collect.ImmutableMap;
+// import io.fabric8.kubernetes.api.model.Status;
+// import io.fabric8.kubernetes.client.KubernetesClientException;
+// import io.fabric8.kubernetes.client.Watch;
+// import io.fabric8.kubernetes.client.Watcher;
+// import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
+// import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+// import io.fabric8.kubernetes.client.dsl.Resource;
+// import io.fabric8.openshift.api.model.DoneableProject;
+// import io.fabric8.openshift.api.model.Project;
+// import io.fabric8.openshift.api.model.ProjectBuilder;
+// import io.fabric8.openshift.api.model.ProjectList;
+// import io.fabric8.openshift.client.OpenShiftClient;
+// import java.util.Arrays;
+// import java.util.HashMap;
+// import java.util.List;
+// import java.util.Map;
+// import org.eclipse.che.api.core.ValidationException;
+// import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+// import org.eclipse.che.api.user.server.PreferenceManager;
+// import org.eclipse.che.api.user.server.UserManager;
+// import org.eclipse.che.api.user.server.model.impl.UserImpl;
+// import org.eclipse.che.api.workspace.server.WorkspaceManager;
+// import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
+// import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+// import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+// import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
+// import org.eclipse.che.commons.env.EnvironmentContext;
+// import org.eclipse.che.commons.subject.SubjectImpl;
+// import org.eclipse.che.inject.ConfigurationException;
+// import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
+// import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
+// import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
+// import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
+// import
+// org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftStopWorkspaceRoleProvisioner;
+// import org.mockito.Mock;
+// import org.mockito.testng.MockitoTestNGListener;
+// import org.testng.annotations.BeforeMethod;
+// import org.testng.annotations.Listeners;
+// import org.testng.annotations.Test;
 //
-///**
+/// **
 // * Tests {@link OpenShiftProjectFactory}.
 // *
 // * @author Sergii Leshchenko
 // */
-//@Listeners(MockitoTestNGListener.class)
-//public class OpenShiftProjectFactoryTest {
+// @Listeners(MockitoTestNGListener.class)
+// public class OpenShiftProjectFactoryTest {
 //
 //  private static final String USER_ID = "userid";
 //  private static final String USER_NAME = "username";
@@ -166,7 +173,8 @@
 //
 //  @Test
 //  public void
-//      shouldNotThrowExceptionIfNonDefaultNamespaceIsSpecifiedAndUserDefinedAreAllowedOnCheckingIfNamespaceIsAllowed()
+//
+// shouldNotThrowExceptionIfNonDefaultNamespaceIsSpecifiedAndUserDefinedAreAllowedOnCheckingIfNamespaceIsAllowed()
 //          throws Exception {
 //    projectFactory =
 //        new OpenShiftProjectFactory(
@@ -192,9 +200,11 @@
 //  @Test(
 //      expectedExceptions = ValidationException.class,
 //      expectedExceptionsMessageRegExp =
-//          "User defined namespaces are not allowed. Only the default namespace 'defaultNs' is available.")
+//          "User defined namespaces are not allowed. Only the default namespace 'defaultNs' is
+// available.")
 //  public void
-//      shouldThrowExceptionIfNonDefaultNamespaceIsSpecifiedAndUserDefinedAreNotAllowedOnCheckingIfNamespaceIsAllowed()
+//
+// shouldThrowExceptionIfNonDefaultNamespaceIsSpecifiedAndUserDefinedAreNotAllowedOnCheckingIfNamespaceIsAllowed()
 //          throws Exception {
 //    projectFactory =
 //        new OpenShiftProjectFactory(
@@ -219,7 +229,8 @@
 //
 //  @Test(
 //      expectedExceptions = ConfigurationException.class,
-//      expectedExceptionsMessageRegExp = "che.infra.kubernetes.namespace.default must be configured")
+//      expectedExceptionsMessageRegExp = "che.infra.kubernetes.namespace.default must be
+// configured")
 //  public void
 //      shouldThrowExceptionIfNoDefaultNamespaceIsConfiguredAndUserDefinedNamespacesAreNotAllowed()
 //          throws Exception {
@@ -248,7 +259,8 @@
 //    List<Project> projects =
 //        Arrays.asList(
 //            createProject(
-//                "ns1", "project1", "desc1", "Active", Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe")),
+//                "ns1", "project1", "desc1", "Active", Map.of(NAMESPACE_ANNOTATION_NAME,
+// "jondoe")),
 //            createProject(
 //                "ns3",
 //                "project3",
@@ -256,7 +268,8 @@
 //                "Active",
 //                Map.of(NAMESPACE_ANNOTATION_NAME, "some_other_user")),
 //            createProject(
-//                "ns2", "project2", "desc2", "Active", Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe")));
+//                "ns2", "project2", "desc2", "Active", Map.of(NAMESPACE_ANNOTATION_NAME,
+// "jondoe")));
 //    doReturn(projects).when(projectList).getItems();
 //
 //    projectFactory =
@@ -354,7 +367,8 @@
 //  }
 //
 //  @Test
-//  public void shouldReturnDefaultProjectWhenItExistsAndUserDefinedIsNotAllowed() throws Exception {
+//  public void shouldReturnDefaultProjectWhenItExistsAndUserDefinedIsNotAllowed() throws Exception
+// {
 //    prepareNamespaceToBeFoundByName(
 //        "che-default",
 //        new ProjectBuilder()
@@ -516,7 +530,8 @@
 //  }
 //
 //  @Test
-//  public void shouldReturnListOfExistingProjectsAlongWithNonExistingDefaultIfUserDefinedIsAllowed()
+//  public void
+// shouldReturnListOfExistingProjectsAlongWithNonExistingDefaultIfUserDefinedIsAllowed()
 //      throws Exception {
 //    prepareListedProjects(singletonList(createProject("my-for-ws", "", "", "Active")));
 //
@@ -582,7 +597,8 @@
 //  }
 //
 //  @Test
-//  public void shouldRequireNamespacePriorExistenceIfDifferentFromDefaultAndUserDefinedIsNotAllowed()
+//  public void
+// shouldRequireNamespacePriorExistenceIfDifferentFromDefaultAndUserDefinedIsNotAllowed()
 //      throws Exception {
 //    // There is only one scenario where this can happen. The workspace was created and started in
 //    // some default namespace. Then server was reconfigured to use a different default namespace
@@ -650,7 +666,8 @@
 //    when(toReturnProject.getName()).thenReturn("workspace123");
 //    doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
 //
-//    OpenShiftWorkspaceServiceAccount serviceAccount = mock(OpenShiftWorkspaceServiceAccount.class);
+//    OpenShiftWorkspaceServiceAccount serviceAccount =
+// mock(OpenShiftWorkspaceServiceAccount.class);
 //    doReturn(serviceAccount).when(projectFactory).doCreateServiceAccount(any(), any());
 //
 //    // when
@@ -664,7 +681,8 @@
 //  }
 //
 //  @Test
-//  public void shouldCallStopWorkspaceRoleProvisionWhenIdentityProviderIsDefined() throws Exception {
+//  public void shouldCallStopWorkspaceRoleProvisionWhenIdentityProviderIsDefined() throws Exception
+// {
 //    projectFactory =
 //        spy(
 //            new OpenShiftProjectFactory(
@@ -688,7 +706,8 @@
 //    when(toReturnProject.getName()).thenReturn("workspace123");
 //    doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
 //
-//    OpenShiftWorkspaceServiceAccount serviceAccount = mock(OpenShiftWorkspaceServiceAccount.class);
+//    OpenShiftWorkspaceServiceAccount serviceAccount =
+// mock(OpenShiftWorkspaceServiceAccount.class);
 //    doReturn(serviceAccount).when(projectFactory).doCreateServiceAccount(any(), any());
 //
 //    // when
@@ -728,7 +747,8 @@
 //    when(toReturnProject.getName()).thenReturn("workspace123");
 //    doReturn(toReturnProject).when(projectFactory).doCreateProjectAccess(any(), any());
 //
-//    OpenShiftWorkspaceServiceAccount serviceAccount = mock(OpenShiftWorkspaceServiceAccount.class);
+//    OpenShiftWorkspaceServiceAccount serviceAccount =
+// mock(OpenShiftWorkspaceServiceAccount.class);
 //    doReturn(serviceAccount).when(projectFactory).doCreateServiceAccount(any(), any());
 //
 //    // when
@@ -747,7 +767,8 @@
 //    List<Project> projects =
 //        Arrays.asList(
 //            createProject(
-//                "ns1", "project1", "desc1", "Active", Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe")),
+//                "ns1", "project1", "desc1", "Active", Map.of(NAMESPACE_ANNOTATION_NAME,
+// "jondoe")),
 //            createProject(
 //                "ns3",
 //                "project3",
@@ -755,7 +776,8 @@
 //                "Active",
 //                Map.of(NAMESPACE_ANNOTATION_NAME, "some_other_user")),
 //            createProject(
-//                "ns2", "project2", "desc2", "Active", Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe")));
+//                "ns2", "project2", "desc2", "Active", Map.of(NAMESPACE_ANNOTATION_NAME,
+// "jondoe")));
 //    doReturn(projects).when(projectList).getItems();
 //
 //    projectFactory =
@@ -788,7 +810,8 @@
 //    List<Project> projects =
 //        singletonList(
 //            createProject(
-//                "ns1", "project1", "desc1", "Active", Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe")));
+//                "ns1", "project1", "desc1", "Active", Map.of(NAMESPACE_ANNOTATION_NAME,
+// "jondoe")));
 //    doReturn(projects).when(projectList).getItems();
 //
 //    projectFactory =
@@ -843,7 +866,8 @@
 //    when(projectOperation.list()).thenThrow(e);
 //  }
 //
-//  private Project createProject(String name, String displayName, String description, String phase) {
+//  private Project createProject(String name, String displayName, String description, String phase)
+// {
 //    return createProject(name, displayName, description, phase, emptyMap());
 //  }
 //
@@ -874,4 +898,4 @@
 //        .endStatus()
 //        .build();
 //  }
-//}
+// }

@@ -1,4 +1,4 @@
-///*
+/// *
 // * Copyright (c) 2012-2018 Red Hat, Inc.
 // * This program and the accompanying materials are made
 // * available under the terms of the Eclipse Public License 2.0
@@ -9,54 +9,55 @@
 // * Contributors:
 // *   Red Hat, Inc. - initial API and implementation
 // */
-//package org.eclipse.che.workspace.infrastructure.openshift.project;
+// package org.eclipse.che.workspace.infrastructure.openshift.project;
 //
-//import static org.mockito.ArgumentMatchers.anyString;
-//import static org.mockito.Mockito.doReturn;
-//import static org.mockito.Mockito.doThrow;
-//import static org.mockito.Mockito.lenient;
-//import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.never;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//import static org.testng.Assert.assertEquals;
-//import static org.testng.Assert.assertNotNull;
+// import static org.mockito.ArgumentMatchers.anyString;
+// import static org.mockito.Mockito.doReturn;
+// import static org.mockito.Mockito.doThrow;
+// import static org.mockito.Mockito.lenient;
+// import static org.mockito.Mockito.mock;
+// import static org.mockito.Mockito.never;
+// import static org.mockito.Mockito.verify;
+// import static org.mockito.Mockito.when;
+// import static org.testng.Assert.assertEquals;
+// import static org.testng.Assert.assertNotNull;
 //
-//import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
-//import io.fabric8.kubernetes.api.model.ServiceAccount;
-//import io.fabric8.kubernetes.client.KubernetesClient;
-//import io.fabric8.kubernetes.client.KubernetesClientException;
-//import io.fabric8.kubernetes.client.dsl.MixedOperation;
-//import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-//import io.fabric8.kubernetes.client.dsl.Resource;
-//import io.fabric8.openshift.api.model.DoneableProjectRequest;
-//import io.fabric8.openshift.api.model.Project;
-//import io.fabric8.openshift.api.model.ProjectBuilder;
-//import io.fabric8.openshift.api.model.ProjectRequestFluent.MetadataNested;
-//import io.fabric8.openshift.client.OpenShiftClient;
-//import io.fabric8.openshift.client.dsl.ProjectRequestOperation;
-//import java.util.concurrent.Executor;
-//import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-//import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
-//import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
-//import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
-//import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
-//import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
-//import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
-//import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-//import org.mockito.Mock;
-//import org.mockito.testng.MockitoTestNGListener;
-//import org.testng.annotations.BeforeMethod;
-//import org.testng.annotations.Listeners;
-//import org.testng.annotations.Test;
+// import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
+// import io.fabric8.kubernetes.api.model.ServiceAccount;
+// import io.fabric8.kubernetes.client.KubernetesClient;
+// import io.fabric8.kubernetes.client.KubernetesClientException;
+// import io.fabric8.kubernetes.client.dsl.MixedOperation;
+// import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+// import io.fabric8.kubernetes.client.dsl.Resource;
+// import io.fabric8.openshift.api.model.DoneableProjectRequest;
+// import io.fabric8.openshift.api.model.Project;
+// import io.fabric8.openshift.api.model.ProjectBuilder;
+// import io.fabric8.openshift.api.model.ProjectRequestFluent.MetadataNested;
+// import io.fabric8.openshift.client.OpenShiftClient;
+// import io.fabric8.openshift.client.dsl.ProjectRequestOperation;
+// import java.util.concurrent.Executor;
+// import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+// import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
+// import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
+// import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
+// import
+// org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
+// import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
+// import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
+// import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
+// import org.mockito.Mock;
+// import org.mockito.testng.MockitoTestNGListener;
+// import org.testng.annotations.BeforeMethod;
+// import org.testng.annotations.Listeners;
+// import org.testng.annotations.Test;
 //
-///**
+/// **
 // * Tests {@link OpenShiftProject}
 // *
 // * @author Sergii Leshchenko
 // */
-//@Listeners(MockitoTestNGListener.class)
-//public class OpenShiftProjectTest {
+// @Listeners(MockitoTestNGListener.class)
+// public class OpenShiftProjectTest {
 //
 //  public static final String PROJECT_NAME = "testProject";
 //  public static final String WORKSPACE_ID = "workspace123";
@@ -266,4 +267,4 @@
 //    doReturn(project).when(projectResource).get();
 //    return project;
 //  }
-//}
+// }

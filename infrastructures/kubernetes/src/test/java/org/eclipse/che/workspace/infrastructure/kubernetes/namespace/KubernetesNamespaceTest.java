@@ -1,4 +1,4 @@
-///*
+/// *
 // * Copyright (c) 2012-2018 Red Hat, Inc.
 // * This program and the accompanying materials are made
 // * available under the terms of the Eclipse Public License 2.0
@@ -9,53 +9,53 @@
 // * Contributors:
 // *   Red Hat, Inc. - initial API and implementation
 // */
-//package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
+// package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 //
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.ArgumentMatchers.anyString;
-//import static org.mockito.ArgumentMatchers.eq;
-//import static org.mockito.Mockito.doAnswer;
-//import static org.mockito.Mockito.doReturn;
-//import static org.mockito.Mockito.doThrow;
-//import static org.mockito.Mockito.lenient;
-//import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.never;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//import static org.testng.Assert.assertEquals;
-//import static org.testng.Assert.assertNotNull;
+// import static org.mockito.ArgumentMatchers.any;
+// import static org.mockito.ArgumentMatchers.anyString;
+// import static org.mockito.ArgumentMatchers.eq;
+// import static org.mockito.Mockito.doAnswer;
+// import static org.mockito.Mockito.doReturn;
+// import static org.mockito.Mockito.doThrow;
+// import static org.mockito.Mockito.lenient;
+// import static org.mockito.Mockito.mock;
+// import static org.mockito.Mockito.never;
+// import static org.mockito.Mockito.verify;
+// import static org.mockito.Mockito.when;
+// import static org.testng.Assert.assertEquals;
+// import static org.testng.Assert.assertNotNull;
 //
-//import io.fabric8.kubernetes.api.model.DoneableNamespace;
-//import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
-//import io.fabric8.kubernetes.api.model.Namespace;
-//import io.fabric8.kubernetes.api.model.NamespaceBuilder;
-//import io.fabric8.kubernetes.api.model.NamespaceFluent.MetadataNested;
-//import io.fabric8.kubernetes.api.model.ServiceAccount;
-//import io.fabric8.kubernetes.client.KubernetesClient;
-//import io.fabric8.kubernetes.client.KubernetesClientException;
-//import io.fabric8.kubernetes.client.Watch;
-//import io.fabric8.kubernetes.client.Watcher;
-//import io.fabric8.kubernetes.client.Watcher.Action;
-//import io.fabric8.kubernetes.client.dsl.MixedOperation;
-//import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-//import io.fabric8.kubernetes.client.dsl.Resource;
-//import java.util.concurrent.Executor;
-//import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-//import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
-//import org.mockito.Mock;
-//import org.mockito.stubbing.Answer;
-//import org.mockito.testng.MockitoTestNGListener;
-//import org.testng.annotations.BeforeMethod;
-//import org.testng.annotations.Listeners;
-//import org.testng.annotations.Test;
+// import io.fabric8.kubernetes.api.model.DoneableNamespace;
+// import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
+// import io.fabric8.kubernetes.api.model.Namespace;
+// import io.fabric8.kubernetes.api.model.NamespaceBuilder;
+// import io.fabric8.kubernetes.api.model.NamespaceFluent.MetadataNested;
+// import io.fabric8.kubernetes.api.model.ServiceAccount;
+// import io.fabric8.kubernetes.client.KubernetesClient;
+// import io.fabric8.kubernetes.client.KubernetesClientException;
+// import io.fabric8.kubernetes.client.Watch;
+// import io.fabric8.kubernetes.client.Watcher;
+// import io.fabric8.kubernetes.client.Watcher.Action;
+// import io.fabric8.kubernetes.client.dsl.MixedOperation;
+// import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+// import io.fabric8.kubernetes.client.dsl.Resource;
+// import java.util.concurrent.Executor;
+// import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+// import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
+// import org.mockito.Mock;
+// import org.mockito.stubbing.Answer;
+// import org.mockito.testng.MockitoTestNGListener;
+// import org.testng.annotations.BeforeMethod;
+// import org.testng.annotations.Listeners;
+// import org.testng.annotations.Test;
 //
-///**
+/// **
 // * Tests {@link KubernetesNamespace}
 // *
 // * @author Sergii Leshchenko
 // */
-//@Listeners(MockitoTestNGListener.class)
-//public class KubernetesNamespaceTest {
+// @Listeners(MockitoTestNGListener.class)
+// public class KubernetesNamespaceTest {
 //
 //  public static final String NAMESPACE = "testNamespace";
 //  public static final String WORKSPACE_ID = "workspace123";
@@ -117,7 +117,8 @@
 //  }
 //
 //  @Test
-//  public void testKubernetesNamespacePreparingCreationWhenNamespaceDoesNotExist() throws Exception {
+//  public void testKubernetesNamespacePreparingCreationWhenNamespaceDoesNotExist() throws Exception
+// {
 //    // given
 //    MetadataNested namespaceMeta = prepareCreateNamespaceRequest();
 //
@@ -307,7 +308,8 @@
 //    doReturn(namespaceResource).when(namespaceResource).withPropagationPolicy(eq("Background"));
 //    when(namespaceResource.get())
 //        .thenReturn(
-//            new NamespaceBuilder().withNewMetadata().withName(namespaceName).endMetadata().build());
+//            new
+// NamespaceBuilder().withNewMetadata().withName(namespaceName).endMetadata().build());
 //    kubernetesClient.namespaces().withName(namespaceName).get();
 //    return namespaceResource;
 //  }
@@ -318,4 +320,4 @@
 //    doReturn(namespace).when(namespaceResource).get();
 //    return namespace;
 //  }
-//}
+// }

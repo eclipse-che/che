@@ -172,7 +172,8 @@ public class KubernetesNamespaceFactory {
 
   @VisibleForTesting
   KubernetesNamespace doCreateNamespaceAccess(String workspaceId, String name) {
-    return new KubernetesNamespace(clientFactory, cheClientFactory, sharedPool.getExecutor(), name, workspaceId);
+    return new KubernetesNamespace(
+        clientFactory, cheClientFactory, sharedPool.getExecutor(), name, workspaceId);
   }
 
   /**

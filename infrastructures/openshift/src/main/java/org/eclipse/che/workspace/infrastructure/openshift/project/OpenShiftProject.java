@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
@@ -79,7 +78,11 @@ public class OpenShiftProject extends KubernetesNamespace {
   }
 
   public OpenShiftProject(
-      OpenShiftClientFactory clientFactory, KubernetesClientFactory cheClientFactory, Executor executor, String name, String workspaceId) {
+      OpenShiftClientFactory clientFactory,
+      KubernetesClientFactory cheClientFactory,
+      Executor executor,
+      String name,
+      String workspaceId) {
     super(clientFactory, cheClientFactory, executor, name, workspaceId);
     this.clientFactory = clientFactory;
     this.routes = new OpenShiftRoutes(name, workspaceId, clientFactory);
@@ -115,7 +118,8 @@ public class OpenShiftProject extends KubernetesNamespace {
       create(projectName, osClient);
       waitDefaultServiceAccount(projectName, kubeClient);
     }
-    Namespace namespace = clientFactory.create(workspaceId).namespaces().withName(projectName).get();
+    Namespace namespace =
+        clientFactory.create(workspaceId).namespaces().withName(projectName).get();
     label(namespace, labels);
   }
 
@@ -168,7 +172,6 @@ public class OpenShiftProject extends KubernetesNamespace {
           .createNew()
           .withNewMetadata()
           .withName(projectName)
-          .withLabels(Map.of("A", "b"))
           .endMetadata()
           .done();
     } catch (KubernetesClientException e) {

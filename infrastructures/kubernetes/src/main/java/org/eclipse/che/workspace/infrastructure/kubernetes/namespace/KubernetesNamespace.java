@@ -28,7 +28,6 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -40,7 +39,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.slf4j.Logger;
@@ -103,8 +101,11 @@ public class KubernetesNamespace {
   }
 
   public KubernetesNamespace(
-      KubernetesClientFactory clientFactory, KubernetesClientFactory cheClientFactory,
-      Executor executor, String name, String workspaceId) {
+      KubernetesClientFactory clientFactory,
+      KubernetesClientFactory cheClientFactory,
+      Executor executor,
+      String name,
+      String workspaceId) {
     this.clientFactory = clientFactory;
     this.cheClientFactory = cheClientFactory;
     this.workspaceId = workspaceId;
@@ -123,10 +124,9 @@ public class KubernetesNamespace {
    * <p>Preparing includes creating if needed and waiting for default service account.
    *
    * @param canCreate defines what to do when the namespace is not found. The namespace is created
-   *                  when {@code true}, otherwise an exception is thrown.
+   *     when {@code true}, otherwise an exception is thrown.
    * @throws InfrastructureException if any exception occurs during namespace preparation or if the
-   *                                 namespace doesn't exist and {@code canCreate} is {@code
-   *                                 false}.
+   *     namespace doesn't exist and {@code canCreate} is {@code false}.
    */
   void prepare(boolean canCreate, Map<String, String> labels) throws InfrastructureException {
     KubernetesClient client = clientFactory.create(workspaceId);
@@ -157,9 +157,7 @@ public class KubernetesNamespace {
     namespace.getMetadata().setLabels(newLabels);
 
     try {
-      return cheClientFactory.create()
-          .namespaces()
-          .createOrReplace(namespace);
+      return cheClientFactory.create().namespaces().createOrReplace(namespace);
     } catch (KubernetesClientException kce) {
       if (kce.getCode() == 403) {
         LOG.debug("Can't label the namespace due to lack of permissions ¯\\_(ツ)_/¯");
@@ -272,14 +270,15 @@ public class KubernetesNamespace {
   private Namespace create(String namespaceName, KubernetesClient client)
       throws InfrastructureException {
     try {
-      Namespace namespace = client
-          .namespaces()
-          .createNew()
-          .withNewMetadata()
-          .withName(namespaceName)
-          .withLabels(Map.of("A", "B"))
-          .endMetadata()
-          .done();
+      Namespace namespace =
+          client
+              .namespaces()
+              .createNew()
+              .withNewMetadata()
+              .withName(namespaceName)
+              .withLabels(Map.of("A", "B"))
+              .endMetadata()
+              .done();
       waitDefaultServiceAccount(namespaceName, client);
       return namespace;
     } catch (KubernetesClientException e) {
