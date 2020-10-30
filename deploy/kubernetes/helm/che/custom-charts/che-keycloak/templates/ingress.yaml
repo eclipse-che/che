@@ -27,7 +27,9 @@ spec:
   tls:
   - hosts:
     - {{ template "keycloakHost" . }}
+    {{- if .Values.global.tls.secretName }}
     secretName: {{ .Values.global.tls.secretName }}
+    {{- end -}}
 {{- end }}
   rules:
 {{- if eq .Values.global.serverStrategy "default-host" }}

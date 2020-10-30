@@ -34,7 +34,7 @@ data:
   CHE_INFRA_KUBERNETES_MASTER__URL: ""
 {{- if and .Values.global.tls .Values.global.tls.enabled }}
   CHE_INFRA_KUBERNETES_TLS__ENABLED: {{ .Values.global.tls.enabled | quote}}
-  CHE_INFRA_KUBERNETES_TLS__SECRET: {{ .Values.global.tls.secretName }}
+  CHE_INFRA_KUBERNETES_TLS__SECRET: {{ .Values.global.tls.secretName | quote}}
 {{- else }}
   CHE_INFRA_KUBERNETES_TLS__ENABLED: "false"
   CHE_INFRA_KUBERNETES_TLS__SECRET: ""

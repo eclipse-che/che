@@ -51,6 +51,7 @@ global:
     ## Secret name that will be used in Che Ingresses for setting TLS up
     ## Note the helm chart does not create this secret and
     ## it MUST be pre-created in the configured Che namespace
+    ## If the value is empty, then the certificate from default ingress controller will be used.
     secretName: che-tls
 
     ## If self-signed certificate flag is enabled
