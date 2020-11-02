@@ -7,6 +7,10 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
+global:
+  ingress:
+    class: "nginx"
+
 cheDevfileRegistry:
   image: quay.io/eclipse/che-devfile-registry:nightly
   imagePullPolicy: Always
