@@ -36,6 +36,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -484,7 +485,7 @@ public class WorkspaceRuntimes {
           workspace.getId(),
           sessionUserNameOr("undefined"));
 
-      publishWorkspaceStatusEvent(workspaceId, STARTING, STOPPED, null, options);
+      publishWorkspaceStatusEvent(workspaceId, STARTING, STOPPED, null, false, options);
       return CompletableFuture.runAsync(
           ThreadLocalPropagateContext.wrap(new StartRuntimeTask(workspace, options, runtime)),
           sharedPool.getExecutor());
@@ -831,7 +832,7 @@ public class WorkspaceRuntimes {
 
   private void publishWorkspaceStatusEvent(
       String workspaceId, WorkspaceStatus status, WorkspaceStatus previous, String errorMsg) {
-    publishWorkspaceStatusEvent(workspaceId, status, previous, errorMsg, emptyMap());
+    publishWorkspaceStatusEvent(workspaceId, status, previous, errorMsg, false, emptyMap());
   }
 
   private void publishWorkspaceStatusEvent(
@@ -839,12 +840,14 @@ public class WorkspaceRuntimes {
       WorkspaceStatus status,
       WorkspaceStatus previous,
       String errorMsg,
+      boolean isInterrupted,
       Map<String, String> options) {
     eventService.publish(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withWorkspaceId(workspaceId)
             .withPrevStatus(previous)
             .withError(errorMsg)
+            .withStartupInterrupted(isInterrupted)
             .withStatus(status)
             .withOptions(options));
   }
@@ -978,9 +981,11 @@ public class WorkspaceRuntimes {
         probeScheduler.cancel(workspaceId);
 
         String failureCause = "failed";
-        if (e instanceof RuntimeStartInterruptedException) {
+        boolean isWorkspaceStartInterrupted = e instanceof RuntimeStartInterruptedException;
+        if (isWorkspaceStartInterrupted) {
           failureCause = "interrupted";
         }
+
         LOG.info(
             "Workspace '{}:{}' with id '{}' start {}",
             workspace.getNamespace(),
@@ -993,7 +998,13 @@ public class WorkspaceRuntimes {
         if (e instanceof InternalInfrastructureException) {
           LOG.error(e.getLocalizedMessage(), e);
         }
-        publishWorkspaceStatusEvent(workspaceId, STOPPED, STARTING, e.getMessage());
+        publishWorkspaceStatusEvent(
+            workspaceId,
+            STOPPED,
+            STARTING,
+            e.getMessage(),
+            isWorkspaceStartInterrupted,
+            Collections.emptyMap());
         throw new RuntimeException(e);
       }
     }
