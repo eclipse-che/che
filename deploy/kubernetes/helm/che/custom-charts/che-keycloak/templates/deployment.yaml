@@ -64,6 +64,8 @@ spec:
           value: {{ .Values.global.ingressDomain }}
         - name: NAMESPACE
           value: {{ .Release.Namespace }}
+        - name: CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD
+          value: {{ .Values.requireAdminPasswordChange | quote }}
         - name: PROTOCOL
 {{- if .Values.global.tls.enabled }}
           value: "https"
