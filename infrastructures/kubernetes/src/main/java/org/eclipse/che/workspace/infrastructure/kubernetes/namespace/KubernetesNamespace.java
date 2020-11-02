@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -116,6 +117,10 @@ public class KubernetesNamespace {
     this.ingresses = new KubernetesIngresses(name, workspaceId, clientFactory);
     this.secrets = new KubernetesSecrets(name, workspaceId, clientFactory);
     this.configMaps = new KubernetesConfigsMaps(name, workspaceId, clientFactory);
+  }
+
+  void prepare(boolean canCreate) throws InfrastructureException {
+    prepare(canCreate, emptyMap());
   }
 
   /**
@@ -276,7 +281,6 @@ public class KubernetesNamespace {
               .createNew()
               .withNewMetadata()
               .withName(namespaceName)
-              .withLabels(Map.of("A", "B"))
               .endMetadata()
               .done();
       waitDefaultServiceAccount(namespaceName, client);

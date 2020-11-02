@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.Namespace;
@@ -88,6 +89,10 @@ public class OpenShiftProject extends KubernetesNamespace {
     this.routes = new OpenShiftRoutes(name, workspaceId, clientFactory);
   }
 
+  void prepare(boolean canCreate) throws InfrastructureException {
+    prepare(canCreate, emptyMap());
+  }
+
   /**
    * Prepare a project for using.
    *
@@ -118,8 +123,7 @@ public class OpenShiftProject extends KubernetesNamespace {
       create(projectName, osClient);
       waitDefaultServiceAccount(projectName, kubeClient);
     }
-    Namespace namespace =
-        clientFactory.create(workspaceId).namespaces().withName(projectName).get();
+    Namespace namespace = osClient.namespaces().withName(projectName).get();
     label(namespace, labels);
   }
 
