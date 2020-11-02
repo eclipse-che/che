@@ -44,6 +44,7 @@ public abstract class AbstractWorkspaceServiceAccount<
   private static final Logger LOG = LoggerFactory.getLogger(AbstractWorkspaceServiceAccount.class);
   public static final String EXEC_ROLE_NAME = "exec";
   public static final String VIEW_ROLE_NAME = "workspace-view";
+  public static final String METRICS_ROLE_NAME = "workspace-metrics";
 
   protected final String namespace;
   protected final String serviceAccountName;
@@ -139,8 +140,17 @@ public abstract class AbstractWorkspaceServiceAccount<
         VIEW_ROLE_NAME,
         Arrays.asList("pods", "services"),
         singletonList(""),
-        singletonList("list"),
+        Arrays.asList("list", "get"),
         serviceAccountName + "-view");
+
+    // metrics role
+    createRoleWithBinding(
+        k8sClient,
+        METRICS_ROLE_NAME,
+        Arrays.asList("pods", "nodes"),
+        singletonList("metrics.k8s.io"),
+        Arrays.asList("list", "get", "watch"),
+        serviceAccountName + "-metrics");
   }
 
   private void createRoleWithBinding(
