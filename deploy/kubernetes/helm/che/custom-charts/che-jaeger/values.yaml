@@ -7,7 +7,7 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-# Default values for postgres.
+# Default values for Jaegar
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
