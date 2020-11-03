@@ -55,12 +55,12 @@ public class Openshift4TrustedCAProvisioner {
 
   @Inject
   public Openshift4TrustedCAProvisioner(
-      CheInstallationLocation cheInstallationLocation,
-      CheServerKubernetesClientFactory cheServerClientFactory,
       @Nullable @Named("che.trusted_ca_bundles_configmap") String caBundleConfigMap,
       @Named("che.infra.openshift.trusted_ca_bundles_config_map") String configMapName,
       @Named("che.infra.openshift.trusted_ca_bundles_config_map_labels") String configMapLabel,
-      @Named("che.infra.openshift.trusted_ca_bundles_mount_path") String certificateMountPath) {
+      @Named("che.infra.openshift.trusted_ca_bundles_mount_path") String certificateMountPath,
+      CheInstallationLocation cheInstallationLocation,
+      CheServerKubernetesClientFactory cheServerClientFactory) {
     this.cheInstallationLocation = cheInstallationLocation;
     this.cheServerClientFactory = cheServerClientFactory;
     this.trustedStoreInitialized = !isNullOrEmpty(caBundleConfigMap);

@@ -121,24 +121,24 @@ public class Openshift4TrustedCAProvisionerTest {
 
     this.trustedCAProvisioner =
         new Openshift4TrustedCAProvisioner(
-            cheInstallationLocation,
-            clientFactory,
             CONFIGMAP_NAME,
             CONFIGMAP_NAME,
             CONFIGMAP_LABELS,
-            CERTIFICATE_MOUNT_PATH);
+            CERTIFICATE_MOUNT_PATH,
+            cheInstallationLocation,
+            clientFactory);
   }
 
   @Test
   public void shouldDoNothingIfCAStoreIsNotInitialized() throws Exception {
     Openshift4TrustedCAProvisioner localProvisioner =
         new Openshift4TrustedCAProvisioner(
-            cheInstallationLocation,
-            clientFactory,
             null,
             CONFIGMAP_NAME,
             CONFIGMAP_LABELS,
-            CERTIFICATE_MOUNT_PATH);
+            CERTIFICATE_MOUNT_PATH,
+            cheInstallationLocation,
+            clientFactory);
 
     localProvisioner.provision(k8sEnv, openShiftProject);
     verifyZeroInteractions(
