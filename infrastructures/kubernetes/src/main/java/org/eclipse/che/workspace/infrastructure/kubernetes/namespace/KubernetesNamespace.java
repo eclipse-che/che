@@ -12,7 +12,6 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static java.lang.String.format;
-import static java.util.Collections.emptyMap;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -119,17 +118,18 @@ public class KubernetesNamespace {
     this.configMaps = new KubernetesConfigsMaps(name, workspaceId, clientFactory);
   }
 
-  void prepare(boolean canCreate) throws InfrastructureException {
-    prepare(canCreate, emptyMap());
-  }
-
   /**
    * Prepare namespace for using.
    *
    * <p>Preparing includes creating if needed and waiting for default service account.
    *
+   * <p>The method will try to label the namespace with provided `labels`. It does not matter if the
+   * namespace already exists or we create new one. If update labels operation fail due to lack of
+   * permission, we do not fail completely.
+   *
    * @param canCreate defines what to do when the namespace is not found. The namespace is created
    *     when {@code true}, otherwise an exception is thrown.
+   * @param labels labels that should be set to the namespace
    * @throws InfrastructureException if any exception occurs during namespace preparation or if the
    *     namespace doesn't exist and {@code canCreate} is {@code false}.
    */
@@ -154,7 +154,9 @@ public class KubernetesNamespace {
         currentLabels != null ? new HashMap<>(currentLabels) : new HashMap<>();
 
     if (newLabels.entrySet().containsAll(ensureLabels.entrySet())) {
-      LOG.debug("Nothing to do, namespace already has all labels.");
+      LOG.debug(
+          "Nothing to do, namespace [{}] already has all required labels.",
+          namespace.getMetadata().getName());
       return namespace;
     }
 
@@ -168,7 +170,7 @@ public class KubernetesNamespace {
         LOG.debug("Can't label the namespace due to lack of permissions ¯\\_(ツ)_/¯");
         return namespace;
       }
-      throw kce;
+      throw new InfrastructureException(kce);
     }
   }
 

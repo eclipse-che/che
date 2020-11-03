@@ -11,7 +11,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -21,11 +23,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
+import io.fabric8.kubernetes.api.model.Status;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
@@ -37,6 +41,7 @@ import io.fabric8.openshift.api.model.ProjectBuilder;
 import io.fabric8.openshift.api.model.ProjectRequestFluent.MetadataNested;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.ProjectRequestOperation;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
@@ -120,7 +125,7 @@ public class OpenShiftProjectTest {
         new OpenShiftProject(clientFactory, cheClientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
 
     // when
-    project.prepare(true);
+    project.prepare(true, Map.of());
 
     // then
     verify(projectMeta, never()).withName(PROJECT_NAME);
@@ -138,7 +143,7 @@ public class OpenShiftProjectTest {
         new OpenShiftProject(clientFactory, cheClientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
 
     // when
-    openShiftProject.prepare(true);
+    openShiftProject.prepare(true, Map.of());
 
     // then
     verify(projectMetadata).withName(PROJECT_NAME);
@@ -153,7 +158,7 @@ public class OpenShiftProjectTest {
         new OpenShiftProject(clientFactory, cheClientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
 
     // when
-    project.prepare(false);
+    project.prepare(false, Map.of());
 
     // then
     // exception is thrown
@@ -239,6 +244,119 @@ public class OpenShiftProjectTest {
     // and no exception is thrown
   }
 
+  @Test
+  public void testLabelNamespace() throws InfrastructureException {
+    // given
+    prepareProject(PROJECT_NAME);
+    Namespace namespace = prepareNamespaceGet(PROJECT_NAME);
+    OpenShiftProject openShiftProject =
+        new OpenShiftProject(clientFactory, cheClientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
+
+    KubernetesClient cheKubeClient = mock(KubernetesClient.class);
+    doReturn(cheKubeClient).when(cheClientFactory).create();
+
+    NonNamespaceOperation nonNamespaceOperation = mock(NonNamespaceOperation.class);
+    doReturn(nonNamespaceOperation).when(cheKubeClient).namespaces();
+
+    doAnswer(a -> a.getArgument(0))
+        .when(nonNamespaceOperation)
+        .createOrReplace(any(Namespace.class));
+
+    Map<String, String> labels = Map.of("label.with.this", "yes", "and.this", "of courese");
+
+    // when
+    openShiftProject.prepare(true, labels);
+
+    // then
+    assertTrue(namespace.getMetadata().getLabels().entrySet().containsAll(labels.entrySet()));
+    verify(nonNamespaceOperation).createOrReplace(namespace);
+  }
+
+  @Test
+  public void testDontTryToLabelNamespaceIfAlreadyLabeled() throws InfrastructureException {
+    // given
+    Map<String, String> labels = Map.of("label.with.this", "yes", "and.this", "of courese");
+
+    prepareProject(PROJECT_NAME);
+    Namespace namespace = prepareNamespaceGet(PROJECT_NAME);
+    namespace.getMetadata().setLabels(labels);
+    OpenShiftProject openShiftProject =
+        new OpenShiftProject(clientFactory, cheClientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
+
+    KubernetesClient cheKubeClient = mock(KubernetesClient.class);
+    doReturn(cheKubeClient).when(cheClientFactory).create();
+
+    NonNamespaceOperation nonNamespaceOperation = mock(NonNamespaceOperation.class);
+    doReturn(nonNamespaceOperation).when(cheKubeClient).namespaces();
+
+    doAnswer(a -> a.getArgument(0))
+        .when(nonNamespaceOperation)
+        .createOrReplace(any(Namespace.class));
+
+    // when
+    openShiftProject.prepare(true, labels);
+
+    // then
+    assertTrue(namespace.getMetadata().getLabels().entrySet().containsAll(labels.entrySet()));
+    verify(nonNamespaceOperation, never()).createOrReplace(namespace);
+  }
+
+  @Test
+  public void testDoNotFailWhenNoPermissionsToUpdateNamespace() throws InfrastructureException {
+    // given
+    Map<String, String> labels = Map.of("label.with.this", "yes", "and.this", "of courese");
+
+    prepareProject(PROJECT_NAME);
+    Namespace namespace = prepareNamespaceGet(PROJECT_NAME);
+    OpenShiftProject openShiftProject =
+        new OpenShiftProject(clientFactory, cheClientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
+
+    KubernetesClient cheKubeClient = mock(KubernetesClient.class);
+    lenient().doReturn(cheKubeClient).when(cheClientFactory).create();
+
+    NonNamespaceOperation nonNamespaceOperation = mock(NonNamespaceOperation.class);
+    lenient().doReturn(nonNamespaceOperation).when(cheKubeClient).namespaces();
+
+    lenient()
+        .doThrow(new KubernetesClientException("No permissions.", 403, new Status()))
+        .when(nonNamespaceOperation)
+        .createOrReplace(any(Namespace.class));
+
+    // when
+    openShiftProject.prepare(true, labels);
+
+    // then
+    verify(nonNamespaceOperation).createOrReplace(namespace);
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void testFailWhenFailToUpdateNamespace() throws InfrastructureException {
+    // given
+    Map<String, String> labels = Map.of("label.with.this", "yes", "and.this", "of courese");
+
+    prepareProject(PROJECT_NAME);
+    Namespace namespace = prepareNamespaceGet(PROJECT_NAME);
+    OpenShiftProject openShiftProject =
+        new OpenShiftProject(clientFactory, cheClientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
+
+    KubernetesClient cheKubeClient = mock(KubernetesClient.class);
+    lenient().doReturn(cheKubeClient).when(cheClientFactory).create();
+
+    NonNamespaceOperation nonNamespaceOperation = mock(NonNamespaceOperation.class);
+    lenient().doReturn(nonNamespaceOperation).when(cheKubeClient).namespaces();
+
+    lenient()
+        .doThrow(new KubernetesClientException("Some other error", 500, new Status()))
+        .when(nonNamespaceOperation)
+        .createOrReplace(any(Namespace.class));
+
+    // when
+    openShiftProject.prepare(true, labels);
+
+    // then
+    verify(nonNamespaceOperation).createOrReplace(namespace);
+  }
+
   private MetadataNested prepareProjectRequest() {
     ProjectRequestOperation projectRequestOperation = mock(ProjectRequestOperation.class);
     DoneableProjectRequest projectRequest = mock(DoneableProjectRequest.class);
@@ -267,7 +385,7 @@ public class OpenShiftProjectTest {
     return projectResource;
   }
 
-  private void prepareNamespaceGet(String namespaceName) {
+  private Namespace prepareNamespaceGet(String namespaceName) {
     Namespace namespace =
         new NamespaceBuilder().withNewMetadata().withNamespace(namespaceName).endMetadata().build();
 
@@ -278,10 +396,13 @@ public class OpenShiftProjectTest {
     doReturn(nsResource).when(nsOperation).withName(namespaceName);
 
     doReturn(namespace).when(nsResource).get();
+
+    return namespace;
   }
 
   private Project prepareProject(String projectName) {
-    Project project = mock(Project.class);
+    Project project =
+        new ProjectBuilder().withNewMetadata().withName(projectName).endMetadata().build();
     Resource projectResource = prepareProjectResource(projectName);
     doReturn(project).when(projectResource).get();
     return project;
