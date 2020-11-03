@@ -142,7 +142,7 @@ public class Openshift4TrustedCAProvisionerTest {
 
     localProvisioner.provision(k8sEnv, openShiftProject);
     verifyZeroInteractions(
-        k8sEnv, openShiftProject, clientFactory, openShiftProject, cheInstallationLocation);
+        k8sEnv, openShiftProject, clientFactory, openShiftProject, clientFactory);
   }
 
   @Test

@@ -50,8 +50,8 @@ public class Openshift4TrustedCAProvisioner {
   private final String caBundleConfigMap;
   private final String configMapName;
   private final Map<String, String> configMapLabelKeyValue;
-  private final CheInstallationLocation cheInstallationLocation;
   private final CheServerKubernetesClientFactory cheServerClientFactory;
+  private final String installationLocationNamespace;
 
   @Inject
   public Openshift4TrustedCAProvisioner(
@@ -60,14 +60,15 @@ public class Openshift4TrustedCAProvisioner {
       @Named("che.infra.openshift.trusted_ca_bundles_config_map_labels") String configMapLabel,
       @Named("che.infra.openshift.trusted_ca_bundles_mount_path") String certificateMountPath,
       CheInstallationLocation cheInstallationLocation,
-      CheServerKubernetesClientFactory cheServerClientFactory) {
-    this.cheInstallationLocation = cheInstallationLocation;
+      CheServerKubernetesClientFactory cheServerClientFactory)
+      throws InfrastructureException {
     this.cheServerClientFactory = cheServerClientFactory;
     this.trustedStoreInitialized = !isNullOrEmpty(caBundleConfigMap);
     this.configMapName = configMapName;
     this.caBundleConfigMap = caBundleConfigMap;
     this.certificateMountPath = certificateMountPath;
     this.configMapLabelKeyValue = Splitter.on(",").withKeyValueSeparator("=").split(configMapLabel);
+    this.installationLocationNamespace = cheInstallationLocation.getInstallationLocationNamespace();
   }
 
   public boolean isTrustedStoreInitialized() {
@@ -83,7 +84,7 @@ public class Openshift4TrustedCAProvisioner {
         cheServerClientFactory
             .create()
             .configMaps()
-            .inNamespace(cheInstallationLocation.getInstallationLocationNamespace())
+            .inNamespace(installationLocationNamespace)
             .withName(caBundleConfigMap)
             .get();
 
