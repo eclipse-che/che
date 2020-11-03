@@ -147,7 +147,17 @@ public class KubernetesNamespace {
     label(namespace, labels);
   }
 
-  protected Namespace label(Namespace namespace, Map<String, String> ensureLabels)
+  /**
+   * Applies given `ensureLabels` into given `namespace` and update the `namespace` in the
+   * Kubernetes.
+   *
+   * <p>If we do not have permissions to do so (code=403), this method does not throw any exception.
+   *
+   * @param namespace namespace to label
+   * @param ensureLabels these labels should be applied on given `namespace`
+   * @throws InfrastructureException if something goes wrong with update, except lack of permissions
+   */
+  protected void label(Namespace namespace, Map<String, String> ensureLabels)
       throws InfrastructureException {
     Map<String, String> currentLabels = namespace.getMetadata().getLabels();
     Map<String, String> newLabels =
@@ -157,18 +167,18 @@ public class KubernetesNamespace {
       LOG.debug(
           "Nothing to do, namespace [{}] already has all required labels.",
           namespace.getMetadata().getName());
-      return namespace;
+      return;
     }
 
     newLabels.putAll(ensureLabels);
     namespace.getMetadata().setLabels(newLabels);
 
     try {
-      return cheClientFactory.create().namespaces().createOrReplace(namespace);
+      cheClientFactory.create().namespaces().createOrReplace(namespace);
     } catch (KubernetesClientException kce) {
       if (kce.getCode() == 403) {
         LOG.debug("Can't label the namespace due to lack of permissions ¯\\_(ツ)_/¯");
-        return namespace;
+        return;
       }
       throw new InfrastructureException(kce);
     }
@@ -333,7 +343,7 @@ public class KubernetesNamespace {
               .withName(DEFAULT_SERVICE_ACCOUNT_NAME);
       watch =
           saResource.watch(
-              new Watcher<>() {
+              new Watcher<ServiceAccount>() {
                 @Override
                 public void eventReceived(Action action, ServiceAccount serviceAccount) {
                   if (predicate.test(serviceAccount)) {

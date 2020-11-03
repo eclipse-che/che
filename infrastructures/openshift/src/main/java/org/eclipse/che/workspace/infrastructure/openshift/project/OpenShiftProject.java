@@ -14,7 +14,6 @@ package org.eclipse.che.workspace.infrastructure.openshift.project;
 import static java.lang.String.format;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.api.model.Project;
@@ -118,8 +117,7 @@ public class OpenShiftProject extends KubernetesNamespace {
       create(projectName, osClient);
       waitDefaultServiceAccount(projectName, kubeClient);
     }
-    Namespace namespace = osClient.namespaces().withName(projectName).get();
-    label(namespace, labels);
+    label(osClient.namespaces().withName(projectName).get(), labels);
   }
 
   /**
