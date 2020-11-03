@@ -28,11 +28,11 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstallationLocation;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 
 /**
@@ -51,18 +51,18 @@ public class Openshift4TrustedCAProvisioner {
   private final String configMapName;
   private final Map<String, String> configMapLabelKeyValue;
   private final CheInstallationLocation cheInstallationLocation;
-  private final OpenShiftClientFactory clientFactory;
+  private final CheServerKubernetesClientFactory cheServerClientFactory;
 
   @Inject
   public Openshift4TrustedCAProvisioner(
       CheInstallationLocation cheInstallationLocation,
-      OpenShiftClientFactory clientFactory,
+      CheServerKubernetesClientFactory cheServerClientFactory,
       @Nullable @Named("che.trusted_ca_bundles_configmap") String caBundleConfigMap,
       @Named("che.infra.openshift.trusted_ca_bundles_config_map") String configMapName,
       @Named("che.infra.openshift.trusted_ca_bundles_config_map_labels") String configMapLabel,
       @Named("che.infra.openshift.trusted_ca_bundles_mount_path") String certificateMountPath) {
     this.cheInstallationLocation = cheInstallationLocation;
-    this.clientFactory = clientFactory;
+    this.cheServerClientFactory = cheServerClientFactory;
     this.trustedStoreInitialized = !isNullOrEmpty(caBundleConfigMap);
     this.configMapName = configMapName;
     this.caBundleConfigMap = caBundleConfigMap;
@@ -80,8 +80,8 @@ public class Openshift4TrustedCAProvisioner {
       return;
     }
     ConfigMap configMap =
-        clientFactory
-            .createOC()
+        cheServerClientFactory
+            .create()
             .configMaps()
             .inNamespace(cheInstallationLocation.getInstallationLocationNamespace())
             .withName(caBundleConfigMap)

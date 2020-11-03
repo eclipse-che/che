@@ -35,11 +35,11 @@ import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstallationLocation;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -62,7 +62,7 @@ public class Openshift4TrustedCAProvisionerTest {
   private static final String MANUAL_CA_BUNDLE_KEY = "manual-ca.crt";
   private static final String MANUAL_CA_BUNDLE_VALUE = "maunal-ca.crt.content";
 
-  @Mock OpenShiftClientFactory clientFactory;
+  @Mock CheServerKubernetesClientFactory clientFactory;
 
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private OpenShiftProject openShiftProject;
@@ -100,7 +100,7 @@ public class Openshift4TrustedCAProvisionerTest {
 
   @BeforeMethod
   public void setup() throws Exception {
-    lenient().when(clientFactory.createOC()).thenReturn(k8sClient);
+    lenient().when(clientFactory.create()).thenReturn(k8sClient);
     lenient().when(openShiftProject.configMaps()).thenReturn(kubernetesConfigsMaps);
     lenient()
         .when(cheInstallationLocation.getInstallationLocationNamespace())
