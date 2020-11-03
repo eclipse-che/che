@@ -45,7 +45,7 @@ metadata:
     name: jaeger-infra
     jaeger-infra: jaeger-template-all-in-one
 objects:
-- apiVersion: extensions/v1beta1
+- apiVersion: apps/v1
   kind: Deployment
   metadata:
     name: ${JAEGER_SERVICE_NAME}
@@ -54,6 +54,9 @@ objects:
       jaeger-infra: jaeger-deployment
   spec:
     replicas: 1
+    selector:
+      matchLabels:
+        app: jaeger
     strategy:
       type: Recreate
     template:
