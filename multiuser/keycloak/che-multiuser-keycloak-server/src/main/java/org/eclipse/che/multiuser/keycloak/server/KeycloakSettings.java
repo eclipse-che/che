@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_INTERNAL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.CLIENT_ID_SETTING;
@@ -55,7 +56,18 @@ public class KeycloakSettings {
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakSettings.class);
   private static final String DEFAULT_USERNAME_CLAIM = "preferred_username";
 
+  /**
+   * Public Keycloak connection settings. It contains information about keycloak api urls and
+   * information required to make Keycloak connection using public domain hostname. This info will
+   * be shared with frontend.
+   */
   private final Map<String, String> settings;
+  /**
+   * Internal network Keycloak connection settings. It contains information about keycloak api urls
+   * and information required to make connection using k8s/openshift internal services hostname.
+   * This info will be used only on the Che server side. If using internal network is disabled, then
+   * will be included settings with public domain hostname.
+   */
   private final Map<String, String> internalSettings;
 
   @Inject
@@ -73,9 +85,8 @@ public class KeycloakSettings {
       @Nullable @Named(GITHUB_ENDPOINT_SETTING) String gitHubEndpoint,
       @Named(USE_FIXED_REDIRECT_URLS_SETTING) boolean useFixedRedirectUrls) {
 
-    if (serverInternalURL == null) {
-      serverInternalURL = serverURL;
-    }
+    serverInternalURL = firstNonNull(serverInternalURL, serverURL);
+
     if (serverURL == null && oidcProvider == null) {
       throw new RuntimeException(
           "Either the '"
@@ -91,8 +102,7 @@ public class KeycloakSettings {
       throw new RuntimeException("The '" + REALM_SETTING + "' property should be set");
     }
 
-    String wellKnownEndpoint =
-        oidcProvider != null ? oidcProvider : serverInternalURL + "/realms/" + realm;
+    String wellKnownEndpoint = firstNonNull(oidcProvider, serverInternalURL + "/realms/" + realm);
     if (!wellKnownEndpoint.endsWith("/")) {
       wellKnownEndpoint = wellKnownEndpoint + "/";
     }
