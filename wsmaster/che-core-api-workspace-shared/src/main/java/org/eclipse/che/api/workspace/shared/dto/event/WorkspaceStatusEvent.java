@@ -65,8 +65,8 @@ public interface WorkspaceStatusEvent {
 
   WorkspaceStatusEvent withOptions(Map<String, String> options);
 
-  /** @return whether workspace startup was interrupted by user */
-  boolean isStartupInterrupted();
+  /** @return whether event cause by some concrete user's request */
+  boolean isInitiatedByUser();
 
-  WorkspaceStatusEvent withStartupInterrupted(boolean isStartupInterrupted);
+  WorkspaceStatusEvent withInitiatedByUser(boolean isInitiatedByUser);
 }

@@ -46,7 +46,7 @@ public class WorkspaceInterruptedStartAttemptsMeterBinder implements MeterBinder
         event -> {
           if (event.getPrevStatus() == WorkspaceStatus.STARTING
               && event.getStatus() == WorkspaceStatus.STOPPED
-              && event.isStartupInterrupted()) {
+              && event.isInitiatedByUser()) {
             interruptionCounter.increment();
           }
         },

@@ -67,7 +67,7 @@ public class WorkspaceInterruptedStartAttemptsMeterBinderTest {
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withPrevStatus(WorkspaceStatus.STARTING)
             .withStatus(WorkspaceStatus.STOPPED)
-            .withStartupInterrupted(true)
+            .withInitiatedByUser(true)
             .withError("interrupted")
             .withWorkspaceId("1");
 
@@ -85,7 +85,7 @@ public class WorkspaceInterruptedStartAttemptsMeterBinderTest {
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withPrevStatus(WorkspaceStatus.STARTING)
             .withStatus(WorkspaceStatus.STOPPED)
-            .withStartupInterrupted(false)
+            .withInitiatedByUser(false)
             .withError("interrupted")
             .withWorkspaceId("1");
 
@@ -107,7 +107,7 @@ public class WorkspaceInterruptedStartAttemptsMeterBinderTest {
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withPrevStatus(from)
             .withStatus(to)
-            .withStartupInterrupted(true)
+            .withInitiatedByUser(true)
             .withError("D'oh!")
             .withWorkspaceId("1"));
 

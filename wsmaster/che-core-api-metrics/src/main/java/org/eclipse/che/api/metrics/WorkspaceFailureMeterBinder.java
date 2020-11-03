@@ -53,7 +53,7 @@ public class WorkspaceFailureMeterBinder implements MeterBinder {
         event -> {
           if (event.getError() == null
               || event.getStatus() != WorkspaceStatus.STOPPED
-              || event.isStartupInterrupted()) {
+              || event.isInitiatedByUser()) {
             return;
           }
           Counter counter;

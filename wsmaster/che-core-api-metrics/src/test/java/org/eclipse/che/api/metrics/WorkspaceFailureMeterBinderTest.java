@@ -105,7 +105,7 @@ public class WorkspaceFailureMeterBinderTest {
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withPrevStatus(WorkspaceStatus.STARTING)
             .withStatus(WorkspaceStatus.STOPPED)
-            .withStartupInterrupted(true)
+            .withInitiatedByUser(true)
             .withError("interrupted")
             .withWorkspaceId("1");
 
