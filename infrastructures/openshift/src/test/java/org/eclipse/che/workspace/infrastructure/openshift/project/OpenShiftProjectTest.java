@@ -52,6 +52,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesP
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -248,7 +249,7 @@ public class OpenShiftProjectTest {
   public void testLabelNamespace() throws InfrastructureException {
     // given
     prepareProject(PROJECT_NAME);
-    Namespace namespace = prepareNamespaceGet(PROJECT_NAME);
+    prepareNamespaceGet(PROJECT_NAME);
     OpenShiftProject openShiftProject =
         new OpenShiftProject(clientFactory, cheClientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
 
@@ -258,9 +259,10 @@ public class OpenShiftProjectTest {
     NonNamespaceOperation nonNamespaceOperation = mock(NonNamespaceOperation.class);
     doReturn(nonNamespaceOperation).when(cheKubeClient).namespaces();
 
+    ArgumentCaptor<Namespace> namespaceArgumentCaptor = ArgumentCaptor.forClass(Namespace.class);
     doAnswer(a -> a.getArgument(0))
         .when(nonNamespaceOperation)
-        .createOrReplace(any(Namespace.class));
+        .createOrReplace(namespaceArgumentCaptor.capture());
 
     Map<String, String> labels = Map.of("label.with.this", "yes", "and.this", "of courese");
 
@@ -268,8 +270,10 @@ public class OpenShiftProjectTest {
     openShiftProject.prepare(true, labels);
 
     // then
-    assertTrue(namespace.getMetadata().getLabels().entrySet().containsAll(labels.entrySet()));
-    verify(nonNamespaceOperation).createOrReplace(namespace);
+    Namespace updatedNamespace = namespaceArgumentCaptor.getValue();
+    assertTrue(
+        updatedNamespace.getMetadata().getLabels().entrySet().containsAll(labels.entrySet()));
+    assertEquals(updatedNamespace.getMetadata().getName(), PROJECT_NAME);
   }
 
   @Test
@@ -298,7 +302,7 @@ public class OpenShiftProjectTest {
 
     // then
     assertTrue(namespace.getMetadata().getLabels().entrySet().containsAll(labels.entrySet()));
-    verify(nonNamespaceOperation, never()).createOrReplace(namespace);
+    verify(nonNamespaceOperation, never()).createOrReplace(any());
   }
 
   @Test
@@ -307,7 +311,7 @@ public class OpenShiftProjectTest {
     Map<String, String> labels = Map.of("label.with.this", "yes", "and.this", "of courese");
 
     prepareProject(PROJECT_NAME);
-    Namespace namespace = prepareNamespaceGet(PROJECT_NAME);
+    prepareNamespaceGet(PROJECT_NAME);
     OpenShiftProject openShiftProject =
         new OpenShiftProject(clientFactory, cheClientFactory, executor, PROJECT_NAME, WORKSPACE_ID);
 
@@ -317,16 +321,20 @@ public class OpenShiftProjectTest {
     NonNamespaceOperation nonNamespaceOperation = mock(NonNamespaceOperation.class);
     lenient().doReturn(nonNamespaceOperation).when(cheKubeClient).namespaces();
 
+    ArgumentCaptor<Namespace> namespaceArgumentCaptor = ArgumentCaptor.forClass(Namespace.class);
     lenient()
         .doThrow(new KubernetesClientException("No permissions.", 403, new Status()))
         .when(nonNamespaceOperation)
-        .createOrReplace(any(Namespace.class));
+        .createOrReplace(namespaceArgumentCaptor.capture());
 
     // when
     openShiftProject.prepare(true, labels);
 
     // then
-    verify(nonNamespaceOperation).createOrReplace(namespace);
+    Namespace updatedNamespace = namespaceArgumentCaptor.getValue();
+    assertTrue(
+        updatedNamespace.getMetadata().getLabels().entrySet().containsAll(labels.entrySet()));
+    assertEquals(updatedNamespace.getMetadata().getName(), PROJECT_NAME);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -387,7 +395,7 @@ public class OpenShiftProjectTest {
 
   private Namespace prepareNamespaceGet(String namespaceName) {
     Namespace namespace =
-        new NamespaceBuilder().withNewMetadata().withNamespace(namespaceName).endMetadata().build();
+        new NamespaceBuilder().withNewMetadata().withName(namespaceName).endMetadata().build();
 
     NonNamespaceOperation nsOperation = mock(NonNamespaceOperation.class);
     doReturn(nsOperation).when(openShiftClient).namespaces();

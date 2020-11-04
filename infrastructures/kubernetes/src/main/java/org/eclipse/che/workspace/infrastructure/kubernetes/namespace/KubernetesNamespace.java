@@ -17,6 +17,7 @@ import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -71,15 +72,18 @@ public class KubernetesNamespace {
   private final KubernetesServices services;
   private final KubernetesPersistentVolumeClaims pvcs;
   private final KubernetesIngresses ingresses;
+  /** Factory for workspace related operations clients */
   private final KubernetesClientFactory clientFactory;
-  private final KubernetesClientFactory cheClientFactory;
+  /** Factory for cluster related operations clients (like labeling the namespaces) */
+  private final KubernetesClientFactory cheSAClientFactory;
+
   private final KubernetesSecrets secrets;
   private final KubernetesConfigsMaps configMaps;
 
   @VisibleForTesting
   protected KubernetesNamespace(
       KubernetesClientFactory clientFactory,
-      KubernetesClientFactory cheClientFactory,
+      KubernetesClientFactory cheSAClientFactory,
       String workspaceId,
       String name,
       KubernetesDeployments deployments,
@@ -89,7 +93,7 @@ public class KubernetesNamespace {
       KubernetesSecrets secrets,
       KubernetesConfigsMaps configMaps) {
     this.clientFactory = clientFactory;
-    this.cheClientFactory = cheClientFactory;
+    this.cheSAClientFactory = cheSAClientFactory;
     this.workspaceId = workspaceId;
     this.name = name;
     this.deployments = deployments;
@@ -102,12 +106,12 @@ public class KubernetesNamespace {
 
   public KubernetesNamespace(
       KubernetesClientFactory clientFactory,
-      KubernetesClientFactory cheClientFactory,
+      KubernetesClientFactory cheSAClientFactory,
       Executor executor,
       String name,
       String workspaceId) {
     this.clientFactory = clientFactory;
-    this.cheClientFactory = cheClientFactory;
+    this.cheSAClientFactory = cheSAClientFactory;
     this.workspaceId = workspaceId;
     this.name = name;
     this.deployments = new KubernetesDeployments(name, workspaceId, clientFactory, executor);
@@ -170,11 +174,17 @@ public class KubernetesNamespace {
       return;
     }
 
-    newLabels.putAll(ensureLabels);
-    namespace.getMetadata().setLabels(newLabels);
-
     try {
-      cheClientFactory.create().namespaces().createOrReplace(namespace);
+      // update the namespace with new labels
+      cheSAClientFactory
+          .create()
+          .namespaces()
+          .createOrReplace(
+              new NamespaceBuilder(namespace)
+                  .editMetadata()
+                  .addToLabels(ensureLabels)
+                  .endMetadata()
+                  .build());
     } catch (KubernetesClientException kce) {
       if (kce.getCode() == 403) {
         LOG.debug("Can't label the namespace due to lack of permissions ¯\\_(ツ)_/¯");

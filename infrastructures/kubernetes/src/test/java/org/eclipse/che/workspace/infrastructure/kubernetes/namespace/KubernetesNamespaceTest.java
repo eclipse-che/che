@@ -46,6 +46,7 @@ import java.util.concurrent.Executor;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
 import org.mockito.testng.MockitoTestNGListener;
@@ -310,7 +311,7 @@ public class KubernetesNamespaceTest {
   @Test
   public void testLabelNamespace() throws InfrastructureException {
     // given
-    Namespace namespace = prepareNamespace(NAMESPACE);
+    prepareNamespace(NAMESPACE);
     KubernetesNamespace kubernetesNamespace =
         new KubernetesNamespace(clientFactory, cheClientFactory, executor, NAMESPACE, WORKSPACE_ID);
 
@@ -320,9 +321,10 @@ public class KubernetesNamespaceTest {
     NonNamespaceOperation nonNamespaceOperation = mock(NonNamespaceOperation.class);
     doReturn(nonNamespaceOperation).when(cheKubeClient).namespaces();
 
+    ArgumentCaptor<Namespace> namespaceArgumentCaptor = ArgumentCaptor.forClass(Namespace.class);
     doAnswer(a -> a.getArgument(0))
         .when(nonNamespaceOperation)
-        .createOrReplace(any(Namespace.class));
+        .createOrReplace(namespaceArgumentCaptor.capture());
 
     Map<String, String> labels = Map.of("label.with.this", "yes", "and.this", "of courese");
 
@@ -330,8 +332,10 @@ public class KubernetesNamespaceTest {
     kubernetesNamespace.prepare(true, labels);
 
     // then
-    assertTrue(namespace.getMetadata().getLabels().entrySet().containsAll(labels.entrySet()));
-    verify(nonNamespaceOperation).createOrReplace(namespace);
+    Namespace updatedNamespace = namespaceArgumentCaptor.getValue();
+    assertTrue(
+        updatedNamespace.getMetadata().getLabels().entrySet().containsAll(labels.entrySet()));
+    assertEquals(updatedNamespace.getMetadata().getName(), NAMESPACE);
   }
 
   @Test
@@ -360,7 +364,7 @@ public class KubernetesNamespaceTest {
 
     // then
     assertTrue(namespace.getMetadata().getLabels().entrySet().containsAll(labels.entrySet()));
-    verify(nonNamespaceOperation, never()).createOrReplace(namespace);
+    verify(nonNamespaceOperation, never()).createOrReplace(any());
   }
 
   @Test
@@ -368,7 +372,7 @@ public class KubernetesNamespaceTest {
     // given
     Map<String, String> labels = Map.of("label.with.this", "yes", "and.this", "of courese");
 
-    Namespace namespace = prepareNamespace(NAMESPACE);
+    prepareNamespace(NAMESPACE);
     KubernetesNamespace kubernetesNamespace =
         new KubernetesNamespace(clientFactory, cheClientFactory, executor, NAMESPACE, WORKSPACE_ID);
 
@@ -378,16 +382,20 @@ public class KubernetesNamespaceTest {
     NonNamespaceOperation nonNamespaceOperation = mock(NonNamespaceOperation.class);
     lenient().doReturn(nonNamespaceOperation).when(cheKubeClient).namespaces();
 
+    ArgumentCaptor<Namespace> namespaceArgumentCaptor = ArgumentCaptor.forClass(Namespace.class);
     lenient()
         .doThrow(new KubernetesClientException("No permissions.", 403, new Status()))
         .when(nonNamespaceOperation)
-        .createOrReplace(any(Namespace.class));
+        .createOrReplace(namespaceArgumentCaptor.capture());
 
     // when
     kubernetesNamespace.prepare(true, labels);
 
     // then
-    verify(nonNamespaceOperation).createOrReplace(namespace);
+    Namespace updatedNamespace = namespaceArgumentCaptor.getValue();
+    assertTrue(
+        updatedNamespace.getMetadata().getLabels().entrySet().containsAll(labels.entrySet()));
+    assertEquals(updatedNamespace.getMetadata().getName(), NAMESPACE);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -449,7 +457,7 @@ public class KubernetesNamespaceTest {
 
   private Namespace prepareNamespace(String namespaceName) {
     Namespace namespace =
-        new NamespaceBuilder().withNewMetadata().withNamespace(namespaceName).endMetadata().build();
+        new NamespaceBuilder().withNewMetadata().withName(namespaceName).endMetadata().build();
     Resource namespaceResource = prepareNamespaceResource(namespaceName);
     doReturn(namespace).when(namespaceResource).get();
     return namespace;

@@ -21,8 +21,10 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
- * This {@link KubernetesClientFactory} is used to access Che installation namespace. It always
- * provides client with default {@link Config}.
+ * This {@link KubernetesClientFactory} ensures that we use `che` ServiceAccount and not related to
+ * any workspace. It always provides client with default {@link Config}. It's useful for operations
+ * that needs permissions of `che` SA, such as operations inside `che` namespace (like creating a
+ * ConfigMaps for Gateway router) or some cluste-wide actions (like labeling the namespaces).
  */
 @Singleton
 public class CheServerKubernetesClientFactory extends KubernetesClientFactory {
