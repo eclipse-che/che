@@ -74,6 +74,7 @@ import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.inject.ConfigurationException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -103,6 +104,7 @@ public class KubernetesNamespaceFactoryTest {
 
   @Mock private KubernetesSharedPool pool;
   @Mock private KubernetesClientFactory clientFactory;
+  @Mock private CheServerKubernetesClientFactory cheClientFactory;
   private KubernetesClient k8sClient;
   @Mock private UserManager userManager;
   @Mock private PreferenceManager preferenceManager;
@@ -164,6 +166,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -186,6 +189,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -213,6 +217,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -238,6 +243,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -260,6 +266,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -310,6 +317,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -353,6 +361,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -383,6 +392,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -417,6 +427,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -445,6 +456,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -476,6 +488,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -502,6 +515,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -537,6 +551,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -573,6 +588,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -603,6 +619,7 @@ public class KubernetesNamespaceFactoryTest {
                 NAMESPACE_LABELS,
                 NAMESPACE_ANNOTATIONS,
                 clientFactory,
+                cheClientFactory,
                 userManager,
                 preferenceManager,
                 pool));
@@ -617,7 +634,7 @@ public class KubernetesNamespaceFactoryTest {
     // then
     assertEquals(toReturnNamespace, namespace);
     verify(namespaceFactory, never()).doCreateServiceAccount(any(), any());
-    verify(toReturnNamespace).prepare(eq(false));
+    verify(toReturnNamespace).prepare(eq(false), any());
   }
 
   @Test
@@ -635,6 +652,7 @@ public class KubernetesNamespaceFactoryTest {
                 NAMESPACE_LABELS,
                 NAMESPACE_ANNOTATIONS,
                 clientFactory,
+                cheClientFactory,
                 userManager,
                 preferenceManager,
                 pool));
@@ -649,7 +667,7 @@ public class KubernetesNamespaceFactoryTest {
     // then
     assertEquals(toReturnNamespace, namespace);
     verify(namespaceFactory, never()).doCreateServiceAccount(any(), any());
-    verify(toReturnNamespace).prepare(eq(false));
+    verify(toReturnNamespace).prepare(eq(false), any());
   }
 
   @Test
@@ -668,6 +686,7 @@ public class KubernetesNamespaceFactoryTest {
                 NAMESPACE_LABELS,
                 NAMESPACE_ANNOTATIONS,
                 clientFactory,
+                cheClientFactory,
                 userManager,
                 preferenceManager,
                 pool));
@@ -705,6 +724,7 @@ public class KubernetesNamespaceFactoryTest {
                 NAMESPACE_LABELS,
                 NAMESPACE_ANNOTATIONS,
                 clientFactory,
+                cheClientFactory,
                 userManager,
                 preferenceManager,
                 pool));
@@ -773,6 +793,7 @@ public class KubernetesNamespaceFactoryTest {
                 NAMESPACE_LABELS,
                 NAMESPACE_ANNOTATIONS,
                 clientFactory,
+                cheClientFactory,
                 userManager,
                 preferenceManager,
                 pool));
@@ -829,6 +850,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -848,6 +870,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -871,6 +894,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -898,6 +922,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -928,6 +953,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -959,6 +985,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -990,6 +1017,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -1021,6 +1049,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -1048,6 +1077,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -1077,6 +1107,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -1128,6 +1159,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -1165,6 +1197,7 @@ public class KubernetesNamespaceFactoryTest {
             "try_placeholder_here=<username>",
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -1187,6 +1220,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);
@@ -1206,6 +1240,7 @@ public class KubernetesNamespaceFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             userManager,
             preferenceManager,
             pool);

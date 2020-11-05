@@ -57,6 +57,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.inject.ConfigurationException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.impls.KubernetesNamespaceMetaImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
@@ -99,6 +100,7 @@ public class KubernetesNamespaceFactory {
   private final String serviceAccountName;
   private final Set<String> clusterRoleNames;
   private final KubernetesClientFactory clientFactory;
+  private final KubernetesClientFactory cheClientFactory;
   private final boolean namespaceCreationAllowed;
   private final UserManager userManager;
   private final PreferenceManager preferenceManager;
@@ -116,6 +118,7 @@ public class KubernetesNamespaceFactory {
       @Named("che.infra.kubernetes.namespace.labels") String namespaceLabels,
       @Named("che.infra.kubernetes.namespace.annotations") String namespaceAnnotations,
       KubernetesClientFactory clientFactory,
+      CheServerKubernetesClientFactory cheClientFactory,
       UserManager userManager,
       PreferenceManager preferenceManager,
       KubernetesSharedPool sharedPool)
@@ -125,6 +128,7 @@ public class KubernetesNamespaceFactory {
     this.legacyNamespaceName = legacyNamespaceName;
     this.serviceAccountName = serviceAccountName;
     this.clientFactory = clientFactory;
+    this.cheClientFactory = cheClientFactory;
     this.defaultNamespaceName = defaultNamespaceName;
     this.allowUserDefinedNamespaces = allowUserDefinedNamespaces;
     this.preferenceManager = preferenceManager;
@@ -168,7 +172,8 @@ public class KubernetesNamespaceFactory {
 
   @VisibleForTesting
   KubernetesNamespace doCreateNamespaceAccess(String workspaceId, String name) {
-    return new KubernetesNamespace(clientFactory, sharedPool.getExecutor(), name, workspaceId);
+    return new KubernetesNamespace(
+        clientFactory, cheClientFactory, sharedPool.getExecutor(), name, workspaceId);
   }
 
   /**
@@ -386,7 +391,7 @@ public class KubernetesNamespaceFactory {
   public KubernetesNamespace getOrCreate(RuntimeIdentity identity) throws InfrastructureException {
     KubernetesNamespace namespace = get(identity);
 
-    namespace.prepare(canCreateNamespace(identity));
+    namespace.prepare(canCreateNamespace(identity), namespaceLabels);
 
     if (!isNullOrEmpty(serviceAccountName)) {
       KubernetesWorkspaceServiceAccount workspaceServiceAccount =

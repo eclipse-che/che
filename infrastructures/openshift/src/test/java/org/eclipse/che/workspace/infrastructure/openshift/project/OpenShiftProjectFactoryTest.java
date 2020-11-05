@@ -64,6 +64,7 @@ import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.inject.ConfigurationException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
@@ -94,6 +95,7 @@ public class OpenShiftProjectFactoryTest {
 
   @Mock private OpenShiftClientConfigFactory configFactory;
   @Mock private OpenShiftClientFactory clientFactory;
+  @Mock private CheServerKubernetesClientFactory cheClientFactory;
   @Mock private OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner;
   @Mock private WorkspaceManager workspaceManager;
   @Mock private UserManager userManager;
@@ -154,6 +156,7 @@ public class OpenShiftProjectFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
@@ -179,6 +182,7 @@ public class OpenShiftProjectFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
@@ -207,6 +211,7 @@ public class OpenShiftProjectFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
@@ -234,6 +239,7 @@ public class OpenShiftProjectFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
@@ -270,6 +276,7 @@ public class OpenShiftProjectFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
@@ -307,6 +314,7 @@ public class OpenShiftProjectFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
@@ -340,6 +348,7 @@ public class OpenShiftProjectFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
@@ -383,6 +392,7 @@ public class OpenShiftProjectFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
@@ -420,6 +430,7 @@ public class OpenShiftProjectFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
@@ -457,6 +468,7 @@ public class OpenShiftProjectFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
@@ -486,6 +498,7 @@ public class OpenShiftProjectFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
@@ -531,6 +544,7 @@ public class OpenShiftProjectFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
@@ -571,6 +585,7 @@ public class OpenShiftProjectFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
@@ -603,6 +618,7 @@ public class OpenShiftProjectFactoryTest {
                 NAMESPACE_LABELS,
                 NAMESPACE_ANNOTATIONS,
                 clientFactory,
+                cheClientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
                 userManager,
@@ -620,7 +636,7 @@ public class OpenShiftProjectFactoryTest {
     // then
     assertEquals(toReturnProject, project);
     verify(projectFactory, never()).doCreateServiceAccount(any(), any());
-    verify(toReturnProject).prepare(eq(false));
+    verify(toReturnProject).prepare(eq(false), any());
   }
 
   @Test
@@ -639,6 +655,7 @@ public class OpenShiftProjectFactoryTest {
                 NAMESPACE_LABELS,
                 NAMESPACE_ANNOTATIONS,
                 clientFactory,
+                cheClientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
                 userManager,
@@ -677,6 +694,7 @@ public class OpenShiftProjectFactoryTest {
                 NAMESPACE_LABELS,
                 NAMESPACE_ANNOTATIONS,
                 clientFactory,
+                cheClientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
                 userManager,
@@ -717,6 +735,7 @@ public class OpenShiftProjectFactoryTest {
                 NAMESPACE_LABELS,
                 NAMESPACE_ANNOTATIONS,
                 clientFactory,
+                cheClientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
                 userManager,
@@ -769,6 +788,7 @@ public class OpenShiftProjectFactoryTest {
             NAMESPACE_LABELS,
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
@@ -802,6 +822,7 @@ public class OpenShiftProjectFactoryTest {
             "try_placeholder_here=<username>",
             NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
