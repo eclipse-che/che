@@ -32,6 +32,8 @@ global:
   #  default (if empty) is true
   #cheDedicatedKeycloak: false
   ingressDomain: 192.168.99.100.nip.io
+  ingress:
+    class: "nginx"
   # See --annotations-prefix flag (https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/cli-arguments.md)
   ingressAnnotationsPrefix: "nginx."
   # options: default-host, single-host, multi-host

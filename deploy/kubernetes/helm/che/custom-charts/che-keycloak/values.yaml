@@ -7,9 +7,13 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-# Default values for postgres.
+# Default values for Keycloak
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+
+global:
+  ingress:
+    class: "nginx"
 
 image: quay.io/eclipse/che-keycloak:nightly
 requireAdminPasswordChange: true
