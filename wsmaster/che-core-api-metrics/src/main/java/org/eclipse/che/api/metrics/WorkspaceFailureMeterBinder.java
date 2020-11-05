@@ -30,6 +30,7 @@ import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
  */
 @Singleton
 public class WorkspaceFailureMeterBinder implements MeterBinder {
+
   private final EventService eventService;
 
   private Counter startingStoppedFailureCounter;
@@ -50,10 +51,11 @@ public class WorkspaceFailureMeterBinder implements MeterBinder {
     // only subscribe to the event once we have the counters ready
     eventService.subscribe(
         event -> {
-          if (event.getError() == null || event.getStatus() != WorkspaceStatus.STOPPED) {
+          if (event.getError() == null
+              || event.getStatus() != WorkspaceStatus.STOPPED
+              || event.isInitiatedByUser()) {
             return;
           }
-
           Counter counter;
           switch (event.getPrevStatus()) {
             case STARTING:

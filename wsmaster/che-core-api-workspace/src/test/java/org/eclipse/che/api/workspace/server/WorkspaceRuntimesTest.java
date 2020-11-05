@@ -203,6 +203,13 @@ public class WorkspaceRuntimesTest {
     verify(infrastructure).prepare(runtimeIdCaptor.capture(), any());
     RuntimeIdentity runtimeId = runtimeIdCaptor.getValue();
     assertEquals(runtimeId.getInfrastructureNamespace(), "infraNamespace");
+    assertWorkspaceEventFired(
+        "workspace123",
+        WorkspaceStatus.STARTING,
+        WorkspaceStatus.STOPPED,
+        null,
+        true,
+        Collections.emptyMap());
   }
 
   @Test
@@ -336,16 +343,13 @@ public class WorkspaceRuntimesTest {
     }
     ;
     verify(statuses).remove("workspace123");
-    ArgumentCaptor<WorkspaceStatusEvent> captor =
-        ArgumentCaptor.forClass(WorkspaceStatusEvent.class);
-    verify(eventService).publish(captor.capture());
-    WorkspaceStatusEvent event = captor.getValue();
-    assertEquals("workspace123", event.getWorkspaceId());
-    assertEquals(WorkspaceStatus.STOPPING, event.getPrevStatus());
-    assertEquals(WorkspaceStatus.STOPPED, event.getStatus());
-    assertEquals(
+    assertWorkspaceEventFired(
+        "workspace123",
+        WorkspaceStatus.STOPPED,
+        WorkspaceStatus.STOPPING,
         "Workspace is stopped. Reason: InternalEnvironmentFactory is not configured for recipe type: 'UNKNOWN'",
-        event.getError());
+        false,
+        Collections.emptyMap());
     assertFalse(runtimesMap.containsKey("workspace123"));
   }
 
@@ -1015,6 +1019,25 @@ public class WorkspaceRuntimesTest {
         internalRuntime.getOwner(),
         internalRuntime.getCommands(),
         internalRuntime.getWarnings());
+  }
+
+  private void assertWorkspaceEventFired(
+      String workspaceId,
+      WorkspaceStatus status,
+      WorkspaceStatus previous,
+      String errorMsg,
+      boolean isInitiatedByUser,
+      Map<String, String> options) {
+    ArgumentCaptor<WorkspaceStatusEvent> captor =
+        ArgumentCaptor.forClass(WorkspaceStatusEvent.class);
+    verify(eventService).publish(captor.capture());
+    WorkspaceStatusEvent event = captor.getValue();
+    assertEquals(event.getWorkspaceId(), workspaceId);
+    assertEquals(event.getStatus(), status);
+    assertEquals(event.getPrevStatus(), previous);
+    assertEquals(event.getError(), errorMsg);
+    assertEquals(event.isInitiatedByUser(), isInitiatedByUser);
+    assertEquals(event.getOptions(), options);
   }
 
   private static class TestInfrastructure extends RuntimeInfrastructure {

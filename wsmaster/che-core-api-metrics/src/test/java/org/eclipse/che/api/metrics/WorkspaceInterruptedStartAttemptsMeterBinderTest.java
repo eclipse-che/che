@@ -15,13 +15,11 @@ import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertEquals;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
@@ -29,14 +27,15 @@ import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.ArgumentCaptor;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class WorkspaceFailureMeterBinderTest {
+public class WorkspaceInterruptedStartAttemptsMeterBinderTest {
 
-  private Collection<Counter> failureCounters;
   private EventSubscriber<WorkspaceStatusEvent> events;
+  private Counter interruptedCounter;
 
   @BeforeMethod
   public void setup() {
@@ -44,7 +43,8 @@ public class WorkspaceFailureMeterBinderTest {
 
     EventService eventService = mock(EventService.class);
 
-    WorkspaceFailureMeterBinder meterBinder = new WorkspaceFailureMeterBinder(eventService);
+    WorkspaceInterruptedStartAttemptsMeterBinder meterBinder =
+        new WorkspaceInterruptedStartAttemptsMeterBinder(eventService);
 
     meterBinder.bindTo(registry);
 
@@ -52,7 +52,7 @@ public class WorkspaceFailureMeterBinderTest {
     ArgumentCaptor<EventSubscriber<WorkspaceStatusEvent>> statusChangeEventCaptor =
         ArgumentCaptor.forClass(EventSubscriber.class);
 
-    failureCounters = registry.find("che.workspace.failure.total").counters();
+    interruptedCounter = registry.find("che.workspace.start.interrupt.total").counter();
 
     verify(eventService)
         .subscribe(statusChangeEventCaptor.capture(), eq(WorkspaceStatusEvent.class));
@@ -60,46 +60,8 @@ public class WorkspaceFailureMeterBinderTest {
     events = statusChangeEventCaptor.getValue();
   }
 
-  @Test(dataProvider = "failureWhileInStatus")
-  public void shouldCollectFailureCountsPerStatus(WorkspaceStatus failureStatus) {
-    events.onEvent(
-        DtoFactory.newDto(WorkspaceStatusEvent.class)
-            .withPrevStatus(failureStatus)
-            .withStatus(WorkspaceStatus.STOPPED)
-            .withError("D'oh!")
-            .withWorkspaceId("1"));
-
-    List<Counter> restOfCounters = new ArrayList<>(failureCounters);
-
-    Counter counter =
-        failureCounters
-            .stream()
-            .filter(c -> failureStatus.name().equals(c.getId().getTag("while")))
-            .findAny()
-            .orElseThrow(
-                () ->
-                    new AssertionError(
-                        "Could not find a counter for failure status " + failureStatus));
-
-    restOfCounters.remove(counter);
-
-    assertEquals(counter.count(), 1d);
-    restOfCounters.forEach(c -> assertEquals(c.count(), 0d));
-  }
-
-  @Test(dataProvider = "failureWhileInStatus")
-  public void shouldNotCollectFailureWhenNoErrorInEvent(WorkspaceStatus prevStatus) {
-    events.onEvent(
-        DtoFactory.newDto(WorkspaceStatusEvent.class)
-            .withPrevStatus(prevStatus)
-            .withStatus(WorkspaceStatus.STOPPED)
-            .withWorkspaceId("1"));
-
-    failureCounters.forEach(c -> assertEquals(c.count(), 0d));
-  }
-
   @Test
-  public void shouldNotCollectInterruptedEvent() {
+  public void shouldCountWorkspaceInterruptedEvent() {
     // given
     WorkspaceStatusEvent event =
         DtoFactory.newDto(WorkspaceStatusEvent.class)
@@ -113,33 +75,43 @@ public class WorkspaceFailureMeterBinderTest {
     events.onEvent(event);
 
     // then
-    failureCounters.forEach(c -> assertEquals(c.count(), 0d));
+    Assert.assertEquals(interruptedCounter.count(), 1.0);
+  }
+
+  @Test
+  public void shouldNotCountWorkspaceNonInterruptedEvent() {
+    // given
+    WorkspaceStatusEvent event =
+        DtoFactory.newDto(WorkspaceStatusEvent.class)
+            .withPrevStatus(WorkspaceStatus.STARTING)
+            .withStatus(WorkspaceStatus.STOPPED)
+            .withInitiatedByUser(false)
+            .withError("interrupted")
+            .withWorkspaceId("1");
+
+    // when
+    events.onEvent(event);
+
+    // then
+    Assert.assertEquals(interruptedCounter.count(), 0.0);
   }
 
   @Test(dataProvider = "allStatusTransitionsWithoutToStopped")
-  public void shouldNotCollectFailureWhenNotTransitioningToStopped(
+  public void shouldNotCollectInterruptionWhenNotTransitioningToStopped(
       WorkspaceStatus from, WorkspaceStatus to) {
     // This really doesn't make much sense because the codebase always transitions the workspace
-    // to STOPPED on any kind of failure. This is just a precaution that a potential bug in the
+    // to STOPPED on interruption. This is just a precaution that a potential bug in the
     // rest of the codebase doesn't affect the metric collection ;)
 
     events.onEvent(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withPrevStatus(from)
             .withStatus(to)
+            .withInitiatedByUser(true)
             .withError("D'oh!")
             .withWorkspaceId("1"));
 
-    failureCounters.forEach(c -> assertEquals(c.count(), 0d));
-  }
-
-  @DataProvider
-  public Object[][] failureWhileInStatus() {
-    return new Object[][] {
-      new Object[] {WorkspaceStatus.STARTING},
-      new Object[] {WorkspaceStatus.RUNNING},
-      new Object[] {WorkspaceStatus.STOPPING},
-    };
+    Assert.assertEquals(interruptedCounter.count(), 0.0);
   }
 
   @DataProvider
