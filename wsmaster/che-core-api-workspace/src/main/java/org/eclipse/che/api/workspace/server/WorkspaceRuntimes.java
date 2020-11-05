@@ -36,7 +36,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1006,12 +1005,7 @@ public class WorkspaceRuntimes {
           LOG.error(e.getLocalizedMessage(), e);
         }
         publishWorkspaceStatusEvent(
-            workspaceId,
-            STOPPED,
-            STARTING,
-            e.getMessage(),
-            isWorkspaceStartInterrupted,
-            Collections.emptyMap());
+            workspaceId, STOPPED, STARTING, e.getMessage(), isWorkspaceStartInterrupted);
         throw new RuntimeException(e);
       }
     }
