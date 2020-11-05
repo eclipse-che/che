@@ -12,26 +12,34 @@
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
 import static com.google.common.collect.ImmutableMap.of;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
+import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
+import io.fabric8.kubernetes.api.model.DoneableConfigMap;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.client.dsl.MixedOperation;
+import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstallationLocation;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -48,12 +56,41 @@ public class Openshift4TrustedCAProvisionerTest {
   private static final String CERTIFICATE_MOUNT_PATH = "/certs";
   private static final String CONFIGMAP_KEY = "testConfigMapKey";
   private static final String CONFIGMAP_VALUE = "testConfigMapValue";
+  private static final String CHE_SERVER_NAMESPACE = "testCheServerNamespace";
+  private static final String INJECTED_CA_BUNDLE_KEY = "ca-bundle.crt";
+  private static final String INJECTED_CA_BUNDLE_VALUE = "ca-bundle.crt.content";
+  private static final String MANUAL_CA_BUNDLE_KEY = "manual-ca.crt";
+  private static final String MANUAL_CA_BUNDLE_VALUE = "maunal-ca.crt.content";
 
-  @Mock OpenShiftClientFactory clientFactory;
+  @Mock CheServerKubernetesClientFactory clientFactory;
 
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private OpenShiftProject openShiftProject;
   @Mock private KubernetesConfigsMaps kubernetesConfigsMaps;
+  @Mock private CheInstallationLocation cheInstallationLocation;
+
+  @Mock
+  private MixedOperation<
+          ConfigMap, ConfigMapList, DoneableConfigMap, Resource<ConfigMap, DoneableConfigMap>>
+      cheServerConfigMapGetter1;
+
+  @Mock
+  private NonNamespaceOperation<
+          ConfigMap, ConfigMapList, DoneableConfigMap, Resource<ConfigMap, DoneableConfigMap>>
+      cheServerConfigMapGetter2;
+
+  @Mock private Resource<ConfigMap, DoneableConfigMap> cheServerConfigMapResource;
+  @Mock private ConfigMap cheServerConfigMap;
+  @Mock private ObjectMeta cheServerConfigMapMetadata;
+
+  private Map<String, String> cheServerConfigMapData =
+      ImmutableMap.of(
+          INJECTED_CA_BUNDLE_KEY, INJECTED_CA_BUNDLE_VALUE,
+          MANUAL_CA_BUNDLE_KEY, MANUAL_CA_BUNDLE_VALUE);
+
+  private Map<String, String> cheServerConfigMapAnnotations =
+      ImmutableMap.of(
+          "testCheServerConfigMapAnnotationsKey", "testCheServerConfigMapAnnotationsValue");
 
   @Mock private OpenShiftClient k8sClient;
 
@@ -63,22 +100,49 @@ public class Openshift4TrustedCAProvisionerTest {
 
   @BeforeMethod
   public void setup() throws Exception {
-    lenient().when(clientFactory.createOC()).thenReturn(k8sClient);
+    lenient().when(clientFactory.create()).thenReturn(k8sClient);
     lenient().when(openShiftProject.configMaps()).thenReturn(kubernetesConfigsMaps);
+    lenient()
+        .when(cheInstallationLocation.getInstallationLocationNamespace())
+        .thenReturn(CHE_SERVER_NAMESPACE);
     lenient().when(k8sEnv.getConfigMaps()).thenReturn(envConfigMaps);
+    lenient().when(k8sClient.configMaps()).thenReturn(cheServerConfigMapGetter1);
+    lenient()
+        .when(cheServerConfigMapGetter1.inNamespace(CHE_SERVER_NAMESPACE))
+        .thenReturn(cheServerConfigMapGetter2);
+    lenient()
+        .when(cheServerConfigMapGetter2.withName(anyString()))
+        .thenReturn(cheServerConfigMapResource);
+    lenient().when(cheServerConfigMap.getData()).thenReturn(cheServerConfigMapData);
+    lenient().when(cheServerConfigMap.getMetadata()).thenReturn(cheServerConfigMapMetadata);
+    lenient()
+        .when(cheServerConfigMapMetadata.getAnnotations())
+        .thenReturn(cheServerConfigMapAnnotations);
+
     this.trustedCAProvisioner =
         new Openshift4TrustedCAProvisioner(
-            CONFIGMAP_NAME, CONFIGMAP_NAME, CONFIGMAP_LABELS, CERTIFICATE_MOUNT_PATH);
+            CONFIGMAP_NAME,
+            CONFIGMAP_NAME,
+            CONFIGMAP_LABELS,
+            CERTIFICATE_MOUNT_PATH,
+            cheInstallationLocation,
+            clientFactory);
   }
 
   @Test
   public void shouldDoNothingIfCAStoreIsNotInitialized() throws Exception {
     Openshift4TrustedCAProvisioner localProvisioner =
         new Openshift4TrustedCAProvisioner(
-            null, CONFIGMAP_NAME, CONFIGMAP_LABELS, CERTIFICATE_MOUNT_PATH);
+            null,
+            CONFIGMAP_NAME,
+            CONFIGMAP_LABELS,
+            CERTIFICATE_MOUNT_PATH,
+            cheInstallationLocation,
+            clientFactory);
 
     localProvisioner.provision(k8sEnv, openShiftProject);
-    verifyZeroInteractions(k8sEnv, openShiftProject, clientFactory, openShiftProject);
+    verifyZeroInteractions(
+        k8sEnv, openShiftProject, clientFactory, openShiftProject, clientFactory);
   }
 
   @Test
@@ -86,12 +150,18 @@ public class Openshift4TrustedCAProvisionerTest {
     Pod pod = newPod();
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     doReturn(of(POD_NAME, podData)).when(k8sEnv).getPodsData();
+    lenient().when(cheServerConfigMapResource.get()).thenReturn(cheServerConfigMap);
 
     trustedCAProvisioner.provision(k8sEnv, openShiftProject);
 
     assertEquals(envConfigMaps.size(), 1);
     assertTrue(envConfigMaps.get(CONFIGMAP_NAME).getMetadata().getLabels().containsKey("foo"));
     assertEquals(envConfigMaps.get(CONFIGMAP_NAME).getMetadata().getLabels().get("foo"), "bar");
+    assertEquals(
+        envConfigMaps.get(CONFIGMAP_NAME).getMetadata().getAnnotations(),
+        cheServerConfigMapAnnotations);
+    assertEquals(envConfigMaps.get(CONFIGMAP_NAME).getData(), cheServerConfigMapData);
+
     PodSpec podSpec = pod.getSpec();
     assertEquals(podSpec.getVolumes().size(), 1);
     assertEquals(podSpec.getVolumes().get(0).getConfigMap().getName(), CONFIGMAP_NAME);
@@ -109,16 +179,6 @@ public class Openshift4TrustedCAProvisionerTest {
         .withNewSpec()
         .withContainers(new ContainerBuilder().build(), new ContainerBuilder().build())
         .endSpec()
-        .build();
-  }
-
-  private static ConfigMap newConfigMap() {
-    return new ConfigMapBuilder()
-        .withNewMetadata()
-        .withName(CONFIGMAP_NAME)
-        .withLabels(of("foo", "bar"))
-        .endMetadata()
-        .withData(of(CONFIGMAP_KEY, CONFIGMAP_VALUE))
         .build();
   }
 }

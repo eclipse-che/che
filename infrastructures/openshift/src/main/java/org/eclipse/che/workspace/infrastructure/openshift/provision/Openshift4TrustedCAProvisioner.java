@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.openshift.provision;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 import com.google.common.base.Splitter;
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Container;
@@ -21,11 +22,14 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import java.util.Map;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstallationLocation;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
@@ -43,19 +47,28 @@ public class Openshift4TrustedCAProvisioner {
 
   private final String certificateMountPath;
   private final boolean trustedStoreInitialized;
+  private final String caBundleConfigMap;
   private final String configMapName;
   private final Map<String, String> configMapLabelKeyValue;
+  private final CheServerKubernetesClientFactory cheServerClientFactory;
+  private final String installationLocationNamespace;
 
   @Inject
   public Openshift4TrustedCAProvisioner(
       @Nullable @Named("che.trusted_ca_bundles_configmap") String caBundleConfigMap,
       @Named("che.infra.openshift.trusted_ca_bundles_config_map") String configMapName,
       @Named("che.infra.openshift.trusted_ca_bundles_config_map_labels") String configMapLabel,
-      @Named("che.infra.openshift.trusted_ca_bundles_mount_path") String certificateMountPath) {
+      @Named("che.infra.openshift.trusted_ca_bundles_mount_path") String certificateMountPath,
+      CheInstallationLocation cheInstallationLocation,
+      CheServerKubernetesClientFactory cheServerClientFactory)
+      throws InfrastructureException {
+    this.cheServerClientFactory = cheServerClientFactory;
     this.trustedStoreInitialized = !isNullOrEmpty(caBundleConfigMap);
     this.configMapName = configMapName;
+    this.caBundleConfigMap = caBundleConfigMap;
     this.certificateMountPath = certificateMountPath;
     this.configMapLabelKeyValue = Splitter.on(",").withKeyValueSeparator("=").split(configMapLabel);
+    this.installationLocationNamespace = cheInstallationLocation.getInstallationLocationNamespace();
   }
 
   public boolean isTrustedStoreInitialized() {
@@ -67,9 +80,22 @@ public class Openshift4TrustedCAProvisioner {
     if (!trustedStoreInitialized) {
       return;
     }
+    ConfigMap configMap =
+        cheServerClientFactory
+            .create()
+            .configMaps()
+            .inNamespace(installationLocationNamespace)
+            .withName(caBundleConfigMap)
+            .get();
 
-    if (!project.configMaps().get(configMapName).isPresent()) {
-      // create new map
+    if (configMap == null) {
+      return;
+    }
+
+    Optional<ConfigMap> existing = project.configMaps().get(configMapName);
+
+    if (!existing.isPresent() || !existing.get().getData().equals(configMap.getData())) {
+      // create or renew map
       k8sEnv
           .getConfigMaps()
           .put(
@@ -78,10 +104,14 @@ public class Openshift4TrustedCAProvisioner {
                   .withMetadata(
                       new ObjectMetaBuilder()
                           .withName(configMapName)
+                          .withAnnotations(configMap.getMetadata().getAnnotations())
                           .withLabels(configMapLabelKeyValue)
                           .build())
+                  .withApiVersion(configMap.getApiVersion())
+                  .withData(configMap.getData())
                   .build());
     }
+
     for (PodData pod : k8sEnv.getPodsData().values()) {
       if (pod.getRole() == PodRole.DEPLOYMENT) {
         if (pod.getSpec()
