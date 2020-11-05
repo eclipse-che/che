@@ -24,11 +24,6 @@ data:
           rule: "PathPrefix(`/`)"
           service: che
           priority: 1
-        # The path rule for Che Dashboard next hosted by Che Server. It should be removed after https://github.com/eclipse/che/issues/17647 is fixed
-        dashboard-next:
-          rule: "PathPrefix(`/dashboard/next`)"
-          service: che
-          priority: 20
       services:
         che:
           loadBalancer:
