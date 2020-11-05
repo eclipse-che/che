@@ -161,7 +161,7 @@ pipeline {
 
                     steps {
                         echo "Build branch ${ghprbSourceBranch} of upstream projects"
-                        sh "sudo yum install -y glibc.i686 libfreetype.so.6 libfontconfig.so.1 libstdc++-devel.i686"
+                        sh "sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686"
 
                         sh """
                             project_list=(
@@ -211,9 +211,9 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
                     sh """
+                        docker login -u maxura -p ${maxura_docker_password}
                         ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
                         docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
-                        docker login -u maxura -p ${maxura_docker_password}
                         docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
                     """
                 }
