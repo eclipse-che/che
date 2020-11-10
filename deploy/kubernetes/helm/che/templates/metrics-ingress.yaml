@@ -36,7 +36,9 @@ spec:
   - hosts:
     - {{ template "prometheusHost" . }}
     - {{ template "grafanaHost" . }}
+    {{- if .Values.global.tls.secretName }}
     secretName: {{ .Values.global.tls.secretName }}
+    {{- end -}}
 {{- end }}
   rules:
   - host: {{ template "prometheusHost" . }}
