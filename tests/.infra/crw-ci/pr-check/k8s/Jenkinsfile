@@ -190,6 +190,12 @@ pipeline {
                     steps {
                         script {
                             retry(2) {
+                                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
+                                    sh """
+                                        docker login -u maxura -p ${maxura_docker_password}
+                                    """
+                                }
+
                                 sh """
                                     docker pull quay.io/eclipse/che-e2e:$cheE2eImageTag
                                     docker pull quay.io/eclipse/happy-path:nightly
@@ -209,14 +215,11 @@ pipeline {
             }
 
             steps {
-                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
-                    sh """
-                        docker login -u maxura -p ${maxura_docker_password}
-                        ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
-                        docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
-                        docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
-                    """
-                }
+                sh """
+                    ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
+                    docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
+                    docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
+                """
             }
         }
 
