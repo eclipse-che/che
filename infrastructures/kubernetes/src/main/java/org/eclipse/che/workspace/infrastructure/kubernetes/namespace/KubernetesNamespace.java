@@ -163,6 +163,9 @@ public class KubernetesNamespace {
    */
   protected void label(Namespace namespace, Map<String, String> ensureLabels)
       throws InfrastructureException {
+    if (ensureLabels.isEmpty()) {
+      return;
+    }
     Map<String, String> currentLabels = namespace.getMetadata().getLabels();
     Map<String, String> newLabels =
         currentLabels != null ? new HashMap<>(currentLabels) : new HashMap<>();

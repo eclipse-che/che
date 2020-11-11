@@ -41,6 +41,7 @@ import io.fabric8.kubernetes.client.Watcher.Action;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -364,6 +365,35 @@ public class KubernetesNamespaceTest {
 
     // then
     assertTrue(namespace.getMetadata().getLabels().entrySet().containsAll(labels.entrySet()));
+    verify(nonNamespaceOperation, never()).createOrReplace(any());
+  }
+
+  @Test
+  public void testDontTryToLabelNamespaceIfNoNamespacesProvided() throws InfrastructureException {
+    // given
+    Map<String, String> existingLabels = Map.of("some", "labels");
+    Namespace namespace = prepareNamespace(NAMESPACE);
+    namespace.getMetadata().setLabels(existingLabels);
+    KubernetesNamespace kubernetesNamespace =
+        new KubernetesNamespace(clientFactory, cheClientFactory, executor, NAMESPACE, WORKSPACE_ID);
+
+    KubernetesClient cheKubeClient = mock(KubernetesClient.class);
+    lenient().doReturn(cheKubeClient).when(cheClientFactory).create();
+
+    NonNamespaceOperation nonNamespaceOperation = mock(NonNamespaceOperation.class);
+    lenient().doReturn(nonNamespaceOperation).when(cheKubeClient).namespaces();
+
+    lenient()
+        .doAnswer(a -> a.getArgument(0))
+        .when(nonNamespaceOperation)
+        .createOrReplace(any(Namespace.class));
+
+    // when
+    kubernetesNamespace.prepare(true, Collections.emptyMap());
+
+    // then
+    assertTrue(
+        namespace.getMetadata().getLabels().entrySet().containsAll(existingLabels.entrySet()));
     verify(nonNamespaceOperation, never()).createOrReplace(any());
   }
 
