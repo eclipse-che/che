@@ -58,7 +58,6 @@ public class ProjectStateAfterRefreshTest {
   @Test
   public void checkRestoreStateOfProjectAfterRefreshTest() {
     theiaProjectTree.waitFilesTab();
-    theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectAreaOpened();
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
     theiaIde.waitAllNotificationsClosed();

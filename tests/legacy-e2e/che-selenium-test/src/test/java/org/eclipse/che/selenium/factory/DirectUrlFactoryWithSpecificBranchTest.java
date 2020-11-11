@@ -99,7 +99,6 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     theiaIde.waitAllNotificationsClosed();
 
     theiaProjectTree.waitFilesTab();
-    theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitItem(repositoryName);
     theiaIde.waitNotificationDisappearance(
         "Che Workspace: Finished importing projects.", UPDATING_PROJECT_TIMEOUT_SEC);
