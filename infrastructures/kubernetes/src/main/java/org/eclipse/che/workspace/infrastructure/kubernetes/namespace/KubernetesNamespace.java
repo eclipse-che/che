@@ -190,7 +190,12 @@ public class KubernetesNamespace {
                   .build());
     } catch (KubernetesClientException kce) {
       if (kce.getCode() == 403) {
-        LOG.debug("Can't label the namespace due to lack of permissions ¯\\_(ツ)_/¯");
+        LOG.warn(
+            "Can't label the namespace due to lack of permissions. Grant to `che` ServiceAccount "
+                + "cluster-wide permissions to `get` and `update` the `namespaces` "
+                + "(there should be `che-namespace-editor` ClusterRole prepared for this). "
+                + "Or consider disabling the feature with setting "
+                + "`che.infra.kubernetes.namespace.label=false`");
         return;
       }
       throw new InfrastructureException(kce);
