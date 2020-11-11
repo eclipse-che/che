@@ -67,7 +67,6 @@ public class RollingUpdateStrategyWithStartedWorkspaceTest {
   @Test
   public void startStopWorkspaceFunctionsShouldBeAvailableDuringRollingUpdate() throws Exception {
     theiaProjectTree.waitFilesTab();
-    theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectAreaOpened();
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
     theiaIde.waitAllNotificationsClosed();

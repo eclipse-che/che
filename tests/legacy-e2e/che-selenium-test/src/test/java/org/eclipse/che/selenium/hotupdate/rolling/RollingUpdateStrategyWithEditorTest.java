@@ -62,7 +62,6 @@ public class RollingUpdateStrategyWithEditorTest {
   @Test
   public void shouldUpdateMasterByRollingStrategyWithAccessibleEditorInProcess() throws Exception {
     theiaProjectTree.waitFilesTab();
-    theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectAreaOpened();
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
     theiaIde.waitAllNotificationsClosed();
