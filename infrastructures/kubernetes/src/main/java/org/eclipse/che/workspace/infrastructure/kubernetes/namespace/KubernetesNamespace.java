@@ -193,7 +193,7 @@ public class KubernetesNamespace {
         LOG.warn(
             "Can't label the namespace due to lack of permissions. Grant to `che` ServiceAccount "
                 + "cluster-wide permissions to `get` and `update` the `namespaces` "
-                + "(there should be `che-namespace-editor` ClusterRole prepared for this). "
+                + "(there might be `che-namespace-editor` ClusterRole prepared for this). "
                 + "Or consider disabling the feature with setting "
                 + "`che.infra.kubernetes.namespace.label=false`");
         return;
