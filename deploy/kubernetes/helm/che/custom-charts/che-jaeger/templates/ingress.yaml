@@ -28,7 +28,9 @@ spec:
   tls:
   - hosts:
     - {{ template "jaegerHost" . }}
+    {{- if .Values.global.tls.secretName }}
     secretName: {{ .Values.global.tls.secretName }}
+    {{- end -}}
 {{- end }}
   rules:
   - host: {{ template "jaegerHost" . }}

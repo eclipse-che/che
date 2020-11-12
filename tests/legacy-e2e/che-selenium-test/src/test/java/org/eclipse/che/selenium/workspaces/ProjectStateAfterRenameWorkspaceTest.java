@@ -65,7 +65,6 @@ public class ProjectStateAfterRenameWorkspaceTest {
   @Test
   public void checkProjectAfterRenameWs() {
     theiaProjectTree.waitFilesTab();
-    theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectAreaOpened();
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
     theiaIde.waitAllNotificationsClosed();

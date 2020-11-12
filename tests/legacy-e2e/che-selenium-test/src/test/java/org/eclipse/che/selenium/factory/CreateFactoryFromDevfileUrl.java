@@ -72,7 +72,6 @@ public class CreateFactoryFromDevfileUrl {
     theiaIde.waitAllNotificationsClosed();
 
     theiaProjectTree.waitFilesTab();
-    theiaProjectTree.clickOnFilesTab();
     theiaIde.waitNotificationDisappearance(
         "Che Workspace: Finished importing projects.", UPDATING_PROJECT_TIMEOUT_SEC);
     theiaIde.waitAllNotificationsClosed();
