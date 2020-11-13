@@ -8,13 +8,13 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { WorkspaceNameHandler} from '../..';
+import { WorkspaceNameHandler } from '../..';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 
-const stack : string = 'Java Spring Boot';
+const stack: string = 'Java Spring Boot';
 const workspaceSampleName: string = 'java-web-spring';
 const workspaceRootFolderName: string = 'src';
 const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/main/java/org/springframework/samples/petclinic`;
@@ -22,10 +22,10 @@ const tabTitle: string = 'PetClinicApplication.java';
 const codeNavigationClassName: string = 'SpringApplication.class';
 const buildTaskName: string = 'maven build';
 const runTaskName: string = 'run webapp';
-const runTaskExpectedDialogue: string = 'A process is now listening on port 8080.';
+const runTaskExpectedDialogue: string = 'Process 8080-tcp is now listening on port 8080. Open it ?';
 
 suite(`${stack} test`, async () => {
-    suite (`Create ${stack} workspace`, async () => {
+    suite(`Create ${stack} workspace`, async () => {
         workspaceHandling.createAndOpenWorkspace(stack);
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
@@ -41,7 +41,7 @@ suite(`${stack} test`, async () => {
     });
 
     suite('Validation of workspace execution', async () => {
-        codeExecutionTests.runTaskWithDialogShellAndOpenLink(runTaskName, runTaskExpectedDialogue, 30_000);
+        codeExecutionTests.runTaskWithNotification(runTaskName, runTaskExpectedDialogue, 30_000);
         codeExecutionTests.closeTerminal(runTaskName);
     });
 
@@ -52,15 +52,15 @@ suite(`${stack} test`, async () => {
         commonLsTests.suggestionInvoking(tabTitle, 32, 23, 'run(Class<?>');
     });
 
-    suite ('Stopping and deleting the workspace', async () => {
+    suite('Stopping and deleting the workspace', async () => {
         let workspaceName = 'not defined';
-        suiteSetup( async () => {
+        suiteSetup(async () => {
             workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
-        test (`Stop worksapce`, async () => {
+        test(`Stop worksapce`, async () => {
             await workspaceHandling.stopWorkspace(workspaceName);
         });
-        test (`Remove workspace`, async () => {
+        test(`Remove workspace`, async () => {
             await workspaceHandling.removeWorkspace(workspaceName);
         });
     });
