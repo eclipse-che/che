@@ -163,6 +163,9 @@ public class KubernetesNamespace {
    */
   protected void label(Namespace namespace, Map<String, String> ensureLabels)
       throws InfrastructureException {
+    if (ensureLabels.isEmpty()) {
+      return;
+    }
     Map<String, String> currentLabels = namespace.getMetadata().getLabels();
     Map<String, String> newLabels =
         currentLabels != null ? new HashMap<>(currentLabels) : new HashMap<>();
@@ -187,7 +190,13 @@ public class KubernetesNamespace {
                   .build());
     } catch (KubernetesClientException kce) {
       if (kce.getCode() == 403) {
-        LOG.debug("Can't label the namespace due to lack of permissions ¯\\_(ツ)_/¯");
+        LOG.warn(
+            "Can't label the namespace due to lack of permissions. Grant cluster-wide permissions "
+                + "to `get` and `update` the `namespaces` to the `che` service account "
+                + "(Che operator might have already prepared a cluster role called "
+                + "`che-namespace-editor` for this, depending on its configuration). "
+                + "Alternatively, consider disabling the feature by setting "
+                + "`che.infra.kubernetes.namepsace.label` to `false`.");
         return;
       }
       throw new InfrastructureException(kce);
