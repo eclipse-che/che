@@ -55,13 +55,13 @@ export class UpdateAccountInformationPage {
         await this.driverHelper.enterValue(By.id('password'), password, timeout);
     }
 
-    async clickLogInButton(timeout: number){
+    async clickLogInButton(timeout: number) {
         Logger.debug('UpdateAccountInformationPage.clickLogInButton');
 
         await this.driverHelper.waitAndClick(By.id('kc-login'), timeout);
     }
 
-    async clickToAllowSelectedPermissionsButton(timeout: number){
+    async clickToAllowSelectedPermissionsButton(timeout: number) {
         Logger.debug('UpdateAccountInformationPage.clickToAllowSelectedPermissionsButton');
 
         await this.driverHelper.waitAndClick(By.xpath('//input[@name=\'approve\']'), timeout);

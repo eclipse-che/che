@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { TestConstants, DriverHelper, CLASSES, ICheLoginPage, TYPES } from '../..';
+import { TestConstants, DriverHelper, CLASSES, TYPES } from '../..';
 import { e2eContainer } from '../../inversify.config';
 import { IOcpLoginPage } from '../../pageobjects/login/IOcpLoginPage';
 import { UpdateAccountInformationPage } from '../../pageobjects/login/UpdateAccountInformationPage';

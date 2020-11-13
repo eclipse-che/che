@@ -46,7 +46,7 @@ suite(`${workspaceStack} test`, async () => {
         codeExecutionHelper.closeTerminal(taskPackageNative);
     });
     suite('Start Quarkus Native application', async () => {
-        codeExecutionHelper.runTaskInputText(taskStartNative, 'Test User' + Key.ENTER, 90_000);
+        codeExecutionHelper.runTaskInputText(taskStartNative, 'Enter your name', 'Test User' + Key.ENTER, 90_000);
     });
 
     suite(`'Language server validation'`, async () => {
