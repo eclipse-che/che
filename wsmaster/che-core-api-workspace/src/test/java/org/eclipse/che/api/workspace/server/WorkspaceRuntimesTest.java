@@ -40,8 +40,10 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertTrue;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,6 +55,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import javax.ws.rs.core.Response;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -1068,6 +1071,12 @@ public class WorkspaceRuntimesTest {
 
     @Override
     public RuntimeContext internalPrepare(RuntimeIdentity id, InternalEnvironment environment) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Response sendDirectInfrastructureRequest(
+        String httpMethod, URI relativeUri, JsonNode body) {
       throw new UnsupportedOperationException();
     }
   }

@@ -164,6 +164,7 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
     bind(org.eclipse.che.api.devfile.server.DevfileService.class);
+    bind(org.eclipse.che.api.infraproxy.server.InfrastructureApiService.class);
     bind(org.eclipse.che.api.devfile.server.UserDevfileEntityProvider.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
 

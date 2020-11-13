@@ -45,7 +45,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 public class KubernetesClientFactory {
 
   /** {@link OkHttpClient} instance shared by all Kubernetes clients. */
-  private OkHttpClient httpClient;
+  private final OkHttpClient httpClient;
 
   /**
    * Default Kubernetes {@link Config} that will be the base configuration to create per-workspace
@@ -129,11 +129,15 @@ public class KubernetesClientFactory {
     return httpClient;
   }
 
+  public OkHttpClient getAuthenticatedHttpClient() throws InfrastructureException {
+    return getHttpClient();
+  }
+
   /**
    * Retrieves the default Kubernetes {@link Config} that will be the base configuration to create
    * per-workspace configurations.
    */
-  protected Config getDefaultConfig() {
+  public Config getDefaultConfig() {
     return defaultConfig;
   }
 

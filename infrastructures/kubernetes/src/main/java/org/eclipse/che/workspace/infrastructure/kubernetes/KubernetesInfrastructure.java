@@ -13,10 +13,13 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static java.lang.String.format;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableSet;
+import java.net.URI;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.core.Response;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.NoEnvironmentFactory.NoEnvInternalEnvironment;
@@ -27,6 +30,7 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.Constants;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -41,6 +45,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
   private final KubernetesRuntimeContextFactory runtimeContextFactory;
   private final KubernetesRuntimeStateCache runtimeStatusesCache;
   private final KubernetesNamespaceFactory namespaceFactory;
+  private final KubernetesClientFactory kubernetesClientFactory;
 
   @Inject
   public KubernetesInfrastructure(
@@ -48,7 +53,8 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
       KubernetesRuntimeContextFactory runtimeContextFactory,
       Set<InternalEnvironmentProvisioner> internalEnvProvisioners,
       KubernetesRuntimeStateCache runtimeStatusesCache,
-      KubernetesNamespaceFactory namespaceFactory) {
+      KubernetesNamespaceFactory namespaceFactory,
+      KubernetesClientFactory kubernetesClientFactory) {
     super(
         NAME,
         ImmutableSet.of(KubernetesEnvironment.TYPE, Constants.NO_ENVIRONMENT_RECIPE_TYPE),
@@ -57,6 +63,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
     this.runtimeContextFactory = runtimeContextFactory;
     this.runtimeStatusesCache = runtimeStatusesCache;
     this.namespaceFactory = namespaceFactory;
+    this.kubernetesClientFactory = kubernetesClientFactory;
   }
 
   @Override
@@ -79,6 +86,17 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
   @Override
   public boolean isNamespaceValid(String name) {
     return NamespaceNameValidator.isValid(name);
+  }
+
+  @Override
+  public Response sendDirectInfrastructureRequest(
+      String httpMethod, URI relativeUri, @Nullable JsonNode body) throws InfrastructureException {
+    return DirectKubernetesAPIAccessHelper.call(
+        kubernetesClientFactory.getDefaultConfig().getMasterUrl(),
+        kubernetesClientFactory.getAuthenticatedHttpClient(),
+        httpMethod,
+        relativeUri,
+        body);
   }
 
   @Override
