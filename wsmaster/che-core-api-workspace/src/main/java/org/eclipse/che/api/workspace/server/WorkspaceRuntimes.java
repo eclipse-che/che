@@ -484,7 +484,7 @@ public class WorkspaceRuntimes {
           workspace.getId(),
           sessionUserNameOr("undefined"));
 
-      publishWorkspaceStatusEvent(workspaceId, STARTING, STOPPED, null, options);
+      publishWorkspaceStatusEvent(workspaceId, STARTING, STOPPED, null, true, options);
       return CompletableFuture.runAsync(
           ThreadLocalPropagateContext.wrap(new StartRuntimeTask(workspace, options, runtime)),
           sharedPool.getExecutor());
@@ -544,7 +544,8 @@ public class WorkspaceRuntimes {
         workspace.getName(),
         workspace.getId(),
         stoppedBy);
-    publishWorkspaceStatusEvent(workspaceId, STOPPING, status, options.get(WORKSPACE_STOP_REASON));
+    publishWorkspaceStatusEvent(
+        workspaceId, STOPPING, status, options.get(WORKSPACE_STOP_REASON), true);
     return CompletableFuture.runAsync(
         ThreadLocalPropagateContext.wrap(new StopRuntimeTask(workspace, options, stoppedBy)),
         sharedPool.getExecutor());
@@ -784,7 +785,8 @@ public class WorkspaceRuntimes {
           identity.getWorkspaceId(),
           STOPPED,
           STOPPING,
-          "Workspace is stopped. Reason: " + x.getMessage());
+          "Workspace is stopped. Reason: " + x.getMessage(),
+          false);
       throw new ServerException(
           format(
               "Couldn't recover runtime '%s:%s'. Error: %s",
@@ -830,8 +832,13 @@ public class WorkspaceRuntimes {
   }
 
   private void publishWorkspaceStatusEvent(
-      String workspaceId, WorkspaceStatus status, WorkspaceStatus previous, String errorMsg) {
-    publishWorkspaceStatusEvent(workspaceId, status, previous, errorMsg, emptyMap());
+      String workspaceId,
+      WorkspaceStatus status,
+      WorkspaceStatus previous,
+      String errorMsg,
+      boolean isInitiatedByUser) {
+    publishWorkspaceStatusEvent(
+        workspaceId, status, previous, errorMsg, isInitiatedByUser, emptyMap());
   }
 
   private void publishWorkspaceStatusEvent(
@@ -839,12 +846,14 @@ public class WorkspaceRuntimes {
       WorkspaceStatus status,
       WorkspaceStatus previous,
       String errorMsg,
+      boolean isInitiatedByUser,
       Map<String, String> options) {
     eventService.publish(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withWorkspaceId(workspaceId)
             .withPrevStatus(previous)
             .withError(errorMsg)
+            .withInitiatedByUser(isInitiatedByUser)
             .withStatus(status)
             .withOptions(options));
   }
@@ -968,7 +977,7 @@ public class WorkspaceRuntimes {
             workspace.getName(),
             workspaceId,
             sessionUserNameOr("undefined"));
-        publishWorkspaceStatusEvent(workspaceId, RUNNING, STARTING, null);
+        publishWorkspaceStatusEvent(workspaceId, RUNNING, STARTING, null, true);
       } catch (InfrastructureException e) {
         try (Unlocker ignored = lockService.writeLock(workspaceId)) {
           runtimes.remove(workspaceId);
@@ -978,9 +987,11 @@ public class WorkspaceRuntimes {
         probeScheduler.cancel(workspaceId);
 
         String failureCause = "failed";
-        if (e instanceof RuntimeStartInterruptedException) {
+        boolean isWorkspaceStartInterrupted = e instanceof RuntimeStartInterruptedException;
+        if (isWorkspaceStartInterrupted) {
           failureCause = "interrupted";
         }
+
         LOG.info(
             "Workspace '{}:{}' with id '{}' start {}",
             workspace.getNamespace(),
@@ -993,7 +1004,8 @@ public class WorkspaceRuntimes {
         if (e instanceof InternalInfrastructureException) {
           LOG.error(e.getLocalizedMessage(), e);
         }
-        publishWorkspaceStatusEvent(workspaceId, STOPPED, STARTING, e.getMessage());
+        publishWorkspaceStatusEvent(
+            workspaceId, STOPPED, STARTING, e.getMessage(), isWorkspaceStartInterrupted);
         throw new RuntimeException(e);
       }
     }
@@ -1033,7 +1045,7 @@ public class WorkspaceRuntimes {
             workspace.getName(),
             workspaceId,
             stoppedBy);
-        publishWorkspaceStatusEvent(workspaceId, STOPPED, STOPPING, null);
+        publishWorkspaceStatusEvent(workspaceId, STOPPED, STOPPING, null, true);
       } catch (ServerException | InfrastructureException e) {
         // remove before firing an event to have consistency between state and the event
         try (Unlocker ignored = lockService.writeLock(workspaceId)) {
@@ -1064,7 +1076,8 @@ public class WorkspaceRuntimes {
             workspaceId,
             STOPPED,
             STOPPING,
-            "Error occurs on workspace runtime stop. Error: " + e.getMessage());
+            "Error occurs on workspace runtime stop. Error: " + e.getMessage(),
+            false);
         throw new RuntimeException(e);
       }
     }
@@ -1101,7 +1114,8 @@ public class WorkspaceRuntimes {
           workspaceId,
           STOPPING,
           previousStatus,
-          "Workspace is going to be STOPPED. Reason: " + event.getReason());
+          "Workspace is going to be STOPPED. Reason: " + event.getReason(),
+          false);
     }
   }
 
@@ -1139,7 +1153,8 @@ public class WorkspaceRuntimes {
           workspaceId,
           STOPPED,
           previousStatus,
-          "Workspace is stopped. Reason: " + event.getReason());
+          "Workspace is stopped. Reason: " + event.getReason(),
+          false);
       setAbnormalStopAttributes(workspaceId, event.getReason());
     }
 

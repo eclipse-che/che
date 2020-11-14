@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.openshift.project;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -35,6 +36,7 @@ import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.impls.KubernetesNamespaceMetaImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -56,6 +58,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   private static final Logger LOG = LoggerFactory.getLogger(OpenShiftProjectFactory.class);
 
   private final OpenShiftClientFactory clientFactory;
+  private final CheServerKubernetesClientFactory cheClientFactory;
   private final OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner;
 
   private final String oAuthIdentityProvider;
@@ -69,9 +72,11 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
       @Named("che.infra.kubernetes.namespace.allow_user_defined")
           boolean allowUserDefinedNamespaces,
       @Named("che.infra.kubernetes.namespace.creation_allowed") boolean namespaceCreationAllowed,
+      @Named("che.infra.kubernetes.namespace.label") boolean labelProjects,
       @Named("che.infra.kubernetes.namespace.labels") String projectLabels,
       @Named("che.infra.kubernetes.namespace.annotations") String projectAnnotations,
       OpenShiftClientFactory clientFactory,
+      CheServerKubernetesClientFactory cheClientFactory,
       OpenShiftClientConfigFactory clientConfigFactory,
       OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner,
       UserManager userManager,
@@ -86,9 +91,11 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
         defaultNamespaceName,
         allowUserDefinedNamespaces,
         namespaceCreationAllowed,
+        labelProjects,
         projectLabels,
         projectAnnotations,
         clientFactory,
+        cheClientFactory,
         userManager,
         preferenceManager,
         sharedPool);
@@ -99,6 +106,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
               + "OAuth to personalize credentials that will be used for cluster access.");
     }
     this.clientFactory = clientFactory;
+    this.cheClientFactory = cheClientFactory;
     this.stopWorkspaceRoleProvisioner = stopWorkspaceRoleProvisioner;
     this.oAuthIdentityProvider = oAuthIdentityProvider;
   }
@@ -106,7 +114,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   public OpenShiftProject getOrCreate(RuntimeIdentity identity) throws InfrastructureException {
     OpenShiftProject osProject = get(identity);
 
-    osProject.prepare(canCreateNamespace(identity));
+    osProject.prepare(canCreateNamespace(identity), labelNamespaces ? namespaceLabels : emptyMap());
 
     if (!isNullOrEmpty(getServiceAccountName())) {
       OpenShiftWorkspaceServiceAccount osWorkspaceServiceAccount =
@@ -156,7 +164,8 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
 
   @VisibleForTesting
   OpenShiftProject doCreateProjectAccess(String workspaceId, String name) {
-    return new OpenShiftProject(clientFactory, sharedPool.getExecutor(), name, workspaceId);
+    return new OpenShiftProject(
+        clientFactory, cheClientFactory, sharedPool.getExecutor(), name, workspaceId);
   }
 
   @VisibleForTesting

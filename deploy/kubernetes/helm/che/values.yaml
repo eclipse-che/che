@@ -32,6 +32,8 @@ global:
   #  default (if empty) is true
   #cheDedicatedKeycloak: false
   ingressDomain: 192.168.99.100.nip.io
+  ingress:
+    class: "nginx"
   # See --annotations-prefix flag (https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/cli-arguments.md)
   ingressAnnotationsPrefix: "nginx."
   # options: default-host, single-host, multi-host
@@ -49,6 +51,7 @@ global:
     ## Secret name that will be used in Che Ingresses for setting TLS up
     ## Note the helm chart does not create this secret and
     ## it MUST be pre-created in the configured Che namespace
+    ## If the value is empty, then the certificate from default ingress controller will be used.
     secretName: che-tls
 
     ## If self-signed certificate flag is enabled

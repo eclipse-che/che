@@ -19,9 +19,11 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
@@ -49,6 +51,7 @@ public class OpenShiftProject extends KubernetesNamespace {
   @VisibleForTesting
   OpenShiftProject(
       OpenShiftClientFactory clientFactory,
+      KubernetesClientFactory cheClientFactory,
       String workspaceId,
       String name,
       KubernetesDeployments deployments,
@@ -60,6 +63,7 @@ public class OpenShiftProject extends KubernetesNamespace {
       KubernetesConfigsMaps configMaps) {
     super(
         clientFactory,
+        cheClientFactory,
         workspaceId,
         name,
         deployments,
@@ -73,8 +77,12 @@ public class OpenShiftProject extends KubernetesNamespace {
   }
 
   public OpenShiftProject(
-      OpenShiftClientFactory clientFactory, Executor executor, String name, String workspaceId) {
-    super(clientFactory, executor, name, workspaceId);
+      OpenShiftClientFactory clientFactory,
+      KubernetesClientFactory cheClientFactory,
+      Executor executor,
+      String name,
+      String workspaceId) {
+    super(clientFactory, cheClientFactory, executor, name, workspaceId);
     this.clientFactory = clientFactory;
     this.routes = new OpenShiftRoutes(name, workspaceId, clientFactory);
   }
@@ -89,7 +97,7 @@ public class OpenShiftProject extends KubernetesNamespace {
    * @throws InfrastructureException if any exception occurs during project preparation or if the
    *     project doesn't exist and {@code canCreate} is {@code false}.
    */
-  void prepare(boolean canCreate) throws InfrastructureException {
+  void prepare(boolean canCreate, Map<String, String> labels) throws InfrastructureException {
     String workspaceId = getWorkspaceId();
     String projectName = getName();
 
@@ -109,6 +117,7 @@ public class OpenShiftProject extends KubernetesNamespace {
       create(projectName, osClient);
       waitDefaultServiceAccount(projectName, kubeClient);
     }
+    label(osClient.namespaces().withName(projectName).get(), labels);
   }
 
   /**

@@ -21,8 +21,7 @@ const taskSetUpVenv: string = 'set up venv';
 const taskInstallDependencies: string = 'install dependencies';
 const taskMigrate: string = 'migrate';
 const taskRunServer: string = 'run server';
-const taskExpectedDialogText: string = 'A process is now listening on port 7000';
-const taskCustomUrlSubpath: string = '/api/';
+const taskExpectedDialogText: string = 'Process django is now listening on port 7000. Open it ?';
 
 suite(`${workspaceStack} test`, async () => {
 
@@ -47,7 +46,7 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite('Run django server', async () => {
-        codeExecutionHelper.runTaskWithDialogShellDjangoWorkaround(taskRunServer, taskExpectedDialogText, taskCustomUrlSubpath, 30_000);
+        codeExecutionHelper.runTaskWithNotification(taskRunServer, taskExpectedDialogText, 30_000);
     });
 
     suite ('Stopping and deleting the workspace', async () => {

@@ -40,7 +40,7 @@ pipeline {
                 description: 'Tag of Che server image')
 
         booleanParam(name: 'buildChe',
-                defaultValue: true,
+                defaultValue: false,
                 description: 'Should build Che server')
 
         string(name: 'e2eTestToRun',
@@ -77,14 +77,13 @@ pipeline {
     stages {
         stage("Setup environment") {
             steps {
-                script {
+                script { 
                     if (cheImageTag == null || cheImageTag == '') {
                         mutableCheImageTag = ghprbPullId
                     } else {
                         mutableCheImageTag = cheImageTag
                     }
-                    sh "sudo yum install -y glibc.i686 libfreetype.so.6 libfontconfig.so.1 libstdc++-devel.i686"
-                }
+               }
             }
         }
 
@@ -155,14 +154,15 @@ pipeline {
 
                 stage("Build Che including upstream projects") {
                     when {
-                        expression { return buildChe.toString() == 'true' }
+                        expression { 
+                            return buildChe.toString() == 'true' || (params['ghprbCommentBody'] && (params.ghprbCommentBody == 'null' || params.ghprbCommentBody.contains("--rebuild")))
+                        }
                     }
 
                     steps {
-                        echo "buildChe = $params.buildChe"
-                        echo "createTestWorkspace = $params.createTestWorkspace"
-
                         echo "Build branch ${ghprbSourceBranch} of upstream projects"
+                        sh "sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686"
+
                         sh """
                             project_list=(
                                 eclipse/che-parent
@@ -190,6 +190,12 @@ pipeline {
                     steps {
                         script {
                             retry(2) {
+                                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
+                                    sh """
+                                        docker login -u maxura -p ${maxura_docker_password}
+                                    """
+                                }
+
                                 sh """
                                     docker pull quay.io/eclipse/che-e2e:$cheE2eImageTag
                                     docker pull quay.io/eclipse/happy-path:nightly
@@ -203,18 +209,17 @@ pipeline {
 
         stage("Build and push che-server image") {
             when {
-                expression { return buildChe.toString() == 'true' }
+                expression {
+                    return buildChe.toString() == 'true' || (params['ghprbCommentBody'] && (params.ghprbCommentBody == 'null' || params.ghprbCommentBody.contains("--rebuild"))) 
+                }
             }
 
             steps {
-                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
-                    sh """
-                        ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
-                        docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
-                        docker login -u maxura -p ${maxura_docker_password}
-                        docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
-                    """
-                }
+                sh """
+                    ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
+                    docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
+                    docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
+                """
             }
         }
 

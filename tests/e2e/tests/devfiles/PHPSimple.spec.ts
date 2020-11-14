@@ -23,7 +23,6 @@ const tabTitle: string = 'index.php';
 // const codeNavigationClassName: string = 'RouterImpl.class';
 const depTaskName: string = 'Configure Apache Web Server DocumentRoot';
 const buildTaskName: string = 'Start Apache Web Server';
-const buildTaskLinkExpectedText: string = 'A process is now listening on port 8080.';
 const stack: string = 'PHP Simple';
 
 suite(`${stack} test`, async () => {
@@ -42,15 +41,15 @@ suite(`${stack} test`, async () => {
         codeExecutionTests.runTask(depTaskName, 30_000);
     });
 
+    suite('Validation of project build', async () => {
+        codeExecutionTests.runTask(buildTaskName, 30_000);
+    });
+
     suite('Language server validation', async () => {
         commonLsTests.errorHighlighting(tabTitle, `error_text;`, 14);
         commonLsTests.suggestionInvoking(tabTitle, 14, 26, '$test');
         commonLsTests.autocomplete(tabTitle, 15, 5, 'phpinfo');
         // commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName); // there is no codenavigation in the php simple stack (no object oriented code)
-    });
-
-    suite('Validation of project build', async () => {
-        codeExecutionTests.runTaskWithDialogShellAndOpenLink(buildTaskName, buildTaskLinkExpectedText, 30_000);
     });
 
     suite ('Stopping and deleting the workspace', async () => {

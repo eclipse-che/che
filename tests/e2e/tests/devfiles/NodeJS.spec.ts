@@ -22,7 +22,7 @@ const fileName: string = `app.js`;
 
 const taskDownloadDependencies: string = 'download dependencies';
 const taskRunWebApp: string = 'run the web app';
-const taskExpectedDialogText: string = 'A process is now listening on port 3000';
+const taskExpectedDialogText: string = 'Process nodejs is now listening on port 3000. Open it ?';
 
 suite(`${workspaceStack} test`, async () => {
 
@@ -42,7 +42,7 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite('Run nodejs application', async () => {
-        codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskRunWebApp, taskExpectedDialogText, 30_000);
+        codeExecutionHelper.runTaskWithNotification(taskRunWebApp, taskExpectedDialogText, 30_000);
     });
 
     suite(`'Language server validation'`, async () => {
