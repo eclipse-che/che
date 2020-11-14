@@ -66,7 +66,7 @@ If you are interested in fixing issues and contributing directly to the code bas
 
 #### Extending Eclipse Che
 - [Add a new language support. (to be provided soon)](https://www.eclipse.org/che/docs/che-7/adding-support-for-a-new-language/)
-- [Package your favorite VSCode extensions and make them available in Che.](hhttps://www.eclipse.org/che/docs/che-7/end-user-guide/publishing-metadata-for-a-vs-code-extension/)
+- [Package your favorite VSCode extensions and make them available in Che.](https://www.eclipse.org/che/docs/che-7/end-user-guide/publishing-metadata-for-a-vs-code-extension/)
 - [Write your own VSCode extension that runs on a dedicated side car container.](https://www.eclipse.org/che/docs/che-7/what-is-a-che-theia-plug-in/)
 - [Build and package your custom Che-Theia editor with your extensions and plugins.](https://www.eclipse.org/che/docs/che-7/using-alternative-ides-in-che/)
 
