@@ -24,6 +24,9 @@ import javax.persistence.EntityManager;
 import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.account.spi.jpa.JpaAccountDao;
+import org.eclipse.che.api.devfile.server.jpa.JpaUserDevfileDao;
+import org.eclipse.che.api.devfile.server.model.impl.UserDevfileImpl;
+import org.eclipse.che.api.devfile.server.spi.UserDevfileDao;
 import org.eclipse.che.api.ssh.server.jpa.JpaSshDao;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
@@ -130,6 +133,7 @@ public class PostgreSqlTckModule extends TckModule {
                 WorkspaceActivity.class,
                 VolumeImpl.class,
                 // devfile
+                UserDevfileImpl.class,
                 ActionImpl.class,
                 org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl.class,
                 ComponentImpl.class,
@@ -191,6 +195,9 @@ public class PostgreSqlTckModule extends TckModule {
     bind(WorkspaceActivityDao.class).to(JpaWorkspaceActivityDao.class);
     bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new WorkspaceRepository());
 
+    bind(UserDevfileDao.class).to(JpaUserDevfileDao.class);
+    bind(new TypeLiteral<TckRepository<UserDevfileImpl>>() {})
+        .toInstance(new JpaTckRepository<>(UserDevfileImpl.class));
     // k8s runtimes
     bind(new TypeLiteral<TckRepository<KubernetesRuntimeState>>() {})
         .toInstance(new JpaTckRepository<>(KubernetesRuntimeState.class));

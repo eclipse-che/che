@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
@@ -22,6 +23,7 @@ import static org.eclipse.che.workspace.infrastructure.openshift.Constants.PROJE
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -33,7 +35,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.ImmutableMap;
+import io.fabric8.kubernetes.api.model.Status;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watch;
+import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.api.model.DoneableProject;
@@ -47,13 +53,18 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.NamespaceResolutionContext;
+import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.inject.ConfigurationException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
@@ -77,12 +88,18 @@ public class OpenShiftProjectFactoryTest {
   private static final String USER_NAME = "username";
   private static final String NO_OAUTH_IDENTITY_PROVIDER = null;
   private static final String OAUTH_IDENTITY_PROVIDER = "openshift-v4";
+  private static final String NAMESPACE_LABEL_NAME = "component";
+  private static final String NAMESPACE_LABELS = NAMESPACE_LABEL_NAME + "=workspace";
+  private static final String NAMESPACE_ANNOTATION_NAME = "owner";
+  private static final String NAMESPACE_ANNOTATIONS = NAMESPACE_ANNOTATION_NAME + "=<username>";
 
   @Mock private OpenShiftClientConfigFactory configFactory;
   @Mock private OpenShiftClientFactory clientFactory;
+  @Mock private CheServerKubernetesClientFactory cheClientFactory;
   @Mock private OpenShiftStopWorkspaceRoleProvisioner stopWorkspaceRoleProvisioner;
   @Mock private WorkspaceManager workspaceManager;
   @Mock private UserManager userManager;
+  @Mock private PreferenceManager preferenceManager;
   @Mock private KubernetesSharedPool pool;
 
   @Mock
@@ -96,6 +113,12 @@ public class OpenShiftProjectFactoryTest {
 
   private OpenShiftProjectFactory projectFactory;
 
+  @Mock
+  private FilterWatchListDeletable<Project, ProjectList, Boolean, Watch, Watcher<Project>>
+      projectListResource;
+
+  @Mock private ProjectList projectList;
+
   @BeforeMethod
   public void setUp() throws Exception {
     lenient().when(clientFactory.createOC()).thenReturn(osClient);
@@ -108,9 +131,15 @@ public class OpenShiftProjectFactoryTest {
     lenient().when(projectOperation.withName(any())).thenReturn(projectResource);
     lenient().when(projectResource.get()).thenReturn(mock(Project.class));
 
+    lenient().when(projectOperation.withLabels(any())).thenReturn(projectListResource);
+    lenient().when(projectListResource.list()).thenReturn(projectList);
+    lenient().when(projectList.getItems()).thenReturn(emptyList());
+
     lenient()
         .when(userManager.getById(USER_ID))
         .thenReturn(new UserImpl(USER_ID, "test@mail.com", USER_NAME));
+
+    EnvironmentContext.setCurrent(new EnvironmentContext());
   }
 
   @Test
@@ -123,10 +152,16 @@ public class OpenShiftProjectFactoryTest {
             null,
             "defaultNs",
             false,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -144,10 +179,16 @@ public class OpenShiftProjectFactoryTest {
             null,
             "defaultNs",
             true,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -168,10 +209,16 @@ public class OpenShiftProjectFactoryTest {
             null,
             "defaultNs",
             false,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -191,12 +238,135 @@ public class OpenShiftProjectFactoryTest {
             null,
             null,
             false,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
+  }
+
+  @Test
+  public void shouldReturnPreparedNamespacesWhenFound() throws InfrastructureException {
+    // given
+    List<Project> projects =
+        Arrays.asList(
+            createProject(
+                "ns1", "project1", "desc1", "Active", Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe")),
+            createProject(
+                "ns3",
+                "project3",
+                "desc3",
+                "Active",
+                Map.of(NAMESPACE_ANNOTATION_NAME, "some_other_user")),
+            createProject(
+                "ns2", "project2", "desc2", "Active", Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe")));
+    doReturn(projects).when(projectList).getItems();
+
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "predefined",
+            "",
+            "",
+            "che-default",
+            false,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
+            clientFactory,
+            cheClientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            preferenceManager,
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
+    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("jondoe", "123", null, false));
+
+    // when
+    List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
+
+    // then
+    assertEquals(availableNamespaces.size(), 2);
+    assertEquals(availableNamespaces.get(0).getName(), "ns1");
+    assertEquals(availableNamespaces.get(1).getName(), "ns2");
+  }
+
+  @Test
+  public void shouldNotThrowAnExceptionWhenNotAllowedToListNamespaces() throws Exception {
+    // given
+    Project p = createProject("ns1", "project1", "desc1", "Active");
+    doThrow(new KubernetesClientException("Not allowed.", 403, new Status()))
+        .when(projectList)
+        .getItems();
+    prepareNamespaceToBeFoundByName("che-default", p);
+
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "predefined",
+            "",
+            "",
+            "che-default",
+            false,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
+            clientFactory,
+            cheClientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            preferenceManager,
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
+    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("jondoe", "123", null, false));
+
+    // when
+    List<KubernetesNamespaceMeta> availableNamespaces = projectFactory.list();
+
+    // then
+    assertEquals(availableNamespaces.get(0).getName(), "ns1");
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void throwAnExceptionWhenErrorListingNamespaces() throws Exception {
+    // given
+    doThrow(new KubernetesClientException("Not allowed.", 500, new Status()))
+        .when(projectList)
+        .getItems();
+
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "predefined",
+            "",
+            "",
+            "che-default",
+            false,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
+            clientFactory,
+            cheClientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            preferenceManager,
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
+
+    // when
+    projectFactory.list();
+
+    // then throw
   }
 
   @Test
@@ -225,10 +395,16 @@ public class OpenShiftProjectFactoryTest {
             null,
             "che-default",
             false,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -258,10 +434,16 @@ public class OpenShiftProjectFactoryTest {
             null,
             "che-default",
             false,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -291,10 +473,16 @@ public class OpenShiftProjectFactoryTest {
             null,
             "che-default",
             false,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -316,10 +504,16 @@ public class OpenShiftProjectFactoryTest {
             null,
             "default",
             true,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -357,10 +551,16 @@ public class OpenShiftProjectFactoryTest {
             null,
             "default",
             true,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -393,10 +593,16 @@ public class OpenShiftProjectFactoryTest {
             null,
             "default-ns",
             true,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
+            cheClientFactory,
             configFactory,
             stopWorkspaceRoleProvisioner,
             userManager,
+            preferenceManager,
             pool,
             NO_OAUTH_IDENTITY_PROVIDER);
 
@@ -421,10 +627,16 @@ public class OpenShiftProjectFactoryTest {
                 null,
                 "new-default",
                 false,
+                true,
+                true,
+                NAMESPACE_LABELS,
+                NAMESPACE_ANNOTATIONS,
                 clientFactory,
+                cheClientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
                 userManager,
+                preferenceManager,
                 pool,
                 NO_OAUTH_IDENTITY_PROVIDER));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
@@ -438,7 +650,7 @@ public class OpenShiftProjectFactoryTest {
     // then
     assertEquals(toReturnProject, project);
     verify(projectFactory, never()).doCreateServiceAccount(any(), any());
-    verify(toReturnProject).prepare(eq(false));
+    verify(toReturnProject).prepare(eq(false), any());
   }
 
   @Test
@@ -453,10 +665,16 @@ public class OpenShiftProjectFactoryTest {
                 null,
                 "<workspaceid>",
                 false,
+                true,
+                true,
+                NAMESPACE_LABELS,
+                NAMESPACE_ANNOTATIONS,
                 clientFactory,
+                cheClientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
                 userManager,
+                preferenceManager,
                 pool,
                 NO_OAUTH_IDENTITY_PROVIDER));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
@@ -487,10 +705,16 @@ public class OpenShiftProjectFactoryTest {
                 null,
                 "<workspaceid>",
                 false,
+                true,
+                true,
+                NAMESPACE_LABELS,
+                NAMESPACE_ANNOTATIONS,
                 clientFactory,
+                cheClientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
                 userManager,
+                preferenceManager,
                 pool,
                 OAUTH_IDENTITY_PROVIDER));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
@@ -523,10 +747,16 @@ public class OpenShiftProjectFactoryTest {
                 null,
                 "<workspaceid>",
                 false,
+                true,
+                true,
+                NAMESPACE_LABELS,
+                NAMESPACE_ANNOTATIONS,
                 clientFactory,
+                cheClientFactory,
                 configFactory,
                 stopWorkspaceRoleProvisioner,
                 userManager,
+                preferenceManager,
                 pool,
                 NO_OAUTH_IDENTITY_PROVIDER));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
@@ -546,6 +776,82 @@ public class OpenShiftProjectFactoryTest {
     verify(projectFactory).doCreateServiceAccount("workspace123", "workspace123");
     verify(serviceAccount).prepare();
     verify(stopWorkspaceRoleProvisioner, times(0)).provision("workspace123");
+  }
+
+  @Test
+  public void testEvalNamespaceNameWhenPreparedNamespacesFound() throws InfrastructureException {
+    List<Project> projects =
+        Arrays.asList(
+            createProject(
+                "ns1", "project1", "desc1", "Active", Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe")),
+            createProject(
+                "ns3",
+                "project3",
+                "desc3",
+                "Active",
+                Map.of(NAMESPACE_ANNOTATION_NAME, "some_other_user")),
+            createProject(
+                "ns2", "project2", "desc2", "Active", Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe")));
+    doReturn(projects).when(projectList).getItems();
+
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "legacy",
+            "",
+            "",
+            "defaultNs",
+            false,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
+            clientFactory,
+            cheClientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            preferenceManager,
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
+
+    String namespace =
+        projectFactory.evaluateNamespaceName(
+            new NamespaceResolutionContext("workspace123", "user123", "jondoe"));
+
+    assertEquals(namespace, "ns1");
+  }
+
+  @Test
+  public void testUsernamePlaceholderInLabelsIsNotEvaluated() throws InfrastructureException {
+    List<Project> projects =
+        singletonList(
+            createProject(
+                "ns1", "project1", "desc1", "Active", Map.of(NAMESPACE_ANNOTATION_NAME, "jondoe")));
+    doReturn(projects).when(projectList).getItems();
+
+    projectFactory =
+        new OpenShiftProjectFactory(
+            "predefined",
+            "",
+            null,
+            "che-default",
+            false,
+            true,
+            true,
+            "try_placeholder_here=<username>",
+            NAMESPACE_ANNOTATIONS,
+            clientFactory,
+            cheClientFactory,
+            configFactory,
+            stopWorkspaceRoleProvisioner,
+            userManager,
+            preferenceManager,
+            pool,
+            NO_OAUTH_IDENTITY_PROVIDER);
+    EnvironmentContext.getCurrent().setSubject(new SubjectImpl("jondoe", "123", null, false));
+    projectFactory.list();
+
+    verify(projectOperation).withLabels(Map.of("try_placeholder_here", "<username>"));
   }
 
   private void prepareNamespaceToBeFoundByName(String name, Project project) throws Exception {
@@ -578,12 +884,24 @@ public class OpenShiftProjectFactoryTest {
   }
 
   private Project createProject(String name, String displayName, String description, String phase) {
+    return createProject(name, displayName, description, phase, emptyMap());
+  }
+
+  private Project createProject(
+      String name,
+      String displayName,
+      String description,
+      String phase,
+      Map<String, String> extraAnnotations) {
     Map<String, String> annotations = new HashMap<>();
     if (displayName != null) {
       annotations.put(PROJECT_DISPLAY_NAME_ANNOTATION, displayName);
     }
     if (description != null) {
       annotations.put(PROJECT_DESCRIPTION_ANNOTATION, description);
+    }
+    if (extraAnnotations != null) {
+      annotations.putAll(extraAnnotations);
     }
 
     return new ProjectBuilder()

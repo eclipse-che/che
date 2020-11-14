@@ -51,16 +51,16 @@ public class RouteServerResolver extends AbstractServerResolver {
   }
 
   @Override
-  protected Map<String, ServerImpl> resolveExternalServers(String machineName) {
+  public Map<String, ServerImpl> resolveExternalServers(String machineName) {
     return routes
         .get(machineName)
         .stream()
-        .map(this::resolveRouteServers)
+        .map(r -> resolveRouteServers(machineName, r))
         .flatMap(m -> m.entrySet().stream())
         .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (v1, v2) -> v2));
   }
 
-  private Map<String, ServerImpl> resolveRouteServers(Route route) {
+  private Map<String, ServerImpl> resolveRouteServers(String serviceName, Route route) {
     return Annotations.newDeserializer(route.getMetadata().getAnnotations())
         .servers()
         .entrySet()
@@ -73,6 +73,8 @@ public class RouteServerResolver extends AbstractServerResolver {
                         .protocol(e.getValue().getProtocol())
                         .host(route.getSpec().getHost())
                         .path(e.getValue().getPath())
+                        .endpointOrigin(
+                            "/") // routes are always multihost, so we don't need to think here...
                         .attributes(e.getValue().getAttributes())
                         .targetPort(e.getValue().getPort())
                         .build(),

@@ -24,6 +24,5 @@ public class CheJsonRpcWebSocketConfigurationModule implements Module {
     Multibinder<RequestProcessorConfigurationProvider.Configuration> configurationMultibinder =
         Multibinder.newSetBinder(binder, RequestProcessorConfigurationProvider.Configuration.class);
     configurationMultibinder.addBinding().to(CheMajorWebSocketEndpointConfiguration.class);
-    configurationMultibinder.addBinding().to(CheMinorWebSocketEndpointConfiguration.class);
   }
 }

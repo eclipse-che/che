@@ -99,23 +99,17 @@ public class GithubURLParserTest {
   @DataProvider(name = "parsing")
   public Object[][] expectedParsing() {
     return new Object[][] {
-      {"https://github.com/eclipse/che", "eclipse", "che", "master", null},
-      {"https://github.com/eclipse/che123", "eclipse", "che123", "master", null},
-      {"https://github.com/eclipse/che.git", "eclipse", "che", "master", null},
-      {"https://github.com/eclipse/che.with.dot.git", "eclipse", "che.with.dot", "master", null},
-      {"https://github.com/eclipse/-.git", "eclipse", "-", "master", null},
-      {"https://github.com/eclipse/-j.git", "eclipse", "-j", "master", null},
-      {"https://github.com/eclipse/-", "eclipse", "-", "master", null},
-      {"https://github.com/eclipse/che-with-hyphen", "eclipse", "che-with-hyphen", "master", null},
-      {
-        "https://github.com/eclipse/che-with-hyphen.git",
-        "eclipse",
-        "che-with-hyphen",
-        "master",
-        null
-      },
-      {"https://github.com/eclipse/che/", "eclipse", "che", "master", null},
-      {"https://github.com/eclipse/repositorygit", "eclipse", "repositorygit", "master", null},
+      {"https://github.com/eclipse/che", "eclipse", "che", null, null},
+      {"https://github.com/eclipse/che123", "eclipse", "che123", null, null},
+      {"https://github.com/eclipse/che.git", "eclipse", "che", null, null},
+      {"https://github.com/eclipse/che.with.dot.git", "eclipse", "che.with.dot", null, null},
+      {"https://github.com/eclipse/-.git", "eclipse", "-", null, null},
+      {"https://github.com/eclipse/-j.git", "eclipse", "-j", null, null},
+      {"https://github.com/eclipse/-", "eclipse", "-", null, null},
+      {"https://github.com/eclipse/che-with-hyphen", "eclipse", "che-with-hyphen", null, null},
+      {"https://github.com/eclipse/che-with-hyphen.git", "eclipse", "che-with-hyphen", null, null},
+      {"https://github.com/eclipse/che/", "eclipse", "che", null, null},
+      {"https://github.com/eclipse/repositorygit", "eclipse", "repositorygit", null, null},
       {"https://github.com/eclipse/che/tree/4.2.x", "eclipse", "che", "4.2.x", null},
       {
         "https://github.com/eclipse/che/tree/master/dashboard/",

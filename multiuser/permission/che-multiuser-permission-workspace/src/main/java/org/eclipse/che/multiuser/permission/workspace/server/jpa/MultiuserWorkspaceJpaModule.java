@@ -14,7 +14,6 @@ package org.eclipse.che.multiuser.permission.workspace.server.jpa;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
-import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.multiuser.api.permission.server.AbstractPermissionsDomain;
 import org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermissions;
@@ -24,6 +23,7 @@ import org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerIm
 import org.eclipse.che.multiuser.permission.workspace.server.spi.WorkerDao;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.JpaWorkerDao;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.MultiuserJpaWorkspaceDao;
+import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.MultiuserJpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
 
 /** @author Yevhenii Voevodin */
 public class MultiuserWorkspaceJpaModule extends AbstractModule {

@@ -32,7 +32,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Servi
  * {@link
  * org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy}),
  * this class merely internally uses different functions for different service exposure strategies.
- * This is done because the full-blown stragegy pattern implementation felt like over-engineering
+ * This is done because the full-blown strategy pattern implementation felt like over-engineering
  * when compared with the simplicity of the functions.
  */
 @Singleton

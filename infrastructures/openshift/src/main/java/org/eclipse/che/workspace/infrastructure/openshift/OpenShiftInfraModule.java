@@ -72,18 +72,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.Serv
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.GatewayServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ServiceExposureStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.SingleHostExternalServiceExposureStrategy;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.CookiePathStrategy;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.PassThroughProxySecureServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxyProvisionerFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.PassThroughProxySecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.NonTlsDistributedClusterModeNotifier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
@@ -101,6 +96,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftCookie
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftPreviewUrlExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.server.RouteServerExposer;
+import org.eclipse.che.workspace.infrastructure.openshift.server.external.OpenShiftExternalServerExposerProvider;
 import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases.OpenshiftBrokerEnvironmentFactory;
 
 /** @author Sergii Leshchenko */
@@ -146,14 +142,18 @@ public class OpenShiftInfraModule extends AbstractModule {
 
     MapBinder<WorkspaceExposureType, ExternalServerExposer<OpenShiftEnvironment>>
         exposureStrategies =
-            MapBinder.newMapBinder(
-                binder(),
-                new TypeLiteral<WorkspaceExposureType>() {},
-                new TypeLiteral<ExternalServerExposer<OpenShiftEnvironment>>() {});
+            MapBinder.newMapBinder(binder(), new TypeLiteral<>() {}, new TypeLiteral<>() {});
     exposureStrategies.addBinding(WorkspaceExposureType.NATIVE).to(RouteServerExposer.class);
     exposureStrategies
         .addBinding(WorkspaceExposureType.GATEWAY)
         .to(new TypeLiteral<GatewayServerExposer<OpenShiftEnvironment>>() {});
+
+    bind(new TypeLiteral<ExternalServerExposer<OpenShiftEnvironment>>() {})
+        .annotatedWith(com.google.inject.name.Names.named("multihost-exposer"))
+        .to(RouteServerExposer.class);
+
+    bind(new TypeLiteral<ExternalServerExposerProvider<OpenShiftEnvironment>>() {})
+        .to(OpenShiftExternalServerExposerProvider.class);
 
     bind(ServersConverter.class).to(new TypeLiteral<ServersConverter<OpenShiftEnvironment>>() {});
     bind(PreviewUrlExposer.class).to(new TypeLiteral<OpenShiftPreviewUrlExposer>() {});
@@ -176,28 +176,6 @@ public class OpenShiftInfraModule extends AbstractModule {
 
     bind(SecureServerExposerFactoryProvider.class)
         .to(new TypeLiteral<SecureServerExposerFactoryProvider<OpenShiftEnvironment>>() {});
-
-    MapBinder<String, SecureServerExposerFactory<OpenShiftEnvironment>>
-        secureServerExposerFactories =
-            MapBinder.newMapBinder(
-                binder(),
-                new TypeLiteral<String>() {},
-                new TypeLiteral<SecureServerExposerFactory<OpenShiftEnvironment>>() {});
-
-    install(new FactoryModuleBuilder().build(JwtProxyConfigBuilderFactory.class));
-    install(new FactoryModuleBuilder().build(PassThroughProxyProvisionerFactory.class));
-    install(
-        new FactoryModuleBuilder()
-            .implement(
-                new TypeLiteral<SecureServerExposer<OpenShiftEnvironment>>() {},
-                new TypeLiteral<PassThroughProxySecureServerExposer<OpenShiftEnvironment>>() {})
-            .build(
-                new TypeLiteral<
-                    PassThroughProxySecureServerExposerFactory<OpenShiftEnvironment>>() {}));
-
-    secureServerExposerFactories
-        .addBinding("default")
-        .to(new TypeLiteral<PassThroughProxySecureServerExposerFactory<OpenShiftEnvironment>>() {});
 
     bind(BrokerService.class);
 

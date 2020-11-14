@@ -34,6 +34,7 @@ import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesRuntimeContext;
+import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeCleaner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
@@ -84,6 +85,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       SecretAsContainerResourceProvisioner<OpenShiftEnvironment>
           secretAsContainerResourceProvisioner,
       OpenShiftServerResolverFactory serverResolverFactory,
+      RuntimeCleaner runtimeCleaner,
       CheNamespace cheNamespace,
       Tracer tracer,
       Openshift4TrustedCAProvisioner trustedCAProvisioner,
@@ -110,6 +112,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         previewUrlCommandProvisioner,
         secretAsContainerResourceProvisioner,
         null,
+        runtimeCleaner,
         cheNamespace,
         tracer,
         context,

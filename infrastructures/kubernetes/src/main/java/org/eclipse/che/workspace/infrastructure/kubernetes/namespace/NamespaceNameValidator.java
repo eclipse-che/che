@@ -20,7 +20,7 @@ import org.eclipse.che.api.core.ValidationException;
 
 public final class NamespaceNameValidator {
 
-  private static final int METADATA_NAME_MAX_LENGTH = 63;
+  static final int METADATA_NAME_MAX_LENGTH = 63;
   private static final String METADATA_NAME_REGEX = "[a-z0-9]([-a-z0-9]*[a-z0-9])?";
   private static final Pattern METADATA_NAME_PATTERN = Pattern.compile(METADATA_NAME_REGEX);
 

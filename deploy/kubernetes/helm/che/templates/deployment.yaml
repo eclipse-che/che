@@ -107,7 +107,8 @@ spec:
 
         # If workspaces are created in a separate namespace(s)
         # then configure Che Server to propagate TLS secret to workspaces' namespaces
-        {{- if ne .Release.Namespace .Values.global.cheWorkspacesNamespace }}
+        # Do not propagate anything in case of using default ingress controller certificate (global.tls.secretName is empty)
+        {{- if and (ne .Release.Namespace .Values.global.cheWorkspacesNamespace) (.Values.global.tls.secretName) }}
         - name: "CHE_INFRA_KUBERNETES_TLS__CERT"
           valueFrom:
             secretKeyRef:

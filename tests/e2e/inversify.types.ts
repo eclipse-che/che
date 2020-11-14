@@ -53,7 +53,8 @@ const CLASSES = {
     PreferencesHandler: 'PreferencesHandler',
     CheApiRequestHandler: 'CheApiRequestHandler',
     GetStarted: 'GetStarted',
-    OpenDialogWidget: 'OpenDialogWidget'
+    OpenDialogWidget: 'OpenDialogWidget',
+    UpdateAccountInformationPage: 'UpdateAccountInformationPage'
 };
 
 export { TYPES, CLASSES };

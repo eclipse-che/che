@@ -12,7 +12,7 @@ kind: Ingress
 metadata:
   name: che-ingress
   annotations:
-    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/ingress.class: {{ .Values.global.ingress.class | quote }}
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-read-timeout: "3600"
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-connect-timeout: "3600"
 {{- if and .Values.global.tls .Values.global.tls.enabled }}
@@ -25,7 +25,9 @@ spec:
   tls:
   - hosts:
     - {{ template "cheHost" . }}
+    {{- if .Values.global.tls.secretName }}
     secretName: {{ .Values.global.tls.secretName }}
+    {{- end -}}
 {{- end }}
   rules:
 {{- if ne .Values.global.serverStrategy "default-host" }}
@@ -35,11 +37,19 @@ spec:
   - http:
 {{- end }}
       paths:
-      - path: /
-        backend:
 {{- if and (eq .Values.global.serverStrategy "single-host") (eq .Values.global.singleHostExposure "gateway") }}
-          serviceName: che-gateway
+        - path: /
+          backend:
+            serviceName: che-gateway
+            servicePort: 8080
 {{- else }}
-          serviceName: che-host
+        - path: /
+          backend:
+            serviceName: che-host
+            servicePort: 8080
+        # The path rule for Che Dashboard next hosted by Che Server. It should be removed after https://github.com/eclipse/che/issues/17647 is fixed
+        - path: /dashboard/next
+          backend:
+            serviceName: che-host
+            servicePort: 8080
 {{- end }}
-          servicePort: 8080

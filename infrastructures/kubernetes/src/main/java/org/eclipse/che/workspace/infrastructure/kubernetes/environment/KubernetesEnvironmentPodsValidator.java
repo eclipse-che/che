@@ -18,7 +18,9 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSource;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
@@ -72,7 +74,10 @@ public class KubernetesEnvironmentPodsValidator {
         }
       }
 
-      for (Container container : pod.getSpec().getContainers()) {
+      List<Container> containers = new ArrayList<>();
+      containers.addAll(pod.getSpec().getContainers());
+      containers.addAll(pod.getSpec().getInitContainers());
+      for (Container container : containers) {
         for (VolumeMount volumeMount : container.getVolumeMounts()) {
           if (!volumesNames.contains(volumeMount.getName())) {
             throw new ValidationException(
@@ -91,6 +96,9 @@ public class KubernetesEnvironmentPodsValidator {
     for (PodData pod : env.getPodsData().values()) {
       if (pod.getSpec() != null && pod.getSpec().getContainers() != null) {
         for (Container container : pod.getSpec().getContainers()) {
+          missingMachines.remove(Names.machineName(pod, container));
+        }
+        for (Container container : pod.getSpec().getInitContainers()) {
           missingMachines.remove(Names.machineName(pod, container));
         }
       }

@@ -314,4 +314,3 @@ async function checkJavaPathCompletion() {
         await editor.waitTabWithSavedStatus(classPathFilename);
     }
 }
-

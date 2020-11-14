@@ -17,14 +17,13 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.20.0-SNAPSHOT</version>
+        <version>7.22.0-SNAPSHOT</version>
         <relativePath>../core/pom.xml</relativePath>
     </parent>
     <artifactId>che-master-parent</artifactId>
     <packaging>pom</packaging>
     <name>Che Core :: API :: Che Master Parent</name>
     <modules>
-        <module>che-core-api-installer-shared</module>
         <module>che-core-api-auth-shared</module>
         <module>che-core-api-auth</module>
         <module>che-core-api-auth-github</module>
@@ -33,6 +32,8 @@
         <module>che-core-api-workspace</module>
         <module>che-core-api-workspace-activity</module>
         <module>che-core-api-user-shared</module>
+        <module>che-core-api-devfile-shared</module>
+        <module>che-core-api-devfile</module>
         <module>che-core-api-account</module>
         <module>che-core-api-user</module>
         <module>che-core-api-factory-shared</module>

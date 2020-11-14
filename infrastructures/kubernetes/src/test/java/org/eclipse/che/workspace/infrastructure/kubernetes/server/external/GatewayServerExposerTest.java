@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
@@ -96,6 +97,7 @@ public class GatewayServerExposerTest {
     assertEquals(s1.getAttributes().get(ServerConfigImpl.SERVICE_PORT_ATTRIBUTE), "1234");
     assertEquals(s1.getPort(), "1111");
     assertEquals(s1.getProtocol(), "ws");
-    assertEquals(s1.getPath(), "/service/server/");
+    assertNull(s1.getPath());
+    assertEquals(s1.getEndpointOrigin(), "/service/server/");
   }
 }

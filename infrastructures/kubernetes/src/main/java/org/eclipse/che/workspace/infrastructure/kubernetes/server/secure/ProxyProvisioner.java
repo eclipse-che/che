@@ -38,6 +38,8 @@ public interface ProxyProvisioner {
    * @param backendServiceName service name that will be exposed
    * @param backendServicePort service port that will be exposed
    * @param protocol protocol that will be used for exposed port
+   * @param requireSubdomain if true, the supplied servers are supposed to require a subdomain, if
+   *     false the servers are considered to follow the configured exposure strategy
    * @param secureServers secure servers to expose
    * @return JWTProxy service port that expose the specified one
    * @throws InfrastructureException if any exception occurs during port exposing
@@ -49,6 +51,7 @@ public interface ProxyProvisioner {
       @Nullable String backendServiceName,
       ServicePort backendServicePort,
       String protocol,
+      boolean requireSubdomain,
       Map<String, ServerConfig> secureServers)
       throws InfrastructureException;
 

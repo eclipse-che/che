@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-integration-tests</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>7.20.0-SNAPSHOT</version>
+        <version>7.22.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-mysql-tck</artifactId>
     <packaging>jar</packaging>
@@ -45,6 +45,11 @@
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-api-resource</artifactId>
+            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-permission-devfile</artifactId>
             <classifier>tests</classifier>
         </dependency>
         <dependency>
@@ -114,6 +119,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-permission-devfile</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-permission-workspace</artifactId>
             <scope>test</scope>
         </dependency>
@@ -166,21 +176,16 @@
                         <artifactId>maven-dependency-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>analyze</id>
-                                <configuration>
-                                    <skip>true</skip>
-                                </configuration>
-                            </execution>
-                            <execution>
                                 <goals>
                                     <goal>unpack-dependencies</goal>
                                 </goals>
                                 <configuration>
                                     <outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
                                     <includeArtifactIds>che-multiuser-api-resource,
-                                che-multiuser-api-organization,
-                                che-multiuser-api-permission,
-                                che-multiuser-permission-workspace</includeArtifactIds>
+                                        che-multiuser-api-organization,
+                                        che-multiuser-api-permission,
+                                        che-multiuser-permission-devfile,
+                                        che-multiuser-permission-workspace</includeArtifactIds>
                                     <includeScope>test</includeScope>
                                 </configuration>
                             </execution>
@@ -192,7 +197,7 @@
                                 </goals>
                                 <configuration>
                                     <includeArtifactIds>che-core-sql-schema,
-                                che-multiuser-sql-schema</includeArtifactIds>
+                                        che-multiuser-sql-schema</includeArtifactIds>
                                     <includes>che-schema/</includes>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
                                 </configuration>

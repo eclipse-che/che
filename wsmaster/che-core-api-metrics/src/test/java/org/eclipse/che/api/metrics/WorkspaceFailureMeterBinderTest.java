@@ -98,6 +98,24 @@ public class WorkspaceFailureMeterBinderTest {
     failureCounters.forEach(c -> assertEquals(c.count(), 0d));
   }
 
+  @Test
+  public void shouldNotCollectInterruptedEvent() {
+    // given
+    WorkspaceStatusEvent event =
+        DtoFactory.newDto(WorkspaceStatusEvent.class)
+            .withPrevStatus(WorkspaceStatus.STARTING)
+            .withStatus(WorkspaceStatus.STOPPED)
+            .withInitiatedByUser(true)
+            .withError("interrupted")
+            .withWorkspaceId("1");
+
+    // when
+    events.onEvent(event);
+
+    // then
+    failureCounters.forEach(c -> assertEquals(c.count(), 0d));
+  }
+
   @Test(dataProvider = "allStatusTransitionsWithoutToStopped")
   public void shouldNotCollectFailureWhenNotTransitioningToStopped(
       WorkspaceStatus from, WorkspaceStatus to) {

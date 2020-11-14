@@ -23,6 +23,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStoragePodInterceptor;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.DeploymentMetadataProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
@@ -82,6 +83,7 @@ public class OpenShiftEnvironmentProvisioner
   private final PreviewUrlExposer<OpenShiftEnvironment> previewUrlExposer;
   private final VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
   private final GatewayRouterProvisioner gatewayRouterProvisioner;
+  private final DeploymentMetadataProvisioner deploymentMetadataProvisioner;
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
@@ -106,7 +108,8 @@ public class OpenShiftEnvironmentProvisioner
       GitConfigProvisioner gitConfigProvisioner,
       OpenShiftPreviewUrlExposer previewUrlEndpointsProvisioner,
       VcsSslCertificateProvisioner vcsSslCertificateProvisioner,
-      GatewayRouterProvisioner gatewayRouterProvisioner) {
+      GatewayRouterProvisioner gatewayRouterProvisioner,
+      DeploymentMetadataProvisioner deploymentMetadataProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -129,6 +132,7 @@ public class OpenShiftEnvironmentProvisioner
     this.previewUrlExposer = previewUrlEndpointsProvisioner;
     this.vcsSslCertificateProvisioner = vcsSslCertificateProvisioner;
     this.gatewayRouterProvisioner = gatewayRouterProvisioner;
+    this.deploymentMetadataProvisioner = deploymentMetadataProvisioner;
   }
 
   @Override
@@ -169,6 +173,7 @@ public class OpenShiftEnvironmentProvisioner
     vcsSslCertificateProvisioner.provision(osEnv, identity);
     gitConfigProvisioner.provision(osEnv, identity);
     gatewayRouterProvisioner.provision(osEnv, identity);
+    deploymentMetadataProvisioner.provision(osEnv, identity);
     LOG.debug(
         "Provisioning OpenShift environment done for workspace '{}'", identity.getWorkspaceId());
   }

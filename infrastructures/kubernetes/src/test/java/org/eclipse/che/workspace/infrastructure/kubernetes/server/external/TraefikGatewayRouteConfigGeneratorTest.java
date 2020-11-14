@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
@@ -61,8 +62,14 @@ public class TraefikGatewayRouteConfigGeneratorTest {
         new ServerConfigImpl(
             "123",
             "https",
-            "/blabol-cesta",
-            ImmutableMap.of(SERVICE_NAME_ATTRIBUTE, "service-url", SERVICE_PORT_ATTRIBUTE, "1234"));
+            "/",
+            ImmutableMap.of(
+                SERVICE_NAME_ATTRIBUTE,
+                "service-url",
+                SERVICE_PORT_ATTRIBUTE,
+                "1234",
+                ServerConfig.ENDPOINT_ORIGIN,
+                "/blabol-cesta"));
     Map<String, String> annotations =
         new Annotations.Serializer().server("s1", serverConfig).annotations();
     ConfigMap routeConfig =
@@ -87,8 +94,14 @@ public class TraefikGatewayRouteConfigGeneratorTest {
         new ServerConfigImpl(
             "123",
             "https",
-            "/blabol-cesta",
-            ImmutableMap.of(SERVICE_NAME_ATTRIBUTE, "service-url", SERVICE_PORT_ATTRIBUTE, "1234"));
+            "/",
+            ImmutableMap.of(
+                SERVICE_NAME_ATTRIBUTE,
+                "service-url",
+                SERVICE_PORT_ATTRIBUTE,
+                "1234",
+                ServerConfig.ENDPOINT_ORIGIN,
+                "/blabol-cesta"));
     Map<String, String> annotations =
         new Annotations.Serializer().server("s1", serverConfig).annotations();
     ConfigMap routeConfig =
@@ -112,8 +125,14 @@ public class TraefikGatewayRouteConfigGeneratorTest {
         new ServerConfigImpl(
             "123",
             "https",
-            "/blabol-cesta",
-            ImmutableMap.of(SERVICE_NAME_ATTRIBUTE, "service-url", SERVICE_PORT_ATTRIBUTE, "1234"));
+            "/",
+            ImmutableMap.of(
+                SERVICE_NAME_ATTRIBUTE,
+                "service-url",
+                SERVICE_PORT_ATTRIBUTE,
+                "1234",
+                ServerConfig.ENDPOINT_ORIGIN,
+                "/blabol-cesta"));
     Map<String, String> annotations =
         new Annotations.Serializer()
             .server("s1", serverConfig)

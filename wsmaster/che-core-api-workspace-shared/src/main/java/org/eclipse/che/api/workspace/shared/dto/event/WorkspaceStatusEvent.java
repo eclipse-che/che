@@ -64,4 +64,9 @@ public interface WorkspaceStatusEvent {
   Map<String, String> getOptions();
 
   WorkspaceStatusEvent withOptions(Map<String, String> options);
+
+  /** @return whether event cause by some concrete user's request */
+  boolean isInitiatedByUser();
+
+  WorkspaceStatusEvent withInitiatedByUser(boolean isInitiatedByUser);
 }

@@ -27,6 +27,10 @@ pipeline {
     }
 
     parameters {
+        booleanParam(name: 'cheSingleHost',
+               defaultValue: false,
+               description: 'Configuration Che server strategy')
+
         string(name: 'cheImageRepo',
                 defaultValue: "maxura/che-server",
                 description: 'Repo of Che server image')
@@ -36,7 +40,7 @@ pipeline {
                 description: 'Tag of Che server image')
 
         booleanParam(name: 'buildChe',
-                defaultValue: true,
+                defaultValue: false,
                 description: 'Should build Che server')
 
         string(name: 'e2eTestToRun',
@@ -73,14 +77,13 @@ pipeline {
     stages {
         stage("Setup environment") {
             steps {
-                script {
+                script { 
                     if (cheImageTag == null || cheImageTag == '') {
                         mutableCheImageTag = ghprbPullId
                     } else {
                         mutableCheImageTag = cheImageTag
                     }
-                    sh "sudo yum install -y glibc.i686 libfreetype.so.6 libfontconfig.so.1 libstdc++-devel.i686"
-                }
+               }
             }
         }
 
@@ -151,14 +154,15 @@ pipeline {
 
                 stage("Build Che including upstream projects") {
                     when {
-                        expression { return buildChe.toString() == 'true' }
+                        expression { 
+                            return buildChe.toString() == 'true' || (params['ghprbCommentBody'] && (params.ghprbCommentBody == 'null' || params.ghprbCommentBody.contains("--rebuild")))
+                        }
                     }
 
                     steps {
-                        echo "buildChe = $params.buildChe"
-                        echo "createTestWorkspace = $params.createTestWorkspace"
-
                         echo "Build branch ${ghprbSourceBranch} of upstream projects"
+                        sh "sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686"
+
                         sh """
                             project_list=(
                                 eclipse/che-parent
@@ -186,6 +190,12 @@ pipeline {
                     steps {
                         script {
                             retry(2) {
+                                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
+                                    sh """
+                                        docker login -u maxura -p ${maxura_docker_password}
+                                    """
+                                }
+
                                 sh """
                                     docker pull quay.io/eclipse/che-e2e:$cheE2eImageTag
                                     docker pull quay.io/eclipse/happy-path:nightly
@@ -199,18 +209,17 @@ pipeline {
 
         stage("Build and push che-server image") {
             when {
-                expression { return buildChe.toString() == 'true' }
+                expression {
+                    return buildChe.toString() == 'true' || (params['ghprbCommentBody'] && (params.ghprbCommentBody == 'null' || params.ghprbCommentBody.contains("--rebuild"))) 
+                }
             }
 
             steps {
-                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
-                    sh """
-                        ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
-                        docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
-                        docker login -u maxura -p ${maxura_docker_password}
-                        docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
-                    """
-                }
+                sh """
+                    ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
+                    docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
+                    docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
+                """
             }
         }
 
@@ -218,14 +227,33 @@ pipeline {
             steps {
                 script {
                     echo "Create custom-resource patch file"
-                    sh """cat > $CUSTOM_RESOURCE_PATCH_FILE <<EOL
+                    if (cheSingleHost.toBoolean() == true) {
+                        sh """cat > $CUSTOM_RESOURCE_PATCH_FILE <<EOL
 spec:
   server:
     cheImage: '${cheImageRepo}'
     cheImageTag: '${mutableCheImageTag}'
+    serverExposureStrategy: 'single-host'
+    customCheProperties:
+      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
+  k8s:  
+    singleHostExposureType: 'gateway'
   auth:
     updateAdminPassword: false
 EOL"""
+
+                    } else {
+                        sh """cat > $CUSTOM_RESOURCE_PATCH_FILE <<EOL
+spec:
+  server:
+    cheImage: '${cheImageRepo}'
+    cheImageTag: '${mutableCheImageTag}'
+    customCheProperties:
+      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
+  auth:
+    updateAdminPassword: false
+EOL"""
+                    }
 
                     echo "Install Che"
                     sh """
@@ -287,19 +315,11 @@ EOL"""
                         sh "cp ${WORKSPACE}/tests/e2e/files/happy-path/happy-path-workspace.yaml $DEVFILE_PATH"
                     }
 
-                    sh """   
-                        KEYCLOAK_BASE_URL="https://\$(kubectl get ingress/keycloak --namespace=eclipse-che -o jsonpath='{.spec.rules[0].host}')/auth"
-    
-                        USER_ACCESS_TOKEN=\$(curl -k -X POST \$KEYCLOAK_BASE_URL/realms/che/protocol/openid-connect/token \\
-                           -H "Content-Type: application/x-www-form-urlencoded" \\
-                           -d "username=admin" \\
-                           -d "password=admin" \\
-                           -d "grant_type=password" \\
-                           -d "client_id=che-public" | jq -r .access_token)
-    
+                    sh """
+                        ${pathToChectl} auth:login -u admin -p admin --chenamespace=eclipse-che
+
                         ${pathToChectl} workspace:create --start \\
                            --devfile=${DEVFILE_PATH} \\
-                           --access-token "\$USER_ACCESS_TOKEN" \\
                            --chenamespace=eclipse-che
                     """
                 }

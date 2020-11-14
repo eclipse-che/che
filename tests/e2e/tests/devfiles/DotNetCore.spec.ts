@@ -25,9 +25,9 @@ const stack : string = '.NET Core';
 const updateDependenciesTaskName: string = 'update dependencies';
 const buildTaskName: string = 'build';
 const runTaskName: string = 'run';
-const runTaskNameExpectedString: string = 'A process is now listening on port 5000.';
+const runTaskNameExpectedString: string = 'Process 5000-tcp is now listening on port 5000. Open it ?';
 
-suite(`${stack} test`, async () => {
+suite(`Test ${stack}`, async () => {
     suite (`Create ${stack} workspace`, async () => {
         workspaceHandling.createAndOpenWorkspace(stack);
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName);
@@ -39,12 +39,18 @@ suite(`${stack} test`, async () => {
         prepareEditorForLSTests();
     });
 
-    suite('Validation of workspace build and run', async () => {
+    suite('Installing dependencies', async () => {
         codeExecutionTests.runTask(updateDependenciesTaskName, 120_000);
         codeExecutionTests.closeTerminal(updateDependenciesTaskName);
+    });
+
+    suite('Validation of workspace build', async () => {
         codeExecutionTests.runTask(buildTaskName, 30_000);
         codeExecutionTests.closeTerminal(buildTaskName);
-        codeExecutionTests.runTaskWithDialogShellAndOpenLink(runTaskName, runTaskNameExpectedString , 30_000);
+    });
+
+    suite('Run .NET Core example application', async () => {
+        codeExecutionTests.runTaskWithNotification(runTaskName, runTaskNameExpectedString , 30_000);
     });
 
     suite('Language server validation', async () => {

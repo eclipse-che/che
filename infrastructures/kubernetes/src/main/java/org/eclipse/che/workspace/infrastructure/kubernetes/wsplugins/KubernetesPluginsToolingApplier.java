@@ -18,7 +18,6 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DI
 import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_SOURCE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PLUGIN_MACHINE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.TOOL_CONTAINER_SOURCE;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
 
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ArrayListMultimap;
@@ -174,12 +173,6 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     }
 
     chePlugins.forEach(chePlugin -> populateWorkspaceEnvVars(chePlugin, k8sEnv));
-
-    if (isAuthEnabled) {
-      // enable per-workspace security with JWT proxy for sidecar based workspaces
-      // because it is the only workspace security implementation supported for now
-      k8sEnv.getAttributes().putIfAbsent(SECURE_EXPOSER_IMPL_PROPERTY, "jwtproxy");
-    }
   }
 
   private void addToolingPod(KubernetesEnvironment kubernetesEnvironment) {

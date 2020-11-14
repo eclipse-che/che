@@ -21,7 +21,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -368,7 +367,6 @@ public class WorkspaceActivityDaoTest {
     final ServerConfigImpl serverConf1 =
         new ServerConfigImpl("2265", "http", "path1", singletonMap("key", "value"));
     exMachine1.setServers(ImmutableMap.of("ref1", serverConf1));
-    exMachine1.setInstallers(ImmutableList.of("agent5", "agent4"));
     exMachine1.setAttributes(singletonMap("att1", "val"));
     exMachine1.setEnv(ImmutableMap.of("CHE_ENV1", "value", "CHE_ENV2", "value"));
     exMachine1.setVolumes(ImmutableMap.of("vol1", new VolumeImpl().withPath("/path/1")));
