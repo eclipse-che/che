@@ -34,6 +34,7 @@ import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.factory.server.github.GithubFactoryParametersResolver;
+import org.eclipse.che.api.infraproxy.server.InfraProxyModule;
 import org.eclipse.che.api.metrics.WsMasterMetricsModule;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.system.server.SystemModule;
@@ -164,9 +165,10 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
     bind(org.eclipse.che.api.devfile.server.DevfileService.class);
-    bind(org.eclipse.che.api.infraproxy.server.InfrastructureApiService.class);
     bind(org.eclipse.che.api.devfile.server.UserDevfileEntityProvider.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
+
+    install(new InfraProxyModule());
 
     Multibinder<InternalEnvironmentProvisioner> internalEnvironmentProvisioners =
         Multibinder.newSetBinder(binder(), InternalEnvironmentProvisioner.class);
