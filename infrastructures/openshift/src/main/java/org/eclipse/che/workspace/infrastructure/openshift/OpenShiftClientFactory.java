@@ -117,6 +117,10 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
 
   @Override
   public OkHttpClient getAuthenticatedHttpClient() throws InfrastructureException {
+    if (!configBuilder.isPersonalized()) {
+      throw new InfrastructureException(
+          "Not able to construct impersonating openshift API client.");
+    }
     return clientForConfig(buildConfig(getDefaultConfig(), null));
   }
 

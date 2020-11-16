@@ -160,9 +160,8 @@ public abstract class RuntimeInfrastructure {
   /**
    * This is a very dangerous method that should be used with care.
    *
-   * <p>Currently, this method is called after it has been checked that Che server is operating on
-   * OpenShift with OpenShift OAuth on. The implementation of this method therefore needs to make
-   * sure that it properly impersonates when performing the request.
+   * <p>The implementation of this method needs to make sure that it properly impersonates the current user
+   * when performing the request.
    *
    * @param httpMethod the http method to use
    * @param relativeUri the URI to request - this must be a relative URI that is appended to the
