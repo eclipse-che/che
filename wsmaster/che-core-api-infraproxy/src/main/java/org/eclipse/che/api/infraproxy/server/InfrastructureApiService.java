@@ -14,6 +14,7 @@ package org.eclipse.che.api.infraproxy.server;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.Beta;
+import com.google.common.annotations.VisibleForTesting;
 import io.swagger.annotations.Api;
 import java.io.IOException;
 import java.io.Reader;
@@ -51,8 +52,7 @@ public class InfrastructureApiService extends Service {
   private final RuntimeInfrastructure runtimeInfrastructure;
   private final ObjectMapper mapper;
 
-  private static boolean determineAllowed(String identityProvider) {
-    String infra = System.getenv("CHE_INFRASTRUCTURE_ACTIVE");
+  private static boolean determineAllowed(String infra, String identityProvider) {
     return "openshift".equals(infra)
         && identityProvider != null
         && identityProvider.startsWith("openshift");
@@ -62,9 +62,14 @@ public class InfrastructureApiService extends Service {
   public InfrastructureApiService(
       @Named("che.infra.openshift.oauth_identity_provider") String identityProvider,
       RuntimeInfrastructure runtimeInfrastructure) {
-    this.runtimeInfrastructure = runtimeInfrastructure;
+    this(System.getenv("CHE_INFRASTRUCTURE_ACTIVE"), identityProvider, runtimeInfrastructure);
+  }
+
+  @VisibleForTesting
+  InfrastructureApiService(String infraName, String identityProvider, RuntimeInfrastructure infra) {
+    this.runtimeInfrastructure = infra;
     this.mapper = new ObjectMapper();
-    this.allowed = determineAllowed(identityProvider);
+    this.allowed = determineAllowed(infraName, identityProvider);
   }
 
   @GET
