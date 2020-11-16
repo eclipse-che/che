@@ -129,6 +129,18 @@ public class KubernetesClientFactory {
     return httpClient;
   }
 
+  /**
+   * Unlike {@link #getHttpClient()} method, this method always returns an HTTP client that contains
+   * interceptors that augment the request with authentication information available in the global
+   * context.
+   *
+   * <p>Unlike {@link #getHttpClient()}, this method creates a new HTTP client instance each time it
+   * is called.
+   *
+   * @return HTTP client with authorization set up
+   * @throws InfrastructureException if it is not possible to build the client with authentication
+   *     infromation
+   */
   public OkHttpClient getAuthenticatedHttpClient() throws InfrastructureException {
     return getHttpClient();
   }

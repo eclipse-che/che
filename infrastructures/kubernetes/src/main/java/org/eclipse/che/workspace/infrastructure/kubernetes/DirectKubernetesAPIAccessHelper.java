@@ -29,6 +29,19 @@ import org.eclipse.che.commons.annotation.Nullable;
 public class DirectKubernetesAPIAccessHelper {
   private DirectKubernetesAPIAccessHelper() {}
 
+  /**
+   * This method just performs an HTTP request of given {@code httpMethod} on an URL composed of the
+   * {@code masterUrl} and {@code relativeUri} using the provided {@code httpClient}, optionally
+   * sending the provided {@code body}.
+   *
+   * @param masterUrl the base of the final URL
+   * @param httpClient the HTTP client to perform the request with
+   * @param httpMethod the HTTP method of the request
+   * @param relativeUri the relative URI that should be appended ot the {@code masterUrl}
+   * @param body the body to send with the request, if any
+   * @return the HTTP response received
+   * @throws InfrastructureException on failure to validate or perform the request
+   */
   public static Response call(
       String masterUrl,
       OkHttpClient httpClient,
