@@ -112,7 +112,7 @@ public class InfrastructureApiService extends Service {
   private void auth() throws ApiException {
     if (!allowed) {
       throw new ForbiddenException(
-          "Interaction with devworkspaces is only allowed in multi-user mode with OpenShift OAuth");
+          "Interaction with backing infrastructure is only allowed in multi-user mode with OpenShift OAuth");
     }
   }
 
