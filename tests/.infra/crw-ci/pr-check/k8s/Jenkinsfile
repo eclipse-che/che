@@ -83,6 +83,21 @@ pipeline {
                     } else {
                         mutableCheImageTag = cheImageTag
                     }
+
+                    withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
+                        sh """
+                            docker login -u maxura -p ${maxura_docker_password}
+
+                            TOKEN=\$(curl --user 'maxura:${maxura_docker_password}' "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
+                            curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
+                        """
+                    }
+
+                    echo "Print anonymouse dockerhub limits"
+                    sh """
+                        TOKEN=\$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
+                        curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
+                    """
                }
             }
         }
@@ -190,12 +205,7 @@ pipeline {
                     steps {
                         script {
                             retry(2) {
-                                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
-                                    sh """
-                                        docker login -u maxura -p ${maxura_docker_password}
-                                    """
-                                }
-
+                                echo "Pull test images"
                                 sh """
                                     docker pull quay.io/eclipse/che-e2e:$cheE2eImageTag
                                     docker pull quay.io/eclipse/happy-path:nightly
@@ -226,6 +236,21 @@ pipeline {
         stage("Start Che") {
             steps {
                 script {
+                    echo "Pre-pull Eclipse Che and test images from dockerhub"
+                    withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
+                        sh """
+                            eval \$(minikube docker-env)
+                            docker login -u maxura -p ${maxura_docker_password}
+
+                            docker pull mariolet/petclinic:d2831f9b
+                            docker pull centos/postgresql-96-centos7:9.6
+                            docker pull centos/mysql-57-centos7
+                            docker pull ${cheImageRepo}:${mutableCheImageTag}
+                            docker pull docker.io/traefik:v2.2.8
+                        """
+                    }
+
+
                     echo "Create custom-resource patch file"
                     if (cheSingleHost.toBoolean() == true) {
                         sh """cat > $CUSTOM_RESOURCE_PATCH_FILE <<EOL
@@ -254,6 +279,12 @@ spec:
     updateAdminPassword: false
 EOL"""
                     }
+
+                    echo "Print anonymouse dockerhub limits"
+                    sh """
+                        TOKEN=\$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
+                        curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
+                    """
 
                     echo "Install Che"
                     sh """
@@ -296,6 +327,12 @@ EOL"""
                             break
                             fi
                             done
+                    """
+
+                    echo "Print anonymouse dockerhub limits"
+                    sh """
+                        TOKEN=\$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
+                        curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
                     """
                 }
             }
