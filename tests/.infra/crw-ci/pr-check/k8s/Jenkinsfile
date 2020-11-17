@@ -258,19 +258,15 @@ spec:
   server:
     cheImage: '${cheImageRepo}'
     cheImageTag: '${mutableCheImageTag}'
-    cheImagePullPolicy: IfNotPresent
     serverExposureStrategy: 'single-host'
     customCheProperties:
       CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
       CHE_WORKSPACE_SIDECAR_IMAGE__PULL__POLICY: IfNotPresent
       CHE_WORKSPACE_PLUGIN__BROKER_PULL__POLICY: IfNotPresent
-  database:
-    postgresImagePullPolicy: IfNotPresent
   k8s:  
     singleHostExposureType: 'gateway'
   auth:
     updateAdminPassword: false
-    identityProviderImagePullPolicy: IfNotPresent
 EOL"""
 
                     } else {
@@ -279,16 +275,12 @@ spec:
   server:
     cheImage: '${cheImageRepo}'
     cheImageTag: '${mutableCheImageTag}'
-    cheImagePullPolicy: IfNotPresent
     customCheProperties:
       CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
       CHE_WORKSPACE_SIDECAR_IMAGE__PULL__POLICY: IfNotPresent
       CHE_WORKSPACE_PLUGIN__BROKER_PULL__POLICY: IfNotPresent
-  database:
-    postgresImagePullPolicy: IfNotPresent
   auth:
     updateAdminPassword: false
-    identityProviderImagePullPolicy: IfNotPresent
 EOL"""
                     }
 
@@ -333,12 +325,6 @@ EOL"""
                             break
                             fi
                             done
-                    """
-
-                    echo "Print anonymouse dockerhub limits"
-                    sh """
-                        TOKEN=\$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
-                        curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
                     """
                 }
             }
