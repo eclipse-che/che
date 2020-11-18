@@ -168,8 +168,6 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.devfile.server.UserDevfileEntityProvider.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
 
-    install(new InfraProxyModule());
-
     Multibinder<InternalEnvironmentProvisioner> internalEnvironmentProvisioners =
         Multibinder.newSetBinder(binder(), InternalEnvironmentProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(EnvVarEnvironmentProvisioner.class);
@@ -412,6 +410,10 @@ public class WsMasterModule extends AbstractModule {
     bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
 
     bindConstant().annotatedWith(Names.named("che.agents.auth_enabled")).to(true);
+
+    if (OpenShiftInfrastructure.NAME.equals(infrastructure)) {
+      install(new InfraProxyModule());
+    }
   }
 
   private void configureJwtProxySecureProvisioner(String infrastructure) {

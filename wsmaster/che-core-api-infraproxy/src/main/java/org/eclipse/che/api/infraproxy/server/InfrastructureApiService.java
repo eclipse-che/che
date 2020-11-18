@@ -60,7 +60,7 @@ public class InfrastructureApiService extends Service {
 
   @Inject
   public InfrastructureApiService(
-      @Named("che.infra.openshift.oauth_identity_provider") String identityProvider,
+      @Nullable @Named("che.infra.openshift.oauth_identity_provider") String identityProvider,
       RuntimeInfrastructure runtimeInfrastructure) {
     this(System.getenv("CHE_INFRASTRUCTURE_ACTIVE"), identityProvider, runtimeInfrastructure);
   }
