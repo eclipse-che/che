@@ -15,7 +15,7 @@ global:
   ingress:
     class: "nginx"
 
-image: quay.io/eclipse/che-keycloak:nightly
+image: quay.io/eclipse/che-keycloak:7.22.0
 requireAdminPasswordChange: true
 keycloakAdminUserName: admin
 keycloakAdminUserPassword: admin
