@@ -19,26 +19,26 @@ import { TimeoutConstants } from '../../TimeoutConstants';
 
 @injectable()
 export class Workspaces {
-    private static readonly ADD_WORKSPACE_BUTTON_CSS: string = '#add-item-button';
+    private static readonly ADD_WORKSPACE_BUTTON_XPATH: string = `//button[text()='Add Workspace']`;
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitPage(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         Logger.debug('Workspaces.waitPage');
 
-        await this.driverHelper.waitVisibility(By.css(Workspaces.ADD_WORKSPACE_BUTTON_CSS), timeout);
+        await this.driverHelper.waitVisibility(By.xpath(Workspaces.ADD_WORKSPACE_BUTTON_XPATH), timeout);
     }
 
     async clickAddWorkspaceButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug('Workspaces.clickAddWorkspaceButton');
 
-        await this.driverHelper.waitAndClick(By.css(Workspaces.ADD_WORKSPACE_BUTTON_CSS), timeout);
+        await this.driverHelper.waitAndClick(By.xpath(Workspaces.ADD_WORKSPACE_BUTTON_XPATH), timeout);
     }
 
     async waitWorkspaceListItem(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceListItem "${workspaceName}"`);
 
-        const workspaceListItemLocator: By = By.css(this.getWorkspaceListItemLocator(workspaceName));
+        const workspaceListItemLocator: By = By.xpath(this.getWorkspaceListItemLocator(workspaceName));
 
         await this.driverHelper.waitVisibility(workspaceListItemLocator, timeout);
     }
@@ -46,7 +46,7 @@ export class Workspaces {
     async clickOnStopWorkspaceButton(workspaceName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug(`Workspaces.clickOnStopWorkspaceButton "${workspaceName}"`);
 
-        const stopWorkspaceButtonLocator: By = By.css(`#ws-name-${workspaceName} .workspace-status[uib-tooltip="Stop workspace"]`);
+        const stopWorkspaceButtonLocator: By = By.xpath(`(//tbody[@class='workspaces-list-table-body' and //td[text()[3]='${workspaceName}']]//td[@data-label='ACTIONS']//span)[1]`);
 
         await this.driverHelper.waitAndClick(stopWorkspaceButtonLocator, timeout);
     }
@@ -70,8 +70,7 @@ export class Workspaces {
     async clickWorkspaceListItem(workspaceName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug(`Workspaces.clickWorkspaceListItem "${workspaceName}"`);
 
-        let namespace: string = TestConstants.TS_SELENIUM_USERNAME;
-        const workspaceListItemLocator: By = By.css(`div[id='ws-full-name-${namespace}/${workspaceName}']`);
+        const workspaceListItemLocator: By = By.xpath(this.getWorkspaceListItemLocator(workspaceName));
 
         await this.driverHelper.waitAndClick(workspaceListItemLocator, timeout);
     }
@@ -87,8 +86,7 @@ export class Workspaces {
     async waitWorkspaceListItemAbcence(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceListItemAbcence "${workspaceName}"`);
 
-        let namespace: string = TestConstants.TS_SELENIUM_USERNAME;
-        const workspaceListItemLocator: By = By.css(`div[id='ws-full-name-${namespace}/${workspaceName}']`);
+        const workspaceListItemLocator: By = By.xpath(this.getWorkspaceListItemLocator(workspaceName));
 
         await this.driverHelper.waitDisappearance(workspaceListItemLocator, timeout);
     }
@@ -119,7 +117,7 @@ export class Workspaces {
     }
 
     private getWorkspaceListItemLocator(workspaceName: string): string {
-        return `#ws-name-${workspaceName}`;
+        return `//tbody[@class='workspaces-list-table-body']//td[text()[3]='${workspaceName}']`;
     }
 
     private getWorkspaceStatusCssLocator(workspaceName: string, workspaceStatus: string): string {

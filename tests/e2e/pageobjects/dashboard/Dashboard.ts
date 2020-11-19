@@ -19,11 +19,9 @@ import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class Dashboard {
-    private static readonly DASHBOARD_BUTTON_CSS: string = '#dashboard-item';
-    private static readonly WORKSPACES_BUTTON_CSS: string = '#workspaces-item';
-    private static readonly STACKS_BUTTON_CSS: string = '#stacks-item';
-    private static readonly FACTORIES_BUTTON_CSS: string = '#factories-item';
-    private static readonly GET_STARTED_BUTTON_XPATH: string = '//md-list-item//span[text()=\'Get Started\']';
+    private static readonly WORKSPACES_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Workspaces']`;
+    private static readonly GET_STARTED_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Get Started Page']`;
+    private static readonly CREATE_WORKSPACE_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Create Workspace']`;
     private static readonly LOADER_PAGE_CSS: string = '.main-page-loader';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
@@ -58,7 +56,7 @@ export class Dashboard {
     async openDashboard() {
         Logger.debug('Dashboard.openDashboard');
 
-        await this.driverHelper.getDriver().navigate().to(TestConstants.TS_SELENIUM_BASE_URL);
+        await this.driverHelper.getDriver().navigate().to(`${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/next`);
         await this.waitPage();
 
     }
@@ -66,39 +64,27 @@ export class Dashboard {
     async waitPage(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         Logger.debug('Dashboard.waitPage');
 
-        await this.driverHelper.waitVisibility(By.css(Dashboard.WORKSPACES_BUTTON_CSS), timeout);
-        await this.driverHelper.waitVisibility(By.css(Dashboard.STACKS_BUTTON_CSS), timeout);
+        await this.driverHelper.waitVisibility(By.xpath(Dashboard.WORKSPACES_BUTTON_XPATH), timeout);
         await this.driverHelper.waitVisibility(By.xpath(Dashboard.GET_STARTED_BUTTON_XPATH), timeout);
-    }
-
-    async clickDashboardButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
-        Logger.debug('Dashboard.clickDashboardButton');
-
-        await this.driverHelper.waitAndClick(By.css(Dashboard.DASHBOARD_BUTTON_CSS), timeout);
+        await this.driverHelper.waitVisibility(By.xpath(Dashboard.CREATE_WORKSPACE_BUTTON_XPATH), timeout);
     }
 
     async clickWorkspacesButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug('Dashboard.clickWorkspacesButton');
 
-        await this.driverHelper.waitAndClick(By.css(Dashboard.WORKSPACES_BUTTON_CSS), timeout);
+        await this.driverHelper.waitAndClick(By.xpath(Dashboard.WORKSPACES_BUTTON_XPATH), timeout);
     }
 
-    async clickStacksdButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
-        Logger.debug('Dashboard.clickStacksdButton');
+    async clickCreateWorkspaceButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
+        Logger.debug('Dashboard.clickCreateWorkspaceButton');
 
-        await this.driverHelper.waitAndClick(By.css(Dashboard.STACKS_BUTTON_CSS), timeout);
+        await this.driverHelper.waitAndClick(By.xpath(Dashboard.CREATE_WORKSPACE_BUTTON_XPATH), timeout);
     }
 
     async clickGetStartedButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug('Dashboard.clickGetStartedButton');
 
         await this.driverHelper.waitAndClick(By.xpath(Dashboard.GET_STARTED_BUTTON_XPATH), timeout);
-    }
-
-    async clickFactoriesButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
-        Logger.debug('Dashboard.clickFactoriesButton');
-
-        await this.driverHelper.waitAndClick(By.css(Dashboard.FACTORIES_BUTTON_CSS), timeout);
     }
 
     async waitLoader(timeout: number = TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT) {
