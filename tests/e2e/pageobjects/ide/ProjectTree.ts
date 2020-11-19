@@ -141,9 +141,6 @@ export class ProjectTree {
         const expandIconLocator: By = By.css(locator);
         const treeItemLocator: By = By.css(this.getTreeItemCssLocator(itemPath));
 
-
-
-
         await this.driverHelper.getDriver().wait(async () => {
             const classAttributeValue: string = await this.driverHelper.waitAndGetElementAttribute(expandIconLocator, 'class', timeout);
             const isItemCollapsed: boolean = classAttributeValue.search('theia-mod-collapsed') > 0;
@@ -323,8 +320,12 @@ export class ProjectTree {
     }
 
     private async getExpandIconCssLocator(itemPath: string): Promise<string> {
-        const entry: string = await this.getWorkspacePathEntry();
-        return `div[data-node-id='${entry}/projects/${itemPath}']`;
+        const items: Array<string> = itemPath.split('/');
+        if (items.length > 1) {
+            const entry: string = await this.getWorkspacePathEntry();
+            return `div[data-node-id='${entry}/projects/${itemPath}']`;
+        }
+        return `div[data-node-id='/projects/${itemPath}']`;
     }
 
     private getTreeItemCssLocator(itemPath: string): string {
