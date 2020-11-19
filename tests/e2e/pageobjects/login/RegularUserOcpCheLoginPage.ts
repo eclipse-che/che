@@ -15,13 +15,15 @@ import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { Logger } from '../../utils/Logger';
+import { DriverHelper } from '../../utils/DriverHelper';
 
 @injectable()
 export class RegularUserOcpCheLoginPage implements ICheLoginPage {
 
     constructor(
         @inject (CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage,
-        @inject (CLASSES.CheLoginPage) private readonly cheLogin: CheLoginPage) { }
+        @inject (CLASSES.CheLoginPage) private readonly cheLogin: CheLoginPage,
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async login() {
         Logger.debug('RegularUserOcpCheLoginPage.login');
@@ -56,6 +58,9 @@ export class RegularUserOcpCheLoginPage implements ICheLoginPage {
             await this.cheLogin.inputPaswordEclipseCheLoginPage(TestConstants.TS_SELENIUM_PASSWORD);
             await this.cheLogin.clickEclipseCheLoginButton();
         }
+
+        await this.driverHelper.wait(10000);
+        await this.driverHelper.navigateToUrl(`${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/next`);
     }
 
 }

@@ -8,7 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { TestConstants } from '../../TestConstants';
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
@@ -16,6 +15,10 @@ import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
 
+export enum WorkspaceStatusUI {
+    Running = 'green',
+    Stopped = 'grey'
+}
 
 @injectable()
 export class Workspaces {
@@ -46,7 +49,7 @@ export class Workspaces {
     async clickOnStopWorkspaceButton(workspaceName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug(`Workspaces.clickOnStopWorkspaceButton "${workspaceName}"`);
 
-        const stopWorkspaceButtonLocator: By = By.xpath(`(//tbody[@class='workspaces-list-table-body' and //td[text()[3]='${workspaceName}']]//td[@data-label='ACTIONS']//span)[1]`);
+        const stopWorkspaceButtonLocator: By = By.xpath(`(${this.getWorkspaceListItemLocator(workspaceName)}//td[@data-label='ACTIONS']//span)[1]`);
 
         await this.driverHelper.waitAndClick(stopWorkspaceButtonLocator, timeout);
     }
@@ -54,7 +57,7 @@ export class Workspaces {
     async waitWorkspaceWithRunningStatus(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceWithRunningStatus "${workspaceName}"`);
 
-        const runningStatusLocator: By = By.css(this.getWorkspaceStatusCssLocator(workspaceName, 'RUNNING'));
+        const runningStatusLocator: By = By.css(this.getWorkspaceStatusCssLocator(workspaceName, WorkspaceStatusUI.Running));
 
         await this.driverHelper.waitVisibility(runningStatusLocator, timeout);
     }
@@ -62,7 +65,7 @@ export class Workspaces {
     async waitWorkspaceWithStoppedStatus(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceWithStoppedStatus "${workspaceName}"`);
 
-        const stoppedStatusLocator: By = By.css(this.getWorkspaceStatusCssLocator(workspaceName, 'STOPPED'));
+        const stoppedStatusLocator: By = By.css(this.getWorkspaceStatusCssLocator(workspaceName, WorkspaceStatusUI.Stopped));
 
         await this.driverHelper.waitVisibility(stoppedStatusLocator, timeout);
     }
@@ -75,10 +78,10 @@ export class Workspaces {
         await this.driverHelper.waitAndClick(workspaceListItemLocator, timeout);
     }
 
-    async clickDeleteButtonOnWorkspaceDetails(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
+    async clickWorkspaceDeleteButton(workspaceName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug('Workspaces.clickDeleteButtonOnWorkspaceDetails');
 
-        const deleteButtonOnWorkspaceDetailsLocator: By = By.css('che-button-danger[che-button-title=\'Delete\']');
+        const deleteButtonOnWorkspaceDetailsLocator: By = By.xpath(`(${this.getWorkspaceListItemLocator(workspaceName)}//td[@data-label='ACTIONS']//span)[2]`);
 
         await this.driverHelper.waitAndClick(deleteButtonOnWorkspaceDetailsLocator, timeout);
     }
@@ -91,37 +94,12 @@ export class Workspaces {
         await this.driverHelper.waitDisappearance(workspaceListItemLocator, timeout);
     }
 
-    async confirmWorkspaceDeletion(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
-        Logger.debug('Workspaces.confirmWorkspaceDeletion');
-
-        const checkbox: By = By.xpath(`//che-popup//input[@id='enable-button' and contains(@class, 'ng-empty')]`);
-        const checkbox_checked: By = By.xpath(`//che-popup//input[@id='enable-button' and contains(@class, 'ng-not-empty')]`);
-        const deleteButton: By = By.xpath('//che-popup//che-button-danger');
-
-        await this.driverHelper.waitAndClick(checkbox, 5000);
-        try {
-            await this.driverHelper.waitVisibility(checkbox_checked, 3000);
-        } catch (err) {
-            Logger.info('The checkbox is not checked. Trying again.');
-            await this.driverHelper.waitAndClick(checkbox, 5000);
-
-            try {
-                await this.driverHelper.waitVisibility(checkbox_checked, 3000);
-            } catch (err) {
-                Logger.error('Test was not able to select the checkbox during a workspace deletion.');
-                throw err;
-            }
-        }
-
-        await this.driverHelper.waitAndClick(deleteButton, 10000);
-    }
-
     private getWorkspaceListItemLocator(workspaceName: string): string {
-        return `//tbody[@class='workspaces-list-table-body']//td[text()[3]='${workspaceName}']`;
+        return `//tbody[@class='workspaces-list-table-body']//tr[//td[text()[3]='${workspaceName}']]`;
     }
 
-    private getWorkspaceStatusCssLocator(workspaceName: string, workspaceStatus: string): string {
-        return `#ws-name-${workspaceName}[data-ws-status='${workspaceStatus}']`;
+    private getWorkspaceStatusCssLocator(workspaceName: string, workspaceStatus: WorkspaceStatusUI): string {
+        return `${this.getWorkspaceListItemLocator(workspaceName)}//span[@data-testid='workspace-status-indicator']//*[local-name()='svg' and @fill='${workspaceStatus}']`;
     }
 
 }

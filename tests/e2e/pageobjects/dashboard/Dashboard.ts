@@ -35,6 +35,7 @@ export class Dashboard {
         await this.workspaces.waitPage();
         await this.workspaces.waitWorkspaceListItem(workspaceName);
         await this.workspaces.waitWorkspaceWithRunningStatus(workspaceName);
+
         await this.workspaces.clickOnStopWorkspaceButton(workspaceName);
         await this.workspaces.waitWorkspaceWithStoppedStatus(workspaceName);
     }
@@ -46,9 +47,7 @@ export class Dashboard {
         await this.clickWorkspacesButton();
         await this.workspaces.waitPage();
         await this.workspaces.waitWorkspaceListItem(workspaceName);
-        await this.workspaces.clickWorkspaceListItem(workspaceName);
-        await this.workspaces.clickDeleteButtonOnWorkspaceDetails();
-        await this.workspaces.confirmWorkspaceDeletion();
+        await this.workspaces.clickWorkspaceDeleteButton(workspaceName);
         await this.workspaces.waitPage();
         await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
     }

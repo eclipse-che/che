@@ -22,7 +22,7 @@ export class GetStarted {
     async waitTitleContains(expectedText: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`GetStarted.waitTitleContains text: "${expectedText}"`);
 
-        const pageTitleLocator: By = By.xpath(`//div[contains(@title, '${expectedText}')]`);
+        const pageTitleLocator: By = By.xpath(`//h1[contains(text(), '${expectedText}')]`);
 
         await this.driverHelper.waitVisibility(pageTitleLocator, timeout);
     }
