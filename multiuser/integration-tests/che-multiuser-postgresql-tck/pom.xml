@@ -23,7 +23,7 @@
     <packaging>jar</packaging>
     <name>Che Multiuser :: PostgreSQL Tck</name>
     <properties>
-        <db.image.name>centos/postgresql-96-centos7</db.image.name>
+        <db.image.name>${integration.postgresql.db.image}</db.image.name>
         <jdbc.admin.name>postgres</jdbc.admin.name>
         <jdbc.admin.password>che2</jdbc.admin.password>
         <jdbc.driver>org.postgresql.Driver</jdbc.driver>
