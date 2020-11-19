@@ -96,6 +96,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatc
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogToEventPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PreviewUrlCommandProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TrustedCAProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.KubernetesServerResolverFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.resolver.ServerResolver;
@@ -138,6 +139,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final RuntimeCleaner runtimeCleaner;
   protected final CheNamespace cheNamespace;
   protected final Tracer tracer;
+  protected final TrustedCAProvisioner trustedCAProvisioner;
 
   @Inject
   public KubernetesInternalRuntime(
@@ -164,6 +166,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       RuntimeCleaner runtimeCleaner,
       CheNamespace cheNamespace,
       Tracer tracer,
+      TrustedCAProvisioner trustedCAProvisioner,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace) {
     super(context, urlRewriter);
@@ -190,6 +193,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.serverResolverFactory = kubernetesServerResolverFactory;
     this.runtimeCleaner = runtimeCleaner;
     this.tracer = tracer;
+    this.trustedCAProvisioner = trustedCAProvisioner;
   }
 
   @Override
@@ -307,6 +311,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     secretAsContainerResourceProvisioner.provision(
         context.getEnvironment(), context.getIdentity(), namespace);
     LOG.debug("Provisioning of workspace '{}' completed.", workspaceId);
+
+    trustedCAProvisioner.provision(context.getEnvironment(), context.getIdentity());
   }
 
   /**

@@ -20,7 +20,6 @@ import io.opentracing.Tracer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -33,7 +32,6 @@ import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentPro
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesRuntimeContext;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeCleaner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
@@ -41,6 +39,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachi
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.CheNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TrustedCAProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
@@ -49,7 +48,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarTool
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftPreviewUrlCommandProvisioner;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.Openshift4TrustedCAProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerResolverFactory;
 
 /**
@@ -59,7 +57,6 @@ import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServer
 public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShiftEnvironment> {
 
   private final OpenShiftProject project;
-  private final Openshift4TrustedCAProvisioner trustedCAProvisioner;
   private final OpenShiftServerResolverFactory serverResolverFactory;
 
   @Inject
@@ -88,7 +85,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       RuntimeCleaner runtimeCleaner,
       CheNamespace cheNamespace,
       Tracer tracer,
-      Openshift4TrustedCAProvisioner trustedCAProvisioner,
+      TrustedCAProvisioner trustedCAProvisioner,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project) {
     super(
@@ -115,21 +112,11 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         runtimeCleaner,
         cheNamespace,
         tracer,
+        trustedCAProvisioner,
         context,
         project);
     this.project = project;
-    this.trustedCAProvisioner = trustedCAProvisioner;
     this.serverResolverFactory = serverResolverFactory;
-  }
-
-  @Override
-  protected void provisionWorkspace(
-      Map<String, String> startOptions,
-      KubernetesRuntimeContext<OpenShiftEnvironment> context,
-      String workspaceId)
-      throws InfrastructureException {
-    super.provisionWorkspace(startOptions, context, workspaceId);
-    trustedCAProvisioner.provision(context.getEnvironment(), project);
   }
 
   @Override

@@ -139,6 +139,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.LogWatc
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.log.PodLogHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesPreviewUrlCommandProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TrustedCAProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.WorkspaceExposureType;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
@@ -221,6 +222,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private SecretAsContainerResourceProvisioner secretAsContainerResourceProvisioner;
   @Mock private ServiceExposureStrategyProvider serviceExposureStrategyProvider;
   @Mock private RuntimeCleaner runtimeCleaner;
+  @Mock private TrustedCAProvisioner trustedCAProvisioner;
   private KubernetesServerResolverFactory serverResolverFactory;
 
   @Mock
@@ -254,7 +256,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock(answer = Answers.RETURNS_MOCKS)
   private Tracer tracer;
 
-  private CommandImpl envCommand = new CommandImpl("envCommand", "echo hello", "env");
+  private final CommandImpl envCommand = new CommandImpl("envCommand", "echo hello", "env");
 
   @BeforeMethod
   public void setup() throws Exception {
@@ -298,10 +300,12 @@ public class KubernetesInternalRuntimeTest {
             runtimeCleaner,
             cheNamespace,
             tracer,
+            trustedCAProvisioner,
             context,
             namespace);
 
     when(context.getEnvironment()).thenReturn(k8sEnv);
+    when(context.getRuntime()).thenReturn(internalRuntime);
     when(serverCheckerFactory.create(any(), anyString(), any())).thenReturn(serversChecker);
     when(context.getIdentity()).thenReturn(IDENTITY);
     doNothing().when(namespace).cleanUp();
