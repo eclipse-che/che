@@ -14,6 +14,7 @@ import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 import { e2eContainer } from '../../inversify.config';
 import { Editor, CLASSES } from '../..';
+import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 
@@ -49,12 +50,11 @@ suite(`${stack} test`, async () => {
     });
 
     suite('Stopping and deleting the workspace', async () => {
-        // let workspaceName = 'not defined';
-        // suiteSetup(async () => {
-        //     workspaceName = await WorkspaceNameHandler.getNameFromUrl();
-        // });
+        let workspaceName = 'not defined';
+        suiteSetup(async () => {
+            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
+        });
 
-        let workspaceName: string = 'cpp-2ctus';
         test(`Stop and remowe workspace`, async () => {
             await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
         });

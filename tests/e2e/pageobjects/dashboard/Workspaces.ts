@@ -50,7 +50,6 @@ export class Workspaces {
         Logger.debug(`Workspaces.clickOnStopWorkspaceButton "${workspaceName}"`);
 
         const stopWorkspaceButtonLocator: By = By.xpath(`(${this.getWorkspaceListItemLocator(workspaceName)}//td[@data-label='ACTIONS']//span)[1]`);
-        Logger.debug(`Stop workspace button ${stopWorkspaceButtonLocator}`);
 
         await this.driverHelper.waitAndClick(stopWorkspaceButtonLocator, timeout);
     }
@@ -67,7 +66,6 @@ export class Workspaces {
         Logger.debug(`Workspaces.waitWorkspaceWithStoppedStatus "${workspaceName}"`);
 
         const stoppedStatusLocator: By = this.getWorkspaceStatusLocator(workspaceName, WorkspaceStatusUI.Stopped);
-        Logger.debug(`Worksapce with stopped status locator  ${stoppedStatusLocator}`);
 
         await this.driverHelper.waitVisibility(stoppedStatusLocator, timeout);
     }
