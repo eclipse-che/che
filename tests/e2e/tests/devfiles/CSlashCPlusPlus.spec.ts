@@ -26,23 +26,23 @@ const runTaskName: string = 'run';
 const stack: string = 'C/C++';
 
 suite(`${stack} test`, async () => {
-    suite.skip(`Create ${stack} workspace`, async () => {
+    suite(`Create ${stack} workspace`, async () => {
         workspaceHandling.createAndOpenWorkspace(stack);
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName);
     });
 
-    suite.skip('Test opening file', async () => {
+    suite('Test opening file', async () => {
         // opening file that soon should give time for LS to initialize
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
         prepareEditorForLSTests();
     });
 
-    suite.skip('Validation of project build', async () => {
+    suite('Validation of project build', async () => {
         codeExecutionTests.runTask(buildTaskName, 30_000);
         codeExecutionTests.runTask(runTaskName, 30_000);
     });
 
-    suite.skip('Language server validation', async () => {
+    suite('Language server validation', async () => {
         commonLsTests.errorHighlighting(tabTitle, `error_text;`, 12);
         commonLsTests.suggestionInvoking(tabTitle, 15, 22, 'test');
         commonLsTests.autocomplete(tabTitle, 15, 9, 'printf');
