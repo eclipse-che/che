@@ -52,6 +52,21 @@ export class Dashboard {
         await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
     }
 
+    async stopAndRemoveWorkspaceByUI(workspaceName: string) {
+        Logger.debug(`Dashboard.stopAndRemoveWorkspaceByUI "${workspaceName}"`);
+
+        await this.openDashboard();
+        await this.clickWorkspacesButton();
+        await this.workspaces.waitPage();
+        await this.workspaces.waitWorkspaceListItem(workspaceName);
+        await this.workspaces.waitWorkspaceWithRunningStatus(workspaceName);
+
+        await this.workspaces.clickOnStopWorkspaceButton(workspaceName);
+        await this.workspaces.waitWorkspaceWithStoppedStatus(workspaceName);
+        await this.workspaces.clickWorkspaceDeleteButton(workspaceName);
+        await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
+    }
+
     async openDashboard() {
         Logger.debug('Dashboard.openDashboard');
 

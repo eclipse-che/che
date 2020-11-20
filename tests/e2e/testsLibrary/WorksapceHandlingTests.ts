@@ -29,10 +29,14 @@ export function createAndOpenWorkspace(stack: string) {
     });
 }
 
-export async function stopWorkspace(workspaceName: string ) {
-        await dashboard.stopWorkspaceByUI(workspaceName);
+export async function stopWorkspace(workspaceName: string) {
+    await dashboard.stopWorkspaceByUI(workspaceName);
 }
 
 export async function removeWorkspace(workspaceName: string) {
-        await dashboard.deleteWorkspaceByUI(workspaceName);
+    await dashboard.deleteWorkspaceByUI(workspaceName);
+}
+
+export async function stopAndRemoveWorkspace(workspaceName: string) {
+    await dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
 }

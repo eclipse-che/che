@@ -50,6 +50,7 @@ export class Workspaces {
         Logger.debug(`Workspaces.clickOnStopWorkspaceButton "${workspaceName}"`);
 
         const stopWorkspaceButtonLocator: By = By.xpath(`(${this.getWorkspaceListItemLocator(workspaceName)}//td[@data-label='ACTIONS']//span)[1]`);
+        Logger.debug(`Stop workspace button ${stopWorkspaceButtonLocator}`);
 
         await this.driverHelper.waitAndClick(stopWorkspaceButtonLocator, timeout);
     }
@@ -57,7 +58,7 @@ export class Workspaces {
     async waitWorkspaceWithRunningStatus(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceWithRunningStatus "${workspaceName}"`);
 
-        const runningStatusLocator: By = By.css(this.getWorkspaceStatusCssLocator(workspaceName, WorkspaceStatusUI.Running));
+        const runningStatusLocator: By = this.getWorkspaceStatusLocator(workspaceName, WorkspaceStatusUI.Running);
 
         await this.driverHelper.waitVisibility(runningStatusLocator, timeout);
     }
@@ -65,7 +66,8 @@ export class Workspaces {
     async waitWorkspaceWithStoppedStatus(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceWithStoppedStatus "${workspaceName}"`);
 
-        const stoppedStatusLocator: By = By.css(this.getWorkspaceStatusCssLocator(workspaceName, WorkspaceStatusUI.Stopped));
+        const stoppedStatusLocator: By = this.getWorkspaceStatusLocator(workspaceName, WorkspaceStatusUI.Stopped);
+        Logger.debug(`Worksapce with stopped status locator  ${stoppedStatusLocator}`);
 
         await this.driverHelper.waitVisibility(stoppedStatusLocator, timeout);
     }
@@ -98,8 +100,8 @@ export class Workspaces {
         return `//tbody[@class='workspaces-list-table-body']//tr[//td[text()[3]='${workspaceName}']]`;
     }
 
-    private getWorkspaceStatusCssLocator(workspaceName: string, workspaceStatus: WorkspaceStatusUI): string {
-        return `${this.getWorkspaceListItemLocator(workspaceName)}//span[@data-testid='workspace-status-indicator']//*[local-name()='svg' and @fill='${workspaceStatus}']`;
+    private getWorkspaceStatusLocator(workspaceName: string, workspaceStatus: WorkspaceStatusUI): By {
+        return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}//span[@data-testid='workspace-status-indicator']//*[local-name()='svg' and @fill='${workspaceStatus}']`);
     }
 
 }

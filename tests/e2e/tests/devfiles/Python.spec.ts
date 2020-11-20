@@ -10,10 +10,10 @@
 import { WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
 import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
-import * as workspaceHandler from '../../testsLibrary/WorksapceHandlingTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
+import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
 
 const workspaceStack: string = 'Python';
 const workspaceSampleName: string = 'python-hello-world';
@@ -25,7 +25,7 @@ const fileName: string = `hello-world.py`;
 suite(`${workspaceStack} test`, async () => {
 
     suite(`Create ${workspaceStack} workspace`, async () => {
-        workspaceHandler.createAndOpenWorkspace(workspaceStack);
+        workspaceHandling.createAndOpenWorkspace(workspaceStack);
         projectManager.waitWorkspaceReadinessNoSubfolder(workspaceSampleName);
     });
 
@@ -48,14 +48,12 @@ suite(`${workspaceStack} test`, async () => {
 
     suite ('Stopping and deleting the workspace', async () => {
         let workspaceName = 'not defined';
-        suiteSetup( async () => {
+        suiteSetup(async () => {
             workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
-        test (`Stop worksapce`, async () => {
-            await workspaceHandler.stopWorkspace(workspaceName);
-        });
-        test (`Remove workspace`, async () => {
-            await workspaceHandler.removeWorkspace(workspaceName);
+
+        test(`Stop and remowe workspace`, async () => {
+            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
         });
     });
 });

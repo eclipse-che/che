@@ -59,7 +59,7 @@ export class RegularUserOcpCheLoginPage implements ICheLoginPage {
             await this.cheLogin.clickEclipseCheLoginButton();
         }
 
-        await this.driverHelper.wait(10000);
+        await this.driverHelper.wait(5000);
         await this.driverHelper.navigateToUrl(`${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/next`);
     }
 

@@ -13,7 +13,7 @@ import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 import { e2eContainer } from '../../inversify.config';
-import { WorkspaceNameHandler, Editor, CLASSES } from '../..';
+import { Editor, CLASSES } from '../..';
 
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 
@@ -25,39 +25,38 @@ const runTaskName: string = 'run';
 const stack: string = 'C/C++';
 
 suite(`${stack} test`, async () => {
-    suite (`Create ${stack} workspace`, async () => {
+    suite.skip(`Create ${stack} workspace`, async () => {
         workspaceHandling.createAndOpenWorkspace(stack);
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName);
     });
 
-    suite('Test opening file', async () => {
+    suite.skip('Test opening file', async () => {
         // opening file that soon should give time for LS to initialize
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
         prepareEditorForLSTests();
     });
 
-    suite('Validation of project build', async () => {
+    suite.skip('Validation of project build', async () => {
         codeExecutionTests.runTask(buildTaskName, 30_000);
         codeExecutionTests.runTask(runTaskName, 30_000);
     });
 
-    suite('Language server validation', async () => {
+    suite.skip('Language server validation', async () => {
         commonLsTests.errorHighlighting(tabTitle, `error_text;`, 12);
         commonLsTests.suggestionInvoking(tabTitle, 15, 22, 'test');
         commonLsTests.autocomplete(tabTitle, 15, 9, 'printf');
         // commonLsTests.codeNavigation(tabTitle, 15, 9, 'stdio.h'); currently not working because of LS not exposing Ctrl + F12 combination
     });
 
-    suite ('Stopping and deleting the workspace', async () => {
-        let workspaceName = 'not defined';
-        suiteSetup( async () => {
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
-        });
-        test (`Stop worksapce`, async () => {
-            await workspaceHandling.stopWorkspace(workspaceName);
-        });
-        test (`Remove workspace`, async () => {
-            await workspaceHandling.removeWorkspace(workspaceName);
+    suite('Stopping and deleting the workspace', async () => {
+        // let workspaceName = 'not defined';
+        // suiteSetup(async () => {
+        //     workspaceName = await WorkspaceNameHandler.getNameFromUrl();
+        // });
+
+        let workspaceName: string = 'cpp-2ctus';
+        test(`Stop and remowe workspace`, async () => {
+            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
         });
     });
 

@@ -12,8 +12,8 @@ import { e2eContainer } from  '../../inversify.config';
 import 'reflect-metadata';
 import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
-import * as workspaceHandler from '../../testsLibrary/WorksapceHandlingTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
+import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
 import { Logger } from '../../utils/Logger';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
 
@@ -37,7 +37,7 @@ suite(`${workspaceStack} test`, async () => {
             Logger.warn(`Manually setting a preference for golang devfile LS based on issue: https://github.com/eclipse/che/issues/16113`);
             await preferencesHandler.setUseGoLanaguageServer();
         });
-        workspaceHandler.createAndOpenWorkspace(workspaceStack);
+        workspaceHandling.createAndOpenWorkspace(workspaceStack);
         projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
@@ -65,14 +65,12 @@ suite(`${workspaceStack} test`, async () => {
 
     suite('Stop and remove workspace', async() => {
         let workspaceName = 'not defined';
-        suiteSetup( async () => {
+        suiteSetup(async () => {
             workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
-        test (`Stop worksapce`, async () => {
-            await workspaceHandler.stopWorkspace(workspaceName);
-        });
-        test (`Remove workspace`, async () => {
-            await workspaceHandler.removeWorkspace(workspaceName);
+
+        test(`Stop and remowe workspace`, async () => {
+            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
         });
     });
 
