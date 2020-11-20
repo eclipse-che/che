@@ -11,27 +11,16 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
-
+import com.google.common.base.Strings;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
@@ -42,6 +31,21 @@ import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 
 /**
  * Sets subject attribute into session based on keycloak authentication data.
@@ -59,6 +63,7 @@ public class KeycloakEnvironmentInitializationFilter
   private final KeycloakProfileRetriever keycloakProfileRetriever;
   private final PermissionChecker permissionChecker;
   private final KeycloakSettings keycloakSettings;
+  private final String backSlashReplaceWith;
   private final JwtParser jwtParser;
 
   @Inject
@@ -69,13 +74,16 @@ public class KeycloakEnvironmentInitializationFilter
       KeycloakProfileRetriever keycloakProfileRetriever,
       RequestTokenExtractor tokenExtractor,
       PermissionChecker permissionChecker,
-      KeycloakSettings settings) {
+      KeycloakSettings settings,
+      @Nullable @Named("che.keycloak.username.replace_backslash_in_username_with")
+          String backSlashReplaceWith) {
     super(sessionStore, tokenExtractor);
     this.jwtParser = jwtParser;
     this.userManager = userManager;
     this.keycloakProfileRetriever = keycloakProfileRetriever;
     this.permissionChecker = permissionChecker;
     this.keycloakSettings = settings;
+    this.backSlashReplaceWith = backSlashReplaceWith;
   }
 
   @Override
@@ -116,6 +124,11 @@ public class KeycloakEnvironmentInitializationFilter
         // https://openid.net/specs/openid-connect-basic-1_0.html#ClaimStability
         username = claims.getIssuer() + ":" + claims.getSubject();
       }
+      LOG.info("username={} backSlashReplaceWith={}", username, backSlashReplaceWith);
+      if (!Strings.isNullOrEmpty(backSlashReplaceWith)) {
+        username = username.replace("\\", backSlashReplaceWith);
+      }
+      LOG.info("username={} ", username);
       String id = claims.getSubject();
 
       String email =
