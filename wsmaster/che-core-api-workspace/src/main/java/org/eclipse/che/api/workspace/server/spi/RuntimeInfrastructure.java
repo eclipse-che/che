@@ -11,13 +11,14 @@
  */
 package org.eclipse.che.api.workspace.server.spi;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -166,9 +167,11 @@ public abstract class RuntimeInfrastructure {
    * @param httpMethod the http method to use
    * @param relativeUri the URI to request - this must be a relative URI that is appended to the
    *     master URL of the infrastructure
+   * @param headers the HTTP headers to send
    * @param body the optional body of the request
    * @return the response from the backing infrastructure
    */
   public abstract Response sendDirectInfrastructureRequest(
-      String httpMethod, URI relativeUri, @Nullable JsonNode body) throws InfrastructureException;
+      String httpMethod, URI relativeUri, @Nullable HttpHeaders headers, @Nullable InputStream body)
+      throws InfrastructureException;
 }

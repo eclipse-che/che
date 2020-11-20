@@ -11,18 +11,23 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import okhttp3.Call;
+import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import okio.BufferedSink;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -47,7 +52,8 @@ public class DirectKubernetesAPIAccessHelper {
       OkHttpClient httpClient,
       String httpMethod,
       URI relativeUri,
-      @Nullable JsonNode body)
+      @Nullable HttpHeaders headers,
+      @Nullable InputStream body)
       throws InfrastructureException {
     if (relativeUri.isAbsolute() || relativeUri.isOpaque()) {
       throw new InfrastructureException(
@@ -56,13 +62,20 @@ public class DirectKubernetesAPIAccessHelper {
 
     try {
       URI fullUrl = new URI(masterUrl).resolve(relativeUri);
+      javax.ws.rs.core.MediaType mediaTypeHeader = headers.getMediaType();
+      String mediaType =
+          mediaTypeHeader == null ? "application/json;charset=utf-8" : mediaTypeHeader.toString();
+
       RequestBody requestBody =
-          body == null
-              ? null
-              : RequestBody.create(MediaType.parse("application/json"), body.toString());
+          body == null ? null : new InputStreamBasedRequestBody(body, mediaType);
+
       Call httpCall =
           httpClient.newCall(
-              new Request.Builder().url(fullUrl.toURL()).method(httpMethod, requestBody).build());
+              new Request.Builder()
+                  .url(fullUrl.toURL())
+                  .method(httpMethod, requestBody)
+                  .headers(toOkHttpHeaders(headers))
+                  .build());
 
       okhttp3.Response response = httpCall.execute();
       Response.ResponseBuilder bld = Response.status(response.code());
@@ -86,6 +99,43 @@ public class DirectKubernetesAPIAccessHelper {
       throw new InfrastructureException("Could not compose the direct URI.", e);
     } catch (IOException e) {
       throw new InfrastructureException("Error sending the direct infrastructure request.", e);
+    }
+  }
+
+  private static Headers toOkHttpHeaders(HttpHeaders headers) {
+    Headers.Builder bld = new Headers.Builder();
+    for (Map.Entry<String, List<String>> e : headers.getRequestHeaders().entrySet()) {
+      String name = e.getKey();
+      List<String> values = e.getValue();
+      for (String value : values) {
+        bld.add(name, value);
+      }
+    }
+
+    return bld.build();
+  }
+
+  private static final class InputStreamBasedRequestBody extends RequestBody {
+    private final InputStream inputStream;
+    private final MediaType mediaType;
+
+    private InputStreamBasedRequestBody(InputStream is, String contentType) {
+      this.inputStream = is;
+      this.mediaType = contentType == null ? null : MediaType.parse(contentType);
+    }
+
+    @Override
+    public MediaType contentType() {
+      return mediaType;
+    }
+
+    @Override
+    public void writeTo(BufferedSink sink) throws IOException {
+      byte[] buffer = new byte[1024];
+      int cnt;
+      while ((cnt = inputStream.read(buffer)) != -1) {
+        sink.write(buffer, 0, cnt);
+      }
     }
   }
 }

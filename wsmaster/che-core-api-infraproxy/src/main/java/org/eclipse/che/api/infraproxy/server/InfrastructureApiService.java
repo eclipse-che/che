@@ -11,13 +11,12 @@
  */
 package org.eclipse.che.api.infraproxy.server;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import io.swagger.annotations.Api;
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
 import java.net.URI;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -28,6 +27,9 @@ import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -52,6 +54,8 @@ public class InfrastructureApiService extends Service {
   private final RuntimeInfrastructure runtimeInfrastructure;
   private final ObjectMapper mapper;
 
+  @Context private MediaType mediaType;
+
   private static boolean determineAllowed(String infra, String identityProvider) {
     return "openshift".equals(infra)
         && identityProvider != null
@@ -74,44 +78,51 @@ public class InfrastructureApiService extends Service {
 
   @GET
   @Path("{path:.+}")
-  public Response get() throws InfrastructureException, ApiException, IOException {
-    return request("GET", null);
+  public Response get(@Context HttpHeaders headers)
+      throws InfrastructureException, ApiException, IOException {
+    return request("GET", headers, null);
   }
 
   @HEAD
   @Path("{path:.+}")
-  public Response head() throws InfrastructureException, ApiException, IOException {
-    return request("HEAD", null);
+  public Response head(@Context HttpHeaders headers)
+      throws InfrastructureException, ApiException, IOException {
+    return request("HEAD", headers, null);
   }
 
   @POST
   @Path("{path:.+}")
-  public Response post(Reader body) throws InfrastructureException, IOException, ApiException {
-    return request("POST", body);
+  public Response post(@Context HttpHeaders headers, InputStream body)
+      throws InfrastructureException, IOException, ApiException {
+    return request("POST", headers, body);
   }
 
   @DELETE
   @Path("{path:.+}")
-  public Response delete(Reader body) throws InfrastructureException, IOException, ApiException {
-    return request("DELETE", body);
+  public Response delete(@Context HttpHeaders headers, InputStream body)
+      throws InfrastructureException, IOException, ApiException {
+    return request("DELETE", headers, body);
   }
 
   @PUT
   @Path("{path:.+}")
-  public Response put(Reader body) throws InfrastructureException, IOException, ApiException {
-    return request("PUT", body);
+  public Response put(@Context HttpHeaders headers, InputStream body)
+      throws InfrastructureException, IOException, ApiException {
+    return request("PUT", headers, body);
   }
 
   @OPTIONS
   @Path("{path:.+}")
-  public Response options() throws InfrastructureException, ApiException, IOException {
-    return request("OPTIONS", null);
+  public Response options(@Context HttpHeaders headers)
+      throws InfrastructureException, ApiException, IOException {
+    return request("OPTIONS", headers, null);
   }
 
   @PATCH
   @Path("{path:.+}")
-  public Response patch(Reader body) throws InfrastructureException, IOException, ApiException {
-    return request("PATCH", body);
+  public Response patch(@Context HttpHeaders headers, InputStream body)
+      throws InfrastructureException, IOException, ApiException {
+    return request("PATCH", headers, body);
   }
 
   private void auth() throws ApiException {
@@ -121,12 +132,11 @@ public class InfrastructureApiService extends Service {
     }
   }
 
-  private Response request(String method, @Nullable Reader body)
+  private Response request(String method, HttpHeaders headers, @Nullable InputStream body)
       throws ApiException, IOException, InfrastructureException {
     auth();
-    JsonNode bodyJson = body == null ? mapper.missingNode() : mapper.readTree(body);
     return runtimeInfrastructure.sendDirectInfrastructureRequest(
-        method, relativizeRequestAndStripPrefix(), bodyJson.isMissingNode() ? null : bodyJson);
+        method, relativizeRequestAndStripPrefix(), headers, body);
   }
 
   /**

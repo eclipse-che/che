@@ -60,6 +60,7 @@
         <com.jayway.restassured.version>2.4.0</com.jayway.restassured.version>
         <com.jcraft.jsch.version>0.1.54</com.jcraft.jsch.version>
         <com.squareup.okhttp3.version>3.12.6</com.squareup.okhttp3.version>
+        <com.squareup.okio.version>1.15.0</com.squareup.okio.version>
         <commons-codec.version>1.11</commons-codec.version>
         <commons-compress.version>1.19</commons-compress.version>
         <commons-fileupload.version>1.3.3</commons-fileupload.version>
@@ -250,6 +251,11 @@
                 <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp</artifactId>
                 <version>${com.squareup.okhttp3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>${com.squareup.okio.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>

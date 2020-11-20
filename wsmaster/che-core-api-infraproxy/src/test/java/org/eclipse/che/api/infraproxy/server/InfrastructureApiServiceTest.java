@@ -75,7 +75,7 @@ public class InfrastructureApiServiceTest {
   @Test
   public void testGet() throws Exception {
     // given
-    when(infra.sendDirectInfrastructureRequest(any(), any(), eq(null)))
+    when(infra.sendDirectInfrastructureRequest(any(), any(), any(), eq(null)))
         .thenReturn(
             javax.ws.rs.core.Response.ok()
                 .header("Content-Type", "application/json; charset=utf-8")
@@ -95,7 +95,7 @@ public class InfrastructureApiServiceTest {
   @Test
   public void testPost() throws Exception {
     // given
-    when(infra.sendDirectInfrastructureRequest(any(), any(), any()))
+    when(infra.sendDirectInfrastructureRequest(any(), any(), any(), any()))
         .thenReturn(
             javax.ws.rs.core.Response.ok()
                 .header("Content-Type", "application/json; charset=utf-8")
@@ -116,7 +116,7 @@ public class InfrastructureApiServiceTest {
   @Test
   public void testPut() throws Exception {
     // given
-    when(infra.sendDirectInfrastructureRequest(any(), any(), any()))
+    when(infra.sendDirectInfrastructureRequest(any(), any(), any(), any()))
         .thenReturn(
             javax.ws.rs.core.Response.ok()
                 .header("Content-Type", "application/json; charset=utf-8")
@@ -137,7 +137,7 @@ public class InfrastructureApiServiceTest {
   @Test
   public void testHead() throws Exception {
     // given
-    when(infra.sendDirectInfrastructureRequest(any(), any(), any()))
+    when(infra.sendDirectInfrastructureRequest(any(), any(), any(), any()))
         .thenReturn(
             javax.ws.rs.core.Response.ok()
                 .header("Content-Type", "application/json; charset=utf-8")
@@ -156,7 +156,7 @@ public class InfrastructureApiServiceTest {
   @Test
   public void testDelete() throws Exception {
     // given
-    when(infra.sendDirectInfrastructureRequest(any(), any(), any()))
+    when(infra.sendDirectInfrastructureRequest(any(), any(), any(), any()))
         .thenReturn(
             javax.ws.rs.core.Response.ok()
                 .header("Content-Type", "application/json; charset=utf-8")
@@ -177,7 +177,7 @@ public class InfrastructureApiServiceTest {
   @Test
   public void testOptions() throws Exception {
     // given
-    when(infra.sendDirectInfrastructureRequest(any(), any(), any()))
+    when(infra.sendDirectInfrastructureRequest(any(), any(), any(), any()))
         .thenReturn(
             javax.ws.rs.core.Response.ok()
                 .header("Content-Type", "application/json; charset=utf-8")
@@ -197,7 +197,7 @@ public class InfrastructureApiServiceTest {
   @Test
   public void testPatch() throws Exception {
     // given
-    when(infra.sendDirectInfrastructureRequest(any(), any(), any()))
+    when(infra.sendDirectInfrastructureRequest(any(), any(), any(), any()))
         .thenReturn(
             javax.ws.rs.core.Response.ok()
                 .header("Content-Type", "application/json; charset=utf-8")

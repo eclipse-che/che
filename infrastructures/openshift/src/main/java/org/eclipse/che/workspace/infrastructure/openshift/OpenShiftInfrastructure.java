@@ -13,13 +13,14 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static java.lang.String.format;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
@@ -31,6 +32,7 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.Constants;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.DirectKubernetesAPIAccessHelper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -100,13 +102,15 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
   }
 
   @Override
-  public Response sendDirectInfrastructureRequest(String httpMethod, URI relativeUri, JsonNode body)
+  public Response sendDirectInfrastructureRequest(
+      String httpMethod, URI relativeUri, @Nullable HttpHeaders headers, @Nullable InputStream body)
       throws InfrastructureException {
     return DirectKubernetesAPIAccessHelper.call(
         openShiftClientFactory.getDefaultConfig().getMasterUrl(),
         openShiftClientFactory.getAuthenticatedHttpClient(),
         httpMethod,
         relativeUri,
+        headers,
         body);
   }
 
