@@ -39,7 +39,7 @@ public class BitbucketURLParser {
 
   @Inject
   public BitbucketURLParser(
-      @Nullable @Named("bitbucket.endpoint") String bitbucketEndpoint,
+      @Nullable @Named("bitbucket.server.endpoint") String bitbucketEndpoint,
       URLFetcher urlFetcher,
       DevfileFilenamesProvider devfileFilenamesProvider) {
     if (bitbucketEndpoint != null) {
@@ -69,7 +69,7 @@ public class BitbucketURLParser {
     if (!matcher.matches()) {
       throw new IllegalArgumentException(
           String.format(
-              "The given github url %s is not a valid URL github url. It should start with https://github.com/<user>/<repo>",
+              "The given url %s is not a valid Bitbucket server URL. Check either URL or server configuration.",
               url));
     }
 
