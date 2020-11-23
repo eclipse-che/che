@@ -126,8 +126,8 @@ public class OpenshiftTrustedCAProvisionerTest {
         new OpenshiftTrustedCAProvisioner(
             CONFIGMAP_NAME,
             CONFIGMAP_NAME,
-            CONFIGMAP_LABELS,
             CERTIFICATE_MOUNT_PATH,
+            CONFIGMAP_LABELS,
             cheInstallationLocation,
             openShiftProjectFactory,
             clientFactory);
@@ -139,8 +139,8 @@ public class OpenshiftTrustedCAProvisionerTest {
         new OpenshiftTrustedCAProvisioner(
             null,
             CONFIGMAP_NAME,
-            CONFIGMAP_LABELS,
             CERTIFICATE_MOUNT_PATH,
+            CONFIGMAP_LABELS,
             cheInstallationLocation,
             openShiftProjectFactory,
             clientFactory);

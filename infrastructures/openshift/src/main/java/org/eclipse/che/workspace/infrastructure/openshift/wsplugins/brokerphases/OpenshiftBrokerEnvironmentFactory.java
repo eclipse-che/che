@@ -11,14 +11,10 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases;
 
-import java.util.Collection;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
-import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory;
@@ -33,8 +29,6 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenshiftTru
  */
 public class OpenshiftBrokerEnvironmentFactory
     extends BrokerEnvironmentFactory<OpenShiftEnvironment> {
-
-  private final OpenshiftTrustedCAProvisioner trustedCAProvisioner;
 
   @Inject
   public OpenshiftBrokerEnvironmentFactory(
@@ -62,7 +56,6 @@ public class OpenshiftBrokerEnvironmentFactory
         trustedCAProvisioner,
         caCertificatesMountPath,
         certProvisioner);
-    this.trustedCAProvisioner = trustedCAProvisioner;
   }
 
   @Override
@@ -72,15 +65,5 @@ public class OpenshiftBrokerEnvironmentFactory
         .setMachines(brokersConfigs.machines)
         .setPods(brokersConfigs.pods)
         .build();
-  }
-
-  @Override
-  public OpenShiftEnvironment createForMetadataBroker(
-      Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID, boolean mergePlugins)
-      throws InfrastructureException {
-    OpenShiftEnvironment openShiftEnvironment =
-        super.createForMetadataBroker(pluginFQNs, runtimeID, mergePlugins);
-    // trustedCAProvisioner.provision(openShiftEnvironment, runtimeID);
-    return openShiftEnvironment;
   }
 }

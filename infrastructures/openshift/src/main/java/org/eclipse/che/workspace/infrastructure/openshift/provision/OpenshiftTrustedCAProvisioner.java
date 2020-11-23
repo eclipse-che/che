@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
-import com.google.common.base.Splitter;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -34,10 +33,11 @@ public class OpenshiftTrustedCAProvisioner extends KubernetesTrustedCAProvisione
 
   @Inject
   public OpenshiftTrustedCAProvisioner(
-      @Nullable @Named("che.trusted_ca_bundles_configmap") String caBundleConfigMap,
-      @Named("che.infra.openshift.trusted_ca_bundles_config_map") String configMapName,
-      @Named("che.infra.openshift.trusted_ca_bundles_config_map_labels") String configMapLabel,
-      @Named("che.infra.openshift.trusted_ca_bundles_mount_path") String certificateMountPath,
+      @Nullable @Named("che.trusted_ca.bundles_configmap") String caBundleConfigMap,
+      @Named("che.trusted_ca.workspace_bundle_configmap") String configMapName,
+      @Named("che.trusted_ca.bundle_mount_path") String certificateMountPath,
+      @Nullable @Named("che.infra.openshift.trusted_ca_bundles_config_map_labels")
+          String configMapLabel,
       CheInstallationLocation cheInstallationLocation,
       OpenShiftProjectFactory projectFactory,
       CheServerKubernetesClientFactory cheServerClientFactory)
@@ -46,9 +46,9 @@ public class OpenshiftTrustedCAProvisioner extends KubernetesTrustedCAProvisione
         caBundleConfigMap,
         configMapName,
         certificateMountPath,
+        configMapLabel,
         cheInstallationLocation,
         projectFactory,
         cheServerClientFactory);
-    this.configMapLabelKeyValue = Splitter.on(",").withKeyValueSeparator("=").split(configMapLabel);
   }
 }
