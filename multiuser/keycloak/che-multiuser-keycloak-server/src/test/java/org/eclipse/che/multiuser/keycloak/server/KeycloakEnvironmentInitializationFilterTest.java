@@ -54,7 +54,6 @@ import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -112,7 +111,7 @@ public class KeycloakEnvironmentInitializationFilterTest {
 
   @Test
   public void shouldReplaceBackSlashInUsername() throws Exception {
-    //given
+    // given
     Map<String, Object> claimParams = new HashMap<>();
     claimParams.put("email", "test@test.com");
     claimParams.put("preferred_username", "myorg\\myname");
@@ -121,17 +120,18 @@ public class KeycloakEnvironmentInitializationFilterTest {
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token");
     when(jwtParser.parseClaimsJws(anyString())).thenReturn(jws);
     keycloakSettingsMap.put(USERNAME_CLAIM_SETTING, "preferred_username");
-    when(userManager.getOrCreateUser(anyString(), anyString(), anyString())).thenReturn(mock(UserImpl.class, RETURNS_DEEP_STUBS));
+    when(userManager.getOrCreateUser(anyString(), anyString(), anyString()))
+        .thenReturn(mock(UserImpl.class, RETURNS_DEEP_STUBS));
     filter =
-            new KeycloakEnvironmentInitializationFilter(
-                    sessionStore,
-                    jwtParser,
-                    userManager,
-                    keycloakProfileRetriever,
-                    tokenExtractor,
-                    permissionChecker,
-                    keycloakSettings,
-                    "-backslash-");
+        new KeycloakEnvironmentInitializationFilter(
+            sessionStore,
+            jwtParser,
+            userManager,
+            keycloakProfileRetriever,
+            tokenExtractor,
+            permissionChecker,
+            keycloakSettings,
+            "-backslash-");
     // when
     filter.doFilter(request, response, chain);
 
@@ -141,7 +141,7 @@ public class KeycloakEnvironmentInitializationFilterTest {
 
   @Test
   public void shoulBeAbleToDisableBackSlashReplacing() throws Exception {
-    //given
+    // given
     Map<String, Object> claimParams = new HashMap<>();
     claimParams.put("email", "test@test.com");
     claimParams.put("preferred_username", "myorg\\myname");
@@ -150,25 +150,26 @@ public class KeycloakEnvironmentInitializationFilterTest {
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token");
     when(jwtParser.parseClaimsJws(anyString())).thenReturn(jws);
     keycloakSettingsMap.put(USERNAME_CLAIM_SETTING, "preferred_username");
-    when(userManager.getOrCreateUser(anyString(), anyString(), anyString())).thenReturn(mock(UserImpl.class, RETURNS_DEEP_STUBS));
+    when(userManager.getOrCreateUser(anyString(), anyString(), anyString()))
+        .thenReturn(mock(UserImpl.class, RETURNS_DEEP_STUBS));
     filter =
-            new KeycloakEnvironmentInitializationFilter(
-                    sessionStore,
-                    jwtParser,
-                    userManager,
-                    keycloakProfileRetriever,
-                    tokenExtractor,
-                    permissionChecker,
-                    keycloakSettings,
-                    null);
+        new KeycloakEnvironmentInitializationFilter(
+            sessionStore,
+            jwtParser,
+            userManager,
+            keycloakProfileRetriever,
+            tokenExtractor,
+            permissionChecker,
+            keycloakSettings,
+            null);
     // when
     filter.doFilter(request, response, chain);
 
     // then
-    verify(userManager).getOrCreateUser("id", "test@test.com",  "myorg\\myname");
+    verify(userManager).getOrCreateUser("id", "test@test.com", "myorg\\myname");
   }
 
-    @Test
+  @Test
   public void shouldSkipRequestsWithMachineTokens() throws Exception {
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("not_null_token");
     when(jwtParser.parseClaimsJws(anyString())).thenThrow(MachineTokenJwtException.class);
