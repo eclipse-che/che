@@ -39,7 +39,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachi
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.CheNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TrustedCAProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
@@ -85,7 +84,6 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       RuntimeCleaner runtimeCleaner,
       CheNamespace cheNamespace,
       Tracer tracer,
-      TrustedCAProvisioner trustedCAProvisioner,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project) {
     super(
@@ -112,7 +110,6 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         runtimeCleaner,
         cheNamespace,
         tracer,
-        trustedCAProvisioner,
         context,
         project);
     this.project = project;

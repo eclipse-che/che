@@ -44,6 +44,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.Serv
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.PreviewUrlExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftUniqueNamesProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenshiftTrustedCAProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftPreviewUrlExposer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,6 +85,7 @@ public class OpenShiftEnvironmentProvisioner
   private final VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
   private final GatewayRouterProvisioner gatewayRouterProvisioner;
   private final DeploymentMetadataProvisioner deploymentMetadataProvisioner;
+  private final OpenshiftTrustedCAProvisioner trustedCAProvisioner;
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
@@ -109,7 +111,8 @@ public class OpenShiftEnvironmentProvisioner
       OpenShiftPreviewUrlExposer previewUrlEndpointsProvisioner,
       VcsSslCertificateProvisioner vcsSslCertificateProvisioner,
       GatewayRouterProvisioner gatewayRouterProvisioner,
-      DeploymentMetadataProvisioner deploymentMetadataProvisioner) {
+      DeploymentMetadataProvisioner deploymentMetadataProvisioner,
+      OpenshiftTrustedCAProvisioner trustedCAProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -133,6 +136,7 @@ public class OpenShiftEnvironmentProvisioner
     this.vcsSslCertificateProvisioner = vcsSslCertificateProvisioner;
     this.gatewayRouterProvisioner = gatewayRouterProvisioner;
     this.deploymentMetadataProvisioner = deploymentMetadataProvisioner;
+    this.trustedCAProvisioner = trustedCAProvisioner;
   }
 
   @Override
@@ -174,6 +178,7 @@ public class OpenShiftEnvironmentProvisioner
     gitConfigProvisioner.provision(osEnv, identity);
     gatewayRouterProvisioner.provision(osEnv, identity);
     deploymentMetadataProvisioner.provision(osEnv, identity);
+    trustedCAProvisioner.provision(osEnv, identity);
     LOG.debug(
         "Provisioning OpenShift environment done for workspace '{}'", identity.getWorkspaceId());
   }

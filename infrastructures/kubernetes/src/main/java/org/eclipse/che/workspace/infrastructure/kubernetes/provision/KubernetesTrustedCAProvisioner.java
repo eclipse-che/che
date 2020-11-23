@@ -80,6 +80,14 @@ public class KubernetesTrustedCAProvisioner implements TrustedCAProvisioner {
     return trustedStoreInitialized;
   }
 
+  /**
+   * Propagates additional CA certificates into config map and mounts them into all pods of given
+   * namespace
+   *
+   * @param k8sEnv available objects in the scope
+   * @param runtimeID defines namespace into which config map should be provisioned
+   * @throws InfrastructureException if failed to CRUD a resource
+   */
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity runtimeID)
       throws InfrastructureException {
     if (!trustedStoreInitialized) {

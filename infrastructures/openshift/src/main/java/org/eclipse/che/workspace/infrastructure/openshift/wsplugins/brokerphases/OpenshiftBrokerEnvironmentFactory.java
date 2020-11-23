@@ -80,7 +80,7 @@ public class OpenshiftBrokerEnvironmentFactory
       throws InfrastructureException {
     OpenShiftEnvironment openShiftEnvironment =
         super.createForMetadataBroker(pluginFQNs, runtimeID, mergePlugins);
-    trustedCAProvisioner.provision(openShiftEnvironment, runtimeID);
+    // trustedCAProvisioner.provision(openShiftEnvironment, runtimeID);
     return openShiftEnvironment;
   }
 }
