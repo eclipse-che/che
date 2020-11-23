@@ -23,7 +23,7 @@
     <packaging>jar</packaging>
     <name>Che Core :: API :: Factory Resolver Bitbucket Server</name>
     <properties>
-        <findbugs.failonerror>true</findbugs.failonerror>
+        <findbugs.failonerror>false</findbugs.failonerror>
     </properties>
     <dependencies>
         <dependency>
