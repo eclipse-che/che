@@ -167,7 +167,7 @@ public class BitbucketUrl implements RemoteFactoryUrl {
     StringJoiner joiner =
         new StringJoiner("/")
             .add(hostName)
-            .add("rest/api/latest/projects")
+            .add("rest/api/1.0/projects")
             .add(project)
             .add("repos")
             .add(repository)
