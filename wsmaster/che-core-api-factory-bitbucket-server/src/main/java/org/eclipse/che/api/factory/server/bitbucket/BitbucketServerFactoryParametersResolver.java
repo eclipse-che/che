@@ -38,7 +38,7 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 public class BitbucketServerFactoryParametersResolver extends DefaultFactoryParameterResolver {
 
   /** Parser which will allow to check validity of URLs and create objects. */
-  private BitbucketURLParser bitbucketURLParser;
+  private final BitbucketURLParser bitbucketURLParser;
 
   @Inject
   public BitbucketServerFactoryParametersResolver(

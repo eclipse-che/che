@@ -65,6 +65,12 @@ public class BitbucketURLParser {
    */
   public BitbucketUrl parse(String url) {
 
+    if (bitbucketUrlPattern == null) {
+      throw new UnsupportedOperationException(
+          "The Bitbucket integration is not configured properly and cannot be used at this moment."
+              + "Please refer to docs to check the Bitbucket integration instructions");
+    }
+
     Matcher matcher = bitbucketUrlPattern.matcher(url);
     if (!matcher.matches()) {
       throw new IllegalArgumentException(
