@@ -13,6 +13,7 @@ package org.eclipse.che.api.infraproxy.server;
 
 import com.google.inject.AbstractModule;
 
+/** Guice module class configuring the infra proxy. */
 public class InfraProxyModule extends AbstractModule {
   @Override
   protected void configure() {
