@@ -15,9 +15,13 @@ import static java.lang.String.format;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.NoEnvironmentFactory.NoEnvInternalEnvironment;
@@ -28,6 +32,8 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.Constants;
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.workspace.infrastructure.kubernetes.DirectKubernetesAPIAccessHelper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator;
@@ -43,6 +49,7 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
   private final OpenShiftRuntimeContextFactory runtimeContextFactory;
   private final KubernetesRuntimeStateCache runtimeStatusesCache;
   private final OpenShiftProjectFactory projectFactory;
+  private final OpenShiftClientFactory openShiftClientFactory;
 
   @Inject
   public OpenShiftInfrastructure(
@@ -50,7 +57,8 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
       OpenShiftRuntimeContextFactory runtimeContextFactory,
       Set<InternalEnvironmentProvisioner> internalEnvProvisioners,
       KubernetesRuntimeStateCache runtimeStatusesCache,
-      OpenShiftProjectFactory projectFactory) {
+      OpenShiftProjectFactory projectFactory,
+      OpenShiftClientFactory openShiftClientFactory) {
     super(
         NAME,
         ImmutableSet.of(
@@ -62,6 +70,7 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
     this.runtimeContextFactory = runtimeContextFactory;
     this.runtimeStatusesCache = runtimeStatusesCache;
     this.projectFactory = projectFactory;
+    this.openShiftClientFactory = openShiftClientFactory;
   }
 
   @Override
@@ -90,6 +99,19 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
   protected OpenShiftRuntimeContext internalPrepare(
       RuntimeIdentity identity, InternalEnvironment environment) throws InfrastructureException {
     return runtimeContextFactory.create(asOpenShiftEnv(environment), identity, this);
+  }
+
+  @Override
+  public Response sendDirectInfrastructureRequest(
+      String httpMethod, URI relativeUri, @Nullable HttpHeaders headers, @Nullable InputStream body)
+      throws InfrastructureException {
+    return DirectKubernetesAPIAccessHelper.call(
+        openShiftClientFactory.getDefaultConfig().getMasterUrl(),
+        openShiftClientFactory.getAuthenticatedHttpClient(),
+        httpMethod,
+        relativeUri,
+        headers,
+        body);
   }
 
   private OpenShiftEnvironment asOpenShiftEnv(InternalEnvironment source)

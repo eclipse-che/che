@@ -45,7 +45,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 public class KubernetesClientFactory {
 
   /** {@link OkHttpClient} instance shared by all Kubernetes clients. */
-  private OkHttpClient httpClient;
+  private final OkHttpClient httpClient;
 
   /**
    * Default Kubernetes {@link Config} that will be the base configuration to create per-workspace
@@ -130,10 +130,27 @@ public class KubernetesClientFactory {
   }
 
   /**
+   * Unlike {@link #getHttpClient()} method, this method always returns an HTTP client that contains
+   * interceptors that augment the request with authentication information available in the global
+   * context.
+   *
+   * <p>Unlike {@link #getHttpClient()}, this method creates a new HTTP client instance each time it
+   * is called.
+   *
+   * @return HTTP client with authorization set up
+   * @throws InfrastructureException if it is not possible to build the client with authentication
+   *     infromation
+   */
+  public OkHttpClient getAuthenticatedHttpClient() throws InfrastructureException {
+    throw new InfrastructureException(
+        "Impersonating the current user is not supported in the Kubernetes Client.");
+  }
+
+  /**
    * Retrieves the default Kubernetes {@link Config} that will be the base configuration to create
    * per-workspace configurations.
    */
-  protected Config getDefaultConfig() {
+  public Config getDefaultConfig() {
     return defaultConfig;
   }
 

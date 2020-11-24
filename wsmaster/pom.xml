@@ -32,6 +32,7 @@
         <module>che-core-api-workspace</module>
         <module>che-core-api-workspace-activity</module>
         <module>che-core-api-user-shared</module>
+        <module>che-core-api-infraproxy</module>
         <module>che-core-api-devfile-shared</module>
         <module>che-core-api-devfile</module>
         <module>che-core-api-account</module>
