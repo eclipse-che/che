@@ -16,6 +16,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
@@ -32,6 +34,11 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 
 public class DirectKubernetesAPIAccessHelper {
+  private static final String DEFAULT_MEDIA_TYPE =
+      javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE
+          .withCharset(StandardCharsets.UTF_8.name())
+          .toString();
+
   private DirectKubernetesAPIAccessHelper() {}
 
   /**
@@ -61,40 +68,9 @@ public class DirectKubernetesAPIAccessHelper {
     }
 
     try {
-      URI fullUrl = new URI(masterUrl).resolve(relativeUri);
-      javax.ws.rs.core.MediaType mediaTypeHeader = headers == null ? null : headers.getMediaType();
-      String mediaType =
-          mediaTypeHeader == null ? "application/json;charset=utf-8" : mediaTypeHeader.toString();
-
-      RequestBody requestBody =
-          body == null ? null : new InputStreamBasedRequestBody(body, mediaType);
-
-      Call httpCall =
-          httpClient.newCall(
-              new Request.Builder()
-                  .url(fullUrl.toURL())
-                  .method(httpMethod, requestBody)
-                  .headers(toOkHttpHeaders(headers))
-                  .build());
-
-      okhttp3.Response response = httpCall.execute();
-      Response.ResponseBuilder bld = Response.status(response.code());
-      for (int i = 0; i < response.headers().size(); ++i) {
-        String name = response.headers().name(i);
-        String value = response.headers().value(i);
-        bld.header(name, value);
-      }
-
-      ResponseBody responseBody = response.body();
-      if (responseBody != null) {
-        bld.entity(responseBody.byteStream());
-        MediaType contentType = responseBody.contentType();
-        if (contentType != null) {
-          bld.type(contentType.toString());
-        }
-      }
-
-      return bld.build();
+      URL fullUrl = new URI(masterUrl).resolve(relativeUri).toURL();
+      okhttp3.Response response = callApi(httpClient, fullUrl, httpMethod, headers, body);
+      return convertResponse(response);
     } catch (URISyntaxException | MalformedURLException e) {
       throw new InfrastructureException("Could not compose the direct URI.", e);
     } catch (IOException e) {
@@ -102,20 +78,78 @@ public class DirectKubernetesAPIAccessHelper {
     }
   }
 
+  private static okhttp3.Response callApi(
+      OkHttpClient httpClient,
+      URL url,
+      String httpMethod,
+      @Nullable HttpHeaders headers,
+      @Nullable InputStream body)
+      throws IOException {
+    String mediaType = inputMediaType(headers);
+
+    RequestBody requestBody =
+        body == null ? null : new InputStreamBasedRequestBody(body, mediaType);
+
+    Call httpCall =
+        httpClient.newCall(prepareRequest(url, httpMethod, requestBody, toOkHttpHeaders(headers)));
+
+    return httpCall.execute();
+  }
+
+  private static Request prepareRequest(
+      URL url, String httpMethod, RequestBody requestBody, Headers headers) {
+    return new Request.Builder().url(url).method(httpMethod, requestBody).headers(headers).build();
+  }
+
+  private static Response convertResponse(okhttp3.Response response) {
+    Response.ResponseBuilder responseBuilder = Response.status(response.code());
+
+    convertResponseHeaders(responseBuilder, response);
+    convertResponseBody(responseBuilder, response);
+
+    return responseBuilder.build();
+  }
+
+  private static void convertResponseHeaders(
+      Response.ResponseBuilder responseBuilder, okhttp3.Response response) {
+    for (int i = 0; i < response.headers().size(); ++i) {
+      String name = response.headers().name(i);
+      String value = response.headers().value(i);
+      responseBuilder.header(name, value);
+    }
+  }
+
+  private static void convertResponseBody(
+      Response.ResponseBuilder responseBuilder, okhttp3.Response response) {
+    ResponseBody responseBody = response.body();
+    if (responseBody != null) {
+      responseBuilder.entity(responseBody.byteStream());
+      MediaType contentType = responseBody.contentType();
+      if (contentType != null) {
+        responseBuilder.type(contentType.toString());
+      }
+    }
+  }
+
+  private static String inputMediaType(@Nullable HttpHeaders headers) {
+    javax.ws.rs.core.MediaType mediaTypeHeader = headers == null ? null : headers.getMediaType();
+    return mediaTypeHeader == null ? DEFAULT_MEDIA_TYPE : mediaTypeHeader.toString();
+  }
+
   private static Headers toOkHttpHeaders(HttpHeaders headers) {
-    Headers.Builder bld = new Headers.Builder();
+    Headers.Builder headersBuilder = new Headers.Builder();
 
     if (headers != null) {
       for (Map.Entry<String, List<String>> e : headers.getRequestHeaders().entrySet()) {
         String name = e.getKey();
         List<String> values = e.getValue();
         for (String value : values) {
-          bld.add(name, value);
+          headersBuilder.add(name, value);
         }
       }
     }
 
-    return bld.build();
+    return headersBuilder.build();
   }
 
   private static final class InputStreamBasedRequestBody extends RequestBody {

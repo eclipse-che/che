@@ -82,7 +82,7 @@ public class DirectKubernetesAPIAccessHelperTest {
     // then
     assertEquals(
         requestCaptor.getValue().body().contentType(),
-        MediaType.get("application/json;charset=utf-8"));
+        MediaType.get("application/json;charset=UTF-8"));
 
     Buffer expectedBody = new Buffer();
     expectedBody.write(StandardCharsets.UTF_8.encode("Žluťoučký kůň úpěl ďábelské ódy."));
