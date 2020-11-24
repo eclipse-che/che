@@ -231,6 +231,19 @@ public class DirectKubernetesAPIAccessHelperTest {
     assertEquals(IoUtil.readAndCloseQuietly((InputStream) response.getEntity()), "true");
   }
 
+  @Test
+  public void testEmptyHeadersHandled() throws Exception {
+    setupResponse(new Response.Builder().code(200));
+
+    // when
+    javax.ws.rs.core.Response response =
+        DirectKubernetesAPIAccessHelper.call(
+            "https://master/", client, "GET", URI.create("somewhere/over/the/rainbow"), null, null);
+
+    // then
+    assertEquals(200, response.getStatus());
+  }
+
   private void setupResponse(Response.Builder response) throws Exception {
     when(call.execute())
         .thenAnswer(

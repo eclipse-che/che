@@ -62,7 +62,7 @@ public class DirectKubernetesAPIAccessHelper {
 
     try {
       URI fullUrl = new URI(masterUrl).resolve(relativeUri);
-      javax.ws.rs.core.MediaType mediaTypeHeader = headers.getMediaType();
+      javax.ws.rs.core.MediaType mediaTypeHeader = headers == null ? null : headers.getMediaType();
       String mediaType =
           mediaTypeHeader == null ? "application/json;charset=utf-8" : mediaTypeHeader.toString();
 
@@ -104,11 +104,14 @@ public class DirectKubernetesAPIAccessHelper {
 
   private static Headers toOkHttpHeaders(HttpHeaders headers) {
     Headers.Builder bld = new Headers.Builder();
-    for (Map.Entry<String, List<String>> e : headers.getRequestHeaders().entrySet()) {
-      String name = e.getKey();
-      List<String> values = e.getValue();
-      for (String value : values) {
-        bld.add(name, value);
+
+    if (headers != null) {
+      for (Map.Entry<String, List<String>> e : headers.getRequestHeaders().entrySet()) {
+        String name = e.getKey();
+        List<String> values = e.getValue();
+        for (String value : values) {
+          bld.add(name, value);
+        }
       }
     }
 
