@@ -35,21 +35,24 @@ public class BitbucketURLParser {
   private final DevfileFilenamesProvider devfileFilenamesProvider;
   private static final String bitbucketUrlPatternTemplate =
       "^(?<host>%s)/scm/(?<project>[^/]++)/(?<repo>[^.]++).git(\\?at=)?(?<branch>[\\w\\d-_]*)";
-  private Pattern bitbucketUrlPattern;
+  private final Pattern bitbucketUrlPattern;
 
   @Inject
   public BitbucketURLParser(
       @Nullable @Named("bitbucket.server.endpoint") String bitbucketEndpoint,
       URLFetcher urlFetcher,
       DevfileFilenamesProvider devfileFilenamesProvider) {
+    String trimmedEndpoint = null;
     if (bitbucketEndpoint != null) {
-      String trimmedEndpoint =
+      trimmedEndpoint =
           bitbucketEndpoint.endsWith("/")
               ? bitbucketEndpoint.substring(0, bitbucketEndpoint.length() - 1)
               : bitbucketEndpoint;
-      this.bitbucketUrlPattern =
-          Pattern.compile(format(bitbucketUrlPatternTemplate, trimmedEndpoint));
     }
+    this.bitbucketUrlPattern =
+        trimmedEndpoint != null
+            ? Pattern.compile(format(bitbucketUrlPatternTemplate, trimmedEndpoint))
+            : null;
     this.urlFetcher = urlFetcher;
     this.devfileFilenamesProvider = devfileFilenamesProvider;
   }
