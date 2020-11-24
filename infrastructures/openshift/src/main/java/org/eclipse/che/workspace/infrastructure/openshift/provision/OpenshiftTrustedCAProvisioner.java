@@ -22,11 +22,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesT
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 
 /**
- * Checks if config maps with CA bundles is configured by specific property. If they are, then
- * creates single config map for all ca bundles in workspace namespace and mounts it into pods. If
- * ca-bundle auto-inject label is set, it allows Openshift 4+ to auto-inject cluster ca-bundle into
- * it. (see
- * https://docs.openshift.com/container-platform/4.3/networking/configuring-a-custom-pki.html#certificate-injection-using-operators_configuring-a-custom-pki)
+ * This class overrides CA bundle config map labels (from
+ * che.infra.openshift.trusted_ca_bundles_config_map_labels property) to be able to include
+ * OpenShift 4+ specific label config.openshift.io/inject-trusted-cabundle=true that makes OpenShift
+ * inject cluster CA bundle into resulting config map. For more details see
+ * https://docs.openshift.com/container-platform/4.3/networking/configuring-a-custom-pki.html#certificate-injection-using-operators_configuring-a-custom-pki
  */
 @Singleton
 public class OpenshiftTrustedCAProvisioner extends KubernetesTrustedCAProvisioner {
