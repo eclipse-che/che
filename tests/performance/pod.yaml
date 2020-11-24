@@ -28,11 +28,9 @@ spec:
         - name: TS_SELENIUM_MULTIUSER
           value: "true"
         - name: TS_SELENIUM_LOAD_PAGE_TIMEOUT
-          value: "600000"
+          value: "60000"
         - name: TS_SELENIUM_START_WORKSPACE_TIMEOUT
-          value: "600000"
-        - name: TS_SELENIUM_DEFAULT_TIMEOUT
-          value: "600000"
+          value: "180000"
         - name: TS_SELENIUM_LOG_LEVEL
           value: "REPLACE_LOG_LEVEL"
         - name: NODE_TLS_REJECT_UNAUTHORIZED
@@ -44,9 +42,9 @@ spec:
         name: load-testing-container
         resources:
           requests:
-            memory: "200Mi"
+            memory: "750Mi"
             cpu: "250m"
           limits:
             memory: "750Mi"
-            cpu: "450m"
+            cpu: "700m"
       restartPolicy: Never    
