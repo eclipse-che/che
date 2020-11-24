@@ -143,7 +143,7 @@ export class DriverHelper {
             }
         }
 
-        throw new error.TimeoutError(`Exceeded maximum visibility checkings attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`);
+        throw new error.TimeoutError(`Exceeded maximum visibility checkings attempts for '${elementLocator}' element, timeouted after ${timeout}`);
     }
 
     public async waitPresence(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<WebElement> {

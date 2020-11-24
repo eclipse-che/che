@@ -49,6 +49,7 @@ export * from './pageobjects/login/MultiUserLoginPage';
 export * from './pageobjects/login/OcpUserLoginPage';
 export * from './pageobjects/login/RegularUserOcpCheLoginPage';
 export * from './pageobjects/login/SingleUserLoginPage';
+export * from './pageobjects/login/UpdateAccountInformationPage';
 export * from './pageobjects/openshift/CheLoginPage';
 export * from './pageobjects/openshift/OcpLoginPage';
 export * from './pageobjects/openshift/OcpWebConsolePage';

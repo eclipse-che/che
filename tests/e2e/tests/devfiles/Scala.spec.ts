@@ -37,7 +37,7 @@ suite(`${stack} test`, async () => {
     suite('Validation of commands', async () => {
         codeExecutionTests.runTask(compileTaskkName, 240_000);
         codeExecutionTests.closeTerminal(compileTaskkName);
-        codeExecutionTests.runTask(runTaskName, 120_000);
+        codeExecutionTests.runTaskInputText(runTaskName, '[info] running org.eclipse.che.examples.HelloWorld', 'Test User', 120_000);
         codeExecutionTests.closeTerminal(runTaskName);
         codeExecutionTests.runTask(testTaskName, 120_000);
         codeExecutionTests.closeTerminal(testTaskName);
@@ -45,8 +45,8 @@ suite(`${stack} test`, async () => {
 
     suite('Language server validation', async () => {
         commonLsTests.errorHighlighting(tabTitle, 'Abc:', 21);
-        commonLsTests.suggestionInvoking(tabTitle, 15, 17, 'Console scala');
-        commonLsTests.autocomplete(tabTitle, 14, 26, 'che: String');
+        // commonLsTests.suggestionInvoking(tabTitle, 15, 31, 'Console scala');
+        commonLsTests.autocomplete(tabTitle, 25, 28, 'name: String');
         // commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName, 30_000); // not working
     });
 

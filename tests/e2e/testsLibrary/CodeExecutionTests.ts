@@ -11,7 +11,7 @@
 import { CLASSES, Terminal, TopMenu, Ide, DialogWindow, DriverHelper } from '..';
 import { e2eContainer } from '../inversify.config';
 import Axios from 'axios';
-import { TimeoutConstants } from '../TimeoutConstants';
+import { Key } from 'selenium-webdriver';
 
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
@@ -26,12 +26,13 @@ export function runTask(taskName: string, timeout: number) {
     });
 }
 
-export function runTaskInputText(taskName: string, inputText: string, timeout: number) {
+export function runTaskInputText(taskName: string, waitedText: string, inputText: string, timeout: number) {
     test(`Run command '${taskName}' expecting dialog shell`, async () => {
         await topMenu.runTask(taskName);
-        await terminal.waitText(taskName, 'Enter your name', TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT);
+        await terminal.waitText(taskName, waitedText, timeout);
         await terminal.clickOnTab(taskName);
         await terminal.type(taskName, inputText);
+        await terminal.type(taskName, Key.ENTER);
         await terminal.waitIconSuccess(taskName, timeout);
     });
 }
@@ -66,6 +67,13 @@ export function runTaskWithDialogShellAndClose(taskName: string, expectedDialogT
         await dialogWindow.waitDialog(expectedDialogText, timeout);
         await dialogWindow.closeDialog();
         await dialogWindow.waitDialogDissappearance();
+    });
+}
+
+export function runTaskWithNotification(taskName: string, notificationText: string, timeout: number) {
+    test(`Run command '${taskName}' expecting notification pops up`, async () => {
+        await topMenu.runTask(taskName);
+        await ide.waitNotification(notificationText, timeout);
     });
 }
 

@@ -25,10 +25,10 @@ const workspaceRootFolderName: string = 'github.com';
 const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/golang/example/outyet`;
 const fileName: string = `main.go`;
 
-const taskTestOutyet: string = '1.3 Test outyet';
 const taskRunServer: string = '1.1 Run outyet';
-// const taskStopServer: string = 'stop outyet';
-const taskExpectedDialogText: string = 'A process is now listening on port 8080';
+const taskStopServer: string = '1.2 Stop outyet';
+const taskTestOutyet: string = '1.3 Test outyet';
+const notificationText: string = 'Process 8080-tcp is now listening on port 8080. Open it ?';
 
 suite(`${workspaceStack} test`, async () => {
 
@@ -52,8 +52,8 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite('Run golang example server', async () => {
-        codeExecutionHelper.runTaskWithDialogShellAndOpenLink(taskRunServer, taskExpectedDialogText, 40_000);
-        // codeExecutionHelper.runTask(taskStopServer, 5_000); // stop outyet task causes the server to die with exit code 143 https://github.com/eclipse/che/issues/17005
+        codeExecutionHelper.runTaskWithNotification(taskRunServer, notificationText, 40_000);
+        codeExecutionHelper.runTask(taskStopServer, 5_000);
     });
 
     suite(`'Language server validation'`, async () => {
