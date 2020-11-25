@@ -286,7 +286,7 @@ EOL"""
 
                     echo "Install Che"
                     sh """
-                        ${pathToChectl} server:start \\
+                        ${pathToChectl} server:deploy \\
                         --k8spodreadytimeout=180000 \\
                         --listr-renderer=verbose \\
                         --platform=minikube \\
