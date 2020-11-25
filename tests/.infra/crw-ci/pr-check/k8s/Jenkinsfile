@@ -287,7 +287,7 @@ EOL"""
                     echo "Install Che"
                     sh """
                         ${pathToChectl} server:deploy \\
-                        --k8spodreadytimeout=180000 \\
+                        --k8spodwaittimeout=600000 \\
                         --listr-renderer=verbose \\
                         --platform=minikube \\
                         --che-operator-cr-patch-yaml=$CUSTOM_RESOURCE_PATCH_FILE \\
@@ -428,6 +428,7 @@ EOL"""
                 ${pathToChectl} --help > $LOGS_AND_CONFIGS/chectl.version.txt || true
 
                 cp -r /tmp/chectl-logs $LOGS_AND_CONFIGS || true
+                cp /home/hudson/.cache/chectl/error.log /tmp/chectl-logs
             """
 
             archiveArtifacts allowEmptyArchive: true, artifacts: "tests/e2e/report/**, logs-and-configs/**"
