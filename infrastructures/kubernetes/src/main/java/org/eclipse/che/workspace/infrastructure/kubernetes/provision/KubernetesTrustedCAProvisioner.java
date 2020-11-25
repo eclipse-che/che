@@ -58,10 +58,10 @@ public class KubernetesTrustedCAProvisioner implements TrustedCAProvisioner {
 
   @Inject
   public KubernetesTrustedCAProvisioner(
-      @Nullable @Named("che.trusted_ca.bundles_configmap") String caBundleConfigMap,
-      @Named("che.trusted_ca.workspace_bundle_configmap") String configMapName,
-      @Named("che.trusted_ca.bundle_mount_path") String certificateMountPath,
-      @Nullable @Named("che.infra.kubernetes.trusted_ca_bundles_config_map_labels")
+      @Nullable @Named("che.infra.kubernetes.trusted_ca.src_configmap") String caBundleConfigMap,
+      @Named("che.infra.kubernetes.trusted_ca.dest_configmap") String configMapName,
+      @Named("che.infra.kubernetes.trusted_ca.mount_path") String certificateMountPath,
+      @Nullable @Named("che.infra.kubernetes.trusted_ca.dest_configmap_labels")
           String configMapLabel,
       CheInstallationLocation cheInstallationLocation,
       KubernetesNamespaceFactory namespaceFactory,

@@ -23,9 +23,9 @@ import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProje
 
 /**
  * This class overrides CA bundle config map labels (from
- * che.infra.openshift.trusted_ca_bundles_config_map_labels property) to be able to include
- * OpenShift 4+ specific label config.openshift.io/inject-trusted-cabundle=true that makes OpenShift
- * inject cluster CA bundle into resulting config map. For more details see
+ * che.infra.openshift.trusted_ca.dest_configmap_labels) to be able to include OpenShift 4+ specific
+ * label config.openshift.io/inject-trusted-cabundle=true that makes OpenShift inject cluster CA
+ * bundle into resulting config map. For more details see
  * https://docs.openshift.com/container-platform/4.3/networking/configuring-a-custom-pki.html#certificate-injection-using-operators_configuring-a-custom-pki
  */
 @Singleton
@@ -33,10 +33,10 @@ public class OpenshiftTrustedCAProvisioner extends KubernetesTrustedCAProvisione
 
   @Inject
   public OpenshiftTrustedCAProvisioner(
-      @Nullable @Named("che.trusted_ca.bundles_configmap") String caBundleConfigMap,
-      @Named("che.trusted_ca.workspace_bundle_configmap") String configMapName,
-      @Named("che.trusted_ca.bundle_mount_path") String certificateMountPath,
-      @Nullable @Named("che.infra.openshift.trusted_ca_bundles_config_map_labels")
+      @Nullable @Named("che.infra.kubernetes.trusted_ca.src_configmap") String caBundleConfigMap,
+      @Named("che.infra.kubernetes.trusted_ca.dest_configmap") String configMapName,
+      @Named("che.infra.kubernetes.trusted_ca.mount_path") String certificateMountPath,
+      @Nullable @Named("che.infra.openshift.trusted_ca.dest_configmap_labels")
           String configMapLabel,
       CheInstallationLocation cheInstallationLocation,
       OpenShiftProjectFactory projectFactory,
