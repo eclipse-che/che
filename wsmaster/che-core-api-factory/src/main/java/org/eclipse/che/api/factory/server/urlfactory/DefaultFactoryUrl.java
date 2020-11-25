@@ -23,28 +23,6 @@ import java.util.Optional;
 public class DefaultFactoryUrl implements RemoteFactoryUrl {
 
   private String devfileFileLocation;
-  private String factoryFilename;
-  private String factoryFileLocation;
-
-  @Override
-  public String getFactoryFilename() {
-    return factoryFilename;
-  }
-
-  public DefaultFactoryUrl withFactoryFilename(String factoryFilename) {
-    this.factoryFilename = factoryFilename;
-    return this;
-  }
-
-  @Override
-  public String factoryFileLocation() {
-    return factoryFileLocation;
-  }
-
-  public DefaultFactoryUrl withFactoryFileLocation(String factoryFileLocation) {
-    this.factoryFileLocation = factoryFileLocation;
-    return this;
-  }
 
   @Override
   public List<DevfileLocation> devfileFileLocations() {
