@@ -62,7 +62,7 @@ public class KubernetesTrustedCAProvisioner implements TrustedCAProvisioner {
       @Named("che.infra.kubernetes.trusted_ca.dest_configmap") String configMapName,
       @Named("che.infra.kubernetes.trusted_ca.mount_path") String certificateMountPath,
       @Nullable @Named("che.infra.kubernetes.trusted_ca.dest_configmap_labels")
-          String configMapLabel,
+          String configMapLabels,
       CheInstallationLocation cheInstallationLocation,
       KubernetesNamespaceFactory namespaceFactory,
       CheServerKubernetesClientFactory cheServerClientFactory)
@@ -75,9 +75,9 @@ public class KubernetesTrustedCAProvisioner implements TrustedCAProvisioner {
     this.installationLocationNamespace = cheInstallationLocation.getInstallationLocationNamespace();
     this.namespaceFactory = namespaceFactory;
 
-    if (configMapLabel != null) {
+    if (configMapLabels != null && !configMapLabels.trim().equals("")) {
       this.configMapLabelKeyValue =
-          Splitter.on(",").withKeyValueSeparator("=").split(configMapLabel);
+          Splitter.on(",").withKeyValueSeparator("=").split(configMapLabels);
     } else {
       this.configMapLabelKeyValue = new HashMap<>();
     }
