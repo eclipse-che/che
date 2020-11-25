@@ -36,7 +36,7 @@ public class KubernetesBrokerEnvironmentFactory
   public KubernetesBrokerEnvironmentFactory(
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.workspace.plugin_broker.pull_policy") String brokerPullPolicy,
-      @Named("che.trusted_ca.bundle_mount_path") String certificateMountPath,
+      @Named("che.infra.kubernetes.trusted_ca.mount_path") String certificateMountPath,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
       MachineTokenEnvVarProvider machineTokenEnvVarProvider,
       @Named("che.workspace.plugin_broker.artifacts.image") String artifactsBrokerImage,
