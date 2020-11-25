@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-infrastructures-parent</artifactId>
         <groupId>org.eclipse.che.infrastructure</groupId>
-        <version>7.22.0-SNAPSHOT</version>
+        <version>7.23.0-SNAPSHOT</version>
     </parent>
     <artifactId>infrastructure-kubernetes</artifactId>
     <name>Infrastructure :: Kubernetes</name>
@@ -68,6 +68,10 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
@@ -240,6 +244,11 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
