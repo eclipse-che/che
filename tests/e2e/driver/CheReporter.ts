@@ -21,6 +21,7 @@ import { ITestWorkspaceUtil } from '../utils/workspace/ITestWorkspaceUtil';
 import { PreferencesHandler, AskForConfirmationType, TerminalRendererType } from '../utils/PreferencesHandler';
 import { CheApiRequestHandler } from '../utils/requestHandlers/CheApiRequestHandler';
 import { TimeoutConstants } from '../TimeoutConstants';
+import { Logger } from '../utils/Logger';
 
 const e2eContainer = inversifyConfig.e2eContainer;
 const driver: IDriver = e2eContainer.get(TYPES.Driver);
@@ -120,6 +121,7 @@ class CheReporter extends mocha.reporters.Spec {
     });
 
     runner.on('fail', async function (test: mocha.Test) {
+      Logger.error(`CheReporter runner.on.fail: ${test.fullTitle()} failed after ${test.duration}ms`);
       // raise flag for keeping the screencast
       deleteScreencast = false;
 
