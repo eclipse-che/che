@@ -14,11 +14,13 @@ package org.eclipse.che.multiuser.keycloak.server;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 
+import com.google.common.base.Splitter;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -63,6 +65,7 @@ public class KeycloakEnvironmentInitializationFilter
   private final KeycloakSettings keycloakSettings;
   private final String backSlashReplaceWith;
   private final JwtParser jwtParser;
+  private final Map<String, String> userNameReplacers;
 
   @Inject
   public KeycloakEnvironmentInitializationFilter(
@@ -82,6 +85,10 @@ public class KeycloakEnvironmentInitializationFilter
     this.permissionChecker = permissionChecker;
     this.keycloakSettings = settings;
     this.backSlashReplaceWith = backSlashReplaceWith;
+    this.userNameReplacers =
+        isNullOrEmpty(backSlashReplaceWith)
+            ? Collections.emptyMap()
+            : Splitter.on(",").withKeyValueSeparator("=").split(backSlashReplaceWith);
   }
 
   @Override
@@ -122,8 +129,10 @@ public class KeycloakEnvironmentInitializationFilter
         // https://openid.net/specs/openid-connect-basic-1_0.html#ClaimStability
         username = claims.getIssuer() + ":" + claims.getSubject();
       }
-      if (!isNullOrEmpty(backSlashReplaceWith) && username.contains("\\")) {
-        username = username.replace("\\", backSlashReplaceWith);
+      if (!userNameReplacers.isEmpty()) {
+        for (Map.Entry<String, String> entry : userNameReplacers.entrySet()) {
+          username = username.replaceAll(entry.getKey(), entry.getValue());
+        }
       }
       String id = claims.getSubject();
 

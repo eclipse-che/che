@@ -98,7 +98,7 @@ public class KeycloakEnvironmentInitializationFilterTest {
             tokenExtractor,
             permissionChecker,
             keycloakSettings,
-            "-");
+            "\\\\=-");
     final KeyPair kp = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
     lenient().when(keyManager.getOrCreateKeyPair(anyString())).thenReturn(kp);
     keycloakAttributes.clear();
@@ -110,11 +110,11 @@ public class KeycloakEnvironmentInitializationFilterTest {
   }
 
   @Test
-  public void shouldReplaceBackSlashInUsername() throws Exception {
+  public void shouldReplaceBackSlashAndAtSignInUsername() throws Exception {
     // given
     Map<String, Object> claimParams = new HashMap<>();
     claimParams.put("email", "test@test.com");
-    claimParams.put("preferred_username", "myorg\\myname");
+    claimParams.put("preferred_username", "myorg\\me@mynamecom");
     Claims claims = new DefaultClaims(claimParams).setSubject("id");
     DefaultJws<Claims> jws = new DefaultJws<>(new DefaultJwsHeader(), claims, "");
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token");
@@ -131,16 +131,16 @@ public class KeycloakEnvironmentInitializationFilterTest {
             tokenExtractor,
             permissionChecker,
             keycloakSettings,
-            "-backslash-");
+            "\\\\=-,@=-at-");
     // when
     filter.doFilter(request, response, chain);
 
     // then
-    verify(userManager).getOrCreateUser("id", "test@test.com", "myorg-backslash-myname");
+    verify(userManager).getOrCreateUser("id", "test@test.com", "myorg-me-at-mynamecom");
   }
 
   @Test
-  public void shoulBeAbleToDisableBackSlashReplacing() throws Exception {
+  public void shoulBeAbleToDisableUsernameStringReplacing() throws Exception {
     // given
     Map<String, Object> claimParams = new HashMap<>();
     claimParams.put("email", "test@test.com");
