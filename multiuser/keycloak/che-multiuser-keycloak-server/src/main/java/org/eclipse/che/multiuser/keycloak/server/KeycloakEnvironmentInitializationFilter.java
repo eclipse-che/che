@@ -63,9 +63,8 @@ public class KeycloakEnvironmentInitializationFilter
   private final KeycloakProfileRetriever keycloakProfileRetriever;
   private final PermissionChecker permissionChecker;
   private final KeycloakSettings keycloakSettings;
-  private final String backSlashReplaceWith;
   private final JwtParser jwtParser;
-  private final Map<String, String> userNameReplacers;
+  private final Map<String, String> userNameReplacerPatterns;
 
   @Inject
   public KeycloakEnvironmentInitializationFilter(
@@ -76,19 +75,17 @@ public class KeycloakEnvironmentInitializationFilter
       RequestTokenExtractor tokenExtractor,
       PermissionChecker permissionChecker,
       KeycloakSettings settings,
-      @Nullable @Named("che.keycloak.username.replace_backslash_in_username_with")
-          String backSlashReplaceWith) {
+      @Nullable @Named("che.keycloak.username.replacer_patterns") String userNameReplacerPatterns) {
     super(sessionStore, tokenExtractor);
     this.jwtParser = jwtParser;
     this.userManager = userManager;
     this.keycloakProfileRetriever = keycloakProfileRetriever;
     this.permissionChecker = permissionChecker;
     this.keycloakSettings = settings;
-    this.backSlashReplaceWith = backSlashReplaceWith;
-    this.userNameReplacers =
-        isNullOrEmpty(backSlashReplaceWith)
+    this.userNameReplacerPatterns =
+        isNullOrEmpty(userNameReplacerPatterns)
             ? Collections.emptyMap()
-            : Splitter.on(",").withKeyValueSeparator("=").split(backSlashReplaceWith);
+            : Splitter.on(",").withKeyValueSeparator("=").split(userNameReplacerPatterns);
   }
 
   @Override
@@ -129,8 +126,8 @@ public class KeycloakEnvironmentInitializationFilter
         // https://openid.net/specs/openid-connect-basic-1_0.html#ClaimStability
         username = claims.getIssuer() + ":" + claims.getSubject();
       }
-      if (!userNameReplacers.isEmpty()) {
-        for (Map.Entry<String, String> entry : userNameReplacers.entrySet()) {
+      if (!userNameReplacerPatterns.isEmpty()) {
+        for (Map.Entry<String, String> entry : userNameReplacerPatterns.entrySet()) {
           username = username.replaceAll(entry.getKey(), entry.getValue());
         }
       }
