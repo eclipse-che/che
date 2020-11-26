@@ -60,9 +60,17 @@ public final class Constants {
   public static final String CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY =
       "che.workspace.plugin_registry_url";
 
+  /** Property name for internal network Che plugin registry url. */
+  public static final String CHE_WORKSPACE_PLUGIN_REGISTRY_INTERNAL_URL_PROPERTY =
+      "che.workspace.plugin_registry_internal_url";
+
   /** Property name for Che Devfile Registry URL. */
   public static final String CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY =
       "che.workspace.devfile_registry_url";
+
+  /** Property name for internal network Che Devfile Registry URL. */
+  public static final String CHE_WORKSPACE_DEVFILE_REGISTRY_INTERNAL_URL_PROPERTY =
+      "che.workspace.devfile_registry_internal_url";
 
   /** Name for environment variable of machine name */
   public static final String CHE_MACHINE_NAME_ENV_VAR = "CHE_MACHINE_NAME";

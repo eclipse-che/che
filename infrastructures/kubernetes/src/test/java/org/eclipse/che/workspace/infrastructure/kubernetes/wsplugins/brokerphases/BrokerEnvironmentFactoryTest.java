@@ -74,6 +74,7 @@ public class BrokerEnvironmentFactoryTest {
                 ARTIFACTS_BROKER_IMAGE,
                 METADATA_BROKER_IMAGE,
                 DEFAULT_REGISTRY,
+                "",
                 certProvisioner) {
               @Override
               protected KubernetesEnvironment doCreate(BrokersConfigs brokersConfigs) {
