@@ -545,20 +545,6 @@ public class KubernetesNamespaceFactory {
   }
 
   /**
-   * Finds namespace name stored in User's preferences and ensures it is still valid.
-   *
-   * @return user's stored namespace if exists
-   */
-  private Optional<String> findStoredNamespace(NamespaceResolutionContext resolutionCtx) {
-    Optional<Pair<String, String>> storedNamespace = getPreferencesNamespaceName(resolutionCtx);
-    if (storedNamespace.isPresent() && isStoredTemplateValid(storedNamespace.get().second)) {
-      return Optional.of(storedNamespace.get().first);
-    } else {
-      return Optional.empty();
-    }
-  }
-
-  /**
    * Constructs the namespace name from `che.infra.kubernetes.namespace.default` property. Ensures
    * that all placeholders are evaluated and final namespace name is in valid format.
    *
