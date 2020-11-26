@@ -25,7 +25,7 @@ pipeline {
         mutableCheImageTag = ""
         pathToChectl = ""
 
-
+        CHE_REPO_BRANCH = "iokhrime-dashboard-next"
         DASHBOARD_NEXT_REPO_URL="https://github.com/che-incubator/che-dashboard-next.git"
     }
 
@@ -47,7 +47,7 @@ pipeline {
                 description: 'Should build Che server')
 
         string(name: 'e2eTestToRun',
-                defaultValue: "test-happy-path",
+                defaultValue: "test-all-devfiles",
                 description: 'TypeScript E2E test to run')
         
         string(name: 'testWorkspaceDevfileUrl',
@@ -178,7 +178,7 @@ pipeline {
                     }
 
                     steps {
-                        echo "Build branch master of upstream projects"
+                        echo "Build branch $CHE_REPO_BRANCH of upstream projects"
                         sh "sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686"
 
                         sh """
@@ -188,13 +188,13 @@ pipeline {
                             
                             for project in \${project_list[@]};
                             do
-                                result=\$(git ls-remote --heads https://github.com/\${project}.git master)
+                                result=\$(git ls-remote --heads https://github.com/\${project}.git $CHE_REPO_BRANCH)
                                 if [[ \$result == *"refs"* ]]; then
-                                    echo "[PRE-BUILD CHECK] found upstream project: \${project} with same branch name: master"
-                                    git clone -b master https://github.com/\${project} \${project}
+                                    echo "[PRE-BUILD CHECK] found upstream project: \${project} with same branch name: $CHE_REPO_BRANCH"
+                                    git clone -b $CHE_REPO_BRANCH https://github.com/\${project} \${project}
                                     mvn clean install -f ${WORKSPACE}/\${project}/pom.xml -DskipTests
                                 else
-                                    echo "[PRE-BUILD CHECK] skip build upstream project: \$project, unable to find branch: master."
+                                    echo "[PRE-BUILD CHECK] skip build upstream project: \$project, unable to find branch: $CHE_REPO_BRANCH."
                                 fi
                             done
                         """
@@ -355,32 +355,7 @@ EOL"""
             }
         }
 
-        stage("Create test workspace") {
-            when {
-                expression { return createTestWorkspace.toString() == 'true' }
-            }
-
-            steps {
-                script {
-                    if (testWorkspaceDevfileUrl != null && testWorkspaceDevfileUrl != "") {
-                        sh "wget $testWorkspaceDevfileUrl -O $DEVFILE_PATH"
-
-                    } else {
-                        sh "cp ${WORKSPACE}/tests/e2e/files/happy-path/happy-path-workspace.yaml $DEVFILE_PATH"
-                    }
-
-                    sh """
-                        ${pathToChectl} auth:login -u admin -p admin --chenamespace=eclipse-che
-
-                        ${pathToChectl} workspace:create --start \\
-                           --devfile=${DEVFILE_PATH} \\
-                           --chenamespace=eclipse-che
-                    """
-                }
-            }
-        }
-
-        stage("Run E2E Happy path tests") {
+        stage("Run the 'JavaMaven' tests") {
             steps {
                 sh """
                      CHE_URL=https://${cheHost}
@@ -393,6 +368,7 @@ EOL"""
                        -e TS_SELENIUM_PASSWORD="admin" \\
                        -e TEST_SUITE="${e2eTestToRun}" ${e2eTestParameters} \\
                        -e NODE_TLS_REJECT_UNAUTHORIZED=0 \\
+                       -e USERSTORY=JavaMaven \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
                        quay.io/eclipse/che-e2e:${cheE2eImageTag}
                 """
