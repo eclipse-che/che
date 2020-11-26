@@ -210,6 +210,8 @@ public class KubernetesNamespaceFactoryTest {
             "defaultNs",
             false,
             true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
             clientFactory,
             userManager,
             preferenceManager,
