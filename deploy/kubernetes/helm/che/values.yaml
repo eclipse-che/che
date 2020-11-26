@@ -114,7 +114,7 @@ che:
   logLevel: "INFO"
 
 dashboard:
-  image: quay.io/eclipse/che-dashboard:next
+  image: quay.io/eclipse/che-dashboard:next-react
   imagePullPolicy: "Always"
   memoryRequest: 16Mi
   memoryLimit: 256Mi

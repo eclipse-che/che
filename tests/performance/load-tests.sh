@@ -135,11 +135,18 @@ if [[ $clean_pvc == true ]]; then
   do
     status=$(oc get pod ftp-server | awk '{print $3}' | tail -n 1)
     if [[ $status == "Running" ]]; then
-      oc exec ftp-server -it -- rm -rf /home/vsftpd/user/*
+      oc exec ftp-server -- rm -rf /home/vsftpd/user/*
       break
     fi
   done
 fi
+
+sleep 10
+
+#setup and run vsftpd in ftp-server pod
+oc exec ftp-server -- sed -i 's/connect_from_port_20/#connect_from_port_20/' /etc/vsftpd/vsftpd.conf
+oc exec ftp-server -- sed -i 's/ftp_data_port/#ftp_data_port/' /etc/vsftpd/vsftpd.conf
+oc exec ftp-server -- sh /usr/sbin/run-vsftpd.sh &
 
 # set common variables to template.yaml
 echo "set common variables to template.yaml"

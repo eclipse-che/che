@@ -271,7 +271,7 @@ function getOpenshiftLogs() {
 
 function deployCheIntoCluster() {
   echo "======== Start to install CHE ========"
-  if chectl server:start --listr-renderer=verbose -a operator -p minishift --k8spodreadytimeout=360000 $1 --chenamespace=eclipse-che; then
+  if chectl server:deploy --listr-renderer=verbose -a operator -p minishift --k8spodreadytimeout=600000 --k8spodwaittimeout=600000 --k8spoddownloadimagetimeout=600000 $1 --chenamespace=eclipse-che; then
     echo "Started successfully"
     oc get checluster -o yaml
   else
