@@ -51,6 +51,8 @@ public class OpenshiftBrokerEnvironmentFactory
       @Named("che.workspace.plugin_broker.artifacts.image") String artifactsBrokerImage,
       @Named("che.workspace.plugin_broker.metadata.image") String metadataBrokerImage,
       @Nullable @Named("che.workspace.plugin_registry_url") String pluginRegistryUrl,
+      @Nullable @Named("che.workspace.plugin_registry_internal_url")
+          String pluginRegistryInternalUrl,
       @Named("che.infra.openshift.trusted_ca_bundles_mount_path") String caCertificatesMountPath,
       CertificateProvisioner certProvisioner,
       OpenShiftProjectFactory factory,
@@ -63,6 +65,7 @@ public class OpenshiftBrokerEnvironmentFactory
         artifactsBrokerImage,
         metadataBrokerImage,
         pluginRegistryUrl,
+        pluginRegistryInternalUrl,
         certProvisioner);
     this.caCertificatesMountPath = caCertificatesMountPath;
     this.metadataBrokerImage = metadataBrokerImage;

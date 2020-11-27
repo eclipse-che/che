@@ -40,7 +40,7 @@ public class KeycloakProfileRetriever {
       KeycloakSettings keycloakSettings, HttpJsonRequestFactory requestFactory) {
     this.requestFactory = requestFactory;
     this.keyclockCurrentUserInfoUrl =
-        keycloakSettings.get().get(KeycloakConstants.USERINFO_ENDPOINT_SETTING);
+        keycloakSettings.getInternalSettings().get(KeycloakConstants.USERINFO_ENDPOINT_SETTING);
   }
 
   /**

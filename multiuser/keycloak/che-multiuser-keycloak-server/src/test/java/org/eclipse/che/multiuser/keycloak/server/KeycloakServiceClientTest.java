@@ -13,7 +13,7 @@ package org.eclipse.che.multiuser.keycloak.server;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_INTERNAL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -67,10 +67,12 @@ public class KeycloakServiceClientTest {
   public void setUp() throws Exception {
     keycloakServiceClient = new KeycloakServiceClient(keycloakSettings, jwtParser);
     Map<String, String> conf = new HashMap<>();
-    conf.put(
-        AUTH_SERVER_URL_SETTING,
+    Map<String, String> confInternal = new HashMap<>();
+    confInternal.put(
+        AUTH_SERVER_URL_INTERNAL_SETTING,
         RestAssured.baseURI + ":" + RestAssured.port + RestAssured.basePath);
     conf.put(REALM_SETTING, "che");
+    when(keycloakSettings.getInternalSettings()).thenReturn(confInternal);
     when(keycloakSettings.get()).thenReturn(conf);
   }
 
