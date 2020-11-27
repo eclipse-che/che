@@ -285,6 +285,7 @@ spec:
       CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
       CHE_WORKSPACE_SIDECAR_IMAGE__PULL__POLICY: IfNotPresent
       CHE_WORKSPACE_PLUGIN__BROKER_PULL__POLICY: IfNotPresent
+      CHE_INFRA_KUBERNETES_WORKSPACE__UNRECOVERABLE__EVENTS: 'Failed Scheduling,Failed to pull image'
   k8s:  
     singleHostExposureType: 'gateway'
   auth:
@@ -301,6 +302,7 @@ spec:
       CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
       CHE_WORKSPACE_SIDECAR_IMAGE__PULL__POLICY: IfNotPresent
       CHE_WORKSPACE_PLUGIN__BROKER_PULL__POLICY: IfNotPresent
+      CHE_INFRA_KUBERNETES_WORKSPACE__UNRECOVERABLE__EVENTS: 'Failed Scheduling,Failed to pull image'
   auth:
     updateAdminPassword: false
 EOL"""
@@ -356,6 +358,8 @@ EOL"""
 
         stage("Run the 'JavaMaven' tests") {
             steps {
+                sleep 1200
+
                 sh """
                      CHE_URL=https://${cheHost}
                      docker run --shm-size=1g --net=host --ipc=host \\
