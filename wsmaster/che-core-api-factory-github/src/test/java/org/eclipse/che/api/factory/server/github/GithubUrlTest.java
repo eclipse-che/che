@@ -69,14 +69,6 @@ public class GithubUrlTest {
         iterator.next().location(), "https://raw.githubusercontent.com/eclipse/che/HEAD/foo.bar");
   }
 
-  /** Check when there is .factory.json file in the repository */
-  @Test
-  public void checkFactoryJsonFileLocation() {
-    assertEquals(
-        githubUrl.factoryFileLocation(),
-        "https://raw.githubusercontent.com/eclipse/che/HEAD/.factory.json");
-  }
-
   /** Check the original repository */
   @Test
   public void checkRepositoryLocation() {

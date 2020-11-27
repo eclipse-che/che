@@ -21,21 +21,6 @@ import java.util.Optional;
 public interface RemoteFactoryUrl {
 
   /**
-   * Filename of factory json (typically .factory.json) or {@code null} if it cannot be clearly
-   * detected from provided factory url.
-   *
-   * @return factory json filename
-   */
-  String getFactoryFilename();
-
-  /**
-   * Location of factory json. Must points to the raw factory file content.
-   *
-   * @return factory json file location
-   */
-  String factoryFileLocation();
-
-  /**
    * List of possible filenames and raw locations of devfile.
    *
    * @return devfile filenames and locations list
