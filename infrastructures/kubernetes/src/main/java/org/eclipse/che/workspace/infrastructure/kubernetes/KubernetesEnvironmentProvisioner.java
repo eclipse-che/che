@@ -26,6 +26,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.Certificate
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GatewayRouterProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesTrustedCAProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.NodeSelectorProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
@@ -86,6 +87,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer;
     private final VcsSslCertificateProvisioner vcsSslCertificateProvisioner;
     private final GatewayRouterProvisioner gatewayRouterProvisioner;
+    private final KubernetesTrustedCAProvisioner trustedCAProvisioner;
 
     @Inject
     public KubernetesEnvironmentProvisionerImpl(
@@ -111,7 +113,8 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         GitConfigProvisioner gitConfigProvisioner,
         PreviewUrlExposer<KubernetesEnvironment> previewUrlExposer,
         VcsSslCertificateProvisioner vcsSslCertificateProvisioner,
-        GatewayRouterProvisioner gatewayRouterProvisioner) {
+        GatewayRouterProvisioner gatewayRouterProvisioner,
+        KubernetesTrustedCAProvisioner trustedCAProvisioner) {
       this.pvcEnabled = pvcEnabled;
       this.volumesStrategy = volumesStrategy;
       this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -135,6 +138,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.gitConfigProvisioner = gitConfigProvisioner;
       this.previewUrlExposer = previewUrlExposer;
       this.gatewayRouterProvisioner = gatewayRouterProvisioner;
+      this.trustedCAProvisioner = trustedCAProvisioner;
     }
 
     @Traced
@@ -178,6 +182,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       vcsSslCertificateProvisioner.provision(k8sEnv, identity);
       gitConfigProvisioner.provision(k8sEnv, identity);
       gatewayRouterProvisioner.provision(k8sEnv, identity);
+      trustedCAProvisioner.provision(k8sEnv, identity);
       LOG.debug("Provisioning Kubernetes environment done for workspace '{}'", workspaceId);
     }
   }

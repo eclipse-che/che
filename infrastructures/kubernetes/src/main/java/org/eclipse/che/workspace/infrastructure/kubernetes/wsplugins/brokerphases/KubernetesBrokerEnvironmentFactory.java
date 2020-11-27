@@ -19,6 +19,7 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVar
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesTrustedCAProvisioner;
 
 /**
  * Extends {@link BrokerEnvironmentFactory} to be used in the kubernetes infrastructure.
@@ -35,6 +36,7 @@ public class KubernetesBrokerEnvironmentFactory
   public KubernetesBrokerEnvironmentFactory(
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.workspace.plugin_broker.pull_policy") String brokerPullPolicy,
+      @Named("che.infra.kubernetes.trusted_ca.mount_path") String certificateMountPath,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
       MachineTokenEnvVarProvider machineTokenEnvVarProvider,
       @Named("che.workspace.plugin_broker.artifacts.image") String artifactsBrokerImage,
@@ -42,6 +44,7 @@ public class KubernetesBrokerEnvironmentFactory
       @Nullable @Named("che.workspace.plugin_registry_url") String pluginRegistryUrl,
       @Nullable @Named("che.workspace.plugin_registry_internal_url")
           String pluginRegistryInternalUrl,
+      KubernetesTrustedCAProvisioner trustedCAProvisioner,
       CertificateProvisioner certProvisioner) {
     super(
         cheWebsocketEndpoint,
@@ -52,6 +55,8 @@ public class KubernetesBrokerEnvironmentFactory
         metadataBrokerImage,
         pluginRegistryUrl,
         pluginRegistryInternalUrl,
+        trustedCAProvisioner,
+        certificateMountPath,
         certProvisioner);
   }
 

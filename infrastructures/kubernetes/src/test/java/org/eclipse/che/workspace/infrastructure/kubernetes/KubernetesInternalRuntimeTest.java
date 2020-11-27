@@ -254,7 +254,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock(answer = Answers.RETURNS_MOCKS)
   private Tracer tracer;
 
-  private CommandImpl envCommand = new CommandImpl("envCommand", "echo hello", "env");
+  private final CommandImpl envCommand = new CommandImpl("envCommand", "echo hello", "env");
 
   @BeforeMethod
   public void setup() throws Exception {
@@ -302,6 +302,7 @@ public class KubernetesInternalRuntimeTest {
             namespace);
 
     when(context.getEnvironment()).thenReturn(k8sEnv);
+    when(context.getRuntime()).thenReturn(internalRuntime);
     when(serverCheckerFactory.create(any(), anyString(), any())).thenReturn(serversChecker);
     when(context.getIdentity()).thenReturn(IDENTITY);
     doNothing().when(namespace).cleanUp();
