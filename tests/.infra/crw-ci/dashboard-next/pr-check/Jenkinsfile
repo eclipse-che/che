@@ -362,8 +362,6 @@ EOL"""
 
         stage("Run the 'Cpp' devfile test") {
             steps {
-                sleep 3600
-
                 sh """
                      CHE_URL=https://${cheHost}
                      docker run --shm-size=1g --net=host --ipc=host \\
