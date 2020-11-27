@@ -248,7 +248,7 @@ pipeline {
             steps {
                 sh """
                     export CHE_DASHBOARD_NEXT_VERSION=iokhrime
-                    ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
+                    ${WORKSPACE}/dockerfiles/che/build.sh --build-arg:CHE_DASHBOARD_NEXT_VERSION=iokhrime --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
                     docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
                     docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
                 """
