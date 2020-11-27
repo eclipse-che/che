@@ -171,12 +171,6 @@ pipeline {
                 }
 
                 stage("Build Che including upstream projects") {
-                    when {
-                        expression { 
-                            return buildChe.toString() == 'true' || (params['ghprbCommentBody'] && (params.ghprbCommentBody == 'null' || params.ghprbCommentBody.contains("--rebuild")))
-                        }
-                    }
-
                     steps {
                         echo "Build branch $CHE_REPO_BRANCH of upstream projects"
                         sh "sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686"
@@ -239,12 +233,6 @@ pipeline {
         }
 
         stage("Build and push che-server image") {
-            when {
-                expression {
-                    return buildChe.toString() == 'true' || (params['ghprbCommentBody'] && (params.ghprbCommentBody == 'null' || params.ghprbCommentBody.contains("--rebuild"))) 
-                }
-            }
-
             steps {
                 sh """
                     export CHE_DASHBOARD_NEXT_VERSION=iokhrime
