@@ -352,11 +352,15 @@ EOL"""
                             fi
                             done
                     """
+
+                    sh """
+                        cat /tmp/cheCA.crt
+                    """
                 }
             }
         }
 
-        stage("Run the 'JavaMaven' tests") {
+        stage("Run the 'Cpp' devfile test") {
             steps {
                 sleep 1200
 
