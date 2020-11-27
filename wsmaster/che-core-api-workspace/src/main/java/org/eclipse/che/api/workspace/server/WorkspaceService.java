@@ -19,7 +19,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.server.WorkspaceKeyValidator.validateKey;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_DEVFILE_REGISTRY_INTERNAL_URL_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_INTERNAL_URL_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_STORAGE_PREFERRED_TYPE;
@@ -101,7 +103,9 @@ public class WorkspaceService extends Service {
   private final MachineTokenProvider machineTokenProvider;
   private final WorkspaceLinksGenerator linksGenerator;
   private final String pluginRegistryUrl;
+  private final String pluginRegistryInternalUrl;
   private final String devfileRegistryUrl;
+  private final String devfileRegistryInternalUrl;
   private final String apiEndpoint;
   private final boolean cheWorkspaceAutoStart;
   private final FileContentProvider devfileContentProvider;
@@ -117,7 +121,11 @@ public class WorkspaceService extends Service {
       MachineTokenProvider machineTokenProvider,
       WorkspaceLinksGenerator linksGenerator,
       @Named(CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY) @Nullable String pluginRegistryUrl,
+      @Named(CHE_WORKSPACE_PLUGIN_REGISTRY_INTERNAL_URL_PROPERTY) @Nullable
+          String pluginRegistryInternalUrl,
       @Named(CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY) @Nullable String devfileRegistryUrl,
+      @Named(CHE_WORKSPACE_DEVFILE_REGISTRY_INTERNAL_URL_PROPERTY) @Nullable
+          String devfileRegistryInternalUrl,
       URLFetcher urlFetcher,
       @Named(DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES) Long logLimitBytes,
       @Named(CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES) String availableStorageTypes,
@@ -127,8 +135,10 @@ public class WorkspaceService extends Service {
     this.workspaceManager = workspaceManager;
     this.machineTokenProvider = machineTokenProvider;
     this.linksGenerator = linksGenerator;
+    this.pluginRegistryInternalUrl = pluginRegistryInternalUrl;
     this.pluginRegistryUrl = pluginRegistryUrl;
     this.devfileRegistryUrl = devfileRegistryUrl;
+    this.devfileRegistryInternalUrl = devfileRegistryInternalUrl;
     this.devfileContentProvider = new URLFileContentProvider(null, urlFetcher);
     this.logLimitBytes = logLimitBytes;
     this.availableStorageTypes = availableStorageTypes;
@@ -430,9 +440,18 @@ public class WorkspaceService extends Service {
       settings.put("cheWorkspacePluginRegistryUrl", pluginRegistryUrl);
     }
 
+    if (pluginRegistryInternalUrl != null) {
+      settings.put("cheWorkspacePluginRegistryInternalUrl", pluginRegistryInternalUrl);
+    }
+
     if (devfileRegistryUrl != null) {
       settings.put("cheWorkspaceDevfileRegistryUrl", devfileRegistryUrl);
     }
+
+    if (devfileRegistryInternalUrl != null) {
+      settings.put("cheWorkspaceDevfileRegistryInternalUrl", devfileRegistryInternalUrl);
+    }
+
     settings.put(CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES, availableStorageTypes);
     settings.put(CHE_WORKSPACE_STORAGE_PREFERRED_TYPE, preferredStorageType);
     return settings.build();

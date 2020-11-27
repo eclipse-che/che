@@ -37,19 +37,11 @@ spec:
   - http:
 {{- end }}
       paths:
+      - path: /
+        backend:
+          servicePort: 8080
 {{- if and (eq .Values.global.serverStrategy "single-host") (eq .Values.global.singleHostExposure "gateway") }}
-        - path: /
-          backend:
-            serviceName: che-gateway
-            servicePort: 8080
+          serviceName: che-gateway
 {{- else }}
-        - path: /
-          backend:
-            serviceName: che-host
-            servicePort: 8080
-        # The path rule for Che Dashboard next hosted by Che Server. It should be removed after https://github.com/eclipse/che/issues/17647 is fixed
-        - path: /dashboard/next
-          backend:
-            serviceName: che-host
-            servicePort: 8080
+          serviceName: che-host
 {{- end }}

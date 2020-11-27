@@ -116,6 +116,15 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
   }
 
   @Override
+  public OkHttpClient getAuthenticatedHttpClient() throws InfrastructureException {
+    if (!configBuilder.isPersonalized()) {
+      throw new InfrastructureException(
+          "Not able to construct impersonating openshift API client.");
+    }
+    return clientForConfig(buildConfig(getDefaultConfig(), null));
+  }
+
+  @Override
   protected Config buildDefaultConfig(String masterUrl, Boolean doTrustCerts) {
     OpenShiftConfigBuilder configBuilder = new OpenShiftConfigBuilder();
     if (!isNullOrEmpty(masterUrl)) {
@@ -206,18 +215,19 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
   }
 
   private OpenShiftClient createOC(Config config) {
+    return new UnclosableOpenShiftClient(clientForConfig(config), config);
+  }
+
+  private OkHttpClient clientForConfig(Config config) {
     OkHttpClient clientHttpClient =
         getHttpClient().newBuilder().authenticator(Authenticator.NONE).build();
     OkHttpClient.Builder builder = clientHttpClient.newBuilder();
     builder.interceptors().clear();
-    clientHttpClient =
-        builder
-            .addInterceptor(
-                new OpenShiftOAuthInterceptor(clientHttpClient, OpenShiftConfig.wrap(config)))
-            .addInterceptor(new ImpersonatorInterceptor(config))
-            .build();
-
-    return new UnclosableOpenShiftClient(clientHttpClient, config);
+    return builder
+        .addInterceptor(
+            new OpenShiftOAuthInterceptor(clientHttpClient, OpenShiftConfig.wrap(config)))
+        .addInterceptor(new ImpersonatorInterceptor(config))
+        .build();
   }
 
   /** Decorates the {@link DefaultOpenShiftClient} so that it can not be closed from the outside. */

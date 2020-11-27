@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.singletonMap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -87,6 +88,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       String artifactsBrokerImage,
       String metadataBrokerImage,
       String pluginRegistryUrl,
+      String pluginRegistryInternalUrl,
       CertificateProvisioner certProvisioner) {
     this.cheWebsocketEndpoint = cheWebsocketEndpoint;
     this.brokerPullPolicy = brokerPullPolicy;
@@ -94,7 +96,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     this.machineTokenEnvVarProvider = machineTokenEnvVarProvider;
     this.artifactsBrokerImage = artifactsBrokerImage;
     this.metadataBrokerImage = metadataBrokerImage;
-    this.pluginRegistryUrl = pluginRegistryUrl;
+    this.pluginRegistryUrl =
+        isNullOrEmpty(pluginRegistryInternalUrl) ? pluginRegistryUrl : pluginRegistryInternalUrl;
     this.certProvisioner = certProvisioner;
   }
 

@@ -13,8 +13,7 @@ package org.eclipse.che.multiuser.keycloak.server;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static javax.ws.rs.HttpMethod.POST;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_SETTING;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.*;
 
 import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
@@ -76,9 +75,14 @@ public class KeycloakUserRemover {
     this.keycloakPassword = keycloakPassword;
     this.requestFactory = requestFactory;
     if (userRemovalEnabled) {
-      String serverUrl = keycloakSettings.get().get(AUTH_SERVER_URL_SETTING);
+      String serverUrl =
+          keycloakSettings.getInternalSettings().get(AUTH_SERVER_URL_INTERNAL_SETTING);
       if (serverUrl == null) {
-        throw new ConfigurationException(AUTH_SERVER_URL_SETTING + " is not configured");
+        throw new ConfigurationException(
+            AUTH_SERVER_URL_SETTING
+                + " or "
+                + AUTH_SERVER_URL_INTERNAL_SETTING
+                + " is not configured");
       }
       String realm = keycloakSettings.get().get(REALM_SETTING);
       if (realm == null) {
