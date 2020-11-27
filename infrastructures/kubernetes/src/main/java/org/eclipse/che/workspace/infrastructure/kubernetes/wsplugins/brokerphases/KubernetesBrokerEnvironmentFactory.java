@@ -43,7 +43,7 @@ public class KubernetesBrokerEnvironmentFactory
       @Named("che.workspace.plugin_broker.metadata.image") String metadataBrokerImage,
       @Nullable @Named("che.workspace.plugin_registry_url") String pluginRegistryUrl,
       @Nullable @Named("che.workspace.plugin_registry_internal_url")
-              String pluginRegistryInternalUrl,
+          String pluginRegistryInternalUrl,
       KubernetesTrustedCAProvisioner trustedCAProvisioner,
       CertificateProvisioner certProvisioner) {
     super(
