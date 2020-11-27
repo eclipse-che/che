@@ -362,7 +362,7 @@ EOL"""
 
         stage("Run the 'Cpp' devfile test") {
             steps {
-                sleep 1200
+                sleep 3600
 
                 sh """
                      CHE_URL=https://${cheHost}
