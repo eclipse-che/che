@@ -94,21 +94,6 @@ public class BitbucketUrl implements RemoteFactoryUrl {
   }
 
   /**
-   * Gets factory file name of this bitbucket url
-   *
-   * @return the factory file name
-   */
-  @Override
-  public String getFactoryFilename() {
-    return this.factoryFilename;
-  }
-
-  protected BitbucketUrl withFactoryFilename(String factoryFilename) {
-    this.factoryFilename = factoryFilename;
-    return this;
-  }
-
-  /**
    * Gets branch of this bitbucket url
    *
    * @return the branch part
@@ -122,16 +107,6 @@ public class BitbucketUrl implements RemoteFactoryUrl {
       this.branch = branch;
     }
     return this;
-  }
-
-  /**
-   * Provides location to raw content of the factory json file
-   *
-   * @return location of factory json file in a repository
-   */
-  @Override
-  public String factoryFileLocation() {
-    return rawFileLocation(factoryFilename);
   }
 
   /**

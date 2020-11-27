@@ -92,7 +92,6 @@ public class BitbucketURLParser {
         .withProject(project)
         .withRepository(repoName)
         .withBranch(branch)
-        .withFactoryFilename(".factory.json")
         .withDevfileFilenames(devfileFilenamesProvider.getConfiguredDevfileFilenames());
   }
 }

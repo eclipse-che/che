@@ -83,15 +83,7 @@ public class BitbucketServerFactoryParametersResolver extends DefaultFactoryPara
                 bitbucketUrl,
                 fileName -> urlFetcher.fetch(bitbucketUrl.rawFileLocation(fileName)),
                 extractOverrideParams(factoryParameters))
-            .orElseGet(
-                () ->
-                    urlFactoryBuilder
-                        .createFactoryFromJson(bitbucketUrl)
-                        .orElseGet(
-                            () ->
-                                newDto(FactoryDto.class)
-                                    .withV(CURRENT_VERSION)
-                                    .withSource("repo")));
+            .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"));
 
     if (factory.getDevfile() == null) {
       // initialize default devfile

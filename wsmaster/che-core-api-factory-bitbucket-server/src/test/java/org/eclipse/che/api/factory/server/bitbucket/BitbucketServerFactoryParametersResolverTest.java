@@ -94,8 +94,6 @@ public class BitbucketServerFactoryParametersResolverTest {
 
     when(urlFactoryBuilder.buildDefaultDevfile(any())).thenReturn(computedFactory.getDevfile());
 
-    when(urlFactoryBuilder.createFactoryFromJson(any(RemoteFactoryUrl.class)))
-        .thenReturn(Optional.empty());
     when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any(), anyMap()))
         .thenReturn(Optional.empty());
     Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, bitbucketUrl);
