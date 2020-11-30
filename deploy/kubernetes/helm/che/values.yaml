@@ -59,7 +59,8 @@ global:
     useSelfSignedCerts: true
     selfSignedCertSecretName: self-signed-certificate
 
-    ## Name of the config-map with public certificates to add to Java trust store of the Che server.
+    ## Name of the config-map with public certificates to add to Java trust store 
+    ## of the Che server, Keycloak and propagate into user workspaces.
     serverTrustStoreConfigMapName: ""
 
 

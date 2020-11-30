@@ -43,9 +43,6 @@ public class GithubUrl implements RemoteFactoryUrl {
   /** Subfolder if any */
   private String subfolder;
 
-  /** Factory json filename */
-  private String factoryFilename;
-
   /** Devfile filenames list */
   private final List<String> devfileFilenames = new ArrayList<>();
 
@@ -89,21 +86,6 @@ public class GithubUrl implements RemoteFactoryUrl {
   }
 
   /**
-   * Gets factory file name of this github url
-   *
-   * @return the factory file name
-   */
-  @Override
-  public String getFactoryFilename() {
-    return this.factoryFilename;
-  }
-
-  protected GithubUrl withFactoryFilename(String factoryFilename) {
-    this.factoryFilename = factoryFilename;
-    return this;
-  }
-
-  /**
    * Gets branch of this github url
    *
    * @return the branch part
@@ -137,16 +119,6 @@ public class GithubUrl implements RemoteFactoryUrl {
   protected GithubUrl withSubfolder(String subfolder) {
     this.subfolder = subfolder;
     return this;
-  }
-
-  /**
-   * Provides location to raw content of the factory json file
-   *
-   * @return location of factory json file in a repository
-   */
-  @Override
-  public String factoryFileLocation() {
-    return rawFileLocation(factoryFilename);
   }
 
   /**
