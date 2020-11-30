@@ -237,7 +237,7 @@ pipeline {
         stage("Build and push che-server image") {
             steps {
                 sh """
-                    ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
+                    ${WORKSPACE}/dockerfiles/che/build.sh --build-arg:CHE_DASHBOARD_NEXT_VERSION=iokhrime --build-arg:CHE_DASHBOARD_NEXT_ORGANIZATION=docker.io/maxura --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
                     docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
                     docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
                 """
