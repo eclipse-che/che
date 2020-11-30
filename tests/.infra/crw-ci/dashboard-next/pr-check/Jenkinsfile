@@ -225,7 +225,9 @@ pipeline {
 
                     echo "Build the 'che-dashboard-next' image"
 
-                    docker build . -f apache.Dockerfile -t quay.io/che-incubator/che-dashboard-next:iokhrime
+                    docker build . -f apache.Dockerfile -t docker.io/maxura/che-dashboard-next:iokhrime
+
+                    docker push docker.io/maxura/che-dashboard-next:iokhrime
 
                     cd ..
                 """
@@ -235,8 +237,7 @@ pipeline {
         stage("Build and push che-server image") {
             steps {
                 sh """
-                    export CHE_DASHBOARD_NEXT_VERSION=iokhrime
-                    ${WORKSPACE}/dockerfiles/che/build.sh --build-arg:CHE_DASHBOARD_NEXT_VERSION=iokhrime --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
+                    ${WORKSPACE}/dockerfiles/che/build.sh --build-arg:CHE_DASHBOARD_NEXT_VERSION=iokhrime --build-arg:CHE_DASHBOARD_NEXT_ORGANIZATION=docker.io/maxura/che-dashboard-next --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
                     docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
                     docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
                 """
