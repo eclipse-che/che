@@ -38,7 +38,6 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
-import org.eclipse.che.dto.server.DtoFactory;
 
 /**
  * Handle the creation of some elements used inside a {@link FactoryDto}.
@@ -65,28 +64,6 @@ public class URLFactoryBuilder {
     this.defaultChePlugins = defaultChePlugins;
     this.urlFetcher = urlFetcher;
     this.devfileParser = devfileParser;
-  }
-
-  /**
-   * Build a factory using the provided json file or create default one
-   *
-   * @param remoteFactoryUrl parsed factory URL object
-   * @return a factory or null if factory json in not found
-   */
-  public Optional<FactoryDto> createFactoryFromJson(RemoteFactoryUrl remoteFactoryUrl) {
-    // Check if there is factory json file inside the repository
-    if (remoteFactoryUrl.factoryFileLocation() != null) {
-      final String factoryJsonContent =
-          urlFetcher.fetchSafely(remoteFactoryUrl.factoryFileLocation());
-      if (!isNullOrEmpty(factoryJsonContent)) {
-        FactoryDto factoryDto =
-            DtoFactory.getInstance()
-                .createDtoFromJson(factoryJsonContent, FactoryDto.class)
-                .withSource(remoteFactoryUrl.getFactoryFilename());
-        return Optional.of(factoryDto);
-      }
-    }
-    return Optional.empty();
   }
 
   /**

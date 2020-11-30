@@ -38,6 +38,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpoli
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftUniqueNamesProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenshiftTrustedCAProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftPreviewUrlExposer;
 import org.mockito.InOrder;
@@ -80,6 +81,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private NodeSelectorProvisioner nodeSelectorProvisioner;
   @Mock private GatewayRouterProvisioner gatewayRouterProvisioner;
   @Mock private DeploymentMetadataProvisioner deploymentMetadataProvisioner;
+  @Mock private OpenshiftTrustedCAProvisioner trustedCAProvisioner;
 
   private OpenShiftEnvironmentProvisioner osInfraProvisioner;
 
@@ -112,7 +114,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             previewUrlEndpointsProvisioner,
             vcsSslCertificateProvisioner,
             gatewayRouterProvisioner,
-            deploymentMetadataProvisioner);
+            deploymentMetadataProvisioner,
+            trustedCAProvisioner);
     provisionOrder =
         inOrder(
             logsVolumeMachineProvisioner,
@@ -134,7 +137,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             gitConfigProvisioner,
             previewUrlEndpointsProvisioner,
             gatewayRouterProvisioner,
-            deploymentMetadataProvisioner);
+            deploymentMetadataProvisioner,
+            trustedCAProvisioner);
   }
 
   @Test
@@ -162,6 +166,7 @@ public class OpenShiftEnvironmentProvisionerTest {
     provisionOrder.verify(gitConfigProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(gatewayRouterProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(deploymentMetadataProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(trustedCAProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }
