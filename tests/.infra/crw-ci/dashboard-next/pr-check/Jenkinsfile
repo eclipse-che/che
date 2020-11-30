@@ -225,7 +225,7 @@ pipeline {
 
                     echo "Build the 'che-dashboard-next' image"
 
-                    docker build . -f apache.Dockerfile -t docker.io/maxura/che-dashboard-next:iokhrime
+                    docker build . -f apache.Dockerfile -t docker.io/maxura/che-dashboard:iokhrime
 
                     docker push docker.io/maxura/che-dashboard:iokhrime
 
