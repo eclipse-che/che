@@ -193,7 +193,7 @@ pipeline {
             }
         }
 
-        stage("Build the 'che-dashboard-next' image"){
+        stage("Build and push 'che-dashboard-next' image"){
             steps {
                 sh """
                     echo "Donwload the 'che-dashboard-next' project and checkout to branch"
