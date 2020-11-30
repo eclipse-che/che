@@ -64,7 +64,7 @@ public class KeycloakEnvironmentInitializationFilter
   private final PermissionChecker permissionChecker;
   private final KeycloakSettings keycloakSettings;
   private final JwtParser jwtParser;
-  private final Map<String, String> userNameReplacerPatterns;
+  private final Map<String, String> userNameReplacementPatterns;
 
   @Inject
   public KeycloakEnvironmentInitializationFilter(
@@ -75,17 +75,17 @@ public class KeycloakEnvironmentInitializationFilter
       RequestTokenExtractor tokenExtractor,
       PermissionChecker permissionChecker,
       KeycloakSettings settings,
-      @Nullable @Named("che.keycloak.username.replacer_patterns") String userNameReplacerPatterns) {
+      @Nullable @Named("che.keycloak.username.replacement_patterns") String userNameReplacementPatterns) {
     super(sessionStore, tokenExtractor);
     this.jwtParser = jwtParser;
     this.userManager = userManager;
     this.keycloakProfileRetriever = keycloakProfileRetriever;
     this.permissionChecker = permissionChecker;
     this.keycloakSettings = settings;
-    this.userNameReplacerPatterns =
-        isNullOrEmpty(userNameReplacerPatterns)
+    this.userNameReplacementPatterns =
+        isNullOrEmpty(userNameReplacementPatterns)
             ? Collections.emptyMap()
-            : Splitter.on(",").withKeyValueSeparator("=").split(userNameReplacerPatterns);
+            : Splitter.on(",").withKeyValueSeparator("=").split(userNameReplacementPatterns);
   }
 
   @Override
@@ -126,8 +126,8 @@ public class KeycloakEnvironmentInitializationFilter
         // https://openid.net/specs/openid-connect-basic-1_0.html#ClaimStability
         username = claims.getIssuer() + ":" + claims.getSubject();
       }
-      if (!userNameReplacerPatterns.isEmpty()) {
-        for (Map.Entry<String, String> entry : userNameReplacerPatterns.entrySet()) {
+      if (!userNameReplacementPatterns.isEmpty()) {
+        for (Map.Entry<String, String> entry : userNameReplacementPatterns.entrySet()) {
           username = username.replaceAll(entry.getKey(), entry.getValue());
         }
       }
