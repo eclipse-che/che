@@ -75,7 +75,8 @@ public class KeycloakEnvironmentInitializationFilter
       RequestTokenExtractor tokenExtractor,
       PermissionChecker permissionChecker,
       KeycloakSettings settings,
-      @Nullable @Named("che.keycloak.username.replacement_patterns") String userNameReplacementPatterns) {
+      @Nullable @Named("che.keycloak.username.replacement_patterns")
+          String userNameReplacementPatterns) {
     super(sessionStore, tokenExtractor);
     this.jwtParser = jwtParser;
     this.userManager = userManager;
