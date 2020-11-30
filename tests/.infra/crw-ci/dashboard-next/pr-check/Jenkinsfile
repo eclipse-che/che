@@ -38,25 +38,9 @@ pipeline {
                 defaultValue: "maxura/che-server",
                 description: 'Repo of Che server image')
 
-        string(name: 'cheImageTag',
-                defaultValue: "",
-                description: 'Tag of Che server image')
-
-        booleanParam(name: 'buildChe',
-                defaultValue: false,
-                description: 'Should build Che server')
-
-        string(name: 'e2eTestToRun',
-                defaultValue: "test-all-devfiles",
-                description: 'TypeScript E2E test to run')
-        
         string(name: 'testWorkspaceDevfileUrl',
                 defaultValue: "",
                 description: 'URL of devfile of test workspace')
-
-        booleanParam(name: 'createTestWorkspace',
-                defaultValue: true,
-                description: 'Should create test workspace')
 
         string(name: 'ghprbSourceBranch',
                 defaultValue: "master")
@@ -81,11 +65,7 @@ pipeline {
         stage("Setup environment") {
             steps {
                 script { 
-                    if (cheImageTag == null || cheImageTag == '') {
-                        mutableCheImageTag = ghprbPullId
-                    } else {
-                        mutableCheImageTag = cheImageTag
-                    }
+                    mutableCheImageTag = ghprbPullId
 
                     withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
                         sh """
@@ -198,18 +178,18 @@ pipeline {
                     }
                 }
 
-                // stage("Pull test images") {
-                //     steps {
-                //         script {
-                //             retry(2) {
-                //                 echo "Pull test images"
-                //                 sh """
-                //                     docker pull quay.io/eclipse/che-e2e:$cheE2eImageTag
-                //                 """
-                //             }
-                //         }
-                //     }
-                // }
+                stage("Pull test images") {
+                    steps {
+                        script {
+                            retry(2) {
+                                echo "Pull test images"
+                                sh """
+                                    docker pull quay.io/eclipse/che-e2e:$cheE2eImageTag
+                                """
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -225,9 +205,9 @@ pipeline {
 
                     echo "Build the 'che-dashboard-next' image"
 
-                    docker build . -f apache.Dockerfile -t docker.io/maxura/che-dashboard:iokhrime
+                    docker build . -f apache.Dockerfile -t docker.io/maxura/che-dashboard:${mutableCheImageTag}
 
-                    docker push docker.io/maxura/che-dashboard:iokhrime
+                    docker push docker.io/maxura/che-dashboard:${mutableCheImageTag}
 
                     cd ..
                 """
@@ -237,7 +217,7 @@ pipeline {
         stage("Build and push che-server image") {
             steps {
                 sh """
-                    ${WORKSPACE}/dockerfiles/che/build.sh --build-arg:CHE_DASHBOARD_NEXT_VERSION=iokhrime --build-arg:CHE_DASHBOARD_NEXT_ORGANIZATION=docker.io/maxura --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
+                    ${WORKSPACE}/dockerfiles/che/build.sh --build-arg:CHE_DASHBOARD_NEXT_VERSION=${mutableCheImageTag} --build-arg:CHE_DASHBOARD_NEXT_ORGANIZATION=docker.io/maxura --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
                     docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
                     docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
                 """
@@ -349,7 +329,7 @@ EOL"""
             }
         }
 
-        stage("Run the 'Cpp' devfile test") {
+        stage("Run the 'JavaMaven' devfile test") {
             steps {
                 sh """
                      CHE_URL=https://${cheHost}
@@ -362,7 +342,7 @@ EOL"""
                        -e TS_SELENIUM_PASSWORD="admin" \\
                        -e TEST_SUITE="test-all-devfiles" ${e2eTestParameters} \\
                        -e NODE_TLS_REJECT_UNAUTHORIZED=0 \\
-                       -e USERSTORY=CSlashCPlusPlus \\
+                       -e USERSTORY=JavaMaven \\
                        -e TS_SELENIUM_START_WORKSPACE_TIMEOUT=720000 \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
                        quay.io/eclipse/che-e2e:${cheE2eImageTag}
