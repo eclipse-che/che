@@ -324,14 +324,57 @@ add_che_cert_to_truststore() {
 }
 
 add_public_cert_to_truststore() {
+  chmod 644 $JAVA_TRUST_STORE || true
+
+  JAVA_TRUST_STORE=/home/user/cacerts
+  DEFAULT_JAVA_TRUST_STOREPASS="changeit"
+
   CUSTOM_PUBLIC_CERTIFICATES="/public-certs"
   if [[ -d "$CUSTOM_PUBLIC_CERTIFICATES" && -n "$(find $CUSTOM_PUBLIC_CERTIFICATES -type f)" ]]; then
     FILES="$CUSTOM_PUBLIC_CERTIFICATES/*"
     for cert in $FILES
     do
-      add_cert_to_truststore "$(<$cert)" "HOSTDOMAIN-$(basename $cert)"
+      jks_import_ca_bundle $cert $JAVA_TRUST_STORE $DEFAULT_JAVA_TRUST_STOREPASS
     done
   fi
+
+  chmod 444 $JAVA_TRUST_STORE
+}
+
+function jks_import_ca_bundle {
+  CA_FILE=$1
+  KEYSTORE_PATH=$2
+  KEYSTORE_PASSWORD=$3
+
+  if [ ! -f $CA_FILE ]; then
+    # CA bundle file doesn't exist, skip it
+    echo "Failed to import CA certificates from ${CA_FILE}. File doesn't exist"
+    return
+  fi
+
+  bundle_name=$(basename $CA_FILE)
+  cert_index=0
+  tmp_file=/tmp/cert.pem
+  is_cert=false
+  while IFS= read -r line; do
+    if [ "$line" == "-----BEGIN CERTIFICATE-----" ]; then
+      # Start copying a new certificate
+      is_cert=true
+      cert_index=$((cert_index+1))
+      # Reset destination file and add header line
+      echo $line > ${tmp_file}
+    elif [ "$line" == "-----END CERTIFICATE-----" ]; then
+      # End of the certificate is reached, add it to trust store
+      is_cert=false
+      echo $line >> ${tmp_file}
+      keytool -importcert -alias "${bundle_name}_${cert_index}" -keystore $KEYSTORE_PATH -file $tmp_file -storepass $KEYSTORE_PASSWORD -noprompt
+    elif [ "$is_cert" == true ]; then
+      # In the middle of a certificate, copy line to target file
+      echo $line >> ${tmp_file}
+    fi
+  done < "$CA_FILE"
+  # Clean up
+  rm -f $tmp_file
 }
 
 get_che_data_from_host() {
