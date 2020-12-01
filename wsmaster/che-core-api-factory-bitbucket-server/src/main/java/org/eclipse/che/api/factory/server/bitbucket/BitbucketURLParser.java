@@ -15,7 +15,6 @@ import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
@@ -79,19 +78,18 @@ public class BitbucketURLParser {
               + "Please refer to docs to check the Bitbucket integration instructions");
     }
 
-    Optional<Matcher> validMatcherOpt =
+    Matcher matcher =
         bitbucketUrlPatterns
             .stream()
             .map(pattern -> pattern.matcher(url))
             .filter(Matcher::matches)
-            .findFirst();
-    if (validMatcherOpt.isEmpty()) {
-      throw new IllegalArgumentException(
-          String.format(
-              "The given url %s is not a valid Bitbucket server URL. Check either URL or server configuration.",
-              url));
-    }
-    Matcher matcher = validMatcherOpt.get();
+            .findFirst()
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        format(
+                            "The given url %s is not a valid Bitbucket server URL. Check either URL or server configuration.",
+                            url)));
     String host = matcher.group("host");
     String project = matcher.group("project");
     String repoName = matcher.group("repo");

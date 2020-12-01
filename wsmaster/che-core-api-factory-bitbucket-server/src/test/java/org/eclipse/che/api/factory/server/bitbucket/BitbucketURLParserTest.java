@@ -57,6 +57,14 @@ public class BitbucketURLParserTest {
     assertEquals(bitbucketUrl.getBranch(), branch);
   }
 
+  @Test(
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "The given url https://github.com/org/repo is not a valid Bitbucket server URL. Check either URL or server configuration.")
+  public void shouldThrowExceptionWhenURLDintMatchAnyConfiguredServer() {
+    bitbucketURLParser.parse("https://github.com/org/repo");
+  }
+
   @DataProvider(name = "UrlsProvider")
   public Object[][] urls() {
     return new Object[][] {
