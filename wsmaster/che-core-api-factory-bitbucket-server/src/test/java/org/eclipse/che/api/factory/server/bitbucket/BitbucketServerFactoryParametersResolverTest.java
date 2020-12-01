@@ -60,7 +60,8 @@ public class BitbucketServerFactoryParametersResolverTest {
   @BeforeMethod
   protected void init() {
     bitbucketURLParser =
-        new BitbucketURLParser("http://bitbucket.2mcl.com", urlFetcher, devfileFilenamesProvider);
+        new BitbucketURLParser(
+            new String[] {"http://bitbucket.2mcl.com"}, urlFetcher, devfileFilenamesProvider);
     assertNotNull(this.bitbucketURLParser);
     bitbucketServerFactoryParametersResolver =
         new BitbucketServerFactoryParametersResolver(

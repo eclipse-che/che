@@ -35,7 +35,10 @@ public class BitbucketURLParserTest {
   @BeforeClass
   public void setUp() {
     bitbucketURLParser =
-        new BitbucketURLParser("https://bitbucket.2mcl.com", urlFetcher, devfileFilenamesProvider);
+        new BitbucketURLParser(
+            new String[] {"https://bitbucket.2mcl.com", "https://bbkt.com"},
+            urlFetcher,
+            devfileFilenamesProvider);
   }
 
   /** Check URLs are valid with regexp */
@@ -59,6 +62,7 @@ public class BitbucketURLParserTest {
     return new Object[][] {
       {"https://bitbucket.2mcl.com/scm/project/test1.git"},
       {"https://bitbucket.2mcl.com/scm/project/test1.git?at=branch"},
+      {"https://bbkt.com/scm/project/test1.git"},
     };
   }
 
@@ -66,7 +70,8 @@ public class BitbucketURLParserTest {
   public Object[][] expectedParsing() {
     return new Object[][] {
       {"https://bitbucket.2mcl.com/scm/project/test1.git", "project", "test1", null},
-      {"https://bitbucket.2mcl.com/scm/project/test1.git?at=branch", "project", "test1", "branch"}
+      {"https://bitbucket.2mcl.com/scm/project/test1.git?at=branch", "project", "test1", "branch"},
+      {"https://bbkt.com/scm/project/test1.git?at=branch", "project", "test1", "branch"}
     };
   }
 }

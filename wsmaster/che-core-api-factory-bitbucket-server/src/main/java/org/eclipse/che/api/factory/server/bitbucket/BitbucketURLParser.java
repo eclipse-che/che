@@ -13,6 +13,9 @@ package org.eclipse.che.api.factory.server.bitbucket;
 
 import static java.lang.String.format;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
@@ -35,30 +38,32 @@ public class BitbucketURLParser {
   private final DevfileFilenamesProvider devfileFilenamesProvider;
   private static final String bitbucketUrlPatternTemplate =
       "^(?<host>%s)/scm/(?<project>[^/]++)/(?<repo>[^.]++).git(\\?at=)?(?<branch>[\\w\\d-_]*)";
-  private final Pattern bitbucketUrlPattern;
+  private final List<Pattern> bitbucketUrlPatterns = new ArrayList<>();
 
   @Inject
   public BitbucketURLParser(
-      @Nullable @Named("bitbucket.server.endpoint") String bitbucketEndpoint,
+      @Nullable @Named("bitbucket.server.endpoints") String[] bitbucketEndpoints,
       URLFetcher urlFetcher,
       DevfileFilenamesProvider devfileFilenamesProvider) {
-    String trimmedEndpoint = null;
-    if (bitbucketEndpoint != null) {
-      trimmedEndpoint =
+    this.urlFetcher = urlFetcher;
+    this.devfileFilenamesProvider = devfileFilenamesProvider;
+    if (bitbucketEndpoints == null) {
+      // nothing to initialize
+      return;
+    }
+    for (String bitbucketEndpoint : bitbucketEndpoints) {
+      String trimmedEndpoint =
           bitbucketEndpoint.endsWith("/")
               ? bitbucketEndpoint.substring(0, bitbucketEndpoint.length() - 1)
               : bitbucketEndpoint;
+      this.bitbucketUrlPatterns.add(
+          Pattern.compile(format(bitbucketUrlPatternTemplate, trimmedEndpoint)));
     }
-    this.bitbucketUrlPattern =
-        trimmedEndpoint != null
-            ? Pattern.compile(format(bitbucketUrlPatternTemplate, trimmedEndpoint))
-            : null;
-    this.urlFetcher = urlFetcher;
-    this.devfileFilenamesProvider = devfileFilenamesProvider;
   }
 
   public boolean isValid(@NotNull String url) {
-    return bitbucketUrlPattern != null && bitbucketUrlPattern.matcher(url).matches();
+    return !bitbucketUrlPatterns.isEmpty()
+        && bitbucketUrlPatterns.stream().anyMatch(pattern -> pattern.matcher(url).matches());
   }
 
   /**
@@ -68,20 +73,25 @@ public class BitbucketURLParser {
    */
   public BitbucketUrl parse(String url) {
 
-    if (bitbucketUrlPattern == null) {
+    if (bitbucketUrlPatterns.isEmpty()) {
       throw new UnsupportedOperationException(
           "The Bitbucket integration is not configured properly and cannot be used at this moment."
               + "Please refer to docs to check the Bitbucket integration instructions");
     }
 
-    Matcher matcher = bitbucketUrlPattern.matcher(url);
-    if (!matcher.matches()) {
+    Optional<Matcher> validMatcherOpt =
+        bitbucketUrlPatterns
+            .stream()
+            .map(pattern -> pattern.matcher(url))
+            .filter(Matcher::matches)
+            .findFirst();
+    if (validMatcherOpt.isEmpty()) {
       throw new IllegalArgumentException(
           String.format(
               "The given url %s is not a valid Bitbucket server URL. Check either URL or server configuration.",
               url));
     }
-
+    Matcher matcher = validMatcherOpt.get();
     String host = matcher.group("host");
     String project = matcher.group("project");
     String repoName = matcher.group("repo");

@@ -152,7 +152,9 @@ public class WsMasterModule extends AbstractModule {
     Multibinder<FactoryParametersResolver> factoryParametersResolverMultibinder =
         Multibinder.newSetBinder(binder(), FactoryParametersResolver.class);
     factoryParametersResolverMultibinder.addBinding().to(GithubFactoryParametersResolver.class);
-    factoryParametersResolverMultibinder.addBinding().to(BitbucketServerFactoryParametersResolver.class);
+    factoryParametersResolverMultibinder
+        .addBinding()
+        .to(BitbucketServerFactoryParametersResolver.class);
 
     bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
     bind(org.eclipse.che.api.ssh.server.SshService.class);
