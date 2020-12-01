@@ -32,7 +32,7 @@ spec:
     spec:
       initContainers:
       - name: wait-for-postgres
-        image: quay.io/eclipse/che-endpoint-watcher:nightly
+        image: {{ .Values.global.endpointWatcher.image }}
         env:
           - name: POD_NAMESPACE
             valueFrom:
@@ -54,10 +54,23 @@ spec:
           value: keycloak
         - name: DB_PASSWORD
           value: keycloak
+{{- if .Values.keycloakAdminUserSecret }}
+        - name: KEYCLOAK_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.keycloakAdminUserSecret }}
+              key: KEYCLOAK_USER
+        - name: KEYCLOAK_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.keycloakAdminUserSecret }}
+              key: KEYCLOAK_PASSWORD
+{{- else }}
         - name: KEYCLOAK_USER
           value: {{ .Values.keycloakAdminUserName }}
         - name: KEYCLOAK_PASSWORD
           value: {{ .Values.keycloakAdminUserPassword }}
+{{- end }}
         - name: CHE_HOST
           value: {{ template "cheHost" . }}
         - name: ROUTING_SUFFIX

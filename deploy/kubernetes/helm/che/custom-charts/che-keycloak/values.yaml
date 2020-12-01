@@ -17,9 +17,18 @@ global:
   tls:
     ## Name of the config-map with public certificates to add to Java trust store of the Keycloak
     serverTrustStoreConfigMapName: ""
+  # Image used by endpoint watcher (postgres)
+  endpointWatcher:
+    image: quay.io/eclipse/che-endpoint-watcher:nightly
 
 image: quay.io/eclipse/che-keycloak:nightly
+
+## Admin credentials configuration
+# Manually define them in clear
 requireAdminPasswordChange: true
 keycloakAdminUserName: admin
 keycloakAdminUserPassword: admin
+# Or use a secret with keys 'KEYCLOAK_USER' and 'KEYCLOAK_PASSWORD'
+#keycloakAdminUserSecret: keycloak-admin-secret
+
 deploymentStrategy: RollingUpdate
