@@ -16,7 +16,7 @@
 cheWorkspaceHttpProxy: ""
 cheWorkspaceHttpsProxy: ""
 cheWorkspaceNoProxy: ""
-cheImage: quay.io/eclipse/che-server:7.22.1
+cheImage: quay.io/eclipse/che-server:7.22.2
 cheImagePullPolicy: Always
 cheKeycloakRealm: "che"
 cheKeycloakClientId: "che-public"
@@ -114,7 +114,7 @@ che:
   logLevel: "INFO"
 
 dashboard:
-  image: quay.io/eclipse/che-dashboard:7.22.1
+  image: quay.io/eclipse/che-dashboard:7.22.2
   imagePullPolicy: "Always"
   memoryRequest: 16Mi
   memoryLimit: 256Mi
