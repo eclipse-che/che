@@ -324,10 +324,10 @@ add_che_cert_to_truststore() {
 }
 
 add_public_cert_to_truststore() {
-  chmod 644 $JAVA_TRUST_STORE || true
-
   JAVA_TRUST_STORE=/home/user/cacerts
   DEFAULT_JAVA_TRUST_STOREPASS="changeit"
+
+  chmod 644 $JAVA_TRUST_STORE || true
 
   CUSTOM_PUBLIC_CERTIFICATES="/public-certs"
   if [[ -d "$CUSTOM_PUBLIC_CERTIFICATES" && -n "$(find $CUSTOM_PUBLIC_CERTIFICATES -type f)" ]]; then
