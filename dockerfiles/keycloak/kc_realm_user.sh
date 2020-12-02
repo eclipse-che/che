@@ -20,6 +20,7 @@ function jks_import_ca_bundle {
   fi
 
   bundle_name=$(basename $CA_FILE)
+  certs_imported=0
   cert_index=0
   tmp_file=/tmp/cert.pem
   is_cert=false
@@ -34,12 +35,14 @@ function jks_import_ca_bundle {
       # End of the certificate is reached, add it to trust store
       is_cert=false
       echo $line >> ${tmp_file}
-      keytool -importcert -alias "${bundle_name}_${cert_index}" -keystore $KEYSTORE_PATH -file $tmp_file -storepass $KEYSTORE_PASSWORD -noprompt
+      keytool -importcert -alias "${bundle_name}_${cert_index}" -keystore $KEYSTORE_PATH -file $tmp_file -storepass $KEYSTORE_PASSWORD -noprompt && \
+      certs_imported=$((certs_imported+1))
     elif [ "$is_cert" == true ]; then
       # In the middle of a certificate, copy line to target file
       echo $line >> ${tmp_file}
     fi
   done < "$CA_FILE"
+  echo "Imported ${certs_imported} certificates from ${CA_FILE}"
   # Clean up
   rm -f $tmp_file
 }
