@@ -342,6 +342,7 @@ EOL"""
                        -e TS_SELENIUM_PASSWORD="admin" \\
                        -e TEST_SUITE="test-all-devfiles" ${e2eTestParameters} \\
                        -e NODE_TLS_REJECT_UNAUTHORIZED=0 \\
+                       -e TS_SELENIUM_DEFAULT_POLLING=20000 \\
                        -e USERSTORY=JavaMaven \\
                        -e TS_SELENIUM_START_WORKSPACE_TIMEOUT=720000 \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
