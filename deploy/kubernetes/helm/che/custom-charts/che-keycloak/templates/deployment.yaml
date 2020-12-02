@@ -67,9 +67,9 @@ spec:
               key: KEYCLOAK_PASSWORD
 {{- else }}
         - name: KEYCLOAK_USER
-          value: {{ .Values.keycloakAdminUserName }}
+          value: {{ .Values.keycloakAdminUserName | default "admin" }}
         - name: KEYCLOAK_PASSWORD
-          value: {{ .Values.keycloakAdminUserPassword }}
+          value: {{ required "keycloakAdminUserPassword cannot be empty" (.Values.keycloakAdminUserPassword | trim) }}
 {{- end }}
         - name: CHE_HOST
           value: {{ template "cheHost" . }}
