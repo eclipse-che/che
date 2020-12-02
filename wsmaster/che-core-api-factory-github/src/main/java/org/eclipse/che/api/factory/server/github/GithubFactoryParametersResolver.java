@@ -95,15 +95,7 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
                 githubUrl,
                 fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)),
                 extractOverrideParams(factoryParameters))
-            .orElseGet(
-                () ->
-                    urlFactoryBuilder
-                        .createFactoryFromJson(githubUrl)
-                        .orElseGet(
-                            () ->
-                                newDto(FactoryDto.class)
-                                    .withV(CURRENT_VERSION)
-                                    .withSource("repo")));
+            .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"));
 
     if (factory.getWorkspace() != null) {
       return projectConfigDtoMerger.merge(

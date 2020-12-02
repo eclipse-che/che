@@ -12,10 +12,12 @@
 package org.eclipse.che.multiuser.keycloak.server;
 
 import static org.eclipse.che.multiuser.api.authentication.commons.Constants.CHE_SUBJECT_ATTRIBUTE;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USERNAME_CLAIM_SETTING;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -95,7 +97,8 @@ public class KeycloakEnvironmentInitializationFilterTest {
             keycloakProfileRetriever,
             tokenExtractor,
             permissionChecker,
-            keycloakSettings);
+            keycloakSettings,
+            "\\\\=-");
     final KeyPair kp = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
     lenient().when(keyManager.getOrCreateKeyPair(anyString())).thenReturn(kp);
     keycloakAttributes.clear();
@@ -104,6 +107,66 @@ public class KeycloakEnvironmentInitializationFilterTest {
         .when(keycloakProfileRetriever.retrieveKeycloakAttributes(anyString()))
         .thenReturn(keycloakAttributes);
     lenient().when(keycloakSettings.get()).thenReturn(keycloakSettingsMap);
+  }
+
+  @Test
+  public void shouldReplaceBackSlashAndAtSignInUsername() throws Exception {
+    // given
+    Map<String, Object> claimParams = new HashMap<>();
+    claimParams.put("email", "test@test.com");
+    claimParams.put("preferred_username", "myorg\\me@mynamecom");
+    Claims claims = new DefaultClaims(claimParams).setSubject("id");
+    DefaultJws<Claims> jws = new DefaultJws<>(new DefaultJwsHeader(), claims, "");
+    when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token");
+    when(jwtParser.parseClaimsJws(anyString())).thenReturn(jws);
+    keycloakSettingsMap.put(USERNAME_CLAIM_SETTING, "preferred_username");
+    when(userManager.getOrCreateUser(anyString(), anyString(), anyString()))
+        .thenReturn(mock(UserImpl.class, RETURNS_DEEP_STUBS));
+    filter =
+        new KeycloakEnvironmentInitializationFilter(
+            sessionStore,
+            jwtParser,
+            userManager,
+            keycloakProfileRetriever,
+            tokenExtractor,
+            permissionChecker,
+            keycloakSettings,
+            "\\\\=-,@=-at-");
+    // when
+    filter.doFilter(request, response, chain);
+
+    // then
+    verify(userManager).getOrCreateUser("id", "test@test.com", "myorg-me-at-mynamecom");
+  }
+
+  @Test
+  public void shoulBeAbleToDisableUsernameStringReplacing() throws Exception {
+    // given
+    Map<String, Object> claimParams = new HashMap<>();
+    claimParams.put("email", "test@test.com");
+    claimParams.put("preferred_username", "myorg\\myname");
+    Claims claims = new DefaultClaims(claimParams).setSubject("id");
+    DefaultJws<Claims> jws = new DefaultJws<>(new DefaultJwsHeader(), claims, "");
+    when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token");
+    when(jwtParser.parseClaimsJws(anyString())).thenReturn(jws);
+    keycloakSettingsMap.put(USERNAME_CLAIM_SETTING, "preferred_username");
+    when(userManager.getOrCreateUser(anyString(), anyString(), anyString()))
+        .thenReturn(mock(UserImpl.class, RETURNS_DEEP_STUBS));
+    filter =
+        new KeycloakEnvironmentInitializationFilter(
+            sessionStore,
+            jwtParser,
+            userManager,
+            keycloakProfileRetriever,
+            tokenExtractor,
+            permissionChecker,
+            keycloakSettings,
+            null);
+    // when
+    filter.doFilter(request, response, chain);
+
+    // then
+    verify(userManager).getOrCreateUser("id", "test@test.com", "myorg\\myname");
   }
 
   @Test

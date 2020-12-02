@@ -13,14 +13,19 @@ package org.eclipse.che.api.workspace.server.spi;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Starting point of describing the contract which infrastructure provider should implement for
@@ -152,4 +157,21 @@ public abstract class RuntimeInfrastructure {
   protected abstract RuntimeContext internalPrepare(
       RuntimeIdentity identity, InternalEnvironment environment)
       throws ValidationException, InfrastructureException;
+
+  /**
+   * This is a very dangerous method that should be used with care.
+   *
+   * <p>The implementation of this method needs to make sure that it properly impersonates the
+   * current user when performing the request.
+   *
+   * @param httpMethod the http method to use
+   * @param relativeUri the URI to request - this must be a relative URI that is appended to the
+   *     master URL of the infrastructure
+   * @param headers the HTTP headers to send
+   * @param body the optional body of the request
+   * @return the response from the backing infrastructure
+   */
+  public abstract Response sendDirectInfrastructureRequest(
+      String httpMethod, URI relativeUri, @Nullable HttpHeaders headers, @Nullable InputStream body)
+      throws InfrastructureException;
 }

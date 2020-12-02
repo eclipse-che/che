@@ -34,8 +34,11 @@ import okhttp3.EventListener;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.logging.HttpLoggingInterceptor;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Sergii Leshchenko
@@ -44,8 +47,10 @@ import org.eclipse.che.commons.annotation.Nullable;
 @Singleton
 public class KubernetesClientFactory {
 
+  protected static final Logger REQUEST_LOG = LoggerFactory.getLogger("che.infra.request-logging");
+
   /** {@link OkHttpClient} instance shared by all Kubernetes clients. */
-  private OkHttpClient httpClient;
+  private final OkHttpClient httpClient;
 
   /**
    * Default Kubernetes {@link Config} that will be the base configuration to create per-workspace
@@ -130,10 +135,27 @@ public class KubernetesClientFactory {
   }
 
   /**
+   * Unlike {@link #getHttpClient()} method, this method always returns an HTTP client that contains
+   * interceptors that augment the request with authentication information available in the global
+   * context.
+   *
+   * <p>Unlike {@link #getHttpClient()}, this method creates a new HTTP client instance each time it
+   * is called.
+   *
+   * @return HTTP client with authorization set up
+   * @throws InfrastructureException if it is not possible to build the client with authentication
+   *     infromation
+   */
+  public OkHttpClient getAuthenticatedHttpClient() throws InfrastructureException {
+    throw new InfrastructureException(
+        "Impersonating the current user is not supported in the Kubernetes Client.");
+  }
+
+  /**
    * Retrieves the default Kubernetes {@link Config} that will be the base configuration to create
    * per-workspace configurations.
    */
-  protected Config getDefaultConfig() {
+  public Config getDefaultConfig() {
     return defaultConfig;
   }
 
@@ -199,13 +221,24 @@ public class KubernetesClientFactory {
         httpClient.newBuilder().authenticator(Authenticator.NONE).build();
     OkHttpClient.Builder builder = clientHttpClient.newBuilder();
     builder.interceptors().clear();
-    clientHttpClient =
-        builder
-            .addInterceptor(buildKubernetesInterceptor(config))
-            .addInterceptor(new ImpersonatorInterceptor(config))
-            .build();
+
+    builder
+        .addInterceptor(buildKubernetesInterceptor(config))
+        .addInterceptor(new ImpersonatorInterceptor(config));
+
+    initializeRequestTracing(builder);
+
+    clientHttpClient = builder.build();
 
     return new UnclosableKubernetesClient(clientHttpClient, config);
+  }
+
+  protected void initializeRequestTracing(OkHttpClient.Builder builder) {
+    if (REQUEST_LOG.isTraceEnabled()) {
+      HttpLoggingInterceptor logging = new HttpLoggingInterceptor(REQUEST_LOG::trace);
+      logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+      builder.addInterceptor(logging);
+    }
   }
 
   /**

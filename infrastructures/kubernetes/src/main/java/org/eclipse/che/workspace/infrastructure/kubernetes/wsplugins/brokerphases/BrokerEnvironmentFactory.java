@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.singletonMap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -50,6 +51,7 @@ import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TrustedCAProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 
 /**
@@ -77,6 +79,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   private final String artifactsBrokerImage;
   private final String metadataBrokerImage;
   private final String pluginRegistryUrl;
+  private final TrustedCAProvisioner trustedCAProvisioner;
+  private final String certificateMountPath;
   private final CertificateProvisioner certProvisioner;
 
   public BrokerEnvironmentFactory(
@@ -87,6 +91,9 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       String artifactsBrokerImage,
       String metadataBrokerImage,
       String pluginRegistryUrl,
+      String pluginRegistryInternalUrl,
+      TrustedCAProvisioner trustedCAProvisioner,
+      String certificateMountPath,
       CertificateProvisioner certProvisioner) {
     this.cheWebsocketEndpoint = cheWebsocketEndpoint;
     this.brokerPullPolicy = brokerPullPolicy;
@@ -94,7 +101,10 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     this.machineTokenEnvVarProvider = machineTokenEnvVarProvider;
     this.artifactsBrokerImage = artifactsBrokerImage;
     this.metadataBrokerImage = metadataBrokerImage;
-    this.pluginRegistryUrl = pluginRegistryUrl;
+    this.pluginRegistryUrl =
+        isNullOrEmpty(pluginRegistryInternalUrl) ? pluginRegistryUrl : pluginRegistryInternalUrl;
+    this.trustedCAProvisioner = trustedCAProvisioner;
+    this.certificateMountPath = certificateMountPath;
     this.certProvisioner = certProvisioner;
   }
 
@@ -212,6 +222,10 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
                 certProvisioner.isConfigured() ? certProvisioner.getCertPath() : "",
                 "--registry-address",
                 Strings.nullToEmpty(pluginRegistryUrl)));
+    if (trustedCAProvisioner.isTrustedStoreInitialized()) {
+      args.add("--cadir");
+      args.add(certificateMountPath);
+    }
     if (mergePlugins) {
       args.add("--merge-plugins");
     }

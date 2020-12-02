@@ -101,7 +101,6 @@ public class GithubURLParser {
         .withUsername(repoUser)
         .withRepository(repoName)
         .withBranch(branchName)
-        .withFactoryFilename(".factory.json")
         .withSubfolder(matcher.group("subFolder"))
         .withDevfileFilenames(devfileFilenamesProvider.getConfiguredDevfileFilenames());
   }

@@ -268,8 +268,9 @@ public class UserManager {
     eventService.publish(new UserRemovedEvent(id));
   }
 
-  @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
-  protected void doRemove(String id) throws ServerException {
+  @Transactional(
+      rollbackOn = {RuntimeException.class, ServerException.class, ConflictException.class})
+  protected void doRemove(String id) throws ConflictException, ServerException {
     UserImpl user;
     try {
       user = userDao.getById(id);
@@ -278,7 +279,14 @@ public class UserManager {
     }
     preferencesDao.remove(id);
     profileDao.remove(id);
-    eventService.publish(new BeforeUserRemovedEvent(user)).propagateException();
+    try {
+      eventService.publish(new BeforeUserRemovedEvent(user)).propagateException();
+    } catch (ServerException e) {
+      if (e.getCause() instanceof ConflictException) {
+        throw (ConflictException) e.getCause();
+      }
+      throw e;
+    }
     userDao.remove(id);
   }
 }
