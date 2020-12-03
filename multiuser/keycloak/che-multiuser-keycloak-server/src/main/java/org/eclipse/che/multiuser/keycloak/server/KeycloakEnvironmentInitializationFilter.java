@@ -14,14 +14,17 @@ package org.eclipse.che.multiuser.keycloak.server;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 
+import com.google.common.base.Splitter;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -32,6 +35,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
@@ -60,6 +64,7 @@ public class KeycloakEnvironmentInitializationFilter
   private final PermissionChecker permissionChecker;
   private final KeycloakSettings keycloakSettings;
   private final JwtParser jwtParser;
+  private final Map<String, String> userNameReplacementPatterns;
 
   @Inject
   public KeycloakEnvironmentInitializationFilter(
@@ -69,13 +74,19 @@ public class KeycloakEnvironmentInitializationFilter
       KeycloakProfileRetriever keycloakProfileRetriever,
       RequestTokenExtractor tokenExtractor,
       PermissionChecker permissionChecker,
-      KeycloakSettings settings) {
+      KeycloakSettings settings,
+      @Nullable @Named("che.keycloak.username.replacement_patterns")
+          String userNameReplacementPatterns) {
     super(sessionStore, tokenExtractor);
     this.jwtParser = jwtParser;
     this.userManager = userManager;
     this.keycloakProfileRetriever = keycloakProfileRetriever;
     this.permissionChecker = permissionChecker;
     this.keycloakSettings = settings;
+    this.userNameReplacementPatterns =
+        isNullOrEmpty(userNameReplacementPatterns)
+            ? Collections.emptyMap()
+            : Splitter.on(",").withKeyValueSeparator("=").split(userNameReplacementPatterns);
   }
 
   @Override
@@ -115,6 +126,11 @@ public class KeycloakEnvironmentInitializationFilter
       if (username == null) { // fallback to unique id promised by spec
         // https://openid.net/specs/openid-connect-basic-1_0.html#ClaimStability
         username = claims.getIssuer() + ":" + claims.getSubject();
+      }
+      if (!userNameReplacementPatterns.isEmpty()) {
+        for (Map.Entry<String, String> entry : userNameReplacementPatterns.entrySet()) {
+          username = username.replaceAll(entry.getKey(), entry.getValue());
+        }
       }
       String id = claims.getSubject();
 
