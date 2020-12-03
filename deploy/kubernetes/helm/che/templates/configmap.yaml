@@ -92,6 +92,7 @@ data:
   CHE_WORKSPACE_HTTPS__PROXY: {{ .Values.cheWorkspaceHttpsProxy | quote}}
   CHE_WORKSPACE_NO__PROXY: {{ .Values.cheWorkspaceNoProxy | quote}}
   CHE_LIMITS_WORKSPACE_IDLE_TIMEOUT: '{{ .Values.global.workspaceIdleTimeout }}'
+  CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: {{ .Values.global.workspace.number | quote }}
 {{- if .Values.workspaceDefaultRamRequest }}
   CHE_WORKSPACE_DEFAULT_MEMORY_REQUEST_MB: {{ .Values.workspaceDefaultRamRequest | quote }}
 {{- end }}
@@ -118,6 +119,9 @@ data:
 {{- end }}
 {{- if .Values.global.cheWorkspaceClusterRole }}
   CHE_INFRA_KUBERNETES_CLUSTER__ROLE__NAME: {{ .Values.global.cheWorkspaceClusterRole }}
+{{- end }}
+{{- if .Values.che.workspace.podNodeSelector }}
+  CHE_WORKSPACE_POD_NODE__SELECTOR: {{ .Values.che.workspace.podNodeSelector | quote }}
 {{- end }}
   CHE_CORS_ENABLED: "false"
   CHE_CORS_ALLOW__CREDENTIALS: "false"
