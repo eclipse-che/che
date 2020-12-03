@@ -54,17 +54,17 @@ spec:
           value: keycloak
         - name: DB_PASSWORD
           value: keycloak
-{{- if .Values.keycloakAdminUserSecret }}
+{{- if .Values.keycloakCredentialsSecret }}
         - name: KEYCLOAK_USER
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.keycloakAdminUserSecret }}
-              key: KEYCLOAK_USER
+              name: {{ .Values.keycloakCredentialsSecret }}
+              key: user
         - name: KEYCLOAK_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.keycloakAdminUserSecret }}
-              key: KEYCLOAK_PASSWORD
+              name: {{ .Values.keycloakCredentialsSecret }}
+              key: password
 {{- else }}
         - name: KEYCLOAK_USER
           value: {{ .Values.keycloakAdminUserName | default "admin" }}

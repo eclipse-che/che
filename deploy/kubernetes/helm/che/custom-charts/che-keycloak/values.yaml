@@ -29,6 +29,6 @@ requireAdminPasswordChange: true
 keycloakAdminUserName: admin
 keycloakAdminUserPassword: admin
 # Or use a secret with keys 'KEYCLOAK_USER' and 'KEYCLOAK_PASSWORD'
-#keycloakAdminUserSecret: keycloak-admin-secret
+#keycloakCredentialsSecret: che-identity-secret
 
 deploymentStrategy: RollingUpdate
