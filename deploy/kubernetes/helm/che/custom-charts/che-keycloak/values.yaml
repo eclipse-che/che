@@ -28,7 +28,7 @@ image: quay.io/eclipse/che-keycloak:nightly
 requireAdminPasswordChange: true
 keycloakAdminUserName: admin
 keycloakAdminUserPassword: admin
-# Or use a secret with keys 'KEYCLOAK_USER' and 'KEYCLOAK_PASSWORD'
+# Or use a secret with keys 'user' and 'password'
 #keycloakCredentialsSecret: che-identity-secret
 
 deploymentStrategy: RollingUpdate
