@@ -33,10 +33,27 @@ if [ $KEYCLOAK_USER ] && [ $KEYCLOAK_PASSWORD ]; then
     /opt/jboss/keycloak/bin/add-user-keycloak.sh --user $KEYCLOAK_USER --password $KEYCLOAK_PASSWORD
 fi
 
+# Handle CA certificates
+KEYSTORE_PATH=/scripts/openshift.jks
+TRUST_STORE_PASSWORD=${TRUSTPASS:-openshift}
+CUSTOM_CERTS_DIR=/public-certs
+
+# Check for additional CA certificates propagated to Keycloak
+if [[ -d $CUSTOM_CERTS_DIR && -n $(find ${CUSTOM_CERTS_DIR} -type f) ]]; then
+    for certfile in ${CUSTOM_CERTS_DIR}/* ; do
+        keytool -importcert -alias CERT_$(basename $certfile) -keystore $KEYSTORE_PATH -file $certfile -storepass $TRUST_STORE_PASSWORD  -noprompt;
+    done
+fi
+
+# Check for self-sighed certificate
 if [ "${CHE_SELF__SIGNED__CERT}" != "" ]; then
     echo "${CHE_SELF__SIGNED__CERT}" > /scripts/openshift.cer
-    keytool -importcert -alias HOSTDOMAIN -keystore /scripts/openshift.jks -file /scripts/openshift.cer -storepass openshift -noprompt
-    keytool -importkeystore -srckeystore $JAVA_HOME/jre/lib/security/cacerts -destkeystore /scripts/openshift.jks -srcstorepass changeit -deststorepass openshift
+    keytool -importcert -alias HOSTDOMAIN -keystore $KEYSTORE_PATH -file /scripts/openshift.cer -storepass $TRUST_STORE_PASSWORD -noprompt
+fi
+
+# Export Java trust store into one that is propagated to Keycloak
+if [ -f "$KEYSTORE_PATH" ]; then
+    keytool -importkeystore -srckeystore $JAVA_HOME/jre/lib/security/cacerts -destkeystore $KEYSTORE_PATH -srcstorepass changeit -deststorepass $TRUST_STORE_PASSWORD
     /opt/jboss/keycloak/bin/jboss-cli.sh --file=/scripts/cli/add_openshift_certificate.cli && rm -rf /opt/jboss/keycloak/standalone/configuration/standalone_xml_history
 fi
 

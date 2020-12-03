@@ -84,6 +84,8 @@ public class IdentityProviderConfigFactory extends OpenShiftClientConfigFactory 
             + "</strong> \n"
             + "identity provider by visiting the "
             + "<a href='"
+            // Here should be used public url. User should have it to make manual actions in the
+            // browser.
             + keycloakSettings.get().get(AUTH_SERVER_URL_SETTING)
             + "/realms/"
             + keycloakSettings.get().get(REALM_SETTING)
