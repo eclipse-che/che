@@ -157,12 +157,12 @@ public class KubernetesSize {
   }
 
   /**
-   * Converts CPU resource in {@link Quantity} to cores.
+   * Converts CPU resource from {@link Quantity} object to cores.
    *
    * <p>see {@link KubernetesSize#toCores(String)} for conversion rules
    *
    * @param quantity to convert
-   * @return value in full cores
+   * @return value in cores
    */
   public static float toCores(Quantity quantity) {
     return toCores(quantity.getAmount() + quantity.getFormat());
