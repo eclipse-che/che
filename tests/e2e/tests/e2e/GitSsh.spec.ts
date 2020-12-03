@@ -57,6 +57,7 @@ suite('Git with ssh workflow', async () => {
         await loginPage.login();
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
+        await driverHelper.wait(5000);
     });
 
     test('Generate a SSH key', async () => {
@@ -85,8 +86,8 @@ suite('Git with ssh workflow', async () => {
         await gitPlugin.stageAllChanges(committedFile);
         await gitPlugin.waitChangedFileInChagesList(committedFile);
         await gitPlugin.typeCommitMessage(this.test!.title + currentDate);
-        await gitPlugin.commitFromScmView();
-        await gitPlugin.selectCommandInMoreActionsMenu('Push');
+        await gitPlugin.commitFromCommandMenu();
+        await gitPlugin.pushChangesFromCommandMenu();
         await gitPlugin.waitDataIsSynchronized();
         const rawDataFromFile: string = await gitHubUtils.getRawContentFromFile(TestConstants.TS_GITHUB_TEST_REPO + '/master/' + committedFile);
         assert.isTrue(rawDataFromFile.includes(currentDate));
@@ -100,6 +101,7 @@ suite('Git with ssh workflow', async () => {
         await testWorkspaceUtils.createWsFromDevFile(data);
         await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckPropagatingKeys);
         await ide.waitWorkspaceAndIde();
+        await driverHelper.wait(5000);
         await projectTree.openProjectTreeContainer();
         await cloneTestRepo();
         await projectTree.waitItem('Spoon-Knife');
@@ -115,10 +117,10 @@ suite('Cleanup', async () => {
 
 async function cloneTestRepo() {
     const sshLinkToRepo: string = 'git@github.com:' + TestConstants.TS_GITHUB_TEST_REPO + '.git';
-    const confirmMessage = 'Repository URL (Press \'Enter\' to confirm your input or \'Escape\' to cancel)';
+    const confirmMessage = 'Clone from URL';
 
     await topMenu.selectOption('View', 'Find Command...');
     await quickOpenContainer.typeAndSelectSuggestion('clone', 'Git: Clone');
     await quickOpenContainer.typeAndSelectSuggestion(sshLinkToRepo, confirmMessage);
+    await gitPlugin.clickOnSelectRepositoryButton();
 }
-

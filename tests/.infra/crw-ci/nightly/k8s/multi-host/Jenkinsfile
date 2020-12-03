@@ -148,7 +148,7 @@ pipeline {
                                                             value: false),
 
                                                     string(name: 'e2eTestParameters',
-                                                            value: "-e TS_GITHUB_TEST_REPO_ACCESS_TOKEN=$github_oauth_token  -e TS_GITHUB_TEST_REPO=chepullreq4/Spoon-Knife -e NODE_TLS_REJECT_UNAUTHORIZED=0"),
+                                                            value: "-e TS_SELENIUM_LOAD_PAGE_TIMEOUT=30000 -e TS_GITHUB_TEST_REPO_ACCESS_TOKEN=$github_oauth_token  -e TS_GITHUB_TEST_REPO=chepullreq4/Spoon-Knife -e NODE_TLS_REJECT_UNAUTHORIZED=0"),
 
                                                     string(name: 'chectlPackageUrl',
                                                             value: ''),
