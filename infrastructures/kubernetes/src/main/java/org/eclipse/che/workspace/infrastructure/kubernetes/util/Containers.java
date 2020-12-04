@@ -128,7 +128,7 @@ public class Containers {
         && resources.getLimits() != null
         && (quantity = resources.getLimits().get("cpu")) != null
         && quantity.getAmount() != null) {
-      return KubernetesSize.toCores(quantity.getAmount());
+      return KubernetesSize.toCores(quantity);
     }
     return 0;
   }
@@ -174,7 +174,7 @@ public class Containers {
         && resources.getRequests() != null
         && (quantity = resources.getRequests().get("cpu")) != null
         && quantity.getAmount() != null) {
-      return KubernetesSize.toCores(quantity.getAmount());
+      return KubernetesSize.toCores(quantity);
     }
     return 0;
   }
