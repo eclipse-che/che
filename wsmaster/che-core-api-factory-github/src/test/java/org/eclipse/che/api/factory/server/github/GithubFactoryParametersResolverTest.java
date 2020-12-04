@@ -39,7 +39,6 @@ import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
@@ -80,7 +79,6 @@ public class GithubFactoryParametersResolverTest {
 
   /**
    * Capturing the location parameter when calling {@link
-   * URLFactoryBuilder#createFactoryFromJson(RemoteFactoryUrl)} or {@link
    * URLFactoryBuilder#createFactoryFromDevfile(RemoteFactoryUrl, FileContentProvider, Map)}
    */
   @Captor private ArgumentCaptor<RemoteFactoryUrl> factoryUrlArgumentCaptor;
@@ -131,7 +129,7 @@ public class GithubFactoryParametersResolverTest {
   }
 
   @Test
-  public void shouldGenerateDevfileForFactoryWithNoDevfileOrJson() throws Exception {
+  public void shouldGenerateDevfileForFactoryWithNoDevfile() throws Exception {
 
     String githubUrl = "https://github.com/eclipse/che";
 
@@ -139,8 +137,6 @@ public class GithubFactoryParametersResolverTest {
 
     when(urlFactoryBuilder.buildDefaultDevfile(any())).thenReturn(computedFactory.getDevfile());
 
-    when(urlFactoryBuilder.createFactoryFromJson(any(RemoteFactoryUrl.class)))
-        .thenReturn(Optional.empty());
     when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any(), anyMap()))
         .thenReturn(Optional.empty());
     Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, githubUrl);
@@ -229,30 +225,6 @@ public class GithubFactoryParametersResolverTest {
     assertEquals(source.getBranch(), "foobranch");
   }
 
-  @Test
-  public void shouldReturnFactoryFromRepositoryWithFactoryJson() throws Exception {
-
-    String githubUrl = "https://github.com/eclipse/che";
-
-    FactoryDto computedFactory = generateWsConfigFactory();
-
-    when(urlFactoryBuilder.createFactoryFromJson(any(RemoteFactoryUrl.class)))
-        .thenReturn(Optional.of(computedFactory));
-
-    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, githubUrl);
-    // when
-    githubFactoryParametersResolver.createFactory(params);
-    // then
-    // check we called the builder with the following factory json file
-    verify(urlFactoryBuilder).createFactoryFromJson(factoryUrlArgumentCaptor.capture());
-    verify(urlFactoryBuilder, never()).buildDefaultDevfile(eq("che"));
-    assertEquals(
-        factoryUrlArgumentCaptor.getValue().factoryFileLocation(),
-        "https://raw.githubusercontent.com/eclipse/che/HEAD/.factory.json");
-
-    assertEquals(factoryUrlArgumentCaptor.getValue().getFactoryFilename(), ".factory.json");
-  }
-
   private FactoryDto generateDevfileFactory() {
     return newDto(FactoryDto.class)
         .withV(CURRENT_VERSION)
@@ -261,12 +233,5 @@ public class GithubFactoryParametersResolverTest {
             newDto(DevfileDto.class)
                 .withApiVersion(CURRENT_API_VERSION)
                 .withMetadata(newDto(MetadataDto.class).withName("che")));
-  }
-
-  private FactoryDto generateWsConfigFactory() {
-    return newDto(FactoryDto.class)
-        .withV(CURRENT_VERSION)
-        .withSource("repo")
-        .withWorkspace(newDto(WorkspaceConfigDto.class).withName("che"));
   }
 }

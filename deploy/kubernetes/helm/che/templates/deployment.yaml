@@ -33,7 +33,7 @@ spec:
       initContainers:
 {{- if .Values.global.multiuser }}
       - name: wait-for-postgres
-        image: quay.io/eclipse/che-endpoint-watcher:nightly
+        image: {{ .Values.global.endpointWatcher.image }}
         env:
           - name: POD_NAMESPACE
             valueFrom:
@@ -45,7 +45,7 @@ spec:
 #wait for keycloak if in multiuser mode and .Values.customOidcProvider was not defined
 {{- if (and .Values.global.multiuser (not .Values.customOidcProvider)) }}
       - name: wait-for-keycloak
-        image: quay.io/eclipse/che-endpoint-watcher:nightly
+        image: {{ .Values.global.endpointWatcher.image }}
         env:
           - name: POD_NAMESPACE
             valueFrom:

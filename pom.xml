@@ -21,7 +21,7 @@
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>7.22.0-SNAPSHOT</version>
+    <version>7.23.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -42,8 +42,8 @@
     <properties>
         <?SORTPOM IGNORE?>
         <build.info>${project.version}</build.info>
-        <che.dashboard.version>7.22.0-SNAPSHOT</che.dashboard.version>
-        <che.version>7.22.0-SNAPSHOT</che.version>
+        <che.dashboard.version>7.23.0-SNAPSHOT</che.dashboard.version>
+        <che.version>7.23.0-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
         <?SORTPOM RESUME?>
         <aopalliance.version>1.0</aopalliance.version>
@@ -60,6 +60,7 @@
         <com.jayway.restassured.version>2.4.0</com.jayway.restassured.version>
         <com.jcraft.jsch.version>0.1.54</com.jcraft.jsch.version>
         <com.squareup.okhttp3.version>3.12.6</com.squareup.okhttp3.version>
+        <com.squareup.okio.version>1.15.0</com.squareup.okio.version>
         <commons-codec.version>1.11</commons-codec.version>
         <commons-compress.version>1.19</commons-compress.version>
         <commons-fileupload.version>1.3.3</commons-fileupload.version>
@@ -99,7 +100,7 @@
         <org.apache.maven.plugin-testing.maven-plugin-testing-harness.version>3.3.0</org.apache.maven.plugin-testing.maven-plugin-testing-harness.version>
         <org.apache.maven.plugin-tools.plugin-annotations.version>3.2</org.apache.maven.plugin-tools.plugin-annotations.version>
         <org.apache.maven.verson>3.3.3</org.apache.maven.verson>
-        <org.apache.tomcat.version>8.5.59</org.apache.tomcat.version>
+        <org.apache.tomcat.version>8.5.60</org.apache.tomcat.version>
         <org.codehaus.plexus.utils.version>3.0.20</org.codehaus.plexus.utils.version>
         <org.eclipse.persistence.eclipselink.version>2.7.5</org.eclipse.persistence.eclipselink.version>
         <org.eclipse.persistence.version>2.2.0</org.eclipse.persistence.version>
@@ -250,8 +251,18 @@
             </dependency>
             <dependency>
                 <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>logging-interceptor</artifactId>
+                <version>${com.squareup.okhttp3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp</artifactId>
                 <version>${com.squareup.okhttp3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>${com.squareup.okio.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>
@@ -764,6 +775,11 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-git-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-infraproxy</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

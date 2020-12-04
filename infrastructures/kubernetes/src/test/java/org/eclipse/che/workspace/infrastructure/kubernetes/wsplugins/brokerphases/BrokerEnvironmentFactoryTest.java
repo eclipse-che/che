@@ -36,6 +36,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TrustedCAProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory.BrokersConfigs;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -55,7 +56,9 @@ public class BrokerEnvironmentFactoryTest {
   private static final String IMAGE_PULL_POLICY = "Never";
   private static final String PUSH_ENDPOINT = "http://localhost:8080";
   private static final String PLUGINS_VOLUME_NAME = "plugins";
+  private static final String CA_CERTIFICATES_MOUNT_PATH = "/public-certs";
   @Mock private CertificateProvisioner certProvisioner;
+  @Mock private TrustedCAProvisioner trustedCAProvisioner;
   @Mock private AgentAuthEnableEnvVarProvider authEnableEnvVarProvider;
   @Mock private MachineTokenEnvVarProvider machineTokenEnvVarProvider;
   @Mock private RuntimeIdentity runtimeId;
@@ -74,6 +77,9 @@ public class BrokerEnvironmentFactoryTest {
                 ARTIFACTS_BROKER_IMAGE,
                 METADATA_BROKER_IMAGE,
                 DEFAULT_REGISTRY,
+                "",
+                trustedCAProvisioner,
+                CA_CERTIFICATES_MOUNT_PATH,
                 certProvisioner) {
               @Override
               protected KubernetesEnvironment doCreate(BrokersConfigs brokersConfigs) {

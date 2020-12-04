@@ -12,11 +12,17 @@
 package org.eclipse.che.api.workspace.server.hc;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.CharStreams;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Server checker that uses http connection response code as a criteria of availability of a server.
@@ -25,11 +31,13 @@ import java.util.concurrent.TimeUnit;
  * @author Alexander Garagatyi
  */
 public class HttpConnectionServerChecker extends ServerChecker {
+  private static final Logger LOG = LoggerFactory.getLogger(HttpConnectionServerChecker.class);
   private static final String AUTHORIZATION_HEADER = "Authorization";
   private static final String CONNECTION_HEADER = "Connection";
   private static final String CONNECTION_CLOSE = "close";
   private final URL url;
   private final String token;
+  private final String serverRef;
 
   public HttpConnectionServerChecker(
       URL url,
@@ -43,6 +51,7 @@ public class HttpConnectionServerChecker extends ServerChecker {
       String token) {
     super(machineName, serverRef, period, timeout, successThreshold, timeUnit, timer);
     this.url = url;
+    this.serverRef = serverRef;
     this.token = token;
   }
 
@@ -60,6 +69,10 @@ public class HttpConnectionServerChecker extends ServerChecker {
       }
       return isConnectionSuccessful(httpURLConnection);
     } catch (IOException e) {
+      LOG.debug(
+          "Failed to establish http connection to check server '{}'. Cause: {}",
+          serverRef,
+          e.getMessage());
       return false;
     } finally {
       if (httpURLConnection != null) {
@@ -71,10 +84,43 @@ public class HttpConnectionServerChecker extends ServerChecker {
   boolean isConnectionSuccessful(HttpURLConnection conn) {
     try {
       int responseCode = conn.getResponseCode();
-      return responseCode >= 200 && responseCode < 400;
+      boolean success = isConnectionSuccessful(responseCode);
+
+      if (!success && LOG.isDebugEnabled()) {
+        String response;
+        try {
+          InputStream in = conn.getErrorStream();
+          if (in == null) {
+            in = conn.getInputStream();
+          }
+
+          try (Reader reader = new InputStreamReader(in)) {
+            response = CharStreams.toString(reader);
+          }
+        } catch (Exception e) {
+          response = "failed to ready response: " + e.getMessage();
+        }
+        LOG.debug(
+            "Server check for '{}:{}' request failed with code {}. Response: {}",
+            serverRef,
+            url,
+            responseCode,
+            response);
+      }
+
+      return success;
     } catch (IOException e) {
+      LOG.debug(
+          "Failed to establish http connection to check server '{}:{}'. Cause: {}",
+          serverRef,
+          url,
+          e.getMessage());
       return false;
     }
+  }
+
+  boolean isConnectionSuccessful(int responseCode) {
+    return responseCode >= 200 && responseCode < 400;
   }
 
   @VisibleForTesting

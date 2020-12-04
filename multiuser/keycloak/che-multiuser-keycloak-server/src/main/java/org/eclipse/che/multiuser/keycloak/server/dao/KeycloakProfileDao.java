@@ -25,7 +25,7 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakProfileRetriever;
 
 /**
- * Fetches user profile from Keycloack server.
+ * Fetches user profile from Keycloak server.
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  * @author Sergii Leshchenko

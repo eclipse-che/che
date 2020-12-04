@@ -26,6 +26,7 @@ import io.fabric8.openshift.client.OpenShiftConfig;
 import io.fabric8.openshift.client.OpenShiftConfigBuilder;
 import io.fabric8.openshift.client.internal.OpenShiftOAuthInterceptor;
 import java.net.URL;
+import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -113,6 +114,15 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
    */
   public OpenShiftClient createOC() throws InfrastructureException {
     return createOC(buildConfig(getDefaultConfig(), null));
+  }
+
+  @Override
+  public OkHttpClient getAuthenticatedHttpClient() throws InfrastructureException {
+    if (!configBuilder.isPersonalized()) {
+      throw new InfrastructureException(
+          "Not able to construct impersonating openshift API client.");
+    }
+    return clientForConfig(buildConfig(getDefaultConfig(), null));
   }
 
   @Override
@@ -206,29 +216,38 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
   }
 
   private OpenShiftClient createOC(Config config) {
+    return new UnclosableOpenShiftClient(
+        clientForConfig(config), config, this::initializeRequestTracing);
+  }
+
+  private OkHttpClient clientForConfig(Config config) {
     OkHttpClient clientHttpClient =
         getHttpClient().newBuilder().authenticator(Authenticator.NONE).build();
     OkHttpClient.Builder builder = clientHttpClient.newBuilder();
     builder.interceptors().clear();
-    clientHttpClient =
-        builder
-            .addInterceptor(
-                new OpenShiftOAuthInterceptor(clientHttpClient, OpenShiftConfig.wrap(config)))
-            .addInterceptor(new ImpersonatorInterceptor(config))
-            .build();
-
-    return new UnclosableOpenShiftClient(clientHttpClient, config);
+    return builder
+        .addInterceptor(
+            new OpenShiftOAuthInterceptor(clientHttpClient, OpenShiftConfig.wrap(config)))
+        .addInterceptor(new ImpersonatorInterceptor(config))
+        .build();
   }
 
   /** Decorates the {@link DefaultOpenShiftClient} so that it can not be closed from the outside. */
   private static class UnclosableOpenShiftClient extends DefaultOpenShiftClient {
 
-    public UnclosableOpenShiftClient(OkHttpClient httpClient, Config config) {
+    public UnclosableOpenShiftClient(
+        OkHttpClient httpClient, Config config, Consumer<OkHttpClient.Builder> clientModifier) {
       super(
           httpClient,
           config instanceof OpenShiftConfig
               ? (OpenShiftConfig) config
               : new OpenShiftConfig(config));
+
+      // the super constructor resets the http client configuration, so we enable the callers to
+      // override the client config after it has modified in the super constructor
+      OkHttpClient.Builder bld = this.httpClient.newBuilder();
+      clientModifier.accept(bld);
+      this.httpClient = bld.build();
     }
 
     @Override

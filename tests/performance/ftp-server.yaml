@@ -7,6 +7,8 @@ metadata:
 spec:
   containers:
   - name: load-tests-ftp-container
+    securityContext:
+      privileged: true
     image: fauria/vsftpd
     ports:
     - containerPort: 21
@@ -17,6 +19,16 @@ spec:
       value: "user"
     - name: FTP_PASS
       value: "pass1234"
+    - name: PASV_PROMISCUOUS
+      value: "YES"
+    - name: PORT_PROMISCUOUS
+      value: "YES"
+    - name: PASV_MIN_PORT
+      value: "21000"
+    - name: PASV_MAX_PORT
+      value: "22000"
+    command: ["sleep"]
+    args: ["100000"]
     volumeMounts:
       - mountPath: /home/vsftpd/user
         name: pv-storage
