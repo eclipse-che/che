@@ -222,7 +222,7 @@ export class ProjectTree {
     async waitProjectImported(projectName: string,
         rootSubItem: string,
         attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
-        visibilityItemPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5,
+        visibilityItemPolling: number = TimeoutConstants.TS_IMPORT_PROJECT_DEFAULT_POLLING,
         triesPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 30) {
 
         Logger.debug(`ProjectTree.waitProjectImported "${projectName}" rootSubItem: "${rootSubItem}"`);
@@ -238,10 +238,10 @@ export class ProjectTree {
             if (!isProjectFolderVisible) {
                 Logger.trace(`ProjectTree.waitProjectImported project not located, reloading page.`);
                 await this.driverHelper.reloadPage();
-                await this.driverHelper.wait(triesPolling);
                 await this.ide.waitAndSwitchToIdeFrame();
                 await this.ide.waitIde();
                 await this.openProjectTreeContainer();
+                await this.driverHelper.wait(triesPolling);
                 continue;
             }
 
@@ -266,6 +266,7 @@ export class ProjectTree {
         }
 
         throw new error.TimeoutError('Exceeded the maximum number of checking attempts, project has not been imported');
+
     }
 
     async waitProjectImportedNoSubfolder(projectName: string,
