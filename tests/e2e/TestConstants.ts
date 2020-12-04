@@ -54,7 +54,7 @@ export const TestConstants = {
     TS_SELENIUM_DEFAULT_ATTEMPTS: Number(process.env.TS_SELENIUM_DEFAULT_ATTEMPTS) || 5,
 
     /**
-     * Default delay in milliseconds between tries, "1000" by default.
+     * Default delay in milliseconds between tries, "2000" by default.
      */
     TS_SELENIUM_DEFAULT_POLLING: Number(process.env.TS_SELENIUM_DEFAULT_POLLING) || 2000,
 
