@@ -56,7 +56,7 @@ export const TestConstants = {
     /**
      * Default delay in milliseconds between tries, "1000" by default.
      */
-    TS_SELENIUM_DEFAULT_POLLING: Number(process.env.TS_SELENIUM_DEFAULT_POLLING) || 1000,
+    TS_SELENIUM_DEFAULT_POLLING: Number(process.env.TS_SELENIUM_DEFAULT_POLLING) || 2000,
 
     /**
      * Amount of tries for checking workspace status.
