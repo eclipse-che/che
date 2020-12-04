@@ -241,7 +241,6 @@ export class ProjectTree {
                 await this.ide.waitAndSwitchToIdeFrame();
                 await this.ide.waitIde();
                 await this.openProjectTreeContainer();
-                await this.driverHelper.wait(triesPolling);
                 continue;
             }
 
@@ -255,7 +254,6 @@ export class ProjectTree {
             if (!isRootSubItemVisible) {
                 Logger.trace(`ProjectTree.waitProjectImported sub-items not found, reloading page.`);
                 await this.driverHelper.reloadPage();
-                await this.driverHelper.wait(triesPolling);
                 await this.ide.waitAndSwitchToIdeFrame();
                 await this.ide.waitIde();
                 await this.openProjectTreeContainer();
