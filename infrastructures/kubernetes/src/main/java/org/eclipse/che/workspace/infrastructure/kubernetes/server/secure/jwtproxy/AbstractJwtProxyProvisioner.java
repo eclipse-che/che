@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CPU_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CPU_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_SOURCE_ATTRIBUTE;
@@ -103,7 +104,9 @@ abstract class AbstractJwtProxyProvisioner implements ProxyProvisioner {
       CookiePathStrategy cookiePathStrategy,
       MultiHostCookiePathStrategy multihostCookiePathStrategy,
       String jwtProxyImage,
+      String memoryRequestBytes,
       String memoryLimitBytes,
+      String cpuRequestCores,
       String cpuLimitCores,
       String imagePullPolicy,
       String workspaceId,
@@ -120,14 +123,18 @@ abstract class AbstractJwtProxyProvisioner implements ProxyProvisioner {
 
     this.availablePort = FIRST_AVAILABLE_PROXY_PORT;
     long memoryLimitLong = Size.parseSizeToMegabytes(memoryLimitBytes) * MEGABYTES_TO_BYTES_DIVIDER;
+    long memoryRequestLong =
+        Size.parseSizeToMegabytes(memoryRequestBytes) * MEGABYTES_TO_BYTES_DIVIDER;
     this.attributes =
         ImmutableMap.of(
             MEMORY_LIMIT_ATTRIBUTE,
             Long.toString(memoryLimitLong),
             MEMORY_REQUEST_ATTRIBUTE,
-            Long.toString(memoryLimitLong),
+            Long.toString(memoryRequestLong),
             CPU_LIMIT_ATTRIBUTE,
             cpuLimitCores,
+            CPU_REQUEST_ATTRIBUTE,
+            cpuRequestCores,
             CONTAINER_SOURCE_ATTRIBUTE,
             TOOL_CONTAINER_SOURCE);
 
