@@ -109,7 +109,12 @@ global:
   chePluginRegistryUrlFormat: "plugin-registry-%s.%s"
 
 che:
+  limits: {
+    # userWorkspacesRunCount
+  }
   workspace: {}
+    # This variable may contain a set of comma-separated key=value pairs to form the nodeSelector rule
+#    podNodeSelector: "key1=value1,key2=value2"
 #    devfileRegistryUrl: "https://che-devfile-registry.openshift.io/"
 #    pluginBroker:
 #      waitTimeoutMin: "3"
