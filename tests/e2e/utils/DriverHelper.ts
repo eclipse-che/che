@@ -32,6 +32,12 @@ export class DriverHelper {
         return this.driver.actions();
     }
 
+    public async maximize() {
+        Logger.trace(`DriverHelper.maximize`);
+
+        await this.driver.manage().window().maximize();
+    }
+
     public async isVisible(locator: By): Promise<boolean> {
         Logger.trace(`DriverHelper.isVisible ${locator}`);
 

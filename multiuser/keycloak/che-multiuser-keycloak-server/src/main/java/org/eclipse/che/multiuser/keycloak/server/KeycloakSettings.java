@@ -85,9 +85,9 @@ public class KeycloakSettings {
       @Nullable @Named(GITHUB_ENDPOINT_SETTING) String gitHubEndpoint,
       @Named(USE_FIXED_REDIRECT_URLS_SETTING) boolean useFixedRedirectUrls) {
 
-    serverInternalURL = firstNonNull(serverInternalURL, serverURL);
+    serverInternalURL = (serverInternalURL != null) ? serverInternalURL : serverURL;
 
-    if (serverURL == null && oidcProvider == null) {
+    if (serverURL == null && serverInternalURL == null && oidcProvider == null) {
       throw new RuntimeException(
           "Either the '"
               + AUTH_SERVER_URL_SETTING
