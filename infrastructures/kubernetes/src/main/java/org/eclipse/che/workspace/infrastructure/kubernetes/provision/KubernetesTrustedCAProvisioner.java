@@ -114,7 +114,9 @@ public class KubernetesTrustedCAProvisioner implements TrustedCAProvisioner {
 
     KubernetesNamespace namespace = namespaceFactory.getOrCreate(runtimeID);
     Optional<ConfigMap> existing = namespace.configMaps().get(configMapName);
-    if (existing.isEmpty() || !existing.get().getData().equals(allCaCertsConfigMap.getData())) {
+    if (existing.isEmpty()
+        || !(existing.get().getData() == allCaCertsConfigMap.getData()
+            || existing.get().getData().equals(allCaCertsConfigMap.getData()))) {
       // create or renew map
       k8sEnv
           .getConfigMaps()

@@ -4,6 +4,9 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
+import { DialogWindow } from './DialogWindow';
+import { TopMenu } from './TopMenu';
+import { QuickOpenContainer } from './QuickOpenContainer';
 
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
@@ -19,7 +22,12 @@ import { TimeoutConstants } from '../../TimeoutConstants';
 export class GitPlugin {
     private static readonly COMMIT_MESSAGE_TEXTAREA_CSS: string = 'textarea#theia-scm-input-message';
 
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+    constructor(
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.DialogWindow) private readonly dialogWindow: DialogWindow,
+        @inject(CLASSES.TopMenu) private readonly topMenu: TopMenu,
+        @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer
+    ) { }
 
     async openGitPluginContainer(timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
         Logger.debug('GitPlugin.openGitPluginContainer');
@@ -75,11 +83,18 @@ export class GitPlugin {
         await this.driverHelper.waitPresence(By.xpath(`//div[text()='Staged Changes']/parent::div/parent::div/parent::div/following-sibling::div//span[text()=\'${expectedStagedItem}\']`), timeout);
     }
 
-    async commitFromScmView(timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
+    async commitFromCommandMenu() {
         Logger.debug('GitPlugin.commitFromScmView');
-
-        await this.driverHelper.waitAndClick(By.id('__scm-view-container_title:__plugin.scm.title.action.git.commit'), timeout);
+        await this.topMenu.selectOption('View', 'Find Command...');
+        await this.quickOpenContainer.typeAndSelectSuggestion('Commit', 'Git: Commit');
     }
+
+    async pushChangesFromCommandMenu() {
+        Logger.debug('GitPlugin.commitFromScmView');
+        await this.topMenu.selectOption('View', 'Find Command...');
+        await this.quickOpenContainer.typeAndSelectSuggestion('Push', 'Git: Push');
+    }
+
 
     async stageAllChanges(expectedStagedItem: string, timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
         Logger.debug('GitPlugin.stageAllChanges');
@@ -93,6 +108,12 @@ export class GitPlugin {
     async waitDataIsSynchronized(timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
         Logger.debug('GitPlugin.waitDataIsSynchronized');
         await this.driverHelper.waitDisappearance(By.xpath(`//div[contains(@title,'Synchronize Changes')]//span[contains(.,' 0↓')]`), timeout);
+    }
+
+    async clickOnSelectRepositoryButton(timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
+        Logger.debug('GitPlugin.clickOnSelectRepositoryButton');
+        await this.driverHelper.waitAndClick(By.xpath(`//button[@class='theia-button main' and text()='Select Repository Location']`), timeout);
+        await this.dialogWindow.waitDialogDissappearance();
     }
 
 }

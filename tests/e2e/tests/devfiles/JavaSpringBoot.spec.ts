@@ -41,7 +41,7 @@ suite(`${stack} test`, async () => {
     });
 
     suite('Validation of workspace execution', async () => {
-        codeExecutionTests.runTaskWithNotification(runTaskName, runTaskExpectedDialogue, 30_000);
+        codeExecutionTests.runTaskWithNotification(runTaskName, runTaskExpectedDialogue, 120_000);
         codeExecutionTests.closeTerminal(runTaskName);
     });
 

@@ -19,7 +19,7 @@ In series, the following will be released via [che-release](https://github.com/e
 * che-parent, che-dashboard, che-workspace-loader, and che (server assembly), including release to [Maven Central](https://github.com/eclipse/che/issues/16043)
 * che-operator
 
-Then, these steps will be done, which still require some manual intervention (PR verification is not yet automated):
+Then, these steps will be done, which still [require some manual intervention](https://github.com/eclipse/che-release/blob/master/README.md#phase-2---manual-steps) (PR verification is not yet automated):
 
 * generation of OperatorHub PRs
 * chectl
@@ -27,8 +27,7 @@ Then, these steps will be done, which still require some manual intervention (PR
 - [ ] che-theia, che-machine-exec, che-devfile-registry, che-plugin-registry
 - [ ] che-parent, che-dashboard, che-workspace-loader, che
 - [ ] che-operator _(depends on all of the above)_
-  - [ ] https://github.com/operator-framework/community-operators/pull/xxxx
-  - [ ] https://github.com/operator-framework/community-operators/pull/xxxx
+- [ ] [Che community operator PRs](https://github.com/operator-framework/community-operators/pulls?q=%22Update+eclipse-che+operator%22+is%3Aopen) _(depends on all of the above)_
 - [ ] chectl _(depends on all of the above)_
 
 If this is a .0 release:

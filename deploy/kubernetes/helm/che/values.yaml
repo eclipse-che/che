@@ -44,6 +44,9 @@ global:
   singleHostGatewayLabels: app=che,component=che-gateway-config
   # Public hostname of the installed Che server. If value is omitted then it will be automatically set.
   cheHost: ""
+  # Image used by endpoint watchers
+  endpointWatcher:
+    image: quay.io/eclipse/che-endpoint-watcher:nightly
 
   ## Allows to enable and configure TLS
   tls:

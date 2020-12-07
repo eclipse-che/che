@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.util;
 
+import io.fabric8.kubernetes.api.model.Quantity;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -153,5 +154,17 @@ public class KubernetesSize {
       }
     }
     throw new IllegalArgumentException("Invalid Kubernetes CPU size format provided: " + cpuString);
+  }
+
+  /**
+   * Converts CPU resource from {@link Quantity} object to cores.
+   *
+   * <p>see {@link KubernetesSize#toCores(String)} for conversion rules
+   *
+   * @param quantity to convert
+   * @return value in cores
+   */
+  public static float toCores(Quantity quantity) {
+    return toCores(quantity.getAmount() + quantity.getFormat());
   }
 }
