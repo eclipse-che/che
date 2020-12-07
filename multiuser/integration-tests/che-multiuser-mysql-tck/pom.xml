@@ -263,9 +263,6 @@
                                         <restartPolicy>
                                             <name>always</name>
                                         </restartPolicy>
-                                        <log>
-                                            <enabled>true</enabled>
-                                        </log>
                                         <env>
                                             <MYSQL_USER>${jdbc.user.name}</MYSQL_USER>
                                             <MYSQL_PASSWORD>${jdbc.user.password}</MYSQL_PASSWORD>
