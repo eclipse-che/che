@@ -36,9 +36,7 @@ public class BitbucketURLParserTest {
   public void setUp() {
     bitbucketURLParser =
         new BitbucketURLParser(
-            new String[] {"https://bitbucket.2mcl.com", "https://bbkt.com"},
-            urlFetcher,
-            devfileFilenamesProvider);
+            "https://bitbucket.2mcl.com,https://bbkt.com", urlFetcher, devfileFilenamesProvider);
   }
 
   /** Check URLs are valid with regexp */

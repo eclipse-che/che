@@ -13,6 +13,7 @@ package org.eclipse.che.api.factory.server.bitbucket;
 
 import static java.lang.String.format;
 
+import com.google.common.base.Splitter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -41,22 +42,20 @@ public class BitbucketURLParser {
 
   @Inject
   public BitbucketURLParser(
-      @Nullable @Named("bitbucket.server.endpoints") String[] bitbucketEndpoints,
+      @Nullable @Named("bitbucket.server.endpoints") String bitbucketEndpoints,
       URLFetcher urlFetcher,
       DevfileFilenamesProvider devfileFilenamesProvider) {
     this.urlFetcher = urlFetcher;
     this.devfileFilenamesProvider = devfileFilenamesProvider;
-    if (bitbucketEndpoints == null) {
-      // nothing to initialize
-      return;
-    }
-    for (String bitbucketEndpoint : bitbucketEndpoints) {
-      String trimmedEndpoint =
-          bitbucketEndpoint.endsWith("/")
-              ? bitbucketEndpoint.substring(0, bitbucketEndpoint.length() - 1)
-              : bitbucketEndpoint;
-      this.bitbucketUrlPatterns.add(
-          Pattern.compile(format(bitbucketUrlPatternTemplate, trimmedEndpoint)));
+    if (bitbucketEndpoints != null) {
+      for (String bitbucketEndpoint : Splitter.on(",").split(bitbucketEndpoints)) {
+        String trimmedEndpoint =
+            bitbucketEndpoint.endsWith("/")
+                ? bitbucketEndpoint.substring(0, bitbucketEndpoint.length() - 1)
+                : bitbucketEndpoint;
+        this.bitbucketUrlPatterns.add(
+            Pattern.compile(format(bitbucketUrlPatternTemplate, trimmedEndpoint)));
+      }
     }
   }
 
