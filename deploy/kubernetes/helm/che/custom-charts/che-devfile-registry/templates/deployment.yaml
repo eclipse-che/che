@@ -59,3 +59,7 @@ spec:
             memory: {{ .Values.cheDevfileRegistry.memoryLimit }}
           requests:
             memory: {{ .Values.cheDevfileRegistry.memoryRequests }}
+        envFrom:
+          - configMapRef:
+              name: che-devfile-registry
+              optional: true
