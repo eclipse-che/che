@@ -14,12 +14,12 @@ metadata:
 data:
 {{- with .Values.cheDevfileImagesOverride -}}
   {{- with .url }}
-  CHE_DEVFILE_IMAGES_REGISTRY_URL: {{ . }}
+  CHE_DEVFILE_IMAGES_REGISTRY_URL: {{ . | quote }}
   {{- end }}
   {{- with .organization }}
-  CHE_DEVFILE_IMAGES_REGISTRY_ORGANIZATION: {{ . }}
+  CHE_DEVFILE_IMAGES_REGISTRY_ORGANIZATION: {{ . | quote }}
   {{- end }}
   {{- with .tag }}
-  CHE_DEVFILE_IMAGES_REGISTRY_TAG: {{ . }}
+  CHE_DEVFILE_IMAGES_REGISTRY_TAG: {{ . | quote }}
   {{- end }}
 {{- end }}
