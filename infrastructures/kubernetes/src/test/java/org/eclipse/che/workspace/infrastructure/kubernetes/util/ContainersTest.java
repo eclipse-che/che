@@ -288,4 +288,13 @@ public class ContainersTest {
       {"155m", "155", "m", null},
     };
   }
+
+  @Test
+  public void testReturnContainerCPULimitAndRequestConvertedToFullCores() {
+    when(resource.getLimits()).thenReturn(ImmutableMap.of("cpu", new Quantity("1000", "m")));
+    when(resource.getRequests()).thenReturn(ImmutableMap.of("cpu", new Quantity("30", "m")));
+
+    assertEquals(Containers.getCpuLimit(container), 1);
+    assertEquals(Containers.getCpuRequest(container), 0.03, 0.000000001);
+  }
 }

@@ -43,7 +43,6 @@ export class ChromeDriver implements IDriver {
         if (TestConstants.TS_SELENIUM_HEADLESS) {
             options = options.addArguments('headless');
         }
-
         return options;
     }
 

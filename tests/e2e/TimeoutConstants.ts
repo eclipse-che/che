@@ -93,6 +93,11 @@ export const TimeoutConstants = {
      */
     TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT: Number(process.env.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT) || 5_000,
 
+    /**
+     * Timeout for waiting workspace sample import, 50_000 by default.
+     */
+    TS_IMPORT_PROJECT_DEFAULT_POLLING: Number(process.env.TS_SELENIUM_DEFAULT_POLLING) || 50_000,
+
     // -------------------------------------------- EDITOR --------------------------------------------
 
     /**
