@@ -162,17 +162,17 @@ public class KeycloakSettings {
     if (userInfoEndpoint != null) {
       settings.put(USERINFO_ENDPOINT_SETTING, userInfoEndpoint);
       if (serverURL != null) {
-        String internalInfoEndpoint = userInfoEndpoint.replace(serverURL, serverInternalURL);
-        internalSettings.put(USERINFO_ENDPOINT_SETTING, internalInfoEndpoint);
+        userInfoEndpoint = userInfoEndpoint.replace(serverURL, serverInternalURL);
       }
+      internalSettings.put(USERINFO_ENDPOINT_SETTING, userInfoEndpoint);
     }
     String jwksUriEndpoint = (String) openIdConfiguration.get("jwks_uri");
     if (jwksUriEndpoint != null) {
       settings.put(JWKS_ENDPOINT_SETTING, jwksUriEndpoint);
       if (serverURL != null) {
-        String internalJwksUriEndpoint = jwksUriEndpoint.replace(serverURL, serverInternalURL);
-        internalSettings.put(JWKS_ENDPOINT_SETTING, internalJwksUriEndpoint);
+        jwksUriEndpoint = jwksUriEndpoint.replace(serverURL, serverInternalURL);
       }
+      internalSettings.put(JWKS_ENDPOINT_SETTING, jwksUriEndpoint);
     }
 
     settings.put(OSO_ENDPOINT_SETTING, osoEndpoint);
