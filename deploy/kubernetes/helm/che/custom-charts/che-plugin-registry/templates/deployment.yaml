@@ -63,3 +63,4 @@ spec:
         - configMapRef:
             name: che-plugin-registry
             optional: true
+            
