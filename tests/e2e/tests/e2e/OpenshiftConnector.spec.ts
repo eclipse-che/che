@@ -95,7 +95,6 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_USERNAME, `Provide Username ${provideAuthenticationSuffix}`);
     await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PASSWORD, `Provide Password ${provideAuthenticationSuffix}`);
 
-    // change active folder
     await topMenu.selectOption('View', 'Find Command...');
     await quickOpenContainer.typeAndSelectSuggestion('OpenShift: Set Active Project', 'OpenShift: Set Active Project');
     await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT, TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
