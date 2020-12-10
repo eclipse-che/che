@@ -41,12 +41,17 @@ export class OpenshiftPlugin {
 
     async clickOnOpenshiftToollBarIcon(timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) {
         Logger.debug(`OpenshiftPlugin.clickOnOpenshiftTollBar`);
-        await this.ide.waitAndClickLeftToolbarButton(LeftToolbarButton.Openshift, timeout);
+        await this.ide.waitAndClickLeftToolbarButton(LeftToolbarButton.Openshift, 60000);
     }
 
     async waitOpenshiftConnectorTree(timeout: number = TimeoutConstants.TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT) {
         Logger.debug(`OpenshiftPlugin.waitOpenshiftConnectorTree`);
         await this.driverHelper.waitPresence(By.id('openshiftProjectExplorer'), timeout);
+    }
+
+    async clickOnOpenshiftConnectorTree(timeout: number = TimeoutConstants.TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT) {
+        Logger.debug(`OpenshiftPlugin.waitOpenshiftConnectorTree`);
+        await this.driverHelper.waitAndClick(By.id('plugin-view:openshiftProjectExplorer'), timeout);
     }
 
     async clickOnApplicationToolbarItem(item: OpenshiftAppExplorerToolbar, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) {
