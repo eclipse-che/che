@@ -306,11 +306,11 @@ add_cert_to_truststore() {
   echo "$1" > $SELF_SIGNED_CERT
 
   # make sure that owner has permissions to write and other groups have permissions to read
-  chmod 644 $JAVA_TRUST_STORE
+  chmod 644 "$JAVA_TRUST_STORE"
 
   echo yes | keytool -keystore $JAVA_TRUST_STORE -importcert -alias "$2" -file $SELF_SIGNED_CERT -storepass $DEFAULT_JAVA_TRUST_STOREPASS > /dev/null
-  # return back read only permissions for keystore
-  chmod 444 $JAVA_TRUST_STORE
+  # set read-only permissions on keystore file
+  chmod 444 "$JAVA_TRUST_STORE"
   if [[ "$JAVA_OPTS" != *"-Djavax.net.ssl.trustStore"* && "$JAVA_OPTS" != *"-Djavax.net.ssl.trustStorePassword"* ]]; then
     export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=$JAVA_TRUST_STORE -Djavax.net.ssl.trustStorePassword=$DEFAULT_JAVA_TRUST_STOREPASS"
   fi
@@ -326,18 +326,18 @@ add_public_cert_to_truststore() {
   JAVA_TRUST_STORE=/home/user/cacerts
   DEFAULT_JAVA_TRUST_STOREPASS="changeit"
 
-  chmod 644 $JAVA_TRUST_STORE
+  chmod 644 "$JAVA_TRUST_STORE"
 
   CUSTOM_PUBLIC_CERTIFICATES="/public-certs"
   if [[ -d "$CUSTOM_PUBLIC_CERTIFICATES" && -n "$(find $CUSTOM_PUBLIC_CERTIFICATES -type f)" ]]; then
     FILES="$CUSTOM_PUBLIC_CERTIFICATES/*"
     for cert in $FILES
     do
-      jks_import_ca_bundle $cert $JAVA_TRUST_STORE $DEFAULT_JAVA_TRUST_STOREPASS
+      jks_import_ca_bundle "$cert" "$JAVA_TRUST_STORE" "$DEFAULT_JAVA_TRUST_STOREPASS"
     done
   fi
 
-  chmod 444 $JAVA_TRUST_STORE
+  chmod 444 "$JAVA_TRUST_STORE"
 }
 
 function jks_import_ca_bundle {
@@ -345,13 +345,13 @@ function jks_import_ca_bundle {
   KEYSTORE_PATH=$2
   KEYSTORE_PASSWORD=$3
 
-  if [ ! -f $CA_FILE ]; then
+  if [ ! -f "$CA_FILE" ]; then
     # CA bundle file doesn't exist, skip it
     echo "Failed to import CA certificates from ${CA_FILE}. File doesn't exist"
     return
   fi
 
-  bundle_name=$(basename $CA_FILE)
+  bundle_name=$(basename "$CA_FILE")
   certs_imported=0
   cert_index=0
   tmp_file=/tmp/cert.pem
@@ -362,16 +362,16 @@ function jks_import_ca_bundle {
       is_cert=true
       cert_index=$((cert_index+1))
       # Reset destination file and add header line
-      echo $line > ${tmp_file}
+      echo "$line" > ${tmp_file}
     elif [ "$line" == "-----END CERTIFICATE-----" ]; then
       # End of the certificate is reached, add it to trust store
       is_cert=false
-      echo $line >> ${tmp_file}
-      keytool -importcert -alias "${bundle_name}_${cert_index}" -keystore $KEYSTORE_PATH -file $tmp_file -storepass $KEYSTORE_PASSWORD -noprompt && \
+      echo "$line" >> ${tmp_file}
+      keytool -importcert -alias "${bundle_name}_${cert_index}" -keystore "$KEYSTORE_PATH" -file $tmp_file -storepass "$KEYSTORE_PASSWORD" -noprompt && \
       certs_imported=$((certs_imported+1))
     elif [ "$is_cert" == true ]; then
       # In the middle of a certificate, copy line to target file
-      echo $line >> ${tmp_file}
+      echo "$line" >> ${tmp_file}
     fi
   done < "$CA_FILE"
   echo "Imported ${certs_imported} certificates from ${CA_FILE}"

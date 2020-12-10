@@ -13,13 +13,13 @@ function jks_import_ca_bundle {
   KEYSTORE_PATH=$2
   KEYSTORE_PASSWORD=$3
 
-  if [ ! -f $CA_FILE ]; then
+  if [ ! -f "$CA_FILE" ]; then
     # CA bundle file doesn't exist, skip it
     echo "Failed to import CA certificates from ${CA_FILE}. File doesn't exist"
     return
   fi
 
-  bundle_name=$(basename $CA_FILE)
+  bundle_name=$(basename "$CA_FILE")
   certs_imported=0
   cert_index=0
   tmp_file=/tmp/cert.pem
@@ -30,16 +30,16 @@ function jks_import_ca_bundle {
       is_cert=true
       cert_index=$((cert_index+1))
       # Reset destination file and add header line
-      echo $line > ${tmp_file}
+      echo "$line" > ${tmp_file}
     elif [ "$line" == "-----END CERTIFICATE-----" ]; then
       # End of the certificate is reached, add it to trust store
       is_cert=false
-      echo $line >> ${tmp_file}
-      keytool -importcert -alias "${bundle_name}_${cert_index}" -keystore $KEYSTORE_PATH -file $tmp_file -storepass $KEYSTORE_PASSWORD -noprompt && \
+      echo "$line" >> ${tmp_file}
+      keytool -importcert -alias "${bundle_name}_${cert_index}" -keystore "$KEYSTORE_PATH" -file $tmp_file -storepass "$KEYSTORE_PASSWORD" -noprompt && \
       certs_imported=$((certs_imported+1))
     elif [ "$is_cert" == true ]; then
       # In the middle of a certificate, copy line to target file
-      echo $line >> ${tmp_file}
+      echo "$line" >> ${tmp_file}
     fi
   done < "$CA_FILE"
   echo "Imported ${certs_imported} certificates from ${CA_FILE}"
@@ -78,9 +78,9 @@ TRUST_STORE_PASSWORD=${TRUSTPASS:-openshift}
 CUSTOM_CERTS_DIR=/public-certs
 
 # Check for additional CA certificates propagated to Keycloak
-if [[ -d $CUSTOM_CERTS_DIR && -n $(find ${CUSTOM_CERTS_DIR} -type f) ]]; then
+if [[ -d $CUSTOM_CERTS_DIR && -n $(find "${CUSTOM_CERTS_DIR}" -type f) ]]; then
     for certfile in ${CUSTOM_CERTS_DIR}/* ; do
-        jks_import_ca_bundle $certfile $KEYSTORE_PATH $TRUST_STORE_PASSWORD
+        jks_import_ca_bundle "$certfile" "$KEYSTORE_PATH" "$TRUST_STORE_PASSWORD"
     done
 fi
 
