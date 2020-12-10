@@ -50,7 +50,7 @@ export class OpenshiftPlugin {
     }
 
     async clickOnOpenshiftConnectorTree(timeout: number = TimeoutConstants.TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT) {
-        Logger.debug(`OpenshiftPlugin.waitOpenshiftConnectorTree`);
+        Logger.debug(`OpenshiftPlugin.clickOnOpenshiftConnectorTree`);
         await this.driverHelper.waitAndClick(By.id('plugin-view:openshiftProjectExplorer'), timeout);
     }
 
