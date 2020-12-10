@@ -172,6 +172,7 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
         buildDeployment(
             machineName,
             dockerimageComponent.getImage(),
+            dockerimageComponent.getMemoryRequest(),
             dockerimageComponent.getMemoryLimit(),
             dockerimageComponent.getCpuRequest(),
             dockerimageComponent.getCpuLimit(),
@@ -190,6 +191,7 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
   private Deployment buildDeployment(
       String name,
       String image,
+      String memoryRequest,
       String memoryLimit,
       String cpuRequest,
       String cpuLimit,
@@ -207,6 +209,9 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
             .build();
 
     Containers.addRamLimit(container, memoryLimit);
+    if (!isNullOrEmpty(memoryRequest)) {
+      Containers.addRamRequest(container, memoryRequest);
+    }
     if (!isNullOrEmpty(cpuRequest)) {
       Containers.addCpuRequest(container, KubernetesSize.toCores(cpuRequest));
     }
