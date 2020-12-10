@@ -113,7 +113,7 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.typeAndSelectSuggestion('component-node-js', `Provide Component name ${selectSugestionSuffix}`);
 
     await quickOpenContainer.clickOnContainerItem(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_COMPONENT_TYPE);
-    await quickOpenContainer.clickOnContainerItem('latest');
+    await quickOpenContainer.clickOnContainerItem(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_COMPONENT_VERSION);
 
     await openshiftPlugin.clickOnItemInTree(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
     await openshiftPlugin.clickOnItemInTree('node-js-app');

@@ -81,7 +81,7 @@ export const TimeoutConstants = {
     /**
      * Wait for IDE showing project tree tab, "20 000" by default.
      */
-    TS_PROJECT_TREE_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 120_000,
+    TS_PROJECT_TREE_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 20_000,
 
     /**
      * Click on item timeout (project tree), "10 000" by default.
@@ -213,7 +213,7 @@ export const TimeoutConstants = {
     /**
      * Timeout for obtaining cluster IP, "10 000" by default.
      */
-    TS_GET_CLUSTER_IP_TIMEOUT: Number(process.env.TS_GET_CLUSTER_IP_TIMEOUT) || 120_000,
+    TS_GET_CLUSTER_IP_TIMEOUT: Number(process.env.TS_GET_CLUSTER_IP_TIMEOUT) || 60_000,
 
     /**
      * Timeout for waiting fr openshift connector tree, "10 000" by default.
@@ -224,6 +224,5 @@ export const TimeoutConstants = {
      * Timeout for creating CheCluster yaml, "10 000" by default.
      */
     TS_CREATE_CHECLUSTER_YAML_TIMEOUT: Number(process.env.TS_CREATE_CHECLUSTER_YAML_TIMEOUT) || 10_000,
-
 
 };
