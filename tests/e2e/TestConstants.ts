@@ -235,9 +235,20 @@ export const TestConstants = {
     TS_TEST_OPENSHIFT_PLUGIN_PASSWORD: process.env.TS_TEST_OPENSHIFT_PLUGIN_PASSWORD || '',
 
     /**
-     * The name of project in the Openshidt plugin tree
+     * The name of project in the Openshift plugin tree
      */
     TS_TEST_OPENSHIFT_PLUGIN_PROJECT: process.env.TS_TEST_OPENSHIFT_PLUGIN_PROJECT || '',
+
+    /**
+     * The name of the Openshift connector plugin component type
+     */
+    TS_TEST_OPENSHIFT_PLUGIN_COMPONENT_TYPE: process.env.TS_TEST_OPENSHIFT_PLUGIN_COMPONENT_TYPE || 'nodejs (s2i)',
+
+
+    /**
+     * The name of the Openshift connector plugin component version
+     */
+    TS_TEST_OPENSHIFT_PLUGIN_COMPONENT_VERSION: process.env.TS_TEST_OPENSHIFT_PLUGIN_COMPONENT_VERSION || 'latest',
 
     /**
      * Print all timeout variables when tests launch, defaulte to false
