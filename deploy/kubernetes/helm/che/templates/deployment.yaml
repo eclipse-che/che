@@ -27,6 +27,8 @@ spec:
       labels:
         app: che
         component: che
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       securityContext:
         fsGroup: {{ .Values.global.securityContext.fsGroup }}
