@@ -75,8 +75,7 @@ public class KeycloakUserRemover {
     this.keycloakPassword = keycloakPassword;
     this.requestFactory = requestFactory;
     if (userRemovalEnabled) {
-      String serverUrl =
-          keycloakSettings.getInternalSettings().get(AUTH_SERVER_URL_INTERNAL_SETTING);
+      String serverUrl = keycloakSettings.getAuthServerURL();
       if (serverUrl == null) {
         throw new ConfigurationException(
             AUTH_SERVER_URL_SETTING

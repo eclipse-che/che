@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_INTERNAL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
 
 import com.google.common.io.CharStreams;
@@ -101,8 +100,7 @@ public class KeycloakServiceClient {
     byte[] check = md.digest(input.getBytes(StandardCharsets.UTF_8));
     final String hash = Base64.getUrlEncoder().encodeToString(check);
 
-    return UriBuilder.fromUri(
-            keycloakSettings.getInternalSettings().get(AUTH_SERVER_URL_INTERNAL_SETTING))
+    return UriBuilder.fromUri(keycloakSettings.getAuthServerURL())
         .path("/realms/{realm}/broker/{provider}/link")
         .queryParam("nonce", nonce)
         .queryParam("hash", hash)
@@ -128,8 +126,7 @@ public class KeycloakServiceClient {
       throws ForbiddenException, BadRequestException, IOException, NotFoundException,
           ServerException, UnauthorizedException {
     String url =
-        UriBuilder.fromUri(
-                keycloakSettings.getInternalSettings().get(AUTH_SERVER_URL_INTERNAL_SETTING))
+        UriBuilder.fromUri(keycloakSettings.getAuthServerURL())
             .path("/realms/{realm}/broker/{provider}/token")
             .build(keycloakSettings.get().get(REALM_SETTING), oauthProvider)
             .toString();
