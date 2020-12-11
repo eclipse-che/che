@@ -31,8 +31,6 @@ spec:
       labels:
         app: che
         component: plugin-registry
-      annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       containers:
       - image: {{ .Values.chePluginRegistry.image }}
