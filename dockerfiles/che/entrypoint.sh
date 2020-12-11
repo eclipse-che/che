@@ -322,9 +322,14 @@ add_che_cert_to_truststore() {
   fi
 }
 
-add_public_cert_to_truststore() {
+add_public_certs_to_truststore() {
   JAVA_TRUST_STORE=/home/user/cacerts
+  DEFAULT_JAVA_TRUST_STORE=${JAVA_HOME}/lib/security/cacerts
   DEFAULT_JAVA_TRUST_STOREPASS="changeit"
+
+  if [ ! -f "$JAVA_TRUST_STORE" ]; then
+    cp "$DEFAULT_JAVA_TRUST_STORE" "$JAVA_TRUST_STORE"
+  fi
 
   chmod 644 "$JAVA_TRUST_STORE"
 
@@ -439,7 +444,7 @@ init
 init_global_variables
 set_environment_variables
 add_che_cert_to_truststore
-add_public_cert_to_truststore
+add_public_certs_to_truststore
 
 # run che
 start_che_server &
