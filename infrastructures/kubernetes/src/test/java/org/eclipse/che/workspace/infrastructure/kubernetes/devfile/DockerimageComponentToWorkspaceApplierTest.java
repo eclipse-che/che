@@ -276,7 +276,6 @@ public class DockerimageComponentToWorkspaceApplierTest {
     Quantity memoryRequest = container.getResources().getRequests().get("memory");
     assertEquals(memoryRequest.getAmount(), "128");
     assertEquals(memoryRequest.getFormat(), "M");
-
   }
 
   @Test
