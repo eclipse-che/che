@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_INTERNAL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.CLIENT_ID_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.FIXED_REDIRECT_URL_FOR_DASHBOARD;
@@ -46,19 +44,13 @@ public class KeycloakSettings {
   protected static final String DEFAULT_USERNAME_CLAIM = "preferred_username";
 
   private final Map<String, String> settings;
-
   private final String oidcProviderUrl;
-  private final String serverURL;
-  private final String serverInternalURL;
-  private final String realm;
-  private final OIDCInfoProvider oidcInfoProvider;
 
   @Inject
   public KeycloakSettings(
       @Named("che.api") String cheServerEndpoint,
       @Nullable @Named(JS_ADAPTER_URL_SETTING) String jsAdapterUrl,
       @Nullable @Named(AUTH_SERVER_URL_SETTING) String serverURL,
-      @Nullable @Named(AUTH_SERVER_URL_INTERNAL_SETTING) String serverInternalURL,
       @Nullable @Named(REALM_SETTING) String realm,
       @Named(CLIENT_ID_SETTING) String clientId,
       @Nullable @Named(OIDC_PROVIDER_SETTING) String oidcProviderUrl,
@@ -68,21 +60,8 @@ public class KeycloakSettings {
       @Nullable @Named(GITHUB_ENDPOINT_SETTING) String gitHubEndpoint,
       @Named(USE_FIXED_REDIRECT_URLS_SETTING) boolean useFixedRedirectUrls,
       OIDCInfoProvider oidcInfoProvider) {
-    this.serverURL = serverURL;
-    this.serverInternalURL = serverInternalURL;
     this.oidcProviderUrl = oidcProviderUrl;
-    this.realm = realm;
-    this.oidcInfoProvider = oidcInfoProvider;
-
-    String serverAuthUrl = getAuthServerURL();
-    this.validate();
-
-    String wellKnownEndpoint = firstNonNull(oidcProviderUrl, serverAuthUrl + "/realms/" + realm);
-    if (!wellKnownEndpoint.endsWith("/")) {
-      wellKnownEndpoint = wellKnownEndpoint + "/";
-    }
-    wellKnownEndpoint += ".well-known/openid-configuration";
-    oidcInfoProvider.requestInfo(wellKnownEndpoint);
+    OIDCInfo oidcInfo = oidcInfoProvider.get();
 
     Map<String, String> settings = Maps.newHashMap();
     settings.put(
@@ -102,43 +81,26 @@ public class KeycloakSettings {
           serverURL + "/realms/" + realm + "/protocol/openid-connect/token");
     }
 
-    if (oidcInfoProvider.getEndSessionEndpoint() != null) {
-      settings.put(LOGOUT_ENDPOINT_SETTING, oidcInfoProvider.getEndSessionEndpoint());
+    if (oidcInfo.getEndSessionEndpoint() != null) {
+      settings.put(LOGOUT_ENDPOINT_SETTING, oidcInfo.getEndSessionEndpoint());
     }
-    if (oidcInfoProvider.getTokenEndpoint() != null) {
-      settings.put(TOKEN_ENDPOINT_SETTING, oidcInfoProvider.getTokenEndpoint());
+    if (oidcInfo.getTokenEndpoint() != null) {
+      settings.put(TOKEN_ENDPOINT_SETTING, oidcInfo.getTokenEndpoint());
     }
-    if (oidcInfoProvider.getUserInfoEndpoint() != null) {
-      settings.put(USERINFO_ENDPOINT_SETTING, oidcInfoProvider.getUserInfoEndpoint());
+    if (oidcInfo.getUserInfoEndpoint() != null) {
+      settings.put(USERINFO_ENDPOINT_SETTING, oidcInfo.getUserInfoEndpoint());
     }
-    if (oidcInfoProvider.getJWKS_URI() != null) {
-      settings.put(JWKS_ENDPOINT_SETTING, oidcInfoProvider.getJWKS_URI());
+    if (oidcInfo.getJwksUri() != null) {
+      settings.put(JWKS_ENDPOINT_SETTING, oidcInfo.getJwksUri());
     }
 
     settings.put(OSO_ENDPOINT_SETTING, osoEndpoint);
     settings.put(GITHUB_ENDPOINT_SETTING, gitHubEndpoint);
 
     this.setUpKeycloakJSAdaptersURLS(
-        settings, useNonce, useFixedRedirectUrls, jsAdapterUrl, cheServerEndpoint);
+        settings, useNonce, useFixedRedirectUrls, jsAdapterUrl, cheServerEndpoint, serverURL);
 
     this.settings = Collections.unmodifiableMap(settings);
-  }
-
-  private void validate() {
-    if (serverURL == null && serverInternalURL == null && oidcProviderUrl == null) {
-      throw new RuntimeException(
-          "Either the '"
-              + AUTH_SERVER_URL_SETTING
-              + "' or '"
-              + AUTH_SERVER_URL_INTERNAL_SETTING
-              + "' or '"
-              + OIDC_PROVIDER_SETTING
-              + "' property should be set");
-    }
-
-    if (oidcProviderUrl == null && realm == null) {
-      throw new RuntimeException("The '" + REALM_SETTING + "' property should be set");
-    }
   }
 
   private void setUpKeycloakJSAdaptersURLS(
@@ -146,7 +108,8 @@ public class KeycloakSettings {
       boolean useNonce,
       boolean useFixedRedirectUrls,
       String jsAdapterUrl,
-      String cheServerEndpoint) {
+      String cheServerEndpoint,
+      String serverURL) {
     if (oidcProviderUrl != null) {
       settings.put(OIDC_PROVIDER_SETTING, oidcProviderUrl);
       if (useFixedRedirectUrls) {
@@ -176,28 +139,5 @@ public class KeycloakSettings {
    */
   public Map<String, String> get() {
     return settings;
-  }
-
-  /** @return url to get user profile information. */
-  public String getUserInfoEndpoint() {
-    String userInfoEndpoint = this.oidcInfoProvider.getUserInfoEndpoint();
-    if (this.serverURL != null && this.serverInternalURL != null) {
-      userInfoEndpoint = userInfoEndpoint.replace(this.serverURL, this.serverInternalURL);
-    }
-    return userInfoEndpoint;
-  }
-
-  /** @return url to retrieve JWK public key for token validation. */
-  public String getJWKS_URI() {
-    String jwksUriEndpoint = this.oidcInfoProvider.getJWKS_URI();
-    if (serverURL != null && this.serverInternalURL != null) {
-      jwksUriEndpoint = jwksUriEndpoint.replace(this.serverURL, this.serverInternalURL);
-    }
-    return jwksUriEndpoint;
-  }
-
-  /** @return Keycloak server url. */
-  public String getAuthServerURL() {
-    return (serverInternalURL != null) ? serverInternalURL : serverURL;
   }
 }

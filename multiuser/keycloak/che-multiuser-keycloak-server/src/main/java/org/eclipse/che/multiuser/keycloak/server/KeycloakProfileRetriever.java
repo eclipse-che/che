@@ -36,9 +36,9 @@ public class KeycloakProfileRetriever {
 
   @Inject
   public KeycloakProfileRetriever(
-      KeycloakSettings keycloakSettings, HttpJsonRequestFactory requestFactory) {
+      OIDCInfoProvider oidcInfoProvider, HttpJsonRequestFactory requestFactory) {
     this.requestFactory = requestFactory;
-    this.keyclockCurrentUserInfoUrl = keycloakSettings.getUserInfoEndpoint();
+    this.keyclockCurrentUserInfoUrl = oidcInfoProvider.get().getUserInfoEndpoint();
   }
 
   /**

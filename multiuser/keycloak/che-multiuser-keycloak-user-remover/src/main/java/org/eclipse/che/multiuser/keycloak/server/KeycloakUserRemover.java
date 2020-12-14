@@ -70,12 +70,14 @@ public class KeycloakUserRemover {
       @Nullable @Named("che.keycloak.admin_username") String keycloakUser,
       @Nullable @Named("che.keycloak.admin_password") String keycloakPassword,
       KeycloakSettings keycloakSettings,
+      OIDCInfoProvider oidcInfoProvider,
       HttpJsonRequestFactory requestFactory) {
     this.keycloakUser = keycloakUser;
     this.keycloakPassword = keycloakPassword;
     this.requestFactory = requestFactory;
+
     if (userRemovalEnabled) {
-      String serverUrl = keycloakSettings.getAuthServerURL();
+      String serverUrl = oidcInfoProvider.get().getAuthServerURL();
       if (serverUrl == null) {
         throw new ConfigurationException(
             AUTH_SERVER_URL_SETTING

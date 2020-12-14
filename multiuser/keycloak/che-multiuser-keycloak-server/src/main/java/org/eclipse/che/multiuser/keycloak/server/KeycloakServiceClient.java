@@ -61,6 +61,7 @@ import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
 public class KeycloakServiceClient {
 
   private KeycloakSettings keycloakSettings;
+  private OIDCInfo oidcInfo;
 
   private static final Pattern assotiateUserPattern =
       Pattern.compile("User (.+) is not associated with identity provider (.+)");
@@ -69,8 +70,10 @@ public class KeycloakServiceClient {
   private JwtParser jwtParser;
 
   @Inject
-  public KeycloakServiceClient(KeycloakSettings keycloakSettings, JwtParser jwtParser) {
+  public KeycloakServiceClient(
+      KeycloakSettings keycloakSettings, OIDCInfoProvider oidcInfoProvider, JwtParser jwtParser) {
     this.keycloakSettings = keycloakSettings;
+    this.oidcInfo = oidcInfoProvider.get();
     this.jwtParser = jwtParser;
   }
 
@@ -100,7 +103,7 @@ public class KeycloakServiceClient {
     byte[] check = md.digest(input.getBytes(StandardCharsets.UTF_8));
     final String hash = Base64.getUrlEncoder().encodeToString(check);
 
-    return UriBuilder.fromUri(keycloakSettings.getAuthServerURL())
+    return UriBuilder.fromUri(oidcInfo.getAuthServerURL())
         .path("/realms/{realm}/broker/{provider}/link")
         .queryParam("nonce", nonce)
         .queryParam("hash", hash)
@@ -126,7 +129,7 @@ public class KeycloakServiceClient {
       throws ForbiddenException, BadRequestException, IOException, NotFoundException,
           ServerException, UnauthorizedException {
     String url =
-        UriBuilder.fromUri(keycloakSettings.getAuthServerURL())
+        UriBuilder.fromUri(oidcInfo.getAuthServerURL())
             .path("/realms/{realm}/broker/{provider}/token")
             .build(keycloakSettings.get().get(REALM_SETTING), oauthProvider)
             .toString();

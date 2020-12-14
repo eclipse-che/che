@@ -12,7 +12,23 @@
 package org.eclipse.che.multiuser.keycloak.server;
 
 import static org.eclipse.che.multiuser.keycloak.server.KeycloakSettings.DEFAULT_USERNAME_CLAIM;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.*;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.CLIENT_ID_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.FIXED_REDIRECT_URL_FOR_DASHBOARD;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.FIXED_REDIRECT_URL_FOR_IDE;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.GITHUB_ENDPOINT_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.JS_ADAPTER_URL_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.JWKS_ENDPOINT_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.LOGOUT_ENDPOINT_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.OIDC_PROVIDER_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.OSO_ENDPOINT_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.PASSWORD_ENDPOINT_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.PROFILE_ENDPOINT_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.TOKEN_ENDPOINT_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USERINFO_ENDPOINT_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USERNAME_CLAIM_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USE_NONCE_SETTING;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -20,6 +36,7 @@ import static org.testng.Assert.assertNull;
 import java.util.Map;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -28,6 +45,7 @@ import org.testng.annotations.Test;
 public class KeycloakSettingsTest {
 
   @Mock private OIDCInfoProvider oidcInfoProvider;
+  @Mock private OIDCInfo oidcInfo;
 
   private static final String CHE_REALM = "che";
   private static final String CLIENT_ID = "che-public";
@@ -43,45 +61,9 @@ public class KeycloakSettingsTest {
       "/realms/" + CHE_REALM + "/protocol/openid-connect/certs";
   private static final String cheServerEndpoint = "https://test-crc-cluster.com.testing";
 
-  @Test(
-      expectedExceptions = RuntimeException.class,
-      expectedExceptionsMessageRegExp = "Either the '.*' or '.*' or '.*' property should be set")
-  public void shouldThrowErrorWhenAuthServerWasNotSet() {
-    new KeycloakSettings(
-        cheServerEndpoint,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false,
-        null,
-        null,
-        false,
-        oidcInfoProvider);
-  }
-
-  @Test(
-      expectedExceptions = RuntimeException.class,
-      expectedExceptionsMessageRegExp = "The '.*' property should be set")
-  public void shouldThrowErrorWhenRealmPropertyWasNotSet() {
-    final String SERVER_AUTH_URL = "keycloak-che.apps-crc.testing/auth";
-    new KeycloakSettings(
-        cheServerEndpoint,
-        null,
-        SERVER_AUTH_URL,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false,
-        null,
-        null,
-        false,
-        oidcInfoProvider);
+  @BeforeMethod
+  public void setUp() {
+    when(oidcInfoProvider.get()).thenReturn(oidcInfo);
   }
 
   @Test
@@ -91,7 +73,6 @@ public class KeycloakSettingsTest {
 
     KeycloakSettings settings =
         new KeycloakSettings(
-            null,
             null,
             SERVER_AUTH_URL,
             null,
@@ -116,7 +97,6 @@ public class KeycloakSettingsTest {
     KeycloakSettings settings =
         new KeycloakSettings(
             null,
-            null,
             SERVER_AUTH_URL,
             null,
             CHE_REALM,
@@ -139,7 +119,6 @@ public class KeycloakSettingsTest {
 
     KeycloakSettings settings =
         new KeycloakSettings(
-            null,
             null,
             SERVER_AUTH_URL,
             null,
@@ -166,7 +145,6 @@ public class KeycloakSettingsTest {
             cheServerEndpoint,
             JS_ADAPTER_URL,
             null,
-            null,
             CHE_REALM,
             CLIENT_ID,
             SERVER_AUTH_URL,
@@ -187,7 +165,6 @@ public class KeycloakSettingsTest {
     KeycloakSettings settings =
         new KeycloakSettings(
             cheServerEndpoint,
-            null,
             null,
             null,
             CHE_REALM,
@@ -215,15 +192,14 @@ public class KeycloakSettingsTest {
   public void shouldBeUsedConfigurationFromExternalOIDCProviderWithoutFixedRedirectLinks() {
     final String SERVER_AUTH_URL = "https://external-keycloak-che.apps-crc.testing/auth";
 
-    when(oidcInfoProvider.getEndSessionEndpoint()).thenReturn(SERVER_AUTH_URL + LOGOUT_URL_PATH);
-    when(oidcInfoProvider.getJWKS_URI()).thenReturn(SERVER_AUTH_URL + JWKS_ENDPOINT_PATH);
-    when(oidcInfoProvider.getUserInfoEndpoint()).thenReturn(SERVER_AUTH_URL + USER_INFO_PATH);
-    when(oidcInfoProvider.getTokenEndpoint()).thenReturn(SERVER_AUTH_URL + TOKEN_URL_PATH);
+    when(oidcInfo.getEndSessionEndpoint()).thenReturn(SERVER_AUTH_URL + LOGOUT_URL_PATH);
+    when(oidcInfo.getJwksUri()).thenReturn(SERVER_AUTH_URL + JWKS_ENDPOINT_PATH);
+    when(oidcInfo.getUserInfoEndpoint()).thenReturn(SERVER_AUTH_URL + USER_INFO_PATH);
+    when(oidcInfo.getTokenEndpoint()).thenReturn(SERVER_AUTH_URL + TOKEN_URL_PATH);
 
     KeycloakSettings settings =
         new KeycloakSettings(
             cheServerEndpoint,
-            null,
             null,
             null,
             CHE_REALM,
@@ -254,26 +230,23 @@ public class KeycloakSettingsTest {
     assertNull(publicSettings.get(FIXED_REDIRECT_URL_FOR_IDE));
     assertEquals(publicSettings.get(USE_NONCE_SETTING), "false");
     assertEquals(publicSettings.get(JS_ADAPTER_URL_SETTING), "/api/keycloak/OIDCKeycloak.js");
-
-    assertNull(settings.getAuthServerURL());
-    assertEquals(settings.getUserInfoEndpoint(), publicSettings.get(USERINFO_ENDPOINT_SETTING));
-    assertEquals(settings.getJWKS_URI(), publicSettings.get(JWKS_ENDPOINT_SETTING));
   }
 
   @Test
   public void shouldBeUsedConfigurationFromExternalAuthServer() {
     final String SERVER_AUTH_URL = "https://keycloak-che.apps-crc.testing/auth";
-    when(oidcInfoProvider.getEndSessionEndpoint()).thenReturn(SERVER_AUTH_URL + LOGOUT_URL_PATH);
-    when(oidcInfoProvider.getJWKS_URI()).thenReturn(SERVER_AUTH_URL + JWKS_ENDPOINT_PATH);
-    when(oidcInfoProvider.getUserInfoEndpoint()).thenReturn(SERVER_AUTH_URL + USER_INFO_PATH);
-    when(oidcInfoProvider.getTokenEndpoint()).thenReturn(SERVER_AUTH_URL + TOKEN_URL_PATH);
+
+    when(oidcInfoProvider.get()).thenReturn(oidcInfo);
+    when(oidcInfo.getEndSessionEndpoint()).thenReturn(SERVER_AUTH_URL + LOGOUT_URL_PATH);
+    when(oidcInfo.getJwksUri()).thenReturn(SERVER_AUTH_URL + JWKS_ENDPOINT_PATH);
+    when(oidcInfo.getUserInfoEndpoint()).thenReturn(SERVER_AUTH_URL + USER_INFO_PATH);
+    when(oidcInfo.getTokenEndpoint()).thenReturn(SERVER_AUTH_URL + TOKEN_URL_PATH);
 
     KeycloakSettings settings =
         new KeycloakSettings(
             null,
             null,
             SERVER_AUTH_URL,
-            null,
             CHE_REALM,
             CLIENT_ID,
             null,
@@ -303,59 +276,5 @@ public class KeycloakSettingsTest {
     assertNull(publicSettings.get(FIXED_REDIRECT_URL_FOR_IDE));
     assertEquals(publicSettings.get(USE_NONCE_SETTING), "false");
     assertEquals(publicSettings.get(JS_ADAPTER_URL_SETTING), SERVER_AUTH_URL + "/js/keycloak.js");
-
-    assertEquals(settings.getAuthServerURL(), publicSettings.get(AUTH_SERVER_URL_SETTING));
-    assertEquals(settings.getUserInfoEndpoint(), publicSettings.get(USERINFO_ENDPOINT_SETTING));
-    assertEquals(settings.getJWKS_URI(), publicSettings.get(JWKS_ENDPOINT_SETTING));
-  }
-
-  @Test
-  public void shouldBeUsedConfigurationForInternalNetwork() {
-    final String SERVER_AUTH_URL = "https://keycloak-che.apps-crc.testing/auth";
-    final String SERVER_AUTH_URL_INTERNAL = "https://keycloak.svc.cluster.local";
-    when(oidcInfoProvider.getEndSessionEndpoint()).thenReturn(SERVER_AUTH_URL + LOGOUT_URL_PATH);
-    when(oidcInfoProvider.getJWKS_URI()).thenReturn(SERVER_AUTH_URL + JWKS_ENDPOINT_PATH);
-    when(oidcInfoProvider.getUserInfoEndpoint()).thenReturn(SERVER_AUTH_URL + USER_INFO_PATH);
-    when(oidcInfoProvider.getTokenEndpoint()).thenReturn(SERVER_AUTH_URL + TOKEN_URL_PATH);
-
-    KeycloakSettings settings =
-        new KeycloakSettings(
-            null,
-            null,
-            SERVER_AUTH_URL,
-            SERVER_AUTH_URL_INTERNAL,
-            CHE_REALM,
-            CLIENT_ID,
-            null,
-            null,
-            false,
-            null,
-            null,
-            false,
-            oidcInfoProvider);
-
-    Map<String, String> publicSettings = settings.get();
-    assertEquals(publicSettings.get(USERNAME_CLAIM_SETTING), DEFAULT_USERNAME_CLAIM);
-    assertEquals(publicSettings.get(CLIENT_ID_SETTING), CLIENT_ID);
-    assertEquals(publicSettings.get(REALM_SETTING), CHE_REALM);
-    assertEquals(publicSettings.get(AUTH_SERVER_URL_SETTING), SERVER_AUTH_URL);
-    assertEquals(publicSettings.get(PROFILE_ENDPOINT_SETTING), SERVER_AUTH_URL + PROFILE_URL_PATH);
-    assertEquals(
-        publicSettings.get(PASSWORD_ENDPOINT_SETTING), SERVER_AUTH_URL + PASSWORD_URL_PATH);
-    assertEquals(publicSettings.get(LOGOUT_ENDPOINT_SETTING), SERVER_AUTH_URL + LOGOUT_URL_PATH);
-    assertEquals(publicSettings.get(TOKEN_ENDPOINT_SETTING), SERVER_AUTH_URL + TOKEN_URL_PATH);
-    assertEquals(publicSettings.get(USERINFO_ENDPOINT_SETTING), SERVER_AUTH_URL + USER_INFO_PATH);
-    assertEquals(publicSettings.get(JWKS_ENDPOINT_SETTING), SERVER_AUTH_URL + JWKS_ENDPOINT_PATH);
-    assertNull(publicSettings.get(OSO_ENDPOINT_SETTING));
-    assertNull(publicSettings.get(GITHUB_ENDPOINT_SETTING));
-    assertNull(publicSettings.get(OIDC_PROVIDER_SETTING));
-    assertNull(publicSettings.get(FIXED_REDIRECT_URL_FOR_DASHBOARD));
-    assertNull(publicSettings.get(FIXED_REDIRECT_URL_FOR_IDE));
-    assertEquals(publicSettings.get(USE_NONCE_SETTING), "false");
-    assertEquals(publicSettings.get(JS_ADAPTER_URL_SETTING), SERVER_AUTH_URL + "/js/keycloak.js");
-
-    assertEquals(settings.getAuthServerURL(), SERVER_AUTH_URL_INTERNAL);
-    assertEquals(settings.getUserInfoEndpoint(), SERVER_AUTH_URL_INTERNAL + USER_INFO_PATH);
-    assertEquals(settings.getJWKS_URI(), SERVER_AUTH_URL_INTERNAL + JWKS_ENDPOINT_PATH);
   }
 }
