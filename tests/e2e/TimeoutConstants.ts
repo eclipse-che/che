@@ -57,6 +57,10 @@ export const TimeoutConstants = {
      */
     TS_CLICK_DASHBOARD_ITEM_TIMEOUT: Number(process.env.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) || 2_000,
 
+    /**
+     * Timeout for workspace stopped status, "30 000" by default
+     */
+    TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT: Number(process.env.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) || 30_000,
 
     // -------------------------------------------- LANGUAGE SERVER VALIDATION --------------------------------------------
 
