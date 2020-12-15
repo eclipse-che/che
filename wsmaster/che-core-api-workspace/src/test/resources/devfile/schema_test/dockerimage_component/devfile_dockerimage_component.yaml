@@ -32,6 +32,7 @@ components:
           public: 'true'
           discoverable: 'false'
     memoryLimit: 1536M
+    memoryRequest: 512M
     cpuLimit: 1.5
     cpuRequest: 750m
     command: ['/bin/sh']
