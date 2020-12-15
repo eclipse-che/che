@@ -23,7 +23,6 @@ import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -113,26 +112,21 @@ public class KubernetesTrustedCAProvisioner implements TrustedCAProvisioner {
     }
 
     KubernetesNamespace namespace = namespaceFactory.getOrCreate(runtimeID);
-    Optional<ConfigMap> existing = namespace.configMaps().get(configMapName);
-    if (existing.isEmpty()
-        || !(existing.get().getData() == allCaCertsConfigMap.getData()
-            || existing.get().getData().equals(allCaCertsConfigMap.getData()))) {
-      // create or renew map
-      k8sEnv
-          .getConfigMaps()
-          .put(
-              configMapName,
-              new ConfigMapBuilder()
-                  .withMetadata(
-                      new ObjectMetaBuilder()
-                          .withName(configMapName)
-                          .withAnnotations(allCaCertsConfigMap.getMetadata().getAnnotations())
-                          .withLabels(configMapLabelKeyValue)
-                          .build())
-                  .withApiVersion(allCaCertsConfigMap.getApiVersion())
-                  .withData(allCaCertsConfigMap.getData())
-                  .build());
-    }
+
+    k8sEnv
+        .getConfigMaps()
+        .put(
+            configMapName,
+            new ConfigMapBuilder()
+                .withMetadata(
+                    new ObjectMetaBuilder()
+                        .withName(configMapName)
+                        .withAnnotations(allCaCertsConfigMap.getMetadata().getAnnotations())
+                        .withLabels(configMapLabelKeyValue)
+                        .build())
+                .withApiVersion(allCaCertsConfigMap.getApiVersion())
+                .withData(allCaCertsConfigMap.getData())
+                .build());
 
     for (PodData pod : k8sEnv.getPodsData().values()) {
       if (pod.getRole() == PodRole.DEPLOYMENT) {

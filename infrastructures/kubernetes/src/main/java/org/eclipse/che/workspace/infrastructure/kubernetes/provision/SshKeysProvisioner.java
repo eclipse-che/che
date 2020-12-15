@@ -84,7 +84,7 @@ public class SshKeysProvisioner implements ConfigurationProvisioner<KubernetesEn
   private static final String SSH_CONFIG = "ssh_config";
   private static final String SSH_CONFIG_PATH = SSH_BASE_CONFIG_PATH + SSH_CONFIG;
 
-  private static final String SSH_CONFIG_MAP_NAME_SUFFIX = "-sshconfigmap";
+  private static final String SSH_CONFIG_MAP_NAME = "sshconfigmap";
   private static final String SSH_SECRET_NAME_SUFFIX = "-sshprivatekeys";
 
   private static final String SSH_SECRET_TYPE = "opaque";
@@ -250,7 +250,7 @@ public class SshKeysProvisioner implements ConfigurationProvisioner<KubernetesEn
       sshConfigData.append(buildConfig(sshPair.getName()));
     }
 
-    String sshConfigMapName = wsId + SSH_CONFIG_MAP_NAME_SUFFIX;
+    String sshConfigMapName = SSH_CONFIG_MAP_NAME;
 
     Map<String, String> sshConfig = new HashMap<>();
     sshConfig.put(SSH_CONFIG, sshConfigData.toString());
