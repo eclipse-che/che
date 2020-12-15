@@ -23,9 +23,9 @@ import org.eclipse.che.multiuser.keycloak.server.KeycloakJwkProvider;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakJwtParserProvider;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakTokenValidator;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakUserManager;
-import org.eclipse.che.multiuser.keycloak.server.dao.KeycloakProfileDao;
 import org.eclipse.che.multiuser.keycloak.server.OIDCInfo;
 import org.eclipse.che.multiuser.keycloak.server.OIDCInfoProvider;
+import org.eclipse.che.multiuser.keycloak.server.dao.KeycloakProfileDao;
 import org.eclipse.che.security.oauth.OAuthAPI;
 
 public class KeycloakModule extends AbstractModule {
