@@ -13,15 +13,12 @@ package org.eclipse.che.multiuser.keycloak.server;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import com.jayway.restassured.RestAssured;
 import io.jsonwebtoken.JwtParser;
-import java.util.HashMap;
-import java.util.Map;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -51,9 +48,7 @@ import org.testng.annotations.Test;
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class KeycloakServiceClientTest {
 
-  @Mock private KeycloakSettings keycloakSettings;
   @Mock private JwtParser jwtParser;
-  @Mock private OIDCInfoProvider oidcInfoProvider;
   @Mock private OIDCInfo oidcInfo;
 
   private KeycloakServiceClient keycloakServiceClient;
@@ -66,15 +61,10 @@ public class KeycloakServiceClientTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(oidcInfoProvider.get()).thenReturn(oidcInfo);
     when(oidcInfo.getAuthServerURL())
         .thenReturn(RestAssured.baseURI + ":" + RestAssured.port + RestAssured.basePath);
 
-    keycloakServiceClient =
-        new KeycloakServiceClient(keycloakSettings, oidcInfoProvider, jwtParser);
-    Map<String, String> conf = new HashMap<>();
-    conf.put(REALM_SETTING, "che");
-    when(keycloakSettings.get()).thenReturn(conf);
+    keycloakServiceClient = new KeycloakServiceClient("che", oidcInfo, jwtParser);
   }
 
   @Test

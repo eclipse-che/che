@@ -15,23 +15,44 @@ package org.eclipse.che.multiuser.keycloak.server;
 /** OIDCInfo - POJO object to store information about Keycloak api. */
 public class OIDCInfo {
 
+  private final String tokenPublicEndpoint;
+  private final String endSessionPublicEndpoint;
+  private final String userInfoPublicEndpoint;
   private final String userInfoEndpoint;
-  private final String tokenEndpoint;
+  private final String jwksPublicUri;
   private final String jwksUri;
-  private final String endSessionEndpoint;
   private final String authServerURL;
 
   public OIDCInfo(
+      String tokenPublicEndpoint,
+      String endSessionPublicEndpoint,
+      String userInfoPublicEndpoint,
       String userInfoEndpoint,
-      String tokenEndpoint,
+      String jwksPublicUri,
       String jwksUri,
-      String endSessionEndpoint,
       String authServerURL) {
+    this.tokenPublicEndpoint = tokenPublicEndpoint;
+    this.endSessionPublicEndpoint = endSessionPublicEndpoint;
+    this.userInfoPublicEndpoint = userInfoPublicEndpoint;
     this.userInfoEndpoint = userInfoEndpoint;
-    this.tokenEndpoint = tokenEndpoint;
+    this.jwksPublicUri = jwksPublicUri;
     this.jwksUri = jwksUri;
-    this.endSessionEndpoint = endSessionEndpoint;
+
     this.authServerURL = authServerURL;
+  }
+
+  /** @return url to retrieve token */
+  public String getTokenPublicEndpoint() {
+    return tokenPublicEndpoint;
+  }
+
+  /** @return log out url. */
+  public String getEndSessionPublicEndpoint() {
+    return endSessionPublicEndpoint;
+  }
+
+  public String getUserInfoPublicEndpoint() {
+    return userInfoPublicEndpoint;
   }
 
   /** @return url to get user profile information. */
@@ -39,19 +60,13 @@ public class OIDCInfo {
     return userInfoEndpoint;
   }
 
-  /** @return url to retrieve token */
-  public String getTokenEndpoint() {
-    return tokenEndpoint;
+  public String getJwksPublicUri() {
+    return jwksPublicUri;
   }
 
   /** @return url to retrieve JWK public key for token validation. */
   public String getJwksUri() {
     return jwksUri;
-  }
-
-  /** @return log out url. */
-  public String getEndSessionEndpoint() {
-    return endSessionEndpoint;
   }
 
   /** @return OIDC auth endpoint url */

@@ -26,9 +26,8 @@ public class KeycloakJwkProvider implements Provider<JwkProvider> {
   private final JwkProvider jwkProvider;
 
   @Inject
-  public KeycloakJwkProvider(OIDCInfoProvider oidcInfoProvider) throws MalformedURLException {
-
-    final String jwksUrl = oidcInfoProvider.get().getJwksUri();
+  public KeycloakJwkProvider(OIDCInfo oidcInfo) throws MalformedURLException {
+    final String jwksUrl = oidcInfo.getJwksUri();
 
     if (jwksUrl == null) {
       throw new ConfigurationException("Jwks endpoint url not found in keycloak settings");

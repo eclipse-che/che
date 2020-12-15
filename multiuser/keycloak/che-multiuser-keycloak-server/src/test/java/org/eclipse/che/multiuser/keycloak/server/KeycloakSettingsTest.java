@@ -36,7 +36,6 @@ import static org.testng.Assert.assertNull;
 import java.util.Map;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -44,7 +43,6 @@ import org.testng.annotations.Test;
 @Listeners(value = {MockitoTestNGListener.class})
 public class KeycloakSettingsTest {
 
-  @Mock private OIDCInfoProvider oidcInfoProvider;
   @Mock private OIDCInfo oidcInfo;
 
   private static final String CHE_REALM = "che";
@@ -60,11 +58,6 @@ public class KeycloakSettingsTest {
   private static final String JWKS_ENDPOINT_PATH =
       "/realms/" + CHE_REALM + "/protocol/openid-connect/certs";
   private static final String cheServerEndpoint = "https://test-crc-cluster.com.testing";
-
-  @BeforeMethod
-  public void setUp() {
-    when(oidcInfoProvider.get()).thenReturn(oidcInfo);
-  }
 
   @Test
   public void shouldBeSetGithubEndpointSettings() {
@@ -84,7 +77,7 @@ public class KeycloakSettingsTest {
             null,
             GITHUB_ENDPOINT,
             false,
-            oidcInfoProvider);
+            oidcInfo);
 
     assertEquals(settings.get().get(GITHUB_ENDPOINT_SETTING), GITHUB_ENDPOINT);
   }
@@ -107,7 +100,7 @@ public class KeycloakSettingsTest {
             OSO_ENDPOINT,
             null,
             false,
-            oidcInfoProvider);
+            oidcInfo);
 
     assertEquals(settings.get().get(OSO_ENDPOINT_SETTING), OSO_ENDPOINT);
   }
@@ -130,7 +123,7 @@ public class KeycloakSettingsTest {
             null,
             null,
             false,
-            oidcInfoProvider);
+            oidcInfo);
 
     assertEquals(settings.get().get(USE_NONCE_SETTING), "true");
   }
@@ -153,7 +146,7 @@ public class KeycloakSettingsTest {
             null,
             null,
             false,
-            oidcInfoProvider);
+            oidcInfo);
 
     assertEquals(settings.get().get(JS_ADAPTER_URL_SETTING), JS_ADAPTER_URL);
   }
@@ -175,7 +168,7 @@ public class KeycloakSettingsTest {
             null,
             null,
             true,
-            oidcInfoProvider);
+            oidcInfo);
 
     Map<String, String> publicSettings = settings.get();
     assertEquals(publicSettings.get(OIDC_PROVIDER_SETTING), SERVER_AUTH_URL);
@@ -192,10 +185,10 @@ public class KeycloakSettingsTest {
   public void shouldBeUsedConfigurationFromExternalOIDCProviderWithoutFixedRedirectLinks() {
     final String SERVER_AUTH_URL = "https://external-keycloak-che.apps-crc.testing/auth";
 
-    when(oidcInfo.getEndSessionEndpoint()).thenReturn(SERVER_AUTH_URL + LOGOUT_URL_PATH);
-    when(oidcInfo.getJwksUri()).thenReturn(SERVER_AUTH_URL + JWKS_ENDPOINT_PATH);
-    when(oidcInfo.getUserInfoEndpoint()).thenReturn(SERVER_AUTH_URL + USER_INFO_PATH);
-    when(oidcInfo.getTokenEndpoint()).thenReturn(SERVER_AUTH_URL + TOKEN_URL_PATH);
+    when(oidcInfo.getEndSessionPublicEndpoint()).thenReturn(SERVER_AUTH_URL + LOGOUT_URL_PATH);
+    when(oidcInfo.getJwksPublicUri()).thenReturn(SERVER_AUTH_URL + JWKS_ENDPOINT_PATH);
+    when(oidcInfo.getUserInfoPublicEndpoint()).thenReturn(SERVER_AUTH_URL + USER_INFO_PATH);
+    when(oidcInfo.getTokenPublicEndpoint()).thenReturn(SERVER_AUTH_URL + TOKEN_URL_PATH);
 
     KeycloakSettings settings =
         new KeycloakSettings(
@@ -210,7 +203,7 @@ public class KeycloakSettingsTest {
             null,
             null,
             false,
-            oidcInfoProvider);
+            oidcInfo);
 
     Map<String, String> publicSettings = settings.get();
     assertEquals(publicSettings.get(USERNAME_CLAIM_SETTING), DEFAULT_USERNAME_CLAIM);
@@ -236,11 +229,10 @@ public class KeycloakSettingsTest {
   public void shouldBeUsedConfigurationFromExternalAuthServer() {
     final String SERVER_AUTH_URL = "https://keycloak-che.apps-crc.testing/auth";
 
-    when(oidcInfoProvider.get()).thenReturn(oidcInfo);
-    when(oidcInfo.getEndSessionEndpoint()).thenReturn(SERVER_AUTH_URL + LOGOUT_URL_PATH);
-    when(oidcInfo.getJwksUri()).thenReturn(SERVER_AUTH_URL + JWKS_ENDPOINT_PATH);
-    when(oidcInfo.getUserInfoEndpoint()).thenReturn(SERVER_AUTH_URL + USER_INFO_PATH);
-    when(oidcInfo.getTokenEndpoint()).thenReturn(SERVER_AUTH_URL + TOKEN_URL_PATH);
+    when(oidcInfo.getEndSessionPublicEndpoint()).thenReturn(SERVER_AUTH_URL + LOGOUT_URL_PATH);
+    when(oidcInfo.getJwksPublicUri()).thenReturn(SERVER_AUTH_URL + JWKS_ENDPOINT_PATH);
+    when(oidcInfo.getUserInfoPublicEndpoint()).thenReturn(SERVER_AUTH_URL + USER_INFO_PATH);
+    when(oidcInfo.getTokenPublicEndpoint()).thenReturn(SERVER_AUTH_URL + TOKEN_URL_PATH);
 
     KeycloakSettings settings =
         new KeycloakSettings(
@@ -255,7 +247,7 @@ public class KeycloakSettingsTest {
             null,
             null,
             false,
-            oidcInfoProvider);
+            oidcInfo);
 
     Map<String, String> publicSettings = settings.get();
     assertEquals(publicSettings.get(USERNAME_CLAIM_SETTING), DEFAULT_USERNAME_CLAIM);

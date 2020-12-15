@@ -26,7 +26,6 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.proxy.ProxyAuthenticator;
 import org.slf4j.Logger;
@@ -36,27 +35,34 @@ import org.slf4j.LoggerFactory;
  * OIDCInfoProvider retrieves OpenID Connect (OIDC) configuration for well-known endpoint. These
  * information is useful to provide access to the Keycloak api.
  */
-@Singleton
 public class OIDCInfoProvider implements Provider<OIDCInfo> {
 
   private static final Logger LOG = LoggerFactory.getLogger(OIDCInfoProvider.class);
-
-  private final OIDCInfo oidcInfo;
-  private final String realm;
-  private final String serverURL;
-  private final String serverInternalURL;
-  private final String oidcProviderUrl;
+  private OIDCInfo oidcInfo;
 
   @Inject
-  public OIDCInfoProvider(
-      @Nullable @Named(AUTH_SERVER_URL_SETTING) String serverURL,
-      @Nullable @Named(AUTH_SERVER_URL_INTERNAL_SETTING) String serverInternalURL,
-      @Nullable @Named(OIDC_PROVIDER_SETTING) String oidcProviderUrl,
-      @Nullable @Named(REALM_SETTING) String realm) {
-    this.serverURL = serverURL;
-    this.serverInternalURL = serverInternalURL;
-    this.oidcProviderUrl = oidcProviderUrl;
-    this.realm = realm;
+  @Nullable
+  @Named(AUTH_SERVER_URL_SETTING)
+  protected String serverURL;
+
+  @Inject
+  @Nullable
+  @Named(AUTH_SERVER_URL_INTERNAL_SETTING)
+  protected String serverInternalURL;
+
+  @Inject
+  @Nullable
+  @Named(OIDC_PROVIDER_SETTING)
+  protected String oidcProviderUrl;
+
+  @Inject
+  @Nullable
+  @Named(REALM_SETTING)
+  protected String realm;
+
+  /** @return OIDCInfo with OIDC settings information. */
+  @Override
+  public OIDCInfo get() {
     this.validate();
 
     String serverAuthUrl = (serverInternalURL != null) ? serverInternalURL : serverURL;
@@ -73,13 +79,21 @@ public class OIDCInfoProvider implements Provider<OIDCInfo> {
 
       LOG.info("openid configuration = {}", openIdConfiguration);
 
-      String tokenEndPoint = (String) openIdConfiguration.get("token_endpoint");
-      String userInfoEndpoint =
-          this.setUserInfoEndpoint((String) openIdConfiguration.get("userinfo_endpoint"));
-      String jwksUri = this.setJwksUri((String) openIdConfiguration.get("jwks_uri"));
-      String endSessionEndpoint = (String) openIdConfiguration.get("end_session_endpoint");
-      this.oidcInfo =
-          new OIDCInfo(userInfoEndpoint, tokenEndPoint, jwksUri, endSessionEndpoint, serverAuthUrl);
+      String tokenPublicEndPoint = (String) openIdConfiguration.get("token_endpoint");
+      String userInfoPublicEndpoint = (String) openIdConfiguration.get("userinfo_endpoint");
+      String endSessionPublicEndpoint = (String) openIdConfiguration.get("end_session_endpoint");
+      String jwksPublicUri = (String) openIdConfiguration.get("jwks_uri");
+      String jwksUri = setJwksUri(jwksPublicUri);
+      String userInfoEndpoint = setUserInfoEndpoint(userInfoPublicEndpoint);
+
+      return new OIDCInfo(
+          tokenPublicEndPoint,
+          endSessionPublicEndpoint,
+          userInfoPublicEndpoint,
+          userInfoEndpoint,
+          jwksPublicUri,
+          jwksUri,
+          serverAuthUrl);
     } catch (IOException e) {
       throw new RuntimeException(
           "Exception while retrieving OpenId configuration from endpoint: " + wellKnownEndpoint, e);
@@ -126,11 +140,5 @@ public class OIDCInfoProvider implements Provider<OIDCInfo> {
       return jwksUri.replace(serverURL, serverInternalURL);
     }
     return jwksUri;
-  }
-
-  /** @return OIDCInfo with OIDC settings information. */
-  @Override
-  public OIDCInfo get() {
-    return oidcInfo;
   }
 }

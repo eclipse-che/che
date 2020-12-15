@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.HttpHeaders;
@@ -46,6 +47,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -60,8 +62,8 @@ import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
 @Singleton
 public class KeycloakServiceClient {
 
-  private KeycloakSettings keycloakSettings;
-  private OIDCInfo oidcInfo;
+  private final String realm;
+  private final OIDCInfo oidcInfo;
 
   private static final Pattern assotiateUserPattern =
       Pattern.compile("User (.+) is not associated with identity provider (.+)");
@@ -71,9 +73,9 @@ public class KeycloakServiceClient {
 
   @Inject
   public KeycloakServiceClient(
-      KeycloakSettings keycloakSettings, OIDCInfoProvider oidcInfoProvider, JwtParser jwtParser) {
-    this.keycloakSettings = keycloakSettings;
-    this.oidcInfo = oidcInfoProvider.get();
+      @Nullable @Named(REALM_SETTING) String realm, OIDCInfo oidcInfo, JwtParser jwtParser) {
+    this.realm = realm;
+    this.oidcInfo = oidcInfo;
     this.jwtParser = jwtParser;
   }
 
@@ -109,7 +111,7 @@ public class KeycloakServiceClient {
         .queryParam("hash", hash)
         .queryParam("client_id", clientId)
         .queryParam("redirect_uri", redirectAfterLogin)
-        .build(keycloakSettings.get().get(REALM_SETTING), oauthProvider)
+        .build(realm, oauthProvider)
         .toString();
   }
 
@@ -131,7 +133,7 @@ public class KeycloakServiceClient {
     String url =
         UriBuilder.fromUri(oidcInfo.getAuthServerURL())
             .path("/realms/{realm}/broker/{provider}/token")
-            .build(keycloakSettings.get().get(REALM_SETTING), oauthProvider)
+            .build(realm, oauthProvider)
             .toString();
     try {
       String response = doRequest(url, HttpMethod.GET, null);

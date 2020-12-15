@@ -79,7 +79,10 @@ public class OIDCInfoProviderTest {
             .willReturn(
                 aResponse().withHeader("Content-Type", "text/html").withBody("broken json")));
 
-    OIDCInfoProvider oidcInfoProvider = new OIDCInfoProvider(SERVER_URL, null, null, CHE_REALM);
+    OIDCInfoProvider oidcInfoProvider = new OIDCInfoProvider();
+    oidcInfoProvider.oidcProviderUrl = SERVER_URL;
+    oidcInfoProvider.realm = CHE_REALM;
+
     oidcInfoProvider.get();
   }
 
@@ -92,15 +95,17 @@ public class OIDCInfoProviderTest {
                     .withHeader("Content-Type", "text/html")
                     .withBody(OPEN_ID_CONF_TEMPLATE)));
 
-    OIDCInfoProvider oidcInfoProvider = new OIDCInfoProvider(SERVER_URL, null, null, CHE_REALM);
+    OIDCInfoProvider oidcInfoProvider = new OIDCInfoProvider();
+    oidcInfoProvider.serverURL = SERVER_URL;
+    oidcInfoProvider.realm = CHE_REALM;
     OIDCInfo oidcInfo = oidcInfoProvider.get();
 
     assertEquals(
         SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/token",
-        oidcInfo.getTokenEndpoint());
+        oidcInfo.getTokenPublicEndpoint());
     assertEquals(
         SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/logout",
-        oidcInfo.getEndSessionEndpoint());
+        oidcInfo.getEndSessionPublicEndpoint());
     assertEquals(
         SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/userinfo",
         oidcInfo.getUserInfoEndpoint());
@@ -118,15 +123,18 @@ public class OIDCInfoProviderTest {
                     .withHeader("Content-Type", "text/html")
                     .withBody(OPEN_ID_CONF_TEMPLATE)));
 
-    OIDCInfoProvider oidcInfoProvider = new OIDCInfoProvider(TEST_URL, SERVER_URL, null, CHE_REALM);
+    OIDCInfoProvider oidcInfoProvider = new OIDCInfoProvider();
+    oidcInfoProvider.serverURL = TEST_URL;
+    oidcInfoProvider.serverInternalURL = SERVER_URL;
+    oidcInfoProvider.realm = CHE_REALM;
     OIDCInfo oidcInfo = oidcInfoProvider.get();
 
     assertEquals(
         SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/token",
-        oidcInfo.getTokenEndpoint());
+        oidcInfo.getTokenPublicEndpoint());
     assertEquals(
         SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/logout",
-        oidcInfo.getEndSessionEndpoint());
+        oidcInfo.getEndSessionPublicEndpoint());
     assertEquals(
         SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/userinfo",
         oidcInfo.getUserInfoEndpoint());
@@ -145,16 +153,19 @@ public class OIDCInfoProviderTest {
                     .withHeader("Content-Type", "text/html")
                     .withBody(OPEN_ID_CONF_TEMPLATE)));
 
-    OIDCInfoProvider oidcInfoProvider =
-        new OIDCInfoProvider(TEST_URL, TEST_URL, OIDCProviderUrl, CHE_REALM);
+    OIDCInfoProvider oidcInfoProvider = new OIDCInfoProvider();
+    oidcInfoProvider.serverURL = TEST_URL;
+    oidcInfoProvider.serverInternalURL = TEST_URL;
+    oidcInfoProvider.oidcProviderUrl = OIDCProviderUrl;
+    oidcInfoProvider.realm = CHE_REALM;
     OIDCInfo oidcInfo = oidcInfoProvider.get();
 
     assertEquals(
         SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/token",
-        oidcInfo.getTokenEndpoint());
+        oidcInfo.getTokenPublicEndpoint());
     assertEquals(
         SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/logout",
-        oidcInfo.getEndSessionEndpoint());
+        oidcInfo.getEndSessionPublicEndpoint());
     assertEquals(
         SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/userinfo",
         oidcInfo.getUserInfoEndpoint());
@@ -167,14 +178,18 @@ public class OIDCInfoProviderTest {
       expectedExceptions = RuntimeException.class,
       expectedExceptionsMessageRegExp = "Either the '.*' or '.*' or '.*' property should be set")
   public void shouldThrowErrorWhenAuthServerWasNotSet() {
-    new OIDCInfoProvider(null, null, null, CHE_REALM);
+    OIDCInfoProvider oidcInfoProvider = new OIDCInfoProvider();
+    oidcInfoProvider.realm = CHE_REALM;
+    oidcInfoProvider.get();
   }
 
   @Test(
       expectedExceptions = RuntimeException.class,
       expectedExceptionsMessageRegExp = "The '.*' property should be set")
   public void shouldThrowErrorWhenRealmPropertyWasNotSet() {
-    new OIDCInfoProvider(TEST_URL, null, null, null);
+    OIDCInfoProvider oidcInfoProvider = new OIDCInfoProvider();
+    oidcInfoProvider.serverURL = TEST_URL;
+    oidcInfoProvider.get();
   }
 
   private static int getHttpPort() {
