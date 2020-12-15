@@ -63,16 +63,10 @@ data:
   CHE_INFRA_KUBERNETES_PVC_QUANTITY: {{ .Values.global.pvcClaim }}
   CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS: "true"
   CHE_INFRA_KUBERNETES_PVC_STORAGE__CLASS__NAME: "{{ .Values.global.cheWorkspacePVCStorageClassName }}"
-{{- with .Values.che }}
-  {{- with .infra }}
-    {{- with .kubernetes }}
-      {{- with .pvc }}
-        {{- with .jobs }}
-          {{- with .image }}
-  CHE_INFRA_KUBERNETES_PVC_JOBS_IMAGE: {{ . | quote }}
-          {{- end }}
-        {{- end }}
-      {{- end }}
+{{- if .Values.che.infra }}
+  {{- if .Values.che.infra.kubernetes }}
+    {{- if .Values.che.infra.kubernetes.pvcJobsImage }}
+  CHE_INFRA_KUBERNETES_PVC_JOBS_IMAGE: {{ .Values.che.infra.kubernetes.pvcJobsImage | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -154,12 +148,10 @@ data:
   CHE_WORKSPACE_JAVA__OPTIONS: "-Xmx2000m"
   CHE_WORKSPACE_MAVEN__OPTIONS: "-Xmx20000m"
   CHE_INFRA_KUBERNETES_WORKSPACE__START__TIMEOUT__MIN: "15"
-{{- if .Values.che }}
-  {{- if .Values.che.server }}
-    {{- if .Values.che.server.secureExposer }}
-      {{- if .Values.che.server.secureExposer.jwtProxyImage }}
-  CHE_SERVER_SECURE__EXPOSER_JWTPROXY_IMAGE: {{ .Values.che.server.secureExposer.jwtProxyImage | quote }}
-      {{- end }}
+{{- if .Values.che.server }}
+  {{- if .Values.che.server.secure }}
+    {{- if .Values.che.server.secure.exposerJwtProxyImage }}
+  CHE_SERVER_SECURE__EXPOSER_JWTPROXY_IMAGE: {{ .Values.che.server.secure.exposerJwtProxyImage | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
