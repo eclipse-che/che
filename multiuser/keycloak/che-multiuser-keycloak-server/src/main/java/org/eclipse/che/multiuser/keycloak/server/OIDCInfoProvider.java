@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * OIDCInfoProvider retrieves OpenID Connect (OIDC) configuration for well-known endpoint. These
  * information is useful to provide access to the Keycloak api.
  */
+@Singleton
 public class OIDCInfoProvider implements Provider<OIDCInfo> {
 
   private static final Logger LOG = LoggerFactory.getLogger(OIDCInfoProvider.class);
@@ -45,7 +47,7 @@ public class OIDCInfoProvider implements Provider<OIDCInfo> {
   private final String serverInternalURL;
   private final String oidcProviderUrl;
 
-  @Singleton
+  @Inject
   public OIDCInfoProvider(
       @Nullable @Named(AUTH_SERVER_URL_SETTING) String serverURL,
       @Nullable @Named(AUTH_SERVER_URL_INTERNAL_SETTING) String serverInternalURL,
