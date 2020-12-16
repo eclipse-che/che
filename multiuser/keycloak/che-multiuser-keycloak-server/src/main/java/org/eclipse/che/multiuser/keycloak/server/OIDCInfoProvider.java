@@ -63,6 +63,10 @@ public class OIDCInfoProvider implements Provider<OIDCInfo> {
   /** @return OIDCInfo with OIDC settings information. */
   @Override
   public OIDCInfo get() {
+    if (oidcInfo != null) {
+      return oidcInfo;
+    }
+
     this.validate();
 
     String serverAuthUrl = (serverInternalURL != null) ? serverInternalURL : serverURL;
@@ -83,23 +87,25 @@ public class OIDCInfoProvider implements Provider<OIDCInfo> {
       String userInfoPublicEndpoint = (String) openIdConfiguration.get("userinfo_endpoint");
       String endSessionPublicEndpoint = (String) openIdConfiguration.get("end_session_endpoint");
       String jwksPublicUri = (String) openIdConfiguration.get("jwks_uri");
-      String jwksUri = setJwksUri(jwksPublicUri);
-      String userInfoEndpoint = setUserInfoEndpoint(userInfoPublicEndpoint);
+      String jwksUri = setInternalUrl(jwksPublicUri);
+      String userInfoEndpoint = setInternalUrl(userInfoPublicEndpoint);
 
-      return new OIDCInfo(
-          tokenPublicEndPoint,
-          endSessionPublicEndpoint,
-          userInfoPublicEndpoint,
-          userInfoEndpoint,
-          jwksPublicUri,
-          jwksUri,
-          serverAuthUrl);
+      oidcInfo =
+          new OIDCInfo(
+              tokenPublicEndPoint,
+              endSessionPublicEndpoint,
+              userInfoPublicEndpoint,
+              userInfoEndpoint,
+              jwksPublicUri,
+              jwksUri,
+              serverAuthUrl);
     } catch (IOException e) {
       throw new RuntimeException(
           "Exception while retrieving OpenId configuration from endpoint: " + wellKnownEndpoint, e);
     } finally {
       ProxyAuthenticator.resetAuthenticator();
     }
+    return this.oidcInfo;
   }
 
   private String getWellKnownEndpoint(String serverAuthUrl) {
@@ -128,17 +134,10 @@ public class OIDCInfoProvider implements Provider<OIDCInfo> {
     }
   }
 
-  private String setUserInfoEndpoint(String userInfoEndpoint) {
+  private String setInternalUrl(String endpointUrl) {
     if (serverURL != null && serverInternalURL != null) {
-      return userInfoEndpoint.replace(serverURL, serverInternalURL);
+      return endpointUrl.replace(serverURL, serverInternalURL);
     }
-    return userInfoEndpoint;
-  }
-
-  private String setJwksUri(String jwksUri) {
-    if (serverURL != null && serverInternalURL != null) {
-      return jwksUri.replace(serverURL, serverInternalURL);
-    }
-    return jwksUri;
+    return endpointUrl;
   }
 }
