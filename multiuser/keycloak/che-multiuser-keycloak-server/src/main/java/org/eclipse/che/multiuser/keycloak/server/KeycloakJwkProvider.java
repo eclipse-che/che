@@ -19,7 +19,6 @@ import java.net.URL;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import org.eclipse.che.inject.ConfigurationException;
-import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
 
 /** Constructs {@link UrlJwkProvider} based on Jwk endpoint from keycloak settings */
 public class KeycloakJwkProvider implements Provider<JwkProvider> {
@@ -27,10 +26,8 @@ public class KeycloakJwkProvider implements Provider<JwkProvider> {
   private final JwkProvider jwkProvider;
 
   @Inject
-  public KeycloakJwkProvider(KeycloakSettings keycloakSettings) throws MalformedURLException {
-
-    final String jwksUrl =
-        keycloakSettings.getInternalSettings().get(KeycloakConstants.JWKS_ENDPOINT_SETTING);
+  public KeycloakJwkProvider(OIDCInfo oidcInfo) throws MalformedURLException {
+    final String jwksUrl = oidcInfo.getJwksUri();
 
     if (jwksUrl == null) {
       throw new ConfigurationException("Jwks endpoint url not found in keycloak settings");
