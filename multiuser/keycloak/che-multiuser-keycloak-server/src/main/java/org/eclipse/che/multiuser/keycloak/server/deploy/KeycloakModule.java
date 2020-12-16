@@ -23,6 +23,8 @@ import org.eclipse.che.multiuser.keycloak.server.KeycloakJwkProvider;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakJwtParserProvider;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakTokenValidator;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakUserManager;
+import org.eclipse.che.multiuser.keycloak.server.OIDCInfo;
+import org.eclipse.che.multiuser.keycloak.server.OIDCInfoProvider;
 import org.eclipse.che.multiuser.keycloak.server.dao.KeycloakProfileDao;
 import org.eclipse.che.security.oauth.OAuthAPI;
 
@@ -38,6 +40,7 @@ public class KeycloakModule extends AbstractModule {
     bind(ProfileDao.class).to(KeycloakProfileDao.class);
     bind(JwkProvider.class).toProvider(KeycloakJwkProvider.class);
     bind(JwtParser.class).toProvider(KeycloakJwtParserProvider.class);
+    bind(OIDCInfo.class).toProvider(OIDCInfoProvider.class).asEagerSingleton();
     bind(PersonalAccountUserManager.class).to(KeycloakUserManager.class);
 
     bind(OAuthAPI.class).toProvider(OAuthAPIProvider.class);
