@@ -51,6 +51,7 @@
         <com.auth0.jwks-rsa.version>0.3.0</com.auth0.jwks-rsa.version>
         <com.fasterxml.jackson.core.version>2.10.3</com.fasterxml.jackson.core.version>
         <com.github.kirviq.dumbster.version>1.7.1</com.github.kirviq.dumbster.version>
+        <com.github.tomakehurst.wiremock-jre8-standalone.version>2.27.2</com.github.tomakehurst.wiremock-jre8-standalone.version>
         <com.google.code.guice.version>4.2.2</com.google.code.guice.version>
         <com.google.guava.version>27.0.1-jre</com.google.guava.version>
         <com.google.http-client.version>1.27.0</com.google.http-client.version>
@@ -161,6 +162,11 @@
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-yaml</artifactId>
                 <version>${com.fasterxml.jackson.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.tomakehurst</groupId>
+                <artifactId>wiremock-jre8-standalone</artifactId>
+                <version>${com.github.tomakehurst.wiremock-jre8-standalone.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
