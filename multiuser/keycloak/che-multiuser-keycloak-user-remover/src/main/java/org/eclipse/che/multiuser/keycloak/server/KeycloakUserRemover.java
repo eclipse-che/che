@@ -69,7 +69,7 @@ public class KeycloakUserRemover {
       @Nullable @Named("che.keycloak.cascade_user_removal_enabled") boolean userRemovalEnabled,
       @Nullable @Named("che.keycloak.admin_username") String keycloakUser,
       @Nullable @Named("che.keycloak.admin_password") String keycloakPassword,
-      @Nullable @Named(REALM_SETTING) String realm,
+      KeycloakSettings keycloakSettings,
       OIDCInfo oidcInfo,
       HttpJsonRequestFactory requestFactory) {
     this.keycloakUser = keycloakUser;
@@ -85,6 +85,7 @@ public class KeycloakUserRemover {
                 + AUTH_SERVER_URL_INTERNAL_SETTING
                 + " is not configured");
       }
+      String realm = keycloakSettings.get().get(REALM_SETTING);
       if (realm == null) {
         throw new ConfigurationException(REALM_SETTING + " is not configured");
       }

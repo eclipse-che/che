@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.HttpHeaders;
@@ -47,7 +46,6 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -62,7 +60,7 @@ import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
 @Singleton
 public class KeycloakServiceClient {
 
-  private final String realm;
+  private KeycloakSettings keycloakSettings;
   private final OIDCInfo oidcInfo;
 
   private static final Pattern assotiateUserPattern =
@@ -73,8 +71,8 @@ public class KeycloakServiceClient {
 
   @Inject
   public KeycloakServiceClient(
-      @Nullable @Named(REALM_SETTING) String realm, OIDCInfo oidcInfo, JwtParser jwtParser) {
-    this.realm = realm;
+      KeycloakSettings keycloakSettings, OIDCInfo oidcInfo, JwtParser jwtParser) {
+    this.keycloakSettings = keycloakSettings;
     this.oidcInfo = oidcInfo;
     this.jwtParser = jwtParser;
   }
@@ -111,7 +109,7 @@ public class KeycloakServiceClient {
         .queryParam("hash", hash)
         .queryParam("client_id", clientId)
         .queryParam("redirect_uri", redirectAfterLogin)
-        .build(realm, oauthProvider)
+        .build(keycloakSettings.get().get(REALM_SETTING), oauthProvider)
         .toString();
   }
 
@@ -133,7 +131,7 @@ public class KeycloakServiceClient {
     String url =
         UriBuilder.fromUri(oidcInfo.getAuthServerURL())
             .path("/realms/{realm}/broker/{provider}/token")
-            .build(realm, oauthProvider)
+            .build(keycloakSettings.get().get(REALM_SETTING), oauthProvider)
             .toString();
     try {
       String response = doRequest(url, HttpMethod.GET, null);
