@@ -34,9 +34,6 @@ public class BitbucketUrl implements RemoteFactoryUrl {
   /** Branch name */
   private String branch;
 
-  /** Factory json filename */
-  private String factoryFilename;
-
   /** Devfile filenames list */
   private final List<String> devfileFilenames = new ArrayList<>();
 

@@ -12,12 +12,14 @@
 package org.eclipse.che.api.factory.server.urlfactory;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -86,10 +88,20 @@ public class URLFactoryBuilder {
       FileContentProvider fileContentProvider,
       Map<String, String> overrideProperties)
       throws BadRequestException {
+    String devfileYamlContent;
     for (DevfileLocation location : remoteFactoryUrl.devfileFileLocations()) {
-      String devfileYamlContent = urlFetcher.fetchSafely(location.location());
-      if (isNullOrEmpty(devfileYamlContent)) {
+      try {
+        devfileYamlContent = fileContentProvider.fetchContent(location.location());
+      } catch (IOException ex) {
+        // try next location
         continue;
+      } catch (DevfileException e) {
+        // must never happen as devfile location is always an absolute URL
+        throw new BadRequestException(
+            format("There is an error resolving defvile. URL is %s", location.location()));
+      }
+      if (isNullOrEmpty(devfileYamlContent)) {
+        return Optional.empty();
       }
       try {
         DevfileImpl devfile = devfileParser.parseYaml(devfileYamlContent, overrideProperties);

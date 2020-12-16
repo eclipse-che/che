@@ -29,7 +29,7 @@ public class KubernetesCheApiInternalEnvVarProvider implements CheApiInternalEnv
 
   @Inject
   public KubernetesCheApiInternalEnvVarProvider(
-      @Named("che.api.internal") String cheServerEndpoint) {
+      @Named("che.api") String cheServerEndpoint) {
     this.cheServerEndpoint = cheServerEndpoint;
   }
 

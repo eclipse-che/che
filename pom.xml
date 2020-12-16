@@ -1024,6 +1024,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.infrastructure</groupId>
+                <artifactId>infrastructure-factory</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.infrastructure</groupId>
                 <artifactId>infrastructure-kubernetes</artifactId>
                 <version>${che.version}</version>
             </dependency>
