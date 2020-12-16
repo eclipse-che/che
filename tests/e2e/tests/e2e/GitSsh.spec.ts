@@ -24,6 +24,7 @@ import { CheGitApi } from '../../utils/VCS/CheGitApi';
 import { GitHubUtil } from '../../utils/VCS/github/GitHubUtil';
 import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -55,7 +56,7 @@ suite('Git with ssh workflow', async () => {
         await loginPage.login();
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
-        await driverHelper.wait(15000);
+        await driverHelper.wait(TimeoutConstants.TS_DEBUGGER_CONNECTION_TIMEOUT);
     });
 
     test('Generate a SSH key', async () => {
