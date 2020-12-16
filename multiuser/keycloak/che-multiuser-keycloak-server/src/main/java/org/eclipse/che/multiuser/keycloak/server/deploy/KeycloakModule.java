@@ -40,7 +40,7 @@ public class KeycloakModule extends AbstractModule {
     bind(ProfileDao.class).to(KeycloakProfileDao.class);
     bind(JwkProvider.class).toProvider(KeycloakJwkProvider.class);
     bind(JwtParser.class).toProvider(KeycloakJwtParserProvider.class);
-    bind(OIDCInfo.class).toProvider(OIDCInfoProvider.class);
+    bind(OIDCInfo.class).toProvider(OIDCInfoProvider.class).asEagerSingleton();
     bind(PersonalAccountUserManager.class).to(KeycloakUserManager.class);
 
     bind(OAuthAPI.class).toProvider(OAuthAPIProvider.class);

@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 public class OIDCInfoProvider implements Provider<OIDCInfo> {
 
   private static final Logger LOG = LoggerFactory.getLogger(OIDCInfoProvider.class);
-  private OIDCInfo oidcInfo;
 
   @Inject
   @Nullable
@@ -63,10 +62,6 @@ public class OIDCInfoProvider implements Provider<OIDCInfo> {
   /** @return OIDCInfo with OIDC settings information. */
   @Override
   public OIDCInfo get() {
-    if (oidcInfo != null) {
-      return oidcInfo;
-    }
-
     this.validate();
 
     String serverAuthUrl = (serverInternalURL != null) ? serverInternalURL : serverURL;
@@ -90,22 +85,20 @@ public class OIDCInfoProvider implements Provider<OIDCInfo> {
       String jwksUri = setInternalUrl(jwksPublicUri);
       String userInfoEndpoint = setInternalUrl(userInfoPublicEndpoint);
 
-      oidcInfo =
-          new OIDCInfo(
-              tokenPublicEndPoint,
-              endSessionPublicEndpoint,
-              userInfoPublicEndpoint,
-              userInfoEndpoint,
-              jwksPublicUri,
-              jwksUri,
-              serverAuthUrl);
+      return new OIDCInfo(
+          tokenPublicEndPoint,
+          endSessionPublicEndpoint,
+          userInfoPublicEndpoint,
+          userInfoEndpoint,
+          jwksPublicUri,
+          jwksUri,
+          serverAuthUrl);
     } catch (IOException e) {
       throw new RuntimeException(
           "Exception while retrieving OpenId configuration from endpoint: " + wellKnownEndpoint, e);
     } finally {
       ProxyAuthenticator.resetAuthenticator();
     }
-    return this.oidcInfo;
   }
 
   private String getWellKnownEndpoint(String serverAuthUrl) {
