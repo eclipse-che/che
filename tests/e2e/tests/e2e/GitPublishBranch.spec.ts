@@ -8,7 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { assert } from 'chai';
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES, TYPES } from '../../inversify.types';
 import { Editor } from '../../pageobjects/ide/Editor';
@@ -40,7 +39,8 @@ suite('Publish branch in git extension', async () => {
     const wsNameGitPublishBranch = WorkspaceNameHandler.generateWorkspaceName('checkGitPublishBranch-', 5);
     const changedFile = 'README.md';
     const branchName = WorkspaceNameHandler.generateWorkspaceName('checkGitPublishBranch', 5);
-    const file = 'https://github.com/' + TestConstants.TS_GITHUB_TEST_REPO + '/blob/' + branchName + '/README.md';
+    const file = `https://github.com/${TestConstants.TS_GITHUB_TEST_REPO}/blob/${branchName}/README.md`;
+
 
     suiteSetup(async function () {
         const wsConfig = await testWorkspaceUtils.getBaseDevfile();
@@ -58,7 +58,7 @@ suite('Publish branch in git extension', async () => {
 
     test('Create a new branch, change commit and push', async function changeCommitAndPushFunc() {
         const currentDate: string = Date.now().toString();
-        const readmeFileContentXpath: string = `//div[@id='readme']//p`;
+        const readmeFileContentXpath: string = `//div[@id='readme']//p[contains(text(), '${currentDate}')]`;
         await cloneTestRepo();
 
         await driverHelper.wait(15000);
@@ -80,8 +80,7 @@ suite('Publish branch in git extension', async () => {
         await testWorkspaceUtils.cleanUpAllWorkspaces();
 
         await driverHelper.navigateToUrl(file);
-        const rawDataFromFile: string = await driverHelper.waitAndGetText(By.xpath(readmeFileContentXpath));
-        assert.isTrue(rawDataFromFile.includes(currentDate));
+        await driverHelper.waitVisibility(By.xpath(readmeFileContentXpath));
     });
 
 });
