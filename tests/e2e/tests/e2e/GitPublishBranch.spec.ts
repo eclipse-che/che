@@ -8,7 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { assert } from 'chai';
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES, TYPES } from '../../inversify.types';
 import { Editor } from '../../pageobjects/ide/Editor';
@@ -19,12 +18,10 @@ import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { TestConstants } from '../../TestConstants';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
-import { CheGitApi } from '../../utils/VCS/CheGitApi';
-import { GitHubUtil } from '../../utils/VCS/github/GitHubUtil';
 import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
-import { TimeoutConstants } from '../../TimeoutConstants';
+import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
+import { By } from 'selenium-webdriver';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -32,78 +29,58 @@ const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpe
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
-const gitHubUtils: GitHubUtil = e2eContainer.get<GitHubUtil>(CLASSES.GitHubUtil);
-const cheGitAPI: CheGitApi = e2eContainer.get(CLASSES.CheGitApi);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const gitPlugin: GitPlugin = e2eContainer.get(CLASSES.GitPlugin);
 const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
 
 
-suite('Git with ssh workflow', async () => {
+suite('Publish branch in git extension', async () => {
     const workspacePrefixUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/`;
-    const wsNameCheckGeneratingKeys = 'checkGeneraringSsh';
-    const wsNameCheckPropagatingKeys = 'checkPropagatingSsh';
-    const committedFile = 'README.md';
+    const wsNameGitPublishBranch = WorkspaceNameHandler.generateWorkspaceName('checkGitPublishBranch-', 5);
+    const changedFile = 'README.md';
+    const branchName = WorkspaceNameHandler.generateWorkspaceName('checkGitPublishBranch', 5);
+    const file = `https://github.com/${TestConstants.TS_GITHUB_TEST_REPO}/blob/${branchName}/README.md`;
+
 
     suiteSetup(async function () {
         const wsConfig = await testWorkspaceUtils.getBaseDevfile();
-        wsConfig.metadata!.name = wsNameCheckGeneratingKeys;
+        wsConfig.metadata!.name = wsNameGitPublishBranch;
         await testWorkspaceUtils.createWsFromDevFile(wsConfig);
     });
 
-    test('Login into workspace and open tree container', async () => {
-        await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckGeneratingKeys);
+    test('Login into workspace', async () => {
+        await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameGitPublishBranch);
         await loginPage.login();
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
-        await driverHelper.wait(TimeoutConstants.TS_DEBUGGER_CONNECTION_TIMEOUT);
+        await driverHelper.wait(15000);
     });
 
-    test('Generate a SSH key', async () => {
-        await topMenu.selectOption('View', 'Find Command...');
-        await quickOpenContainer.typeAndSelectSuggestion('SSH', 'SSH: generate key pair...');
-        await ide.waitNotificationAndClickOnButton('Key pair successfully generated, do you want to view the public key', 'View');
-        await editor.waitEditorOpened('Untitled-0');
-        await editor.waitText('Untitled-0', 'ssh-rsa');
-    });
-
-
-    test('Add a SSH key to GitHub side and clone by ssh link', async () => {
-        const sshName: string = WorkspaceNameHandler.generateWorkspaceName('test-SSH-', 5);
-        const publicSshKey = await cheGitAPI.getPublicSSHKey();
-        await gitHubUtils.addPublicSshKeyToUserAccount(TestConstants.TS_GITHUB_TEST_REPO_ACCESS_TOKEN, sshName, publicSshKey);
+    test('Create a new branch, change commit and push', async function changeCommitAndPushFunc() {
+        const currentDate: string = Date.now().toString();
+        const readmeFileContentXpath: string = `//div[@id='readme']//p[contains(text(), '${currentDate}')]`;
         await cloneTestRepo();
 
-    });
+        await driverHelper.wait(15000);
+        await topMenu.selectOption('View', 'Find Command...');
+        await quickOpenContainer.typeAndSelectSuggestion('branch', 'Git: Create Branch...');
+        await quickOpenContainer.typeAndSelectSuggestion(branchName, `Please provide a new branch name (Press 'Enter' to confirm your input or 'Escape' to cancel)`);
 
-    test('Change commit and push', async function changeCommitAndPushFunc() {
-        const currentDate: string = Date.now().toString();
-        await projectTree.expandPathAndOpenFile('Spoon-Knife', committedFile);
-        await editor.type(committedFile, currentDate + '\n', 1);
+        await projectTree.expandPathAndOpenFile('Spoon-Knife', changedFile);
+        await editor.type(changedFile, currentDate + '\n', 1);
         await gitPlugin.openGitPluginContainer();
-        await gitPlugin.waitChangedFileInChagesList(committedFile);
-        await gitPlugin.stageAllChanges(committedFile);
-        await gitPlugin.waitChangedFileInChagesList(committedFile);
+        await gitPlugin.waitChangedFileInChagesList(changedFile);
+        await gitPlugin.stageAllChanges(changedFile);
+        await gitPlugin.waitChangedFileInChagesList(changedFile);
         await gitPlugin.typeCommitMessage(this.test!.title + currentDate);
         await gitPlugin.commitFromCommandMenu();
         await gitPlugin.pushChangesFromCommandMenu();
+        await driverHelper.waitAndClick(By.xpath(`//button[@class='theia-button main']`));
         await gitPlugin.waitDataIsSynchronized();
-        const rawDataFromFile: string = await gitHubUtils.getRawContentFromFile(TestConstants.TS_GITHUB_TEST_REPO + '/master/' + committedFile);
-        assert.isTrue(rawDataFromFile.includes(currentDate));
         await testWorkspaceUtils.cleanUpAllWorkspaces();
-    });
 
-    test('Check ssh key in  a new workspace', async () => {
-        const data = await testWorkspaceUtils.getBaseDevfile();
-
-        data.metadata!.name = wsNameCheckPropagatingKeys;
-        await testWorkspaceUtils.createWsFromDevFile(data);
-        await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckPropagatingKeys);
-        await ide.waitWorkspaceAndIde();
-        await driverHelper.wait(5000);
-        await projectTree.openProjectTreeContainer();
-        await cloneTestRepo();
-        await projectTree.waitItem('Spoon-Knife');
+        await driverHelper.navigateToUrl(file);
+        await driverHelper.waitVisibility(By.xpath(readmeFileContentXpath));
     });
 
 });
