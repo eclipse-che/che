@@ -96,8 +96,6 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PASSWORD, `Provide Password ${provideAuthenticationSuffix}`);
 
     await topMenu.selectOption('View', 'Find Command...');
-    await quickOpenContainer.typeAndSelectSuggestion('OpenShift: Set Active Project', 'OpenShift: Set Active Project');
-    await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT, TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
     await openshiftPlugin.clickOnItemInTree(openshiftIP);
     await openshiftPlugin.waitItemInTree(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
   });
@@ -115,8 +113,6 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.clickOnContainerItem(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_COMPONENT_VERSION);
 
     await openshiftPlugin.clickOnItemInTree(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
-    await openshiftPlugin.clickOnItemInTree('node-js-app');
-    await openshiftPlugin.clickOnItemInTree('component-node-js');
   });
 
   test('Push new component', async () => {
