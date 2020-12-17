@@ -15,10 +15,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-parent</artifactId>
+        <artifactId>che-server</artifactId>
         <groupId>org.eclipse.che</groupId>
         <version>7.24.0-SNAPSHOT</version>
-        <relativePath>../..</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.selenium</groupId>
     <artifactId>che-selenium-parent</artifactId>
@@ -33,6 +33,7 @@
         <com.google.guava.version>20.0</com.google.guava.version>
         <log4j.version>1.2.17</log4j.version>
         <org.testng.version>6.8.21</org.testng.version>
+        <sonar.skip>true</sonar.skip>
     </properties>
     <dependencyManagement>
         <dependencies>
