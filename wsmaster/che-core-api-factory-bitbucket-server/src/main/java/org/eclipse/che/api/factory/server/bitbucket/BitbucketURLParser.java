@@ -25,6 +25,7 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.factory.server.urlfactory.DevfileFilenamesProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.lang.StringUtils;
 
 /**
  * Parser of String Bitbucket URLs and provide {@link BitbucketUrl} objects.
@@ -49,10 +50,7 @@ public class BitbucketURLParser {
     this.devfileFilenamesProvider = devfileFilenamesProvider;
     if (bitbucketEndpoints != null) {
       for (String bitbucketEndpoint : Splitter.on(",").split(bitbucketEndpoints)) {
-        String trimmedEndpoint =
-            bitbucketEndpoint.endsWith("/")
-                ? bitbucketEndpoint.substring(0, bitbucketEndpoint.length() - 1)
-                : bitbucketEndpoint;
+        String trimmedEndpoint = StringUtils.trimEnd(bitbucketEndpoint, '/');
         this.bitbucketUrlPatterns.add(
             Pattern.compile(format(bitbucketUrlPatternTemplate, trimmedEndpoint)));
       }

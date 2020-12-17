@@ -12,6 +12,7 @@
 package org.eclipse.che.api.factory.server.bitbucket;
 
 import static java.lang.String.format;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_PREFIX;
 
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -32,9 +33,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 
 public class BitbucketServerAuthorizingFileContentProvider implements FileContentProvider {
 
-  public static final String BITBUCKET_HOSTNAME_ANNOTATION = "che.eclipse.org/bitbucket-hostname";
-  public static final String BITBUCKET_USERNAME_ANNOTATION = "che.eclipse.org/bitbucket-username";
-  public static final String CHE_USERID_ANNOTATION = "che.eclipse.org/che-userid";
+  public static final String BITBUCKET_HOSTNAME_ANNOTATION = ANNOTATION_PREFIX + "/bitbucket-hostname";
+  public static final String BITBUCKET_USERNAME_ANNOTATION = ANNOTATION_PREFIX + "/bitbucket-username";
+  public static final String CHE_USERID_ANNOTATION = ANNOTATION_PREFIX+ "/che-userid";
   private final URLFetcher urlFetcher;
   private final BitbucketUrl bitbucketUrl;
   private final KubernetesNamespaceFactory namespaceFactory;
