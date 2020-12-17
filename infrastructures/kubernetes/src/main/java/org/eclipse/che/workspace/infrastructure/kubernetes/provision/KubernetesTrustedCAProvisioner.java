@@ -34,7 +34,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstal
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
 /**
@@ -110,8 +109,6 @@ public class KubernetesTrustedCAProvisioner implements TrustedCAProvisioner {
     if (allCaCertsConfigMap == null) {
       return;
     }
-
-    KubernetesNamespace namespace = namespaceFactory.getOrCreate(runtimeID);
 
     k8sEnv
         .getConfigMaps()
