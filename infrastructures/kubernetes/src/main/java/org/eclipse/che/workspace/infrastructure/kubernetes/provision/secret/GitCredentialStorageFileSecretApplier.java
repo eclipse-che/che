@@ -12,7 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret;
 
 import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner.ANNOTATION_PREFIX;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_MOUNT_PATH;
 
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -39,9 +39,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.GitConfigPr
 @Beta
 @Singleton
 public class GitCredentialStorageFileSecretApplier extends FileSecretApplier {
-
-  public static final String ANNOTATION_GIT_CREDENTIALS =
-      ANNOTATION_PREFIX + "/" + "git-credential";
 
   private static final String GIT_CREDENTIALS_FILE_STORE_PATTERN =
       "\n[credential]\n\thelper = store --file %s\n";

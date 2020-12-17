@@ -13,7 +13,8 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner.ANNOTATION_PREFIX;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_AUTOMOUNT;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_MOUNT_PATH;
 
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.Container;
@@ -50,8 +51,6 @@ import org.slf4j.LoggerFactory;
 public class FileSecretApplier extends KubernetesSecretApplier<KubernetesEnvironment> {
 
   private static final Logger LOG = LoggerFactory.getLogger(FileSecretApplier.class);
-
-  static final String ANNOTATION_MOUNT_PATH = ANNOTATION_PREFIX + "/" + "mount-path";
 
   private final K8sVersion k8sVersion;
 

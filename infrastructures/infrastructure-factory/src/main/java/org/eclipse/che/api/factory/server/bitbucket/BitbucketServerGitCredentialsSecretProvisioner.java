@@ -12,6 +12,10 @@
 package org.eclipse.che.api.factory.server.bitbucket;
 
 import static java.lang.String.format;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_AUTOMOUNT;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_GIT_CREDENTIALS;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_MOUNT_AS;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_MOUNT_PATH;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
@@ -41,13 +45,13 @@ public class BitbucketServerGitCredentialsSecretProvisioner {
 
   final Map<String, String> annotations =
       Map.of(
-          "che.eclipse.org/automount-workspace-secret",
+          ANNOTATION_AUTOMOUNT,
           "true",
-          "che.eclipse.org/mount-path",
+          ANNOTATION_MOUNT_PATH,
           "/home/theia/.git-credentials",
-          "che.eclipse.org/mount-as",
+          ANNOTATION_MOUNT_AS,
           "file",
-          "che.eclipse.org/git-credential",
+          ANNOTATION_GIT_CREDENTIALS,
           "true");
 
   @Inject
