@@ -54,6 +54,7 @@ public class KeycloakServiceClientTest {
 
   @Mock private KeycloakSettings keycloakSettings;
   @Mock private JwtParser jwtParser;
+  @Mock private OIDCInfo oidcInfo;
 
   private KeycloakServiceClient keycloakServiceClient;
 
@@ -65,14 +66,17 @@ public class KeycloakServiceClientTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    keycloakServiceClient = new KeycloakServiceClient(keycloakSettings, jwtParser);
+    when(oidcInfo.getAuthServerURL())
+        .thenReturn(RestAssured.baseURI + ":" + RestAssured.port + RestAssured.basePath);
+
+    keycloakServiceClient = new KeycloakServiceClient(keycloakSettings, oidcInfo, jwtParser);
     Map<String, String> conf = new HashMap<>();
     Map<String, String> confInternal = new HashMap<>();
     confInternal.put(
         AUTH_SERVER_URL_INTERNAL_SETTING,
         RestAssured.baseURI + ":" + RestAssured.port + RestAssured.basePath);
     conf.put(REALM_SETTING, "che");
-    when(keycloakSettings.getInternalSettings()).thenReturn(confInternal);
+    when(keycloakSettings.get()).thenReturn(confInternal);
     when(keycloakSettings.get()).thenReturn(conf);
   }
 
