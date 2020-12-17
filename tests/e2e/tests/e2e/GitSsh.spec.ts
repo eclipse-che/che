@@ -112,6 +112,8 @@ suite('Git with ssh workflow', async () => {
 suite('Cleanup', async () => {
     test('Remove test workspace', async () => {
         await testWorkspaceUtils.cleanUpAllWorkspaces();
+        await gitHubUtils.removeAllPublicSshKeys(TestConstants.TS_GITHUB_TEST_REPO_ACCESS_TOKEN);
+
     });
 });
 
