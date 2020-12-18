@@ -12,6 +12,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: {{ .Release.Namespace }}
   name: che-endpoints-monitor
+  labels:
+    app: che
+    component: keycloak
 rules:
 - apiGroups: [""]
   resources: ["services", "endpoints", "pods"]

@@ -119,5 +119,6 @@ parameters:
   description: Enable Postgres DB debug log mode
   value: "false"
 labels:
-  app: postgres
+  app: che
+  component: postgres
   template: postgres

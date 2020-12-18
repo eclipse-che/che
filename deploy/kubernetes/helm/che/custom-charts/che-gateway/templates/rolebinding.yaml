@@ -11,6 +11,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: che-gateway
+  labels:
+    app: che
+    component: che-gateway
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
