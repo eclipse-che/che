@@ -13,6 +13,9 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: devfile-registry
+  labels:
+    app: che
+    component: devfile-registry
   annotations:
     kubernetes.io/ingress.class: {{ .Values.global.ingress.class | quote }}
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-read-timeout: "3600"

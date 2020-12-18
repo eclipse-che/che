@@ -421,4 +421,5 @@ parameters:
   value: ''
 labels:
   app: che
+  component: che
   template: che
