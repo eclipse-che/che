@@ -167,7 +167,6 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       // 3 stage - add Kubernetes env items
       LOG.debug("Provisioning environment items for workspace '{}'", workspaceId);
       restartPolicyRewriter.provision(k8sEnv, identity);
-      uniqueNamesProvisioner.provision(k8sEnv, identity);
       resourceLimitRequestProvisioner.provision(k8sEnv, identity);
       nodeSelectorProvisioner.provision(k8sEnv, identity);
       externalServerTlsProvisioner.provision(k8sEnv, identity);
@@ -183,6 +182,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       gitConfigProvisioner.provision(k8sEnv, identity);
       gatewayRouterProvisioner.provision(k8sEnv, identity);
       trustedCAProvisioner.provision(k8sEnv, identity);
+      uniqueNamesProvisioner.provision(k8sEnv, identity);
       LOG.debug("Provisioning Kubernetes environment done for workspace '{}'", workspaceId);
     }
   }

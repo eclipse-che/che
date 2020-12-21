@@ -150,7 +150,6 @@ public class OpenShiftEnvironmentProvisionerTest {
     provisionOrder.verify(envVarsProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(volumesStrategy).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(restartPolicyRewriter).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(uniqueNamesProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(tlsRouteProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(ramLimitProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(nodeSelectorProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
@@ -167,6 +166,7 @@ public class OpenShiftEnvironmentProvisionerTest {
     provisionOrder.verify(gatewayRouterProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(deploymentMetadataProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(trustedCAProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(uniqueNamesProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }

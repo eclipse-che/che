@@ -153,7 +153,7 @@ public class KubernetesEnvironmentProvisionerTest {
     provisionOrder.verify(envVarsProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(volumesStrategy).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(restartPolicyRewriter).provision(eq(k8sEnv), eq(runtimeIdentity));
-    provisionOrder.verify(uniqueNamesProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+
     provisionOrder.verify(ramLimitProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(nodeSelectorProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder
@@ -170,6 +170,7 @@ public class KubernetesEnvironmentProvisionerTest {
     provisionOrder.verify(gitConfigProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(gatewayRouterProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(trustedCAProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(uniqueNamesProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }
