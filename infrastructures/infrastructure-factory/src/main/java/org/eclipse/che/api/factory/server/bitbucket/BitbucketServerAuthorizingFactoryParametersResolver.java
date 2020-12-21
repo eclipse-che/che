@@ -23,14 +23,14 @@ import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.DefaultFactoryParameterResolver;
+import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
+import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
 /**
  * Provides Factory Parameters resolver for private bitbucket repositories.
@@ -44,23 +44,20 @@ public class BitbucketServerAuthorizingFactoryParametersResolver
   /** Parser which will allow to check validity of URLs and create objects. */
   private final BitbucketURLParser bitbucketURLParser;
 
-  private final KubernetesNamespaceFactory kubernetesNamespaceFactory;
-  private final KubernetesClientFactory clientFactory;
-  private BitbucketServerGitCredentialsSecretProvisioner gitCredentialsSecretProvisioner;
+  private final GitCredentialManager gitCredentialManager;
+  private final PersonalAccessTokenManager personalAccessTokenManager;
 
   @Inject
   public BitbucketServerAuthorizingFactoryParametersResolver(
       URLFactoryBuilder urlFactoryBuilder,
       URLFetcher urlFetcher,
       BitbucketURLParser bitbucketURLParser,
-      KubernetesNamespaceFactory kubernetesNamespaceFactory,
-      KubernetesClientFactory clientFactory,
-      BitbucketServerGitCredentialsSecretProvisioner gitCredentialsSecretProvisioner) {
+      GitCredentialManager gitCredentialManager,
+      PersonalAccessTokenManager personalAccessTokenManager) {
     super(urlFactoryBuilder, urlFetcher);
     this.bitbucketURLParser = bitbucketURLParser;
-    this.kubernetesNamespaceFactory = kubernetesNamespaceFactory;
-    this.clientFactory = clientFactory;
-    this.gitCredentialsSecretProvisioner = gitCredentialsSecretProvisioner;
+    this.gitCredentialManager = gitCredentialManager;
+    this.personalAccessTokenManager = personalAccessTokenManager;
   }
 
   /**
@@ -92,11 +89,7 @@ public class BitbucketServerAuthorizingFactoryParametersResolver
 
     final FileContentProvider fileContentProvider =
         new BitbucketServerAuthorizingFileContentProvider(
-            bitbucketUrl,
-            urlFetcher,
-            kubernetesNamespaceFactory,
-            clientFactory,
-            gitCredentialsSecretProvisioner);
+            bitbucketUrl, urlFetcher, gitCredentialManager, personalAccessTokenManager);
 
     // create factory from the following location if location exists, else create default factory
     FactoryDto factory =

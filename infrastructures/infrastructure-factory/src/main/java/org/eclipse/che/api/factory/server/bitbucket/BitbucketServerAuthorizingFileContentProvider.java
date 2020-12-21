@@ -11,48 +11,39 @@
  */
 package org.eclipse.che.api.factory.server.bitbucket;
 
-import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_PREFIX;
-
-import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Base64;
-import java.util.List;
 import java.util.Optional;
+import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
+import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
+import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
+import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
+import org.eclipse.che.api.factory.server.scm.exception.ScmConfigurationPersistenceException;
+import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
+import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderException;
+import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedPreconditionException;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
 public class BitbucketServerAuthorizingFileContentProvider implements FileContentProvider {
 
-  public static final String BITBUCKET_HOSTNAME_ANNOTATION = ANNOTATION_PREFIX + "/bitbucket-hostname";
-  public static final String BITBUCKET_USERNAME_ANNOTATION = ANNOTATION_PREFIX + "/bitbucket-username";
-  public static final String CHE_USERID_ANNOTATION = ANNOTATION_PREFIX+ "/che-userid";
   private final URLFetcher urlFetcher;
   private final BitbucketUrl bitbucketUrl;
-  private final KubernetesNamespaceFactory namespaceFactory;
-  private final KubernetesClientFactory clientFactory;
-  private final BitbucketServerGitCredentialsSecretProvisioner gitCredentialsSecretProvisioner;
+  private final GitCredentialManager gitCredentialManager;
+  private final PersonalAccessTokenManager personalAccessTokenManager;
 
   public BitbucketServerAuthorizingFileContentProvider(
       BitbucketUrl bitbucketUrl,
       URLFetcher urlFetcher,
-      KubernetesNamespaceFactory namespaceFactory,
-      KubernetesClientFactory clientFactory,
-      BitbucketServerGitCredentialsSecretProvisioner gitCredentialsSecretProvisioner) {
+      GitCredentialManager gitCredentialManager,
+      PersonalAccessTokenManager personalAccessTokenManager) {
     this.bitbucketUrl = bitbucketUrl;
     this.urlFetcher = urlFetcher;
-    this.namespaceFactory = namespaceFactory;
-    this.clientFactory = clientFactory;
-    this.gitCredentialsSecretProvisioner = gitCredentialsSecretProvisioner;
+    this.gitCredentialManager = gitCredentialManager;
+    this.personalAccessTokenManager = personalAccessTokenManager;
   }
 
   @Override
@@ -75,17 +66,45 @@ public class BitbucketServerAuthorizingFileContentProvider implements FileConten
         throw new DevfileException(e.getMessage(), e);
       }
     }
-
-    Optional<String> token =
-        readTokenSecret(
-            bitbucketUrl.getHostName(), EnvironmentContext.getCurrent().getSubject().getUserId());
     try {
-      return token.isPresent()
-          ? urlFetcher.fetch(requestURL, "Bearer " + token.get())
-          : urlFetcher.fetch(requestURL);
+      Optional<PersonalAccessToken> token =
+          personalAccessTokenManager.get(
+              EnvironmentContext.getCurrent().getSubject().getUserId(), bitbucketUrl.getHostName());
+      if (token.isPresent()) {
+        PersonalAccessToken personalAccessToken = token.get();
+        String content = urlFetcher.fetch(requestURL, "Bearer " + personalAccessToken.getToken());
+        gitCredentialManager.createOrReplace(personalAccessToken);
+        return content;
+      } else {
+        try {
+          return urlFetcher.fetch(requestURL);
+        } catch (Exception exception) {
+          // UnauthorizedException
+          try {
+            PersonalAccessToken personalAccessToken =
+                personalAccessTokenManager.fetchAndSave(
+                    EnvironmentContext.getCurrent().getSubject().getUserId(),
+                    bitbucketUrl.getHostName());
+            String content =
+                urlFetcher.fetch(requestURL, "Bearer " + personalAccessToken.getToken());
+            gitCredentialManager.createOrReplace(personalAccessToken);
+            return content;
+          } catch (ScmUnauthorizedException e) {
+            // TODO proper error handling
+            throw new DevfileException(e.getMessage());
+          } catch (ScmCommunicationException e) {
+            // TODO proper error handling
+            throw new DevfileException(e.getMessage());
+          } catch (UnknownScmProviderException unknownScmProvider) {
+            // TODO proper error handling
+            throw new DevfileException(unknownScmProvider.getMessage());
+          }
+        }
+      }
+
     } catch (IOException e) {
       throw new IOException(
-          format(
+          String.format(
               "Failed to fetch a content from URL %s. Make sure the URL"
                   + " is correct. Additionally, if you're using "
                   + " relative form, make sure the referenced files are actually stored"
@@ -94,55 +113,12 @@ public class BitbucketServerAuthorizingFileContentProvider implements FileConten
                   + " the file failed with the following error message: %s",
               fileURL, e.getMessage()),
           e);
+    } catch (ScmConfigurationPersistenceException e) {
+      // TODO proper error handling
+      throw new DevfileException(e.getMessage());
+    } catch (UnsatisfiedPreconditionException e) {
+      // TODO proper error handling
+      throw new DevfileException(e.getMessage());
     }
-  }
-
-  private Optional<String> readTokenSecret(String hostname, String cheUserId)
-      throws DevfileException {
-    List<KubernetesNamespaceMeta> availableNamespaces;
-    KubernetesClient client;
-    try {
-      availableNamespaces = namespaceFactory.list();
-      client = clientFactory.create();
-    } catch (InfrastructureException e) {
-      throw new DevfileException("Unable to read user namespaces. Cause is:", e);
-    }
-    for (KubernetesNamespaceMeta meta : availableNamespaces) {
-      List<Secret> bitbucketTokenSecrets =
-          client
-              .secrets()
-              .inNamespace(meta.getName())
-              .withLabel("app.kubernetes.io/component", "bitbucket-personal-access-token")
-              .list()
-              .getItems();
-      if (bitbucketTokenSecrets.isEmpty()) {
-        continue;
-      }
-      Optional<Secret> matchedSecret =
-          bitbucketTokenSecrets
-              .stream()
-              .filter(
-                  s ->
-                      s.getMetadata()
-                              .getAnnotations()
-                              .get(BITBUCKET_HOSTNAME_ANNOTATION)
-                              .equals(hostname)
-                          && s.getMetadata()
-                              .getAnnotations()
-                              .get(CHE_USERID_ANNOTATION)
-                              .equals(cheUserId))
-              .findFirst();
-      if (matchedSecret.isPresent()) {
-        final String tokenValue =
-            new String(Base64.getDecoder().decode(matchedSecret.get().getData().get("token")));
-        gitCredentialsSecretProvisioner.provision(
-            meta.getName(),
-            hostname,
-            matchedSecret.get().getMetadata().getAnnotations().get(BITBUCKET_USERNAME_ANNOTATION),
-            tokenValue);
-        return Optional.of(tokenValue);
-      }
-    }
-    return Optional.empty();
   }
 }

@@ -13,9 +13,10 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.FileSecretApplier.ANNOTATION_MOUNT_PATH;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretApplier.ANNOTATION_AUTOMOUNT;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner.ANNOTATION_MOUNT_AS;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_AUTOMOUNT;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_GIT_CREDENTIALS;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_MOUNT_AS;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_MOUNT_PATH;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertTrue;
@@ -86,7 +87,7 @@ public class GitCredentialStorageFileSecretApplierTest {
                             "file",
                             ANNOTATION_MOUNT_PATH,
                             "/home/user/.git",
-                            GitCredentialStorageFileSecretApplier.ANNOTATION_GIT_CREDENTIALS,
+                            ANNOTATION_GIT_CREDENTIALS,
                             "true",
                             ANNOTATION_AUTOMOUNT,
                             "true"))
@@ -112,7 +113,7 @@ public class GitCredentialStorageFileSecretApplierTest {
                             "file",
                             ANNOTATION_MOUNT_PATH,
                             "/home/user/.git",
-                            GitCredentialStorageFileSecretApplier.ANNOTATION_GIT_CREDENTIALS,
+                            ANNOTATION_GIT_CREDENTIALS,
                             "true",
                             ANNOTATION_AUTOMOUNT,
                             "true"))
@@ -156,7 +157,7 @@ public class GitCredentialStorageFileSecretApplierTest {
                             "file",
                             ANNOTATION_MOUNT_PATH,
                             "/home/user/.git",
-                            GitCredentialStorageFileSecretApplier.ANNOTATION_GIT_CREDENTIALS,
+                            ANNOTATION_GIT_CREDENTIALS,
                             "true",
                             ANNOTATION_AUTOMOUNT,
                             "true"))
