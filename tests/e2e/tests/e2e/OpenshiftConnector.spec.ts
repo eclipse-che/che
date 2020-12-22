@@ -23,8 +23,7 @@ import { TestConstants } from '../../TestConstants';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { PreferencesHandler, TerminalRendererType } from '../../utils/PreferencesHandler';
 import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
-import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
-import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
@@ -114,9 +113,10 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.clickOnContainerItem(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_COMPONENT_TYPE);
     await quickOpenContainer.clickOnContainerItem(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_COMPONENT_VERSION);
 
-    await openshiftPlugin.clickOnItemInTree(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
-    await openshiftPlugin.clickOnItemInTree('node-js-app');
-    await openshiftPlugin.clickOnItemInTree('component-node-js');
+    await driverHelper.wait(TimeoutConstants.TS_PROJECT_TREE_TIMEOUT);
+    await openshiftPlugin.waitItemInTree(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
+    await openshiftPlugin.waitItemInTree('node-js-app');
+    await openshiftPlugin.waitItemInTree('component-node-js');
   });
 
   test('Push new component', async () => {
@@ -127,17 +127,10 @@ suite('Openshift connector user story', async () => {
     await terminal.selectTabByPrefixAndWaitText('OpenShift: Push', 'Changes successfully pushed to component', 120_000);
   });
 
-  suite ('Stopping and deleting the workspace', async () => {
-    let workspaceName = 'not defined';
-    suiteSetup( async () => {
-        workspaceName = await WorkspaceNameHandler.getNameFromUrl();
+  suite('Cleanup', async () => {
+    test('Remove test workspace', async () => {
+        await testWorkspaceUtils.cleanUpAllWorkspaces();
     });
-    test (`Stop workspace`, async () => {
-        await workspaceHandling.stopWorkspace(workspaceName);
-    });
-    test (`Remove workspace`, async () => {
-        await workspaceHandling.removeWorkspace(workspaceName);
-    });
-  });
+});
 
 });
