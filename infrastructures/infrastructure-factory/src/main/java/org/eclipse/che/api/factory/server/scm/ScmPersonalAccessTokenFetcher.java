@@ -11,7 +11,8 @@
  */
 package org.eclipse.che.api.factory.server.scm;
 
-import java.util.List;
+import java.util.Set;
+import javax.inject.Inject;
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderException;
@@ -21,10 +22,11 @@ import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderExcept
  * PersonalAccessToken.
  */
 public class ScmPersonalAccessTokenFetcher {
-  private List<PersonalAccessTokenFetcher> personalAccessTokenFetchers;
+  private Set<PersonalAccessTokenFetcher> personalAccessTokenFetchers;
 
+  @Inject
   public ScmPersonalAccessTokenFetcher(
-      List<PersonalAccessTokenFetcher> personalAccessTokenFetchers) {
+      Set<PersonalAccessTokenFetcher> personalAccessTokenFetchers) {
     this.personalAccessTokenFetchers = personalAccessTokenFetchers;
   }
 

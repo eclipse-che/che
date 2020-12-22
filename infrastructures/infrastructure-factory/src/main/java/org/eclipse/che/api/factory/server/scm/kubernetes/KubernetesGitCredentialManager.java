@@ -23,6 +23,7 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -31,12 +32,14 @@ import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
 import org.eclipse.che.api.factory.server.scm.exception.ScmConfigurationPersistenceException;
 import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedPreconditionException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
 public class KubernetesGitCredentialManager implements GitCredentialManager {
   public static final String NAME_PATTERN = "%s-git-credentials-secret";
+  public static final String ANNOTATION_SCM_URL = "che.eclipse.org/scm-url";
 
   private static final Map<String, String> LABELS =
       ImmutableMap.of(
@@ -69,16 +72,18 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
       throws UnsatisfiedPreconditionException, ScmConfigurationPersistenceException {
     try {
       String namespace = getFirstNamespace();
+      Map<String, String> annotations = new HashMap<>(ANNOTATIONS);
+      annotations.put(ANNOTATION_SCM_URL, personalAccessToken.getScmProviderUrl());
       ObjectMeta meta =
           new ObjectMetaBuilder()
-              .withName(String.format(NAME_PATTERN, personalAccessToken.getScmProviderHost()))
-              .withAnnotations(ANNOTATIONS)
+              .withName(String.format(NAME_PATTERN,  NameGenerator.generate(personalAccessToken.getUserName(), 5)))
+              .withAnnotations(annotations)
               .withLabels(LABELS)
               .build();
 
       Secret secret =
           new SecretBuilder()
-              .withApiVersion("1")
+              .withApiVersion("v1")
               .withMetadata(meta)
               .withData(
                   Map.of(

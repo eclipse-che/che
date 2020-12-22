@@ -25,6 +25,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.inject.Inject;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
 import org.eclipse.che.api.factory.server.scm.ScmPersonalAccessTokenFetcher;
@@ -59,6 +60,7 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
   private final KubernetesClientFactory clientFactory;
   private final ScmPersonalAccessTokenFetcher scmPersonalAccessTokenFetcher;
 
+  @Inject
   public KubernetesPersonalAccessTokenManager(
       KubernetesNamespaceFactory namespaceFactory,
       KubernetesClientFactory clientFactory,
@@ -91,7 +93,7 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
 
       Secret secret =
           new SecretBuilder()
-              .withApiVersion("1")
+              .withApiVersion("v1")
               .withMetadata(meta)
               .withData(
                   Map.of(
@@ -173,7 +175,7 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
       throws UnsatisfiedPreconditionException, ScmConfigurationPersistenceException {
     try {
       Optional<String> namespace =
-          namespaceFactory.list().stream().map(m -> m.getName()).findFirst();
+          namespaceFactory.list().stream().map(KubernetesNamespaceMeta::getName).findFirst();
       if (namespace.isEmpty()) {
         throw new UnsatisfiedPreconditionException("No namespace found");
       }
