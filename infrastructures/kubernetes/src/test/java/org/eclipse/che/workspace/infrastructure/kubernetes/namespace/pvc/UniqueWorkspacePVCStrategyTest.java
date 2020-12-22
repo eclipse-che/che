@@ -230,7 +230,7 @@ public class UniqueWorkspacePVCStrategyTest {
     strategy.cleanup(workspace);
 
     // then
-    verify(pvcs).delete(any());
+    verify(pvcs).delete(ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, WORKSPACE_ID));
   }
 
   @Test
@@ -251,7 +251,7 @@ public class UniqueWorkspacePVCStrategyTest {
     strategy.cleanup(workspace);
 
     // then
-    verify(pvcs, never()).delete(any());
+    verify(pvcs, never()).delete(ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, WORKSPACE_ID));
   }
 
   static PersistentVolumeClaim newPVC(String name) {

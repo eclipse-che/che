@@ -159,6 +159,26 @@ public class KubernetesPersistentVolumeClaims {
   }
 
   /**
+   * Removes PVC by name.
+   *
+   * @param name the name of the PVC
+   * @throws InfrastructureException when any error occurs while removing
+   */
+  public void delete(final String name) throws InfrastructureException {
+    try {
+      clientFactory
+          .create(workspaceId)
+          .persistentVolumeClaims()
+          .inNamespace(namespace)
+          .withName(name)
+          .withPropagationPolicy("Background")
+          .delete();
+    } catch (KubernetesClientException e) {
+      throw new KubernetesInfrastructureException(e);
+    }
+  }
+
+  /**
    * Waits until persistent volume claim state is bound. If used k8s Storage Class has
    * 'volumeBindingMode: WaitForFirstConsumer', we don't wait to avoid deadlock.
    *

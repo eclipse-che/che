@@ -24,10 +24,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Named;
+import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
+import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -70,7 +76,6 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Garagatyi
  */
 public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
-
   // use non-static variable to reuse child class logger
   private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -96,6 +101,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   private final PodsVolumes podsVolumes;
   private final SubPathPrefixes subpathPrefixes;
   private final boolean waitBound;
+  private final WorkspaceManager workspaceManager;
 
   @Inject
   public CommonPVCStrategy(
@@ -110,7 +116,8 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter,
       PVCProvisioner pvcProvisioner,
       PodsVolumes podsVolumes,
-      SubPathPrefixes subpathPrefixes) {
+      SubPathPrefixes subpathPrefixes,
+      WorkspaceManager workspaceManager) {
     this.configuredPVCName = configuredPVCName;
     this.pvcQuantity = pvcQuantity;
     this.pvcAccessMode = pvcAccessMode;
@@ -123,6 +130,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     this.pvcProvisioner = pvcProvisioner;
     this.podsVolumes = podsVolumes;
     this.subpathPrefixes = subpathPrefixes;
+    this.workspaceManager = workspaceManager;
   }
 
   /**
@@ -229,6 +237,10 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   public void cleanup(Workspace workspace) throws InfrastructureException {
     if (EphemeralWorkspaceUtility.isEphemeral(workspace)) {
       return;
+    } else if (userHasNoWorkspaces()) {
+      log.debug("Deleting the common PVC: '{}',", configuredPVCName);
+      deleteCommonPVC(workspace);
+      return;
     }
     String workspaceId = workspace.getId();
     PersistentVolumeClaim pvc = createCommonPVC(workspaceId);
@@ -257,5 +269,37 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
         .map(VolumeMount::getSubPath)
         .filter(subpath -> !isNullOrEmpty(subpath))
         .collect(Collectors.toSet());
+  }
+
+  private void deleteCommonPVC(Workspace workspace) throws InfrastructureException {
+    factory.get(workspace).persistentVolumeClaims().delete(configuredPVCName);
+  }
+
+  private boolean userHasNoWorkspaces() {
+    String userId = getSessionUserIdOrUndefined();
+    if (!"undefined".equals(userId)) {
+      try {
+        Page<WorkspaceImpl> workspaces = workspaceManager.getWorkspaces(userId, false, 1, 0);
+        if (workspaces.isEmpty()) {
+          log.debug("User '{}' has no more workspaces left", userId);
+          return true;
+        }
+      } catch (ServerException e) {
+        log.error(
+            "Unable to get the number of workspaces for user '{}'. Cause: {}",
+            userId,
+            e.getMessage(),
+            e);
+      }
+    }
+    return false;
+  }
+
+  private String getSessionUserIdOrUndefined() {
+    final Subject subject = EnvironmentContext.getCurrent().getSubject();
+    if (!subject.isAnonymous()) {
+      return subject.getUserId();
+    }
+    return "undefined";
   }
 }

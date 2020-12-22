@@ -20,6 +20,7 @@ import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
@@ -62,7 +63,8 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
       EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter,
       PVCProvisioner pvcProvisioner,
       PodsVolumes podsVolumes,
-      SubPathPrefixes subpathPrefixes) {
+      SubPathPrefixes subpathPrefixes,
+      WorkspaceManager workspaceManager) {
     super(
         pvcName,
         pvcQuantity,
@@ -75,7 +77,8 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
         ephemeralWorkspaceAdapter,
         pvcProvisioner,
         podsVolumes,
-        subpathPrefixes);
+        subpathPrefixes,
+        workspaceManager);
     this.pvcNamePrefix = pvcName;
     this.factory = factory;
     this.pvcAccessMode = pvcAccessMode;

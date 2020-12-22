@@ -34,6 +34,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -73,6 +74,7 @@ public class PerWorkspacePVCStrategyTest {
   @Mock private PVCProvisioner volumeConverter;
   @Mock private PodsVolumes podsVolumes;
   @Mock private SubPathPrefixes subpathPrefixes;
+  @Mock private WorkspaceManager workspaceManager;
 
   private PerWorkspacePVCStrategy strategy;
 
@@ -91,7 +93,8 @@ public class PerWorkspacePVCStrategyTest {
             ephemeralWorkspaceAdapter,
             volumeConverter,
             podsVolumes,
-            subpathPrefixes);
+            subpathPrefixes,
+            workspaceManager);
 
     lenient().when(factory.getOrCreate(IDENTITY)).thenReturn(k8sNamespace);
     lenient().when(factory.get(any(Workspace.class))).thenReturn(k8sNamespace);
@@ -137,7 +140,8 @@ public class PerWorkspacePVCStrategyTest {
             ephemeralWorkspaceAdapter,
             volumeConverter,
             podsVolumes,
-            subpathPrefixes);
+            subpathPrefixes,
+            workspaceManager);
     final PersistentVolumeClaim pvc = newPVC(PVC_NAME_PREFIX + "-" + WORKSPACE_ID);
     String perWorkspacePVCName = pvc.getMetadata().getName();
 
@@ -187,7 +191,8 @@ public class PerWorkspacePVCStrategyTest {
               ephemeralWorkspaceAdapter,
               volumeConverter,
               podsVolumes,
-              subpathPrefixes);
+              subpathPrefixes,
+              workspaceManager);
 
       final PersistentVolumeClaim commonPVC = strategy.createCommonPVC(WORKSPACE_ID);
 
