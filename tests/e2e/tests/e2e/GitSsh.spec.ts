@@ -56,7 +56,7 @@ suite('Git with ssh workflow', async () => {
         await loginPage.login();
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
-        await driverHelper.wait(TimeoutConstants.TS_DEBUGGER_CONNECTION_TIMEOUT);
+        await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     });
 
     test('Generate a SSH key', async () => {
@@ -101,7 +101,7 @@ suite('Git with ssh workflow', async () => {
         await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckPropagatingKeys);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
-        await driverHelper.wait(TimeoutConstants.TS_DEBUGGER_CONNECTION_TIMEOUT);
+        await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
         await cloneTestRepo();
         await projectTree.waitItem('Spoon-Knife');
     });
