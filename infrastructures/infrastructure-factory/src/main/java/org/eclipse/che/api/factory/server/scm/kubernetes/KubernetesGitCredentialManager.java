@@ -76,7 +76,9 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
       annotations.put(ANNOTATION_SCM_URL, personalAccessToken.getScmProviderUrl());
       ObjectMeta meta =
           new ObjectMetaBuilder()
-              .withName(String.format(NAME_PATTERN,  NameGenerator.generate(personalAccessToken.getUserName(), 5)))
+              .withName(
+                  String.format(
+                      NAME_PATTERN, NameGenerator.generate(personalAccessToken.getUserName(), 5)))
               .withAnnotations(annotations)
               .withLabels(LABELS)
               .build();

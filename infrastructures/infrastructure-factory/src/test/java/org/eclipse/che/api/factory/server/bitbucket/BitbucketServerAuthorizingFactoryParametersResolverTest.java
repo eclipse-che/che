@@ -30,6 +30,8 @@ import static org.testng.Assert.assertTrue;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.Optional;
+import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
+import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
 import org.eclipse.che.api.factory.server.urlfactory.DevfileFilenamesProvider;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
@@ -45,7 +47,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
-public class BitbucketServerFactoryParametersResolverTest {
+public class BitbucketServerAuthorizingFactoryParametersResolverTest {
 
   @Mock private URLFactoryBuilder urlFactoryBuilder;
 
@@ -55,16 +57,24 @@ public class BitbucketServerFactoryParametersResolverTest {
 
   BitbucketURLParser bitbucketURLParser;
 
-  private BitbucketServerFactoryParametersResolver bitbucketServerFactoryParametersResolver;
+  @Mock private GitCredentialManager gitCredentialManager;
+  @Mock private PersonalAccessTokenManager personalAccessTokenManager;
+
+  private BitbucketServerAuthorizingFactoryParametersResolver
+      bitbucketServerFactoryParametersResolver;
 
   @BeforeMethod
   protected void init() {
     bitbucketURLParser =
-        new BitbucketURLParser("http://bitbucket.2mcl.com", urlFetcher, devfileFilenamesProvider);
+        new BitbucketURLParser("http://bitbucket.2mcl.com", devfileFilenamesProvider);
     assertNotNull(this.bitbucketURLParser);
     bitbucketServerFactoryParametersResolver =
-        new BitbucketServerFactoryParametersResolver(
-            urlFactoryBuilder, urlFetcher, bitbucketURLParser);
+        new BitbucketServerAuthorizingFactoryParametersResolver(
+            urlFactoryBuilder,
+            urlFetcher,
+            bitbucketURLParser,
+            gitCredentialManager,
+            personalAccessTokenManager);
     assertNotNull(this.bitbucketServerFactoryParametersResolver);
   }
 

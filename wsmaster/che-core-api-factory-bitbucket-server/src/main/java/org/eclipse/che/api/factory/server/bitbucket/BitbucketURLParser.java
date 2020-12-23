@@ -23,7 +23,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.factory.server.urlfactory.DevfileFilenamesProvider;
-import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.StringUtils;
 
@@ -35,7 +34,6 @@ import org.eclipse.che.commons.lang.StringUtils;
 @Singleton
 public class BitbucketURLParser {
 
-  private final URLFetcher urlFetcher;
   private final DevfileFilenamesProvider devfileFilenamesProvider;
   private static final String bitbucketUrlPatternTemplate =
       "^(?<host>%s)/scm/(?<project>[^/]++)/(?<repo>[^.]++).git(\\?at=)?(?<branch>[\\w\\d-_]*)";
@@ -43,10 +41,8 @@ public class BitbucketURLParser {
 
   @Inject
   public BitbucketURLParser(
-      @Nullable @Named("bitbucket.server.endpoints") String bitbucketEndpoints,
-      URLFetcher urlFetcher,
+      @Nullable @Named("che.integration.bitbucket.server_endpoints") String bitbucketEndpoints,
       DevfileFilenamesProvider devfileFilenamesProvider) {
-    this.urlFetcher = urlFetcher;
     this.devfileFilenamesProvider = devfileFilenamesProvider;
     if (bitbucketEndpoints != null) {
       for (String bitbucketEndpoint : Splitter.on(",").split(bitbucketEndpoints)) {
