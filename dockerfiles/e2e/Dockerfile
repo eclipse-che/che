@@ -1,4 +1,4 @@
-FROM selenium/standalone-chrome:3.141.59-20201119
+FROM selenium/standalone-chrome:87.0
 
 ENV DISPLAY=':20'
 
@@ -15,6 +15,8 @@ COPY --chown=0:0 entrypoint.sh /tmp/
 
 RUN mkdir /tmp/e2e && \
     chmod -R 777 /tmp/e2e
+
+RUN sed -i "s/nodaemon=true/nodaemon=false/" /etc/supervisord.conf
 
 COPY e2e/package.json e2e/package-lock.json /tmp/e2e/
 
