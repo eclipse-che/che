@@ -155,5 +155,5 @@ data:
   CHE_SERVER_SECURE__EXPOSER_JWTPROXY_IMAGE: {{ .Values.cheServerSecureExposerJwtProxyImage | quote }}
 {{- end }}
 {{- if .Values.che.workspace.tolerations }}
-  CHE_WORKSPACE_POD_TOLERATIONS: {{ .Values.che.workspace.tolerations | toJson | quote }}
+  CHE_WORKSPACE_POD_TOLERATIONS__JSON: {{ .Values.che.workspace.tolerations | toJson | quote }}
 {{- end }}

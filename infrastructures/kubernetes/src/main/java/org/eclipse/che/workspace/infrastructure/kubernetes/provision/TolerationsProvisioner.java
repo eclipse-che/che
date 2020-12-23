@@ -33,7 +33,9 @@ public class TolerationsProvisioner implements ConfigurationProvisioner {
   @Inject
   public TolerationsProvisioner(
       @Nullable @Named("che.workspace.pod.tolerations") String tolerationsProperty)
-      throws JsonProcessingException {
+      throws
+          JsonProcessingException { // TODO: What kind of exception should I throw here?  Code the
+    // appropriate unit test.
     ObjectMapper jsonMapper = new ObjectMapper();
     this.tolerations =
         tolerationsProperty != null

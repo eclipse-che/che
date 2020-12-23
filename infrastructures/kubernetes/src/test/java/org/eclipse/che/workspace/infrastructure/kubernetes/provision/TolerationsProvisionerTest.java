@@ -46,11 +46,11 @@ public class TolerationsProvisionerTest {
     // given
     k8sEnv.addPod(createPod("pod"));
     k8sEnv.addPod(createPod("pod2"));
-    Toleration t = new Toleration("NoExecute", "scylladev.node.taint", "Equal", 0L, "logging");
-    ObjectMapper m = new ObjectMapper();
-    String json = m.writeValueAsString(Collections.singletonList(t));
+    Toleration expectedToleration =
+        new Toleration("NoExecute", "a.node.taint", "Equal", 0L, "aValue");
+    ObjectMapper objMapper = new ObjectMapper();
+    String json = objMapper.writeValueAsString(Collections.singletonList(expectedToleration));
     provisioner = new TolerationsProvisioner(json);
-    // "[{\"effect\":\"NoExecute\",\"key\":\"scylladev.node.taint\",\"operator\":\"Equal\",\"value\":\"logging\"}]");
 
     // when
     provisioner.provision(k8sEnv, runtimeId);
@@ -58,20 +58,12 @@ public class TolerationsProvisionerTest {
     // then
     for (Pod pod : k8sEnv.getPodsCopy().values()) {
       assertEquals(pod.getSpec().getTolerations().size(), 1);
-      assertEquals(pod.getSpec().getTolerations().get(0).getEffect(), t.getEffect());
-      assertEquals(pod.getSpec().getTolerations().get(0).getKey(), t.getKey());
-      assertEquals(pod.getSpec().getTolerations().get(0).getOperator(), t.getOperator());
-      assertEquals(
-          pod.getSpec().getTolerations().get(0).getTolerationSeconds(), t.getTolerationSeconds());
-      assertEquals(pod.getSpec().getTolerations().get(0).getValue(), t.getValue());
-      assertEquals(
-          pod.getSpec().getTolerations().get(0).getAdditionalProperties(),
-          t.getAdditionalProperties());
+      assertEquals(pod.getSpec().getTolerations().get(0), expectedToleration);
     }
   }
 
   @Test
-  public void shouldOmitEmptySelector() throws Exception {
+  public void shouldOmitEmptyTolerations() throws Exception {
     // given
     k8sEnv.addPod(createPod("pod"));
     k8sEnv.addPod(createPod("pod2"));
