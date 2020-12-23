@@ -24,20 +24,16 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Provisions tolerations into workspace pod spec. */
 public class TolerationsProvisioner implements ConfigurationProvisioner {
 
   private final List<Toleration> tolerations;
-  private static final Logger LOG = LoggerFactory.getLogger(TolerationsProvisioner.class);
 
   @Inject
   public TolerationsProvisioner(
       @Nullable @Named("che.workspace.pod.tolerations") String tolerationsProperty)
       throws JsonProcessingException {
-    LOG.info("CHKPNT: TolerationsProvisioner created with {}", tolerationsProperty);
     ObjectMapper jsonMapper = new ObjectMapper();
     this.tolerations =
         tolerationsProperty != null
@@ -49,23 +45,7 @@ public class TolerationsProvisioner implements ConfigurationProvisioner {
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     if (!tolerations.isEmpty()) {
-      k8sEnv
-          .getPodsData()
-          .values()
-          .forEach(
-              d -> {
-                LOG.info(
-                    "CHKPNT: adding tolerations '[{}] {} {} {}' to pod {}/{}",
-                    tolerations.get(0).getEffect(),
-                    tolerations.get(0).getKey(),
-                    tolerations.get(0).getOperator(),
-                    tolerations.get(0).getValue(),
-                    d.getMetadata().getNamespace(),
-                    d.getMetadata().getName());
-                d.getSpec().setTolerations(tolerations);
-              });
-    } else {
-      LOG.info("CHKPNT: No tolerations available");
+      k8sEnv.getPodsData().values().forEach(d -> d.getSpec().setTolerations(tolerations));
     }
   }
 }
