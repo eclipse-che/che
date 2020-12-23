@@ -31,7 +31,7 @@ RUN mkdir /logs /data && \
     chmod -R g+rwX /home/user && \
     find /home/user -type d -exec chmod 777 {} \; && \
     java -version && echo -n "Server startup script in: " && \
-    find /home/user/codeready -name catalina.sh | grep -z /home/user/codeready/tomcat/bin/catalina.sh
+    find /home/user/eclipse-che -name catalina.sh | grep -z /home/user/eclipse-che/tomcat/bin/catalina.sh
 
 USER user
 
