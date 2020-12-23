@@ -21,11 +21,14 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Provisions node selector into workspace pod spec. */
 public class NodeSelectorProvisioner implements ConfigurationProvisioner {
 
   private final Map<String, String> nodeSelectorAttributes;
+  private static final Logger LOG = LoggerFactory.getLogger(NodeSelectorProvisioner.class);
 
   @Inject
   public NodeSelectorProvisioner(
@@ -43,7 +46,14 @@ public class NodeSelectorProvisioner implements ConfigurationProvisioner {
       k8sEnv
           .getPodsData()
           .values()
-          .forEach(d -> d.getSpec().setNodeSelector(nodeSelectorAttributes));
+          .forEach(
+              d -> {
+                LOG.info(
+                    "CHKPNT: adding nodeSelector to pod {}/{}",
+                    d.getMetadata().getNamespace(),
+                    d.getMetadata().getName());
+                d.getSpec().setNodeSelector(nodeSelectorAttributes);
+              });
     }
   }
 }

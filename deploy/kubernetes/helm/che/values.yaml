@@ -119,6 +119,11 @@ che:
 #    pluginBroker:
 #      waitTimeoutMin: "3"
 #    pluginRegistryUrl: "https://che-plugin-registry.openshift.io/v3"
+#    tolerations:
+#      - key: "a.node.taint"
+#        operator: "Equal"
+#        value: "aValue"
+#        effect: "NoExecute"
   disableProbes: false
   logLevel: "INFO"
 
