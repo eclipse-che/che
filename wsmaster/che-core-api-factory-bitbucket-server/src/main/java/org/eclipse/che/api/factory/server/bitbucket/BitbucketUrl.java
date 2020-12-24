@@ -145,10 +145,11 @@ public class BitbucketUrl implements RemoteFactoryUrl {
             .add(repository)
             .add("raw")
             .add(fileName);
+    String resultUrl = joiner.toString();
     if (branch != null) {
-      joiner.add("?at=" + branch);
+      resultUrl = resultUrl + "?at=" + branch;
     }
-    return joiner.toString();
+    return resultUrl;
   }
 
   /**

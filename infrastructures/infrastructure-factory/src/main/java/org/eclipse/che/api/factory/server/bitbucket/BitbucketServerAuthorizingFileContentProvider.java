@@ -48,23 +48,15 @@ public class BitbucketServerAuthorizingFileContentProvider implements FileConten
 
   @Override
   public String fetchContent(String fileURL) throws IOException, DevfileException {
-    URI fileURI;
     String requestURL;
     try {
-      fileURI = new URI(fileURL);
+      if (new URI(fileURL).isAbsolute()) {
+        requestURL = fileURL;
+      } else {
+        requestURL = bitbucketUrl.rawFileLocation(fileURL.replaceAll("^[/.]+", ""));
+      }
     } catch (URISyntaxException e) {
       throw new DevfileException(e.getMessage(), e);
-    }
-
-    if (fileURI.isAbsolute()) {
-      requestURL = fileURL;
-    } else {
-      // check me
-      try {
-        requestURL = new URI(bitbucketUrl.rawFileLocation("test.file")).resolve(fileURI).toString();
-      } catch (URISyntaxException e) {
-        throw new DevfileException(e.getMessage(), e);
-      }
     }
     try {
       Optional<PersonalAccessToken> token =
