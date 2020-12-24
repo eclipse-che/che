@@ -53,6 +53,7 @@ public class BitbucketServerAuthorizingFileContentProvider implements FileConten
       if (new URI(fileURL).isAbsolute()) {
         requestURL = fileURL;
       } else {
+        // since files retrieved via REST, we cannot use path symbols like . ./ so cut them off
         requestURL = bitbucketUrl.rawFileLocation(fileURL.replaceAll("^[/.]+", ""));
       }
     } catch (URISyntaxException e) {
