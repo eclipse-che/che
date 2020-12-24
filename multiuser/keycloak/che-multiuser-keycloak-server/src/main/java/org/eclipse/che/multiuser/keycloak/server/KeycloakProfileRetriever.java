@@ -19,7 +19,6 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +35,9 @@ public class KeycloakProfileRetriever {
   private final HttpJsonRequestFactory requestFactory;
 
   @Inject
-  public KeycloakProfileRetriever(
-      KeycloakSettings keycloakSettings, HttpJsonRequestFactory requestFactory) {
+  public KeycloakProfileRetriever(OIDCInfo oidcInfo, HttpJsonRequestFactory requestFactory) {
     this.requestFactory = requestFactory;
-    this.keyclockCurrentUserInfoUrl =
-        keycloakSettings.getInternalSettings().get(KeycloakConstants.USERINFO_ENDPOINT_SETTING);
+    this.keyclockCurrentUserInfoUrl = oidcInfo.getUserInfoEndpoint();
   }
 
   /**

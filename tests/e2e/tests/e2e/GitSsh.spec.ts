@@ -24,8 +24,7 @@ import { CheGitApi } from '../../utils/VCS/CheGitApi';
 import { GitHubUtil } from '../../utils/VCS/github/GitHubUtil';
 import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
-
-
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -57,7 +56,7 @@ suite('Git with ssh workflow', async () => {
         await loginPage.login();
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
-        await driverHelper.wait(5000);
+        await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     });
 
     test('Generate a SSH key', async () => {
@@ -101,8 +100,8 @@ suite('Git with ssh workflow', async () => {
         await testWorkspaceUtils.createWsFromDevFile(data);
         await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckPropagatingKeys);
         await ide.waitWorkspaceAndIde();
-        await driverHelper.wait(5000);
         await projectTree.openProjectTreeContainer();
+        await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
         await cloneTestRepo();
         await projectTree.waitItem('Spoon-Knife');
     });

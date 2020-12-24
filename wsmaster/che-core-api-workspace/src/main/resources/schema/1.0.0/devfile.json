@@ -247,46 +247,10 @@
                     "examples": [
                       "https://che-plugin-registry.openshift.io/v3/"
                     ]
-                  },
-                  "memoryLimit": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "integer",
-                        "exclusiveMinimum": 0
-                      }
-                    ],
-                    "description": "Describes memory limit for the component. You can express memory as a plain integer or as a fixed-point integer using one of these suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi, Ki",
-                    "examples": [
-                      "128974848",
-                      "129e6",
-                      "129M",
-                      "123Mi"
-                    ]
-                  },
-                  "memoryRequest": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "integer",
-                          "exclusiveMinimum": 0
-                        }
-                      ],
-                      "description": "Describes memory request for the component. You can express memory as a plain integer or as a fixed-point integer using one of these suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi, Ki",
-                      "examples": [
-                        "128974848",
-                        "129e6",
-                        "129M",
-                        "123Mi"
-                      ]
-                    }
                   }
                 }
-              },
+              }
+            },
             {
               "if": {
                 "properties": {
@@ -349,7 +313,7 @@
                       "{\"java.home\": \"/home/user/jdk11\", \"java.jdt.ls.vmargs\": \"-Xmx1G\"}"
                     ],
                     "additionalProperties": {
-                      "anyOf" : [
+                      "anyOf": [
                         {
                           "type": [
                             "boolean",
@@ -500,24 +464,8 @@
                   "automountWorkspaceSecrets": {},
                   "volumes": {},
                   "endpoints": {},
-                  "memoryLimit": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "integer",
-                        "exclusiveMinimum": 0
-                      }
-                    ],
-                    "description": "Describes memory limit for the component. You can express memory as a plain integer or as a fixed-point integer using one of these suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi, Ki",
-                    "examples": [
-                      "128974848",
-                      "129e6",
-                      "129M",
-                      "123Mi"
-                    ]
-                  },
+                  "memoryLimit": {},
+                  "memoryRequest": {},
                   "image": {
                     "type": "string",
                     "description": "Specifies the docker image that should be used for component",
@@ -581,6 +529,42 @@
             "type": "boolean",
             "description": "Describes whether projects sources should be mount to the component. `CHE_PROJECTS_ROOT` environment variable should contains a path where projects sources are mount",
             "default": "false"
+          },
+          "memoryLimit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              }
+            ],
+            "description": "Describes memory limit for the component. You can express memory as a plain integer or as a fixed-point integer using one of these suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi, Ki",
+            "examples": [
+              "128974848",
+              "129e6",
+              "129M",
+              "123Mi"
+            ]
+          },
+          "memoryRequest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              }
+            ],
+            "description": "Describes memory request for the component. You can express memory as a plain integer or as a fixed-point integer using one of these suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi, Ki",
+            "examples": [
+              "128974848",
+              "129e6",
+              "129M",
+              "123Mi"
+            ]
           },
           "cpuLimit": {
             "anyOf": [

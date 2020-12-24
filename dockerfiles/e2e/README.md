@@ -6,7 +6,7 @@
 * [What are these tests meant for](#what-are-these-tests-meant-for)
 * [How to run it](#how-to-run-it)
 
-##Requirements
+## Requirements
 To run these tests you need to have running Che instance. You can execute tests directly using ` npm ` but if you like to use this Docker image, you need to have 
 installed Docker on your machine. 
 

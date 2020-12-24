@@ -19,10 +19,12 @@ data:
   CHE_PORT: "8080"
 {{- if and .Values.global.tls .Values.global.tls.enabled }}
   CHE_API: https://{{ template "cheHost" . }}/api
+  CHE_API_INTERNAL: https://{{ template "cheHost" . }}/api
   CHE_WEBSOCKET_ENDPOINT:  wss://{{ template "cheHost" . }}/api/websocket
   CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL: https://{{ template "cheHost" . }}/agent-binaries/linux_amd64/bootstrapper/bootstrapper
 {{ else }}
   CHE_API: http://{{ template "cheHost" . }}/api
+  CHE_API_INTERNAL: http://{{ template "cheHost" . }}/api
   CHE_WEBSOCKET_ENDPOINT:  ws://{{ template "cheHost" . }}/api/websocket
   CHE_WEBSOCKET_ENDPOINT__MINOR:  ws://{{ template "cheHost" . }}/api/websocket-minor
   CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL: http://{{ template "cheHost" . }}/agent-binaries/linux_amd64/bootstrapper/bootstrapper
@@ -42,6 +44,7 @@ data:
 {{- if .Values.global.multiuser }}
   CHE_KEYCLOAK_CLIENT__ID: {{ .Values.cheKeycloakClientId | quote}}
   CHE_KEYCLOAK_AUTH__SERVER__URL: {{ template "keycloakAuthUrl" . }}
+  CHE_KEYCLOAK_AUTH__INTERNAL__SERVER__URL: {{ template "keycloakAuthUrl" . }}
   CHE_KEYCLOAK_REALM: {{ .Values.cheKeycloakRealm }}
 {{- end }}
 {{- if (and .Values.global.multiuser .Values.customOidcProvider) }}
@@ -63,6 +66,9 @@ data:
   CHE_INFRA_KUBERNETES_PVC_QUANTITY: {{ .Values.global.pvcClaim }}
   CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS: "true"
   CHE_INFRA_KUBERNETES_PVC_STORAGE__CLASS__NAME: "{{ .Values.global.cheWorkspacePVCStorageClassName }}"
+{{- if .Values.cheInfraKubernetesPvcJobsImage }}
+  CHE_INFRA_KUBERNETES_PVC_JOBS_IMAGE: {{ .Values.cheInfraKubernetesPvcJobsImage | quote }}
+{{- end }}
   CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_RUN__AS__USER: "{{ .Values.global.securityContext.runAsUser }}"
   CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_FS__GROUP: "{{ .Values.global.securityContext.fsGroup }}"
   CHE_LOCAL_CONF_DIR: /etc/conf
@@ -94,7 +100,7 @@ data:
   CHE_LIMITS_WORKSPACE_IDLE_TIMEOUT: '{{ .Values.global.workspaceIdleTimeout }}'
 {{- if .Values.che.limits.userWorkspacesRunCount }}
   CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: {{ .Values.che.limits.userWorkspacesRunCount | quote }}
-{{- end }}  
+{{- end }}
 {{- if .Values.workspaceDefaultRamRequest }}
   CHE_WORKSPACE_DEFAULT_MEMORY_REQUEST_MB: {{ .Values.workspaceDefaultRamRequest | quote }}
 {{- end }}
@@ -103,18 +109,24 @@ data:
 {{- end }}
 {{- if .Values.che.workspace.devfileRegistryUrl }}
   CHE_WORKSPACE_DEVFILE__REGISTRY__URL: {{ .Values.che.workspace.devfileRegistryUrl | quote }}
+  CHE_WORKSPACE_DEVFILE__REGISTRY__INTERNAL__URL: {{ .Values.che.workspace.devfileRegistryUrl | quote }}
 {{- else if .Values.cheDevfileRegistry.deploy }}
   CHE_WORKSPACE_DEVFILE__REGISTRY__URL: {{ template "devfileRegistryUrl" . }}
+  CHE_WORKSPACE_DEVFILE__REGISTRY__INTERNAL__URL: {{ template "devfileRegistryUrl" . }}
 {{- end }}
 {{- if .Values.che.workspace.pluginRegistryUrl }}
   CHE_WORKSPACE_PLUGIN__REGISTRY__URL: {{ .Values.che.workspace.pluginRegistryUrl | quote }}
+  CHE_WORKSPACE_PLUGIN__REGISTRY__INTERNAL__URL: {{ .Values.che.workspace.pluginRegistryUrl | quote }}
 {{- else if .Values.chePluginRegistry.deploy }}
   CHE_WORKSPACE_PLUGIN__REGISTRY__URL: {{ template "pluginRegistryUrl" . }}
+  CHE_WORKSPACE_PLUGIN__REGISTRY__INTERNAL__URL: {{ template "pluginRegistryUrl" . }}
 {{- end }}
 {{- if .Values.che.workspace.pluginBroker }}
   {{- if .Values.che.workspace.pluginBroker.waitTimeoutMin }}
   CHE_WORKSPACE_PLUGIN__BROKER_WAIT__TIMEOUT__MIN: {{ .Values.che.workspace.pluginBroker.waitTimeoutMin | quote }}
   {{- end }}
+  CHE_WORKSPACE_PLUGIN__BROKER_METADATA_IMAGE: {{ .Values.che.workspace.pluginBroker.metadataImage | quote }}
+  CHE_WORKSPACE_PLUGIN__BROKER_ARTIFACTS_IMAGE: {{ .Values.che.workspace.pluginBroker.artifactsImage | quote }}
 {{- end }}
 {{- if .Values.workspaceSidecarDefaultRamLimit }}
   CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB: {{ .Values.workspaceSidecarDefaultRamLimit | quote }}
@@ -139,3 +151,6 @@ data:
   CHE_WORKSPACE_JAVA__OPTIONS: "-Xmx2000m"
   CHE_WORKSPACE_MAVEN__OPTIONS: "-Xmx20000m"
   CHE_INFRA_KUBERNETES_WORKSPACE__START__TIMEOUT__MIN: "15"
+{{- if .Values.cheServerSecureExposerJwtProxyImage }}
+  CHE_SERVER_SECURE__EXPOSER_JWTPROXY_IMAGE: {{ .Values.cheServerSecureExposerJwtProxyImage | quote }}
+{{- end }}

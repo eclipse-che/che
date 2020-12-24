@@ -33,10 +33,10 @@ dependencies:
     version: 1.0.0
     condition: global.tracingEnabled
   - name: prometheus
-    repository: https://kubernetes-charts.storage.googleapis.com/
+    repository: https://prometheus-community.github.io/helm-charts
     version: ^9.3.1
     condition: global.metricsEnabled
   - name: grafana
-    repository: https://kubernetes-charts.storage.googleapis.com/
+    repository: https://grafana.github.io/helm-charts
     version: ^4.0.3
     condition: global.metricsEnabled

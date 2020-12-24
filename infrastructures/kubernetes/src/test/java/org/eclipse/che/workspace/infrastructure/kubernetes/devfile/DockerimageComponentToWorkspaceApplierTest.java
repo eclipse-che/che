@@ -243,13 +243,14 @@ public class DockerimageComponentToWorkspaceApplierTest {
   }
 
   @Test
-  public void shouldProvisionContainerWithMemoryLimitSpecified() throws Exception {
+  public void shouldProvisionContainerWithMemoryResourcesSpecified() throws Exception {
     // given
     ComponentImpl dockerimageComponent = new ComponentImpl();
     dockerimageComponent.setAlias("jdk");
     dockerimageComponent.setType(DOCKERIMAGE_COMPONENT_TYPE);
     dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
     dockerimageComponent.setMemoryLimit("1G");
+    dockerimageComponent.setMemoryRequest("128M");
 
     // when
     dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
@@ -271,6 +272,10 @@ public class DockerimageComponentToWorkspaceApplierTest {
     Quantity memoryLimit = container.getResources().getLimits().get("memory");
     assertEquals(memoryLimit.getAmount(), "1");
     assertEquals(memoryLimit.getFormat(), "G");
+
+    Quantity memoryRequest = container.getResources().getRequests().get("memory");
+    assertEquals(memoryRequest.getAmount(), "128");
+    assertEquals(memoryRequest.getFormat(), "M");
   }
 
   @Test

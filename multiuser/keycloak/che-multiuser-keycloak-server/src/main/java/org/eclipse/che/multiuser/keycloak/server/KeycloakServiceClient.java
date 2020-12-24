@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_INTERNAL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
 
 import com.google.common.io.CharStreams;
@@ -62,6 +61,7 @@ import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
 public class KeycloakServiceClient {
 
   private KeycloakSettings keycloakSettings;
+  private final OIDCInfo oidcInfo;
 
   private static final Pattern assotiateUserPattern =
       Pattern.compile("User (.+) is not associated with identity provider (.+)");
@@ -70,8 +70,10 @@ public class KeycloakServiceClient {
   private JwtParser jwtParser;
 
   @Inject
-  public KeycloakServiceClient(KeycloakSettings keycloakSettings, JwtParser jwtParser) {
+  public KeycloakServiceClient(
+      KeycloakSettings keycloakSettings, OIDCInfo oidcInfo, JwtParser jwtParser) {
     this.keycloakSettings = keycloakSettings;
+    this.oidcInfo = oidcInfo;
     this.jwtParser = jwtParser;
   }
 
@@ -101,8 +103,7 @@ public class KeycloakServiceClient {
     byte[] check = md.digest(input.getBytes(StandardCharsets.UTF_8));
     final String hash = Base64.getUrlEncoder().encodeToString(check);
 
-    return UriBuilder.fromUri(
-            keycloakSettings.getInternalSettings().get(AUTH_SERVER_URL_INTERNAL_SETTING))
+    return UriBuilder.fromUri(oidcInfo.getAuthServerURL())
         .path("/realms/{realm}/broker/{provider}/link")
         .queryParam("nonce", nonce)
         .queryParam("hash", hash)
@@ -128,8 +129,7 @@ public class KeycloakServiceClient {
       throws ForbiddenException, BadRequestException, IOException, NotFoundException,
           ServerException, UnauthorizedException {
     String url =
-        UriBuilder.fromUri(
-                keycloakSettings.getInternalSettings().get(AUTH_SERVER_URL_INTERNAL_SETTING))
+        UriBuilder.fromUri(oidcInfo.getAuthServerURL())
             .path("/realms/{realm}/broker/{provider}/token")
             .build(keycloakSettings.get().get(REALM_SETTING), oauthProvider)
             .toString();
