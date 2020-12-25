@@ -116,6 +116,7 @@ public class PodMergerTest {
             .withContainers(new ContainerBuilder().withName("c1").build())
             .withInitContainers(new ContainerBuilder().withName("initC1").build())
             .withVolumes(new VolumeBuilder().withName("v1").build())
+            .withNodeSelector(Map.of("foo1", "bar1"))
             .withImagePullSecrets(new LocalObjectReferenceBuilder().withName("secret1").build())
             .build();
     podSpec1.setAdditionalProperty("add1", 1L);
@@ -126,6 +127,7 @@ public class PodMergerTest {
             .withContainers(new ContainerBuilder().withName("c2").build())
             .withInitContainers(new ContainerBuilder().withName("initC2").build())
             .withVolumes(new VolumeBuilder().withName("v2").build())
+            .withNodeSelector(Map.of("foo2", "bar2"))
             .withImagePullSecrets(new LocalObjectReferenceBuilder().withName("secret2").build())
             .build();
     podSpec2.setAdditionalProperty("add2", 2L);
@@ -439,6 +441,8 @@ public class PodMergerTest {
     assertTrue(source.getInitContainers().containsAll(toCheck.getInitContainers()));
     assertTrue(source.getVolumes().containsAll(toCheck.getVolumes()));
     assertTrue(source.getImagePullSecrets().containsAll(toCheck.getImagePullSecrets()));
+    assertTrue(
+        source.getNodeSelector().entrySet().containsAll(toCheck.getNodeSelector().entrySet()));
     assertTrue(
         source
             .getAdditionalProperties()
