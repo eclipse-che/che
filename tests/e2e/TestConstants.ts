@@ -84,45 +84,15 @@ export const TestConstants = {
     TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: process.env.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME || 'petclinic-dev-environment',
 
     /**
-     * Catalog tile operator name on OperatorHub UI.
+     * Using 'single-host' strategy, "false" by default.
      */
-    TS_SELENIUM_CATALOG_TILE_OPERATOR_NAME: process.env.TS_SELENIUM_CATALOG_TILE_OPERATOR_NAME || 'eclipse-che-preview',
-
-    /**
-     * Operator logo name by installation using OperatorHub
-     */
-    TS_SELENIUM_OPERATOR_LOGO_NAME: process.env.TS_SELENIUM_OPERATOR_LOGO_NAME || 'Eclipse Che',
-
-    /**
-     * Name of namespace created on OCP for installation CHE by using OperatorHub UI.
-     */
-    TS_SELENIUM_INSTALL_PROJECT_NAME: process.env.TS_SELENIUM_INSTALL_PROJECT_NAME || '',
-
-    /**
-     * Update Channel name on 'Create Operator Subscription' page on OCP, "nightly" or "stable".
-     */
-    TS_OCP_OPERATOR_UPDATE_CHANNEL: process.env.TS_OCP_OPERATOR_UPDATE_CHANNEL || 'nightly',
-
-    /**
-     * Value of TLS Support property in the 'Create Che Cluster' yaml using OperatorHub.
-     */
-    TS_SELENIUM_VALUE_TLS_SUPPORT: process.env.TS_SELENIUM_VALUE_TLS_SUPPORT || 'true',
-
-    /**
-     * Value of Self Sign Cert property in the 'Create Che Cluster' yaml using OperatorHub.
-     */
-    TS_SELENIUM_VALUE_SELF_SIGN_CERT: process.env.TS_SELENIUM_VALUE_SELF_SIGN_CERT || 'false',
+    TS_SELENIUM_SINGLE_HOST: process.env.TS_SELENIUM_SINGLE_HOST === 'true',
 
     /**
      * Value of OpenShift oAuth property determines how to login in installed application,
      * if 'false' as an user of application, if 'true' as a regular user of OCP.
      */
     TS_SELENIUM_VALUE_OPENSHIFT_OAUTH: process.env.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH || 'false',
-
-    /**
-     * Prefix URL on deployed application by installation using OperatorHub.
-     */
-    TS_SELENIUM_INSTALL_APP_PREFIX_URL: process.env.TS_SELENIUM_INSTALL_APP_PREFIX_URL || 'che',
 
     /**
      * Username used to log in MultiUser Che.
