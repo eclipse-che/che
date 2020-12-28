@@ -10,8 +10,6 @@
     "test": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha.opts",
     "load-test": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-load.opts",
     "test-happy-path": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-happy-path.opts",
-    "test-operatorhub-subscription": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-che-subscribe-operator.opts",
-    "test-operatorhub-installation": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-che-operatorhub.opts",
     "test-wkspc-creation-and-ls": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-wkspc-creation-and-ls.opts",
     "test-java-vertx": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-java-vertx.opts",
     "test-git-ssh": "./generateIndex.sh &&  npm run lint && npm run tsc && mocha --opts mocha-git-ssh.opts",
