@@ -22,7 +22,7 @@ import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderExcept
  * PersonalAccessToken.
  */
 public class ScmPersonalAccessTokenFetcher {
-  private Set<PersonalAccessTokenFetcher> personalAccessTokenFetchers;
+  private final Set<PersonalAccessTokenFetcher> personalAccessTokenFetchers;
 
   @Inject
   public ScmPersonalAccessTokenFetcher(

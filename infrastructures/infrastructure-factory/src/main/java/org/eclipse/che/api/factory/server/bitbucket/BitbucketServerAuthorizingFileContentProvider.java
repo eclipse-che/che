@@ -28,6 +28,10 @@ import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
+/**
+ * Bitbucket specific file content provider. Files are retrieved using bitbucket REST API and
+ * personal access token based authentication is performed during requests.
+ */
 public class BitbucketServerAuthorizingFileContentProvider implements FileContentProvider {
 
   private final URLFetcher urlFetcher;
@@ -71,8 +75,8 @@ public class BitbucketServerAuthorizingFileContentProvider implements FileConten
       } else {
         try {
           return urlFetcher.fetch(requestURL);
-        } catch (Exception exception) {
-          // UnauthorizedException
+        } catch (IOException exception) {
+          // try to authorize
           try {
             PersonalAccessToken personalAccessToken =
                 personalAccessTokenManager.fetchAndSave(
@@ -82,15 +86,10 @@ public class BitbucketServerAuthorizingFileContentProvider implements FileConten
                 urlFetcher.fetch(requestURL, "Bearer " + personalAccessToken.getToken());
             gitCredentialManager.createOrReplace(personalAccessToken);
             return content;
-          } catch (ScmUnauthorizedException e) {
-            // TODO proper error handling
-            throw new DevfileException(e.getMessage());
-          } catch (ScmCommunicationException e) {
-            // TODO proper error handling
-            throw new DevfileException(e.getMessage());
-          } catch (UnknownScmProviderException unknownScmProvider) {
-            // TODO proper error handling
-            throw new DevfileException(unknownScmProvider.getMessage());
+          } catch (ScmUnauthorizedException
+              | ScmCommunicationException
+              | UnknownScmProviderException e) {
+            throw new DevfileException(e.getMessage(), e);
           }
         }
       }
@@ -106,12 +105,8 @@ public class BitbucketServerAuthorizingFileContentProvider implements FileConten
                   + " the file failed with the following error message: %s",
               fileURL, e.getMessage()),
           e);
-    } catch (ScmConfigurationPersistenceException e) {
-      // TODO proper error handling
-      throw new DevfileException(e.getMessage());
-    } catch (UnsatisfiedPreconditionException e) {
-      // TODO proper error handling
-      throw new DevfileException(e.getMessage());
+    } catch (ScmConfigurationPersistenceException | UnsatisfiedPreconditionException e) {
+      throw new DevfileException(e.getMessage(), e);
     }
   }
 }

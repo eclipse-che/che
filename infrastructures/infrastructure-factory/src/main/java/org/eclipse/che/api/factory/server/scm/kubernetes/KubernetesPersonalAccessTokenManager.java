@@ -39,6 +39,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFacto
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
+/** Manages personal access token secrets used for private repositories authentication. */
 public class KubernetesPersonalAccessTokenManager implements PersonalAccessTokenManager {
   public static final Map<String, String> SECRET_LABELS =
       Map.of(

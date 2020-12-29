@@ -37,6 +37,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFacto
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
+/**
+ * Creates or updates Git credentials secret in user-s namespace to allow Git operations on private
+ * repositories.
+ */
 public class KubernetesGitCredentialManager implements GitCredentialManager {
   public static final String NAME_PATTERN = "%s-git-credentials-secret";
   public static final String ANNOTATION_SCM_URL = "che.eclipse.org/scm-url";
@@ -112,7 +116,8 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
       Optional<String> namespace =
           namespaceFactory.list().stream().map(KubernetesNamespaceMeta::getName).findFirst();
       if (namespace.isEmpty()) {
-        throw new UnsatisfiedPreconditionException("No namespace found");
+        throw new UnsatisfiedPreconditionException(
+            "No user namespace found. Cannot read SCM credentials.");
       }
       return namespace.get();
     } catch (InfrastructureException e) {

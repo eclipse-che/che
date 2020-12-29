@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.api.factory.server.scm.exception;
 
-/** In case if OAuth1 or Oauth2 token is missing and we can make any authorised calls */
+/** In case if OAuth1 or Oauth2 token is missing and we cant make any authorised calls */
 public class ScmUnauthorizedException extends Exception {
   private final String authorizationUrl;
 
