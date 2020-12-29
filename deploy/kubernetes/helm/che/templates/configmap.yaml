@@ -53,7 +53,7 @@ data:
   CHE_KEYCLOAK_CLIENT__ID: {{ .Values.cheKeycloakClientId | quote}}
   CHE_KEYCLOAK_AUTH__SERVER__URL: {{ template "keycloakAuthUrl" . }}
   {{- if .Values.global.useInternalClusterSVCNames }}
-  CHE_KEYCLOAK_AUTH__INTERNAL__SERVER__URL: http://keycloak.{{ .Release.Namespace }}.svc:8080/auth
+  CHE_KEYCLOAK_AUTH__INTERNAL__SERVER__URL: http://keycloak.{{ .Release.Namespace }}.svc:5050/auth
   {{- else }}
   CHE_KEYCLOAK_AUTH__INTERNAL__SERVER__URL: {{ template "keycloakAuthUrl" . }}
   {{- end }}

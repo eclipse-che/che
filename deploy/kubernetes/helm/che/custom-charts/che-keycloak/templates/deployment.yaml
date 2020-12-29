@@ -73,6 +73,10 @@ spec:
 {{- end }}
         - name: CHE_HOST
           value: {{ template "cheHost" . }}
+        - name: KEYCLOAK_HOST
+          value: {{ template "keycloakHost" . }}
+        - name: USE_INTERNAL_CLUSTER_SVC_NAMES
+          value: {{ .Values.global.useInternalClusterSVCNames | quote }}
         - name: ROUTING_SUFFIX
           value: {{ .Values.global.ingressDomain }}
         - name: NAMESPACE

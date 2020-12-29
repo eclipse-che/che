@@ -1,0 +1,15 @@
+embed-server --server-config=standalone.xml --std-out=echo
+
+/subsystem=keycloak-server/spi=hostname:write-attribute(name=default-provider, value="fixed")
+/subsystem=keycloak-server/spi=hostname/provider=fixed:write-attribute(name=properties.hostname,value="${KEYCLOAK_HOST}")
+
+/system-property=protocol:add(value=${PROTOCOL})
+if (result.value == "https") of /system-property=protocol:read-resource
+  /subsystem=keycloak-server/spi=hostname/provider=fixed:write-attribute(name=properties.httpsPort,value="443")
+  /subsystem=keycloak-server/spi=hostname/provider=fixed:write-attribute(name=properties.alwaysHttps,value="true")
+else
+  /subsystem=keycloak-server/spi=hostname/provider=fixed:write-attribute(name=properties.httpPort,value="80")
+end-if
+/system-property=protocol:remove
+
+stop-embedded-server
