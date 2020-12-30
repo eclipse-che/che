@@ -193,25 +193,6 @@ export const TimeoutConstants = {
     TS_SELENIUM_WAIT_TASK_EXIT_CODE_TIMEOUT: Number(process.env.TS_SELENIUM_WAIT_TASK_EXIT_CODE_TIMEOUT) || 300_000,
 
 
-
-    // ------------------------------------ OCP WEB CONSOLE PAGE ------------------------------------
-
-    /**
-     * Timeout for OcpWebConsolePage.waitOverviewCsvEclipseCheOperator, "20 000" by default
-     */
-    TS_SELENIUM_CSV_OPERATOR_TIMEOUT: Number(process.env.TS_SELENIUM_CSV_OPERATOR_TIMEOUT) || 20_000,
-
-    /**
-     * Timeout for listing the namespaces on subscription in OcpWebConsolePage, "10 000" by default
-     */
-    TS_SELENIUM_LIST_NAMESPACES_ON_SUBSCRIPTION_TIMEOUT: Number(process.env.TS_SELENIUM_LIST_NAMESPACES_ON_SUBSCRIPTION_TIMEOUT) || 10_000,
-
-    /**
-     * Timeout for Che cluster title visibility in OcpWebConsolePage, "10 000" by default.
-     */
-    TS_SELENIUM_RESOURCES_CHE_CLUSTER_TITLE_TIMEOUT: Number(process.env.TS_SELENIUM_RESOURCES_CHE_CLUSTER_TITLE_TIMEOUT) || 10_000,
-
-
     // ------------------------------------ OPENSHIFT RELATED ------------------------------------
 
     /**
@@ -223,10 +204,5 @@ export const TimeoutConstants = {
      * Timeout for waiting fr openshift connector tree, "10 000" by default.
      */
     TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT: Number(process.env.TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT) || 40_000,
-
-    /**
-     * Timeout for creating CheCluster yaml, "10 000" by default.
-     */
-    TS_CREATE_CHECLUSTER_YAML_TIMEOUT: Number(process.env.TS_CREATE_CHECLUSTER_YAML_TIMEOUT) || 10_000,
 
 };
