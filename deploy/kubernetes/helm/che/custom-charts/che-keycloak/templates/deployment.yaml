@@ -73,10 +73,10 @@ spec:
 {{- end }}
         - name: CHE_HOST
           value: {{ template "cheHost" . }}
+{{- if .Values.global.useInternalClusterSVCNames }}
         - name: KEYCLOAK_HOST
           value: {{ template "keycloakHost" . }}
-        - name: USE_INTERNAL_CLUSTER_SVC_NAMES
-          value: {{ .Values.global.useInternalClusterSVCNames | quote }}
+{{- end }}
         - name: ROUTING_SUFFIX
           value: {{ .Values.global.ingressDomain }}
         - name: NAMESPACE
@@ -86,10 +86,14 @@ spec:
         - name: PROTOCOL
 {{- if .Values.global.tls.enabled }}
           value: "https"
+        - name: KEYCLOAK_HTTPS_PORT
+          value: "443"
         - name: PROXY_ADDRESS_FORWARDING
           value: "true"
 {{- else }}
           value: "http"
+        - name: KEYCLOAK_HTTP_PORT
+          value: "80"
 {{- end }}
 
         image: {{ .Values.image }}

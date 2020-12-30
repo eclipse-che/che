@@ -97,11 +97,11 @@ if [ -f "$KEYSTORE_PATH" ]; then
 fi
 
 # Configure keycloak to use fixed hostname provider
-USE_INTERNAL_CLUSTER_SVC_NAMES=${USE_INTERNAL_CLUSTER_SVC_NAMES:-false}
-if [ "$USE_INTERNAL_CLUSTER_SVC_NAMES" == true ]; then
+if [ "$KEYCLOAK_HOST" ]; then
+  echo "Configure Keycloak to use fixed hostname provider"
   sed -i "s|<resolve-parameter-values>false</resolve-parameter-values>|<resolve-parameter-values>true</resolve-parameter-values>|g" $JBOSS_HOME/bin/jboss-cli.xml
   printenv > /tmp/env.properties
-  /opt/jboss/keycloak/bin/jboss-cli.sh --file=/scripts/cli/use_fixed_hostname_provider.cli --properties /tmp/env.properties
+  /opt/jboss/keycloak/bin/jboss-cli.sh --file=/scripts/cli/use_fixed_hostname_provider.cli --properties=/tmp/env.properties
 fi
 
 # POSTGRES_PORT is assigned by Kubernetes controller
@@ -114,4 +114,5 @@ exec /opt/jboss/docker-entrypoint.sh -Dkeycloak.migration.action=import \
                                      -Dkeycloak.migration.provider=dir \
                                      -Dkeycloak.migration.strategy=IGNORE_EXISTING \
                                      -Dkeycloak.migration.dir=/scripts/ \
-                                     -Djboss.bind.address=0.0.0.0
+                                     -Djboss.bind.address=0.0.0.0 \
+                                     -c standalone.xml
