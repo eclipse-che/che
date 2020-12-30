@@ -96,13 +96,9 @@ if [ -f "$KEYSTORE_PATH" ]; then
     /opt/jboss/keycloak/bin/jboss-cli.sh --file=/scripts/cli/add_openshift_certificate.cli && rm -rf /opt/jboss/keycloak/standalone/configuration/standalone_xml_history
 fi
 
-# Configure keycloak to use fixed hostname provider
-if [ "$KEYCLOAK_HOST" ]; then
-  echo "Configure Keycloak to use fixed hostname provider"
-  sed -i "s|<resolve-parameter-values>false</resolve-parameter-values>|<resolve-parameter-values>true</resolve-parameter-values>|g" $JBOSS_HOME/bin/jboss-cli.xml
-  printenv > /tmp/env.properties
-  /opt/jboss/keycloak/bin/jboss-cli.sh --file=/scripts/cli/use_fixed_hostname_provider.cli --properties=/tmp/env.properties
-fi
+# Patch configuration to allow to set 'keycloak.hostname.fixed.alwaysHttps'
+sed -i 's|<property name="httpsPort" value="${keycloak.hostname.fixed.httpsPort:-1}"/>|<property name="httpsPort" value="${keycloak.hostname.fixed.httpsPort:-1}"/><property name="alwaysHttps" value="${keycloak.hostname.fixed.alwaysHttps:false}"/>|g' /opt/jboss/keycloak/standalone/configuration/standalone.xml
+sed -i 's|<property name="httpsPort" value="${keycloak.hostname.fixed.httpsPort:-1}"/>|<property name="httpsPort" value="${keycloak.hostname.fixed.httpsPort:-1}"/><property name="alwaysHttps" value="${keycloak.hostname.fixed.alwaysHttps:false}"/>|g' /opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
 
 # POSTGRES_PORT is assigned by Kubernetes controller
 # and it isn't fit to docker-entrypoin.sh.
@@ -110,9 +106,14 @@ unset POSTGRES_PORT
 
 echo "Starting Keycloak server..."
 
-exec /opt/jboss/docker-entrypoint.sh -Dkeycloak.migration.action=import \
-                                     -Dkeycloak.migration.provider=dir \
-                                     -Dkeycloak.migration.strategy=IGNORE_EXISTING \
-                                     -Dkeycloak.migration.dir=/scripts/ \
-                                     -Djboss.bind.address=0.0.0.0 \
-                                     -c standalone.xml
+SYS_PROPS="-Dkeycloak.migration.action=import \
+    -Dkeycloak.migration.provider=dir \
+    -Dkeycloak.migration.strategy=IGNORE_EXISTING \
+    -Dkeycloak.migration.dir=/scripts/ \
+    -Djboss.bind.address=0.0.0.0"
+
+if [ $KEYCLOAK_HOSTNAME ] && [ $PROTOCOL == "https" ]; then
+  SYS_PROPS+=" -Dkeycloak.hostname.fixed.alwaysHttps=true"
+fi
+
+exec /opt/jboss/docker-entrypoint.sh $SYS_PROPS

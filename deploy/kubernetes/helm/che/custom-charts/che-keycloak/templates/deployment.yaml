@@ -74,7 +74,7 @@ spec:
         - name: CHE_HOST
           value: {{ template "cheHost" . }}
 {{- if .Values.global.useInternalClusterSVCNames }}
-        - name: KEYCLOAK_HOST
+        - name: KEYCLOAK_HOSTNAME
           value: {{ template "keycloakHost" . }}
 {{- end }}
         - name: ROUTING_SUFFIX
