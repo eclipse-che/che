@@ -41,7 +41,6 @@ const CLASSES = {
     ScreenCatcher: 'ScreenCatcher',
     OpenshiftPlugin: 'OpenshiftPlugin',
     OcpLoginPage: 'OcpLoginPage',
-    OcpWebConsolePage: 'OcpWebConsolePage',
     OpenWorkspaceWidget: 'OpenWorkspaceWidget',
     ContextMenu: 'ContextMenu',
     CheLoginPage: 'CheLoginPage',
