@@ -138,7 +138,7 @@ data:
   {{- if .Values.global.useInternalClusterSVCNames }}
   CHE_WORKSPACE_PLUGIN__REGISTRY__INTERNAL__URL: http://plugin-registry.{{ .Release.Namespace }}.svc:8080/v3
   {{- else }}
-  CHE_WORKSPACE_PLUGIN__REGISTRY__INTERNAL__URL: {{ template "devfileRegistryUrl" . }}
+  CHE_WORKSPACE_PLUGIN__REGISTRY__INTERNAL__URL: {{ template "pluginRegistryUrl" . }}
   {{- end }}
 {{- end }}
 {{- if .Values.che.workspace.pluginBroker }}
