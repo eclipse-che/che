@@ -31,6 +31,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -101,6 +102,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   private final PodsVolumes podsVolumes;
   private final SubPathPrefixes subpathPrefixes;
   private final boolean waitBound;
+  private final String defaultNamespaceName;
   private final WorkspaceManager workspaceManager;
 
   @Inject
@@ -111,6 +113,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       @Named("che.infra.kubernetes.pvc.precreate_subpaths") boolean preCreateDirs,
       @Named("che.infra.kubernetes.pvc.storage_class_name") String pvcStorageClassName,
       @Named("che.infra.kubernetes.pvc.wait_bound") boolean waitBound,
+      @Nullable @Named("che.infra.kubernetes.namespace.default") String defaultNamespaceName,
       PVCSubPathHelper pvcSubPathHelper,
       KubernetesNamespaceFactory factory,
       EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter,
@@ -130,6 +133,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     this.pvcProvisioner = pvcProvisioner;
     this.podsVolumes = podsVolumes;
     this.subpathPrefixes = subpathPrefixes;
+    this.defaultNamespaceName = defaultNamespaceName;
     this.workspaceManager = workspaceManager;
   }
 
@@ -237,7 +241,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   public void cleanup(Workspace workspace) throws InfrastructureException {
     if (EphemeralWorkspaceUtility.isEphemeral(workspace)) {
       return;
-    } else if (userHasNoWorkspaces()) {
+    } else if (noWorkspacesLeft()) {
       log.debug("Deleting the common PVC: '{}',", configuredPVCName);
       deleteCommonPVC(workspace);
       return;
@@ -275,6 +279,44 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     factory.get(workspace).persistentVolumeClaims().delete(configuredPVCName);
   }
 
+  /**
+   * @return true, if the common PVC is expected to be deleted, false otherwise. Depending on the
+   *     configuration it could be either the common PVC of a particular user, or the common PVC
+   *     that is shared across all the users (the last setup is considered to be uncommon and
+   *     not-recommended)
+   */
+  private boolean noWorkspacesLeft() {
+    return defaultNamespaceWithoutPlaceholderIsDefined()
+        ? totalNumberOfWorkspacesIsZero()
+        : userHasNoWorkspaces();
+  }
+
+  /**
+   * The method is expected to be used in order to identify if the common PVC is used across all the
+   * users. The common PVC for all the users will be used if
+   * 'che.infra.kubernetes.namespace.default' points to a particular namespace e.g. 'che',
+   * 'workspaces' etc.
+   *
+   * @return true, if 'che.infra.kubernetes.namespace.default' is defined and does NOT contain the
+   *     placeholder e.g.: che-workspace-<username>), false otherwise
+   */
+  private boolean defaultNamespaceWithoutPlaceholderIsDefined() {
+    return defaultNamespaceName != null
+        && !defaultNamespaceName.contains("<")
+        && !defaultNamespaceName.contains(">");
+  }
+
+  /** @return true, if there are no workspaces left across all the users, false otherwise */
+  private boolean totalNumberOfWorkspacesIsZero() {
+    try {
+      return workspaceManager.getWorkspacesTotalCount() == 0;
+    } catch (ServerException e) {
+      log.error("Unable to get the total number of workspaces. Cause: {}", e.getMessage(), e);
+    }
+    return false;
+  }
+
+  /** @return true, if a given user has no workspaces, false otherwise */
   private boolean userHasNoWorkspaces() {
     String userId = getSessionUserIdOrUndefined();
     if (!"undefined".equals(userId)) {
