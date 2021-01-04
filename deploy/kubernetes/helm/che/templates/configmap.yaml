@@ -19,12 +19,20 @@ data:
   CHE_PORT: "8080"
 {{- if and .Values.global.tls .Values.global.tls.enabled }}
   CHE_API: https://{{ template "cheHost" . }}/api
+  {{- if .Values.global.useInternalClusterSVCNames }}
+  CHE_API_INTERNAL: http://che-host.{{ .Release.Namespace }}.svc:8080/api
+  {{- else }}
   CHE_API_INTERNAL: https://{{ template "cheHost" . }}/api
+  {{- end }}
   CHE_WEBSOCKET_ENDPOINT:  wss://{{ template "cheHost" . }}/api/websocket
   CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL: https://{{ template "cheHost" . }}/agent-binaries/linux_amd64/bootstrapper/bootstrapper
 {{ else }}
   CHE_API: http://{{ template "cheHost" . }}/api
+  {{- if .Values.global.useInternalClusterSVCNames }}
+  CHE_API_INTERNAL: http://che-host.{{ .Release.Namespace }}.svc:8080/api
+  {{- else }}
   CHE_API_INTERNAL: http://{{ template "cheHost" . }}/api
+  {{- end }}
   CHE_WEBSOCKET_ENDPOINT:  ws://{{ template "cheHost" . }}/api/websocket
   CHE_WEBSOCKET_ENDPOINT__MINOR:  ws://{{ template "cheHost" . }}/api/websocket-minor
   CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL: http://{{ template "cheHost" . }}/agent-binaries/linux_amd64/bootstrapper/bootstrapper
@@ -44,7 +52,11 @@ data:
 {{- if .Values.global.multiuser }}
   CHE_KEYCLOAK_CLIENT__ID: {{ .Values.cheKeycloakClientId | quote}}
   CHE_KEYCLOAK_AUTH__SERVER__URL: {{ template "keycloakAuthUrl" . }}
+  {{- if .Values.global.useInternalClusterSVCNames }}
+  CHE_KEYCLOAK_AUTH__INTERNAL__SERVER__URL: http://keycloak.{{ .Release.Namespace }}.svc:5050/auth
+  {{- else }}
   CHE_KEYCLOAK_AUTH__INTERNAL__SERVER__URL: {{ template "keycloakAuthUrl" . }}
+  {{- end }}
   CHE_KEYCLOAK_REALM: {{ .Values.cheKeycloakRealm }}
 {{- end }}
 {{- if (and .Values.global.multiuser .Values.customOidcProvider) }}
@@ -112,14 +124,22 @@ data:
   CHE_WORKSPACE_DEVFILE__REGISTRY__INTERNAL__URL: {{ .Values.che.workspace.devfileRegistryUrl | quote }}
 {{- else if .Values.cheDevfileRegistry.deploy }}
   CHE_WORKSPACE_DEVFILE__REGISTRY__URL: {{ template "devfileRegistryUrl" . }}
+  {{- if .Values.global.useInternalClusterSVCNames }}
+  CHE_WORKSPACE_DEVFILE__REGISTRY__INTERNAL__URL: http://devfile-registry.{{ .Release.Namespace }}.svc:8080
+  {{- else }}
   CHE_WORKSPACE_DEVFILE__REGISTRY__INTERNAL__URL: {{ template "devfileRegistryUrl" . }}
+  {{- end }}
 {{- end }}
 {{- if .Values.che.workspace.pluginRegistryUrl }}
   CHE_WORKSPACE_PLUGIN__REGISTRY__URL: {{ .Values.che.workspace.pluginRegistryUrl | quote }}
   CHE_WORKSPACE_PLUGIN__REGISTRY__INTERNAL__URL: {{ .Values.che.workspace.pluginRegistryUrl | quote }}
 {{- else if .Values.chePluginRegistry.deploy }}
   CHE_WORKSPACE_PLUGIN__REGISTRY__URL: {{ template "pluginRegistryUrl" . }}
+  {{- if .Values.global.useInternalClusterSVCNames }}
+  CHE_WORKSPACE_PLUGIN__REGISTRY__INTERNAL__URL: http://plugin-registry.{{ .Release.Namespace }}.svc:8080/v3
+  {{- else }}
   CHE_WORKSPACE_PLUGIN__REGISTRY__INTERNAL__URL: {{ template "pluginRegistryUrl" . }}
+  {{- end }}
 {{- end }}
 {{- if .Values.che.workspace.pluginBroker }}
   {{- if .Values.che.workspace.pluginBroker.waitTimeoutMin }}
