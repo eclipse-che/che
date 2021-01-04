@@ -16,12 +16,9 @@ import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
@@ -40,9 +37,9 @@ import org.testng.annotations.Test;
 public class DirectUrlFactoryWithRootFolderTest {
   private static final Logger LOG =
       LoggerFactory.getLogger(DirectUrlFactoryWithRootFolderTest.class);
+  private final String REPOSITORY_URL = "https://github.com/che-samples/console-java-simple";
 
   @Inject private TestFactoryInitializer testFactoryInitializer;
-  @Inject private TestGitHubRepository testRepo;
   @Inject private TheiaIde theiaIde;
   @Inject private TheiaProjectTree theiaProjectTree;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
@@ -54,12 +51,8 @@ public class DirectUrlFactoryWithRootFolderTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    // preconditions - add the project to the test repository
-    Path entryPath = Paths.get(getClass().getResource("/projects/quickstart").getPath());
-    testRepo.addContent(entryPath);
-    String repositoryUrl = testRepo.getHtmlUrl();
+    testFactoryWithRootFolder = testFactoryInitializer.fromUrl(REPOSITORY_URL);
 
-    testFactoryWithRootFolder = testFactoryInitializer.fromUrl(repositoryUrl);
     dashboard.open();
   }
 
@@ -74,25 +67,9 @@ public class DirectUrlFactoryWithRootFolderTest {
 
   @Test
   public void factoryWithDirectUrlWithRootFolder() {
-    String repositoryName = testRepo.getName();
+    String repositoryName = "console-java-simple";
     List<String> expectedItemsAfterCloning =
-        Arrays.asList(
-            "CHANGELOG.md",
-            "Dockerfile",
-            "LICENSE.txt",
-            "README.md",
-            "favicon.ico",
-            "index.html",
-            "karma-test-shim.js",
-            "karma.conf.js",
-            "package.json",
-            "protractor.config.js",
-            "styles.css",
-            "systemjs.config.js",
-            "tsconfig.json",
-            "tslint.json",
-            "typings.json",
-            "wallaby.js");
+        Arrays.asList("pom.xml", "build.gradle", "LICENSE", "README.md");
 
     testFactoryWithRootFolder.authenticateAndOpen();
 
