@@ -122,7 +122,6 @@ public class PodMergerTest {
             .build();
     podSpec1.setAdditionalProperty("add1", 1L);
     PodData podData1 = new PodData(podSpec1, new ObjectMetaBuilder().build());
-    System.out.println("#tolerations for pod1: " + podData1.getSpec().getTolerations().size());
 
     PodSpec podSpec2 =
         new PodSpecBuilder()
@@ -134,15 +133,12 @@ public class PodMergerTest {
             .build();
     podSpec2.setAdditionalProperty("add2", 2L);
     PodData podData2 = new PodData(podSpec2, new ObjectMetaBuilder().build());
-    System.out.println("#tolerations for pod2: " + podData2.getSpec().getTolerations().size());
 
     // when
     Deployment merged = podMerger.merge(Arrays.asList(podData1, podData2));
 
     // then
     PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
-    System.out.println(
-        "#tolerations for merged pod: " + podTemplate.getSpec().getTolerations().size());
     verifyContainsAllFrom(podTemplate.getSpec(), podData1.getSpec());
     verifyContainsAllFrom(podTemplate.getSpec(), podData2.getSpec());
   }
