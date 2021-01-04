@@ -28,6 +28,7 @@ import io.fabric8.kubernetes.api.model.PodSecurityContextBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.PodSpecBuilder;
 import io.fabric8.kubernetes.api.model.PodTemplateSpec;
+import io.fabric8.kubernetes.api.model.Toleration;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import java.util.Arrays;
@@ -117,9 +118,11 @@ public class PodMergerTest {
             .withInitContainers(new ContainerBuilder().withName("initC1").build())
             .withVolumes(new VolumeBuilder().withName("v1").build())
             .withImagePullSecrets(new LocalObjectReferenceBuilder().withName("secret1").build())
+            .withTolerations(new Toleration("Effect", "key", "operator", 0L, "value1"))
             .build();
     podSpec1.setAdditionalProperty("add1", 1L);
     PodData podData1 = new PodData(podSpec1, new ObjectMetaBuilder().build());
+    System.out.println("#tolerations for pod1: " + podData1.getSpec().getTolerations().size());
 
     PodSpec podSpec2 =
         new PodSpecBuilder()
@@ -127,15 +130,19 @@ public class PodMergerTest {
             .withInitContainers(new ContainerBuilder().withName("initC2").build())
             .withVolumes(new VolumeBuilder().withName("v2").build())
             .withImagePullSecrets(new LocalObjectReferenceBuilder().withName("secret2").build())
+            .withTolerations(new Toleration("Effect", "key", "operator", 0L, "value2"))
             .build();
     podSpec2.setAdditionalProperty("add2", 2L);
     PodData podData2 = new PodData(podSpec2, new ObjectMetaBuilder().build());
+    System.out.println("#tolerations for pod2: " + podData2.getSpec().getTolerations().size());
 
     // when
     Deployment merged = podMerger.merge(Arrays.asList(podData1, podData2));
 
     // then
     PodTemplateSpec podTemplate = merged.getSpec().getTemplate();
+    System.out.println(
+        "#tolerations for merged pod: " + podTemplate.getSpec().getTolerations().size());
     verifyContainsAllFrom(podTemplate.getSpec(), podData1.getSpec());
     verifyContainsAllFrom(podTemplate.getSpec(), podData2.getSpec());
   }
@@ -444,5 +451,6 @@ public class PodMergerTest {
             .getAdditionalProperties()
             .entrySet()
             .containsAll(toCheck.getAdditionalProperties().entrySet()));
+    assertTrue(source.getTolerations().containsAll(toCheck.getTolerations()));
   }
 }
