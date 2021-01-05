@@ -84,9 +84,9 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
                       ANNOTATION_CHE_USERID,
                       personalAccessToken.getCheUserId(),
                       ANNOTATION_SCM_USERID,
-                      personalAccessToken.getUserId(),
+                      personalAccessToken.getScmUserId(),
                       ANNOTATION_SCM_USERNAME,
-                      personalAccessToken.getUserName(),
+                      personalAccessToken.getScmUserName(),
                       ANNOTATION_SCM_URL,
                       personalAccessToken.getScmProviderUrl()))
               .withLabels(SECRET_LABELS)

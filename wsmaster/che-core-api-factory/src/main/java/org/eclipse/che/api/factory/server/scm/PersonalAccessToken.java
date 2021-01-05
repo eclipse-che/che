@@ -22,29 +22,29 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 public class PersonalAccessToken {
 
   private final URL scmProviderUrl;
-  private final String userName;
-  private final String userId;
+  private final String scmUserName;
+  private final String scmUserId;
   private final String token;
   private final String cheUserId;
 
   public PersonalAccessToken(
-      String scmProviderUrl, String cheUserId, String userName, String userId, String token) {
+      String scmProviderUrl, String cheUserId, String scmUserName, String scmUserId, String token) {
     try {
       this.scmProviderUrl = new URL(scmProviderUrl);
     } catch (MalformedURLException e) {
       throw new RuntimeException(e);
     }
-    this.userName = userName;
-    this.userId = userId;
+    this.scmUserName = scmUserName;
+    this.scmUserId = scmUserId;
     this.token = token;
     this.cheUserId = cheUserId;
   }
 
-  public PersonalAccessToken(String scmProviderUrl, String userName, String token) {
+  public PersonalAccessToken(String scmProviderUrl, String scmUserName, String token) {
     this(
         scmProviderUrl,
         EnvironmentContext.getCurrent().getSubject().getUserId(),
-        userName,
+        scmUserName,
         null,
         token);
   }
@@ -65,12 +65,12 @@ public class PersonalAccessToken {
     return scmProviderUrl;
   }
 
-  public String getUserName() {
-    return userName;
+  public String getScmUserName() {
+    return scmUserName;
   }
 
-  public String getUserId() {
-    return userId;
+  public String getScmUserId() {
+    return scmUserId;
   }
 
   public String getToken() {

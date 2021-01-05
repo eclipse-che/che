@@ -46,6 +46,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 public class KubernetesGitCredentialManager implements GitCredentialManager {
   public static final String NAME_PATTERN = "%s-git-credentials-secret";
   public static final String ANNOTATION_SCM_URL = "che.eclipse.org/scm-url";
+  public static final String ANNOTATION_SCM_USERNAME = "che.eclipse.org/scm-username";
 
   private static final Map<String, String> LABELS =
       ImmutableMap.of(
@@ -78,34 +79,58 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
       throws UnsatisfiedPreconditionException, ScmConfigurationPersistenceException {
     try {
       String namespace = getFirstNamespace();
-      Map<String, String> annotations = new HashMap<>(ANNOTATIONS);
-      annotations.put(ANNOTATION_SCM_URL, personalAccessToken.getScmProviderUrl());
-      ObjectMeta meta =
-          new ObjectMetaBuilder()
-              .withName(
-                  String.format(
-                      NAME_PATTERN, NameGenerator.generate(personalAccessToken.getUserName(), 5)))
-              .withAnnotations(annotations)
+      Optional<Secret> existing =
+          clientFactory
+              .create()
+              .secrets()
+              .inNamespace(namespace)
               .withLabels(LABELS)
-              .build();
+              .list()
+              .getItems()
+              .stream()
+              .filter(
+                  s ->
+                      Boolean.parseBoolean(
+                              s.getMetadata().getAnnotations().get(ANNOTATION_GIT_CREDENTIALS))
+                          && s.getMetadata()
+                              .getAnnotations()
+                              .get(ANNOTATION_SCM_URL)
+                              .equals(personalAccessToken.getScmProviderUrl())
+                          && s.getMetadata()
+                              .getAnnotations()
+                              .get(ANNOTATION_SCM_USERNAME)
+                              .equals(personalAccessToken.getScmUserName()))
+              .findFirst();
 
       Secret secret =
-          new SecretBuilder()
-              .withApiVersion("v1")
-              .withMetadata(meta)
-              .withData(
-                  Map.of(
-                      "credentials",
-                      Base64.getEncoder()
-                          .encodeToString(
-                              format(
-                                      "%s://%s:%s@%s",
-                                      personalAccessToken.getScmProviderProtocol(),
-                                      personalAccessToken.getUserName(),
-                                      URLEncoder.encode(personalAccessToken.getToken(), UTF_8),
-                                      personalAccessToken.getScmProviderHost())
-                                  .getBytes())))
-              .build();
+          existing.orElseGet(
+              () -> {
+                Map<String, String> annotations = new HashMap<>(ANNOTATIONS);
+                annotations.put(ANNOTATION_SCM_URL, personalAccessToken.getScmProviderUrl());
+                annotations.put(ANNOTATION_SCM_USERNAME, personalAccessToken.getScmUserName());
+                ObjectMeta meta =
+                    new ObjectMetaBuilder()
+                        .withName(
+                            String.format(
+                                NAME_PATTERN,
+                                NameGenerator.generate(personalAccessToken.getScmUserName(), 5)))
+                        .withAnnotations(annotations)
+                        .withLabels(LABELS)
+                        .build();
+                return new SecretBuilder().withMetadata(meta).build();
+              });
+      secret.setData(
+          Map.of(
+              "credentials",
+              Base64.getEncoder()
+                  .encodeToString(
+                      format(
+                              "%s://%s:%s@%s",
+                              personalAccessToken.getScmProviderProtocol(),
+                              personalAccessToken.getScmUserName(),
+                              URLEncoder.encode(personalAccessToken.getToken(), UTF_8),
+                              personalAccessToken.getScmProviderHost())
+                          .getBytes())));
       clientFactory.create().secrets().inNamespace(namespace).createOrReplace(secret);
     } catch (InfrastructureException e) {
       throw new ScmConfigurationPersistenceException(e.getMessage(), e);

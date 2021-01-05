@@ -12,21 +12,36 @@
 package org.eclipse.che.api.factory.server.scm.kubernetes;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.factory.server.scm.kubernetes.KubernetesGitCredentialManager.ANNOTATION_SCM_URL;
+import static org.eclipse.che.api.factory.server.scm.kubernetes.KubernetesGitCredentialManager.ANNOTATION_SCM_USERNAME;
+import static org.eclipse.che.api.factory.server.scm.kubernetes.KubernetesGitCredentialManager.NAME_PATTERN;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
 import io.fabric8.kubernetes.api.model.DoneableSecret;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.SecretList;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.Watch;
+import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.impls.KubernetesNamespaceMetaImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
@@ -43,7 +58,6 @@ public class KubernetesGitCredentialManagerTest {
 
   @Mock private KubernetesNamespaceFactory namespaceFactory;
   @Mock private KubernetesClientFactory clientFactory;
-
   @Mock private KubernetesClient kubeClient;
 
   @Mock
@@ -53,6 +67,12 @@ public class KubernetesGitCredentialManagerTest {
   @Mock
   NonNamespaceOperation<Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>>
       nonNamespaceOperation;
+
+  @Mock
+  private FilterWatchListDeletable<Secret, SecretList, Boolean, Watch, Watcher<Secret>>
+      filterWatchDeletable;
+
+  @Mock private SecretList secretList;
 
   KubernetesGitCredentialManager kubernetesGitCredentialManager;
 
@@ -64,13 +84,16 @@ public class KubernetesGitCredentialManagerTest {
   }
 
   @Test
-  public void testCreateAndSaveHitCredential() throws Exception {
+  public void testCreateAndSaveNewGitCredential() throws Exception {
     KubernetesNamespaceMeta meta = new KubernetesNamespaceMetaImpl("test");
     when(namespaceFactory.list()).thenReturn(Collections.singletonList(meta));
 
     when(clientFactory.create()).thenReturn(kubeClient);
     when(kubeClient.secrets()).thenReturn(secretsMixedOperation);
     when(secretsMixedOperation.inNamespace(eq(meta.getName()))).thenReturn(nonNamespaceOperation);
+    when(nonNamespaceOperation.withLabels(anyMap())).thenReturn(filterWatchDeletable);
+    when(filterWatchDeletable.list()).thenReturn(secretList);
+    when(secretList.getItems()).thenReturn(emptyList());
     ArgumentCaptor<Secret> captor = ArgumentCaptor.forClass(Secret.class);
 
     PersonalAccessToken token =
@@ -90,7 +113,59 @@ public class KubernetesGitCredentialManagerTest {
                 format(
                         "%s://%s:%s@%s",
                         token.getScmProviderProtocol(),
-                        token.getUserName(),
+                        token.getScmUserName(),
+                        token.getToken(),
+                        token.getScmProviderHost())
+                    .getBytes()));
+  }
+
+  @Test
+  public void testUpdateTokenInExistingCredential() throws Exception {
+    KubernetesNamespaceMeta namespaceMeta = new KubernetesNamespaceMetaImpl("test");
+    PersonalAccessToken token =
+        new PersonalAccessToken(
+            "https://bitbucket.com", "cheUser", "username", "userId", "token123");
+
+    Map<String, String> annotations = new HashMap<>();
+    annotations.put(ANNOTATION_SCM_URL, token.getScmProviderUrl());
+    annotations.put(ANNOTATION_SCM_USERNAME, token.getScmUserName());
+    ObjectMeta objectMeta =
+        new ObjectMetaBuilder()
+            .withName(
+                String.format(NAME_PATTERN, NameGenerator.generate(token.getScmUserName(), 5)))
+            .withAnnotations(annotations)
+            .build();
+    Secret existing =
+        new SecretBuilder()
+            .withMetadata(objectMeta)
+            .withData(Map.of("credentials", "foo 123"))
+            .build();
+
+    when(namespaceFactory.list()).thenReturn(Collections.singletonList(namespaceMeta));
+
+    when(clientFactory.create()).thenReturn(kubeClient);
+    when(kubeClient.secrets()).thenReturn(secretsMixedOperation);
+    when(secretsMixedOperation.inNamespace(eq(namespaceMeta.getName())))
+        .thenReturn(nonNamespaceOperation);
+    when(nonNamespaceOperation.withLabels(anyMap())).thenReturn(filterWatchDeletable);
+    when(filterWatchDeletable.list()).thenReturn(secretList);
+    when(secretList.getItems()).thenReturn(singletonList(existing));
+    ArgumentCaptor<Secret> captor = ArgumentCaptor.forClass(Secret.class);
+
+    // when
+    kubernetesGitCredentialManager.createOrReplace(token);
+    // then
+    verify(nonNamespaceOperation).createOrReplace(captor.capture());
+    Secret createdSecret = captor.getValue();
+    assertNotNull(createdSecret);
+    assertEquals(
+        createdSecret.getData().get("credentials"),
+        Base64.getEncoder()
+            .encodeToString(
+                format(
+                        "%s://%s:%s@%s",
+                        token.getScmProviderProtocol(),
+                        token.getScmUserName(),
                         token.getToken(),
                         token.getScmProviderHost())
                     .getBytes()));
