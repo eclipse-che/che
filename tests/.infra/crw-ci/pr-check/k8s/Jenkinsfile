@@ -293,6 +293,7 @@ EOL"""
                         --listr-renderer=verbose \\
                         --platform=minikube \\
                         --che-operator-cr-patch-yaml=$CUSTOM_RESOURCE_PATCH_FILE \\
+                        --telemetry=off \\
                         --chenamespace=eclipse-che
                     """
 
@@ -347,10 +348,11 @@ EOL"""
                     }
 
                     sh """
-                        ${pathToChectl} auth:login -u admin -p admin --chenamespace=eclipse-che
+                        ${pathToChectl} auth:login -u admin -p admin --telemetry=off --chenamespace=eclipse-che
 
                         ${pathToChectl} workspace:create --start \\
                            --devfile=${DEVFILE_PATH} \\
+                           --telemetry=off \\
                            --chenamespace=eclipse-che
                     """
                 }
