@@ -163,7 +163,6 @@ public class OpenShiftEnvironmentProvisioner
 
     // 3 stage - add OpenShift env items
     restartPolicyRewriter.provision(osEnv, identity);
-    uniqueNamesProvisioner.provision(osEnv, identity);
     routeTlsProvisioner.provision(osEnv, identity);
     resourceLimitRequestProvisioner.provision(osEnv, identity);
     nodeSelectorProvisioner.provision(osEnv, identity);
@@ -179,6 +178,7 @@ public class OpenShiftEnvironmentProvisioner
     gatewayRouterProvisioner.provision(osEnv, identity);
     deploymentMetadataProvisioner.provision(osEnv, identity);
     trustedCAProvisioner.provision(osEnv, identity);
+    uniqueNamesProvisioner.provision(osEnv, identity);
     LOG.debug(
         "Provisioning OpenShift environment done for workspace '{}'", identity.getWorkspaceId());
   }

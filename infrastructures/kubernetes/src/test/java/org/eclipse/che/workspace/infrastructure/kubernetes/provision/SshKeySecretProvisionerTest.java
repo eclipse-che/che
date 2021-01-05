@@ -144,9 +144,9 @@ public class SshKeySecretProvisionerTest {
 
     Map<String, ConfigMap> configMaps = k8sEnv.getConfigMaps();
     assertNotNull(configMaps);
-    assertTrue(configMaps.containsKey("wksp-sshconfigmap"));
+    assertTrue(configMaps.containsKey("sshconfigmap"));
 
-    ConfigMap sshConfigMap = configMaps.get("wksp-sshconfigmap");
+    ConfigMap sshConfigMap = configMaps.get("sshconfigmap");
     assertNotNull(sshConfigMap);
 
     Map<String, String> mapData = sshConfigMap.getData();

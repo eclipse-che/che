@@ -10,7 +10,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: "keycloak"
+  name: keycloak
+  labels:
+    app: che
+    component: keycloak
 spec:
   ports:
   - name: "5050"

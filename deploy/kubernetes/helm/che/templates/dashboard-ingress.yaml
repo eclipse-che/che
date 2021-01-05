@@ -15,6 +15,9 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: che-dashboard-ingress
+  labels:
+    app: che
+    component: che-dashboard
   annotations:
     kubernetes.io/ingress.class: {{ .Values.global.ingress.class | quote }}
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-read-timeout: "3600"

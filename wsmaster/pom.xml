@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.23.0-SNAPSHOT</version>
+        <version>7.24.0-SNAPSHOT</version>
         <relativePath>../core/pom.xml</relativePath>
     </parent>
     <artifactId>che-master-parent</artifactId>
@@ -40,6 +40,7 @@
         <module>che-core-api-factory-shared</module>
         <module>che-core-api-factory</module>
         <module>che-core-api-factory-github</module>
+        <module>che-core-api-factory-bitbucket-server</module>
         <module>che-core-api-ssh</module>
         <module>che-core-api-ssh-shared</module>
         <module>wsmaster-local</module>

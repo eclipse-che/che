@@ -11,20 +11,15 @@
  */
 package org.eclipse.che.selenium.factory;
 
-import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.AUXILIARY;
 import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.testng.AssertJUnit.assertEquals;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
@@ -32,7 +27,6 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
-import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -44,11 +38,8 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   private static final Logger LOG =
       LoggerFactory.getLogger(DirectUrlFactoryWithSpecificBranchTest.class);
 
-  private static final String SECOND_BRANCH_NAME = "contrib";
-
-  @Inject
-  @Named(AUXILIARY)
-  private TestGitHubRepository testAuxiliaryRepo;
+  private static final String SECOND_BRANCH_NAME = "java1.11";
+  private final String REPOSITORY_URL = "https://github.com/che-samples/console-java-simple";
 
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestFactoryInitializer testFactoryInitializer;
@@ -62,16 +53,9 @@ public class DirectUrlFactoryWithSpecificBranchTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    // preconditions - add the project to the test repository
-    Path entryPath = Paths.get(getClass().getResource("/projects/java-multimodule").getPath());
-    testAuxiliaryRepo.addContent(entryPath);
-    String repositoryUrl = testAuxiliaryRepo.getHtmlUrl();
-
-    // create another branch in the test repo
-    testAuxiliaryRepo.createBranch(SECOND_BRANCH_NAME);
-
     testFactoryWithSpecificBranch =
-        testFactoryInitializer.fromUrl(repositoryUrl + "/tree/" + SECOND_BRANCH_NAME);
+        testFactoryInitializer.fromUrl(REPOSITORY_URL + "/tree/" + SECOND_BRANCH_NAME);
+
     dashboard.open();
   }
 
@@ -86,9 +70,9 @@ public class DirectUrlFactoryWithSpecificBranchTest {
 
   @Test
   public void factoryWithDirectUrlWithSpecificBranch() {
-    String repositoryName = testAuxiliaryRepo.getName();
+    String repositoryName = "console-java-simple";
     List<String> expectedItemsAfterCloning =
-        Arrays.asList("my-lib", "my-webapp", "my-lib/src", "pom.xml");
+        Arrays.asList("pom.xml", "build.gradle", "LICENSE", "README.md");
 
     testFactoryWithSpecificBranch.authenticateAndOpen();
 
@@ -103,20 +87,11 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     theiaIde.waitNotificationDisappearance(
         "Che Workspace: Finished importing projects.", UPDATING_PROJECT_TIMEOUT_SEC);
     theiaIde.waitAllNotificationsClosed();
-
     theiaProjectTree.expandItemWithIgnoreExceptions(repositoryName);
-    theiaProjectTree.waitItem(repositoryName + "/pom.xml");
-    theiaProjectTree.expandItemWithIgnoreExceptions(repositoryName + "/my-lib");
-    theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
 
     expectedItemsAfterCloning.forEach(
         name -> {
-          try {
-            theiaProjectTree.waitItem(repositoryName + "/" + name);
-          } catch (TimeoutException ex) {
-            seleniumWebDriver.navigate().refresh();
-            theiaProjectTree.waitItem(repositoryName + "/" + name);
-          }
+          theiaProjectTree.waitItem(repositoryName + "/" + name);
         });
 
     // check specific branch

@@ -205,9 +205,9 @@ public class GitConfigProvisionerTest {
     assertEquals(mount.getSubPath(), "gitconfig");
 
     assertEquals(k8sEnv.getConfigMaps().size(), 1);
-    assertTrue(k8sEnv.getConfigMaps().containsKey("wksp-gitconfig"));
+    assertTrue(k8sEnv.getConfigMaps().containsKey("gitconfig"));
 
-    ConfigMap configMap = k8sEnv.getConfigMaps().get("wksp-gitconfig");
+    ConfigMap configMap = k8sEnv.getConfigMaps().get("gitconfig");
 
     assertEquals(configMap.getData().size(), 1);
     assertTrue(configMap.getData().containsKey("gitconfig"));
@@ -257,9 +257,9 @@ public class GitConfigProvisionerTest {
     assertEquals(mount.getSubPath(), "gitconfig");
 
     assertEquals(k8sEnv.getConfigMaps().size(), 1);
-    assertTrue(k8sEnv.getConfigMaps().containsKey("wksp-gitconfig"));
+    assertTrue(k8sEnv.getConfigMaps().containsKey("gitconfig"));
 
-    ConfigMap configMap = k8sEnv.getConfigMaps().get("wksp-gitconfig");
+    ConfigMap configMap = k8sEnv.getConfigMaps().get("gitconfig");
 
     assertEquals(configMap.getData().size(), 1);
     assertTrue(configMap.getData().containsKey("gitconfig"));
@@ -309,9 +309,9 @@ public class GitConfigProvisionerTest {
     assertEquals(mount.getSubPath(), "gitconfig");
 
     assertEquals(k8sEnv.getConfigMaps().size(), 1);
-    assertTrue(k8sEnv.getConfigMaps().containsKey("wksp-gitconfig"));
+    assertTrue(k8sEnv.getConfigMaps().containsKey("gitconfig"));
 
-    ConfigMap configMap = k8sEnv.getConfigMaps().get("wksp-gitconfig");
+    ConfigMap configMap = k8sEnv.getConfigMaps().get("gitconfig");
 
     assertEquals(configMap.getData().size(), 1);
     assertTrue(configMap.getData().containsKey("gitconfig"));
@@ -354,9 +354,9 @@ public class GitConfigProvisionerTest {
     assertEquals(mount.getSubPath(), "gitconfig");
 
     assertEquals(k8sEnv.getConfigMaps().size(), 1);
-    assertTrue(k8sEnv.getConfigMaps().containsKey("wksp-gitconfig"));
+    assertTrue(k8sEnv.getConfigMaps().containsKey("gitconfig"));
 
-    ConfigMap configMap = k8sEnv.getConfigMaps().get("wksp-gitconfig");
+    ConfigMap configMap = k8sEnv.getConfigMaps().get("gitconfig");
 
     assertEquals(configMap.getData().size(), 1);
     assertTrue(configMap.getData().containsKey("gitconfig"));
@@ -402,9 +402,9 @@ public class GitConfigProvisionerTest {
     assertEquals(mount.getSubPath(), "gitconfig");
 
     assertEquals(k8sEnv.getConfigMaps().size(), 1);
-    assertTrue(k8sEnv.getConfigMaps().containsKey("wksp-gitconfig"));
+    assertTrue(k8sEnv.getConfigMaps().containsKey("gitconfig"));
 
-    ConfigMap configMap = k8sEnv.getConfigMaps().get("wksp-gitconfig");
+    ConfigMap configMap = k8sEnv.getConfigMaps().get("gitconfig");
 
     assertEquals(configMap.getData().size(), 1);
     assertTrue(configMap.getData().containsKey("gitconfig"));
@@ -420,8 +420,6 @@ public class GitConfigProvisionerTest {
     when(vcsSslCertificateProvisioner.isConfigured()).thenReturn(true);
     when(vcsSslCertificateProvisioner.getGitServerHost()).thenReturn("https://localhost");
     when(vcsSslCertificateProvisioner.getCertPath()).thenReturn("/some/path");
-
-    when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
 
     ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
     when(pod.getMetadata()).thenReturn(podMeta);
@@ -450,9 +448,9 @@ public class GitConfigProvisionerTest {
     assertEquals(mount.getSubPath(), "gitconfig");
 
     assertEquals(k8sEnv.getConfigMaps().size(), 1);
-    assertTrue(k8sEnv.getConfigMaps().containsKey("wksp-gitconfig"));
+    assertTrue(k8sEnv.getConfigMaps().containsKey("gitconfig"));
 
-    ConfigMap configMap = k8sEnv.getConfigMaps().get("wksp-gitconfig");
+    ConfigMap configMap = k8sEnv.getConfigMaps().get("gitconfig");
 
     assertEquals(configMap.getData().size(), 1);
     assertTrue(configMap.getData().containsKey("gitconfig"));
@@ -471,7 +469,6 @@ public class GitConfigProvisionerTest {
         singletonMap(
             "theia-user-preferences", "{\"git.user.name\":\"user\",\"git.user.email\":\"email\"}");
     when(preferenceManager.find(eq("id"), eq("theia-user-preferences"))).thenReturn(preferences);
-    when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
 
     Pod pod =
         new PodBuilder()

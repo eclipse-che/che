@@ -149,6 +149,9 @@ public class PodMerger {
           mergeServiceAccountName(
               baseSpec.getServiceAccountName(), podData.getSpec().getServiceAccountName()));
 
+      baseSpec.setNodeSelector(
+          mergeNodeSelector(baseSpec.getNodeSelector(), podData.getSpec().getNodeSelector()));
+
       // if there are entries with such keys then values will be overridden
       baseSpec.getAdditionalProperties().putAll(podData.getSpec().getAdditionalProperties());
     }
@@ -202,5 +205,17 @@ public class PodMerger {
     } else {
       throw new ValidationException(String.format(errorMessageTemplate, a, b));
     }
+  }
+
+  private Map<String, String> mergeNodeSelector(
+      @Nullable Map<String, String> base, @Nullable Map<String, String> nodeSelector) {
+    Map<String, String> mergedMap = base;
+    if (nodeSelector != null && !nodeSelector.isEmpty()) {
+      if (mergedMap == null) {
+        mergedMap = new HashMap<>();
+      }
+      mergedMap.putAll(nodeSelector);
+    }
+    return mergedMap;
   }
 }

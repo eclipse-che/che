@@ -57,6 +57,10 @@ export const TimeoutConstants = {
      */
     TS_CLICK_DASHBOARD_ITEM_TIMEOUT: Number(process.env.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) || 2_000,
 
+    /**
+     * Timeout for workspace stopped status, "30 000" by default
+     */
+    TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT: Number(process.env.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) || 30_000,
 
     // -------------------------------------------- LANGUAGE SERVER VALIDATION --------------------------------------------
 
@@ -189,41 +193,16 @@ export const TimeoutConstants = {
     TS_SELENIUM_WAIT_TASK_EXIT_CODE_TIMEOUT: Number(process.env.TS_SELENIUM_WAIT_TASK_EXIT_CODE_TIMEOUT) || 300_000,
 
 
-
-    // ------------------------------------ OCP WEB CONSOLE PAGE ------------------------------------
-
-    /**
-     * Timeout for OcpWebConsolePage.waitOverviewCsvEclipseCheOperator, "20 000" by default
-     */
-    TS_SELENIUM_CSV_OPERATOR_TIMEOUT: Number(process.env.TS_SELENIUM_CSV_OPERATOR_TIMEOUT) || 20_000,
-
-    /**
-     * Timeout for listing the namespaces on subscription in OcpWebConsolePage, "10 000" by default
-     */
-    TS_SELENIUM_LIST_NAMESPACES_ON_SUBSCRIPTION_TIMEOUT: Number(process.env.TS_SELENIUM_LIST_NAMESPACES_ON_SUBSCRIPTION_TIMEOUT) || 10_000,
-
-    /**
-     * Timeout for Che cluster title visibility in OcpWebConsolePage, "10 000" by default.
-     */
-    TS_SELENIUM_RESOURCES_CHE_CLUSTER_TITLE_TIMEOUT: Number(process.env.TS_SELENIUM_RESOURCES_CHE_CLUSTER_TITLE_TIMEOUT) || 10_000,
-
-
     // ------------------------------------ OPENSHIFT RELATED ------------------------------------
 
     /**
      * Timeout for obtaining cluster IP, "10 000" by default.
      */
-    TS_GET_CLUSTER_IP_TIMEOUT: Number(process.env.TS_GET_CLUSTER_IP_TIMEOUT) || 10_000,
+    TS_GET_CLUSTER_IP_TIMEOUT: Number(process.env.TS_GET_CLUSTER_IP_TIMEOUT) || 60_000,
 
     /**
      * Timeout for waiting fr openshift connector tree, "10 000" by default.
      */
-    TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT: Number(process.env.TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT) || 10_000,
-
-    /**
-     * Timeout for creating CheCluster yaml, "10 000" by default.
-     */
-    TS_CREATE_CHECLUSTER_YAML_TIMEOUT: Number(process.env.TS_CREATE_CHECLUSTER_YAML_TIMEOUT) || 10_000,
-
+    TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT: Number(process.env.TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT) || 40_000,
 
 };

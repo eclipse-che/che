@@ -52,7 +52,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 @Singleton
 public class GitConfigProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
 
-  public static final String GIT_CONFIG_MAP_NAME_SUFFIX = "-gitconfig";
+  public static final String GIT_CONFIG_MAP_NAME = "gitconfig";
 
   private static final String GIT_BASE_CONFIG_PATH = "/etc/";
   public static final String GIT_CONFIG = "gitconfig";
@@ -132,12 +132,7 @@ public class GitConfigProvisioner implements ConfigurationProvisioner<Kubernetes
   private void prepareAndProvisionGitConfiguration(
       String name, String email, KubernetesEnvironment k8sEnv, RuntimeIdentity identity) {
     prepareGitConfigurationContent(name, email)
-        .ifPresent(
-            content -> {
-              String configMapName = identity.getWorkspaceId() + GIT_CONFIG_MAP_NAME_SUFFIX;
-
-              doProvisionGitConfiguration(configMapName, content, k8sEnv);
-            });
+        .ifPresent(content -> doProvisionGitConfiguration(GIT_CONFIG_MAP_NAME, content, k8sEnv));
   }
 
   private String getStringValueOrNull(Map<String, Object> map, String key) {

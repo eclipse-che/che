@@ -39,7 +39,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
 /**
- * Makes names of Kubernetes pods and ingresses unique whole namespace by {@link Names}.
+ * Makes names of Kubernetes pods, ingresses and config maps unique whole namespace by {@link
+ * Names}.
  *
  * <p>Original names will be stored in {@link Constants#CHE_ORIGINAL_NAME_LABEL} label of renamed
  * object.

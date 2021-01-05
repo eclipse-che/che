@@ -52,7 +52,6 @@ export * from './pageobjects/login/SingleUserLoginPage';
 export * from './pageobjects/login/UpdateAccountInformationPage';
 export * from './pageobjects/openshift/CheLoginPage';
 export * from './pageobjects/openshift/OcpLoginPage';
-export * from './pageobjects/openshift/OcpWebConsolePage';
 export * from './testsLibrary/CodeExecutionTests';
 export * from './testsLibrary/LsTests';
 export * from './testsLibrary/ProjectAndFileTests';

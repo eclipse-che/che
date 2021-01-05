@@ -17,8 +17,7 @@ function runOpenshiftConnectorTest(){
     mkdir report
     REPORT_FOLDER=$(pwd)/report
     ### Run tests
-    docker run --net=host  --ipc=host -v $REPORT_FOLDER:/tmp/e2e/report:Z -p 5920:5920 \
-    -e TS_SELENIUM_HEADLESS=true \
+    docker run --net=host  --ipc=host -v $REPORT_FOLDER:/tmp/e2e/report:Z --shm-size=1g \
     -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=420000 \
     -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
     -e TS_SELENIUM_BASE_URL="https://$CHE_ROUTE" \
@@ -27,7 +26,9 @@ function runOpenshiftConnectorTest(){
     -e TS_SELENIUM_PASSWORD=${TEST_USERNAME} \
     -e TS_TEST_OPENSHIFT_PLUGIN_USERNAME=developer \
     -e TS_TEST_OPENSHIFT_PLUGIN_PASSWORD=pass \
-    -e TS_TEST_OPENSHIFT_PLUGIN_PROJECT=default \
+    -e TS_TEST_OPENSHIFT_PLUGIN_PROJECT=eclipse-che \
+    -e TS_TEST_OPENSHIFT_PLUGIN_COMPONENT_TYPE="nodejs (s2i)" \
+    -e TS_TEST_OPENSHIFT_PLUGIN_COMPONENT_VERSION=latest \
     -e TS_SELENIUM_MULTIUSER=true \
     -e DELETE_WORKSPACE_ON_FAILED_TEST=true \
     -e TEST_SUITE=test-openshift-connector \

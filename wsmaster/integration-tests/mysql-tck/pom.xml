@@ -17,13 +17,13 @@
     <parent>
         <artifactId>integration-tests-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.23.0-SNAPSHOT</version>
+        <version>7.24.0-SNAPSHOT</version>
     </parent>
     <artifactId>mysql-tck</artifactId>
     <packaging>jar</packaging>
     <name>Integration Tests :: MYSQL</name>
     <properties>
-        <db.image.name>centos/mysql-57-centos7</db.image.name>
+        <db.image.name>${integration.mysql.db.image}</db.image.name>
         <jdbc.admin.name>root</jdbc.admin.name>
         <jdbc.admin.password>che2</jdbc.admin.password>
         <jdbc.driver>com.mysql.cj.jdbc.Driver</jdbc.driver>

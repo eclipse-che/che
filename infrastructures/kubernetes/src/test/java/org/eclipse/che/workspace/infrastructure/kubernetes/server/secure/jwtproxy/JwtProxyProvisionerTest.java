@@ -116,7 +116,9 @@ public class JwtProxyProvisionerTest {
             cookiePathStrategy,
             multiHostCookiePathStrategy,
             "eclipse/che-jwtproxy",
+            "10m",
             "128mb",
+            "0.02",
             "0.5",
             "Always",
             runtimeId);
@@ -237,7 +239,9 @@ public class JwtProxyProvisionerTest {
             cookiePathStrategy,
             multiHostCookiePathStrategy,
             "eclipse/che-jwtproxy",
+            "10m",
             "128mb",
+            "0.02",
             "500m",
             "Always",
             runtimeId);
@@ -287,7 +291,9 @@ public class JwtProxyProvisionerTest {
             cookiePathStrategy,
             multiHostCookiePathStrategy,
             "eclipse/che-jwtproxy",
+            "10m",
             "128mb",
+            "0.02",
             "0.5",
             "Always",
             runtimeId);
@@ -328,7 +334,9 @@ public class JwtProxyProvisionerTest {
             cookiePathStrategy,
             multiHostCookiePathStrategy,
             "eclipse/che-jwtproxy",
+            "10m",
             "128mb",
+            "0.02",
             "0.5",
             "Always",
             runtimeId);
@@ -369,7 +377,9 @@ public class JwtProxyProvisionerTest {
             cookiePathStrategy,
             multiHostCookiePathStrategy,
             "eclipse/che-jwtproxy",
+            "10m",
             "128mb",
+            "0.02",
             "0.5",
             "Always",
             runtimeId);

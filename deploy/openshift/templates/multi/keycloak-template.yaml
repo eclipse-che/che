@@ -183,5 +183,6 @@ parameters:
   description: Always pull by default. Can be IfNotPresent
   value: 'Always'
 labels:
-  app: keycloak
+  app: che
+  component: keycloak
   template: keycloak

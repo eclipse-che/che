@@ -14,6 +14,9 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: jaeger-query
+  labels:
+    app: jaeger
+    jaeger-infra: jaeger-deployment
   annotations:
     kubernetes.io/ingress.class: {{ .Values.global.ingress.class | quote }}
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-read-timeout: "3600"

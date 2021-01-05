@@ -17,13 +17,13 @@
     <parent>
         <artifactId>che-multiuser-integration-tests</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>7.23.0-SNAPSHOT</version>
+        <version>7.24.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-postgresql-tck</artifactId>
     <packaging>jar</packaging>
     <name>Che Multiuser :: PostgreSQL Tck</name>
     <properties>
-        <db.image.name>centos/postgresql-96-centos7</db.image.name>
+        <db.image.name>${integration.postgresql.db.image}</db.image.name>
         <jdbc.admin.name>postgres</jdbc.admin.name>
         <jdbc.admin.password>che2</jdbc.admin.password>
         <jdbc.driver>org.postgresql.Driver</jdbc.driver>

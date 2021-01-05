@@ -31,6 +31,8 @@ spec:
       labels:
         app: che
         component: devfile-registry
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       containers:
       - image: {{ .Values.cheDevfileRegistry.image }}
@@ -59,3 +61,7 @@ spec:
             memory: {{ .Values.cheDevfileRegistry.memoryLimit }}
           requests:
             memory: {{ .Values.cheDevfileRegistry.memoryRequests }}
+        envFrom:
+          - configMapRef:
+              name: che-devfile-registry
+              optional: true

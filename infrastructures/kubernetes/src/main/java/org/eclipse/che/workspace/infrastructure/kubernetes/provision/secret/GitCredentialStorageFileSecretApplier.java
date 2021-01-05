@@ -64,10 +64,7 @@ public class GitCredentialStorageFileSecretApplier extends FileSecretApplier {
               keys.size()));
     }
     Path gitSecretFilePath = Paths.get(secretMountPath, keys.iterator().next());
-    ConfigMap gitConfigMap =
-        env.getConfigMaps()
-            .get(
-                runtimeIdentity.getWorkspaceId() + GitConfigProvisioner.GIT_CONFIG_MAP_NAME_SUFFIX);
+    ConfigMap gitConfigMap = env.getConfigMaps().get(GitConfigProvisioner.GIT_CONFIG_MAP_NAME);
     if (gitConfigMap != null) {
       Map<String, String> gitConfigMapData = gitConfigMap.getData();
       String gitConfig = gitConfigMapData.get(GitConfigProvisioner.GIT_CONFIG);

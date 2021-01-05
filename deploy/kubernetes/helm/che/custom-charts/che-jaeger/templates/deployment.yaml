@@ -12,8 +12,8 @@ kind: Deployment
 metadata:
   name: jaeger
   labels:
-      app: jaeger
-      jaeger-infra: jaeger-deployment
+    app: jaeger
+    jaeger-infra: jaeger-deployment
 spec:
   replicas: 1
   selector:

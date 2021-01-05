@@ -12,6 +12,7 @@ kind: Route
 metadata:
     labels:
       app: che
+      component: che
     name: che
 spec:
     tls:

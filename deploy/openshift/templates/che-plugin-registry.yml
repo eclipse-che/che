@@ -98,3 +98,6 @@ parameters:
   value: Always
   displayName: Eclipse Che plugin registry image pull policy
   description: Always pull by default. Can be IfNotPresent
+labels:
+  app: che
+  component: plugin-registry

@@ -8,6 +8,45 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
+function jks_import_ca_bundle {
+  CA_FILE=$1
+  KEYSTORE_PATH=$2
+  KEYSTORE_PASSWORD=$3
+
+  if [ ! -f "$CA_FILE" ]; then
+    # CA bundle file doesn't exist, skip it
+    echo "Failed to import CA certificates from ${CA_FILE}. File doesn't exist"
+    return
+  fi
+
+  bundle_name=$(basename "$CA_FILE")
+  certs_imported=0
+  cert_index=0
+  tmp_file=/tmp/cert.pem
+  is_cert=false
+  while IFS= read -r line; do
+    if [ "$line" == "-----BEGIN CERTIFICATE-----" ]; then
+      # Start copying a new certificate
+      is_cert=true
+      cert_index=$((cert_index+1))
+      # Reset destination file and add header line
+      echo "$line" > ${tmp_file}
+    elif [ "$line" == "-----END CERTIFICATE-----" ]; then
+      # End of the certificate is reached, add it to trust store
+      is_cert=false
+      echo "$line" >> ${tmp_file}
+      keytool -importcert -alias "${bundle_name}_${cert_index}" -keystore "$KEYSTORE_PATH" -file $tmp_file -storepass "$KEYSTORE_PASSWORD" -noprompt && \
+      certs_imported=$((certs_imported+1))
+    elif [ "$is_cert" == true ]; then
+      # In the middle of a certificate, copy line to target file
+      echo "$line" >> ${tmp_file}
+    fi
+  done < "$CA_FILE"
+  echo "Imported ${certs_imported} certificates from ${CA_FILE}"
+  # Clean up
+  rm -f $tmp_file
+}
+
 echo "Configuring Keycloak by modifying realm and user templates..."
 
 cat /scripts/che-users-0.json.erb | \
@@ -39,9 +78,9 @@ TRUST_STORE_PASSWORD=${TRUSTPASS:-openshift}
 CUSTOM_CERTS_DIR=/public-certs
 
 # Check for additional CA certificates propagated to Keycloak
-if [[ -d $CUSTOM_CERTS_DIR && -n $(find ${CUSTOM_CERTS_DIR} -type f) ]]; then
+if [[ -d $CUSTOM_CERTS_DIR && -n $(find "${CUSTOM_CERTS_DIR}" -type f) ]]; then
     for certfile in ${CUSTOM_CERTS_DIR}/* ; do
-        keytool -importcert -alias CERT_$(basename $certfile) -keystore $KEYSTORE_PATH -file $certfile -storepass $TRUST_STORE_PASSWORD  -noprompt;
+        jks_import_ca_bundle "$certfile" "$KEYSTORE_PATH" "$TRUST_STORE_PASSWORD"
     done
 fi
 
@@ -57,14 +96,24 @@ if [ -f "$KEYSTORE_PATH" ]; then
     /opt/jboss/keycloak/bin/jboss-cli.sh --file=/scripts/cli/add_openshift_certificate.cli && rm -rf /opt/jboss/keycloak/standalone/configuration/standalone_xml_history
 fi
 
+# Patch configuration to allow to set 'keycloak.hostname.fixed.alwaysHttps'
+sed -i 's|<property name="httpsPort" value="${keycloak.hostname.fixed.httpsPort:-1}"/>|<property name="httpsPort" value="${keycloak.hostname.fixed.httpsPort:-1}"/><property name="alwaysHttps" value="${keycloak.hostname.fixed.alwaysHttps:false}"/>|g' /opt/jboss/keycloak/standalone/configuration/standalone.xml
+sed -i 's|<property name="httpsPort" value="${keycloak.hostname.fixed.httpsPort:-1}"/>|<property name="httpsPort" value="${keycloak.hostname.fixed.httpsPort:-1}"/><property name="alwaysHttps" value="${keycloak.hostname.fixed.alwaysHttps:false}"/>|g' /opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
+
 # POSTGRES_PORT is assigned by Kubernetes controller
 # and it isn't fit to docker-entrypoin.sh.
 unset POSTGRES_PORT
 
 echo "Starting Keycloak server..."
 
-exec /opt/jboss/docker-entrypoint.sh -Dkeycloak.migration.action=import \
-                                     -Dkeycloak.migration.provider=dir \
-                                     -Dkeycloak.migration.strategy=IGNORE_EXISTING \
-                                     -Dkeycloak.migration.dir=/scripts/ \
-                                     -Djboss.bind.address=0.0.0.0
+SYS_PROPS="-Dkeycloak.migration.action=import \
+    -Dkeycloak.migration.provider=dir \
+    -Dkeycloak.migration.strategy=IGNORE_EXISTING \
+    -Dkeycloak.migration.dir=/scripts/ \
+    -Djboss.bind.address=0.0.0.0"
+
+if [ $KEYCLOAK_HOSTNAME ] && [ $PROTOCOL == "https" ]; then
+  SYS_PROPS+=" -Dkeycloak.hostname.fixed.alwaysHttps=true"
+fi
+
+exec /opt/jboss/docker-entrypoint.sh $SYS_PROPS
