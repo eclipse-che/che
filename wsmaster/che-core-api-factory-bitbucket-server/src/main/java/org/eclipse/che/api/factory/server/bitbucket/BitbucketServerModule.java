@@ -15,7 +15,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenFetcher;
 
-public class BitbucketModule extends AbstractModule {
+public class BitbucketServerModule extends AbstractModule {
   @Override
   protected void configure() {
     Multibinder<PersonalAccessTokenFetcher> tokenFetcherMultibinder =

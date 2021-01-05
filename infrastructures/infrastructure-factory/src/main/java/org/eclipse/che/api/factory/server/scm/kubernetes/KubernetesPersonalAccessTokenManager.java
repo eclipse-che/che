@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
 import org.eclipse.che.api.factory.server.scm.ScmPersonalAccessTokenFetcher;
@@ -40,13 +41,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.Kubernetes
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
 /** Manages personal access token secrets used for private repositories authentication. */
+@Singleton
 public class KubernetesPersonalAccessTokenManager implements PersonalAccessTokenManager {
   public static final Map<String, String> SECRET_LABELS =
-      Map.of(
-          "app.kubernetes.io/part-of",
-          "che.eclipse.org",
-          "app.kubernetes.io/component",
-          "scm-personal-access-token");
+      ImmutableMap.of(
+          "app.kubernetes.io/part-of", "che.eclipse.org",
+          "app.kubernetes.io/component", "scm-personal-access-token");
   public static final LabelSelector KPAT_LABEL_SELECTOR =
       new LabelSelectorBuilder().withMatchLabels(SECRET_LABELS).build();
 
@@ -151,34 +151,14 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
     return Optional.empty();
   }
 
-  //  @Override
-  //  public void delete(String cheUserId, String scmServerUrl)
-  //      throws UnsatisfiedCondition, ScmConfigurationPersistenceException,
-  //          InvalidScmProviderUrlException {
-  //    try {
-  //      String namespace = getFirstNamespace();
-  //      URL scmUrl = new URL(scmServerUrl);
-  //      clientFactory
-  //          .create()
-  //          .secrets()
-  //          .inNamespace(namespace)
-  //          .withName(String.format(NAME_PATTERN, scmUrl.getHost()))
-  //          .withPropagationPolicy("Background")
-  //          .delete();
-  //    } catch (KubernetesClientException | InfrastructureException e) {
-  //      throw new ScmConfigurationPersistenceException(e.getMessage(), e);
-  //    } catch (MalformedURLException e) {
-  //      throw new InvalidScmProviderUrlException(e.getMessage());
-  //    }
-  //  }
-
   private String getFirstNamespace()
       throws UnsatisfiedPreconditionException, ScmConfigurationPersistenceException {
     try {
       Optional<String> namespace =
           namespaceFactory.list().stream().map(KubernetesNamespaceMeta::getName).findFirst();
       if (namespace.isEmpty()) {
-        throw new UnsatisfiedPreconditionException("No namespace found");
+        throw new UnsatisfiedPreconditionException(
+            "No user namespace found. Cannot read SCM credentials.");
       }
       return namespace.get();
     } catch (InfrastructureException e) {

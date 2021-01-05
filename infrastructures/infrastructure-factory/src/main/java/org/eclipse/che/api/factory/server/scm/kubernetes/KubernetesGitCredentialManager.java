@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
 import org.eclipse.che.api.factory.server.scm.exception.ScmConfigurationPersistenceException;
@@ -43,6 +44,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
  * Creates or updates Git credentials secret in user-s namespace to allow Git operations on private
  * repositories.
  */
+@Singleton
 public class KubernetesGitCredentialManager implements GitCredentialManager {
   public static final String NAME_PATTERN = "%s-git-credentials-secret";
   public static final String ANNOTATION_SCM_URL = "che.eclipse.org/scm-url";

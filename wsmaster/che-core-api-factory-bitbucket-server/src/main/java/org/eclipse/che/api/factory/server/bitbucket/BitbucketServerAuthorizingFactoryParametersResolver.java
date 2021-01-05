@@ -33,7 +33,7 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 
 /**
- * Provides Factory Parameters resolver for private bitbucket repositories.
+ * Provides Factory Parameters resolver for both public and private bitbucket repositories.
  *
  * @author Max Shaposhnyk
  */

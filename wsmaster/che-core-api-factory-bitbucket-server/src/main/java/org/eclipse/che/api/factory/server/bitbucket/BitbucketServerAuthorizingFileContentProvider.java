@@ -76,7 +76,7 @@ public class BitbucketServerAuthorizingFileContentProvider implements FileConten
         try {
           return urlFetcher.fetch(requestURL);
         } catch (IOException exception) {
-          // try to authorize
+          // unable to determine exact cause, so let's just try to authorize...
           try {
             PersonalAccessToken personalAccessToken =
                 personalAccessTokenManager.fetchAndSave(
