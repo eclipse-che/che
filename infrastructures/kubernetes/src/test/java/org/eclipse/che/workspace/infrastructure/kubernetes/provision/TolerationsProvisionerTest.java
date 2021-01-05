@@ -21,6 +21,7 @@ import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.Toleration;
 import java.util.Collections;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -77,6 +78,12 @@ public class TolerationsProvisionerTest {
     for (Pod pod : k8sEnv.getPodsCopy().values()) {
       assertTrue(pod.getSpec().getTolerations().isEmpty());
     }
+  }
+
+  @Test(expectedExceptions = ConfigurationException.class)
+  public void shouldFailOnInvalidTolerationsJson() throws Exception {
+    // given
+    provisioner = new TolerationsProvisioner("an invalid json string");
   }
 
   private Pod createPod(String podName) {

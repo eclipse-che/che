@@ -23,6 +23,7 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /** Provisions tolerations into workspace pod spec. */
@@ -32,15 +33,18 @@ public class TolerationsProvisioner implements ConfigurationProvisioner {
 
   @Inject
   public TolerationsProvisioner(
-      @Nullable @Named("che.workspace.pod.tolerations") String tolerationsProperty)
-      throws
-          JsonProcessingException { // TODO: What kind of exception should I throw here?  Code the
-    // appropriate unit test.
-    ObjectMapper jsonMapper = new ObjectMapper();
-    this.tolerations =
-        tolerationsProperty != null
-            ? jsonMapper.readValue(tolerationsProperty, new TypeReference<List<Toleration>>() {})
-            : emptyList();
+      @Nullable @Named("che.workspace.pod.tolerations_json") String tolerationsProperty)
+      throws ConfigurationException {
+    try {
+      ObjectMapper jsonMapper = new ObjectMapper();
+      this.tolerations =
+          tolerationsProperty != null
+              ? jsonMapper.readValue(tolerationsProperty, new TypeReference<List<Toleration>>() {})
+              : emptyList();
+    } catch (JsonProcessingException e) {
+      throw new ConfigurationException(
+          "che.workspace.pod.tolerations_json contains an invalid JSON string", e);
+    }
   }
 
   @Override
