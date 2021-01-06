@@ -10,15 +10,10 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.api.factory.server.scm.exception;
+/** Thrown when scm provider responded 400 on http request. */
+public class ScmBadRequestException extends Exception {
 
-/** In case if OAuth1 or Oauth2 token is missing and we cant make any authorised calls */
-public class ScmUnauthorizedException extends Exception {
-
-  public ScmUnauthorizedException(String message) {
+  public ScmBadRequestException(String message) {
     super(message);
-  }
-
-  public ScmUnauthorizedException(String message, Throwable cause) {
-    super(message, cause);
   }
 }

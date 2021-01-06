@@ -23,6 +23,8 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.HashMap;
@@ -46,9 +48,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
  */
 @Singleton
 public class KubernetesGitCredentialManager implements GitCredentialManager {
-  public static final String NAME_PATTERN = "%s-git-credentials-secret";
+  public static final String NAME_PATTERN = "%s-git-credentials-secret-";
   public static final String ANNOTATION_SCM_URL = "che.eclipse.org/scm-url";
   public static final String ANNOTATION_SCM_USERNAME = "che.eclipse.org/scm-username";
+  public static final String ANNOTATION_CHE_USERID = "che.eclipse.org/che-userid";
 
   private static final Map<String, String> LABELS =
       ImmutableMap.of(
@@ -100,6 +103,10 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
                               .equals(personalAccessToken.getScmProviderUrl())
                           && s.getMetadata()
                               .getAnnotations()
+                              .get(ANNOTATION_CHE_USERID)
+                              .equals(personalAccessToken.getCheUserId())
+                          && s.getMetadata()
+                              .getAnnotations()
                               .get(ANNOTATION_SCM_USERNAME)
                               .equals(personalAccessToken.getScmUserName()))
               .findFirst();
@@ -110,31 +117,36 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
                 Map<String, String> annotations = new HashMap<>(ANNOTATIONS);
                 annotations.put(ANNOTATION_SCM_URL, personalAccessToken.getScmProviderUrl());
                 annotations.put(ANNOTATION_SCM_USERNAME, personalAccessToken.getScmUserName());
+                annotations.put(ANNOTATION_CHE_USERID, personalAccessToken.getCheUserId());
                 ObjectMeta meta =
                     new ObjectMetaBuilder()
                         .withName(
-                            String.format(
-                                NAME_PATTERN,
-                                NameGenerator.generate(personalAccessToken.getScmUserName(), 5)))
+                            NameGenerator.generate(
+                                String.format(NAME_PATTERN, personalAccessToken.getScmUserName()),
+                                5))
                         .withAnnotations(annotations)
                         .withLabels(LABELS)
                         .build();
                 return new SecretBuilder().withMetadata(meta).build();
               });
+      URL scmUrl = new URL(personalAccessToken.getScmProviderUrl());
       secret.setData(
           Map.of(
               "credentials",
               Base64.getEncoder()
                   .encodeToString(
                       format(
-                              "%s://%s:%s@%s",
-                              personalAccessToken.getScmProviderProtocol(),
+                              "%s://%s:%s@%s%s",
+                              scmUrl.getProtocol(),
                               personalAccessToken.getScmUserName(),
                               URLEncoder.encode(personalAccessToken.getToken(), UTF_8),
-                              personalAccessToken.getScmProviderHost())
+                              scmUrl.getHost(),
+                              scmUrl.getPort() != 80 && scmUrl.getPort() != -1
+                                  ? ":" + scmUrl.getPort()
+                                  : "")
                           .getBytes())));
       clientFactory.create().secrets().inNamespace(namespace).createOrReplace(secret);
-    } catch (InfrastructureException e) {
+    } catch (InfrastructureException | MalformedURLException e) {
       throw new ScmConfigurationPersistenceException(e.getMessage(), e);
     }
   }
