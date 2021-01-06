@@ -395,13 +395,13 @@ public class AsyncStorageProvisioner {
             .build();
     ServiceSpec spec = new ServiceSpec();
     spec.setPorts(singletonList(port));
-    spec.setSelector(of("app", ASYNC_STORAGE));
+    spec.setSelector(of(CHE_DEPLOYMENT_NAME_LABEL, ASYNC_STORAGE));
 
     ServerServiceBuilder serviceBuilder = new ServerServiceBuilder();
     Service service =
         serviceBuilder
             .withPorts(singletonList(port))
-            .withSelectorEntry("app", ASYNC_STORAGE)
+            .withSelectorEntry(CHE_DEPLOYMENT_NAME_LABEL, ASYNC_STORAGE)
             .withName(ASYNC_STORAGE)
             .build();
 
