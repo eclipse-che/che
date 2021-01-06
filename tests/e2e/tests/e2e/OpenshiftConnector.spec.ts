@@ -124,7 +124,7 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.typeAndSelectSuggestion(OpenshiftContextMenuItems.Push, 'OpenShift: Push Component');
     await quickOpenContainer.clickOnContainerItem('node-js-app');
     await quickOpenContainer.clickOnContainerItem('component-node-js (s2i)');
-    await terminal.selectTabByPrefixAndWaitText('OpenShift: Push', 'Changes successfully pushed to component', 120_000);
+    await terminal.selectTabByPrefixAndWaitText('OpenShift: Push', 'Changes successfully pushed to component', 240000);
   });
 
   suite('Cleanup', async () => {

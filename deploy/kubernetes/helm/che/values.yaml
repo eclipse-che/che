@@ -47,6 +47,8 @@ global:
   # Image used by endpoint watchers
   endpointWatcher:
     image: quay.io/eclipse/che-endpoint-watcher:nightly
+  # Use internal cluster svc names to communicate between components
+  useInternalClusterSVCNames: true
 
   ## Allows to enable and configure TLS
   tls:
@@ -62,7 +64,7 @@ global:
     useSelfSignedCerts: true
     selfSignedCertSecretName: self-signed-certificate
 
-    ## Name of the config-map with public certificates to add to Java trust store 
+    ## Name of the config-map with public certificates to add to Java trust store
     ## of the Che server, Keycloak and propagate into user workspaces.
     serverTrustStoreConfigMapName: ""
 

@@ -11,7 +11,7 @@ To run these tests you need to have running Che instance. You can execute tests 
 installed Docker on your machine. 
 
 ## What are these tests meant for
-These tests serves for testing Che 7 happy path. You can see description about these tests here: https://github.com/eclipse/che/tree/master/e2e.
+These tests serves for testing Che 7 happy path. You can see description about these tests here: https://github.com/eclipse/che/tree/master/tests/e2e.
 
 ## How to run it
 The easiest way is to run them via Docker. To build locally you have go to ` dockerfiles ` folder and execute following command: 

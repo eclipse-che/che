@@ -43,7 +43,7 @@ spec:
         image: centos/mysql-57-centos7
         resources:
           requests:
-            memory: 512Mi
+            memory: 256Mi
         env:
         - name: MYSQL_USER
           value: petclinic
@@ -100,7 +100,7 @@ spec:
         image: mariolet/petclinic:d2831f9b
         resources:
           requests:
-            memory: 2000Mi
+            memory: 512Mi
         ports:
         - containerPort: 8080
 ---

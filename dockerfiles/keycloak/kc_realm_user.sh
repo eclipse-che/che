@@ -96,14 +96,24 @@ if [ -f "$KEYSTORE_PATH" ]; then
     /opt/jboss/keycloak/bin/jboss-cli.sh --file=/scripts/cli/add_openshift_certificate.cli && rm -rf /opt/jboss/keycloak/standalone/configuration/standalone_xml_history
 fi
 
+# Patch configuration to allow to set 'keycloak.hostname.fixed.alwaysHttps'
+sed -i 's|<property name="httpsPort" value="${keycloak.hostname.fixed.httpsPort:-1}"/>|<property name="httpsPort" value="${keycloak.hostname.fixed.httpsPort:-1}"/><property name="alwaysHttps" value="${keycloak.hostname.fixed.alwaysHttps:false}"/>|g' /opt/jboss/keycloak/standalone/configuration/standalone.xml
+sed -i 's|<property name="httpsPort" value="${keycloak.hostname.fixed.httpsPort:-1}"/>|<property name="httpsPort" value="${keycloak.hostname.fixed.httpsPort:-1}"/><property name="alwaysHttps" value="${keycloak.hostname.fixed.alwaysHttps:false}"/>|g' /opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
+
 # POSTGRES_PORT is assigned by Kubernetes controller
 # and it isn't fit to docker-entrypoin.sh.
 unset POSTGRES_PORT
 
 echo "Starting Keycloak server..."
 
-exec /opt/jboss/docker-entrypoint.sh -Dkeycloak.migration.action=import \
-                                     -Dkeycloak.migration.provider=dir \
-                                     -Dkeycloak.migration.strategy=IGNORE_EXISTING \
-                                     -Dkeycloak.migration.dir=/scripts/ \
-                                     -Djboss.bind.address=0.0.0.0
+SYS_PROPS="-Dkeycloak.migration.action=import \
+    -Dkeycloak.migration.provider=dir \
+    -Dkeycloak.migration.strategy=IGNORE_EXISTING \
+    -Dkeycloak.migration.dir=/scripts/ \
+    -Djboss.bind.address=0.0.0.0"
+
+if [ $KEYCLOAK_HOSTNAME ] && [ $PROTOCOL == "https" ]; then
+  SYS_PROPS+=" -Dkeycloak.hostname.fixed.alwaysHttps=true"
+fi
+
+exec /opt/jboss/docker-entrypoint.sh $SYS_PROPS
