@@ -34,7 +34,7 @@ import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationExceptio
 import org.eclipse.che.api.factory.server.scm.exception.ScmConfigurationPersistenceException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderException;
-import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedPreconditionException;
+import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedScmPreconditionException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -78,7 +78,7 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
 
   @VisibleForTesting
   void save(PersonalAccessToken personalAccessToken)
-      throws UnsatisfiedPreconditionException, ScmConfigurationPersistenceException {
+      throws UnsatisfiedScmPreconditionException, ScmConfigurationPersistenceException {
     try {
       String namespace = getFirstNamespace();
       ObjectMeta meta =
@@ -120,7 +120,7 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
 
   @Override
   public PersonalAccessToken fetchAndSave(String cheUserId, String scmServerUrl)
-      throws UnsatisfiedPreconditionException, ScmConfigurationPersistenceException,
+      throws UnsatisfiedScmPreconditionException, ScmConfigurationPersistenceException,
           ScmUnauthorizedException, ScmCommunicationException, UnknownScmProviderException {
     PersonalAccessToken personalAccessToken =
         scmPersonalAccessTokenFetcher.fetchPersonalAccessToken(cheUserId, scmServerUrl);
@@ -162,15 +162,17 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
   }
 
   private String getFirstNamespace()
-      throws UnsatisfiedPreconditionException, ScmConfigurationPersistenceException {
+      throws UnsatisfiedScmPreconditionException, ScmConfigurationPersistenceException {
     try {
-      Optional<String> namespace =
-          namespaceFactory.list().stream().map(KubernetesNamespaceMeta::getName).findFirst();
-      if (namespace.isEmpty()) {
-        throw new UnsatisfiedPreconditionException(
-            "No user namespace found. Cannot read SCM credentials.");
-      }
-      return namespace.get();
+      return namespaceFactory
+          .list()
+          .stream()
+          .map(KubernetesNamespaceMeta::getName)
+          .findFirst()
+          .orElseThrow(
+              () ->
+                  new UnsatisfiedScmPreconditionException(
+                      "No user namespace found. Cannot read SCM credentials."));
     } catch (InfrastructureException e) {
       throw new ScmConfigurationPersistenceException(e.getMessage(), e);
     }

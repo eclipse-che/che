@@ -22,7 +22,7 @@ import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationExceptio
 import org.eclipse.che.api.factory.server.scm.exception.ScmConfigurationPersistenceException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderException;
-import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedPreconditionException;
+import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedScmPreconditionException;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
@@ -105,7 +105,7 @@ public class BitbucketServerAuthorizingFileContentProvider implements FileConten
                   + " the file failed with the following error message: %s",
               fileURL, e.getMessage()),
           e);
-    } catch (ScmConfigurationPersistenceException | UnsatisfiedPreconditionException e) {
+    } catch (ScmConfigurationPersistenceException | UnsatisfiedScmPreconditionException e) {
       throw new DevfileException(e.getMessage(), e);
     }
   }

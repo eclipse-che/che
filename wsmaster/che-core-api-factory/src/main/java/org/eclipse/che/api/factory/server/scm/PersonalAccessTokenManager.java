@@ -16,7 +16,7 @@ import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationExceptio
 import org.eclipse.che.api.factory.server.scm.exception.ScmConfigurationPersistenceException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderException;
-import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedPreconditionException;
+import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedScmPreconditionException;
 
 /** Manages {@link PersonalAccessToken}s in Che's permanent storage. */
 public interface PersonalAccessTokenManager {
@@ -27,7 +27,7 @@ public interface PersonalAccessTokenManager {
    * @param cheUserId
    * @param scmServerUrl
    * @return personal access token
-   * @throws UnsatisfiedPreconditionException - storage preconditions aren't met.
+   * @throws UnsatisfiedScmPreconditionException - storage preconditions aren't met.
    * @throws ScmConfigurationPersistenceException - problem occurred during communication with
    *     permanent storage.
    * @throws ScmUnauthorizedException - scm authorization required.
@@ -35,7 +35,7 @@ public interface PersonalAccessTokenManager {
    * @throws UnknownScmProviderException - scm provider is unknown.
    */
   PersonalAccessToken fetchAndSave(String cheUserId, String scmServerUrl)
-      throws UnsatisfiedPreconditionException, ScmConfigurationPersistenceException,
+      throws UnsatisfiedScmPreconditionException, ScmConfigurationPersistenceException,
           ScmUnauthorizedException, ScmCommunicationException, UnknownScmProviderException;
 
   /**

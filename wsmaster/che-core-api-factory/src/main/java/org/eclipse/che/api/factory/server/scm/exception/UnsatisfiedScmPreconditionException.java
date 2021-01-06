@@ -15,8 +15,8 @@ package org.eclipse.che.api.factory.server.scm.exception;
  * Exception for the case when one of the precondition are not met. For example at least one k8s
  * namespace exists.
  */
-public class UnsatisfiedPreconditionException extends Exception {
-  public UnsatisfiedPreconditionException(String message) {
+public class UnsatisfiedScmPreconditionException extends Exception {
+  public UnsatisfiedScmPreconditionException(String message) {
     super(message);
   }
 }

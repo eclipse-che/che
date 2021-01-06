@@ -35,7 +35,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
 import org.eclipse.che.api.factory.server.scm.exception.ScmConfigurationPersistenceException;
-import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedPreconditionException;
+import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedScmPreconditionException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -81,7 +81,7 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
 
   @Override
   public void createOrReplace(PersonalAccessToken personalAccessToken)
-      throws UnsatisfiedPreconditionException, ScmConfigurationPersistenceException {
+      throws UnsatisfiedScmPreconditionException, ScmConfigurationPersistenceException {
     try {
       String namespace = getFirstNamespace();
       Optional<Secret> existing =
@@ -93,22 +93,21 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
               .list()
               .getItems()
               .stream()
+              .filter(s -> s.getMetadata().getAnnotations() != null)
               .filter(
                   s ->
                       Boolean.parseBoolean(
                               s.getMetadata().getAnnotations().get(ANNOTATION_GIT_CREDENTIALS))
-                          && s.getMetadata()
-                              .getAnnotations()
-                              .get(ANNOTATION_SCM_URL)
-                              .equals(personalAccessToken.getScmProviderUrl())
-                          && s.getMetadata()
-                              .getAnnotations()
-                              .get(ANNOTATION_CHE_USERID)
-                              .equals(personalAccessToken.getCheUserId())
-                          && s.getMetadata()
-                              .getAnnotations()
-                              .get(ANNOTATION_SCM_USERNAME)
-                              .equals(personalAccessToken.getScmUserName()))
+                          && personalAccessToken
+                              .getScmProviderUrl()
+                              .equals(s.getMetadata().getAnnotations().get(ANNOTATION_SCM_URL))
+                          && personalAccessToken
+                              .getCheUserId()
+                              .equals(s.getMetadata().getAnnotations().get(ANNOTATION_CHE_USERID))
+                          && personalAccessToken
+                              .getScmUserName()
+                              .equals(
+                                  s.getMetadata().getAnnotations().get(ANNOTATION_SCM_USERNAME)))
               .findFirst();
 
       Secret secret =
@@ -152,12 +151,12 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
   }
 
   private String getFirstNamespace()
-      throws UnsatisfiedPreconditionException, ScmConfigurationPersistenceException {
+      throws UnsatisfiedScmPreconditionException, ScmConfigurationPersistenceException {
     try {
       Optional<String> namespace =
           namespaceFactory.list().stream().map(KubernetesNamespaceMeta::getName).findFirst();
       if (namespace.isEmpty()) {
-        throw new UnsatisfiedPreconditionException(
+        throw new UnsatisfiedScmPreconditionException(
             "No user namespace found. Cannot read SCM credentials.");
       }
       return namespace.get();
