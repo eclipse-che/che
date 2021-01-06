@@ -36,6 +36,7 @@ import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException
 import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderException;
 import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedPreconditionException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -50,11 +51,15 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
   public static final LabelSelector KPAT_LABEL_SELECTOR =
       new LabelSelectorBuilder().withMatchLabels(SECRET_LABELS).build();
 
-  public static final String NAME_PATTERN = "%s-personal-access-token";
+  public static final String NAME_PATTERN = "personal-access-token-";
 
   public static final String ANNOTATION_CHE_USERID = "che.eclipse.org/che-userid";
   public static final String ANNOTATION_SCM_USERID = "che.eclipse.org/scm-userid";
   public static final String ANNOTATION_SCM_USERNAME = "che.eclipse.org/scm-username";
+  public static final String ANNOTATION_SCM_PERSONAL_ACCESS_TOKEN_ID =
+      "che.eclipse.org/scm-personal-access-token-id";
+  public static final String ANNOTATION_SCM_PERSONAL_ACCESS_TOKEN_NAME =
+      "che.eclipse.org/scm-personal-access-token-name";
   public static final String ANNOTATION_SCM_URL = "che.eclipse.org/scm-url";
 
   private final KubernetesNamespaceFactory namespaceFactory;
@@ -78,17 +83,20 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
       String namespace = getFirstNamespace();
       ObjectMeta meta =
           new ObjectMetaBuilder()
-              .withName(String.format(NAME_PATTERN, personalAccessToken.getScmProviderHost()))
+              .withName(NameGenerator.generate(NAME_PATTERN, 5))
               .withAnnotations(
-                  ImmutableMap.of(
-                      ANNOTATION_CHE_USERID,
-                      personalAccessToken.getCheUserId(),
-                      ANNOTATION_SCM_USERID,
-                      personalAccessToken.getScmUserId(),
-                      ANNOTATION_SCM_USERNAME,
-                      personalAccessToken.getScmUserName(),
-                      ANNOTATION_SCM_URL,
-                      personalAccessToken.getScmProviderUrl()))
+                  new ImmutableMap.Builder<String, String>()
+                      .put(ANNOTATION_CHE_USERID, personalAccessToken.getCheUserId())
+                      .put(ANNOTATION_SCM_USERID, personalAccessToken.getScmUserId())
+                      .put(ANNOTATION_SCM_USERNAME, personalAccessToken.getScmUserName())
+                      .put(ANNOTATION_SCM_URL, personalAccessToken.getScmProviderUrl())
+                      .put(
+                          ANNOTATION_SCM_PERSONAL_ACCESS_TOKEN_ID,
+                          personalAccessToken.getScmTokenId())
+                      .put(
+                          ANNOTATION_SCM_PERSONAL_ACCESS_TOKEN_NAME,
+                          personalAccessToken.getScmTokenName())
+                      .build())
               .withLabels(SECRET_LABELS)
               .build();
 
@@ -141,6 +149,8 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
                     annotations.get(ANNOTATION_CHE_USERID),
                     annotations.get(ANNOTATION_SCM_USERNAME),
                     annotations.get(ANNOTATION_SCM_USERID),
+                    annotations.get(ANNOTATION_SCM_PERSONAL_ACCESS_TOKEN_ID),
+                    annotations.get(ANNOTATION_SCM_PERSONAL_ACCESS_TOKEN_NAME),
                     new String(Base64.getDecoder().decode(secret.getData().get("token")))));
           }
         }

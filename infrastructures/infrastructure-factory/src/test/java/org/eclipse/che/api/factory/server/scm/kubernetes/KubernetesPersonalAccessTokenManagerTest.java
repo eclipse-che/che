@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import io.fabric8.kubernetes.api.model.DoneableSecret;
 import io.fabric8.kubernetes.api.model.LabelSelector;
@@ -92,7 +93,13 @@ public class KubernetesPersonalAccessTokenManagerTest {
 
     PersonalAccessToken token =
         new PersonalAccessToken(
-            "https://bitbucket.com", "cheUser", "username", "userId", "token123");
+            "https://bitbucket.com",
+            "cheUser",
+            "username",
+            "userId",
+            "token-name",
+            "tid-24",
+            "token123");
 
     // when
     personalAccessTokenManager.save(token);
@@ -101,10 +108,11 @@ public class KubernetesPersonalAccessTokenManagerTest {
     verify(nonNamespaceOperation).createOrReplace(captor.capture());
     Secret createdSecret = captor.getValue();
     assertNotNull(createdSecret);
-    assertEquals(
-        createdSecret.getMetadata().getName(),
-        String.format(
-            KubernetesPersonalAccessTokenManager.NAME_PATTERN, token.getScmProviderHost()));
+    assertTrue(
+        createdSecret
+            .getMetadata()
+            .getName()
+            .startsWith(KubernetesPersonalAccessTokenManager.NAME_PATTERN));
     assertEquals(
         createdSecret.getData().get("token"),
         Base64.getEncoder().encodeToString(token.getToken().getBytes()));
@@ -155,7 +163,7 @@ public class KubernetesPersonalAccessTokenManagerTest {
 
     // then
     assertEquals(token.getCheUserId(), "user1");
-    assertEquals(token.getScmProviderHost(), "host1");
+    assertEquals(token.getScmProviderUrl(), "http://host1");
     assertEquals(token.getToken(), "token1");
   }
 }

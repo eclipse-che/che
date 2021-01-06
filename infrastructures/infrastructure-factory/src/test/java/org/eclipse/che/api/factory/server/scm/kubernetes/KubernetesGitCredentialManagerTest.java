@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.factory.server.scm.kubernetes;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.factory.server.scm.kubernetes.KubernetesGitCredentialManager.ANNOTATION_SCM_URL;
@@ -21,7 +20,8 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import io.fabric8.kubernetes.api.model.DoneableSecret;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -98,7 +98,13 @@ public class KubernetesGitCredentialManagerTest {
 
     PersonalAccessToken token =
         new PersonalAccessToken(
-            "https://bitbucket.com", "cheUser", "username", "userId", "token123");
+            "https://bitbucket.com",
+            "cheUser",
+            "username",
+            "userId",
+            "token-name",
+            "tid-23434",
+            "token123");
 
     // when
     kubernetesGitCredentialManager.createOrReplace(token);
@@ -107,16 +113,8 @@ public class KubernetesGitCredentialManagerTest {
     Secret createdSecret = captor.getValue();
     assertNotNull(createdSecret);
     assertEquals(
-        createdSecret.getData().get("credentials"),
-        Base64.getEncoder()
-            .encodeToString(
-                format(
-                        "%s://%s:%s@%s",
-                        token.getScmProviderProtocol(),
-                        token.getScmUserName(),
-                        token.getToken(),
-                        token.getScmProviderHost())
-                    .getBytes()));
+        new String(Base64.getDecoder().decode(createdSecret.getData().get("credentials"))),
+        "https://username:token123@bitbucket.com");
   }
 
   @Test
@@ -124,7 +122,13 @@ public class KubernetesGitCredentialManagerTest {
     KubernetesNamespaceMeta namespaceMeta = new KubernetesNamespaceMetaImpl("test");
     PersonalAccessToken token =
         new PersonalAccessToken(
-            "https://bitbucket.com", "cheUser", "username", "userId", "token123");
+            "https://bitbucket.com:5648",
+            "cheUser",
+            "username",
+            "userId",
+            "token-name",
+            "tid-23434",
+            "token123");
 
     Map<String, String> annotations = new HashMap<>();
     annotations.put(ANNOTATION_SCM_URL, token.getScmProviderUrl());
@@ -159,15 +163,7 @@ public class KubernetesGitCredentialManagerTest {
     Secret createdSecret = captor.getValue();
     assertNotNull(createdSecret);
     assertEquals(
-        createdSecret.getData().get("credentials"),
-        Base64.getEncoder()
-            .encodeToString(
-                format(
-                        "%s://%s:%s@%s",
-                        token.getScmProviderProtocol(),
-                        token.getScmUserName(),
-                        token.getToken(),
-                        token.getScmProviderHost())
-                    .getBytes()));
+        new String(Base64.getDecoder().decode(createdSecret.getData().get("credentials"))),
+        "https://username:token123@bitbucket.com:5648");
   }
 }

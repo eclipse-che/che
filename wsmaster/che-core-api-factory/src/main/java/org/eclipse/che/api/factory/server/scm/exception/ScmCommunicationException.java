@@ -16,4 +16,8 @@ public class ScmCommunicationException extends Exception {
   public ScmCommunicationException(String message) {
     super(message);
   }
+
+  public ScmCommunicationException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }
