@@ -286,7 +286,8 @@ EOL"""
                         --listr-renderer=verbose \\
                         --platform=minikube \\
                         --che-operator-cr-patch-yaml=$CUSTOM_RESOURCE_PATCH_FILE \\
-                        --chenamespace=eclipse-che
+                        --chenamespace=eclipse-che \\
+                        --telemetry=off
                     """
 
                     cheHost = sh(
