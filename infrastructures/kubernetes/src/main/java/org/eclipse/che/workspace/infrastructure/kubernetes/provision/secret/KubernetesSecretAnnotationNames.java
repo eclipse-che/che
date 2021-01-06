@@ -11,6 +11,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret;
 
+/**
+ * Set of annotations used in auto-mount secrets to specify theirs type and/or expected behaviour.
+ */
 public class KubernetesSecretAnnotationNames {
 
   public static final String ANNOTATION_PREFIX = "che.eclipse.org";

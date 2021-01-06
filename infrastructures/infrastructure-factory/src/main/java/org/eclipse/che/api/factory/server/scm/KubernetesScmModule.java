@@ -15,7 +15,7 @@ import com.google.inject.AbstractModule;
 import org.eclipse.che.api.factory.server.scm.kubernetes.KubernetesGitCredentialManager;
 import org.eclipse.che.api.factory.server.scm.kubernetes.KubernetesPersonalAccessTokenManager;
 
-public class ScmModule extends AbstractModule {
+public class KubernetesScmModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(GitCredentialManager.class).to(KubernetesGitCredentialManager.class);

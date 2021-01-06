@@ -18,7 +18,7 @@ import java.util.Map;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 
 /**
- * Interface for fetching devfile-related stuff from repositories or raw URL-s. Used for retrieving
+ * Interface for fetching devfile-related content from repositories or raw URL-s. Used for retrieving
  * devfile content as well as referenced files.
  *
  * @author Max Shaposhnyk

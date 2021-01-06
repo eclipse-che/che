@@ -34,8 +34,8 @@ import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.factory.server.bitbucket.BitbucketServerAuthorizingFactoryParametersResolver;
-import org.eclipse.che.api.factory.server.bitbucket.BitbucketServerModule;
 import org.eclipse.che.api.factory.server.github.GithubFactoryParametersResolver;
+import org.eclipse.che.api.factory.server.scm.KubernetesScmModule;
 import org.eclipse.che.api.infraproxy.server.InfraProxyModule;
 import org.eclipse.che.api.metrics.WsMasterMetricsModule;
 import org.eclipse.che.api.system.server.ServiceTermination;
@@ -157,8 +157,8 @@ public class WsMasterModule extends AbstractModule {
         .addBinding()
         .to(BitbucketServerAuthorizingFactoryParametersResolver.class);
 
-    install(new org.eclipse.che.api.factory.server.scm.ScmModule());
-    install(new BitbucketServerModule());
+    install(new KubernetesScmModule());
+    install(new org.eclipse.che.api.factory.server.bitbucket.BitbucketServerModule());
 
     bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
     bind(org.eclipse.che.api.ssh.server.SshService.class);
