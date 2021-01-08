@@ -61,6 +61,7 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
   public static final String ANNOTATION_SCM_PERSONAL_ACCESS_TOKEN_NAME =
       "che.eclipse.org/scm-personal-access-token-name";
   public static final String ANNOTATION_SCM_URL = "che.eclipse.org/scm-url";
+  public static final String TOKEN_DATA_FIELD = "token";
 
   private final KubernetesNamespaceFactory namespaceFactory;
   private final KubernetesClientFactory clientFactory;
@@ -102,11 +103,10 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
 
       Secret secret =
           new SecretBuilder()
-              .withApiVersion("v1")
               .withMetadata(meta)
               .withData(
                   Map.of(
-                      "token",
+                      TOKEN_DATA_FIELD,
                       Base64.getEncoder()
                           .encodeToString(
                               personalAccessToken.getToken().getBytes(StandardCharsets.UTF_8))))

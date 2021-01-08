@@ -14,6 +14,11 @@ package org.eclipse.che.api.factory.server.bitbucket;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenFetcher;
 
+/**
+ * Bitbucket implementation for {@link PersonalAccessTokenFetcher}. Right now returns {@code null}
+ * for all possible SCM URL-s (which is valid value) but later will be extended to fully featured
+ * class.
+ */
 public class BitbucketServerPersonalAccessTokenFetcher implements PersonalAccessTokenFetcher {
   @Override
   public PersonalAccessToken fetchPersonalAccessToken(String cheUserId, String scmServerUrl) {
