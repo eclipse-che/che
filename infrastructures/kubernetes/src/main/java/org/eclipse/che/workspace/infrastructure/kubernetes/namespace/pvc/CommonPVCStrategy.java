@@ -316,10 +316,14 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     return false;
   }
 
-  /** @return true, if a given user has no workspaces, false otherwise */
+  /**
+   * @return true, if a given user has no workspaces, false otherwise (or if the subject is
+   *     anonymous)
+   */
   private boolean userHasNoWorkspaces() {
-    String userId = getSessionUserIdOrUndefined();
-    if (!"undefined".equals(userId)) {
+    Subject subject = EnvironmentContext.getCurrent().getSubject();
+    if (!subject.isAnonymous()) {
+      String userId = subject.getUserId();
       try {
         Page<WorkspaceImpl> workspaces = workspaceManager.getWorkspaces(userId, false, 1, 0);
         if (workspaces.isEmpty()) {
@@ -335,13 +339,5 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       }
     }
     return false;
-  }
-
-  private String getSessionUserIdOrUndefined() {
-    final Subject subject = EnvironmentContext.getCurrent().getSubject();
-    if (!subject.isAnonymous()) {
-      return subject.getUserId();
-    }
-    return "undefined";
   }
 }

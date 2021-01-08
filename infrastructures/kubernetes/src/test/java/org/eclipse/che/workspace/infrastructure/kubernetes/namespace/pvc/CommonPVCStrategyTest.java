@@ -50,6 +50,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -428,7 +429,7 @@ public class CommonPVCStrategyTest {
   }
 
   @Test
-  public void shoulNotDeleteCommonPVCIfUserIdIsUndefined() throws Exception {
+  public void shoulNotDeleteCommonPVCIfSubjectIsAnonymous() throws Exception {
     // given
     Workspace workspace = mock(Workspace.class);
     Page workspaces = mock(Page.class);
@@ -438,7 +439,7 @@ public class CommonPVCStrategyTest {
     lenient()
         .when(workspaceManager.getWorkspaces(anyString(), eq(false), anyInt(), anyLong()))
         .thenReturn((workspaces));
-    lenient().when(workspaces.isEmpty()).thenReturn(false);
+    lenient().when(workspaces.isEmpty()).thenReturn(true);
     lenient().when(workspace.getId()).thenReturn(WORKSPACE_ID);
 
     WorkspaceConfig workspaceConfig = mock(WorkspaceConfig.class);
@@ -453,7 +454,7 @@ public class CommonPVCStrategyTest {
     when(ns.getName()).thenReturn("ns");
 
     EnvironmentContext context = new EnvironmentContext();
-    context.setSubject(new SubjectImpl("user", "undefined", "token123", false));
+    context.setSubject(Subject.ANONYMOUS);
     EnvironmentContext.setCurrent(context);
 
     // when
@@ -467,7 +468,7 @@ public class CommonPVCStrategyTest {
   }
 
   @Test
-  public void shoulDeleteCommonPVCIfUsedAcrossAllUsersAndNoWorspacesLeft() throws Exception {
+  public void shoulDeleteCommonPVCIfUsedAcrossAllUsersAndNoWorkspacesLeft() throws Exception {
     // given
     commonPVCStrategy =
         new CommonPVCStrategy(
