@@ -8,7 +8,6 @@ kill_ffmpeg(){
   wait "$ffmpeg_pid"
   mkdir -p /tmp/e2e/report/
   cp /tmp/ffmpeg_report/* /tmp/e2e/report/
-  exit $EXIT_CODE
 }
 
 set -x
@@ -110,4 +109,5 @@ else
   if [ "${SCREEN_RECORDING}" == "true" ]; then
     kill_ffmpeg
   fi
+  exit $EXIT_CODE
 fi
