@@ -86,7 +86,8 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
     try {
       final String namespace = getFirstNamespace();
       final KubernetesClient client = clientFactory.create();
-      Optional<Secret> existing = client
+      Optional<Secret> existing =
+          client
               .secrets()
               .inNamespace(namespace)
               .withLabels(LABELS)
