@@ -39,6 +39,8 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handle the creation of some elements used inside a {@link FactoryDto}.
@@ -48,6 +50,8 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
  */
 @Singleton
 public class URLFactoryBuilder {
+
+  private static final Logger LOG = LoggerFactory.getLogger(URLFactoryBuilder.class);
 
   private final String defaultCheEditor;
   private final String defaultChePlugins;
@@ -90,9 +94,14 @@ public class URLFactoryBuilder {
         devfileYamlContent = fileContentProvider.fetchContent(location.location());
       } catch (IOException ex) {
         // try next location
+        LOG.debug(
+            "Unreachable devfile location met: {}. Error is: {}",
+            location.location(),
+            ex.getMessage());
         continue;
       } catch (DevfileException e) {
         // must never happen as devfile location is always an absolute URL
+        LOG.debug("Unexpected devfile exception: {}", e.getMessage());
         throw new BadRequestException(
             format("There is an error resolving defvile. URL is %s", location.location()));
       }
