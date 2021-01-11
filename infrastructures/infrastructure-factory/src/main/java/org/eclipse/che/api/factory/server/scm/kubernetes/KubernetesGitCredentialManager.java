@@ -23,6 +23,7 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -43,7 +44,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.Kubernetes
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 
 /**
- * Creates or updates Git credentials secret in user-s namespace to allow Git operations on private
+ * Creates or updates Git credentials secret in user's namespace to allow Git operations on private
  * repositories.
  */
 @Singleton
@@ -83,10 +84,9 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
   public void createOrReplace(PersonalAccessToken personalAccessToken)
       throws UnsatisfiedScmPreconditionException, ScmConfigurationPersistenceException {
     try {
-      String namespace = getFirstNamespace();
-      Optional<Secret> existing =
-          clientFactory
-              .create()
+      final String namespace = getFirstNamespace();
+      final KubernetesClient client = clientFactory.create();
+      Optional<Secret> existing = client
               .secrets()
               .inNamespace(namespace)
               .withLabels(LABELS)
@@ -144,7 +144,7 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
                                   ? ":" + scmUrl.getPort()
                                   : "")
                           .getBytes())));
-      clientFactory.create().secrets().inNamespace(namespace).createOrReplace(secret);
+      client.secrets().inNamespace(namespace).createOrReplace(secret);
     } catch (InfrastructureException | MalformedURLException e) {
       throw new ScmConfigurationPersistenceException(e.getMessage(), e);
     }
