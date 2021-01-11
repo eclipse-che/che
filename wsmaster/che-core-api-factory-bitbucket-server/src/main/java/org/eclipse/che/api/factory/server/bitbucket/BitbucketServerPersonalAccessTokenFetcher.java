@@ -22,7 +22,7 @@ import org.eclipse.che.commons.subject.Subject;
  */
 public class BitbucketServerPersonalAccessTokenFetcher implements PersonalAccessTokenFetcher {
   @Override
-  public PersonalAccessToken  fetchPersonalAccessToken(Subject cheUser, String scmServerUrl) {
+  public PersonalAccessToken fetchPersonalAccessToken(Subject cheUser, String scmServerUrl) {
     return null;
   }
 }
