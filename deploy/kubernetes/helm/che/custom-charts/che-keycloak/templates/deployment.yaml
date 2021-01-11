@@ -14,6 +14,10 @@ metadata:
     app: che
     component: keycloak
     io.kompose.service: keycloak
+    app.kubernetes.io/name: che
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
   name: keycloak
 spec:
   replicas: 1

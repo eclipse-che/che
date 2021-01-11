@@ -13,6 +13,10 @@ metadata:
   labels:
     app: che
     component: che-gateway
+    app.kubernetes.io/name: che
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
   name: che-gateway
 spec:
   replicas: 1

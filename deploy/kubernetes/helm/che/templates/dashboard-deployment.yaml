@@ -13,6 +13,10 @@ metadata:
   labels:
     app: che
     component: che-dashboard
+    app.kubernetes.io/name: che
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
   name: che-dashboard
 spec:
   replicas: 1

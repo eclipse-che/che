@@ -14,6 +14,10 @@ metadata:
   labels:
     app: jaeger
     jaeger-infra: jaeger-deployment
+    app.kubernetes.io/name: che
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   replicas: 1
   selector:
