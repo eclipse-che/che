@@ -37,6 +37,7 @@ import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderExcept
 import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedScmPreconditionException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -119,17 +120,17 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
   }
 
   @Override
-  public PersonalAccessToken fetchAndSave(String cheUserId, String scmServerUrl)
+  public PersonalAccessToken fetchAndSave(Subject cheUser, String scmServerUrl)
       throws UnsatisfiedScmPreconditionException, ScmConfigurationPersistenceException,
           ScmUnauthorizedException, ScmCommunicationException, UnknownScmProviderException {
     PersonalAccessToken personalAccessToken =
-        scmPersonalAccessTokenFetcher.fetchPersonalAccessToken(cheUserId, scmServerUrl);
+        scmPersonalAccessTokenFetcher.fetchPersonalAccessToken(cheUser, scmServerUrl);
     save(personalAccessToken);
     return personalAccessToken;
   }
 
   @Override
-  public Optional<PersonalAccessToken> get(String cheUserId, String scmServerUrl)
+  public Optional<PersonalAccessToken> get(Subject cheUser, String scmServerUrl)
       throws ScmConfigurationPersistenceException {
 
     try {
@@ -141,7 +142,7 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
                 .get(KPAT_LABEL_SELECTOR);
         for (Secret secret : secrets) {
           Map<String, String> annotations = secret.getMetadata().getAnnotations();
-          if (annotations.get(ANNOTATION_CHE_USERID).equals(cheUserId)
+          if (annotations.get(ANNOTATION_CHE_USERID).equals(cheUser.getUserId())
               && annotations.get(ANNOTATION_SCM_URL).equals(scmServerUrl)) {
             return Optional.of(
                 new PersonalAccessToken(

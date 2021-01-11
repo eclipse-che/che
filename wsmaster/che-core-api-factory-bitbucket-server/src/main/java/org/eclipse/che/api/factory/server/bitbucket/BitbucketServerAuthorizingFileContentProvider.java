@@ -66,7 +66,7 @@ public class BitbucketServerAuthorizingFileContentProvider implements FileConten
     try {
       Optional<PersonalAccessToken> token =
           personalAccessTokenManager.get(
-              EnvironmentContext.getCurrent().getSubject().getUserId(), bitbucketUrl.getHostName());
+              EnvironmentContext.getCurrent().getSubject(), bitbucketUrl.getHostName());
       if (token.isPresent()) {
         PersonalAccessToken personalAccessToken = token.get();
         String content = urlFetcher.fetch(requestURL, "Bearer " + personalAccessToken.getToken());
@@ -80,8 +80,7 @@ public class BitbucketServerAuthorizingFileContentProvider implements FileConten
           try {
             PersonalAccessToken personalAccessToken =
                 personalAccessTokenManager.fetchAndSave(
-                    EnvironmentContext.getCurrent().getSubject().getUserId(),
-                    bitbucketUrl.getHostName());
+                    EnvironmentContext.getCurrent().getSubject(), bitbucketUrl.getHostName());
             String content =
                 urlFetcher.fetch(requestURL, "Bearer " + personalAccessToken.getToken());
             gitCredentialManager.createOrReplace(personalAccessToken);

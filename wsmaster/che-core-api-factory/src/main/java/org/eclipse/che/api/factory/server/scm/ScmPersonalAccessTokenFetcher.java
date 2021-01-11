@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderException;
+import org.eclipse.che.commons.subject.Subject;
 
 /**
  * Iterate over configured list of PersonalAccessTokenFetcher with attempt to get
@@ -30,10 +31,10 @@ public class ScmPersonalAccessTokenFetcher {
     this.personalAccessTokenFetchers = personalAccessTokenFetchers;
   }
 
-  public PersonalAccessToken fetchPersonalAccessToken(String cheUserId, String scmServerUrl)
+  public PersonalAccessToken fetchPersonalAccessToken(Subject cheUser, String scmServerUrl)
       throws ScmUnauthorizedException, ScmCommunicationException, UnknownScmProviderException {
     for (PersonalAccessTokenFetcher fetcher : personalAccessTokenFetchers) {
-      PersonalAccessToken token = fetcher.fetchPersonalAccessToken(cheUserId, scmServerUrl);
+      PersonalAccessToken token = fetcher.fetchPersonalAccessToken(cheUser, scmServerUrl);
       if (token != null) {
         return token;
       }

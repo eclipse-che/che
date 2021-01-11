@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.Map;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
 import org.eclipse.che.api.factory.server.scm.ScmPersonalAccessTokenFetcher;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.server.impls.KubernetesNamespaceMetaImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
@@ -159,7 +160,10 @@ public class KubernetesPersonalAccessTokenManagerTest {
         .thenReturn(Arrays.asList(secret1, secret2, secret3));
 
     // when
-    PersonalAccessToken token = personalAccessTokenManager.get("user1", "http://host1").get();
+    PersonalAccessToken token =
+        personalAccessTokenManager
+            .get(new SubjectImpl("user", "user1", "t1", false), "http://host1")
+            .get();
 
     // then
     assertEquals(token.getCheUserId(), "user1");

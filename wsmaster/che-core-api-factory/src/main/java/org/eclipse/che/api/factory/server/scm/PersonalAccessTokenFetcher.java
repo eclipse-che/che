@@ -13,12 +13,13 @@ package org.eclipse.che.api.factory.server.scm;
 
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
+import org.eclipse.che.commons.subject.Subject;
 
 public interface PersonalAccessTokenFetcher {
   /**
    * Retrieve new PersonalAccessToken from concrete scm provider
    *
-   * @param cheUserId
+   * @param cheUser
    * @param scmServerUrl
    * @return - personal access token.
    * @throws ScmUnauthorizedException - in case if user are not authorized che server to create new
@@ -26,6 +27,6 @@ public interface PersonalAccessTokenFetcher {
    * @throws ScmCommunicationException - Some unexpected problem occurred during communication with
    *     scm provider.
    */
-  PersonalAccessToken fetchPersonalAccessToken(String cheUserId, String scmServerUrl)
+  PersonalAccessToken fetchPersonalAccessToken(Subject cheUser, String scmServerUrl)
       throws ScmUnauthorizedException, ScmCommunicationException;
 }
