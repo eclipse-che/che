@@ -13,6 +13,7 @@ package org.eclipse.che.api.factory.server.bitbucket;
 
 import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenFetcher;
+import org.eclipse.che.commons.subject.Subject;
 
 /**
  * Bitbucket implementation for {@link PersonalAccessTokenFetcher}. Right now returns {@code null}
@@ -21,7 +22,7 @@ import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenFetcher;
  */
 public class BitbucketServerPersonalAccessTokenFetcher implements PersonalAccessTokenFetcher {
   @Override
-  public PersonalAccessToken fetchPersonalAccessToken(String cheUserId, String scmServerUrl) {
+  public PersonalAccessToken  fetchPersonalAccessToken(Subject cheUser, String scmServerUrl) {
     return null;
   }
 }

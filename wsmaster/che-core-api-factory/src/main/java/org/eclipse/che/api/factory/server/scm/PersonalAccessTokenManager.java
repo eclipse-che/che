@@ -17,6 +17,7 @@ import org.eclipse.che.api.factory.server.scm.exception.ScmConfigurationPersiste
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderException;
 import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedScmPreconditionException;
+import org.eclipse.che.commons.subject.Subject;
 
 /** Manages {@link PersonalAccessToken}s in Che's permanent storage. */
 public interface PersonalAccessTokenManager {
@@ -24,7 +25,7 @@ public interface PersonalAccessTokenManager {
    * Fetches a new {@link PersonalAccessToken} token from scm provider and save it in permanent
    * storage for further usage.
    *
-   * @param cheUserId
+   * @param cheUser
    * @param scmServerUrl
    * @return personal access token
    * @throws UnsatisfiedScmPreconditionException - storage preconditions aren't met.
@@ -34,19 +35,19 @@ public interface PersonalAccessTokenManager {
    * @throws ScmCommunicationException - problem occurred during communication with scm provider.
    * @throws UnknownScmProviderException - scm provider is unknown.
    */
-  PersonalAccessToken fetchAndSave(String cheUserId, String scmServerUrl)
+  PersonalAccessToken fetchAndSave(Subject cheUser, String scmServerUrl)
       throws UnsatisfiedScmPreconditionException, ScmConfigurationPersistenceException,
           ScmUnauthorizedException, ScmCommunicationException, UnknownScmProviderException;
 
   /**
    * Gets {@link PersonalAccessToken} from permanent storage.
    *
-   * @param cheUserId
+   * @param cheUser
    * @param scmServerUrl
    * @return personal access token
    * @throws ScmConfigurationPersistenceException - problem occurred during communication with *
    *     permanent storage.
    */
-  Optional<PersonalAccessToken> get(String cheUserId, String scmServerUrl)
+  Optional<PersonalAccessToken> get(Subject cheUser, String scmServerUrl)
       throws ScmConfigurationPersistenceException;
 }
