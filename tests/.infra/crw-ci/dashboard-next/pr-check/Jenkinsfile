@@ -26,7 +26,7 @@ pipeline {
         pathToChectl = ""
 
         CHE_REPO_BRANCH = "iokhrime-dashboard-next"
-        DASHBOARD_NEXT_REPO_URL="https://github.com/che-incubator/che-dashboard-next.git"
+        DASHBOARD_NEXT_REPO_URL="https://github.com/eclipse/che-dashboard.git"
     }
 
     parameters {
@@ -199,7 +199,7 @@ pipeline {
                     echo "Donwload the 'che-dashboard-next' project and checkout to branch"
 
                     git clone $DASHBOARD_NEXT_REPO_URL
-                    cd che-dashboard-next
+                    cd che-dashboard
                     git checkout $ghprbSourceBranch
 
 
