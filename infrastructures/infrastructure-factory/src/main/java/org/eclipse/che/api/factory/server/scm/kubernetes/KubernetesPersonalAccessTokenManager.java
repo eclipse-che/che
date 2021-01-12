@@ -49,7 +49,7 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
       ImmutableMap.of(
           "app.kubernetes.io/part-of", "che.eclipse.org",
           "app.kubernetes.io/component", "scm-personal-access-token");
-  public static final LabelSelector KPAT_LABEL_SELECTOR =
+  public static final LabelSelector KUBERNETES_PERSONAL_ACCESS_TOKEN_LABEL_SELECTOR =
       new LabelSelectorBuilder().withMatchLabels(SECRET_LABELS).build();
 
   public static final String NAME_PATTERN = "personal-access-token-";
@@ -139,7 +139,7 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
             namespaceFactory
                 .access(null, namespaceMeta.getName())
                 .secrets()
-                .get(KPAT_LABEL_SELECTOR);
+                .get(KUBERNETES_PERSONAL_ACCESS_TOKEN_LABEL_SELECTOR);
         for (Secret secret : secrets) {
           Map<String, String> annotations = secret.getMetadata().getAnnotations();
           if (annotations.get(ANNOTATION_CHE_USERID).equals(cheUser.getUserId())
