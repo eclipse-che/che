@@ -86,6 +86,8 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
     try {
       final String namespace = getFirstNamespace();
       final KubernetesClient client = clientFactory.create();
+      // to avoid duplicating secrets we try to reuse existing one by matching
+      // hostname/username if possible, and update it. Otherwise, create new one.
       Optional<Secret> existing =
           client
               .secrets()
@@ -151,6 +153,11 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
     }
   }
 
+  /**
+   * It is not guaranteed that this code will always return same namespace, but since credentials
+   * are now added into manually pre-created user namespace, we can expect always the same result
+   * will be returned.
+   */
   private String getFirstNamespace()
       throws UnsatisfiedScmPreconditionException, ScmConfigurationPersistenceException {
     try {
