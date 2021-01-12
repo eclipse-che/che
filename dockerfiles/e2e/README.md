@@ -38,6 +38,13 @@ Happy Path test suite will be run by default when executing a docker run command
 docker run --shm-size=256m -e TEST_SUITE=test-happy-path -e TS_SELENIUM_BASE_URL=$URL eclipse/che-e2e:nightly
 ```
 
+### Video recording
+ffmpeg will record the screen and produce mp4 file. Disable the recording by specifying `VIDEO_RECORDING=false` env parameter.
+
+```
+docker run ... -e VIDEO_RECORDING=false ... eclipse/che-e2e:nightly
+```
+
 ### Debugging
 #### Running own code
 If you have done some changes locally and you want to test them, you can mount your code directly to the Docker. If you do so, your mounted code will be executed instead of the code that is already in an image.
@@ -48,3 +55,4 @@ docker run --shm-size=256m -v /full/path/to/your/e2e:/tmp/e2e:Z -e TS_SELENIUM_B
 
 #### Watching Chrome
 If you want to see what is going on in chrome inside a docker, you can use VNC. When running a docker, you can see API where you can connect. This API is on the first line of output and can look like that: ` You can watch locally using VNC with IP: 172.17.0.2 `. Then you can easily join VNC using this API: ` 172.17.0.2:0 `.
+

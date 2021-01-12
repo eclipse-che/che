@@ -95,13 +95,19 @@ End_script
   
   echo "Files sent to load-tests-ftp-service."
 else
-  mkdir -p /tmp/ffmpeg_report
-  nohup ffmpeg -y -video_size 1920x1080 -framerate 24 -f x11grab -i :20.0 /tmp/ffmpeg_report/output.mp4 2> /tmp/ffmpeg_report/ffmpeg_err.txt > /tmp/ffmpeg_report/ffmpeg_std.txt & 
-  ffmpeg_pid=$!
-  trap kill_ffmpeg 2 15
+  SCREEN_RECORDING=${VIDEO_RECORDING:-true}
+  if [ "${SCREEN_RECORDING}" == "true" ]; then
+    echo "Starting ffmpeg recording..."
+    mkdir -p /tmp/ffmpeg_report
+    nohup ffmpeg -y -video_size 1920x1080 -framerate 24 -f x11grab -i :20.0 /tmp/ffmpeg_report/output.mp4 2> /tmp/ffmpeg_report/ffmpeg_err.txt > /tmp/ffmpeg_report/ffmpeg_std.txt & 
+    ffmpeg_pid=$!
+    trap kill_ffmpeg 2 15
+  fi
 
   echo "Running TEST_SUITE: $TEST_SUITE with user: $TS_SELENIUM_USERNAME"
   npm run $TEST_SUITE
   EXIT_CODE=$?
-  kill_ffmpeg
+  if [ "${SCREEN_RECORDING}" == "true" ]; then
+    kill_ffmpeg
+  fi
 fi
