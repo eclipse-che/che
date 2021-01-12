@@ -47,14 +47,6 @@ export class Workspaces {
         await this.driverHelper.waitVisibility(workspaceListItemLocator, timeout);
     }
 
-    async clickOnStopWorkspaceButton(workspaceName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
-        Logger.debug(`Workspaces.clickOnStopWorkspaceButton "${workspaceName}"`);
-
-        const stopWorkspaceButtonLocator: By = By.xpath(`(${this.getWorkspaceListItemLocator(workspaceName)}//td[@data-label='ACTIONS']//span)[1]`);
-
-        await this.driverHelper.waitAndClick(stopWorkspaceButtonLocator, timeout);
-    }
-
     async waitWorkspaceWithRunningStatus(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceWithRunningStatus "${workspaceName}"`);
 
@@ -105,6 +97,12 @@ export class Workspaces {
         await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator(workspaceName, 'Delete Workspace'));
     }
 
+    async clickActionsStopWorkspaceButton(workspaceName: string) {
+        Logger.debug(`Workspaces.clickActionsStopWorkspaceButton for the '${workspaceName}' list item`);
+
+        await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator(workspaceName, 'Stop Workspace'));
+    }
+
     async waitDeleteWorkspaceConfirmationWindow(timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT){
         Logger.debug(`Workspaces.waitDeleteWorkspaceConfirmationWindow`);
 
@@ -141,6 +139,14 @@ export class Workspaces {
         await this.waitDeleteWorkspaceConfirmationWindow(timeout);
         await this.clickToDeleteConfirmationCheckbox(timeout);
         await this.waitAndClickEnabledConfirmationWindowDeleteButton(timeout);
+    }
+
+    async stopWorkspaceByActionsButton(workspaceName: string, timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) {
+        Logger.debug('Workspaces.stopWorkspaceByActionsButton');
+
+        await this.waitWorkspaceListItem(workspaceName, timeout);
+        await this.openActionsPopup(workspaceName, timeout);
+        await this.clickActionsStopWorkspaceButton(workspaceName);
     }
 
     async waitWorkspaceListItemAbcence(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
