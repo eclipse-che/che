@@ -157,7 +157,7 @@ public class WsMasterModule extends AbstractModule {
         .addBinding()
         .to(BitbucketServerAuthorizingFactoryParametersResolver.class);
 
-    install(new KubernetesScmModule());
+    install(new org.eclipse.che.api.factory.server.scm.KubernetesScmModule());
     install(new org.eclipse.che.api.factory.server.bitbucket.BitbucketServerModule());
 
     bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
