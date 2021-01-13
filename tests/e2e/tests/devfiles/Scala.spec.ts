@@ -18,7 +18,7 @@ const workspaceSampleName: string = 'console-scala-simple';
 const workspaceRootFolderName: string = 'example';
 const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/src/main/scala/org/eclipse/che/examples`;
 const tabTitle: string = 'HelloWorld.scala';
-const compileTaskkName: string = 'sbt compile';
+const compileTaskName: string = 'sbt compile';
 const runTaskName: string = 'sbt run';
 const testTaskName: string = 'sbt test';
 const stack: string = 'Scala';
@@ -35,8 +35,8 @@ suite(`${stack} test`, async () => {
     });
 
     suite('Validation of commands', async () => {
-        codeExecutionTests.runTask(compileTaskkName, 240_000);
-        codeExecutionTests.closeTerminal(compileTaskkName);
+        codeExecutionTests.runTask(compileTaskName, 360_000);
+        codeExecutionTests.closeTerminal(compileTaskName);
         codeExecutionTests.runTaskInputText(runTaskName, '[info] running org.eclipse.che.examples.HelloWorld', 'Test User', 120_000);
         codeExecutionTests.closeTerminal(runTaskName);
         codeExecutionTests.runTask(testTaskName, 120_000);
