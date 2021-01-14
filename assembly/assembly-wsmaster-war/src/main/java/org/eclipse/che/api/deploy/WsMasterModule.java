@@ -35,7 +35,6 @@ import org.eclipse.che.api.factory.server.FactoryEditValidator;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.factory.server.bitbucket.BitbucketServerAuthorizingFactoryParametersResolver;
 import org.eclipse.che.api.factory.server.github.GithubFactoryParametersResolver;
-import org.eclipse.che.api.factory.server.scm.KubernetesScmModule;
 import org.eclipse.che.api.infraproxy.server.InfraProxyModule;
 import org.eclipse.che.api.metrics.WsMasterMetricsModule;
 import org.eclipse.che.api.system.server.ServiceTermination;
