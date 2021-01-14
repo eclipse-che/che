@@ -102,8 +102,9 @@ public class URLFactoryBuilder {
       } catch (DevfileException e) {
         LOG.debug("Unexpected devfile exception: {}", e.getMessage());
         throw new BadRequestException(
-            format("There is an error resolving defvile. Error: %s. URL is %s", e.getMessage(),
-                location.location()));
+            format(
+                "There is an error resolving defvile. Error: %s. URL is %s",
+                e.getMessage(), location.location()));
       }
       if (isNullOrEmpty(devfileYamlContent)) {
         return Optional.empty();
