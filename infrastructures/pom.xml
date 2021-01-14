@@ -30,5 +30,6 @@
         <module>infrastructure-metrics</module>
         <module>infrastructure-distributed</module>
         <module>infrastructure-permission</module>
+        <module>infrastructure-factory</module>
     </modules>
 </project>

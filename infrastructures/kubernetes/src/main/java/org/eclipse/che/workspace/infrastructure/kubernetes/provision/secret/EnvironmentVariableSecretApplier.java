@@ -12,7 +12,9 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret;
 
 import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner.ANNOTATION_PREFIX;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_AUTOMOUNT;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_ENV_NAME;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_ENV_NAME_TEMPLATE;
 
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.Container;
@@ -51,9 +53,6 @@ public class EnvironmentVariableSecretApplier
   @Inject private RuntimeEventsPublisher runtimeEventsPublisher;
 
   private static final Logger LOG = LoggerFactory.getLogger(EnvironmentVariableSecretApplier.class);
-
-  static final String ANNOTATION_ENV_NAME = ANNOTATION_PREFIX + "/" + "env-name";
-  static final String ANNOTATION_ENV_NAME_TEMPLATE = ANNOTATION_PREFIX + "/%s_" + "env-name";
 
   /**
    * Applies secret as environment variable into workspace containers, respecting automount

@@ -34,9 +34,6 @@ public class BitbucketUrl implements RemoteFactoryUrl {
   /** Branch name */
   private String branch;
 
-  /** Factory json filename */
-  private String factoryFilename;
-
   /** Devfile filenames list */
   private final List<String> devfileFilenames = new ArrayList<>();
 
@@ -148,10 +145,11 @@ public class BitbucketUrl implements RemoteFactoryUrl {
             .add(repository)
             .add("raw")
             .add(fileName);
+    String resultUrl = joiner.toString();
     if (branch != null) {
-      joiner.add("?at=" + branch);
+      resultUrl = resultUrl + "?at=" + branch;
     }
-    return joiner.toString();
+    return resultUrl;
   }
 
   /**

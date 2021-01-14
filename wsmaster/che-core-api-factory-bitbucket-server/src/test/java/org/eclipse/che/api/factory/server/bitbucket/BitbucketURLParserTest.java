@@ -15,7 +15,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import org.eclipse.che.api.factory.server.urlfactory.DevfileFilenamesProvider;
-import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeClass;
@@ -26,7 +25,6 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class BitbucketURLParserTest {
 
-  @Mock private URLFetcher urlFetcher;
   @Mock private DevfileFilenamesProvider devfileFilenamesProvider;
 
   /** Instance of component that will be tested. */
@@ -36,7 +34,7 @@ public class BitbucketURLParserTest {
   public void setUp() {
     bitbucketURLParser =
         new BitbucketURLParser(
-            "https://bitbucket.2mcl.com,https://bbkt.com", urlFetcher, devfileFilenamesProvider);
+            "https://bitbucket.2mcl.com,https://bbkt.com", devfileFilenamesProvider);
   }
 
   /** Check URLs are valid with regexp */
