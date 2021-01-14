@@ -73,8 +73,7 @@ public class URLFactoryBuilderTest {
 
   @BeforeClass
   public void setUp() {
-    this.urlFactoryBuilder =
-        new URLFactoryBuilder(defaultEditor, defaultPlugin, urlFetcher, devfileParser);
+    this.urlFactoryBuilder = new URLFactoryBuilder(defaultEditor, defaultPlugin, devfileParser);
   }
 
   @Test
@@ -165,7 +164,7 @@ public class URLFactoryBuilderTest {
                   }
                 }));
     when(devfileParser.parseYaml(anyString(), anyMap())).thenReturn(devfile);
-    when(urlFetcher.fetchSafely(anyString())).thenReturn("anything");
+    when(fileContentProvider.fetchContent(anyString())).thenReturn("anything");
     FactoryDto factory =
         urlFactoryBuilder
             .createFactoryFromDevfile(defaultFactoryUrl, fileContentProvider, emptyMap())

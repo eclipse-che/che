@@ -18,13 +18,24 @@ import java.util.Map;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 
 /**
- * Some types of {@link org.eclipse.che.api.core.model.workspace.devfile.Component} may have
- * configuration located in a separate file. It fetches content of file by its name.
+ * Interface for fetching devfile-related content from repositories or raw URL-s. Used for
+ * retrieving devfile content as well as referenced files.
  *
  * @author Max Shaposhnyk
  * @author Sergii Leshchenko
  */
 public interface FileContentProvider {
+
+  /**
+   * Fetches content of the specified file.
+   *
+   * @param fileURL absolute or devfile-relative file URL to fetch content
+   * @return content of the specified file
+   * @throws IOException when there is an error during content retrieval
+   * @throws DevfileException when implementation does not support fetching of additional files
+   *     content
+   */
+  String fetchContent(String fileURL) throws IOException, DevfileException;
 
   /**
    * Short for {@code new CachingProvider(contentProvider);}. If the {@code contentProvider} is
@@ -40,17 +51,6 @@ public interface FileContentProvider {
       return new CachingProvider(contentProvider);
     }
   }
-
-  /**
-   * Fetches content of the specified file.
-   *
-   * @param fileURL absolute or devfile-relative file URL to fetch content
-   * @return content of the specified file
-   * @throws IOException when there is an error during content retrieval
-   * @throws DevfileException when implementation does not support fetching of additional files
-   *     content
-   */
-  String fetchContent(String fileURL) throws IOException, DevfileException;
 
   /**
    * A file content provider that caches responses from the content provider it is wrapping. Useful

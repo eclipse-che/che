@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.devfile;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
@@ -27,6 +28,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.core.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,6 +79,17 @@ public class URLFetcher {
   public String fetch(@NotNull final String url) throws IOException {
     return fetch(url, CONNECTION_READ_TIMEOUT);
   }
+  /**
+   * Fetches the url provided and return its content. Uses default read connection timeout {@link
+   * URLFetcher#CONNECTION_READ_TIMEOUT}
+   *
+   * @param url the URL to fetch
+   * @return content of the requested URL
+   * @throws IOException if fetch error occurs
+   */
+  public String fetch(@NotNull final String url, String authorization) throws IOException {
+    return fetch(url, CONNECTION_READ_TIMEOUT, authorization);
+  }
 
   /**
    * Fetches the url provided and return its content.
@@ -88,10 +101,26 @@ public class URLFetcher {
    * @throws IOException if fetch error occurs
    */
   String fetch(@NotNull final String url, int timeout) throws IOException {
+    return fetch(url, timeout, null);
+  }
+
+  /**
+   * Fetches the url provided and return its content.
+   *
+   * @param url the URL to fetch
+   * @param timeout read and connection timeout (see {@link URLConnection#setConnectTimeout(int)}
+   *     and {@link URLConnection#setReadTimeout(int)}
+   * @return content of the requested URL
+   * @throws IOException if fetch error occurs
+   */
+  String fetch(@NotNull final String url, int timeout, String authorization) throws IOException {
     requireNonNull(url, "url parameter can't be null");
     URLConnection connection = new URL(sanitized(url)).openConnection();
     connection.setConnectTimeout(timeout);
     connection.setReadTimeout(timeout);
+    if (!isNullOrEmpty(authorization)) {
+      connection.setRequestProperty(HttpHeaders.AUTHORIZATION, authorization);
+    }
     return fetch(connection);
   }
 

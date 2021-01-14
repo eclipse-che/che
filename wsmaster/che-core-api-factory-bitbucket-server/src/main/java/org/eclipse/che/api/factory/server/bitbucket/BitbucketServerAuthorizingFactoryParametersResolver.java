@@ -23,30 +23,41 @@ import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.DefaultFactoryParameterResolver;
+import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
+import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 
 /**
- * Provides Factory Parameters resolver for bitbucket repositories.
+ * Provides Factory Parameters resolver for both public and private bitbucket repositories.
  *
  * @author Max Shaposhnyk
  */
 @Singleton
-public class BitbucketServerFactoryParametersResolver extends DefaultFactoryParameterResolver {
+public class BitbucketServerAuthorizingFactoryParametersResolver
+    extends DefaultFactoryParameterResolver {
 
   /** Parser which will allow to check validity of URLs and create objects. */
   private final BitbucketURLParser bitbucketURLParser;
 
+  private final GitCredentialManager gitCredentialManager;
+  private final PersonalAccessTokenManager personalAccessTokenManager;
+
   @Inject
-  public BitbucketServerFactoryParametersResolver(
+  public BitbucketServerAuthorizingFactoryParametersResolver(
       URLFactoryBuilder urlFactoryBuilder,
       URLFetcher urlFetcher,
-      BitbucketURLParser bitbucketURLParser) {
+      BitbucketURLParser bitbucketURLParser,
+      GitCredentialManager gitCredentialManager,
+      PersonalAccessTokenManager personalAccessTokenManager) {
     super(urlFactoryBuilder, urlFetcher);
     this.bitbucketURLParser = bitbucketURLParser;
+    this.gitCredentialManager = gitCredentialManager;
+    this.personalAccessTokenManager = personalAccessTokenManager;
   }
 
   /**
@@ -76,13 +87,15 @@ public class BitbucketServerFactoryParametersResolver extends DefaultFactoryPara
     final BitbucketUrl bitbucketUrl =
         bitbucketURLParser.parse(factoryParameters.get(URL_PARAMETER_NAME));
 
+    final FileContentProvider fileContentProvider =
+        new BitbucketServerAuthorizingFileContentProvider(
+            bitbucketUrl, urlFetcher, gitCredentialManager, personalAccessTokenManager);
+
     // create factory from the following location if location exists, else create default factory
     FactoryDto factory =
         urlFactoryBuilder
             .createFactoryFromDevfile(
-                bitbucketUrl,
-                fileName -> urlFetcher.fetch(bitbucketUrl.rawFileLocation(fileName)),
-                extractOverrideParams(factoryParameters))
+                bitbucketUrl, fileContentProvider, extractOverrideParams(factoryParameters))
             .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"));
 
     if (factory.getDevfile() == null) {
