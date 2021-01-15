@@ -78,8 +78,7 @@ public class DefaultFactoryParameterResolverTest {
 
     DevfileParser devfileParser = new DevfileParser(validator, integrityValidator);
 
-    URLFactoryBuilder factoryBuilder =
-        new URLFactoryBuilder("editor", "plugin", urlFetcher, devfileParser);
+    URLFactoryBuilder factoryBuilder = new URLFactoryBuilder("editor", "plugin", devfileParser);
 
     DefaultFactoryParameterResolver res =
         new DefaultFactoryParameterResolver(factoryBuilder, urlFetcher);
@@ -87,7 +86,7 @@ public class DefaultFactoryParameterResolverTest {
     // set up our factory with the location of our devfile that is referencing our localfile
     Map<String, String> factoryParameters = new HashMap<>();
     factoryParameters.put(URL_PARAMETER_NAME, "http://myloc.com/aa/bb/devfile");
-    doReturn(DEVFILE).when(urlFetcher).fetchSafely(eq("http://myloc.com/aa/bb/devfile"));
+    doReturn(DEVFILE).when(urlFetcher).fetch(eq("http://myloc.com/aa/bb/devfile"));
     doReturn("localfile").when(urlFetcher).fetch("http://myloc.com/aa/localfile");
 
     // when

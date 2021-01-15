@@ -12,7 +12,6 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret;
 
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.DEVFILE_COMPONENT_ALIAS_ATTRIBUTE;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner.ANNOTATION_PREFIX;
 
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -29,8 +28,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  */
 @Beta
 public abstract class KubernetesSecretApplier<E extends KubernetesEnvironment> {
-
-  static final String ANNOTATION_AUTOMOUNT = ANNOTATION_PREFIX + "/" + "automount-workspace-secret";
 
   /**
    * Applies particular secret to workspace containers.

@@ -12,12 +12,14 @@
 package org.eclipse.che.api.factory.server.urlfactory;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -30,7 +32,6 @@ import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
-import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.devfile.exception.OverrideParameterException;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
@@ -38,6 +39,8 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handle the creation of some elements used inside a {@link FactoryDto}.
@@ -48,21 +51,20 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
 @Singleton
 public class URLFactoryBuilder {
 
+  private static final Logger LOG = LoggerFactory.getLogger(URLFactoryBuilder.class);
+
   private final String defaultCheEditor;
   private final String defaultChePlugins;
 
-  private final URLFetcher urlFetcher;
   private final DevfileParser devfileParser;
 
   @Inject
   public URLFactoryBuilder(
       @Named("che.factory.default_editor") String defaultCheEditor,
       @Named("che.factory.default_plugins") String defaultChePlugins,
-      URLFetcher urlFetcher,
       DevfileParser devfileParser) {
     this.defaultCheEditor = defaultCheEditor;
     this.defaultChePlugins = defaultChePlugins;
-    this.urlFetcher = urlFetcher;
     this.devfileParser = devfileParser;
   }
 
@@ -86,10 +88,26 @@ public class URLFactoryBuilder {
       FileContentProvider fileContentProvider,
       Map<String, String> overrideProperties)
       throws BadRequestException {
+    String devfileYamlContent;
     for (DevfileLocation location : remoteFactoryUrl.devfileFileLocations()) {
-      String devfileYamlContent = urlFetcher.fetchSafely(location.location());
-      if (isNullOrEmpty(devfileYamlContent)) {
+      try {
+        devfileYamlContent = fileContentProvider.fetchContent(location.location());
+      } catch (IOException ex) {
+        // try next location
+        LOG.debug(
+            "Unreachable devfile location met: {}. Error is: {}",
+            location.location(),
+            ex.getMessage());
         continue;
+      } catch (DevfileException e) {
+        LOG.debug("Unexpected devfile exception: {}", e.getMessage());
+        throw new BadRequestException(
+            format(
+                "There is an error resolving defvile. Error: %s. URL is %s",
+                e.getMessage(), location.location()));
+      }
+      if (isNullOrEmpty(devfileYamlContent)) {
+        return Optional.empty();
       }
       try {
         DevfileImpl devfile = devfileParser.parseYaml(devfileYamlContent, overrideProperties);

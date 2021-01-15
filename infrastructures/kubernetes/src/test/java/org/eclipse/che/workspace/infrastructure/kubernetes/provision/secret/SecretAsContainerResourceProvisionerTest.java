@@ -14,10 +14,11 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.EnvironmentVariableSecretApplier.ANNOTATION_ENV_NAME;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.FileSecretApplier.ANNOTATION_MOUNT_PATH;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretApplier.ANNOTATION_AUTOMOUNT;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.SecretAsContainerResourceProvisioner.ANNOTATION_MOUNT_AS;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_AUTOMOUNT;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_ENV_NAME;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_GIT_CREDENTIALS;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_MOUNT_AS;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_MOUNT_PATH;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -165,7 +166,7 @@ public class SecretAsContainerResourceProvisionerTest {
                             "file",
                             ANNOTATION_MOUNT_PATH,
                             "/home/user/.git",
-                            GitCredentialStorageFileSecretApplier.ANNOTATION_GIT_CREDENTIALS,
+                            ANNOTATION_GIT_CREDENTIALS,
                             "true",
                             ANNOTATION_AUTOMOUNT,
                             "true"))
