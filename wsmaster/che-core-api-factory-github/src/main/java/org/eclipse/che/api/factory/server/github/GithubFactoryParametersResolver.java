@@ -15,6 +15,9 @@ import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +30,9 @@ import org.eclipse.che.api.factory.server.DefaultFactoryParameterResolver;
 import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
 
@@ -93,7 +98,7 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
         urlFactoryBuilder
             .createFactoryFromDevfile(
                 githubUrl,
-                fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)),
+                new GithubFileContentProvider(githubUrl),
                 extractOverrideParams(factoryParameters))
             .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"));
 
@@ -134,5 +139,32 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
           });
     }
     return factory;
+  }
+
+  /** Github specific file content provider. */
+  private class GithubFileContentProvider implements FileContentProvider {
+
+    private final GithubUrl githubUrl;
+
+    private GithubFileContentProvider(GithubUrl githubUrl) {
+      this.githubUrl = githubUrl;
+    }
+
+    @Override
+    public String fetchContent(String fileURL) throws IOException, DevfileException {
+      {
+        String requestURL;
+        try {
+          if (new URI(fileURL).isAbsolute()) {
+            requestURL = fileURL;
+          } else {
+            requestURL = githubUrl.rawFileLocation(fileURL);
+          }
+        } catch (URISyntaxException e) {
+          throw new DevfileException(e.getMessage(), e);
+        }
+        return urlFetcher.fetch(requestURL);
+      }
+    }
   }
 }
