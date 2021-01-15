@@ -92,7 +92,8 @@ public class OIDCInfoProvider implements Provider<OIDCInfo> {
           userInfoEndpoint,
           jwksPublicUri,
           jwksUri,
-          serverAuthUrl);
+          serverAuthUrl,
+          serverURL);
     } catch (IOException e) {
       throw new RuntimeException(
           "Exception while retrieving OpenId configuration from endpoint: " + wellKnownEndpoint, e);

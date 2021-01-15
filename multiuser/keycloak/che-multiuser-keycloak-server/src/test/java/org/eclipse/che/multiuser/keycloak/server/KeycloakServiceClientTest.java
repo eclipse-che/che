@@ -13,13 +13,17 @@ package org.eclipse.che.multiuser.keycloak.server;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_INTERNAL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import com.jayway.restassured.RestAssured;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,11 +59,18 @@ public class KeycloakServiceClientTest {
   @Mock private KeycloakSettings keycloakSettings;
   @Mock private JwtParser jwtParser;
   @Mock private OIDCInfo oidcInfo;
+  @Mock private Jws<Claims> jws;
+  @Mock private Claims claims;
 
   private KeycloakServiceClient keycloakServiceClient;
 
   @SuppressWarnings("unused")
   private KeycloakService keycloakService;
+
+  private static final String token = "token123";
+  private static final String clientId = "some-client-id";
+  private static final String someSessionState = "some-state";
+  private static final String scope = "test_scope";
 
   @SuppressWarnings("unused")
   private final LocalApiExceptionMapper exceptionMapper = new LocalApiExceptionMapper();
@@ -68,22 +79,43 @@ public class KeycloakServiceClientTest {
   public void setUp() throws Exception {
     when(oidcInfo.getAuthServerURL())
         .thenReturn(RestAssured.baseURI + ":" + RestAssured.port + RestAssured.basePath);
+    when(oidcInfo.getAuthServerPublicURL()).thenReturn("https://keycloak-che");
+    when(jwtParser.parseClaimsJws(token)).thenReturn(jws);
+    when(jws.getBody()).thenReturn(claims);
+    when(claims.get(anyString(), eq(String.class)))
+        .thenAnswer(
+            invocationOnMock -> {
+              String arg = (String) invocationOnMock.getArguments()[0];
+              if (arg.equals("azp")) {
+                return clientId;
+              }
+              if (arg.equals("session_state")) {
+                return someSessionState;
+              }
+              return null;
+            });
 
     keycloakServiceClient = new KeycloakServiceClient(keycloakSettings, oidcInfo, jwtParser);
-    Map<String, String> conf = new HashMap<>();
     Map<String, String> confInternal = new HashMap<>();
-    confInternal.put(
-        AUTH_SERVER_URL_INTERNAL_SETTING,
-        RestAssured.baseURI + ":" + RestAssured.port + RestAssured.basePath);
-    conf.put(REALM_SETTING, "che");
+    confInternal.put(REALM_SETTING, "che");
     when(keycloakSettings.get()).thenReturn(confInternal);
-    when(keycloakSettings.get()).thenReturn(conf);
+  }
+
+  @Test
+  public void shouldReturnPublicAccountLinkingURL() throws Exception {
+    keycloakService = new KeycloakService(token, scope, token, null);
+    keycloakServiceClient.getIdentityProviderToken("github");
+
+    String accountLinkURL =
+        keycloakServiceClient.getAccountLinkingURL(
+            token, "github", "https://some-redirect-link/auth/realms/che/broker/github/endpoint");
+    assertTrue(
+        accountLinkURL.matches(
+            "https://keycloak-che/realms/che/broker/github/link\\?nonce=([0-9a-z-]*)&hash=([0-9A-Za-z-_%]*)&client_id=some-client-id&redirect_uri=https://some-redirect-link/auth/realms/che/broker/github/endpoint"));
   }
 
   @Test
   public void shouldReturnToken() throws Exception {
-    String token = "token123";
-    String scope = "test_scope";
     String tokenType = "test_type";
     keycloakService = new KeycloakService(token, scope, tokenType, null);
     KeycloakTokenResponse response = keycloakServiceClient.getIdentityProviderToken("github");

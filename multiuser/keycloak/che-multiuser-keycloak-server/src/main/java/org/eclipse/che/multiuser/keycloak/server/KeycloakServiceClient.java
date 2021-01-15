@@ -103,7 +103,7 @@ public class KeycloakServiceClient {
     byte[] check = md.digest(input.getBytes(StandardCharsets.UTF_8));
     final String hash = Base64.getUrlEncoder().encodeToString(check);
 
-    return UriBuilder.fromUri(oidcInfo.getAuthServerURL())
+    return UriBuilder.fromUri(oidcInfo.getAuthServerPublicURL())
         .path("/realms/{realm}/broker/{provider}/link")
         .queryParam("nonce", nonce)
         .queryParam("hash", hash)
