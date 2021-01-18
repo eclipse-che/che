@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.util;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -92,6 +93,9 @@ public class EnvVars {
    */
   public static Set<String> extractReferencedVariables(EnvVar var) {
     String val = var.getValue();
+    if (val == null) {
+      return Collections.emptySet();
+    }
 
     Matcher matcher = REFERENCE_PATTERN.matcher(val);
 
