@@ -154,6 +154,8 @@ public class PodMerger {
 
       // if there are entries with such keys then values will be overridden
       baseSpec.getAdditionalProperties().putAll(podData.getSpec().getAdditionalProperties());
+      // add tolerations to baseSpec if any
+      baseSpec.getTolerations().addAll(podData.getSpec().getTolerations());
     }
 
     Map<String, String> matchLabels = new HashMap<>();

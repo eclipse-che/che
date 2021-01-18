@@ -35,6 +35,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAcco
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SshKeysProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TlsProvisionerProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.TolerationsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSslCertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
@@ -75,6 +76,7 @@ public class OpenShiftEnvironmentProvisioner
   private final ImagePullSecretProvisioner imagePullSecretProvisioner;
   private final ProxySettingsProvisioner proxySettingsProvisioner;
   private final NodeSelectorProvisioner nodeSelectorProvisioner;
+  private final TolerationsProvisioner tolerationsProvisioner;
   private final AsyncStoragePodInterceptor asyncStoragePodInterceptor;
   private final ServiceAccountProvisioner serviceAccountProvisioner;
   private final AsyncStorageProvisioner asyncStorageProvisioner;
@@ -102,6 +104,7 @@ public class OpenShiftEnvironmentProvisioner
       ImagePullSecretProvisioner imagePullSecretProvisioner,
       ProxySettingsProvisioner proxySettingsProvisioner,
       NodeSelectorProvisioner nodeSelectorProvisioner,
+      TolerationsProvisioner tolerationsProvisioner,
       AsyncStorageProvisioner asyncStorageProvisioner,
       AsyncStoragePodInterceptor asyncStoragePodInterceptor,
       ServiceAccountProvisioner serviceAccountProvisioner,
@@ -126,6 +129,7 @@ public class OpenShiftEnvironmentProvisioner
     this.imagePullSecretProvisioner = imagePullSecretProvisioner;
     this.proxySettingsProvisioner = proxySettingsProvisioner;
     this.nodeSelectorProvisioner = nodeSelectorProvisioner;
+    this.tolerationsProvisioner = tolerationsProvisioner;
     this.asyncStorageProvisioner = asyncStorageProvisioner;
     this.asyncStoragePodInterceptor = asyncStoragePodInterceptor;
     this.serviceAccountProvisioner = serviceAccountProvisioner;
@@ -166,6 +170,7 @@ public class OpenShiftEnvironmentProvisioner
     routeTlsProvisioner.provision(osEnv, identity);
     resourceLimitRequestProvisioner.provision(osEnv, identity);
     nodeSelectorProvisioner.provision(osEnv, identity);
+    tolerationsProvisioner.provision(osEnv, identity);
     podTerminationGracePeriodProvisioner.provision(osEnv, identity);
     imagePullSecretProvisioner.provision(osEnv, identity);
     proxySettingsProvisioner.provision(osEnv, identity);
