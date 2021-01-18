@@ -91,7 +91,7 @@ git push --set-upstream origin {branchname}
   To do this execute commands:
   ```
   cd .ci
-  set_tag_version_images_linux.sh 7.25.0
+  set_tag_version_images.sh 7.25.0
   git commit
   git push
   ```
