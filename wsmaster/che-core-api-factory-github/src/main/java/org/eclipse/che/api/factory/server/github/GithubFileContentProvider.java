@@ -22,7 +22,7 @@ import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 class GithubFileContentProvider implements FileContentProvider {
 
   private final GithubUrl githubUrl;
-  private URLFetcher urlFetcher;
+  private final URLFetcher urlFetcher;
 
   GithubFileContentProvider(GithubUrl githubUrl, URLFetcher urlFetcher) {
     this.githubUrl = githubUrl;
@@ -31,18 +31,16 @@ class GithubFileContentProvider implements FileContentProvider {
 
   @Override
   public String fetchContent(String fileURL) throws IOException, DevfileException {
-    {
-      String requestURL;
-      try {
-        if (new URI(fileURL).isAbsolute()) {
-          requestURL = fileURL;
-        } else {
-          requestURL = githubUrl.rawFileLocation(fileURL);
-        }
-      } catch (URISyntaxException e) {
-        throw new DevfileException(e.getMessage(), e);
+    String requestURL;
+    try {
+      if (new URI(fileURL).isAbsolute()) {
+        requestURL = fileURL;
+      } else {
+        requestURL = githubUrl.rawFileLocation(fileURL);
       }
-      return urlFetcher.fetch(requestURL);
+    } catch (URISyntaxException e) {
+      throw new DevfileException(e.getMessage(), e);
     }
+    return urlFetcher.fetch(requestURL);
   }
 }
