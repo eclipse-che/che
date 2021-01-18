@@ -93,7 +93,7 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
         urlFactoryBuilder
             .createFactoryFromDevfile(
                 githubUrl,
-                fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)),
+                new GithubFileContentProvider(githubUrl, urlFetcher),
                 extractOverrideParams(factoryParameters))
             .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"));
 
