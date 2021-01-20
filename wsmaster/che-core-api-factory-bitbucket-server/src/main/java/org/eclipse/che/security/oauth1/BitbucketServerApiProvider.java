@@ -70,7 +70,7 @@ public class BitbucketServerApiProvider implements Provider<BitbucketServerApi> 
                   .findFirst();
           if (authenticator.isEmpty()) {
             throw new RuntimeException(
-                "'che.oauth1.bitbucket.endpoint' is set but BitbucketServerOAuthAuthenticator deployed correctly");
+                "'che.oauth1.bitbucket.endpoint' is set but BitbucketServerOAuthAuthenticator is not deployed correctly");
           }
           return new HttpBitbucketServerApi(
               bitbucketOauth1Endpoint,
