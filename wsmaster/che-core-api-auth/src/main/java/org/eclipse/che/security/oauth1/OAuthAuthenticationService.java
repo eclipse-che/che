@@ -28,6 +28,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.rest.Service;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,17 +83,16 @@ public class OAuthAuthenticationService extends Service {
   @Path("signature")
   public String signature(
       @QueryParam("oauth_provider") String providerName,
-      @QueryParam("user_id") String userId,
       @QueryParam("request_url") String requestUrl,
       @QueryParam("request_method") String requestMethod)
       throws OAuthAuthenticationException, BadRequestException {
     requiredNotNull(providerName, "Provider name");
-    requiredNotNull(userId, "User Id");
     requiredNotNull(requestUrl, "Request url");
     requiredNotNull(requestMethod, "Request method");
 
     return getAuthenticator(providerName)
-        .computeAuthorizationHeader(userId, requestMethod, requestUrl);
+        .computeAuthorizationHeader(
+            EnvironmentContext.getCurrent().getSubject().getUserId(), requestMethod, requestUrl);
   }
 
   private OAuthAuthenticator getAuthenticator(String oauthProviderName) throws BadRequestException {

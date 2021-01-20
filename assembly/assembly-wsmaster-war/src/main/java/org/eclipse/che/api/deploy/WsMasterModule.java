@@ -165,6 +165,7 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.user.server.ProfileService.class);
     bind(org.eclipse.che.api.user.server.PreferencesService.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
+    bind(org.eclipse.che.security.oauth1.OAuthAuthenticationService.class);
 
     install(new DevfileModule());
 
@@ -256,6 +257,7 @@ public class WsMasterModule extends AbstractModule {
     install(new FactoryModuleBuilder().build(JwtProxyConfigBuilderFactory.class));
     install(new FactoryModuleBuilder().build(PassThroughProxyProvisionerFactory.class));
     installDefaultSecureServerExposer(infrastructure);
+    install(new org.eclipse.che.security.oauth1.BitbucketModule());
 
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
       configureMultiUserMode(persistenceProperties, infrastructure);

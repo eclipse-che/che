@@ -25,7 +25,7 @@ public class KeycloakServletModule extends ServletModule {
           // not contains /docs/ (for swagger)
           + "(?!.*(/docs/))"
           // not ends with '/oauth/callback/' or '/keycloak/settings/' or '/system/state'
-          + "(?!.*(/keycloak/settings/?|/oauth/callback/?|/system/state/?)$)"
+          + "(?!.*(/keycloak/settings/?|/oauth/callback/?|/oauth/1.0/callback/?|/system/state/?)$)"
           // all other
           + ".*";
 
