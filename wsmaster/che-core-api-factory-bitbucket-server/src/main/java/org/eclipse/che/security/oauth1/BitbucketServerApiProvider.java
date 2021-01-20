@@ -78,7 +78,7 @@ public class BitbucketServerApiProvider implements Provider<BitbucketServerApi> 
                   (BitbucketServerOAuthAuthenticator) authenticator.get()));
         } else {
           throw new RuntimeException(
-              "`che.integration.bitbucket.server_endpoints` mast contain `"
+              "`che.integration.bitbucket.server_endpoints` must contain `"
                   + bitbucketOauth1Endpoint
                   + "` value");
         }
