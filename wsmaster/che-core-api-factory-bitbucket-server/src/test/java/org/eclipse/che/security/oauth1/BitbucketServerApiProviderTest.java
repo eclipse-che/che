@@ -82,7 +82,7 @@ public class BitbucketServerApiProviderTest {
   @Test(
       expectedExceptions = RuntimeException.class,
       expectedExceptionsMessageRegExp =
-          "'che.oauth1.bitbucket.endpoint' is set but BitbucketServerOAuthAuthenticator deployed correctly")
+          "'che.oauth1.bitbucket.endpoint' is set but BitbucketServerOAuthAuthenticator is not deployed correctly")
   public void shouldFailToBuildIfEndpointsAreMisconfigured2() {
     // given
     // when
@@ -96,7 +96,7 @@ public class BitbucketServerApiProviderTest {
   @Test(
       expectedExceptions = RuntimeException.class,
       expectedExceptionsMessageRegExp =
-          "`che.integration.bitbucket.server_endpoints` mast contain `https://bitbucket.server.com` value")
+          "`che.integration.bitbucket.server_endpoints` must contain `https://bitbucket.server.com` value")
   public void shouldFailToBuildIfEndpointsAreMisconfigured3() {
     // given
     // when
