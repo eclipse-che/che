@@ -21,7 +21,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApi;
 import org.eclipse.che.api.factory.server.bitbucket.server.HttpBitbucketServerApi;
-import org.eclipse.che.api.factory.server.bitbucket.server.NopBitbucketServerApi;
+import org.eclipse.che.api.factory.server.bitbucket.server.NoopBitbucketServerApi;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,7 @@ public class BitbucketServerApiProvider implements Provider<BitbucketServerApi> 
       String bitbucketOauth1Endpoint,
       Set<OAuthAuthenticator> authenticators) {
     if (isNullOrEmpty(bitbucketOauth1Endpoint)) {
-      return new NopBitbucketServerApi();
+      return new NoopBitbucketServerApi();
     } else {
       if (isNullOrEmpty(bitbucketEndpoints)) {
         throw new RuntimeException(

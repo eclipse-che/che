@@ -23,7 +23,7 @@ import org.eclipse.che.commons.subject.Subject;
  * Implementation of @{@link BitbucketServerApi} that is going to be deployed in container in case
  * if no integration with Bitbucket server is needed.
  */
-public class NopBitbucketServerApi implements BitbucketServerApi {
+public class NoopBitbucketServerApi implements BitbucketServerApi {
   @Override
   public boolean isConnected(String bitbucketServerUrl) {
     return false;

@@ -35,7 +35,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 import org.eclipse.che.api.factory.server.scm.exception.ScmBadRequestException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
@@ -57,7 +56,6 @@ public class HttpBitbucketServerApi implements BitbucketServerApi {
   private final URI serverUri;
   private final AuthorizationHeaderSupplier headerProvider;
 
-  @Inject
   public HttpBitbucketServerApi(
       String serverUrl, AuthorizationHeaderSupplier authorizationHeaderSupplier) {
     this.serverUri = URI.create(serverUrl);

@@ -63,7 +63,8 @@ public class BitbucketServerPersonalAccessTokenFetcher implements PersonalAccess
       return null;
     }
 
-    String tokenName = format(TOKEN_NAME_TEMPLATE, cheUser.getUserId(), apiEndpoint.getHost());
+    final String tokenName =
+        format(TOKEN_NAME_TEMPLATE, cheUser.getUserId(), apiEndpoint.getHost());
     try {
       BitbucketUser user = bitbucketServerApi.getUser(EnvironmentContext.getCurrent().getSubject());
       LOG.debug("Current bitbucket user {} ", user);

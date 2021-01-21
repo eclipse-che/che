@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Set;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApi;
 import org.eclipse.che.api.factory.server.bitbucket.server.HttpBitbucketServerApi;
-import org.eclipse.che.api.factory.server.bitbucket.server.NopBitbucketServerApi;
+import org.eclipse.che.api.factory.server.bitbucket.server.NoopBitbucketServerApi;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -64,7 +64,7 @@ public class BitbucketServerApiProviderTest {
     BitbucketServerApi actual = bitbucketServerApiProvider.get();
     // then
     assertNotNull(actual);
-    assertTrue(NopBitbucketServerApi.class.isAssignableFrom(actual.getClass()));
+    assertTrue(NoopBitbucketServerApi.class.isAssignableFrom(actual.getClass()));
   }
 
   @Test(
