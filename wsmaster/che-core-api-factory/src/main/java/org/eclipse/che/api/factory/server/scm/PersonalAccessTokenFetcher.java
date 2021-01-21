@@ -21,7 +21,7 @@ public interface PersonalAccessTokenFetcher {
    *
    * @param cheUser
    * @param scmServerUrl
-   * @return - personal access token. Mast return null if scmServerUrl is not applicable for the
+   * @return - personal access token. Must return {@code null} if scmServerUrl is not applicable for the
    *     current fetcher.
    * @throws ScmUnauthorizedException - in case if user are not authorized che server to create new
    *     token. Further user interaction is needed before calling next time this method.
