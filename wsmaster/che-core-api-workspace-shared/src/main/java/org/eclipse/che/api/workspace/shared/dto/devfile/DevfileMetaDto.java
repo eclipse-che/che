@@ -5,6 +5,6 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface DevfileMetaDto {
   default String version() {
-    return "picovina";
+    return null;
   }
 }
