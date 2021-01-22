@@ -15,12 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /** Defines Devfile. */
-public interface Devfile extends DevfileMeta {
-
-  @Override
-  default String getVersion() {
-    return "1.0.0";
-  }
+public interface Devfile {
 
   /** Returns the name of the devfile. Shortcut for {@code getMetadata().getName()}. */
   default String getName() {
