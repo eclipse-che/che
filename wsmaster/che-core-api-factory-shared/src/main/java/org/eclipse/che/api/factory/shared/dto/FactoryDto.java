@@ -21,6 +21,7 @@ import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileMetaDto;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -40,11 +41,11 @@ public interface FactoryDto extends Factory, Hyperlinks {
   FactoryDto withV(String v);
 
   @FactoryParameter(obligation = OPTIONAL)
-  DevfileDto getDevfile();
+  DevfileMetaDto getDevfile();
 
-  void setDevfile(DevfileDto workspace);
+  void setDevfile(DevfileMetaDto workspace);
 
-  FactoryDto withDevfile(DevfileDto devfileDto);
+  FactoryDto withDevfile(DevfileMetaDto devfileDto);
 
   /** because factory DTO may have devfile, in that case, workspace may be optional */
   @Override

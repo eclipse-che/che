@@ -29,6 +29,8 @@ import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
+import org.eclipse.che.api.workspace.server.dto.DtoServerImpls.DevfileDtoImpl;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 
@@ -98,35 +100,29 @@ public class BitbucketServerAuthorizingFactoryParametersResolver
                 bitbucketUrl, fileContentProvider, extractOverrideParams(factoryParameters))
             .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"));
 
+    if (factory.getDevfile().version().equals("2.0.0")) {
+      return factory;
+    }
     if (factory.getDevfile() == null) {
       // initialize default devfile
       factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(bitbucketUrl.getRepository()));
     }
 
-    List<ProjectDto> projects = factory.getDevfile().getProjects();
-    // if no projects set, set the default one from Bitbucket url
-    if (projects.isEmpty()) {
-      factory
-          .getDevfile()
-          .setProjects(
-              Collections.singletonList(
-                  newDto(ProjectDto.class)
-                      .withSource(
-                          newDto(SourceDto.class)
-                              .withLocation(bitbucketUrl.repositoryLocation())
-                              .withType("git")
-                              .withBranch(bitbucketUrl.getBranch()))
-                      .withName(bitbucketUrl.getRepository())));
-    } else {
-      // update existing project with same repository, set current branch if needed
-      projects.forEach(
-          project -> {
-            final String location = project.getSource().getLocation();
-            if (location.equals(bitbucketUrl.repositoryLocation())) {
-              project.getSource().setBranch(bitbucketUrl.getBranch());
-            }
-          });
-    }
+    handleProjects(factory, () -> newDto(ProjectDto.class)
+            .withSource(
+                newDto(SourceDto.class)
+                    .withLocation(bitbucketUrl.repositoryLocation())
+                    .withType("git")
+                    .withBranch(bitbucketUrl.getBranch()))
+            .withName(bitbucketUrl.getRepository()),
+        project -> {
+          final String location = project.getSource().getLocation();
+          if (location.equals(bitbucketUrl.repositoryLocation())) {
+            project.getSource().setBranch(bitbucketUrl.getBranch());
+          }
+        }
+    );
+
     return factory;
   }
 }

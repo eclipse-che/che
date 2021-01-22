@@ -96,7 +96,9 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
                 new GithubFileContentProvider(githubUrl, urlFetcher),
                 extractOverrideParams(factoryParameters))
             .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"));
-
+    if (factory.getDevfile().version().equals("2.0.0")) {
+      return factory;
+    }
     if (factory.getWorkspace() != null) {
       return projectConfigDtoMerger.merge(
           factory,
@@ -112,27 +114,18 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
       factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(githubUrl.getRepository()));
     }
 
-    List<ProjectDto> projects = factory.getDevfile().getProjects();
-    // if no projects set, set the default one from GitHub url
-    if (projects.isEmpty()) {
-      factory
-          .getDevfile()
-          .setProjects(
-              Collections.singletonList(
-                  newDto(ProjectDto.class)
-                      .withSource(githubSourceStorageBuilder.buildDevfileSource(githubUrl))
-                      .withName(githubUrl.getRepository())));
-    } else {
-      // update existing project with same repository, set current branch if needed
-      projects.forEach(
-          project -> {
-            final String location = project.getSource().getLocation();
-            if (location.equals(githubUrl.repositoryLocation())
-                || location.equals(githubUrl.repositoryLocation() + ".git")) {
-              project.getSource().setBranch(githubUrl.getBranch());
-            }
-          });
-    }
+    handleProjects(factory, () -> newDto(ProjectDto.class)
+            .withSource(githubSourceStorageBuilder.buildDevfileSource(githubUrl))
+            .withName(githubUrl.getRepository()),
+        project -> {
+          final String location = project.getSource().getLocation();
+          if (location.equals(githubUrl.repositoryLocation())
+              || location.equals(githubUrl.repositoryLocation() + ".git")) {
+            project.getSource().setBranch(githubUrl.getBranch());
+          }
+        }
+    );
+
     return factory;
   }
 }

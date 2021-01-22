@@ -19,6 +19,7 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_
 import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -91,6 +92,19 @@ public class DevfileParser {
     } catch (OverrideParameterException e) {
       // should never happen as we send empty overrides map
       throw new RuntimeException(e.getMessage());
+    }
+  }
+
+  public Object convertYamlToObject(String yaml) throws DevfileFormatException {
+    try {
+      ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory())
+          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      return yamlReader.readValue(yaml, Object.class);
+
+//      ObjectMapper jsonWriter = new ObjectMapper();
+//      return jsonWriter.writeValueAsString(obj);
+    } catch (JsonProcessingException jpe) {
+      throw new DevfileFormatException("Can't parse devfile yaml.", jpe);
     }
   }
 

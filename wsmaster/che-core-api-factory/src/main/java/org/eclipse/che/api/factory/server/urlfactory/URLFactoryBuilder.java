@@ -19,6 +19,9 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_E
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +41,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileV2Dto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,16 +113,33 @@ public class URLFactoryBuilder {
       if (isNullOrEmpty(devfileYamlContent)) {
         return Optional.empty();
       }
-      try {
-        DevfileImpl devfile = devfileParser.parseYaml(devfileYamlContent, overrideProperties);
-        devfileParser.resolveReference(devfile, fileContentProvider);
-        devfile = ensureToUseGenerateName(devfile);
 
-        FactoryDto factoryDto =
-            newDto(FactoryDto.class)
-                .withV(CURRENT_VERSION)
-                .withDevfile(DtoConverter.asDto(devfile))
-                .withSource(location.filename().isPresent() ? location.filename().get() : null);
+      try {
+        final FactoryDto factoryDto;
+        //TODO: if 1.0
+        if (devfileYamlContent.contains("apiVersion: 1.0.0")) {
+          DevfileImpl devfile = devfileParser.parseYaml(devfileYamlContent, overrideProperties);
+          devfileParser.resolveReference(devfile, fileContentProvider);
+          devfile = ensureToUseGenerateName(devfile);
+
+          factoryDto =
+              newDto(FactoryDto.class)
+                  .withV(CURRENT_VERSION)
+                  .withDevfile(DtoConverter.asDto(devfile))
+                  .withSource(location.filename().isPresent() ? location.filename().get() : null);
+
+        } else if (devfileYamlContent.contains("schemaVersion: \"2.0.0\"")) {
+          LOG.debug("aaaah, we've got devfile 2.0");
+          factoryDto = newDto(FactoryDto.class)
+              .withV(CURRENT_VERSION)
+              .withDevfile(newDto(DevfileV2Dto.class)
+                  .withContent(devfileParser.convertYamlToObject(devfileYamlContent)))
+              .withSource(location.filename().isPresent() ? location.filename().get() : null);
+        } else {
+          LOG.error("eeeh? what's this?");
+          throw new DevfileException("Unknown devfile version");
+        }
+        // TODO: elif 2.0
         return Optional.of(factoryDto);
       } catch (DevfileException | OverrideParameterException e) {
         throw new BadRequestException(

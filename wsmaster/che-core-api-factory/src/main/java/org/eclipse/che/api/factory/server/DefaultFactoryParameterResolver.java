@@ -14,13 +14,18 @@ package org.eclipse.che.api.factory.server;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
@@ -31,6 +36,9 @@ import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 
 /**
  * Default {@link FactoryParametersResolver} implementation. Tries to resolve factory based on
@@ -99,5 +107,17 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
         .stream()
         .filter(e -> e.getKey().startsWith(OVERRIDE_PREFIX))
         .collect(toMap(e -> e.getKey().substring(OVERRIDE_PREFIX.length()), Entry::getValue));
+  }
+
+  protected void handleProjects(FactoryDto factory, Supplier<ProjectDto> projectSupplier, Consumer<ProjectDto> projectModifier) {
+    DevfileDto devfile = (DevfileDto) factory.getDevfile();
+    List<ProjectDto> projects = devfile.getProjects();
+    if (projects.isEmpty()) {
+      devfile.setProjects(
+          Collections.singletonList(projectSupplier.get()));
+    } else {
+      // update existing project with same repository, set current branch if needed
+      projects.forEach(projectModifier);
+    }
   }
 }

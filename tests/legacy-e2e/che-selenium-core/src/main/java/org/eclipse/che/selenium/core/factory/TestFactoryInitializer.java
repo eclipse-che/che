@@ -32,6 +32,7 @@ import org.eclipse.che.api.factory.shared.dto.IdeDto;
 import org.eclipse.che.api.factory.shared.dto.PoliciesDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileMetaDto;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -181,17 +182,17 @@ public class TestFactoryInitializer {
     }
 
     @Override
-    public DevfileDto getDevfile() {
+    public DevfileMetaDto getDevfile() {
       return factoryDto.getDevfile();
     }
 
     @Override
-    public void setDevfile(DevfileDto workspace) {
+    public void setDevfile(DevfileMetaDto workspace) {
       factoryDto.setDevfile(workspace);
     }
 
     @Override
-    public FactoryDto withDevfile(DevfileDto devfileDto) {
+    public FactoryDto withDevfile(DevfileMetaDto devfileDto) {
       return factoryDto.withDevfile(devfileDto);
     }
 
