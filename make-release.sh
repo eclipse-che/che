@@ -119,7 +119,7 @@ if [[ "${BASEBRANCH}" != "${BRANCH}" ]]; then
   git checkout "${BRANCH}"
 
   cd .ci 
-  ./set_tag_version_images_linux.sh ${VERSION}
+  ./set_tag_version_images.sh ${VERSION}
   cd ..
   git commit -a -s -m "Update image tags to ${VERSION} version"
 fi
@@ -128,7 +128,7 @@ if [[ $PRERELEASE_TESTING -eq 1 ]]; then
   # create pre-release branch and update image tags
   git checkout release-candidate
   cd .ci 
-  ./set_tag_version_images_linux.sh ${VERSION}
+  ./set_tag_version_images.sh ${VERSION}
   cd ..
   git commit -a -s -m "Update image tags to ${VERSION} version"
   git push origin release-candidate -f
