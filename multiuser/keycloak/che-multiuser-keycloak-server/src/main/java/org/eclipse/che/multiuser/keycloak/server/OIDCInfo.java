@@ -22,6 +22,7 @@ public class OIDCInfo {
   private final String jwksPublicUri;
   private final String jwksUri;
   private final String authServerURL;
+  private final String authServerPublicURL;
 
   public OIDCInfo(
       String tokenPublicEndpoint,
@@ -30,7 +31,8 @@ public class OIDCInfo {
       String userInfoEndpoint,
       String jwksPublicUri,
       String jwksUri,
-      String authServerURL) {
+      String authServerURL,
+      String authServerPublicURL) {
     this.tokenPublicEndpoint = tokenPublicEndpoint;
     this.endSessionPublicEndpoint = endSessionPublicEndpoint;
     this.userInfoPublicEndpoint = userInfoPublicEndpoint;
@@ -39,6 +41,7 @@ public class OIDCInfo {
     this.jwksUri = jwksUri;
 
     this.authServerURL = authServerURL;
+    this.authServerPublicURL = authServerPublicURL;
   }
 
   /** @return public url to retrieve token */
@@ -83,5 +86,10 @@ public class OIDCInfo {
    */
   public String getAuthServerURL() {
     return authServerURL;
+  }
+
+  /** @return public OIDC auth endpoint url. */
+  public String getAuthServerPublicURL() {
+    return authServerPublicURL;
   }
 }

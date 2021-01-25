@@ -16,11 +16,14 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.util.EnvVars.extractReferencedVariables;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarSource;
+import io.fabric8.kubernetes.api.model.EnvVarSourceBuilder;
 import io.fabric8.kubernetes.api.model.PodBuilder;
+import io.fabric8.kubernetes.api.model.SecretKeySelectorBuilder;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -74,6 +77,26 @@ public class EnvVarsTest {
 
     // then
     assertEquals(refs, new HashSet<>(Arrays.asList("b", "c")));
+  }
+
+  @Test
+  public void shouldReturnEmptySetOnEnvContainingValueFrom() throws Exception {
+    // given
+    EnvVar envVar = var("a", null);
+    envVar.setValueFrom(
+        new EnvVarSourceBuilder()
+            .withSecretKeyRef(
+                new SecretKeySelectorBuilder()
+                    .withName("secret_name")
+                    .withKey("secret_key")
+                    .build())
+            .build());
+
+    // when
+    Set<String> refs = extractReferencedVariables(envVar);
+
+    // then
+    assertTrue(refs.isEmpty());
   }
 
   @Test

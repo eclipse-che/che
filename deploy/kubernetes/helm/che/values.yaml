@@ -16,6 +16,11 @@
 cheWorkspaceHttpProxy: ""
 cheWorkspaceHttpsProxy: ""
 cheWorkspaceNoProxy: ""
+#cheWorkspacePodTolerations:
+#  - key: "a.node.taint"
+#    operator: "Equal"
+#    value: "aValue"
+#    effect: "NoExecute"
 cheImage: quay.io/eclipse/che-server:nightly
 cheImagePullPolicy: Always
 cheKeycloakRealm: "che"
@@ -125,7 +130,7 @@ che:
   logLevel: "INFO"
 
 dashboard:
-  image: quay.io/eclipse/che-dashboard:next-react
+  image: quay.io/eclipse/che-dashboard:next
   imagePullPolicy: "Always"
   memoryRequest: 16Mi
   memoryLimit: 256Mi

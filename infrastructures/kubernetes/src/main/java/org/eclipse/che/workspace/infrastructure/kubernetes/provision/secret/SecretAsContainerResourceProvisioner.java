@@ -14,7 +14,8 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.GitCredentialStorageFileSecretApplier.ANNOTATION_GIT_CREDENTIALS;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_GIT_CREDENTIALS;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_MOUNT_AS;
 
 import com.google.common.annotations.Beta;
 import io.fabric8.kubernetes.api.model.LabelSelector;
@@ -41,8 +42,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 @Singleton
 public class SecretAsContainerResourceProvisioner<E extends KubernetesEnvironment> {
 
-  static final String ANNOTATION_PREFIX = "che.eclipse.org";
-  static final String ANNOTATION_MOUNT_AS = ANNOTATION_PREFIX + "/" + "mount-as";
   private final FileSecretApplier fileSecretApplier;
   private final EnvironmentVariableSecretApplier environmentVariableSecretApplier;
 

@@ -16,7 +16,8 @@ In series, the following will be released via [che-release](https://github.com/e
 
 * che-theia, che-machine-exec, che-devfile registry, 
 * che-plugin-registry (once che-theia and machine-exec are done)
-* che-parent, che-dashboard, che-workspace-loader, and che (server assembly)
+* che-parent, che-dashboard, che-workspace-loader
+* che (server assembly, with maven artifacts + containers)
 
 Then manually:
 
@@ -29,11 +30,13 @@ Then by script:
 * chectl
 
 - [ ] che-theia, che-machine-exec, che-devfile-registry, che-plugin-registry
-- [ ] che-parent, che-dashboard, che-workspace-loader, che
+- [ ] che-parent, che-dashboard, che-workspace-loader
+- [ ] che
 - [ ] che-operator _(depends on all of the above)_
-  - [ ] https://github.com/operator-framework/community-operators/pull/ ???
-  - [ ] https://github.com/operator-framework/community-operators/pull/ ???
 - [ ] chectl _(depends on all of the above)_
+- [ ] community operator PRs _(depends on all of the above)_
+  - [ ] https://github.com/operator-framework/community-operators/pull/ ???
+  - [ ] https://github.com/operator-framework/community-operators/pull/ ???
 
 If this is a .0 release:
 
@@ -52,7 +55,7 @@ If this is a .0 release:
 | @mkuznyetsov  | [che-parent](https://github.com/eclipse/che/blob/master/RELEASE.md) | [cico_release.sh](https://github.com/eclipse/che-release/blob/master/cico_release.sh) | [centos](https://ci.centos.org/job/devtools-che-release-che-release) | [che-parent](https://search.maven.org/search?q=a:che-parent) |
 | @mkuznyetsov  | [che-dashboard](https://github.com/eclipse/che-dashboard/blob/master/RELEASE.md) | [cico_release.sh](https://github.com/eclipse/che-release/blob/master/cico_release.sh) | [centos](https://ci.centos.org/job/devtools-che-release-che-release/) | [`che-dashboard`](https://quay.io/repository/eclipse/che-dashboard?tag=next&tab=tags) |
 | @mkuznyetsov  | [che-workspace-loader](https://github.com/eclipse/che-workspace-loader/blob/master/RELEASE.md) | [cico_release.sh](https://github.com/eclipse/che-release/blob/master/cico_release.sh) | [centos](https://ci.centos.org/job/devtools-che-release-che-release) | [`che-workspace-loader`](https://quay.io/repository/eclipse/che-workspace-loader?tag=next&tab=tags) |
-| @mkuznyetsov  | [che](https://github.com/eclipse/che/blob/master/RELEASE.md) | [cico_release.sh](https://github.com/eclipse/che-release/blob/master/cico_release.sh) | [centos](https://ci.centos.org/job/devtools-che-release-che-release) | [che.core](https://search.maven.org/search?q=che.core),<br/> [`eclipse/che-server`](https://quay.io/eclipse/che-server),<br/>[`eclipse/che-endpoint-watcher`](https://quay.io/eclipse/che-endpoint-watcher),<br/> [`eclipse/che-keycloak`](https://quay.io/eclipse/che-keycloak),<br/> [`eclipse/che-postgres`](https://quay.io/eclipse/che-postgres),<br/> [`eclipse/che-server`](https://quay.io/eclipse/che-server),<br/> [`eclipse/che-e2e`](https://quay.io/eclipse/che-e2e) |
+| @mkuznyetsov  | [che](https://github.com/eclipse/che/blob/master/RELEASE.md) | [cico_release.sh](https://github.com/eclipse/che-release/blob/master/cico_release.sh) | [centos](https://ci.centos.org/job/devtools-che-release-che-release) | [che.core](https://search.maven.org/search?q=che.core), [che.server](https://mvnrepository.com/artifact/org.eclipse.che/che-server)<br/> [`eclipse/che-server`](https://quay.io/eclipse/che-server),<br/>[`eclipse/che-endpoint-watcher`](https://quay.io/eclipse/che-endpoint-watcher),<br/> [`eclipse/che-keycloak`](https://quay.io/eclipse/che-keycloak),<br/> [`eclipse/che-postgres`](https://quay.io/eclipse/che-postgres),<br/> [`eclipse/che-server`](https://quay.io/eclipse/che-server),<br/> [`eclipse/che-e2e`](https://quay.io/eclipse/che-e2e) |
 | @tolusha| [che-operator](https://github.com/eclipse/che-operator/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-operator/blob/master/make-release.sh) | ? | [`eclipse/che-operator`](https://quay.io/eclipse/che-operator)| 
 | @tolusha| [chectl](https://github.com/che-incubator/chectl/blob/master/RELEASE.md) | [make-release.sh](https://github.com/che-incubator/chectl/blob/master/make-release.sh) | [travis](https://travis-ci.org/che-incubator/chectl) | [chectl releases](https://github.com/che-incubator/chectl/releases)
 
@@ -60,14 +63,25 @@ RELEASE-TEMPLATE-END
 -->
 
 ##### 1. Create branch for release preparation and next bugfixes:
-* `git branch {branchname} #e.g 7.7.x`
-* `git push --set-upstream origin {branchname}`
-##### 2. Create PR for switch master to the next development version :
-* `git branch set_next_version_in_master_{next_version} #e.g 7.8.0-SNAPSHOT`
-* Update parent version : `mvn versions:update-parent  versions:commit -DallowSnapshots=true -DparentVersion={next_version}`
-* Update dependencies: `sed -i -e "s#{version_old}#{next_version}#" pom.xml`
-* `git commit`
-* `git push --set-upstream origin set_next_version_in_master_{next_version}`
+
+```
+git branch {branchname} # e.g 7.7.x
+git push --set-upstream origin {branchname}
+```
+
+##### 2. Create PR for switch master to the next development version:
+
+```
+  git branch set_next_version_in_master_{next_version} # e.g 7.8.0-SNAPSHOT
+  # Update parent version
+  mvn versions:update-parent  versions:commit -DallowSnapshots=true -DparentVersion={next_version} 
+
+  # Update dependencies
+  sed -i -e "s#{version_old}#{next_version}#" pom.xml
+  git commit
+  git push --set-upstream origin set_next_version_in_master_{next_version}
+  ```
+
 * Create PR
 ##### 3. In release branch of Che need to set up released version of plugin registry and plugins:
     1 Update deploy_che.sh (should be deprecated soon - https://github.com/eclipse/che/issues/14069) default environment variables
@@ -75,18 +89,22 @@ RELEASE-TEMPLATE-END
     3 Update Helm charts with released tag e.g `7.7.0`
     
   To do this execute commands:
-  * `cd .ci`
-  * on Linux machine: `set_tag_version_images_linux.sh {tag}` 
-  * on MacOS: `set_tag_version_images_macos.sh {tag}`
-  * `git commit` 
-  * `git push`
+  ```
+  cd .ci
+  set_tag_version_images.sh 7.25.0
+  git commit
+  git push
+  ```
 ##### 4. Start pre-release testing.
 ##### 5. If pre-release test passed need to merge branch to the `release` branch and push changes, release process will start by webhook:
 * Set released parent version
-* Update dependencies in pom.xml 
-* `git checkout release`
-* `git merge -X theirs {branchname}`
-* `git push -f`
+* Update dependencies in pom.xml, then:
+  ```
+  git checkout release
+  git merge -X theirs {branchname}
+  git push -f
+  ```
+
 ##### 6. Close/release repository on Nexus 
  https://oss.sonatype.org/#stagingRepositories
 
