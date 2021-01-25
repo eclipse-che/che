@@ -20,7 +20,7 @@ import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException
 import org.eclipse.che.commons.subject.Subject;
 
 /** Bitbucket Server API client. */
-public interface BitbucketServerApi {
+public interface BitbucketServerApiClient {
   /**
    * @param bitbucketServerUrl
    * @return - true if client is connected to the given bitbucket server.

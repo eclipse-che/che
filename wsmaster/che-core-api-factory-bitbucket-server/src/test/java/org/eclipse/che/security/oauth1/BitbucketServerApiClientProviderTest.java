@@ -18,15 +18,16 @@ import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
-import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApi;
-import org.eclipse.che.api.factory.server.bitbucket.server.HttpBitbucketServerApi;
-import org.eclipse.che.api.factory.server.bitbucket.server.NoopBitbucketServerApi;
+import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApiClient;
+import org.eclipse.che.api.factory.server.bitbucket.server.HttpBitbucketServerApiClient;
+import org.eclipse.che.api.factory.server.bitbucket.server.NoopBitbucketServerApiClient;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.inject.ConfigurationException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class BitbucketServerApiProviderTest {
+public class BitbucketServerApiClientProviderTest {
   BitbucketServerOAuthAuthenticator oAuthAuthenticator;
 
   @BeforeClass
@@ -45,10 +46,10 @@ public class BitbucketServerApiProviderTest {
             "https://bitbucket.server.com",
             ImmutableSet.of(oAuthAuthenticator));
     // when
-    BitbucketServerApi actual = bitbucketServerApiProvider.get();
+    BitbucketServerApiClient actual = bitbucketServerApiProvider.get();
     // then
     assertNotNull(actual);
-    assertTrue(HttpBitbucketServerApi.class.isAssignableFrom(actual.getClass()));
+    assertTrue(HttpBitbucketServerApiClient.class.isAssignableFrom(actual.getClass()));
   }
 
   @Test(dataProvider = "noopConfig")
@@ -61,14 +62,14 @@ public class BitbucketServerApiProviderTest {
     BitbucketServerApiProvider bitbucketServerApiProvider =
         new BitbucketServerApiProvider(bitbucketEndpoints, bitbucketOauth1Endpoint, authenticators);
     // when
-    BitbucketServerApi actual = bitbucketServerApiProvider.get();
+    BitbucketServerApiClient actual = bitbucketServerApiProvider.get();
     // then
     assertNotNull(actual);
-    assertTrue(NoopBitbucketServerApi.class.isAssignableFrom(actual.getClass()));
+    assertTrue(NoopBitbucketServerApiClient.class.isAssignableFrom(actual.getClass()));
   }
 
   @Test(
-      expectedExceptions = RuntimeException.class,
+      expectedExceptions = ConfigurationException.class,
       expectedExceptionsMessageRegExp =
           "`che.integration.bitbucket.server_endpoints` bitbucket configuration is missing. It should contain values from 'che.oauth1.bitbucket.endpoint'")
   public void shouldFailToBuildIfEndpointsAreMisconfigured() {
@@ -80,7 +81,7 @@ public class BitbucketServerApiProviderTest {
   }
 
   @Test(
-      expectedExceptions = RuntimeException.class,
+      expectedExceptions = ConfigurationException.class,
       expectedExceptionsMessageRegExp =
           "'che.oauth1.bitbucket.endpoint' is set but BitbucketServerOAuthAuthenticator is not deployed correctly")
   public void shouldFailToBuildIfEndpointsAreMisconfigured2() {
@@ -94,7 +95,7 @@ public class BitbucketServerApiProviderTest {
   }
 
   @Test(
-      expectedExceptions = RuntimeException.class,
+      expectedExceptions = ConfigurationException.class,
       expectedExceptionsMessageRegExp =
           "`che.integration.bitbucket.server_endpoints` must contain `https://bitbucket.server.com` value")
   public void shouldFailToBuildIfEndpointsAreMisconfigured3() {

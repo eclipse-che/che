@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketPersonalAccessToken;
-import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApi;
+import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApiClient;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketUser;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenFetcher;
@@ -45,20 +45,20 @@ public class BitbucketServerPersonalAccessTokenFetcher implements PersonalAccess
       LoggerFactory.getLogger(BitbucketServerPersonalAccessTokenFetcher.class);
 
   private static final String TOKEN_NAME_TEMPLATE = "che-token-<%s>-<%s>";
-  private final BitbucketServerApi bitbucketServerApi;
+  private final BitbucketServerApiClient bitbucketServerApiClient;
   private final URL apiEndpoint;
 
   @Inject
   public BitbucketServerPersonalAccessTokenFetcher(
-      BitbucketServerApi bitbucketServerApi, @Named("che.api") URL apiEndpoint) {
-    this.bitbucketServerApi = bitbucketServerApi;
+      BitbucketServerApiClient bitbucketServerApiClient, @Named("che.api") URL apiEndpoint) {
+    this.bitbucketServerApiClient = bitbucketServerApiClient;
     this.apiEndpoint = apiEndpoint;
   }
 
   @Override
   public PersonalAccessToken fetchPersonalAccessToken(Subject cheUser, String scmServerUrl)
       throws ScmUnauthorizedException, ScmCommunicationException {
-    if (!bitbucketServerApi.isConnected(scmServerUrl)) {
+    if (!bitbucketServerApiClient.isConnected(scmServerUrl)) {
       LOG.debug("not a  valid url {} for current fetcher ", scmServerUrl);
       return null;
     }
@@ -66,22 +66,23 @@ public class BitbucketServerPersonalAccessTokenFetcher implements PersonalAccess
     final String tokenName =
         format(TOKEN_NAME_TEMPLATE, cheUser.getUserId(), apiEndpoint.getHost());
     try {
-      BitbucketUser user = bitbucketServerApi.getUser(EnvironmentContext.getCurrent().getSubject());
+      BitbucketUser user =
+          bitbucketServerApiClient.getUser(EnvironmentContext.getCurrent().getSubject());
       LOG.debug("Current bitbucket user {} ", user);
       // cleanup existed
       List<BitbucketPersonalAccessToken> existedTokens =
-          bitbucketServerApi
+          bitbucketServerApiClient
               .getPersonalAccessTokens(user.getSlug())
               .stream()
               .filter(p -> p.getName().equals(tokenName))
               .collect(Collectors.toList());
       for (BitbucketPersonalAccessToken existedToken : existedTokens) {
         LOG.debug("Deleting existed che token {} {}", existedToken.getId(), existedToken.getName());
-        bitbucketServerApi.deletePersonalAccessTokens(user.getSlug(), existedToken.getId());
+        bitbucketServerApiClient.deletePersonalAccessTokens(user.getSlug(), existedToken.getId());
       }
 
       BitbucketPersonalAccessToken token =
-          bitbucketServerApi.createPersonalAccessTokens(
+          bitbucketServerApiClient.createPersonalAccessTokens(
               user.getSlug(), tokenName, ImmutableSet.of("PROJECT_WRITE", "REPO_WRITE"));
       LOG.debug("Token created = {} for {}", token.getId(), token.getUser());
       return new PersonalAccessToken(

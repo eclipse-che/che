@@ -26,9 +26,10 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class BitbucketServerOAuthAuthenticatorProvider implements Provider<OAuthAuthenticator> {
-  private final OAuthAuthenticator authenticator;
   private static final Logger LOG =
       LoggerFactory.getLogger(BitbucketServerOAuthAuthenticatorProvider.class);
+
+  private final OAuthAuthenticator authenticator;
 
   @Inject
   public BitbucketServerOAuthAuthenticatorProvider(
@@ -37,7 +38,6 @@ public class BitbucketServerOAuthAuthenticatorProvider implements Provider<OAuth
       @Nullable @Named("che.oauth1.bitbucket.endpoint") String bitbucketEndpoint,
       @Named("che.api") String apiEndpoint)
       throws IOException {
-
     authenticator =
         getOAuthAuthenticator(consumerKeyPath, privateKeyPath, bitbucketEndpoint, apiEndpoint);
     LOG.debug("{} Bitbucket OAuthAuthenticator is used.", authenticator);

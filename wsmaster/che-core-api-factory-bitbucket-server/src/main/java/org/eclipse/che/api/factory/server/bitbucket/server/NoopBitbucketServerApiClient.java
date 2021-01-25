@@ -20,10 +20,10 @@ import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException
 import org.eclipse.che.commons.subject.Subject;
 
 /**
- * Implementation of @{@link BitbucketServerApi} that is going to be deployed in container in case
- * if no integration with Bitbucket server is needed.
+ * Implementation of @{@link BitbucketServerApiClient} that is going to be deployed in container in
+ * case if no integration with Bitbucket server is needed.
  */
-public class NoopBitbucketServerApi implements BitbucketServerApi {
+public class NoopBitbucketServerApiClient implements BitbucketServerApiClient {
   @Override
   public boolean isConnected(String bitbucketServerUrl) {
     return false;

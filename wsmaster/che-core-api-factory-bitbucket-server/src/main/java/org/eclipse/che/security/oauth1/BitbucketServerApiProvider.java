@@ -19,41 +19,44 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApi;
-import org.eclipse.che.api.factory.server.bitbucket.server.HttpBitbucketServerApi;
-import org.eclipse.che.api.factory.server.bitbucket.server.NoopBitbucketServerApi;
+import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApiClient;
+import org.eclipse.che.api.factory.server.bitbucket.server.HttpBitbucketServerApiClient;
+import org.eclipse.che.api.factory.server.bitbucket.server.NoopBitbucketServerApiClient;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.inject.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class BitbucketServerApiProvider implements Provider<BitbucketServerApi> {
-  private final BitbucketServerApi bitbucketServerApi;
+public class BitbucketServerApiProvider implements Provider<BitbucketServerApiClient> {
+
   private static final Logger LOG = LoggerFactory.getLogger(BitbucketServerApiProvider.class);
+
+  private final BitbucketServerApiClient bitbucketServerApiClient;
 
   @Inject
   public BitbucketServerApiProvider(
       @Nullable @Named("che.integration.bitbucket.server_endpoints") String bitbucketEndpoints,
       @Nullable @Named("che.oauth1.bitbucket.endpoint") String bitbucketOauth1Endpoint,
       Set<OAuthAuthenticator> authenticators) {
-    bitbucketServerApi = doGet(bitbucketEndpoints, bitbucketOauth1Endpoint, authenticators);
-    LOG.debug("Bitbucket server api is used {}", bitbucketServerApi);
+    bitbucketServerApiClient = doGet(bitbucketEndpoints, bitbucketOauth1Endpoint, authenticators);
+    LOG.debug("Bitbucket server api is used {}", bitbucketServerApiClient);
   }
 
   @Override
-  public BitbucketServerApi get() {
-    return bitbucketServerApi;
+  public BitbucketServerApiClient get() {
+    return bitbucketServerApiClient;
   }
 
-  private static BitbucketServerApi doGet(
+  private static BitbucketServerApiClient doGet(
       String bitbucketEndpoints,
       String bitbucketOauth1Endpoint,
       Set<OAuthAuthenticator> authenticators) {
     if (isNullOrEmpty(bitbucketOauth1Endpoint)) {
-      return new NoopBitbucketServerApi();
+      return new NoopBitbucketServerApiClient();
     } else {
       if (isNullOrEmpty(bitbucketEndpoints)) {
-        throw new RuntimeException(
+        throw new ConfigurationException(
             "`che.integration.bitbucket.server_endpoints` bitbucket configuration is missing."
                 + " It should contain values from 'che.oauth1.bitbucket.endpoint'");
       } else {
@@ -69,15 +72,15 @@ public class BitbucketServerApiProvider implements Provider<BitbucketServerApi> 
                       a -> BitbucketServerOAuthAuthenticator.class.isAssignableFrom(a.getClass()))
                   .findFirst();
           if (authenticator.isEmpty()) {
-            throw new RuntimeException(
+            throw new ConfigurationException(
                 "'che.oauth1.bitbucket.endpoint' is set but BitbucketServerOAuthAuthenticator is not deployed correctly");
           }
-          return new HttpBitbucketServerApi(
+          return new HttpBitbucketServerApiClient(
               bitbucketOauth1Endpoint,
               new BitbucketServerOAuth1AuthorizationHeaderSupplier(
                   (BitbucketServerOAuthAuthenticator) authenticator.get()));
         } else {
-          throw new RuntimeException(
+          throw new ConfigurationException(
               "`che.integration.bitbucket.server_endpoints` must contain `"
                   + bitbucketOauth1Endpoint
                   + "` value");

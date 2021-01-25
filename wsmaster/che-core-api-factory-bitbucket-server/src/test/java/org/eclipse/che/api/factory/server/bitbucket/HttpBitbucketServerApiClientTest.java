@@ -33,9 +33,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketPersonalAccessToken;
-import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApi;
+import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApiClient;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketUser;
-import org.eclipse.che.api.factory.server.bitbucket.server.HttpBitbucketServerApi;
+import org.eclipse.che.api.factory.server.bitbucket.server.HttpBitbucketServerApiClient;
 import org.eclipse.che.api.factory.server.scm.exception.ScmBadRequestException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmItemNotFoundException;
@@ -44,7 +44,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class HttpBitbucketServerApiTest {
+public class HttpBitbucketServerApiClientTest {
   private final String AUTHORIZATION_TOKEN =
       "OAuth oauth_consumer_key=\"key123321\", oauth_nonce=\"6c0eace252f8dcda\","
           + " oauth_signature=\"dPCm521TAF56FfGxabBAZDs9YTNeCg%2BiRK49afoJve8Mxk5ILlfkZKH693udqOig5k5ydeVxX%2FTso%2Flxx1pv2bqdbCqj3Nq82do1hJN5eTDLSvbHfGvjFuOGRobHTHwP6oJkaBSafjMUY8i8Vnz6hLfxToPj2ktd6ug4nKc1WGg%3D\", "
@@ -52,7 +52,7 @@ public class HttpBitbucketServerApiTest {
           + "oauth_token=\"JmpyDe9sgYNn6pYHP6eGLaIU0vxdKLCJ\", oauth_version=\"1.0\"";
   WireMockServer wireMockServer;
   WireMock wireMock;
-  BitbucketServerApi bitbucketServer;
+  BitbucketServerApiClient bitbucketServer;
 
   @BeforeMethod
   void start() {
@@ -63,7 +63,7 @@ public class HttpBitbucketServerApiTest {
     WireMock.configureFor("localhost", httpPort);
     wireMock = new WireMock("localhost", httpPort);
     bitbucketServer =
-        new HttpBitbucketServerApi(
+        new HttpBitbucketServerApiClient(
             wireMockServer.url("/"), (requestMethod, requestUrl) -> AUTHORIZATION_TOKEN);
   }
 

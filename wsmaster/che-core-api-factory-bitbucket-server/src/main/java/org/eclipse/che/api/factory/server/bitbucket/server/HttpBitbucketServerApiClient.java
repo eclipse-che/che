@@ -11,6 +11,9 @@
  */
 package org.eclipse.che.api.factory.server.bitbucket.server;
 
+import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import static java.time.Duration.ofSeconds;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,6 +32,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,18 +49,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implementation of @{@link BitbucketServerApi} that is using @{@link HttpClient} to communicate
- * with Bitbucket Server.s
+ * Implementation of @{@link BitbucketServerApiClient} that is using @{@link HttpClient} to
+ * communicate with Bitbucket Server.
  */
-public class HttpBitbucketServerApi implements BitbucketServerApi {
+public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
 
   private static final ObjectMapper OM = new ObjectMapper();
 
-  private static final Logger LOG = LoggerFactory.getLogger(HttpBitbucketServerApi.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HttpBitbucketServerApiClient.class);
+  private static final Duration DEFAULT_HTTP_TIMEOUT = ofSeconds(10);
   private final URI serverUri;
   private final AuthorizationHeaderSupplier headerProvider;
 
-  public HttpBitbucketServerApi(
+  public HttpBitbucketServerApiClient(
       String serverUrl, AuthorizationHeaderSupplier authorizationHeaderSupplier) {
     this.serverUri = URI.create(serverUrl);
     this.headerProvider = authorizationHeaderSupplier;
@@ -74,7 +79,7 @@ public class HttpBitbucketServerApi implements BitbucketServerApi {
       Set<String> usersByName =
           getUsers(cheUser.getUserName())
               .stream()
-              .map(u -> u.getSlug())
+              .map(BitbucketUser::getSlug)
               .collect(Collectors.toSet());
 
       Optional<BitbucketUser> currentUser = findCurrentUser(usersByName);
@@ -84,7 +89,7 @@ public class HttpBitbucketServerApi implements BitbucketServerApi {
       Set<String> usersAllExceptByName =
           getUsers()
               .stream()
-              .map(u -> u.getSlug())
+              .map(BitbucketUser::getSlug)
               .filter(s -> !usersByName.contains(s))
               .collect(Collectors.toSet());
       currentUser = findCurrentUser(usersAllExceptByName);
@@ -109,7 +114,7 @@ public class HttpBitbucketServerApi implements BitbucketServerApi {
         HttpRequest.newBuilder(uri)
             .headers(
                 "Authorization", headerProvider.computeAuthorizationHeader("GET", uri.toString()))
-            .timeout(ofSeconds(10))
+            .timeout(DEFAULT_HTTP_TIMEOUT)
             .build();
 
     try {
@@ -164,7 +169,7 @@ public class HttpBitbucketServerApi implements BitbucketServerApi {
                 MediaType.APPLICATION_JSON,
                 HttpHeaders.CONTENT_TYPE,
                 MediaType.APPLICATION_JSON)
-            .timeout(ofSeconds(10))
+            .timeout(DEFAULT_HTTP_TIMEOUT)
             .build();
 
     try {
@@ -205,7 +210,7 @@ public class HttpBitbucketServerApi implements BitbucketServerApi {
                   MediaType.APPLICATION_JSON,
                   HttpHeaders.CONTENT_TYPE,
                   MediaType.APPLICATION_JSON)
-              .timeout(ofSeconds(10))
+              .timeout(DEFAULT_HTTP_TIMEOUT)
               .build();
       LOG.debug("executeRequest={}", request);
       return executeRequest(
@@ -276,7 +281,7 @@ public class HttpBitbucketServerApi implements BitbucketServerApi {
         HttpRequest.newBuilder(uri)
             .headers(
                 "Authorization", headerProvider.computeAuthorizationHeader("GET", uri.toString()))
-            .timeout(ofSeconds(10))
+            .timeout(DEFAULT_HTTP_TIMEOUT)
             .build();
     LOG.debug("executeRequest={}", request);
     final JavaType typeReference =
@@ -294,31 +299,31 @@ public class HttpBitbucketServerApi implements BitbucketServerApi {
   }
 
   private <T> T executeRequest(
-      HttpClient httpClient, HttpRequest request, Function<InputStream, T> function)
+      HttpClient httpClient, HttpRequest request, Function<InputStream, T> bodyConverter)
       throws ScmBadRequestException, ScmItemNotFoundException, ScmCommunicationException,
           ScmUnauthorizedException {
     try {
       HttpResponse<InputStream> response =
           httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-      LOG.debug("executeRequest={} response {}", request, response.statusCode());
+      LOG.trace("executeRequest={} response {}", request, response.statusCode());
       if (response.statusCode() == 200) {
-        return function.apply(response.body());
+        return bodyConverter.apply(response.body());
       } else if (response.statusCode() == 204) {
         return null;
       } else {
         String body = CharStreams.toString(new InputStreamReader(response.body(), Charsets.UTF_8));
-        if (response.statusCode() == 400) {
-          throw new ScmBadRequestException(body);
-        } else if (response.statusCode() == 401) {
-          throw new ScmUnauthorizedException(body);
-        } else if (response.statusCode() == 404) {
-          throw new ScmItemNotFoundException(body);
-        } else {
-          throw new ScmCommunicationException(
-              "Unexpected status code " + response.statusCode() + " " + response.toString());
+        switch (response.statusCode()) {
+          case HTTP_BAD_REQUEST:
+            throw new ScmBadRequestException(body);
+          case HTTP_UNAUTHORIZED:
+            throw new ScmUnauthorizedException(body);
+          case HTTP_NOT_FOUND:
+            throw new ScmItemNotFoundException(body);
+          default:
+            throw new ScmCommunicationException(
+                "Unexpected status code " + response.statusCode() + " " + response.toString());
         }
       }
-
     } catch (IOException | InterruptedException | UncheckedIOException e) {
       throw new ScmCommunicationException(e.getMessage(), e);
     }

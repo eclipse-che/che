@@ -13,7 +13,7 @@ package org.eclipse.che.api.factory.server.bitbucket;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
-import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApi;
+import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApiClient;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenFetcher;
 import org.eclipse.che.security.oauth1.BitbucketServerApiProvider;
 
@@ -23,6 +23,6 @@ public class BitbucketServerModule extends AbstractModule {
     Multibinder<PersonalAccessTokenFetcher> tokenFetcherMultibinder =
         Multibinder.newSetBinder(binder(), PersonalAccessTokenFetcher.class);
     tokenFetcherMultibinder.addBinding().to(BitbucketServerPersonalAccessTokenFetcher.class);
-    bind(BitbucketServerApi.class).toProvider(BitbucketServerApiProvider.class);
+    bind(BitbucketServerApiClient.class).toProvider(BitbucketServerApiProvider.class);
   }
 }

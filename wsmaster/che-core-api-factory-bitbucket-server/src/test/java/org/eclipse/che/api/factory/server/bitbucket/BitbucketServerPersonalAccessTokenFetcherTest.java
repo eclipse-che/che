@@ -24,7 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketPersonalAccessToken;
-import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApi;
+import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApiClient;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketUser;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
 import org.eclipse.che.api.factory.server.scm.exception.ScmBadRequestException;
@@ -46,7 +46,7 @@ public class BitbucketServerPersonalAccessTokenFetcherTest {
   String someNotBitbucketURL = "https://notabitbucket.com";
   String someBitbucketURL = "https://some.bitbucketserver.com";
   Subject subject;
-  @Mock BitbucketServerApi bitbucketServerApi;
+  @Mock BitbucketServerApiClient bitbucketServerApiClient;
   BitbucketUser bitbucketUser;
   BitbucketServerPersonalAccessTokenFetcher fetcher;
   BitbucketPersonalAccessToken bitbucketPersonalAccessToken;
@@ -86,7 +86,7 @@ public class BitbucketServerPersonalAccessTokenFetcherTest {
             "3456\\<0>945//i0923i4jasoidfj934ui50",
             bitbucketUser,
             ImmutableSet.of("PROJECT_READ", "REPO_READ"));
-    fetcher = new BitbucketServerPersonalAccessTokenFetcher(bitbucketServerApi, apiEndpoint);
+    fetcher = new BitbucketServerPersonalAccessTokenFetcher(bitbucketServerApiClient, apiEndpoint);
     EnvironmentContext context = new EnvironmentContext();
     context.setSubject(subject);
     EnvironmentContext.setCurrent(context);
@@ -96,7 +96,7 @@ public class BitbucketServerPersonalAccessTokenFetcherTest {
   public void shouldSkipToFetchUnknownUrls()
       throws ScmUnauthorizedException, ScmCommunicationException {
     // given
-    when(bitbucketServerApi.isConnected(eq(someNotBitbucketURL))).thenReturn(false);
+    when(bitbucketServerApiClient.isConnected(eq(someNotBitbucketURL))).thenReturn(false);
     // when
     PersonalAccessToken result = fetcher.fetchPersonalAccessToken(subject, someNotBitbucketURL);
     // then
@@ -109,8 +109,8 @@ public class BitbucketServerPersonalAccessTokenFetcherTest {
   public void shouldRethrowBasicExceptionsOnGetUserStep(Class<? extends Throwable> exception)
       throws ScmUnauthorizedException, ScmCommunicationException {
     // given
-    when(bitbucketServerApi.isConnected(eq(someNotBitbucketURL))).thenReturn(true);
-    doThrow(exception).when(bitbucketServerApi).getUser(eq(subject));
+    when(bitbucketServerApiClient.isConnected(eq(someNotBitbucketURL))).thenReturn(true);
+    doThrow(exception).when(bitbucketServerApiClient).getUser(eq(subject));
     // when
     fetcher.fetchPersonalAccessToken(subject, someNotBitbucketURL);
   }
@@ -120,12 +120,12 @@ public class BitbucketServerPersonalAccessTokenFetcherTest {
       throws ScmUnauthorizedException, ScmCommunicationException, ScmItemNotFoundException,
           ScmBadRequestException {
     // given
-    when(bitbucketServerApi.isConnected(eq(someBitbucketURL))).thenReturn(true);
-    when(bitbucketServerApi.getUser(eq(subject))).thenReturn(bitbucketUser);
-    when(bitbucketServerApi.getPersonalAccessTokens(eq(bitbucketUser.getSlug())))
+    when(bitbucketServerApiClient.isConnected(eq(someBitbucketURL))).thenReturn(true);
+    when(bitbucketServerApiClient.getUser(eq(subject))).thenReturn(bitbucketUser);
+    when(bitbucketServerApiClient.getPersonalAccessTokens(eq(bitbucketUser.getSlug())))
         .thenReturn(Collections.emptyList());
 
-    when(bitbucketServerApi.createPersonalAccessTokens(
+    when(bitbucketServerApiClient.createPersonalAccessTokens(
             eq(bitbucketUser.getSlug()),
             eq("che-token-<user987>-<che.server.com>"),
             eq(ImmutableSet.of("PROJECT_WRITE", "REPO_WRITE"))))
@@ -140,11 +140,11 @@ public class BitbucketServerPersonalAccessTokenFetcherTest {
   public void shouldDeleteExistedCheTokenBeforeCreatingNew()
       throws ScmUnauthorizedException, ScmCommunicationException, ScmItemNotFoundException,
           ScmBadRequestException {
-    when(bitbucketServerApi.isConnected(eq(someBitbucketURL))).thenReturn(true);
-    when(bitbucketServerApi.getUser(eq(subject))).thenReturn(bitbucketUser);
-    when(bitbucketServerApi.getPersonalAccessTokens(eq(bitbucketUser.getSlug())))
+    when(bitbucketServerApiClient.isConnected(eq(someBitbucketURL))).thenReturn(true);
+    when(bitbucketServerApiClient.getUser(eq(subject))).thenReturn(bitbucketUser);
+    when(bitbucketServerApiClient.getPersonalAccessTokens(eq(bitbucketUser.getSlug())))
         .thenReturn(ImmutableList.of(bitbucketPersonalAccessToken, bitbucketPersonalAccessToken2));
-    when(bitbucketServerApi.createPersonalAccessTokens(
+    when(bitbucketServerApiClient.createPersonalAccessTokens(
             eq(bitbucketUser.getSlug()),
             eq("che-token-<user987>-<che.server.com>"),
             eq(ImmutableSet.of("PROJECT_WRITE", "REPO_WRITE"))))
@@ -153,10 +153,10 @@ public class BitbucketServerPersonalAccessTokenFetcherTest {
     PersonalAccessToken result = fetcher.fetchPersonalAccessToken(subject, someBitbucketURL);
     // then
     assertNotNull(result);
-    verify(bitbucketServerApi)
+    verify(bitbucketServerApiClient)
         .deletePersonalAccessTokens(
             eq(bitbucketUser.getSlug()), eq(bitbucketPersonalAccessToken.getId()));
-    verify(bitbucketServerApi)
+    verify(bitbucketServerApiClient)
         .deletePersonalAccessTokens(
             eq(bitbucketUser.getSlug()), eq(bitbucketPersonalAccessToken2.getId()));
   }
@@ -166,12 +166,12 @@ public class BitbucketServerPersonalAccessTokenFetcherTest {
       throws ScmUnauthorizedException, ScmCommunicationException, ScmItemNotFoundException,
           ScmBadRequestException {
     // given
-    when(bitbucketServerApi.isConnected(eq(someBitbucketURL))).thenReturn(true);
-    when(bitbucketServerApi.getUser(eq(subject))).thenReturn(bitbucketUser);
-    when(bitbucketServerApi.getPersonalAccessTokens(eq(bitbucketUser.getSlug())))
+    when(bitbucketServerApiClient.isConnected(eq(someBitbucketURL))).thenReturn(true);
+    when(bitbucketServerApiClient.getUser(eq(subject))).thenReturn(bitbucketUser);
+    when(bitbucketServerApiClient.getPersonalAccessTokens(eq(bitbucketUser.getSlug())))
         .thenReturn(Collections.emptyList());
     doThrow(ScmBadRequestException.class)
-        .when(bitbucketServerApi)
+        .when(bitbucketServerApiClient)
         .createPersonalAccessTokens(
             eq(bitbucketUser.getSlug()),
             eq("che-token-<user987>-<che.server.com>"),
