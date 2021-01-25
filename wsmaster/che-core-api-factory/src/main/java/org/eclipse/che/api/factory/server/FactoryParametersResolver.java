@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
 
 /**
  * Defines a resolver that will produce factories for some parameters
@@ -39,6 +40,6 @@ public interface FactoryParametersResolver {
    * @param factoryParameters map containing factory data parameters provided through URL
    * @throws BadRequestException when data are invalid
    */
-  FactoryDto createFactory(@NotNull Map<String, String> factoryParameters)
+  FactoryMetaDto createFactory(@NotNull Map<String, String> factoryParameters)
       throws BadRequestException, ServerException;
 }

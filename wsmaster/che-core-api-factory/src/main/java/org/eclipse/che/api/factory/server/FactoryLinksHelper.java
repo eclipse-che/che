@@ -26,6 +26,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
 
 /**
  * Helper class for creation links.
@@ -43,7 +44,7 @@ public class FactoryLinksHelper {
    * @return list of factory links
    */
   public static List<Link> createLinks(
-      FactoryDto factory, ServiceContext serviceContext, String userName) {
+      FactoryMetaDto factory, ServiceContext serviceContext, String userName) {
     final List<Link> links = new LinkedList<>();
     final UriBuilder uriBuilder = serviceContext.getServiceUriBuilder();
     final String factoryId = factory.getId();

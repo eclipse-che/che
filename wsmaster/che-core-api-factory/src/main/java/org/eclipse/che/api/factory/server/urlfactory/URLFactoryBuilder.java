@@ -19,9 +19,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_E
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +29,8 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryDevfileV2Dto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
@@ -41,7 +40,6 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
-import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileV2Dto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +85,7 @@ public class URLFactoryBuilder {
    * @param overrideProperties map of overridden properties to apply in devfile
    * @return a factory or null if devfile is not found
    */
-  public Optional<FactoryDto> createFactoryFromDevfile(
+  public Optional<FactoryMetaDto> createFactoryFromDevfile(
       RemoteFactoryUrl remoteFactoryUrl,
       FileContentProvider fileContentProvider,
       Map<String, String> overrideProperties)
@@ -115,7 +113,7 @@ public class URLFactoryBuilder {
       }
 
       try {
-        final FactoryDto factoryDto;
+        final FactoryMetaDto factoryDto;
         //TODO: if 1.0
         if (devfileYamlContent.contains("apiVersion: 1.0.0")) {
           DevfileImpl devfile = devfileParser.parseYaml(devfileYamlContent, overrideProperties);
@@ -130,10 +128,9 @@ public class URLFactoryBuilder {
 
         } else if (devfileYamlContent.contains("schemaVersion: \"2.0.0\"")) {
           LOG.debug("aaaah, we've got devfile 2.0");
-          factoryDto = newDto(FactoryDto.class)
+          factoryDto = newDto(FactoryDevfileV2Dto.class)
               .withV(CURRENT_VERSION)
-              .withDevfile(newDto(DevfileV2Dto.class)
-                  .withContent(devfileParser.convertYamlToObject(devfileYamlContent)))
+              .withDevfile(devfileParser.convertYamlToMap(devfileYamlContent))
               .withSource(location.filename().isPresent() ? location.filename().get() : null);
         } else {
           LOG.error("eeeh? what's this?");

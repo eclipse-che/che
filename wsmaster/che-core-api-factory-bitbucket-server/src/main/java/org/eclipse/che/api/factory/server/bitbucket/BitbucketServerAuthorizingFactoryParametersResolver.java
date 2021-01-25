@@ -15,8 +15,6 @@ import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -27,10 +25,9 @@ import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
-import org.eclipse.che.api.workspace.server.dto.DtoServerImpls.DevfileDtoImpl;
-import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 
@@ -82,7 +79,7 @@ public class BitbucketServerAuthorizingFactoryParametersResolver
    * @throws BadRequestException when data are invalid
    */
   @Override
-  public FactoryDto createFactory(@NotNull final Map<String, String> factoryParameters)
+  public FactoryMetaDto createFactory(@NotNull final Map<String, String> factoryParameters)
       throws BadRequestException {
 
     // no need to check null value of url parameter as accept() method has performed the check
@@ -94,35 +91,37 @@ public class BitbucketServerAuthorizingFactoryParametersResolver
             bitbucketUrl, urlFetcher, gitCredentialManager, personalAccessTokenManager);
 
     // create factory from the following location if location exists, else create default factory
-    FactoryDto factory =
+    FactoryMetaDto factoryMeta =
         urlFactoryBuilder
             .createFactoryFromDevfile(
                 bitbucketUrl, fileContentProvider, extractOverrideParams(factoryParameters))
             .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"));
 
-    if (factory.getDevfile().version().equals("2.0.0")) {
-      return factory;
-    }
-    if (factory.getDevfile() == null) {
-      // initialize default devfile
-      factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(bitbucketUrl.getRepository()));
-    }
+    if (factoryMeta instanceof FactoryDto) {
+      FactoryDto factory = (FactoryDto) factoryMeta;
+      if (factory.getDevfile() == null) {
+        // initialize default devfile
+        factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(bitbucketUrl.getRepository()));
+      }
 
-    handleProjects(factory, () -> newDto(ProjectDto.class)
-            .withSource(
-                newDto(SourceDto.class)
-                    .withLocation(bitbucketUrl.repositoryLocation())
-                    .withType("git")
-                    .withBranch(bitbucketUrl.getBranch()))
-            .withName(bitbucketUrl.getRepository()),
-        project -> {
-          final String location = project.getSource().getLocation();
-          if (location.equals(bitbucketUrl.repositoryLocation())) {
-            project.getSource().setBranch(bitbucketUrl.getBranch());
+      handleProjects(factory, () -> newDto(ProjectDto.class)
+              .withSource(
+                  newDto(SourceDto.class)
+                      .withLocation(bitbucketUrl.repositoryLocation())
+                      .withType("git")
+                      .withBranch(bitbucketUrl.getBranch()))
+              .withName(bitbucketUrl.getRepository()),
+          project -> {
+            final String location = project.getSource().getLocation();
+            if (location.equals(bitbucketUrl.repositoryLocation())) {
+              project.getSource().setBranch(bitbucketUrl.getBranch());
+            }
           }
-        }
-    );
+      );
 
-    return factory;
+      return factory;
+    } else {
+      return factoryMeta;
+    }
   }
 }

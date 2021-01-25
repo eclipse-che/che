@@ -34,6 +34,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.urlfactory.DefaultFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
@@ -73,7 +74,7 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
    * @param factoryParameters map containing factory data parameters provided through URL
    */
   @Override
-  public FactoryDto createFactory(@NotNull final Map<String, String> factoryParameters)
+  public FactoryMetaDto createFactory(@NotNull final Map<String, String> factoryParameters)
       throws BadRequestException, ServerException {
     // This should never be null, because our contract in #accept prohibits that
     String devfileLocation = factoryParameters.get(URL_PARAMETER_NAME);

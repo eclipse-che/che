@@ -18,12 +18,7 @@ import org.eclipse.che.dto.shared.DTO;
 
 /** @author Sergii Leshchenko */
 @DTO
-public interface DevfileDto extends Devfile, DevfileMetaDto {
-
-  @Override
-  default String version() {
-    return "1.0.0";
-  }
+public interface DevfileDto extends Devfile {
 
   @Override
   String getApiVersion();
