@@ -15,7 +15,6 @@ import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { Logger } from '../../utils/Logger';
-import { DriverHelper } from '../../utils/DriverHelper';
 
 @injectable()
 export class RegularUserOcpCheLoginPage implements ICheLoginPage {

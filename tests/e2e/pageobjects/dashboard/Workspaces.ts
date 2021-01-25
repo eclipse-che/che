@@ -14,7 +14,6 @@ import { CLASSES } from '../../inversify.types';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
-import { TestConstants } from '../../TestConstants';
 
 export enum WorkspaceStatusUI {
     Running = 'green',
@@ -77,11 +76,11 @@ export class Workspaces {
         await this.driverHelper.waitAndClick(this.getActionsLocator(workspaceName));
     }
 
-    async waitActionsPopup(workspaceName: string, timeout = TimeoutConstants.TS_CONTEXT_MENU_TIMEOUT) {
+    async waitActionsPopup(workspaceName: string, timeout: number = TimeoutConstants.TS_CONTEXT_MENU_TIMEOUT) {
         Logger.debug(`Workspaces.waitActionsPopup of the '${workspaceName}' list item`);
 
-        await this.driverHelper.waitVisibility(this.getExpandedActionsLocator(workspaceName), timeout)
-        await this.driverHelper.wait(5000)
+        await this.driverHelper.waitVisibility(this.getExpandedActionsLocator(workspaceName), timeout);
+        await this.driverHelper.wait(5000);
     }
 
     async openActionsPopup(workspaceName: string, timeout: number = TimeoutConstants.TS_CONTEXT_MENU_TIMEOUT) {
@@ -103,7 +102,7 @@ export class Workspaces {
         await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator(workspaceName, 'Stop Workspace'));
     }
 
-    async waitDeleteWorkspaceConfirmationWindow(timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT){
+    async waitDeleteWorkspaceConfirmationWindow(timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) {
         Logger.debug(`Workspaces.waitDeleteWorkspaceConfirmationWindow`);
 
         const confirmationWindowLocator: By = By.xpath(`//div[@aria-label='Delete workspaces confirmation window']`);
@@ -113,7 +112,7 @@ export class Workspaces {
     }
 
 
-    async clickToDeleteConfirmationCheckbox(timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT){
+    async clickToDeleteConfirmationCheckbox(timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) {
         Logger.debug(`Workspaces.clickToDeleteConfirmationCheckbox`);
 
         const deleteConfirmationCheckboxLocator: By = By.xpath(`//input[@data-testid='confirmation-checkbox']`);
@@ -121,7 +120,7 @@ export class Workspaces {
         await this.driverHelper.waitAndClick(deleteConfirmationCheckboxLocator, timeout);
     }
 
-    async waitAndClickEnabledConfirmationWindowDeleteButton(timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT){
+    async waitAndClickEnabledConfirmationWindowDeleteButton(timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) {
         Logger.debug(`Workspaces.waitEnabledConfirmationWindowDeleteButton`);
 
         const enabledConfirmationWindowDeleteButton: By = By.xpath(`//button[@data-testid='delete-workspace-button' and not(@disabled)]`);
