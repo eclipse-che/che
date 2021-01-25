@@ -21,9 +21,8 @@ import { DriverHelper } from '../../utils/DriverHelper';
 export class RegularUserOcpCheLoginPage implements ICheLoginPage {
 
     constructor(
-        @inject (CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage,
-        @inject (CLASSES.CheLoginPage) private readonly cheLogin: CheLoginPage,
-        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+        @inject(CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage,
+        @inject(CLASSES.CheLoginPage) private readonly cheLogin: CheLoginPage) { }
 
     async login() {
         Logger.debug('RegularUserOcpCheLoginPage.login');
@@ -58,9 +57,6 @@ export class RegularUserOcpCheLoginPage implements ICheLoginPage {
             await this.cheLogin.inputPaswordEclipseCheLoginPage(TestConstants.TS_SELENIUM_PASSWORD);
             await this.cheLogin.clickEclipseCheLoginButton();
         }
-
-        await this.driverHelper.wait(5000);
-        await this.driverHelper.navigateToUrl(`${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/next`);
     }
 
 }

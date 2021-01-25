@@ -20,8 +20,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 export class MultiUserLoginPage implements ICheLoginPage {
 
     constructor(
-        @inject(CLASSES.CheLoginPage) private readonly cheLogin: CheLoginPage,
-        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+        @inject(CLASSES.CheLoginPage) private readonly cheLogin: CheLoginPage) { }
 
     async login() {
         Logger.debug('MultiUserLoginPage.login');
@@ -30,9 +29,6 @@ export class MultiUserLoginPage implements ICheLoginPage {
         await this.cheLogin.inputUserNameEclipseCheLoginPage(TestConstants.TS_SELENIUM_USERNAME);
         await this.cheLogin.inputPaswordEclipseCheLoginPage(TestConstants.TS_SELENIUM_PASSWORD);
         await this.cheLogin.clickEclipseCheLoginButton();
-
-        await this.driverHelper.wait(5000);
-        await this.driverHelper.navigateToUrl(`${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/next`);
     }
 
 }
