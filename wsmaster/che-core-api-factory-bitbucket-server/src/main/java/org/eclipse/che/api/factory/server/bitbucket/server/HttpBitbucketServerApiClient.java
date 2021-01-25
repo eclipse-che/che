@@ -24,6 +24,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.io.CharStreams;
 import com.google.common.net.HttpHeaders;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -37,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
@@ -44,6 +46,7 @@ import org.eclipse.che.api.factory.server.scm.exception.ScmBadRequestException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmItemNotFoundException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,11 +63,23 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
   private static final Duration DEFAULT_HTTP_TIMEOUT = ofSeconds(10);
   private final URI serverUri;
   private final AuthorizationHeaderSupplier headerProvider;
+  private final HttpClient httpClient;
 
   public HttpBitbucketServerApiClient(
       String serverUrl, AuthorizationHeaderSupplier authorizationHeaderSupplier) {
     this.serverUri = URI.create(serverUrl);
     this.headerProvider = authorizationHeaderSupplier;
+    this.httpClient =
+        HttpClient.newBuilder()
+            .executor(
+                Executors.newCachedThreadPool(
+                    new ThreadFactoryBuilder()
+                        .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+                        .setNameFormat(HttpBitbucketServerApiClient.class.getName() + "-%d")
+                        .setDaemon(true)
+                        .build()))
+            .connectTimeout(DEFAULT_HTTP_TIMEOUT)
+            .build();
   }
 
   @Override
@@ -108,7 +123,6 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
   @Override
   public BitbucketUser getUser(String slug)
       throws ScmItemNotFoundException, ScmUnauthorizedException, ScmCommunicationException {
-    HttpClient httpClient = HttpClient.newHttpClient();
     URI uri = serverUri.resolve("/rest/api/1.0/users/" + slug);
     HttpRequest request =
         HttpRequest.newBuilder(uri)
@@ -157,7 +171,6 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
   @Override
   public void deletePersonalAccessTokens(String userSlug, Long tokenId)
       throws ScmItemNotFoundException, ScmUnauthorizedException, ScmCommunicationException {
-    HttpClient httpClient = HttpClient.newHttpClient();
     URI uri = serverUri.resolve("/rest/access-tokens/1.0/users/" + userSlug + "/" + tokenId);
     HttpRequest request =
         HttpRequest.newBuilder(uri)
@@ -193,7 +206,6 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
   public BitbucketPersonalAccessToken createPersonalAccessTokens(
       String userSlug, String tokenName, Set<String> permissions)
       throws ScmBadRequestException, ScmUnauthorizedException, ScmCommunicationException {
-    HttpClient httpClient = HttpClient.newHttpClient();
     URI uri = serverUri.resolve("/rest/access-tokens/1.0/users/" + userSlug);
 
     try {
@@ -270,7 +282,6 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
   private <T> Page<T> doGetPage(Class<T> tClass, String api, int start, int limit, String filter)
       throws ScmUnauthorizedException, ScmBadRequestException, ScmCommunicationException,
           ScmItemNotFoundException {
-    HttpClient httpClient = HttpClient.newHttpClient();
     String suffix = api + "?start=" + start + "&limit=" + limit;
     if (!Strings.isNullOrEmpty(filter)) {
       suffix += "&filter=" + filter;
