@@ -132,7 +132,7 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
             .build();
 
     try {
-      LOG.debug("executeRequest={}", request);
+      LOG.trace("executeRequest={}", request);
       return executeRequest(
           httpClient,
           request,
@@ -186,7 +186,7 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
             .build();
 
     try {
-      LOG.debug("executeRequest={}", request);
+      LOG.trace("executeRequest={}", request);
       executeRequest(
           httpClient,
           request,
@@ -224,7 +224,7 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
                   MediaType.APPLICATION_JSON)
               .timeout(DEFAULT_HTTP_TIMEOUT)
               .build();
-      LOG.debug("executeRequest={}", request);
+      LOG.trace("executeRequest={}", request);
       return executeRequest(
           httpClient,
           request,
@@ -294,7 +294,7 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
                 "Authorization", headerProvider.computeAuthorizationHeader("GET", uri.toString()))
             .timeout(DEFAULT_HTTP_TIMEOUT)
             .build();
-    LOG.debug("executeRequest={}", request);
+    LOG.trace("executeRequest={}", request);
     final JavaType typeReference =
         TypeFactory.defaultInstance().constructParametricType(Page.class, tClass);
     return executeRequest(
