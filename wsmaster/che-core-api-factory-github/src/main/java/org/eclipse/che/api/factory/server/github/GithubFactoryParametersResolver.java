@@ -27,6 +27,7 @@ import org.eclipse.che.api.factory.server.DefaultFactoryParameterResolver;
 import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
@@ -82,50 +83,52 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
    * @throws BadRequestException when data are invalid
    */
   @Override
-  public FactoryDto createFactory(@NotNull final Map<String, String> factoryParameters)
+  public FactoryMetaDto createFactory(@NotNull final Map<String, String> factoryParameters)
       throws BadRequestException, ServerException {
 
     // no need to check null value of url parameter as accept() method has performed the check
     final GithubUrl githubUrl = githubUrlParser.parse(factoryParameters.get(URL_PARAMETER_NAME));
 
     // create factory from the following location if location exists, else create default factory
-    FactoryDto factory =
+    FactoryMetaDto factoryMeta =
         urlFactoryBuilder
             .createFactoryFromDevfile(
                 githubUrl,
                 new GithubFileContentProvider(githubUrl, urlFetcher),
                 extractOverrideParams(factoryParameters))
             .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"));
-    if (factory.getDevfile().version().equals("2.0.0")) {
-      return factory;
-    }
-    if (factory.getWorkspace() != null) {
-      return projectConfigDtoMerger.merge(
-          factory,
-          () -> {
-            // Compute project configuration
-            return newDto(ProjectConfigDto.class)
-                .withSource(githubSourceStorageBuilder.buildWorkspaceConfigSource(githubUrl))
-                .withName(githubUrl.getRepository())
-                .withPath("/".concat(githubUrl.getRepository()));
-          });
-    } else if (factory.getDevfile() == null) {
-      // initialize default devfile
-      factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(githubUrl.getRepository()));
-    }
 
-    handleProjects(factory, () -> newDto(ProjectDto.class)
-            .withSource(githubSourceStorageBuilder.buildDevfileSource(githubUrl))
-            .withName(githubUrl.getRepository()),
-        project -> {
-          final String location = project.getSource().getLocation();
-          if (location.equals(githubUrl.repositoryLocation())
-              || location.equals(githubUrl.repositoryLocation() + ".git")) {
-            project.getSource().setBranch(githubUrl.getBranch());
+    if (factoryMeta instanceof FactoryDto) {
+      FactoryDto factory = (FactoryDto) factoryMeta;
+      if (factory.getWorkspace() != null) {
+        return projectConfigDtoMerger.merge(
+            factory,
+            () -> {
+              // Compute project configuration
+              return newDto(ProjectConfigDto.class)
+                  .withSource(githubSourceStorageBuilder.buildWorkspaceConfigSource(githubUrl))
+                  .withName(githubUrl.getRepository())
+                  .withPath("/".concat(githubUrl.getRepository()));
+            });
+      } else if (factory.getDevfile() == null) {
+        // initialize default devfile
+        factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(githubUrl.getRepository()));
+      }
+
+      handleProjects(factory, () -> newDto(ProjectDto.class)
+              .withSource(githubSourceStorageBuilder.buildDevfileSource(githubUrl))
+              .withName(githubUrl.getRepository()),
+          project -> {
+            final String location = project.getSource().getLocation();
+            if (location.equals(githubUrl.repositoryLocation())
+                || location.equals(githubUrl.repositoryLocation() + ".git")) {
+              project.getSource().setBranch(githubUrl.getBranch());
+            }
           }
-        }
-    );
-
-    return factory;
+      );
+      return factory;
+    } else {
+      return factoryMeta;
+    }
   }
 }

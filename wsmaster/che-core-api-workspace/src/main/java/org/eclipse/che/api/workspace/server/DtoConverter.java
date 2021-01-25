@@ -60,7 +60,6 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.ComponentDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileActionDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileCommandDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
-import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileV2Dto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileVolumeDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.EndpointDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.EntrypointDto;

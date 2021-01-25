@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.factory.shared.dto;
 
-import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.MANDATORY;
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
 
 import java.util.List;
@@ -21,7 +20,6 @@ import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
-import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileMetaDto;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -30,47 +28,37 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Max Shaposhnik
  */
 @DTO
-public interface FactoryDto extends Factory, Hyperlinks {
+public interface FactoryDto extends FactoryMetaDto, Factory, Hyperlinks {
 
-  @Override
-  @FactoryParameter(obligation = MANDATORY)
-  String getV();
+  @FactoryParameter(obligation = OPTIONAL)
+  DevfileDto getDevfile();
 
-  void setV(String v);
+  void setDevfile(DevfileDto devfileDto);
+
+  FactoryDto withDevfile(DevfileDto devfileDto);
 
   FactoryDto withV(String v);
 
-  @FactoryParameter(obligation = OPTIONAL)
-  DevfileMetaDto getDevfile();
-
-  void setDevfile(DevfileMetaDto workspace);
-
-  FactoryDto withDevfile(DevfileMetaDto devfileDto);
-
-  /** because factory DTO may have devfile, in that case, workspace may be optional */
   @Override
-  @FactoryParameter(obligation = OPTIONAL)
-  WorkspaceConfigDto getWorkspace();
-
-  void setWorkspace(WorkspaceConfigDto workspace);
-
-  FactoryDto withWorkspace(WorkspaceConfigDto workspace);
+  FactoryDto withName(String name);
 
   @Override
-  @FactoryParameter(obligation = OPTIONAL, trackedOnly = true)
-  PoliciesDto getPolicies();
-
-  void setPolicies(PoliciesDto policies);
-
   FactoryDto withPolicies(PoliciesDto policies);
 
   @Override
-  @FactoryParameter(obligation = OPTIONAL)
-  AuthorDto getCreator();
+  FactoryDto withIde(IdeDto ide);
 
-  void setCreator(AuthorDto creator);
+  @Override
+  FactoryDto withId(String id);
 
+  @Override
+  FactoryDto withSource(String source);
+
+  @Override
   FactoryDto withCreator(AuthorDto creator);
+
+  @Override
+  FactoryDto withLinks(List<Link> links);
 
   @Override
   @FactoryParameter(obligation = OPTIONAL)
@@ -80,42 +68,12 @@ public interface FactoryDto extends Factory, Hyperlinks {
 
   FactoryDto withButton(ButtonDto button);
 
+  /** because factory DTO may have devfile, in that case, workspace may be optional */
   @Override
   @FactoryParameter(obligation = OPTIONAL)
-  IdeDto getIde();
+  WorkspaceConfigDto getWorkspace();
 
-  void setIde(IdeDto ide);
+  void setWorkspace(WorkspaceConfigDto workspace);
 
-  FactoryDto withIde(IdeDto ide);
-
-  @Override
-  @FactoryParameter(obligation = OPTIONAL, setByServer = true)
-  String getId();
-
-  void setId(String id);
-
-  FactoryDto withId(String id);
-
-  /**
-   * Indicates filename in repository from which the factory was created (for example, .devfile) or
-   * just contains 'repo' value if factory was created from bare GitHub repository. For custom raw
-   * URL's (pastebin, gist etc) value is {@code null}
-   */
-  @FactoryParameter(obligation = OPTIONAL, setByServer = true)
-  String getSource();
-
-  void setSource(String source);
-
-  FactoryDto withSource(String source);
-
-  @Override
-  @FactoryParameter(obligation = OPTIONAL)
-  String getName();
-
-  void setName(String name);
-
-  FactoryDto withName(String name);
-
-  @Override
-  FactoryDto withLinks(List<Link> links);
+  FactoryDto withWorkspace(WorkspaceConfigDto workspace);
 }
