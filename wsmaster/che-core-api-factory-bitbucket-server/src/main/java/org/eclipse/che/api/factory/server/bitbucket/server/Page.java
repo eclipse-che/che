@@ -15,6 +15,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Bitbucket's paging object. Combines collections of items with some metadata.
+ *
+ * <p>See more
+ *
+ * <p>https://docs.atlassian.com/bitbucket-server/rest/5.6.1/bitbucket-rest.html
+ *
+ * @param <T>
+ */
 public class Page<T> {
   private int start;
   private int size;
