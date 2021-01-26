@@ -29,7 +29,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
-import okio.BufferedSink;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -88,7 +88,9 @@ public class DirectKubernetesAPIAccessHelper {
     String mediaType = inputMediaType(headers);
 
     RequestBody requestBody =
-        body == null ? null : new InputStreamBasedRequestBody(body, mediaType);
+        body == null
+            ? null
+            : RequestBody.create(MediaType.parse(mediaType), IOUtils.toByteArray(body));
 
     Call httpCall =
         httpClient.newCall(prepareRequest(url, httpMethod, requestBody, toOkHttpHeaders(headers)));
@@ -150,29 +152,5 @@ public class DirectKubernetesAPIAccessHelper {
     }
 
     return headersBuilder.build();
-  }
-
-  private static final class InputStreamBasedRequestBody extends RequestBody {
-    private final InputStream inputStream;
-    private final MediaType mediaType;
-
-    private InputStreamBasedRequestBody(InputStream is, String contentType) {
-      this.inputStream = is;
-      this.mediaType = contentType == null ? null : MediaType.parse(contentType);
-    }
-
-    @Override
-    public MediaType contentType() {
-      return mediaType;
-    }
-
-    @Override
-    public void writeTo(BufferedSink sink) throws IOException {
-      byte[] buffer = new byte[1024];
-      int cnt;
-      while ((cnt = inputStream.read(buffer)) != -1) {
-        sink.write(buffer, 0, cnt);
-      }
-    }
   }
 }
