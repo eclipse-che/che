@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -40,7 +41,7 @@ public class BitbucketServerOAuth1AuthorizationHeaderSupplierTest {
 
   @Test
   public void shouldBeAbleToComputeAuthorizationHeader()
-      throws ScmUnauthorizedException, OAuthAuthenticationException {
+      throws ScmUnauthorizedException, OAuthAuthenticationException, ScmCommunicationException {
     // given
     when(authenticator.computeAuthorizationHeader(
             eq(subject.getUserId()), eq("POST"), eq("/api/user")))
@@ -56,7 +57,7 @@ public class BitbucketServerOAuth1AuthorizationHeaderSupplierTest {
       expectedExceptionsMessageRegExp =
           "user is not authorized in bitbucket-server OAuth1 provider")
   public void shouldThrowScmUnauthorizedExceptionIfHeaderIsNull()
-      throws OAuthAuthenticationException, ScmUnauthorizedException {
+      throws OAuthAuthenticationException, ScmUnauthorizedException, ScmCommunicationException {
     // given
     when(authenticator.computeAuthorizationHeader(
             eq(subject.getUserId()), eq("POST"), eq("/api/user")))
@@ -70,7 +71,7 @@ public class BitbucketServerOAuth1AuthorizationHeaderSupplierTest {
       expectedExceptionsMessageRegExp =
           "user is not authorized in bitbucket-server OAuth1 provider")
   public void shouldThrowScmUnauthorizedExceptionIfHeaderIsEmpty()
-      throws OAuthAuthenticationException, ScmUnauthorizedException {
+      throws OAuthAuthenticationException, ScmUnauthorizedException, ScmCommunicationException {
     // given
     when(authenticator.computeAuthorizationHeader(
             eq(subject.getUserId()), eq("POST"), eq("/api/user")))
@@ -80,10 +81,10 @@ public class BitbucketServerOAuth1AuthorizationHeaderSupplierTest {
   }
 
   @Test(
-      expectedExceptions = ScmUnauthorizedException.class,
+      expectedExceptions = ScmCommunicationException.class,
       expectedExceptionsMessageRegExp = "this is a message")
   public void shouldThrowScmUnauthorizedExceptionOnOAuthAuthenticationException()
-      throws OAuthAuthenticationException, ScmUnauthorizedException {
+      throws OAuthAuthenticationException, ScmUnauthorizedException, ScmCommunicationException {
     // given
     when(authenticator.computeAuthorizationHeader(
             eq(subject.getUserId()), eq("POST"), eq("/api/user")))
