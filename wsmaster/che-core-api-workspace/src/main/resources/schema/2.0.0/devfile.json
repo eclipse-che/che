@@ -1,0 +1,8 @@
+{
+  "description": "Devfile describes the structure of a cloud-native workspace and development environment.",
+  "type": "object",
+  "title": "Devfile schema - Version 2.0.0",
+  "required": [
+    "schemaVersion"
+  ]
+}

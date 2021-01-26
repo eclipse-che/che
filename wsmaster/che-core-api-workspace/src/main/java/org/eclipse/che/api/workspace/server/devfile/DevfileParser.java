@@ -51,8 +51,8 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 @Singleton
 public class DevfileParser {
 
-  private ObjectMapper yamlMapper;
-  private ObjectMapper jsonMapper;
+  private final ObjectMapper yamlMapper;
+  private final ObjectMapper jsonMapper;
   private final DevfileSchemaValidator schemaValidator;
   private final DevfileIntegrityValidator integrityValidator;
   private final OverridePropertiesApplier overridePropertiesApplier;
@@ -98,37 +98,20 @@ public class DevfileParser {
     }
   }
 
-  public String devfileVersion(JsonNode devfile) throws DevfileException {
-    final String version;
-    if (devfile.has("apiVersion")) {
-      version = devfile.get("apiVersion").textValue();
-    } else if (devfile.has("schemaVersion")) {
-      version = devfile.get("schemaVersion").textValue();
-    } else {
-      throw new DevfileException(
-          "Neither of `apiVersion` and `schemaVersion` found. This is not a valid devfile.");
-    }
-
-    return version;
-  }
-
-  public int devfileMajorVersion(JsonNode devfile) throws DevfileException {
-    String version = devfileVersion(devfile);
-
-    String majorVersion = version.substring(0, version.indexOf("."));
-    return Integer.parseInt(majorVersion);
-  }
-
   public JsonNode parseRaw(String yaml) throws DevfileFormatException {
     try {
-      return Optional.ofNullable(yamlMapper.readTree(yaml)).orElseThrow(
-          () -> new DevfileFormatException("Unable to parse Devfile - provided source is empty"));
+      JsonNode devfileJson = yamlMapper.readTree(yaml);
+      if (devfileJson == null) {
+        throw new DevfileFormatException("Unable to parse Devfile - provided source is empty");
+      }
+      schemaValidator.validate(devfileJson);
+      return devfileJson;
     } catch (JsonProcessingException jpe) {
       throw new DevfileFormatException("Can't parse devfile yaml.", jpe);
     }
   }
 
-  public Map<String, Object> convertYamlToMap(JsonNode devfileJson) throws DevfileFormatException {
+  public Map<String, Object> convertYamlToMap(JsonNode devfileJson) {
     ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory())
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     return yamlReader.convertValue(devfileJson, new TypeReference<>() {

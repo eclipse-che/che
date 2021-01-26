@@ -25,7 +25,7 @@ public class Constants {
   public static final String CURRENT_API_VERSION = "1.0.0";
 
   public static final List<String> SUPPORTED_VERSIONS =
-      Collections.singletonList(CURRENT_API_VERSION);
+      List.of(CURRENT_API_VERSION, "2.0.0");
 
   public static final String EDITOR_COMPONENT_TYPE = "cheEditor";
 

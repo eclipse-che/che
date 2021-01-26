@@ -34,6 +34,7 @@ import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryDevfileV2Dto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
+import org.eclipse.che.api.workspace.server.devfile.DevfileVersion;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
@@ -61,15 +62,18 @@ public class URLFactoryBuilder {
   private final String defaultChePlugins;
 
   private final DevfileParser devfileParser;
+  private final DevfileVersion devfileVersion;
 
   @Inject
   public URLFactoryBuilder(
       @Named("che.factory.default_editor") String defaultCheEditor,
       @Named("che.factory.default_plugins") String defaultChePlugins,
-      DevfileParser devfileParser) {
+      DevfileParser devfileParser,
+      DevfileVersion devfileVersion) {
     this.defaultCheEditor = defaultCheEditor;
     this.defaultChePlugins = defaultChePlugins;
     this.devfileParser = devfileParser;
+    this.devfileVersion = devfileVersion;
   }
 
   /**
@@ -137,7 +141,7 @@ public class URLFactoryBuilder {
       FileContentProvider fileContentProvider,
       DevfileLocation location)
       throws OverrideParameterException, DevfileException {
-    if (devfileParser.devfileMajorVersion(devfileJson) == 1) {
+    if (devfileVersion.devfileMajorVersion(devfileJson) == 1) {
       DevfileImpl devfile = devfileParser.parseJsonNode(devfileJson, overrideProperties);
       devfileParser.resolveReference(devfile, fileContentProvider);
       devfile = ensureToUseGenerateName(devfile);
@@ -147,7 +151,7 @@ public class URLFactoryBuilder {
           .withDevfile(DtoConverter.asDto(devfile))
           .withSource(location.filename().isPresent() ? location.filename().get() : null);
 
-    } else if (devfileParser.devfileMajorVersion(devfileJson) == 2) {
+    } else if (devfileVersion.devfileMajorVersion(devfileJson) == 2) {
       return newDto(FactoryDevfileV2Dto.class)
           .withV(CURRENT_VERSION)
           .withDevfile(devfileParser.convertYamlToMap(devfileJson))
